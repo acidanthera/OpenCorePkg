@@ -27,16 +27,16 @@
 EFI_STATUS
 EFIAPI
 _ModuleEntryPointReal (
-  IN EFI_PEI_FILE_HANDLE       FileHandle,
-  IN CONST EFI_PEI_SERVICES    **PeiServices
+  IN EFI_PEI_FILE_HANDLE     FileHandle,
+  IN CONST EFI_PEI_SERVICES  **PeiServices
   );
 
 EFI_STATUS
 EFIAPI
 _ModuleEntryPoint (
-  IN EFI_PEI_FILE_HANDLE       FileHandle,
-  IN CONST EFI_PEI_SERVICES    **PeiServices
+  IN EFI_PEI_FILE_HANDLE     FileHandle,
+  IN CONST EFI_PEI_SERVICES  **PeiServices
   )
 {
-  return _ModuleEntryPointReal(FileHandle, PeiServices);
+  return _ModuleEntryPointReal (FileHandle, PeiServices);
 }

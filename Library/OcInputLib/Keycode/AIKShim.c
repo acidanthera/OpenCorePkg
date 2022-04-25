@@ -26,14 +26,20 @@ AIKShimAmiKeycodeReadEfikey (
   OUT AMI_EFI_KEY_DATA         *KeyData
   )
 {
-  DEBUG ((DEBUG_VERBOSE, "AIKAmiKeycodeReadEfikey %p %p ours %p event %d",
-    This, KeyData, gAikSelf.Source.AmiKeycode, gAikSelf.InPollKeyboardEvent));
+  DEBUG ((
+    DEBUG_VERBOSE,
+    "AIKAmiKeycodeReadEfikey %p %p ours %p event %d",
+    This,
+    KeyData,
+    gAikSelf.Source.AmiKeycode,
+    gAikSelf.InPollKeyboardEvent
+    ));
 
-  if (This == NULL || KeyData == NULL || gAikSelf.OurJobIsDone) {
+  if ((This == NULL) || (KeyData == NULL) || gAikSelf.OurJobIsDone) {
     return EFI_INVALID_PARAMETER;
   }
 
-  if (This == gAikSelf.Source.AmiKeycode && !gAikSelf.InPollKeyboardEvent) {
+  if ((This == gAikSelf.Source.AmiKeycode) && !gAikSelf.InPollKeyboardEvent) {
     //
     // Do not touch any protocol but ours.
     //
@@ -53,14 +59,20 @@ AIKShimTextInputReadKeyStroke (
   EFI_STATUS        Status;
   AMI_EFI_KEY_DATA  AmiKeyData;
 
-  DEBUG ((DEBUG_VERBOSE, "AIKTextInputReadKeyStroke %p %p ours %p event %d",
-    This, Key, gAikSelf.Source.TextInput, gAikSelf.InPollKeyboardEvent));
+  DEBUG ((
+    DEBUG_VERBOSE,
+    "AIKTextInputReadKeyStroke %p %p ours %p event %d",
+    This,
+    Key,
+    gAikSelf.Source.TextInput,
+    gAikSelf.InPollKeyboardEvent
+    ));
 
-  if (This == NULL || Key == NULL || gAikSelf.OurJobIsDone) {
+  if ((This == NULL) || (Key == NULL) || gAikSelf.OurJobIsDone) {
     return EFI_INVALID_PARAMETER;
   }
 
-  if (This == gAikSelf.Source.TextInput && !gAikSelf.InPollKeyboardEvent) {
+  if ((This == gAikSelf.Source.TextInput) && !gAikSelf.InPollKeyboardEvent) {
     //
     // Do not touch any protocol but ours.
     //
@@ -69,8 +81,9 @@ AIKShimTextInputReadKeyStroke (
       //
       // 'Partial' keys should not be returned by SimpleTextInput protocols.
       //
-      if (AmiKeyData.Key.ScanCode == 0 && AmiKeyData.Key.UnicodeChar == 0
-        && (AmiKeyData.KeyState.KeyToggleState & KEY_STATE_EXPOSED)) {
+      if (  (AmiKeyData.Key.ScanCode == 0) && (AmiKeyData.Key.UnicodeChar == 0)
+         && (AmiKeyData.KeyState.KeyToggleState & KEY_STATE_EXPOSED))
+      {
         Status = EFI_NOT_READY;
       } else {
         CopyMem (Key, &AmiKeyData.Key, sizeof (AmiKeyData.Key));
@@ -93,14 +106,20 @@ AIKShimTextInputReadKeyStrokeEx (
   EFI_STATUS        Status;
   AMI_EFI_KEY_DATA  AmiKeyData;
 
-  DEBUG ((DEBUG_VERBOSE, "AIKTextInputReadKeyStrokeEx %p %p ours %p event %d",
-    This, KeyData, gAikSelf.Source.TextInputEx, gAikSelf.InPollKeyboardEvent));
+  DEBUG ((
+    DEBUG_VERBOSE,
+    "AIKTextInputReadKeyStrokeEx %p %p ours %p event %d",
+    This,
+    KeyData,
+    gAikSelf.Source.TextInputEx,
+    gAikSelf.InPollKeyboardEvent
+    ));
 
-  if (This == NULL || KeyData == NULL || gAikSelf.OurJobIsDone) {
+  if ((This == NULL) || (KeyData == NULL) || gAikSelf.OurJobIsDone) {
     return EFI_INVALID_PARAMETER;
   }
 
-  if (This == gAikSelf.Source.TextInputEx && !gAikSelf.InPollKeyboardEvent) {
+  if ((This == gAikSelf.Source.TextInputEx) && !gAikSelf.InPollKeyboardEvent) {
     //
     // Do not touch any protocol but ours.
     //

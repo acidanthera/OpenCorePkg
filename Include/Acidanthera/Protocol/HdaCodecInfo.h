@@ -41,51 +41,51 @@ typedef struct EFI_HDA_CODEC_INFO_PROTOCOL_ EFI_HDA_CODEC_INFO_PROTOCOL;
 **/
 
 typedef struct {
-  UINT8   NodeId;
+  UINT8     NodeId;
   ///
   /// General widgets.
   ///
-  UINT32  Capabilities;
-  UINT8   DefaultUnSol;
-  UINT8   DefaultEapd;
+  UINT32    Capabilities;
+  UINT8     DefaultUnSol;
+  UINT8     DefaultEapd;
   ///
   /// Connections.
   ///
-  UINT32  ConnectionCount;
-  UINT16  *Connections;
+  UINT32    ConnectionCount;
+  UINT16    *Connections;
   ///
   /// Power.
   ///
-  UINT32  SupportedPowerStates;
-  UINT32  DefaultPowerState;
+  UINT32    SupportedPowerStates;
+  UINT32    DefaultPowerState;
   ///
   /// Amps.
   ///
-  UINT32  AmpInCapabilities;
-  UINT32  AmpOutCapabilities;
-  UINT8   *AmpInLeftDefaultGainMute;
-  UINT8   *AmpInRightDefaultGainMute;
-  UINT8   AmpOutLeftDefaultGainMute;
-  UINT8   AmpOutRightDefaultGainMute;
+  UINT32    AmpInCapabilities;
+  UINT32    AmpOutCapabilities;
+  UINT8     *AmpInLeftDefaultGainMute;
+  UINT8     *AmpInRightDefaultGainMute;
+  UINT8     AmpOutLeftDefaultGainMute;
+  UINT8     AmpOutRightDefaultGainMute;
   ///
   /// Input/Output.
   ///
-  UINT32  SupportedPcmRates;
-  UINT32  SupportedFormats;
-  UINT16  DefaultConvFormat;
-  UINT8   DefaultConvStreamChannel;
-  UINT8   DefaultConvChannelCount;
+  UINT32    SupportedPcmRates;
+  UINT32    SupportedFormats;
+  UINT16    DefaultConvFormat;
+  UINT8     DefaultConvStreamChannel;
+  UINT8     DefaultConvChannelCount;
   ///
   /// Pin Complex.
   ///
-  UINT32  PinCapabilities;
-  UINT8   DefaultPinControl;
-  UINT32  DefaultConfiguration;
+  UINT32    PinCapabilities;
+  UINT8     DefaultPinControl;
+  UINT32    DefaultConfiguration;
   ///
   /// Volume Knob.
   ///
-  UINT32  VolumeCapabilities;
-  UINT8   DefaultVolume;
+  UINT32    VolumeCapabilities;
+  UINT8     DefaultVolume;
 } HDA_WIDGET;
 
 /**
@@ -99,7 +99,7 @@ typedef struct {
 **/
 typedef
 EFI_STATUS
-(EFIAPI *EFI_HDA_CODEC_INFO_GET_ADDRESS) (
+(EFIAPI *EFI_HDA_CODEC_INFO_GET_ADDRESS)(
   IN  EFI_HDA_CODEC_INFO_PROTOCOL  *This,
   OUT UINT8                        *Address
   );
@@ -115,7 +115,7 @@ EFI_STATUS
 **/
 typedef
 EFI_STATUS
-(EFIAPI *EFI_HDA_CODEC_INFO_GET_NAME) (
+(EFIAPI *EFI_HDA_CODEC_INFO_GET_NAME)(
   IN  EFI_HDA_CODEC_INFO_PROTOCOL  *This,
   OUT CONST CHAR16                 **CodecName
   );
@@ -131,7 +131,7 @@ EFI_STATUS
 **/
 typedef
 EFI_STATUS
-(EFIAPI *EFI_HDA_CODEC_INFO_GET_VENDOR_ID) (
+(EFIAPI *EFI_HDA_CODEC_INFO_GET_VENDOR_ID)(
   IN  EFI_HDA_CODEC_INFO_PROTOCOL  *This,
   OUT UINT32                       *VendorId
   );
@@ -147,7 +147,7 @@ EFI_STATUS
 **/
 typedef
 EFI_STATUS
-(EFIAPI *EFI_HDA_CODEC_INFO_GET_REVISION_ID) (
+(EFIAPI *EFI_HDA_CODEC_INFO_GET_REVISION_ID)(
   IN  EFI_HDA_CODEC_INFO_PROTOCOL  *This,
   OUT UINT32                       *RevisionId
   );
@@ -164,7 +164,7 @@ EFI_STATUS
 **/
 typedef
 EFI_STATUS
-(EFIAPI *EFI_HDA_CODEC_INFO_GET_AUDIO_FUNC_ID) (
+(EFIAPI *EFI_HDA_CODEC_INFO_GET_AUDIO_FUNC_ID)(
   IN  EFI_HDA_CODEC_INFO_PROTOCOL  *This,
   OUT UINT8                        *AudioFuncId,
   OUT BOOLEAN                      *UnsolCapable
@@ -182,7 +182,7 @@ EFI_STATUS
 **/
 typedef
 EFI_STATUS
-(EFIAPI *EFI_HDA_CODEC_INFO_GET_DEFAULT_RATES_FORMATS) (
+(EFIAPI *EFI_HDA_CODEC_INFO_GET_DEFAULT_RATES_FORMATS)(
   IN  EFI_HDA_CODEC_INFO_PROTOCOL  *This,
   OUT UINT32                       *Rates,
   OUT UINT32                       *Formats
@@ -200,7 +200,7 @@ EFI_STATUS
 **/
 typedef
 EFI_STATUS
-(EFIAPI *EFI_HDA_CODEC_INFO_GET_DEFAULT_AMP_CAPS) (
+(EFIAPI *EFI_HDA_CODEC_INFO_GET_DEFAULT_AMP_CAPS)(
   IN  EFI_HDA_CODEC_INFO_PROTOCOL  *This,
   OUT UINT32                       *AmpInCaps,
   OUT UINT32                       *AmpOutCaps
@@ -218,7 +218,7 @@ EFI_STATUS
 **/
 typedef
 EFI_STATUS
-(EFIAPI *EFI_HDA_CODEC_INFO_GET_WIDGETS) (
+(EFIAPI *EFI_HDA_CODEC_INFO_GET_WIDGETS)(
   IN  EFI_HDA_CODEC_INFO_PROTOCOL  *This,
   OUT HDA_WIDGET                   **Widgets,
   OUT UINTN                        *WidgetCount
@@ -235,7 +235,7 @@ EFI_STATUS
 **/
 typedef
 EFI_STATUS
-(EFIAPI *EFI_HDA_CODEC_INFO_FREE_WIDGETS_BUFFER) (
+(EFIAPI *EFI_HDA_CODEC_INFO_FREE_WIDGETS_BUFFER)(
   IN  HDA_WIDGET                   *Widgets,
   IN  UINTN                        WidgetCount
   );
@@ -255,6 +255,6 @@ struct EFI_HDA_CODEC_INFO_PROTOCOL_ {
   EFI_HDA_CODEC_INFO_FREE_WIDGETS_BUFFER          FreeWidgetsBuffer;
 };
 
-extern EFI_GUID gEfiHdaCodecInfoProtocolGuid;
+extern EFI_GUID  gEfiHdaCodecInfoProtocolGuid;
 
 #endif // EFI_HDA_CODEC_INFO_H

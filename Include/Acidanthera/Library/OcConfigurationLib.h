@@ -30,11 +30,11 @@
   _(BOOLEAN                     , Enabled          ,     , FALSE   , () ) \
   _(OC_STRING                   , Comment          ,     , OC_STRING_CONSTR ("", _, __), OC_DESTR (OC_STRING) ) \
   _(OC_STRING                   , Path             ,     , OC_STRING_CONSTR ("", _, __), OC_DESTR (OC_STRING) )
-  OC_DECLARE (OC_ACPI_ADD_ENTRY)
+OC_DECLARE (OC_ACPI_ADD_ENTRY)
 
 #define OC_ACPI_ADD_ARRAY_FIELDS(_, __) \
   OC_ARRAY (OC_ACPI_ADD_ENTRY, _, __)
-  OC_DECLARE (OC_ACPI_ADD_ARRAY)
+OC_DECLARE (OC_ACPI_ADD_ARRAY)
 
 ///
 /// ACPI table deletion.
@@ -46,11 +46,11 @@
   _(UINT8                       , OemTableId       , [8] , {0}     , () ) \
   _(UINT32                      , TableLength      ,     , 0       , () ) \
   _(UINT8                       , TableSignature   , [4] , {0}     , () )
-  OC_DECLARE (OC_ACPI_DELETE_ENTRY)
+OC_DECLARE (OC_ACPI_DELETE_ENTRY)
 
 #define OC_ACPI_DELETE_ARRAY_FIELDS(_, __) \
   OC_ARRAY (OC_ACPI_DELETE_ENTRY, _, __)
-  OC_DECLARE (OC_ACPI_DELETE_ARRAY)
+OC_DECLARE (OC_ACPI_DELETE_ARRAY)
 
 ///
 /// ACPI patches.
@@ -70,11 +70,11 @@
   _(UINT32                      , TableLength      ,     , 0                           , ()                   ) \
   _(UINT8                       , TableSignature   , [4] , {0}                         , ()                   ) \
   _(UINT32                      , Skip             ,     , 0                           , ()                   )
-  OC_DECLARE (OC_ACPI_PATCH_ENTRY)
+OC_DECLARE (OC_ACPI_PATCH_ENTRY)
 
 #define OC_ACPI_PATCH_ARRAY_FIELDS(_, __) \
   OC_ARRAY (OC_ACPI_PATCH_ENTRY, _, __)
-  OC_DECLARE (OC_ACPI_PATCH_ARRAY)
+OC_DECLARE (OC_ACPI_PATCH_ARRAY)
 
 ///
 /// ACPI quirks.
@@ -86,14 +86,14 @@
   _(BOOLEAN                     , ResetHwSig          ,     , FALSE  , ()) \
   _(BOOLEAN                     , ResetLogoStatus     ,     , FALSE  , ()) \
   _(BOOLEAN                     , SyncTableIds        ,     , FALSE  , ())
-  OC_DECLARE (OC_ACPI_QUIRKS)
+OC_DECLARE (OC_ACPI_QUIRKS)
 
 #define OC_ACPI_CONFIG_FIELDS(_, __) \
   _(OC_ACPI_ADD_ARRAY         , Add              ,     , OC_CONSTR2 (OC_ACPI_ADD_ARRAY, _, __)     , OC_DESTR (OC_ACPI_ADD_ARRAY)) \
   _(OC_ACPI_DELETE_ARRAY      , Delete           ,     , OC_CONSTR2 (OC_ACPI_DELETE_ARRAY, _, __)  , OC_DESTR (OC_ACPI_DELETE_ARRAY)) \
   _(OC_ACPI_PATCH_ARRAY       , Patch            ,     , OC_CONSTR2 (OC_ACPI_PATCH_ARRAY, _, __)   , OC_DESTR (OC_ACPI_PATCH_ARRAY)) \
   _(OC_ACPI_QUIRKS            , Quirks           ,     , OC_CONSTR2 (OC_ACPI_QUIRKS, _, __)        , OC_DESTR (OC_ACPI_QUIRKS))
-  OC_DECLARE (OC_ACPI_CONFIG)
+OC_DECLARE (OC_ACPI_CONFIG)
 
 /**
   Apple bootloader section
@@ -103,11 +103,11 @@
   _(UINT64                      , Address          ,     , 0       , () ) \
   _(BOOLEAN                     , Enabled          ,     , FALSE   , () ) \
   _(OC_STRING                   , Comment          ,     , OC_STRING_CONSTR ("", _, __), OC_DESTR (OC_STRING) )
-  OC_DECLARE (OC_BOOTER_WL_ENTRY)
+OC_DECLARE (OC_BOOTER_WL_ENTRY)
 
 #define OC_BOOTER_WL_ARRAY_FIELDS(_, __) \
   OC_ARRAY (OC_BOOTER_WL_ENTRY, _, __)
-  OC_DECLARE (OC_BOOTER_WL_ARRAY)
+OC_DECLARE (OC_BOOTER_WL_ARRAY)
 
 ///
 /// Bootloader patches.
@@ -124,11 +124,11 @@
   _(OC_DATA                     , ReplaceMask      ,     , OC_EDATA_CONSTR (_, __)     , OC_DESTR (OC_DATA)   ) \
   _(UINT32                      , Limit            ,     , 0                           , ()                   ) \
   _(UINT32                      , Skip             ,     , 0                           , ()                   )
-  OC_DECLARE (OC_BOOTER_PATCH_ENTRY)
+OC_DECLARE (OC_BOOTER_PATCH_ENTRY)
 
 #define OC_BOOTER_PATCH_ARRAY_FIELDS(_, __) \
   OC_ARRAY (OC_BOOTER_PATCH_ENTRY, _, __)
-  OC_DECLARE (OC_BOOTER_PATCH_ARRAY)
+OC_DECLARE (OC_BOOTER_PATCH_ARRAY)
 
 ///
 /// Apple bootloader quirks.
@@ -154,7 +154,7 @@
   _(BOOLEAN                     , SetupVirtualMap           ,     , FALSE  , ()) \
   _(BOOLEAN                     , SignalAppleOS             ,     , FALSE  , ()) \
   _(BOOLEAN                     , SyncRuntimePermissions    ,     , FALSE  , ())
-  OC_DECLARE (OC_BOOTER_QUIRKS)
+OC_DECLARE (OC_BOOTER_QUIRKS)
 
 ///
 /// Apple bootloader section.
@@ -163,7 +163,7 @@
   _(OC_BOOTER_WL_ARRAY          , MmioWhitelist    ,     , OC_CONSTR2 (OC_BOOTER_WL_ARRAY, _, __)      , OC_DESTR (OC_BOOTER_WL_ARRAY)) \
   _(OC_BOOTER_PATCH_ARRAY       , Patch            ,     , OC_CONSTR2 (OC_BOOTER_PATCH_ARRAY, _, __)   , OC_DESTR (OC_BOOTER_PATCH_ARRAY)) \
   _(OC_BOOTER_QUIRKS            , Quirks           ,     , OC_CONSTR2 (OC_BOOTER_QUIRKS, _, __)        , OC_DESTR (OC_BOOTER_QUIRKS))
-  OC_DECLARE (OC_BOOTER_CONFIG)
+OC_DECLARE (OC_BOOTER_CONFIG)
 
 /**
   DeviceProperties section
@@ -174,20 +174,20 @@
 ///
 #define OC_DEV_PROP_ADD_MAP_FIELDS(_, __) \
   OC_MAP (OC_STRING, OC_ASSOC, _, __)
-  OC_DECLARE (OC_DEV_PROP_ADD_MAP)
+OC_DECLARE (OC_DEV_PROP_ADD_MAP)
 
 #define OC_DEV_PROP_DELETE_ENTRY_FIELDS(_, __) \
   OC_ARRAY (OC_STRING, _, __)
-  OC_DECLARE (OC_DEV_PROP_DELETE_ENTRY)
+OC_DECLARE (OC_DEV_PROP_DELETE_ENTRY)
 
 #define OC_DEV_PROP_DELETE_MAP_FIELDS(_, __) \
   OC_MAP (OC_STRING, OC_DEV_PROP_DELETE_ENTRY, _, __)
-  OC_DECLARE (OC_DEV_PROP_DELETE_MAP)
+OC_DECLARE (OC_DEV_PROP_DELETE_MAP)
 
 #define OC_DEV_PROP_CONFIG_FIELDS(_, __) \
   _(OC_DEV_PROP_ADD_MAP       , Add              ,     , OC_CONSTR2 (OC_DEV_PROP_ADD_MAP, _, __)    , OC_DESTR (OC_DEV_PROP_ADD_MAP)) \
   _(OC_DEV_PROP_DELETE_MAP    , Delete           ,     , OC_CONSTR2 (OC_DEV_PROP_DELETE_MAP, _, __) , OC_DESTR (OC_DEV_PROP_DELETE_MAP))
-  OC_DECLARE (OC_DEV_PROP_CONFIG)
+OC_DECLARE (OC_DEV_PROP_CONFIG)
 
 /**
   KernelSpace section
@@ -210,11 +210,11 @@
   _(UINT32                      , ImageDataSize    ,     , 0                                ,  ()                   ) \
   _(CHAR8 *                     , PlistData        ,     , NULL                             ,  OcFreePointer        ) \
   _(UINT32                      , PlistDataSize    ,     , 0                                ,  ()                   )
-  OC_DECLARE (OC_KERNEL_ADD_ENTRY)
+OC_DECLARE (OC_KERNEL_ADD_ENTRY)
 
 #define OC_KERNEL_ADD_ARRAY_FIELDS(_, __) \
   OC_ARRAY (OC_KERNEL_ADD_ENTRY, _, __)
-  OC_DECLARE (OC_KERNEL_ADD_ARRAY)
+OC_DECLARE (OC_KERNEL_ADD_ARRAY)
 
 ///
 /// KernelSpace kext blocks.
@@ -227,29 +227,29 @@
   _(OC_STRING                   , MaxKernel        ,     , OC_STRING_CONSTR ("", _, __)         ,  OC_DESTR (OC_STRING) ) \
   _(OC_STRING                   , MinKernel        ,     , OC_STRING_CONSTR ("", _, __)         ,  OC_DESTR (OC_STRING) ) \
   _(OC_STRING                   , Strategy         ,     , OC_STRING_CONSTR ("Disable", _, __)  ,  OC_DESTR (OC_STRING) )
-  OC_DECLARE (OC_KERNEL_BLOCK_ENTRY)
+OC_DECLARE (OC_KERNEL_BLOCK_ENTRY)
 
 #define OC_KERNEL_BLOCK_ARRAY_FIELDS(_, __) \
   OC_ARRAY (OC_KERNEL_BLOCK_ENTRY, _, __)
-  OC_DECLARE (OC_KERNEL_BLOCK_ARRAY)
+OC_DECLARE (OC_KERNEL_BLOCK_ARRAY)
 
 ///
 /// Kernel emulation preferences.
 ///
-#define OC_KERNEL_EMULATE_FIELDS(_,__) \
+#define OC_KERNEL_EMULATE_FIELDS(_, __) \
   _(UINT32                      , Cpuid1Data          , [4] , {0}                         , () ) \
   _(UINT32                      , Cpuid1Mask          , [4] , {0}                         , () ) \
   _(BOOLEAN                     , DummyPowerManagement,     , FALSE                       , () ) \
   _(OC_STRING                   , MaxKernel           ,     , OC_STRING_CONSTR ("", _, __), OC_DESTR (OC_STRING) ) \
   _(OC_STRING                   , MinKernel           ,     , OC_STRING_CONSTR ("", _, __), OC_DESTR (OC_STRING) )
-  OC_DECLARE (OC_KERNEL_EMULATE)
+OC_DECLARE (OC_KERNEL_EMULATE)
 
 ///
 /// KernelSpace forced loaded kexts.
 ///
 #define OC_KERNEL_FORCE_ARRAY_FIELDS(_, __) \
   OC_ARRAY (OC_KERNEL_ADD_ENTRY, _, __)
-  OC_DECLARE (OC_KERNEL_FORCE_ARRAY)
+OC_DECLARE (OC_KERNEL_FORCE_ARRAY)
 
 ///
 /// KernelSpace patches.
@@ -269,11 +269,11 @@
   _(OC_DATA                     , ReplaceMask      ,     , OC_EDATA_CONSTR (_, __)     , OC_DESTR (OC_DATA)   ) \
   _(UINT32                      , Limit            ,     , 0                           , ()                   ) \
   _(UINT32                      , Skip             ,     , 0                           , ()                   )
-  OC_DECLARE (OC_KERNEL_PATCH_ENTRY)
+OC_DECLARE (OC_KERNEL_PATCH_ENTRY)
 
 #define OC_KERNEL_PATCH_ARRAY_FIELDS(_, __) \
   OC_ARRAY (OC_KERNEL_PATCH_ENTRY, _, __)
-  OC_DECLARE (OC_KERNEL_PATCH_ARRAY)
+OC_DECLARE (OC_KERNEL_PATCH_ARRAY)
 
 ///
 /// KernelSpace quirks.
@@ -301,7 +301,7 @@
   _(BOOLEAN                     , ProvideCurrentCpuInfo       ,     , FALSE  , ()) \
   _(BOOLEAN                     , ThirdPartyDrives            ,     , FALSE  , ()) \
   _(BOOLEAN                     , XhciPortLimit               ,     , FALSE  , ())
-  OC_DECLARE (OC_KERNEL_QUIRKS)
+OC_DECLARE (OC_KERNEL_QUIRKS)
 
 ///
 /// KernelSpace operation scheme.
@@ -311,7 +311,7 @@
   _(OC_STRING                   , KernelCache      ,     , OC_STRING_CONSTR ("Auto", _, __), OC_DESTR (OC_STRING)) \
   _(BOOLEAN                     , CustomKernel     ,     , FALSE  , ()) \
   _(BOOLEAN                     , FuzzyMatch       ,     , FALSE  , ())
-  OC_DECLARE (OC_KERNEL_SCHEME)
+OC_DECLARE (OC_KERNEL_SCHEME)
 
 #define OC_KERNEL_CONFIG_FIELDS(_, __) \
   _(OC_KERNEL_ADD_ARRAY         , Add              ,     , OC_CONSTR2 (OC_KERNEL_ADD_ARRAY, _, __)     , OC_DESTR (OC_KERNEL_ADD_ARRAY)) \
@@ -321,7 +321,7 @@
   _(OC_KERNEL_PATCH_ARRAY       , Patch            ,     , OC_CONSTR2 (OC_KERNEL_PATCH_ARRAY, _, __)   , OC_DESTR (OC_KERNEL_PATCH_ARRAY)) \
   _(OC_KERNEL_QUIRKS            , Quirks           ,     , OC_CONSTR2 (OC_KERNEL_QUIRKS, _, __)        , OC_DESTR (OC_KERNEL_QUIRKS)) \
   _(OC_KERNEL_SCHEME            , Scheme           ,     , OC_CONSTR2 (OC_KERNEL_SCHEME, _, __)        , OC_DESTR (OC_KERNEL_SCHEME))
-  OC_DECLARE (OC_KERNEL_CONFIG)
+OC_DECLARE (OC_KERNEL_CONFIG)
 
 /**
   Misc section
@@ -329,7 +329,7 @@
 
 #define OC_MISC_BLESS_ARRAY_FIELDS(_, __) \
   OC_ARRAY (OC_STRING, _, __)
-  OC_DECLARE (OC_MISC_BLESS_ARRAY)
+OC_DECLARE (OC_MISC_BLESS_ARRAY)
 
 #define OC_MISC_BOOT_FIELDS(_, __) \
   _(OC_STRING                   , PickerMode                  ,     , OC_STRING_CONSTR ("Builtin", _, __) , OC_DESTR (OC_STRING)) \
@@ -345,7 +345,7 @@
   _(BOOLEAN                     , HideAuxiliary               ,     , FALSE                               , ())                   \
   _(BOOLEAN                     , PollAppleHotKeys            ,     , FALSE                               , ())                   \
   _(BOOLEAN                     , ShowPicker                  ,     , FALSE                               , ())
-  OC_DECLARE (OC_MISC_BOOT)
+OC_DECLARE (OC_MISC_BOOT)
 
 #define OC_MISC_DEBUG_FIELDS(_, __) \
   _(UINT64                      , DisplayLevel                ,     , 0            , ()) \
@@ -356,14 +356,14 @@
   _(BOOLEAN                     , DisableWatchDog             ,     , FALSE        , ()) \
   _(BOOLEAN                     , SysReport                   ,     , FALSE        , ()) \
   _(OC_STRING                   , LogModules                  ,     , OC_STRING_CONSTR ("*", _, __) , OC_DESTR (OC_STRING))
-  OC_DECLARE (OC_MISC_DEBUG)
+OC_DECLARE (OC_MISC_DEBUG)
 
-#define OCS_EXPOSE_BOOT_PATH   1U
-#define OCS_EXPOSE_VERSION_VAR 2U
-#define OCS_EXPOSE_VERSION_UI  4U
-#define OCS_EXPOSE_OEM_INFO    8U
-#define OCS_EXPOSE_VERSION     (OCS_EXPOSE_VERSION_VAR | OCS_EXPOSE_VERSION_UI)
-#define OCS_EXPOSE_ALL_BITS (\
+#define OCS_EXPOSE_BOOT_PATH    1U
+#define OCS_EXPOSE_VERSION_VAR  2U
+#define OCS_EXPOSE_VERSION_UI   4U
+#define OCS_EXPOSE_OEM_INFO     8U
+#define OCS_EXPOSE_VERSION      (OCS_EXPOSE_VERSION_VAR | OCS_EXPOSE_VERSION_UI)
+#define OCS_EXPOSE_ALL_BITS     (\
   OCS_EXPOSE_BOOT_PATH  | OCS_EXPOSE_VERSION_VAR | \
   OCS_EXPOSE_VERSION_UI | OCS_EXPOSE_OEM_INFO)
 
@@ -389,7 +389,7 @@ typedef enum {
   _(OC_STRING                   , SecureBootModel             ,      , OC_STRING_CONSTR ("Default", _, __), OC_DESTR (OC_STRING) ) \
   _(UINT64                      , ApECID                      ,      , 0                       , ()) \
   _(UINT64                      , HaltLevel                   ,      , 0x80000000              , ())
-  OC_DECLARE (OC_MISC_SECURITY)
+OC_DECLARE (OC_MISC_SECURITY)
 
 #define OC_MISC_TOOLS_ENTRY_FIELDS(_, __) \
   _(OC_STRING                   , Arguments        ,     , OC_STRING_CONSTR ("", _, __), OC_DESTR (OC_STRING) ) \
@@ -401,17 +401,17 @@ typedef enum {
   _(BOOLEAN                     , TextMode         ,     , FALSE                       , ()                   ) \
   _(OC_STRING                   , Name             ,     , OC_STRING_CONSTR ("", _, __), OC_DESTR (OC_STRING) ) \
   _(OC_STRING                   , Path             ,     , OC_STRING_CONSTR ("", _, __), OC_DESTR (OC_STRING) )
-  OC_DECLARE (OC_MISC_TOOLS_ENTRY)
+OC_DECLARE (OC_MISC_TOOLS_ENTRY)
 
 #define OC_MISC_TOOLS_ARRAY_FIELDS(_, __) \
   OC_ARRAY (OC_MISC_TOOLS_ENTRY, _, __)
-  OC_DECLARE (OC_MISC_TOOLS_ARRAY)
+OC_DECLARE (OC_MISC_TOOLS_ARRAY)
 
 ///
 /// Reference:
 /// https://github.com/acidanthera/bugtracker/issues/1954#issuecomment-1084220743
 ///
-#define OC_SERIAL_PCI_DEVICE_INFO_MAX_SIZE 41U
+#define OC_SERIAL_PCI_DEVICE_INFO_MAX_SIZE  41U
 
 ///
 /// Reference:
@@ -431,13 +431,13 @@ typedef enum {
   _(UINT32                      , RegisterStride           ,      , 1                                , ()) \
   _(BOOLEAN                     , UseHardwareFlowControl   ,      , FALSE                            , ()) \
   _(BOOLEAN                     , UseMmio                  ,      , FALSE                            , ())
-  OC_DECLARE (OC_MISC_SERIAL_CUSTOM)
+OC_DECLARE (OC_MISC_SERIAL_CUSTOM)
 
 #define OC_MISC_SERIAL_FIELDS(_, __) \
   _(OC_MISC_SERIAL_CUSTOM              , Custom    ,     , OC_CONSTR3 (OC_MISC_SERIAL_CUSTOM, _, __)         , OC_DESTR (OC_MISC_SERIAL_CUSTOM)) \
   _(BOOLEAN                            , Init      ,     , FALSE                                             , ()) \
   _(BOOLEAN                            , Override  ,     , FALSE                                             , ())
-  OC_DECLARE (OC_MISC_SERIAL)
+OC_DECLARE (OC_MISC_SERIAL)
 
 #define OC_MISC_CONFIG_FIELDS(_, __) \
   _(OC_MISC_BLESS_ARRAY        , BlessOverride   ,     , OC_CONSTR2 (OC_MISC_BLESS_ARRAY, _, __)  , OC_DESTR (OC_MISC_BLESS_ARRAY)) \
@@ -447,7 +447,7 @@ typedef enum {
   _(OC_MISC_SERIAL             , Serial          ,     , OC_CONSTR2 (OC_MISC_SERIAL, _, __)       , OC_DESTR (OC_MISC_SERIAL)) \
   _(OC_MISC_TOOLS_ARRAY        , Entries         ,     , OC_CONSTR2 (OC_MISC_TOOLS_ARRAY, _, __)  , OC_DESTR (OC_MISC_TOOLS_ARRAY)) \
   _(OC_MISC_TOOLS_ARRAY        , Tools           ,     , OC_CONSTR2 (OC_MISC_TOOLS_ARRAY, _, __)  , OC_DESTR (OC_MISC_TOOLS_ARRAY))
-  OC_DECLARE (OC_MISC_CONFIG)
+OC_DECLARE (OC_MISC_CONFIG)
 
 /**
   NVRAM section
@@ -458,23 +458,23 @@ typedef enum {
 ///
 #define OC_NVRAM_ADD_MAP_FIELDS(_, __) \
   OC_MAP (OC_STRING, OC_ASSOC, _, __)
-  OC_DECLARE (OC_NVRAM_ADD_MAP)
+OC_DECLARE (OC_NVRAM_ADD_MAP)
 
 #define OC_NVRAM_DELETE_ENTRY_FIELDS(_, __) \
   OC_ARRAY (OC_STRING, _, __)
-  OC_DECLARE (OC_NVRAM_DELETE_ENTRY)
+OC_DECLARE (OC_NVRAM_DELETE_ENTRY)
 
 #define OC_NVRAM_DELETE_MAP_FIELDS(_, __) \
   OC_MAP (OC_STRING, OC_NVRAM_DELETE_ENTRY, _, __)
-  OC_DECLARE (OC_NVRAM_DELETE_MAP)
+OC_DECLARE (OC_NVRAM_DELETE_MAP)
 
 #define OC_NVRAM_LEGACY_ENTRY_FIELDS(_, __) \
   OC_ARRAY (OC_STRING, _, __)
-  OC_DECLARE (OC_NVRAM_LEGACY_ENTRY)
+OC_DECLARE (OC_NVRAM_LEGACY_ENTRY)
 
 #define OC_NVRAM_LEGACY_MAP_FIELDS(_, __) \
   OC_MAP (OC_STRING, OC_NVRAM_LEGACY_ENTRY, _, __)
-  OC_DECLARE (OC_NVRAM_LEGACY_MAP)
+OC_DECLARE (OC_NVRAM_LEGACY_MAP)
 
 #define OC_NVRAM_CONFIG_FIELDS(_, __) \
   _(OC_NVRAM_ADD_MAP           , Add               ,     , OC_CONSTR2 (OC_NVRAM_ADD_MAP, _, __)        , OC_DESTR (OC_NVRAM_ADD_MAP)) \
@@ -483,7 +483,7 @@ typedef enum {
   _(BOOLEAN                    , LegacyEnable      ,     , FALSE                                       , () ) \
   _(BOOLEAN                    , LegacyOverwrite   ,     , FALSE                                       , () ) \
   _(BOOLEAN                    , WriteFlash        ,     , FALSE                                       , () )
-  OC_DECLARE (OC_NVRAM_CONFIG)
+OC_DECLARE (OC_NVRAM_CONFIG)
 
 /**
   Platform information configuration
@@ -500,7 +500,7 @@ typedef enum {
   _(BOOLEAN                     , SpoofVendor        ,     , FALSE                                        , () )                   \
   _(BOOLEAN                     , AdviseFeatures     ,     , FALSE                                        , () )                   \
   _(BOOLEAN                     , MaxBIOSVersion     ,     , FALSE                                        , () )
-  OC_DECLARE (OC_PLATFORM_GENERIC_CONFIG)
+OC_DECLARE (OC_PLATFORM_GENERIC_CONFIG)
 
 #define OC_PLATFORM_DATA_HUB_CONFIG_FIELDS(_, __) \
   _(OC_STRING                   , PlatformName        ,     , OC_STRING_CONSTR ("", _, __)     , OC_DESTR (OC_STRING) ) \
@@ -517,7 +517,7 @@ typedef enum {
   _(UINT8                       , SmcRevision         , [6] , {0}                              , () )                   \
   _(UINT8                       , SmcBranch           , [8] , {0}                              , () )                   \
   _(UINT8                       , SmcPlatform         , [8] , {0}                              , () )
-  OC_DECLARE (OC_PLATFORM_DATA_HUB_CONFIG)
+OC_DECLARE (OC_PLATFORM_DATA_HUB_CONFIG)
 
 #define OC_PLATFORM_MEMORY_DEVICE_ENTRY_FIELDS(_, __) \
   _(UINT32                      , Size                ,     , 0                                  , () )                   \
@@ -528,11 +528,11 @@ typedef enum {
   _(OC_STRING                   , SerialNumber        ,     , OC_STRING_CONSTR ("Unknown", _, __), OC_DESTR (OC_STRING) ) \
   _(OC_STRING                   , AssetTag            ,     , OC_STRING_CONSTR ("Unknown", _, __), OC_DESTR (OC_STRING) ) \
   _(OC_STRING                   , PartNumber          ,     , OC_STRING_CONSTR ("Unknown", _, __), OC_DESTR (OC_STRING) )
-  OC_DECLARE (OC_PLATFORM_MEMORY_DEVICE_ENTRY)
+OC_DECLARE (OC_PLATFORM_MEMORY_DEVICE_ENTRY)
 
 #define OC_PLATFORM_MEMORY_DEVICES_ARRAY_FIELDS(_, __) \
   OC_ARRAY (OC_PLATFORM_MEMORY_DEVICE_ENTRY, _, __)
-  OC_DECLARE (OC_PLATFORM_MEMORY_DEVICES_ARRAY)
+OC_DECLARE (OC_PLATFORM_MEMORY_DEVICES_ARRAY)
 
 #define OC_PLATFORM_MEMORY_CONFIG_FIELDS(_, __) \
   _(UINT8                           , FormFactor     ,     , 0x2                                                 , () ) \
@@ -543,7 +543,7 @@ typedef enum {
   _(UINT8                           , ErrorCorrection,     , 0x3                                                 , () ) \
   _(UINT64                          , MaxCapacity    ,     , 0                                                   , () ) \
   _(OC_PLATFORM_MEMORY_DEVICES_ARRAY, Devices        ,     , OC_CONSTR3 (OC_PLATFORM_MEMORY_DEVICES_ARRAY, _, __), OC_DESTR (OC_PLATFORM_MEMORY_DEVICES_ARRAY))
-  OC_DECLARE (OC_PLATFORM_MEMORY_CONFIG)
+OC_DECLARE (OC_PLATFORM_MEMORY_CONFIG)
 
 #define OC_PLATFORM_NVRAM_CONFIG_FIELDS(_, __) \
   _(OC_STRING                   , Bid                   ,     , OC_STRING_CONSTR ("", _, __)     , OC_DESTR (OC_STRING) ) \
@@ -553,7 +553,7 @@ typedef enum {
   _(UINT8                       , Rom                   , [6] , {0}                              , ()                   ) \
   _(UINT64                      , FirmwareFeatures      ,     , 0                                , ()                   ) \
   _(UINT64                      , FirmwareFeaturesMask  ,     , 0                                , ()                   )
-  OC_DECLARE (OC_PLATFORM_NVRAM_CONFIG)
+OC_DECLARE (OC_PLATFORM_NVRAM_CONFIG)
 
 #define OC_PLATFORM_SMBIOS_CONFIG_FIELDS(_, __) \
   _(OC_STRING                    , BIOSVendor            ,  , OC_STRING_CONSTR ("", _, __)     , OC_DESTR (OC_STRING) ) \
@@ -583,7 +583,7 @@ typedef enum {
   _(UINT64                       , FirmwareFeaturesMask  ,  , 0                                , ()                   ) \
   _(UINT8                        , SmcVersion            , [16] , {0}                          , ()                   ) \
   _(UINT16                       , ProcessorType         ,  , 0                                , ()                   )
-  OC_DECLARE (OC_PLATFORM_SMBIOS_CONFIG)
+OC_DECLARE (OC_PLATFORM_SMBIOS_CONFIG)
 
 #define OC_PLATFORM_CONFIG_FIELDS(_, __) \
   _(BOOLEAN                     , Automatic          ,     , FALSE                                           , ()) \
@@ -598,8 +598,7 @@ typedef enum {
   _(OC_PLATFORM_MEMORY_CONFIG   , Memory             ,     , OC_CONSTR2 (OC_PLATFORM_MEMORY_CONFIG, _, __)   , OC_DESTR (OC_PLATFORM_MEMORY_CONFIG)) \
   _(OC_PLATFORM_NVRAM_CONFIG    , Nvram              ,     , OC_CONSTR2 (OC_PLATFORM_NVRAM_CONFIG, _, __)    , OC_DESTR (OC_PLATFORM_NVRAM_CONFIG)) \
   _(OC_PLATFORM_SMBIOS_CONFIG   , Smbios             ,     , OC_CONSTR2 (OC_PLATFORM_SMBIOS_CONFIG, _, __)   , OC_DESTR (OC_PLATFORM_SMBIOS_CONFIG))
-  OC_DECLARE (OC_PLATFORM_CONFIG)
-
+OC_DECLARE (OC_PLATFORM_CONFIG)
 
 /**
   Uefi section
@@ -613,11 +612,11 @@ typedef enum {
   _(OC_STRING                   , Comment            ,     , OC_STRING_CONSTR ("", _, __)                    , OC_DESTR (OC_STRING) ) \
   _(BOOLEAN                     , Enabled            ,     , FALSE                                           , ())                    \
   _(OC_STRING                   , Path               ,     , OC_STRING_CONSTR ("", _, __)                    , OC_DESTR (OC_STRING) )
-  OC_DECLARE (OC_UEFI_DRIVER_ENTRY)
+OC_DECLARE (OC_UEFI_DRIVER_ENTRY)
 
 #define OC_UEFI_DRIVER_ARRAY_FIELDS(_, __) \
   OC_ARRAY (OC_UEFI_DRIVER_ENTRY, _, __)
-  OC_DECLARE (OC_UEFI_DRIVER_ARRAY)
+OC_DECLARE (OC_UEFI_DRIVER_ARRAY)
 
 ///
 /// APFS is a set of options for APFS file system support.
@@ -629,7 +628,7 @@ typedef enum {
   _(BOOLEAN                     , GlobalConnect      ,     , FALSE                         , ()) \
   _(BOOLEAN                     , HideVerbose        ,     , FALSE                         , ()) \
   _(BOOLEAN                     , JumpstartHotPlug   ,     , FALSE                         , ())
-  OC_DECLARE (OC_UEFI_APFS)
+OC_DECLARE (OC_UEFI_APFS)
 
 ///
 /// AppleInput is a set of options to configure OpenCore's reverse engingeered then customised implementation of the AppleEvent protocol.
@@ -645,7 +644,7 @@ typedef enum {
   _(UINT32                      , PointerPollMask       ,     , ((UINT32) (-1))                   , ()) \
   _(UINT16                      , PointerSpeedDiv       ,     , 1                                 , ()) \
   _(UINT16                      , PointerSpeedMul       ,     , 1                                 , ())
-  OC_DECLARE (OC_UEFI_APPLEINPUT)
+OC_DECLARE (OC_UEFI_APPLEINPUT)
 
 ///
 /// Audio is a set of options for sound configuration.
@@ -662,7 +661,7 @@ typedef enum {
   _(INT8                        , MinimumAudibleGain ,     , -128                              , ()) \
   _(BOOLEAN                     , ResetTrafficClass  ,     , FALSE                             , ()) \
   _(BOOLEAN                     , DisconnectHda      ,     , FALSE                             , ())
-  OC_DECLARE (OC_UEFI_AUDIO)
+OC_DECLARE (OC_UEFI_AUDIO)
 
 ///
 /// Input is a set of options to support advanced input.
@@ -676,7 +675,7 @@ typedef enum {
   _(BOOLEAN                     , KeyFiltering       ,     , FALSE                             , ()) \
   _(BOOLEAN                     , KeySwap            ,     , FALSE                             , ()) \
   _(BOOLEAN                     , PointerSupport     ,     , FALSE                             , ())
-  OC_DECLARE (OC_UEFI_INPUT)
+OC_DECLARE (OC_UEFI_INPUT)
 
 ///
 /// Output is a set of options to support advanced output.
@@ -697,7 +696,7 @@ typedef enum {
   _(BOOLEAN                     , DirectGopRendering          ,     , FALSE  , ()) \
   _(BOOLEAN                     , ForceResolution             ,     , FALSE  , ()) \
   _(BOOLEAN                     , ReconnectGraphicsOnConnect  ,     , FALSE  , ())
-  OC_DECLARE (OC_UEFI_OUTPUT)
+OC_DECLARE (OC_UEFI_OUTPUT)
 
 ///
 /// Prefer own protocol implementation for these protocols.
@@ -721,7 +720,7 @@ typedef enum {
   _(BOOLEAN                     , HashServices                ,     , FALSE  , ()) \
   _(BOOLEAN                     , OSInfo                      ,     , FALSE  , ()) \
   _(BOOLEAN                     , UnicodeCollation            ,     , FALSE  , ())
-  OC_DECLARE (OC_UEFI_PROTOCOL_OVERRIDES)
+OC_DECLARE (OC_UEFI_PROTOCOL_OVERRIDES)
 
 ///
 /// Quirks is a set of hacks for different types of firmware.
@@ -741,7 +740,7 @@ typedef enum {
   _(BOOLEAN                     , RequestBootVarRouting       ,     , FALSE  , ()) \
   _(BOOLEAN                     , UnblockFsConnect            ,     , FALSE  , ()) \
   _(BOOLEAN                     , ForceOcWriteFlash           ,     , FALSE  , ())
-  OC_DECLARE (OC_UEFI_QUIRKS)
+OC_DECLARE (OC_UEFI_QUIRKS)
 
 ///
 /// Reserved memory entries adds.
@@ -752,11 +751,11 @@ typedef enum {
   _(BOOLEAN                     , Enabled          ,     , FALSE   , () ) \
   _(OC_STRING                   , Type             ,     , OC_STRING_CONSTR ("Reserved", _, __), OC_DESTR (OC_STRING) ) \
   _(OC_STRING                   , Comment          ,     , OC_STRING_CONSTR ("", _, __), OC_DESTR (OC_STRING) )
-  OC_DECLARE (OC_UEFI_RSVD_ENTRY)
+OC_DECLARE (OC_UEFI_RSVD_ENTRY)
 
 #define OC_UEFI_RSVD_ARRAY_FIELDS(_, __) \
   OC_ARRAY (OC_UEFI_RSVD_ENTRY, _, __)
-  OC_DECLARE (OC_UEFI_RSVD_ARRAY)
+OC_DECLARE (OC_UEFI_RSVD_ARRAY)
 
 ///
 /// Uefi contains firmware tweaks and extra drivers.
@@ -772,7 +771,7 @@ typedef enum {
   _(OC_UEFI_PROTOCOL_OVERRIDES  , ProtocolOverrides ,     , OC_CONSTR2 (OC_UEFI_PROTOCOL_OVERRIDES, _, __) , OC_DESTR (OC_UEFI_PROTOCOL_OVERRIDES)) \
   _(OC_UEFI_QUIRKS              , Quirks            ,     , OC_CONSTR2 (OC_UEFI_QUIRKS, _, __)             , OC_DESTR (OC_UEFI_QUIRKS)) \
   _(OC_UEFI_RSVD_ARRAY          , ReservedMemory    ,     , OC_CONSTR2 (OC_UEFI_RSVD_ARRAY, _, __)         , OC_DESTR (OC_UEFI_RSVD_ARRAY))
-  OC_DECLARE (OC_UEFI_CONFIG)
+OC_DECLARE (OC_UEFI_CONFIG)
 
 /**
   Root configuration
@@ -787,7 +786,7 @@ typedef enum {
   _(OC_NVRAM_CONFIG             , Nvram             ,     , OC_CONSTR1 (OC_NVRAM_CONFIG, _, __)     , OC_DESTR (OC_NVRAM_CONFIG)) \
   _(OC_PLATFORM_CONFIG          , PlatformInfo      ,     , OC_CONSTR1 (OC_PLATFORM_CONFIG, _, __)  , OC_DESTR (OC_PLATFORM_CONFIG)) \
   _(OC_UEFI_CONFIG              , Uefi              ,     , OC_CONSTR1 (OC_UEFI_CONFIG, _, __)      , OC_DESTR (OC_UEFI_CONFIG))
-  OC_DECLARE (OC_GLOBAL_CONFIG)
+OC_DECLARE (OC_GLOBAL_CONFIG)
 
 /**
   Initialize configuration with plist data.
@@ -801,10 +800,10 @@ typedef enum {
 **/
 EFI_STATUS
 OcConfigurationInit (
-      OUT  OC_GLOBAL_CONFIG   *Config,
-  IN       VOID               *Buffer,
-  IN       UINT32             Size,
-  IN  OUT  UINT32             *ErrorCount  OPTIONAL
+  OUT  OC_GLOBAL_CONFIG  *Config,
+  IN       VOID          *Buffer,
+  IN       UINT32        Size,
+  IN  OUT  UINT32        *ErrorCount  OPTIONAL
   );
 
 /**
@@ -814,7 +813,7 @@ OcConfigurationInit (
 **/
 VOID
 OcConfigurationFree (
-  IN OUT OC_GLOBAL_CONFIG   *Config
+  IN OUT OC_GLOBAL_CONFIG  *Config
   );
 
 #endif // OC_CONFIGURATION_LIB_H

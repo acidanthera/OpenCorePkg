@@ -20,31 +20,31 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 ///
 /// Default assumed page size.
 ///
-#define MACHO_PAGE_SIZE 4096U
+#define MACHO_PAGE_SIZE  4096U
 
 ///
 /// Macro to align by default assumed page size.
 ///
-#define MACHO_ALIGN(x) ALIGN_VALUE((x), MACHO_PAGE_SIZE)
+#define MACHO_ALIGN(x)  ALIGN_VALUE((x), MACHO_PAGE_SIZE)
 
 ///
 /// Context used to refer to a Mach-O.  This struct is exposed for reference
 /// only.  Members are not guaranteed to be sane.
 ///
 typedef struct {
-  MACH_HEADER_ANY       *MachHeader;
-  UINT32                FileSize;
+  MACH_HEADER_ANY          *MachHeader;
+  UINT32                   FileSize;
 
-  UINT32                ContainerOffset;
-  MACH_SYMTAB_COMMAND   *Symtab;
-  MACH_NLIST_ANY        *SymbolTable;
-  CHAR8                 *StringTable;
-  MACH_DYSYMTAB_COMMAND *DySymtab;
-  MACH_NLIST_ANY        *IndirectSymbolTable;
-  MACH_RELOCATION_INFO  *LocalRelocations;
-  MACH_RELOCATION_INFO  *ExternRelocations;
+  UINT32                   ContainerOffset;
+  MACH_SYMTAB_COMMAND      *Symtab;
+  MACH_NLIST_ANY           *SymbolTable;
+  CHAR8                    *StringTable;
+  MACH_DYSYMTAB_COMMAND    *DySymtab;
+  MACH_NLIST_ANY           *IndirectSymbolTable;
+  MACH_RELOCATION_INFO     *LocalRelocations;
+  MACH_RELOCATION_INFO     *ExternRelocations;
 
-  BOOLEAN               Is32Bit;
+  BOOLEAN                  Is32Bit;
 } OC_MACHO_CONTEXT;
 
 /**
@@ -117,7 +117,7 @@ MachoInitializeContext (
 **/
 MACH_HEADER_ANY *
 MachoGetMachHeader (
-  IN OUT OC_MACHO_CONTEXT   *Context
+  IN OUT OC_MACHO_CONTEXT  *Context
   );
 
 /**
@@ -247,9 +247,9 @@ MachoGetSegmentByName64 (
 **/
 MACH_SECTION_ANY *
 MachoGetSectionByName (
-  IN OUT OC_MACHO_CONTEXT         *Context,
-  IN     MACH_SEGMENT_COMMAND_ANY *Segment,
-  IN     CONST CHAR8              *SectionName
+  IN OUT OC_MACHO_CONTEXT          *Context,
+  IN     MACH_SEGMENT_COMMAND_ANY  *Segment,
+  IN     CONST CHAR8               *SectionName
   );
 
 /**
@@ -264,9 +264,9 @@ MachoGetSectionByName (
 **/
 MACH_SECTION *
 MachoGetSectionByName32 (
-  IN OUT OC_MACHO_CONTEXT         *Context,
-  IN     MACH_SEGMENT_COMMAND     *Segment,
-  IN     CONST CHAR8              *SectionName
+  IN OUT OC_MACHO_CONTEXT      *Context,
+  IN     MACH_SEGMENT_COMMAND  *Segment,
+  IN     CONST CHAR8           *SectionName
   );
 
 /**
@@ -349,8 +349,8 @@ MachoGetSegmentSectionByName64 (
 **/
 MACH_SEGMENT_COMMAND_ANY *
 MachoGetNextSegment (
-  IN OUT OC_MACHO_CONTEXT               *Context,
-  IN     CONST MACH_SEGMENT_COMMAND_ANY *Segment  OPTIONAL
+  IN OUT OC_MACHO_CONTEXT                *Context,
+  IN     CONST MACH_SEGMENT_COMMAND_ANY  *Segment  OPTIONAL
   );
 
 /**
@@ -365,8 +365,8 @@ MachoGetNextSegment (
 **/
 MACH_SEGMENT_COMMAND *
 MachoGetNextSegment32 (
-  IN OUT OC_MACHO_CONTEXT               *Context,
-  IN     CONST MACH_SEGMENT_COMMAND     *Segment  OPTIONAL
+  IN OUT OC_MACHO_CONTEXT            *Context,
+  IN     CONST MACH_SEGMENT_COMMAND  *Segment  OPTIONAL
   );
 
 /**
@@ -397,9 +397,9 @@ MachoGetNextSegment64 (
 **/
 MACH_SECTION_ANY *
 MachoGetNextSection (
-  IN OUT OC_MACHO_CONTEXT         *Context,
-  IN     MACH_SEGMENT_COMMAND_ANY *Segment,
-  IN     MACH_SECTION_ANY         *Section  OPTIONAL
+  IN OUT OC_MACHO_CONTEXT          *Context,
+  IN     MACH_SEGMENT_COMMAND_ANY  *Segment,
+  IN     MACH_SECTION_ANY          *Section  OPTIONAL
   );
 
 /**
@@ -414,9 +414,9 @@ MachoGetNextSection (
 **/
 MACH_SECTION *
 MachoGetNextSection32 (
-  IN OUT OC_MACHO_CONTEXT         *Context,
-  IN     MACH_SEGMENT_COMMAND     *Segment,
-  IN     MACH_SECTION             *Section  OPTIONAL
+  IN OUT OC_MACHO_CONTEXT      *Context,
+  IN     MACH_SEGMENT_COMMAND  *Segment,
+  IN     MACH_SECTION          *Section  OPTIONAL
   );
 
 /**
@@ -522,8 +522,8 @@ MachoGetSectionByAddress64 (
 **/
 BOOLEAN
 MachoMergeSegments (
-  IN OUT OC_MACHO_CONTEXT     *Context,
-  IN     CONST CHAR8          *Prefix
+  IN OUT OC_MACHO_CONTEXT  *Context,
+  IN     CONST CHAR8       *Prefix
   );
 
 /**
@@ -534,7 +534,7 @@ MachoMergeSegments (
 **/
 BOOLEAN
 MachoSymbolIsSection32 (
-  IN CONST MACH_NLIST     *Symbol
+  IN CONST MACH_NLIST  *Symbol
   );
 
 /**
@@ -557,8 +557,8 @@ MachoSymbolIsSection64 (
 **/
 BOOLEAN
 MachoSymbolIsDefined (
-  IN OUT OC_MACHO_CONTEXT *Context,
-  IN CONST MACH_NLIST_ANY *Symbol
+  IN OUT OC_MACHO_CONTEXT  *Context,
+  IN CONST MACH_NLIST_ANY  *Symbol
   );
 
 /**
@@ -569,7 +569,7 @@ MachoSymbolIsDefined (
 **/
 BOOLEAN
 MachoSymbolIsDefined32 (
-  IN CONST MACH_NLIST     *Symbol
+  IN CONST MACH_NLIST  *Symbol
   );
 
 /**
@@ -592,8 +592,8 @@ MachoSymbolIsDefined64 (
 **/
 BOOLEAN
 MachoSymbolIsLocalDefined (
-  IN OUT OC_MACHO_CONTEXT     *Context,
-  IN     CONST MACH_NLIST_ANY *Symbol
+  IN OUT OC_MACHO_CONTEXT      *Context,
+  IN     CONST MACH_NLIST_ANY  *Symbol
   );
 
 /**
@@ -605,8 +605,8 @@ MachoSymbolIsLocalDefined (
 **/
 BOOLEAN
 MachoSymbolIsLocalDefined32 (
-  IN OUT OC_MACHO_CONTEXT     *Context,
-  IN     CONST MACH_NLIST     *Symbol
+  IN OUT OC_MACHO_CONTEXT  *Context,
+  IN     CONST MACH_NLIST  *Symbol
   );
 
 /**
@@ -631,8 +631,8 @@ MachoSymbolIsLocalDefined64 (
 **/
 MACH_NLIST_ANY *
 MachoGetLocalDefinedSymbolByName (
-  IN OUT OC_MACHO_CONTEXT   *Context,
-  IN     CONST CHAR8        *Name
+  IN OUT OC_MACHO_CONTEXT  *Context,
+  IN     CONST CHAR8       *Name
   );
 
 /**
@@ -644,8 +644,8 @@ MachoGetLocalDefinedSymbolByName (
 **/
 MACH_NLIST *
 MachoGetLocalDefinedSymbolByName32 (
-  IN OUT OC_MACHO_CONTEXT   *Context,
-  IN     CONST CHAR8        *Name
+  IN OUT OC_MACHO_CONTEXT  *Context,
+  IN     CONST CHAR8       *Name
   );
 
 /**
@@ -657,8 +657,8 @@ MachoGetLocalDefinedSymbolByName32 (
 **/
 MACH_NLIST_64 *
 MachoGetLocalDefinedSymbolByName64 (
-  IN OUT OC_MACHO_CONTEXT   *Context,
-  IN     CONST CHAR8        *Name
+  IN OUT OC_MACHO_CONTEXT  *Context,
+  IN     CONST CHAR8       *Name
   );
 
 /**
@@ -717,8 +717,8 @@ MachoGetSymbolByIndex64 (
 **/
 CONST CHAR8 *
 MachoGetSymbolName (
-  IN OUT OC_MACHO_CONTEXT     *Context,
-  IN     CONST MACH_NLIST_ANY *Symbol
+  IN OUT OC_MACHO_CONTEXT      *Context,
+  IN     CONST MACH_NLIST_ANY  *Symbol
   );
 
 /**
@@ -732,8 +732,8 @@ MachoGetSymbolName (
 **/
 CONST CHAR8 *
 MachoGetSymbolName32 (
-  IN OUT OC_MACHO_CONTEXT     *Context,
-  IN     CONST MACH_NLIST     *Symbol
+  IN OUT OC_MACHO_CONTEXT  *Context,
+  IN     CONST MACH_NLIST  *Symbol
   );
 
 /**
@@ -762,8 +762,8 @@ MachoGetSymbolName64 (
 **/
 CONST CHAR8 *
 MachoGetIndirectSymbolName (
-  IN OUT OC_MACHO_CONTEXT     *Context,
-  IN     CONST MACH_NLIST_ANY *Symbol
+  IN OUT OC_MACHO_CONTEXT      *Context,
+  IN     CONST MACH_NLIST_ANY  *Symbol
   );
 
 /**
@@ -777,8 +777,8 @@ MachoGetIndirectSymbolName (
 **/
 CONST CHAR8 *
 MachoGetIndirectSymbolName32 (
-  IN OUT OC_MACHO_CONTEXT     *Context,
-  IN     CONST MACH_NLIST     *Symbol
+  IN OUT OC_MACHO_CONTEXT  *Context,
+  IN     CONST MACH_NLIST  *Symbol
   );
 
 /**
@@ -806,8 +806,8 @@ MachoGetIndirectSymbolName64 (
 **/
 BOOLEAN
 MachoIsSymbolValueInRange (
-  IN OUT OC_MACHO_CONTEXT     *Context,
-  IN     CONST MACH_NLIST_ANY *Symbol
+  IN OUT OC_MACHO_CONTEXT      *Context,
+  IN     CONST MACH_NLIST_ANY  *Symbol
   );
 
 /**
@@ -820,8 +820,8 @@ MachoIsSymbolValueInRange (
 **/
 BOOLEAN
 MachoIsSymbolValueInRange32 (
-  IN OUT OC_MACHO_CONTEXT     *Context,
-  IN     CONST MACH_NLIST     *Symbol
+  IN OUT OC_MACHO_CONTEXT  *Context,
+  IN     CONST MACH_NLIST  *Symbol
   );
 
 /**
@@ -852,9 +852,9 @@ MachoIsSymbolValueInRange64 (
 **/
 BOOLEAN
 MachoGetSymbolByRelocationOffset32 (
-  IN OUT OC_MACHO_CONTEXT   *Context,
-  IN     UINT32             Address,
-  OUT    MACH_NLIST         **Symbol
+  IN OUT OC_MACHO_CONTEXT  *Context,
+  IN     UINT32            Address,
+  OUT    MACH_NLIST        **Symbol
   );
 
 /**
@@ -871,9 +871,9 @@ MachoGetSymbolByRelocationOffset32 (
 **/
 BOOLEAN
 MachoGetSymbolByRelocationOffset64 (
-  IN OUT OC_MACHO_CONTEXT   *Context,
-  IN     UINT64             Address,
-  OUT    MACH_NLIST_64      **Symbol
+  IN OUT OC_MACHO_CONTEXT  *Context,
+  IN     UINT64            Address,
+  OUT    MACH_NLIST_64     **Symbol
   );
 
 /**
@@ -890,9 +890,9 @@ MachoGetSymbolByRelocationOffset64 (
 **/
 BOOLEAN
 MachoGetSymbolByExternRelocationOffset (
-  IN OUT OC_MACHO_CONTEXT   *Context,
-  IN     UINT64             Address,
-  OUT    MACH_NLIST_ANY     **Symbol
+  IN OUT OC_MACHO_CONTEXT  *Context,
+  IN     UINT64            Address,
+  OUT    MACH_NLIST_ANY    **Symbol
   );
 
 /**
@@ -909,9 +909,9 @@ MachoGetSymbolByExternRelocationOffset (
 **/
 BOOLEAN
 MachoGetSymbolByExternRelocationOffset32 (
-  IN OUT OC_MACHO_CONTEXT   *Context,
-  IN     UINT32             Address,
-  OUT    MACH_NLIST         **Symbol
+  IN OUT OC_MACHO_CONTEXT  *Context,
+  IN     UINT32            Address,
+  OUT    MACH_NLIST        **Symbol
   );
 
 /**
@@ -928,9 +928,9 @@ MachoGetSymbolByExternRelocationOffset32 (
 **/
 BOOLEAN
 MachoGetSymbolByExternRelocationOffset64 (
-  IN OUT OC_MACHO_CONTEXT   *Context,
-  IN     UINT64             Address,
-  OUT    MACH_NLIST_64      **Symbol
+  IN OUT OC_MACHO_CONTEXT  *Context,
+  IN     UINT64            Address,
+  OUT    MACH_NLIST_64     **Symbol
   );
 
 /**
@@ -945,9 +945,9 @@ MachoGetSymbolByExternRelocationOffset64 (
 **/
 BOOLEAN
 MachoRelocateSymbol (
-  IN OUT OC_MACHO_CONTEXT   *Context,
-  IN     UINT64             LinkAddress,
-  IN OUT MACH_NLIST_ANY     *Symbol
+  IN OUT OC_MACHO_CONTEXT  *Context,
+  IN     UINT64            LinkAddress,
+  IN OUT MACH_NLIST_ANY    *Symbol
   );
 
 /**
@@ -962,9 +962,9 @@ MachoRelocateSymbol (
 **/
 BOOLEAN
 MachoRelocateSymbol32 (
-  IN OUT OC_MACHO_CONTEXT   *Context,
-  IN     UINT32             LinkAddress,
-  IN OUT MACH_NLIST         *Symbol
+  IN OUT OC_MACHO_CONTEXT  *Context,
+  IN     UINT32            LinkAddress,
+  IN OUT MACH_NLIST        *Symbol
   );
 
 /**
@@ -979,9 +979,9 @@ MachoRelocateSymbol32 (
 **/
 BOOLEAN
 MachoRelocateSymbol64 (
-  IN OUT OC_MACHO_CONTEXT   *Context,
-  IN     UINT64             LinkAddress,
-  IN OUT MACH_NLIST_64      *Symbol
+  IN OUT OC_MACHO_CONTEXT  *Context,
+  IN     UINT64            LinkAddress,
+  IN OUT MACH_NLIST_64     *Symbol
   );
 
 /**
@@ -998,10 +998,10 @@ MachoRelocateSymbol64 (
 **/
 BOOLEAN
 MachoSymbolGetFileOffset32 (
-  IN OUT OC_MACHO_CONTEXT       *Context,
-  IN     CONST  MACH_NLIST      *Symbol,
-  OUT    UINT32                 *FileOffset,
-  OUT    UINT32                 *MaxSize OPTIONAL
+  IN OUT OC_MACHO_CONTEXT   *Context,
+  IN     CONST  MACH_NLIST  *Symbol,
+  OUT    UINT32             *FileOffset,
+  OUT    UINT32             *MaxSize OPTIONAL
   );
 
 /**
@@ -1018,10 +1018,10 @@ MachoSymbolGetFileOffset32 (
 **/
 BOOLEAN
 MachoSymbolGetFileOffset64 (
-  IN OUT OC_MACHO_CONTEXT       *Context,
-  IN     CONST  MACH_NLIST_64   *Symbol,
-  OUT    UINT32                 *FileOffset,
-  OUT    UINT32                 *MaxSize OPTIONAL
+  IN OUT OC_MACHO_CONTEXT      *Context,
+  IN     CONST  MACH_NLIST_64  *Symbol,
+  OUT    UINT32                *FileOffset,
+  OUT    UINT32                *MaxSize OPTIONAL
   );
 
 /**
@@ -1058,10 +1058,10 @@ MachoSymbolGetFileOffset (
 **/
 BOOLEAN
 MachoSymbolGetDirectFileOffset (
-  IN OUT OC_MACHO_CONTEXT       *Context,
-  IN     UINT64                 Address,
-  OUT    UINT32                 *FileOffset,
-  OUT    UINT32                 *MaxSize OPTIONAL
+  IN OUT OC_MACHO_CONTEXT  *Context,
+  IN     UINT64            Address,
+  OUT    UINT32            *FileOffset,
+  OUT    UINT32            *MaxSize OPTIONAL
   );
 
 /**
@@ -1125,10 +1125,10 @@ MachoSymbolNameIsMetaclassPointer (
 **/
 BOOLEAN
 MachoGetClassNameFromSuperMetaClassPointer (
-  IN OUT OC_MACHO_CONTEXT     *Context,
-  IN     CONST CHAR8          *SmcpName,
-  IN     UINTN                ClassNameSize,
-  OUT    CHAR8                *ClassName
+  IN OUT OC_MACHO_CONTEXT  *Context,
+  IN     CONST CHAR8       *SmcpName,
+  IN     UINTN             ClassNameSize,
+  OUT    CHAR8             *ClassName
   );
 
 /**
@@ -1172,10 +1172,10 @@ MachoGetFunctionPrefixFromClassName (
 **/
 BOOLEAN
 MachoGetClassNameFromMetaClassPointer (
-  IN OUT OC_MACHO_CONTEXT     *Context,
-  IN     CONST CHAR8          *MetaClassName,
-  IN     UINTN                ClassNameSize,
-  OUT    CHAR8                *ClassName
+  IN OUT OC_MACHO_CONTEXT  *Context,
+  IN     CONST CHAR8       *MetaClassName,
+  IN     UINTN             ClassNameSize,
+  OUT    CHAR8             *ClassName
   );
 
 /**
@@ -1262,7 +1262,7 @@ MachoSymbolNameIsCxx (
 **/
 MACH_NLIST_ANY *
 MachoGetMetaclassSymbolFromSmcpSymbol (
-  IN OUT OC_MACHO_CONTEXT     *Context,
+  IN OUT OC_MACHO_CONTEXT      *Context,
   IN     CONST MACH_NLIST_ANY  *Smcp
   );
 
@@ -1277,8 +1277,8 @@ MachoGetMetaclassSymbolFromSmcpSymbol (
 **/
 MACH_NLIST *
 MachoGetMetaclassSymbolFromSmcpSymbol32 (
-  IN OUT OC_MACHO_CONTEXT     *Context,
-  IN     CONST MACH_NLIST     *Smcp
+  IN OUT OC_MACHO_CONTEXT  *Context,
+  IN     CONST MACH_NLIST  *Smcp
   );
 
 /**
@@ -1308,10 +1308,10 @@ MachoGetMetaclassSymbolFromSmcpSymbol64 (
 **/
 BOOLEAN
 MachoGetVtableSymbolsFromSmcp (
-  IN OUT OC_MACHO_CONTEXT     *Context,
-  IN     CONST CHAR8          *SmcpName,
-  OUT    CONST MACH_NLIST_ANY **Vtable,
-  OUT    CONST MACH_NLIST_ANY **MetaVtable
+  IN OUT OC_MACHO_CONTEXT      *Context,
+  IN     CONST CHAR8           *SmcpName,
+  OUT    CONST MACH_NLIST_ANY  **Vtable,
+  OUT    CONST MACH_NLIST_ANY  **MetaVtable
   );
 
 /**
@@ -1326,10 +1326,10 @@ MachoGetVtableSymbolsFromSmcp (
 **/
 BOOLEAN
 MachoGetVtableSymbolsFromSmcp32 (
-  IN OUT OC_MACHO_CONTEXT     *Context,
-  IN     CONST CHAR8          *SmcpName,
-  OUT    CONST MACH_NLIST     **Vtable,
-  OUT    CONST MACH_NLIST     **MetaVtable
+  IN OUT OC_MACHO_CONTEXT  *Context,
+  IN     CONST CHAR8       *SmcpName,
+  OUT    CONST MACH_NLIST  **Vtable,
+  OUT    CONST MACH_NLIST  **MetaVtable
   );
 
 /**
@@ -1428,15 +1428,15 @@ MachoInitialiseSymtabsExternal (
 **/
 UINT32
 MachoGetSymbolTable (
-  IN OUT OC_MACHO_CONTEXT     *Context,
-     OUT CONST MACH_NLIST_ANY **SymbolTable,
-     OUT CONST CHAR8          **StringTable OPTIONAL,
-     OUT CONST MACH_NLIST_ANY **LocalSymbols OPTIONAL,
-     OUT UINT32               *NumLocalSymbols OPTIONAL,
-     OUT CONST MACH_NLIST_ANY **ExternalSymbols OPTIONAL,
-     OUT UINT32               *NumExternalSymbols OPTIONAL,
-     OUT CONST MACH_NLIST_ANY **UndefinedSymbols OPTIONAL,
-     OUT UINT32               *NumUndefinedSymbols OPTIONAL
+  IN OUT OC_MACHO_CONTEXT   *Context,
+  OUT CONST MACH_NLIST_ANY  **SymbolTable,
+  OUT CONST CHAR8           **StringTable OPTIONAL,
+  OUT CONST MACH_NLIST_ANY  **LocalSymbols OPTIONAL,
+  OUT UINT32                *NumLocalSymbols OPTIONAL,
+  OUT CONST MACH_NLIST_ANY  **ExternalSymbols OPTIONAL,
+  OUT UINT32                *NumExternalSymbols OPTIONAL,
+  OUT CONST MACH_NLIST_ANY  **UndefinedSymbols OPTIONAL,
+  OUT UINT32                *NumUndefinedSymbols OPTIONAL
   );
 
 /**
@@ -1456,15 +1456,15 @@ MachoGetSymbolTable (
 **/
 UINT32
 MachoGetSymbolTable32 (
-  IN OUT OC_MACHO_CONTEXT     *Context,
-     OUT CONST MACH_NLIST     **SymbolTable,
-     OUT CONST CHAR8          **StringTable OPTIONAL,
-     OUT CONST MACH_NLIST     **LocalSymbols OPTIONAL,
-     OUT UINT32               *NumLocalSymbols OPTIONAL,
-     OUT CONST MACH_NLIST     **ExternalSymbols OPTIONAL,
-     OUT UINT32               *NumExternalSymbols OPTIONAL,
-     OUT CONST MACH_NLIST     **UndefinedSymbols OPTIONAL,
-     OUT UINT32               *NumUndefinedSymbols OPTIONAL
+  IN OUT OC_MACHO_CONTEXT  *Context,
+  OUT CONST MACH_NLIST     **SymbolTable,
+  OUT CONST CHAR8          **StringTable OPTIONAL,
+  OUT CONST MACH_NLIST     **LocalSymbols OPTIONAL,
+  OUT UINT32               *NumLocalSymbols OPTIONAL,
+  OUT CONST MACH_NLIST     **ExternalSymbols OPTIONAL,
+  OUT UINT32               *NumExternalSymbols OPTIONAL,
+  OUT CONST MACH_NLIST     **UndefinedSymbols OPTIONAL,
+  OUT UINT32               *NumUndefinedSymbols OPTIONAL
   );
 
 /**
@@ -1484,15 +1484,15 @@ MachoGetSymbolTable32 (
 **/
 UINT32
 MachoGetSymbolTable64 (
-  IN OUT OC_MACHO_CONTEXT     *Context,
-     OUT CONST MACH_NLIST_64  **SymbolTable,
-     OUT CONST CHAR8          **StringTable OPTIONAL,
-     OUT CONST MACH_NLIST_64  **LocalSymbols OPTIONAL,
-     OUT UINT32               *NumLocalSymbols OPTIONAL,
-     OUT CONST MACH_NLIST_64  **ExternalSymbols OPTIONAL,
-     OUT UINT32               *NumExternalSymbols OPTIONAL,
-     OUT CONST MACH_NLIST_64  **UndefinedSymbols OPTIONAL,
-     OUT UINT32               *NumUndefinedSymbols OPTIONAL
+  IN OUT OC_MACHO_CONTEXT  *Context,
+  OUT CONST MACH_NLIST_64  **SymbolTable,
+  OUT CONST CHAR8          **StringTable OPTIONAL,
+  OUT CONST MACH_NLIST_64  **LocalSymbols OPTIONAL,
+  OUT UINT32               *NumLocalSymbols OPTIONAL,
+  OUT CONST MACH_NLIST_64  **ExternalSymbols OPTIONAL,
+  OUT UINT32               *NumExternalSymbols OPTIONAL,
+  OUT CONST MACH_NLIST_64  **UndefinedSymbols OPTIONAL,
+  OUT UINT32               *NumUndefinedSymbols OPTIONAL
   );
 
 /**
@@ -1505,8 +1505,8 @@ MachoGetSymbolTable64 (
 **/
 UINT32
 MachoGetIndirectSymbolTable (
-  IN OUT OC_MACHO_CONTEXT     *Context,
-     OUT CONST MACH_NLIST_ANY **SymbolTable
+  IN OUT OC_MACHO_CONTEXT   *Context,
+  OUT CONST MACH_NLIST_ANY  **SymbolTable
   );
 
 /**
@@ -1519,8 +1519,8 @@ MachoGetIndirectSymbolTable (
 **/
 UINT32
 MachoGetIndirectSymbolTable32 (
-  IN OUT OC_MACHO_CONTEXT     *Context,
-     OUT CONST MACH_NLIST     **SymbolTable
+  IN OUT OC_MACHO_CONTEXT  *Context,
+  OUT CONST MACH_NLIST     **SymbolTable
   );
 
 /**
@@ -1533,8 +1533,8 @@ MachoGetIndirectSymbolTable32 (
 **/
 UINT32
 MachoGetIndirectSymbolTable64 (
-  IN OUT OC_MACHO_CONTEXT     *Context,
-     OUT CONST MACH_NLIST_64  **SymbolTable
+  IN OUT OC_MACHO_CONTEXT  *Context,
+  OUT CONST MACH_NLIST_64  **SymbolTable
   );
 
 /**
@@ -1567,11 +1567,11 @@ MachoGetFilePointerByAddress (
 **/
 UINT32
 MachoExpandImage (
-  IN  OC_MACHO_CONTEXT   *Context,
-  OUT UINT8              *Destination,
-  IN  UINT32             DestinationSize,
-  IN  BOOLEAN            Strip,
-  OUT UINT64             *FileOffset OPTIONAL
+  IN  OC_MACHO_CONTEXT  *Context,
+  OUT UINT8             *Destination,
+  IN  UINT32            DestinationSize,
+  IN  BOOLEAN           Strip,
+  OUT UINT64            *FileOffset OPTIONAL
   );
 
 /**
@@ -1584,7 +1584,7 @@ MachoExpandImage (
 **/
 UINT32
 MachoGetExpandedImageSize (
-  IN  OC_MACHO_CONTEXT   *Context
+  IN  OC_MACHO_CONTEXT  *Context
   );
 
 /**
@@ -1634,12 +1634,12 @@ MachoGetNextCommand (
 **/
 EFI_STATUS
 FatGetArchitectureOffset (
-  IN  CONST UINT8       *Buffer,
-  IN  UINT32            BufferSize,
-  IN  UINT32            FullSize,
-  IN  MACH_CPU_TYPE     CpuType,
-  OUT UINT32            *FatOffset,
-  OUT UINT32            *FatSize
+  IN  CONST UINT8    *Buffer,
+  IN  UINT32         BufferSize,
+  IN  UINT32         FullSize,
+  IN  MACH_CPU_TYPE  CpuType,
+  OUT UINT32         *FatOffset,
+  OUT UINT32         *FatSize
   );
 
 /**
@@ -1654,9 +1654,9 @@ FatGetArchitectureOffset (
 **/
 EFI_STATUS
 FatFilterArchitectureByType (
-  IN OUT UINT8         **FileData,
-  IN OUT UINT32        *FileSize,
-  IN     MACH_CPU_TYPE CpuType
+  IN OUT UINT8          **FileData,
+  IN OUT UINT32         *FileSize,
+  IN     MACH_CPU_TYPE  CpuType
   );
 
 /**
@@ -1670,8 +1670,8 @@ FatFilterArchitectureByType (
 **/
 EFI_STATUS
 FatFilterArchitecture32 (
-  IN OUT UINT8         **FileData,
-  IN OUT UINT32        *FileSize
+  IN OUT UINT8   **FileData,
+  IN OUT UINT32  *FileSize
   );
 
 /**
@@ -1685,8 +1685,8 @@ FatFilterArchitecture32 (
 **/
 EFI_STATUS
 FatFilterArchitecture64 (
-  IN OUT UINT8         **FileData,
-  IN OUT UINT32        *FileSize
+  IN OUT UINT8   **FileData,
+  IN OUT UINT32  *FileSize
   );
 
 #endif // OC_MACHO_LIB_H

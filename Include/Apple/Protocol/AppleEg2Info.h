@@ -21,7 +21,7 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
   { 0x63FAECF2, 0xE7EE, 0x4CB9,               \
     { 0x8A, 0x0C, 0x11, 0xCE, 0x5E, 0x89, 0xE3, 0x3C } }
 
-#define APPLE_EG2_INFO_PROTOCOL_REVISION 0x10002
+#define APPLE_EG2_INFO_PROTOCOL_REVISION  0x10002
 
 typedef struct APPLE_EG2_INFO_PROTOCOL_ APPLE_EG2_INFO_PROTOCOL;
 
@@ -38,7 +38,7 @@ enum {
 **/
 typedef
 EFI_STATUS
-(EFIAPI *APPLE_EG2_INFO_UNKNOWN1) (
+(EFIAPI *APPLE_EG2_INFO_UNKNOWN1)(
   IN   APPLE_EG2_INFO_PROTOCOL      *This,
   IN   EFI_HANDLE                   GpuHandle
   );
@@ -48,7 +48,7 @@ EFI_STATUS
 **/
 typedef
 EFI_STATUS
-(EFIAPI *APPLE_EG2_INFO_GET_PLATFORM_INFO) (
+(EFIAPI *APPLE_EG2_INFO_GET_PLATFORM_INFO)(
   IN   APPLE_EG2_INFO_PROTOCOL      *This,
   IN   EFI_HANDLE                   GpuHandle,
   OUT  VOID                         *Data,
@@ -61,7 +61,7 @@ EFI_STATUS
 **/
 typedef
 EFI_STATUS
-(EFIAPI *APPLE_EG2_INFO_STARTUP_DISPLAY) (
+(EFIAPI *APPLE_EG2_INFO_STARTUP_DISPLAY)(
   IN   APPLE_EG2_INFO_PROTOCOL      *This,
   IN   EFI_HANDLE                   GpuHandle,
   OUT  VOID                         *Unk1,
@@ -74,28 +74,28 @@ EFI_STATUS
 **/
 typedef
 EFI_STATUS
-(EFIAPI *APPLE_EG2_INFO_GET_HIBERNATION) (
+(EFIAPI *APPLE_EG2_INFO_GET_HIBERNATION)(
   IN   APPLE_EG2_INFO_PROTOCOL      *This,
   OUT  BOOLEAN                      *Hibernated
   );
 
 typedef
 EFI_STATUS
-(EFIAPI *APPLE_EG2_INFO_GET_ROTATION) (
+(EFIAPI *APPLE_EG2_INFO_GET_ROTATION)(
   IN   APPLE_EG2_INFO_PROTOCOL      *This,
   OUT  UINT32                       *Rotation
   );
 
 struct APPLE_EG2_INFO_PROTOCOL_ {
-  UINT32                            Revision;
-  VOID                              *Unused;
-  APPLE_EG2_INFO_UNKNOWN1           Unknown1;
-  APPLE_EG2_INFO_GET_PLATFORM_INFO  GetPlatformInfo;
-  APPLE_EG2_INFO_STARTUP_DISPLAY    StartupDisplay;
-  APPLE_EG2_INFO_GET_HIBERNATION    GetHibernation;
-  APPLE_EG2_INFO_GET_ROTATION       GetRotation;
+  UINT32                              Revision;
+  VOID                                *Unused;
+  APPLE_EG2_INFO_UNKNOWN1             Unknown1;
+  APPLE_EG2_INFO_GET_PLATFORM_INFO    GetPlatformInfo;
+  APPLE_EG2_INFO_STARTUP_DISPLAY      StartupDisplay;
+  APPLE_EG2_INFO_GET_HIBERNATION      GetHibernation;
+  APPLE_EG2_INFO_GET_ROTATION         GetRotation;
 };
 
-extern EFI_GUID gAppleEg2InfoProtocolGuid;
+extern EFI_GUID  gAppleEg2InfoProtocolGuid;
 
 #endif // APPLE_EG2_INFO_H

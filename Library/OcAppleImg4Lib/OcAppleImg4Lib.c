@@ -32,43 +32,43 @@
 #include "libDERImg4/libDERImg4.h"
 #include "libDERImg4/Img4oids.h"
 
-GLOBAL_REMOVE_IF_UNREFERENCED const UINT8 *DERImg4RootCertificate     = gAppleX86SecureBootRootCaCert;
-GLOBAL_REMOVE_IF_UNREFERENCED const UINTN *DERImg4RootCertificateSize = &gAppleX86SecureBootRootCaCertSize;
+GLOBAL_REMOVE_IF_UNREFERENCED const UINT8  *DERImg4RootCertificate     = gAppleX86SecureBootRootCaCert;
+GLOBAL_REMOVE_IF_UNREFERENCED const UINTN  *DERImg4RootCertificateSize = &gAppleX86SecureBootRootCaCertSize;
 
 typedef struct OC_SB_MODEL_DESC_ {
-  CONST CHAR8  *HardwareModel;
-  UINT32       BoardId;
+  CONST CHAR8    *HardwareModel;
+  UINT32         BoardId;
 } OC_SB_MODEL_DESC;
 
-STATIC CHAR8 mCryptoDigestMethod[16] = "sha2-384";
-STATIC DERImg4Environment mEnvInfo;
+STATIC CHAR8               mCryptoDigestMethod[16] = "sha2-384";
+STATIC DERImg4Environment  mEnvInfo;
 ///
 /// List of model mapping to board identifiers.
 /// Alphabetically sorted (!), for release order refer to the documentation.
 ///
-STATIC OC_SB_MODEL_DESC mModelInformation[] = {
-  { "j132",      0x0C }, ///< MacBookPro15,2
-  { "j137",      0x0A }, ///< iMacPro1,1
-  { "j140a",     0x37 }, ///< MacBookAir8,2
-  { "j140k",     0x17 }, ///< MacBookAir8,1
-  { "j152f",     0x3A }, ///< MacBookPro16,1
-  { "j160",      0x0F }, ///< MacPro7,1
-  { "j174",      0x0E }, ///< Macmini8,1
-  { "j185",      0x22 }, ///< iMac20,1
-  { "j185f",     0x23 }, ///< iMac20,2
-  { "j213",      0x18 }, ///< MacBookPro15,4
-  { "j214k",     0x3E }, ///< MacBookPro16,2
-  { "j215",      0x38 }, ///< MacBookPro16,4
-  { "j223",      0x3B }, ///< MacBookPro16,3
-  { "j230k",     0x3F }, ///< MacBookAir9,1
-  { "j680",      0x0B }, ///< MacBookPro15,1
-  { "j780",      0x07 }, ///< MacBookPro15,3
+STATIC OC_SB_MODEL_DESC  mModelInformation[] = {
+  { "j132",             0x0C }, ///< MacBookPro15,2
+  { "j137",             0x0A }, ///< iMacPro1,1
+  { "j140a",            0x37 }, ///< MacBookAir8,2
+  { "j140k",            0x17 }, ///< MacBookAir8,1
+  { "j152f",            0x3A }, ///< MacBookPro16,1
+  { "j160",             0x0F }, ///< MacPro7,1
+  { "j174",             0x0E }, ///< Macmini8,1
+  { "j185",             0x22 }, ///< iMac20,1
+  { "j185f",            0x23 }, ///< iMac20,2
+  { "j213",             0x18 }, ///< MacBookPro15,4
+  { "j214k",            0x3E }, ///< MacBookPro16,2
+  { "j215",             0x38 }, ///< MacBookPro16,4
+  { "j223",             0x3B }, ///< MacBookPro16,3
+  { "j230k",            0x3F }, ///< MacBookAir9,1
+  { "j680",             0x0B }, ///< MacBookPro15,1
+  { "j780",             0x07 }, ///< MacBookPro15,3
   { OC_SB_MODEL_LEGACY, 0xF0 }, ///< Generic x86 from Big Sur
 };
 
-STATIC BOOLEAN mHasDigestOverride;
-STATIC UINT8   mOriginalDigest[SHA384_DIGEST_SIZE];
-STATIC UINT8   mOverrideDigest[SHA384_DIGEST_SIZE];
+STATIC BOOLEAN  mHasDigestOverride;
+STATIC UINT8    mOriginalDigest[SHA384_DIGEST_SIZE];
+STATIC UINT8    mOverrideDigest[SHA384_DIGEST_SIZE];
 
 STATIC
 OC_SB_MODEL_DESC *
@@ -89,7 +89,7 @@ InternalGetModelInfo (
 
   while (Start <= End) {
     Curr = (Start + End) / 2;
-    Cmp = AsciiStrCmp (mModelInformation[Curr].HardwareModel, Model);
+    Cmp  = AsciiStrCmp (mModelInformation[Curr].HardwareModel, Model);
 
     if (Cmp == 0) {
       return &mModelInformation[Curr];
@@ -120,7 +120,7 @@ DERImg4VerifySignature (
   const DERItem  *AlgoOid
   )
 {
-  OC_SIG_HASH_TYPE AlgoType;
+  OC_SIG_HASH_TYPE  AlgoType;
 
   ASSERT (Modulus != NULL);
   ASSERT (ModulusSize > 0);
@@ -154,7 +154,7 @@ DERImg4VerifySignature (
 
 CONST CHAR8 *
 OcAppleImg4GetHardwareModel (
-  IN CONST CHAR8    *ModelRequest
+  IN CONST CHAR8  *ModelRequest
   )
 {
   OC_SB_MODEL_DESC  *ModelInfo;
@@ -181,18 +181,19 @@ OcAppleImg4Verify (
   OUT UINTN                             *DigestSize OPTIONAL
   )
 {
-  DERReturn           DerResult;
-  INTN                CmpResult;
-  UINT8               Digest[SHA384_DIGEST_SIZE];
+  DERReturn  DerResult;
+  INTN       CmpResult;
+  UINT8      Digest[SHA384_DIGEST_SIZE];
 
-  DERImg4ManifestInfo ManInfo;
+  DERImg4ManifestInfo  ManInfo;
 
-  if ((ImageBuffer    == NULL || ImageSize    == 0)
-   || (ManifestBuffer == NULL || ManifestSize == 0)
-   || (HashDigest     == NULL && DigestSize   != NULL)
-   || (HashDigest     != NULL && DigestSize   == NULL)
-   || (SbMode         != AppleImg4SbModeMedium
-    && SbMode         != AppleImg4SbModeFull)) {
+  if (  ((ImageBuffer    == NULL) || (ImageSize    == 0))
+     || ((ManifestBuffer == NULL) || (ManifestSize == 0))
+     || ((HashDigest     == NULL) && (DigestSize   != NULL))
+     || ((HashDigest     != NULL) && (DigestSize   == NULL))
+     || (  (SbMode         != AppleImg4SbModeMedium)
+        && (SbMode         != AppleImg4SbModeFull)))
+  {
     return EFI_INVALID_PARAMETER;
   }
 
@@ -234,9 +235,10 @@ OcAppleImg4Verify (
   //
   // Provide a route to accept our modified kernel as long as we can trust it is really it.
   //
-  if (mHasDigestOverride
-    && ManInfo.imageDigestSize == SHA384_DIGEST_SIZE
-    && CompareMem (mOriginalDigest, ManInfo.imageDigest, sizeof (mOriginalDigest)) == 0) {
+  if (  mHasDigestOverride
+     && (ManInfo.imageDigestSize == SHA384_DIGEST_SIZE)
+     && (CompareMem (mOriginalDigest, ManInfo.imageDigest, sizeof (mOriginalDigest)) == 0))
+  {
     Sha384 (Digest, ImageBuffer, ImageSize);
     CmpResult = CompareMem (Digest, mOverrideDigest, sizeof (mOverrideDigest));
     DEBUG ((
@@ -264,42 +266,46 @@ OcAppleImg4Verify (
   //
   if (CmpResult != 0) {
     CmpResult = SigVerifyShaHashBySize (
-      ImageBuffer,
-      ImageSize,
-      ManInfo.imageDigest,
-      ManInfo.imageDigestSize
-      );
+                  ImageBuffer,
+                  ImageSize,
+                  ManInfo.imageDigest,
+                  ManInfo.imageDigestSize
+                  );
   }
+
   if (CmpResult != 0) {
     return EFI_SECURITY_VIOLATION;
   }
 
   if (SbMode == AppleImg4SbModeMedium) {
-    if (ManInfo.hasEcid
-     || !ManInfo.hasXugs || ManInfo.environment.xugs != mEnvInfo.xugs
-     || (ManInfo.environment.internalUseOnlyUnit
-      && ManInfo.environment.internalUseOnlyUnit != mEnvInfo.internalUseOnlyUnit)) {
+    if (  ManInfo.hasEcid
+       || !ManInfo.hasXugs || (ManInfo.environment.xugs != mEnvInfo.xugs)
+       || (  ManInfo.environment.internalUseOnlyUnit
+          && (ManInfo.environment.internalUseOnlyUnit != mEnvInfo.internalUseOnlyUnit)))
+    {
       return EFI_SECURITY_VIOLATION;
     }
   } else if (SbMode == AppleImg4SbModeFull) {
-    if (!ManInfo.hasEcid || ManInfo.environment.ecid != mEnvInfo.ecid
-     || ManInfo.hasXugs
-     || ManInfo.environment.internalUseOnlyUnit) {
+    if (  !ManInfo.hasEcid || (ManInfo.environment.ecid != mEnvInfo.ecid)
+       || ManInfo.hasXugs
+       || ManInfo.environment.internalUseOnlyUnit)
+    {
       return EFI_SECURITY_VIOLATION;
     }
   }
 
-  if ((ManInfo.environment.boardId                    != mEnvInfo.boardId)
-   || (ManInfo.environment.chipId                     != mEnvInfo.chipId)
-   || (ManInfo.environment.certificateEpoch            < mEnvInfo.certificateEpoch)
-   || (ManInfo.environment.productionStatus           != mEnvInfo.productionStatus && !ManInfo.environment.productionStatus)
-   || (ManInfo.environment.securityMode               != mEnvInfo.securityMode && !ManInfo.environment.securityMode)
-   || (ManInfo.environment.securityDomain             != mEnvInfo.securityDomain)
-   || (ManInfo.hasEffectiveProductionStatus
-    && (ManInfo.environment.effectiveProductionStatus != mEnvInfo.effectiveProductionStatus && !ManInfo.environment.effectiveProductionStatus))
-   || (ManInfo.hasEffectiveSecurityMode
-    && (ManInfo.environment.effectiveSecurityMode     != mEnvInfo.effectiveSecurityMode && !ManInfo.environment.effectiveSecurityMode))
-    ) {
+  if (  (ManInfo.environment.boardId                    != mEnvInfo.boardId)
+     || (ManInfo.environment.chipId                     != mEnvInfo.chipId)
+     || (ManInfo.environment.certificateEpoch            < mEnvInfo.certificateEpoch)
+     || ((ManInfo.environment.productionStatus           != mEnvInfo.productionStatus) && !ManInfo.environment.productionStatus)
+     || ((ManInfo.environment.securityMode               != mEnvInfo.securityMode) && !ManInfo.environment.securityMode)
+     || (ManInfo.environment.securityDomain             != mEnvInfo.securityDomain)
+     || (  ManInfo.hasEffectiveProductionStatus
+        && ((ManInfo.environment.effectiveProductionStatus != mEnvInfo.effectiveProductionStatus) && !ManInfo.environment.effectiveProductionStatus))
+     || (  ManInfo.hasEffectiveSecurityMode
+        && ((ManInfo.environment.effectiveSecurityMode     != mEnvInfo.effectiveSecurityMode) && !ManInfo.environment.effectiveSecurityMode))
+        )
+  {
     return EFI_SECURITY_VIOLATION;
   }
 
@@ -333,8 +339,8 @@ OcAppleImg4RegisterOverride (
 
 EFI_STATUS
 OcAppleImg4BootstrapValues (
-  IN CONST CHAR8   *Model,
-  IN UINT64        Ecid  OPTIONAL
+  IN CONST CHAR8  *Model,
+  IN UINT64       Ecid  OPTIONAL
   )
 {
   EFI_STATUS        Status;
@@ -348,152 +354,152 @@ OcAppleImg4BootstrapValues (
   //
   // Predefine most of the values as they are common for all the models.
   //
-  mEnvInfo.ecid                       = Ecid;
-  mEnvInfo.boardId                    = SbInfo->BoardId;
-  mEnvInfo.chipId                     = 0x8012;
-  mEnvInfo.certificateEpoch           = 2;
-  mEnvInfo.securityDomain             = 1;
-  mEnvInfo.productionStatus           = TRUE;
-  mEnvInfo.securityMode               = 1;
-  mEnvInfo.effectiveProductionStatus  = TRUE;
-  mEnvInfo.effectiveSecurityMode      = 1;
-  mEnvInfo.internalUseOnlyUnit        = AsciiStrCmp (Model, OC_SB_MODEL_LEGACY) == 0;
-  mEnvInfo.xugs                       = 1;
-  mEnvInfo.allowMixNMatch             = FALSE;
+  mEnvInfo.ecid                      = Ecid;
+  mEnvInfo.boardId                   = SbInfo->BoardId;
+  mEnvInfo.chipId                    = 0x8012;
+  mEnvInfo.certificateEpoch          = 2;
+  mEnvInfo.securityDomain            = 1;
+  mEnvInfo.productionStatus          = TRUE;
+  mEnvInfo.securityMode              = 1;
+  mEnvInfo.effectiveProductionStatus = TRUE;
+  mEnvInfo.effectiveSecurityMode     = 1;
+  mEnvInfo.internalUseOnlyUnit       = AsciiStrCmp (Model, OC_SB_MODEL_LEGACY) == 0;
+  mEnvInfo.xugs                      = 1;
+  mEnvInfo.allowMixNMatch            = FALSE;
 
   //
   // Expose all the variables via NVRAM.
   //
   Status = gRT->SetVariable (
-    L"ApECID",
-    &gAppleSecureBootVariableGuid,
-    EFI_VARIABLE_RUNTIME_ACCESS | EFI_VARIABLE_BOOTSERVICE_ACCESS,
-    sizeof (mEnvInfo.ecid),
-    &mEnvInfo.ecid
-    );
+                  L"ApECID",
+                  &gAppleSecureBootVariableGuid,
+                  EFI_VARIABLE_RUNTIME_ACCESS | EFI_VARIABLE_BOOTSERVICE_ACCESS,
+                  sizeof (mEnvInfo.ecid),
+                  &mEnvInfo.ecid
+                  );
   if (EFI_ERROR (Status)) {
     return Status;
   }
 
   Status = gRT->SetVariable (
-    L"ApChipID",
-    &gAppleSecureBootVariableGuid,
-    EFI_VARIABLE_RUNTIME_ACCESS | EFI_VARIABLE_BOOTSERVICE_ACCESS,
-    sizeof (mEnvInfo.chipId),
-    &mEnvInfo.chipId
-    );
+                  L"ApChipID",
+                  &gAppleSecureBootVariableGuid,
+                  EFI_VARIABLE_RUNTIME_ACCESS | EFI_VARIABLE_BOOTSERVICE_ACCESS,
+                  sizeof (mEnvInfo.chipId),
+                  &mEnvInfo.chipId
+                  );
   if (EFI_ERROR (Status)) {
     return Status;
   }
 
-  Tmp = (UINT8) mEnvInfo.certificateEpoch;
+  Tmp    = (UINT8)mEnvInfo.certificateEpoch;
   Status = gRT->SetVariable (
-    L"CertificateEpoch",
-    &gAppleSecureBootVariableGuid,
-    EFI_VARIABLE_RUNTIME_ACCESS | EFI_VARIABLE_BOOTSERVICE_ACCESS,
-    sizeof (Tmp),
-    &Tmp
-    );
-  if (EFI_ERROR (Status)) {
-    return Status;
-  }
-
-  Status = gRT->SetVariable (
-    L"ApBoardID",
-    &gAppleSecureBootVariableGuid,
-    EFI_VARIABLE_RUNTIME_ACCESS | EFI_VARIABLE_BOOTSERVICE_ACCESS,
-    sizeof (mEnvInfo.boardId),
-    &mEnvInfo.boardId
-    );
+                  L"CertificateEpoch",
+                  &gAppleSecureBootVariableGuid,
+                  EFI_VARIABLE_RUNTIME_ACCESS | EFI_VARIABLE_BOOTSERVICE_ACCESS,
+                  sizeof (Tmp),
+                  &Tmp
+                  );
   if (EFI_ERROR (Status)) {
     return Status;
   }
 
   Status = gRT->SetVariable (
-    L"ApSecurityDomain",
-    &gAppleSecureBootVariableGuid,
-    EFI_VARIABLE_RUNTIME_ACCESS | EFI_VARIABLE_BOOTSERVICE_ACCESS,
-    sizeof (mEnvInfo.securityDomain),
-    &mEnvInfo.securityDomain
-    );
+                  L"ApBoardID",
+                  &gAppleSecureBootVariableGuid,
+                  EFI_VARIABLE_RUNTIME_ACCESS | EFI_VARIABLE_BOOTSERVICE_ACCESS,
+                  sizeof (mEnvInfo.boardId),
+                  &mEnvInfo.boardId
+                  );
   if (EFI_ERROR (Status)) {
     return Status;
   }
 
   Status = gRT->SetVariable (
-    L"ApProductionStatus",
-    &gAppleSecureBootVariableGuid,
-    EFI_VARIABLE_RUNTIME_ACCESS | EFI_VARIABLE_BOOTSERVICE_ACCESS,
-    sizeof (mEnvInfo.productionStatus),
-    &mEnvInfo.productionStatus
-    );
+                  L"ApSecurityDomain",
+                  &gAppleSecureBootVariableGuid,
+                  EFI_VARIABLE_RUNTIME_ACCESS | EFI_VARIABLE_BOOTSERVICE_ACCESS,
+                  sizeof (mEnvInfo.securityDomain),
+                  &mEnvInfo.securityDomain
+                  );
   if (EFI_ERROR (Status)) {
     return Status;
   }
 
   Status = gRT->SetVariable (
-    L"ApSecurityMode",
-    &gAppleSecureBootVariableGuid,
-    EFI_VARIABLE_RUNTIME_ACCESS | EFI_VARIABLE_BOOTSERVICE_ACCESS,
-    sizeof (mEnvInfo.securityMode),
-    &mEnvInfo.securityMode
-    );
+                  L"ApProductionStatus",
+                  &gAppleSecureBootVariableGuid,
+                  EFI_VARIABLE_RUNTIME_ACCESS | EFI_VARIABLE_BOOTSERVICE_ACCESS,
+                  sizeof (mEnvInfo.productionStatus),
+                  &mEnvInfo.productionStatus
+                  );
   if (EFI_ERROR (Status)) {
     return Status;
   }
 
   Status = gRT->SetVariable (
-    L"EffectiveProductionStatus",
-    &gAppleSecureBootVariableGuid,
-    EFI_VARIABLE_RUNTIME_ACCESS | EFI_VARIABLE_BOOTSERVICE_ACCESS,
-    sizeof (mEnvInfo.effectiveProductionStatus),
-    &mEnvInfo.effectiveProductionStatus
-    );
+                  L"ApSecurityMode",
+                  &gAppleSecureBootVariableGuid,
+                  EFI_VARIABLE_RUNTIME_ACCESS | EFI_VARIABLE_BOOTSERVICE_ACCESS,
+                  sizeof (mEnvInfo.securityMode),
+                  &mEnvInfo.securityMode
+                  );
   if (EFI_ERROR (Status)) {
     return Status;
   }
 
   Status = gRT->SetVariable (
-    L"EffectiveSecurityMode",
-    &gAppleSecureBootVariableGuid,
-    EFI_VARIABLE_RUNTIME_ACCESS | EFI_VARIABLE_BOOTSERVICE_ACCESS,
-    sizeof (mEnvInfo.effectiveSecurityMode),
-    &mEnvInfo.effectiveSecurityMode
-    );
+                  L"EffectiveProductionStatus",
+                  &gAppleSecureBootVariableGuid,
+                  EFI_VARIABLE_RUNTIME_ACCESS | EFI_VARIABLE_BOOTSERVICE_ACCESS,
+                  sizeof (mEnvInfo.effectiveProductionStatus),
+                  &mEnvInfo.effectiveProductionStatus
+                  );
   if (EFI_ERROR (Status)) {
     return Status;
   }
 
   Status = gRT->SetVariable (
-    L"InternalUseOnlyUnit",
-    &gAppleSecureBootVariableGuid,
-    EFI_VARIABLE_RUNTIME_ACCESS | EFI_VARIABLE_BOOTSERVICE_ACCESS,
-    sizeof (mEnvInfo.internalUseOnlyUnit),
-    &mEnvInfo.internalUseOnlyUnit
-    );
-  if (EFI_ERROR (Status)) {
-    return Status;
-  }
-
-  Tmp = (UINT8) mEnvInfo.allowMixNMatch;
-  Status = gRT->SetVariable (
-    L"MixNMatchPreventionStatus",
-    &gAppleSecureBootVariableGuid,
-    EFI_VARIABLE_RUNTIME_ACCESS | EFI_VARIABLE_BOOTSERVICE_ACCESS,
-    sizeof (Tmp),
-    &Tmp
-    );
+                  L"EffectiveSecurityMode",
+                  &gAppleSecureBootVariableGuid,
+                  EFI_VARIABLE_RUNTIME_ACCESS | EFI_VARIABLE_BOOTSERVICE_ACCESS,
+                  sizeof (mEnvInfo.effectiveSecurityMode),
+                  &mEnvInfo.effectiveSecurityMode
+                  );
   if (EFI_ERROR (Status)) {
     return Status;
   }
 
   Status = gRT->SetVariable (
-    L"CryptoDigestMethod",
-    &gAppleSecureBootVariableGuid,
-    EFI_VARIABLE_RUNTIME_ACCESS | EFI_VARIABLE_BOOTSERVICE_ACCESS,
-    sizeof (mCryptoDigestMethod),
-    &mCryptoDigestMethod
-    );
+                  L"InternalUseOnlyUnit",
+                  &gAppleSecureBootVariableGuid,
+                  EFI_VARIABLE_RUNTIME_ACCESS | EFI_VARIABLE_BOOTSERVICE_ACCESS,
+                  sizeof (mEnvInfo.internalUseOnlyUnit),
+                  &mEnvInfo.internalUseOnlyUnit
+                  );
+  if (EFI_ERROR (Status)) {
+    return Status;
+  }
+
+  Tmp    = (UINT8)mEnvInfo.allowMixNMatch;
+  Status = gRT->SetVariable (
+                  L"MixNMatchPreventionStatus",
+                  &gAppleSecureBootVariableGuid,
+                  EFI_VARIABLE_RUNTIME_ACCESS | EFI_VARIABLE_BOOTSERVICE_ACCESS,
+                  sizeof (Tmp),
+                  &Tmp
+                  );
+  if (EFI_ERROR (Status)) {
+    return Status;
+  }
+
+  Status = gRT->SetVariable (
+                  L"CryptoDigestMethod",
+                  &gAppleSecureBootVariableGuid,
+                  EFI_VARIABLE_RUNTIME_ACCESS | EFI_VARIABLE_BOOTSERVICE_ACCESS,
+                  sizeof (mCryptoDigestMethod),
+                  &mCryptoDigestMethod
+                  );
   if (EFI_ERROR (Status)) {
     return Status;
   }
@@ -506,14 +512,14 @@ OcAppleImg4VerificationInstallProtocol (
   IN BOOLEAN  Reinstall
   )
 {
-  STATIC APPLE_IMG4_VERIFICATION_PROTOCOL Img4Verification = {
+  STATIC APPLE_IMG4_VERIFICATION_PROTOCOL  Img4Verification = {
     APPLE_IMG4_VERIFICATION_PROTOCOL_REVISION,
     OcAppleImg4Verify
   };
 
-  EFI_STATUS                       Status;
-  APPLE_IMG4_VERIFICATION_PROTOCOL *Protocol;
-  EFI_HANDLE                       Handle;
+  EFI_STATUS                        Status;
+  APPLE_IMG4_VERIFICATION_PROTOCOL  *Protocol;
+  EFI_HANDLE                        Handle;
 
   if (Reinstall) {
     Status = OcUninstallAllProtocolInstances (&gAppleImg4VerificationProtocolGuid);
@@ -523,10 +529,10 @@ OcAppleImg4VerificationInstallProtocol (
     }
   } else {
     Status = gBS->LocateProtocol (
-      &gAppleImg4VerificationProtocolGuid,
-      NULL,
-      (VOID **)&Protocol
-      );
+                    &gAppleImg4VerificationProtocolGuid,
+                    NULL,
+                    (VOID **)&Protocol
+                    );
     if (!EFI_ERROR (Status)) {
       return Protocol;
     }
@@ -534,11 +540,11 @@ OcAppleImg4VerificationInstallProtocol (
 
   Handle = NULL;
   Status = gBS->InstallMultipleProtocolInterfaces (
-    &Handle,
-    &gAppleImg4VerificationProtocolGuid,
-    (VOID **)&Img4Verification,
-    NULL
-    );
+                  &Handle,
+                  &gAppleImg4VerificationProtocolGuid,
+                  (VOID **)&Img4Verification,
+                  NULL
+                  );
   if (EFI_ERROR (Status)) {
     return NULL;
   }

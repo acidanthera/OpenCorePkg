@@ -78,7 +78,7 @@ BigNumSwapWord (
 
 /**
   1 + 2 * NumWords for RSqr, and then twice more than that for Mod.
- 
+
   @param[in] NumWords   The number of Words of RSqrMod and N.
 **/
 #define BIG_NUM_MONT_PARAMS_SCRATCH_SIZE(NumWords) \

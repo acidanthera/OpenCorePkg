@@ -22,14 +22,14 @@
   { 0x5127A9FE, 0x2274, 0x451D,     \
     { 0x90, 0xAA, 0xCB, 0xE8, 0x44, 0xCF, 0x55, 0x71 } }
 
-extern EFI_GUID gVMwareDebugProtocolGuid;
+extern EFI_GUID  gVMwareDebugProtocolGuid;
 
 /**
   Function to message on VMware virtual machines.
 **/
 typedef
 VOID
-(EFIAPI *VMWARE_DEBUG_PROTOCOL_MESSAGE) (
+(EFIAPI *VMWARE_DEBUG_PROTOCOL_MESSAGE)(
   IN CONST CHAR8  *FormatString,
   IN VA_LIST      Marker
   );
@@ -38,7 +38,7 @@ VOID
   VMware debug protocol definition.
 **/
 typedef struct VMWARE_DEBUG_PROTOCOL_ {
-  VMWARE_DEBUG_PROTOCOL_MESSAGE  Message;
+  VMWARE_DEBUG_PROTOCOL_MESSAGE    Message;
 } VMWARE_DEBUG_PROTOCOL;
 
 #endif // VMWARE_DEBUG_H

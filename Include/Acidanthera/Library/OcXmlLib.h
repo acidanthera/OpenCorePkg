@@ -49,7 +49,7 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
   XML_PARSER_NEST_LEVEL is required to fit into INT32.
 **/
 #ifndef XML_PARSER_NEST_LEVEL
-#define XML_PARSER_NEST_LEVEL 32ULL
+#define XML_PARSER_NEST_LEVEL  32ULL
 #endif
 
 /**
@@ -57,7 +57,7 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
   XML_PARSER_NODE_COUNT*2 is required to fit into INT32.
 **/
 #ifndef XML_PARSER_NODE_COUNT
-#define XML_PARSER_NODE_COUNT 32768ULL
+#define XML_PARSER_NODE_COUNT  32768ULL
 #endif
 
 /**
@@ -65,7 +65,7 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
   XML_PARSER_MAX_REFERENCE_COUNT*2 is required to fit into INT32.
 **/
 #ifndef XML_PARSER_MAX_REFERENCE_COUNT
-#define XML_PARSER_MAX_REFERENCE_COUNT (32ULL*1024)
+#define XML_PARSER_MAX_REFERENCE_COUNT  (32ULL*1024)
 #endif
 
 /**
@@ -73,14 +73,14 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
   XML_PARSER_MAX_SIZE is required to fit into INT32.
 **/
 #ifndef XML_PARSER_MAX_SIZE
-#define XML_PARSER_MAX_SIZE (32ULL*1024*1024)
+#define XML_PARSER_MAX_SIZE  (32ULL*1024*1024)
 #endif
 
 /**
   Debug controls.
 **/
-//#define XML_PARSER_VERBOSE
-//#define XML_PRINT_ERRORS
+// #define XML_PARSER_VERBOSE
+// #define XML_PRINT_ERRORS
 
 /**
   Plist node types.
@@ -105,9 +105,8 @@ typedef enum PLIST_NODE_TYPE_ {
 **/
 struct XML_DOCUMENT_;
 struct XML_NODE_;
-typedef struct XML_DOCUMENT_ XML_DOCUMENT;
-typedef struct XML_NODE_ XML_NODE;
-
+typedef struct XML_DOCUMENT_  XML_DOCUMENT;
+typedef struct XML_NODE_      XML_NODE;
 
 /**
   Parse the XML fragment in buffer.
@@ -305,8 +304,8 @@ XmlNodePrepend (
 **/
 VOID
 XmlNodeRemoveByIndex (
-  IN OUT  XML_NODE     *Node,
-  IN      UINT32       Index
+  IN OUT  XML_NODE  *Node,
+  IN      UINT32    Index
   );
 
 /**
@@ -317,8 +316,8 @@ XmlNodeRemoveByIndex (
 **/
 VOID
 XmlNodeRemove (
-  IN OUT  XML_NODE     *Node,
-  IN      XML_NODE     *ChildNode
+  IN OUT  XML_NODE  *Node,
+  IN      XML_NODE  *ChildNode
   );
 
 /**
@@ -421,7 +420,7 @@ PlistKeyValue (
 BOOLEAN
 PlistStringValue (
   IN      XML_NODE  *Node   OPTIONAL,
-     OUT  CHAR8     *Value,
+  OUT  CHAR8        *Value,
   IN OUT  UINT32    *Size
   );
 
@@ -461,7 +460,7 @@ PlistBooleanValue (
   @param[in]   Node   A pointer to the XML node. Optional.
   @param[out]  Value  Value of plist integer.
   @param[in]   Size   Size of Value to be casted to (UINT8, UINT16, UINT32, or UINT64).
-  @param[in]   Hex    TRUE to interpret the value as hexadecimal values, decimal otherwise.   
+  @param[in]   Hex    TRUE to interpret the value as hexadecimal values, decimal otherwise.
 
   @return TRUE if Node can be casted to PLIST_NODE_TYPE_TRUE or PLIST_NODE_TYPE_FALSE.
 **/
@@ -491,7 +490,7 @@ PlistIntegerValue (
 BOOLEAN
 PlistMultiDataValue (
   IN      XML_NODE  *Node    OPTIONAL,
-     OUT  VOID      *Buffer,
+  OUT  VOID         *Buffer,
   IN OUT  UINT32    *Size
   );
 

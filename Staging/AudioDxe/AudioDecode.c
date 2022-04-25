@@ -49,28 +49,28 @@ STATIC
 EFI_STATUS
 EFIAPI
 AudioDecodeWave (
-  IN  EFI_AUDIO_DECODE_PROTOCOL      *This,
-  IN  CONST VOID                     *InBuffer,
-  IN  UINT32                         InBufferSize,
-  OUT VOID                           **OutBuffer,
-  OUT UINT32                         *OutBufferSize,
-  OUT EFI_AUDIO_IO_PROTOCOL_FREQ     *Frequency,
-  OUT EFI_AUDIO_IO_PROTOCOL_BITS     *Bits,
-  OUT UINT8                          *Channels,
-  IN  BOOLEAN                        InPlace
+  IN  EFI_AUDIO_DECODE_PROTOCOL   *This,
+  IN  CONST VOID                  *InBuffer,
+  IN  UINT32                      InBufferSize,
+  OUT VOID                        **OutBuffer,
+  OUT UINT32                      *OutBufferSize,
+  OUT EFI_AUDIO_IO_PROTOCOL_FREQ  *Frequency,
+  OUT EFI_AUDIO_IO_PROTOCOL_BITS  *Bits,
+  OUT UINT8                       *Channels,
+  IN  BOOLEAN                     InPlace
   )
 {
   EFI_STATUS  Status;
 
   Status = OcDecodeWave (
-    (UINT8 *) InBuffer,
-    InBufferSize,
-    (UINT8 **) OutBuffer,
-    OutBufferSize,
-    Frequency,
-    Bits,
-    Channels
-    );
+             (UINT8 *)InBuffer,
+             InBufferSize,
+             (UINT8 **)OutBuffer,
+             OutBufferSize,
+             Frequency,
+             Bits,
+             Channels
+             );
   if (EFI_ERROR (Status)) {
     return Status;
   }
@@ -106,27 +106,27 @@ STATIC
 EFI_STATUS
 EFIAPI
 AudioDecodeMp3 (
-  IN  EFI_AUDIO_DECODE_PROTOCOL      *This,
-  IN  CONST VOID                     *InBuffer,
-  IN  UINT32                         InBufferSize,
-  OUT VOID                           **OutBuffer,
-  OUT UINT32                         *OutBufferSize,
-  OUT EFI_AUDIO_IO_PROTOCOL_FREQ     *Frequency,
-  OUT EFI_AUDIO_IO_PROTOCOL_BITS     *Bits,
-  OUT UINT8                          *Channels
+  IN  EFI_AUDIO_DECODE_PROTOCOL   *This,
+  IN  CONST VOID                  *InBuffer,
+  IN  UINT32                      InBufferSize,
+  OUT VOID                        **OutBuffer,
+  OUT UINT32                      *OutBufferSize,
+  OUT EFI_AUDIO_IO_PROTOCOL_FREQ  *Frequency,
+  OUT EFI_AUDIO_IO_PROTOCOL_BITS  *Bits,
+  OUT UINT8                       *Channels
   )
 {
   EFI_STATUS  Status;
 
   Status = OcDecodeMp3 (
-    InBuffer,
-    InBufferSize,
-    OutBuffer,
-    OutBufferSize,
-    Frequency,
-    Bits,
-    Channels
-    );
+             InBuffer,
+             InBufferSize,
+             OutBuffer,
+             OutBufferSize,
+             Frequency,
+             Bits,
+             Channels
+             );
 
   return Status;
 }
@@ -152,40 +152,40 @@ STATIC
 EFI_STATUS
 EFIAPI
 AudioDecodeAny (
-  IN  EFI_AUDIO_DECODE_PROTOCOL      *This,
-  IN  CONST VOID                     *InBuffer,
-  IN  UINT32                         InBufferSize,
-  OUT VOID                           **OutBuffer,
-  OUT UINT32                         *OutBufferSize,
-  OUT EFI_AUDIO_IO_PROTOCOL_FREQ     *Frequency,
-  OUT EFI_AUDIO_IO_PROTOCOL_BITS     *Bits,
-  OUT UINT8                          *Channels
+  IN  EFI_AUDIO_DECODE_PROTOCOL   *This,
+  IN  CONST VOID                  *InBuffer,
+  IN  UINT32                      InBufferSize,
+  OUT VOID                        **OutBuffer,
+  OUT UINT32                      *OutBufferSize,
+  OUT EFI_AUDIO_IO_PROTOCOL_FREQ  *Frequency,
+  OUT EFI_AUDIO_IO_PROTOCOL_BITS  *Bits,
+  OUT UINT8                       *Channels
   )
 {
   EFI_STATUS  Status;
 
   Status = AudioDecodeMp3 (
-    This,
-    InBuffer,
-    InBufferSize,
-    OutBuffer,
-    OutBufferSize,
-    Frequency,
-    Bits,
-    Channels
-    );
+             This,
+             InBuffer,
+             InBufferSize,
+             OutBuffer,
+             OutBufferSize,
+             Frequency,
+             Bits,
+             Channels
+             );
   if (EFI_ERROR (Status)) {
     Status = AudioDecodeWave (
-      This,
-      InBuffer,
-      InBufferSize,
-      OutBuffer,
-      OutBufferSize,
-      Frequency,
-      Bits,
-      Channels,
-      FALSE
-      );
+               This,
+               InBuffer,
+               InBufferSize,
+               OutBuffer,
+               OutBufferSize,
+               Frequency,
+               Bits,
+               Channels,
+               FALSE
+               );
   }
 
   return Status;
@@ -195,7 +195,7 @@ AudioDecodeAny (
   Protocol definition.
 **/
 EFI_AUDIO_DECODE_PROTOCOL
-gEfiAudioDecodeProtocol = {
+  gEfiAudioDecodeProtocol = {
   .DecodeAny  = AudioDecodeAny,
   .DecodeWave = AudioDecodeWave,
   .DecodeMp3  = AudioDecodeMp3

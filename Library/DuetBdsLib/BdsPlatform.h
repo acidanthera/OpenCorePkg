@@ -38,14 +38,14 @@ extern ACPI_HID_DEVICE_PATH       gPnpPs2KeyboardDeviceNode;
 #define EFI_MEMORY_INITIALIZED  0x0200000000000000ULL
 #define EFI_MEMORY_TESTED       0x0400000000000000ULL
 
-#define VarConsoleInpDev        L"ConInDev"
-#define VarConsoleInp           L"ConIn"
-#define VarConsoleOutDev        L"ConOutDev"
-#define VarConsoleOut           L"ConOut"
-#define VarErrorOutDev          L"ErrOutDev"
-#define VarErrorOut             L"ErrOut"
+#define VarConsoleInpDev  L"ConInDev"
+#define VarConsoleInp     L"ConIn"
+#define VarConsoleOutDev  L"ConOutDev"
+#define VarConsoleOut     L"ConOut"
+#define VarErrorOutDev    L"ErrOutDev"
+#define VarErrorOut       L"ErrOut"
 
-#define IS_PCI_ISA_PDECODE(_p)        IS_CLASS3 (_p, PCI_CLASS_BRIDGE, PCI_CLASS_BRIDGE_ISA_PDECODE, 0)
+#define IS_PCI_ISA_PDECODE(_p)  IS_CLASS3 (_p, PCI_CLASS_BRIDGE, PCI_CLASS_BRIDGE_ISA_PDECODE, 0)
 
 #define PCI_DEVICE_PATH_NODE(Func, Dev) \
   { \
@@ -94,35 +94,35 @@ extern ACPI_HID_DEVICE_PATH       gPnpPs2KeyboardDeviceNode;
     } \
   }
 
-#define EFI_SYSTEM_TABLE_MAX_ADDRESS 0xFFFFFFFF
-#define SYS_TABLE_PAD(ptr) (((~ptr) +1) & 0x07 )
+#define EFI_SYSTEM_TABLE_MAX_ADDRESS  0xFFFFFFFF
+#define SYS_TABLE_PAD(ptr)  (((~ptr) +1) & 0x07 )
 
 //
 // Platform Root Bridge
 //
 typedef struct {
-  ACPI_HID_DEVICE_PATH      PciRootBridge;
-  EFI_DEVICE_PATH_PROTOCOL  End;
+  ACPI_HID_DEVICE_PATH        PciRootBridge;
+  EFI_DEVICE_PATH_PROTOCOL    End;
 } PLATFORM_ROOT_BRIDGE_DEVICE_PATH;
 
 typedef struct {
-  ACPI_HID_DEVICE_PATH      PciRootBridge;
-  PCI_DEVICE_PATH           IsaBridge;
-  ACPI_HID_DEVICE_PATH      Keyboard;
-  EFI_DEVICE_PATH_PROTOCOL  End;
+  ACPI_HID_DEVICE_PATH        PciRootBridge;
+  PCI_DEVICE_PATH             IsaBridge;
+  ACPI_HID_DEVICE_PATH        Keyboard;
+  EFI_DEVICE_PATH_PROTOCOL    End;
 } PLATFORM_DUMMY_ISA_KEYBOARD_DEVICE_PATH;
 
 typedef struct {
-  USB_CLASS_DEVICE_PATH           UsbClass;
-  EFI_DEVICE_PATH_PROTOCOL        End;
+  USB_CLASS_DEVICE_PATH       UsbClass;
+  EFI_DEVICE_PATH_PROTOCOL    End;
 } USB_CLASS_FORMAT_DEVICE_PATH;
 
 //
 // the short form device path for Usb keyboard
 //
-#define CLASS_HID           3
-#define SUBCLASS_BOOT       1
-#define PROTOCOL_KEYBOARD   1
+#define CLASS_HID          3
+#define SUBCLASS_BOOT      1
+#define PROTOCOL_KEYBOARD  1
 
 extern USB_CLASS_FORMAT_DEVICE_PATH      gUsbClassKeyboardDevicePath;
 extern PLATFORM_ROOT_BRIDGE_DEVICE_PATH  gPlatformRootBridge0;

@@ -30,7 +30,7 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 // Note, never use Apple or similar on non-Apple instances (e.g. VMs).
 // This breaks many internal and external OS mechanisms.
 //
-#define OC_SMBIOS_VENDOR_NAME "Acidanthera"
+#define OC_SMBIOS_VENDOR_NAME  "Acidanthera"
 
 typedef struct OC_SMBIOS_MEMORY_DEVICE_DATA_ {
   //
@@ -53,77 +53,77 @@ typedef struct OC_SMBIOS_DATA_ {
   //
   // Type 0
   //
-  CONST CHAR8     *BIOSVendor;
-  CONST CHAR8     *BIOSVersion;
-  CONST CHAR8     *BIOSReleaseDate;
+  CONST CHAR8                     *BIOSVendor;
+  CONST CHAR8                     *BIOSVersion;
+  CONST CHAR8                     *BIOSReleaseDate;
   //
   // Type 1
   //
-  CONST CHAR8     *SystemManufacturer;
-  CONST CHAR8     *SystemProductName;
-  CONST CHAR8     *SystemVersion;
-  CONST CHAR8     *SystemSerialNumber;
-  CONST GUID      *SystemUUID;
-  CONST CHAR8     *SystemSKUNumber;
-  CONST CHAR8     *SystemFamily;
+  CONST CHAR8                     *SystemManufacturer;
+  CONST CHAR8                     *SystemProductName;
+  CONST CHAR8                     *SystemVersion;
+  CONST CHAR8                     *SystemSerialNumber;
+  CONST GUID                      *SystemUUID;
+  CONST CHAR8                     *SystemSKUNumber;
+  CONST CHAR8                     *SystemFamily;
   //
   // Type 2
   //
-  CONST CHAR8     *BoardManufacturer;
-  CONST CHAR8     *BoardProduct;
-  CONST CHAR8     *BoardVersion;
-  CONST CHAR8     *BoardSerialNumber;
-  CONST CHAR8     *BoardAssetTag;
-  CONST CHAR8     *BoardLocationInChassis;
-  CONST UINT8     *BoardType;
+  CONST CHAR8                     *BoardManufacturer;
+  CONST CHAR8                     *BoardProduct;
+  CONST CHAR8                     *BoardVersion;
+  CONST CHAR8                     *BoardSerialNumber;
+  CONST CHAR8                     *BoardAssetTag;
+  CONST CHAR8                     *BoardLocationInChassis;
+  CONST UINT8                     *BoardType;
   //
   // Type 3
   //
-  CONST UINT8     *ChassisType;
-  CONST CHAR8     *ChassisManufacturer;
-  CONST CHAR8     *ChassisVersion;
-  CONST CHAR8     *ChassisSerialNumber;
-  CONST CHAR8     *ChassisAssetTag;
+  CONST UINT8                     *ChassisType;
+  CONST CHAR8                     *ChassisManufacturer;
+  CONST CHAR8                     *ChassisVersion;
+  CONST CHAR8                     *ChassisSerialNumber;
+  CONST CHAR8                     *ChassisAssetTag;
   //
   // Type 16
   //
-  BOOLEAN         HasCustomMemory;
-  CONST UINT8     *MemoryErrorCorrection;
-  UINT16          MemoryDevicesCount;
-  CONST UINT64    *MemoryMaxCapacity;
+  BOOLEAN                         HasCustomMemory;
+  CONST UINT8                     *MemoryErrorCorrection;
+  UINT16                          MemoryDevicesCount;
+  CONST UINT64                    *MemoryMaxCapacity;
   //
   // Type 17
   //
-  CONST UINT16                  *MemoryDataWidth;
-  OC_SMBIOS_MEMORY_DEVICE_DATA  *MemoryDevices;
-  CONST UINT8                   *MemoryFormFactor;
+  CONST UINT16                    *MemoryDataWidth;
+  OC_SMBIOS_MEMORY_DEVICE_DATA    *MemoryDevices;
+  CONST UINT8                     *MemoryFormFactor;
   //
   // Forcibly override MemoryFormFactor on non-Automatic mode when TRUE.
   //
-  BOOLEAN                       ForceMemoryFormFactor;
-  CONST UINT16                  *MemoryTotalWidth;
-  CONST UINT8                   *MemoryType;
-  CONST UINT16                  *MemoryTypeDetail;
+  BOOLEAN                         ForceMemoryFormFactor;
+  CONST UINT16                    *MemoryTotalWidth;
+  CONST UINT8                     *MemoryType;
+  CONST UINT16                    *MemoryTypeDetail;
   //
   // Type 128
   // FirmwareFeatures and FirmwareFeaturesMask are split into two UINT32
   // values, the lower referring to the traditional FirmwareFeatures and the
   // upper representing the additions introduced by ExtendedFirmwareFeatures.
   //
-  UINT64          FirmwareFeatures;
-  UINT64          FirmwareFeaturesMask;
+  UINT64                          FirmwareFeatures;
+  UINT64                          FirmwareFeaturesMask;
   //
   // Type 131
   //
-  CONST UINT16    *ProcessorType;
+  CONST UINT16                    *ProcessorType;
   //
   // Type 133
   //
-  CONST UINT32    *PlatformFeature;
+  CONST UINT32                    *PlatformFeature;
   //
   // Type 134
   //
-  CONST UINT8     *SmcVersion;
+  CONST UINT8                     *SmcVersion;
 } OC_SMBIOS_DATA;
 
 typedef enum OC_SMBIOS_UPDATE_MODE_ {
@@ -145,19 +145,19 @@ typedef enum OC_SMBIOS_UPDATE_MODE_ {
   // UEFI 2.7A specification (page 166).
   // * We allocate EfiReservedMemoryType at AllocateMaxAddress without any fallbacks.
   //
-  OcSmbiosUpdateCreate       = 1,
+  OcSmbiosUpdateCreate = 1,
   //
   // Overwrite existing gEfiSmbiosTableGuid and gEfiSmbiosTable3Guid data if it fits new size.
   // Abort with unspecified state otherwise.
   //
-  OcSmbiosUpdateOverwrite    = 2,
+  OcSmbiosUpdateOverwrite = 2,
   //
   // Writes first SMBIOS table (gEfiSmbiosTableGuid) to gOcCustomSmbiosTableGuid to workaround
   // some types of firmware overwriting SMBIOS contents at ExitBootServices. Otherwise equivalent
-  // to OcSmbiosUpdateCreate. Requires patching AppleSmbios.kext and AppleACPIPlatform.kext 
+  // to OcSmbiosUpdateCreate. Requires patching AppleSmbios.kext and AppleACPIPlatform.kext
   // to read from another GUID: "EB9D2D31" -> "EB9D2D35" (in ASCII).
   //
-  OcSmbiosUpdateCustom       = 3,
+  OcSmbiosUpdateCustom = 3,
 } OC_SMBIOS_UPDATE_MODE;
 
 //
@@ -167,31 +167,31 @@ typedef struct OC_SMBIOS_TABLE_ {
   //
   // SMBIOS table.
   //
-  UINT8                            *Table;
+  UINT8                             *Table;
   //
   // Current table position.
   //
-  APPLE_SMBIOS_STRUCTURE_POINTER   CurrentPtr;
+  APPLE_SMBIOS_STRUCTURE_POINTER    CurrentPtr;
   //
   // Current string position.
   //
-  CHAR8                            *CurrentStrPtr;
+  CHAR8                             *CurrentStrPtr;
   //
   // Allocated table size, multiple of EFI_PAGE_SIZE.
   //
-  UINT32                           AllocatedTableSize;
+  UINT32                            AllocatedTableSize;
   //
   // Incrementable handle.
   //
-  SMBIOS_HANDLE                    Handle;
+  SMBIOS_HANDLE                     Handle;
   //
   // Largest structure size within the table.
   //
-  UINT16                           MaxStructureSize;
+  UINT16                            MaxStructureSize;
   //
   // Number of structures within the table.
   //
-  UINT16                           NumberOfStructures;
+  UINT16                            NumberOfStructures;
 } OC_SMBIOS_TABLE;
 
 /**
@@ -258,14 +258,14 @@ OcSmbiosCreate (
 **/
 VOID
 OcSmbiosExtractOemInfo (
-  IN  OC_SMBIOS_TABLE   *SmbiosTable,
-  OUT CHAR8             *ProductName        OPTIONAL,
-  OUT CHAR8             *SerialNumber       OPTIONAL,
-  OUT EFI_GUID          *SystemUuid         OPTIONAL,
-  OUT CHAR8             *Mlb                OPTIONAL,
-  OUT UINT8             *Rom                OPTIONAL,
-  IN  BOOLEAN           UuidIsRawEncoded,
-  IN  BOOLEAN           UseVariableStorage
+  IN  OC_SMBIOS_TABLE  *SmbiosTable,
+  OUT CHAR8            *ProductName        OPTIONAL,
+  OUT CHAR8            *SerialNumber       OPTIONAL,
+  OUT EFI_GUID         *SystemUuid         OPTIONAL,
+  OUT CHAR8            *Mlb                OPTIONAL,
+  OUT UINT8            *Rom                OPTIONAL,
+  IN  BOOLEAN          UuidIsRawEncoded,
+  IN  BOOLEAN          UseVariableStorage
   );
 
 /**
@@ -273,7 +273,7 @@ OcSmbiosExtractOemInfo (
   to SMBIOS ASCII format (16-byte, APPLE_SMBIOS_SMC_VERSION_SIZE).
 
   @param[in]  SmcRevision  SMC revision in REV key format.
-  @param[out] SmcVersion   SMC revision in SMBIOS format.  
+  @param[out] SmcVersion   SMC revision in SMBIOS format.
 **/
 VOID
 OcSmbiosGetSmcVersion (

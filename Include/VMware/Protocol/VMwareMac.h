@@ -23,6 +23,6 @@
   { 0x03F38E56, 0x8231, 0x4469,   \
     { 0x94, 0xED, 0x82, 0xAE, 0x53, 0x15, 0x83, 0x4F } }
 
-extern EFI_GUID gVMwareMacProtocolGuid;
+extern EFI_GUID  gVMwareMacProtocolGuid;
 
 #endif // VMWARE_MAC_H

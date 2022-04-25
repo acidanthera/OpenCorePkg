@@ -21,7 +21,7 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 **/
 VOID
 InitializeBiosIntCaller (
-  THUNK_CONTEXT     *ThunkContext
+  THUNK_CONTEXT  *ThunkContext
   )
 {
   EFI_STATUS            Status;
@@ -29,26 +29,27 @@ InitializeBiosIntCaller (
   UINT32                ExtraStackSize;
   EFI_PHYSICAL_ADDRESS  LegacyRegionBase;
   UINT32                LegacyRegionSize;
+
   //
   // Get LegacyRegion
   //
   AsmGetThunk16Properties (&RealModeBufferSize, &ExtraStackSize);
   LegacyRegionSize = (((RealModeBufferSize + ExtraStackSize) / EFI_PAGE_SIZE) + 1) * EFI_PAGE_SIZE;
   LegacyRegionBase = LEGACY_REGION_BASE;
-  Status = gBS->AllocatePages (
-                  AllocateMaxAddress,
-                  EfiACPIMemoryNVS,
-                  EFI_SIZE_TO_PAGES(LegacyRegionSize),
-                  &LegacyRegionBase
-                  );
+  Status           = gBS->AllocatePages (
+                            AllocateMaxAddress,
+                            EfiACPIMemoryNVS,
+                            EFI_SIZE_TO_PAGES (LegacyRegionSize),
+                            &LegacyRegionBase
+                            );
   ASSERT_EFI_ERROR (Status);
 
-  ZeroMem ((VOID*)(UINTN) LegacyRegionBase, LegacyRegionSize);
+  ZeroMem ((VOID *)(UINTN)LegacyRegionBase, LegacyRegionSize);
 
-  ThunkContext->RealModeBuffer     = (VOID*)(UINTN)LegacyRegionBase;
+  ThunkContext->RealModeBuffer     = (VOID *)(UINTN)LegacyRegionBase;
   ThunkContext->RealModeBufferSize = LegacyRegionSize;
   ThunkContext->ThunkAttributes    = THUNK_ATTRIBUTE_BIG_REAL_MODE|THUNK_ATTRIBUTE_DISABLE_A20_MASK_INT_15;
-  AsmPrepareThunk16(ThunkContext);
+  AsmPrepareThunk16 (ThunkContext);
 }
 
 /**
@@ -73,7 +74,7 @@ InitializeInterruptRedirection (
   UINTN                 Index;
   UINT8                 ProtectedModeBaseVector;
 
-  STATIC CONST UINT32 InterruptRedirectionCode[] = {
+  STATIC CONST UINT32  InterruptRedirectionCode[] = {
     0x90CF08CD, // INT8; IRET; NOP
     0x90CF09CD, // INT9; IRET; NOP
     0x90CF0ACD, // INTA; IRET; NOP
@@ -84,18 +85,17 @@ InitializeInterruptRedirection (
     0x90CF0FCD  // INTF; IRET; NOP
   };
 
-
   //
   // Get LegacyRegion
   //
-  LegacyRegionLength = sizeof(InterruptRedirectionCode);
-  LegacyRegionBase = LEGACY_REGION_BASE;
-  Status = gBS->AllocatePages (
-                  AllocateMaxAddress,
-                  EfiACPIMemoryNVS,
-                  EFI_SIZE_TO_PAGES(LegacyRegionLength),
-                  &LegacyRegionBase
-                  );
+  LegacyRegionLength = sizeof (InterruptRedirectionCode);
+  LegacyRegionBase   = LEGACY_REGION_BASE;
+  Status             = gBS->AllocatePages (
+                              AllocateMaxAddress,
+                              EfiACPIMemoryNVS,
+                              EFI_SIZE_TO_PAGES (LegacyRegionLength),
+                              &LegacyRegionBase
+                              );
   ASSERT_EFI_ERROR (Status);
 
   //
@@ -112,7 +112,7 @@ InitializeInterruptRedirection (
   //
   // Patch IVT 0x68 ~ 0x6f
   //
-  IdtArray = (UINT32 *) 0;
+  IdtArray = (UINT32 *)0;
   for (Index = 0; Index < 8; Index++) {
     IdtArray[ProtectedModeBaseVector + Index] = ((EFI_SEGMENT (LegacyRegionBase + Index * 4)) << 16) | (EFI_OFFSET (LegacyRegionBase + Index * 4));
   }
@@ -134,16 +134,16 @@ InitializeInterruptRedirection (
 BOOLEAN
 EFIAPI
 LegacyBiosInt86 (
-  IN  BIOS_VIDEO_DEV                 *BiosDev,
-  IN  UINT8                           BiosInt,
-  IN  IA32_REGISTER_SET              *Regs
+  IN  BIOS_VIDEO_DEV     *BiosDev,
+  IN  UINT8              BiosInt,
+  IN  IA32_REGISTER_SET  *Regs
   )
 {
-  UINTN                 Status;
-  IA32_REGISTER_SET     ThunkRegSet;
-  BOOLEAN               Ret;
-  UINT16                *Stack16;
-  BOOLEAN               Enabled;
+  UINTN              Status;
+  IA32_REGISTER_SET  ThunkRegSet;
+  BOOLEAN            Ret;
+  UINT16             *Stack16;
+  BOOLEAN            Enabled;
 
   ZeroMem (&ThunkRegSet, sizeof (ThunkRegSet));
   ThunkRegSet.E.EFLAGS.Bits.Reserved_0 = 1;
@@ -156,20 +156,20 @@ LegacyBiosInt86 (
   ThunkRegSet.E.EFLAGS.Bits.TF         = 0;
   ThunkRegSet.E.EFLAGS.Bits.CF         = 0;
 
-  ThunkRegSet.E.EDI  = Regs->E.EDI;
-  ThunkRegSet.E.ESI  = Regs->E.ESI;
-  ThunkRegSet.E.EBP  = Regs->E.EBP;
-  ThunkRegSet.E.EBX  = Regs->E.EBX;
-  ThunkRegSet.E.EDX  = Regs->E.EDX;
-  ThunkRegSet.E.ECX  = Regs->E.ECX;
-  ThunkRegSet.E.EAX  = Regs->E.EAX;
-  ThunkRegSet.E.DS   = Regs->E.DS;
-  ThunkRegSet.E.ES   = Regs->E.ES;
+  ThunkRegSet.E.EDI = Regs->E.EDI;
+  ThunkRegSet.E.ESI = Regs->E.ESI;
+  ThunkRegSet.E.EBP = Regs->E.EBP;
+  ThunkRegSet.E.EBX = Regs->E.EBX;
+  ThunkRegSet.E.EDX = Regs->E.EDX;
+  ThunkRegSet.E.ECX = Regs->E.ECX;
+  ThunkRegSet.E.EAX = Regs->E.EAX;
+  ThunkRegSet.E.DS  = Regs->E.DS;
+  ThunkRegSet.E.ES  = Regs->E.ES;
 
   //
   // The call to Legacy16 is a critical section to EFI
   //
-  Enabled = SaveAndDisableInterrupts();
+  Enabled = SaveAndDisableInterrupts ();
 
   //
   // Set Legacy16 state. 0x08, 0x70 is legacy 8259 vector bases.
@@ -177,13 +177,13 @@ LegacyBiosInt86 (
   Status = BiosDev->Legacy8259->SetMode (BiosDev->Legacy8259, Efi8259LegacyMode, NULL, NULL);
   ASSERT_EFI_ERROR (Status);
 
-  Stack16 = (UINT16 *)((UINT8 *) BiosDev->ThunkContext->RealModeBuffer + BiosDev->ThunkContext->RealModeBufferSize - sizeof (UINT16));
+  Stack16 = (UINT16 *)((UINT8 *)BiosDev->ThunkContext->RealModeBuffer + BiosDev->ThunkContext->RealModeBufferSize - sizeof (UINT16));
 
-  ThunkRegSet.E.SS   = (UINT16) (((UINTN) Stack16 >> 16) << 12);
-  ThunkRegSet.E.ESP  = (UINT16) (UINTN) Stack16;
+  ThunkRegSet.E.SS  = (UINT16)(((UINTN)Stack16 >> 16) << 12);
+  ThunkRegSet.E.ESP = (UINT16)(UINTN)Stack16;
 
-  ThunkRegSet.E.Eip  = (UINT16)((volatile UINT32 *)NULL)[BiosInt];
-  ThunkRegSet.E.CS   = (UINT16)(((volatile UINT32 *)NULL)[BiosInt] >> 16);
+  ThunkRegSet.E.Eip                    = (UINT16)((volatile UINT32 *)NULL)[BiosInt];
+  ThunkRegSet.E.CS                     = (UINT16)(((volatile UINT32 *)NULL)[BiosInt] >> 16);
   BiosDev->ThunkContext->RealModeState = &ThunkRegSet;
   AsmThunk16 (BiosDev->ThunkContext);
 
@@ -198,21 +198,21 @@ LegacyBiosInt86 (
   //
   SetInterruptState (Enabled);
 
-  Regs->E.EDI      = ThunkRegSet.E.EDI;
-  Regs->E.ESI      = ThunkRegSet.E.ESI;
-  Regs->E.EBP      = ThunkRegSet.E.EBP;
-  Regs->E.EBX      = ThunkRegSet.E.EBX;
-  Regs->E.EDX      = ThunkRegSet.E.EDX;
-  Regs->E.ECX      = ThunkRegSet.E.ECX;
-  Regs->E.EAX      = ThunkRegSet.E.EAX;
-  Regs->E.SS       = ThunkRegSet.E.SS;
-  Regs->E.CS       = ThunkRegSet.E.CS;
-  Regs->E.DS       = ThunkRegSet.E.DS;
-  Regs->E.ES       = ThunkRegSet.E.ES;
+  Regs->E.EDI = ThunkRegSet.E.EDI;
+  Regs->E.ESI = ThunkRegSet.E.ESI;
+  Regs->E.EBP = ThunkRegSet.E.EBP;
+  Regs->E.EBX = ThunkRegSet.E.EBX;
+  Regs->E.EDX = ThunkRegSet.E.EDX;
+  Regs->E.ECX = ThunkRegSet.E.ECX;
+  Regs->E.EAX = ThunkRegSet.E.EAX;
+  Regs->E.SS  = ThunkRegSet.E.SS;
+  Regs->E.CS  = ThunkRegSet.E.CS;
+  Regs->E.DS  = ThunkRegSet.E.DS;
+  Regs->E.ES  = ThunkRegSet.E.ES;
 
   CopyMem (&(Regs->E.EFLAGS), &(ThunkRegSet.E.EFLAGS), sizeof (UINT32));
 
-  Ret = (BOOLEAN) (Regs->E.EFLAGS.Bits.CF == 1);
+  Ret = (BOOLEAN)(Regs->E.EFLAGS.Bits.CF == 1);
 
   return Ret;
 }

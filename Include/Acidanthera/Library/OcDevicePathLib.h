@@ -21,7 +21,7 @@
   Here we replace it with the "right" value.
   Reference: https://forums.macrumors.com/posts/28169441.
 **/
-#define MSG_APPLE_NVME_NAMESPACE_DP 0x22
+#define MSG_APPLE_NVME_NAMESPACE_DP  0x22
 
 /**
   Append file name to device path.
@@ -67,8 +67,8 @@ FindDevicePathNodeWithType (
 BOOLEAN
 EFIAPI
 IsDevicePathEqual (
-  IN  EFI_DEVICE_PATH_PROTOCOL      *DevicePath1,
-  IN  EFI_DEVICE_PATH_PROTOCOL      *DevicePath2
+  IN  EFI_DEVICE_PATH_PROTOCOL  *DevicePath1,
+  IN  EFI_DEVICE_PATH_PROTOCOL  *DevicePath2
   );
 
 /**
@@ -98,8 +98,8 @@ FileDevicePathsEqual (
 BOOLEAN
 EFIAPI
 IsDevicePathChild (
-  IN  EFI_DEVICE_PATH_PROTOCOL      *ParentPath,
-  IN  EFI_DEVICE_PATH_PROTOCOL      *ChildPath
+  IN  EFI_DEVICE_PATH_PROTOCOL  *ParentPath,
+  IN  EFI_DEVICE_PATH_PROTOCOL  *ChildPath
   );
 
 /**
@@ -212,8 +212,8 @@ OcFileDevicePathFullName (
 **/
 CHAR16 *
 OcCopyDevicePathFullName (
-  IN   EFI_DEVICE_PATH_PROTOCOL        *DevicePath,
-  OUT  EFI_DEVICE_PATH_PROTOCOL        **FileDevicePath  OPTIONAL
+  IN   EFI_DEVICE_PATH_PROTOCOL  *DevicePath,
+  OUT  EFI_DEVICE_PATH_PROTOCOL  **FileDevicePath  OPTIONAL
   );
 
 /**
@@ -250,27 +250,27 @@ typedef struct {
   //
   // Stores the old device path prior to expansion.
   //
-  EFI_DEVICE_PATH_PROTOCOL *OldPath;
+  EFI_DEVICE_PATH_PROTOCOL    *OldPath;
   //
   // Valid iff OldPath == NULL.
   //
   union {
     struct {
-      UINT16 PortMultiplierPortNumber;
+      UINT16    PortMultiplierPortNumber;
     } Sata;
 
     struct {
-      UINT8 SubType;
+      UINT8    SubType;
     } SasExNvme;
 
     struct {
-      UINT32 HID;
-      UINT32 UID;
+      UINT32    HID;
+      UINT32    UID;
     } Acpi;
 
     struct {
-      UINT32 HID;
-      UINT32 CID;
+      UINT32    HID;
+      UINT32    CID;
     } ExtendedAcpi;
   } Types;
 } APPLE_BOOT_DP_PATCH_CONTEXT;

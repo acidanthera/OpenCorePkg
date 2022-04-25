@@ -26,7 +26,7 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 /**
   Apple Disk Image protocol revision.
 **/
-#define APPLE_DISK_IMAGE_PROTOCOL_REVISION 2
+#define APPLE_DISK_IMAGE_PROTOCOL_REVISION  2
 
 /**
   Checks whether dmg file at DevicePath is valid.
@@ -42,7 +42,7 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 **/
 typedef
 EFI_STATUS
-(EFIAPI *APPLE_DISK_IMAGE_SUPPORTED) (
+(EFIAPI *APPLE_DISK_IMAGE_SUPPORTED)(
   IN  EFI_DEVICE_PATH_PROTOCOL   *DevicePath
   );
 
@@ -71,7 +71,7 @@ EFI_STATUS
 **/
 typedef
 EFI_STATUS
-(EFIAPI *APPLE_DISK_IMAGE_MOUNT_IMAGE) (
+(EFIAPI *APPLE_DISK_IMAGE_MOUNT_IMAGE)(
   IN  EFI_DEVICE_PATH_PROTOCOL   *DevicePath,
   OUT EFI_HANDLE                 *Handle OPTIONAL
   );
@@ -91,7 +91,7 @@ EFI_STATUS
 **/
 typedef
 EFI_STATUS
-(EFIAPI *APPLE_DISK_IMAGE_UNMOUNT_IMAGE) (
+(EFIAPI *APPLE_DISK_IMAGE_UNMOUNT_IMAGE)(
   IN  EFI_HANDLE                 Handle
   );
 
@@ -99,12 +99,12 @@ EFI_STATUS
   Apple disk imge protocol.
 **/
 typedef struct {
-  UINT32                         Revision;
-  APPLE_DISK_IMAGE_SUPPORTED     Supported;
-  APPLE_DISK_IMAGE_MOUNT_IMAGE   MountImage;
-  APPLE_DISK_IMAGE_UNMOUNT_IMAGE UnmountImage;
+  UINT32                            Revision;
+  APPLE_DISK_IMAGE_SUPPORTED        Supported;
+  APPLE_DISK_IMAGE_MOUNT_IMAGE      MountImage;
+  APPLE_DISK_IMAGE_UNMOUNT_IMAGE    UnmountImage;
 } APPLE_DISK_IMAGE_PROTOCOL;
 
-extern EFI_GUID gAppleDiskImageProtocolGuid;
+extern EFI_GUID  gAppleDiskImageProtocolGuid;
 
 #endif // APPLE_DISK_IMAGE_PROTOCOL_H

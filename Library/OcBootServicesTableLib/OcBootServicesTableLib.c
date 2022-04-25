@@ -19,19 +19,19 @@
 #include <Protocol/LoadedImage.h>
 
 typedef struct OC_REGISTERED_PROTOCOL_ {
-  EFI_GUID   *ProtocolGuid;
-  VOID       *ProtocolInstance;
-  BOOLEAN    Override;
+  EFI_GUID    *ProtocolGuid;
+  VOID        *ProtocolInstance;
+  BOOLEAN     Override;
 } OC_REGISTERED_PROTOCOL;
 
-EFI_HANDLE                      gImageHandle       = NULL;
-EFI_SYSTEM_TABLE                *gST               = NULL;
-EFI_BOOT_SERVICES               *gBS               = NULL;
+EFI_HANDLE         gImageHandle = NULL;
+EFI_SYSTEM_TABLE   *gST         = NULL;
+EFI_BOOT_SERVICES  *gBS         = NULL;
 
-STATIC EFI_CONNECT_CONTROLLER    mConnectController = NULL;
-STATIC EFI_OPEN_PROTOCOL         mOpenProtocol = NULL;
+STATIC EFI_CONNECT_CONTROLLER    mConnectController  = NULL;
+STATIC EFI_OPEN_PROTOCOL         mOpenProtocol       = NULL;
 STATIC EFI_LOCATE_HANDLE_BUFFER  mLocateHandleBuffer = NULL;
-STATIC EFI_LOCATE_PROTOCOL       mLocateProtocol    = NULL;
+STATIC EFI_LOCATE_PROTOCOL       mLocateProtocol     = NULL;
 STATIC OC_REGISTERED_PROTOCOL    mRegisteredProtocols[16];
 STATIC UINTN                     mRegisteredProtocolCount = 0;
 
@@ -39,10 +39,10 @@ STATIC
 EFI_STATUS
 EFIAPI
 OcConnectController (
-  IN  EFI_HANDLE                    ControllerHandle,
-  IN  EFI_HANDLE                    *DriverImageHandle   OPTIONAL,
-  IN  EFI_DEVICE_PATH_PROTOCOL      *RemainingDevicePath OPTIONAL,
-  IN  BOOLEAN                       Recursive
+  IN  EFI_HANDLE                ControllerHandle,
+  IN  EFI_HANDLE                *DriverImageHandle   OPTIONAL,
+  IN  EFI_DEVICE_PATH_PROTOCOL  *RemainingDevicePath OPTIONAL,
+  IN  BOOLEAN                   Recursive
   )
 {
   EFI_STATUS  Status;
@@ -62,20 +62,20 @@ OcConnectController (
   // when connecting handles without device paths.
   //
   Status = gBS->HandleProtocol (
-    ControllerHandle,
-    &gEfiDevicePathProtocolGuid,
-    &DevicePath
-    );
+                  ControllerHandle,
+                  &gEfiDevicePathProtocolGuid,
+                  &DevicePath
+                  );
   if (EFI_ERROR (Status)) {
     return EFI_NOT_FOUND;
   }
 
   Status = mConnectController (
-    ControllerHandle,
-    DriverImageHandle,
-    RemainingDevicePath,
-    Recursive
-    );
+             ControllerHandle,
+             DriverImageHandle,
+             RemainingDevicePath,
+             Recursive
+             );
 
   return Status;
 }
@@ -84,12 +84,12 @@ STATIC
 EFI_STATUS
 EFIAPI
 OcOpenProtocol (
-  IN  EFI_HANDLE                Handle,
-  IN  EFI_GUID                  *Protocol,
-  OUT VOID                      **Interface OPTIONAL,
-  IN  EFI_HANDLE                AgentHandle,
-  IN  EFI_HANDLE                ControllerHandle,
-  IN  UINT32                    Attributes
+  IN  EFI_HANDLE  Handle,
+  IN  EFI_GUID    *Protocol,
+  OUT VOID        **Interface OPTIONAL,
+  IN  EFI_HANDLE  AgentHandle,
+  IN  EFI_HANDLE  ControllerHandle,
+  IN  UINT32      Attributes
   )
 {
   EFI_STATUS                 Status;
@@ -97,34 +97,35 @@ OcOpenProtocol (
   EFI_LOADED_IMAGE_PROTOCOL  *LoadedImage;
 
   Status = mOpenProtocol (
-    Handle,
-    Protocol,
-    Interface,
-    AgentHandle,
-    ControllerHandle,
-    Attributes
-    );
+             Handle,
+             Protocol,
+             Interface,
+             AgentHandle,
+             ControllerHandle,
+             Attributes
+             );
 
   //
   // On Apple EFI some paths may not be valid for our DevicePath library.
   // As a result we can end up in an infinite loop in GetImageNameFromHandle
   // calling "drivers" in the Shell. Workaround by discarding unsupported paths.
   //
-  if (!EFI_ERROR (Status)
-    && CompareGuid (Protocol, &gEfiLoadedImageProtocolGuid)
-    && Interface != NULL) {
+  if (  !EFI_ERROR (Status)
+     && CompareGuid (Protocol, &gEfiLoadedImageProtocolGuid)
+     && (Interface != NULL))
+  {
     LoadedImage = *Interface;
 
-    if (LoadedImage->FilePath != NULL && !IsDevicePathValid (LoadedImage->FilePath, 0)) {
+    if ((LoadedImage->FilePath != NULL) && !IsDevicePathValid (LoadedImage->FilePath, 0)) {
       LoadedImage->FilePath = NULL;
     }
   }
 
-  if (Status != EFI_UNSUPPORTED || Handle != gImageHandle) {
+  if ((Status != EFI_UNSUPPORTED) || (Handle != gImageHandle)) {
     return Status;
   }
 
-  if (Interface == NULL && Attributes != EFI_OPEN_PROTOCOL_TEST_PROTOCOL) {
+  if ((Interface == NULL) && (Attributes != EFI_OPEN_PROTOCOL_TEST_PROTOCOL)) {
     return EFI_INVALID_PARAMETER;
   }
 
@@ -136,6 +137,7 @@ OcOpenProtocol (
       if (Interface != NULL) {
         *Interface = mRegisteredProtocols[Index].ProtocolInstance;
       }
+
       return EFI_SUCCESS;
     }
   }
@@ -147,35 +149,35 @@ STATIC
 EFI_STATUS
 EFIAPI
 OcLocateHandleBuffer (
-  IN     EFI_LOCATE_SEARCH_TYPE       SearchType,
-  IN     EFI_GUID                     *Protocol      OPTIONAL,
-  IN     VOID                         *SearchKey     OPTIONAL,
-  IN OUT UINTN                        *NoHandles,
-  OUT    EFI_HANDLE                   **Buffer
+  IN     EFI_LOCATE_SEARCH_TYPE  SearchType,
+  IN     EFI_GUID                *Protocol      OPTIONAL,
+  IN     VOID                    *SearchKey     OPTIONAL,
+  IN OUT UINTN                   *NoHandles,
+  OUT    EFI_HANDLE              **Buffer
   )
 {
   EFI_STATUS  Status;
   UINTN       Index;
 
   Status = mLocateHandleBuffer (
-    SearchType,
-    Protocol,
-    SearchKey,
-    NoHandles,
-    Buffer
-    );
+             SearchType,
+             Protocol,
+             SearchKey,
+             NoHandles,
+             Buffer
+             );
 
-  if (Status == EFI_NOT_FOUND && SearchType == ByProtocol) {
+  if ((Status == EFI_NOT_FOUND) && (SearchType == ByProtocol)) {
     //
     // Process all protocols as overrides are not specific to handle.
     //
     for (Index = 0; Index < mRegisteredProtocolCount; ++Index) {
       if (CompareGuid (mRegisteredProtocols[Index].ProtocolGuid, Protocol)) {
         Status = gBS->AllocatePool (
-          EfiBootServicesData,
-          sizeof (**Buffer),
-          (VOID **) Buffer
-          );
+                        EfiBootServicesData,
+                        sizeof (**Buffer),
+                        (VOID **)Buffer
+                        );
         if (!EFI_ERROR (Status)) {
           *NoHandles = 1;
           **Buffer   = gImageHandle;
@@ -202,7 +204,7 @@ OcLocateProtocol (
   EFI_STATUS  Status;
   UINTN       Index;
 
-  if (Protocol == NULL || Interface == NULL) {
+  if ((Protocol == NULL) || (Interface == NULL)) {
     return EFI_INVALID_PARAMETER;
   }
 
@@ -210,8 +212,9 @@ OcLocateProtocol (
   // Process overriding protocols first.
   //
   for (Index = 0; Index < mRegisteredProtocolCount; ++Index) {
-    if (mRegisteredProtocols[Index].Override
-      && CompareGuid (mRegisteredProtocols[Index].ProtocolGuid, Protocol)) {
+    if (  mRegisteredProtocols[Index].Override
+       && CompareGuid (mRegisteredProtocols[Index].ProtocolGuid, Protocol))
+    {
       *Interface = mRegisteredProtocols[Index].ProtocolInstance;
       return EFI_SUCCESS;
     }
@@ -221,18 +224,19 @@ OcLocateProtocol (
   // Call the original function second.
   //
   Status = mLocateProtocol (
-    Protocol,
-    Registration,
-    Interface
-    );
+             Protocol,
+             Registration,
+             Interface
+             );
 
   //
   // Process fallback protocols third.
   //
   if (EFI_ERROR (Status)) {
     for (Index = 0; Index < mRegisteredProtocolCount; ++Index) {
-      if (!mRegisteredProtocols[Index].Override
-        && CompareGuid (mRegisteredProtocols[Index].ProtocolGuid, Protocol)) {
+      if (  !mRegisteredProtocols[Index].Override
+         && CompareGuid (mRegisteredProtocols[Index].ProtocolGuid, Protocol))
+      {
         *Interface = mRegisteredProtocols[Index].ProtocolInstance;
         return EFI_SUCCESS;
       }
@@ -244,9 +248,9 @@ OcLocateProtocol (
 
 EFI_STATUS
 OcRegisterBootServicesProtocol (
-  IN EFI_GUID   *ProtocolGuid,
-  IN VOID       *ProtocolInstance,
-  IN BOOLEAN    Override
+  IN EFI_GUID  *ProtocolGuid,
+  IN VOID      *ProtocolInstance,
+  IN BOOLEAN   Override
   )
 {
   if (mRegisteredProtocolCount == ARRAY_SIZE (mRegisteredProtocols)) {
@@ -294,10 +298,10 @@ OcBootServicesTableLibConstructor (
   // Allocate a copy of EFI Boot Services Table.
   //
   Status = SystemTable->BootServices->AllocatePool (
-    EfiBootServicesData,
-    SystemTable->BootServices->Hdr.HeaderSize,
-    (VOID **) &gBS
-    );
+                                        EfiBootServicesData,
+                                        SystemTable->BootServices->Hdr.HeaderSize,
+                                        (VOID **)&gBS
+                                        );
   if (EFI_ERROR (Status)) {
     return Status;
   }
@@ -324,10 +328,10 @@ OcBootServicesTableLibConstructor (
   gBS->LocateProtocol     = OcLocateProtocol;
   gBS->Hdr.CRC32          = 0;
   SystemTable->BootServices->CalculateCrc32 (
-    gBS,
-    gBS->Hdr.HeaderSize,
-    &gBS->Hdr.CRC32
-    );
+                               gBS,
+                               gBS->Hdr.HeaderSize,
+                               &gBS->Hdr.CRC32
+                               );
 
   return EFI_SUCCESS;
 }

@@ -61,16 +61,16 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 #include <Protocol/Security2.h>
 #include <Protocol/SimplePointer.h>
 
-#define OC_EXIT_BOOT_SERVICES_HANDLER_MAX 5
+#define OC_EXIT_BOOT_SERVICES_HANDLER_MAX  5
 
-STATIC EFI_EVENT_NOTIFY mOcExitBootServicesHandlers[OC_EXIT_BOOT_SERVICES_HANDLER_MAX+1];
-STATIC VOID             *mOcExitBootServicesContexts[OC_EXIT_BOOT_SERVICES_HANDLER_MAX];
-STATIC UINTN            mOcExitBootServicesIndex;
+STATIC EFI_EVENT_NOTIFY  mOcExitBootServicesHandlers[OC_EXIT_BOOT_SERVICES_HANDLER_MAX+1];
+STATIC VOID              *mOcExitBootServicesContexts[OC_EXIT_BOOT_SERVICES_HANDLER_MAX];
+STATIC UINTN             mOcExitBootServicesIndex;
 
 VOID
 OcScheduleExitBootServices (
-  IN EFI_EVENT_NOTIFY   Handler,
-  IN VOID               *Context
+  IN EFI_EVENT_NOTIFY  Handler,
+  IN VOID              *Context
   )
 {
   if (mOcExitBootServicesIndex + 1 == OC_EXIT_BOOT_SERVICES_HANDLER_MAX) {
@@ -91,21 +91,21 @@ OcLoadDrivers (
   OUT EFI_HANDLE          **DriversToConnect  OPTIONAL
   )
 {
-  EFI_STATUS                  Status;
-  VOID                        *Driver;
-  UINT32                      DriverSize;
-  UINT32                      Index;
-  CHAR16                      DriverPath[OC_STORAGE_SAFE_PATH_MAX];
-  EFI_HANDLE                  ImageHandle;
-  EFI_LOADED_IMAGE_PROTOCOL   *LoadedImage;
-  EFI_HANDLE                  *DriversToConnectIterator;
-  VOID                        *DriverBinding;
-  BOOLEAN                     SkipDriver;
-  OC_UEFI_DRIVER_ENTRY        *DriverEntry;
-  CONST CHAR8                 *DriverComment;
-  CHAR8                       *DriverFileName;
-  CONST CHAR8                 *DriverArguments;
-  CONST CHAR8                 *UnescapedArguments;
+  EFI_STATUS                 Status;
+  VOID                       *Driver;
+  UINT32                     DriverSize;
+  UINT32                     Index;
+  CHAR16                     DriverPath[OC_STORAGE_SAFE_PATH_MAX];
+  EFI_HANDLE                 ImageHandle;
+  EFI_LOADED_IMAGE_PROTOCOL  *LoadedImage;
+  EFI_HANDLE                 *DriversToConnectIterator;
+  VOID                       *DriverBinding;
+  BOOLEAN                    SkipDriver;
+  OC_UEFI_DRIVER_ENTRY       *DriverEntry;
+  CONST CHAR8                *DriverComment;
+  CHAR8                      *DriverFileName;
+  CONST CHAR8                *DriverArguments;
+  CONST CHAR8                *UnescapedArguments;
 
   DriversToConnectIterator = NULL;
   if (DriversToConnect != NULL) {
@@ -139,11 +139,11 @@ OcLoadDrivers (
     }
 
     Status = OcUnicodeSafeSPrint (
-      DriverPath,
-      sizeof (DriverPath),
-      OPEN_CORE_UEFI_DRIVER_PATH "%a",
-      DriverFileName
-      );
+               DriverPath,
+               sizeof (DriverPath),
+               OPEN_CORE_UEFI_DRIVER_PATH "%a",
+               DriverFileName
+               );
     if (EFI_ERROR (Status)) {
       DEBUG ((
         DEBUG_ERROR,
@@ -172,14 +172,14 @@ OcLoadDrivers (
     // TODO: Use AppleLoadedImage!!
     //
     ImageHandle = NULL;
-    Status = gBS->LoadImage (
-      FALSE,
-      gImageHandle,
-      NULL,
-      Driver,
-      DriverSize,
-      &ImageHandle
-      );
+    Status      = gBS->LoadImage (
+                         FALSE,
+                         gImageHandle,
+                         NULL,
+                         Driver,
+                         DriverSize,
+                         &ImageHandle
+                         );
     if (EFI_ERROR (Status)) {
       DEBUG ((
         DEBUG_ERROR,
@@ -192,12 +192,12 @@ OcLoadDrivers (
       continue;
     }
 
-    if (DriverArguments != NULL && DriverArguments[0] != '\0') {
+    if ((DriverArguments != NULL) && (DriverArguments[0] != '\0')) {
       Status = gBS->HandleProtocol (
-        ImageHandle,
-        &gEfiLoadedImageProtocolGuid,
-        (VOID **) &LoadedImage
-        );
+                      ImageHandle,
+                      &gEfiLoadedImageProtocolGuid,
+                      (VOID **)&LoadedImage
+                      );
       if (EFI_ERROR (Status)) {
         DEBUG ((
           DEBUG_ERROR,
@@ -210,6 +210,7 @@ OcLoadDrivers (
         FreePool (Driver);
         continue;
       }
+
       UnescapedArguments = XmlUnescapeString (DriverArguments);
       if (UnescapedArguments == NULL) {
         DEBUG ((
@@ -222,6 +223,7 @@ OcLoadDrivers (
         FreePool (Driver);
         continue;
       }
+
       if (!OcAppendArgumentsToLoadedImage (LoadedImage, &UnescapedArguments, 1, TRUE)) {
         DEBUG ((
           DEBUG_ERROR,
@@ -232,17 +234,18 @@ OcLoadDrivers (
           ));
         gBS->UnloadImage (ImageHandle);
         FreePool (Driver);
-        FreePool ((CHAR8 *) UnescapedArguments);
+        FreePool ((CHAR8 *)UnescapedArguments);
         continue;
       }
-      FreePool ((CHAR8 *) UnescapedArguments);
+
+      FreePool ((CHAR8 *)UnescapedArguments);
     }
 
     Status = gBS->StartImage (
-      ImageHandle,
-      NULL,
-      NULL
-      );
+                    ImageHandle,
+                    NULL,
+                    NULL
+                    );
 
     if (EFI_ERROR (Status)) {
       DEBUG ((
@@ -265,10 +268,10 @@ OcLoadDrivers (
 
       if (DriversToConnect != NULL) {
         Status = gBS->HandleProtocol (
-          ImageHandle,
-          &gEfiDriverBindingProtocolGuid,
-          (VOID **) &DriverBinding
-          );
+                        ImageHandle,
+                        &gEfiDriverBindingProtocolGuid,
+                        (VOID **)&DriverBinding
+                        );
 
         if (!EFI_ERROR (Status)) {
           if (*DriversToConnect == NULL) {
@@ -276,8 +279,8 @@ OcLoadDrivers (
             // Allocate enough entries for the drivers to connect.
             //
             *DriversToConnect = AllocatePool (
-              (Config->Uefi.Drivers.Count + 1 - Index) * sizeof (**DriversToConnect)
-              );
+                                  (Config->Uefi.Drivers.Count + 1 - Index) * sizeof (**DriversToConnect)
+                                  );
 
             if (*DriversToConnect != NULL) {
               DriversToConnectIterator = *DriversToConnect;
@@ -320,10 +323,10 @@ OcExitBootServicesHandler (
   IN VOID       *Context
   )
 {
-  EFI_STATUS         Status;
-  OC_GLOBAL_CONFIG   *Config;
+  EFI_STATUS        Status;
+  OC_GLOBAL_CONFIG  *Config;
 
-  Config = (OC_GLOBAL_CONFIG *) Context;
+  Config = (OC_GLOBAL_CONFIG *)Context;
 
   //
   // Printing from ExitBootServices is dangerous, as it may cause
@@ -355,17 +358,18 @@ OcExitBootServicesHandler (
 STATIC
 VOID
 OcReinstallProtocols (
-  IN OC_GLOBAL_CONFIG    *Config
+  IN OC_GLOBAL_CONFIG  *Config
   )
 {
-  CONST CHAR8   *AppleEventMode;
-  BOOLEAN       InstallAppleEvent;
-  BOOLEAN       OverrideAppleEvent;
+  CONST CHAR8  *AppleEventMode;
+  BOOLEAN      InstallAppleEvent;
+  BOOLEAN      OverrideAppleEvent;
 
   if (OcAudioInstallProtocols (
-    Config->Uefi.ProtocolOverrides.AppleAudio,
-    Config->Uefi.Audio.DisconnectHda
-    ) == NULL) {
+        Config->Uefi.ProtocolOverrides.AppleAudio,
+        Config->Uefi.Audio.DisconnectHda
+        ) == NULL)
+  {
     DEBUG ((DEBUG_INFO, "OC: Disabling audio in favour of firmware implementation\n"));
   }
 
@@ -409,8 +413,8 @@ OcReinstallProtocols (
     DEBUG ((DEBUG_INFO, "OC: Failed to install key map protocols\n"));
   }
 
-  InstallAppleEvent   = TRUE;
-  OverrideAppleEvent  = FALSE;
+  InstallAppleEvent  = TRUE;
+  OverrideAppleEvent = FALSE;
 
   AppleEventMode = OC_BLOB_GET (&Config->Uefi.AppleInput.AppleEvent);
 
@@ -423,22 +427,23 @@ OcReinstallProtocols (
     DEBUG ((DEBUG_INFO, "OC: Invalid AppleInput AppleEvent setting %a, using Auto\n", AppleEventMode));
   }
 
-  if (OcAppleEventInstallProtocol (
-    InstallAppleEvent,
-    OverrideAppleEvent,
-    Config->Uefi.AppleInput.CustomDelays,
-    Config->Uefi.AppleInput.KeyInitialDelay,
-    Config->Uefi.AppleInput.KeySubsequentDelay,
-    Config->Uefi.AppleInput.GraphicsInputMirroring,
-    Config->Uefi.AppleInput.PointerPollMin,
-    Config->Uefi.AppleInput.PointerPollMax,
-    Config->Uefi.AppleInput.PointerPollMask,
-    Config->Uefi.AppleInput.PointerSpeedDiv,
-    Config->Uefi.AppleInput.PointerSpeedMul
-    ) == NULL
-    && InstallAppleEvent) {
+  if (  (OcAppleEventInstallProtocol (
+           InstallAppleEvent,
+           OverrideAppleEvent,
+           Config->Uefi.AppleInput.CustomDelays,
+           Config->Uefi.AppleInput.KeyInitialDelay,
+           Config->Uefi.AppleInput.KeySubsequentDelay,
+           Config->Uefi.AppleInput.GraphicsInputMirroring,
+           Config->Uefi.AppleInput.PointerPollMin,
+           Config->Uefi.AppleInput.PointerPollMax,
+           Config->Uefi.AppleInput.PointerPollMask,
+           Config->Uefi.AppleInput.PointerSpeedDiv,
+           Config->Uefi.AppleInput.PointerSpeedMul
+           ) == NULL)
+     && InstallAppleEvent)
+  {
     DEBUG ((DEBUG_INFO, "OC: Failed to install apple event protocol\n"));
-  };
+  }
 
   if (OcFirmwareVolumeInstallProtocol (Config->Uefi.ProtocolOverrides.FirmwareVolume) == NULL) {
     DEBUG ((DEBUG_INFO, "OC: Failed to install firmware volume protocol\n"));
@@ -476,7 +481,7 @@ OcLoadAppleSecureBoot (
   UINT8                       SecureBootPolicy;
 
   SecureBootModel = OC_BLOB_GET (&Config->Misc.Security.SecureBootModel);
-  if (AsciiStrCmp (SecureBootModel, OC_SB_MODEL_DEFAULT) == 0 || SecureBootModel[0] == '\0') {
+  if ((AsciiStrCmp (SecureBootModel, OC_SB_MODEL_DEFAULT) == 0) || (SecureBootModel[0] == '\0')) {
     SecureBootModel = OcGetDefaultSecureBootModel (Config, CpuInfo);
   }
 
@@ -484,9 +489,10 @@ OcLoadAppleSecureBoot (
 
   if (AsciiStrCmp (SecureBootModel, OC_SB_MODEL_DISABLED) == 0) {
     SecureBootPolicy = AppleImg4SbModeDisabled;
-  } else if (Config->Misc.Security.ApECID != 0
-    && (RealSecureBootModel == NULL
-      || AsciiStrCmp (RealSecureBootModel, OC_SB_MODEL_LEGACY) != 0)) {
+  } else if (  (Config->Misc.Security.ApECID != 0)
+            && (  (RealSecureBootModel == NULL)
+               || (AsciiStrCmp (RealSecureBootModel, OC_SB_MODEL_LEGACY) != 0)))
+  {
     //
     // Note, for x86legacy it is always medium policy.
     //
@@ -505,9 +511,10 @@ OcLoadAppleSecureBoot (
     //
     // Check against all valid values in case more are added.
     //
-    if (AsciiStrCmp (DmgLoading, "Signed") != 0
-      && AsciiStrCmp (DmgLoading, "Disabled") != 0
-      && DmgLoading[0] != '\0') {
+    if (  (AsciiStrCmp (DmgLoading, "Signed") != 0)
+       && (AsciiStrCmp (DmgLoading, "Disabled") != 0)
+       && (DmgLoading[0] != '\0'))
+    {
       DEBUG ((DEBUG_ERROR, "OC: Cannot use Secure Boot with Any DmgLoading!\n"));
       CpuDeadLoop ();
       return;
@@ -531,8 +538,9 @@ OcLoadAppleSecureBoot (
     // This is what Apple does at least.
     // I believe no ECID is invalid for macOS 12.
     //
-    if (AsciiStrCmp (RealSecureBootModel, OC_SB_MODEL_LEGACY) == 0
-      && Config->Misc.Security.ApECID == 0) {
+    if (  (AsciiStrCmp (RealSecureBootModel, OC_SB_MODEL_LEGACY) == 0)
+       && (Config->Misc.Security.ApECID == 0))
+    {
       DEBUG ((DEBUG_INFO, "OC: Discovered x86legacy with zero ECID, using system-id\n"));
       OcGetLegacySecureBootECID (Config, &Config->Misc.Security.ApECID);
     }
@@ -562,11 +570,11 @@ OcLoadAppleSecureBoot (
   // TODO: Do we need to make Windows policy configurable?
   //
   SecureBoot = OcAppleSecureBootInstallProtocol (
-    Config->Uefi.ProtocolOverrides.AppleSecureBoot,
-    SecureBootPolicy,
-    0,
-    FALSE
-    );
+                 Config->Uefi.ProtocolOverrides.AppleSecureBoot,
+                 SecureBootPolicy,
+                 0,
+                 FALSE
+                 );
   if (SecureBoot == NULL) {
     DEBUG ((DEBUG_ERROR, "OC: Failed to install secure boot protocol\n"));
   }
@@ -576,9 +584,9 @@ STATIC
 EFI_STATUS
 EFIAPI
 OcSecurityFileAuthentication (
-  IN  CONST EFI_SECURITY_ARCH_PROTOCOL *This,
-  IN  UINT32                           AuthenticationStatus,
-  IN  CONST EFI_DEVICE_PATH_PROTOCOL   *File
+  IN  CONST EFI_SECURITY_ARCH_PROTOCOL  *This,
+  IN  UINT32                            AuthenticationStatus,
+  IN  CONST EFI_DEVICE_PATH_PROTOCOL    *File
   )
 {
   DEBUG ((DEBUG_VERBOSE, "OC: Security V1 %u\n", AuthenticationStatus));
@@ -589,11 +597,11 @@ STATIC
 EFI_STATUS
 EFIAPI
 OcSecurity2FileAuthentication (
-  IN CONST EFI_SECURITY2_ARCH_PROTOCOL *This,
-  IN CONST EFI_DEVICE_PATH_PROTOCOL    *File OPTIONAL,
-  IN VOID                              *FileBuffer,
-  IN UINTN                             FileSize,
-  IN BOOLEAN                           BootPolicy
+  IN CONST EFI_SECURITY2_ARCH_PROTOCOL  *This,
+  IN CONST EFI_DEVICE_PATH_PROTOCOL     *File OPTIONAL,
+  IN VOID                               *FileBuffer,
+  IN UINTN                              FileSize,
+  IN BOOLEAN                            BootPolicy
   )
 {
   DEBUG ((DEBUG_VERBOSE, "OC: Security V2 %u\n", BootPolicy));
@@ -613,10 +621,10 @@ OcInstallPermissiveSecurityPolicy (
   DEBUG ((DEBUG_INFO, "OC: Installing DISABLING secure boot policy overrides\n"));
 
   Status = gBS->LocateProtocol (
-    &gEfiSecurityArchProtocolGuid,
-    NULL,
-    (VOID **) &Security
-    );
+                  &gEfiSecurityArchProtocolGuid,
+                  NULL,
+                  (VOID **)&Security
+                  );
 
   DEBUG ((DEBUG_INFO, "OC: Security arch protocol - %r\n", Status));
 
@@ -625,10 +633,10 @@ OcInstallPermissiveSecurityPolicy (
   }
 
   Status = gBS->LocateProtocol (
-    &gEfiSecurity2ArchProtocolGuid,
-    NULL,
-    (VOID **) &Security2
-    );
+                  &gEfiSecurity2ArchProtocolGuid,
+                  NULL,
+                  (VOID **)&Security2
+                  );
 
   DEBUG ((DEBUG_INFO, "OC: Security2 arch protocol - %r\n", Status));
 
@@ -636,7 +644,6 @@ OcInstallPermissiveSecurityPolicy (
     Security2->FileAuthentication = OcSecurity2FileAuthentication;
   }
 }
-
 
 VOID
 OcLoadBooterUefiSupport (
@@ -678,10 +685,10 @@ OcLoadBooterUefiSupport (
   //
   // Handle MmioWhitelist patches.
   //
-  if (AbcSettings.DevirtualiseMmio && Config->Booter.MmioWhitelist.Count > 0) {
+  if (AbcSettings.DevirtualiseMmio && (Config->Booter.MmioWhitelist.Count > 0)) {
     AbcSettings.MmioWhitelist = AllocatePool (
-      Config->Booter.MmioWhitelist.Count * sizeof (AbcSettings.MmioWhitelist[0])
-      );
+                                  Config->Booter.MmioWhitelist.Count * sizeof (AbcSettings.MmioWhitelist[0])
+                                  );
 
     if (AbcSettings.MmioWhitelist != NULL) {
       NextIndex = 0;
@@ -691,12 +698,13 @@ OcLoadBooterUefiSupport (
           ++NextIndex;
         }
       }
+
       AbcSettings.MmioWhitelistSize = NextIndex;
     } else {
       DEBUG ((
         DEBUG_ERROR,
         "OC: Failed to allocate %u slots for mmio addresses\n",
-        (UINT32) Config->Booter.MmioWhitelist.Count
+        (UINT32)Config->Booter.MmioWhitelist.Count
         ));
     }
   }
@@ -706,13 +714,13 @@ OcLoadBooterUefiSupport (
   //
   if (Config->Booter.Patch.Count > 0) {
     AbcSettings.BooterPatches = AllocateZeroPool (
-      Config->Booter.Patch.Count * sizeof (AbcSettings.BooterPatches[0])
-      );
+                                  Config->Booter.Patch.Count * sizeof (AbcSettings.BooterPatches[0])
+                                  );
 
     if (AbcSettings.BooterPatches != NULL) {
       NextIndex = 0;
       for (Index = 0; Index < Config->Booter.Patch.Count; ++Index) {
-        Patch = &AbcSettings.BooterPatches[NextIndex];
+        Patch     = &AbcSettings.BooterPatches[NextIndex];
         UserPatch = Config->Booter.Patch.Values[Index];
 
         if (!UserPatch->Enabled) {
@@ -725,10 +733,11 @@ OcLoadBooterUefiSupport (
         // - Find and replace mismatch in size.
         // - Mask and ReplaceMask mismatch in size when are available.
         //
-        if (UserPatch->Replace.Size == 0
-          || UserPatch->Find.Size != UserPatch->Replace.Size
-          || (UserPatch->Mask.Size > 0 && UserPatch->Find.Size != UserPatch->Mask.Size)
-          || (UserPatch->ReplaceMask.Size > 0 && UserPatch->Find.Size != UserPatch->ReplaceMask.Size)) {
+        if (  (UserPatch->Replace.Size == 0)
+           || (UserPatch->Find.Size != UserPatch->Replace.Size)
+           || ((UserPatch->Mask.Size > 0) && (UserPatch->Find.Size != UserPatch->Mask.Size))
+           || ((UserPatch->ReplaceMask.Size > 0) && (UserPatch->Find.Size != UserPatch->ReplaceMask.Size)))
+        {
           DEBUG ((DEBUG_ERROR, "OC: Booter patch %u is borked\n", Index));
           continue;
         }
@@ -736,19 +745,21 @@ OcLoadBooterUefiSupport (
         //
         // Also, ignore patch on mismatched architecture.
         //
-        Patch->Arch    = OC_BLOB_GET (&UserPatch->Arch);
-        if (Patch->Arch[0] != '\0' && AsciiStrCmp (Patch->Arch, "Any") != 0) {
-#if defined(MDE_CPU_X64)
+        Patch->Arch = OC_BLOB_GET (&UserPatch->Arch);
+        if ((Patch->Arch[0] != '\0') && (AsciiStrCmp (Patch->Arch, "Any") != 0)) {
+ #if defined (MDE_CPU_X64)
           if (AsciiStrCmp (Patch->Arch, "x86_64") != 0) {
             continue;
           }
-#elif defined(MDE_CPU_IA32)
+
+ #elif defined (MDE_CPU_IA32)
           if (AsciiStrCmp (Patch->Arch, "i386") != 0) {
             continue;
           }
-#else
-#error "Unsupported architecture"
-#endif
+
+ #else
+          #error "Unsupported architecture"
+ #endif
         }
 
         //
@@ -757,37 +768,38 @@ OcLoadBooterUefiSupport (
         //
         Patch->Identifier = OC_BLOB_GET (&UserPatch->Identifier);
 
-        Patch->Find       = OC_BLOB_GET (&UserPatch->Find);
-        Patch->Replace    = OC_BLOB_GET (&UserPatch->Replace);
+        Patch->Find    = OC_BLOB_GET (&UserPatch->Find);
+        Patch->Replace = OC_BLOB_GET (&UserPatch->Replace);
 
-        Patch->Comment    = OC_BLOB_GET (&UserPatch->Comment);
+        Patch->Comment = OC_BLOB_GET (&UserPatch->Comment);
 
         if (UserPatch->Mask.Size > 0) {
-          Patch->Mask     = OC_BLOB_GET (&UserPatch->Mask);
+          Patch->Mask = OC_BLOB_GET (&UserPatch->Mask);
         }
 
         if (UserPatch->ReplaceMask.Size > 0) {
           Patch->ReplaceMask = OC_BLOB_GET (&UserPatch->ReplaceMask);
         }
 
-        Patch->Size          = UserPatch->Replace.Size;
-        Patch->Count         = UserPatch->Count;
-        Patch->Skip          = UserPatch->Skip;
-        Patch->Limit         = UserPatch->Limit;
+        Patch->Size  = UserPatch->Replace.Size;
+        Patch->Count = UserPatch->Count;
+        Patch->Skip  = UserPatch->Skip;
+        Patch->Limit = UserPatch->Limit;
 
         ++NextIndex;
       }
+
       AbcSettings.BooterPatchesSize = NextIndex;
     } else {
       DEBUG ((
         DEBUG_ERROR,
         "OC: Failed to allocate %u slots for user booter patches\n",
-        (UINT32) Config->Booter.Patch.Count
+        (UINT32)Config->Booter.Patch.Count
         ));
     }
   }
 
-  AbcSettings.ExitBootServicesHandlers = mOcExitBootServicesHandlers;
+  AbcSettings.ExitBootServicesHandlers        = mOcExitBootServicesHandlers;
   AbcSettings.ExitBootServicesHandlerContexts = mOcExitBootServicesContexts;
 
   OcAbcInitialize (&AbcSettings, CpuInfo);
@@ -795,7 +807,7 @@ OcLoadBooterUefiSupport (
 
 VOID
 OcReserveMemory (
-  IN OC_GLOBAL_CONFIG    *Config
+  IN OC_GLOBAL_CONFIG  *Config
   )
 {
   EFI_STATUS            Status;
@@ -809,8 +821,9 @@ OcReserveMemory (
       continue;
     }
 
-    if ((Config->Uefi.ReservedMemory.Values[Index]->Address & (BASE_4KB - 1)) != 0
-      || (Config->Uefi.ReservedMemory.Values[Index]->Size & (BASE_4KB - 1)) != 0) {
+    if (  ((Config->Uefi.ReservedMemory.Values[Index]->Address & (BASE_4KB - 1)) != 0)
+       || ((Config->Uefi.ReservedMemory.Values[Index]->Size & (BASE_4KB - 1)) != 0))
+    {
       Status = EFI_INVALID_PARAMETER;
     } else {
       RsvdMemoryTypeStr = OC_BLOB_GET (&Config->Uefi.ReservedMemory.Values[Index]->Type);
@@ -822,12 +835,12 @@ OcReserveMemory (
       }
 
       ReservedAddress = Config->Uefi.ReservedMemory.Values[Index]->Address;
-      Status = gBS->AllocatePages (
-        AllocateAddress,
-        RsvdMemoryType,
-        (UINTN) EFI_SIZE_TO_PAGES (Config->Uefi.ReservedMemory.Values[Index]->Size),
-        &ReservedAddress
-        );
+      Status          = gBS->AllocatePages (
+                               AllocateAddress,
+                               RsvdMemoryType,
+                               (UINTN)EFI_SIZE_TO_PAGES (Config->Uefi.ReservedMemory.Values[Index]->Size),
+                               &ReservedAddress
+                               );
     }
 
     DEBUG ((
@@ -840,7 +853,6 @@ OcReserveMemory (
   }
 }
 
-
 VOID
 OcLoadUefiSupport (
   IN OC_STORAGE_CONTEXT  *Storage,
@@ -849,12 +861,12 @@ OcLoadUefiSupport (
   IN UINT8               *Signature
   )
 {
-  EFI_STATUS            Status;
-  EFI_HANDLE            *DriversToConnect;
-  EFI_HANDLE            *HandleBuffer;
-  UINTN                 HandleCount;
-  EFI_EVENT             Event;
-  BOOLEAN               AccelEnabled;
+  EFI_STATUS  Status;
+  EFI_HANDLE  *DriversToConnect;
+  EFI_HANDLE  *HandleBuffer;
+  UINTN       HandleCount;
+  EFI_EVENT   Event;
+  BOOLEAN     AccelEnabled;
 
   OcReinstallProtocols (Config);
 
@@ -924,8 +936,9 @@ OcLoadUefiSupport (
     DEBUG ((DEBUG_INFO, "OC: AVX enabled - %u\n", AccelEnabled));
   }
 
-  if (Config->Uefi.Quirks.ResizeGpuBars >= 0
-    && Config->Uefi.Quirks.ResizeGpuBars < PciBarTotal) {
+  if (  (Config->Uefi.Quirks.ResizeGpuBars >= 0)
+     && (Config->Uefi.Quirks.ResizeGpuBars < PciBarTotal))
+  {
     DEBUG ((DEBUG_INFO, "OC: Increasing GPU BARs to %d\n", Config->Uefi.Quirks.ResizeGpuBars));
     ResizeGpuBars (Config->Uefi.Quirks.ResizeGpuBars, TRUE);
   }
@@ -960,19 +973,20 @@ OcLoadUefiSupport (
   }
 
   DEBUG_CODE_BEGIN ();
-  HandleCount = 0;
+  HandleCount  = 0;
   HandleBuffer = NULL;
-  Status = gBS->LocateHandleBuffer (
-    ByProtocol,
-    &gEfiSimplePointerProtocolGuid,
-    NULL,
-    &HandleCount,
-    &HandleBuffer
-    );
+  Status       = gBS->LocateHandleBuffer (
+                        ByProtocol,
+                        &gEfiSimplePointerProtocolGuid,
+                        NULL,
+                        &HandleCount,
+                        &HandleBuffer
+                        );
   DEBUG ((DEBUG_INFO, "OC: Found %u pointer devices - %r\n", HandleCount, Status));
   if (!EFI_ERROR (Status)) {
     FreePool (HandleBuffer);
   }
+
   DEBUG_CODE_END ();
 
   if (Config->Uefi.Apfs.EnableJumpstart) {
@@ -995,10 +1009,10 @@ OcLoadUefiSupport (
   OcLoadUefiAudioSupport (Storage, Config);
 
   gBS->CreateEvent (
-    EVT_SIGNAL_EXIT_BOOT_SERVICES,
-    TPL_CALLBACK,
-    OcExitBootServicesHandler,
-    Config,
-    &Event
-    );
+         EVT_SIGNAL_EXIT_BOOT_SERVICES,
+         TPL_CALLBACK,
+         OcExitBootServicesHandler,
+         Config,
+         &Event
+         );
 }

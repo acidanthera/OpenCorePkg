@@ -29,7 +29,6 @@
 
 #include <Library/OcAcpiLib.h>
 
-
 /**
   Find RSD_PTR Table In Legacy Area
 
@@ -41,10 +40,10 @@ AcpiFindLegacyRsdp (
   VOID
   )
 {
-  EFI_ACPI_6_2_ROOT_SYSTEM_DESCRIPTION_POINTER *Rsdp;
+  EFI_ACPI_6_2_ROOT_SYSTEM_DESCRIPTION_POINTER  *Rsdp;
 
-  UINTN                                        Address;
-  UINTN                                        Index;
+  UINTN  Address;
+  UINTN  Index;
 
   //
   // First Search 0x0E0000 - 0x0FFFFF for RSD_PTR
@@ -53,8 +52,8 @@ AcpiFindLegacyRsdp (
   Rsdp = NULL;
 
   for (Address = 0x0E0000; Address < 0x0FFFFF; Address += 16) {
-    if (*(UINT64 *) Address == EFI_ACPI_6_2_ROOT_SYSTEM_DESCRIPTION_POINTER_SIGNATURE) {
-      Rsdp = (EFI_ACPI_6_2_ROOT_SYSTEM_DESCRIPTION_POINTER *) Address;
+    if (*(UINT64 *)Address == EFI_ACPI_6_2_ROOT_SYSTEM_DESCRIPTION_POINTER_SIGNATURE) {
+      Rsdp = (EFI_ACPI_6_2_ROOT_SYSTEM_DESCRIPTION_POINTER *)Address;
     }
   }
 
@@ -63,11 +62,11 @@ AcpiFindLegacyRsdp (
   //
 
   if (Rsdp == NULL) {
-    Address = ((UINTN)(*(UINT16 *) 0x040E) << 4U);
+    Address = ((UINTN)(*(UINT16 *)0x040E) << 4U);
 
     for (Index = 0; Index < 0x0400; Index += 16) {
-      if (*(UINT64 *) (Address + Index) == EFI_ACPI_6_2_ROOT_SYSTEM_DESCRIPTION_POINTER_SIGNATURE) {
-        Rsdp = (EFI_ACPI_6_2_ROOT_SYSTEM_DESCRIPTION_POINTER *) Address;
+      if (*(UINT64 *)(Address + Index) == EFI_ACPI_6_2_ROOT_SYSTEM_DESCRIPTION_POINTER_SIGNATURE) {
+        Rsdp = (EFI_ACPI_6_2_ROOT_SYSTEM_DESCRIPTION_POINTER *)Address;
       }
     }
   }
@@ -89,7 +88,7 @@ AcpiFindRsdp (
   EFI_ACPI_6_2_ROOT_SYSTEM_DESCRIPTION_POINTER  *Rsdp;
   UINTN                                         Index;
 
-  Rsdp    = NULL;
+  Rsdp = NULL;
 
   //
   // Find ACPI table RSD_PTR from system table
@@ -100,7 +99,7 @@ AcpiFindRsdp (
     // Prefer ACPI 2.0
     //
     if (CompareGuid (&gST->ConfigurationTable[Index].VendorGuid, &gEfiAcpi20TableGuid)) {
-      Rsdp = (EFI_ACPI_6_2_ROOT_SYSTEM_DESCRIPTION_POINTER *) gST->ConfigurationTable[Index].VendorTable;
+      Rsdp = (EFI_ACPI_6_2_ROOT_SYSTEM_DESCRIPTION_POINTER *)gST->ConfigurationTable[Index].VendorTable;
       DEBUG ((DEBUG_VERBOSE, "OCA: Found ACPI 2.0 RSDP table %p\n", Rsdp));
       break;
     }
@@ -109,7 +108,7 @@ AcpiFindRsdp (
     // Otherwise use ACPI 1.0, but do search for ACPI 2.0.
     //
     if (CompareGuid (&gST->ConfigurationTable[Index].VendorGuid, &gEfiAcpi10TableGuid)) {
-      Rsdp = (EFI_ACPI_6_2_ROOT_SYSTEM_DESCRIPTION_POINTER *) gST->ConfigurationTable[Index].VendorTable;
+      Rsdp = (EFI_ACPI_6_2_ROOT_SYSTEM_DESCRIPTION_POINTER *)gST->ConfigurationTable[Index].VendorTable;
       DEBUG ((DEBUG_VERBOSE, "OCA: Found ACPI 1.0 RSDP table %p\n", Rsdp));
     }
   }
@@ -144,13 +143,13 @@ AcpiReadSignature (
   IN  CONST EFI_ACPI_COMMON_HEADER  *Common
   )
 {
-  UINT32   Result;
-  CHAR8    *Walker;
-  UINT32   Index;
+  UINT32  Result;
+  CHAR8   *Walker;
+  UINT32  Index;
 
   Result = Common->Signature;
 
-  Walker = (CHAR8 *) &Result;
+  Walker = (CHAR8 *)&Result;
   for (Index = 0; Index < sizeof (Common->Signature); Index++) {
     if (!IsAsciiPrint (Walker[Index])) {
       Walker[Index] = '?';
@@ -177,7 +176,7 @@ AcpiReadOemTableId (
     return 0;
   }
 
-  return ((EFI_ACPI_DESCRIPTION_HEADER *) Common)->OemTableId;
+  return ((EFI_ACPI_DESCRIPTION_HEADER *)Common)->OemTableId;
 }
 
 /**
@@ -206,9 +205,10 @@ AcpiReadName (
   Off = Data[0] == '\\' ? 1 : 0;
 
   for (Index = Off; Index < Off + OC_ACPI_NAME_SIZE; ++Index) {
-    if (Data[Index] < '/'
-      || ((Data[Index] > '9') && (Data[Index] < 'A'))
-      || ((Data[Index] > 'Z') && (Data[Index] != '_'))) {
+    if (  (Data[Index] < '/')
+       || ((Data[Index] > '9') && (Data[Index] < 'A'))
+       || ((Data[Index] > 'Z') && (Data[Index] != '_')))
+    {
       return FALSE;
     }
 
@@ -251,11 +251,12 @@ AcpiFindName (
   }
 
   for (Index = 0; Index < Length - OC_ACPI_NAME_SIZE; ++Index) {
-    if (Data[Index] == AML_NAME_OP
-      && Data[Index+1] == Name[0]
-      && Data[Index+2] == Name[1]
-      && Data[Index+3] == Name[2]
-      && Data[Index+4] == Name[3]) {
+    if (  (Data[Index] == AML_NAME_OP)
+       && (Data[Index+1] == Name[0])
+       && (Data[Index+2] == Name[1])
+       && (Data[Index+3] == Name[2])
+       && (Data[Index+4] == Name[3]))
+    {
       return Index+1;
     }
   }
@@ -269,16 +270,16 @@ AcpiRefreshTableChecksum (
   IN EFI_ACPI_DESCRIPTION_HEADER  *Table
   )
 {
-  UINT32      TablePrintSignature;
+  UINT32  TablePrintSignature;
 
-  TablePrintSignature = AcpiReadSignature ((EFI_ACPI_COMMON_HEADER *) Table);
+  TablePrintSignature = AcpiReadSignature ((EFI_ACPI_COMMON_HEADER *)Table);
   Table->Checksum     = 0;
-  Table->Checksum     = CalculateCheckSum8 ((UINT8 *) Table, Table->Length);
+  Table->Checksum     = CalculateCheckSum8 ((UINT8 *)Table, Table->Length);
 
   DEBUG ((
     DEBUG_INFO,
     "OCA: Refreshed %.4a checksum to %02x\n",
-    (CHAR8 *) &TablePrintSignature,
+    (CHAR8 *)&TablePrintSignature,
     Table->Checksum
     ));
 }
@@ -307,12 +308,12 @@ EFI_STATUS
 AcpiAllocateCopyTable (
   IN     EFI_ACPI_COMMON_HEADER  *Table,
   IN     UINT32                  NewSize OPTIONAL,
-     OUT EFI_ACPI_COMMON_HEADER  **NewTable
+  OUT EFI_ACPI_COMMON_HEADER     **NewTable
   )
 {
-  EFI_STATUS              Status;
-  UINT32                  TablePrintSignature;
-  EFI_PHYSICAL_ADDRESS    NewTableAddress;
+  EFI_STATUS            Status;
+  UINT32                TablePrintSignature;
+  EFI_PHYSICAL_ADDRESS  NewTableAddress;
 
   if (NewSize < Table->Length) {
     NewSize = Table->Length;
@@ -321,33 +322,33 @@ AcpiAllocateCopyTable (
   TablePrintSignature = AcpiReadSignature (Table);
 
   NewTableAddress = BASE_4GB - 1;
-  Status = gBS->AllocatePages (
-    AllocateMaxAddress,
-    EfiACPIMemoryNVS,
-    EFI_SIZE_TO_PAGES (NewSize),
-    &NewTableAddress
-    );
+  Status          = gBS->AllocatePages (
+                           AllocateMaxAddress,
+                           EfiACPIMemoryNVS,
+                           EFI_SIZE_TO_PAGES (NewSize),
+                           &NewTableAddress
+                           );
   if (EFI_ERROR (Status)) {
     DEBUG ((
       DEBUG_WARN,
       "OCA: Failed to allocate %u bytes for table %.4a\n",
       NewSize,
-      (CHAR8 *) &TablePrintSignature
+      (CHAR8 *)&TablePrintSignature
       ));
     return Status;
   }
 
-  *NewTable = (EFI_ACPI_COMMON_HEADER *)(UINTN) NewTableAddress;
+  *NewTable = (EFI_ACPI_COMMON_HEADER *)(UINTN)NewTableAddress;
 
   DEBUG ((
     DEBUG_INFO,
     "OCA: Allocated new table %.4a at %p\n",
-    (CHAR8 *) &TablePrintSignature,
+    (CHAR8 *)&TablePrintSignature,
     *NewTable
     ));
 
   CopyMem (*NewTable, Table, Table->Length);
-  ZeroMem (((UINT8 *) *NewTable) + Table->Length, EFI_PAGES_TO_SIZE (EFI_SIZE_TO_PAGES (NewSize)) - Table->Length);
+  ZeroMem (((UINT8 *)*NewTable) + Table->Length, EFI_PAGES_TO_SIZE (EFI_SIZE_TO_PAGES (NewSize)) - Table->Length);
   (*NewTable)->Length = NewSize;
 
   return EFI_SUCCESS;
@@ -356,8 +357,8 @@ AcpiAllocateCopyTable (
 STATIC
 EFI_STATUS
 AcpiAllocateCopyFadt (
-  IN OUT OC_ACPI_CONTEXT             *Context,
-  IN     UINT32                      NewSize
+  IN OUT OC_ACPI_CONTEXT  *Context,
+  IN     UINT32           NewSize
   )
 {
   EFI_STATUS              Status;
@@ -365,10 +366,10 @@ AcpiAllocateCopyFadt (
   UINT32                  Index;
 
   Status = AcpiAllocateCopyTable (
-    (EFI_ACPI_COMMON_HEADER *) Context->Fadt,
-    NewSize,
-    &NewFadt
-    );
+             (EFI_ACPI_COMMON_HEADER *)Context->Fadt,
+             NewSize,
+             &NewFadt
+             );
   if (EFI_ERROR (Status)) {
     return Status;
   }
@@ -381,7 +382,8 @@ AcpiAllocateCopyFadt (
       Context->Tables[Index] = NewFadt;
     }
   }
-  Context->Fadt = (EFI_ACPI_6_2_FIXED_ACPI_DESCRIPTION_TABLE *) NewFadt;
+
+  Context->Fadt = (EFI_ACPI_6_2_FIXED_ACPI_DESCRIPTION_TABLE *)NewFadt;
 
   return EFI_SUCCESS;
 }
@@ -389,18 +391,18 @@ AcpiAllocateCopyFadt (
 STATIC
 EFI_STATUS
 AcpiAllocateCopyDsdt (
-  IN OUT OC_ACPI_CONTEXT             *Context,
-  IN     EFI_ACPI_DESCRIPTION_HEADER *NewDsdt     OPTIONAL
+  IN OUT OC_ACPI_CONTEXT              *Context,
+  IN     EFI_ACPI_DESCRIPTION_HEADER  *NewDsdt     OPTIONAL
   )
 {
   EFI_STATUS              Status;
   EFI_ACPI_COMMON_HEADER  *AllocatedDsdt;
 
   Status = AcpiAllocateCopyTable (
-    (EFI_ACPI_COMMON_HEADER *) (NewDsdt != NULL ? NewDsdt : Context->Dsdt),
-    0,
-    &AllocatedDsdt
-    );
+             (EFI_ACPI_COMMON_HEADER *)(NewDsdt != NULL ? NewDsdt : Context->Dsdt),
+             0,
+             &AllocatedDsdt
+             );
   if (EFI_ERROR (Status)) {
     return Status;
   }
@@ -408,7 +410,7 @@ AcpiAllocateCopyDsdt (
   //
   // Reallocate FADT if needed.
   //
-  if (!AcpiIsTableWritable ((EFI_ACPI_COMMON_HEADER *) Context->Fadt)) {
+  if (!AcpiIsTableWritable ((EFI_ACPI_COMMON_HEADER *)Context->Fadt)) {
     Status = AcpiAllocateCopyFadt (Context, 0);
     if (EFI_ERROR (Status)) {
       FreePool (AllocatedDsdt);
@@ -417,12 +419,13 @@ AcpiAllocateCopyDsdt (
   }
 
   if (Context->Fadt->Header.Length >= OFFSET_OF (EFI_ACPI_6_2_FIXED_ACPI_DESCRIPTION_TABLE, XDsdt) + sizeof (Context->Fadt->XDsdt)) {
-    Context->Fadt->XDsdt = (UINT64)(UINTN) AllocatedDsdt;
+    Context->Fadt->XDsdt = (UINT64)(UINTN)AllocatedDsdt;
   }
-  Context->Fadt->Dsdt = (UINT32)(UINTN) AllocatedDsdt;
-  AcpiRefreshTableChecksum ((EFI_ACPI_DESCRIPTION_HEADER *) Context->Fadt);
 
-  Context->Dsdt = (EFI_ACPI_DESCRIPTION_HEADER *) AllocatedDsdt;
+  Context->Fadt->Dsdt = (UINT32)(UINTN)AllocatedDsdt;
+  AcpiRefreshTableChecksum ((EFI_ACPI_DESCRIPTION_HEADER *)Context->Fadt);
+
+  Context->Dsdt = (EFI_ACPI_DESCRIPTION_HEADER *)AllocatedDsdt;
 
   return EFI_SUCCESS;
 }
@@ -452,7 +455,7 @@ AcpiLoadTableRegions (
   OC_ACPI_REGION  *NewRegions;
   UINT32          Address;
 
-  Buffer    = (UINT8 *) Table;
+  Buffer    = (UINT8 *)Table;
   BufferLen = Table->Length;
 
   if (BufferLen < sizeof (EFI_ACPI_DESCRIPTION_HEADER)) {
@@ -460,10 +463,11 @@ AcpiLoadTableRegions (
   }
 
   for (Index = sizeof (EFI_ACPI_DESCRIPTION_HEADER); Index < BufferLen - 0xF; ++Index) {
-    if (Buffer[Index] == AML_EXT_OP
-      && Buffer[Index+1] == AML_EXT_REGION_OP
-      && AcpiReadName (&Buffer[Index+2], &Name[0], &NameOffset)
-      && Buffer[Index+OC_ACPI_NAME_SIZE+2+NameOffset] == EFI_ACPI_6_2_SYSTEM_MEMORY) {
+    if (  (Buffer[Index] == AML_EXT_OP)
+       && (Buffer[Index+1] == AML_EXT_REGION_OP)
+       && AcpiReadName (&Buffer[Index+2], &Name[0], &NameOffset)
+       && (Buffer[Index+OC_ACPI_NAME_SIZE+2+NameOffset] == EFI_ACPI_6_2_SYSTEM_MEMORY))
+    {
       //
       // This is SystemMemory region. Try to save it.
       //
@@ -474,7 +478,7 @@ AcpiLoadTableRegions (
         CopyMem (&Address, &Buffer[Index+OC_ACPI_NAME_SIZE+4+NameOffset], sizeof (UINT16));
       } else if (AcpiReadName (&Buffer[Index+OC_ACPI_NAME_SIZE+3+NameOffset], &NameAddr[0], NULL)) {
         Index2 = AcpiFindName (Buffer, BufferLen, &NameAddr[0]);
-        if (Index2 > 0 && Index2 < BufferLen - 0xF) {
+        if ((Index2 > 0) && (Index2 < BufferLen - 0xF)) {
           if (Buffer[Index2+OC_ACPI_NAME_SIZE] == AML_DWORD_PREFIX) {
             CopyMem (&Address, &Buffer[Index2+OC_ACPI_NAME_SIZE+1], sizeof (UINT32));
           } else if (Buffer[Index2+OC_ACPI_NAME_SIZE] == AML_WORD_PREFIX) {
@@ -497,10 +501,11 @@ AcpiLoadTableRegions (
             DEBUG ((DEBUG_WARN, "OCA: Failed to allocate memory for %u regions\n", Context->AllocatedRegions+2));
             return EFI_OUT_OF_RESOURCES;
           }
+
           CopyMem (NewRegions, Context->Regions, Context->NumberOfRegions * sizeof (Context->Regions[0]));
           FreePool (Context->Regions);
 
-          Context->Regions = NewRegions;
+          Context->Regions           = NewRegions;
           Context->AllocatedRegions += 2;
         }
 
@@ -528,18 +533,18 @@ AcpiRelocateTableRegions (
   IN     EFI_ACPI_COMMON_HEADER  *Table
   )
 {
-  UINT32          Index;
-  UINT32          Index2;
-  UINT32          RegionIndex;
-  UINT32          NameOffset;
-  UINT8           *Buffer;
-  UINT32          BufferLen;
-  CHAR8           Name[OC_ACPI_NAME_SIZE+1];
-  CHAR8           NameAddr[OC_ACPI_NAME_SIZE+1];
-  UINT32          OldAddress;
-  BOOLEAN         Modified;
+  UINT32   Index;
+  UINT32   Index2;
+  UINT32   RegionIndex;
+  UINT32   NameOffset;
+  UINT8    *Buffer;
+  UINT32   BufferLen;
+  CHAR8    Name[OC_ACPI_NAME_SIZE+1];
+  CHAR8    NameAddr[OC_ACPI_NAME_SIZE+1];
+  UINT32   OldAddress;
+  BOOLEAN  Modified;
 
-  Buffer    = (UINT8 *) Table;
+  Buffer    = (UINT8 *)Table;
   BufferLen = Table->Length;
   Modified  = FALSE;
 
@@ -548,10 +553,11 @@ AcpiRelocateTableRegions (
   }
 
   for (Index = sizeof (EFI_ACPI_DESCRIPTION_HEADER); Index < BufferLen - 0xF; ++Index) {
-    if (Buffer[Index] == AML_EXT_OP
-      && Buffer[Index+1] == AML_EXT_REGION_OP
-      && AcpiReadName (&Buffer[Index+2], &Name[0], &NameOffset)
-      && Buffer[Index+OC_ACPI_NAME_SIZE+2+NameOffset] == EFI_ACPI_6_2_SYSTEM_MEMORY) {
+    if (  (Buffer[Index] == AML_EXT_OP)
+       && (Buffer[Index+1] == AML_EXT_REGION_OP)
+       && AcpiReadName (&Buffer[Index+2], &Name[0], &NameOffset)
+       && (Buffer[Index+OC_ACPI_NAME_SIZE+2+NameOffset] == EFI_ACPI_6_2_SYSTEM_MEMORY))
+    {
       //
       // This is region. Compare to current BIOS tables and relocate.
       //
@@ -568,7 +574,7 @@ AcpiRelocateTableRegions (
             Modified = TRUE;
           } else if (AcpiReadName (&Buffer[Index+OC_ACPI_NAME_SIZE+3+NameOffset], &NameAddr[0], NULL)) {
             Index2 = AcpiFindName (Buffer, BufferLen, &NameAddr[0]);
-            if (Index2 > 0 && Index2 < BufferLen - 0xF) {
+            if ((Index2 > 0) && (Index2 < BufferLen - 0xF)) {
               if (Buffer[Index2+OC_ACPI_NAME_SIZE] == AML_DWORD_PREFIX) {
                 CopyMem (&OldAddress, &Buffer[Index2+OC_ACPI_NAME_SIZE+1], sizeof (UINT32));
                 CopyMem (&Buffer[Index2+OC_ACPI_NAME_SIZE+1], &Context->Regions[RegionIndex].Address, sizeof (UINT32));
@@ -581,7 +587,7 @@ AcpiRelocateTableRegions (
             }
           }
 
-          if (Modified && OldAddress != Context->Regions[RegionIndex].Address) {
+          if (Modified && (OldAddress != Context->Regions[RegionIndex].Address)) {
             DEBUG ((
               DEBUG_INFO,
               "OCA: Region %a address relocated from %08X to %08X\n",
@@ -603,9 +609,9 @@ AcpiRelocateTableRegions (
   if (Modified) {
     ((EFI_ACPI_DESCRIPTION_HEADER *)Table)->Checksum = 0;
     ((EFI_ACPI_DESCRIPTION_HEADER *)Table)->Checksum = CalculateCheckSum8 (
-      (UINT8 *) Table,
-      Table->Length
-      );
+                                                         (UINT8 *)Table,
+                                                         Table->Length
+                                                         );
   }
 }
 
@@ -631,44 +637,44 @@ AcpiNormalizeTableHeaders (
 
   Modified = FALSE;
 
-  Walker = (CHAR8 *) &Table->Signature;
+  Walker = (CHAR8 *)&Table->Signature;
   for (Index = 0; Index < sizeof (Table->Signature); ++Index) {
     if (!IsAsciiPrint (Walker[Index])) {
       Walker[Index] = '?';
-      Modified = TRUE;
+      Modified      = TRUE;
     }
   }
 
-  Walker = (CHAR8 *) &Table->OemId;
+  Walker = (CHAR8 *)&Table->OemId;
   for (Index = 0; Index < sizeof (Table->OemId); ++Index) {
     if (!IsAsciiPrint (Walker[Index])) {
       Walker[Index] = '?';
-      Modified = TRUE;
+      Modified      = TRUE;
     }
   }
 
-  Walker = (CHAR8 *) &Table->OemTableId;
+  Walker = (CHAR8 *)&Table->OemTableId;
   for (Index = 0; Index < sizeof (Table->OemTableId); ++Index) {
     if (!IsAsciiPrint (Walker[Index])) {
       Walker[Index] = '?';
-      Modified = TRUE;
+      Modified      = TRUE;
     }
   }
 
-  Walker = (CHAR8 *) &Table->CreatorId;
+  Walker = (CHAR8 *)&Table->CreatorId;
   for (Index = 0; Index < sizeof (Table->CreatorId); ++Index) {
     if (!IsAsciiPrint (Walker[Index])) {
       Walker[Index] = '?';
-      Modified = TRUE;
+      Modified      = TRUE;
     }
   }
 
   if (Modified) {
     Table->Checksum = 0;
     Table->Checksum = CalculateCheckSum8 (
-      (UINT8 *) Table,
-      Table->Length
-      );
+                        (UINT8 *)Table,
+                        Table->Length
+                        );
   }
 
   return Modified;
@@ -694,11 +700,11 @@ AcpiNormalizeRsdp (
 
   Modified = FALSE;
 
-  Walker = (CHAR8 *) &Rsdp->OemId;
+  Walker = (CHAR8 *)&Rsdp->OemId;
   for (Index = 0; Index < sizeof (Rsdp->OemId); ++Index) {
     if (!IsAsciiPrint (Walker[Index])) {
       Walker[Index] = '?';
-      Modified = TRUE;
+      Modified      = TRUE;
     }
   }
 
@@ -709,14 +715,16 @@ AcpiNormalizeRsdp (
     //
     Rsdp->Checksum = 0;
     Rsdp->Checksum = CalculateCheckSum8 (
-      (UINT8 *) Rsdp, 20
-      );
+                       (UINT8 *)Rsdp,
+                       20
+                       );
 
     if (HasXsdt) {
       Rsdp->ExtendedChecksum = 0;
       Rsdp->ExtendedChecksum = CalculateCheckSum8 (
-        (UINT8 *) Rsdp, Rsdp->Length
-        );
+                                 (UINT8 *)Rsdp,
+                                 Rsdp->Length
+                                 );
     }
   }
 
@@ -743,28 +751,28 @@ AcpiInitContext (
   //
   // Support RSDT on ACPI 1.0 and newer.
   //
-  Context->Rsdt = (OC_ACPI_6_2_ROOT_SYSTEM_DESCRIPTION_TABLE *)(UINTN) Context->Rsdp->RsdtAddress;
+  Context->Rsdt = (OC_ACPI_6_2_ROOT_SYSTEM_DESCRIPTION_TABLE *)(UINTN)Context->Rsdp->RsdtAddress;
   DEBUG ((DEBUG_VERBOSE, "OCA: Found ACPI RSDT table %p", Context->Rsdt));
 
   //
   // ACPI 2.0 and newer have XSDT as well.
   //
   if (Context->Rsdp->Revision > 0) {
-    Context->Xsdt = (OC_ACPI_6_2_EXTENDED_SYSTEM_DESCRIPTION_TABLE *)(UINTN) Context->Rsdp->XsdtAddress;
+    Context->Xsdt = (OC_ACPI_6_2_EXTENDED_SYSTEM_DESCRIPTION_TABLE *)(UINTN)Context->Rsdp->XsdtAddress;
     DEBUG ((DEBUG_VERBOSE, "OCA: Found ACPI XSDT table %p", Context->Xsdt));
   }
 
-  if (Context->Rsdt == NULL && Context->Xsdt == NULL) {
+  if ((Context->Rsdt == NULL) && (Context->Xsdt == NULL)) {
     DEBUG ((DEBUG_WARN, "OCA: Failed to find ACPI RSDT or XSDT tables\n"));
     return EFI_NOT_FOUND;
   }
 
   if (Context->Xsdt != NULL) {
     Context->NumberOfTables = (Context->Xsdt->Header.Length - sizeof (Context->Xsdt->Header))
-      / sizeof (Context->Xsdt->Tables[0]);
+                              / sizeof (Context->Xsdt->Tables[0]);
   } else {
     Context->NumberOfTables = (Context->Rsdt->Header.Length - sizeof (Context->Rsdt->Header))
-      / sizeof (Context->Rsdt->Tables[0]);
+                              / sizeof (Context->Rsdt->Tables[0]);
   }
 
   DEBUG ((DEBUG_INFO, "OCA: Found %u ACPI tables\n", Context->NumberOfTables));
@@ -784,14 +792,15 @@ AcpiInitContext (
 
   for (DstIndex = 0, Index = 0; Index < Context->NumberOfTables; ++Index) {
     Context->Tables[DstIndex] = (EFI_ACPI_COMMON_HEADER *)(Context->Xsdt != NULL
-      ? (UINTN) Context->Xsdt->Tables[Index] : (UINTN) Context->Rsdt->Tables[Index]);
+      ? (UINTN)Context->Xsdt->Tables[Index] : (UINTN)Context->Rsdt->Tables[Index]);
 
     //
     // Skip NULL table entries, DSDT, and RSDP if any.
     //
-    if (Context->Tables[DstIndex] == NULL
-      || Context->Tables[DstIndex]->Signature == EFI_ACPI_6_2_DIFFERENTIATED_SYSTEM_DESCRIPTION_TABLE_SIGNATURE
-      || *(UINT64 *) Context->Tables[DstIndex] == EFI_ACPI_6_2_ROOT_SYSTEM_DESCRIPTION_POINTER_SIGNATURE) {
+    if (  (Context->Tables[DstIndex] == NULL)
+       || (Context->Tables[DstIndex]->Signature == EFI_ACPI_6_2_DIFFERENTIATED_SYSTEM_DESCRIPTION_TABLE_SIGNATURE)
+       || (*(UINT64 *)Context->Tables[DstIndex] == EFI_ACPI_6_2_ROOT_SYSTEM_DESCRIPTION_POINTER_SIGNATURE))
+    {
       continue;
     }
 
@@ -800,7 +809,7 @@ AcpiInitContext (
     DEBUG ((
       DEBUG_INFO,
       "OCA: Detected table %.4a (%08x) (OEM %016Lx) at %p of %u bytes at index %u\n",
-      (CHAR8 *) &TablePrintSignature,
+      (CHAR8 *)&TablePrintSignature,
       Context->Tables[DstIndex]->Signature,
       AcpiReadOemTableId (Context->Tables[DstIndex]),
       Context->Tables[DstIndex],
@@ -815,7 +824,7 @@ AcpiInitContext (
       DEBUG ((
         DEBUG_INFO,
         "OCA: Unlocking table %.4a (%08x) at %p\n",
-        (CHAR8 *) &TablePrintSignature,
+        (CHAR8 *)&TablePrintSignature,
         Context->Tables[DstIndex]->Signature,
         Context->Tables[DstIndex]
         ));
@@ -823,13 +832,14 @@ AcpiInitContext (
     }
 
     if (Context->Tables[DstIndex]->Signature == EFI_ACPI_6_2_FIXED_ACPI_DESCRIPTION_TABLE_SIGNATURE) {
-      Context->Fadt = (EFI_ACPI_6_2_FIXED_ACPI_DESCRIPTION_TABLE *) Context->Tables[DstIndex];
+      Context->Fadt = (EFI_ACPI_6_2_FIXED_ACPI_DESCRIPTION_TABLE *)Context->Tables[DstIndex];
 
       if (Context->Fadt->Header.Length >= OFFSET_OF (EFI_ACPI_6_2_FIXED_ACPI_DESCRIPTION_TABLE, XDsdt) + sizeof (Context->Fadt->XDsdt)) {
-        Context->Dsdt = (EFI_ACPI_DESCRIPTION_HEADER *)(UINTN) Context->Fadt->XDsdt;
+        Context->Dsdt = (EFI_ACPI_DESCRIPTION_HEADER *)(UINTN)Context->Fadt->XDsdt;
       } else {
-        Context->Dsdt = (EFI_ACPI_DESCRIPTION_HEADER *)(UINTN) Context->Fadt->Dsdt;
+        Context->Dsdt = (EFI_ACPI_DESCRIPTION_HEADER *)(UINTN)Context->Fadt->Dsdt;
       }
+
       DEBUG ((
         DEBUG_INFO,
         "OCA: Detected DSDT at %p of %u bytes at index %u\n",
@@ -900,13 +910,13 @@ AcpiApplyContext (
   RsdtSize = Context->Rsdt == NULL ? 0 : sizeof (*Context->Rsdt) + sizeof (Context->Rsdt->Tables[0]) * Context->NumberOfTables;
   Size     = ALIGN_VALUE (XsdtSize, sizeof (UINT64)) + ALIGN_VALUE (RsdtSize, sizeof (UINT64));
 
-  Table = BASE_4GB - 1;
+  Table  = BASE_4GB - 1;
   Status = gBS->AllocatePages (
-          AllocateMaxAddress,
-          EfiACPIMemoryNVS,
-          EFI_SIZE_TO_PAGES (Size),
-          &Table
-          );
+                  AllocateMaxAddress,
+                  EfiACPIMemoryNVS,
+                  EFI_SIZE_TO_PAGES (Size),
+                  &Table
+                  );
 
   if (EFI_ERROR (Status)) {
     DEBUG ((DEBUG_WARN, "OCA: Failed to allocate %u bytes for ACPI system tables\n", Size));
@@ -915,18 +925,18 @@ AcpiApplyContext (
 
   if (Context->Xsdt != NULL) {
     CopyMem ((VOID *)(UINTN)Table, Context->Xsdt, sizeof (*Context->Xsdt));
-    Context->Xsdt = (OC_ACPI_6_2_EXTENDED_SYSTEM_DESCRIPTION_TABLE *)(UINTN)Table;
+    Context->Xsdt                = (OC_ACPI_6_2_EXTENDED_SYSTEM_DESCRIPTION_TABLE *)(UINTN)Table;
     Context->Xsdt->Header.Length = XsdtSize;
 
     for (Index = 0; Index < Context->NumberOfTables; ++Index) {
-      Context->Xsdt->Tables[Index] = (UINT64)(UINTN) Context->Tables[Index];
+      Context->Xsdt->Tables[Index] = (UINT64)(UINTN)Context->Tables[Index];
 
       TablePrintSignature = AcpiReadSignature (Context->Tables[Index]);
 
       DEBUG ((
         DEBUG_INFO,
         "OCA: Exposing XSDT table table %.4a (%08x) (OEM %016Lx) at %p of %u bytes at index %u\n",
-        (CHAR8 *) &TablePrintSignature,
+        (CHAR8 *)&TablePrintSignature,
         Context->Tables[Index]->Signature,
         AcpiReadOemTableId (Context->Tables[Index]),
         Context->Tables[Index],
@@ -937,28 +947,28 @@ AcpiApplyContext (
 
     Context->Xsdt->Header.Checksum = 0;
     Context->Xsdt->Header.Checksum = CalculateCheckSum8 (
-      (UINT8 *) Context->Xsdt,
-      Context->Xsdt->Header.Length
-      );
+                                       (UINT8 *)Context->Xsdt,
+                                       Context->Xsdt->Header.Length
+                                       );
 
-    Context->Rsdp->XsdtAddress = (UINT64) Table;
-    Table += ALIGN_VALUE (XsdtSize, sizeof (UINT64));
+    Context->Rsdp->XsdtAddress = (UINT64)Table;
+    Table                     += ALIGN_VALUE (XsdtSize, sizeof (UINT64));
   }
 
   if (Context->Rsdt != NULL) {
     CopyMem ((VOID *)(UINTN)Table, Context->Rsdt, sizeof (*Context->Rsdt));
-    Context->Rsdt = (OC_ACPI_6_2_ROOT_SYSTEM_DESCRIPTION_TABLE *)(UINTN)Table;
+    Context->Rsdt                = (OC_ACPI_6_2_ROOT_SYSTEM_DESCRIPTION_TABLE *)(UINTN)Table;
     Context->Rsdt->Header.Length = RsdtSize;
 
     for (Index = 0; Index < Context->NumberOfTables; ++Index) {
-      Context->Rsdt->Tables[Index] = (UINT32)(UINTN) Context->Tables[Index];
+      Context->Rsdt->Tables[Index] = (UINT32)(UINTN)Context->Tables[Index];
 
       TablePrintSignature = AcpiReadSignature (Context->Tables[Index]);
 
       DEBUG ((
         Context->Xsdt != NULL ? DEBUG_BULK_INFO : DEBUG_INFO,
         "OCA: Exposing RSDT table table %.4a (%08x) (OEM %016Lx) at %p of %u bytes at index %u\n",
-        (CHAR8 *) &TablePrintSignature,
+        (CHAR8 *)&TablePrintSignature,
         Context->Tables[Index]->Signature,
         AcpiReadOemTableId (Context->Tables[Index]),
         Context->Tables[Index],
@@ -969,12 +979,12 @@ AcpiApplyContext (
 
     Context->Rsdt->Header.Checksum = 0;
     Context->Rsdt->Header.Checksum = CalculateCheckSum8 (
-      (UINT8 *) Context->Rsdt,
-      Context->Rsdt->Header.Length
-      );
+                                       (UINT8 *)Context->Rsdt,
+                                       Context->Rsdt->Header.Length
+                                       );
 
-    Context->Rsdp->RsdtAddress = (UINT32) Table;
-    Table += ALIGN_VALUE (RsdtSize, sizeof (UINT64));
+    Context->Rsdp->RsdtAddress = (UINT32)Table;
+    Table                     += ALIGN_VALUE (RsdtSize, sizeof (UINT64));
   }
 
   //
@@ -983,14 +993,16 @@ AcpiApplyContext (
   //
   Context->Rsdp->Checksum = 0;
   Context->Rsdp->Checksum = CalculateCheckSum8 (
-    (UINT8 *) Context->Rsdp, 20
-    );
+                              (UINT8 *)Context->Rsdp,
+                              20
+                              );
 
   if (Context->Xsdt != NULL) {
     Context->Rsdp->ExtendedChecksum = 0;
     Context->Rsdp->ExtendedChecksum = CalculateCheckSum8 (
-      (UINT8 *) Context->Rsdp, Context->Rsdp->Length
-      );
+                                        (UINT8 *)Context->Rsdp,
+                                        Context->Rsdp->Length
+                                        );
   }
 
   return EFI_SUCCESS;
@@ -1014,22 +1026,22 @@ AcpiDeleteTable (
   Found = FALSE;
 
   while (Index < Context->NumberOfTables) {
-    if ((Signature == 0 || Context->Tables[Index]->Signature == Signature)
-      && (Length == 0 || Context->Tables[Index]->Length == Length)) {
-
+    if (  ((Signature == 0) || (Context->Tables[Index]->Signature == Signature))
+       && ((Length == 0) || (Context->Tables[Index]->Length == Length)))
+    {
       if (Context->Tables[Index]->Length >= sizeof (EFI_ACPI_DESCRIPTION_HEADER)) {
-        CurrOemTableId = ((EFI_ACPI_DESCRIPTION_HEADER *) Context->Tables[Index])->OemTableId;
+        CurrOemTableId = ((EFI_ACPI_DESCRIPTION_HEADER *)Context->Tables[Index])->OemTableId;
       } else {
         CurrOemTableId = 0;
       }
 
-      if (OemTableId == 0 || CurrOemTableId == OemTableId) {
+      if ((OemTableId == 0) || (CurrOemTableId == OemTableId)) {
         TablePrintSignature = AcpiReadSignature (Context->Tables[Index]);
 
         DEBUG ((
           DEBUG_INFO,
           "OCA: Deleting table %.4a (%08x) (OEM %016Lx) of %u bytes with %016Lx ID at index %u\n",
-          (CHAR8 *) &TablePrintSignature,
+          (CHAR8 *)&TablePrintSignature,
           Context->Tables[Index]->Signature,
           AcpiReadOemTableId (Context->Tables[Index]),
           Context->Tables[Index]->Length,
@@ -1070,19 +1082,19 @@ AcpiInsertTable (
   IN     UINT32           Length
   )
 {
-  EFI_ACPI_COMMON_HEADER    *Common;
-  EFI_STATUS                Status;
-  EFI_ACPI_COMMON_HEADER    *NewTable;
-  EFI_ACPI_COMMON_HEADER    **NewTables;
-  BOOLEAN                   ReplaceDsdt;
-  UINT32                    TablePrintSignature;
+  EFI_ACPI_COMMON_HEADER  *Common;
+  EFI_STATUS              Status;
+  EFI_ACPI_COMMON_HEADER  *NewTable;
+  EFI_ACPI_COMMON_HEADER  **NewTables;
+  BOOLEAN                 ReplaceDsdt;
+  UINT32                  TablePrintSignature;
 
   if (Length < sizeof (EFI_ACPI_COMMON_HEADER)) {
     DEBUG ((DEBUG_WARN, "OCA: Inserted ACPI table is only %u bytes, ignoring\n", Length));
     return EFI_INVALID_PARAMETER;
   }
 
-  Common = (EFI_ACPI_COMMON_HEADER *) Data;
+  Common = (EFI_ACPI_COMMON_HEADER *)Data;
   if (Common->Length != Length) {
     DEBUG ((DEBUG_WARN, "OCA: Inserted ACPI table has length mismatch %u vs %u, ignoring\n", Length, Common->Length));
     return EFI_INVALID_PARAMETER;
@@ -1090,12 +1102,12 @@ AcpiInsertTable (
 
   ReplaceDsdt = Common->Signature == EFI_ACPI_6_2_DIFFERENTIATED_SYSTEM_DESCRIPTION_TABLE_SIGNATURE;
 
-  if (ReplaceDsdt && (Context->Dsdt == NULL || Context->Fadt == NULL)) {
+  if (ReplaceDsdt && ((Context->Dsdt == NULL) || (Context->Fadt == NULL))) {
     DEBUG ((DEBUG_WARN, "OCA: We do not have DSDT to replace\n"));
     return EFI_INVALID_PARAMETER;
   }
 
-  if (!ReplaceDsdt && Context->NumberOfTables == Context->AllocatedTables) {
+  if (!ReplaceDsdt && (Context->NumberOfTables == Context->AllocatedTables)) {
     NewTables = AllocatePool ((Context->NumberOfTables + 2) * sizeof (Context->Tables[0]));
     if (NewTables == NULL) {
       DEBUG ((DEBUG_WARN, "OCA: Cannot allocate space for new %u ACPI tables\n", Context->NumberOfTables+2));
@@ -1105,7 +1117,7 @@ AcpiInsertTable (
     CopyMem (NewTables, Context->Tables, Context->NumberOfTables * sizeof (Context->Tables[0]));
     FreePool (Context->Tables);
 
-    Context->Tables = NewTables;
+    Context->Tables           = NewTables;
     Context->AllocatedTables += 2;
   }
 
@@ -1116,13 +1128,12 @@ AcpiInsertTable (
       Common->Length
       ));
 
-    Status = AcpiAllocateCopyDsdt (Context, (EFI_ACPI_DESCRIPTION_HEADER *) Data);
+    Status = AcpiAllocateCopyDsdt (Context, (EFI_ACPI_DESCRIPTION_HEADER *)Data);
     if (EFI_ERROR (Status)) {
       return Status;
     }
-
   } else {
-    Status = AcpiAllocateCopyTable ((EFI_ACPI_COMMON_HEADER *) Data, 0, &NewTable);
+    Status = AcpiAllocateCopyTable ((EFI_ACPI_COMMON_HEADER *)Data, 0, &NewTable);
     if (EFI_ERROR (Status)) {
       return Status;
     }
@@ -1132,7 +1143,7 @@ AcpiInsertTable (
     DEBUG ((
       DEBUG_INFO,
       "OCA: Inserted table %.4a (%08x) (OEM %016Lx) of %u bytes into ACPI at index %u\n",
-      (CHAR8 *) &TablePrintSignature,
+      (CHAR8 *)&TablePrintSignature,
       NewTable->Signature,
       AcpiReadOemTableId (NewTable),
       NewTable->Length,
@@ -1156,40 +1167,42 @@ AcpiNormalizeHeaders (
   EFI_ACPI_COMMON_HEADER  *NewTable;
   UINT32                  TablePrintSignature;
 
-  if (AcpiNormalizeRsdp (Context->Rsdp, Context->Xsdt != NULL)) {
+  if (AcpiNormalizeRsdp (Context->Rsdp, (Context->Xsdt != NULL))) {
     DEBUG ((DEBUG_INFO, "OCA: Normalized RSDP\n"));
   }
 
   if (Context->Xsdt != NULL) {
-    if (!AcpiIsTableWritable ((EFI_ACPI_COMMON_HEADER *) Context->Xsdt)) {
-      Status = AcpiAllocateCopyTable ((EFI_ACPI_COMMON_HEADER *) Context->Xsdt, 0, &NewTable);
+    if (!AcpiIsTableWritable ((EFI_ACPI_COMMON_HEADER *)Context->Xsdt)) {
+      Status = AcpiAllocateCopyTable ((EFI_ACPI_COMMON_HEADER *)Context->Xsdt, 0, &NewTable);
       if (EFI_ERROR (Status)) {
         return;
       }
-      Context->Xsdt = (OC_ACPI_6_2_EXTENDED_SYSTEM_DESCRIPTION_TABLE *) NewTable;
+
+      Context->Xsdt = (OC_ACPI_6_2_EXTENDED_SYSTEM_DESCRIPTION_TABLE *)NewTable;
     }
 
-    if (AcpiNormalizeTableHeaders ((EFI_ACPI_DESCRIPTION_HEADER *) Context->Xsdt)) {
+    if (AcpiNormalizeTableHeaders ((EFI_ACPI_DESCRIPTION_HEADER *)Context->Xsdt)) {
       DEBUG ((DEBUG_INFO, "OCA: Normalized XSDT of %u bytes headers\n", Context->Xsdt->Header.Length));
     }
   }
 
   if (Context->Rsdt != NULL) {
-    if (!AcpiIsTableWritable ((EFI_ACPI_COMMON_HEADER *) Context->Rsdt)) {
-      Status = AcpiAllocateCopyTable ((EFI_ACPI_COMMON_HEADER *) Context->Rsdt, 0, &NewTable);
+    if (!AcpiIsTableWritable ((EFI_ACPI_COMMON_HEADER *)Context->Rsdt)) {
+      Status = AcpiAllocateCopyTable ((EFI_ACPI_COMMON_HEADER *)Context->Rsdt, 0, &NewTable);
       if (EFI_ERROR (Status)) {
         return;
       }
-      Context->Rsdt = (OC_ACPI_6_2_ROOT_SYSTEM_DESCRIPTION_TABLE *) NewTable;
+
+      Context->Rsdt = (OC_ACPI_6_2_ROOT_SYSTEM_DESCRIPTION_TABLE *)NewTable;
     }
 
-    if (AcpiNormalizeTableHeaders ((EFI_ACPI_DESCRIPTION_HEADER *) Context->Rsdt)) {
+    if (AcpiNormalizeTableHeaders ((EFI_ACPI_DESCRIPTION_HEADER *)Context->Rsdt)) {
       DEBUG ((DEBUG_INFO, "OCA: Normalized RSDT of %u bytes headers\n", Context->Rsdt->Header.Length));
     }
   }
 
   if (Context->Dsdt != NULL) {
-    if (!AcpiIsTableWritable ((EFI_ACPI_COMMON_HEADER *) Context->Dsdt)) {
+    if (!AcpiIsTableWritable ((EFI_ACPI_COMMON_HEADER *)Context->Dsdt)) {
       Status = AcpiAllocateCopyDsdt (Context, NULL);
       if (EFI_ERROR (Status)) {
         return;
@@ -1207,16 +1220,17 @@ AcpiNormalizeHeaders (
       if (EFI_ERROR (Status)) {
         return;
       }
+
       Context->Tables[Index] = NewTable;
     }
 
-    if (AcpiNormalizeTableHeaders ((EFI_ACPI_DESCRIPTION_HEADER *) Context->Tables[Index])) {
+    if (AcpiNormalizeTableHeaders ((EFI_ACPI_DESCRIPTION_HEADER *)Context->Tables[Index])) {
       TablePrintSignature = AcpiReadSignature (Context->Tables[Index]);
 
       DEBUG ((
         DEBUG_INFO,
         "OCA: Normalized %.4a (%08x) (OEM %016Lx) of %u bytes headers at index %u\n",
-        (CHAR8 *) &TablePrintSignature,
+        (CHAR8 *)&TablePrintSignature,
         Context->Tables[Index]->Signature,
         AcpiReadOemTableId (Context->Tables[Index]),
         Context->Tables[Index]->Length,
@@ -1243,10 +1257,11 @@ AcpiApplyPatch (
 
   DEBUG ((DEBUG_INFO, "OCA: Applying %u byte ACPI patch skip %u, count %u\n", Patch->Size, Patch->Skip, Patch->Count));
 
-  if (Context->Dsdt != NULL
-    && (Patch->TableSignature == 0 || Patch->TableSignature == EFI_ACPI_6_2_DIFFERENTIATED_SYSTEM_DESCRIPTION_TABLE_SIGNATURE)
-    && (Patch->TableLength == 0 || Context->Dsdt->Length == Patch->TableLength)
-    && (Patch->OemTableId == 0 || Context->Dsdt->OemTableId == Patch->OemTableId)) {
+  if (  (Context->Dsdt != NULL)
+     && ((Patch->TableSignature == 0) || (Patch->TableSignature == EFI_ACPI_6_2_DIFFERENTIATED_SYSTEM_DESCRIPTION_TABLE_SIGNATURE))
+     && ((Patch->TableLength == 0) || (Context->Dsdt->Length == Patch->TableLength))
+     && ((Patch->OemTableId == 0) || (Context->Dsdt->OemTableId == Patch->OemTableId)))
+  {
     ReplaceLimit = Context->Dsdt->Length;
     if (Patch->Limit > 0) {
       ReplaceLimit = MIN (ReplaceLimit, Patch->Limit);
@@ -1254,14 +1269,14 @@ AcpiApplyPatch (
 
     BaseOffset = 0;
 
-    if (Patch->Base != NULL && Patch->Base[0] != '\0') {
+    if ((Patch->Base != NULL) && (Patch->Base[0] != '\0')) {
       Status = AcpiFindEntryInMemory (
-        (VOID *) Context->Dsdt,
-        Patch->Base,
-        (UINT8) (Patch->BaseSkip + 1),
-        &BaseOffset,
-        Context->Dsdt->Length
-        );
+                 (VOID *)Context->Dsdt,
+                 Patch->Base,
+                 (UINT8)(Patch->BaseSkip + 1),
+                 &BaseOffset,
+                 Context->Dsdt->Length
+                 );
       if (!EFI_ERROR (Status)) {
         ReplaceLimit = MIN (ReplaceLimit, Context->Dsdt->Length - BaseOffset);
       } else {
@@ -1271,13 +1286,13 @@ AcpiApplyPatch (
           Context->Dsdt->Length,
           Patch->Base
           ));
-      }      
+      }
     } else {
       Status = EFI_SUCCESS;
     }
 
     if (!EFI_ERROR (Status)) {
-      if (!AcpiIsTableWritable ((EFI_ACPI_COMMON_HEADER *) Context->Dsdt)) {
+      if (!AcpiIsTableWritable ((EFI_ACPI_COMMON_HEADER *)Context->Dsdt)) {
         Status = AcpiAllocateCopyDsdt (Context, NULL);
         if (EFI_ERROR (Status)) {
           return Status;
@@ -1285,16 +1300,16 @@ AcpiApplyPatch (
       }
 
       ReplaceCount = ApplyPatch (
-        Patch->Find,
-        Patch->Mask,
-        Patch->Size,
-        Patch->Replace,
-        Patch->ReplaceMask,
-        (UINT8 *) Context->Dsdt + BaseOffset,
-        ReplaceLimit,
-        Patch->Count,
-        Patch->Skip
-        );
+                       Patch->Find,
+                       Patch->Mask,
+                       Patch->Size,
+                       Patch->Replace,
+                       Patch->ReplaceMask,
+                       (UINT8 *)Context->Dsdt + BaseOffset,
+                       ReplaceLimit,
+                       Patch->Count,
+                       Patch->Skip
+                       );
 
       DEBUG ((
         ReplaceCount > 0 ? DEBUG_INFO : DEBUG_BULK_INFO,
@@ -1312,16 +1327,16 @@ AcpiApplyPatch (
   }
 
   for (Index = 0; Index < Context->NumberOfTables; ++Index) {
-    if ((Patch->TableSignature == 0 || Context->Tables[Index]->Signature == Patch->TableSignature)
-      && (Patch->TableLength == 0 || Context->Tables[Index]->Length == Patch->TableLength)) {
-
+    if (  ((Patch->TableSignature == 0) || (Context->Tables[Index]->Signature == Patch->TableSignature))
+       && ((Patch->TableLength == 0) || (Context->Tables[Index]->Length == Patch->TableLength)))
+    {
       if (Context->Tables[Index]->Length >= sizeof (EFI_ACPI_DESCRIPTION_HEADER)) {
-        CurrOemTableId = ((EFI_ACPI_DESCRIPTION_HEADER *) Context->Tables[Index])->OemTableId;
+        CurrOemTableId = ((EFI_ACPI_DESCRIPTION_HEADER *)Context->Tables[Index])->OemTableId;
       } else {
         CurrOemTableId = 0;
       }
 
-      if (Patch->OemTableId != 0 && CurrOemTableId != Patch->OemTableId) {
+      if ((Patch->OemTableId != 0) && (CurrOemTableId != Patch->OemTableId)) {
         continue;
       }
 
@@ -1333,19 +1348,19 @@ AcpiApplyPatch (
       TablePrintSignature = AcpiReadSignature (Context->Tables[Index]);
 
       BaseOffset = 0;
-      if (Patch->Base != NULL && Patch->Base[0] != '\0') {
+      if ((Patch->Base != NULL) && (Patch->Base[0] != '\0')) {
         Status = AcpiFindEntryInMemory (
-          (VOID *) Context->Tables[Index],
-          Patch->Base,
-          (UINT8) (Patch->BaseSkip + 1),
-          &BaseOffset,
-          Context->Tables[Index]->Length
-          );
+                   (VOID *)Context->Tables[Index],
+                   Patch->Base,
+                   (UINT8)(Patch->BaseSkip + 1),
+                   &BaseOffset,
+                   Context->Tables[Index]->Length
+                   );
         if (EFI_ERROR (Status)) {
           DEBUG ((
             DEBUG_INFO,
             "OCA: Patching %.4a (%08x) (OEM %016Lx) of %u bytes with %016Lx ID failed to find base %a\n",
-            (CHAR8 *) &TablePrintSignature,
+            (CHAR8 *)&TablePrintSignature,
             Context->Tables[Index]->Signature,
             AcpiReadOemTableId (Context->Tables[Index]),
             Context->Tables[Index]->Length,
@@ -1363,25 +1378,26 @@ AcpiApplyPatch (
         if (EFI_ERROR (Status)) {
           return Status;
         }
+
         Context->Tables[Index] = NewTable;
       }
 
       ReplaceCount = ApplyPatch (
-        Patch->Find,
-        Patch->Mask,
-        Patch->Size,
-        Patch->Replace,
-        Patch->ReplaceMask,
-        (UINT8 *) Context->Tables[Index] + BaseOffset,
-        ReplaceLimit,
-        Patch->Count,
-        Patch->Skip
-        );
+                       Patch->Find,
+                       Patch->Mask,
+                       Patch->Size,
+                       Patch->Replace,
+                       Patch->ReplaceMask,
+                       (UINT8 *)Context->Tables[Index] + BaseOffset,
+                       ReplaceLimit,
+                       Patch->Count,
+                       Patch->Skip
+                       );
 
       DEBUG ((
         ReplaceCount > 0 ? DEBUG_INFO : DEBUG_BULK_INFO,
         "OCA: Patching %.4a (%08x) (OEM %016Lx) of %u bytes with %016Lx ID at %u replaced %u of %u\n",
-        (CHAR8 *) &TablePrintSignature,
+        (CHAR8 *)&TablePrintSignature,
         Context->Tables[Index]->Signature,
         AcpiReadOemTableId (Context->Tables[Index]),
         Context->Tables[Index]->Length,
@@ -1391,8 +1407,8 @@ AcpiApplyPatch (
         Patch->Count
         ));
 
-      if (ReplaceCount > 0 && Context->Tables[Index]->Length >= sizeof (EFI_ACPI_DESCRIPTION_HEADER)) {
-        AcpiRefreshTableChecksum ((EFI_ACPI_DESCRIPTION_HEADER *) Context->Tables[Index]);
+      if ((ReplaceCount > 0) && (Context->Tables[Index]->Length >= sizeof (EFI_ACPI_DESCRIPTION_HEADER))) {
+        AcpiRefreshTableChecksum ((EFI_ACPI_DESCRIPTION_HEADER *)Context->Tables[Index]);
       }
     }
   }
@@ -1418,7 +1434,7 @@ AcpiLoadRegions (
   //
   Context->NumberOfRegions  = 0;
   Context->AllocatedRegions = 8;
-  Context->Regions = AllocatePool (sizeof (Context->Regions[0]) * Context->AllocatedRegions);
+  Context->Regions          = AllocatePool (sizeof (Context->Regions[0]) * Context->AllocatedRegions);
 
   if (Context->Regions == NULL) {
     DEBUG ((DEBUG_WARN, "OCA: Failed to allocate memory for %u regions\n", Context->NumberOfRegions));
@@ -1426,7 +1442,7 @@ AcpiLoadRegions (
   }
 
   if (Context->Dsdt != NULL) {
-    Status = AcpiLoadTableRegions (Context, (EFI_ACPI_COMMON_HEADER *) Context->Dsdt);
+    Status = AcpiLoadTableRegions (Context, (EFI_ACPI_COMMON_HEADER *)Context->Dsdt);
     if (EFI_ERROR (Status)) {
       return Status;
     }
@@ -1463,14 +1479,14 @@ AcpiRelocateRegions (
   }
 
   if (Context->Dsdt != NULL) {
-    if (!AcpiIsTableWritable ((EFI_ACPI_COMMON_HEADER *) Context->Dsdt)) {
+    if (!AcpiIsTableWritable ((EFI_ACPI_COMMON_HEADER *)Context->Dsdt)) {
       Status = AcpiAllocateCopyDsdt (Context, NULL);
       if (EFI_ERROR (Status)) {
         return;
       }
     }
 
-    AcpiRelocateTableRegions (Context, (EFI_ACPI_COMMON_HEADER *) Context->Dsdt);
+    AcpiRelocateTableRegions (Context, (EFI_ACPI_COMMON_HEADER *)Context->Dsdt);
   }
 
   for (Index = 0; Index < Context->NumberOfTables; ++Index) {
@@ -1480,6 +1496,7 @@ AcpiRelocateRegions (
         if (EFI_ERROR (Status)) {
           return;
         }
+
         Context->Tables[Index] = NewTable;
       }
 
@@ -1493,9 +1510,9 @@ AcpiFadtEnableReset (
   IN OUT OC_ACPI_CONTEXT  *Context
   )
 {
-  EFI_STATUS    Status;
-  UINT32        OldSize;
-  UINT32        RequiredSize;
+  EFI_STATUS  Status;
+  UINT32      OldSize;
+  UINT32      RequiredSize;
 
   if (Context->Fadt == NULL) {
     return EFI_NOT_FOUND;
@@ -1514,17 +1531,18 @@ AcpiFadtEnableReset (
   // REF: https://github.com/acidanthera/bugtracker/issues/897
   //
 
-  if (OldSize < RequiredSize || !AcpiIsTableWritable ((EFI_ACPI_COMMON_HEADER *) Context->Fadt)) {
+  if ((OldSize < RequiredSize) || !AcpiIsTableWritable ((EFI_ACPI_COMMON_HEADER *)Context->Fadt)) {
     Status = AcpiAllocateCopyFadt (Context, OldSize < RequiredSize ? RequiredSize : 0);
     if (EFI_ERROR (Status)) {
       return Status;
     }
-  } else if (!((Context->Fadt->Flags & EFI_ACPI_6_2_RESET_REG_SUP) == 0
-    || (Context->Fadt->Flags & EFI_ACPI_6_2_SLP_BUTTON) == 0
-    || (Context->Fadt->Flags & EFI_ACPI_6_2_PWR_BUTTON) != 0
-    || Context->Fadt->ResetReg.Address == 0
-    || Context->Fadt->ResetReg.Address == 0x64
-    || Context->Fadt->ResetReg.RegisterBitWidth != 8)) {
+  } else if (!(  ((Context->Fadt->Flags & EFI_ACPI_6_2_RESET_REG_SUP) == 0)
+              || ((Context->Fadt->Flags & EFI_ACPI_6_2_SLP_BUTTON) == 0)
+              || ((Context->Fadt->Flags & EFI_ACPI_6_2_PWR_BUTTON) != 0)
+              || (Context->Fadt->ResetReg.Address == 0)
+              || (Context->Fadt->ResetReg.Address == 0x64)
+              || (Context->Fadt->ResetReg.RegisterBitWidth != 8)))
+  {
     return EFI_SUCCESS;
   }
 
@@ -1540,9 +1558,10 @@ AcpiFadtEnableReset (
   // as it is known to work incorrectly at least on Dell Latitude E6410
   // when the NVIDIA GPU is attached.
   //
-  if (Context->Fadt->ResetReg.Address == 0
-    || Context->Fadt->ResetReg.Address == 0x64
-    || Context->Fadt->ResetReg.RegisterBitWidth != 8) {
+  if (  (Context->Fadt->ResetReg.Address == 0)
+     || (Context->Fadt->ResetReg.Address == 0x64)
+     || (Context->Fadt->ResetReg.RegisterBitWidth != 8))
+  {
     //
     // Resetting through port 0xCF9 is universal on Intel and AMD.
     // But may not be the case on e.g. Dell laptops and desktops, which use 0xB2.
@@ -1555,7 +1574,7 @@ AcpiFadtEnableReset (
     Context->Fadt->ResetValue                 = 6;
   }
 
-  AcpiRefreshTableChecksum ((EFI_ACPI_DESCRIPTION_HEADER *) Context->Fadt);
+  AcpiRefreshTableChecksum ((EFI_ACPI_DESCRIPTION_HEADER *)Context->Fadt);
 
   return EFI_SUCCESS;
 }
@@ -1568,36 +1587,37 @@ AcpiResetLogoStatus (
   EFI_STATUS  Status;
   UINT32      Index;
 
-  EFI_ACPI_6_2_BOOT_GRAPHICS_RESOURCE_TABLE *Bgrt;
-  EFI_ACPI_6_2_BOOT_GRAPHICS_RESOURCE_TABLE *BgrtNew;
+  EFI_ACPI_6_2_BOOT_GRAPHICS_RESOURCE_TABLE  *Bgrt;
+  EFI_ACPI_6_2_BOOT_GRAPHICS_RESOURCE_TABLE  *BgrtNew;
 
   for (Index = 0; Index < Context->NumberOfTables; ++Index) {
     if (Context->Tables[Index]->Signature == EFI_ACPI_6_2_BOOT_GRAPHICS_RESOURCE_TABLE_SIGNATURE) {
       if (Context->Tables[Index]->Length >= sizeof (EFI_ACPI_6_2_BOOT_GRAPHICS_RESOURCE_TABLE)) {
-        Bgrt = (EFI_ACPI_6_2_BOOT_GRAPHICS_RESOURCE_TABLE *) Context->Tables[Index];
+        Bgrt = (EFI_ACPI_6_2_BOOT_GRAPHICS_RESOURCE_TABLE *)Context->Tables[Index];
 
-        if (!AcpiIsTableWritable ((EFI_ACPI_COMMON_HEADER *) Bgrt)) {
+        if (!AcpiIsTableWritable ((EFI_ACPI_COMMON_HEADER *)Bgrt)) {
           Status = AcpiAllocateCopyTable (
-            (EFI_ACPI_COMMON_HEADER *) Bgrt,
-            0,
-            (EFI_ACPI_COMMON_HEADER **) &BgrtNew
-            );
+                     (EFI_ACPI_COMMON_HEADER *)Bgrt,
+                     0,
+                     (EFI_ACPI_COMMON_HEADER **)&BgrtNew
+                     );
 
           if (EFI_ERROR (Status)) {
             return;
           }
 
-          Context->Tables[Index] = (EFI_ACPI_COMMON_HEADER *) BgrtNew;
+          Context->Tables[Index] = (EFI_ACPI_COMMON_HEADER *)BgrtNew;
           Bgrt                   = BgrtNew;
         }
 
-        Bgrt->Status &= ~EFI_ACPI_6_2_BGRT_STATUS_DISPLAYED;
+        Bgrt->Status         &= ~EFI_ACPI_6_2_BGRT_STATUS_DISPLAYED;
         Bgrt->Header.Checksum = 0;
         Bgrt->Header.Checksum = CalculateCheckSum8 (
-          (UINT8 *) Bgrt,
-          Bgrt->Header.Length
-          );
+                                  (UINT8 *)Bgrt,
+                                  Bgrt->Header.Length
+                                  );
       }
+
       break;
     }
   }
@@ -1632,33 +1652,33 @@ AcpiSyncTableIds (
   if (Context->Rsdt != NULL) {
     CopyMem (&Context->Rsdt->Header.OemId, &Slic->OemId, sizeof (Context->Rsdt->Header.OemId));
     Context->Rsdt->Header.OemTableId = Slic->OemTableId;
-    Context->Rsdt->Header.Checksum = 0;
-    Context->Rsdt->Header.Checksum = CalculateCheckSum8 (
-      (UINT8 *) Context->Rsdt,
-      Context->Rsdt->Header.Length
-      );
+    Context->Rsdt->Header.Checksum   = 0;
+    Context->Rsdt->Header.Checksum   = CalculateCheckSum8 (
+                                         (UINT8 *)Context->Rsdt,
+                                         Context->Rsdt->Header.Length
+                                         );
     DEBUG ((DEBUG_INFO, "OCA: SLIC table IDs fixed in RSDT\n"));
   }
 
   if (Context->Xsdt != NULL) {
     CopyMem (&Context->Xsdt->Header.OemId, &Slic->OemId, sizeof (Context->Xsdt->Header.OemId));
     Context->Xsdt->Header.OemTableId = Slic->OemTableId;
-    Context->Xsdt->Header.Checksum = 0;
-    Context->Xsdt->Header.Checksum = CalculateCheckSum8 (
-      (UINT8 *) Context->Xsdt,
-      Context->Xsdt->Header.Length
-      );
+    Context->Xsdt->Header.Checksum   = 0;
+    Context->Xsdt->Header.Checksum   = CalculateCheckSum8 (
+                                         (UINT8 *)Context->Xsdt,
+                                         Context->Xsdt->Header.Length
+                                         );
     DEBUG ((DEBUG_INFO, "OCA: SLIC table IDs fixed in XSDT\n"));
   }
 
   if (Context->Fadt != NULL) {
     CopyMem (&Context->Fadt->Header.OemId, &Slic->OemId, sizeof (Context->Fadt->Header.OemId));
     Context->Fadt->Header.OemTableId = Slic->OemTableId;
-    Context->Fadt->Header.Checksum = 0;
-    Context->Fadt->Header.Checksum = CalculateCheckSum8 (
-      (UINT8 *) Context->Fadt,
-      Context->Fadt->Header.Length
-      );
+    Context->Fadt->Header.Checksum   = 0;
+    Context->Fadt->Header.Checksum   = CalculateCheckSum8 (
+                                         (UINT8 *)Context->Fadt,
+                                         Context->Fadt->Header.Length
+                                         );
     DEBUG ((DEBUG_INFO, "OCA: SLIC table IDs fixed in FADT\n"));
   }
 }
@@ -1680,27 +1700,27 @@ AcpiHandleHardwareSignature (
   }
 
   if (Context->Fadt->Header.Length >= OFFSET_OF (EFI_ACPI_6_2_FIXED_ACPI_DESCRIPTION_TABLE, XFirmwareCtrl) + sizeof (Context->Fadt->XFirmwareCtrl)) {
-    Facs = (EFI_ACPI_6_2_FIRMWARE_ACPI_CONTROL_STRUCTURE *)(UINTN) Context->Fadt->XFirmwareCtrl;
+    Facs            = (EFI_ACPI_6_2_FIRMWARE_ACPI_CONTROL_STRUCTURE *)(UINTN)Context->Fadt->XFirmwareCtrl;
     IsXFirmwareCtrl = TRUE;
   } else {
-    Facs = NULL;
+    Facs            = NULL;
     IsXFirmwareCtrl = FALSE;
   }
 
-  if (Facs == NULL && Context->Fadt->Header.Length >= OFFSET_OF (EFI_ACPI_6_2_FIXED_ACPI_DESCRIPTION_TABLE, FirmwareCtrl) + sizeof (Context->Fadt->FirmwareCtrl)) {
-    Facs = (EFI_ACPI_6_2_FIRMWARE_ACPI_CONTROL_STRUCTURE *)(UINTN) Context->Fadt->FirmwareCtrl;
+  if ((Facs == NULL) && (Context->Fadt->Header.Length >= OFFSET_OF (EFI_ACPI_6_2_FIXED_ACPI_DESCRIPTION_TABLE, FirmwareCtrl) + sizeof (Context->Fadt->FirmwareCtrl))) {
+    Facs = (EFI_ACPI_6_2_FIRMWARE_ACPI_CONTROL_STRUCTURE *)(UINTN)Context->Fadt->FirmwareCtrl;
   }
 
-  if (Facs != NULL && Facs->Length >= OFFSET_OF (EFI_ACPI_6_2_FIRMWARE_ACPI_CONTROL_STRUCTURE, Flags) + sizeof (Facs->HardwareSignature)) {
+  if ((Facs != NULL) && (Facs->Length >= OFFSET_OF (EFI_ACPI_6_2_FIRMWARE_ACPI_CONTROL_STRUCTURE, Flags) + sizeof (Facs->HardwareSignature))) {
     DEBUG ((DEBUG_INFO, "OCA: FACS signature is %X (%d)\n", Facs->Flags, Reset));
 
     if (Reset) {
-      if (!AcpiIsTableWritable ((EFI_ACPI_COMMON_HEADER *) Facs)) {
+      if (!AcpiIsTableWritable ((EFI_ACPI_COMMON_HEADER *)Facs)) {
         Status = AcpiAllocateCopyTable (
-          (EFI_ACPI_COMMON_HEADER *) Facs,
-          0,
-          (EFI_ACPI_COMMON_HEADER **) &FacsNew
-          );
+                   (EFI_ACPI_COMMON_HEADER *)Facs,
+                   0,
+                   (EFI_ACPI_COMMON_HEADER **)&FacsNew
+                   );
         if (EFI_ERROR (Status)) {
           return;
         }
@@ -1708,7 +1728,7 @@ AcpiHandleHardwareSignature (
         //
         // Reallocate FADT if needed.
         //
-        if (!AcpiIsTableWritable ((EFI_ACPI_COMMON_HEADER *) Context->Fadt)) {
+        if (!AcpiIsTableWritable ((EFI_ACPI_COMMON_HEADER *)Context->Fadt)) {
           Status = AcpiAllocateCopyFadt (Context, 0);
           if (EFI_ERROR (Status)) {
             FreePool (FacsNew);
@@ -1717,11 +1737,12 @@ AcpiHandleHardwareSignature (
         }
 
         if (IsXFirmwareCtrl) {
-          Context->Fadt->XFirmwareCtrl = (UINT64)(UINTN) FacsNew;
+          Context->Fadt->XFirmwareCtrl = (UINT64)(UINTN)FacsNew;
         } else {
-          Context->Fadt->FirmwareCtrl = (UINT32)(UINTN) FacsNew;
+          Context->Fadt->FirmwareCtrl = (UINT32)(UINTN)FacsNew;
         }
-        AcpiRefreshTableChecksum ((EFI_ACPI_DESCRIPTION_HEADER *) Context->Fadt);
+
+        AcpiRefreshTableChecksum ((EFI_ACPI_DESCRIPTION_HEADER *)Context->Fadt);
 
         Facs = FacsNew;
       }

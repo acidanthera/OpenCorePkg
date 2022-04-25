@@ -15,11 +15,12 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 #include "MachoX.h"
 
 MACH_NLIST_X *
-MACH_X (MachoGetMetaclassSymbolFromSmcpSymbol) (
-  IN OUT OC_MACHO_CONTEXT     *Context,
-  IN     CONST MACH_NLIST_X   *Smcp
-  )
-{
+MACH_X (
+  MachoGetMetaclassSymbolFromSmcpSymbol
+  )(
+    IN OUT OC_MACHO_CONTEXT     *Context,
+    IN     CONST MACH_NLIST_X   *Smcp
+    ) {
   MACH_NLIST_X  *Symbol;
   BOOLEAN       Result;
 
@@ -27,7 +28,7 @@ MACH_X (MachoGetMetaclassSymbolFromSmcpSymbol) (
   ASSERT (Smcp != NULL);
   MACH_ASSERT_X (Context);
 
-  Result = MACH_X (MachoGetSymbolByRelocationOffset) (
+  Result = MACH_X (MachoGetSymbolByRelocationOffset)(
              Context,
              Smcp->Value,
              &Symbol
@@ -35,7 +36,7 @@ MACH_X (MachoGetMetaclassSymbolFromSmcpSymbol) (
   if (Result && (Symbol != NULL)) {
     Result = MachoSymbolNameIsMetaclassPointer (
                Context,
-               MACH_X (MachoGetSymbolName) (Context, Symbol)
+               MACH_X (MachoGetSymbolName)(Context, Symbol)
                );
     if (Result) {
       return Symbol;
@@ -46,13 +47,14 @@ MACH_X (MachoGetMetaclassSymbolFromSmcpSymbol) (
 }
 
 BOOLEAN
-MACH_X (MachoGetVtableSymbolsFromSmcp) (
-  IN OUT OC_MACHO_CONTEXT     *Context,
-  IN     CONST CHAR8          *SmcpName,
-  OUT    CONST MACH_NLIST_X   **Vtable,
-  OUT    CONST MACH_NLIST_X   **MetaVtable
-  )
-{
+MACH_X (
+  MachoGetVtableSymbolsFromSmcp
+  )(
+                 IN OUT OC_MACHO_CONTEXT     *Context,
+                 IN     CONST CHAR8          *SmcpName,
+                 OUT    CONST MACH_NLIST_X   **Vtable,
+                 OUT    CONST MACH_NLIST_X   **MetaVtable
+                 ) {
   CHAR8         ClassName[SYM_MAX_NAME_LEN];
   CHAR8         VtableName[SYM_MAX_NAME_LEN];
   CHAR8         MetaVtableName[SYM_MAX_NAME_LEN];
@@ -85,7 +87,7 @@ MACH_X (MachoGetVtableSymbolsFromSmcp) (
     return FALSE;
   }
 
-  VtableSymbol = MACH_X (MachoGetLocalDefinedSymbolByName) (Context, VtableName);
+  VtableSymbol = MACH_X (MachoGetLocalDefinedSymbolByName)(Context, VtableName);
   if (VtableSymbol == NULL) {
     return FALSE;
   }
@@ -99,7 +101,7 @@ MACH_X (MachoGetVtableSymbolsFromSmcp) (
     return FALSE;
   }
 
-  MetaVtableSymbol = MACH_X (MachoGetLocalDefinedSymbolByName) (
+  MetaVtableSymbol = MACH_X (MachoGetLocalDefinedSymbolByName)(
                        Context,
                        MetaVtableName
                        );

@@ -34,9 +34,9 @@
 STATIC
 BOOLEAN
 BufferResize (
-  IN OUT VOID            **Buffer,
-  IN OUT VOID            **BufferCurr,
-  IN OUT UINT32          *BufferSize
+  IN OUT VOID    **Buffer,
+  IN OUT VOID    **BufferCurr,
+  IN OUT UINT32  *BufferSize
   )
 {
   UINT32  OrgSize;
@@ -48,7 +48,7 @@ BufferResize (
     OrgOffset     = 0;
     RemainingSize = 0;
   } else {
-    OrgOffset     = (UINT32) ((UINTN) *BufferCurr - (UINTN) *Buffer);
+    OrgOffset     = (UINT32)((UINTN)*BufferCurr - (UINTN)*Buffer);
     RemainingSize = *BufferSize - OrgOffset;
   }
 
@@ -71,38 +71,38 @@ BufferResize (
   ASSERT (OrgSize + MAX_NCHAN * MAX_NGRAN * MAX_NSAMP <= *BufferSize);
 
   NewBuffer = ReallocatePool (
-    OrgSize,
-    *BufferSize,
-    *Buffer
-    );
+                OrgSize,
+                *BufferSize,
+                *Buffer
+                );
   if (NewBuffer == NULL) {
     FreePool (*Buffer);
     return FALSE;
   }
 
   *Buffer     = NewBuffer;
-  *BufferCurr = (UINT8 *) NewBuffer + OrgOffset;
+  *BufferCurr = (UINT8 *)NewBuffer + OrgOffset;
   return TRUE;
 }
 
 EFI_STATUS
 OcDecodeMp3 (
-  IN  CONST VOID                     *InBuffer,
-  IN  UINT32                         InBufferSize,
-  OUT VOID                           **OutBuffer,
-  OUT UINT32                         *OutBufferSize,
-  OUT EFI_AUDIO_IO_PROTOCOL_FREQ     *Frequency,
-  OUT EFI_AUDIO_IO_PROTOCOL_BITS     *Bits,
-  OUT UINT8                          *Channels
+  IN  CONST VOID                  *InBuffer,
+  IN  UINT32                      InBufferSize,
+  OUT VOID                        **OutBuffer,
+  OUT UINT32                      *OutBufferSize,
+  OUT EFI_AUDIO_IO_PROTOCOL_FREQ  *Frequency,
+  OUT EFI_AUDIO_IO_PROTOCOL_BITS  *Bits,
+  OUT UINT8                       *Channels
   )
 {
-  HMP3Decoder     Decoder;
-  MP3FrameInfo    FrameInfo;
-  unsigned char   *Walker;
-  VOID            *OutBufferCurr;
-  int             ErrorCode;
-  int             BytesLeft;
-  int             SyncOffset;
+  HMP3Decoder    Decoder;
+  MP3FrameInfo   FrameInfo;
+  unsigned char  *Walker;
+  VOID           *OutBufferCurr;
+  int            ErrorCode;
+  int            BytesLeft;
+  int            SyncOffset;
 
   Decoder = MP3InitDecoder ();
   if (Decoder == NULL) {
@@ -111,8 +111,8 @@ OcDecodeMp3 (
 
   ZeroMem (&FrameInfo, sizeof (FrameInfo));
 
-  Walker         = (VOID *) InBuffer;
-  BytesLeft      = (int) InBufferSize;
+  Walker         = (VOID *)InBuffer;
+  BytesLeft      = (int)InBufferSize;
   *OutBuffer     = NULL;
   OutBufferCurr  = NULL;
   *OutBufferSize = 0;
@@ -122,9 +122,9 @@ OcDecodeMp3 (
     // Find next frame.
     //
     SyncOffset = MP3FindSyncWord (
-      Walker,
-      BytesLeft
-      );
+                   Walker,
+                   BytesLeft
+                   );
     if (SyncOffset < 0) {
       //
       // Not a valid file.
@@ -146,12 +146,12 @@ OcDecodeMp3 (
     }
 
     ErrorCode = MP3Decode (
-      Decoder,
-      &Walker,
-      &BytesLeft,
-      OutBufferCurr,
-      0
-      );
+                  Decoder,
+                  &Walker,
+                  &BytesLeft,
+                  OutBufferCurr,
+                  0
+                  );
 
     //
     // Do nothing, we will get enough data on the next frame.
@@ -167,7 +167,7 @@ OcDecodeMp3 (
     }
 
     MP3GetLastFrameInfo (Decoder, &FrameInfo);
-    OutBufferCurr = (UINT8 *) OutBufferCurr + FrameInfo.bitsPerSample / 8 * FrameInfo.outputSamps;
+    OutBufferCurr = (UINT8 *)OutBufferCurr + FrameInfo.bitsPerSample / 8 * FrameInfo.outputSamps;
   }
 
   MP3FreeDecoder (Decoder);
@@ -217,8 +217,8 @@ OcDecodeMp3 (
       return EFI_UNSUPPORTED;
   }
 
-  *Channels = (UINT8) FrameInfo.nChans;
-  *OutBufferSize = (UINT32) ((UINT8 *) OutBufferCurr - (UINT8 *) *OutBuffer);
+  *Channels      = (UINT8)FrameInfo.nChans;
+  *OutBufferSize = (UINT32)((UINT8 *)OutBufferCurr - (UINT8 *)*OutBuffer);
 
   return EFI_SUCCESS;
 }

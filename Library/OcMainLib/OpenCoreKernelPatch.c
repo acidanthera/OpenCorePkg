@@ -49,7 +49,7 @@ OcKernelApplyQuirk (
   if (CacheType == CacheTypeCacheless) {
     return CachelessContextAddQuirk (Context, Quirk);
   }
-  
+
   if (CacheType == CacheTypeMkext) {
     return MkextContextApplyQuirk (Context, Quirk, DarwinVersion);
   }
@@ -74,14 +74,14 @@ GetSerialRegisterBase (
 
 VOID
 OcKernelApplyPatches (
-  IN     OC_GLOBAL_CONFIG  *Config,
-  IN     OC_CPU_INFO       *CpuInfo,
-  IN     UINT32            DarwinVersion,
-  IN     BOOLEAN           Is32Bit,
-  IN     KERNEL_CACHE_TYPE CacheType,
-  IN     VOID              *Context,
-  IN OUT UINT8             *Kernel,
-  IN     UINT32            Size
+  IN     OC_GLOBAL_CONFIG   *Config,
+  IN     OC_CPU_INFO        *CpuInfo,
+  IN     UINT32             DarwinVersion,
+  IN     BOOLEAN            Is32Bit,
+  IN     KERNEL_CACHE_TYPE  CacheType,
+  IN     VOID               *Context,
+  IN OUT UINT8              *Kernel,
+  IN     UINT32             Size
   )
 {
   EFI_STATUS             Status;
@@ -104,11 +104,11 @@ OcKernelApplyPatches (
     ASSERT (Kernel != NULL);
 
     Status = PatcherInitContextFromBuffer (
-      &KernelPatcher,
-      Kernel,
-      Size,
-      Is32Bit
-      );
+               &KernelPatcher,
+               Kernel,
+               Size,
+               Is32Bit
+               );
 
     if (EFI_ERROR (Status)) {
       DEBUG ((DEBUG_ERROR, "OC: Kernel patcher kernel init failure - %r\n", Status));
@@ -120,14 +120,14 @@ OcKernelApplyPatches (
     UserPatch = Config->Kernel.Patch.Values[Index];
     Target    = OC_BLOB_GET (&UserPatch->Identifier);
 
-    if (!UserPatch->Enabled || (AsciiStrCmp (Target, "kernel") == 0) != IsKernelPatch) {
+    if (!UserPatch->Enabled || ((AsciiStrCmp (Target, "kernel") == 0) != IsKernelPatch)) {
       continue;
     }
 
-    Comment     = OC_BLOB_GET (&UserPatch->Comment);
-    Arch        = OC_BLOB_GET (&UserPatch->Arch);
-    MaxKernel   = OcParseDarwinVersion (OC_BLOB_GET (&UserPatch->MaxKernel));
-    MinKernel   = OcParseDarwinVersion (OC_BLOB_GET (&UserPatch->MinKernel));
+    Comment   = OC_BLOB_GET (&UserPatch->Comment);
+    Arch      = OC_BLOB_GET (&UserPatch->Arch);
+    MaxKernel = OcParseDarwinVersion (OC_BLOB_GET (&UserPatch->MaxKernel));
+    MinKernel = OcParseDarwinVersion (OC_BLOB_GET (&UserPatch->MinKernel));
 
     if (AsciiStrCmp (Arch, Is32Bit ? "x86_64" : "i386") == 0) {
       DEBUG ((
@@ -165,10 +165,11 @@ OcKernelApplyPatches (
     // - Find and replace mismatch in size.
     // - Mask and ReplaceMask mismatch in size when are available.
     //
-    if (UserPatch->Replace.Size == 0
-      || (OC_BLOB_GET (&UserPatch->Base)[0] == '\0' && UserPatch->Find.Size != UserPatch->Replace.Size)
-      || (UserPatch->Mask.Size > 0 && UserPatch->Find.Size != UserPatch->Mask.Size)
-      || (UserPatch->ReplaceMask.Size > 0 && UserPatch->Find.Size != UserPatch->ReplaceMask.Size)) {
+    if (  (UserPatch->Replace.Size == 0)
+       || ((OC_BLOB_GET (&UserPatch->Base)[0] == '\0') && (UserPatch->Find.Size != UserPatch->Replace.Size))
+       || ((UserPatch->Mask.Size > 0) && (UserPatch->Find.Size != UserPatch->Mask.Size))
+       || ((UserPatch->ReplaceMask.Size > 0) && (UserPatch->Find.Size != UserPatch->ReplaceMask.Size)))
+    {
       DEBUG ((DEBUG_ERROR, "OC: Kernel patch %u for %a (%a) is borked\n", Index, Target, Comment));
       continue;
     }
@@ -176,31 +177,31 @@ OcKernelApplyPatches (
     ZeroMem (&Patch, sizeof (Patch));
 
     if (OC_BLOB_GET (&UserPatch->Comment)[0] != '\0') {
-      Patch.Comment  = OC_BLOB_GET (&UserPatch->Comment);
+      Patch.Comment = OC_BLOB_GET (&UserPatch->Comment);
     }
 
     if (OC_BLOB_GET (&UserPatch->Base)[0] != '\0') {
-      Patch.Base  = OC_BLOB_GET (&UserPatch->Base);
+      Patch.Base = OC_BLOB_GET (&UserPatch->Base);
     }
 
     if (UserPatch->Find.Size > 0) {
-      Patch.Find  = OC_BLOB_GET (&UserPatch->Find);
+      Patch.Find = OC_BLOB_GET (&UserPatch->Find);
     }
 
     Patch.Replace = OC_BLOB_GET (&UserPatch->Replace);
 
     if (UserPatch->Mask.Size > 0) {
-      Patch.Mask  = OC_BLOB_GET (&UserPatch->Mask);
+      Patch.Mask = OC_BLOB_GET (&UserPatch->Mask);
     }
 
     if (UserPatch->ReplaceMask.Size > 0) {
       Patch.ReplaceMask = OC_BLOB_GET (&UserPatch->ReplaceMask);
     }
 
-    Patch.Size    = UserPatch->Replace.Size;
-    Patch.Count   = UserPatch->Count;
-    Patch.Skip    = UserPatch->Skip;
-    Patch.Limit   = UserPatch->Limit;
+    Patch.Size  = UserPatch->Replace.Size;
+    Patch.Count = UserPatch->Count;
+    Patch.Skip  = UserPatch->Skip;
+    Patch.Limit = UserPatch->Limit;
 
     if (IsKernelPatch) {
       Status = PatcherApplyGenericPatch (&KernelPatcher, &Patch);
@@ -258,7 +259,7 @@ OcKernelApplyPatches (
     }
 
     if (Config->Kernel.Quirks.IncreasePciBarSize) {
-      OcKernelApplyQuirk (KernelQuirkIncreasePciBarSize, CacheType, DarwinVersion, Context, NULL);     
+      OcKernelApplyQuirk (KernelQuirkIncreasePciBarSize, CacheType, DarwinVersion, Context, NULL);
     }
 
     if (Config->Kernel.Quirks.CustomSmbiosGuid) {
@@ -279,8 +280,8 @@ OcKernelApplyPatches (
     }
 
     if (Config->Kernel.Emulate.DummyPowerManagement) {
-      MaxKernel   = OcParseDarwinVersion (OC_BLOB_GET (&Config->Kernel.Emulate.MaxKernel));
-      MinKernel   = OcParseDarwinVersion (OC_BLOB_GET (&Config->Kernel.Emulate.MinKernel));
+      MaxKernel = OcParseDarwinVersion (OC_BLOB_GET (&Config->Kernel.Emulate.MaxKernel));
+      MinKernel = OcParseDarwinVersion (OC_BLOB_GET (&Config->Kernel.Emulate.MinKernel));
       if (OcMatchDarwinVersion (DarwinVersion, MinKernel, MaxKernel)) {
         OcKernelApplyQuirk (KernelQuirkDummyPowerManagement, CacheType, DarwinVersion, Context, NULL);
       } else {
@@ -300,7 +301,7 @@ OcKernelApplyPatches (
     // Ignore timeout -1.
     //
     if (Config->Kernel.Quirks.SetApfsTrimTimeout >= 0) {
-      PatchSetApfsTimeout ((UINT32) Config->Kernel.Quirks.SetApfsTrimTimeout);
+      PatchSetApfsTimeout ((UINT32)Config->Kernel.Quirks.SetApfsTrimTimeout);
       OcKernelApplyQuirk (KernelQuirkSetApfsTrimTimeout, CacheType, DarwinVersion, Context, NULL);
     }
   } else {
@@ -320,10 +321,11 @@ OcKernelApplyPatches (
     // Only apply the patch when Misc->Serial->Custom is set (i.e. Override).
     //
     if (Config->Misc.Serial.Override && Config->Kernel.Quirks.CustomPciSerialDevice) {
-      RegisterBase = GetSerialRegisterBase ();
+      RegisterBase   = GetSerialRegisterBase ();
       RegisterStride = PatchPcdGet32 (PcdSerialRegisterStride);
-      if ((RegisterBase != 0 && RegisterStride > 1)
-        && RegisterBase != 0x3F8U) {
+      if (  ((RegisterBase != 0) && (RegisterStride > 1))
+         && (RegisterBase != 0x3F8U))
+      {
         PatchSetPciSerialDevice (RegisterBase, RegisterStride);
         OcKernelApplyQuirk (KernelQuirkCustomPciSerialDevice, CacheType, DarwinVersion, NULL, &KernelPatcher);
       } else {
@@ -335,12 +337,13 @@ OcKernelApplyPatches (
       OcKernelApplyQuirk (KernelQuirkPanicNoKextDump, CacheType, DarwinVersion, NULL, &KernelPatcher);
     }
 
-    if (Config->Kernel.Emulate.Cpuid1Data[0] != 0
-      || Config->Kernel.Emulate.Cpuid1Data[1] != 0
-      || Config->Kernel.Emulate.Cpuid1Data[2] != 0
-      || Config->Kernel.Emulate.Cpuid1Data[3] != 0) {
-      MaxKernel   = OcParseDarwinVersion (OC_BLOB_GET (&Config->Kernel.Emulate.MaxKernel));
-      MinKernel   = OcParseDarwinVersion (OC_BLOB_GET (&Config->Kernel.Emulate.MinKernel));
+    if (  (Config->Kernel.Emulate.Cpuid1Data[0] != 0)
+       || (Config->Kernel.Emulate.Cpuid1Data[1] != 0)
+       || (Config->Kernel.Emulate.Cpuid1Data[2] != 0)
+       || (Config->Kernel.Emulate.Cpuid1Data[3] != 0))
+    {
+      MaxKernel = OcParseDarwinVersion (OC_BLOB_GET (&Config->Kernel.Emulate.MaxKernel));
+      MinKernel = OcParseDarwinVersion (OC_BLOB_GET (&Config->Kernel.Emulate.MinKernel));
       if (OcMatchDarwinVersion (DarwinVersion, MinKernel, MaxKernel)) {
         PatchKernelCpuId (
           &KernelPatcher,
@@ -371,26 +374,26 @@ OcKernelApplyPatches (
     }
 
     if (Config->Kernel.Quirks.DisableLinkeditJettison) {
-      OcKernelApplyQuirk (KernelQuirkSegmentJettison, CacheType, DarwinVersion, NULL, &KernelPatcher);     
+      OcKernelApplyQuirk (KernelQuirkSegmentJettison, CacheType, DarwinVersion, NULL, &KernelPatcher);
     }
 
     if (Config->Kernel.Quirks.LegacyCommpage) {
-      OcKernelApplyQuirk (KernelQuirkLegacyCommpage, CacheType, DarwinVersion, NULL, &KernelPatcher);     
+      OcKernelApplyQuirk (KernelQuirkLegacyCommpage, CacheType, DarwinVersion, NULL, &KernelPatcher);
     }
 
     if (Config->Kernel.Quirks.ProvideCurrentCpuInfo) {
-      PatchProvideCurrentCpuInfo (&KernelPatcher, CpuInfo, DarwinVersion);  
+      PatchProvideCurrentCpuInfo (&KernelPatcher, CpuInfo, DarwinVersion);
     }
   }
 }
 
 VOID
 OcKernelBlockKexts (
-  IN     OC_GLOBAL_CONFIG  *Config,
-  IN     UINT32            DarwinVersion,
-  IN     BOOLEAN           Is32Bit,
-  IN     KERNEL_CACHE_TYPE CacheType,
-  IN     VOID              *Context
+  IN     OC_GLOBAL_CONFIG   *Config,
+  IN     UINT32             DarwinVersion,
+  IN     BOOLEAN            Is32Bit,
+  IN     KERNEL_CACHE_TYPE  CacheType,
+  IN     VOID               *Context
   )
 {
   EFI_STATUS             Status;
@@ -411,12 +414,12 @@ OcKernelBlockKexts (
       continue;
     }
 
-    Target      = OC_BLOB_GET (&Kext->Identifier);
-    Comment     = OC_BLOB_GET (&Kext->Comment);
-    Arch        = OC_BLOB_GET (&Kext->Arch);
-    Strategy    = OC_BLOB_GET (&Kext->Strategy);
-    MaxKernel   = OcParseDarwinVersion (OC_BLOB_GET (&Kext->MaxKernel));
-    MinKernel   = OcParseDarwinVersion (OC_BLOB_GET (&Kext->MinKernel));
+    Target    = OC_BLOB_GET (&Kext->Identifier);
+    Comment   = OC_BLOB_GET (&Kext->Comment);
+    Arch      = OC_BLOB_GET (&Kext->Arch);
+    Strategy  = OC_BLOB_GET (&Kext->Strategy);
+    MaxKernel = OcParseDarwinVersion (OC_BLOB_GET (&Kext->MaxKernel));
+    MinKernel = OcParseDarwinVersion (OC_BLOB_GET (&Kext->MinKernel));
 
     if (AsciiStrCmp (Arch, Is32Bit ? "x86_64" : "i386") == 0) {
       DEBUG ((

@@ -38,16 +38,16 @@
   { 0xE3CC8EC6, 0x81C1, 0x4271, { 0xAC, 0xBC, 0xDB, 0x65, 0x08, 0x6E, 0x8D, 0xC8 } }
 
 typedef struct {
-  EFI_HOB_GENERIC_HEADER      Header;
-  EFI_GUID                    Name;
-  BOOLEAN                     ShouldProvision;
+  EFI_HOB_GENERIC_HEADER    Header;
+  EFI_GUID                  Name;
+  BOOLEAN                   ShouldProvision;
 } APPLE_FPF_CONFIGURATION_HOB;
 
-extern EFI_GUID gAppleEpidCertificateFileGuid;
-extern EFI_GUID gAppleEpidGroupPublicKeysFileGuid;
-extern EFI_GUID gAppleFpfConfigurationHobGuid;
+extern EFI_GUID  gAppleEpidCertificateFileGuid;
+extern EFI_GUID  gAppleEpidGroupPublicKeysFileGuid;
+extern EFI_GUID  gAppleFpfConfigurationHobGuid;
 
-#define APPLE_EPID_PROVISIONED_VARIABLE_NAME L"epid_provisioned"
+#define APPLE_EPID_PROVISIONED_VARIABLE_NAME  L"epid_provisioned"
 
 #define APPLE_FPF_PROVISIONED_VARIABLE_NAME  L"fpf_provisioned"
 

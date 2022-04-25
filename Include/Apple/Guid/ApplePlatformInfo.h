@@ -9,6 +9,7 @@ THE PROGRAM IS DISTRIBUTED UNDER THE BSD LICENSE ON AN "AS IS" BASIS,
 WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 
 **/
+
 #ifndef APPLE_PLATFORM_INFO_H
 #define APPLE_PLATFORM_INFO_H
 
@@ -18,7 +19,7 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
     { 0x90, 0x36, 0x8F, 0x4A, 0x26, 0x1C, 0xBB, 0xA2 } }
 
 // gAppleFsbFrequencyPlatformInfoGuid
-extern EFI_GUID gAppleFsbFrequencyPlatformInfoGuid;
+extern EFI_GUID  gAppleFsbFrequencyPlatformInfoGuid;
 
 // APPLE_FSB_FREQUENCY_LIST_PLATFORM_INFO_GUID
 #define APPLE_FSB_FREQUENCY_LIST_PLATFORM_INFO_GUID \
@@ -26,7 +27,7 @@ extern EFI_GUID gAppleFsbFrequencyPlatformInfoGuid;
     { 0xA9, 0x7B, 0xC1, 0xB1, 0x28, 0x4C, 0xB3, 0x7C } }
 
 // gAppleFsbFrequencyListPlatformInfoGuid
-extern EFI_GUID gAppleFsbFrequencyListPlatformInfoGuid;
+extern EFI_GUID  gAppleFsbFrequencyListPlatformInfoGuid;
 
 // APPLE_PLATFORM_INFO_KEYBOARD_GUID
 #define APPLE_PLATFORM_INFO_KEYBOARD_GUID  \
@@ -37,7 +38,7 @@ extern EFI_GUID gAppleFsbFrequencyListPlatformInfoGuid;
 typedef UINT32 APPLE_KEYBOARD_INFO;
 
 // gAppleKeyboardPlatformInfoGuid
-extern EFI_GUID gAppleKeyboardPlatformInfoGuid;
+extern EFI_GUID  gAppleKeyboardPlatformInfoGuid;
 
 // APPLE_PRODUCT_INFO_PLATFORM_INFO_GUID
 #define APPLE_PRODUCT_INFO_PLATFORM_INFO_GUID  \
@@ -46,12 +47,12 @@ extern EFI_GUID gAppleKeyboardPlatformInfoGuid;
 
 // APPLE_PRODUCT_INFO
 typedef struct {
-  UINT8  Unknown[86];
-  CHAR16 Model[64];
-  CHAR16 Family[64];
+  UINT8     Unknown[86];
+  CHAR16    Model[64];
+  CHAR16    Family[64];
 } APPLE_PRODUCT_INFO;
 
 // gAppleProductInfoPlatformInfoGuid
-extern EFI_GUID gAppleProductInfoPlatformInfoGuid;
+extern EFI_GUID  gAppleProductInfoPlatformInfoGuid;
 
 #endif // APPLE_PLATFORM_INFO_H

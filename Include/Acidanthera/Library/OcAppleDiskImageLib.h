@@ -24,12 +24,12 @@
 // Disk image context.
 //
 typedef struct {
-    CONST APPLE_RAM_DISK_EXTENT_TABLE *ExtentTable;
+  CONST APPLE_RAM_DISK_EXTENT_TABLE    *ExtentTable;
 
-    UINTN                             SectorCount;
+  UINTN                                SectorCount;
 
-    UINT32                            BlockCount;
-    APPLE_DISK_IMAGE_BLOCK_DATA       **Blocks;
+  UINT32                               BlockCount;
+  APPLE_DISK_IMAGE_BLOCK_DATA          **Blocks;
 } OC_APPLE_DISK_IMAGE_CONTEXT;
 
 BOOLEAN
@@ -47,8 +47,9 @@ OcAppleDiskImageInitializeFromFile (
 
 VOID
 OcAppleDiskImageFreeContext (
-  IN OC_APPLE_DISK_IMAGE_CONTEXT *Context
+  IN OC_APPLE_DISK_IMAGE_CONTEXT  *Context
   );
+
 VOID
 OcAppleDiskImageFreeFile (
   IN OC_APPLE_DISK_IMAGE_CONTEXT  *Context

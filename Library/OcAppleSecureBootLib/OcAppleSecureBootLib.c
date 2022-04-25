@@ -33,15 +33,15 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 #include <Library/UefiBootServicesTableLib.h>
 #include <Library/UefiRuntimeServicesTableLib.h>
 
-STATIC APPLE_SECURE_BOOT_PROTOCOL *mSecureBoot;
-STATIC CHAR8   mSbHardwareModel[16];
-STATIC UINT64  mSbEcid;
-STATIC BOOLEAN mDmgLoading = FALSE;
-STATIC UINT8   mDmgLoadingPolicy     = AppleImg4SbModeMedium;
-STATIC BOOLEAN mSbAvailable = TRUE;
-STATIC UINT8   mSbPolicy             = AppleImg4SbModeMedium;
-STATIC UINT8   mSbWindowsPolicy      = 1;
-STATIC BOOLEAN mSbWindowsPolicyValid = TRUE;
+STATIC APPLE_SECURE_BOOT_PROTOCOL  *mSecureBoot;
+STATIC CHAR8                       mSbHardwareModel[16];
+STATIC UINT64                      mSbEcid;
+STATIC BOOLEAN                     mDmgLoading           = FALSE;
+STATIC UINT8                       mDmgLoadingPolicy     = AppleImg4SbModeMedium;
+STATIC BOOLEAN                     mSbAvailable          = TRUE;
+STATIC UINT8                       mSbPolicy             = AppleImg4SbModeMedium;
+STATIC UINT8                       mSbWindowsPolicy      = 1;
+STATIC BOOLEAN                     mSbWindowsPolicyValid = TRUE;
 
 STATIC
 UINT8
@@ -51,7 +51,7 @@ InternalImg4GetFailureReason (
   IN EFI_STATUS                  Status
   )
 {
-  UINT8 Reason;
+  UINT8  Reason;
 
   ASSERT (This != NULL);
 
@@ -98,11 +98,11 @@ OcAppleSecureBootBootstrapValues (
   ASSERT (Model != NULL);
 
   Status = OcAsciiSafeSPrint (
-    mSbHardwareModel,
-    sizeof (mSbHardwareModel),
-    "%aap",
-    Model
-    );
+             mSbHardwareModel,
+             sizeof (mSbHardwareModel),
+             "%aap",
+             Model
+             );
 
   if (EFI_ERROR (Status)) {
     return Status;
@@ -111,27 +111,28 @@ OcAppleSecureBootBootstrapValues (
   for (BridgeModelSize = 0; mSbHardwareModel[BridgeModelSize] != '\0'; ++BridgeModelSize) {
     BridgeModel[BridgeModelSize] = AsciiCharToUpper (mSbHardwareModel[BridgeModelSize]);
   }
+
   BridgeModel[BridgeModelSize] = '\0';
 
   Status = gRT->SetVariable (
-    APPLE_BRIDGE_OS_HARDWARE_MODEL_VARIABLE_NAME,
-    &gAppleVendorVariableGuid,
-    EFI_VARIABLE_BOOTSERVICE_ACCESS | EFI_VARIABLE_RUNTIME_ACCESS,
-    BridgeModelSize,
-    BridgeModel
-    );
+                  APPLE_BRIDGE_OS_HARDWARE_MODEL_VARIABLE_NAME,
+                  &gAppleVendorVariableGuid,
+                  EFI_VARIABLE_BOOTSERVICE_ACCESS | EFI_VARIABLE_RUNTIME_ACCESS,
+                  BridgeModelSize,
+                  BridgeModel
+                  );
 
   if (EFI_ERROR (Status)) {
     return Status;
   }
 
   Status = gRT->SetVariable (
-    L"HardwareModel",
-    &gAppleSecureBootVariableGuid,
-    EFI_VARIABLE_RUNTIME_ACCESS | EFI_VARIABLE_BOOTSERVICE_ACCESS,
-    AsciiStrSize (mSbHardwareModel),
-    mSbHardwareModel
-    );
+                  L"HardwareModel",
+                  &gAppleSecureBootVariableGuid,
+                  EFI_VARIABLE_RUNTIME_ACCESS | EFI_VARIABLE_BOOTSERVICE_ACCESS,
+                  AsciiStrSize (mSbHardwareModel),
+                  mSbHardwareModel
+                  );
 
   mSbEcid = Ecid;
 
@@ -210,8 +211,8 @@ AppleSbGetWindowsFailureReason (
   OUT UINT8                       *Reason
   )
 {
-  UINTN DataSize;
-  UINT8 FailReason;
+  UINTN  DataSize;
+  UINT8  FailReason;
 
   if (Reason == NULL) {
     return EFI_INVALID_PARAMETER;
@@ -271,11 +272,11 @@ InternalReadFile (
   OUT UINT32             *FileSize
   )
 {
-  EFI_STATUS        Status;
+  EFI_STATUS  Status;
 
-  EFI_FILE_PROTOCOL *FileHandle;
-  UINT8             *FileBuffer;
-  UINT32            FileReadSize;
+  EFI_FILE_PROTOCOL  *FileHandle;
+  UINT8              *FileBuffer;
+  UINT32             FileReadSize;
 
   ASSERT (Volume != NULL);
   ASSERT (FilePath != NULL);
@@ -334,8 +335,8 @@ AppleSbGetFailureReason (
   OUT UINT8                       *Reason
   )
 {
-  UINTN DataSize;
-  UINT8 FailReason;
+  UINTN  DataSize;
+  UINT8  FailReason;
 
   if (Reason == NULL) {
     return EFI_INVALID_PARAMETER;
@@ -405,8 +406,8 @@ AppleSbGetKernelFailureReason (
   OUT UINT8                       *Reason
   )
 {
-  UINTN DataSize;
-  UINT8 FailReason;
+  UINTN  DataSize;
+  UINT8  FailReason;
 
   if (Reason == NULL) {
     return EFI_INVALID_PARAMETER;
@@ -503,9 +504,9 @@ InternalVerifyImg4Worker (
   IN UINT8                       SbPolicy
   )
 {
-  STATIC APPLE_IMG4_VERIFICATION_PROTOCOL *Img4Verify = NULL;
+  STATIC APPLE_IMG4_VERIFICATION_PROTOCOL  *Img4Verify = NULL;
 
-  EFI_STATUS Status;
+  EFI_STATUS  Status;
 
   ASSERT (ImageBuffer != NULL);
   ASSERT (ImageSize != 0);
@@ -522,10 +523,11 @@ InternalVerifyImg4Worker (
       return EFI_UNSUPPORTED;
     }
   }
+
   //
   // Apple Secure Boot Policy matches SB Mode so far.
   //
-  if (SbPolicy != AppleImg4SbModeMedium && SbPolicy != AppleImg4SbModeFull) {
+  if ((SbPolicy != AppleImg4SbModeMedium) && (SbPolicy != AppleImg4SbModeFull)) {
     return EFI_LOAD_ERROR;
   }
 
@@ -558,32 +560,32 @@ InternalGetImg4ByPath (
   OUT  UINTN                       *ManifestSizePtr
   )
 {
-  EFI_STATUS                      Status;
-  BOOLEAN                         Result;
+  EFI_STATUS  Status;
+  BOOLEAN     Result;
 
-  UINTN                           ImagePathSize;
-  UINTN                           ManifestPathSize;
-  CHAR16                          *Path;
-  CHAR16                          *ManifestSuffix;
+  UINTN   ImagePathSize;
+  UINTN   ManifestPathSize;
+  CHAR16  *Path;
+  CHAR16  *ManifestSuffix;
 
-  EFI_HANDLE                      Device;
-  EFI_SIMPLE_FILE_SYSTEM_PROTOCOL *FileSystem;
-  EFI_FILE_PROTOCOL               *Root;
+  EFI_HANDLE                       Device;
+  EFI_SIMPLE_FILE_SYSTEM_PROTOCOL  *FileSystem;
+  EFI_FILE_PROTOCOL                *Root;
 
-  VOID                            *ManifestBuffer;
-  UINT32                          ManifestSize;
+  VOID    *ManifestBuffer;
+  UINT32  ManifestSize;
 
-  UINT64                          Ecid;
+  UINT64  Ecid;
 
-  STATIC CONST UINTN ManifestSuffixMaxSize =
+  STATIC CONST UINTN  ManifestSuffixMaxSize =
     (((ARRAY_SIZE (mSbHardwareModel) - 1 + (2 * sizeof (Ecid))) * sizeof (CHAR16))
-      + L_STR_SIZE_NT (L"...im4m"));
+     + L_STR_SIZE_NT (L"...im4m"));
 
   Status = gBS->LocateDevicePath (
-    &gEfiSimpleFileSystemProtocolGuid,
-    &DevicePath,
-    &Device
-    );
+                  &gEfiSimpleFileSystemProtocolGuid,
+                  &DevicePath,
+                  &Device
+                  );
   if (EFI_ERROR (Status)) {
     return EFI_NO_MEDIA;
   }
@@ -594,10 +596,10 @@ InternalGetImg4ByPath (
   }
 
   Result = OcOverflowAddUN (
-    ImagePathSize,
-    ManifestSuffixMaxSize,
-    &ManifestPathSize
-    );
+             ImagePathSize,
+             ManifestSuffixMaxSize,
+             &ManifestPathSize
+             );
   if (Result) {
     return EFI_NOT_FOUND;
   }
@@ -608,10 +610,10 @@ InternalGetImg4ByPath (
   }
 
   Status = gBS->HandleProtocol (
-    Device,
-    &gEfiSimpleFileSystemProtocolGuid,
-    (VOID **)&FileSystem
-    );
+                  Device,
+                  &gEfiSimpleFileSystemProtocolGuid,
+                  (VOID **)&FileSystem
+                  );
   if (EFI_ERROR (Status)) {
     return EFI_NO_MEDIA;
   }
@@ -649,6 +651,7 @@ InternalGetImg4ByPath (
       Result = FALSE;
     }
   }
+
   if (!Result) {
     Root->Close (Root);
     return EFI_LOAD_ERROR;
@@ -663,7 +666,7 @@ InternalGetImg4ByPath (
   }
 
   *ManifestBufferPtr = ManifestBuffer;
-  *ManifestSizePtr = ManifestSize;
+  *ManifestSizePtr   = ManifestSize;
 
   return EFI_SUCCESS;
 }
@@ -739,9 +742,9 @@ AppleSbVerifyImg4 (
   IN BOOLEAN                     SetFailureReason
   )
 {
-  EFI_STATUS Status;
-  UINT8      SbPolicy;
-  UINT8      Reason;
+  EFI_STATUS  Status;
+  UINT8       SbPolicy;
+  UINT8       Reason;
 
   if (!mSbAvailable) {
     return EFI_UNSUPPORTED;
@@ -750,9 +753,9 @@ AppleSbVerifyImg4 (
   AppleSbGetPolicy (This, &SbPolicy);
   if (SbPolicy == 0) {
     Status = EFI_UNSUPPORTED;
-  } else if (ImageBuffer == NULL || ImageSize == 0) {
+  } else if ((ImageBuffer == NULL) || (ImageSize == 0)) {
     Status = EFI_INVALID_PARAMETER;
-  } else if (ManifestBuffer == NULL || ManifestSize == 0) {
+  } else if ((ManifestBuffer == NULL) || (ManifestSize == 0)) {
     Status = EFI_NOT_FOUND;
   } else {
     Status = InternalVerifyImg4Worker (
@@ -769,8 +772,9 @@ AppleSbVerifyImg4 (
 
   if (SetFailureReason) {
     Reason = InternalImg4GetFailureReason (This, SbPolicy, Status);
-    if (ObjType == APPLE_SB_OBJ_KERNEL
-     || ObjType == APPLE_SB_OBJ_KERNEL_DEBUG) {
+    if (  (ObjType == APPLE_SB_OBJ_KERNEL)
+       || (ObjType == APPLE_SB_OBJ_KERNEL_DEBUG))
+    {
       AppleSbSetKernelFailureReason (This, Reason);
     } else {
       AppleSbSetFailureReason (This, Reason);
@@ -843,9 +847,9 @@ AppleSbVerifyWindows (
   IN BOOLEAN                     SetFailureReason
   )
 {
-  EFI_STATUS Status;
-  UINT8      WinPolicy;
-  UINT8      Reason;
+  EFI_STATUS  Status;
+  UINT8       WinPolicy;
+  UINT8       Reason;
 
   if (!mSbAvailable) {
     return EFI_UNSUPPORTED;
@@ -853,7 +857,7 @@ AppleSbVerifyWindows (
 
   Reason = 0x00;
 
-  if (TargetBuffer == NULL || TargetSize == 0) {
+  if ((TargetBuffer == NULL) || (TargetSize == 0)) {
     Status = EFI_INVALID_PARAMETER;
     Reason = 0xFF;
   } else {
@@ -886,7 +890,7 @@ OcAppleSecureBootInstallProtocol (
   IN BOOLEAN  SbWinPolicyValid
   )
 {
-  STATIC APPLE_SECURE_BOOT_PROTOCOL SecureBoot = {
+  STATIC APPLE_SECURE_BOOT_PROTOCOL  SecureBoot = {
     APPLE_SECURE_BOOT_PROTOCOL_REVISION,
     AppleSbSetAvailability,
     AppleSbVerifyImg4ByPath,
@@ -903,10 +907,10 @@ OcAppleSecureBootInstallProtocol (
     AppleSbSetWindowsFailureReason
   };
 
-  EFI_STATUS                 Status;
-  APPLE_SECURE_BOOT_PROTOCOL *Protocol;
-  EFI_HANDLE                 Handle;
-  UINTN                      DataSize;
+  EFI_STATUS                  Status;
+  APPLE_SECURE_BOOT_PROTOCOL  *Protocol;
+  EFI_HANDLE                  Handle;
+  UINTN                       DataSize;
 
   if (Reinstall) {
     Status = OcUninstallAllProtocolInstances (&gAppleSecureBootProtocolGuid);
@@ -944,12 +948,12 @@ OcAppleSecureBootInstallProtocol (
 
   DataSize = sizeof (SbPolicy);
   gRT->SetVariable (
-          L"AppleSecureBootPolicy",
-          &gAppleSecureBootVariableGuid,
-          EFI_VARIABLE_RUNTIME_ACCESS | EFI_VARIABLE_BOOTSERVICE_ACCESS,
-          DataSize,
-          &SbPolicy
-          );
+         L"AppleSecureBootPolicy",
+         &gAppleSecureBootVariableGuid,
+         EFI_VARIABLE_RUNTIME_ACCESS | EFI_VARIABLE_BOOTSERVICE_ACCESS,
+         DataSize,
+         &SbPolicy
+         );
   if (SbWinPolicyValid) {
     DataSize = sizeof (SbWinPolicy);
     gRT->SetVariable (
@@ -979,6 +983,7 @@ OcAppleSecureBootSetDmgLoading (
   )
 {
   EFI_STATUS  Status;
+
   ASSERT (mSecureBoot != NULL);
 
   mDmgLoading = LoadingDmg;
@@ -1005,14 +1010,15 @@ OcAppleSecureBootGetDmgLoading (
   if (RealPolicy != NULL) {
     *RealPolicy = mDmgLoadingPolicy;
   }
+
   return mDmgLoading;
 }
 
 EFI_STATUS
 OcAppleSecureBootVerify (
-  IN  EFI_DEVICE_PATH_PROTOCOL     *DevicePath,
-  IN  VOID                         *SourceBuffer,
-  IN  UINTN                        SourceSize
+  IN  EFI_DEVICE_PATH_PROTOCOL  *DevicePath,
+  IN  VOID                      *SourceBuffer,
+  IN  UINTN                     SourceSize
   )
 {
   EFI_STATUS                  Status;
@@ -1029,9 +1035,9 @@ OcAppleSecureBootVerify (
   // Something is borked if this fails.
   //
   Status = SecureBoot->GetPolicy (
-    SecureBoot,
-    &Policy
-    );
+                         SecureBoot,
+                         &Policy
+                         );
   if (EFI_ERROR (Status)) {
     DEBUG ((DEBUG_WARN, "OCSB: No secure boot policy - %r\n", Status));
     return EFI_SECURITY_VIOLATION;
@@ -1044,7 +1050,7 @@ OcAppleSecureBootVerify (
   // they do not even have global manifests in DMG images.
   // Can consider checking boot.efi codesign integrity if we want.
   //
-  if (Policy == AppleImg4SbModeDisabled && OcAppleSecureBootGetDmgLoading (NULL)) {
+  if ((Policy == AppleImg4SbModeDisabled) && OcAppleSecureBootGetDmgLoading (NULL)) {
     DEBUG ((DEBUG_INFO, "OCSB: Direct booting for DMG image\n"));
     return EFI_SUCCESS;
   }
@@ -1058,18 +1064,18 @@ OcAppleSecureBootVerify (
   }
 
   Status = InternalGetImg4ByPath (
-    SecureBoot,
-    DevicePath,
-    Policy,
-    &ManifestBuffer,
-    &ManifestSize
-    );
+             SecureBoot,
+             DevicePath,
+             Policy,
+             &ManifestBuffer,
+             &ManifestSize
+             );
   if (EFI_ERROR (Status)) {
     DEBUG ((DEBUG_INFO, "OCSB: No IMG4 found - %r\n", Status));
     return EFI_UNSUPPORTED;
   }
 
-  STATIC UINT32 mCheckedObjects[] = {
+  STATIC UINT32  mCheckedObjects[] = {
     APPLE_SB_OBJ_EFIBOOT,
     APPLE_SB_OBJ_EFIBOOT_BASE,
     APPLE_SB_OBJ_EFIBOOT_DEBUG,
@@ -1077,14 +1083,14 @@ OcAppleSecureBootVerify (
 
   for (Index = 0; Index < ARRAY_SIZE (mCheckedObjects); ++Index) {
     Status = SecureBoot->VerifyImg4 (
-      SecureBoot,
-      SourceBuffer,
-      SourceSize,
-      ManifestBuffer,
-      ManifestSize,
-      mCheckedObjects[Index],
-      FALSE
-      );
+                           SecureBoot,
+                           SourceBuffer,
+                           SourceSize,
+                           ManifestBuffer,
+                           ManifestSize,
+                           mCheckedObjects[Index],
+                           FALSE
+                           );
 
     //
     // We are successful.

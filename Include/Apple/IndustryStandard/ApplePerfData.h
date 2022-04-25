@@ -31,26 +31,26 @@
   Performance data header.
 **/
 typedef struct APPLE_PERF_DATA_ {
-  UINT64  Signature;
-  UINT32  NumberOfEntries;
-  UINT32  NextPerfData;
-  UINT64  TimerFrequencyMs;
-  UINT64  TimerStartMs;
+  UINT64    Signature;
+  UINT32    NumberOfEntries;
+  UINT32    NextPerfData;
+  UINT64    TimerFrequencyMs;
+  UINT64    TimerStartMs;
 } APPLE_PERF_DATA;
 
 /**
   Performance data entry.
 **/
 typedef struct APPLE_PERF_ENTRY_ {
-  UINT32  StreamId;      ///< Identifier, normally 1.
-  UINT32  EntryDataSize; ///< EntryData size aligned up to 8.
-  UINT64  TimestampMs;
-  UINT64  TimestampTsc;
-  CHAR8   EntryData[];   ///< Null terminated
+  UINT32    StreamId;      ///< Identifier, normally 1.
+  UINT32    EntryDataSize; ///< EntryData size aligned up to 8.
+  UINT64    TimestampMs;
+  UINT64    TimestampTsc;
+  CHAR8     EntryData[]; ///< Null terminated
 } APPLE_PERF_ENTRY;
 
-#define APPLE_PERF_FIRST_ENTRY(Data) ((APPLE_PERF_ENTRY *) ((UINTN) (Data) + APPLE_PERF_DATA_HEADER_SIZE))
-#define APPLE_PERF_NEXT_ENTRY(Entry) ((APPLE_PERF_ENTRY *) ((UINTN) (Entry) + sizeof (APPLE_PERF_ENTRY) + (Entry)->EntryDataSize))
+#define APPLE_PERF_FIRST_ENTRY(Data)  ((APPLE_PERF_ENTRY *) ((UINTN) (Data) + APPLE_PERF_DATA_HEADER_SIZE))
+#define APPLE_PERF_NEXT_ENTRY(Entry)  ((APPLE_PERF_ENTRY *) ((UINTN) (Entry) + sizeof (APPLE_PERF_ENTRY) + (Entry)->EntryDataSize))
 
 #pragma pack(pop)
 

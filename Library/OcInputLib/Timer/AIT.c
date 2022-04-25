@@ -28,6 +28,7 @@ OcAppleGenericInputTimerQuirkInit (
   )
 {
   EFI_STATUS  Status;
+
   //
   // Refresh rate needs to be increased to poll mouse and keyboard frequently enough
   //
@@ -39,11 +40,20 @@ OcAppleGenericInputTimerQuirkInit (
       if (mOriginalTimerPeriod > TimerResolution) {
         Status = mTimerProtocol->SetTimerPeriod (mTimerProtocol, TimerResolution);
         if (!EFI_ERROR (Status)) {
-          DEBUG ((DEBUG_INFO, "OCII: AIFTimerBoostInit changed period %d to %d\n",
-            mOriginalTimerPeriod, TimerResolution));
+          DEBUG ((
+            DEBUG_INFO,
+            "OCII: AIFTimerBoostInit changed period %d to %d\n",
+            mOriginalTimerPeriod,
+            TimerResolution
+            ));
         } else {
-          DEBUG ((DEBUG_INFO, "OCII: AIFTimerBoostInit failed to change period %d to %d, error - %r\n",
-            mOriginalTimerPeriod, TimerResolution, Status));
+          DEBUG ((
+            DEBUG_INFO,
+            "OCII: AIFTimerBoostInit failed to change period %d to %d, error - %r\n",
+            mOriginalTimerPeriod,
+            TimerResolution,
+            Status
+            ));
           mTimerProtocol = NULL;
         }
       } else {
@@ -81,13 +91,14 @@ OcAppleGenericInputTimerQuirkExit (
         mOriginalTimerPeriod
         ));
     } else {
-       DEBUG ((
+      DEBUG ((
         DEBUG_INFO,
         "AmiShimTimerBoostExit failed to change current period to %Lu, error - %r\n",
         mOriginalTimerPeriod,
         Status
         ));
     }
+
     mTimerProtocol = NULL;
   }
 

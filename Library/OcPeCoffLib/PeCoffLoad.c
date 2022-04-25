@@ -38,14 +38,14 @@ InternalLoadSections (
   IN  UINT32                       DestinationSize
   )
 {
-  CONST EFI_IMAGE_SECTION_HEADER *Sections;
-  UINT16                         Index;
-  UINT32                         DataSize;
-  UINT32                         PreviousTopRva;
+  CONST EFI_IMAGE_SECTION_HEADER  *Sections;
+  UINT16                          Index;
+  UINT32                          DataSize;
+  UINT32                          PreviousTopRva;
 
-  Sections = (CONST EFI_IMAGE_SECTION_HEADER *) (CONST VOID *) (
-               (CONST CHAR8 *) Context->FileBuffer + Context->SectionsOffset
-               );
+  Sections = (CONST EFI_IMAGE_SECTION_HEADER *)(CONST VOID *)(
+                                                              (CONST CHAR8 *)Context->FileBuffer + Context->SectionsOffset
+                                                              );
   //
   // As the loop zero's the data from the end of the previous section, start
   // with the size of the loaded Image Headers to zero their trailing data.
@@ -63,14 +63,14 @@ InternalLoadSections (
     //
     // Zero from the end of the previous Section to the start of this Section.
     //
-    ZeroMem ((CHAR8 *) Destination + PreviousTopRva, Sections[Index].VirtualAddress - PreviousTopRva);
+    ZeroMem ((CHAR8 *)Destination + PreviousTopRva, Sections[Index].VirtualAddress - PreviousTopRva);
 
     //
     // Load the current Section into memory.
     //
     CopyMem (
-      (CHAR8 *) Destination + Sections[Index].VirtualAddress,
-      (CONST CHAR8 *) Context->FileBuffer + (Sections[Index].PointerToRawData - Context->TeStrippedOffset),
+      (CHAR8 *)Destination + Sections[Index].VirtualAddress,
+      (CONST CHAR8 *)Context->FileBuffer + (Sections[Index].PointerToRawData - Context->TeStrippedOffset),
       DataSize
       );
 
@@ -81,7 +81,7 @@ InternalLoadSections (
   // Zero the trailer after the last Image Section.
   //
   ZeroMem (
-    (CHAR8 *) Destination + PreviousTopRva,
+    (CHAR8 *)Destination + PreviousTopRva,
     DestinationSize - PreviousTopRva
     );
 }
@@ -93,13 +93,13 @@ PeCoffLoadImage (
   IN     UINT32                 DestinationSize
   )
 {
-  CHAR8                          *AlignedDest;
-  UINT32                         AlignOffset;
-  UINT32                         AlignedSize;
-  UINT32                         LoadedHeaderSize;
-  CONST EFI_IMAGE_SECTION_HEADER *Sections;
-  UINTN                          Address;
-  UINTN                          AlignedAddress;
+  CHAR8                           *AlignedDest;
+  UINT32                          AlignOffset;
+  UINT32                          AlignedSize;
+  UINT32                          LoadedHeaderSize;
+  CONST EFI_IMAGE_SECTION_HEADER  *Sections;
+  UINTN                           Address;
+  UINTN                           AlignedAddress;
 
   ASSERT (Context != NULL);
   ASSERT (Destination != NULL);
@@ -118,25 +118,25 @@ PeCoffLoadImage (
     AlignedSize = DestinationSize;
     AlignOffset = 0;
   } else {
-    Address = PTR_TO_ADDR (Destination, DestinationSize);
-    AlignedAddress = ALIGN_VALUE (Address, (UINTN) Context->SectionAlignment);
-    AlignOffset = (UINT32) (AlignedAddress - Address);
-    AlignedSize = DestinationSize - AlignOffset;
+    Address        = PTR_TO_ADDR (Destination, DestinationSize);
+    AlignedAddress = ALIGN_VALUE (Address, (UINTN)Context->SectionAlignment);
+    AlignOffset    = (UINT32)(AlignedAddress - Address);
+    AlignedSize    = DestinationSize - AlignOffset;
     ASSERT (Context->SizeOfImage <= AlignedSize);
-    AlignedDest = (CHAR8 *) Destination + AlignOffset;
+    AlignedDest = (CHAR8 *)Destination + AlignOffset;
     ZeroMem (Destination, AlignOffset);
   }
 
   ASSERT (AlignedSize >= Context->SizeOfImage);
 
-  Sections = (CONST EFI_IMAGE_SECTION_HEADER *) (CONST VOID *) (
-               (CONST CHAR8 *) Context->FileBuffer + Context->SectionsOffset
-               );
+  Sections = (CONST EFI_IMAGE_SECTION_HEADER *)(CONST VOID *)(
+                                                              (CONST CHAR8 *)Context->FileBuffer + Context->SectionsOffset
+                                                              );
   //
   // If configured, load the Image Headers into the memory space.
   //
 
-  if (Sections[0].VirtualAddress != 0 && PcdGetBool (PcdImageLoaderLoadHeader)) {
+  if ((Sections[0].VirtualAddress != 0) && PcdGetBool (PcdImageLoaderLoadHeader)) {
     LoadedHeaderSize = (Context->SizeOfHeaders - Context->TeStrippedOffset);
     CopyMem (AlignedDest, Context->FileBuffer, LoadedHeaderSize);
   } else {
@@ -171,9 +171,9 @@ PeCoffDiscardSections (
   IN OUT PE_COFF_IMAGE_CONTEXT  *Context
   )
 {
-  CONST EFI_IMAGE_SECTION_HEADER *Sections;
-  UINT32                         SectIndex;
-  BOOLEAN                        Discardable;
+  CONST EFI_IMAGE_SECTION_HEADER  *Sections;
+  UINT32                          SectIndex;
+  BOOLEAN                         Discardable;
 
   ASSERT (Context != NULL);
 
@@ -182,12 +182,12 @@ PeCoffDiscardSections (
   // discardable, so we must assume it is no longer valid.
   //
 
-  Context->RelocDirRva = 0;
+  Context->RelocDirRva  = 0;
   Context->RelocDirSize = 0;
 
-  Sections = (CONST EFI_IMAGE_SECTION_HEADER *) (CONST VOID *) (
-               (CONST CHAR8 *) Context->FileBuffer + Context->SectionsOffset
-               );
+  Sections = (CONST EFI_IMAGE_SECTION_HEADER *)(CONST VOID *)(
+                                                              (CONST CHAR8 *)Context->FileBuffer + Context->SectionsOffset
+                                                              );
   //
   // Discard all Image Sections that are flagged as optional.
   //
@@ -196,7 +196,7 @@ PeCoffDiscardSections (
 
     if (Discardable) {
       ZeroMem (
-        (CHAR8 *) Context->ImageBuffer + Sections[SectIndex].VirtualAddress,
+        (CHAR8 *)Context->ImageBuffer + Sections[SectIndex].VirtualAddress,
         Sections[SectIndex].VirtualSize
         );
     }

@@ -27,8 +27,8 @@
 /**
   Conversions to microseconds for use in e.g. gBS->Stall.
 **/
-#define SECONDS_TO_MICROSECONDS(x) ((x) * 1000000)
-#define MS_TO_MICROSECONDS(x)      ((x) * 1000)
+#define SECONDS_TO_MICROSECONDS(x)  ((x) * 1000000)
+#define MS_TO_MICROSECONDS(x)       ((x) * 1000)
 
 /**
   Conversions to nanoseconds for use in e.g. PciIo->PollMem.
@@ -132,10 +132,10 @@ OcCountProtocolInstances (
 **/
 VOID *
 OcGetProtocol (
-  IN  EFI_GUID      *Protocol,
-  IN  UINTN         ErrorLevel,
-  IN  CONST CHAR8   *CallerName     OPTIONAL,
-  IN  CONST CHAR8   *ProtocolName   OPTIONAL
+  IN  EFI_GUID     *Protocol,
+  IN  UINTN        ErrorLevel,
+  IN  CONST CHAR8  *CallerName     OPTIONAL,
+  IN  CONST CHAR8  *ProtocolName   OPTIONAL
   );
 
 /**
@@ -171,7 +171,7 @@ OcReadApplePlatformFirstData (
   IN      APPLE_PLATFORM_INFO_DATABASE_PROTOCOL  *PlatformInfo,
   IN      EFI_GUID                               *DataGuid,
   IN OUT  UINT32                                 *Size,
-     OUT  VOID                                   *Data
+  OUT  VOID                                      *Data
   );
 
 /**
@@ -209,7 +209,7 @@ OcReadApplePlatformData (
   IN      EFI_GUID                               *DataGuid,
   IN      EFI_GUID                               *HobGuid,
   IN OUT  UINT32                                 *Size,
-     OUT  VOID                                   *Data
+  OUT  VOID                                      *Data
   );
 
 /**
@@ -255,8 +255,8 @@ OcConsoleFlush (
   @param  ExpectedValue  Expected value (should be convertible to INTN).
 
 **/
-#if !defined(MDEPKG_NDEBUG)
-  #define ASSERT_EQUALS(Expression, ExpectedValue)    \
+#if !defined (MDEPKG_NDEBUG)
+#define ASSERT_EQUALS(Expression, ExpectedValue)    \
     do {                                      \
       if (DebugAssertEnabled ()) {            \
         if ((Expression) != (ExpectedValue)) {        \
@@ -267,7 +267,7 @@ OcConsoleFlush (
       }                                       \
     } while (FALSE)
 #else
-  #define ASSERT_EQUALS(Expression, ExpectedValue)
+#define ASSERT_EQUALS(Expression, ExpectedValue)
 #endif
 
 #endif // OC_MISC_LIB_H

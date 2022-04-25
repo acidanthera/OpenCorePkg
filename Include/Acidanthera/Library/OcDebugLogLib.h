@@ -19,8 +19,8 @@
 #include <Protocol/OcLog.h>
 #include <Protocol/AppleDebugLog.h>
 
-#define OC_HEX_LOWER(x) "0123456789ABCDEF"[((UINT32) (x) & 0x0FU)]
-#define OC_HEX_UPPER(x) "0123456789ABCDEF"[((UINT32) (x) & 0xF0U) >> 4U]
+#define OC_HEX_LOWER(x)  "0123456789ABCDEF"[((UINT32) (x) & 0x0FU)]
+#define OC_HEX_UPPER(x)  "0123456789ABCDEF"[((UINT32) (x) & 0xF0U) >> 4U]
 
 /**
   Expand device path to human readable string.
@@ -32,23 +32,23 @@
   Debug information that is not logged when NVRAM logging is on.
 **/
 #ifndef DEBUG_BULK_INFO
-  #define DEBUG_BULK_INFO (DEBUG_VERBOSE|DEBUG_INFO)
+#define DEBUG_BULK_INFO  (DEBUG_VERBOSE|DEBUG_INFO)
 #endif
 
 /**
   This is a place print debug messages when they happen after ExitBootServices.
 **/
-#define RUNTIME_DEBUG(x) do { } while (0)
+#define RUNTIME_DEBUG(x)  do { } while (0)
 
 /**
   Pointer debug kit.
 **/
-#if defined(OC_TARGET_DEBUG) || defined(OC_TARGET_NOOPT)
-#define DEBUG_POINTER(x) x
-#elif defined(OC_TARGET_RELEASE)
-#define DEBUG_POINTER(x) NULL
+#if defined (OC_TARGET_DEBUG) || defined (OC_TARGET_NOOPT)
+#define DEBUG_POINTER(x)  x
+#elif defined (OC_TARGET_RELEASE)
+#define DEBUG_POINTER(x)  NULL
 #else
-#error "Define target macro: OC_TARGET_<TARGET>!"
+  #error "Define target macro: OC_TARGET_<TARGET>!"
 #endif
 
 /**
@@ -66,7 +66,7 @@ DebugBreak (
 **/
 VOID
 WaitForKeyPress (
-  IN  CONST CHAR16 *Message
+  IN  CONST CHAR16  *Message
   );
 
 /**
@@ -92,9 +92,9 @@ DebugPrintDevicePath (
 **/
 VOID
 DebugPrintDevicePathForHandle (
-  IN UINTN                     ErrorLevel,
-  IN CONST CHAR8               *Message,
-  IN EFI_HANDLE                Handle       OPTIONAL
+  IN UINTN        ErrorLevel,
+  IN CONST CHAR8  *Message,
+  IN EFI_HANDLE   Handle       OPTIONAL
   );
 
 /**
@@ -107,10 +107,10 @@ DebugPrintDevicePathForHandle (
 **/
 VOID
 DebugPrintHexDump (
-  IN UINTN                     ErrorLevel,
-  IN CONST CHAR8               *Message,
-  IN UINT8                     *Bytes,
-  IN UINTN                     Size
+  IN UINTN        ErrorLevel,
+  IN CONST CHAR8  *Message,
+  IN UINT8        *Bytes,
+  IN UINTN        Size
   );
 
 #endif // OC_DEBUG_LOG_LIB_H

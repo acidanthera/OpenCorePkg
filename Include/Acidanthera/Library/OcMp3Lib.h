@@ -35,13 +35,13 @@
 **/
 EFI_STATUS
 OcDecodeMp3 (
-  IN  CONST VOID                     *InBuffer,
-  IN  UINT32                         InBufferSize,
-  OUT VOID                           **OutBuffer,
-  OUT UINT32                         *OutBufferSize,
-  OUT EFI_AUDIO_IO_PROTOCOL_FREQ     *Frequency,
-  OUT EFI_AUDIO_IO_PROTOCOL_BITS     *Bits,
-  OUT UINT8                          *Channels
+  IN  CONST VOID                  *InBuffer,
+  IN  UINT32                      InBufferSize,
+  OUT VOID                        **OutBuffer,
+  OUT UINT32                      *OutBufferSize,
+  OUT EFI_AUDIO_IO_PROTOCOL_FREQ  *Frequency,
+  OUT EFI_AUDIO_IO_PROTOCOL_BITS  *Bits,
+  OUT UINT8                       *Channels
   );
 
 #endif // OC_MP3_LIB_H

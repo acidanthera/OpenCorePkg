@@ -72,8 +72,8 @@ InternalGetLocalRelocationByOffset (
 **/
 BOOLEAN
 InternalSymbolIsSane32 (
-  IN OUT OC_MACHO_CONTEXT     *Context,
-  IN     CONST MACH_NLIST     *Symbol
+  IN OUT OC_MACHO_CONTEXT  *Context,
+  IN     CONST MACH_NLIST  *Symbol
   );
 
 /**
@@ -104,10 +104,10 @@ InternalSymbolIsSane64 (
 **/
 BOOLEAN
 InternalMachoSymbolGetDirectFileOffset32 (
-  IN OUT OC_MACHO_CONTEXT       *Context,
-  IN     UINT32                 Address,
-  OUT    UINT32                 *FileOffset,
-  OUT    UINT32                 *MaxSize OPTIONAL
+  IN OUT OC_MACHO_CONTEXT  *Context,
+  IN     UINT32            Address,
+  OUT    UINT32            *FileOffset,
+  OUT    UINT32            *MaxSize OPTIONAL
   );
 
 /**
@@ -124,10 +124,10 @@ InternalMachoSymbolGetDirectFileOffset32 (
 **/
 BOOLEAN
 InternalMachoSymbolGetDirectFileOffset64 (
-  IN OUT OC_MACHO_CONTEXT       *Context,
-  IN     UINT64                 Address,
-  OUT    UINT32                 *FileOffset,
-  OUT    UINT32                 *MaxSize OPTIONAL
+  IN OUT OC_MACHO_CONTEXT  *Context,
+  IN     UINT64            Address,
+  OUT    UINT32            *FileOffset,
+  OUT    UINT32            *MaxSize OPTIONAL
   );
 
 /**
@@ -216,7 +216,7 @@ InternalMachoGetNextCommand64 (
   Returns a pointer to the 32-bit Mach-O file at the specified virtual address.
 
   @param[in,out] Context  Context of the Mach-O.
-  @param[in]     Address  Virtual address to look up.    
+  @param[in]     Address  Virtual address to look up.
   @param[out]    MaxSize  Maximum data safely available from FileOffset.
                           If NULL is returned, the output is undefined.
 
@@ -232,7 +232,7 @@ InternalMachoGetFilePointerByAddress32 (
   Returns a pointer to the 64-bit Mach-O file at the specified virtual address.
 
   @param[in,out] Context  Context of the Mach-O.
-  @param[in]     Address  Virtual address to look up.    
+  @param[in]     Address  Virtual address to look up.
   @param[out]    MaxSize  Maximum data safely available from FileOffset.
                           If NULL is returned, the output is undefined.
 
@@ -259,12 +259,12 @@ InternalMachoGetFilePointerByAddress64 (
 **/
 UINT32
 InternalMachoExpandImage32 (
-  IN  OC_MACHO_CONTEXT   *Context,
-  IN  BOOLEAN            CalculateSizeOnly,
-  OUT UINT8              *Destination,
-  IN  UINT32             DestinationSize,
-  IN  BOOLEAN            Strip,
-  OUT UINT64             *FileOffset OPTIONAL
+  IN  OC_MACHO_CONTEXT  *Context,
+  IN  BOOLEAN           CalculateSizeOnly,
+  OUT UINT8             *Destination,
+  IN  UINT32            DestinationSize,
+  IN  BOOLEAN           Strip,
+  OUT UINT64            *FileOffset OPTIONAL
   );
 
 /**
@@ -282,12 +282,12 @@ InternalMachoExpandImage32 (
 **/
 UINT32
 InternalMachoExpandImage64 (
-  IN  OC_MACHO_CONTEXT   *Context,
-  IN  BOOLEAN            CalculateSizeOnly,
-  OUT UINT8              *Destination,
-  IN  UINT32             DestinationSize,
-  IN  BOOLEAN            Strip,
-  OUT UINT64             *FileOffset OPTIONAL
+  IN  OC_MACHO_CONTEXT  *Context,
+  IN  BOOLEAN           CalculateSizeOnly,
+  OUT UINT8             *Destination,
+  IN  UINT32            DestinationSize,
+  IN  BOOLEAN           Strip,
+  OUT UINT64            *FileOffset OPTIONAL
   );
 
 /**
@@ -301,8 +301,8 @@ InternalMachoExpandImage64 (
 **/
 BOOLEAN
 InternalMachoMergeSegments32 (
-  IN OUT OC_MACHO_CONTEXT     *Context,
-  IN     CONST CHAR8          *Prefix
+  IN OUT OC_MACHO_CONTEXT  *Context,
+  IN     CONST CHAR8       *Prefix
   );
 
 /**
@@ -316,8 +316,8 @@ InternalMachoMergeSegments32 (
 **/
 BOOLEAN
 InternalMachoMergeSegments64 (
-  IN OUT OC_MACHO_CONTEXT     *Context,
-  IN     CONST CHAR8          *Prefix
+  IN OUT OC_MACHO_CONTEXT  *Context,
+  IN     CONST CHAR8       *Prefix
   );
 
 #endif // OC_MACHO_LIB_INTERNAL_H_

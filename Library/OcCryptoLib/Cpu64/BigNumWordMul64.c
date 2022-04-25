@@ -13,7 +13,7 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 
 #include "../BigNumLib.h"
 
-#if defined(_MSC_VER) && !defined(__clang__)
+#if defined (_MSC_VER) && !defined (__clang__)
   #include <intrin.h>
   #pragma intrinsic(_umul128)
 #endif
@@ -28,18 +28,18 @@ BigNumWordMul64 (
   ASSERT (OC_BN_WORD_SIZE == sizeof (UINT64));
   ASSERT (Hi != NULL);
 
-#if !defined(_MSC_VER) || defined(__clang__)
+ #if !defined (_MSC_VER) || defined (__clang__)
   //
   // Clang and GCC support the __int128 type for edk2 builds.
   //
-  unsigned __int128 Result = (unsigned __int128)A * B;
+  unsigned __int128  Result = (unsigned __int128)A * B;
   *Hi = (OC_BN_WORD)(Result >> OC_BN_WORD_NUM_BITS);
   return (OC_BN_WORD)Result;
-#else
+ #else
   //
   // MSVC does not support the __int128 type for edk2 builds, but a proprietary
   // intrinsic function declared above.
   //
   return _umul128 (A, B, Hi);
-#endif
+ #endif
 }

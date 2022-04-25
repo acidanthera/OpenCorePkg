@@ -20,7 +20,7 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
   { 0x48465300, 0x0000, 0x11AA,         \
     { 0xAA, 0x11, 0x00, 0x30, 0x65, 0x43, 0xEC, 0xAC } }
 
-extern EFI_GUID gAppleHfsPartitionTypeGuid;
+extern EFI_GUID  gAppleHfsPartitionTypeGuid;
 
 /**
   CoreStorage HFS+ volume.
@@ -29,7 +29,7 @@ extern EFI_GUID gAppleHfsPartitionTypeGuid;
   { 0x53746F72, 0x6167, 0x11AA,           \
     { 0xAA, 0x11, 0x00, 0x30, 0x65, 0x43, 0xEC, 0xAC } }
 
-extern EFI_GUID gAppleHfsCsPartitionTypeGuid;
+extern EFI_GUID  gAppleHfsCsPartitionTypeGuid;
 
 /**
   Boot (Recovery) HFS+ volume.
@@ -38,7 +38,7 @@ extern EFI_GUID gAppleHfsCsPartitionTypeGuid;
   { 0x426F6F74, 0x0000, 0x11AA,             \
     { 0xAA, 0x11, 0x00, 0x30, 0x65, 0x43, 0xEC, 0xAC } }
 
-extern EFI_GUID gAppleHfsBootPartitionTypeGuid;
+extern EFI_GUID  gAppleHfsBootPartitionTypeGuid;
 
 /**
   Accessible from EFI_FILE_PROTOCOL::GetInfo, this GUID
@@ -48,6 +48,6 @@ extern EFI_GUID gAppleHfsBootPartitionTypeGuid;
   { 0xFA99420C, 0x88F1, 0x11E7,  \
     { 0x95, 0xF6, 0xB8, 0xE8, 0x56, 0x2C, 0xBA, 0xFA } }
 
-extern EFI_GUID gAppleHfsUuidInfoGuid;
+extern EFI_GUID  gAppleHfsUuidInfoGuid;
 
 #endif // APPLE_HFS_INFO_H

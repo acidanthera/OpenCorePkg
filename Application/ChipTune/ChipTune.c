@@ -52,7 +52,7 @@ UefiMain (
   OcSetConsoleResolution (0, 0, 0, FALSE);
 
   Status = GetArguments (&Argc, &Argv);
-  if (EFI_ERROR (Status) || Argc < 5) {
+  if (EFI_ERROR (Status) || (Argc < 5)) {
     Print (L"Usage: ChipTune <any|hda|beep> <count> <signal> <silence> [<frequency>]\n");
     return EFI_SUCCESS;
   }
@@ -88,25 +88,25 @@ UefiMain (
   HdaProtocol     = NULL;
   BeepGenProtocol = NULL;
 
-  if (OcStriCmp (Argv[1], L"any") == 0 || OcStriCmp (Argv[1], L"beep") == 0) {
+  if ((OcStriCmp (Argv[1], L"any") == 0) || (OcStriCmp (Argv[1], L"beep") == 0)) {
     Status = gBS->LocateProtocol (
-      &gAppleBeepGenProtocolGuid,
-      NULL,
-      (VOID **) &BeepGenProtocol
-      );
-    if (EFI_ERROR (Status) || BeepGenProtocol->GenBeep == NULL) {
+                    &gAppleBeepGenProtocolGuid,
+                    NULL,
+                    (VOID **)&BeepGenProtocol
+                    );
+    if (EFI_ERROR (Status) || (BeepGenProtocol->GenBeep == NULL)) {
       Print (L"Beep protocol is unusable - %r\n", Status);
       BeepGenProtocol = NULL;
     }
   }
 
-  if (BeepGenProtocol == NULL && (OcStriCmp (Argv[1], L"any") == 0 || OcStriCmp (Argv[1], L"hda") == 0)) {
+  if ((BeepGenProtocol == NULL) && ((OcStriCmp (Argv[1], L"any") == 0) || (OcStriCmp (Argv[1], L"hda") == 0))) {
     Status = gBS->LocateProtocol (
-      &gAppleHighDefinitionAudioProtocolGuid,
-      NULL,
-      (VOID **) &HdaProtocol
-      );
-    if (EFI_ERROR (Status) || HdaProtocol->PlayTone == NULL) {
+                    &gAppleHighDefinitionAudioProtocolGuid,
+                    NULL,
+                    (VOID **)&HdaProtocol
+                    );
+    if (EFI_ERROR (Status) || (HdaProtocol->PlayTone == NULL)) {
       Print (L"HDA protocol is unusable - %r\n", Status);
       HdaProtocol = NULL;
     }
@@ -114,26 +114,26 @@ UefiMain (
 
   Print (
     L"Trying playback %u %Lu %Lu %d\n",
-    (UINT32) Count,
-    (UINT64) Signal,
-    (UINT64) Silence,
-    (UINT64) Frequency
+    (UINT32)Count,
+    (UINT64)Signal,
+    (UINT64)Silence,
+    (UINT64)Frequency
     );
 
   if (BeepGenProtocol != NULL) {
     Status = BeepGenProtocol->GenBeep (
-      (UINT32) Count,
-      Signal,
-      Silence
-      );
+                                (UINT32)Count,
+                                Signal,
+                                Silence
+                                );
   } else if (HdaProtocol != NULL) {
     Status = HdaProtocol->PlayTone (
-      HdaProtocol,
-      (UINT32) Count,
-      Signal,
-      Silence,
-      Frequency
-      );
+                            HdaProtocol,
+                            (UINT32)Count,
+                            Signal,
+                            Silence,
+                            Frequency
+                            );
   } else {
     Status = EFI_UNSUPPORTED;
   }

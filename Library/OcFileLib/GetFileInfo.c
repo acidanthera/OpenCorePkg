@@ -37,10 +37,10 @@ OcGetFileInfo (
   OUT UINTN              *RealFileInfoSize  OPTIONAL
   )
 {
-  VOID       *FileInfoBuffer;
+  VOID  *FileInfoBuffer;
 
-  UINTN      FileInfoSize;
-  EFI_STATUS Status;
+  UINTN       FileInfoSize;
+  EFI_STATUS  Status;
 
   FileInfoSize   = 0;
   FileInfoBuffer = NULL;
@@ -52,13 +52,14 @@ OcGetFileInfo (
                    NULL
                    );
 
-  if (Status == EFI_BUFFER_TOO_SMALL && FileInfoSize >= MinFileInfoSize) {
+  if ((Status == EFI_BUFFER_TOO_SMALL) && (FileInfoSize >= MinFileInfoSize)) {
     //
     // Some drivers (i.e. built-in 32-bit Apple HFS driver) may possibly omit null terminators from file info data.
     //
     if (CompareGuid (InformationType, &gEfiFileInfoGuid) && OcOverflowAddUN (FileInfoSize, sizeof (CHAR16), &FileInfoSize)) {
       return NULL;
     }
+
     FileInfoBuffer = AllocateZeroPool (FileInfoSize);
 
     if (FileInfoBuffer != NULL) {

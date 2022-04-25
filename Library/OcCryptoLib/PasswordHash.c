@@ -22,23 +22,23 @@ OcHashPasswordSha512 (
   OUT UINT8        *Hash
   )
 {
-  UINT32         Index;
-  SHA512_CONTEXT ShaContext;
+  UINT32          Index;
+  SHA512_CONTEXT  ShaContext;
 
   ASSERT (Password != NULL);
   ASSERT (Hash != NULL);
 
-  Sha512Init   (&ShaContext);
+  Sha512Init (&ShaContext);
   Sha512Update (&ShaContext, Password, PasswordSize);
   Sha512Update (&ShaContext, Salt, SaltSize);
-  Sha512Final  (&ShaContext, Hash);
+  Sha512Final (&ShaContext, Hash);
   //
   // The hash function is applied iteratively to slow down bruteforce attacks.
   // The iteration count has been chosen to take roughly three seconds on
   // modern hardware.
   //
   for (Index = 0; Index < 5000000; ++Index) {
-    Sha512Init   (&ShaContext);
+    Sha512Init (&ShaContext);
     Sha512Update (&ShaContext, Hash, SHA512_DIGEST_SIZE);
     //
     // Password and Salt are re-added into hashing to, in case of a hash
@@ -46,8 +46,9 @@ OcHashPasswordSha512 (
     //
     Sha512Update (&ShaContext, Password, PasswordSize);
     Sha512Update (&ShaContext, Salt, SaltSize);
-    Sha512Final  (&ShaContext, Hash);
+    Sha512Final (&ShaContext, Hash);
   }
+
   SecureZeroMem (&ShaContext, sizeof (ShaContext));
 }
 
@@ -73,8 +74,8 @@ OcVerifyPasswordSha512 (
   IN CONST UINT8  *RefHash
   )
 {
-  BOOLEAN Result;
-  UINT8   VerifyHash[SHA512_DIGEST_SIZE];
+  BOOLEAN  Result;
+  UINT8    VerifyHash[SHA512_DIGEST_SIZE];
 
   ASSERT (Password != NULL);
   ASSERT (RefHash != NULL);

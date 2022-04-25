@@ -32,15 +32,15 @@
 #include <Library/OcBootManagementLib.h>
 #include <Library/OcFlexArrayLib.h>
 
-UINTN	  gGpioSetupStageMask = GPIO_SETUP_STAGE_NONE;
-UINTN	  gGpioPinMask        = GPIO_PIN_MASK_AUTO;
-BOOLEAN gRestoreNoSnoop     = FALSE;
+UINTN    gGpioSetupStageMask = GPIO_SETUP_STAGE_NONE;
+UINTN    gGpioPinMask        = GPIO_PIN_MASK_AUTO;
+BOOLEAN  gRestoreNoSnoop     = FALSE;
 
 /**
   HdaController Driver Binding.
 **/
 EFI_DRIVER_BINDING_PROTOCOL
-gHdaControllerDriverBinding = {
+  gHdaControllerDriverBinding = {
   HdaControllerDriverBindingSupported,
   HdaControllerDriverBindingStart,
   HdaControllerDriverBindingStop,
@@ -53,7 +53,7 @@ gHdaControllerDriverBinding = {
   HdaCodec Driver Binding.
 **/
 EFI_DRIVER_BINDING_PROTOCOL
-gHdaCodecDriverBinding = {
+  gHdaCodecDriverBinding = {
   HdaCodecDriverBindingSupported,
   HdaCodecDriverBindingStart,
   HdaCodecDriverBindingStop,
@@ -64,23 +64,23 @@ gHdaCodecDriverBinding = {
 
 EFI_STATUS
 EFIAPI
-AudioDxeInit(
+AudioDxeInit (
   IN EFI_HANDLE        ImageHandle,
   IN EFI_SYSTEM_TABLE  *SystemTable
   )
 {
-  EFI_STATUS                    Status;
-  EFI_LOADED_IMAGE_PROTOCOL     *LoadedImage;
-  OC_FLEX_ARRAY                 *ParsedLoadOptions;
+  EFI_STATUS                 Status;
+  EFI_LOADED_IMAGE_PROTOCOL  *LoadedImage;
+  OC_FLEX_ARRAY              *ParsedLoadOptions;
 
   //
   // Parse optional driver params.
   //
   Status = gBS->HandleProtocol (
-    ImageHandle,
-    &gEfiLoadedImageProtocolGuid,
-    (VOID **) &LoadedImage
-    );
+                  ImageHandle,
+                  &gEfiLoadedImageProtocolGuid,
+                  (VOID **)&LoadedImage
+                  );
 
   if (EFI_ERROR (Status)) {
     return Status;
@@ -91,9 +91,10 @@ AudioDxeInit(
     gRestoreNoSnoop = OcHasParsedVar (ParsedLoadOptions, L"--restore-nosnoop", TRUE);
 
     Status = OcParsedVarsGetInt (ParsedLoadOptions, L"--gpio-setup", &gGpioSetupStageMask, TRUE);
-    if (Status == EFI_NOT_FOUND && OcHasParsedVar (ParsedLoadOptions, L"--gpio-setup", TRUE)) {
+    if ((Status == EFI_NOT_FOUND) && OcHasParsedVar (ParsedLoadOptions, L"--gpio-setup", TRUE)) {
       gGpioSetupStageMask = GPIO_SETUP_STAGE_ALL;
     }
+
     DEBUG ((DEBUG_INFO, "HDA: GPIO setup stages 0x%X, restore NSNPEN %d\n", gGpioSetupStageMask, gRestoreNoSnoop));
 
     if (gGpioSetupStageMask != GPIO_SETUP_STAGE_NONE) {
@@ -115,13 +116,13 @@ AudioDxeInit(
   // Register HdaController Driver Binding.
   //
   Status = EfiLibInstallDriverBindingComponentName2 (
-    ImageHandle,
-    SystemTable,
-    &gHdaControllerDriverBinding,
-    ImageHandle,
-    &gHdaControllerComponentName,
-    &gHdaControllerComponentName2
-    );
+             ImageHandle,
+             SystemTable,
+             &gHdaControllerDriverBinding,
+             ImageHandle,
+             &gHdaControllerComponentName,
+             &gHdaControllerComponentName2
+             );
 
   if (EFI_ERROR (Status)) {
     return Status;
@@ -131,13 +132,13 @@ AudioDxeInit(
   // Register HdaCodec Driver Binding.
   //
   Status = EfiLibInstallDriverBindingComponentName2 (
-    ImageHandle,
-    SystemTable,
-    &gHdaCodecDriverBinding,
-    NULL,
-    &gHdaCodecComponentName,
-    &gHdaCodecComponentName2
-    );
+             ImageHandle,
+             SystemTable,
+             &gHdaCodecDriverBinding,
+             NULL,
+             &gHdaCodecComponentName,
+             &gHdaCodecComponentName2
+             );
 
   ASSERT_EFI_ERROR (Status);
   if (EFI_ERROR (Status)) {
@@ -145,11 +146,11 @@ AudioDxeInit(
   }
 
   Status = gBS->InstallMultipleProtocolInterfaces (
-    &ImageHandle,
-    &gEfiAudioDecodeProtocolGuid,
-    &gEfiAudioDecodeProtocol,
-    NULL
-    );
+                  &ImageHandle,
+                  &gEfiAudioDecodeProtocolGuid,
+                  &gEfiAudioDecodeProtocol,
+                  NULL
+                  );
 
   ASSERT_EFI_ERROR (Status);
   if (EFI_ERROR (Status)) {

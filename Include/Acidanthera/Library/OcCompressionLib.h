@@ -19,7 +19,7 @@
   Maximumum compression and decompression buffer size may vary from
   0 to OC_COMPRESSION_MAX_LENGTH inclusive.
 **/
-#define OC_COMPRESSION_MAX_LENGTH BASE_1GB
+#define OC_COMPRESSION_MAX_LENGTH  BASE_1GB
 
 /**
   Allow the use of extra adler32 validation.
@@ -93,10 +93,10 @@ DecompressLZVN (
 **/
 UINT8 *
 CompressZLIB (
-  OUT UINT8         *Dst,
-  IN  UINT32        DstLen,
-  IN  CONST UINT8   *Src,
-  IN  UINT32        SrcLen
+  OUT UINT8        *Dst,
+  IN  UINT32       DstLen,
+  IN  CONST UINT8  *Src,
+  IN  UINT32       SrcLen
   );
 
 /**
@@ -133,13 +133,13 @@ DecompressZLIB (
 **/
 UINT32
 DecompressMaskedRLE24 (
-  OUT UINT8   *Dst,
-  IN  UINT32  DstLen,
-  IN  UINT8   *Src,
-  IN  UINT32  SrcLen,
-  IN  UINT8   *Mask,
-  IN  UINT32  MaskLen,
-  IN  BOOLEAN Premultiply
+  OUT UINT8    *Dst,
+  IN  UINT32   DstLen,
+  IN  UINT8    *Src,
+  IN  UINT32   SrcLen,
+  IN  UINT8    *Mask,
+  IN  UINT32   MaskLen,
+  IN  BOOLEAN  Premultiply
   );
 
 /**

@@ -29,27 +29,27 @@
 
 EFI_STATUS
 OcActivateHibernateWake (
-  IN UINT32                       HibernateMask
+  IN UINT32  HibernateMask
   )
 {
-  EFI_STATUS               Status;
-  UINTN                    Size;
-  UINT32                   Attributes;
-  VOID                     *Value;
-  AppleRTCHibernateVars    RtcVars;
-  BOOLEAN                  HasHibernateInfo;
-  BOOLEAN                  HasHibernateInfoInRTC;
-  UINT8                    Index;
-  UINT8                    *RtcRawVars;
-  EFI_DEVICE_PATH_PROTOCOL *BootImagePath;
-  EFI_DEVICE_PATH_PROTOCOL *RemainingPath;
-  INTN                     NumPatchedNodes;
+  EFI_STATUS                Status;
+  UINTN                     Size;
+  UINT32                    Attributes;
+  VOID                      *Value;
+  AppleRTCHibernateVars     RtcVars;
+  BOOLEAN                   HasHibernateInfo;
+  BOOLEAN                   HasHibernateInfoInRTC;
+  UINT8                     Index;
+  UINT8                     *RtcRawVars;
+  EFI_DEVICE_PATH_PROTOCOL  *BootImagePath;
+  EFI_DEVICE_PATH_PROTOCOL  *RemainingPath;
+  INTN                      NumPatchedNodes;
 
   if (HibernateMask == HIBERNATE_MODE_NONE) {
     return EFI_INVALID_PARAMETER;
   }
 
-  HasHibernateInfo = FALSE;
+  HasHibernateInfo      = FALSE;
   HasHibernateInfoInRTC = FALSE;
 
   //
@@ -85,9 +85,9 @@ OcActivateHibernateWake (
       // WARN: BootImagePath must be allocated from pool as it may be reallocated.
       //
       NumPatchedNodes = OcFixAppleBootDevicePath (
-        &BootImagePath,
-        &RemainingPath
-        );
+                          &BootImagePath,
+                          &RemainingPath
+                          );
       if (NumPatchedNodes > 0) {
         DebugPrintDevicePath (
           DEBUG_INFO,
@@ -108,6 +108,7 @@ OcActivateHibernateWake (
                         BootImagePath
                         );
       }
+
       if (NumPatchedNodes >= 0) {
         DebugPrintDevicePath (
           DEBUG_INFO,
@@ -123,9 +124,9 @@ OcActivateHibernateWake (
     FreePool (BootImagePath);
   }
 
-  DEBUG ((DEBUG_INFO, "OCB: boot-image is %u bytes - %r\n", (UINT32) Size, Status));
+  DEBUG ((DEBUG_INFO, "OCB: boot-image is %u bytes - %r\n", (UINT32)Size, Status));
 
-  RtcRawVars = (UINT8 *) &RtcVars;
+  RtcRawVars = (UINT8 *)&RtcVars;
 
   //
   // Work with RTC memory if allowed.
@@ -136,9 +137,9 @@ OcActivateHibernateWake (
     }
 
     HasHibernateInfoInRTC = RtcVars.signature[0] == 'A'
-                         && RtcVars.signature[1] == 'A'
-                         && RtcVars.signature[2] == 'P'
-                         && RtcVars.signature[3] == 'L';
+                            && RtcVars.signature[1] == 'A'
+                            && RtcVars.signature[2] == 'P'
+                            && RtcVars.signature[3] == 'L';
     HasHibernateInfo = HasHibernateInfoInRTC;
 
     DEBUG ((DEBUG_INFO, "OCB: RTC hibernation is %d\n", HasHibernateInfoInRTC));
@@ -150,12 +151,12 @@ OcActivateHibernateWake (
     // Prior to 10.13.6.
     //
     Status = GetVariable2 (L"IOHibernateRTCVariables", &gAppleBootVariableGuid, &Value, &Size);
-    if (!HasHibernateInfo && !EFI_ERROR (Status) && Size == sizeof (RtcVars)) {
+    if (!HasHibernateInfo && !EFI_ERROR (Status) && (Size == sizeof (RtcVars))) {
       CopyMem (RtcRawVars, Value, sizeof (RtcVars));
       HasHibernateInfo = RtcVars.signature[0] == 'A'
-                      && RtcVars.signature[1] == 'A'
-                      && RtcVars.signature[2] == 'P'
-                      && RtcVars.signature[3] == 'L';
+                         && RtcVars.signature[1] == 'A'
+                         && RtcVars.signature[2] == 'P'
+                         && RtcVars.signature[3] == 'L';
     }
 
     DEBUG ((
@@ -163,7 +164,7 @@ OcActivateHibernateWake (
       "OCB: NVRAM hibernation is %d / %r / %u\n",
       HasHibernateInfo,
       Status,
-      (UINT32) Size
+      (UINT32)Size
       ));
 
     //
@@ -171,12 +172,12 @@ OcActivateHibernateWake (
     //
     if (!EFI_ERROR (Status)) {
       Status = gRT->SetVariable (
-        L"IOHibernateRTCVariables",
-        &gAppleBootVariableGuid,
-        EFI_VARIABLE_NON_VOLATILE | EFI_VARIABLE_BOOTSERVICE_ACCESS | EFI_VARIABLE_RUNTIME_ACCESS,
-        0,
-        NULL
-        );
+                      L"IOHibernateRTCVariables",
+                      &gAppleBootVariableGuid,
+                      EFI_VARIABLE_NON_VOLATILE | EFI_VARIABLE_BOOTSERVICE_ACCESS | EFI_VARIABLE_RUNTIME_ACCESS,
+                      0,
+                      NULL
+                      );
       SecureZeroMem (Value, Size);
       FreePool (Value);
     }
@@ -187,32 +188,32 @@ OcActivateHibernateWake (
   //
   if (HasHibernateInfo) {
     gRT->SetVariable (
-      L"boot-image-key",
-      &gAppleBootVariableGuid,
-      EFI_VARIABLE_BOOTSERVICE_ACCESS,
-      sizeof (RtcVars.wiredCryptKey),
-      RtcVars.wiredCryptKey
-      );
+           L"boot-image-key",
+           &gAppleBootVariableGuid,
+           EFI_VARIABLE_BOOTSERVICE_ACCESS,
+           sizeof (RtcVars.wiredCryptKey),
+           RtcVars.wiredCryptKey
+           );
     gRT->SetVariable (
-      L"boot-signature",
-      &gAppleBootVariableGuid,
-      EFI_VARIABLE_BOOTSERVICE_ACCESS,
-      sizeof (RtcVars.booterSignature),
-      RtcVars.booterSignature
-      );
+           L"boot-signature",
+           &gAppleBootVariableGuid,
+           EFI_VARIABLE_BOOTSERVICE_ACCESS,
+           sizeof (RtcVars.booterSignature),
+           RtcVars.booterSignature
+           );
   }
 
   //
   // Erase RTC memory similarly to AppleBds.
   //
   if (HasHibernateInfoInRTC) {
-    SecureZeroMem (RtcRawVars, sizeof(AppleRTCHibernateVars));
+    SecureZeroMem (RtcRawVars, sizeof (AppleRTCHibernateVars));
     RtcVars.signature[0] = 'D';
     RtcVars.signature[1] = 'E';
     RtcVars.signature[2] = 'A';
     RtcVars.signature[3] = 'D';
 
-    for (Index = 0; Index < sizeof(AppleRTCHibernateVars); Index++) {
+    for (Index = 0; Index < sizeof (AppleRTCHibernateVars); Index++) {
       OcRtcWrite (Index + 128, RtcRawVars[Index]);
     }
   }
@@ -232,8 +233,8 @@ OcIsAppleHibernateWake (
   VOID
   )
 {
-  EFI_STATUS   Status;
-  UINTN        ValueSize;
+  EFI_STATUS  Status;
+  UINTN       ValueSize;
 
   //
   // This is reverse engineered from boot.efi.
@@ -241,36 +242,36 @@ OcIsAppleHibernateWake (
   // Starting with 10.13.6 boot-switch-vars is no longer supported.
   //
   ValueSize = 0;
-  Status = gRT->GetVariable (
-    L"boot-signature",
-    &gAppleBootVariableGuid,
-    NULL,
-    &ValueSize,
-    NULL
-    );
+  Status    = gRT->GetVariable (
+                     L"boot-signature",
+                     &gAppleBootVariableGuid,
+                     NULL,
+                     &ValueSize,
+                     NULL
+                     );
 
   if (Status == EFI_BUFFER_TOO_SMALL) {
     ValueSize = 0;
-    Status = gRT->GetVariable (
-      L"boot-image-key",
-      &gAppleBootVariableGuid,
-      NULL,
-      &ValueSize,
-      NULL
-      );
+    Status    = gRT->GetVariable (
+                       L"boot-image-key",
+                       &gAppleBootVariableGuid,
+                       NULL,
+                       &ValueSize,
+                       NULL
+                       );
 
     if (Status == EFI_BUFFER_TOO_SMALL) {
       return TRUE;
     }
   } else {
     ValueSize = 0;
-    Status = gRT->GetVariable (
-      L"boot-switch-vars",
-      &gAppleBootVariableGuid,
-      NULL,
-      &ValueSize,
-      NULL
-      );
+    Status    = gRT->GetVariable (
+                       L"boot-switch-vars",
+                       &gAppleBootVariableGuid,
+                       NULL,
+                       &ValueSize,
+                       NULL
+                       );
 
     if (Status == EFI_BUFFER_TOO_SMALL) {
       return TRUE;

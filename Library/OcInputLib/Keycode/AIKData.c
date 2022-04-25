@@ -36,8 +36,8 @@ AIKDataEmpty (
 
 EFI_STATUS
 AIKDataReadEntry (
-  IN OUT AIK_DATA          *Data,
-     OUT AMI_EFI_KEY_DATA  *KeyData
+  IN OUT AIK_DATA       *Data,
+  OUT AMI_EFI_KEY_DATA  *KeyData
   )
 {
   if (Data->KeyBufferSize == 0) {

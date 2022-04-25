@@ -39,7 +39,7 @@ ENTRY_POINT (
     DEBUG ((DEBUG_ERROR, "Please provide a valid Disk Image path\n"));
     return -1;
   }
-  
+
   if ((argc % 2) != 1) {
     DEBUG ((DEBUG_ERROR, "Please provide a chunklist file for each DMG, enter \'n\' to skip\n"));
   }
@@ -62,9 +62,10 @@ ENTRY_POINT (
     ExtentTable.ExtentCount = MIN (NUM_EXTENTS, ARRAY_SIZE (ExtentTable.Extents));
 
     for (Index2 = 0; Index2 < ExtentTable.ExtentCount; ++Index2) {
-      ExtentTable.Extents[Index2].Start = (UINTN) Dmg + (Index2 * (DmgSize / ExtentTable.ExtentCount));
+      ExtentTable.Extents[Index2].Start  = (UINTN)Dmg + (Index2 * (DmgSize / ExtentTable.ExtentCount));
       ExtentTable.Extents[Index2].Length = (DmgSize / ExtentTable.ExtentCount);
     }
+
     if (Index2 != 0) {
       ExtentTable.Extents[Index2 - 1].Length += (DmgSize - (Index2 * (DmgSize / ExtentTable.ExtentCount)));
     }
@@ -117,11 +118,11 @@ ENTRY_POINT (
 
     DEBUG ((DEBUG_ERROR, "Decompressed the entire DMG...\n"));
 
-#if 0
+ #if 0
     UserWriteFile ("out.bin", UncompDmg, UncompSize);
-#endif
+ #endif
 
-#if 0
+ #if 0
     UINT8       Digest[CC_MD5_DIGEST_LENGTH];
     CC_MD5_CTX  Context;
     UINTN       Index3;
@@ -130,14 +131,15 @@ ENTRY_POINT (
     CC_MD5_Update (&Context, UncompDmg, UncompSize);
     CC_MD5_Final (Digest, &Context);
     for (Index3 = 0; Index3 < CC_MD5_DIGEST_LENGTH; ++Index3) {
-      DEBUG ((DEBUG_ERROR, "%02x", (UINT32) Digest[Index3]));
+      DEBUG ((DEBUG_ERROR, "%02x", (UINT32)Digest[Index3]));
     }
+
     DEBUG ((DEBUG_ERROR, "\n"));
-#endif
+ #endif
 
     DEBUG ((DEBUG_ERROR, "Success...\n"));
 
-  ContinueDmgLoop:
+ContinueDmgLoop:
     if (DmgContextValid) {
       OcAppleDiskImageFreeContext (&DmgContext);
     }
@@ -183,6 +185,6 @@ LLVMFuzzerTestOneInput (
     ASAN_UNPOISON_MEMORY_REGION (Test + Index, MAX_OUTPUT - Index);
     ASSERT (CurrentLength <= Index);
   }
-  
+
   return 0;
 }

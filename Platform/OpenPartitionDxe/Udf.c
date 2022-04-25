@@ -18,7 +18,7 @@
 
 #include "Partition.h"
 
-#define MAX_CORRECTION_BLOCKS_NUM 512u
+#define MAX_CORRECTION_BLOCKS_NUM  512u
 
 //
 // C5BD4D42-1A76-4996-8956-73CDA326CD0A
@@ -29,25 +29,27 @@
   }
 
 typedef struct {
-  VENDOR_DEVICE_PATH        DevicePath;
-  EFI_DEVICE_PATH_PROTOCOL  End;
+  VENDOR_DEVICE_PATH          DevicePath;
+  EFI_DEVICE_PATH_PROTOCOL    End;
 } UDF_DEVICE_PATH;
 
 //
 // Vendor-Defined Device Path GUID for UDF file system
 //
-EFI_GUID gUdfDevPathGuid = EFI_UDF_DEVICE_PATH_GUID;
+EFI_GUID  gUdfDevPathGuid = EFI_UDF_DEVICE_PATH_GUID;
 
 //
 // Vendor-Defined Media Device Path for UDF file system
 //
-UDF_DEVICE_PATH gUdfDevicePath = {
-  { { MEDIA_DEVICE_PATH, MEDIA_VENDOR_DP,
-      { sizeof (VENDOR_DEVICE_PATH), 0 } },
+UDF_DEVICE_PATH  gUdfDevicePath = {
+  {
+    { MEDIA_DEVICE_PATH,                 MEDIA_VENDOR_DP,
+        { sizeof (VENDOR_DEVICE_PATH),       0 }
+    },
     EFI_UDF_DEVICE_PATH_GUID
   },
-  { END_DEVICE_PATH_TYPE, END_ENTIRE_DEVICE_PATH_SUBTYPE,
-    { sizeof (EFI_DEVICE_PATH_PROTOCOL), 0 }
+  { END_DEVICE_PATH_TYPE,              END_ENTIRE_DEVICE_PATH_SUBTYPE,
+        { sizeof (EFI_DEVICE_PATH_PROTOCOL), 0 }
   }
 };
 
@@ -99,10 +101,10 @@ FindAnchorVolumeDescriptorPointer (
   // That said, we define a magic number of 512 blocks to be used as correction
   // when attempting to find AVDP and define last block number.
   //
-  BlockSize = BlockIo->Media->BlockSize;
-  EndLBA = BlockIo->Media->LastBlock;
+  BlockSize          = BlockIo->Media->BlockSize;
+  EndLBA             = BlockIo->Media->LastBlock;
   *LastRecordedBlock = EndLBA;
-  AvdpsCount = 0;
+  AvdpsCount         = 0;
 
   //
   // Check if the block size of the underlying media can hold the data of an
@@ -122,12 +124,12 @@ FindAnchorVolumeDescriptorPointer (
   // Find AVDP at block 256
   //
   Status = DiskIo->ReadDisk (
-    DiskIo,
-    BlockIo->Media->MediaId,
-    MultU64x32 (256, BlockSize),
-    sizeof (*AnchorPoint),
-    AnchorPoint
-    );
+                     DiskIo,
+                     BlockIo->Media->MediaId,
+                     MultU64x32 (256, BlockSize),
+                     sizeof (*AnchorPoint),
+                     AnchorPoint
+                     );
   if (EFI_ERROR (Status)) {
     return Status;
   }
@@ -146,12 +148,12 @@ FindAnchorVolumeDescriptorPointer (
   // Find AVDP at block N - 256
   //
   Status = DiskIo->ReadDisk (
-    DiskIo,
-    BlockIo->Media->MediaId,
-    MultU64x32 ((UINT64)EndLBA - 256, BlockSize),
-    sizeof (*AnchorPoint),
-    AnchorPoint
-    );
+                     DiskIo,
+                     BlockIo->Media->MediaId,
+                     MultU64x32 ((UINT64)EndLBA - 256, BlockSize),
+                     sizeof (*AnchorPoint),
+                     AnchorPoint
+                     );
   if (EFI_ERROR (Status)) {
     return Status;
   }
@@ -159,10 +161,15 @@ FindAnchorVolumeDescriptorPointer (
   //
   // Check if read block is a valid AVDP descriptor
   //
-  if (DescriptorTag->TagIdentifier == UdfAnchorVolumeDescriptorPointer &&
-      ++AvdpsCount == 2) {
-    DEBUG ((DEBUG_INFO, "%a: found AVDP at block %Ld\n", __FUNCTION__,
-            EndLBA - 256));
+  if ((DescriptorTag->TagIdentifier == UdfAnchorVolumeDescriptorPointer) &&
+      (++AvdpsCount == 2))
+  {
+    DEBUG ((
+      DEBUG_INFO,
+      "%a: found AVDP at block %Ld\n",
+      __FUNCTION__,
+      EndLBA - 256
+      ));
     return EFI_SUCCESS;
   }
 
@@ -177,12 +184,12 @@ FindAnchorVolumeDescriptorPointer (
   // Find AVDP at block N
   //
   Status = DiskIo->ReadDisk (
-    DiskIo,
-    BlockIo->Media->MediaId,
-    MultU64x32 ((UINT64)EndLBA, BlockSize),
-    sizeof (*AnchorPoint),
-    AnchorPoint
-    );
+                     DiskIo,
+                     BlockIo->Media->MediaId,
+                     MultU64x32 ((UINT64)EndLBA, BlockSize),
+                     sizeof (*AnchorPoint),
+                     AnchorPoint
+                     );
   if (EFI_ERROR (Status)) {
     return Status;
   }
@@ -213,12 +220,12 @@ FindAnchorVolumeDescriptorPointer (
   // Read consecutive MAX_CORRECTION_BLOCKS_NUM disk blocks
   //
   Status = DiskIo->ReadDisk (
-    DiskIo,
-    BlockIo->Media->MediaId,
-    MultU64x32 ((UINT64)EndLBA - MAX_CORRECTION_BLOCKS_NUM, BlockSize),
-    Size,
-    AnchorPoints
-    );
+                     DiskIo,
+                     BlockIo->Media->MediaId,
+                     MultU64x32 ((UINT64)EndLBA - MAX_CORRECTION_BLOCKS_NUM, BlockSize),
+                     Size,
+                     AnchorPoints
+                     );
   if (EFI_ERROR (Status)) {
     goto Out_Free;
   }
@@ -241,10 +248,19 @@ FindAnchorVolumeDescriptorPointer (
       // Calculate last recorded block number
       //
       LastAvdpBlockNum = EndLBA - (MAX_CORRECTION_BLOCKS_NUM - Index);
-      DEBUG ((DEBUG_WARN, "%a: found AVDP at block %Ld\n", __FUNCTION__,
-              LastAvdpBlockNum));
-      DEBUG ((DEBUG_WARN, "%a: correcting last block from %Ld to %Ld\n",
-              __FUNCTION__, EndLBA, LastAvdpBlockNum));
+      DEBUG ((
+        DEBUG_WARN,
+        "%a: found AVDP at block %Ld\n",
+        __FUNCTION__,
+        LastAvdpBlockNum
+        ));
+      DEBUG ((
+        DEBUG_WARN,
+        "%a: correcting last block from %Ld to %Ld\n",
+        __FUNCTION__,
+        EndLBA,
+        LastAvdpBlockNum
+        ));
       //
       // Save read AVDP from last block
       //
@@ -253,7 +269,7 @@ FindAnchorVolumeDescriptorPointer (
       // Set last recorded block number
       //
       *LastRecordedBlock = LastAvdpBlockNum;
-      Status = EFI_SUCCESS;
+      Status             = EFI_SUCCESS;
       break;
     }
   }
@@ -280,49 +296,60 @@ FindUdfVolumeIdentifiers (
   IN EFI_DISK_IO_PROTOCOL   *DiskIo
   )
 {
-  EFI_STATUS                            Status;
-  UINT64                                Offset;
-  UINT64                                EndDiskOffset;
-  CDROM_VOLUME_DESCRIPTOR               VolDescriptor;
-  CDROM_VOLUME_DESCRIPTOR               TerminatingVolDescriptor;
+  EFI_STATUS               Status;
+  UINT64                   Offset;
+  UINT64                   EndDiskOffset;
+  CDROM_VOLUME_DESCRIPTOR  VolDescriptor;
+  CDROM_VOLUME_DESCRIPTOR  TerminatingVolDescriptor;
 
   ZeroMem ((VOID *)&TerminatingVolDescriptor, sizeof (CDROM_VOLUME_DESCRIPTOR));
 
   //
   // Start Volume Recognition Sequence
   //
-  EndDiskOffset = MultU64x32 (BlockIo->Media->LastBlock,
-                              BlockIo->Media->BlockSize);
+  EndDiskOffset = MultU64x32 (
+                    BlockIo->Media->LastBlock,
+                    BlockIo->Media->BlockSize
+                    );
 
   for (Offset = UDF_VRS_START_OFFSET; Offset < EndDiskOffset;
-       Offset += UDF_LOGICAL_SECTOR_SIZE) {
+       Offset += UDF_LOGICAL_SECTOR_SIZE)
+  {
     //
     // Check if block device has a Volume Structure Descriptor and an Extended
     // Area.
     //
     Status = DiskIo->ReadDisk (
-      DiskIo,
-      BlockIo->Media->MediaId,
-      Offset,
-      sizeof (CDROM_VOLUME_DESCRIPTOR),
-      (VOID *)&VolDescriptor
-      );
+                       DiskIo,
+                       BlockIo->Media->MediaId,
+                       Offset,
+                       sizeof (CDROM_VOLUME_DESCRIPTOR),
+                       (VOID *)&VolDescriptor
+                       );
     if (EFI_ERROR (Status)) {
       return Status;
     }
 
-    if (CompareMem ((VOID *)VolDescriptor.Unknown.Id,
-                    (VOID *)UDF_BEA_IDENTIFIER,
-                    sizeof (VolDescriptor.Unknown.Id)) == 0) {
+    if (CompareMem (
+          (VOID *)VolDescriptor.Unknown.Id,
+          (VOID *)UDF_BEA_IDENTIFIER,
+          sizeof (VolDescriptor.Unknown.Id)
+          ) == 0)
+    {
       break;
     }
 
-    if ((CompareMem ((VOID *)VolDescriptor.Unknown.Id,
-                     (VOID *)CDVOL_ID,
-                     sizeof (VolDescriptor.Unknown.Id)) != 0) ||
-        (CompareMem ((VOID *)&VolDescriptor,
-                     (VOID *)&TerminatingVolDescriptor,
-                     sizeof (CDROM_VOLUME_DESCRIPTOR)) == 0)) {
+    if ((CompareMem (
+           (VOID *)VolDescriptor.Unknown.Id,
+           (VOID *)CDVOL_ID,
+           sizeof (VolDescriptor.Unknown.Id)
+           ) != 0) ||
+        (CompareMem (
+           (VOID *)&VolDescriptor,
+           (VOID *)&TerminatingVolDescriptor,
+           sizeof (CDROM_VOLUME_DESCRIPTOR)
+           ) == 0))
+    {
       return EFI_NOT_FOUND;
     }
   }
@@ -336,22 +363,27 @@ FindUdfVolumeIdentifiers (
   }
 
   Status = DiskIo->ReadDisk (
-    DiskIo,
-    BlockIo->Media->MediaId,
-    Offset,
-    sizeof (CDROM_VOLUME_DESCRIPTOR),
-    (VOID *)&VolDescriptor
-    );
+                     DiskIo,
+                     BlockIo->Media->MediaId,
+                     Offset,
+                     sizeof (CDROM_VOLUME_DESCRIPTOR),
+                     (VOID *)&VolDescriptor
+                     );
   if (EFI_ERROR (Status)) {
     return Status;
   }
 
-  if ((CompareMem ((VOID *)VolDescriptor.Unknown.Id,
-                   (VOID *)UDF_NSR2_IDENTIFIER,
-                   sizeof (VolDescriptor.Unknown.Id)) != 0) &&
-      (CompareMem ((VOID *)VolDescriptor.Unknown.Id,
-                   (VOID *)UDF_NSR3_IDENTIFIER,
-                   sizeof (VolDescriptor.Unknown.Id)) != 0)) {
+  if ((CompareMem (
+         (VOID *)VolDescriptor.Unknown.Id,
+         (VOID *)UDF_NSR2_IDENTIFIER,
+         sizeof (VolDescriptor.Unknown.Id)
+         ) != 0) &&
+      (CompareMem (
+         (VOID *)VolDescriptor.Unknown.Id,
+         (VOID *)UDF_NSR3_IDENTIFIER,
+         sizeof (VolDescriptor.Unknown.Id)
+         ) != 0))
+  {
     return EFI_NOT_FOUND;
   }
 
@@ -364,19 +396,22 @@ FindUdfVolumeIdentifiers (
   }
 
   Status = DiskIo->ReadDisk (
-    DiskIo,
-    BlockIo->Media->MediaId,
-    Offset,
-    sizeof (CDROM_VOLUME_DESCRIPTOR),
-    (VOID *)&VolDescriptor
-    );
+                     DiskIo,
+                     BlockIo->Media->MediaId,
+                     Offset,
+                     sizeof (CDROM_VOLUME_DESCRIPTOR),
+                     (VOID *)&VolDescriptor
+                     );
   if (EFI_ERROR (Status)) {
     return Status;
   }
 
-  if (CompareMem ((VOID *)VolDescriptor.Unknown.Id,
-                  (VOID *)UDF_TEA_IDENTIFIER,
-                  sizeof (VolDescriptor.Unknown.Id)) != 0) {
+  if (CompareMem (
+        (VOID *)VolDescriptor.Unknown.Id,
+        (VOID *)UDF_TEA_IDENTIFIER,
+        sizeof (VolDescriptor.Unknown.Id)
+        ) != 0)
+  {
     return EFI_NOT_FOUND;
   }
 
@@ -395,22 +430,22 @@ FindUdfVolumeIdentifiers (
 **/
 BOOLEAN
 IsLogicalVolumeDescriptorSupported (
-  UDF_LOGICAL_VOLUME_DESCRIPTOR *LogicalVolDesc
+  UDF_LOGICAL_VOLUME_DESCRIPTOR  *LogicalVolDesc
   )
 {
   //
   // Check for a valid UDF revision range
   //
   switch (LogicalVolDesc->DomainIdentifier.Suffix.Domain.UdfRevision) {
-  case 0x0102:
-  case 0x0150:
-  case 0x0200:
-  case 0x0201:
-  case 0x0250:
-  case 0x0260:
-    break;
-  default:
-    return FALSE;
+    case 0x0102:
+    case 0x0150:
+    case 0x0200:
+    case 0x0201:
+    case 0x0250:
+    case 0x0260:
+      break;
+    default:
+      return FALSE;
   }
 
   //
@@ -419,6 +454,7 @@ IsLogicalVolumeDescriptorSupported (
   if (LogicalVolDesc->NumberOfPartitionMaps > 1) {
     return FALSE;
   }
+
   //
   // UDF 1.02 revision supports only Type 1 (Physical) partitions, but
   // let's check it any way.
@@ -426,8 +462,9 @@ IsLogicalVolumeDescriptorSupported (
   // PartitionMap[0] -> type
   // PartitionMap[1] -> length (in bytes)
   //
-  if (LogicalVolDesc->PartitionMaps[0] != 1 ||
-      LogicalVolDesc->PartitionMaps[1] != 6) {
+  if ((LogicalVolDesc->PartitionMaps[0] != 1) ||
+      (LogicalVolDesc->PartitionMaps[1] != 6))
+  {
     return FALSE;
   }
 
@@ -475,7 +512,7 @@ FindLogicalVolumeLocation (
   UDF_DESCRIPTOR_TAG             *DescriptorTag;
 
   BlockSize = BlockIo->Media->BlockSize;
-  ExtentAd = &AnchorPoint->MainVolumeDescriptorSequenceExtent;
+  ExtentAd  = &AnchorPoint->MainVolumeDescriptorSequenceExtent;
 
   //
   // UDF 2.60, 2.2.3.1 struct MainVolumeDescriptorSequenceExtent
@@ -486,7 +523,7 @@ FindLogicalVolumeLocation (
   // Also make sure it does not exceed maximum number of blocks in the disk.
   //
   SeqBlocksNum = DivU64x32 ((UINT64)ExtentAd->ExtentLength, BlockSize);
-  if (SeqBlocksNum < 16 || (EFI_LBA)SeqBlocksNum > LastRecordedBlock + 1) {
+  if ((SeqBlocksNum < 16) || ((EFI_LBA)SeqBlocksNum > LastRecordedBlock + 1)) {
     return EFI_VOLUME_CORRUPTED;
   }
 
@@ -494,8 +531,9 @@ FindLogicalVolumeLocation (
   // Check for valid Volume Descriptor Sequence starting block number
   //
   SeqStartBlock = (UINT64)ExtentAd->ExtentLocation;
-  if (SeqStartBlock > LastRecordedBlock ||
-      SeqStartBlock + SeqBlocksNum - 1 > LastRecordedBlock) {
+  if ((SeqStartBlock > LastRecordedBlock) ||
+      (SeqStartBlock + SeqBlocksNum - 1 > LastRecordedBlock))
+  {
     return EFI_VOLUME_CORRUPTED;
   }
 
@@ -509,24 +547,24 @@ FindLogicalVolumeLocation (
     return EFI_OUT_OF_RESOURCES;
   }
 
-  SeqEndBlock = SeqStartBlock + SeqBlocksNum;
+  SeqEndBlock  = SeqStartBlock + SeqBlocksNum;
   StopSequence = FALSE;
-  LvdsCount = 0;
-  Status = EFI_VOLUME_CORRUPTED;
+  LvdsCount    = 0;
+  Status       = EFI_VOLUME_CORRUPTED;
   //
   // Start Main Volume Descriptor Sequence
   //
-  for (; SeqStartBlock < SeqEndBlock && !StopSequence; SeqStartBlock++) {
+  for ( ; SeqStartBlock < SeqEndBlock && !StopSequence; SeqStartBlock++) {
     //
     // Read disk block
     //
     Status = BlockIo->ReadBlocks (
-      BlockIo,
-      BlockIo->Media->MediaId,
-      SeqStartBlock,
-      BlockSize,
-      Buffer
-      );
+                        BlockIo,
+                        BlockIo->Media->MediaId,
+                        SeqStartBlock,
+                        BlockSize,
+                        Buffer
+                        );
     if (EFI_ERROR (Status)) {
       goto Out_Free;
     }
@@ -548,50 +586,51 @@ FindLogicalVolumeLocation (
     //   Space Descriptors.
     //
     switch (DescriptorTag->TagIdentifier) {
-    case UdfPrimaryVolumeDescriptor:
-    case UdfImplemenationUseVolumeDescriptor:
-    case UdfPartitionDescriptor:
-    case UdfUnallocatedSpaceDescriptor:
-      break;
+      case UdfPrimaryVolumeDescriptor:
+      case UdfImplemenationUseVolumeDescriptor:
+      case UdfPartitionDescriptor:
+      case UdfUnallocatedSpaceDescriptor:
+        break;
 
-    case UdfLogicalVolumeDescriptor:
-      LogicalVolDesc = Buffer;
+      case UdfLogicalVolumeDescriptor:
+        LogicalVolDesc = Buffer;
 
-      //
-      // Check for existence of a single LVD and whether it is supported by
-      // current EDK2 UDF file system implementation.
-      //
-      if (++LvdsCount > 1 ||
-          !IsLogicalVolumeDescriptorSupported (LogicalVolDesc)) {
-        Status = EFI_UNSUPPORTED;
+        //
+        // Check for existence of a single LVD and whether it is supported by
+        // current EDK2 UDF file system implementation.
+        //
+        if ((++LvdsCount > 1) ||
+            !IsLogicalVolumeDescriptorSupported (LogicalVolDesc))
+        {
+          Status       = EFI_UNSUPPORTED;
+          StopSequence = TRUE;
+        }
+
+        break;
+
+      case UdfTerminatingDescriptor:
+        //
+        // Stop the sequence when we find a Terminating Descriptor
+        // (aka Unallocated Sector), se we don't have to walk all the unallocated
+        // area unnecessarily.
+        //
         StopSequence = TRUE;
-      }
+        break;
 
-      break;
-
-    case UdfTerminatingDescriptor:
-      //
-      // Stop the sequence when we find a Terminating Descriptor
-      // (aka Unallocated Sector), se we don't have to walk all the unallocated
-      // area unnecessarily.
-      //
-      StopSequence = TRUE;
-      break;
-
-    default:
-      //
-      // An invalid Volume Descriptor has been found in the sequece. Volume is
-      // corrupted.
-      //
-      Status = EFI_VOLUME_CORRUPTED;
-      goto Out_Free;
+      default:
+        //
+        // An invalid Volume Descriptor has been found in the sequece. Volume is
+        // corrupted.
+        //
+        Status = EFI_VOLUME_CORRUPTED;
+        goto Out_Free;
     }
   }
 
   //
   // Check if LVD was found
   //
-  if (!EFI_ERROR (Status) && LvdsCount == 1) {
+  if (!EFI_ERROR (Status) && (LvdsCount == 1)) {
     *MainVdsStartBlock = GuardMainVdsStartBlock;
     //
     // We do not need to read either LVD or PD descriptors to know the last
@@ -654,11 +693,11 @@ FindUdfFileSystem (
   // Find Anchor Volume Descriptor Pointer
   //
   Status = FindAnchorVolumeDescriptorPointer (
-    BlockIo,
-    DiskIo,
-    &AnchorPoint,
-    &LastRecordedBlock
-    );
+             BlockIo,
+             DiskIo,
+             &AnchorPoint,
+             &LastRecordedBlock
+             );
   if (EFI_ERROR (Status)) {
     return Status;
   }
@@ -667,13 +706,13 @@ FindUdfFileSystem (
   // Find Logical Volume location
   //
   Status = FindLogicalVolumeLocation (
-    BlockIo,
-    DiskIo,
-    &AnchorPoint,
-    LastRecordedBlock,
-    (UINT64 *)StartingLBA,
-    (UINT64 *)EndingLBA
-    );
+             BlockIo,
+             DiskIo,
+             &AnchorPoint,
+             LastRecordedBlock,
+             (UINT64 *)StartingLBA,
+             (UINT64 *)EndingLBA
+             );
 
   return Status;
 }
@@ -706,16 +745,16 @@ PartitionInstallUdfChildHandles (
   IN  EFI_DEVICE_PATH_PROTOCOL     *DevicePath
   )
 {
-  UINT32                       RemainderByMediaBlockSize;
-  EFI_STATUS                   Status;
-  EFI_BLOCK_IO_MEDIA           *Media;
-  EFI_PARTITION_INFO_PROTOCOL  PartitionInfo;
-  APPLE_PARTITION_INFO_PROTOCOL ApplePartitionInfo;
-  EFI_LBA                      StartingLBA;
-  EFI_LBA                      EndingLBA;
-  BOOLEAN                      ChildCreated;
+  UINT32                         RemainderByMediaBlockSize;
+  EFI_STATUS                     Status;
+  EFI_BLOCK_IO_MEDIA             *Media;
+  EFI_PARTITION_INFO_PROTOCOL    PartitionInfo;
+  APPLE_PARTITION_INFO_PROTOCOL  ApplePartitionInfo;
+  EFI_LBA                        StartingLBA;
+  EFI_LBA                        EndingLBA;
+  BOOLEAN                        ChildCreated;
 
-  Media = BlockIo->Media;
+  Media        = BlockIo->Media;
   ChildCreated = FALSE;
 
   //
@@ -761,10 +800,10 @@ PartitionInstallUdfChildHandles (
   //
   ZeroMem (&PartitionInfo, sizeof (EFI_PARTITION_INFO_PROTOCOL));
   PartitionInfo.Revision = EFI_PARTITION_INFO_PROTOCOL_REVISION;
-  PartitionInfo.Type = PARTITION_TYPE_OTHER;
+  PartitionInfo.Type     = PARTITION_TYPE_OTHER;
 
   ZeroMem (&ApplePartitionInfo, sizeof (APPLE_PARTITION_INFO_PROTOCOL));
-  ApplePartitionInfo.Revision = APPLE_PARTITION_INFO_REVISION;
+  ApplePartitionInfo.Revision        = APPLE_PARTITION_INFO_REVISION;
   ApplePartitionInfo.PartitionNumber = 1;
   ApplePartitionInfo.PartitionStart  = StartingLBA;
   ApplePartitionInfo.PartitionSize   = EndingLBA - StartingLBA + 1;
@@ -773,21 +812,21 @@ PartitionInstallUdfChildHandles (
   // Install partition child handle for UDF file system
   //
   Status = PartitionInstallChildHandle (
-    This,
-    Handle,
-    DiskIo,
-    DiskIo2,
-    BlockIo,
-    BlockIo2,
-    DevicePath,
-    (EFI_DEVICE_PATH_PROTOCOL *)&gUdfDevicePath,
-    &PartitionInfo,
-    &ApplePartitionInfo,
-    StartingLBA,
-    EndingLBA,
-    Media->BlockSize,
-    NULL
-    );
+             This,
+             Handle,
+             DiskIo,
+             DiskIo2,
+             BlockIo,
+             BlockIo2,
+             DevicePath,
+             (EFI_DEVICE_PATH_PROTOCOL *)&gUdfDevicePath,
+             &PartitionInfo,
+             &ApplePartitionInfo,
+             StartingLBA,
+             EndingLBA,
+             Media->BlockSize,
+             NULL
+             );
   if (EFI_ERROR (Status)) {
     return (ChildCreated ? EFI_SUCCESS : Status);
   }

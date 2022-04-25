@@ -44,10 +44,10 @@
 #define BOOT_ACTION_BUTTON_FOCUS_DIMENSION  144U
 #define BOOT_ACTION_BUTTON_SPACE            36U
 
-#define PASSWORD_LOCK_DIMENSION 144U
+#define PASSWORD_LOCK_DIMENSION  144U
 
-#define PASSWORD_ENTER_WIDTH  75U
-#define PASSWORD_ENTER_HEIGHT 30U
+#define PASSWORD_ENTER_WIDTH   75U
+#define PASSWORD_ENTER_HEIGHT  30U
 
 #define PASSWORD_BOX_WIDTH   288U
 #define PASSWORD_BOX_HEIGHT  30U
@@ -84,9 +84,9 @@ typedef enum {
   ICON_ENTER,
   ICON_LOCK,
   ICON_NUM_SYS,
-  ICON_GENERIC_HDD       = ICON_NUM_SYS,
+  ICON_GENERIC_HDD = ICON_NUM_SYS,
   ICON_NUM_MANDATORY,
-  ICON_APPLE             = ICON_NUM_MANDATORY,
+  ICON_APPLE = ICON_NUM_MANDATORY,
   ICON_APPLE_RECOVERY,
   ICON_APPLE_TIME_MACHINE,
   ICON_WINDOWS,
@@ -112,25 +112,25 @@ enum {
 };
 
 typedef struct _BOOT_PICKER_GUI_CONTEXT {
-  GUI_IMAGE                            Background;
-  GUI_IMAGE                            Icons[ICON_NUM_TOTAL][ICON_TYPE_COUNT];
-  GUI_IMAGE                            Labels[LABEL_NUM_TOTAL];
+  GUI_IMAGE                              Background;
+  GUI_IMAGE                              Icons[ICON_NUM_TOTAL][ICON_TYPE_COUNT];
+  GUI_IMAGE                              Labels[LABEL_NUM_TOTAL];
   // GUI_IMAGE                         Poof[5];
-  GUI_FONT_CONTEXT                     FontContext;
-  CONST CHAR8                          *Prefix;
-  VOID                                 *BootEntry;
-  EFI_GRAPHICS_OUTPUT_BLT_PIXEL_UNION  BackgroundColor;
-  BOOLEAN                              HideAuxiliary;
-  BOOLEAN                              Refresh;
-  BOOLEAN                              LightBackground;
-  BOOLEAN                              DoneIntroAnimation;
-  BOOLEAN                              ReadyToBoot;
-  UINT8                                Scale;
-  UINT8                                VoAction;
-  INT32                                CursorOffsetX;
-  INT32                                CursorOffsetY;
-  INT32                                AudioPlaybackTimeout;
-  OC_PICKER_CONTEXT                    *PickerContext;
+  GUI_FONT_CONTEXT                       FontContext;
+  CONST CHAR8                            *Prefix;
+  VOID                                   *BootEntry;
+  EFI_GRAPHICS_OUTPUT_BLT_PIXEL_UNION    BackgroundColor;
+  BOOLEAN                                HideAuxiliary;
+  BOOLEAN                                Refresh;
+  BOOLEAN                                LightBackground;
+  BOOLEAN                                DoneIntroAnimation;
+  BOOLEAN                                ReadyToBoot;
+  UINT8                                  Scale;
+  UINT8                                  VoAction;
+  INT32                                  CursorOffsetX;
+  INT32                                  CursorOffsetY;
+  INT32                                  AudioPlaybackTimeout;
+  OC_PICKER_CONTEXT                      *PickerContext;
 } BOOT_PICKER_GUI_CONTEXT;
 
 EFI_STATUS
@@ -162,10 +162,10 @@ BootPickerViewLateInitialize (
 
 EFI_STATUS
 BootPickerEntriesSet (
-  IN OC_PICKER_CONTEXT              *Context,
-  IN BOOT_PICKER_GUI_CONTEXT        *GuiContext,
-  IN OC_BOOT_ENTRY                  *Entry,
-  IN UINT8                          EntryIndex
+  IN OC_PICKER_CONTEXT        *Context,
+  IN BOOT_PICKER_GUI_CONTEXT  *GuiContext,
+  IN OC_BOOT_ENTRY            *Entry,
+  IN UINT8                    EntryIndex
   );
 
 VOID
@@ -181,14 +181,14 @@ InternalGetCursorImage (
 
 EFI_STATUS
 InternalGetFlavourIcon (
-  IN  BOOT_PICKER_GUI_CONTEXT       *GuiContext,
-  IN  OC_STORAGE_CONTEXT            *Storage,
-  IN  CHAR8                         *FlavourName,
-  IN  UINTN                         FlavourNameLen,
-  IN  UINT32                        IconTypeIndex,
-  IN  BOOLEAN                       UseFlavourIcon,
-  OUT GUI_IMAGE                     *EntryIcon,
-  OUT BOOLEAN                       *CustomIcon
+  IN  BOOT_PICKER_GUI_CONTEXT  *GuiContext,
+  IN  OC_STORAGE_CONTEXT       *Storage,
+  IN  CHAR8                    *FlavourName,
+  IN  UINTN                    FlavourNameLen,
+  IN  UINT32                   IconTypeIndex,
+  IN  BOOLEAN                  UseFlavourIcon,
+  OUT GUI_IMAGE                *EntryIcon,
+  OUT BOOLEAN                  *CustomIcon
   );
 
 #endif // GUI_APP_H

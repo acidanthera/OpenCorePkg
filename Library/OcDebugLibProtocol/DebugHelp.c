@@ -20,13 +20,12 @@
 #include <Library/OcMiscLib.h>
 
 VOID
-#if defined(__GNUC__) || defined(__clang__)
+#if defined (__GNUC__) || defined (__clang__)
 __attribute__ ((noinline))
 #endif
 DebugBreak (
   VOID
-  )
-{
+  ) {
   //
   // This function has no code, debuggers may break on it.
   //
@@ -34,7 +33,7 @@ DebugBreak (
 
 VOID
 WaitForKeyPress (
-  IN  CONST CHAR16 *Message
+  IN  CONST CHAR16  *Message
   )
 {
   EFI_STATUS        Status;
@@ -43,9 +42,9 @@ WaitForKeyPress (
 
   //
   // Print message.
-  //  
-  gST->ConOut->OutputString (gST->ConOut, (CHAR16 *) Message);
-  gST->ConOut->OutputString (gST->ConOut, (CHAR16 *) L"\r\n");
+  //
+  gST->ConOut->OutputString (gST->ConOut, (CHAR16 *)Message);
+  gST->ConOut->OutputString (gST->ConOut, (CHAR16 *)L"\r\n");
 
   //
   // Skip previously pressed characters.

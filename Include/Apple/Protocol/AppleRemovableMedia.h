@@ -19,7 +19,7 @@
   Software, with or without modifications, in source and/or binary forms;
   provided that if you redistribute the Apple Software in its entirety and
   without modifications, you must retain this notice and the following
-  text and disclaimers in all such redistributions of the Apple Software. 
+  text and disclaimers in all such redistributions of the Apple Software.
   Neither the name, trademarks, service marks or logos of Apple Computer,
   Inc. may be used to endorse or promote products derived from the Apple
   Software without specific prior written permission from Apple.  Except
@@ -53,11 +53,12 @@
   { 0x2EA9743A, 0x23D9, 0x425E,              \
     { 0x87, 0x2C, 0xF6, 0x15, 0xAA, 0x19, 0x57, 0x88 } }
 
-#define	APPLE_REMOVABLE_MEDIA_PROTOCOL_REVISION		0x00000001
+#define APPLE_REMOVABLE_MEDIA_PROTOCOL_REVISION  0x00000001
 
 typedef struct APPLE_REMOVABLE_MEDIA_PROTOCOL APPLE_REMOVABLE_MEDIA_PROTOCOL;
 
 // APPLE_REMOVABLE_MEDIA_EJECT
+
 /** Eject removable media from drive (such as a CD/DVD).
 
   @param[in] This  Protocol instance pointer.
@@ -66,11 +67,12 @@ typedef struct APPLE_REMOVABLE_MEDIA_PROTOCOL APPLE_REMOVABLE_MEDIA_PROTOCOL;
 **/
 typedef
 EFI_STATUS
-(EFIAPI *APPLE_REMOVABLE_MEDIA_EJECT) (
+(EFIAPI *APPLE_REMOVABLE_MEDIA_EJECT)(
   IN APPLE_REMOVABLE_MEDIA_PROTOCOL  *This
   );
 
 // APPLE_REMOVABLE_MEDIA_INJECT
+
 /** Inject removable media into drive (such as a CD/DVD).
 
   @param[in] This  Protocol instance pointer.
@@ -79,25 +81,27 @@ EFI_STATUS
 **/
 typedef
 EFI_STATUS
-(EFIAPI *APPLE_REMOVABLE_MEDIA_INJECT) (
+(EFIAPI *APPLE_REMOVABLE_MEDIA_INJECT)(
   IN APPLE_REMOVABLE_MEDIA_PROTOCOL  *This
   );
 
 // APPLE_REMOVABLE_MEDIA_ALLOW_REMOVAL
+
 /** Allow the media to be removed from the drive.
 
   @param[in] This  Protocol instance pointer.
 
   @retval EFI_SUCCESS      The media can now be removed.
-	@retval EFI_UNSUPPORTED  The media cannot be removed.
+        @retval EFI_UNSUPPORTED  The media cannot be removed.
 **/
 typedef
 EFI_STATUS
-(EFIAPI *APPLE_REMOVABLE_MEDIA_ALLOW_REMOVAL) (
+(EFIAPI *APPLE_REMOVABLE_MEDIA_ALLOW_REMOVAL)(
   IN APPLE_REMOVABLE_MEDIA_PROTOCOL  *This
   );
 
 // APPLE_REMOVABLE_MEDIA_PREVENT_REMOVAL
+
 /** Prevent the media from being removed from the drive.
 
   @param[in] This  Protocol instance pointer.
@@ -108,21 +112,22 @@ EFI_STATUS
 **/
 typedef
 EFI_STATUS
-(EFIAPI *APPLE_REMOVABLE_MEDIA_PREVENT_REMOVAL) (
+(EFIAPI *APPLE_REMOVABLE_MEDIA_PREVENT_REMOVAL)(
   IN APPLE_REMOVABLE_MEDIA_PROTOCOL  *This
   );
 
 // APPLE_REMOVABLE_MEDIA_DETECT_TRAY_STATE
+
 /** Get the status of the drive tray.
 
   @param[in]  This      Protocol instance pointer.
-	@param[out] TrayOpen  Status of the drive tray.
+        @param[out] TrayOpen  Status of the drive tray.
 
   @retval EFI_SUCCESS  The status has been returned in TrayOpen.
 **/
 typedef
 EFI_STATUS
-(EFIAPI *APPLE_REMOVABLE_MEDIA_DETECT_TRAY_STATE) (
+(EFIAPI *APPLE_REMOVABLE_MEDIA_DETECT_TRAY_STATE)(
   IN  APPLE_REMOVABLE_MEDIA_PROTOCOL  *This,
   OUT BOOLEAN                         *TrayOpen
   );
@@ -131,16 +136,15 @@ EFI_STATUS
 // Protocol definition
 //
 typedef struct APPLE_REMOVABLE_MEDIA_PROTOCOL {
-  UINT32                                  Revision;
-  BOOLEAN                                 RemovalAllowed;
-  APPLE_REMOVABLE_MEDIA_EJECT             Eject;
-  APPLE_REMOVABLE_MEDIA_INJECT            Inject;
-  APPLE_REMOVABLE_MEDIA_ALLOW_REMOVAL     AllowRemoval;
-  APPLE_REMOVABLE_MEDIA_PREVENT_REMOVAL   PreventRemoval;
-  APPLE_REMOVABLE_MEDIA_DETECT_TRAY_STATE DetectTrayState;
-
+  UINT32                                     Revision;
+  BOOLEAN                                    RemovalAllowed;
+  APPLE_REMOVABLE_MEDIA_EJECT                Eject;
+  APPLE_REMOVABLE_MEDIA_INJECT               Inject;
+  APPLE_REMOVABLE_MEDIA_ALLOW_REMOVAL        AllowRemoval;
+  APPLE_REMOVABLE_MEDIA_PREVENT_REMOVAL      PreventRemoval;
+  APPLE_REMOVABLE_MEDIA_DETECT_TRAY_STATE    DetectTrayState;
 } APPLE_REMOVABLE_MEDIA_PROTOCOL;
 
-extern EFI_GUID gAppleRemovableMediaProtocolGuid;
+extern EFI_GUID  gAppleRemovableMediaProtocolGuid;
 
 #endif // APPLE_REMOVABLE_MEDIA_H

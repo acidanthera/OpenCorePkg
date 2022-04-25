@@ -21,11 +21,11 @@ ResetCold (
   )
 {
   gRT->ResetSystem (
-    EfiResetCold,
-    EFI_SUCCESS,
-    0,
-    NULL
-    );
+         EfiResetCold,
+         EFI_SUCCESS,
+         0,
+         NULL
+         );
   //
   // Attempt to perform a cold reset manually if the UEFI call does not work.
   //
@@ -52,11 +52,11 @@ ResetShutdown (
   )
 {
   gRT->ResetSystem (
-    EfiResetShutdown,
-    EFI_SUCCESS,
-    0,
-    NULL
-    );
+         EfiResetShutdown,
+         EFI_SUCCESS,
+         0,
+         NULL
+         );
   //
   // Perform cold reset when shutdown fails (e.g. DUET).
   //
@@ -72,19 +72,19 @@ InternalResetPlatformSpecific (
   )
 {
   gRT->ResetSystem (
-    EfiResetPlatformSpecific,
-    ResetStatus,
-    DataSize,
-    ResetData
-    );
+         EfiResetPlatformSpecific,
+         ResetStatus,
+         DataSize,
+         ResetData
+         );
   ResetCold ();
 }
 
 VOID
 EFIAPI
 ResetPlatformSpecific (
-  IN UINTN   DataSize,
-  IN VOID    *ResetData
+  IN UINTN  DataSize,
+  IN VOID   *ResetData
   )
 {
   InternalResetPlatformSpecific (EFI_SUCCESS, DataSize, ResetData);

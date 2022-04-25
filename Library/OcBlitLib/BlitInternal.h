@@ -32,15 +32,15 @@
 **/
 RETURN_STATUS
 BlitLibBufferToVideo0 (
-  IN  OC_BLIT_CONFIGURE                     *Configure,
-  IN  EFI_GRAPHICS_OUTPUT_BLT_PIXEL         *BltBuffer,
-  IN  UINTN                                 SourceX,
-  IN  UINTN                                 SourceY,
-  IN  UINTN                                 DestinationX,
-  IN  UINTN                                 DestinationY,
-  IN  UINTN                                 Width,
-  IN  UINTN                                 Height,
-  IN  UINTN                                 DeltaPixels
+  IN  OC_BLIT_CONFIGURE              *Configure,
+  IN  EFI_GRAPHICS_OUTPUT_BLT_PIXEL  *BltBuffer,
+  IN  UINTN                          SourceX,
+  IN  UINTN                          SourceY,
+  IN  UINTN                          DestinationX,
+  IN  UINTN                          DestinationY,
+  IN  UINTN                          Width,
+  IN  UINTN                          Height,
+  IN  UINTN                          DeltaPixels
   );
 
 /**
@@ -63,15 +63,15 @@ BlitLibBufferToVideo0 (
 **/
 RETURN_STATUS
 BlitLibBufferToVideo90 (
-  IN  OC_BLIT_CONFIGURE                     *Configure,
-  IN  EFI_GRAPHICS_OUTPUT_BLT_PIXEL         *BltBuffer,
-  IN  UINTN                                 SourceX,
-  IN  UINTN                                 SourceY,
-  IN  UINTN                                 DestinationX,
-  IN  UINTN                                 DestinationY,
-  IN  UINTN                                 Width,
-  IN  UINTN                                 Height,
-  IN  UINTN                                 DeltaPixels
+  IN  OC_BLIT_CONFIGURE              *Configure,
+  IN  EFI_GRAPHICS_OUTPUT_BLT_PIXEL  *BltBuffer,
+  IN  UINTN                          SourceX,
+  IN  UINTN                          SourceY,
+  IN  UINTN                          DestinationX,
+  IN  UINTN                          DestinationY,
+  IN  UINTN                          Width,
+  IN  UINTN                          Height,
+  IN  UINTN                          DeltaPixels
   );
 
 /**
@@ -94,15 +94,15 @@ BlitLibBufferToVideo90 (
 **/
 RETURN_STATUS
 BlitLibBufferToVideo180 (
-  IN  OC_BLIT_CONFIGURE                     *Configure,
-  IN  EFI_GRAPHICS_OUTPUT_BLT_PIXEL         *BltBuffer,
-  IN  UINTN                                 SourceX,
-  IN  UINTN                                 SourceY,
-  IN  UINTN                                 DestinationX,
-  IN  UINTN                                 DestinationY,
-  IN  UINTN                                 Width,
-  IN  UINTN                                 Height,
-  IN  UINTN                                 DeltaPixels
+  IN  OC_BLIT_CONFIGURE              *Configure,
+  IN  EFI_GRAPHICS_OUTPUT_BLT_PIXEL  *BltBuffer,
+  IN  UINTN                          SourceX,
+  IN  UINTN                          SourceY,
+  IN  UINTN                          DestinationX,
+  IN  UINTN                          DestinationY,
+  IN  UINTN                          Width,
+  IN  UINTN                          Height,
+  IN  UINTN                          DeltaPixels
   );
 
 /**
@@ -125,15 +125,15 @@ BlitLibBufferToVideo180 (
 **/
 RETURN_STATUS
 BlitLibBufferToVideo270 (
-  IN  OC_BLIT_CONFIGURE                     *Configure,
-  IN  EFI_GRAPHICS_OUTPUT_BLT_PIXEL         *BltBuffer,
-  IN  UINTN                                 SourceX,
-  IN  UINTN                                 SourceY,
-  IN  UINTN                                 DestinationX,
-  IN  UINTN                                 DestinationY,
-  IN  UINTN                                 Width,
-  IN  UINTN                                 Height,
-  IN  UINTN                                 DeltaPixels
+  IN  OC_BLIT_CONFIGURE              *Configure,
+  IN  EFI_GRAPHICS_OUTPUT_BLT_PIXEL  *BltBuffer,
+  IN  UINTN                          SourceX,
+  IN  UINTN                          SourceY,
+  IN  UINTN                          DestinationX,
+  IN  UINTN                          DestinationY,
+  IN  UINTN                          Width,
+  IN  UINTN                          Height,
+  IN  UINTN                          DeltaPixels
   );
 
 /**
@@ -156,15 +156,15 @@ BlitLibBufferToVideo270 (
 **/
 RETURN_STATUS
 BlitLibVideoToBuffer0 (
-  IN     OC_BLIT_CONFIGURE               *Configure,
-     OUT EFI_GRAPHICS_OUTPUT_BLT_PIXEL   *BltBuffer,
-  IN     UINTN                           SourceX,
-  IN     UINTN                           SourceY,
-  IN     UINTN                           DestinationX,
-  IN     UINTN                           DestinationY,
-  IN     UINTN                           Width,
-  IN     UINTN                           Height,
-  IN     UINTN                           DeltaPixels
+  IN     OC_BLIT_CONFIGURE           *Configure,
+  OUT EFI_GRAPHICS_OUTPUT_BLT_PIXEL  *BltBuffer,
+  IN     UINTN                       SourceX,
+  IN     UINTN                       SourceY,
+  IN     UINTN                       DestinationX,
+  IN     UINTN                       DestinationY,
+  IN     UINTN                       Width,
+  IN     UINTN                       Height,
+  IN     UINTN                       DeltaPixels
   );
 
 /**
@@ -187,15 +187,15 @@ BlitLibVideoToBuffer0 (
 **/
 RETURN_STATUS
 BlitLibVideoToBuffer90 (
-  IN     OC_BLIT_CONFIGURE               *Configure,
-     OUT EFI_GRAPHICS_OUTPUT_BLT_PIXEL   *BltBuffer,
-  IN     UINTN                           SourceX,
-  IN     UINTN                           SourceY,
-  IN     UINTN                           DestinationX,
-  IN     UINTN                           DestinationY,
-  IN     UINTN                           Width,
-  IN     UINTN                           Height,
-  IN     UINTN                           DeltaPixels
+  IN     OC_BLIT_CONFIGURE           *Configure,
+  OUT EFI_GRAPHICS_OUTPUT_BLT_PIXEL  *BltBuffer,
+  IN     UINTN                       SourceX,
+  IN     UINTN                       SourceY,
+  IN     UINTN                       DestinationX,
+  IN     UINTN                       DestinationY,
+  IN     UINTN                       Width,
+  IN     UINTN                       Height,
+  IN     UINTN                       DeltaPixels
   );
 
 /**
@@ -218,15 +218,15 @@ BlitLibVideoToBuffer90 (
 **/
 RETURN_STATUS
 BlitLibVideoToBuffer180 (
-  IN     OC_BLIT_CONFIGURE               *Configure,
-     OUT EFI_GRAPHICS_OUTPUT_BLT_PIXEL   *BltBuffer,
-  IN     UINTN                           SourceX,
-  IN     UINTN                           SourceY,
-  IN     UINTN                           DestinationX,
-  IN     UINTN                           DestinationY,
-  IN     UINTN                           Width,
-  IN     UINTN                           Height,
-  IN     UINTN                           DeltaPixels
+  IN     OC_BLIT_CONFIGURE           *Configure,
+  OUT EFI_GRAPHICS_OUTPUT_BLT_PIXEL  *BltBuffer,
+  IN     UINTN                       SourceX,
+  IN     UINTN                       SourceY,
+  IN     UINTN                       DestinationX,
+  IN     UINTN                       DestinationY,
+  IN     UINTN                       Width,
+  IN     UINTN                       Height,
+  IN     UINTN                       DeltaPixels
   );
 
 /**
@@ -249,15 +249,15 @@ BlitLibVideoToBuffer180 (
 **/
 RETURN_STATUS
 BlitLibVideoToBuffer270 (
-  IN     OC_BLIT_CONFIGURE               *Configure,
-     OUT EFI_GRAPHICS_OUTPUT_BLT_PIXEL   *BltBuffer,
-  IN     UINTN                           SourceX,
-  IN     UINTN                           SourceY,
-  IN     UINTN                           DestinationX,
-  IN     UINTN                           DestinationY,
-  IN     UINTN                           Width,
-  IN     UINTN                           Height,
-  IN     UINTN                           DeltaPixels
+  IN     OC_BLIT_CONFIGURE           *Configure,
+  OUT EFI_GRAPHICS_OUTPUT_BLT_PIXEL  *BltBuffer,
+  IN     UINTN                       SourceX,
+  IN     UINTN                       SourceY,
+  IN     UINTN                       DestinationX,
+  IN     UINTN                       DestinationY,
+  IN     UINTN                       Width,
+  IN     UINTN                       Height,
+  IN     UINTN                       DeltaPixels
   );
 
 #endif // BLIT_INTERNAL_H

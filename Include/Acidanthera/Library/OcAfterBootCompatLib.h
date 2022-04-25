@@ -25,47 +25,47 @@ typedef struct OC_BOOTER_PATCH_ {
   //
   // Comment from user.
   //
-  CHAR8        *Comment;
+  CHAR8          *Comment;
   //
   // Target architecture.
   //
-  CONST CHAR8  *Arch;
+  CONST CHAR8    *Arch;
   //
   // Find bytes.
   //
-  CONST UINT8  *Find;
+  CONST UINT8    *Find;
   //
   // Replace bytes.
   //
-  CONST UINT8  *Replace;
+  CONST UINT8    *Replace;
   //
   // Find mask or NULL.
   //
-  CONST UINT8  *Mask;
+  CONST UINT8    *Mask;
   //
   // Replace mask or NULL.
   //
-  CONST UINT8  *ReplaceMask;
+  CONST UINT8    *ReplaceMask;
   //
   // Patch size.
   //
-  UINT32       Size;
+  UINT32         Size;
   //
   // Replace count or 0 for all.
   //
-  UINT32       Count;
+  UINT32         Count;
   //
   // Skip count or 0 to start from 1 match.
   //
-  UINT32       Skip;
+  UINT32         Skip;
   //
   // Limit replacement size to this value or 0, which assumes booter file size.
   //
-  UINT32       Limit;
+  UINT32         Limit;
   //
   // Identifier for bootloader type. (e.g. Apple for boot.efi, or file name suffix for other possible booters)
   //
-  CONST CHAR8  *Identifier;
+  CONST CHAR8    *Identifier;
 } OC_BOOTER_PATCH;
 
 /**
@@ -77,45 +77,45 @@ typedef struct OC_ABC_SETTINGS_ {
   /// (date and time, NVRAM, power control, etc.) support on many types of firmware.
   /// Needed basically by everyone that uses SMM implementation of variable services.
   ///
-  BOOLEAN  AvoidRuntimeDefrag;
+  BOOLEAN    AvoidRuntimeDefrag;
   ///
   /// Setup virtual memory mapping after SetVirtualAddresses call. This fixes crashes in many types
   /// of firmware at early boot as they accidentally access virtual addresses after ExitBootServices.
   ///
-  BOOLEAN  SetupVirtualMap;
+  BOOLEAN    SetupVirtualMap;
   ///
   /// Provide custom Apple KASLR slide calculation for firmware with polluted low memory ranges.
   /// This also ensures that slide= argument is never passed to the operating system.
   ///
-  BOOLEAN  ProvideCustomSlide;
+  BOOLEAN    ProvideCustomSlide;
   ///
   /// Provide max KASLR slide for firmware with polluted higher memory ranges.
   ///
-  UINT8    ProvideMaxSlide;
+  UINT8      ProvideMaxSlide;
   ///
   /// Remove runtime flag from MMIO areas and prevent virtual address assignment for known
   /// MMIO regions. This may improve the amount of slides available, but may not work on
   /// unknown configurations.
   ///
-  BOOLEAN  DevirtualiseMmio;
+  BOOLEAN    DevirtualiseMmio;
   ///
   /// Disable passing -s to operating system through key presses, to simulate T2 Mac behaviour.
   /// Ref: https://support.apple.com/HT201573
   ///
-  BOOLEAN  DisableSingleUser;
+  BOOLEAN    DisableSingleUser;
   ///
   /// Discard UEFI memory map after waking from hibernation and preserve the original mapping.
   ///
-  BOOLEAN  DiscardHibernateMap;
+  BOOLEAN    DiscardHibernateMap;
   ///
   /// Try to patch Apple bootloader to have KASLR enabled even in SafeMode.
   ///
-  BOOLEAN  EnableSafeModeSlide;
+  BOOLEAN    EnableSafeModeSlide;
   ///
   /// Try to relocate memory to different address space when KASLR is disabled
   /// and lower memory is unavailable.
   ///
-  BOOLEAN  AllowRelocationBlock;
+  BOOLEAN    AllowRelocationBlock;
   ///
   /// Attempt to protect certain memory regions from being incorrectly mapped:
   /// - CSM region could get used by the kernel due to being BS data,
@@ -123,47 +123,47 @@ typedef struct OC_ABC_SETTINGS_ {
   /// - MMIO regions can be marked as reserved memory and be thus unmapped,
   ///   which caused boot failures when accessing NVRAM.
   ///
-  BOOLEAN  ProtectMemoryRegions;
+  BOOLEAN    ProtectMemoryRegions;
   ///
   /// Rebuild memory map to be compatible with Apple kernel.
   /// - Apply memory attributes and split RT entries into code and data.
   /// - Reduce memory map entries through grouping to fit into 4KB.
   ///
-  BOOLEAN  RebuildAppleMemoryMap;
+  BOOLEAN    RebuildAppleMemoryMap;
   ///
   /// Ensure that ExitBootServices call succeeds even with outdated MemoryMap key.
   ///
-  BOOLEAN  ForceExitBootServices;
+  BOOLEAN    ForceExitBootServices;
   ///
   /// Disable NVRAM variable write support to protect from malware or to prevent
   /// buggy NVRAM implementations cause system issues.
   ///
-  BOOLEAN  DisableVariableWrite;
+  BOOLEAN    DisableVariableWrite;
   ///
   /// Protect secure boot variables.
   ///
-  BOOLEAN  ProtectSecureBoot;
+  BOOLEAN    ProtectSecureBoot;
   ///
   /// Permit writing to executable memory in UEFI runtime services. Fixes crashes
   /// on many types of APTIO V firmware.
   ///
-  BOOLEAN  EnableWriteUnprotector;
+  BOOLEAN    EnableWriteUnprotector;
   ///
   /// Signal OSInfo protocol that every loaded non-macOS OS is macOS.
   /// Works around disabled IGPU in Windows and Linux on Apple laptops.
   ///
-  BOOLEAN  SignalAppleOS;
+  BOOLEAN    SignalAppleOS;
   ///
   /// Provide OpenCore boot-signature when loading macOS.
   /// This resolves the ability to wake from hibernate on Mac EFI, which
   /// checks that the hibernation signature matches the SHA-1 hash of the
   /// EFI image it launches prior to exposing the image key.
   ///
-  BOOLEAN  ForceBooterSignature;
+  BOOLEAN    ForceBooterSignature;
   ///
   /// Booter signature for ForceBooterSignature.
   ///
-  UINT8    BooterSignature[SHA1_DIGEST_SIZE];
+  UINT8      BooterSignature[SHA1_DIGEST_SIZE];
   ///
   /// CoreImage may update and restore GetMemoryMap during loading (see InsertImageRecord)
   /// as it needs this for segment splitting. Unfortunately it assumes nobody else
@@ -174,39 +174,39 @@ typedef struct OC_ABC_SETTINGS_ {
   /// may show "Your Mac OS guest might run unreliably with more than one virtual core."
   /// message when running OpenCore.
   ///
-  BOOLEAN  ProtectUefiServices;
+  BOOLEAN                 ProtectUefiServices;
   ///
   /// Fix OpenRuntime permissions in the memory map and memory attributes.
   ///
-  BOOLEAN  SyncRuntimePermissions;
+  BOOLEAN                 SyncRuntimePermissions;
   ///
   /// Reduce GPU BARs for macOS to maximum supported version.
   ///
-  INT8     ResizeAppleGpuBars;
+  INT8                    ResizeAppleGpuBars;
   ///
   /// List of physical addresses to not be devirtualised by DevirtualiseMmio.
   ///
-  EFI_PHYSICAL_ADDRESS *MmioWhitelist;
+  EFI_PHYSICAL_ADDRESS    *MmioWhitelist;
   ///
   /// Size of list of physical addresses to not be devirtualised by DevirtualiseMmio.
   ///
-  UINTN                MmioWhitelistSize;
+  UINTN                   MmioWhitelistSize;
   ///
   /// List of booter patches.
   ///
-  OC_BOOTER_PATCH      *BooterPatches;
+  OC_BOOTER_PATCH         *BooterPatches;
   ///
   /// Size of list of booter patches.
   ///
-  UINT32               BooterPatchesSize;
+  UINT32                  BooterPatchesSize;
   ///
   /// List of NULL-terminated handlers for TPL_APPLICATION execution within ExitBootServices.
   ///
-  EFI_EVENT_NOTIFY     *ExitBootServicesHandlers;
+  EFI_EVENT_NOTIFY        *ExitBootServicesHandlers;
   ///
   /// List of handler contexts for ExitBootServicesHandlers.
   ///
-  VOID                 **ExitBootServicesHandlerContexts;
+  VOID                    **ExitBootServicesHandlerContexts;
 } OC_ABC_SETTINGS;
 
 /**

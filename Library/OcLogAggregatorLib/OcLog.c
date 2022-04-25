@@ -44,13 +44,13 @@ GetTiming  (
   IN OC_LOG_PROTOCOL  *This
   )
 {
-  OC_LOG_PRIVATE_DATA *Private = NULL;
+  OC_LOG_PRIVATE_DATA  *Private = NULL;
 
-  UINT64                dTStartSec = 0;
-  UINT64                dTStartMs = 0;
-  UINT64                dTLastSec = 0;
-  UINT64                dTLastMs = 0;
-  UINT64                CurrentTsc = 0;
+  UINT64  dTStartSec = 0;
+  UINT64  dTStartMs  = 0;
+  UINT64  dTLastSec  = 0;
+  UINT64  dTLastMs   = 0;
+  UINT64  CurrentTsc = 0;
 
   if (This == NULL) {
     return NULL;
@@ -62,7 +62,7 @@ GetTiming  (
   // Calibrate TSC for timings.
   //
 
-  if (Private->TscFrequency == 0)  {
+  if (Private->TscFrequency == 0) {
     Private->TscFrequency = OcGetTSCFrequency ();
 
     if (Private->TscFrequency != 0) {
@@ -129,12 +129,12 @@ GetLogPath (
     Size,
     L"%s-%04u-%02u-%02u-%02u%02u%02u.txt",
     LogPrefixPath,
-    (UINT32) Date.Year,
-    (UINT32) Date.Month,
-    (UINT32) Date.Day,
-    (UINT32) Date.Hour,
-    (UINT32) Date.Minute,
-    (UINT32) Date.Second
+    (UINT32)Date.Year,
+    (UINT32)Date.Month,
+    (UINT32)Date.Day,
+    (UINT32)Date.Hour,
+    (UINT32)Date.Minute,
+    (UINT32)Date.Second
     );
 
   return LogPath;
@@ -147,9 +147,9 @@ GetLogPrefix (
   OUT  CHAR8        *Prefix
   )
 {
-  UINTN    MaxLength;
-  UINTN    Index;
-  CHAR8    Curr;
+  UINTN  MaxLength;
+  UINTN  Index;
+  CHAR8  Curr;
 
   ASSERT (FormatString != NULL);
   ASSERT (Prefix != NULL);
@@ -175,7 +175,7 @@ GetLogPrefix (
     //
     // Except for colon, a valid prefix must be either 0-9, or uppercase letter.
     //
-    if (!(IsAsciiNumber (Curr) || (Curr >= 'A' && Curr <= 'Z'))) {
+    if (!(IsAsciiNumber (Curr) || ((Curr >= 'A') && (Curr <= 'Z')))) {
       return EFI_NOT_FOUND;
     }
   }
@@ -220,7 +220,7 @@ IsPrefixFiltered (
   }
 
   for (Index = 0; Index < FlexFilters->Count; ++Index) {
-    Value = (CHAR8 **) OcFlexArrayItemAt (FlexFilters, Index);
+    Value = (CHAR8 **)OcFlexArrayItemAt (FlexFilters, Index);
     ASSERT (Value != NULL);
 
     if (AsciiStrCmp (Prefix, *Value) == 0) {
@@ -273,7 +273,7 @@ InternalLogAddEntry (
     //
     // Send the string to the console output device.
     //
-    if ((OcLog->Options & OC_LOG_CONSOLE) != 0 && (OcLog->DisplayLevel & ErrorLevel) != 0) {
+    if (((OcLog->Options & OC_LOG_CONSOLE) != 0) && ((OcLog->DisplayLevel & ErrorLevel) != 0)) {
       UnicodeSPrint (
         Private->UnicodeLineBuffer,
         sizeof (Private->UnicodeLineBuffer),
@@ -287,8 +287,8 @@ InternalLogAddEntry (
       }
     }
 
-    TimingLength = (UINT32) AsciiStrLen (Private->TimingTxt);
-    LineLength   = (UINT32) AsciiStrLen (Private->LineBuffer);
+    TimingLength = (UINT32)AsciiStrLen (Private->TimingTxt);
+    LineLength   = (UINT32)AsciiStrLen (Private->LineBuffer);
 
     //
     // Write to serial port.
@@ -297,8 +297,8 @@ InternalLogAddEntry (
       //
       // No return value check - SerialPortWrite either stalls or falsely return all bytes written if no serial available.
       //
-      SerialPortWrite ((UINT8 *) Private->TimingTxt, TimingLength);
-      SerialPortWrite ((UINT8 *) Private->LineBuffer, LineLength);
+      SerialPortWrite ((UINT8 *)Private->TimingTxt, TimingLength);
+      SerialPortWrite ((UINT8 *)Private->LineBuffer, LineLength);
     }
 
     //
@@ -307,10 +307,10 @@ InternalLogAddEntry (
     if ((OcLog->Options & OC_LOG_DATA_HUB) != 0) {
       if (Private->DataHub == NULL) {
         gBS->LocateProtocol (
-          &gEfiDataHubProtocolGuid,
-          NULL,
-          (VOID **) &Private->DataHub
-          );
+               &gEfiDataHubProtocolGuid,
+               NULL,
+               (VOID **)&Private->DataHub
+               );
       }
 
       if (Private->DataHub != NULL) {
@@ -326,7 +326,7 @@ InternalLogAddEntry (
           Entry->ValueSize = DataSize;
 
           UnicodeSPrint (
-            (CHAR16 *) &Entry->Data[0],
+            (CHAR16 *)&Entry->Data[0],
             Entry->KeySize,
             L"%s%05u",
             OC_LOG_VARIABLE_NAME,
@@ -346,13 +346,13 @@ InternalLogAddEntry (
             );
 
           Private->DataHub->LogData (
-            Private->DataHub,
-            &gEfiMiscSubClassGuid,
-            &gApplePlatformProducerNameGuid,
-            EFI_DATA_RECORD_CLASS_DATA,
-            Entry,
-            TotalSize
-            );
+                              Private->DataHub,
+                              &gEfiMiscSubClassGuid,
+                              &gApplePlatformProducerNameGuid,
+                              EFI_DATA_RECORD_CLASS_DATA,
+                              Entry,
+                              TotalSize
+                              );
 
           FreePool (Entry);
         }
@@ -373,13 +373,13 @@ InternalLogAddEntry (
     // Always overwriting file completely is most reliable.
     // I know it is slow, but fixed size write is more reliable with broken FAT32 driver.
     //
-    if ((OcLog->Options & OC_LOG_FILE) != 0 && OcLog->FileSystem != NULL) {
+    if (((OcLog->Options & OC_LOG_FILE) != 0) && (OcLog->FileSystem != NULL)) {
       if (EfiGetCurrentTpl () <= TPL_CALLBACK) {
         OcSetFileData (
           OcLog->FileSystem,
           OcLog->FilePath,
           Private->AsciiBuffer,
-          (UINT32) Private->AsciiBufferSize
+          (UINT32)Private->AsciiBufferSize
           );
       }
     }
@@ -387,7 +387,7 @@ InternalLogAddEntry (
     //
     // Write to a variable.
     //
-    if (ErrorLevel != DEBUG_BULK_INFO && (OcLog->Options & (OC_LOG_VARIABLE | OC_LOG_NONVOLATILE)) != 0) {
+    if ((ErrorLevel != DEBUG_BULK_INFO) && ((OcLog->Options & (OC_LOG_VARIABLE | OC_LOG_NONVOLATILE)) != 0)) {
       //
       // Do not log timing information to NVRAM, it is already large.
       // This check is here, because Microsoft is retarded and asserts.
@@ -397,22 +397,24 @@ InternalLogAddEntry (
       } else {
         Status = EFI_BUFFER_TOO_SMALL;
       }
+
       if (!EFI_ERROR (Status)) {
         Attributes = EFI_VARIABLE_BOOTSERVICE_ACCESS | EFI_VARIABLE_RUNTIME_ACCESS;
         if ((OcLog->Options & OC_LOG_NONVOLATILE) != 0) {
           Attributes |= EFI_VARIABLE_NON_VOLATILE;
         }
+
         //
         // Do not use OcSetSystemVariable() as persistence is configured by the
         // user.
         //
         Status = gRT->SetVariable (
-          OC_LOG_VARIABLE_NAME,
-          &gOcVendorVariableGuid,
-          Attributes,
-          AsciiStrLen (Private->NvramBuffer),
-          Private->NvramBuffer
-          );
+                        OC_LOG_VARIABLE_NAME,
+                        &gOcVendorVariableGuid,
+                        Attributes,
+                        AsciiStrLen (Private->NvramBuffer),
+                        Private->NvramBuffer
+                        );
 
         if (EFI_ERROR (Status)) {
           //
@@ -438,15 +440,15 @@ InternalLogAddEntry (
 EFI_STATUS
 EFIAPI
 OcLogAddEntry (
-  IN OC_LOG_PROTOCOL    *OcLog,
-  IN UINTN              ErrorLevel,
-  IN CONST CHAR8        *FormatString,
-  IN VA_LIST            Marker
+  IN OC_LOG_PROTOCOL  *OcLog,
+  IN UINTN            ErrorLevel,
+  IN CONST CHAR8      *FormatString,
+  IN VA_LIST          Marker
   )
 {
-  EFI_STATUS                  Status;
-  OC_LOG_PRIVATE_DATA         *Private;
-  BOOLEAN                     IsFiltered;
+  EFI_STATUS           Status;
+  OC_LOG_PRIVATE_DATA  *Private;
+  BOOLEAN              IsFiltered;
 
   ASSERT (OcLog != NULL);
   ASSERT (FormatString != NULL);
@@ -463,15 +465,16 @@ OcLogAddEntry (
   //
   // Filter log.
   //
-  Status = EFI_SUCCESS;
+  Status     = EFI_SUCCESS;
   IsFiltered = IsPrefixFiltered (FormatString, Private->FlexFilters, Private->BlacklistFiltering);
   if (!IsFiltered) {
     Status = InternalLogAddEntry (Private, OcLog, ErrorLevel, FormatString, Marker);
   }
 
-  if ((ErrorLevel & OcLog->HaltLevel) != 0
-    && AsciiStrnCmp (FormatString, "\nASSERT_RETURN_ERROR", L_STR_LEN ("\nASSERT_RETURN_ERROR")) != 0
-    && AsciiStrnCmp (FormatString, "\nASSERT_EFI_ERROR", L_STR_LEN ("\nASSERT_EFI_ERROR")) != 0) {
+  if (  ((ErrorLevel & OcLog->HaltLevel) != 0)
+     && (AsciiStrnCmp (FormatString, "\nASSERT_RETURN_ERROR", L_STR_LEN ("\nASSERT_RETURN_ERROR")) != 0)
+     && (AsciiStrnCmp (FormatString, "\nASSERT_EFI_ERROR", L_STR_LEN ("\nASSERT_EFI_ERROR")) != 0))
+  {
     gST->ConOut->OutputString (gST->ConOut, L"Halting on critical error\r\n");
     gBS->Stall (SECONDS_TO_MICROSECONDS (1));
     CpuDeadLoop ();
@@ -487,15 +490,15 @@ OcLogGetLog  (
   OUT CHAR8            **OcLogBuffer
   )
 {
-  EFI_STATUS            Status;
+  EFI_STATUS  Status;
 
-  OC_LOG_PRIVATE_DATA *Private;
+  OC_LOG_PRIVATE_DATA  *Private;
 
   Status = EFI_INVALID_PARAMETER;
 
   if (OcLogBuffer != NULL) {
-    Private        = OC_LOG_PRIVATE_DATA_FROM_OC_LOG_THIS (This);
-    *OcLogBuffer   = Private->AsciiBuffer;
+    Private      = OC_LOG_PRIVATE_DATA_FROM_OC_LOG_THIS (This);
+    *OcLogBuffer = Private->AsciiBuffer;
 
     Status = EFI_SUCCESS;
   }
@@ -530,16 +533,16 @@ InternalGetOcLog (
 {
   EFI_STATUS  Status;
 
-  STATIC OC_LOG_PROTOCOL *mInternalOcLog = NULL;
+  STATIC OC_LOG_PROTOCOL  *mInternalOcLog = NULL;
 
   if (mInternalOcLog == NULL) {
     Status = gBS->LocateProtocol (
-      &gOcLogProtocolGuid,
-      NULL,
-      (VOID **) &mInternalOcLog
-      );
+                    &gOcLogProtocolGuid,
+                    NULL,
+                    (VOID **)&mInternalOcLog
+                    );
 
-    if (EFI_ERROR (Status) || mInternalOcLog->Revision != OC_LOG_REVISION) {
+    if (EFI_ERROR (Status) || (mInternalOcLog->Revision != OC_LOG_REVISION)) {
       mInternalOcLog = NULL;
     }
   }
@@ -558,13 +561,13 @@ OcConfigureLogProtocol (
   IN EFI_SIMPLE_FILE_SYSTEM_PROTOCOL  *LogFileSystem  OPTIONAL
   )
 {
-  EFI_STATUS            Status;
+  EFI_STATUS  Status;
 
-  OC_LOG_PROTOCOL       *OcLog;
-  OC_LOG_PRIVATE_DATA   *Private;
-  EFI_HANDLE            Handle;
-  EFI_FILE_PROTOCOL     *LogRoot;
-  CHAR16                *LogPath;
+  OC_LOG_PROTOCOL      *OcLog;
+  OC_LOG_PRIVATE_DATA  *Private;
+  EFI_HANDLE           Handle;
+  EFI_FILE_PROTOCOL    *LogRoot;
+  CHAR16               *LogPath;
 
   ASSERT (LogModules != NULL);
 
@@ -597,8 +600,8 @@ OcConfigureLogProtocol (
       }
     }
   } else {
-    LogRoot       = NULL;
-    LogPath       = NULL;
+    LogRoot = NULL;
+    LogPath = NULL;
   }
 
   //
@@ -615,6 +618,7 @@ OcConfigureLogProtocol (
     if (OcLog->FileSystem != NULL) {
       OcLog->FileSystem->Close (OcLog->FileSystem);
     }
+
     if (OcLog->FilePath != NULL) {
       FreePool (OcLog->FilePath);
     }
@@ -650,9 +654,9 @@ OcConfigureLogProtocol (
       //
       // Write filters into Private.
       //
-      Private->FlexFilters = NULL;
+      Private->FlexFilters        = NULL;
       Private->BlacklistFiltering = FALSE;
-      if (*LogModules != '*' && *LogModules != '\0') {
+      if ((*LogModules != '*') && (*LogModules != '\0')) {
         //
         // Default to positive filtering without symbol.
         //
@@ -668,11 +672,11 @@ OcConfigureLogProtocol (
 
       Handle = NULL;
       Status = gBS->InstallProtocolInterface (
-        &Handle,
-        &gOcLogProtocolGuid,
-        EFI_NATIVE_INTERFACE,
-        &Private->OcLog
-        );
+                      &Handle,
+                      &gOcLogProtocolGuid,
+                      EFI_NATIVE_INTERFACE,
+                      &Private->OcLog
+                      );
 
       if (!EFI_ERROR (Status)) {
         OcLog = &Private->OcLog;
@@ -689,7 +693,7 @@ OcConfigureLogProtocol (
           LogRoot,
           LogPath,
           OC_LOG_PRIVATE_DATA_FROM_OC_LOG_THIS (OcLog)->AsciiBuffer,
-          (UINT32) OC_LOG_PRIVATE_DATA_FROM_OC_LOG_THIS (OcLog)->AsciiBufferSize
+          (UINT32)OC_LOG_PRIVATE_DATA_FROM_OC_LOG_THIS (OcLog)->AsciiBufferSize
           );
       }
     } else {

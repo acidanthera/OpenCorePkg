@@ -32,12 +32,12 @@ Module Name:
 #define FIRMWARE_VOLUME_PRIVATE_DATA_SIGNATURE  SIGNATURE_32 ('f', 'v', 't', 'h')
 
 typedef struct {
-  UINTN                          Signature;
-  EFI_FIRMWARE_VOLUME_PROTOCOL   FirmwareVolume;
-  EFI_FIRMWARE_VOLUME2_PROTOCOL  *FirmwareVolume2;
+  UINTN                            Signature;
+  EFI_FIRMWARE_VOLUME_PROTOCOL     FirmwareVolume;
+  EFI_FIRMWARE_VOLUME2_PROTOCOL    *FirmwareVolume2;
 } FIRMWARE_VOLUME_PRIVATE_DATA;
 
-#define FIRMWARE_VOLUME_PRIVATE_DATA_FROM_THIS(a) CR (a, FIRMWARE_VOLUME_PRIVATE_DATA, FirmwareVolume, FIRMWARE_VOLUME_PRIVATE_DATA_SIGNATURE)
+#define FIRMWARE_VOLUME_PRIVATE_DATA_FROM_THIS(a)  CR (a, FIRMWARE_VOLUME_PRIVATE_DATA, FirmwareVolume, FIRMWARE_VOLUME_PRIVATE_DATA_SIGNATURE)
 
 /**
   Convert FV attrbiutes to FV2 attributes.
@@ -49,13 +49,13 @@ typedef struct {
 **/
 FRAMEWORK_EFI_FV_ATTRIBUTES
 Fv2AttributesToFvAttributes (
-  IN  EFI_FV_ATTRIBUTES Fv2Attributes
+  IN  EFI_FV_ATTRIBUTES  Fv2Attributes
   )
 {
   //
   // Clear those filed that is not defined in Framework FV spec and Alignment conversion.
   //
-  return (Fv2Attributes & 0x1ff) | ((UINTN) EFI_FV_ALIGNMENT_2 << RShiftU64((Fv2Attributes & EFI_FV2_ALIGNMENT), 16));
+  return (Fv2Attributes & 0x1ff) | ((UINTN)EFI_FV_ALIGNMENT_2 << RShiftU64 ((Fv2Attributes & EFI_FV2_ALIGNMENT), 16));
 }
 
 /**
@@ -79,7 +79,7 @@ FvGetVolumeAttributes (
   FIRMWARE_VOLUME_PRIVATE_DATA   *Private;
   EFI_FIRMWARE_VOLUME2_PROTOCOL  *FirmwareVolume2;
 
-  Private = FIRMWARE_VOLUME_PRIVATE_DATA_FROM_THIS (This);
+  Private         = FIRMWARE_VOLUME_PRIVATE_DATA_FROM_THIS (This);
   FirmwareVolume2 = Private->FirmwareVolume2;
 
   Status = FirmwareVolume2->GetVolumeAttributes (
@@ -89,6 +89,7 @@ FvGetVolumeAttributes (
   if (!EFI_ERROR (Status)) {
     *Attributes = Fv2AttributesToFvAttributes (*Attributes);
   }
+
   return Status;
 }
 
@@ -117,14 +118,14 @@ FvSetVolumeAttributes (
   EFI_FV_ATTRIBUTES              Fv2Attributes;
   EFI_STATUS                     Status;
 
-  Private = FIRMWARE_VOLUME_PRIVATE_DATA_FROM_THIS (This);
+  Private         = FIRMWARE_VOLUME_PRIVATE_DATA_FROM_THIS (This);
   FirmwareVolume2 = Private->FirmwareVolume2;
 
   Fv2Attributes = (*Attributes & 0x1ff);
-  Status = FirmwareVolume2->SetVolumeAttributes (
-                            FirmwareVolume2,
-                            &Fv2Attributes
-                            );
+  Status        = FirmwareVolume2->SetVolumeAttributes (
+                                     FirmwareVolume2,
+                                     &Fv2Attributes
+                                     );
 
   *Attributes = Fv2AttributesToFvAttributes (Fv2Attributes);
 
@@ -164,31 +165,31 @@ FvSetVolumeAttributes (
 EFI_STATUS
 EFIAPI
 FvReadFile (
-  IN EFI_FIRMWARE_VOLUME_PROTOCOL   *This,
-  IN EFI_GUID                       *NameGuid,
-  IN OUT VOID                       **Buffer,
-  IN OUT UINTN                      *BufferSize,
-  OUT EFI_FV_FILETYPE               *FoundType,
-  OUT EFI_FV_FILE_ATTRIBUTES        *FileAttributes,
-  OUT UINT32                        *AuthenticationStatus
+  IN EFI_FIRMWARE_VOLUME_PROTOCOL  *This,
+  IN EFI_GUID                      *NameGuid,
+  IN OUT VOID                      **Buffer,
+  IN OUT UINTN                     *BufferSize,
+  OUT EFI_FV_FILETYPE              *FoundType,
+  OUT EFI_FV_FILE_ATTRIBUTES       *FileAttributes,
+  OUT UINT32                       *AuthenticationStatus
   )
 {
   FIRMWARE_VOLUME_PRIVATE_DATA   *Private;
   EFI_FIRMWARE_VOLUME2_PROTOCOL  *FirmwareVolume2;
   EFI_STATUS                     Status;
 
-  Private = FIRMWARE_VOLUME_PRIVATE_DATA_FROM_THIS (This);
+  Private         = FIRMWARE_VOLUME_PRIVATE_DATA_FROM_THIS (This);
   FirmwareVolume2 = Private->FirmwareVolume2;
 
   Status = FirmwareVolume2->ReadFile (
-                            FirmwareVolume2,
-                            NameGuid,
-                            Buffer,
-                            BufferSize,
-                            FoundType,
-                            FileAttributes,
-                            AuthenticationStatus
-                            );
+                              FirmwareVolume2,
+                              NameGuid,
+                              Buffer,
+                              BufferSize,
+                              FoundType,
+                              FileAttributes,
+                              AuthenticationStatus
+                              );
 
   //
   // For Framework FV attrbutes, only alignment fields are valid.
@@ -231,19 +232,19 @@ FvReadFile (
 EFI_STATUS
 EFIAPI
 FvReadSection (
-  IN EFI_FIRMWARE_VOLUME_PROTOCOL   *This,
-  IN EFI_GUID                       *NameGuid,
-  IN EFI_SECTION_TYPE               SectionType,
-  IN UINTN                          SectionInstance,
-  IN OUT VOID                       **Buffer,
-  IN OUT UINTN                      *BufferSize,
-  OUT UINT32                        *AuthenticationStatus
+  IN EFI_FIRMWARE_VOLUME_PROTOCOL  *This,
+  IN EFI_GUID                      *NameGuid,
+  IN EFI_SECTION_TYPE              SectionType,
+  IN UINTN                         SectionInstance,
+  IN OUT VOID                      **Buffer,
+  IN OUT UINTN                     *BufferSize,
+  OUT UINT32                       *AuthenticationStatus
   )
 {
   FIRMWARE_VOLUME_PRIVATE_DATA   *Private;
   EFI_FIRMWARE_VOLUME2_PROTOCOL  *FirmwareVolume2;
 
-  Private = FIRMWARE_VOLUME_PRIVATE_DATA_FROM_THIS (This);
+  Private         = FIRMWARE_VOLUME_PRIVATE_DATA_FROM_THIS (This);
   FirmwareVolume2 = Private->FirmwareVolume2;
 
   return FirmwareVolume2->ReadSection (
@@ -295,7 +296,7 @@ FvWriteFile (
   EFI_STATUS                     Status;
   UINTN                          Index;
 
-  Private = FIRMWARE_VOLUME_PRIVATE_DATA_FROM_THIS (This);
+  Private         = FIRMWARE_VOLUME_PRIVATE_DATA_FROM_THIS (This);
   FirmwareVolume2 = Private->FirmwareVolume2;
 
   PiFileData = AllocateCopyPool (sizeof (EFI_FV_WRITE_FILE_DATA), FileData);
@@ -309,11 +310,11 @@ FvWriteFile (
   }
 
   Status = FirmwareVolume2->WriteFile (
-                            FirmwareVolume2,
-                            NumberOfFiles,
-                            WritePolicy,
-                            (EFI_FV_WRITE_FILE_DATA *)FileData
-                            );
+                              FirmwareVolume2,
+                              NumberOfFiles,
+                              WritePolicy,
+                              (EFI_FV_WRITE_FILE_DATA *)FileData
+                              );
 
   FreePool (PiFileData);
   return Status;
@@ -342,29 +343,29 @@ FvWriteFile (
 EFI_STATUS
 EFIAPI
 FvGetNextFile (
-  IN EFI_FIRMWARE_VOLUME_PROTOCOL   *This,
-  IN OUT VOID                       *Key,
-  IN OUT EFI_FV_FILETYPE            *FileType,
-  OUT EFI_GUID                      *NameGuid,
-  OUT EFI_FV_FILE_ATTRIBUTES        *Attributes,
-  OUT UINTN                         *Size
+  IN EFI_FIRMWARE_VOLUME_PROTOCOL  *This,
+  IN OUT VOID                      *Key,
+  IN OUT EFI_FV_FILETYPE           *FileType,
+  OUT EFI_GUID                     *NameGuid,
+  OUT EFI_FV_FILE_ATTRIBUTES       *Attributes,
+  OUT UINTN                        *Size
   )
 {
   FIRMWARE_VOLUME_PRIVATE_DATA   *Private;
   EFI_FIRMWARE_VOLUME2_PROTOCOL  *FirmwareVolume2;
   EFI_STATUS                     Status;
 
-  Private = FIRMWARE_VOLUME_PRIVATE_DATA_FROM_THIS (This);
+  Private         = FIRMWARE_VOLUME_PRIVATE_DATA_FROM_THIS (This);
   FirmwareVolume2 = Private->FirmwareVolume2;
 
   Status = FirmwareVolume2->GetNextFile (
-                            FirmwareVolume2,
-                            Key,
-                            FileType,
-                            NameGuid,
-                            Attributes,
-                            Size
-                            );
+                              FirmwareVolume2,
+                              Key,
+                              FileType,
+                              NameGuid,
+                              Attributes,
+                              Size
+                              );
 
   //
   // For Framework FV attrbutes, only alignment fields are valid.
@@ -379,7 +380,7 @@ FvGetNextFile (
 //
 EFI_EVENT  mFvRegistration;
 
-FIRMWARE_VOLUME_PRIVATE_DATA gFirmwareVolumePrivateDataTemplate = {
+FIRMWARE_VOLUME_PRIVATE_DATA  gFirmwareVolumePrivateDataTemplate = {
   FIRMWARE_VOLUME_PRIVATE_DATA_SIGNATURE,
   {
     FvGetVolumeAttributes,
@@ -397,6 +398,7 @@ FIRMWARE_VOLUME_PRIVATE_DATA gFirmwareVolumePrivateDataTemplate = {
 //
 // Module globals
 //
+
 /**
   This notification function is invoked when an instance of the
   EFI_FIRMWARE_VOLUME2_PROTOCOL is produced. It installs another instance of the
@@ -409,8 +411,8 @@ FIRMWARE_VOLUME_PRIVATE_DATA gFirmwareVolumePrivateDataTemplate = {
 VOID
 EFIAPI
 FvNotificationEvent (
-  IN  EFI_EVENT       Event,
-  IN  VOID            *Context
+  IN  EFI_EVENT  Event,
+  IN  VOID       *Context
   )
 {
   EFI_STATUS                    Status;
@@ -421,13 +423,13 @@ FvNotificationEvent (
 
   while (TRUE) {
     BufferSize = sizeof (Handle);
-    Status = gBS->LocateHandle (
-                    ByRegisterNotify,
-                    &gEfiFirmwareVolume2ProtocolGuid,
-                    mFvRegistration,
-                    &BufferSize,
-                    &Handle
-                    );
+    Status     = gBS->LocateHandle (
+                        ByRegisterNotify,
+                        &gEfiFirmwareVolume2ProtocolGuid,
+                        mFvRegistration,
+                        &BufferSize,
+                        &Handle
+                        );
     if (EFI_ERROR (Status)) {
       //
       // Exit Path of While Loop....
@@ -464,7 +466,7 @@ FvNotificationEvent (
                     (VOID **)&Private->FirmwareVolume2
                     );
     if (EFI_ERROR (Status)) {
-       DEBUG ((DEBUG_INFO, "OCFV: HandleProtocol FirmwareVolume2 failure: %r\n", Status));
+      DEBUG ((DEBUG_INFO, "OCFV: HandleProtocol FirmwareVolume2 failure: %r\n", Status));
     }
 
     //
@@ -483,11 +485,10 @@ FvNotificationEvent (
                     NULL
                     );
     if (EFI_ERROR (Status)) {
-       DEBUG ((DEBUG_INFO, "OCFV: Install FirmwareVolume protocol failure: %r\n", Status));
+      DEBUG ((DEBUG_INFO, "OCFV: Install FirmwareVolume protocol failure: %r\n", Status));
     }
   }
 }
-
 
 /**
   The user Entry Point for DXE driver. The user code starts with this function

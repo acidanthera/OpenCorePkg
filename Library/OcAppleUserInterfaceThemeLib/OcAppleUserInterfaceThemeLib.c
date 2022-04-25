@@ -21,7 +21,7 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 #include <Library/OcAppleUserInterfaceThemeLib.h>
 #include <Protocol/UserInterfaceTheme.h>
 
-STATIC UINT32 mCurrentColor;
+STATIC UINT32  mCurrentColor;
 
 STATIC
 EFI_STATUS
@@ -38,7 +38,7 @@ UserInterfaceThemeGetColor (
   return EFI_SUCCESS;
 }
 
-STATIC EFI_USER_INTERFACE_THEME_PROTOCOL mAppleUserInterfaceThemeProtocol = {
+STATIC EFI_USER_INTERFACE_THEME_PROTOCOL  mAppleUserInterfaceThemeProtocol = {
   USER_THEME_INTERFACE_PROTOCOL_REVISION,
   UserInterfaceThemeGetColor
 };
@@ -62,10 +62,10 @@ OcAppleUserInterfaceThemeInstallProtocol (
     }
   } else {
     Status = gBS->LocateProtocol (
-      &gEfiUserInterfaceThemeProtocolGuid,
-      NULL,
-      (VOID **) &EfiUiInterface
-      );
+                    &gEfiUserInterfaceThemeProtocolGuid,
+                    NULL,
+                    (VOID **)&EfiUiInterface
+                    );
     if (!EFI_ERROR (Status)) {
       return EfiUiInterface;
     }
@@ -77,24 +77,24 @@ OcAppleUserInterfaceThemeInstallProtocol (
   mCurrentColor = APPLE_COLOR_SYRAH_BLACK;
 
   DataSize = sizeof (Color);
-  Status = gRT->GetVariable (
-    APPLE_DEFAULT_BACKGROUND_COLOR_VARIABLE_NAME,
-    &gAppleVendorVariableGuid,
-    0,
-    &DataSize,
-    &Color
-    );
+  Status   = gRT->GetVariable (
+                    APPLE_DEFAULT_BACKGROUND_COLOR_VARIABLE_NAME,
+                    &gAppleVendorVariableGuid,
+                    0,
+                    &DataSize,
+                    &Color
+                    );
   if (!EFI_ERROR (Status)) {
     mCurrentColor = Color;
   }
 
   NewHandle = NULL;
-  Status = gBS->InstallMultipleProtocolInterfaces (
-    &NewHandle,
-    &gEfiUserInterfaceThemeProtocolGuid,
-    &mAppleUserInterfaceThemeProtocol,
-    NULL
-    );
+  Status    = gBS->InstallMultipleProtocolInterfaces (
+                     &NewHandle,
+                     &gEfiUserInterfaceThemeProtocolGuid,
+                     &mAppleUserInterfaceThemeProtocol,
+                     NULL
+                     );
   if (EFI_ERROR (Status)) {
     return NULL;
   }

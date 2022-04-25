@@ -23,19 +23,19 @@
 
 // IchPciAddressing  PCI Bus Address for ICH.
 
-#define PCI_BUS_NUMBER_ICH             0x00  ///< ICH is on PCI Bus 0.
-#define PCI_DEVICE_NUMBER_ICH          31    ///< ICH is Device 31.
-#define PCI_FUNCTION_NUMBER_ICH_LPC    0     ///< LPC is Function 0.
-#define PCI_FUNCTION_NUMBER_ICH_PMC    2     ///< PMC is Function 2.
+#define PCI_BUS_NUMBER_ICH           0x00    ///< ICH is on PCI Bus 0.
+#define PCI_DEVICE_NUMBER_ICH        31      ///< ICH is Device 31.
+#define PCI_FUNCTION_NUMBER_ICH_LPC  0       ///< LPC is Function 0.
+#define PCI_FUNCTION_NUMBER_ICH_PMC  2       ///< PMC is Function 2.
 
-#define V_ICH_PCI_VENDOR_ID     0x8086  ///< Intel vendor-id
+#define V_ICH_PCI_VENDOR_ID  0x8086     ///< Intel vendor-id
 
 // IchAcpiCntr   Control for the ICH's ACPI Counter.
 
-#define R_ICH_ACPI_BASE         0x40
-#define B_ICH_ACPI_BASE_BAR     0x0000FF80
-#define R_ICH_ACPI_CNTL         0x44    ///< See ACPI_CNTL
-#define B_ICH_ACPI_CNTL_ACPI_EN 0x80
+#define R_ICH_ACPI_BASE          0x40
+#define B_ICH_ACPI_BASE_BAR      0x0000FF80
+#define R_ICH_ACPI_CNTL          0x44   ///< See ACPI_CNTL
+#define B_ICH_ACPI_CNTL_ACPI_EN  0x80
 
 #define R_ICH_BAR2_BASE         0x20
 #define B_ICH_BAR2_BASE_BAR     0x0000FFC0
@@ -43,17 +43,17 @@
 
 // Pre Intel Sunrisepoint
 
-#define R_ICH_LPC_ACPI_BASE         R_ICH_ACPI_BASE
-#define B_ICH_LPC_ACPI_BASE_BAR     B_ICH_ACPI_BASE_BAR
-#define R_ICH_LPC_ACPI_CNTL         R_ICH_ACPI_CNTL
-#define B_ICH_LPC_ACPI_CNTL_ACPI_EN B_ICH_ACPI_CNTL_ACPI_EN
+#define R_ICH_LPC_ACPI_BASE          R_ICH_ACPI_BASE
+#define B_ICH_LPC_ACPI_BASE_BAR      B_ICH_ACPI_BASE_BAR
+#define R_ICH_LPC_ACPI_CNTL          R_ICH_ACPI_CNTL
+#define B_ICH_LPC_ACPI_CNTL_ACPI_EN  B_ICH_ACPI_CNTL_ACPI_EN
 
 // Intel Sunrisepoint
 
-#define R_ICH_PMC_ACPI_BASE         R_ICH_ACPI_BASE
-#define B_ICH_PMC_ACPI_BASE_BAR     B_ICH_ACPI_BASE_BAR
-#define R_ICH_PMC_ACPI_CNTL         R_ICH_ACPI_CNTL
-#define B_ICH_PMC_ACPI_CNTL_ACPI_EN B_ICH_ACPI_CNTL_ACPI_EN
+#define R_ICH_PMC_ACPI_BASE          R_ICH_ACPI_BASE
+#define B_ICH_PMC_ACPI_BASE_BAR      B_ICH_ACPI_BASE_BAR
+#define R_ICH_PMC_ACPI_CNTL          R_ICH_ACPI_CNTL
+#define B_ICH_PMC_ACPI_CNTL_ACPI_EN  B_ICH_ACPI_CNTL_ACPI_EN
 
 // Intel Coffee Lake
 
@@ -63,9 +63,9 @@
 
 // AMD Bolton (AMD Bolton Register Reference Guide 3.03)
 
-#define R_AMD_ACPI_MMIO_BASE          0xFED80000 ///< AcpiMMioAddr (3-268)
-#define R_AMD_ACPI_MMIO_PMIO_BASE     0x300      ///< PMIO (3-268)
-#define R_AMD_ACPI_PM_TMR_BLOCK       0x64       ///< AcpiPmTmrBlk (3-289)
+#define R_AMD_ACPI_MMIO_BASE       0xFED80000    ///< AcpiMMioAddr (3-268)
+#define R_AMD_ACPI_MMIO_PMIO_BASE  0x300         ///< PMIO (3-268)
+#define R_AMD_ACPI_PM_TMR_BLOCK    0x64          ///< AcpiPmTmrBlk (3-289)
 
 // IchAcpiTimer  The ICH's ACPI Timer.
 

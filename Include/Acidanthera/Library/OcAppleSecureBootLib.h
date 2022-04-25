@@ -94,9 +94,9 @@ OcAppleSecureBootGetDmgLoading (
 **/
 EFI_STATUS
 OcAppleSecureBootVerify (
-  IN  EFI_DEVICE_PATH_PROTOCOL     *DevicePath,
-  IN  VOID                         *SourceBuffer,
-  IN  UINTN                        SourceSize
+  IN  EFI_DEVICE_PATH_PROTOCOL  *DevicePath,
+  IN  VOID                      *SourceBuffer,
+  IN  UINTN                     SourceSize
   );
 
 #endif // OC_APPLE_SECURE_BOOT_LIB_H

@@ -29,11 +29,11 @@
 //
 // Pick a reasonable maximum to fit.
 //
-#define KERNEL_HEADER_SIZE (EFI_PAGE_SIZE * 2)
+#define KERNEL_HEADER_SIZE  (EFI_PAGE_SIZE * 2)
 
-STATIC SHA384_CONTEXT mKernelDigestContext;
-STATIC UINT32         mKernelDigestPosition;
-STATIC BOOLEAN        mNeedKernelDigest;
+STATIC SHA384_CONTEXT  mKernelDigestContext;
+STATIC UINT32          mKernelDigestPosition;
+STATIC BOOLEAN         mNeedKernelDigest;
 
 typedef enum {
   KernelArchUnknown,
@@ -46,7 +46,7 @@ EFI_STATUS
 ReplaceBuffer (
   IN     UINT32  TargetSize,
   IN OUT UINT8   **Buffer,
-     OUT UINT32  *AllocatedSize,
+  OUT UINT32     *AllocatedSize,
   IN     UINT32  ReservedSize
   )
 {
@@ -66,7 +66,7 @@ ReplaceBuffer (
   }
 
   FreePool (*Buffer);
-  *Buffer = TmpBuffer;
+  *Buffer        = TmpBuffer;
   *AllocatedSize = TargetSize;
 
   return EFI_SUCCESS;
@@ -88,33 +88,33 @@ KernelGetFileData (
   //
   // Calculate hash for the prefix.
   //
-  if (mNeedKernelDigest && Position > mKernelDigestPosition) {
+  if (mNeedKernelDigest && (Position > mKernelDigestPosition)) {
     RemainingSize = Position - mKernelDigestPosition;
 
     while (RemainingSize > 0) {
       ChunkSize = MIN (RemainingSize, Size);
-      Status = OcGetFileData (
-        File,
-        mKernelDigestPosition,
-        ChunkSize,
-        Buffer
-        );
+      Status    = OcGetFileData (
+                    File,
+                    mKernelDigestPosition,
+                    ChunkSize,
+                    Buffer
+                    );
       if (EFI_ERROR (Status)) {
         return Status;
       }
 
       Sha384Update (&mKernelDigestContext, Buffer, ChunkSize);
       mKernelDigestPosition += ChunkSize;
-      RemainingSize -= ChunkSize;
+      RemainingSize         -= ChunkSize;
     }
   }
 
   Status = OcGetFileData (
-    File,
-    Position,
-    Size,
-    Buffer
-    );
+             File,
+             Position,
+             Size,
+             Buffer
+             );
 
   if (EFI_ERROR (Status)) {
     return Status;
@@ -123,7 +123,7 @@ KernelGetFileData (
   //
   // Calculate hash for the suffix.
   //
-  if (mNeedKernelDigest && Position >= mKernelDigestPosition) {
+  if (mNeedKernelDigest && (Position >= mKernelDigestPosition)) {
     RemainingSize = Position + Size - mKernelDigestPosition;
     Sha384Update (
       &mKernelDigestContext,
@@ -143,30 +143,31 @@ ParseFatArchitecture (
   IN     BOOLEAN            Prefer32Bit,
   IN     UINT8              *Buffer,
   IN     UINT32             BufferSize,
-     OUT BOOLEAN            *Is32Bit,
-     OUT UINT32             *FatOffset,
-     OUT UINT32             *FatSize
+  OUT BOOLEAN               *Is32Bit,
+  OUT UINT32                *FatOffset,
+  OUT UINT32                *FatSize
   )
 {
-  EFI_STATUS        Status;
-  UINT32            FileSize;
+  EFI_STATUS  Status;
+  UINT32      FileSize;
 
   Status = OcGetFileSize (File, &FileSize);
   if (EFI_ERROR (Status)) {
     return Status;
   }
+
   if (BufferSize >= FileSize) {
     return EFI_INVALID_PARAMETER;
   }
 
   Status = FatGetArchitectureOffset (
-    Buffer,
-    BufferSize,
-    FileSize,
-    Prefer32Bit ? MachCpuTypeI386 : MachCpuTypeX8664,
-    FatOffset,
-    FatSize
-    );
+             Buffer,
+             BufferSize,
+             FileSize,
+             Prefer32Bit ? MachCpuTypeI386 : MachCpuTypeX8664,
+             FatOffset,
+             FatSize
+             );
   *Is32Bit = Prefer32Bit;
 
   //
@@ -174,13 +175,13 @@ ParseFatArchitecture (
   //
   if (Status == EFI_NOT_FOUND) {
     Status = FatGetArchitectureOffset (
-      Buffer,
-      BufferSize,
-      FileSize,
-      !Prefer32Bit ? MachCpuTypeI386 : MachCpuTypeX8664,
-      FatOffset,
-      FatSize
-      );
+               Buffer,
+               BufferSize,
+               FileSize,
+               !Prefer32Bit ? MachCpuTypeI386 : MachCpuTypeX8664,
+               FatOffset,
+               FatSize
+               );
     *Is32Bit = !Prefer32Bit;
   }
 
@@ -193,11 +194,11 @@ ParseCompressedHeader (
   IN     EFI_FILE_PROTOCOL  *File,
   IN OUT UINT8              **Buffer,
   IN     UINT32             Offset,
-     OUT UINT32             *AllocatedSize,
+  OUT UINT32                *AllocatedSize,
   IN     UINT32             ReservedSize
   )
 {
-  EFI_STATUS        Status;
+  EFI_STATUS  Status;
 
   UINT32            KernelSize;
   MACH_COMP_HEADER  *CompHeader;
@@ -215,10 +216,11 @@ ParseCompressedHeader (
 
   KernelSize = 0;
 
-  if (CompressedSize > OC_COMPRESSION_MAX_LENGTH
-    || CompressedSize == 0
-    || DecompressedSize > OC_COMPRESSION_MAX_LENGTH
-    || DecompressedSize < KERNEL_HEADER_SIZE) {
+  if (  (CompressedSize > OC_COMPRESSION_MAX_LENGTH)
+     || (CompressedSize == 0)
+     || (DecompressedSize > OC_COMPRESSION_MAX_LENGTH)
+     || (DecompressedSize < KERNEL_HEADER_SIZE))
+  {
     DEBUG ((DEBUG_INFO, "OCAK: Comp kernel invalid comp %u or decomp %u at %08X\n", CompressedSize, DecompressedSize, Offset));
     return KernelSize;
   }
@@ -255,7 +257,7 @@ ParseCompressedHeader (
   //
   // TODO: implement adler32 hash verification.
   //
-  (VOID) DecompressedHash;
+  (VOID)DecompressedHash;
 
   FreePool (CompressedBuffer);
 
@@ -269,17 +271,17 @@ ReadAppleKernelImage (
   IN     BOOLEAN            Prefer32Bit,
   IN OUT KERNEL_ARCH        *Arch,
   IN OUT UINT8              **Buffer,
-     OUT UINT32             *KernelSize,
-     OUT UINT32             *AllocatedSize,
+  OUT UINT32                *KernelSize,
+  OUT UINT32                *AllocatedSize,
   IN     UINT32             ReservedSize,
   IN     UINT32             Offset
   )
 {
-  EFI_STATUS        Status;
-  UINT32            *MagicPtr;
-  BOOLEAN           ForbidFat;
-  BOOLEAN           Compressed;
-  BOOLEAN           Is32Bit;
+  EFI_STATUS  Status;
+  UINT32      *MagicPtr;
+  BOOLEAN     ForbidFat;
+  BOOLEAN     Compressed;
+  BOOLEAN     Is32Bit;
 
   Status = KernelGetFileData (File, Offset, KERNEL_HEADER_SIZE, *Buffer);
   if (EFI_ERROR (Status)) {
@@ -293,11 +295,12 @@ ReadAppleKernelImage (
   Compressed = FALSE;
 
   while (TRUE) {
-    if (!OC_TYPE_ALIGNED (UINT32 , *Buffer)) {
+    if (!OC_TYPE_ALIGNED (UINT32, *Buffer)) {
       DEBUG ((DEBUG_INFO, "OCAK: Misaligned kernel header %p at %08X\n", *Buffer, Offset));
       return EFI_INVALID_PARAMETER;
     }
-    MagicPtr = (UINT32 *)* Buffer;
+
+    MagicPtr = (UINT32 *)*Buffer;
 
     switch (*MagicPtr) {
       case MACH_HEADER_SIGNATURE:
@@ -312,12 +315,15 @@ ReadAppleKernelImage (
             *Arch = KernelArch64;
           }
         }
+
         Is32Bit = *Arch == KernelArch32;
 
-        if ((Is32Bit && *MagicPtr != MACH_HEADER_SIGNATURE)
-          || (!Is32Bit && *MagicPtr != MACH_HEADER_64_SIGNATURE)) {
+        if (  (Is32Bit && (*MagicPtr != MACH_HEADER_SIGNATURE))
+           || (!Is32Bit && (*MagicPtr != MACH_HEADER_64_SIGNATURE)))
+        {
           return EFI_INVALID_PARAMETER;
         }
+
         DEBUG ((
           DEBUG_VERBOSE,
           "OCAK: Found %a Mach-O compressed %d offset %u size %u\n",
@@ -374,6 +380,7 @@ ReadAppleKernelImage (
         if (EFI_ERROR (Status)) {
           return Status;
         }
+
         *Arch = Is32Bit ? KernelArch32 : KernelArch64;
         return ReadAppleKernelImage (File, Prefer32Bit, Arch, Buffer, KernelSize, AllocatedSize, ReservedSize, Offset);
       }
@@ -394,9 +401,10 @@ ReadAppleKernelImage (
         //
         *KernelSize = ParseCompressedHeader (File, Buffer, Offset, AllocatedSize, ReservedSize);
         if (*KernelSize != 0) {
-          DEBUG ((DEBUG_VERBOSE, "OCAK: Compressed result has %08X magic\n", *(UINT32 *) Buffer));
+          DEBUG ((DEBUG_VERBOSE, "OCAK: Compressed result has %08X magic\n", *(UINT32 *)Buffer));
           continue;
         }
+
         return EFI_INVALID_PARAMETER;
       }
       default:
@@ -410,18 +418,18 @@ EFI_STATUS
 ReadAppleKernel (
   IN     EFI_FILE_PROTOCOL  *File,
   IN     BOOLEAN            Prefer32Bit,
-     OUT BOOLEAN            *Is32Bit,
-     OUT UINT8              **Kernel,
-     OUT UINT32             *KernelSize,
-     OUT UINT32             *AllocatedSize,
+  OUT BOOLEAN               *Is32Bit,
+  OUT UINT8                 **Kernel,
+  OUT UINT32                *KernelSize,
+  OUT UINT32                *AllocatedSize,
   IN     UINT32             ReservedSize,
-     OUT UINT8              *Digest  OPTIONAL
+  OUT UINT8                 *Digest  OPTIONAL
   )
 {
-  EFI_STATUS  Status;
-  UINT32      FullSize;
-  UINT8       *Remainder;
-  KERNEL_ARCH Arch;
+  EFI_STATUS   Status;
+  UINT32       FullSize;
+  UINT8        *Remainder;
+  KERNEL_ARCH  Arch;
 
   ASSERT (File != NULL);
   ASSERT (Is32Bit != NULL);
@@ -446,15 +454,15 @@ ReadAppleKernel (
   }
 
   Status = ReadAppleKernelImage (
-    File,
-    Prefer32Bit,
-    &Arch,
-    Kernel,
-    KernelSize,
-    AllocatedSize,
-    ReservedSize,
-    0
-    );
+             File,
+             Prefer32Bit,
+             &Arch,
+             Kernel,
+             KernelSize,
+             AllocatedSize,
+             ReservedSize,
+             0
+             );
 
   if (EFI_ERROR (Status)) {
     FreePool (*Kernel);
@@ -481,11 +489,11 @@ ReadAppleKernel (
       }
 
       Status = KernelGetFileData (
-        File,
-        mKernelDigestPosition,
-        FullSize - mKernelDigestPosition,
-        Remainder
-        );
+                 File,
+                 mKernelDigestPosition,
+                 FullSize - mKernelDigestPosition,
+                 Remainder
+                 );
       mNeedKernelDigest = FALSE;
       FreePool (Remainder);
       if (EFI_ERROR (Status)) {
@@ -506,18 +514,18 @@ EFI_STATUS
 ReadAppleMkext (
   IN     EFI_FILE_PROTOCOL  *File,
   IN     BOOLEAN            Prefer32Bit,
-     OUT UINT8              **Mkext,
-     OUT UINT32             *MkextSize,
-     OUT UINT32             *AllocatedSize,
+  OUT UINT8                 **Mkext,
+  OUT UINT32                *MkextSize,
+  OUT UINT32                *AllocatedSize,
   IN     UINT32             ReservedSize,
   IN     UINT32             NumReservedKexts
   )
 {
-  EFI_STATUS        Status;
-  UINT32            Offset;
-  BOOLEAN           Is32Bit;
-  UINT8             *TmpMkext;
-  UINT32            TmpMkextSize;
+  EFI_STATUS  Status;
+  UINT32      Offset;
+  BOOLEAN     Is32Bit;
+  UINT8       *TmpMkext;
+  UINT32      TmpMkextSize;
 
   ASSERT (File != NULL);
   ASSERT (Mkext != NULL);
@@ -528,7 +536,7 @@ ReadAppleMkext (
   // Read enough to get fat binary header if present.
   //
   TmpMkextSize = KERNEL_HEADER_SIZE;
-  TmpMkext = AllocatePool (TmpMkextSize);
+  TmpMkext     = AllocatePool (TmpMkextSize);
   if (TmpMkext == NULL) {
     return EFI_OUT_OF_RESOURCES;
   }
@@ -538,11 +546,13 @@ ReadAppleMkext (
     FreePool (TmpMkext);
     return Status;
   }
+
   Status = ParseFatArchitecture (File, Prefer32Bit, TmpMkext, TmpMkextSize, &Is32Bit, &Offset, &TmpMkextSize);
   FreePool (TmpMkext);
   if (EFI_ERROR (Status)) {
     return Status;
   }
+
   if (Prefer32Bit != Is32Bit) {
     return EFI_NOT_FOUND;
   }
@@ -554,6 +564,7 @@ ReadAppleMkext (
   if (TmpMkext == NULL) {
     return EFI_OUT_OF_RESOURCES;
   }
+
   Status = OcGetFileData (File, Offset, TmpMkextSize, TmpMkext);
   if (EFI_ERROR (Status)) {
     FreePool (TmpMkext);
@@ -567,17 +578,19 @@ ReadAppleMkext (
     FreePool (TmpMkext);
     return EFI_UNSUPPORTED;
   }
+
   DEBUG ((DEBUG_VERBOSE, "OCAK: Found %a mkext offset %u size %u\n", Prefer32Bit ? "32-bit" : "64-bit", Offset, TmpMkextSize));
 
   //
   // Calculate size of decompressed mkext.
   //
   *AllocatedSize = 0;
-  Status = MkextDecompress (TmpMkext, TmpMkextSize, NumReservedKexts, NULL, 0, AllocatedSize);
+  Status         = MkextDecompress (TmpMkext, TmpMkextSize, NumReservedKexts, NULL, 0, AllocatedSize);
   if (EFI_ERROR (Status)) {
     FreePool (TmpMkext);
     return Status;
   }
+
   if (OcOverflowAddU32 (*AllocatedSize, ReservedSize, AllocatedSize)) {
     FreePool (TmpMkext);
     return EFI_INVALID_PARAMETER;

@@ -33,11 +33,11 @@ EFI_STATUS
 
 // EFI_USER_INTERFACE_THEME_PROTOCOL
 typedef struct {
-  UINTN                         Revision;            ///< Revision.
-  UI_THEME_GET_BACKGROUND_COLOR GetBackgroundColor;  ///< Present as of Revision 1.
+  UINTN                            Revision;           ///< Revision.
+  UI_THEME_GET_BACKGROUND_COLOR    GetBackgroundColor; ///< Present as of Revision 1.
 } EFI_USER_INTERFACE_THEME_PROTOCOL;
 
 // gEfiUserInterfaceThemeProtocolGuid
-extern EFI_GUID gEfiUserInterfaceThemeProtocolGuid;
+extern EFI_GUID  gEfiUserInterfaceThemeProtocolGuid;
 
 #endif // USER_INTERFACE_THEME_H

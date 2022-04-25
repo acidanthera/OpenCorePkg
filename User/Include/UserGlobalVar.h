@@ -12,31 +12,31 @@
 #include <stdlib.h>
 
 #ifdef SANITIZE_TEST
-#include <sanitizer/asan_interface.h>
+  #include <sanitizer/asan_interface.h>
 #define ASAN_CHECK_MEMORY_REGION(addr, size) \
   do { if (__asan_region_is_poisoned((addr), (size)) != NULL) { abort(); } } while (0)
 #else
-#define ASAN_POISON_MEMORY_REGION(addr, size) do { } while (0)
-#define ASAN_UNPOISON_MEMORY_REGION(addr, size) do { } while (0)
-#define ASAN_CHECK_MEMORY_REGION(addr, size) do { } while (0)
+#define ASAN_POISON_MEMORY_REGION(addr, size)    do { } while (0)
+#define ASAN_UNPOISON_MEMORY_REGION(addr, size)  do { } while (0)
+#define ASAN_CHECK_MEMORY_REGION(addr, size)     do { } while (0)
 #endif
 
-extern EFI_GUID     gAppleBootVariableGuid;
-extern EFI_GUID     gAppleEventProtocolGuid;
-extern EFI_GUID     gAppleKeyMapAggregatorProtocolGuid;
-extern EFI_GUID     gAppleKeyMapDatabaseProtocolGuid;
-extern EFI_GUID     gAppleApfsContainerInfoGuid;
-extern EFI_GUID     gAppleApfsVolumeInfoGuid;
-extern EFI_GUID     gAppleBlessedOsxFolderInfoGuid;
-extern EFI_GUID     gAppleBlessedSystemFileInfoGuid;
-extern EFI_GUID     gAppleBlessedSystemFolderInfoGuid;
-extern EFI_GUID     gAppleBootPolicyProtocolGuid;
-extern EFI_GUID     gAppleVendorVariableGuid;
-extern EFI_GUID     gAppleImg4VerificationProtocolGuid;
-extern EFI_GUID     gAppleBeepGenProtocolGuid;
-extern EFI_GUID     gApplePlatformInfoDatabaseProtocolGuid;
-extern EFI_GUID     gAppleFsbFrequencyPlatformInfoGuid;
-extern EFI_GUID     gAppleFsbFrequencyPlatformInfoIndexHobGuid;
+extern EFI_GUID  gAppleBootVariableGuid;
+extern EFI_GUID  gAppleEventProtocolGuid;
+extern EFI_GUID  gAppleKeyMapAggregatorProtocolGuid;
+extern EFI_GUID  gAppleKeyMapDatabaseProtocolGuid;
+extern EFI_GUID  gAppleApfsContainerInfoGuid;
+extern EFI_GUID  gAppleApfsVolumeInfoGuid;
+extern EFI_GUID  gAppleBlessedOsxFolderInfoGuid;
+extern EFI_GUID  gAppleBlessedSystemFileInfoGuid;
+extern EFI_GUID  gAppleBlessedSystemFolderInfoGuid;
+extern EFI_GUID  gAppleBootPolicyProtocolGuid;
+extern EFI_GUID  gAppleVendorVariableGuid;
+extern EFI_GUID  gAppleImg4VerificationProtocolGuid;
+extern EFI_GUID  gAppleBeepGenProtocolGuid;
+extern EFI_GUID  gApplePlatformInfoDatabaseProtocolGuid;
+extern EFI_GUID  gAppleFsbFrequencyPlatformInfoGuid;
+extern EFI_GUID  gAppleFsbFrequencyPlatformInfoIndexHobGuid;
 
 extern CONST CHAR8  *gEfiCallerBaseName;
 extern EFI_GUID     gEfiGraphicsOutputProtocolGuid;
@@ -73,10 +73,10 @@ extern EFI_GUID     gEfiPciRootBridgeIoProtocolGuid;
 extern EFI_GUID     gEfiSmbiosTableGuid;
 extern EFI_GUID     gEfiUnicodeCollation2ProtocolGuid;
 
-extern EFI_GUID     gOcBootstrapProtocolGuid;
-extern EFI_GUID     gOcVendorVariableGuid;
-extern EFI_GUID     gOcCustomSmbios3TableGuid;
-extern EFI_GUID     gOcCustomSmbiosTableGuid;
-extern EFI_GUID     gOcAudioProtocolGuid;
+extern EFI_GUID  gOcBootstrapProtocolGuid;
+extern EFI_GUID  gOcVendorVariableGuid;
+extern EFI_GUID  gOcCustomSmbios3TableGuid;
+extern EFI_GUID  gOcCustomSmbiosTableGuid;
+extern EFI_GUID  gOcAudioProtocolGuid;
 
 #endif // OC_USER_GLOBAL_VAR_H

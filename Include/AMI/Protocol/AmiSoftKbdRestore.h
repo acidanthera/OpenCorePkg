@@ -11,6 +11,7 @@ THE PROGRAM IS DISTRIBUTED UNDER THE BSD LICENSE ON AN "AS IS" BASIS,
 WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 
 **/
+
 #ifndef AMI_SOFT_KBD_RESTORE_H
 #define AMI_SOFT_KBD_RESTORE_H
 
@@ -23,7 +24,7 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 /**
   AMI Soft Keyboard Restore protocol GUID.
 **/
-extern EFI_GUID gAmiSoftKbdRestoreProtocolGuid;
+extern EFI_GUID  gAmiSoftKbdRestoreProtocolGuid;
 
 /**
   AMI Soft Keyboard Restore protocol forward declaration.
@@ -35,7 +36,7 @@ typedef struct AMI_SOFT_KBD_RESTORE_PROTOCOL_ AMI_SOFT_KBD_RESTORE_PROTOCOL;
 **/
 typedef
 EFI_STATUS
-(EFIAPI *AMI_SOFT_KBD_RESTORE_ACTION) (
+(EFIAPI *AMI_SOFT_KBD_RESTORE_ACTION)(
   IN AMI_SOFT_KBD_RESTORE_PROTOCOL  *This
   );
 
@@ -43,9 +44,9 @@ EFI_STATUS
   AMI Soft Keyboard Restore protocol definition.
 **/
 struct AMI_SOFT_KBD_RESTORE_PROTOCOL_ {
-  AMI_SOFT_KBD_RESTORE_ACTION              Activate;
-  AMI_SOFT_KBD_RESTORE_ACTION              Deactivate;
-  BOOLEAN                                  IsActive;
+  AMI_SOFT_KBD_RESTORE_ACTION    Activate;
+  AMI_SOFT_KBD_RESTORE_ACTION    Deactivate;
+  BOOLEAN                        IsActive;
 };
 
 #endif // AMI_SOFT_KBD_RESTORE_H

@@ -27,15 +27,15 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 // Ptr      - raw pointer value, must fit into UINTN, meant to be uintptr_t equivalent.
 //
 
-#define OC_ALIGNOF(Type)           (_Alignof (Type))
-#define OC_POT_ALIGNED(Align, Ptr) (0ULL == (((UINTN) (Ptr)) & (Align-1U)))
-#define OC_TYPE_ALIGNED(Type, Ptr) (OC_POT_ALIGNED (OC_ALIGNOF (Type), Ptr))
+#define OC_ALIGNOF(Type)            (_Alignof (Type))
+#define OC_POT_ALIGNED(Align, Ptr)  (0ULL == (((UINTN) (Ptr)) & (Align-1U)))
+#define OC_TYPE_ALIGNED(Type, Ptr)  (OC_POT_ALIGNED (OC_ALIGNOF (Type), Ptr))
 
 //
 // Force member alignment for the structure.
 //
-#if (defined(__STDC__) && __STDC_VERSION__ >= 201112L) || defined(__GNUC__) || defined(__clang__)
-#define OC_ALIGNAS(Alignment) _Alignas(Alignment)
+#if (defined (__STDC__) && __STDC_VERSION__ >= 201112L) || defined (__GNUC__) || defined (__clang__)
+#define OC_ALIGNAS(Alignment)  _Alignas(Alignment)
 #else
 #define OC_ALIGNAS(Alignment)
 #endif
@@ -276,7 +276,6 @@ OcOverflowMulAddU64 (
   UINT64  C,
   UINT64  *Result
   );
-
 
 BOOLEAN
 OcOverflowAddS64 (

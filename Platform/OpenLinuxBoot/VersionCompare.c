@@ -11,17 +11,17 @@
 #include <Library/BaseLib.h>
 #include <Library/DebugLib.h>
 
-#define IS_SECTION_BREAK(Ch) ((Ch) == '-' || (Ch) == '~' || (Ch) == '\0')
+#define IS_SECTION_BREAK(Ch)  ((Ch) == '-' || (Ch) == '~' || (Ch) == '\0')
 
 // TODO: (?) Make this one OC library function, and
 // confirm nothing similar already in OC or EDK-II.
 STATIC
 INTN
 BoundedAsciiStrCmp (
-  CONST CHAR8               *FirstString,
-  CONST CHAR8               *FirstStringEnd,
-  CONST CHAR8               *SecondString,
-  CONST CHAR8               *SecondStringEnd
+  CONST CHAR8  *FirstString,
+  CONST CHAR8  *FirstStringEnd,
+  CONST CHAR8  *SecondString,
+  CONST CHAR8  *SecondStringEnd
   )
 {
   ASSERT (FirstString != NULL);
@@ -30,36 +30,40 @@ BoundedAsciiStrCmp (
   ASSERT (SecondStringEnd >= SecondString);
 
   while ((FirstString != FirstStringEnd) &&
-    (SecondString != SecondStringEnd) &&
-    (*FirstString == *SecondString)) {
+         (SecondString != SecondStringEnd) &&
+         (*FirstString == *SecondString))
+  {
     FirstString++;
     SecondString++;
   }
+
   if (FirstString == FirstStringEnd) {
     if (SecondString == SecondStringEnd) {
       return 0;
     } else {
-      return - *SecondString;
+      return -*SecondString;
     }
   }
+
   if (SecondString == SecondStringEnd) {
     return *FirstString;
   }
+
   return *FirstString - *SecondString;
 }
 
 STATIC
 VOID
 GetNextFragment (
-  IN     CONST CHAR8    **Pos,
-     OUT CONST CHAR8    **FragmentStart,
-     OUT CONST CHAR8    **FragmentEnd,
-     OUT       BOOLEAN  *IsAlphaFragment,
-     OUT       BOOLEAN  *IsSectionBreak,
-     OUT       CHAR8    *SectionChar
+  IN     CONST CHAR8  **Pos,
+  OUT CONST CHAR8     **FragmentStart,
+  OUT CONST CHAR8     **FragmentEnd,
+  OUT       BOOLEAN   *IsAlphaFragment,
+  OUT       BOOLEAN   *IsSectionBreak,
+  OUT       CHAR8     *SectionChar
   )
 {
-  CHAR8         Ch;
+  CHAR8  Ch;
 
   ASSERT (Pos             != NULL);
   ASSERT (*Pos            != NULL);
@@ -72,23 +76,23 @@ GetNextFragment (
   Ch = **Pos;
   if (IS_SECTION_BREAK (Ch)) {
     *IsSectionBreak = TRUE;
-    *SectionChar = Ch;
+    *SectionChar    = Ch;
     if (Ch != '\0') {
       ++(*Pos);
     }
+
     return;
   }
 
   *IsSectionBreak = FALSE;
-  *FragmentStart = *Pos;
+  *FragmentStart  = *Pos;
 
   if (IS_ALPHA (Ch) || IS_DIGIT (Ch)) {
     *IsAlphaFragment = IS_ALPHA (Ch);
     do {
       ++(*Pos);
       Ch = **Pos;
-    }
-    while (*IsAlphaFragment ? IS_ALPHA (Ch) : IS_DIGIT (Ch));
+    } while (*IsAlphaFragment ? IS_ALPHA (Ch) : IS_DIGIT (Ch));
   } else {
     *IsAlphaFragment = TRUE;
   }
@@ -124,33 +128,33 @@ GetNextFragment (
 STATIC
 INTN
 DoVersionCompare (
-  IN CONST CHAR8          *Version1,
-  IN CONST CHAR8          *Version2
- )
+  IN CONST CHAR8  *Version1,
+  IN CONST CHAR8  *Version2
+  )
 {
-  EFI_STATUS    Status;
-  CONST CHAR8   *Pos1;
-  CONST CHAR8   *Pos2;
-  CONST CHAR8   *FragmentStart1;
-  CONST CHAR8   *FragmentEnd1;
-  CONST CHAR8   *FragmentStart2;
-  CONST CHAR8   *FragmentEnd2;
-  UINTN         VersionFragment1;
-  UINTN         VersionFragment2;
-  BOOLEAN       IsAlphaFragment1;
-  BOOLEAN       IsAlphaFragment2;
-  BOOLEAN       IsSectionBreak1;
-  BOOLEAN       IsSectionBreak2;
-  CHAR8         SectionChar1;
-  CHAR8         SectionChar2;
-  BOOLEAN       IsRescue1;
-  BOOLEAN       IsRescue2;
-  INTN          Compare;
-  CHAR8         ChSave;
+  EFI_STATUS   Status;
+  CONST CHAR8  *Pos1;
+  CONST CHAR8  *Pos2;
+  CONST CHAR8  *FragmentStart1;
+  CONST CHAR8  *FragmentEnd1;
+  CONST CHAR8  *FragmentStart2;
+  CONST CHAR8  *FragmentEnd2;
+  UINTN        VersionFragment1;
+  UINTN        VersionFragment2;
+  BOOLEAN      IsAlphaFragment1;
+  BOOLEAN      IsAlphaFragment2;
+  BOOLEAN      IsSectionBreak1;
+  BOOLEAN      IsSectionBreak2;
+  CHAR8        SectionChar1;
+  CHAR8        SectionChar2;
+  BOOLEAN      IsRescue1;
+  BOOLEAN      IsRescue2;
+  INTN         Compare;
+  CHAR8        ChSave;
 
   ASSERT (Version1 != NULL);
   ASSERT (Version2 != NULL);
-  if (Version1 == NULL || Version2 == NULL) {
+  if ((Version1 == NULL) || (Version2 == NULL)) {
     return 0;
   }
 
@@ -177,12 +181,14 @@ DoVersionCompare (
       return IsSectionBreak2 ? +1 : -1;
     } else if (IsSectionBreak1) {
       if (SectionChar1 != SectionChar2) {
-        if (SectionChar1 == '-' || SectionChar2 == '~') {
+        if ((SectionChar1 == '-') || (SectionChar2 == '~')) {
           return +1;
         }
-        if (SectionChar1 == '~' || SectionChar2 == '-') {
+
+        if ((SectionChar1 == '~') || (SectionChar2 == '-')) {
           return -1;
         }
+
         ASSERT (FALSE);
         return 0;
       }
@@ -191,23 +197,24 @@ DoVersionCompare (
         return 0;
       }
     } else {
-      if (IsAlphaFragment1 == IsAlphaFragment2 && !IsAlphaFragment1) {
-        ChSave = *FragmentEnd1;
-        *((CHAR8 *) FragmentEnd1) = '\0';
-        Status = AsciiStrDecimalToUintnS (FragmentStart1, NULL, &VersionFragment1);
-        *((CHAR8 *) FragmentEnd1) = ChSave;
-        ASSERT (!EFI_ERROR(Status));
+      if ((IsAlphaFragment1 == IsAlphaFragment2) && !IsAlphaFragment1) {
+        ChSave                   = *FragmentEnd1;
+        *((CHAR8 *)FragmentEnd1) = '\0';
+        Status                   = AsciiStrDecimalToUintnS (FragmentStart1, NULL, &VersionFragment1);
+        *((CHAR8 *)FragmentEnd1) = ChSave;
+        ASSERT (!EFI_ERROR (Status));
 
-        ChSave = *FragmentEnd2;
-        *((CHAR8 *) FragmentEnd2) = '\0';
-        Status = AsciiStrDecimalToUintnS (FragmentStart2, NULL, &VersionFragment2);
-        *((CHAR8 *) FragmentEnd2) = ChSave;
-        ASSERT (!EFI_ERROR(Status));
+        ChSave                   = *FragmentEnd2;
+        *((CHAR8 *)FragmentEnd2) = '\0';
+        Status                   = AsciiStrDecimalToUintnS (FragmentStart2, NULL, &VersionFragment2);
+        *((CHAR8 *)FragmentEnd2) = ChSave;
+        ASSERT (!EFI_ERROR (Status));
 
         Compare = VersionFragment1 - VersionFragment2;
       } else {
         Compare = BoundedAsciiStrCmp (FragmentStart1, FragmentEnd1, FragmentStart2, FragmentEnd2);
       }
+
       if (Compare != 0) {
         return Compare;
       }
@@ -218,19 +225,19 @@ DoVersionCompare (
 INTN
 EFIAPI
 InternalVersionCompare (
-  IN CONST VOID           *Version1,
-  IN CONST VOID           *Version2
- )
+  IN CONST VOID  *Version1,
+  IN CONST VOID  *Version2
+  )
 {
-  return DoVersionCompare (*((CONST CHAR8 **) Version1), *((CONST CHAR8 **) Version2));
+  return DoVersionCompare (*((CONST CHAR8 **)Version1), *((CONST CHAR8 **)Version2));
 }
 
 INTN
 EFIAPI
 InternalReverseVersionCompare (
-  IN CONST VOID           *Version1,
-  IN CONST VOID           *Version2
- )
+  IN CONST VOID  *Version1,
+  IN CONST VOID  *Version2
+  )
 {
-  return -DoVersionCompare (*((CONST CHAR8 **) Version1), *((CONST CHAR8 **) Version2));
+  return -DoVersionCompare (*((CONST CHAR8 **)Version1), *((CONST CHAR8 **)Version2));
 }

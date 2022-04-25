@@ -28,13 +28,13 @@ typedef PACKED struct {
   ///
   /// RSA Public Key header structure.
   ///
-  OC_RSA_PUBLIC_KEY_HDR Hdr;
+  OC_RSA_PUBLIC_KEY_HDR    Hdr;
   ///
   /// The Modulus and Montgomery's R^2 mod N in little endian byte order.
   ///
   union {
-    UINT8               Bytes[OC_RSA_PK_2048_NUM_BYTES];
-    UINT64              Qwords[OC_RSA_PK_2048_NUM_BYTES / sizeof (UINT64)];
+    UINT8     Bytes[OC_RSA_PK_2048_NUM_BYTES];
+    UINT64    Qwords[OC_RSA_PK_2048_NUM_BYTES / sizeof (UINT64)];
   }                     Data;
 } OC_RSA_PUBLIC_KEY_2048;
 
@@ -49,8 +49,9 @@ STATIC_ASSERT (
   "The 2048-bit RSA PK struct is malformed."
   );
 
-STATIC CONST OC_RSA_PUBLIC_KEY_2048 mPkDb1 = {
+STATIC CONST OC_RSA_PUBLIC_KEY_2048  mPkDb1 = {
   { ARRAY_SIZE (mPkDb1.Data.Qwords) / 2, { 0 }, 0xb9a584a4e7cd16d1 },
+
   /**
     CFFD3E6B FE66EC75 F44B7E2E 0ED26398 08A98D10 AC378E55
     1CAA0E1C 1D85EF6C D51C758C 751816BF 599FBEDA EF4D6B0C
@@ -120,8 +121,9 @@ STATIC CONST OC_RSA_PUBLIC_KEY_2048 mPkDb1 = {
   }
 };
 
-STATIC CONST OC_RSA_PUBLIC_KEY_2048 mPkDb2 = {
+STATIC CONST OC_RSA_PUBLIC_KEY_2048  mPkDb2 = {
   { ARRAY_SIZE (mPkDb2.Data.Qwords) / 2, { 0 }, 0x646a020e9ed45d13 },
+
   /**
     E50AC288 2D44B7E3 3B67C51D AC639329 DA0363BD EAB5179F
     F88E460E E703D6CE 30383B25 0DE0E2FF 39386811 512A1A3B
@@ -194,7 +196,7 @@ STATIC CONST OC_RSA_PUBLIC_KEY_2048 mPkDb2 = {
 //
 // The pointer casts are safe because the structs are compatible.
 //
-CONST APPLE_PK_ENTRY PkDataBase[NUM_OF_PK] = {
+CONST APPLE_PK_ENTRY  PkDataBase[NUM_OF_PK] = {
   {
     //
     // PublicKey hash
@@ -219,7 +221,7 @@ CONST APPLE_PK_ENTRY PkDataBase[NUM_OF_PK] = {
   }
 };
 
-GLOBAL_REMOVE_IF_UNREFERENCED CONST UINT8 gAppleX86SecureBootRootCaCert[] = {
+GLOBAL_REMOVE_IF_UNREFERENCED CONST UINT8  gAppleX86SecureBootRootCaCert[] = {
   0x30, 0x82, 0x05, 0x62, 0x30, 0x82, 0x03, 0x4A, 0xA0, 0x03, 0x02, 0x01, 0x02,
   0x02, 0x08, 0x25, 0x2D, 0x14, 0x97, 0x18, 0x5C, 0x6A, 0xA0, 0x30, 0x0D, 0x06,
   0x09, 0x2A, 0x86, 0x48, 0x86, 0xF7, 0x0D, 0x01, 0x01, 0x0C, 0x05, 0x00, 0x30,
@@ -329,5 +331,5 @@ GLOBAL_REMOVE_IF_UNREFERENCED CONST UINT8 gAppleX86SecureBootRootCaCert[] = {
   0x66, 0x08, 0x7E, 0x66
 };
 
-GLOBAL_REMOVE_IF_UNREFERENCED CONST UINTN gAppleX86SecureBootRootCaCertSize =
+GLOBAL_REMOVE_IF_UNREFERENCED CONST UINTN  gAppleX86SecureBootRootCaCertSize =
   sizeof (gAppleX86SecureBootRootCaCert);

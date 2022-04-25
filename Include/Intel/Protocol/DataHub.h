@@ -43,14 +43,14 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 //
 #define EFI_DATA_RECORD_HEADER_VERSION  0x0100
 typedef struct {
-  UINT16    Version;
-  UINT16    HeaderSize;
-  UINT32    RecordSize;
-  EFI_GUID  DataRecordGuid;
-  EFI_GUID  ProducerName;
-  UINT64    DataRecordClass;
-  EFI_TIME  LogTime;
-  UINT64    LogMonotonicCount;
+  UINT16      Version;
+  UINT16      HeaderSize;
+  UINT32      RecordSize;
+  EFI_GUID    DataRecordGuid;
+  EFI_GUID    ProducerName;
+  UINT64      DataRecordClass;
+  EFI_TIME    LogTime;
+  UINT64      LogMonotonicCount;
 } EFI_DATA_RECORD_HEADER;
 
 //
@@ -59,10 +59,10 @@ typedef struct {
 // the data. See the Data Hub Specification for rules on what can and can not be a
 // new DataRecordClass
 //
-#define EFI_DATA_RECORD_CLASS_DEBUG         0x0000000000000001
-#define EFI_DATA_RECORD_CLASS_ERROR         0x0000000000000002
-#define EFI_DATA_RECORD_CLASS_DATA          0x0000000000000004
-#define EFI_DATA_RECORD_CLASS_PROGRESS_CODE 0x0000000000000008
+#define EFI_DATA_RECORD_CLASS_DEBUG          0x0000000000000001
+#define EFI_DATA_RECORD_CLASS_ERROR          0x0000000000000002
+#define EFI_DATA_RECORD_CLASS_DATA           0x0000000000000004
+#define EFI_DATA_RECORD_CLASS_PROGRESS_CODE  0x0000000000000008
 
 //
 // Forward reference for pure ANSI compatability
@@ -198,25 +198,25 @@ struct _EFI_DATA_HUB_PROTOCOL {
   ///
   /// Logs a data record.
   ///
-  EFI_DATA_HUB_LOG_DATA                 LogData;
+  EFI_DATA_HUB_LOG_DATA                    LogData;
 
   ///
   /// Gets a data record. Used both to view the memory-based log and to
   /// get information about which data records have been consumed by a filter driver.
   ///
-  EFI_DATA_HUB_GET_NEXT_RECORD          GetNextRecord;
+  EFI_DATA_HUB_GET_NEXT_RECORD             GetNextRecord;
 
   ///
   /// Allows the registration of an EFI event to act as a filter driver for all data records that are logged.
   ///
-  EFI_DATA_HUB_REGISTER_FILTER_DRIVER   RegisterFilterDriver;
+  EFI_DATA_HUB_REGISTER_FILTER_DRIVER      RegisterFilterDriver;
 
   ///
   /// Used to remove a filter driver that was added with RegisterFilterDriver().
   ///
-  EFI_DATA_HUB_UNREGISTER_FILTER_DRIVER UnregisterFilterDriver;
+  EFI_DATA_HUB_UNREGISTER_FILTER_DRIVER    UnregisterFilterDriver;
 };
 
-extern EFI_GUID gEfiDataHubProtocolGuid;
+extern EFI_GUID  gEfiDataHubProtocolGuid;
 
 #endif

@@ -10,11 +10,11 @@
     { 0x91, 0x47, 0x01, 0xF4, 0x04, 0x2E, 0x68, 0x42 } }
 
 typedef PACKED struct {
-  VENDOR_DEVICE_PATH Header;
-  GUID               Uuid;
+  VENDOR_DEVICE_PATH    Header;
+  GUID                  Uuid;
 } APPLE_APFS_VOLUME_DEVICE_PATH;
 
-extern EFI_GUID gAppleApfsVolumeDevicePathGuid;
+extern EFI_GUID  gAppleApfsVolumeDevicePathGuid;
 
 #pragma pack()
 

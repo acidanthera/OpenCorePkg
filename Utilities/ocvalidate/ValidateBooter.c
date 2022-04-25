@@ -22,15 +22,15 @@ CheckBooterMmioWhitelist (
   IN  OC_GLOBAL_CONFIG  *Config
   )
 {
-  UINT32            ErrorCount;
-  UINT32            Index;
-  CONST CHAR8       *Comment;
-  BOOLEAN           IsMmioWhitelistEnabled;
-  BOOLEAN           ShouldEnableDevirtualiseMmio;
-  BOOLEAN           IsDevirtualiseMmioEnabled;
+  UINT32       ErrorCount;
+  UINT32       Index;
+  CONST CHAR8  *Comment;
+  BOOLEAN      IsMmioWhitelistEnabled;
+  BOOLEAN      ShouldEnableDevirtualiseMmio;
+  BOOLEAN      IsDevirtualiseMmioEnabled;
 
-  ErrorCount                   = 0;
-  IsDevirtualiseMmioEnabled    = Config->Booter.Quirks.DevirtualiseMmio;
+  ErrorCount                = 0;
+  IsDevirtualiseMmioEnabled = Config->Booter.Quirks.DevirtualiseMmio;
 
   IsMmioWhitelistEnabled       = FALSE;
   ShouldEnableDevirtualiseMmio = FALSE;
@@ -64,21 +64,21 @@ CheckBooterPatch (
   IN  OC_GLOBAL_CONFIG  *Config
   )
 {
-  UINT32            ErrorCount;
-  UINT32            Index;
-  CONST CHAR8       *Comment;
-  CONST CHAR8       *Arch;
-  CONST CHAR8       *Identifier;
-  CONST UINT8       *Find;
-  UINT32            FindSize;
-  CONST UINT8       *Replace;
-  UINT32            ReplaceSize;
-  CONST UINT8       *Mask;
-  UINT32            MaskSize;
-  CONST UINT8       *ReplaceMask;
-  UINT32            ReplaceMaskSize;
+  UINT32       ErrorCount;
+  UINT32       Index;
+  CONST CHAR8  *Comment;
+  CONST CHAR8  *Arch;
+  CONST CHAR8  *Identifier;
+  CONST UINT8  *Find;
+  UINT32       FindSize;
+  CONST UINT8  *Replace;
+  UINT32       ReplaceSize;
+  CONST UINT8  *Mask;
+  UINT32       MaskSize;
+  CONST UINT8  *ReplaceMask;
+  UINT32       ReplaceMaskSize;
 
-  ErrorCount        = 0;
+  ErrorCount = 0;
 
   for (Index = 0; Index < Config->Booter.Patch.Count; ++Index) {
     Comment         = OC_BLOB_GET (&Config->Booter.Patch.Values[Index]->Comment);
@@ -100,10 +100,12 @@ CheckBooterPatch (
       DEBUG ((DEBUG_WARN, "Booter->Patch[%u]->Comment contains illegal character!\n", Index));
       ++ErrorCount;
     }
+
     if (!AsciiArchIsLegal (Arch, FALSE)) {
       DEBUG ((DEBUG_WARN, "Booter->Patch[%u]->Arch is borked (Can only be Any, i386, and x86_64)!\n", Index));
       ++ErrorCount;
     }
+
     if (!AsciiIdentifierIsLegal (Identifier, FALSE)) {
       DEBUG ((DEBUG_WARN, "Booter->Patch[%u]->Identifier contains illegal character!\n", Index));
       ++ErrorCount;
@@ -113,18 +115,18 @@ CheckBooterPatch (
     // Checks for size.
     //
     ErrorCount += ValidatePatch (
-      "Booter->Patch",
-      Index,
-      FALSE,
-      Find,
-      FindSize,
-      Replace,
-      ReplaceSize,
-      Mask,
-      MaskSize,
-      ReplaceMask,
-      ReplaceMaskSize
-      );
+                    "Booter->Patch",
+                    Index,
+                    FALSE,
+                    Find,
+                    FindSize,
+                    Replace,
+                    ReplaceSize,
+                    Mask,
+                    MaskSize,
+                    ReplaceMask,
+                    ReplaceMaskSize
+                    );
   }
 
   return ErrorCount;
@@ -167,7 +169,7 @@ CheckBooterQuirks (
     // Skip sanitising UEFI->Drivers as it will be performed when checking UEFI section.
     //
 
-    if (DriverEntry->Enabled && AsciiStrCmp (Driver, "OpenRuntime.efi") == 0) {
+    if (DriverEntry->Enabled && (AsciiStrCmp (Driver, "OpenRuntime.efi") == 0)) {
       HasOpenRuntimeEfiDriver = TRUE;
     }
   }
@@ -177,10 +179,12 @@ CheckBooterQuirks (
       DEBUG ((DEBUG_WARN, "Booter->Quirks->ProvideCustomSlide is enabled, but OpenRuntime.efi is not loaded at UEFI->Drivers!\n"));
       ++ErrorCount;
     }
+
     if (IsDisableVariableWriteEnabled) {
       DEBUG ((DEBUG_WARN, "Booter->Quirks->DisableVariableWrite is enabled, but OpenRuntime.efi is not loaded at UEFI->Drivers!\n"));
       ++ErrorCount;
     }
+
     if (IsEnableWriteUnprotectorEnabled) {
       DEBUG ((DEBUG_WARN, "Booter->Quirks->EnableWriteUnprotector is enabled, but OpenRuntime.efi is not loaded at UEFI->Drivers!\n"));
       ++ErrorCount;
@@ -192,10 +196,12 @@ CheckBooterQuirks (
       DEBUG ((DEBUG_WARN, "Booter->Quirks->AllowRelocationBlock is enabled, but ProvideCustomSlide is not enabled altogether!\n"));
       ++ErrorCount;
     }
+
     if (IsEnableSafeModeSlideEnabled) {
       DEBUG ((DEBUG_WARN, "Booter->Quirks->EnableSafeModeSlide is enabled, but ProvideCustomSlide is not enabled altogether!\n"));
       ++ErrorCount;
     }
+
     if (MaxSlide > 0) {
       DEBUG ((DEBUG_WARN, "Booter->Quirks->ProvideMaxSlide is set to %u, but ProvideCustomSlide is not enabled altogether!\n", MaxSlide));
       ++ErrorCount;
@@ -228,13 +234,13 @@ CheckBooter (
     &CheckBooterPatch,
     &CheckBooterQuirks
   };
-  
+
   DEBUG ((DEBUG_VERBOSE, "config loaded into %a!\n", __func__));
 
-  ErrorCount  = 0;
+  ErrorCount = 0;
 
   for (Index = 0; Index < ARRAY_SIZE (BooterCheckers); ++Index) {
-    ErrorCount += BooterCheckers[Index] (Config);
+    ErrorCount += BooterCheckers[Index](Config);
   }
 
   return ReportError (__func__, ErrorCount);

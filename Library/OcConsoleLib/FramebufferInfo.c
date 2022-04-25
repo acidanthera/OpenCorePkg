@@ -44,21 +44,22 @@ AppleFramebufferGetInfo (
   EFI_GRAPHICS_OUTPUT_MODE_INFORMATION  *Info;
   CONST CONSOLE_GOP_CONTEXT             *DirectConsole;
 
-  if (This == NULL
-    || FramebufferBase == NULL
-    || FramebufferSize == NULL
-    || ScreenRowBytes == NULL
-    || ScreenWidth == NULL
-    || ScreenHeight == NULL
-    || ScreenDepth == NULL) {
+  if (  (This == NULL)
+     || (FramebufferBase == NULL)
+     || (FramebufferSize == NULL)
+     || (ScreenRowBytes == NULL)
+     || (ScreenWidth == NULL)
+     || (ScreenHeight == NULL)
+     || (ScreenDepth == NULL))
+  {
     return EFI_INVALID_PARAMETER;
   }
 
   DirectConsole = InternalGetDirectGopContext ();
   if (DirectConsole != NULL) {
     *FramebufferBase = DirectConsole->OriginalFrameBufferBase;
-    *FramebufferSize = (UINT32) DirectConsole->OriginalFrameBufferSize;
-    *ScreenRowBytes  = (UINT32) (DirectConsole->OriginalModeInfo.PixelsPerScanLine * sizeof (EFI_GRAPHICS_OUTPUT_BLT_PIXEL));
+    *FramebufferSize = (UINT32)DirectConsole->OriginalFrameBufferSize;
+    *ScreenRowBytes  = (UINT32)(DirectConsole->OriginalModeInfo.PixelsPerScanLine * sizeof (EFI_GRAPHICS_OUTPUT_BLT_PIXEL));
     *ScreenWidth     = DirectConsole->CustomModeInfo.HorizontalResolution;
     *ScreenHeight    = DirectConsole->CustomModeInfo.VerticalResolution;
     *ScreenDepth     = DEFAULT_COLOUR_DEPTH;
@@ -66,10 +67,10 @@ AppleFramebufferGetInfo (
   }
 
   Status = gBS->HandleProtocol (
-    gST->ConsoleOutHandle,
-    &gEfiGraphicsOutputProtocolGuid,
-    (VOID **) &GraphicsOutput
-    );
+                  gST->ConsoleOutHandle,
+                  &gEfiGraphicsOutputProtocolGuid,
+                  (VOID **)&GraphicsOutput
+                  );
 
   if (EFI_ERROR (Status)) {
     return EFI_UNSUPPORTED;
@@ -86,8 +87,8 @@ AppleFramebufferGetInfo (
   // This is a bit inaccurate as it assumes 32-bit BPP, but will do for most cases.
   //
   *FramebufferBase = Mode->FrameBufferBase;
-  *FramebufferSize = (UINT32) Mode->FrameBufferSize;
-  *ScreenRowBytes  = (UINT32) (Info->PixelsPerScanLine * sizeof (EFI_GRAPHICS_OUTPUT_BLT_PIXEL));
+  *FramebufferSize = (UINT32)Mode->FrameBufferSize;
+  *ScreenRowBytes  = (UINT32)(Info->PixelsPerScanLine * sizeof (EFI_GRAPHICS_OUTPUT_BLT_PIXEL));
   *ScreenWidth     = Info->HorizontalResolution;
   *ScreenHeight    = Info->VerticalResolution;
   *ScreenDepth     = DEFAULT_COLOUR_DEPTH;
@@ -97,7 +98,7 @@ AppleFramebufferGetInfo (
 
 STATIC
 APPLE_FRAMEBUFFER_INFO_PROTOCOL
-mAppleFramebufferInfo = {
+  mAppleFramebufferInfo = {
   AppleFramebufferGetInfo
 };
 
@@ -106,18 +107,18 @@ OcAppleFbInfoInstallProtocol (
   IN BOOLEAN  Reinstall
   )
 {
-  EFI_STATUS                      Status;
-  APPLE_FRAMEBUFFER_INFO_PROTOCOL *Protocol;
-  EFI_GRAPHICS_OUTPUT_PROTOCOL    *GraphicsOutput;
-  EFI_HANDLE                      NewHandle;
+  EFI_STATUS                       Status;
+  APPLE_FRAMEBUFFER_INFO_PROTOCOL  *Protocol;
+  EFI_GRAPHICS_OUTPUT_PROTOCOL     *GraphicsOutput;
+  EFI_HANDLE                       NewHandle;
 
   DEBUG ((DEBUG_VERBOSE, "OcAppleFbInfoInstallProtocol\n"));
 
   Status = gBS->LocateProtocol (
-    &gEfiGraphicsOutputProtocolGuid,
-    NULL,
-    (VOID *) &GraphicsOutput
-    );
+                  &gEfiGraphicsOutputProtocolGuid,
+                  NULL,
+                  (VOID *)&GraphicsOutput
+                  );
 
   if (EFI_ERROR (Status)) {
     DEBUG ((DEBUG_INFO, "OCOS: No GOP protocols for FB info, ignoring\n"));
@@ -132,10 +133,10 @@ OcAppleFbInfoInstallProtocol (
     }
   } else {
     Status = gBS->LocateProtocol (
-      &gAppleFramebufferInfoProtocolGuid,
-      NULL,
-      (VOID *) &Protocol
-      );
+                    &gAppleFramebufferInfoProtocolGuid,
+                    NULL,
+                    (VOID *)&Protocol
+                    );
 
     if (!EFI_ERROR (Status)) {
       return Protocol;
@@ -143,12 +144,12 @@ OcAppleFbInfoInstallProtocol (
   }
 
   NewHandle = NULL;
-  Status = gBS->InstallMultipleProtocolInterfaces (
-     &NewHandle,
-     &gAppleFramebufferInfoProtocolGuid,
-     (VOID *) &mAppleFramebufferInfo,
-     NULL
-     );
+  Status    = gBS->InstallMultipleProtocolInterfaces (
+                     &NewHandle,
+                     &gAppleFramebufferInfoProtocolGuid,
+                     (VOID *)&mAppleFramebufferInfo,
+                     NULL
+                     );
 
   if (EFI_ERROR (Status)) {
     return NULL;

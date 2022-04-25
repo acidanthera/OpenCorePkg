@@ -7,41 +7,41 @@
 
 #include <stdio.h>
 
-EFI_BOOT_SERVICES mBootServices = {
+EFI_BOOT_SERVICES  mBootServices = {
   .RaiseTPL                  = DummyRaiseTPL,
   .LocateProtocol            = DummyLocateProtocol,
   .AllocatePages             = DummyAllocatePages,
   .InstallConfigurationTable = DummyInstallConfigurationTable
 };
 
-EFI_SIMPLE_TEXT_OUTPUT_PROTOCOL mConOut = {
+EFI_SIMPLE_TEXT_OUTPUT_PROTOCOL  mConOut = {
   .OutputString = NullTextOutputString
 };
 
-EFI_SYSTEM_TABLE mSystemTable = {
+EFI_SYSTEM_TABLE  mSystemTable = {
   .BootServices = &mBootServices,
   .ConOut       = &mConOut
 };
 
-EFI_RUNTIME_SERVICES  mRuntimeServices = {};
+EFI_RUNTIME_SERVICES  mRuntimeServices = { };
 
-EFI_SYSTEM_TABLE      *gST  = &mSystemTable;
-EFI_BOOT_SERVICES     *gBS  = &mBootServices;
+EFI_SYSTEM_TABLE   *gST = &mSystemTable;
+EFI_BOOT_SERVICES  *gBS = &mBootServices;
 
-EFI_HANDLE            gImageHandle = (EFI_HANDLE) 0xDEADBABEULL;
+EFI_HANDLE  gImageHandle = (EFI_HANDLE)0xDEADBABEULL;
 
-BOOLEAN               mPostEBS  = FALSE;
-EFI_SYSTEM_TABLE      *mDebugST = &mSystemTable;
+BOOLEAN           mPostEBS  = FALSE;
+EFI_SYSTEM_TABLE  *mDebugST = &mSystemTable;
 
-EFI_RUNTIME_SERVICES  *gRT      = &mRuntimeServices;
+EFI_RUNTIME_SERVICES  *gRT = &mRuntimeServices;
 
 #define CONFIG_TABLE_SIZE_INCREASED  0x10
-UINTN mSystemTableAllocateSize  = 0ULL;
+UINTN  mSystemTableAllocateSize = 0ULL;
 
 EFI_TPL
 EFIAPI
 DummyRaiseTPL (
-  IN EFI_TPL      NewTpl
+  IN EFI_TPL  NewTpl
   )
 {
   ASSERT (FALSE);
@@ -52,8 +52,8 @@ DummyRaiseTPL (
 EFI_STATUS
 EFIAPI
 DummyLocateProtocol (
-  IN  EFI_GUID  *Protocol,
-  IN  VOID      *Registration, OPTIONAL
+  IN  EFI_GUID *Protocol,
+  IN  VOID *Registration, OPTIONAL
   OUT VOID      **Interface
   )
 {
@@ -63,13 +63,13 @@ DummyLocateProtocol (
 EFI_STATUS
 EFIAPI
 DummyAllocatePages (
-  IN     EFI_ALLOCATE_TYPE            Type,
-  IN     EFI_MEMORY_TYPE              MemoryType,
-  IN     UINTN                        Pages,
-  IN OUT EFI_PHYSICAL_ADDRESS         *Memory
+  IN     EFI_ALLOCATE_TYPE     Type,
+  IN     EFI_MEMORY_TYPE       MemoryType,
+  IN     UINTN                 Pages,
+  IN OUT EFI_PHYSICAL_ADDRESS  *Memory
   )
 {
-  *Memory = (UINTN) AllocatePages (Pages);
+  *Memory = (UINTN)AllocatePages (Pages);
 
   return Memory != NULL ? EFI_SUCCESS : EFI_NOT_FOUND;
 }
@@ -77,8 +77,8 @@ DummyAllocatePages (
 EFI_STATUS
 EFIAPI
 DummyInstallConfigurationTable (
-  IN EFI_GUID                 *Guid,
-  IN VOID                     *Table
+  IN EFI_GUID  *Guid,
+  IN VOID      *Table
   )
 {
   //
@@ -201,8 +201,8 @@ DummyInstallConfigurationTable (
     //
     // Fill in the new entry
     //
-    CopyGuid ((VOID *) &EfiConfigurationTable[Index].VendorGuid, Guid);
-    EfiConfigurationTable[Index].VendorTable  = Table;
+    CopyGuid ((VOID *)&EfiConfigurationTable[Index].VendorGuid, Guid);
+    EfiConfigurationTable[Index].VendorTable = Table;
 
     //
     // This is an add operation, so increment the number of table entries
@@ -225,11 +225,11 @@ NullTextOutputString (
       //
       // Cast string to CHAR8 to truncate unicode symbols.
       //
-      putchar ((CHAR8) *String);
+      putchar ((CHAR8)*String);
     }
 
     ++String;
   }
-  
+
   return EFI_SUCCESS;
 }

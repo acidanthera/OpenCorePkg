@@ -49,38 +49,38 @@ typedef UINTN APPLE_POINTER_EVENT_TYPE;
 
 // APPLE_KEY_EVENT_DATA
 typedef struct {
-  UINT16         NumberOfKeyPairs;
-  EFI_INPUT_KEY  InputKey;
-  APPLE_KEY_CODE AppleKeyCode;
+  UINT16            NumberOfKeyPairs;
+  EFI_INPUT_KEY     InputKey;
+  APPLE_KEY_CODE    AppleKeyCode;
 } APPLE_KEY_EVENT_DATA;
 
 typedef union {
-  APPLE_KEY_EVENT_DATA     *KeyData;
-  APPLE_POINTER_EVENT_TYPE PointerEventType;
-  UINTN                    Raw;
+  APPLE_KEY_EVENT_DATA        *KeyData;
+  APPLE_POINTER_EVENT_TYPE    PointerEventType;
+  UINTN                       Raw;
 } APPLE_EVENT_DATA;
 
 // DIMENSION
 typedef struct {
-  INT32 Horizontal;
-  INT32 Vertical;
+  INT32    Horizontal;
+  INT32    Vertical;
 } DIMENSION;
 
 // APPLE_EVENT_INFORMATION
 typedef struct {
   struct {
-    UINT16 Year;
-    UINT8  Month;
-    UINT8  Day;
-    UINT8  Hour;
-    UINT8  Minute;
-    UINT8  Second;
-    UINT8  Pad1;
+    UINT16    Year;
+    UINT8     Month;
+    UINT8     Day;
+    UINT8     Hour;
+    UINT8     Minute;
+    UINT8     Second;
+    UINT8     Pad1;
   }                  CreationTime;
-  APPLE_EVENT_TYPE   EventType;
-  APPLE_EVENT_DATA   EventData;
-  APPLE_MODIFIER_MAP Modifiers;
-  DIMENSION          PointerPosition;
+  APPLE_EVENT_TYPE      EventType;
+  APPLE_EVENT_DATA      EventData;
+  APPLE_MODIFIER_MAP    Modifiers;
+  DIMENSION             PointerPosition;
 } APPLE_EVENT_INFORMATION;
 
 // APPLE_EVENT_NOTIFY_FUNCTION
@@ -140,6 +140,7 @@ EFI_STATUS
   );
 
 // EVENT_IS_CAPS_LOCK_ON
+
 /** Retrieves the state of the CapsLock key.
 
   @param[in,out] CLockOn  This parameter indicates the state of the CapsLock
@@ -157,15 +158,15 @@ EFI_STATUS
 
 // APPLE_EVENT_PROTOCOL
 typedef struct {
-  UINT32                    Revision;
-  EVENT_REGISTER_HANDLER    RegisterHandler;
-  EVENT_UNREGISTER_HANDLER  UnregisterHandler;
-  EVENT_SET_CURSOR_POSITION SetCursorPosition;
-  EVENT_SET_EVENT_NAME      SetEventName;
-  EVENT_IS_CAPS_LOCK_ON     IsCapsLockOn;
+  UINT32                       Revision;
+  EVENT_REGISTER_HANDLER       RegisterHandler;
+  EVENT_UNREGISTER_HANDLER     UnregisterHandler;
+  EVENT_SET_CURSOR_POSITION    SetCursorPosition;
+  EVENT_SET_EVENT_NAME         SetEventName;
+  EVENT_IS_CAPS_LOCK_ON        IsCapsLockOn;
 } APPLE_EVENT_PROTOCOL;
 
 // gAppleEventProtocolGuid
-extern EFI_GUID gAppleEventProtocolGuid;
+extern EFI_GUID  gAppleEventProtocolGuid;
 
 #endif // APPLE_EVENT_H

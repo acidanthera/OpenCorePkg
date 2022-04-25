@@ -25,7 +25,7 @@ typedef struct {
   //
   // Preserved handle of gST->ConsoleInHandle
   //
-  EFI_HANDLE                         ConSplitHandler;
+  EFI_HANDLE                           ConSplitHandler;
 
   //
   // Solved input protocol instances from ConSplitHandler
@@ -33,19 +33,19 @@ typedef struct {
   // ourselves via polled data from one of these protocols.
   // Polled proto is prioritised as present: AMI, EX, Legacy.
   //
-  AMI_EFIKEYCODE_PROTOCOL            *AmiKeycode;
-  EFI_SIMPLE_TEXT_INPUT_PROTOCOL     *TextInput;
-  EFI_SIMPLE_TEXT_INPUT_EX_PROTOCOL  *TextInputEx;
+  AMI_EFIKEYCODE_PROTOCOL              *AmiKeycode;
+  EFI_SIMPLE_TEXT_INPUT_PROTOCOL       *TextInput;
+  EFI_SIMPLE_TEXT_INPUT_EX_PROTOCOL    *TextInputEx;
 
   //
   // Original implementations of the protocols.
   //
-  AMI_READ_EFI_KEY                   AmiReadEfikey;
-  EFI_EVENT                          AmiWait;
-  EFI_EVENT                          TextWait;
-  EFI_INPUT_READ_KEY                 TextReadKeyStroke;
-  EFI_INPUT_READ_KEY_EX              TextReadKeyStrokeEx;
-  EFI_EVENT                          TextWaitEx;
+  AMI_READ_EFI_KEY                     AmiReadEfikey;
+  EFI_EVENT                            AmiWait;
+  EFI_EVENT                            TextWait;
+  EFI_INPUT_READ_KEY                   TextReadKeyStroke;
+  EFI_INPUT_READ_KEY_EX                TextReadKeyStrokeEx;
+  EFI_EVENT                            TextWaitEx;
 } AIK_SOURCE;
 
 EFI_STATUS

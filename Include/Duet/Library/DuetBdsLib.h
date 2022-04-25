@@ -2,12 +2,12 @@
   Duet BDS library.
 
 Copyright (c) 2004 - 2012, Intel Corporation. All rights reserved.<BR>
-This program and the accompanying materials are licensed and made available under 
-the terms and conditions of the BSD License that accompanies this distribution.  
+This program and the accompanying materials are licensed and made available under
+the terms and conditions of the BSD License that accompanies this distribution.
 The full text of the license may be found at
-http://opensource.org/licenses/bsd-license.php.                                          
-    
-THE PROGRAM IS DISTRIBUTED UNDER THE BSD LICENSE ON AN "AS IS" BASIS,                     
+http://opensource.org/licenses/bsd-license.php.
+
+THE PROGRAM IS DISTRIBUTED UNDER THE BSD LICENSE ON AN "AS IS" BASIS,
 WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 
 **/
@@ -18,14 +18,14 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 ///
 /// ConnectType
 ///
-#define CONSOLE_OUT 0x00000001
-#define STD_ERROR   0x00000002
-#define CONSOLE_IN  0x00000004
-#define CONSOLE_ALL (CONSOLE_OUT | CONSOLE_IN | STD_ERROR)
+#define CONSOLE_OUT  0x00000001
+#define STD_ERROR    0x00000002
+#define CONSOLE_IN   0x00000004
+#define CONSOLE_ALL  (CONSOLE_OUT | CONSOLE_IN | STD_ERROR)
 
 typedef struct {
-  EFI_DEVICE_PATH_PROTOCOL  *DevicePath;
-  UINTN                     ConnectType;
+  EFI_DEVICE_PATH_PROTOCOL    *DevicePath;
+  UINTN                       ConnectType;
 } BDS_CONSOLE_CONNECT_ENTRY;
 
 /**
@@ -36,8 +36,8 @@ typedef struct {
   @param  VendorGuid            The GUID part of the EFI variable name.
   @param  VariableSize          Returns the size of the EFI variable that was read.
 
-  @return                       Dynamically allocated memory that contains a copy 
-                                of the EFI variable. The caller is responsible for 
+  @return                       Dynamically allocated memory that contains a copy
+                                of the EFI variable. The caller is responsible for
                                 freeing the buffer.
   @retval NULL                  The variable was not read.
 
@@ -45,17 +45,17 @@ typedef struct {
 VOID *
 EFIAPI
 BdsLibGetVariableAndSize (
-  IN  CHAR16              *Name,
-  IN  EFI_GUID            *VendorGuid,
-  OUT UINTN               *VariableSize
+  IN  CHAR16    *Name,
+  IN  EFI_GUID  *VendorGuid,
+  OUT UINTN     *VariableSize
   );
-
 
 //
 // Bds connect and disconnect driver lib funcions
 //
+
 /**
-  This function connects all system drivers with the corresponding controllers. 
+  This function connects all system drivers with the corresponding controllers.
 
 **/
 VOID
@@ -77,7 +77,7 @@ BdsLibConnectAll (
 /**
   This function creates all handles associated with the given device
   path node. If the handle associated with one device path node cannot
-  be created, then it tries to execute the dispatch to load the missing drivers.  
+  be created, then it tries to execute the dispatch to load the missing drivers.
 
   @param  DevicePathToConnect   The device path to be connected. Can be
                                 a multi-instance device path.
@@ -95,12 +95,12 @@ BdsLibConnectDevicePath (
   );
 
 /**
-  This function will connect all current system handles recursively.     
-  gBS->ConnectController() service is invoked for each handle exist in system handler buffer.  
+  This function will connect all current system handles recursively.
+  gBS->ConnectController() service is invoked for each handle exist in system handler buffer.
   If the handle is bus type handler, all childrens also will be connected recursively  by gBS->ConnectController().
-  
+
   @retval EFI_SUCCESS           All handles and child handles have been
-                                connected.  
+                                connected.
   @retval EFI_STATUS            Return the status of gBS->LocateHandleBuffer().
 **/
 EFI_STATUS
@@ -110,10 +110,10 @@ BdsLibConnectAllEfi (
   );
 
 /**
-  This function will disconnect all current system handles.     
-  gBS->DisconnectController() is invoked for each handle exists in system handle buffer.  
+  This function will disconnect all current system handles.
+  gBS->DisconnectController() is invoked for each handle exists in system handle buffer.
   If handle is a bus type handle, all childrens also are disconnected recursively by  gBS->DisconnectController().
-  
+
   @retval EFI_SUCCESS           All handles have been disconnected.
   @retval EFI_STATUS            Error status returned by of gBS->LocateHandleBuffer().
 
@@ -127,6 +127,7 @@ BdsLibDisconnectAllEfi (
 //
 // Bds console related lib functions
 //
+
 /**
   This function will search every simpletxt device in the current system,
   and make every simpletxt device a potential console device.
@@ -137,7 +138,6 @@ EFIAPI
 BdsLibConnectAllConsoles (
   VOID
   );
-
 
 /**
   This function will connect console device based on the console
@@ -198,14 +198,15 @@ BdsLibUpdateConsoleVariable (
 EFI_STATUS
 EFIAPI
 BdsLibConnectConsoleVariable (
-  IN  CHAR16                 *ConVarName
+  IN  CHAR16  *ConVarName
   );
 
 //
 // Bds device path related lib functions
 //
+
 /**
-  Delete the instance in Multi that overlaps with Single. 
+  Delete the instance in Multi that overlaps with Single.
 
   @param  Multi                 A pointer to a multi-instance device path data
                                 structure.
@@ -233,9 +234,9 @@ BdsLibDelPartMatchInstance (
   @param  Single                A pointer to a single-instance device path data
                                 structure.
 
-  @retval TRUE                  If the Single device path is contained within a 
+  @retval TRUE                  If the Single device path is contained within a
                                 Multi device path.
-  @retval FALSE                 The Single device path is not contained within a 
+  @retval FALSE                 The Single device path is not contained within a
                                 Multi device path.
 
 **/
@@ -257,7 +258,7 @@ BdsLibMatchDevicePaths (
                                 path.
 
   @retval EFI_SUCCESS           The specific Usb device is connected successfully.
-  @retval EFI_INVALID_PARAMETER Invalid HostControllerPi (not 0x00, 0x20 or 0xFF) 
+  @retval EFI_INVALID_PARAMETER Invalid HostControllerPi (not 0x00, 0x20 or 0xFF)
                                 or RemainingDevicePath is not the USB class device path.
   @retval EFI_NOT_FOUND         The device specified by device path is not found.
 
@@ -265,8 +266,8 @@ BdsLibMatchDevicePaths (
 EFI_STATUS
 EFIAPI
 BdsLibConnectUsbDevByShortFormDP (
-  IN UINT8                      HostControllerPI,
-  IN EFI_DEVICE_PATH_PROTOCOL   *RemainingDevicePath
+  IN UINT8                     HostControllerPI,
+  IN EFI_DEVICE_PATH_PROTOCOL  *RemainingDevicePath
   );
 
 /**

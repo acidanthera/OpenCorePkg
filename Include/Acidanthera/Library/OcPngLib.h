@@ -33,10 +33,10 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 **/
 EFI_STATUS
 OcGetPngDims (
-  IN  VOID     *Buffer,
-  IN  UINTN    Size,
-  OUT UINT32   *Width,
-  OUT UINT32   *Height
+  IN  VOID    *Buffer,
+  IN  UINTN   Size,
+  OUT UINT32  *Width,
+  OUT UINT32  *Height
   );
 
 /**

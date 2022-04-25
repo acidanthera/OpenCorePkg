@@ -25,45 +25,45 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 
 STATIC
 CONST UINT8
-mMovEcxE2[] = {
+  mMovEcxE2[] = {
   0xB9, 0xE2, 0x00, 0x00, 0x00  ///< mov ecx, 0xE2
 };
 STATIC_ASSERT (sizeof (mMovEcxE2) == 5, "Unsupported mMovEcxE2");
 
 STATIC
 CONST UINT8
-mMovCxE2[] = {
+  mMovCxE2[] = {
   0x66, 0xB9, 0xE2, 0x00        ///< mov cx, 0xE2
 };
 STATIC_ASSERT (sizeof (mMovCxE2) == 4, "Unsupported mMovCxE2");
 
 STATIC
 CONST UINT8
-mWrmsr[] = {
+  mWrmsr[] = {
   0x0F, 0x30                    ///< wrmsr
 };
 STATIC_ASSERT (sizeof (mWrmsr) == 2, "Unsupported mWrmsr");
 
 STATIC
 CONST UINTN
-mWrmsrMaxDistance = 32;
+  mWrmsrMaxDistance = 32;
 
 STATIC
 EFI_STATUS
 PatchAppleCpuPmCfgLock (
-  IN OUT PATCHER_CONTEXT    *Patcher,
-  IN     UINT32             KernelVersion
+  IN OUT PATCHER_CONTEXT  *Patcher,
+  IN     UINT32           KernelVersion
   )
 {
-  UINTN   Count;
-  UINT8   *Walker;
-  UINT8   *WalkerEnd;
-  UINT8   *WalkerTmp;
+  UINTN  Count;
+  UINT8  *Walker;
+  UINT8  *WalkerEnd;
+  UINT8  *WalkerTmp;
 
   ASSERT (Patcher != NULL);
 
-  Count = 0;
-  Walker = (UINT8 *) MachoGetMachHeader (&Patcher->MachContext);
+  Count     = 0;
+  Walker    = (UINT8 *)MachoGetMachHeader (&Patcher->MachContext);
   WalkerEnd = Walker + MachoGetFileSize (&Patcher->MachContext) - mWrmsrMaxDistance;
 
   //
@@ -73,16 +73,18 @@ PatchAppleCpuPmCfgLock (
     //
     // Match (e)cx E2h assignment.
     //
-    if (Walker[0] == mMovEcxE2[0]
-      && Walker[1] == mMovEcxE2[1]
-      && Walker[2] == mMovEcxE2[2]
-      && Walker[3] == mMovEcxE2[3]
-      && Walker[4] == mMovEcxE2[4]) {
+    if (  (Walker[0] == mMovEcxE2[0])
+       && (Walker[1] == mMovEcxE2[1])
+       && (Walker[2] == mMovEcxE2[2])
+       && (Walker[3] == mMovEcxE2[3])
+       && (Walker[4] == mMovEcxE2[4]))
+    {
       Walker += sizeof (mMovEcxE2);
-    } else if (Walker[0] == mMovCxE2[0]
-      && Walker[1] == mMovCxE2[1]
-      && Walker[2] == mMovCxE2[2]
-      && Walker[3] == mMovCxE2[3]) {
+    } else if (  (Walker[0] == mMovCxE2[0])
+              && (Walker[1] == mMovCxE2[1])
+              && (Walker[2] == mMovCxE2[2])
+              && (Walker[3] == mMovCxE2[3]))
+    {
       Walker += sizeof (mMovCxE2);
     } else {
       ++Walker;
@@ -92,8 +94,9 @@ PatchAppleCpuPmCfgLock (
     WalkerTmp = Walker + mWrmsrMaxDistance;
 
     while (Walker < WalkerTmp) {
-      if (Walker[0] == mWrmsr[0]
-        && Walker[1] == mWrmsr[1]) {
+      if (  (Walker[0] == mWrmsr[0])
+         && (Walker[1] == mWrmsr[1]))
+      {
         ++Count;
         //
         // Patch matched wrmsr with nop.
@@ -103,20 +106,22 @@ PatchAppleCpuPmCfgLock (
         break;
       }
 
-      if ((Walker[0] == 0xC9 && Walker[1] == 0xC3)     ///< leave; ret
-        || (Walker[0] == 0x5D && Walker[1] == 0xC3)) { ///< pop rbp; ret
-        //
-        // Stop searching upon matching return sequences.
-        //
+      if (  ((Walker[0] == 0xC9) && (Walker[1] == 0xC3)) ///< leave; ret
+         || ((Walker[0] == 0x5D) && (Walker[1] == 0xC3))) ///< pop rbp; ret
+      //
+      // Stop searching upon matching return sequences.
+      //
+      {
         Walker += 2;
         break;
       }
 
-      if ((Walker[0] == 0xB9 && Walker[3] == 0 && Walker[4] == 0) ///< mov ecx, 00000xxxxh
-        || (Walker[0] == 0x66 && Walker[1] == 0xB9 && Walker[3] == 0)) { ///< mov cx, 00xxh
-        //
-        // Stop searching upon matching reassign sequences.
-        //
+      if (  ((Walker[0] == 0xB9) && (Walker[3] == 0) && (Walker[4] == 0)) ///< mov ecx, 00000xxxxh
+         || ((Walker[0] == 0x66) && (Walker[1] == 0xB9) && (Walker[3] == 0))) ///< mov cx, 00xxh
+      //
+      // Stop searching upon matching reassign sequences.
+      //
+      {
         break;
       }
 
@@ -126,7 +131,7 @@ PatchAppleCpuPmCfgLock (
       ++Walker;
     }
   }
-  
+
   //
   // At least one patch must be successful for this to work.
   //
@@ -139,34 +144,34 @@ PatchAppleCpuPmCfgLock (
 // XCPM record definition, extracted from XNU debug kernel.
 //
 typedef struct XCPM_MSR_RECORD_ {
-  UINT32  xcpm_msr_num;
-  UINT32  xcpm_msr_applicable_cpus;
-  UINT32  *xcpm_msr_flag_p;
-  UINT64  xcpm_msr_bits_clear;
-  UINT64  xcpm_msr_bits_set;
-  UINT64  xcpm_msr_initial_value;
-  UINT64  xcpm_msr_rb_value;
+  UINT32    xcpm_msr_num;
+  UINT32    xcpm_msr_applicable_cpus;
+  UINT32    *xcpm_msr_flag_p;
+  UINT64    xcpm_msr_bits_clear;
+  UINT64    xcpm_msr_bits_set;
+  UINT64    xcpm_msr_initial_value;
+  UINT64    xcpm_msr_rb_value;
 } XCPM_MSR_RECORD;
 
 #pragma pack(pop)
 
 STATIC
 CONST UINT8
-mXcpmCfgLockRelFind[] = {
+  mXcpmCfgLockRelFind[] = {
   0xB9, 0xE2, 0x00, 0x00, 0x00,  ///< mov ecx, 0xE2
   0x0F, 0x30                     ///< wrmsr
 };
 
 STATIC
 CONST UINT8
-mXcpmCfgLockRelReplace[] = {
+  mXcpmCfgLockRelReplace[] = {
   0xB9, 0xE2, 0x00, 0x00, 0x00,  ///< mov ecx, 0xE2
   0x90, 0x90                     ///< nop
 };
 
 STATIC
 PATCHER_GENERIC_PATCH
-mXcpmCfgLockRelPatch = {
+  mXcpmCfgLockRelPatch = {
   .Comment     = DEBUG_POINTER ("XcpmCfgLockRel"),
   .Base        = "_xcpm_idle",
   .Find        = mXcpmCfgLockRelFind,
@@ -181,14 +186,14 @@ mXcpmCfgLockRelPatch = {
 
 STATIC
 CONST UINT8
-mXcpmCfgLockDbgFind[] = {
+  mXcpmCfgLockDbgFind[] = {
   0xBF, 0xE2, 0x00, 0x00, 0x00,  ///< mov edi, 0xE2
   0xE8                           ///< call (wrmsr64)
 };
 
 STATIC
 CONST UINT8
-mXcpmCfgLockDbgReplace[] = {
+  mXcpmCfgLockDbgReplace[] = {
   0xEB, 0x08,                    ///< jmp LBL        ; Skip the 3x nops and 5x call
   0x90, 0x90, 0x90,              ///< nop
   0xE8                           ///< call (wrmsr64) ; Skipped by jmp LBL
@@ -196,7 +201,7 @@ mXcpmCfgLockDbgReplace[] = {
 
 STATIC
 PATCHER_GENERIC_PATCH
-mXcpmCfgLockDbgPatch = {
+  mXcpmCfgLockDbgPatch = {
   .Comment     = DEBUG_POINTER ("XcpmCfgLockDbg"),
   .Base        = "_xcpm_cst_control_evaluate",
   .Find        = mXcpmCfgLockDbgFind,
@@ -212,15 +217,15 @@ mXcpmCfgLockDbgPatch = {
 STATIC
 EFI_STATUS
 PatchAppleXcpmCfgLock (
-  IN OUT PATCHER_CONTEXT    *Patcher,
-  IN     UINT32             KernelVersion
+  IN OUT PATCHER_CONTEXT  *Patcher,
+  IN     UINT32           KernelVersion
   )
 {
-  EFI_STATUS          Status;
-  XCPM_MSR_RECORD     *Record;
-  XCPM_MSR_RECORD     *Last;
+  EFI_STATUS       Status;
+  XCPM_MSR_RECORD  *Record;
+  XCPM_MSR_RECORD  *Last;
 
-  UINT32              Replacements;
+  UINT32  Replacements;
 
   ASSERT (Patcher != NULL);
 
@@ -232,12 +237,12 @@ PatchAppleXcpmCfgLock (
     return EFI_SUCCESS;
   }
 
-  Last = (XCPM_MSR_RECORD *) ((UINT8 *) MachoGetMachHeader (&Patcher->MachContext)
-    + MachoGetFileSize (&Patcher->MachContext) - sizeof (XCPM_MSR_RECORD));
+  Last = (XCPM_MSR_RECORD *)((UINT8 *)MachoGetMachHeader (&Patcher->MachContext)
+                             + MachoGetFileSize (&Patcher->MachContext) - sizeof (XCPM_MSR_RECORD));
 
   Replacements = 0;
 
-  Status = PatcherGetSymbolAddress (Patcher, "_xcpm_core_scope_msrs", (UINT8 **) &Record);
+  Status = PatcherGetSymbolAddress (Patcher, "_xcpm_core_scope_msrs", (UINT8 **)&Record);
   if (EFI_ERROR (Status)) {
     DEBUG ((DEBUG_WARN, "OCAK: Failed to locate _xcpm_core_scope_msrs - %r\n", Status));
     return EFI_NOT_FOUND;
@@ -277,21 +282,21 @@ PatchAppleXcpmCfgLock (
 
 STATIC
 CONST UINT8
-mMiscPwrMgmtRelFind[] = {
+  mMiscPwrMgmtRelFind[] = {
   0xB9, 0xAA, 0x01, 0x00, 0x00,  ///< mov ecx, 0x1AA
   0x0F, 0x30                     ///< wrmsr
 };
 
 STATIC
 CONST UINT8
-mMiscPwrMgmtRelReplace[] = {
+  mMiscPwrMgmtRelReplace[] = {
   0xB9, 0xAA, 0x01, 0x00, 0x00,  ///< mov ecx, 0x1AA
   0x90, 0x90                     ///< nop
 };
 
 STATIC
 PATCHER_GENERIC_PATCH
-mMiscPwrMgmtRelPatch = {
+  mMiscPwrMgmtRelPatch = {
   .Comment     = DEBUG_POINTER ("MiscPwrMgmtRel"),
   .Base        = NULL,
   .Find        = mMiscPwrMgmtRelFind,
@@ -306,14 +311,14 @@ mMiscPwrMgmtRelPatch = {
 
 STATIC
 CONST UINT8
-mMiscPwrMgmtDbgFind[] = {
+  mMiscPwrMgmtDbgFind[] = {
   0xBF, 0xAA, 0x01, 0x00, 0x00,  ///< mov edi, 0x1AA
   0xE8                           ///< call (wrmsr64)
 };
 
 STATIC
 CONST UINT8
-mMiscPwrMgmtDbgReplace[] = {
+  mMiscPwrMgmtDbgReplace[] = {
   0xEB, 0x08,                    ///< jmp LBL        ; Skip the 3x nops and 5x call
   0x90, 0x90, 0x90,              ///< nop
   0xE8                           ///< call (wrmsr64) ; Skipped by jmp LBL
@@ -321,7 +326,7 @@ mMiscPwrMgmtDbgReplace[] = {
 
 STATIC
 PATCHER_GENERIC_PATCH
-mMiscPwrMgmtDbgPatch = {
+  mMiscPwrMgmtDbgPatch = {
   .Comment     = DEBUG_POINTER ("MiscPwrMgmtDbg"),
   .Base        = NULL,
   .Find        = mMiscPwrMgmtDbgFind,
@@ -337,14 +342,14 @@ mMiscPwrMgmtDbgPatch = {
 STATIC
 EFI_STATUS
 PatchAppleXcpmExtraMsrs (
-  IN OUT PATCHER_CONTEXT    *Patcher,
-  IN     UINT32             KernelVersion
+  IN OUT PATCHER_CONTEXT  *Patcher,
+  IN     UINT32           KernelVersion
   )
 {
-  EFI_STATUS          Status;
-  XCPM_MSR_RECORD     *Record;
-  XCPM_MSR_RECORD     *Last;
-  UINT32              Replacements;
+  EFI_STATUS       Status;
+  XCPM_MSR_RECORD  *Record;
+  XCPM_MSR_RECORD  *Last;
+  UINT32           Replacements;
 
   ASSERT (Patcher != NULL);
 
@@ -356,12 +361,12 @@ PatchAppleXcpmExtraMsrs (
     return EFI_SUCCESS;
   }
 
-  Last = (XCPM_MSR_RECORD *) ((UINT8 *) MachoGetMachHeader (&Patcher->MachContext)
-    + MachoGetFileSize (&Patcher->MachContext) - sizeof (XCPM_MSR_RECORD));
+  Last = (XCPM_MSR_RECORD *)((UINT8 *)MachoGetMachHeader (&Patcher->MachContext)
+                             + MachoGetFileSize (&Patcher->MachContext) - sizeof (XCPM_MSR_RECORD));
 
   Replacements = 0;
 
-  Status = PatcherGetSymbolAddress (Patcher, "_xcpm_pkg_scope_msrs", (UINT8 **) &Record);
+  Status = PatcherGetSymbolAddress (Patcher, "_xcpm_pkg_scope_msrs", (UINT8 **)&Record);
   if (EFI_ERROR (Status)) {
     DEBUG ((DEBUG_WARN, "OCAK: Failed to locate _xcpm_pkg_scope_msrs - %r\n", Status));
     return EFI_NOT_FOUND;
@@ -385,11 +390,11 @@ PatchAppleXcpmExtraMsrs (
       ));
     Record->xcpm_msr_applicable_cpus = 0;
     ++Replacements;
-    
+
     ++Record;
   }
 
-  Status = PatcherGetSymbolAddress (Patcher, "_xcpm_SMT_scope_msrs", (UINT8 **) &Record);
+  Status = PatcherGetSymbolAddress (Patcher, "_xcpm_SMT_scope_msrs", (UINT8 **)&Record);
   if (EFI_ERROR (Status)) {
     DEBUG ((DEBUG_WARN, "OCAK: Failed to locate _xcpm_SMT_scope_msrs - %r\n", Status));
     return EFI_NOT_FOUND;
@@ -429,47 +434,47 @@ PatchAppleXcpmExtraMsrs (
 
 STATIC
 CONST UINT8
-mPerfCtrlFind1[] = {
+  mPerfCtrlFind1[] = {
   0xB9, 0x99, 0x01, 0x00, 0x00,  ///< mov ecx, 0x199
   0x0F, 0x30                     ///< wrmsr
 };
 
 STATIC
 CONST UINT8
-mPerfCtrlFind2[] = {
-  0xB9, 0x99, 0x01, 0x00, 0x00,  ///< mov ecx, 0x199
-  0x31, 0xD2,                    ///< xor edx, edx
-  0x0F, 0x30                     ///< wrmsr
+  mPerfCtrlFind2[] = {
+  0xB9, 0x99, 0x01, 0x00, 0x00, ///< mov ecx, 0x199
+  0x31, 0xD2,                   ///< xor edx, edx
+  0x0F, 0x30                    ///< wrmsr
 };
 
 STATIC
 CONST UINT8
-mPerfCtrlFind3[] = {
-  0xB9, 0x99, 0x01, 0x00, 0x00,  ///< mov ecx, 0x199
-  0x4C, 0x89, 0xF0,              ///< mov rax, r14
-  0x0F, 0x30                     ///< wrmsr
+  mPerfCtrlFind3[] = {
+  0xB9, 0x99, 0x01, 0x00, 0x00, ///< mov ecx, 0x199
+  0x4C, 0x89, 0xF0,             ///< mov rax, r14
+  0x0F, 0x30                    ///< wrmsr
 };
 
 STATIC
 CONST UINT8
-mPerfCtrlMax[] = {
-  0xB9, 0x99, 0x01, 0x00, 0x00,  ///< mov ecx, 0x199
-  0x31, 0xD2,                    ///< xor edx, edx
-  0xB8, 0x00, 0xFF, 0x00, 0x00,  ///< mov eax, 0xFF00
-  0x0F, 0x30,                    ///< wrmsr
-  0xC3                           ///< ret
+  mPerfCtrlMax[] = {
+  0xB9, 0x99, 0x01, 0x00, 0x00, ///< mov ecx, 0x199
+  0x31, 0xD2,                   ///< xor edx, edx
+  0xB8, 0x00, 0xFF, 0x00, 0x00, ///< mov eax, 0xFF00
+  0x0F, 0x30,                   ///< wrmsr
+  0xC3                          ///< ret
 };
 
 STATIC
 EFI_STATUS
 PatchAppleXcpmForceBoost (
-  IN OUT PATCHER_CONTEXT    *Patcher,
-  IN     UINT32             KernelVersion
+  IN OUT PATCHER_CONTEXT  *Patcher,
+  IN     UINT32           KernelVersion
   )
 {
-  UINT8   *Start;
-  UINT8   *Last;
-  UINT8   *Current;
+  UINT8  *Start;
+  UINT8  *Last;
+  UINT8  *Current;
 
   ASSERT (Patcher != NULL);
 
@@ -481,7 +486,7 @@ PatchAppleXcpmForceBoost (
     return EFI_SUCCESS;
   }
 
-  Start   = (UINT8 *) MachoGetMachHeader (&Patcher->MachContext);
+  Start   = (UINT8 *)MachoGetMachHeader (&Patcher->MachContext);
   Last    = Start + MachoGetFileSize (&Patcher->MachContext) - EFI_PAGE_SIZE * 2;
   Start  += EFI_PAGE_SIZE;
   Current = Start;
@@ -490,13 +495,15 @@ PatchAppleXcpmForceBoost (
     //
     // Compare <mov ecx, 0x199> in common.
     //
-    if (Current[0] == mPerfCtrlFind1[0]
-      && Current[1] == mPerfCtrlFind1[1]
-      && Current[2] == mPerfCtrlFind1[2]
-      && Current[3] == mPerfCtrlFind1[3]) {
-      if (CompareMem (&Current[4], &mPerfCtrlFind1[4], sizeof (mPerfCtrlFind1) - 4) == 0
-        || CompareMem (&Current[4], &mPerfCtrlFind2[4], sizeof (mPerfCtrlFind2) - 4) == 0
-        || CompareMem (&Current[4], &mPerfCtrlFind3[4], sizeof (mPerfCtrlFind3) - 4) == 0) {
+    if (  (Current[0] == mPerfCtrlFind1[0])
+       && (Current[1] == mPerfCtrlFind1[1])
+       && (Current[2] == mPerfCtrlFind1[2])
+       && (Current[3] == mPerfCtrlFind1[3]))
+    {
+      if (  (CompareMem (&Current[4], &mPerfCtrlFind1[4], sizeof (mPerfCtrlFind1) - 4) == 0)
+         || (CompareMem (&Current[4], &mPerfCtrlFind2[4], sizeof (mPerfCtrlFind2) - 4) == 0)
+         || (CompareMem (&Current[4], &mPerfCtrlFind3[4], sizeof (mPerfCtrlFind3) - 4) == 0))
+      {
         break;
       }
     }
@@ -516,10 +523,11 @@ PatchAppleXcpmForceBoost (
     //
     // Locate the beginning.
     //
-    if (Current[0] == 0x55
-      && Current[1] == 0x48
-      && Current[2] == 0x89
-      && Current[3] == 0xE5) {
+    if (  (Current[0] == 0x55)
+       && (Current[1] == 0x48)
+       && (Current[2] == 0x89)
+       && (Current[3] == 0xE5))
+    {
       break;
     }
 
@@ -538,19 +546,19 @@ PatchAppleXcpmForceBoost (
 
 STATIC
 CONST UINT8
-mRemoveUsbLimitV1Find[] = {
+  mRemoveUsbLimitV1Find[] = {
   0xFF, 0xFF, 0x10
 };
 
 STATIC
 CONST UINT8
-mRemoveUsbLimitV1Replace[] = {
+  mRemoveUsbLimitV1Replace[] = {
   0xFF, 0xFF, 0x40
 };
 
 STATIC
 PATCHER_GENERIC_PATCH
-mRemoveUsbLimitV1Patch = {
+  mRemoveUsbLimitV1Patch = {
   .Comment     = DEBUG_POINTER ("RemoveUsbLimitV1"),
   .Base        = "__ZN15AppleUSBXHCIPCI11createPortsEv",
   .Find        = mRemoveUsbLimitV1Find,
@@ -565,19 +573,19 @@ mRemoveUsbLimitV1Patch = {
 
 STATIC
 CONST UINT8
-mRemoveUsbLimitV2Find[] = {
+  mRemoveUsbLimitV2Find[] = {
   0x0F, 0x0F, 0x83
 };
 
 STATIC
 CONST UINT8
-mRemoveUsbLimitV2Replace[] = {
+  mRemoveUsbLimitV2Replace[] = {
   0x40, 0x0F, 0x83
 };
 
 STATIC
 PATCHER_GENERIC_PATCH
-mRemoveUsbLimitV2Patch = {
+  mRemoveUsbLimitV2Patch = {
   .Comment     = DEBUG_POINTER ("RemoveUsbLimitV2"),
   .Base        = "__ZN12AppleUSBXHCI11createPortsEv",
   .Find        = mRemoveUsbLimitV2Find,
@@ -592,19 +600,19 @@ mRemoveUsbLimitV2Patch = {
 
 STATIC
 CONST UINT8
-mRemoveUsbLimitIoP1Find[] = {
+  mRemoveUsbLimitIoP1Find[] = {
   0x0F, 0x0F, 0x87
 };
 
 STATIC
 CONST UINT8
-mRemoveUsbLimitIoP1Replace[] = {
+  mRemoveUsbLimitIoP1Replace[] = {
   0x40, 0x0F, 0x87
 };
 
 STATIC
 PATCHER_GENERIC_PATCH
-mRemoveUsbLimitIoP1Patch = {
+  mRemoveUsbLimitIoP1Patch = {
   .Comment     = DEBUG_POINTER ("RemoveUsbLimitIoP1"),
   .Base        = "__ZN16AppleUSBHostPort15setPortLocationEj",
   .Find        = mRemoveUsbLimitIoP1Find,
@@ -620,8 +628,8 @@ mRemoveUsbLimitIoP1Patch = {
 STATIC
 EFI_STATUS
 PatchUsbXhciPortLimit1 (
-  IN OUT PATCHER_CONTEXT    *Patcher,
-  IN     UINT32             KernelVersion
+  IN OUT PATCHER_CONTEXT  *Patcher,
+  IN     UINT32           KernelVersion
   )
 {
   EFI_STATUS  Status;
@@ -648,8 +656,8 @@ PatchUsbXhciPortLimit1 (
 STATIC
 EFI_STATUS
 PatchUsbXhciPortLimit2 (
-  IN OUT PATCHER_CONTEXT    *Patcher,
-  IN     UINT32             KernelVersion
+  IN OUT PATCHER_CONTEXT  *Patcher,
+  IN     UINT32           KernelVersion
   )
 {
   EFI_STATUS  Status;
@@ -696,8 +704,9 @@ PatchUsbXhciPortLimit2 (
   //
   // TODO: Check when the patch changed actually.
   //
-  if (EFI_ERROR (Status)
-    && OcMatchDarwinVersion (KernelVersion, KERNEL_VERSION_HIGH_SIERRA_MIN, KERNEL_VERSION_HIGH_SIERRA_MAX)) {
+  if (  EFI_ERROR (Status)
+     && OcMatchDarwinVersion (KernelVersion, KERNEL_VERSION_HIGH_SIERRA_MIN, KERNEL_VERSION_HIGH_SIERRA_MAX))
+  {
     DEBUG ((DEBUG_INFO, "OCAK: Assuming success for AppleUSBXHCI on %u\n", KernelVersion));
     return EFI_SUCCESS;
   }
@@ -708,8 +717,8 @@ PatchUsbXhciPortLimit2 (
 STATIC
 EFI_STATUS
 PatchUsbXhciPortLimit3 (
-  IN OUT PATCHER_CONTEXT    *Patcher,
-  IN     UINT32             KernelVersion
+  IN OUT PATCHER_CONTEXT  *Patcher,
+  IN     UINT32           KernelVersion
   )
 {
   EFI_STATUS  Status;
@@ -734,8 +743,9 @@ PatchUsbXhciPortLimit3 (
   //
   // TODO: Check when the patch changed actually.
   //
-  if (EFI_ERROR (Status)
-    && OcMatchDarwinVersion (KernelVersion, KERNEL_VERSION_HIGH_SIERRA_MIN, KERNEL_VERSION_HIGH_SIERRA_MAX)) {
+  if (  EFI_ERROR (Status)
+     && OcMatchDarwinVersion (KernelVersion, KERNEL_VERSION_HIGH_SIERRA_MIN, KERNEL_VERSION_HIGH_SIERRA_MAX))
+  {
     DEBUG ((DEBUG_INFO, "OCAK: Assuming success for legacy port AppleUSBXHCIPCI on %u\n", KernelVersion));
     return EFI_SUCCESS;
   }
@@ -745,19 +755,19 @@ PatchUsbXhciPortLimit3 (
 
 STATIC
 CONST UINT8
-mIOAHCIBlockStoragePatchV1Find[] = {
+  mIOAHCIBlockStoragePatchV1Find[] = {
   0x41, 0x50, 0x50, 0x4C, 0x45, 0x20, 0x53, 0x53, 0x44, 0x00  ///< "APPLE SSD\0"
 };
 
 STATIC
 CONST UINT8
-mIOAHCIBlockStoragePatchV1Replace[] = {
+  mIOAHCIBlockStoragePatchV1Replace[] = {
   0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
 };
 
 STATIC
 PATCHER_GENERIC_PATCH
-mIOAHCIBlockStoragePatchV1 = {
+  mIOAHCIBlockStoragePatchV1 = {
   .Comment     = DEBUG_POINTER ("IOAHCIBlockStorageV1"),
   .Base        = NULL,
   .Find        = mIOAHCIBlockStoragePatchV1Find,
@@ -771,19 +781,19 @@ mIOAHCIBlockStoragePatchV1 = {
 
 STATIC
 CONST UINT8
-mIOAHCIBlockStoragePatchV2Find[] = {
+  mIOAHCIBlockStoragePatchV2Find[] = {
   0x41, 0x50, 0x50, 0x4C, 0x45, 0x00  ///< "APPLE\0"
 };
 
 STATIC
 CONST UINT8
-mIOAHCIBlockStoragePatchV2Replace[] = {
+  mIOAHCIBlockStoragePatchV2Replace[] = {
   0x00, 0x00, 0x00, 0x00, 0x00, 0x00
 };
 
 STATIC
 PATCHER_GENERIC_PATCH
-mIOAHCIBlockStoragePatchV2 = {
+  mIOAHCIBlockStoragePatchV2 = {
   .Comment     = DEBUG_POINTER ("IOAHCIBlockStorageV2"),
   .Base        = NULL,
   .Find        = mIOAHCIBlockStoragePatchV2Find,
@@ -798,11 +808,11 @@ mIOAHCIBlockStoragePatchV2 = {
 STATIC
 EFI_STATUS
 PatchThirdPartyDriveSupport (
-  IN OUT PATCHER_CONTEXT    *Patcher,
-  IN     UINT32             KernelVersion
+  IN OUT PATCHER_CONTEXT  *Patcher,
+  IN     UINT32           KernelVersion
   )
 {
-  EFI_STATUS       Status;
+  EFI_STATUS  Status;
 
   ASSERT (Patcher != NULL);
 
@@ -828,8 +838,9 @@ PatchThirdPartyDriveSupport (
   // This started to be required on 10.6.7 or so.
   // We cannot trust which minor SnowLeo version is this, just let it pass.
   //
-  if (EFI_ERROR (Status)
-    && OcMatchDarwinVersion (KernelVersion, KERNEL_VERSION_SNOW_LEOPARD_MIN, KERNEL_VERSION_SNOW_LEOPARD_MAX)) {
+  if (  EFI_ERROR (Status)
+     && OcMatchDarwinVersion (KernelVersion, KERNEL_VERSION_SNOW_LEOPARD_MIN, KERNEL_VERSION_SNOW_LEOPARD_MAX))
+  {
     DEBUG ((DEBUG_INFO, "OCAK: Assuming success for IOAHCIBlockStorage on %u\n", KernelVersion));
     return EFI_SUCCESS;
   }
@@ -839,38 +850,38 @@ PatchThirdPartyDriveSupport (
 
 STATIC
 CONST UINT8
-mIOAHCIPortPatchFind[] = {
+  mIOAHCIPortPatchFind[] = {
   0x45, 0x78, 0x74, 0x65, 0x72, 0x6E, 0x61, 0x6C  ///< "External"
 };
 
 STATIC
 CONST UINT8
-mIOAHCIPortPatchReplace[] = {
+  mIOAHCIPortPatchReplace[] = {
   0x49, 0x6E, 0x74, 0x65, 0x72, 0x6E, 0x61, 0x6C  ///< "Internal"
 };
 
 STATIC
 PATCHER_GENERIC_PATCH
-mIOAHCIPortPatch = {
-  .Comment      = DEBUG_POINTER ("IOAHCIPort"),
-  .Base         = NULL,
-  .Find         = mIOAHCIPortPatchFind,
-  .Mask         = NULL,
-  .Replace      = mIOAHCIPortPatchReplace,
-  .ReplaceMask  = NULL,
-  .Size         = sizeof (mIOAHCIPortPatchFind),
-  .Count        = 1,
-  .Skip         = 0
+  mIOAHCIPortPatch = {
+  .Comment     = DEBUG_POINTER ("IOAHCIPort"),
+  .Base        = NULL,
+  .Find        = mIOAHCIPortPatchFind,
+  .Mask        = NULL,
+  .Replace     = mIOAHCIPortPatchReplace,
+  .ReplaceMask = NULL,
+  .Size        = sizeof (mIOAHCIPortPatchFind),
+  .Count       = 1,
+  .Skip        = 0
 };
 
 STATIC
 EFI_STATUS
 PatchForceInternalDiskIcons (
-  IN OUT PATCHER_CONTEXT    *Patcher,
-  IN     UINT32             KernelVersion
+  IN OUT PATCHER_CONTEXT  *Patcher,
+  IN     UINT32           KernelVersion
   )
 {
-  EFI_STATUS          Status;
+  EFI_STATUS  Status;
 
   ASSERT (Patcher != NULL);
 
@@ -886,19 +897,19 @@ PatchForceInternalDiskIcons (
 
 STATIC
 CONST UINT8
-mAppleIoMapperPatchFind[] = {
+  mAppleIoMapperPatchFind[] = {
   0x44, 0x4D, 0x41, 0x52, 0x00  ///< "DMAR\0"
 };
 
 STATIC
 CONST UINT8
-mAppleIoMapperPatchReplace[] = {
+  mAppleIoMapperPatchReplace[] = {
   0x52, 0x41, 0x4D, 0x44, 0x00  ///< "RAMD\0"
 };
 
 STATIC
 PATCHER_GENERIC_PATCH
-mAppleIoMapperPatch = {
+  mAppleIoMapperPatch = {
   .Comment     = DEBUG_POINTER ("AppleIoMapper"),
   .Base        = NULL,
   .Find        = mAppleIoMapperPatchFind,
@@ -913,11 +924,11 @@ mAppleIoMapperPatch = {
 STATIC
 EFI_STATUS
 PatchAppleIoMapperSupport (
-  IN OUT PATCHER_CONTEXT    *Patcher,
-  IN     UINT32             KernelVersion
+  IN OUT PATCHER_CONTEXT  *Patcher,
+  IN     UINT32           KernelVersion
   )
 {
-  EFI_STATUS          Status;
+  EFI_STATUS  Status;
 
   ASSERT (Patcher != NULL);
 
@@ -938,14 +949,14 @@ PatchAppleIoMapperSupport (
 
 STATIC
 CONST UINT8
-mAppleDummyCpuPmPatchReplace[] = {
+  mAppleDummyCpuPmPatchReplace[] = {
   0xB8, 0x01, 0x00, 0x00, 0x00,  ///< mov eax, 1
   0xC3                           ///< ret
 };
 
 STATIC
 PATCHER_GENERIC_PATCH
-mAppleDummyCpuPmPatch = {
+  mAppleDummyCpuPmPatch = {
   .Comment     = DEBUG_POINTER ("DummyCpuPm"),
   .Base        = "__ZN28AppleIntelCPUPowerManagement5startEP9IOService",
   .Find        = NULL,
@@ -960,11 +971,11 @@ mAppleDummyCpuPmPatch = {
 STATIC
 EFI_STATUS
 PatchDummyPowerManagement (
-  IN OUT PATCHER_CONTEXT    *Patcher,
-  IN     UINT32             KernelVersion
+  IN OUT PATCHER_CONTEXT  *Patcher,
+  IN     UINT32           KernelVersion
   )
 {
-  EFI_STATUS          Status;
+  EFI_STATUS  Status;
 
   ASSERT (Patcher != NULL);
 
@@ -980,19 +991,19 @@ PatchDummyPowerManagement (
 
 STATIC
 CONST UINT8
-mIncreasePciBarSizePatchFind[] = {
+  mIncreasePciBarSizePatchFind[] = {
   0x00, 0x00, 0x00, 0x40
 };
 
 STATIC
 CONST UINT8
-mIncreasePciBarSizePatchReplace[] = {
+  mIncreasePciBarSizePatchReplace[] = {
   0x00, 0x00, 0x00, 0x80
 };
 
 STATIC
 PATCHER_GENERIC_PATCH
-mIncreasePciBarSizePatch = {
+  mIncreasePciBarSizePatch = {
   .Comment     = DEBUG_POINTER ("IncreasePciBarSize"),
   .Base        = "__ZN17IOPCIConfigurator24probeBaseAddressRegisterEP16IOPCIConfigEntryjj",
   .Find        = mIncreasePciBarSizePatchFind,
@@ -1007,19 +1018,19 @@ mIncreasePciBarSizePatch = {
 
 STATIC
 CONST UINT8
-mIncreasePciBarSizePatchLegacyFind[] = {
+  mIncreasePciBarSizePatchLegacyFind[] = {
   0x01, 0x00, 0x00, 0x40
 };
 
 STATIC
 CONST UINT8
-mIncreasePciBarSizePatchLegacyReplace[] = {
+  mIncreasePciBarSizePatchLegacyReplace[] = {
   0x01, 0x00, 0x00, 0x80
 };
 
 STATIC
 PATCHER_GENERIC_PATCH
-mIncreasePciBarSizeLegacyPatch = {
+  mIncreasePciBarSizeLegacyPatch = {
   .Comment     = DEBUG_POINTER ("IncreasePciBarSizeLegacy"),
   .Base        = "__ZN17IOPCIConfigurator24probeBaseAddressRegisterEP16IOPCIConfigEntryjj",
   .Find        = mIncreasePciBarSizePatchLegacyFind,
@@ -1035,11 +1046,11 @@ mIncreasePciBarSizeLegacyPatch = {
 STATIC
 EFI_STATUS
 PatchIncreasePciBarSize (
-  IN OUT PATCHER_CONTEXT    *Patcher,
-  IN     UINT32             KernelVersion
+  IN OUT PATCHER_CONTEXT  *Patcher,
+  IN     UINT32           KernelVersion
   )
 {
-  EFI_STATUS          Status;
+  EFI_STATUS  Status;
 
   ASSERT (Patcher != NULL);
 
@@ -1066,26 +1077,26 @@ PatchIncreasePciBarSize (
 
 STATIC
 CONST UINT8
-mSerialDevicePmioFind[] = {
+  mSerialDevicePmioFind[] = {
   0x66, 0xBA, 0xF8, 0x03  ///< mov dx, 0x03F[8-9A-F]
 };
 
 STATIC
 UINTN
-mPmioRegisterBase = 0;    ///< To be set by PatchSetPciSerialDevice()
+  mPmioRegisterBase = 0;  ///< To be set by PatchSetPciSerialDevice()
 
 STATIC
 UINT32
-mPmioRegisterStride = 1;  ///< To be set by PatchSetPciSerialDevice()
+  mPmioRegisterStride = 1; ///< To be set by PatchSetPciSerialDevice()
 
 STATIC
 CONST UINTN
-mInOutMaxDistance = 64;
+  mInOutMaxDistance = 64;
 
 VOID
 PatchSetPciSerialDevice (
-  IN  UINTN  RegisterBase,
-  IN  UINT32 RegisterStride
+  IN  UINTN   RegisterBase,
+  IN  UINT32  RegisterStride
   )
 {
   //
@@ -1109,27 +1120,28 @@ PatchSetPciSerialDevice (
 STATIC
 EFI_STATUS
 PatchCustomPciSerialPmio (
-  IN OUT PATCHER_CONTEXT    *Patcher
+  IN OUT PATCHER_CONTEXT  *Patcher
   )
 {
-  UINTN       Count;
-  UINT8       *Walker;
-  UINT8       *WalkerPmio;
-  UINTN       Pmio;
-  UINT8       *WalkerEnd;
-  UINT8       *WalkerTmp;
+  UINTN  Count;
+  UINT8  *Walker;
+  UINT8  *WalkerPmio;
+  UINTN  Pmio;
+  UINT8  *WalkerEnd;
+  UINT8  *WalkerTmp;
 
   ASSERT (Patcher != NULL);
 
   Count     = 0;
-  Walker    = (UINT8 *) MachoGetMachHeader (&Patcher->MachContext);
+  Walker    = (UINT8 *)MachoGetMachHeader (&Patcher->MachContext);
   WalkerEnd = Walker + MachoGetFileSize (&Patcher->MachContext) - mInOutMaxDistance;
 
   while (Walker < WalkerEnd) {
-    if (Walker[0] == mSerialDevicePmioFind[0]
-      && Walker[1] == mSerialDevicePmioFind[1]
-      && (Walker[2] & 0xF8U) == mSerialDevicePmioFind[2]
-      && Walker[3] == mSerialDevicePmioFind[3]) {
+    if (  (Walker[0] == mSerialDevicePmioFind[0])
+       && (Walker[1] == mSerialDevicePmioFind[1])
+       && ((Walker[2] & 0xF8U) == mSerialDevicePmioFind[2])
+       && (Walker[3] == mSerialDevicePmioFind[3]))
+    {
       DEBUG ((
         DEBUG_VERBOSE,
         "OCAK: Matched PMIO serial register base <%02X %02X %02X %02X>\n",
@@ -1145,7 +1157,7 @@ PatchCustomPciSerialPmio (
         //
         // Locate instruction in (0xEC) or out (0xEE).
         //
-        if (*Walker == 0xEC || *Walker == 0xEE) {
+        if ((*Walker == 0xEC) || (*Walker == 0xEE)) {
           DEBUG ((
             DEBUG_VERBOSE,
             "OCAK: Matched PMIO serial register base context %a <%02X>, patching register base\n",
@@ -1157,7 +1169,7 @@ PatchCustomPciSerialPmio (
           // Patch PMIO.
           //
           DEBUG ((DEBUG_VERBOSE, "OCAK: Before register base patch <%02X %02X>\n", WalkerPmio[0], WalkerPmio[1]));
-          Pmio = mPmioRegisterBase + (*WalkerPmio & 7U) * mPmioRegisterStride;
+          Pmio          = mPmioRegisterBase + (*WalkerPmio & 7U) * mPmioRegisterStride;
           WalkerPmio[0] = Pmio & 0xFFU;
           WalkerPmio[1] = (Pmio >> 8U) & 0xFFU;
           DEBUG ((DEBUG_VERBOSE, "OCAK: After register base patch <%02X %02X>\n", WalkerPmio[0], WalkerPmio[1]));
@@ -1188,15 +1200,16 @@ PatchCustomPciSerialPmio (
 STATIC
 EFI_STATUS
 PatchCustomPciSerialDevice (
-  IN OUT PATCHER_CONTEXT    *Patcher,
-  IN     UINT32             KernelVersion
+  IN OUT PATCHER_CONTEXT  *Patcher,
+  IN     UINT32           KernelVersion
   )
 {
   EFI_STATUS  Status;
 
   Status = EFI_INVALID_PARAMETER;
-  if ((mPmioRegisterBase != 0 && mPmioRegisterStride > 1)
-    && (mPmioRegisterBase + 7U * mPmioRegisterStride) <= MAX_UINT16) {
+  if (  ((mPmioRegisterBase != 0) && (mPmioRegisterStride > 1))
+     && ((mPmioRegisterBase + 7U * mPmioRegisterStride) <= MAX_UINT16))
+  {
     Status = PatchCustomPciSerialPmio (Patcher);
   }
 
@@ -1215,38 +1228,38 @@ PatchCustomPciSerialDevice (
 
 STATIC
 CONST UINT8
-mCustomSmbiosGuidPatchFind[] = {
+  mCustomSmbiosGuidPatchFind[] = {
   0x45, 0x42, 0x39, 0x44, 0x32, 0x44, 0x33, 0x31   ///< "EB9D2D31"
 };
 
 STATIC
 CONST UINT8
-mCustomSmbiosGuidPatchReplace[] = {
+  mCustomSmbiosGuidPatchReplace[] = {
   0x45, 0x42, 0x39, 0x44, 0x32, 0x44, 0x33, 0x35   ///< "EB9D2D35"
 };
 
 STATIC
 PATCHER_GENERIC_PATCH
-mCustomSmbiosGuidPatch = {
-  .Comment      = DEBUG_POINTER ("CustomSmbiosGuid"),
-  .Base         = NULL,
-  .Find         = mCustomSmbiosGuidPatchFind,
-  .Mask         = NULL,
-  .Replace      = mCustomSmbiosGuidPatchReplace,
-  .ReplaceMask  = NULL,
-  .Size         = sizeof (mCustomSmbiosGuidPatchFind),
-  .Count        = 1,
-  .Skip         = 0
+  mCustomSmbiosGuidPatch = {
+  .Comment     = DEBUG_POINTER ("CustomSmbiosGuid"),
+  .Base        = NULL,
+  .Find        = mCustomSmbiosGuidPatchFind,
+  .Mask        = NULL,
+  .Replace     = mCustomSmbiosGuidPatchReplace,
+  .ReplaceMask = NULL,
+  .Size        = sizeof (mCustomSmbiosGuidPatchFind),
+  .Count       = 1,
+  .Skip        = 0
 };
 
 STATIC
 EFI_STATUS
 PatchCustomSmbiosGuid (
-  IN OUT PATCHER_CONTEXT    *Patcher,
-  IN     UINT32             KernelVersion
+  IN OUT PATCHER_CONTEXT  *Patcher,
+  IN     UINT32           KernelVersion
   )
 {
-  EFI_STATUS          Status;
+  EFI_STATUS  Status;
 
   ASSERT (Patcher != NULL);
 
@@ -1262,40 +1275,40 @@ PatchCustomSmbiosGuid (
 
 STATIC
 CONST UINT8
-mPanicKextDumpPatchFind[] = {
+  mPanicKextDumpPatchFind[] = {
   0x00, 0x25, 0x2E, 0x2A, 0x73, 0x00  ///< "\0%.*s\0"
 };
 
 STATIC
 CONST UINT8
-mPanicKextDumpPatchReplace[] = {
+  mPanicKextDumpPatchReplace[] = {
   0x00, 0x00, 0x2E, 0x2A, 0x73, 0x00  ///< "\0\0.*s\0"
 };
 
 STATIC
 PATCHER_GENERIC_PATCH
-mPanicKextDumpPatch = {
-  .Comment = DEBUG_POINTER ("PanicKextDump"),
-  .Base    = NULL,
-  .Find    = mPanicKextDumpPatchFind,
-  .Mask    = NULL,
-  .Replace = mPanicKextDumpPatchReplace,
+  mPanicKextDumpPatch = {
+  .Comment     = DEBUG_POINTER ("PanicKextDump"),
+  .Base        = NULL,
+  .Find        = mPanicKextDumpPatchFind,
+  .Mask        = NULL,
+  .Replace     = mPanicKextDumpPatchReplace,
   .ReplaceMask = NULL,
-  .Size    = sizeof (mPanicKextDumpPatchFind),
-  .Count   = 1,
-  .Skip    = 0
+  .Size        = sizeof (mPanicKextDumpPatchFind),
+  .Count       = 1,
+  .Skip        = 0
 };
 
 STATIC
 EFI_STATUS
 PatchPanicKextDump (
-  IN OUT PATCHER_CONTEXT    *Patcher,
-  IN     UINT32             KernelVersion
+  IN OUT PATCHER_CONTEXT  *Patcher,
+  IN     UINT32           KernelVersion
   )
 {
-  EFI_STATUS          Status;
-  UINT8               *Record;
-  UINT8               *Last;
+  EFI_STATUS  Status;
+  UINT8       *Record;
+  UINT8       *Last;
 
   ASSERT (Patcher != NULL);
 
@@ -1304,18 +1317,18 @@ PatchPanicKextDump (
     return EFI_SUCCESS;
   }
 
-  Last = ((UINT8 *) MachoGetMachHeader (&Patcher->MachContext)
-    + MachoGetFileSize (&Patcher->MachContext) - EFI_PAGE_SIZE);
+  Last = ((UINT8 *)MachoGetMachHeader (&Patcher->MachContext)
+          + MachoGetFileSize (&Patcher->MachContext) - EFI_PAGE_SIZE);
 
   //
   // This should work on 10.15 and all debug kernels.
   //
   Status = PatcherGetSymbolAddress (
-    Patcher,
-    "__ZN6OSKext19printKextPanicListsEPFiPKczE",
-    (UINT8 **) &Record
-    );
-  if (EFI_ERROR (Status) || Record >= Last) {
+             Patcher,
+             "__ZN6OSKext19printKextPanicListsEPFiPKczE",
+             (UINT8 **)&Record
+             );
+  if (EFI_ERROR (Status) || (Record >= Last)) {
     DEBUG ((DEBUG_WARN, "OCAK: Failed to locate printKextPanicLists (%p) - %r\n", Record, Status));
     return EFI_NOT_FOUND;
   }
@@ -1338,43 +1351,43 @@ PatchPanicKextDump (
 
 STATIC
 CONST UINT8
-mLapicKernelPanicPatchFind[] = {
+  mLapicKernelPanicPatchFind[] = {
   0x65, 0x8B, 0x04, 0x25, 0x00, 0x00, 0x00, 0x00,  ///< mov eax, gs:1Ch or gs:18h on 10.15.4+ or gs:20h on 11.0.
   0x3B, 0x00, 0x00, 0x00, 0x00, 0x00               ///< cmp eax, cs:_master_cpu <- address masked out
 };
 
 STATIC
 CONST UINT8
-mLapicKernelPanicPatchMask[] = {
+  mLapicKernelPanicPatchMask[] = {
   0xFF, 0xFF, 0xFF, 0xFF, 0xC3, 0xFF, 0xFF, 0xFF,
   0xFF, 0x00, 0x00, 0x00, 0x00, 0x00
 };
 
 STATIC
 CONST UINT8
-mLapicKernelPanicPatchReplace[] = {
-  0x31, 0xC0,                                                             ///< xor eax, eax
-  0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90  ///< nop
+  mLapicKernelPanicPatchReplace[] = {
+  0x31, 0xC0,                                                            ///< xor eax, eax
+  0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90 ///< nop
 };
 
 STATIC
 PATCHER_GENERIC_PATCH
-mLapicKernelPanicPatch = {
-  .Comment = DEBUG_POINTER ("LapicKernelPanic"),
-  .Base    = "_lapic_interrupt",
-  .Find    = mLapicKernelPanicPatchFind,
-  .Mask    = mLapicKernelPanicPatchMask,
-  .Replace = mLapicKernelPanicPatchReplace,
+  mLapicKernelPanicPatch = {
+  .Comment     = DEBUG_POINTER ("LapicKernelPanic"),
+  .Base        = "_lapic_interrupt",
+  .Find        = mLapicKernelPanicPatchFind,
+  .Mask        = mLapicKernelPanicPatchMask,
+  .Replace     = mLapicKernelPanicPatchReplace,
   .ReplaceMask = NULL,
-  .Size    = sizeof (mLapicKernelPanicPatchReplace),
-  .Count   = 1,
-  .Skip    = 0,
-  .Limit   = 1024
+  .Size        = sizeof (mLapicKernelPanicPatchReplace),
+  .Count       = 1,
+  .Skip        = 0,
+  .Limit       = 1024
 };
 
 STATIC
 CONST UINT8
-mLapicKernelPanicPatchLegacyFind[] = {
+  mLapicKernelPanicPatchLegacyFind[] = {
   0x65, 0x8B, 0x04, 0x25, 0x10, 0x00, 0x00, 0x00,  ///< mov eax, gs:1Ch on 10.9.5 and 14h on 10.8.5.
   0x48, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,        ///< lea rcx, _master_cpu
   0x00, 0x00                                       ///< cmp eax, [rcx]
@@ -1382,7 +1395,7 @@ mLapicKernelPanicPatchLegacyFind[] = {
 
 STATIC
 CONST UINT8
-mLapicKernelPanicPatchLegacyMask[] = {
+  mLapicKernelPanicPatchLegacyMask[] = {
   0xFF, 0xFF, 0xFF, 0xFF, 0xF3, 0xFF, 0xFF, 0xFF,
   0xFF, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
   0x00, 0x00
@@ -1390,65 +1403,65 @@ mLapicKernelPanicPatchLegacyMask[] = {
 
 STATIC
 CONST UINT8
-mLapicKernelPanicPatchLegacyReplace[] = {
-  0x31, 0xC0,                                                                               ///< xor eax, eax
-  0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90  ///< nop
+  mLapicKernelPanicPatchLegacyReplace[] = {
+  0x31, 0xC0,                                                                              ///< xor eax, eax
+  0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90 ///< nop
 };
 
 STATIC
 PATCHER_GENERIC_PATCH
-mLapicKernelPanicLegacyPatch = {
-  .Comment = DEBUG_POINTER ("LapicKernelPanicLegacy"),
-  .Base    = "_lapic_interrupt",
-  .Find    = mLapicKernelPanicPatchLegacyFind,
-  .Mask    = mLapicKernelPanicPatchLegacyMask,
-  .Replace = mLapicKernelPanicPatchLegacyReplace,
+  mLapicKernelPanicLegacyPatch = {
+  .Comment     = DEBUG_POINTER ("LapicKernelPanicLegacy"),
+  .Base        = "_lapic_interrupt",
+  .Find        = mLapicKernelPanicPatchLegacyFind,
+  .Mask        = mLapicKernelPanicPatchLegacyMask,
+  .Replace     = mLapicKernelPanicPatchLegacyReplace,
   .ReplaceMask = NULL,
-  .Size    = sizeof (mLapicKernelPanicPatchLegacyReplace),
-  .Count   = 1,
-  .Skip    = 0,
-  .Limit   = 1024
+  .Size        = sizeof (mLapicKernelPanicPatchLegacyReplace),
+  .Count       = 1,
+  .Skip        = 0,
+  .Limit       = 1024
 };
 
 STATIC
 CONST UINT8
-mLapicKernelPanicMasterPatchFind[] = {
+  mLapicKernelPanicMasterPatchFind[] = {
   0x83, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00  ///< cmp cs:_debug_boot_arg, 0 <- address masked out
 };
 
 STATIC
 CONST UINT8
-mLapicKernelPanicMasterPatchMask[] = {
+  mLapicKernelPanicMasterPatchMask[] = {
   0xFF, 0x00, 0x00, 0x00, 0x00, 0xFF, 0xFF
 };
 
 STATIC
 CONST UINT8
-mLapicKernelPanicMasterPatchReplace[] = {
-  0x31, 0xC0,                   ///< xor eax, eax
-  0x90, 0x90, 0x90, 0x90, 0x90  ///< nop
+  mLapicKernelPanicMasterPatchReplace[] = {
+  0x31, 0xC0,                  ///< xor eax, eax
+  0x90, 0x90, 0x90, 0x90, 0x90 ///< nop
 };
 
 STATIC
 PATCHER_GENERIC_PATCH
-mLapicKernelPanicMasterPatch = {
-  .Comment = DEBUG_POINTER ("LapicKernelPanicMaster"),
-  .Base    = "_lapic_interrupt",
-  .Find    = mLapicKernelPanicMasterPatchFind,
-  .Mask    = mLapicKernelPanicMasterPatchMask,
-  .Replace = mLapicKernelPanicMasterPatchReplace,
+  mLapicKernelPanicMasterPatch = {
+  .Comment     = DEBUG_POINTER ("LapicKernelPanicMaster"),
+  .Base        = "_lapic_interrupt",
+  .Find        = mLapicKernelPanicMasterPatchFind,
+  .Mask        = mLapicKernelPanicMasterPatchMask,
+  .Replace     = mLapicKernelPanicMasterPatchReplace,
   .ReplaceMask = NULL,
-  .Size    = sizeof (mLapicKernelPanicMasterPatchFind),
-  .Count   = 1,
-  .Skip    = 0,
-  .Limit   = 4096
+  .Size        = sizeof (mLapicKernelPanicMasterPatchFind),
+  .Count       = 1,
+  .Skip        = 0,
+  .Limit       = 4096
 };
 
 STATIC
 EFI_STATUS
 PatchLapicKernelPanic (
-  IN OUT PATCHER_CONTEXT    *Patcher,
-  IN     UINT32             KernelVersion
+  IN OUT PATCHER_CONTEXT  *Patcher,
+  IN     UINT32           KernelVersion
   )
 {
   EFI_STATUS  Status;
@@ -1491,20 +1504,20 @@ PatchLapicKernelPanic (
 
 STATIC
 CONST UINT8
-mPowerStateTimeoutPanicFind[] = {
+  mPowerStateTimeoutPanicFind[] = {
   0x63, 0x6F, 0x6D, 0x2E, 0x61, 0x70, 0x70, 0x6C, 0x65, 0x00  ///< "com.apple\0"
 };
 
 STATIC
 CONST UINT8
-mPowerStateTimeoutPanicReplace[] = {
+  mPowerStateTimeoutPanicReplace[] = {
   // not.apple\0
   0x6E, 0x6F, 0x74, 0x2E, 0x61, 0x70, 0x70, 0x6C, 0x65, 0x00  ///< "not.apple\0"
 };
 
 STATIC
 PATCHER_GENERIC_PATCH
-mPowerStateTimeoutPanicMasterPatch = {
+  mPowerStateTimeoutPanicMasterPatch = {
   .Comment     = DEBUG_POINTER ("PowerStateTimeout"),
   .Base        = NULL,
   .Find        = mPowerStateTimeoutPanicFind,
@@ -1519,35 +1532,34 @@ mPowerStateTimeoutPanicMasterPatch = {
 
 STATIC
 CONST UINT8
-mPowerStateTimeoutPanicInlineFind[] = {
-  0x80, 0x00, 0x01, 0x6F,  ///< cmp byte ptr [rax+1], 6Fh ; 'o'
-  0x75, 0x00,              ///< jnz short fail
-  0x80, 0x00, 0x02, 0x6D,  ///< cmp byte ptr [rax+2], 6Dh ; 'm'
-  0x75, 0x00,              ///< jnz short fail
+  mPowerStateTimeoutPanicInlineFind[] = {
+  0x80, 0x00, 0x01, 0x6F, ///< cmp byte ptr [rax+1], 6Fh ; 'o'
+  0x75, 0x00,             ///< jnz short fail
+  0x80, 0x00, 0x02, 0x6D, ///< cmp byte ptr [rax+2], 6Dh ; 'm'
+  0x75, 0x00,             ///< jnz short fail
 };
 
 STATIC
 CONST UINT8
-mPowerStateTimeoutPanicInlineMask[] = {
-  0xFF, 0x00, 0xFF, 0xFF,  ///< cmp byte ptr [rax+1], 6Fh ; 'o'
-  0xFF, 0x00,              ///< jnz short fail
-  0xFF, 0x00, 0xFF, 0xFF,  ///< cmp byte ptr [rax+2], 6Dh ; 'm'
-  0xFF, 0x00,              ///< jnz short fail
+  mPowerStateTimeoutPanicInlineMask[] = {
+  0xFF, 0x00, 0xFF, 0xFF, ///< cmp byte ptr [rax+1], 6Fh ; 'o'
+  0xFF, 0x00,             ///< jnz short fail
+  0xFF, 0x00, 0xFF, 0xFF, ///< cmp byte ptr [rax+2], 6Dh ; 'm'
+  0xFF, 0x00,             ///< jnz short fail
 };
-
 
 STATIC
 CONST UINT8
-mPowerStateTimeoutPanicInlineReplace[] = {
-  0x80, 0x00, 0x01, 0x6E,  ///< cmp byte ptr [rax+1], 6Eh ; 'n'
-  0x75, 0x00,              ///< jnz short fail
-  0x80, 0x00, 0x02, 0x6D,  ///< cmp byte ptr [rax+2], 6Dh ; 'm'
-  0x75, 0x00,              ///< jnz short fail
+  mPowerStateTimeoutPanicInlineReplace[] = {
+  0x80, 0x00, 0x01, 0x6E, ///< cmp byte ptr [rax+1], 6Eh ; 'n'
+  0x75, 0x00,             ///< jnz short fail
+  0x80, 0x00, 0x02, 0x6D, ///< cmp byte ptr [rax+2], 6Dh ; 'm'
+  0x75, 0x00,             ///< jnz short fail
 };
 
 STATIC
 PATCHER_GENERIC_PATCH
-mPowerStateTimeoutPanicInlinePatch = {
+  mPowerStateTimeoutPanicInlinePatch = {
   .Comment     = DEBUG_POINTER ("PowerStateTimeout"),
   .Base        = "__ZN9IOService12ackTimerTickEv",
   .Find        = mPowerStateTimeoutPanicInlineFind,
@@ -1563,8 +1575,8 @@ mPowerStateTimeoutPanicInlinePatch = {
 STATIC
 EFI_STATUS
 PatchPowerStateTimeout (
-  IN OUT PATCHER_CONTEXT    *Patcher,
-  IN     UINT32             KernelVersion
+  IN OUT PATCHER_CONTEXT  *Patcher,
+  IN     UINT32           KernelVersion
   )
 {
   EFI_STATUS  Status;
@@ -1610,43 +1622,43 @@ PatchPowerStateTimeout (
 
 STATIC
 CONST UINT8
-mAppleRtcChecksumPatchFind32[] = {
+  mAppleRtcChecksumPatchFind32[] = {
   0xC7, 0x00, 0x00, 0x00, 0x58, 0x00, 0x00, 0x00
 };
 
 STATIC
 CONST UINT8
-mAppleRtcChecksumPatchMask32[] = {
+  mAppleRtcChecksumPatchMask32[] = {
   0xFF, 0x00, 0x00, 0x00, 0xFE, 0xFF, 0xFF, 0xFF
 };
 
 STATIC
 CONST UINT8
-mAppleRtcChecksumPatchReplace32[] = {
+  mAppleRtcChecksumPatchReplace32[] = {
   0xC7, 0x00, 0x00, 0x00, 0xFF, 0xFF, 0x00, 0x00
 };
 
 STATIC
 CONST UINT8
-mAppleRtcChecksumPatchFind64[] = {
+  mAppleRtcChecksumPatchFind64[] = {
   0xBE, 0x58, 0x00, 0x00, 0x00
 };
 
 STATIC
 CONST UINT8
-mAppleRtcChecksumPatchMask64[] = {
+  mAppleRtcChecksumPatchMask64[] = {
   0xFF, 0xFE, 0xFF, 0xFF, 0xFF
 };
 
 STATIC
 CONST UINT8
-mAppleRtcChecksumPatchReplace64[] = {
+  mAppleRtcChecksumPatchReplace64[] = {
   0xBE, 0xFF, 0xFF, 0x00, 0x00
 };
 
 STATIC
 PATCHER_GENERIC_PATCH
-mAppleRtcChecksumPatch32 = {
+  mAppleRtcChecksumPatch32 = {
   .Comment     = DEBUG_POINTER ("DisableRtcChecksum32"),
   .Base        = NULL,
   .Find        = mAppleRtcChecksumPatchFind32,
@@ -1661,7 +1673,7 @@ mAppleRtcChecksumPatch32 = {
 
 STATIC
 PATCHER_GENERIC_PATCH
-mAppleRtcChecksumPatch64 = {
+  mAppleRtcChecksumPatch64 = {
   .Comment     = DEBUG_POINTER ("DisableRtcChecksum64"),
   .Base        = NULL,
   .Find        = mAppleRtcChecksumPatchFind64,
@@ -1677,11 +1689,11 @@ mAppleRtcChecksumPatch64 = {
 STATIC
 EFI_STATUS
 PatchAppleRtcChecksum (
-  IN OUT PATCHER_CONTEXT    *Patcher,
-  IN     UINT32             KernelVersion
+  IN OUT PATCHER_CONTEXT  *Patcher,
+  IN     UINT32           KernelVersion
   )
 {
-  EFI_STATUS Status;
+  EFI_STATUS  Status;
 
   ASSERT (Patcher != NULL);
 
@@ -1698,8 +1710,8 @@ PatchAppleRtcChecksum (
 STATIC
 EFI_STATUS
 PatchSegmentJettison (
-  IN OUT PATCHER_CONTEXT    *Patcher,
-  IN     UINT32             KernelVersion
+  IN OUT PATCHER_CONTEXT  *Patcher,
+  IN     UINT32           KernelVersion
   )
 {
   EFI_STATUS  Status;
@@ -1717,17 +1729,17 @@ PatchSegmentJettison (
     return EFI_SUCCESS;
   }
 
-  Last = (UINT8 *) MachoGetMachHeader (&Patcher->MachContext)
-    + MachoGetFileSize (&Patcher->MachContext) - sizeof (EFI_PAGE_SIZE) * 2;
+  Last = (UINT8 *)MachoGetMachHeader (&Patcher->MachContext)
+         + MachoGetFileSize (&Patcher->MachContext) - sizeof (EFI_PAGE_SIZE) * 2;
 
-  Status = PatcherGetSymbolAddress (Patcher, "__ZN6OSKext19removeKextBootstrapEv", (UINT8 **) &RemoveBs);
-  if (EFI_ERROR (Status) || RemoveBs > Last) {
+  Status = PatcherGetSymbolAddress (Patcher, "__ZN6OSKext19removeKextBootstrapEv", (UINT8 **)&RemoveBs);
+  if (EFI_ERROR (Status) || (RemoveBs > Last)) {
     DEBUG ((DEBUG_INFO, "OCAK: Missing removeKextBootstrap - %r\n", Status));
     return EFI_NOT_FOUND;
   }
 
-  Status = PatcherGetSymbolAddress (Patcher, "_ml_static_mfree", (UINT8 **) &StaticMfree);
-  if (EFI_ERROR (Status) || StaticMfree > Last) {
+  Status = PatcherGetSymbolAddress (Patcher, "_ml_static_mfree", (UINT8 **)&StaticMfree);
+  if (EFI_ERROR (Status) || (StaticMfree > Last)) {
     DEBUG ((DEBUG_INFO, "OCAK: Missing ml_static_mfree - %r\n", Status));
     return EFI_NOT_FOUND;
   }
@@ -1742,12 +1754,13 @@ PatchSegmentJettison (
   //
   // NOTE: One call instruction takes 5 bytes.
   //
-  Diff = (UINT32) ((UINTN) StaticMfree - (UINTN) RemoveBs - 5);
+  Diff = (UINT32)((UINTN)StaticMfree - (UINTN)RemoveBs - 5);
 
   CurrFreeCall = NULL;
   for (Index = 0; Index < EFI_PAGE_SIZE; ++Index) {
-    if (RemoveBs[0] == 0xE8  ///< call
-      && CompareMem (&RemoveBs[1], &Diff, sizeof (Diff)) == 0) {
+    if (  (RemoveBs[0] == 0xE8) ///< call
+       && (CompareMem (&RemoveBs[1], &Diff, sizeof (Diff)) == 0))
+    {
       CurrFreeCall = RemoveBs;
       DEBUG ((
         DEBUG_VERBOSE,
@@ -1759,18 +1772,20 @@ PatchSegmentJettison (
         RemoveBs[4],
         Diff
         ));
-    } else if (CurrFreeCall != NULL
-      && RemoveBs[0] == 0x48 && RemoveBs[1] == 0x8D && RemoveBs[2] == 0x15) {
+    } else if (  (CurrFreeCall != NULL)
+              && (RemoveBs[0] == 0x48) && (RemoveBs[1] == 0x8D) && (RemoveBs[2] == 0x15))
+    {
       //
       // Check if this lea rdx, address is pointing to "Jettisoning fileset Linkedit segments from..."
       //
       CopyMem (&Diff2, &RemoveBs[3], sizeof (Diff2));
-      Jettisoning = (CHAR8 *) RemoveBs + Diff2 + 7;
-      if ((UINT8 *) Jettisoning <= Last
-        && AsciiStrnCmp (Jettisoning, "Jettisoning fileset", L_STR_LEN ("Jettisoning fileset")) == 0) {
+      Jettisoning = (CHAR8 *)RemoveBs + Diff2 + 7;
+      if (  ((UINT8 *)Jettisoning <= Last)
+         && (AsciiStrnCmp (Jettisoning, "Jettisoning fileset", L_STR_LEN ("Jettisoning fileset")) == 0))
+      {
         DEBUG ((DEBUG_INFO, "OCAK: Found jettisoning fileset\n"));
         SetMem (CurrFreeCall, 5, 0x90);
-        return EFI_SUCCESS;    
+        return EFI_SUCCESS;
       }
     }
 
@@ -1785,14 +1800,14 @@ PatchSegmentJettison (
 
 STATIC
 CONST UINT8
-mBTFeatureFlagsReplace[] = {
-  0x55,             ///< push rbp
-  0x83, 0xCE, 0x0F  ///< or esi, 0x0F
+  mBTFeatureFlagsReplace[] = {
+  0x55,            ///< push rbp
+  0x83, 0xCE, 0x0F ///< or esi, 0x0F
 };
 
 STATIC
 PATCHER_GENERIC_PATCH
-mBTFeatureFlagsPatchV1 = {
+  mBTFeatureFlagsPatchV1 = {
   .Comment     = DEBUG_POINTER ("BTFeatureFlagsV1"),
   .Base        = "__ZN25IOBluetoothHostController25SetControllerFeatureFlagsEj",
   .Find        = NULL,
@@ -1806,7 +1821,7 @@ mBTFeatureFlagsPatchV1 = {
 
 STATIC
 PATCHER_GENERIC_PATCH
-mBTFeatureFlagsPatchV2 = {
+  mBTFeatureFlagsPatchV2 = {
   .Comment     = DEBUG_POINTER ("BTFeatureFlagsV2"),
   .Base        = "__ZN24IOBluetoothHCIController25SetControllerFeatureFlagsEj",
   .Find        = NULL,
@@ -1820,7 +1835,7 @@ mBTFeatureFlagsPatchV2 = {
 
 STATIC
 PATCHER_GENERIC_PATCH
-mBTFeatureFlagsPatchV3 = {
+  mBTFeatureFlagsPatchV3 = {
   .Comment     = DEBUG_POINTER ("BTFeatureFlagsV3"),
   .Base        = "__ZN17IOBluetoothDevice25setDeviceSupportedFeatureEj",
   .Find        = NULL,
@@ -1835,8 +1850,8 @@ mBTFeatureFlagsPatchV3 = {
 STATIC
 EFI_STATUS
 PatchBTFeatureFlags (
-  IN OUT PATCHER_CONTEXT    *Patcher,
-  IN     UINT32             KernelVersion
+  IN OUT PATCHER_CONTEXT  *Patcher,
+  IN     UINT32           KernelVersion
   )
 {
   EFI_STATUS  Status;
@@ -1871,23 +1886,23 @@ typedef struct {
   //
   // Address of code.
   //
-  UINT32  CodeAddress;
+  UINT32    CodeAddress;
   //
   // Length of code in bytes.
   //
-  UINT32  CodeLength;
+  UINT32    CodeLength;
   //
   // Address to place this function at.
   //
-  UINT32  CommpageAddress;
+  UINT32    CommpageAddress;
   //
   // CPU capability bits we must have.
   //
-  UINT32  MustHave;
+  UINT32    MustHave;
   //
   // CPU capability bits we can't have.
   //
-  UINT32  CantHave;
+  UINT32    CantHave;
 } COMMPAGE_DESCRIPTOR;
 
 //
@@ -1897,28 +1912,28 @@ typedef struct {
   //
   // Address of code.
   //
-  UINT64  CodeAddress;
+  UINT64    CodeAddress;
   //
   // Length of code in bytes.
   //
-  UINT32  CodeLength;
+  UINT32    CodeLength;
   //
   // Address to place this function at.
   //
-  UINT32  CommpageAddress;
+  UINT32    CommpageAddress;
   //
   // CPU capability bits we must have.
   //
-  UINT32  MustHave;
+  UINT32    MustHave;
   //
   // CPU capability bits we can't have.
   //
-  UINT32  CantHave;
+  UINT32    CantHave;
 } COMMPAGE_DESCRIPTOR_64;
 
 typedef union {
-  COMMPAGE_DESCRIPTOR     Desc32;
-  COMMPAGE_DESCRIPTOR_64  Desc64;
+  COMMPAGE_DESCRIPTOR       Desc32;
+  COMMPAGE_DESCRIPTOR_64    Desc64;
 } COMMPAGE_DESCRIPTOR_ANY;
 
 #define COMM_PAGE_BCOPY       0xFFFF0780
@@ -1926,40 +1941,40 @@ typedef union {
 
 STATIC
 CONST UINT8
-mAsmLegacyBcopy64[] = {
+  mAsmLegacyBcopy64[] = {
   #include "LegacyBcopy.h"
 };
 
 STATIC
 EFI_STATUS
 PatchLegacyCommpage (
-  IN OUT PATCHER_CONTEXT    *Patcher,
-  IN     UINT32             KernelVersion
+  IN OUT PATCHER_CONTEXT  *Patcher,
+  IN     UINT32           KernelVersion
   )
 {
-  EFI_STATUS                Status;
-  UINT8                     *Start;
-  UINT8                     *Last;
-  UINT8                     *CommpageRoutines;
-  UINT8                     *Target;
-  UINT64                    Address;
-  UINT32                    MaxSize;
+  EFI_STATUS  Status;
+  UINT8       *Start;
+  UINT8       *Last;
+  UINT8       *CommpageRoutines;
+  UINT8       *Target;
+  UINT64      Address;
+  UINT32      MaxSize;
 
-  COMMPAGE_DESCRIPTOR_ANY   *Commpage;
-  UINT32                    CommpageCodeLength;
-  UINT32                    CommpageAddress;
-  UINT32                    CommpageMustHave;
+  COMMPAGE_DESCRIPTOR_ANY  *Commpage;
+  UINT32                   CommpageCodeLength;
+  UINT32                   CommpageAddress;
+  UINT32                   CommpageMustHave;
 
   ASSERT (Patcher != NULL);
 
-  Start = ((UINT8 *) MachoGetMachHeader (&Patcher->MachContext));
+  Start = ((UINT8 *)MachoGetMachHeader (&Patcher->MachContext));
   Last  = Start + MachoGetFileSize (&Patcher->MachContext) - EFI_PAGE_SIZE * 2 - (Patcher->Is32Bit ? sizeof (COMMPAGE_DESCRIPTOR) : sizeof (COMMPAGE_DESCRIPTOR_64));
 
   //
   // This is a table of pointers to commpage entries.
   //
-  Status = PatcherGetSymbolAddress (Patcher, "_commpage_64_routines", (UINT8 **) &CommpageRoutines);
-  if (EFI_ERROR (Status) || CommpageRoutines >= Last) {
+  Status = PatcherGetSymbolAddress (Patcher, "_commpage_64_routines", (UINT8 **)&CommpageRoutines);
+  if (EFI_ERROR (Status) || (CommpageRoutines >= Last)) {
     DEBUG ((DEBUG_WARN, "OCAK: Failed to locate _commpage_64_routines (%p) - %r\n", CommpageRoutines, Status));
     return EFI_NOT_FOUND;
   }
@@ -1967,11 +1982,12 @@ PatchLegacyCommpage (
   //
   // Iterate through table looking for bcopy_sse4_64 (on 10.4) or bcopy_sse3x_64 (10.5+) entry.
   //
-  Address = Patcher->Is32Bit ? *((UINT32 *) CommpageRoutines) : *((UINT64 *) CommpageRoutines);
+  Address = Patcher->Is32Bit ? *((UINT32 *)CommpageRoutines) : *((UINT64 *)CommpageRoutines);
   while (Address > 0) {
     Commpage = MachoGetFilePointerByAddress (&Patcher->MachContext, Address, &MaxSize);
-    if (Commpage == NULL
-      || MaxSize < (Patcher->Is32Bit ? sizeof (COMMPAGE_DESCRIPTOR) : sizeof (COMMPAGE_DESCRIPTOR_64))) {
+    if (  (Commpage == NULL)
+       || (MaxSize < (Patcher->Is32Bit ? sizeof (COMMPAGE_DESCRIPTOR) : sizeof (COMMPAGE_DESCRIPTOR_64))))
+    {
       break;
     }
 
@@ -1980,21 +1996,23 @@ PatchLegacyCommpage (
     //
     CommpageAddress  = Patcher->Is32Bit ? Commpage->Desc32.CommpageAddress : Commpage->Desc64.CommpageAddress;
     CommpageMustHave = Patcher->Is32Bit ? Commpage->Desc32.MustHave : Commpage->Desc64.MustHave;
-    if (CommpageAddress == COMM_PAGE_BCOPY
-      && (CommpageMustHave & kHasSupplementalSSE3) == kHasSupplementalSSE3) {
+    if (  (CommpageAddress == COMM_PAGE_BCOPY)
+       && ((CommpageMustHave & kHasSupplementalSSE3) == kHasSupplementalSSE3))
+    {
       Address            = Patcher->Is32Bit ? Commpage->Desc32.CodeAddress : Commpage->Desc64.CodeAddress;
       CommpageCodeLength = Patcher->Is32Bit ? Commpage->Desc32.CodeLength : Commpage->Desc64.CodeLength;
       DEBUG ((
         DEBUG_VERBOSE,
         "OCAK: Found 64-bit _COMM_PAGE_BCOPY function @ 0x%llx (0x%X bytes)\n",
-        Address, 
+        Address,
         CommpageCodeLength
         ));
 
       Target = MachoGetFilePointerByAddress (&Patcher->MachContext, Address, &MaxSize);
-      if (Target == NULL
-        || MaxSize < sizeof (mAsmLegacyBcopy64)
-        || CommpageCodeLength < sizeof (mAsmLegacyBcopy64)) {
+      if (  (Target == NULL)
+         || (MaxSize < sizeof (mAsmLegacyBcopy64))
+         || (CommpageCodeLength < sizeof (mAsmLegacyBcopy64)))
+      {
         break;
       }
 
@@ -2014,7 +2032,8 @@ PatchLegacyCommpage (
     if (CommpageRoutines >= Last) {
       break;
     }
-    Address = Patcher->Is32Bit ? *((UINT32 *) CommpageRoutines) : *((UINT64 *) CommpageRoutines);
+
+    Address = Patcher->Is32Bit ? *((UINT32 *)CommpageRoutines) : *((UINT64 *)CommpageRoutines);
   }
 
   DEBUG ((DEBUG_INFO, "OCAK: Failed to find 64-bit _COMM_PAGE_BCOPY function\n"));
@@ -2024,96 +2043,96 @@ PatchLegacyCommpage (
 
 STATIC
 CONST UINT8
-mAquantiaEthernetPatchFindShikumo[] = {
-  0x83, 0x7D, 0x00, 0x00,              ///< cmp dword [rbp+whatever], whatever
-  0x0F, 0x84, 0x00, 0x00, 0x00, 0x00,  ///< je unsupported
-  0x83, 0x7D                           ///< LBL:
+  mAquantiaEthernetPatchFindShikumo[] = {
+  0x83, 0x7D, 0x00, 0x00,             ///< cmp dword [rbp+whatever], whatever
+  0x0F, 0x84, 0x00, 0x00, 0x00, 0x00, ///< je unsupported
+  0x83, 0x7D                          ///< LBL:
 };
 
 STATIC
 CONST UINT8
-mAquantiaEthernetPatchFindMaskShikumo[] = {
+  mAquantiaEthernetPatchFindMaskShikumo[] = {
   0xFF, 0xFF, 0x00, 0x00,
-  0xFF, 0xFF, 0x00, 0x00, 0x00, 0x00,
+  0xFF, 0xFF, 0x00, 0x00,0x00,  0x00,
   0xFF, 0xFF
 };
 
 STATIC
 CONST UINT8
-mAquantiaEthernetPatchReplaceShikumo[] = {
-  0x83, 0x7D, 0x00, 0x00,              ///< cmp dword [rbp+whatever], whatever
-  0xEB, 0x04, 0x90, 0x90, 0x90, 0x90,  ///< jmp LBL
-  0x83, 0x7D                           ///< LBL:
+  mAquantiaEthernetPatchReplaceShikumo[] = {
+  0x83, 0x7D, 0x00, 0x00,             ///< cmp dword [rbp+whatever], whatever
+  0xEB, 0x04, 0x90, 0x90, 0x90, 0x90, ///< jmp LBL
+  0x83, 0x7D                          ///< LBL:
 };
 
 STATIC
 CONST UINT8
-mAquantiaEthernetPatchReplaceMaskShikumo[] = {
+  mAquantiaEthernetPatchReplaceMaskShikumo[] = {
   0xFF, 0xFF, 0x00, 0x00,
-  0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
+  0xFF, 0xFF, 0xFF, 0xFF,0xFF,  0xFF,
   0xFF, 0xFF
 };
 
 STATIC
 PATCHER_GENERIC_PATCH
-mAquantiaEthernetPatchShikumo = {
-  .Comment = DEBUG_POINTER ("ForceAquantiaEthernetShikumo"),
-  .Base    = "__ZN27AppleEthernetAquantiaAqtion5startEP9IOService",
-  .Find    = mAquantiaEthernetPatchFindShikumo,
-  .Mask    = mAquantiaEthernetPatchFindMaskShikumo,
-  .Replace = mAquantiaEthernetPatchReplaceShikumo,
+  mAquantiaEthernetPatchShikumo = {
+  .Comment     = DEBUG_POINTER ("ForceAquantiaEthernetShikumo"),
+  .Base        = "__ZN27AppleEthernetAquantiaAqtion5startEP9IOService",
+  .Find        = mAquantiaEthernetPatchFindShikumo,
+  .Mask        = mAquantiaEthernetPatchFindMaskShikumo,
+  .Replace     = mAquantiaEthernetPatchReplaceShikumo,
   .ReplaceMask = mAquantiaEthernetPatchReplaceMaskShikumo,
-  .Size    = sizeof (mAquantiaEthernetPatchFindShikumo),
-  .Count   = 1,
-  .Skip    = 0
+  .Size        = sizeof (mAquantiaEthernetPatchFindShikumo),
+  .Count       = 1,
+  .Skip        = 0
 };
 
 STATIC
 CONST UINT8
-mAquantiaEthernetPatchFindMieze[] = {
+  mAquantiaEthernetPatchFindMieze[] = {
   0x41, 0xC7, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,  ///< mov dword ptr [whatever], 0
   0xE9                                             ///< jmp
 };
 
 STATIC
 CONST UINT8
-mAquantiaEthernetPatchReplaceMieze[] = {
+  mAquantiaEthernetPatchReplaceMieze[] = {
   0x41, 0xC7, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00,  ///< mov dword ptr [whatever], 1
   0xE9                                             ///< jmp
 };
 
 STATIC
 CONST UINT8
-mAquantiaEthernetPatchMaskMieze[] = {
+  mAquantiaEthernetPatchMaskMieze[] = {
   0xFF, 0xFF, 0x00, 0x00, 0xFF, 0x00, 0x00, 0x00,
   0xFF
 };
 
 STATIC
 PATCHER_GENERIC_PATCH
-mAquantiaEthernetPatchMieze = {
-  .Comment = DEBUG_POINTER ("ForceAquantiaEthernetMieze"),
-  .Base    = "__ZN30AppleEthernetAquantiaAqtion10718checkConfigSupportERiS0_",
-  .Find    = mAquantiaEthernetPatchFindMieze,
-  .Mask    = mAquantiaEthernetPatchMaskMieze,
-  .Replace = mAquantiaEthernetPatchReplaceMieze,
+  mAquantiaEthernetPatchMieze = {
+  .Comment     = DEBUG_POINTER ("ForceAquantiaEthernetMieze"),
+  .Base        = "__ZN30AppleEthernetAquantiaAqtion10718checkConfigSupportERiS0_",
+  .Find        = mAquantiaEthernetPatchFindMieze,
+  .Mask        = mAquantiaEthernetPatchMaskMieze,
+  .Replace     = mAquantiaEthernetPatchReplaceMieze,
   .ReplaceMask = mAquantiaEthernetPatchMaskMieze,
-  .Size    = sizeof (mAquantiaEthernetPatchFindMieze),
-  .Count   = 1,
-  .Skip    = 0
+  .Size        = sizeof (mAquantiaEthernetPatchFindMieze),
+  .Count       = 1,
+  .Skip        = 0
 };
 
 STATIC
 EFI_STATUS
 PatchAquantiaEthernet (
-  IN OUT PATCHER_CONTEXT    *Patcher,
-  IN     UINT32             KernelVersion
+  IN OUT PATCHER_CONTEXT  *Patcher,
+  IN     UINT32           KernelVersion
   )
 {
-  EFI_STATUS   Status;
+  EFI_STATUS  Status;
 
   ASSERT (Patcher != NULL);
-  
+
   //
   // This patch is not required before macOS 10.15.4.
   //
@@ -2121,7 +2140,7 @@ PatchAquantiaEthernet (
     DEBUG ((DEBUG_INFO, "OCAK: Skipping patching AquantiaEthernet on %u\n", KernelVersion));
     return EFI_SUCCESS;
   }
-  
+
   //
   // Shikumo's patch can be applied to a wider range, not limited to AQC 107 series,
   // thus preferred.
@@ -2149,15 +2168,15 @@ PatchAquantiaEthernet (
 STATIC
 EFI_STATUS
 PatchForceSecureBootScheme (
-  IN OUT PATCHER_CONTEXT    *Patcher,
-  IN     UINT32             KernelVersion
+  IN OUT PATCHER_CONTEXT  *Patcher,
+  IN     UINT32           KernelVersion
   )
 {
-  EFI_STATUS   Status;
-  UINT8        *Last;
-  UINT8        *SelectAp;
-  UINT8        *HybridAp;
-  UINT32       Diff;
+  EFI_STATUS  Status;
+  UINT8       *Last;
+  UINT8       *SelectAp;
+  UINT8       *HybridAp;
+  UINT32      Diff;
 
   ASSERT (Patcher != NULL);
 
@@ -2181,17 +2200,17 @@ PatchForceSecureBootScheme (
   //   for platfirms with v2 or newer coprocessor and personalised policy (2).
   //
 
-  Last = ((UINT8 *) MachoGetMachHeader (&Patcher->MachContext)
-    + MachoGetFileSize (&Patcher->MachContext) - 64);
+  Last = ((UINT8 *)MachoGetMachHeader (&Patcher->MachContext)
+          + MachoGetFileSize (&Patcher->MachContext) - 64);
 
   Status = PatcherGetSymbolAddress (Patcher, "_img4_chip_select_effective_ap", &SelectAp);
-  if (EFI_ERROR (Status) || SelectAp > Last) {
+  if (EFI_ERROR (Status) || (SelectAp > Last)) {
     DEBUG ((DEBUG_INFO, "OCAK: Missing _img4_chip_select_effective_ap - %r\n", Status));
     return EFI_NOT_FOUND;
   }
 
   Status = PatcherGetSymbolAddress (Patcher, "__img4_chip_x86", &HybridAp);
-  if (EFI_ERROR (Status) || HybridAp > Last) {
+  if (EFI_ERROR (Status) || (HybridAp > Last)) {
     DEBUG ((DEBUG_INFO, "OCAK: Missing __img4_chip_x86 - %r\n", Status));
     return EFI_NOT_FOUND;
   }
@@ -2201,7 +2220,7 @@ PatchForceSecureBootScheme (
   SelectAp[0] = 0x48;
   SelectAp[1] = 0x8D;
   SelectAp[2] = 0x05;
-  Diff = (UINT32) (HybridAp - SelectAp - 7);
+  Diff        = (UINT32)(HybridAp - SelectAp - 7);
   CopyMem (&SelectAp[3], &Diff, sizeof (Diff));
   SelectAp[7] = 0xC3;
   return EFI_SUCCESS;
@@ -2209,21 +2228,21 @@ PatchForceSecureBootScheme (
 
 STATIC
 UINT8
-mApfsTimeoutFind[] = {
+  mApfsTimeoutFind[] = {
   0x48, 0x3D, 0x7F, 0x96, 0x98, 0x00  ///< cmp rax, 9999999d
 };
 STATIC_ASSERT (sizeof (mApfsTimeoutFind) == 6, "Unsupported mApfsTimeoutFind");
 
 STATIC
 UINT8
-mApfsTimeoutReplace[] = {
+  mApfsTimeoutReplace[] = {
   0x48, 0x3D, 0x00, 0x00, 0x00, 0x00  ///< cmp rax, <new_timeout> ; To be set by PatchSetApfsTimeout()
 };
 STATIC_ASSERT (sizeof (mApfsTimeoutReplace) == 6, "Unsupported mApfsTimeoutReplace");
 
 STATIC
 PATCHER_GENERIC_PATCH
-mApfsTimeoutPatch = {
+  mApfsTimeoutPatch = {
   .Comment     = DEBUG_POINTER ("ApfsTimeout"),
   .Base        = "_nx_mount_trim_thread",
   .Find        = mApfsTimeoutFind,
@@ -2250,14 +2269,14 @@ PatchSetApfsTimeout (
 
 STATIC
 UINT8
-mApfsDisableTrimReplace[] = {
+  mApfsDisableTrimReplace[] = {
   0x31, 0xC0,  ///< xor eax, eax
   0xC3         ///< ret
 };
 
 STATIC
 PATCHER_GENERIC_PATCH
-mApfsDisableTrimPatch = {
+  mApfsDisableTrimPatch = {
   .Comment     = DEBUG_POINTER ("ApfsTimeout disable trim"),
   .Base        = "_spaceman_iterate_free_extents_internal",
   .Find        = NULL,
@@ -2273,8 +2292,8 @@ mApfsDisableTrimPatch = {
 STATIC
 EFI_STATUS
 PatchSetApfsTrimTimeout (
-  IN OUT PATCHER_CONTEXT    *Patcher,
-  IN     UINT32             KernelVersion
+  IN OUT PATCHER_CONTEXT  *Patcher,
+  IN     UINT32           KernelVersion
   )
 {
   EFI_STATUS  Status;
@@ -2322,32 +2341,32 @@ PatchSetApfsTrimTimeout (
 //
 // Quirks table.
 //
-KERNEL_QUIRK gKernelQuirks[] = {
-  [KernelQuirkAppleCpuPmCfgLock]       = { "com.apple.driver.AppleIntelCPUPowerManagement", PatchAppleCpuPmCfgLock }, 
-  [KernelQuirkAppleXcpmCfgLock]        = { NULL,                                            PatchAppleXcpmCfgLock },
-  [KernelQuirkAppleXcpmExtraMsrs]      = { NULL,                                            PatchAppleXcpmExtraMsrs },
-  [KernelQuirkAppleXcpmForceBoost]     = { NULL,                                            PatchAppleXcpmForceBoost },
-  [KernelQuirkCustomPciSerialDevice]   = { NULL,                                            PatchCustomPciSerialDevice },
-  [KernelQuirkCustomSmbiosGuid1]       = { "com.apple.driver.AppleSMBIOS",                  PatchCustomSmbiosGuid },
-  [KernelQuirkCustomSmbiosGuid2]       = { "com.apple.driver.AppleACPIPlatform",            PatchCustomSmbiosGuid },
-  [KernelQuirkDisableIoMapper]         = { "com.apple.iokit.IOPCIFamily",                   PatchAppleIoMapperSupport },
-  [KernelQuirkDisableRtcChecksum]      = { "com.apple.driver.AppleRTC",                     PatchAppleRtcChecksum },
-  [KernelQuirkDummyPowerManagement]    = { "com.apple.driver.AppleIntelCPUPowerManagement", PatchDummyPowerManagement },
-  [KernelQuirkExtendBTFeatureFlags]    = { "com.apple.iokit.IOBluetoothFamily",             PatchBTFeatureFlags },
+KERNEL_QUIRK  gKernelQuirks[] = {
+  [KernelQuirkAppleCpuPmCfgLock]       = { "com.apple.driver.AppleIntelCPUPowerManagement", PatchAppleCpuPmCfgLock      },
+  [KernelQuirkAppleXcpmCfgLock]        = { NULL,                                            PatchAppleXcpmCfgLock       },
+  [KernelQuirkAppleXcpmExtraMsrs]      = { NULL,                                            PatchAppleXcpmExtraMsrs     },
+  [KernelQuirkAppleXcpmForceBoost]     = { NULL,                                            PatchAppleXcpmForceBoost    },
+  [KernelQuirkCustomPciSerialDevice]   = { NULL,                                            PatchCustomPciSerialDevice  },
+  [KernelQuirkCustomSmbiosGuid1]       = { "com.apple.driver.AppleSMBIOS",                  PatchCustomSmbiosGuid       },
+  [KernelQuirkCustomSmbiosGuid2]       = { "com.apple.driver.AppleACPIPlatform",            PatchCustomSmbiosGuid       },
+  [KernelQuirkDisableIoMapper]         = { "com.apple.iokit.IOPCIFamily",                   PatchAppleIoMapperSupport   },
+  [KernelQuirkDisableRtcChecksum]      = { "com.apple.driver.AppleRTC",                     PatchAppleRtcChecksum       },
+  [KernelQuirkDummyPowerManagement]    = { "com.apple.driver.AppleIntelCPUPowerManagement", PatchDummyPowerManagement   },
+  [KernelQuirkExtendBTFeatureFlags]    = { "com.apple.iokit.IOBluetoothFamily",             PatchBTFeatureFlags         },
   [KernelQuirkExternalDiskIcons]       = { "com.apple.driver.AppleAHCIPort",                PatchForceInternalDiskIcons },
-  [KernelQuirkForceAquantiaEthernet]   = { "com.apple.driver.AppleEthernetAquantiaAqtion",  PatchAquantiaEthernet },
-  [KernelQuirkForceSecureBootScheme]   = { "com.apple.security.AppleImage4",                PatchForceSecureBootScheme },
-  [KernelQuirkIncreasePciBarSize]      = { "com.apple.iokit.IOPCIFamily",                   PatchIncreasePciBarSize },
-  [KernelQuirkLapicKernelPanic]        = { NULL,                                            PatchLapicKernelPanic },
-  [KernelQuirkLegacyCommpage]          = { NULL,                                            PatchLegacyCommpage },
-  [KernelQuirkPanicNoKextDump]         = { NULL,                                            PatchPanicKextDump },
-  [KernelQuirkPowerTimeoutKernelPanic] = { NULL,                                            PatchPowerStateTimeout },
-  [KernelQuirkSegmentJettison]         = { NULL,                                            PatchSegmentJettison },
-  [KernelQuirkSetApfsTrimTimeout]      = { "com.apple.filesystems.apfs",                    PatchSetApfsTrimTimeout },
+  [KernelQuirkForceAquantiaEthernet]   = { "com.apple.driver.AppleEthernetAquantiaAqtion",  PatchAquantiaEthernet       },
+  [KernelQuirkForceSecureBootScheme]   = { "com.apple.security.AppleImage4",                PatchForceSecureBootScheme  },
+  [KernelQuirkIncreasePciBarSize]      = { "com.apple.iokit.IOPCIFamily",                   PatchIncreasePciBarSize     },
+  [KernelQuirkLapicKernelPanic]        = { NULL,                                            PatchLapicKernelPanic       },
+  [KernelQuirkLegacyCommpage]          = { NULL,                                            PatchLegacyCommpage         },
+  [KernelQuirkPanicNoKextDump]         = { NULL,                                            PatchPanicKextDump          },
+  [KernelQuirkPowerTimeoutKernelPanic] = { NULL,                                            PatchPowerStateTimeout      },
+  [KernelQuirkSegmentJettison]         = { NULL,                                            PatchSegmentJettison        },
+  [KernelQuirkSetApfsTrimTimeout]      = { "com.apple.filesystems.apfs",                    PatchSetApfsTrimTimeout     },
   [KernelQuirkThirdPartyDrives]        = { "com.apple.iokit.IOAHCIBlockStorage",            PatchThirdPartyDriveSupport },
-  [KernelQuirkXhciPortLimit1]          = { "com.apple.iokit.IOUSBHostFamily",               PatchUsbXhciPortLimit1 },
-  [KernelQuirkXhciPortLimit2]          = { "com.apple.driver.usb.AppleUSBXHCI",             PatchUsbXhciPortLimit2 },
-  [KernelQuirkXhciPortLimit3]          = { "com.apple.driver.usb.AppleUSBXHCIPCI",          PatchUsbXhciPortLimit3 },  
+  [KernelQuirkXhciPortLimit1]          = { "com.apple.iokit.IOUSBHostFamily",               PatchUsbXhciPortLimit1      },
+  [KernelQuirkXhciPortLimit2]          = { "com.apple.driver.usb.AppleUSBXHCI",             PatchUsbXhciPortLimit2      },
+  [KernelQuirkXhciPortLimit3]          = { "com.apple.driver.usb.AppleUSBXHCIPCI",          PatchUsbXhciPortLimit3      },
 };
 
 EFI_STATUS

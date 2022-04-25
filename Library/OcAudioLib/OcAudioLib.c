@@ -34,7 +34,7 @@
 //
 STATIC
 EFI_GUID *
-mAudioProtocols[] = {
+  mAudioProtocols[] = {
   &gOcAudioProtocolGuid,
   &gAppleBeepGenProtocolGuid,
   &gAppleVOAudioProtocolGuid,
@@ -43,7 +43,7 @@ mAudioProtocols[] = {
 
 STATIC
 OC_AUDIO_PROTOCOL_PRIVATE
-mAudioProtocol = {
+  mAudioProtocol = {
   .Signature       = OC_AUDIO_PROTOCOL_PRIVATE_SIGNATURE,
   .AudioIo         = NULL,
   .ProviderAcquire = NULL,
@@ -56,23 +56,23 @@ mAudioProtocol = {
   .OutputIndexMask = 0,
   .Gain            = APPLE_SYSTEM_AUDIO_VOLUME_DB_MIN,
   .OcAudio         = {
-    .Revision           = OC_AUDIO_PROTOCOL_REVISION,
-    .Connect            = InternalOcAudioConnect,
-    .RawGainToDecibels  = InternalOcAudioRawGainToDecibels,
-    .SetDefaultGain     = InternalOcAudioSetDefaultGain,
-    .SetProvider        = InternalOcAudioSetProvider,
-    .PlayFile           = InternalOcAudioPlayFile,
-    .StopPlayback       = InternalOcAudioStopPlayback,
-    .SetDelay           = InternalOcAudioSetDelay
+    .Revision          = OC_AUDIO_PROTOCOL_REVISION,
+    .Connect           = InternalOcAudioConnect,
+    .RawGainToDecibels = InternalOcAudioRawGainToDecibels,
+    .SetDefaultGain    = InternalOcAudioSetDefaultGain,
+    .SetProvider       = InternalOcAudioSetProvider,
+    .PlayFile          = InternalOcAudioPlayFile,
+    .StopPlayback      = InternalOcAudioStopPlayback,
+    .SetDelay          = InternalOcAudioSetDelay
   },
-  .BeepGen         = {
-    .GenBeep            = InternalOcAudioGenBeep,
+  .BeepGen             = {
+    .GenBeep           = InternalOcAudioGenBeep,
   },
-  .VoiceOver       = {
-    .Play               = InternalOcAudioVoiceOverPlay,
-    .SetLanguageCode    = InternalOcAudioVoiceOverSetLanguageCode,
-    .SetLanguageString  = InternalOcAudioVoiceOverSetLanguageString,
-    .GetLanguage        = InternalOcAudioVoiceOverGetLanguage,
+  .VoiceOver           = {
+    .Play              = InternalOcAudioVoiceOverPlay,
+    .SetLanguageCode   = InternalOcAudioVoiceOverSetLanguageCode,
+    .SetLanguageString = InternalOcAudioVoiceOverSetLanguageString,
+    .GetLanguage       = InternalOcAudioVoiceOverGetLanguage,
   }
 };
 
@@ -82,10 +82,10 @@ OcAudioInstallProtocols (
   IN BOOLEAN  DisconnectHda
   )
 {
-  EFI_STATUS         Status;
-  UINTN              Index;
-  VOID               *Protocol;
-  EFI_HANDLE         NewHandle;
+  EFI_STATUS  Status;
+  UINTN       Index;
+  VOID        *Protocol;
+  EFI_HANDLE  NewHandle;
 
   DEBUG ((DEBUG_INFO, "OCAU: OcAudioInstallProtocols (%u, %u)\n", Reinstall, DisconnectHda));
 
@@ -105,51 +105,53 @@ OcAudioInstallProtocols (
     DEBUG_CODE_BEGIN ();
     for (Index = 0; Index < ARRAY_SIZE (mAudioProtocols); ++Index) {
       Status = gBS->LocateProtocol (
-        mAudioProtocols[Index],
-        NULL,
-        &Protocol
-        );
+                      mAudioProtocols[Index],
+                      NULL,
+                      &Protocol
+                      );
       DEBUG ((DEBUG_INFO, "OCAU: %g protocol - %r\n", mAudioProtocols[Index], Status));
     }
+
     DEBUG_CODE_END ();
     for (Index = 0; Index < ARRAY_SIZE (mAudioProtocols); ++Index) {
       Status = gBS->LocateProtocol (
-        mAudioProtocols[Index],
-        NULL,
-        &Protocol
-        );
+                      mAudioProtocols[Index],
+                      NULL,
+                      &Protocol
+                      );
       if (!EFI_ERROR (Status)) {
         if (Index == 0) {
-          return (OC_AUDIO_PROTOCOL *) Protocol;
+          return (OC_AUDIO_PROTOCOL *)Protocol;
         }
+
         return NULL;
       }
     }
   }
 
   Status = gBS->CreateEvent (
-    0,
-    TPL_NOTIFY,
-    NULL,
-    NULL,
-    &mAudioProtocol.PlaybackEvent
-    );
+                  0,
+                  TPL_NOTIFY,
+                  NULL,
+                  NULL,
+                  &mAudioProtocol.PlaybackEvent
+                  );
   if (EFI_ERROR (Status)) {
     DEBUG ((DEBUG_INFO, "OCAU: Unable to create audio completion event - %r\n", Status));
     return NULL;
   }
 
   NewHandle = NULL;
-  Status = gBS->InstallMultipleProtocolInterfaces (
-    &NewHandle,
-    &gOcAudioProtocolGuid,
-    &mAudioProtocol.OcAudio,
-    &gAppleBeepGenProtocolGuid,
-    &mAudioProtocol.BeepGen,
-    &gAppleVOAudioProtocolGuid,
-    &mAudioProtocol.VoiceOver,
-    NULL
-    );
+  Status    = gBS->InstallMultipleProtocolInterfaces (
+                     &NewHandle,
+                     &gOcAudioProtocolGuid,
+                     &mAudioProtocol.OcAudio,
+                     &gAppleBeepGenProtocolGuid,
+                     &mAudioProtocol.BeepGen,
+                     &gAppleVOAudioProtocolGuid,
+                     &mAudioProtocol.VoiceOver,
+                     NULL
+                     );
 
   if (EFI_ERROR (Status)) {
     gBS->CloseEvent (mAudioProtocol.PlaybackEvent);
@@ -162,10 +164,10 @@ OcAudioInstallProtocols (
 
 VOID
 OcGetAmplifierGain (
-  OUT UINT8              *RawGain,
-  OUT INT8               *DecibelGain,
-  OUT BOOLEAN            *Muted,
-  OUT BOOLEAN            *TryConversion
+  OUT UINT8    *RawGain,
+  OUT INT8     *DecibelGain,
+  OUT BOOLEAN  *Muted,
+  OUT BOOLEAN  *TryConversion
   )
 {
   EFI_STATUS  Status1;
@@ -177,17 +179,17 @@ OcGetAmplifierGain (
   //
   Size    = sizeof (*RawGain);
   Status1 = gRT->GetVariable (
-    APPLE_SYSTEM_AUDIO_VOLUME_VARIABLE_NAME,
-    &gAppleBootVariableGuid,
-    NULL,
-    &Size,
-    RawGain
-    );
+                   APPLE_SYSTEM_AUDIO_VOLUME_VARIABLE_NAME,
+                   &gAppleBootVariableGuid,
+                   NULL,
+                   &Size,
+                   RawGain
+                   );
   if (!EFI_ERROR (Status1)) {
-    *Muted = (*RawGain & APPLE_SYSTEM_AUDIO_VOLUME_MUTED) != 0;
+    *Muted    = (*RawGain & APPLE_SYSTEM_AUDIO_VOLUME_MUTED) != 0;
     *RawGain &= APPLE_SYSTEM_AUDIO_VOLUME_VOLUME_MASK;
   } else {
-    *Muted = FALSE;
+    *Muted   = FALSE;
     *RawGain = 0;
   }
 
@@ -205,12 +207,12 @@ OcGetAmplifierGain (
   //
   Size    = sizeof (*DecibelGain);
   Status2 = gRT->GetVariable (
-    APPLE_SYSTEM_AUDIO_VOLUME_DB_VARIABLE_NAME,
-    &gAppleBootVariableGuid,
-    NULL,
-    &Size,
-    DecibelGain
-    );
+                   APPLE_SYSTEM_AUDIO_VOLUME_DB_VARIABLE_NAME,
+                   &gAppleBootVariableGuid,
+                   NULL,
+                   &Size,
+                   DecibelGain
+                   );
   if (EFI_ERROR (Status2)) {
     *DecibelGain = OC_AUDIO_DEFAULT_GAIN;
   }
@@ -228,8 +230,8 @@ OcGetAmplifierGain (
   // to fall back to default gain value or conversion; for use with audio assist, which never mutes.
   //
   if (*Muted) {
-    *DecibelGain   = OC_AUDIO_DEFAULT_GAIN;
-    Status2 = EFI_INVALID_PARAMETER;
+    *DecibelGain = OC_AUDIO_DEFAULT_GAIN;
+    Status2      = EFI_INVALID_PARAMETER;
   }
 
   //

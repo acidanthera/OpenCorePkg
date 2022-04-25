@@ -19,6 +19,7 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 #define BIOS_ID_LIB_H
 
 // GetBiosVersionDateTime
+
 /** This function returns the Version & Release Date by getting and converting
     BIOS ID.
 
@@ -32,6 +33,7 @@ GetBiosVersionDateTime (
   );
 
 // GetRomInfo
+
 /** This function returns ROM Info by searching FV.
 
   @param[out] RomInfo  ROM Info

@@ -12,7 +12,7 @@
 #include <Library/OcFileLib.h>
 #include <Protocol/OcAudio.h>
 
-#define OC_AUDIO_DEFAULT_GAIN     (-30)
+#define OC_AUDIO_DEFAULT_GAIN  (-30)
 
 /**
   Install audio support protocols.
@@ -53,10 +53,10 @@ OcLanguageCodeToString (
 **/
 VOID
 OcGetAmplifierGain (
-  OUT UINT8              *RawGain,
-  OUT INT8               *DecibelGain,
-  OUT BOOLEAN            *Muted,
-  OUT BOOLEAN            *TryConversion
+  OUT UINT8    *RawGain,
+  OUT INT8     *DecibelGain,
+  OUT BOOLEAN  *Muted,
+  OUT BOOLEAN  *TryConversion
   );
 
 /**
@@ -68,7 +68,7 @@ OcGetAmplifierGain (
 **/
 EFI_STATUS
 OcSetVoiceOverLanguage (
-  CONST CHAR8   *Language  OPTIONAL
+  CONST CHAR8  *Language  OPTIONAL
   );
 
 /**

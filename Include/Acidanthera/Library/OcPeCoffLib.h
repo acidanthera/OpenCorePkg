@@ -34,80 +34,80 @@ typedef struct {
   ///
   /// The preferred load address of the Image.
   ///
-  UINT64     ImageBase;
+  UINT64        ImageBase;
   ///
   /// A pointer to the Image raw file buffer.
   ///
-  CONST VOID *FileBuffer;
+  CONST VOID    *FileBuffer;
   ///
   /// A pointer to the loaded Image destination.
   ///
-  VOID       *ImageBuffer;
+  VOID          *ImageBuffer;
   ///
   /// The offset of the Section Headers from the beginning of the raw file.
   ///
-  UINT32     SectionsOffset;
+  UINT32        SectionsOffset;
   ///
   /// The number of Sections in the Image.
   ///
-  UINT16     NumberOfSections;
+  UINT16        NumberOfSections;
   ///
   /// The size, in bytes, required to load the Image.
   ///
-  UINT32     SizeOfImage;
+  UINT32        SizeOfImage;
   ///
   /// The additional size, in bytes, required to force-load debug information.
   ///
-  UINT32     SizeOfImageDebugAdd;
+  UINT32        SizeOfImageDebugAdd;
   ///
   /// The alignment, in bytes, of Image Sections virtual addresses.
   ///
-  UINT32     SectionAlignment;
+  UINT32        SectionAlignment;
   ///
   /// The offset of the Image Header from the beginning of the raw file.
   ///
-  UINT32     ExeHdrOffset;
+  UINT32        ExeHdrOffset;
   ///
   /// The combined size, in bytes, of all Image Headers.
   ///
-  UINT32     SizeOfHeaders;
+  UINT32        SizeOfHeaders;
   ///
   /// The RVA of the Image entry point.
   ///
-  UINT32     AddressOfEntryPoint;
+  UINT32        AddressOfEntryPoint;
   ///
   /// Indicates whether relocation information has been stripped from the Image.
   ///
-  BOOLEAN    RelocsStripped;
+  BOOLEAN       RelocsStripped;
   ///
   /// The file format of the Image raw file, refer to IMAGE_LOADER_IMAGE_TYPE.
   ///
-  UINT8      ImageType;
+  UINT8         ImageType;
   ///
   /// The Subsystem value from the Image Header.
   ///
-  UINT16     Subsystem;
+  UINT16        Subsystem;
   ///
   /// The Machine value from the Image Header.
   ///
-  UINT16     Machine;
+  UINT16        Machine;
   ///
   /// The size, in bytes, stripped from the beginning of the Image raw file
   /// during TE file generation. Always 0 for PE Images.
   ///
-  UINT16     TeStrippedOffset;
+  UINT16        TeStrippedOffset;
   ///
   /// The RVA of the Relocation Directory.
   ///
-  UINT32     RelocDirRva;
+  UINT32        RelocDirRva;
   ///
   /// The size, in bytes, of the Relocation Directory.
   ///
-  UINT32     RelocDirSize;
+  UINT32        RelocDirSize;
   ///
   /// The RVA of the CodeView debug information.
   ///
-  UINT32     CodeViewRva;
+  UINT32        CodeViewRva;
 } PE_COFF_IMAGE_CONTEXT;
 
 ///
@@ -117,15 +117,15 @@ typedef struct {
   ///
   /// The RVA of the Relocation Directory.
   ///
-  UINT32 RelocDirRva;
+  UINT32    RelocDirRva;
   ///
   /// The size, in bytes, of the Relocation Directory.
   ///
-  UINT32 RelocDirSize;
+  UINT32    RelocDirSize;
   ///
   /// Information bookkept during the initial Image Relocation.
   ///
-  UINT64 FixupData[];
+  UINT64    FixupData[];
 } PE_COFF_RUNTIME_CONTEXT;
 
 /**

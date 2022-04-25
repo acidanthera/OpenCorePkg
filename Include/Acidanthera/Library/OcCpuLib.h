@@ -26,7 +26,7 @@
   Can be overridden by e.g. emulator.
 **/
 #ifndef OC_FALLBACK_CPU_FREQUENCY
-#define OC_FALLBACK_CPU_FREQUENCY 1000000000
+#define OC_FALLBACK_CPU_FREQUENCY  1000000000
 #endif
 
 /**
@@ -62,46 +62,46 @@ typedef struct {
   //
   // Note, Vendor and BrandString are reordered for proper alignment.
   //
-  UINT32                      Vendor[4];
-  CHAR8                       BrandString[48];
+  UINT32                        Vendor[4];
+  CHAR8                         BrandString[48];
 
-  CPUID_VERSION_INFO_EAX      CpuidVerEax;
-  CPUID_VERSION_INFO_EBX      CpuidVerEbx;
-  CPUID_VERSION_INFO_ECX      CpuidVerEcx;
-  CPUID_VERSION_INFO_EDX      CpuidVerEdx;
+  CPUID_VERSION_INFO_EAX        CpuidVerEax;
+  CPUID_VERSION_INFO_EBX        CpuidVerEbx;
+  CPUID_VERSION_INFO_ECX        CpuidVerEcx;
+  CPUID_VERSION_INFO_EDX        CpuidVerEdx;
 
-  CPUID_EXTENDED_CPU_SIG_ECX  CpuidExtSigEcx;
-  CPUID_EXTENDED_CPU_SIG_EDX  CpuidExtSigEdx;
+  CPUID_EXTENDED_CPU_SIG_ECX    CpuidExtSigEcx;
+  CPUID_EXTENDED_CPU_SIG_EDX    CpuidExtSigEdx;
 
-  UINT32                      MicrocodeRevision;
-  BOOLEAN                     Hypervisor;   ///< indicate whether we are under virtualization
+  UINT32                        MicrocodeRevision;
+  BOOLEAN                       Hypervisor; ///< indicate whether we are under virtualization
 
-  UINT8                       Type;
-  UINT8                       Family;
-  UINT8                       Model;
-  UINT8                       ExtModel;
-  UINT8                       ExtFamily;
-  UINT8                       Stepping;
-  UINT64                      Features;
-  UINT64                      ExtFeatures;
-  UINT32                      Signature;
-  UINT8                       Brand;
-  UINT16                      AppleProcessorType;
-  BOOLEAN                     CstConfigLock;
+  UINT8                         Type;
+  UINT8                         Family;
+  UINT8                         Model;
+  UINT8                         ExtModel;
+  UINT8                         ExtFamily;
+  UINT8                         Stepping;
+  UINT64                        Features;
+  UINT64                        ExtFeatures;
+  UINT32                        Signature;
+  UINT8                         Brand;
+  UINT16                        AppleProcessorType;
+  BOOLEAN                       CstConfigLock;
 
-  OC_CPU_GENERATION           CpuGeneration;
+  OC_CPU_GENERATION             CpuGeneration;
 
-  UINT32                      MaxId;
-  UINT32                      MaxExtId;
+  UINT32                        MaxId;
+  UINT32                        MaxExtId;
 
-  UINT16                      PackageCount;
-  UINT16                      CoreCount;
-  UINT16                      ThreadCount;
+  UINT16                        PackageCount;
+  UINT16                        CoreCount;
+  UINT16                        ThreadCount;
 
   //
   // External clock for SMBIOS Type4 table.
   //
-  UINT16                      ExternalClock;
+  UINT16                        ExternalClock;
 
   //
   // Platform-dependent frequency for the Always Running Timer (ART), normally
@@ -114,7 +114,7 @@ typedef struct {
   //   6th and 7th generation Intel Core & Xeon W:      24 Mhz     (client segment)
   //   Nex Generation Intel Atom with CPUID 0x065C:     19.2 Mhz   (atom segment)
   //
-  UINT64                      ARTFrequency;
+  UINT64    ARTFrequency;
 
   //
   // The CPU frequency derived from either CPUFrequencyFromTSC (legacy) or
@@ -124,12 +124,12 @@ typedef struct {
   // CPUFrequencyFromTSC should approximate equal CPUFrequencyFromART. If not,
   // there is likely a bug or miscalculation.
   //
-  UINT64                      CPUFrequency;
+  UINT64    CPUFrequency;
 
   //
   // The CPU frequency as reported by the Time Stamp Counter (TSC).
   //
-  UINT64                      CPUFrequencyFromTSC;
+  UINT64    CPUFrequencyFromTSC;
 
   //
   // The CPU frequency derived from the Always Running Timer (ART) frequency:
@@ -137,80 +137,80 @@ typedef struct {
   //
   // 0 if ART is not present.
   //
-  UINT64                      CPUFrequencyFromART;
+  UINT64    CPUFrequencyFromART;
 
   //
   // TSC adjustment value read from MSR_IA32_TSC_ADJUST if present.
   //
-  UINT64                      TscAdjust;
+  UINT64    TscAdjust;
 
   //
   // The CPU frequency derived from Apple Platform Info.
   // 0 if Apple Platform Info is not present.
   //
-  UINT64                      CPUFrequencyFromApple;
+  UINT64    CPUFrequencyFromApple;
 
   //
   // The CPU frequency derived from the CPUID VMWare Timing leaf.
   // 0 if VMWare Timing leaf is not present.
   //
-  UINT64                      CPUFrequencyFromVMT;
+  UINT64    CPUFrequencyFromVMT;
 
   //
   // The Front Side Bus (FSB) frequency calculated from dividing the CPU
   // frequency by the Max Ratio.
   //
-  UINT64                      FSBFrequency;
+  UINT64    FSBFrequency;
 } OC_CPU_INFO;
 
 typedef struct {
   //
   // MSR_PLATFORM_INFO
   //
-  BOOLEAN                     CpuHasMsrPlatformInfo;
-  UINT64                      CpuMsrPlatformInfoValue;
+  BOOLEAN    CpuHasMsrPlatformInfo;
+  UINT64     CpuMsrPlatformInfoValue;
 
   //
   // MSR_TURBO_RATIO_LIMIT
   //
-  BOOLEAN                     CpuHasMsrTurboRatioLimit;
-  UINT64                      CpuMsrTurboRatioLimitValue;
+  BOOLEAN    CpuHasMsrTurboRatioLimit;
+  UINT64     CpuMsrTurboRatioLimitValue;
 
   //
   // MSR_PKG_POWER_INFO (TODO: To be confirmed)
   //
-  BOOLEAN                     CpuHasMsrPkgPowerInfo;
-  UINT64                      CpuMsrPkgPowerInfoValue;
+  BOOLEAN    CpuHasMsrPkgPowerInfo;
+  UINT64     CpuMsrPkgPowerInfoValue;
 
   //
   // IA32_MISC_ENABLE
   //
-  BOOLEAN                     CpuHasMsrIa32MiscEnable;
-  UINT64                      CpuMsrIa32MiscEnableValue;
+  BOOLEAN    CpuHasMsrIa32MiscEnable;
+  UINT64     CpuMsrIa32MiscEnableValue;
 
   //
   // MSR_IA32_EXT_CONFIG
   //
-  BOOLEAN                     CpuHasMsrIa32ExtConfig;
-  UINT64                      CpuMsrIa32ExtConfigValue;
+  BOOLEAN    CpuHasMsrIa32ExtConfig;
+  UINT64     CpuMsrIa32ExtConfigValue;
 
   //
   // MSR_FSB_FREQ
   //
-  BOOLEAN                     CpuHasMsrFsbFreq;
-  UINT64                      CpuMsrFsbFreqValue;
+  BOOLEAN    CpuHasMsrFsbFreq;
+  UINT64     CpuMsrFsbFreqValue;
 
   //
   // MSR_IA32_PERF_STATUS
   //
-  BOOLEAN                     CpuHasMsrIa32PerfStatus;
-  UINT64                      CpuMsrIa32PerfStatusValue;
+  BOOLEAN    CpuHasMsrIa32PerfStatus;
+  UINT64     CpuMsrIa32PerfStatusValue;
 
   //
   // MSR_BROADWELL_PKG_CST_CONFIG_CONTROL_REGISTER (0xE2)
   //
-  BOOLEAN                     CpuHasMsrE2;
-  UINT64                      CpuMsrE2Value;
+  BOOLEAN    CpuHasMsrE2;
+  UINT64     CpuMsrE2Value;
 } OC_CPU_MSR_REPORT;
 
 //
@@ -220,15 +220,15 @@ typedef struct {
   //
   // Pointer to MP Services.
   //
-  EFI_MP_SERVICES_PROTOCOL  *MpServices;
+  EFI_MP_SERVICES_PROTOCOL    *MpServices;
   //
   // Pointer to CPU MSR report list.
   //
-  OC_CPU_MSR_REPORT         *Reports;
+  OC_CPU_MSR_REPORT           *Reports;
   //
   // Pointer to the CPU Info.
   //
-  OC_CPU_INFO               *CpuInfo;
+  OC_CPU_INFO                 *CpuInfo;
 } OC_CPU_MSR_REPORT_PROCEDURE_ARGUMENT;
 
 /**
@@ -274,8 +274,8 @@ OcCpuGetMsrReportPerCore (
  **/
 OC_CPU_MSR_REPORT *
 OcCpuGetMsrReports (
-  IN  OC_CPU_INFO        *CpuInfo,
-  OUT UINTN              *EntryCount
+  IN  OC_CPU_INFO  *CpuInfo,
+  OUT UINTN        *EntryCount
   );
 
 /**

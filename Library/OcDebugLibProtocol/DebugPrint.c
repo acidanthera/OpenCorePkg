@@ -25,12 +25,13 @@ DebugPrintDevicePath (
 {
   DEBUG_CODE_BEGIN ();
 
-  CHAR16 *TextDevicePath;
+  CHAR16  *TextDevicePath;
 
   TextDevicePath = NULL;
   if (DevicePath != NULL) {
     TextDevicePath = ConvertDevicePathToText (DevicePath, FALSE, FALSE);
   }
+
   DEBUG ((ErrorLevel, "%a - %s\n", Message, OC_HUMAN_STRING (TextDevicePath)));
   if (TextDevicePath != NULL) {
     FreePool (TextDevicePath);
@@ -41,19 +42,20 @@ DebugPrintDevicePath (
 
 VOID
 DebugPrintDevicePathForHandle (
-  IN UINTN                     ErrorLevel,
-  IN CONST CHAR8               *Message,
-  IN EFI_HANDLE                Handle       OPTIONAL
+  IN UINTN        ErrorLevel,
+  IN CONST CHAR8  *Message,
+  IN EFI_HANDLE   Handle       OPTIONAL
   )
 {
   DEBUG_CODE_BEGIN ();
-  
+
   EFI_DEVICE_PATH_PROTOCOL  *DevicePath;
 
   DevicePath = NULL;
   if (Handle != NULL) {
     DevicePath = DevicePathFromHandle (Handle);
   }
+
   DebugPrintDevicePath (ErrorLevel, Message, DevicePath);
 
   DEBUG_CODE_END ();
@@ -61,10 +63,10 @@ DebugPrintDevicePathForHandle (
 
 VOID
 DebugPrintHexDump (
-  IN UINTN                     ErrorLevel,
-  IN CONST CHAR8               *Message,
-  IN UINT8                     *Bytes,
-  IN UINTN                     Size
+  IN UINTN        ErrorLevel,
+  IN CONST CHAR8  *Message,
+  IN UINT8        *Bytes,
+  IN UINTN        Size
   )
 {
   DEBUG_CODE_BEGIN ();
@@ -107,9 +109,9 @@ DebugPrintHexDump (
       ErrorLevel,
       "%a (%u/%u %u) - %a\n",
       Message,
-      (UINT32) Index + 1,
-      (UINT32) Count,
-      (UINT32) Size,
+      (UINT32)Index + 1,
+      (UINT32)Count,
+      (UINT32)Size,
       HexLine
       ));
   }

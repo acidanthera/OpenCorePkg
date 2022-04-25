@@ -15,21 +15,21 @@
 #include <IndustryStandard/AppleCsrConfig.h>
 #include <Guid/AppleVariable.h>
 
-//#define PRINT_ARGUMENTS
+// #define PRINT_ARGUMENTS
 
-#define MAX_FIRST_ARG_LEN 15
+#define MAX_FIRST_ARG_LEN  15
 
 STATIC
 EFI_STATUS
 SplitArguments (
-  UINTN               *Argc,
-  CHAR16              ***Argv
+  UINTN   *Argc,
+  CHAR16  ***Argv
   )
 {
-  CHAR16              *Space;
+  CHAR16  *Space;
 
-  STATIC CHAR16       *NewArgs[3];
-  STATIC CHAR16       FirstArg[MAX_FIRST_ARG_LEN + 1];
+  STATIC CHAR16  *NewArgs[3];
+  STATIC CHAR16  FirstArg[MAX_FIRST_ARG_LEN + 1];
 
   if (*Argc != 2) {
     return EFI_SUCCESS;
@@ -60,16 +60,17 @@ SplitArguments (
 STATIC
 VOID
 PrintArguments (
-  UINTN         Argc,
-  CHAR16        **Argv
+  UINTN   Argc,
+  CHAR16  **Argv
   )
 {
-  UINTN     Index;
+  UINTN  Index;
 
   for (Index = 0; Index < Argc; ++Index) {
     Print (L"%u: %s\n", Index, Argv[Index]);
   }
 }
+
 #endif
 
 STATIC
@@ -102,14 +103,14 @@ UefiMain (
   IN EFI_SYSTEM_TABLE  *SystemTable
   )
 {
-  EFI_STATUS                            OldStatus;
-  EFI_STATUS                            Status;
-  UINTN                                 Data;
-  CHAR16                                *EndPtr;
-  UINTN                                 Argc;
-  CHAR16                                **Argv;
-  UINT32                                CsrConfig;
-  UINT32                                Attributes;
+  EFI_STATUS  OldStatus;
+  EFI_STATUS  Status;
+  UINTN       Data;
+  CHAR16      *EndPtr;
+  UINTN       Argc;
+  CHAR16      **Argv;
+  UINT32      CsrConfig;
+  UINT32      Attributes;
 
   Status = GetArguments (&Argc, &Argv);
 
@@ -120,13 +121,14 @@ UefiMain (
 
   Status = SplitArguments (&Argc, &Argv);
 
-#ifdef PRINT_ARGUMENTS
+ #ifdef PRINT_ARGUMENTS
   if (!EFI_ERROR (Status)) {
     PrintArguments (Argc, Argv);
   }
-#endif
 
-  if (EFI_ERROR (Status) || Argc < 2) {
+ #endif
+
+  if (EFI_ERROR (Status) || (Argc < 2)) {
     PrintUsage ();
     return EFI_SUCCESS;
   }
@@ -139,7 +141,7 @@ UefiMain (
       Status = StrDecimalToUintnS (Argv[2], &EndPtr, &Data);
     }
 
-    if (!EFI_ERROR (Status) && (EndPtr != &Argv[2][StrLen (Argv[2])] || (Data & MAX_UINT32) != Data)) {
+    if (!EFI_ERROR (Status) && ((EndPtr != &Argv[2][StrLen (Argv[2])]) || ((Data & MAX_UINT32) != Data))) {
       Status = EFI_UNSUPPORTED;
     }
   }
@@ -149,7 +151,7 @@ UefiMain (
     return Status;
   }
 
-  if (Argc == 2 && StrCmp (Argv[1], L"status") == 0) {
+  if ((Argc == 2) && (StrCmp (Argv[1], L"status") == 0)) {
     //
     // Status
     //
@@ -161,7 +163,7 @@ UefiMain (
     //
     Status = OcGetSip (&CsrConfig, &Attributes);
 
-    if (Status != EFI_NOT_FOUND && EFI_ERROR (Status)) {
+    if ((Status != EFI_NOT_FOUND) && EFI_ERROR (Status)) {
       Print (L"Error getting SIP status - %r\n", Status);
       return Status;
     }
@@ -176,21 +178,21 @@ UefiMain (
       Attributes &= CSR_APPLE_SIP_NVRAM_NV_ATTR;
     }
 
-    if (Argc == 2 && StrCmp (Argv[1], L"clear") == 0) {
+    if ((Argc == 2) && (StrCmp (Argv[1], L"clear") == 0)) {
       //
       // Clear
       //
       OldStatus = Status;
 
-      Status = OcSetSip(NULL, Attributes);
+      Status = OcSetSip (NULL, Attributes);
 
-      if (EFI_ERROR (Status) && !(OldStatus == EFI_NOT_FOUND && Status == EFI_NOT_FOUND)) {
+      if (EFI_ERROR (Status) && !((OldStatus == EFI_NOT_FOUND) && (Status == EFI_NOT_FOUND))) {
         Print (L"Error clearing SIP - r\n", Status);
         return Status;
       }
-      
+
       Print (L"Successfully cleared system integrity configuration: ");
-    } else if (Argc <= 3 && StrCmp (Argv[1], L"disable") == 0) {
+    } else if ((Argc <= 3) && (StrCmp (Argv[1], L"disable") == 0)) {
       //
       // Disable; allow anything except valid enable values
       //
@@ -201,18 +203,19 @@ UefiMain (
           Print (L"Illegal value for %s\n", L"disable");
           return EFI_UNSUPPORTED;
         }
-        CsrConfig = (UINT32) Data;
+
+        CsrConfig = (UINT32)Data;
       }
 
-      Status = OcSetSip(&CsrConfig, Attributes);
+      Status = OcSetSip (&CsrConfig, Attributes);
 
       if (EFI_ERROR (Status)) {
         Print (L"Error disabling SIP - r\n", Status);
         return Status;
       }
-      
+
       Print (L"System Integrity Protection is ");
-    } else if (Argc <= 3 && StrCmp (Argv[1], L"enable") == 0) {
+    } else if ((Argc <= 3) && (StrCmp (Argv[1], L"enable") == 0)) {
       //
       // Enable; allow user-specified Apple internal (which reports as enabled) or zero only
       //
@@ -223,10 +226,11 @@ UefiMain (
           Print (L"Illegal value for %s\n", L"enable");
           return EFI_UNSUPPORTED;
         }
-        CsrConfig = (UINT32) Data;
+
+        CsrConfig = (UINT32)Data;
       }
 
-      Status = OcSetSip(&CsrConfig, Attributes);
+      Status = OcSetSip (&CsrConfig, Attributes);
 
       if (EFI_ERROR (Status)) {
         Print (L"Error enabling SIP - r\n", Status);
@@ -234,7 +238,7 @@ UefiMain (
       }
 
       Print (L"System Integrity Protection is ");
-    } else if (Argc <= 3 && StrCmp (Argv[1], L"toggle") == 0) {
+    } else if ((Argc <= 3) && (StrCmp (Argv[1], L"toggle") == 0)) {
       //
       // Toggle; allow anything except valid enable values
       //
@@ -245,10 +249,11 @@ UefiMain (
           Print (L"Illegal value for %s\n", L"toggle");
           return EFI_UNSUPPORTED;
         }
-        CsrConfig = (UINT32) Data;
+
+        CsrConfig = (UINT32)Data;
       }
 
-      Status = OcToggleSip(CsrConfig);
+      Status = OcToggleSip (CsrConfig);
 
       if (EFI_ERROR (Status)) {
         Print (L"Error toggling SIP - r\n", Status);
@@ -270,7 +275,7 @@ UefiMain (
   //
   Status = OcGetSip (&CsrConfig, &Attributes);
 
-  if (Status != EFI_NOT_FOUND && EFI_ERROR (Status)) {
+  if ((Status != EFI_NOT_FOUND) && EFI_ERROR (Status)) {
     Print (L"error getting SIP status - %r\n", Status);
     return Status;
   }
@@ -290,6 +295,7 @@ UefiMain (
       Print (L", volatile");
     }
   }
+
   Print (L")\n");
 
   if (StrCmp (Argv[0], L"Self") == 0) {

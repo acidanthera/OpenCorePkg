@@ -1,9 +1,9 @@
 /** @file
   Timer Library functions built upon ACPI on IA32/x64.
-  
+
   ACPI power management timer is a 24-bit or 32-bit fixed rate free running count-up
-  timer that runs off a 3.579545 MHz clock. 
-  When startup, Duet will check the FADT to determine whether the PM timer is a 
+  timer that runs off a 3.579545 MHz clock.
+  When startup, Duet will check the FADT to determine whether the PM timer is a
   32-bit or 24-bit timer.
 
   Copyright (c) 2006 - 2011, Intel Corporation. All rights reserved.<BR>
@@ -26,24 +26,24 @@
 #include <Library/IoLib.h>
 #include <Library/PciLib.h>
 
-EFI_ACPI_DESCRIPTION *gAcpiDesc          = NULL;
+EFI_ACPI_DESCRIPTION  *gAcpiDesc = NULL;
 
 /**
   Internal function to get Acpi information from HOB.
-  
+
   @return Pointer to ACPI description structure.
 **/
-EFI_ACPI_DESCRIPTION*
+EFI_ACPI_DESCRIPTION *
 InternalGetApciDescrptionTable (
   VOID
   )
 {
   EFI_PEI_HOB_POINTERS  GuidHob;
-  
+
   if (gAcpiDesc != NULL) {
     return gAcpiDesc;
   }
-  
+
   GuidHob.Raw = GetFirstGuidHob (&gEfiAcpiDescriptionGuid);
   if (GuidHob.Raw != NULL) {
     gAcpiDesc = GET_GUID_HOB_DATA (GuidHob.Guid);
@@ -83,20 +83,20 @@ InternalAcpiGetTimerTick (
 STATIC
 VOID
 InternalAcpiDelay (
-  IN      UINT32                    Delay
+  IN      UINT32  Delay
   )
 {
-  UINT32                            Ticks;
-  UINT32                            Times;
+  UINT32  Ticks;
+  UINT32  Times;
 
-  Times    = Delay >> (gAcpiDesc->PM_TMR_BLK.RegisterBitWidth - 2);
-  Delay   &= (1 << (gAcpiDesc->PM_TMR_BLK.RegisterBitWidth - 2)) - 1;
+  Times  = Delay >> (gAcpiDesc->PM_TMR_BLK.RegisterBitWidth - 2);
+  Delay &= (1 << (gAcpiDesc->PM_TMR_BLK.RegisterBitWidth - 2)) - 1;
   do {
     //
     // The target timer count is calculated here
     //
-    Ticks    = InternalAcpiGetTimerTick () + Delay;
-    Delay    = 1 << (gAcpiDesc->PM_TMR_BLK.RegisterBitWidth - 2);
+    Ticks = InternalAcpiGetTimerTick () + Delay;
+    Delay = 1 << (gAcpiDesc->PM_TMR_BLK.RegisterBitWidth - 2);
     //
     // Wait until time out
     // Delay >= 2^23 (if ACPI provide 24-bit timer) or Delay >= 2^31 (if ACPI
@@ -122,14 +122,13 @@ InternalAcpiDelay (
 UINTN
 EFIAPI
 MicroSecondDelay (
-  IN      UINTN                     MicroSeconds
+  IN      UINTN  MicroSeconds
   )
 {
-
-  if (InternalGetApciDescrptionTable() == NULL) {
+  if (InternalGetApciDescrptionTable () == NULL) {
     return MicroSeconds;
   }
- 
+
   InternalAcpiDelay (
     (UINT32)DivU64x32 (
               MultU64x32 (
@@ -155,13 +154,13 @@ MicroSecondDelay (
 UINTN
 EFIAPI
 NanoSecondDelay (
-  IN      UINTN                     NanoSeconds
+  IN      UINTN  NanoSeconds
   )
 {
-  if (InternalGetApciDescrptionTable() == NULL) {
+  if (InternalGetApciDescrptionTable () == NULL) {
     return NanoSeconds;
   }
-  
+
   InternalAcpiDelay (
     (UINT32)DivU64x32 (
               MultU64x32 (
@@ -192,10 +191,10 @@ GetPerformanceCounter (
   VOID
   )
 {
-  if (InternalGetApciDescrptionTable() == NULL) {
+  if (InternalGetApciDescrptionTable () == NULL) {
     return 0;
   }
-  
+
   return (UINT64)InternalAcpiGetTimerTick ();
 }
 
@@ -225,14 +224,14 @@ GetPerformanceCounter (
 UINT64
 EFIAPI
 GetPerformanceCounterProperties (
-  OUT      UINT64                    *StartValue,  OPTIONAL
+  OUT      UINT64 *StartValue, OPTIONAL
   OUT      UINT64                    *EndValue     OPTIONAL
   )
 {
-  if (InternalGetApciDescrptionTable() == NULL) {
+  if (InternalGetApciDescrptionTable () == NULL) {
     return 0;
   }
-  
+
   if (StartValue != NULL) {
     *StartValue = 0;
   }
@@ -258,7 +257,7 @@ GetPerformanceCounterProperties (
 UINT64
 EFIAPI
 GetTimeInNanoSecond (
-  IN      UINT64                     Ticks
+  IN      UINT64  Ticks
   )
 {
   UINT64  NanoSeconds;
@@ -275,7 +274,7 @@ GetTimeInNanoSecond (
   // Frequency < 0x100000000, so Remainder < 0x100000000, then (Remainder * 1,000,000,000)
   // will not overflow 64-bit.
   //
-  NanoSeconds += DivU64x32 (MultU64x32 ((UINT64) Remainder, 1000000000u), 3579545);
+  NanoSeconds += DivU64x32 (MultU64x32 ((UINT64)Remainder, 1000000000u), 3579545);
 
   return NanoSeconds;
 }

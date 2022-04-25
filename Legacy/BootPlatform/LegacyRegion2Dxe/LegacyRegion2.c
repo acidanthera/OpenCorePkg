@@ -10,7 +10,7 @@
 
   THE PROGRAM IS DISTRIBUTED UNDER THE BSD LICENSE ON AN "AS IS" BASIS,
   WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
- 
+
   Modified by dmazar with support for different chipsets and added newer ones.
 
 **/
@@ -20,11 +20,11 @@
 //
 // Current chipset's tables
 //
-UINT32                              mVendorDeviceId = 0;
-STATIC PAM_REGISTER_VALUE           *mRegisterValues = NULL;
-UINT8                               mPamPciBus = 0;
-UINT8                               mPamPciDev = 0;
-UINT8                               mPamPciFunc = 0;
+UINT32                     mVendorDeviceId  = 0;
+STATIC PAM_REGISTER_VALUE  *mRegisterValues = NULL;
+UINT8                      mPamPciBus       = 0;
+UINT8                      mPamPciDev       = 0;
+UINT8                      mPamPciFunc      = 0;
 
 //
 // Intel 830 Chipset and similar
@@ -49,38 +49,37 @@ UINT8                               mPamPciFunc = 0;
 // 0xEC000-0xEFFFF  0x5f   5:4   00 = DRAM Disabled, 01= Read Only, 10 = Write Only, 11 = Normal
 // 0xF0000-0xFFFFF  0x59   5:4   00 = DRAM Disabled, 01= Read Only, 10 = Write Only, 11 = Normal
 //
-STATIC LEGACY_MEMORY_SECTION_INFO   mSectionArray[] = {
-  {0xC0000, SIZE_16KB, FALSE, FALSE},
-  {0xC4000, SIZE_16KB, FALSE, FALSE},
-  {0xC8000, SIZE_16KB, FALSE, FALSE},
-  {0xCC000, SIZE_16KB, FALSE, FALSE},
-  {0xD0000, SIZE_16KB, FALSE, FALSE},
-  {0xD4000, SIZE_16KB, FALSE, FALSE},
-  {0xD8000, SIZE_16KB, FALSE, FALSE},
-  {0xDC000, SIZE_16KB, FALSE, FALSE},
-  {0xE0000, SIZE_16KB, FALSE, FALSE},
-  {0xE4000, SIZE_16KB, FALSE, FALSE},
-  {0xE8000, SIZE_16KB, FALSE, FALSE},
-  {0xEC000, SIZE_16KB, FALSE, FALSE},
-  {0xF0000, SIZE_64KB, FALSE, FALSE}
+STATIC LEGACY_MEMORY_SECTION_INFO  mSectionArray[] = {
+  { 0xC0000, SIZE_16KB, FALSE, FALSE },
+  { 0xC4000, SIZE_16KB, FALSE, FALSE },
+  { 0xC8000, SIZE_16KB, FALSE, FALSE },
+  { 0xCC000, SIZE_16KB, FALSE, FALSE },
+  { 0xD0000, SIZE_16KB, FALSE, FALSE },
+  { 0xD4000, SIZE_16KB, FALSE, FALSE },
+  { 0xD8000, SIZE_16KB, FALSE, FALSE },
+  { 0xDC000, SIZE_16KB, FALSE, FALSE },
+  { 0xE0000, SIZE_16KB, FALSE, FALSE },
+  { 0xE4000, SIZE_16KB, FALSE, FALSE },
+  { 0xE8000, SIZE_16KB, FALSE, FALSE },
+  { 0xEC000, SIZE_16KB, FALSE, FALSE },
+  { 0xF0000, SIZE_64KB, FALSE, FALSE }
 };
 
 STATIC PAM_REGISTER_VALUE  mRegisterValues830[] = {
-  {REG_PAM1_OFFSET_830, 0x01, 0x02},
-  {REG_PAM1_OFFSET_830, 0x10, 0x20},
-  {REG_PAM2_OFFSET_830, 0x01, 0x02},
-  {REG_PAM2_OFFSET_830, 0x10, 0x20},
-  {REG_PAM3_OFFSET_830, 0x01, 0x02},
-  {REG_PAM3_OFFSET_830, 0x10, 0x20},
-  {REG_PAM4_OFFSET_830, 0x01, 0x02},
-  {REG_PAM4_OFFSET_830, 0x10, 0x20},
-  {REG_PAM5_OFFSET_830, 0x01, 0x02},
-  {REG_PAM5_OFFSET_830, 0x10, 0x20},
-  {REG_PAM6_OFFSET_830, 0x01, 0x02},
-  {REG_PAM6_OFFSET_830, 0x10, 0x20},
-  {REG_PAM0_OFFSET_830, 0x10, 0x20}
+  { REG_PAM1_OFFSET_830, 0x01, 0x02 },
+  { REG_PAM1_OFFSET_830, 0x10, 0x20 },
+  { REG_PAM2_OFFSET_830, 0x01, 0x02 },
+  { REG_PAM2_OFFSET_830, 0x10, 0x20 },
+  { REG_PAM3_OFFSET_830, 0x01, 0x02 },
+  { REG_PAM3_OFFSET_830, 0x10, 0x20 },
+  { REG_PAM4_OFFSET_830, 0x01, 0x02 },
+  { REG_PAM4_OFFSET_830, 0x10, 0x20 },
+  { REG_PAM5_OFFSET_830, 0x01, 0x02 },
+  { REG_PAM5_OFFSET_830, 0x10, 0x20 },
+  { REG_PAM6_OFFSET_830, 0x01, 0x02 },
+  { REG_PAM6_OFFSET_830, 0x10, 0x20 },
+  { REG_PAM0_OFFSET_830, 0x10, 0x20 }
 };
-
 
 //
 // Intel 4 Series Chipset and similar
@@ -107,19 +106,19 @@ STATIC PAM_REGISTER_VALUE  mRegisterValues830[] = {
 //
 
 STATIC PAM_REGISTER_VALUE  mRegisterValuesS4[] = {
-    {REG_PAM1_OFFSET_S4, 0x01, 0x02},
-    {REG_PAM1_OFFSET_S4, 0x10, 0x20},
-    {REG_PAM2_OFFSET_S4, 0x01, 0x02},
-    {REG_PAM2_OFFSET_S4, 0x10, 0x20},
-    {REG_PAM3_OFFSET_S4, 0x01, 0x02},
-    {REG_PAM3_OFFSET_S4, 0x10, 0x20},
-    {REG_PAM4_OFFSET_S4, 0x01, 0x02},
-    {REG_PAM4_OFFSET_S4, 0x10, 0x20},
-    {REG_PAM5_OFFSET_S4, 0x01, 0x02},
-    {REG_PAM5_OFFSET_S4, 0x10, 0x20},
-    {REG_PAM6_OFFSET_S4, 0x01, 0x02},
-    {REG_PAM6_OFFSET_S4, 0x10, 0x20},
-    {REG_PAM0_OFFSET_S4, 0x10, 0x20}
+  { REG_PAM1_OFFSET_S4, 0x01, 0x02 },
+  { REG_PAM1_OFFSET_S4, 0x10, 0x20 },
+  { REG_PAM2_OFFSET_S4, 0x01, 0x02 },
+  { REG_PAM2_OFFSET_S4, 0x10, 0x20 },
+  { REG_PAM3_OFFSET_S4, 0x01, 0x02 },
+  { REG_PAM3_OFFSET_S4, 0x10, 0x20 },
+  { REG_PAM4_OFFSET_S4, 0x01, 0x02 },
+  { REG_PAM4_OFFSET_S4, 0x10, 0x20 },
+  { REG_PAM5_OFFSET_S4, 0x01, 0x02 },
+  { REG_PAM5_OFFSET_S4, 0x10, 0x20 },
+  { REG_PAM6_OFFSET_S4, 0x01, 0x02 },
+  { REG_PAM6_OFFSET_S4, 0x10, 0x20 },
+  { REG_PAM0_OFFSET_S4, 0x10, 0x20 }
 };
 
 //
@@ -147,35 +146,35 @@ STATIC PAM_REGISTER_VALUE  mRegisterValuesS4[] = {
 //
 
 STATIC PAM_REGISTER_VALUE  mRegisterValuesCP[] = {
-  {REG_PAM1_OFFSET_CP, 0x01, 0x02},
-  {REG_PAM1_OFFSET_CP, 0x10, 0x20},
-  {REG_PAM2_OFFSET_CP, 0x01, 0x02},
-  {REG_PAM2_OFFSET_CP, 0x10, 0x20},
-  {REG_PAM3_OFFSET_CP, 0x01, 0x02},
-  {REG_PAM3_OFFSET_CP, 0x10, 0x20},
-  {REG_PAM4_OFFSET_CP, 0x01, 0x02},
-  {REG_PAM4_OFFSET_CP, 0x10, 0x20},
-  {REG_PAM5_OFFSET_CP, 0x01, 0x02},
-  {REG_PAM5_OFFSET_CP, 0x10, 0x20},
-  {REG_PAM6_OFFSET_CP, 0x01, 0x02},
-  {REG_PAM6_OFFSET_CP, 0x10, 0x20},
-  {REG_PAM0_OFFSET_CP, 0x10, 0x20}
+  { REG_PAM1_OFFSET_CP, 0x01, 0x02 },
+  { REG_PAM1_OFFSET_CP, 0x10, 0x20 },
+  { REG_PAM2_OFFSET_CP, 0x01, 0x02 },
+  { REG_PAM2_OFFSET_CP, 0x10, 0x20 },
+  { REG_PAM3_OFFSET_CP, 0x01, 0x02 },
+  { REG_PAM3_OFFSET_CP, 0x10, 0x20 },
+  { REG_PAM4_OFFSET_CP, 0x01, 0x02 },
+  { REG_PAM4_OFFSET_CP, 0x10, 0x20 },
+  { REG_PAM5_OFFSET_CP, 0x01, 0x02 },
+  { REG_PAM5_OFFSET_CP, 0x10, 0x20 },
+  { REG_PAM6_OFFSET_CP, 0x01, 0x02 },
+  { REG_PAM6_OFFSET_CP, 0x10, 0x20 },
+  { REG_PAM0_OFFSET_CP, 0x10, 0x20 }
 };
 
 STATIC PAM_REGISTER_VALUE  mRegisterValuesNH[] = {
-  {REG_PAM1_OFFSET_NH, 0x01, 0x02},
-  {REG_PAM1_OFFSET_NH, 0x10, 0x20},
-  {REG_PAM2_OFFSET_NH, 0x01, 0x02},
-  {REG_PAM2_OFFSET_NH, 0x10, 0x20},
-  {REG_PAM3_OFFSET_NH, 0x01, 0x02},
-  {REG_PAM3_OFFSET_NH, 0x10, 0x20},
-  {REG_PAM4_OFFSET_NH, 0x01, 0x02},
-  {REG_PAM4_OFFSET_NH, 0x10, 0x20},
-  {REG_PAM5_OFFSET_NH, 0x01, 0x02},
-  {REG_PAM5_OFFSET_NH, 0x10, 0x20},
-  {REG_PAM6_OFFSET_NH, 0x01, 0x02},
-  {REG_PAM6_OFFSET_NH, 0x10, 0x20},
-  {REG_PAM0_OFFSET_NH, 0x10, 0x20}
+  { REG_PAM1_OFFSET_NH, 0x01, 0x02 },
+  { REG_PAM1_OFFSET_NH, 0x10, 0x20 },
+  { REG_PAM2_OFFSET_NH, 0x01, 0x02 },
+  { REG_PAM2_OFFSET_NH, 0x10, 0x20 },
+  { REG_PAM3_OFFSET_NH, 0x01, 0x02 },
+  { REG_PAM3_OFFSET_NH, 0x10, 0x20 },
+  { REG_PAM4_OFFSET_NH, 0x01, 0x02 },
+  { REG_PAM4_OFFSET_NH, 0x10, 0x20 },
+  { REG_PAM5_OFFSET_NH, 0x01, 0x02 },
+  { REG_PAM5_OFFSET_NH, 0x10, 0x20 },
+  { REG_PAM6_OFFSET_NH, 0x01, 0x02 },
+  { REG_PAM6_OFFSET_NH, 0x10, 0x20 },
+  { REG_PAM0_OFFSET_NH, 0x10, 0x20 }
 };
 
 //
@@ -183,19 +182,19 @@ STATIC PAM_REGISTER_VALUE  mRegisterValuesNH[] = {
 //
 
 STATIC PAM_REGISTER_VALUE  mRegisterValuesNV[] = {
-  {REG_PAM1_OFFSET_NV, 0x01, 0x02},
-  {REG_PAM1_OFFSET_NV, 0x10, 0x20},
-  {REG_PAM2_OFFSET_NV, 0x01, 0x02},
-  {REG_PAM2_OFFSET_NV, 0x10, 0x20},
-  {REG_PAM3_OFFSET_NV, 0x01, 0x02},
-  {REG_PAM3_OFFSET_NV, 0x10, 0x20},
-  {REG_PAM4_OFFSET_NV, 0x01, 0x02},
-  {REG_PAM4_OFFSET_NV, 0x10, 0x20},
-  {REG_PAM5_OFFSET_NV, 0x01, 0x02},
-  {REG_PAM5_OFFSET_NV, 0x10, 0x20},
-  {REG_PAM6_OFFSET_NV, 0x01, 0x02},
-  {REG_PAM6_OFFSET_NV, 0x10, 0x20},
-  {REG_PAM0_OFFSET_NV, 0x10, 0x20}
+  { REG_PAM1_OFFSET_NV, 0x01, 0x02 },
+  { REG_PAM1_OFFSET_NV, 0x10, 0x20 },
+  { REG_PAM2_OFFSET_NV, 0x01, 0x02 },
+  { REG_PAM2_OFFSET_NV, 0x10, 0x20 },
+  { REG_PAM3_OFFSET_NV, 0x01, 0x02 },
+  { REG_PAM3_OFFSET_NV, 0x10, 0x20 },
+  { REG_PAM4_OFFSET_NV, 0x01, 0x02 },
+  { REG_PAM4_OFFSET_NV, 0x10, 0x20 },
+  { REG_PAM5_OFFSET_NV, 0x01, 0x02 },
+  { REG_PAM5_OFFSET_NV, 0x10, 0x20 },
+  { REG_PAM6_OFFSET_NV, 0x01, 0x02 },
+  { REG_PAM6_OFFSET_NV, 0x10, 0x20 },
+  { REG_PAM0_OFFSET_NV, 0x10, 0x20 }
 };
 
 //
@@ -217,25 +216,26 @@ STATIC EFI_LEGACY_REGION2_PROTOCOL  mLegacyRegion2 = {
 STATIC
 EFI_STATUS
 LegacyRegionManipulationInternal (
-  IN  UINT32                  Start,
-  IN  UINT32                  Length,
-  IN  BOOLEAN                 *ReadEnable,
-  IN  BOOLEAN                 *WriteEnable,
-  OUT UINT32                  *Granularity
+  IN  UINT32   Start,
+  IN  UINT32   Length,
+  IN  BOOLEAN  *ReadEnable,
+  IN  BOOLEAN  *WriteEnable,
+  OUT UINT32   *Granularity
   )
 {
-  UINT32                        EndAddress;
-  UINTN                         Index;
-  UINTN                         StartIndex;
+  UINT32  EndAddress;
+  UINTN   Index;
+  UINTN   StartIndex;
 
   //
   // Validate input parameters.
   //
-  if (Length == 0 || Granularity == NULL) {
+  if ((Length == 0) || (Granularity == NULL)) {
     return EFI_INVALID_PARAMETER;
   }
+
   EndAddress = Start + Length - 1;
-  if ((Start < PAM_BASE_ADDRESS) || EndAddress > PAM_LIMIT_ADDRESS) {
+  if ((Start < PAM_BASE_ADDRESS) || (EndAddress > PAM_LIMIT_ADDRESS)) {
     return EFI_INVALID_PARAMETER;
   }
 
@@ -243,41 +243,43 @@ LegacyRegionManipulationInternal (
   // Loop to find the start PAM.
   //
   StartIndex = 0;
-  for (Index = 0; Index < (sizeof(mSectionArray) / sizeof(mSectionArray[0])); Index++) {
+  for (Index = 0; Index < (sizeof (mSectionArray) / sizeof (mSectionArray[0])); Index++) {
     if ((Start >= mSectionArray[Index].Start) && (Start < (mSectionArray[Index].Start + mSectionArray[Index].Length))) {
       StartIndex = Index;
       break;
     }
   }
-  ASSERT (Index < (sizeof(mSectionArray) / sizeof(mSectionArray[0])));
+
+  ASSERT (Index < (sizeof (mSectionArray) / sizeof (mSectionArray[0])));
 
   //
   // Program PAM until end PAM is encountered
   //
-  for (Index = StartIndex; Index < (sizeof(mSectionArray) / sizeof(mSectionArray[0])); Index++) {
+  for (Index = StartIndex; Index < (sizeof (mSectionArray) / sizeof (mSectionArray[0])); Index++) {
     if (ReadEnable != NULL) {
       if (*ReadEnable) {
         PciOr8 (
-          PCI_LIB_ADDRESS(mPamPciBus, mPamPciDev, mPamPciFunc, mRegisterValues[Index].PAMRegOffset),
+          PCI_LIB_ADDRESS (mPamPciBus, mPamPciDev, mPamPciFunc, mRegisterValues[Index].PAMRegOffset),
           mRegisterValues[Index].ReadEnableData
           );
       } else {
         PciAnd8 (
-          PCI_LIB_ADDRESS(mPamPciBus, mPamPciDev, mPamPciFunc, mRegisterValues[Index].PAMRegOffset),
-          (UINT8) (~mRegisterValues[Index].ReadEnableData)
+          PCI_LIB_ADDRESS (mPamPciBus, mPamPciDev, mPamPciFunc, mRegisterValues[Index].PAMRegOffset),
+          (UINT8)(~mRegisterValues[Index].ReadEnableData)
           );
       }
     }
+
     if (WriteEnable != NULL) {
       if (*WriteEnable) {
         PciOr8 (
-          PCI_LIB_ADDRESS(mPamPciBus, mPamPciDev, mPamPciFunc, mRegisterValues[Index].PAMRegOffset),
+          PCI_LIB_ADDRESS (mPamPciBus, mPamPciDev, mPamPciFunc, mRegisterValues[Index].PAMRegOffset),
           mRegisterValues[Index].WriteEnableData
           );
       } else {
         PciAnd8 (
-          PCI_LIB_ADDRESS(mPamPciBus, mPamPciDev, mPamPciFunc, mRegisterValues[Index].PAMRegOffset),
-          (UINT8) (~mRegisterValues[Index].WriteEnableData)
+          PCI_LIB_ADDRESS (mPamPciBus, mPamPciDev, mPamPciFunc, mRegisterValues[Index].PAMRegOffset),
+          (UINT8)(~mRegisterValues[Index].WriteEnableData)
           );
       }
     }
@@ -290,7 +292,8 @@ LegacyRegionManipulationInternal (
       break;
     }
   }
-  ASSERT (Index < (sizeof(mSectionArray) / sizeof(mSectionArray[0])));
+
+  ASSERT (Index < (sizeof (mSectionArray) / sizeof (mSectionArray[0])));
 
   return EFI_SUCCESS;
 }
@@ -298,30 +301,31 @@ LegacyRegionManipulationInternal (
 STATIC
 EFI_STATUS
 LegacyRegionGetInfoInternal (
-  OUT UINT32                        *DescriptorCount,
-  OUT LEGACY_MEMORY_SECTION_INFO    **Descriptor
+  OUT UINT32                      *DescriptorCount,
+  OUT LEGACY_MEMORY_SECTION_INFO  **Descriptor
   )
 {
-  UINTN    Index;
-  UINT8    PamValue;
+  UINTN  Index;
+  UINT8  PamValue;
 
   //
   // Check input parameters
   //
-  if (DescriptorCount == NULL || Descriptor == NULL) {
+  if ((DescriptorCount == NULL) || (Descriptor == NULL)) {
     return EFI_INVALID_PARAMETER;
   }
 
   //
   // Fill in current status of legacy region.
   //
-  *DescriptorCount = (sizeof(mSectionArray) / sizeof(mSectionArray[0]));
+  *DescriptorCount = (sizeof (mSectionArray) / sizeof (mSectionArray[0]));
   for (Index = 0; Index < *DescriptorCount; Index++) {
-    PamValue = PciRead8 (PCI_LIB_ADDRESS(mPamPciBus, mPamPciDev, mPamPciFunc, mRegisterValues[Index].PAMRegOffset));
+    PamValue                         = PciRead8 (PCI_LIB_ADDRESS (mPamPciBus, mPamPciDev, mPamPciFunc, mRegisterValues[Index].PAMRegOffset));
     mSectionArray[Index].ReadEnabled = FALSE;
     if ((PamValue & mRegisterValues[Index].ReadEnableData) != 0) {
       mSectionArray[Index].ReadEnabled = TRUE;
     }
+
     mSectionArray[Index].WriteEnabled = FALSE;
     if ((PamValue & mRegisterValues[Index].WriteEnableData) != 0) {
       mSectionArray[Index].WriteEnabled = TRUE;
@@ -369,7 +373,6 @@ LegacyRegion2Decode (
   return LegacyRegionManipulationInternal (Start, Length, On, NULL, Granularity);
 }
 
-
 /**
   Modify the hardware to disallow memory attribute changes in a region.
 
@@ -398,10 +401,10 @@ LegacyRegion2Decode (
 EFI_STATUS
 EFIAPI
 LegacyRegion2BootLock (
-  IN  EFI_LEGACY_REGION2_PROTOCOL         *This,
-  IN  UINT32                              Start,
-  IN  UINT32                              Length,
-  OUT UINT32                              *Granularity
+  IN  EFI_LEGACY_REGION2_PROTOCOL  *This,
+  IN  UINT32                       Start,
+  IN  UINT32                       Length,
+  OUT UINT32                       *Granularity
   )
 {
   if ((Start < 0xC0000) || ((Start + Length - 1) > 0xFFFFF)) {
@@ -410,7 +413,6 @@ LegacyRegion2BootLock (
 
   return EFI_UNSUPPORTED;
 }
-
 
 /**
   Modify the hardware to disallow memory writes in a region.
@@ -435,10 +437,10 @@ LegacyRegion2BootLock (
 EFI_STATUS
 EFIAPI
 LegacyRegion2Lock (
-  IN  EFI_LEGACY_REGION2_PROTOCOL *This,
-  IN  UINT32                      Start,
-  IN  UINT32                      Length,
-  OUT UINT32                      *Granularity
+  IN  EFI_LEGACY_REGION2_PROTOCOL  *This,
+  IN  UINT32                       Start,
+  IN  UINT32                       Length,
+  OUT UINT32                       *Granularity
   )
 {
   BOOLEAN  WriteEnable;
@@ -446,7 +448,6 @@ LegacyRegion2Lock (
   WriteEnable = FALSE;
   return LegacyRegionManipulationInternal (Start, Length, NULL, &WriteEnable, Granularity);
 }
-
 
 /**
   Modify the hardware to allow memory writes in a region.
@@ -510,11 +511,11 @@ LegacyRegionGetInfo (
   OUT EFI_LEGACY_REGION_DESCRIPTOR  **Descriptor
   )
 {
-  LEGACY_MEMORY_SECTION_INFO   *SectionInfo;
-  UINT32                       SectionCount;
-  EFI_LEGACY_REGION_DESCRIPTOR *DescriptorArray;
-  UINTN                        Index;
-  UINTN                        DescriptorIndex;
+  LEGACY_MEMORY_SECTION_INFO    *SectionInfo;
+  UINT32                        SectionCount;
+  EFI_LEGACY_REGION_DESCRIPTOR  *DescriptorArray;
+  UINTN                         Index;
+  UINTN                         DescriptorIndex;
 
   //
   // Get section numbers and information
@@ -535,10 +536,11 @@ LegacyRegionGetInfo (
     DescriptorArray[DescriptorIndex].Length      = SectionInfo[Index].Length;
     DescriptorArray[DescriptorIndex].Granularity = SectionInfo[Index].Length;
     if (SectionInfo[Index].ReadEnabled) {
-      DescriptorArray[DescriptorIndex].Attribute   = LegacyRegionDecoded;
+      DescriptorArray[DescriptorIndex].Attribute = LegacyRegionDecoded;
     } else {
-      DescriptorArray[DescriptorIndex].Attribute   = LegacyRegionNotDecoded;
+      DescriptorArray[DescriptorIndex].Attribute = LegacyRegionNotDecoded;
     }
+
     DescriptorIndex++;
 
     //
@@ -552,6 +554,7 @@ LegacyRegionGetInfo (
     } else {
       DescriptorArray[DescriptorIndex].Attribute = LegacyRegionWriteDisabled;
     }
+
     DescriptorIndex++;
 
     //
@@ -564,18 +567,17 @@ LegacyRegionGetInfo (
     DescriptorIndex++;
   }
 
-  *DescriptorCount = (UINT32) DescriptorIndex;
+  *DescriptorCount = (UINT32)DescriptorIndex;
   *Descriptor      = DescriptorArray;
 
   return EFI_SUCCESS;
 }
 
-
 /**
   Detects chipset and initialize PAM support tables
- 
+
   @retval EFI_SUCCESS   Successfully initialized
- 
+
 **/
 EFI_STATUS
 DetectChipset (
@@ -586,11 +588,10 @@ DetectChipset (
   UINT16  DID = 0;
 
   mRegisterValues = NULL;
-  
-  mVendorDeviceId = PciRead32 (PCI_LIB_ADDRESS(PAM_PCI_BUS, PAM_PCI_DEV, PAM_PCI_FUNC, 0));
+
+  mVendorDeviceId = PciRead32 (PCI_LIB_ADDRESS (PAM_PCI_BUS, PAM_PCI_DEV, PAM_PCI_FUNC, 0));
 
   switch (mVendorDeviceId) {
-    
     //
     // Intel 830 and similar
     // Copied from 915 resolution created by steve tomljenovic,
@@ -607,9 +608,9 @@ DetectChipset (
     case 0x65C08086: // 5100
       /// Intel 5000 and similar (PAM 0x59-0x5f).
       mRegisterValues = mRegisterValues830;
-      mPamPciDev = 16;
+      mPamPciDev      = 16;
       break;
-      
+
     //
     // Intel Series 4 and similar
     // Copied from 915 resolution created by steve tomljenovic,
@@ -630,7 +631,7 @@ DetectChipset (
     case 0x29808086: // G965
     case 0x29908086: // Q965
     case 0x29a08086: // P965
-    case 0x29b08086: // R845  
+    case 0x29b08086: // R845
     case 0x29c08086: // G31/P35
     case 0x29d08086: // Q33
     case 0x29e08086: // X38/X48
@@ -648,7 +649,7 @@ DetectChipset (
       /// Intel Series 4 and similar (PAM 0x90-0x96).
       mRegisterValues = mRegisterValuesS4;
       break;
-          
+
     //
     // Core processors
     // http://pci-ids.ucw.cz/read/PC/8086
@@ -657,12 +658,12 @@ DetectChipset (
     case 0x01048086: // 2nd Generation Core Processor Family DRAM Controller
     case 0x01088086: // Xeon E3-1200 2nd Generation Core Processor Family DRAM Controller
     case 0x010c8086: // Xeon E3-1200 2nd Generation Core Processor Family DRAM Controller
-      
+
     case 0x01508086: // 3rd Generation Core Processor Family DRAM Controller
     case 0x01548086: // 3rd Generation Core Processor Family DRAM Controller
     case 0x01588086: // 3rd Generation Core Processor Family DRAM Controller
     case 0x015c8086: // 3rd Generation Core Processor Family DRAM Controller
-      
+
     case 0x01608086: // 3rd Generation Core Processor Family DRAM Controller
     case 0x01648086: // 3rd Generation Core Processor Family DRAM Controller
 
@@ -674,7 +675,7 @@ DetectChipset (
     case 0x16048086: // 5th Generation Core Processor Family DRAM Controller
 
     case 0x191f8086: // 6th Generation (Skylake) DRAM Controller (Z170X)
-          
+
     case 0x0F008086: // Bay Trail Family DRAM Controller
       /// Next Generation Core processors (PAM 0x80-0x86).
       mRegisterValues = mRegisterValuesCP;
@@ -690,28 +691,30 @@ DetectChipset (
 
     case 0xD1308086: // Xeon(R) CPU L3426 Processor DRAM Controller
     case 0xD1318086: // Core-i Processor DRAM Controller
-    case 0xD1328086: // PM55 i7-720QM  DRAM Controller  
-    case 0x34008086: // Core-i Processor DRAM Controller   
-    case 0x34018086: // Core-i Processor DRAM Controller   
-    case 0x34028086: // Core-i Processor DRAM Controller   
-    case 0x34038086: // Core-i Processor DRAM Controller   
-    case 0x34048086: // Core-i Processor DRAM Controller   
-    case 0x34058086: // X58 Core-i Processor DRAM Controller   
-    case 0x34068086: // Core-i Processor DRAM Controller   
-    case 0x34078086: // Core-i Processor DRAM Controller   
+    case 0xD1328086: // PM55 i7-720QM  DRAM Controller
+    case 0x34008086: // Core-i Processor DRAM Controller
+    case 0x34018086: // Core-i Processor DRAM Controller
+    case 0x34028086: // Core-i Processor DRAM Controller
+    case 0x34038086: // Core-i Processor DRAM Controller
+    case 0x34048086: // Core-i Processor DRAM Controller
+    case 0x34058086: // X58 Core-i Processor DRAM Controller
+    case 0x34068086: // Core-i Processor DRAM Controller
+    case 0x34078086: // Core-i Processor DRAM Controller
       /// Core i7 processors (PAM 0x40-0x47).
       mRegisterValues = mRegisterValuesNH;
-      mPamPciBus = 0xFF;
+      mPamPciBus      = 0xFF;
       for (mPamPciBus = 0xFF; mPamPciBus > 0x1F; mPamPciBus >>= 1) {
-        VID = PciRead16 (PCI_LIB_ADDRESS(mPamPciBus, 0, 1, 0x00));
+        VID = PciRead16 (PCI_LIB_ADDRESS (mPamPciBus, 0, 1, 0x00));
         if (VID != 0x8086) {
           continue;
         }
-        DID = PciRead16 (PCI_LIB_ADDRESS(mPamPciBus, 0, 1, 0x02));
+
+        DID = PciRead16 (PCI_LIB_ADDRESS (mPamPciBus, 0, 1, 0x02));
         if (DID > 0x2c00) {
           break;
         }
-      } 
+      }
+
       if ((VID != 0x8086) || (DID < 0x2c00)) {
         //
         // Nehalem bus is not found, assume 0.
@@ -720,21 +723,22 @@ DetectChipset (
       } else {
         mPamPciFunc = 1;
       }
+
       break;
-    case 0x3C008086: // Xeon E5 Processor 
+    case 0x3C008086: // Xeon E5 Processor
       /// Xeon E5 processors (PAM 0x40-0x47).
       mRegisterValues = mRegisterValuesNH;
-      mPamPciBus = PciRead8 (PCI_LIB_ADDRESS(0, 5, 0, 0x109));
-      mPamPciDev = 12;
-      mPamPciFunc = 6;
+      mPamPciBus      = PciRead8 (PCI_LIB_ADDRESS (0, 5, 0, 0x109));
+      mPamPciDev      = 12;
+      mPamPciFunc     = 6;
       break;
 
     case 0x0a8210de:
-    case 0x0a8610de: 
+    case 0x0a8610de:
       /// NForce MCP79 and similar (PAM 0xC0-0xC7).
       mRegisterValues = mRegisterValuesNV;
-      break;      
-      
+      break;
+
     default:
       // Unknown chipset.
       break;
@@ -758,21 +762,21 @@ LegacyRegion2Install (
 {
   EFI_STATUS  Status;
   VOID        *Protocol;
-  
+
   //
   // Check for presence of gEfiLegacyRegionProtocolGuid
   // and gEfiLegacyRegion2ProtocolGuid
   //
-  Status = gBS->LocateProtocol (&gEfiLegacyRegionProtocolGuid, NULL, (VOID **) &Protocol);
+  Status = gBS->LocateProtocol (&gEfiLegacyRegionProtocolGuid, NULL, (VOID **)&Protocol);
   if (Status == EFI_SUCCESS) {
     return EFI_UNSUPPORTED;
   }
 
-  Status = gBS->LocateProtocol (&gEfiLegacyRegion2ProtocolGuid, NULL, (VOID **) &Protocol);
+  Status = gBS->LocateProtocol (&gEfiLegacyRegion2ProtocolGuid, NULL, (VOID **)&Protocol);
   if (Status == EFI_SUCCESS) {
     return EFI_UNSUPPORTED;
   }
-  
+
   Status = DetectChipset ();
   if (EFI_ERROR (Status)) {
     return EFI_UNSUPPORTED;

@@ -34,17 +34,17 @@ OcLoadPickerHotKeys (
   EFI_STATUS                         Status;
   APPLE_KEY_MAP_AGGREGATOR_PROTOCOL  *KeyMap;
 
-  UINTN                              NumKeys;
-  APPLE_MODIFIER_MAP                 Modifiers;
-  APPLE_KEY_CODE                     Keys[OC_KEY_MAP_DEFAULT_SIZE];
+  UINTN               NumKeys;
+  APPLE_MODIFIER_MAP  Modifiers;
+  APPLE_KEY_CODE      Keys[OC_KEY_MAP_DEFAULT_SIZE];
 
-  BOOLEAN                            HasCommand;
-  BOOLEAN                            HasEscape;
-  BOOLEAN                            HasZero;
-  BOOLEAN                            HasOption;
-  BOOLEAN                            HasKeyP;
-  BOOLEAN                            HasKeyR;
-  BOOLEAN                            HasKeyX;
+  BOOLEAN  HasCommand;
+  BOOLEAN  HasEscape;
+  BOOLEAN  HasZero;
+  BOOLEAN  HasOption;
+  BOOLEAN  HasKeyP;
+  BOOLEAN  HasKeyR;
+  BOOLEAN  HasKeyX;
 
   if (Context->TakeoffDelay > 0) {
     gBS->Stall (Context->TakeoffDelay);
@@ -53,12 +53,12 @@ OcLoadPickerHotKeys (
   KeyMap = OcGetProtocol (&gAppleKeyMapAggregatorProtocolGuid, DEBUG_ERROR, "OcLoadPickerHotKeys", "AppleKeyMapAggregator");
 
   NumKeys = ARRAY_SIZE (Keys);
-  Status = KeyMap->GetKeyStrokes (
-    KeyMap,
-    &Modifiers,
-    &NumKeys,
-    Keys
-    );
+  Status  = KeyMap->GetKeyStrokes (
+                      KeyMap,
+                      &Modifiers,
+                      &NumKeys,
+                      Keys
+                      );
 
   if (EFI_ERROR (Status)) {
     DEBUG ((DEBUG_ERROR, "OCHK: GetKeyStrokes - %r\n", Status));
@@ -117,68 +117,68 @@ STATIC
 VOID
 EFIAPI
 PickerFlushTypingBuffer (
-  IN OUT OC_PICKER_CONTEXT                  *Context
+  IN OUT OC_PICKER_CONTEXT  *Context
   )
 {
-  OcFlushTypingBuffer(Context->HotKeyContext->TypingContext);
+  OcFlushTypingBuffer (Context->HotKeyContext->TypingContext);
 }
 
 STATIC
 VOID
 EFIAPI
 GetPickerKeyInfo (
-  IN OUT OC_PICKER_CONTEXT                  *Context,
-  IN     OC_PICKER_KEY_MAP                  KeyFilter,
-     OUT OC_PICKER_KEY_INFO                 *PickerKeyInfo
+  IN OUT OC_PICKER_CONTEXT  *Context,
+  IN     OC_PICKER_KEY_MAP  KeyFilter,
+  OUT OC_PICKER_KEY_INFO    *PickerKeyInfo
   )
 {
-  EFI_STATUS                         Status;
+  EFI_STATUS  Status;
 
-  UINTN                              NumKeys;
-  APPLE_KEY_CODE                     *Keys;
-  APPLE_KEY_CODE                     Key;
-  APPLE_MODIFIER_MAP                 Modifiers;
-  CHAR16                             UnicodeChar;
-  UINTN                              NumKeysUp;
-  UINTN                              NumKeysDoNotRepeat;
-  APPLE_KEY_CODE                     KeysDoNotRepeat[OC_KEY_MAP_DEFAULT_SIZE];
-  APPLE_MODIFIER_MAP                 ModifiersDoNotRepeat;
+  UINTN               NumKeys;
+  APPLE_KEY_CODE      *Keys;
+  APPLE_KEY_CODE      Key;
+  APPLE_MODIFIER_MAP  Modifiers;
+  CHAR16              UnicodeChar;
+  UINTN               NumKeysUp;
+  UINTN               NumKeysDoNotRepeat;
+  APPLE_KEY_CODE      KeysDoNotRepeat[OC_KEY_MAP_DEFAULT_SIZE];
+  APPLE_MODIFIER_MAP  ModifiersDoNotRepeat;
 
-  UINTN                              AkmaNumKeys;
-  APPLE_MODIFIER_MAP                 AkmaModifiers;
-  APPLE_KEY_CODE                     AkmaKeys[OC_KEY_MAP_DEFAULT_SIZE];
+  UINTN               AkmaNumKeys;
+  APPLE_MODIFIER_MAP  AkmaModifiers;
+  APPLE_KEY_CODE      AkmaKeys[OC_KEY_MAP_DEFAULT_SIZE];
 
-  APPLE_MODIFIER_MAP                 ValidBootModifiers;
-  BOOLEAN                            TriggerBoot;
-  BOOLEAN                            HasCommand;
-  BOOLEAN                            HasKeyC;
-  BOOLEAN                            HasKeyK;
-  BOOLEAN                            HasKeyS;
-  BOOLEAN                            HasKeyV;
-  BOOLEAN                            HasKeyMinus;
-  BOOLEAN                            WantsZeroSlide;
-  UINT32                             CsrActiveConfig;
-  UINTN                              CsrActiveConfigSize;
+  APPLE_MODIFIER_MAP  ValidBootModifiers;
+  BOOLEAN             TriggerBoot;
+  BOOLEAN             HasCommand;
+  BOOLEAN             HasKeyC;
+  BOOLEAN             HasKeyK;
+  BOOLEAN             HasKeyS;
+  BOOLEAN             HasKeyV;
+  BOOLEAN             HasKeyMinus;
+  BOOLEAN             WantsZeroSlide;
+  UINT32              CsrActiveConfig;
+  UINTN               CsrActiveConfigSize;
 
   ASSERT (Context->HotKeyContext->KeyMap             != NULL);
   ASSERT (Context->HotKeyContext->TypingContext      != NULL);
   ASSERT (Context->HotKeyContext->DoNotRepeatContext != NULL);
   ASSERT (PickerKeyInfo                              != NULL);
 
-  PickerKeyInfo->OcKeyCode        = OC_INPUT_NO_ACTION;
-  PickerKeyInfo->OcModifiers      = OC_MODIFIERS_NONE;
-  PickerKeyInfo->UnicodeChar      = CHAR_NULL;
+  PickerKeyInfo->OcKeyCode   = OC_INPUT_NO_ACTION;
+  PickerKeyInfo->OcModifiers = OC_MODIFIERS_NONE;
+  PickerKeyInfo->UnicodeChar = CHAR_NULL;
 
   //
   // AKMA hotkeys
   //
-  AkmaNumKeys         = ARRAY_SIZE (AkmaKeys);
-  Status = Context->HotKeyContext->KeyMap->GetKeyStrokes (
-    Context->HotKeyContext->KeyMap,
-    &AkmaModifiers,
-    &AkmaNumKeys,
-    AkmaKeys
-    );
+  AkmaNumKeys = ARRAY_SIZE (AkmaKeys);
+  Status      = Context->HotKeyContext->KeyMap->GetKeyStrokes (
+                                                  Context->HotKeyContext->KeyMap,
+                                                  &AkmaModifiers,
+                                                  &AkmaNumKeys,
+                                                  AkmaKeys
+                                                  );
 
   if (EFI_ERROR (Status)) {
     DEBUG ((DEBUG_WARN, "OCHK: AKMA GetKeyStrokes - %r\n", Status));
@@ -188,45 +188,46 @@ GetPickerKeyInfo (
   //
   // Apple Event typing
   //
-  Keys                = &Key;
-  OcGetNextKeystroke(Context->HotKeyContext->TypingContext, &Modifiers, Keys, &UnicodeChar);
+  Keys = &Key;
+  OcGetNextKeystroke (Context->HotKeyContext->TypingContext, &Modifiers, Keys, &UnicodeChar);
   if (*Keys == 0) {
     NumKeys = 0;
-  }
-  else {
+  } else {
     NumKeys = 1;
   }
 
   //
   // Non-repeating keys
   //
-  NumKeysUp           = 0;
-  NumKeysDoNotRepeat  = ARRAY_SIZE (KeysDoNotRepeat);
-  Status = OcGetUpDownKeys (
-    Context->HotKeyContext->DoNotRepeatContext,
-    &ModifiersDoNotRepeat,
-    &NumKeysUp, NULL,
-    &NumKeysDoNotRepeat, KeysDoNotRepeat,
-    0ULL // time not needed for non-repeat keys
-    );
+  NumKeysUp          = 0;
+  NumKeysDoNotRepeat = ARRAY_SIZE (KeysDoNotRepeat);
+  Status             = OcGetUpDownKeys (
+                         Context->HotKeyContext->DoNotRepeatContext,
+                         &ModifiersDoNotRepeat,
+                         &NumKeysUp,
+                         NULL,
+                         &NumKeysDoNotRepeat,
+                         KeysDoNotRepeat,
+                         0ULL // time not needed for non-repeat keys
+                         );
 
   if (EFI_ERROR (Status)) {
     DEBUG ((DEBUG_WARN, "OCHK: GetUpDownKeys for DoNotRepeatContext - %r\n", Status));
     return;
   }
 
-
   DEBUG_CODE_BEGIN ();
   if (Context->KbDebug != NULL) {
     Context->KbDebug->Show (NumKeys, AkmaNumKeys, Modifiers);
   }
+
   DEBUG_CODE_END ();
 
   //
   // Set OcModifiers early, so they are correct even if - say - a hotkey or non-repeating key returns first.
   //
   ValidBootModifiers = APPLE_MODIFIERS_NONE;
-  
+
   if (Context->AllowSetDefault) {
     ValidBootModifiers |= APPLE_MODIFIERS_CONTROL;
   }
@@ -236,7 +237,7 @@ GetPickerKeyInfo (
   // it's original reason for being here is to fix difficulties in
   // detecting this and other hotkey modifiers during no-picker boot.
   //
-  if ((KeyFilter & OC_PICKER_KEYS_HOTKEYS) != 0 && Context->PollAppleHotKeys) {
+  if (((KeyFilter & OC_PICKER_KEYS_HOTKEYS) != 0) && Context->PollAppleHotKeys) {
     ValidBootModifiers |= APPLE_MODIFIERS_SHIFT;
   }
 
@@ -247,8 +248,9 @@ GetPickerKeyInfo (
   // Needs to be set/unset even if filtered for typing (otherwise can
   // get locked on if user tabs to typing context).
   //
-  if ((Modifiers & ~ValidBootModifiers) == 0
-    && (Modifiers & APPLE_MODIFIERS_CONTROL) != 0) {
+  if (  ((Modifiers & ~ValidBootModifiers) == 0)
+     && ((Modifiers & APPLE_MODIFIERS_CONTROL) != 0))
+  {
     PickerKeyInfo->OcModifiers |= OC_MODIFIERS_SET_DEFAULT;
   }
 
@@ -256,23 +258,25 @@ GetPickerKeyInfo (
   // Alternative 'set default' key, if modifiers not working;
   // useful both for 'set default' and for tuning KeyForgetThreshold.
   //
-  if (Context->AllowSetDefault
-    && OcKeyMapHasKey (AkmaKeys, AkmaNumKeys, AppleHidUsbKbUsageKeyEquals)) {
+  if (  Context->AllowSetDefault
+     && OcKeyMapHasKey (AkmaKeys, AkmaNumKeys, AppleHidUsbKbUsageKeyEquals))
+  {
     PickerKeyInfo->OcModifiers |= OC_MODIFIERS_SET_DEFAULT;
   }
 
   //
   // Loosely apply regardless of other modifiers.
   //
-  if ((KeyFilter & OC_PICKER_KEYS_TAB_CONTROL) != 0
-    && (Modifiers & APPLE_MODIFIERS_SHIFT) != 0) {
+  if (  ((KeyFilter & OC_PICKER_KEYS_TAB_CONTROL) != 0)
+     && ((Modifiers & APPLE_MODIFIERS_SHIFT) != 0))
+  {
     PickerKeyInfo->OcModifiers |= OC_MODIFIERS_REVERSE_SWITCH_FOCUS;
   }
 
   //
   // Handle key combinations.
   //
-  if ((KeyFilter & OC_PICKER_KEYS_HOTKEYS) != 0 && Context->PollAppleHotKeys) {
+  if (((KeyFilter & OC_PICKER_KEYS_HOTKEYS) != 0) && Context->PollAppleHotKeys) {
     HasCommand = (AkmaModifiers & APPLE_MODIFIERS_COMMAND) != 0;
     HasKeyC    = OcKeyMapHasKey (AkmaKeys, AkmaNumKeys, AppleHidUsbKbUsageKeyC);
     HasKeyK    = OcKeyMapHasKey (AkmaKeys, AkmaNumKeys, AppleHidUsbKbUsageKeyK);
@@ -282,7 +286,7 @@ GetPickerKeyInfo (
     // Checking for PAD minus is our extension to support more keyboards.
     //
     HasKeyMinus = OcKeyMapHasKey (AkmaKeys, AkmaNumKeys, AppleHidUsbKbUsageKeyMinus)
-      || OcKeyMapHasKey (AkmaKeys, AkmaNumKeys, AppleHidUsbKbUsageKeyPadMinus);
+                  || OcKeyMapHasKey (AkmaKeys, AkmaNumKeys, AppleHidUsbKbUsageKeyPadMinus);
 
     //
     // CMD+V is always valid and enables Verbose Mode.
@@ -292,6 +296,7 @@ GetPickerKeyInfo (
         DEBUG ((DEBUG_INFO, "OCHK: CMD+V means -v\n"));
         OcAppendArgumentToCmd (Context, Context->AppleBootArgs, "-v", L_STR_LEN ("-v"));
       }
+
       PickerKeyInfo->OcKeyCode = OC_INPUT_INTERNAL;
     }
 
@@ -303,6 +308,7 @@ GetPickerKeyInfo (
         DEBUG ((DEBUG_INFO, "OCHK: CMD+C+MINUS means -no_compat_check\n"));
         OcAppendArgumentToCmd (Context, Context->AppleBootArgs, "-no_compat_check", L_STR_LEN ("-no_compat_check"));
       }
+
       PickerKeyInfo->OcKeyCode = OC_INPUT_INTERNAL;
     }
 
@@ -314,6 +320,7 @@ GetPickerKeyInfo (
         DEBUG ((DEBUG_INFO, "OCHK: CMD+K means kcsuffix=release\n"));
         OcAppendArgumentToCmd (Context, Context->AppleBootArgs, "kcsuffix=release", L_STR_LEN ("kcsuffix=release"));
       }
+
       PickerKeyInfo->OcKeyCode = OC_INPUT_INTERNAL;
     }
 
@@ -333,13 +340,13 @@ GetPickerKeyInfo (
       if (WantsZeroSlide) {
         CsrActiveConfig     = 0;
         CsrActiveConfigSize = sizeof (CsrActiveConfig);
-        Status = gRT->GetVariable (
-          L"csr-active-config",
-          &gAppleBootVariableGuid,
-          NULL,
-          &CsrActiveConfigSize,
-          &CsrActiveConfig
-          );
+        Status              = gRT->GetVariable (
+                                     L"csr-active-config",
+                                     &gAppleBootVariableGuid,
+                                     NULL,
+                                     &CsrActiveConfigSize,
+                                     &CsrActiveConfig
+                                     );
         //
         // FIXME: CMD+S+Minus behaves as CMD+S when "slide=0" is not supported
         //        by the SIP configuration. This might be an oversight, but is
@@ -357,6 +364,7 @@ GetPickerKeyInfo (
         DEBUG ((DEBUG_INFO, "OCHK: CMD+S means -s\n"));
         OcAppendArgumentToCmd (Context, Context->AppleBootArgs, "-s", L_STR_LEN ("-s"));
       }
+
       PickerKeyInfo->OcKeyCode = OC_INPUT_INTERNAL;
     }
   }
@@ -371,9 +379,10 @@ GetPickerKeyInfo (
   //
   // Handle VoiceOver - non-repeating.
   //
-  if ((KeyFilter & OC_PICKER_KEYS_VOICE_OVER) != 0
-    && (Modifiers & APPLE_MODIFIERS_COMMAND) != 0
-    && OcKeyMapHasKey (KeysDoNotRepeat, NumKeysDoNotRepeat, AppleHidUsbKbUsageKeyF5)) {
+  if (  ((KeyFilter & OC_PICKER_KEYS_VOICE_OVER) != 0)
+     && ((Modifiers & APPLE_MODIFIERS_COMMAND) != 0)
+     && OcKeyMapHasKey (KeysDoNotRepeat, NumKeysDoNotRepeat, AppleHidUsbKbUsageKeyF5))
+  {
     PickerKeyInfo->OcKeyCode = OC_INPUT_VOICE_OVER;
     return;
   }
@@ -382,9 +391,10 @@ GetPickerKeyInfo (
     //
     // Handle reload menu - non-repeating.
     //
-    if (OcKeyMapHasKey (KeysDoNotRepeat, NumKeysDoNotRepeat, AppleHidUsbKbUsageKeyEscape)
-    || OcKeyMapHasKey (KeysDoNotRepeat, NumKeysDoNotRepeat, AppleHidUsbKbUsageKeyZero)
-    ) {
+    if (  OcKeyMapHasKey (KeysDoNotRepeat, NumKeysDoNotRepeat, AppleHidUsbKbUsageKeyEscape)
+       || OcKeyMapHasKey (KeysDoNotRepeat, NumKeysDoNotRepeat, AppleHidUsbKbUsageKeyZero)
+          )
+    {
       PickerKeyInfo->OcKeyCode = OC_INPUT_ABORTED;
       return;
     }
@@ -399,8 +409,9 @@ GetPickerKeyInfo (
   }
 
   if (NumKeys == 1) {
-    if ((KeyFilter & OC_PICKER_KEYS_TAB_CONTROL) != 0
-      && Keys[0] == AppleHidUsbKbUsageKeyTab) {
+    if (  ((KeyFilter & OC_PICKER_KEYS_TAB_CONTROL) != 0)
+       && (Keys[0] == AppleHidUsbKbUsageKeyTab))
+    {
       PickerKeyInfo->OcKeyCode = OC_INPUT_SWITCH_FOCUS;
       return;
     }
@@ -424,14 +435,15 @@ GetPickerKeyInfo (
         return;
       }
 
-      if (Keys[0] ==AppleHidUsbKbUsageKeyBackSpace) {
+      if (Keys[0] == AppleHidUsbKbUsageKeyBackSpace) {
         PickerKeyInfo->OcKeyCode = OC_INPUT_TYPING_BACKSPACE;
         return;
       }
 
-      if (Keys[0] == AppleHidUsbKbUsageKeyEnter
-        || Keys[0] == AppleHidUsbKbUsageKeyReturn
-        || Keys[0] == AppleHidUsbKbUsageKeyPadEnter) {
+      if (  (Keys[0] == AppleHidUsbKbUsageKeyEnter)
+         || (Keys[0] == AppleHidUsbKbUsageKeyReturn)
+         || (Keys[0] == AppleHidUsbKbUsageKeyPadEnter))
+      {
         PickerKeyInfo->OcKeyCode = OC_INPUT_TYPING_CONFIRM;
         return;
       }
@@ -443,28 +455,27 @@ GetPickerKeyInfo (
       //
       // Only select OS if valid modifiers are in place.
       //
-      if ((Modifiers & ~ValidBootModifiers) == 0)
-      {
+      if ((Modifiers & ~ValidBootModifiers) == 0) {
         TriggerBoot = FALSE;
 
-        if (Keys[0] == AppleHidUsbKbUsageKeyEnter
-          || Keys[0] == AppleHidUsbKbUsageKeyReturn
-          || Keys[0] == AppleHidUsbKbUsageKeyPadEnter) {
-
+        if (  (Keys[0] == AppleHidUsbKbUsageKeyEnter)
+           || (Keys[0] == AppleHidUsbKbUsageKeyReturn)
+           || (Keys[0] == AppleHidUsbKbUsageKeyPadEnter))
+        {
           PickerKeyInfo->OcKeyCode = OC_INPUT_CONTINUE;
-          TriggerBoot = TRUE;
+          TriggerBoot              = TRUE;
         }
 
         STATIC_ASSERT (AppleHidUsbKbUsageKeyOne + 8 == AppleHidUsbKbUsageKeyNine, "Unexpected encoding");
-        if (Keys[0] >= AppleHidUsbKbUsageKeyOne && Keys[0] <= AppleHidUsbKbUsageKeyNine) {
-          PickerKeyInfo->OcKeyCode = (INTN) (Keys[0] - AppleHidUsbKbUsageKeyOne);
-          TriggerBoot = TRUE;
+        if ((Keys[0] >= AppleHidUsbKbUsageKeyOne) && (Keys[0] <= AppleHidUsbKbUsageKeyNine)) {
+          PickerKeyInfo->OcKeyCode = (INTN)(Keys[0] - AppleHidUsbKbUsageKeyOne);
+          TriggerBoot              = TRUE;
         }
 
         STATIC_ASSERT (AppleHidUsbKbUsageKeyA + 25 == AppleHidUsbKbUsageKeyZ, "Unexpected encoding");
-        if (Keys[0] > AppleHidUsbKbUsageKeyA && Keys[0] <= AppleHidUsbKbUsageKeyZ) {
-          PickerKeyInfo->OcKeyCode = (INTN) (Keys[0] - AppleHidUsbKbUsageKeyA + 9);
-          TriggerBoot = TRUE;
+        if ((Keys[0] > AppleHidUsbKbUsageKeyA) && (Keys[0] <= AppleHidUsbKbUsageKeyZ)) {
+          PickerKeyInfo->OcKeyCode = (INTN)(Keys[0] - AppleHidUsbKbUsageKeyA + 9);
+          TriggerBoot              = TRUE;
         }
 
         if (TriggerBoot) {
@@ -485,7 +496,7 @@ GetPickerKeyInfo (
 
       //
       // Apply navigation keys regardless of modifiers.
-      // 
+      //
       if (Keys[0] == AppleHidUsbKbUsageKeyUpArrow) {
         PickerKeyInfo->OcKeyCode = OC_INPUT_UP;
         return;
@@ -506,14 +517,16 @@ GetPickerKeyInfo (
         return;
       }
 
-      if (Keys[0] == AppleHidUsbKbUsageKeyPgUp
-        || Keys[0] == AppleHidUsbKbUsageKeyHome) {
+      if (  (Keys[0] == AppleHidUsbKbUsageKeyPgUp)
+         || (Keys[0] == AppleHidUsbKbUsageKeyHome))
+      {
         PickerKeyInfo->OcKeyCode = OC_INPUT_TOP;
         return;
       }
 
-      if (Keys[0] == AppleHidUsbKbUsageKeyPgDn
-        || Keys[0] == AppleHidUsbKbUsageKeyEnd) {
+      if (  (Keys[0] == AppleHidUsbKbUsageKeyPgDn)
+         || (Keys[0] == AppleHidUsbKbUsageKeyEnd))
+      {
         PickerKeyInfo->OcKeyCode = OC_INPUT_BOTTOM;
         return;
       }
@@ -523,13 +536,13 @@ GetPickerKeyInfo (
       //
       if (Modifiers == APPLE_MODIFIERS_NONE) {
         STATIC_ASSERT (AppleHidUsbKbUsageKeyF1 + 11 == AppleHidUsbKbUsageKeyF12, "Unexpected encoding");
-        if (Keys[0] >= AppleHidUsbKbUsageKeyF1 && Keys[0] <= AppleHidUsbKbUsageKeyF12) {
+        if ((Keys[0] >= AppleHidUsbKbUsageKeyF1) && (Keys[0] <= AppleHidUsbKbUsageKeyF12)) {
           PickerKeyInfo->OcKeyCode = OC_INPUT_FUNCTIONAL (Keys[0] - AppleHidUsbKbUsageKeyF1 + 1);
           return;
         }
 
         STATIC_ASSERT (AppleHidUsbKbUsageKeyF13 + 11 == AppleHidUsbKbUsageKeyF24, "Unexpected encoding");
-        if (Keys[0] >= AppleHidUsbKbUsageKeyF13 && Keys[0] <= AppleHidUsbKbUsageKeyF24) {
+        if ((Keys[0] >= AppleHidUsbKbUsageKeyF13) && (Keys[0] <= AppleHidUsbKbUsageKeyF24)) {
           PickerKeyInfo->OcKeyCode = OC_INPUT_FUNCTIONAL (Keys[0] - AppleHidUsbKbUsageKeyF13 + 13);
           return;
         }
@@ -541,14 +554,14 @@ GetPickerKeyInfo (
   // Return NO_ACTION here, since all non-null actions now feedback
   // immediately to either picker, to allow UI response.
   //
-  PickerKeyInfo->OcKeyCode    = OC_INPUT_NO_ACTION;
+  PickerKeyInfo->OcKeyCode = OC_INPUT_NO_ACTION;
 }
 
 STATIC
 UINT64
 EFIAPI
 WaitForPickerKeyInfoGetEndTime (
-  IN UINT64     Timeout
+  IN UINT64  Timeout
   )
 {
   if (Timeout == 0) {
@@ -562,18 +575,18 @@ STATIC
 BOOLEAN
 EFIAPI
 WaitForPickerKeyInfo (
-  IN OUT OC_PICKER_CONTEXT                  *Context,
-  IN     UINT64                             EndTime,
-  IN     OC_PICKER_KEY_MAP                  KeyFilter,
-  IN OUT OC_PICKER_KEY_INFO                 *PickerKeyInfo
+  IN OUT OC_PICKER_CONTEXT   *Context,
+  IN     UINT64              EndTime,
+  IN     OC_PICKER_KEY_MAP   KeyFilter,
+  IN OUT OC_PICKER_KEY_INFO  *PickerKeyInfo
   )
 {
-  OC_MODIFIER_MAP                    OldOcModifiers;
-  UINT64                             CurrTime;
-  UINT64                             LoopDelayStart;
+  OC_MODIFIER_MAP  OldOcModifiers;
+  UINT64           CurrTime;
+  UINT64           LoopDelayStart;
 
-  LoopDelayStart    = 0;
-  OldOcModifiers    = PickerKeyInfo->OcModifiers;
+  LoopDelayStart = 0;
+  OldOcModifiers = PickerKeyInfo->OcModifiers;
 
   //
   // These hotkeys are normally parsed by boot.efi, and they work just fine
@@ -588,30 +601,32 @@ WaitForPickerKeyInfo (
     //
     // All non-null actions (even internal) are now returned to picker for possible UI response.
     //
-    if (PickerKeyInfo->OcKeyCode != OC_INPUT_NO_ACTION ||
-      PickerKeyInfo->OcModifiers != OldOcModifiers     ||
-      PickerKeyInfo->UnicodeChar != CHAR_NULL) {
+    if ((PickerKeyInfo->OcKeyCode != OC_INPUT_NO_ACTION) ||
+        (PickerKeyInfo->OcModifiers != OldOcModifiers) ||
+        (PickerKeyInfo->UnicodeChar != CHAR_NULL))
+    {
       break;
     }
 
     if (EndTime != 0) {
-      CurrTime    = GetTimeInNanoSecond (GetPerformanceCounter ());  
-      if (CurrTime != 0 && CurrTime >= EndTime) {
+      CurrTime = GetTimeInNanoSecond (GetPerformanceCounter ());
+      if ((CurrTime != 0) && (CurrTime >= EndTime)) {
         PickerKeyInfo->OcKeyCode = OC_INPUT_TIMEOUT;
         break;
       }
     }
 
     DEBUG_CODE_BEGIN ();
-    LoopDelayStart = AsmReadTsc();
+    LoopDelayStart = AsmReadTsc ();
     DEBUG_CODE_END ();
 
     MicroSecondDelay (OC_MINIMAL_CPU_DELAY);
 
     DEBUG_CODE_BEGIN ();
     if (Context->KbDebug != NULL) {
-      Context->KbDebug->InstrumentLoopDelay (LoopDelayStart, AsmReadTsc());
+      Context->KbDebug->InstrumentLoopDelay (LoopDelayStart, AsmReadTsc ());
     }
+
     DEBUG_CODE_END ();
   }
 
@@ -626,7 +641,7 @@ OcInitHotKeys (
   IN OUT OC_PICKER_CONTEXT  *Context
   )
 {
-  EFI_STATUS                         Status;
+  EFI_STATUS  Status;
 
   DEBUG ((DEBUG_INFO, "OCHK: InitHotKeys\n"));
 
@@ -637,7 +652,7 @@ OcInitHotKeys (
   //
   Context->KbDebug = NULL;
 
-  Context->HotKeyContext = AllocatePool (sizeof(*(Context->HotKeyContext)));
+  Context->HotKeyContext = AllocatePool (sizeof (*(Context->HotKeyContext)));
   if (Context->HotKeyContext == NULL) {
     return EFI_OUT_OF_RESOURCES;
   }
@@ -645,10 +660,10 @@ OcInitHotKeys (
   //
   // Fn. ptrs.
   //
-  Context->HotKeyContext->GetKeyInfo          = GetPickerKeyInfo;
-  Context->HotKeyContext->GetKeyWaitEndTime   = WaitForPickerKeyInfoGetEndTime;
-  Context->HotKeyContext->WaitForKeyInfo      = WaitForPickerKeyInfo;
-  Context->HotKeyContext->FlushTypingBuffer   = PickerFlushTypingBuffer;
+  Context->HotKeyContext->GetKeyInfo        = GetPickerKeyInfo;
+  Context->HotKeyContext->GetKeyWaitEndTime = WaitForPickerKeyInfoGetEndTime;
+  Context->HotKeyContext->WaitForKeyInfo    = WaitForPickerKeyInfo;
+  Context->HotKeyContext->FlushTypingBuffer = PickerFlushTypingBuffer;
 
   Context->HotKeyContext->KeyMap = OcGetProtocol (&gAppleKeyMapAggregatorProtocolGuid, DEBUG_ERROR, "OcInitHotKeys", "AppleKeyMapAggregator");
   if (Context->HotKeyContext->KeyMap == NULL) {
@@ -661,14 +676,14 @@ OcInitHotKeys (
   // Non-repeating keys, e.g. ESC and SPACE.
   //
   Status = OcInitKeyRepeatContext (
-    &Context->HotKeyContext->DoNotRepeatContext,
-    Context->HotKeyContext->KeyMap,
-    OC_HELD_KEYS_DEFAULT_SIZE,
-    0,
-    0,
-    TRUE
-  );
-  
+             &Context->HotKeyContext->DoNotRepeatContext,
+             Context->HotKeyContext->KeyMap,
+             OC_HELD_KEYS_DEFAULT_SIZE,
+             0,
+             0,
+             TRUE
+             );
+
   if (EFI_ERROR (Status)) {
     DEBUG ((DEBUG_ERROR, "OCHK: Init non-repeating context - %r\n", Status));
     FreePool (Context->HotKeyContext);
@@ -679,7 +694,7 @@ OcInitHotKeys (
   //
   // Typing handler, for most keys.
   //
-  Status = OcRegisterTypingHandler(&Context->HotKeyContext->TypingContext);
+  Status = OcRegisterTypingHandler (&Context->HotKeyContext->TypingContext);
 
   if (EFI_ERROR (Status)) {
     DEBUG ((DEBUG_ERROR, "OCHK: Register typing handler - %r\n", Status));

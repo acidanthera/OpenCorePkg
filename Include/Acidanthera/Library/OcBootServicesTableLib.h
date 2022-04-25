@@ -25,9 +25,9 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 **/
 EFI_STATUS
 OcRegisterBootServicesProtocol (
-  IN EFI_GUID   *ProtocolGuid,
-  IN VOID       *ProtocolInstance,
-  IN BOOLEAN    Override
+  IN EFI_GUID  *ProtocolGuid,
+  IN VOID      *ProtocolInstance,
+  IN BOOLEAN   Override
   );
 
 #endif // OC_BOOT_SERVICES_TABLE_LIB_H

@@ -1,18 +1,18 @@
 /*++
 
 Copyright (c) 2005 - 2012, Intel Corporation. All rights reserved.<BR>
-This program and the accompanying materials                          
-are licensed and made available under the terms and conditions of the BSD License         
-which accompanies this distribution.  The full text of the license may be found at        
-http://opensource.org/licenses/bsd-license.php                                            
-                                                                                          
-THE PROGRAM IS DISTRIBUTED UNDER THE BSD LICENSE ON AN "AS IS" BASIS,                     
-WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.             
+This program and the accompanying materials
+are licensed and made available under the terms and conditions of the BSD License
+which accompanies this distribution.  The full text of the license may be found at
+http://opensource.org/licenses/bsd-license.php
+
+THE PROGRAM IS DISTRIBUTED UNDER THE BSD LICENSE ON AN "AS IS" BASIS,
+WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 
 Module Name:
 
   PciPowerManagement.c
-  
+
 Abstract:
 
   PCI Bus Driver
@@ -26,8 +26,9 @@ Revision History
 EFI_STATUS
 EFIAPI
 ResetPowerManagementFeature (
-  IN PCI_IO_DEVICE *PciIoDevice
+  IN PCI_IO_DEVICE  *PciIoDevice
   )
+
 /*++
 
 Routine Description:
@@ -39,7 +40,7 @@ Routine Description:
 Arguments:
 
 Returns:
-  
+
   None
 
 --*/
@@ -51,11 +52,11 @@ Returns:
   PowerManagementRegBlock = 0;
 
   Status = LocateCapabilityRegBlock (
-            PciIoDevice,
-            EFI_PCI_CAPABILITY_ID_PMI,
-            &PowerManagementRegBlock,
-            NULL
-            );
+             PciIoDevice,
+             EFI_PCI_CAPABILITY_ID_PMI,
+             &PowerManagementRegBlock,
+             NULL
+             );
 
   if (EFI_ERROR (Status)) {
     return EFI_UNSUPPORTED;
@@ -96,5 +97,6 @@ Returns:
                                       &PowerManagementCSR
                                       );
   }
+
   return Status;
 }

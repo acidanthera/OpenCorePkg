@@ -36,15 +36,15 @@ OcGetVolumeLabel (
   IN     EFI_SIMPLE_FILE_SYSTEM_PROTOCOL  *FileSystem
   )
 {
-  EFI_STATUS                      Status;
+  EFI_STATUS  Status;
 
-  EFI_FILE_HANDLE                 Volume;
-  EFI_FILE_SYSTEM_VOLUME_LABEL    *VolumeInfo;
-  UINTN                           VolumeLabelSize;
+  EFI_FILE_HANDLE               Volume;
+  EFI_FILE_SYSTEM_VOLUME_LABEL  *VolumeInfo;
+  UINTN                         VolumeLabelSize;
 
   ASSERT (FileSystem != NULL);
 
-  Volume   = NULL;
+  Volume = NULL;
   Status = FileSystem->OpenVolume (
                          FileSystem,
                          &Volume
@@ -55,21 +55,21 @@ OcGetVolumeLabel (
   }
 
   VolumeInfo = OcGetFileInfo (
-    Volume,
-    &gEfiFileSystemVolumeLabelInfoIdGuid,
-    sizeof (EFI_FILE_SYSTEM_VOLUME_LABEL),
-    &VolumeLabelSize
-    );
+                 Volume,
+                 &gEfiFileSystemVolumeLabelInfoIdGuid,
+                 sizeof (EFI_FILE_SYSTEM_VOLUME_LABEL),
+                 &VolumeLabelSize
+                 );
 
   Volume->Close (Volume);
 
   STATIC_ASSERT (
-    OFFSET_OF(EFI_FILE_SYSTEM_VOLUME_LABEL, VolumeLabel) == 0,
+    OFFSET_OF (EFI_FILE_SYSTEM_VOLUME_LABEL, VolumeLabel) == 0,
     "Expected EFI_FILE_SYSTEM_VOLUME_LABEL to represent CHAR16 string!"
     );
 
   if (VolumeInfo != NULL) {
-    if (VolumeLabelSize >= sizeof (CHAR16) && VolumeInfo->VolumeLabel[0] != L'\0') {
+    if ((VolumeLabelSize >= sizeof (CHAR16)) && (VolumeInfo->VolumeLabel[0] != L'\0')) {
       //
       // The spec requires disk label to be NULL-terminated, but it
       // was unclear whether the size should contain terminator or not.
@@ -77,8 +77,9 @@ OcGetVolumeLabel (
       // terminating \0 (though they do append it). These drivers must
       // not be used, but we try not to die when debugging is off.
       //
-      if (VolumeLabelSize > OC_MAX_VOLUME_LABEL_SIZE * sizeof (CHAR16) 
-       || VolumeInfo->VolumeLabel[VolumeLabelSize / sizeof (CHAR16) - 1] != '\0') {
+      if (  (VolumeLabelSize > OC_MAX_VOLUME_LABEL_SIZE * sizeof (CHAR16))
+         || (VolumeInfo->VolumeLabel[VolumeLabelSize / sizeof (CHAR16) - 1] != '\0'))
+      {
         DEBUG ((DEBUG_INFO, "OCFS: Found unterminated or too long volume label!"));
         FreePool (VolumeInfo);
         return AllocateCopyPool (sizeof (L"INVALID"), L"INVALID");
@@ -87,6 +88,7 @@ OcGetVolumeLabel (
         return VolumeInfo->VolumeLabel;
       }
     }
+
     FreePool (VolumeInfo);
   }
 

@@ -25,52 +25,51 @@ Revision History:
 
 #include <Library/SerialPortLib.h>
 
-EFILDR_LOADED_IMAGE    DxeCoreImage;
-EFILDR_LOADED_IMAGE    DxeIplImage;
+EFILDR_LOADED_IMAGE  DxeCoreImage;
+EFILDR_LOADED_IMAGE  DxeIplImage;
 
 VOID
 SystemHang (
-  CHAR8        *Message
+  CHAR8  *Message
   )
 {
-  CpuDeadLoop();
+  CpuDeadLoop ();
 }
 
 VOID
 EfiLoader (
-  UINT32    BiosMemoryMapBaseAddress
+  UINT32  BiosMemoryMapBaseAddress
   )
 {
-  BIOS_MEMORY_MAP       *BiosMemoryMap;
-  EFILDR_IMAGE          *EFILDRImage;
-  EFI_MEMORY_DESCRIPTOR EfiMemoryDescriptor[EFI_MAX_MEMORY_DESCRIPTORS];
-  EFI_STATUS            Status;
-  UINTN                 NumberOfMemoryMapEntries;
-  UINT32                DestinationSize;
-  UINT32                ScratchSize;
-  UINTN                 BfvPageNumber;
-  UINTN                 BfvBase;
-  EFI_MAIN_ENTRYPOINT   EfiMainEntrypoint;
-  EFILDRHANDOFF         Handoff;
+  BIOS_MEMORY_MAP        *BiosMemoryMap;
+  EFILDR_IMAGE           *EFILDRImage;
+  EFI_MEMORY_DESCRIPTOR  EfiMemoryDescriptor[EFI_MAX_MEMORY_DESCRIPTORS];
+  EFI_STATUS             Status;
+  UINTN                  NumberOfMemoryMapEntries;
+  UINT32                 DestinationSize;
+  UINT32                 ScratchSize;
+  UINTN                  BfvPageNumber;
+  UINTN                  BfvBase;
+  EFI_MAIN_ENTRYPOINT    EfiMainEntrypoint;
+  EFILDRHANDOFF          Handoff;
 
-#if 0
+ #if 0
   SerialPortInitialize ();
-  SerialPortWrite ((UINT8*) "EfiLdr\r\n", AsciiStrLen ("EfiLdr\r\n"));
-#endif
+  SerialPortWrite ((UINT8 *)"EfiLdr\r\n", AsciiStrLen ("EfiLdr\r\n"));
+ #endif
 
   //
   // Add all EfiConventionalMemory descriptors to the table.  If there are partial pages, then
   // round the start address up to the next page, and round the length down to a page boundary.
   //
-  BiosMemoryMap = (BIOS_MEMORY_MAP *) (UINTN) BiosMemoryMapBaseAddress;
+  BiosMemoryMap            = (BIOS_MEMORY_MAP *)(UINTN)BiosMemoryMapBaseAddress;
   NumberOfMemoryMapEntries = 0;
   GenMemoryMap (&NumberOfMemoryMapEntries, EfiMemoryDescriptor, BiosMemoryMap);
 
   //
   // Get information on where the image is in memory
   //
-  EFILDRImage  = (EFILDR_IMAGE *)(UINTN)(EFILDR_HEADER_ADDRESS + sizeof(EFILDR_HEADER));
-
+  EFILDRImage = (EFILDR_IMAGE *)(UINTN)(EFILDR_HEADER_ADDRESS + sizeof (EFILDR_HEADER));
 
   //
   // Point to the 4th image (Bfv)
@@ -92,22 +91,22 @@ EfiLoader (
   }
 
   Status =  LzmaUefiDecompress (
-    (VOID *)(UINTN)(EFILDR_HEADER_ADDRESS + EFILDRImage->Offset),
-    EFILDRImage->Length,
-    (VOID *)(UINTN)EFI_DECOMPRESSED_BUFFER_ADDRESS,
-    (VOID *)(UINTN)((EFI_DECOMPRESSED_BUFFER_ADDRESS + DestinationSize + 0x1000) & 0xfffff000)
-    );
-
+              (VOID *)(UINTN)(EFILDR_HEADER_ADDRESS + EFILDRImage->Offset),
+              EFILDRImage->Length,
+              (VOID *)(UINTN)EFI_DECOMPRESSED_BUFFER_ADDRESS,
+              (VOID *)(UINTN)((EFI_DECOMPRESSED_BUFFER_ADDRESS + DestinationSize + 0x1000) & 0xfffff000)
+              );
 
   if (EFI_ERROR (Status)) {
     SystemHang ("Failed to decompress BFV!\n");
   }
 
   BfvPageNumber = EFI_SIZE_TO_PAGES (DestinationSize);
-  BfvBase = (UINTN) FindSpace (BfvPageNumber, &NumberOfMemoryMapEntries, EfiMemoryDescriptor, EfiRuntimeServicesData, EFI_MEMORY_WB);
+  BfvBase       = (UINTN)FindSpace (BfvPageNumber, &NumberOfMemoryMapEntries, EfiMemoryDescriptor, EfiRuntimeServicesData, EFI_MEMORY_WB);
   if (BfvBase == 0) {
     SystemHang ("Failed to find free space to hold decompressed BFV\n");
   }
+
   ZeroMem ((VOID *)(UINTN)BfvBase, BfvPageNumber * EFI_PAGE_SIZE);
   CopyMem ((VOID *)(UINTN)BfvBase, (VOID *)(UINTN)EFI_DECOMPRESSED_BUFFER_ADDRESS, DestinationSize);
 
@@ -174,7 +173,7 @@ EfiLoader (
 
   Status = LzmaUefiDecompress (
              (VOID *)(UINTN)(EFILDR_HEADER_ADDRESS + EFILDRImage->Offset),
-              EFILDRImage->Length,
+             EFILDRImage->Length,
              (VOID *)(UINTN)EFI_DECOMPRESSED_BUFFER_ADDRESS,
              (VOID *)(UINTN)((EFI_DECOMPRESSED_BUFFER_ADDRESS + DestinationSize + 0x1000) & 0xfffff000)
              );
@@ -200,7 +199,6 @@ EfiLoader (
   //
 
   if (DxeIplImage.EntryPoint != NULL) {
-
     Handoff.MemDescCount      = NumberOfMemoryMapEntries;
     Handoff.MemDesc           = EfiMemoryDescriptor;
     Handoff.BfvBase           = (VOID *)(UINTN)BfvBase;
@@ -211,7 +209,7 @@ EfiLoader (
     Handoff.DxeCoreImageSize  = DxeCoreImage.NoPages * EFI_PAGE_SIZE;
     Handoff.DxeCoreEntryPoint = (VOID *)(UINTN)DxeCoreImage.EntryPoint;
 
-    EfiMainEntrypoint = (EFI_MAIN_ENTRYPOINT)(UINTN) DxeIplImage.EntryPoint;
+    EfiMainEntrypoint = (EFI_MAIN_ENTRYPOINT)(UINTN)DxeIplImage.EntryPoint;
     EfiMainEntrypoint (&Handoff);
   }
 
@@ -225,9 +223,9 @@ EfiLoader (
 EFI_STATUS
 EFIAPI
 _ModuleEntryPointReal (
-  UINT32    BiosMemoryMapBaseAddress
+  UINT32  BiosMemoryMapBaseAddress
   )
 {
-  EfiLoader(BiosMemoryMapBaseAddress);
+  EfiLoader (BiosMemoryMapBaseAddress);
   return EFI_SUCCESS;
 }

@@ -11,27 +11,27 @@
 UINT64
 EFIAPI
 DivU64x32 (
-  IN      UINT64                    Dividend,
-  IN      UINT32                    Divisor
+  IN      UINT64  Dividend,
+  IN      UINT32  Divisor
   )
 {
   ASSERT (Divisor != 0);
-  
+
   return Dividend / Divisor;
 }
 
 UINT64
 EFIAPI
 DivU64x32Remainder (
-  IN      UINT64                    Dividend,
-  IN      UINT32                    Divisor,
-  OUT     UINT32                    *Remainder OPTIONAL
+  IN      UINT64  Dividend,
+  IN      UINT32  Divisor,
+  OUT     UINT32  *Remainder OPTIONAL
   )
 {
   ASSERT (Divisor != 0);
 
   if (Remainder != NULL) {
-    *Remainder = (UINT32) (Dividend % Divisor);
+    *Remainder = (UINT32)(Dividend % Divisor);
   }
 
   return Dividend / Divisor;
@@ -40,9 +40,9 @@ DivU64x32Remainder (
 INT64
 EFIAPI
 DivS64x64Remainder (
-  IN      INT64                     Dividend,
-  IN      INT64                     Divisor,
-  OUT     INT64                     *Remainder  OPTIONAL
+  IN      INT64  Dividend,
+  IN      INT64  Divisor,
+  OUT     INT64  *Remainder  OPTIONAL
   )
 {
   ASSERT (Divisor != 0);
@@ -57,13 +57,13 @@ DivS64x64Remainder (
 UINT64
 EFIAPI
 DivU64x64Remainder (
-  IN      UINT64                    Dividend,
-  IN      UINT64                    Divisor,
-  OUT     UINT64                    *Remainder OPTIONAL
+  IN      UINT64  Dividend,
+  IN      UINT64  Divisor,
+  OUT     UINT64  *Remainder OPTIONAL
   )
 {
   ASSERT (Divisor != 0);
-  
+
   if (Remainder != NULL) {
     *Remainder = Dividend % Divisor;
   }
@@ -74,8 +74,8 @@ DivU64x64Remainder (
 UINT64
 EFIAPI
 LShiftU64 (
-  IN      UINT64                    Operand,
-  IN      UINTN                     Count
+  IN      UINT64  Operand,
+  IN      UINTN   Count
   )
 {
   return Operand << Count;
@@ -84,8 +84,8 @@ LShiftU64 (
 UINT64
 EFIAPI
 RShiftU64 (
-  IN      UINT64                    Operand,
-  IN      UINTN                     Count
+  IN      UINT64  Operand,
+  IN      UINTN   Count
   )
 {
   return Operand >> Count;
@@ -94,8 +94,8 @@ RShiftU64 (
 UINT64
 EFIAPI
 MultU64x32 (
-  IN      UINT64                    Multiplicand,
-  IN      UINT32                    Multiplier
+  IN      UINT64  Multiplicand,
+  IN      UINT32  Multiplier
   )
 {
   return Multiplicand * Multiplier;
@@ -104,8 +104,8 @@ MultU64x32 (
 INT64
 EFIAPI
 MultS64x64 (
-  IN      INT64                     Multiplicand,
-  IN      INT64                     Multiplier
+  IN      INT64  Multiplicand,
+  IN      INT64  Multiplier
   )
 {
   return Multiplicand * Multiplier;
@@ -114,8 +114,8 @@ MultS64x64 (
 UINT64
 EFIAPI
 MultU64x64 (
-  IN      UINT64                    Multiplicand,
-  IN      UINT64                    Multiplier
+  IN      UINT64  Multiplicand,
+  IN      UINT64  Multiplier
   )
 {
   return Multiplicand * Multiplier;
@@ -123,7 +123,7 @@ MultU64x64 (
 
 UINT64
 SwapBytes64 (
-  UINT64                    Operand
+  UINT64  Operand
   )
 {
   return __builtin_bswap64 (Operand);

@@ -26,16 +26,16 @@
 
 #include "VirtualFsInternal.h"
 
-STATIC EFI_HANDLE_PROTOCOL mOriginalHandleProtocol;
-STATIC EFI_LOCATE_PROTOCOL mOriginalLocateProtocol;
-STATIC EFI_FILE_OPEN       mOpenCallback;
-STATIC UINT32              mEntranceCount;
+STATIC EFI_HANDLE_PROTOCOL  mOriginalHandleProtocol;
+STATIC EFI_LOCATE_PROTOCOL  mOriginalLocateProtocol;
+STATIC EFI_FILE_OPEN        mOpenCallback;
+STATIC UINT32               mEntranceCount;
 
 STATIC
 VOID
 VirtualFsWrapProtocol (
-  IN  EFI_GUID          *Protocol,
-  OUT VOID              **Interface
+  IN  EFI_GUID  *Protocol,
+  OUT VOID      **Interface
   )
 {
   EFI_STATUS                       Status;
@@ -55,16 +55,16 @@ STATIC
 EFI_STATUS
 EFIAPI
 VirtualFsHandleProtocol (
-  IN  EFI_HANDLE        Handle,
-  IN  EFI_GUID          *Protocol,
-  OUT VOID              **Interface
+  IN  EFI_HANDLE  Handle,
+  IN  EFI_GUID    *Protocol,
+  OUT VOID        **Interface
   )
 {
   EFI_STATUS  Status;
 
   Status = mOriginalHandleProtocol (Handle, Protocol, Interface);
 
-  if (!EFI_ERROR (Status) && Interface != NULL && mEntranceCount == 0) {
+  if (!EFI_ERROR (Status) && (Interface != NULL) && (mEntranceCount == 0)) {
     ++mEntranceCount;
     VirtualFsWrapProtocol (Protocol, Interface);
     --mEntranceCount;
@@ -86,7 +86,7 @@ VirtualFsLocateProtocol (
 
   Status = mOriginalLocateProtocol (Protocol, Registration, Interface);
 
-  if (!EFI_ERROR (Status) && Interface != NULL && mEntranceCount == 0) {
+  if (!EFI_ERROR (Status) && (Interface != NULL) && (mEntranceCount == 0)) {
     ++mEntranceCount;
     VirtualFsWrapProtocol (Protocol, Interface);
     --mEntranceCount;
@@ -97,12 +97,13 @@ VirtualFsLocateProtocol (
 
 EFI_STATUS
 EnableVirtualFs (
-  IN OUT EFI_BOOT_SERVICES       *BootServices,
-  IN     EFI_FILE_OPEN           OpenCallback
+  IN OUT EFI_BOOT_SERVICES  *BootServices,
+  IN     EFI_FILE_OPEN      OpenCallback
   )
 {
-  if (mOriginalHandleProtocol != NULL
-    || BootServices->HandleProtocol == VirtualFsHandleProtocol) {
+  if (  (mOriginalHandleProtocol != NULL)
+     || (BootServices->HandleProtocol == VirtualFsHandleProtocol))
+  {
     return EFI_ALREADY_STARTED;
   }
 
@@ -122,11 +123,12 @@ EnableVirtualFs (
 
 EFI_STATUS
 DisableVirtualFs (
-  IN OUT EFI_BOOT_SERVICES       *BootServices
+  IN OUT EFI_BOOT_SERVICES  *BootServices
   )
 {
-  if (mOriginalHandleProtocol == NULL
-    || BootServices->HandleProtocol != VirtualFsHandleProtocol) {
+  if (  (mOriginalHandleProtocol == NULL)
+     || (BootServices->HandleProtocol != VirtualFsHandleProtocol))
+  {
     return EFI_ALREADY_STARTED;
   }
 
@@ -140,4 +142,3 @@ DisableVirtualFs (
 
   return EFI_SUCCESS;
 }
-

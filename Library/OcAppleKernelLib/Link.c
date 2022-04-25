@@ -1,6 +1,6 @@
 /** @file
   Library handling KEXT prelinking.
-  
+
 Copyright (c) 2018, Download-Fritz.  All rights reserved.<BR>
 This program and the accompanying materials are licensed and made available
 under the terms and conditions of the BSD License which accompanies this
@@ -28,8 +28,8 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 
 #include "PrelinkedInternal.h"
 
-#define TEXT_SEG_PROT (MACH_SEGMENT_VM_PROT_READ | MACH_SEGMENT_VM_PROT_EXECUTE)
-#define DATA_SEG_PROT (MACH_SEGMENT_VM_PROT_READ | MACH_SEGMENT_VM_PROT_WRITE)
+#define TEXT_SEG_PROT  (MACH_SEGMENT_VM_PROT_READ | MACH_SEGMENT_VM_PROT_EXECUTE)
+#define DATA_SEG_PROT  (MACH_SEGMENT_VM_PROT_READ | MACH_SEGMENT_VM_PROT_WRITE)
 
 //
 // Symbols
@@ -38,17 +38,17 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 STATIC
 CONST PRELINKED_KEXT_SYMBOL *
 InternalOcGetSymbolWorkerName (
-  IN PRELINKED_KEXT                   *Kext,
-  IN CONST CHAR8                      *LookupValue,
-  IN UINT32                           LookupValueLength,
-  IN OC_GET_SYMBOL_LEVEL              SymbolLevel
+  IN PRELINKED_KEXT       *Kext,
+  IN CONST CHAR8          *LookupValue,
+  IN UINT32               LookupValueLength,
+  IN OC_GET_SYMBOL_LEVEL  SymbolLevel
   )
 {
-  PRELINKED_KEXT              *Dependency;
-  CONST PRELINKED_KEXT_SYMBOL *Symbols;
-  CONST PRELINKED_KEXT_SYMBOL *SymbolsEnd;
-  UINT32                      Index;
-  UINT32                      NumSymbols;
+  PRELINKED_KEXT               *Dependency;
+  CONST PRELINKED_KEXT_SYMBOL  *Symbols;
+  CONST PRELINKED_KEXT_SYMBOL  *SymbolsEnd;
+  UINT32                       Index;
+  UINT32                       NumSymbols;
 
   //
   // Block any 1+ level dependencies.
@@ -72,18 +72,21 @@ InternalOcGetSymbolWorkerName (
       // Please do not change this without careful profiling.
       //
       if (Symbols->Length == LookupValueLength) {
-        if (Symbols->Name[LookupValueLength / 2] == LookupValue[LookupValueLength / 2]
-          && Symbols->Name[(LookupValueLength / 2) + 1] == LookupValue[(LookupValueLength / 2) + 1]) {
+        if (  (Symbols->Name[LookupValueLength / 2] == LookupValue[LookupValueLength / 2])
+           && (Symbols->Name[(LookupValueLength / 2) + 1] == LookupValue[(LookupValueLength / 2) + 1]))
+        {
           for (Index = 0; Index < LookupValueLength; ++Index) {
             if (Symbols->Name[Index] != LookupValue[Index]) {
               break;
             }
           }
+
           if (Index == LookupValueLength) {
             return Symbols;
           }
         }
       }
+
       Symbols++;
     }
   }
@@ -100,11 +103,11 @@ InternalOcGetSymbolWorkerName (
       }
 
       Symbols = InternalOcGetSymbolWorkerName (
-                 Dependency,
-                 LookupValue,
-                 LookupValueLength,
-                 OcGetSymbolOnlyCxx
-                 );
+                  Dependency,
+                  LookupValue,
+                  LookupValueLength,
+                  OcGetSymbolOnlyCxx
+                  );
       if (Symbols != NULL) {
         return Symbols;
       }
@@ -117,16 +120,16 @@ InternalOcGetSymbolWorkerName (
 STATIC
 CONST PRELINKED_KEXT_SYMBOL *
 InternalOcGetSymbolWorkerValue (
-  IN PRELINKED_KEXT                   *Kext,
-  IN UINT64                           LookupValue,
-  IN OC_GET_SYMBOL_LEVEL              SymbolLevel
+  IN PRELINKED_KEXT       *Kext,
+  IN UINT64               LookupValue,
+  IN OC_GET_SYMBOL_LEVEL  SymbolLevel
   )
 {
-  PRELINKED_KEXT              *Dependency;
-  CONST PRELINKED_KEXT_SYMBOL *Symbols;
-  CONST PRELINKED_KEXT_SYMBOL *SymbolsEnd;
-  UINT32                      Index;
-  UINT32                      NumSymbols;
+  PRELINKED_KEXT               *Dependency;
+  CONST PRELINKED_KEXT_SYMBOL  *Symbols;
+  CONST PRELINKED_KEXT_SYMBOL  *SymbolsEnd;
+  UINT32                       Index;
+  UINT32                       NumSymbols;
 
   //
   // Block any 1+ level dependencies.
@@ -141,6 +144,7 @@ InternalOcGetSymbolWorkerValue (
       NumSymbols = Kext->NumberOfCxxSymbols;
       Symbols    = &Kext->LinkedSymbolTable[(Kext->NumberOfSymbols - Kext->NumberOfCxxSymbols) & ~15ULL];
     }
+
     //
     // WARN! Hot path! Do not change this code unless you have decent profiling data.
     // We are not allowed to use SIMD in UEFI, but we can still do better with larger iteration.
@@ -150,7 +154,7 @@ InternalOcGetSymbolWorkerValue (
     //
     SymbolsEnd = &Symbols[NumSymbols & ~15ULL];
     while (Symbols < SymbolsEnd) {
-      #define MATCH(X) if (Symbols[X].Value == LookupValue) { return &Symbols[X]; }
+      #define MATCH(X)  if (Symbols[X].Value == LookupValue) { return &Symbols[X]; }
       MATCH (0) MATCH (1) MATCH (2)  MATCH (3)  MATCH (4)  MATCH (5)  MATCH (6)  MATCH (7)
       MATCH (8) MATCH (9) MATCH (10) MATCH (11) MATCH (12) MATCH (13) MATCH (14) MATCH (15)
       #undef MATCH
@@ -170,10 +174,10 @@ InternalOcGetSymbolWorkerValue (
       }
 
       Symbols = InternalOcGetSymbolWorkerValue (
-                 Dependency,
-                 LookupValue,
-                 OcGetSymbolOnlyCxx
-                 );
+                  Dependency,
+                  LookupValue,
+                  OcGetSymbolOnlyCxx
+                  );
       if (Symbols != NULL) {
         return Symbols;
       }
@@ -197,7 +201,7 @@ InternalOcGetSymbolName (
   UINT32                      Index;
   UINT32                      LookupValueLength;
 
-  Symbol = NULL;
+  Symbol            = NULL;
   LookupValueLength = (UINT32)AsciiStrLen (LookupValue);
 
   //
@@ -209,11 +213,11 @@ InternalOcGetSymbolName (
 
   if ((SymbolLevel == OcGetSymbolOnlyCxx) && (Kext->LinkedSymbolTable != NULL)) {
     Symbol = InternalOcGetSymbolWorkerName (
-      Kext,
-      LookupValue,
-      LookupValueLength,
-      SymbolLevel
-      );
+               Kext,
+               LookupValue,
+               LookupValueLength,
+               SymbolLevel
+               );
   } else {
     for (Index = 0; Index < ARRAY_SIZE (Kext->Dependencies); ++Index) {
       Dependency = Kext->Dependencies[Index];
@@ -288,13 +292,13 @@ InternalOcGetSymbolValue (
 **/
 VOID
 InternalSolveSymbolValue (
-  IN  BOOLEAN             Is32Bit,
-  IN  UINT64              Value,
-  OUT MACH_NLIST_ANY      *Symbol
+  IN  BOOLEAN         Is32Bit,
+  IN  UINT64          Value,
+  OUT MACH_NLIST_ANY  *Symbol
   )
 {
   if (Is32Bit) {
-    Symbol->Symbol32.Value   = (UINT32) Value;
+    Symbol->Symbol32.Value   = (UINT32)Value;
     Symbol->Symbol32.Type    = (MACH_N_TYPE_ABS | MACH_N_TYPE_EXT);
     Symbol->Symbol32.Section = NO_SECT;
   } else {
@@ -319,10 +323,10 @@ InternalSolveSymbolValue (
 STATIC
 BOOLEAN
 InternalSolveSymbolNonWeak (
-  IN     PRELINKED_CONTEXT         *Context,
-  IN     PRELINKED_KEXT            *Kext,
-  IN     CONST CHAR8               *Name,
-  IN OUT MACH_NLIST_ANY            *Symbol
+  IN     PRELINKED_CONTEXT  *Context,
+  IN     PRELINKED_KEXT     *Kext,
+  IN     CONST CHAR8        *Name,
+  IN OUT MACH_NLIST_ANY     *Symbol
   )
 {
   INTN                        Result;
@@ -335,7 +339,7 @@ InternalSolveSymbolNonWeak (
     if ((SymbolType & MACH_N_TYPE_TYPE) != MACH_N_TYPE_INDR) {
       //
       // KXLD_WEAK_TEST_SYMBOL might have been resolved by the resolving code
-      // at the end of InternalSolveSymbol. 
+      // at the end of InternalSolveSymbol.
       //
       Result = AsciiStrCmp (
                  MachoGetSymbolName (&Kext->Context.MachContext, Symbol),
@@ -347,6 +351,7 @@ InternalSolveSymbolNonWeak (
         //
         return TRUE;
       }
+
       //
       // Any other symbols must be undefined or indirect.
       //
@@ -358,6 +363,7 @@ InternalSolveSymbolNonWeak (
     //
     return FALSE;
   }
+
   //
   // Do not error when the referenced symbol cannot be found as some will be
   // patched by the VTable code.  This matches the KXLD behaviour.
@@ -396,13 +402,13 @@ InternalSolveSymbolNonWeak (
 STATIC
 BOOLEAN
 InternalSolveSymbol (
-  IN     PRELINKED_CONTEXT         *Context,
-  IN     PRELINKED_KEXT            *Kext,
-  IN     CONST CHAR8               *Name,
-  IN OUT MACH_NLIST_ANY            *Symbol,
-  IN OUT UINT64                    *WeakTestValue,
-  IN     CONST MACH_NLIST_ANY      *UndefinedSymbols,
-  IN     UINT32                    NumUndefinedSymbols
+  IN     PRELINKED_CONTEXT     *Context,
+  IN     PRELINKED_KEXT        *Kext,
+  IN     CONST CHAR8           *Name,
+  IN OUT MACH_NLIST_ANY        *Symbol,
+  IN OUT UINT64                *WeakTestValue,
+  IN     CONST MACH_NLIST_ANY  *UndefinedSymbols,
+  IN     UINT32                NumUndefinedSymbols
   )
 {
   BOOLEAN               Success;
@@ -449,16 +455,18 @@ InternalSolveSymbol (
           } else {
             WeakTestSymbol = (MACH_NLIST_ANY *)&(&UndefinedSymbols->Symbol64)[Index];
           }
+
           Result = AsciiStrCmp (
-                    MachoGetSymbolName (
-                      &Kext->Context.MachContext,
-                      WeakTestSymbol
-                      ),
-                    KXLD_WEAK_TEST_SYMBOL
-                    );
+                     MachoGetSymbolName (
+                       &Kext->Context.MachContext,
+                       WeakTestSymbol
+                       ),
+                     KXLD_WEAK_TEST_SYMBOL
+                     );
           if (Result == 0) {
             if (((Context->Is32Bit ?
-              WeakTestSymbol->Symbol32.Descriptor : WeakTestSymbol->Symbol64.Descriptor) & MACH_N_TYPE_TYPE) == MACH_N_TYPE_UNDF) {
+                  WeakTestSymbol->Symbol32.Descriptor : WeakTestSymbol->Symbol64.Descriptor) & MACH_N_TYPE_TYPE) == MACH_N_TYPE_UNDF)
+            {
               Success = InternalSolveSymbolNonWeak (
                           Context,
                           Kext,
@@ -470,7 +478,7 @@ InternalSolveSymbol (
               }
             }
 
-            Value = Context->Is32Bit ? WeakTestSymbol->Symbol32.Value : WeakTestSymbol->Symbol64.Value;
+            Value          = Context->Is32Bit ? WeakTestSymbol->Symbol32.Value : WeakTestSymbol->Symbol64.Value;
             *WeakTestValue = Value;
             break;
           }
@@ -484,15 +492,16 @@ InternalSolveSymbol (
           }
 
           Result = AsciiStrCmp (
-                    MachoGetSymbolName (
-                      &Kext->Context.MachContext,
-                      WeakTestSymbol
-                      ),
-                    KXLD_WEAK_TEST_SYMBOL
-                    );
+                     MachoGetSymbolName (
+                       &Kext->Context.MachContext,
+                       WeakTestSymbol
+                       ),
+                     KXLD_WEAK_TEST_SYMBOL
+                     );
           if (Result == 0) {
             if (((Context->Is32Bit ?
-              WeakTestSymbol->Symbol32.Descriptor : WeakTestSymbol->Symbol64.Descriptor) & MACH_N_TYPE_TYPE) == MACH_N_TYPE_UNDF) {
+                  WeakTestSymbol->Symbol32.Descriptor : WeakTestSymbol->Symbol64.Descriptor) & MACH_N_TYPE_TYPE) == MACH_N_TYPE_UNDF)
+            {
               Success = InternalSolveSymbolNonWeak (
                           Context,
                           Kext,
@@ -504,7 +513,7 @@ InternalSolveSymbol (
               }
             }
 
-            Value = Context->Is32Bit ? WeakTestSymbol->Symbol32.Value : WeakTestSymbol->Symbol64.Value;
+            Value          = Context->Is32Bit ? WeakTestSymbol->Symbol32.Value : WeakTestSymbol->Symbol64.Value;
             *WeakTestValue = Value;
             break;
           }
@@ -626,9 +635,9 @@ InternalCalculateTargets (
   //
   if (Relocation->Extern != 0) {
     Symbol = MachoGetSymbolByIndex (
-                MachoContext,
-                Relocation->SymbolNumber
-                );
+               MachoContext,
+               Relocation->SymbolNumber
+               );
     if (Symbol == NULL) {
       return FALSE;
     }
@@ -655,8 +664,9 @@ InternalCalculateTargets (
       DEBUG ((DEBUG_INFO, "OCAK: Symbol %a has 0-value\n", Name));
     }
   } else {
-    if ((Relocation->SymbolNumber == NO_SECT)
-     || (Relocation->SymbolNumber > MAX_SECT)) {
+    if (  (Relocation->SymbolNumber == NO_SECT)
+       || (Relocation->SymbolNumber > MAX_SECT))
+    {
       return FALSE;
     }
 
@@ -684,12 +694,14 @@ InternalCalculateTargets (
   }
 
   if (Context->Is32Bit ?
-    MachoRelocationIsPairIntel32 ((UINT8) Relocation->Type) :
-    MachoRelocationIsPairIntel64 ((UINT8) Relocation->Type)
-    ) {
+      MachoRelocationIsPairIntel32 ((UINT8)Relocation->Type) :
+      MachoRelocationIsPairIntel64 ((UINT8)Relocation->Type)
+      )
+  {
     if (NextRelocation == NULL) {
       return FALSE;
     }
+
     //
     // As this relocation is the second one in a pair, it cannot be the start
     // of a pair itself.  Pass dummy data for the related arguments.  This call
@@ -737,7 +749,7 @@ InternalIsDirectPureVirtualCall (
   CONST PRELINKED_VTABLE_ENTRY *Entry;
 
   DivU64x32Remainder (Offset, Is32Bit ? sizeof (UINT32) : sizeof (UINT64), &Remainder);
-  if (Remainder != 0 || Offset < VTABLE_ENTRY_SIZE_X (Is32Bit)) {
+  if ((Remainder != 0) || (Offset < VTABLE_ENTRY_SIZE_X (Is32Bit))) {
     return FALSE;
   }
 
@@ -817,7 +829,7 @@ InternalRelocateRelocation (
 
   Address    = Relocation->Address;
   Length     = Relocation->Size;
-  Type       = (UINT8) Relocation->Type;
+  Type       = (UINT8)Relocation->Type;
   PcRelative = (Relocation->PcRelative != 0);
   PairTarget = 0;
 
@@ -828,12 +840,12 @@ InternalRelocateRelocation (
   // Scattered relocations apply only to 32-bit.
   //
   if (Context->Is32Bit) {
-    if (((MACH_SCATTERED_RELOCATION_INFO *) Relocation)->Scattered) {
-      ScatteredRelocation = (MACH_SCATTERED_RELOCATION_INFO *) Relocation;
+    if (((MACH_SCATTERED_RELOCATION_INFO *)Relocation)->Scattered) {
+      ScatteredRelocation = (MACH_SCATTERED_RELOCATION_INFO *)Relocation;
 
       Address    = ScatteredRelocation->Address;
       Length     = ScatteredRelocation->Size;
-      Type       = (UINT8) ScatteredRelocation->Type;
+      Type       = (UINT8)ScatteredRelocation->Type;
       PcRelative = (ScatteredRelocation->PcRelative != 0);
       Target     = LoadAddress;
     }
@@ -844,10 +856,10 @@ InternalRelocateRelocation (
   }
 
   InstructionPtr = MachoGetFilePointerByAddress (
-    &Kext->Context.MachContext,
-    (RelocationBase + Address),
-    &MaxSize
-    );
+                     &Kext->Context.MachContext,
+                     (RelocationBase + Address),
+                     &MaxSize
+                     );
   if ((InstructionPtr == NULL) || (MaxSize < ((Length != 3) ? 4U : 8U))) {
     return MAX_UINTN;
   }
@@ -861,15 +873,15 @@ InternalRelocateRelocation (
   Vtable = NULL;
   if (ScatteredRelocation == NULL) {
     Result = InternalCalculateTargets (
-      Context,
-      Kext,
-      LoadAddress,
-      Relocation,
-      NextRelocation,
-      &Target,
-      &PairTarget,
-      &Vtable
-      );
+               Context,
+               Kext,
+               LoadAddress,
+               Relocation,
+               NextRelocation,
+               &Target,
+               &PairTarget,
+               &Vtable
+               );
     if (!Result) {
       return MAX_UINTN;
     }
@@ -881,8 +893,9 @@ InternalRelocateRelocation (
   if (Length != 3) {
     CopyMem (&Instruction32, InstructionPtr, sizeof (Instruction32));
 
-    if ((Vtable != NULL)
-     && InternalIsDirectPureVirtualCall (Context->Is32Bit, Vtable, Instruction32)) {
+    if (  (Vtable != NULL)
+       && InternalIsDirectPureVirtualCall (Context->Is32Bit, Vtable, Instruction32))
+    {
       return MAX_UINTN;
     }
 
@@ -893,14 +906,13 @@ InternalRelocateRelocation (
 
       switch (Type) {
         case MachGenericRelocVanilla:
-          Instruction32 += (UINT32) Target;
+          Instruction32 += (UINT32)Target;
           break;
 
         default:
-          DEBUG ((DEBUG_ERROR, "OCAK: Non-vanilla 32-bit relocations are unsupported\n")); //FIXME: Implement paired relocs.
+          DEBUG ((DEBUG_ERROR, "OCAK: Non-vanilla 32-bit relocations are unsupported\n")); // FIXME: Implement paired relocs.
           return MAX_UINTN;
       }
-
     } else {
       //
       // There are a number of different small adjustments for pc-relative
@@ -912,28 +924,32 @@ InternalRelocateRelocation (
       switch (Type) {
         case MachX8664RelocSigned:
           if (IsNormalLocal) {
-            Adjustment = 0;    
+            Adjustment = 0;
             break;
           }
-          // Fall through
+
+        // Fall through
         case MachX8664RelocSigned1:
           if (IsNormalLocal) {
             Adjustment = 1;
             break;
           }
-          // Fall through
+
+        // Fall through
         case MachX8664RelocSigned2:
           if (IsNormalLocal) {
             Adjustment = 2;
             break;
           }
-          // Fall through
+
+        // Fall through
         case MachX8664RelocSigned4:
           if (IsNormalLocal) {
             Adjustment = 4;
             break;
           }
-          // Fall through
+
+        // Fall through
         case MachX8664RelocBranch:
         case MachX8664RelocGot:
         case MachX8664RelocGotLoad:
@@ -947,8 +963,9 @@ InternalRelocateRelocation (
           break;
         }
       }
+
       //
-      // Perform the actual relocation.  All of the 32-bit relocations are 
+      // Perform the actual relocation.  All of the 32-bit relocations are
       // pc-relative except for SUBTRACTOR, so a good chunk of the logic is
       // stuck in calculate_displacement_x86_64.  The signed relocations are
       // a special case, because when they are non-external, the instruction
@@ -991,7 +1008,7 @@ InternalRelocateRelocation (
         case MachX8664RelocSubtractor:
         {
           InvalidPcRel  = PcRelative;
-          Instruction32 = (INT32) (Target - PairTarget);
+          Instruction32 = (INT32)(Target - PairTarget);
           IsPair        = TRUE;
           break;
         }
@@ -1004,10 +1021,10 @@ InternalRelocateRelocation (
 
       if (PcRelative) {
         Result = InternalCalculateDisplacementIntel64 (
-          Target,
-          Adjustment,
-          &Instruction32
-          );
+                   Target,
+                   Adjustment,
+                   &Instruction32
+                   );
         if (!Result) {
           return MAX_UINTN;
         }
@@ -1018,8 +1035,9 @@ InternalRelocateRelocation (
   } else {
     CopyMem (&Instruction64, InstructionPtr, sizeof (Instruction64));
 
-    if ((Vtable != NULL)
-     && InternalIsDirectPureVirtualCall (Context->Is32Bit, Vtable, Instruction64)) {
+    if (  (Vtable != NULL)
+       && InternalIsDirectPureVirtualCall (Context->Is32Bit, Vtable, Instruction64))
+    {
       return MAX_UINTN;
     }
 
@@ -1111,7 +1129,7 @@ InternalRelocateAndCopyRelocations (
   //
   // Fallback to section-based relocations if needed for 32-bit.
   //
-  if (Context->Is32Bit && *NumRelocations == 0) {
+  if (Context->Is32Bit && (*NumRelocations == 0)) {
     SectionIndex = 0;
     while (TRUE) {
       Section32 = MachoGetSectionByIndex32 (&Kext->Context.MachContext, SectionIndex);
@@ -1120,7 +1138,7 @@ InternalRelocateAndCopyRelocations (
       }
 
       if (Section32->NumRelocations > 0) {
-        Relocation = (MACH_RELOCATION_INFO *) ((UINTN) MachoGetMachHeader32 (&Kext->Context.MachContext) + Section32->RelocationsOffset);
+        Relocation = (MACH_RELOCATION_INFO *)((UINTN)MachoGetMachHeader32 (&Kext->Context.MachContext) + Section32->RelocationsOffset);
         for (Index = 0; Index < Section32->NumRelocations; ++Index) {
           NextRelocation = &Relocation[Index + 1];
           //
@@ -1134,20 +1152,20 @@ InternalRelocateAndCopyRelocations (
           // Relocate the relocation.
           //
           Result = InternalRelocateRelocation (
-                    Context,
-                    Kext,
-                    LoadAddress,
-                    RelocationBase + Section32->Address,
-                    &Relocation[Index],
-                    NextRelocation
-                    );
+                     Context,
+                     Kext,
+                     LoadAddress,
+                     RelocationBase + Section32->Address,
+                     &Relocation[Index],
+                     NextRelocation
+                     );
           if (Result == MAX_UINTN) {
             return FALSE;
           }
         }
 
-        Section32->NumRelocations     = 0;
-        Section32->RelocationsOffset  = 0;
+        Section32->NumRelocations    = 0;
+        Section32->RelocationsOffset = 0;
       }
 
       ++SectionIndex;
@@ -1165,10 +1183,11 @@ InternalRelocateAndCopyRelocations (
     // Assertion: Not i386.  Scattered Relocations are only supported by i386.
     //            && ((UINT32)Relocation->Address & MACH_RELOC_SCATTERED) == 0
     //
-    if ((SourceRelocations[Index].Extern == 0)
-     && (SourceRelocations[Index].SymbolNumber == MACH_RELOC_ABSOLUTE)) {
+    if (  (SourceRelocations[Index].Extern == 0)
+       && (SourceRelocations[Index].SymbolNumber == MACH_RELOC_ABSOLUTE))
+    {
       //
-      // A section-based relocation entry can be skipped for absolute 
+      // A section-based relocation entry can be skipped for absolute
       // symbols.
       //
       continue;
@@ -1181,6 +1200,7 @@ InternalRelocateAndCopyRelocations (
     if (Index == (*NumRelocations - 1)) {
       NextRelocation = NULL;
     }
+
     //
     // Relocate the relocation.
     //
@@ -1195,6 +1215,7 @@ InternalRelocateAndCopyRelocations (
     if (Result == MAX_UINTN) {
       return FALSE;
     }
+
     //
     // Copy the Relocation to the destination buffer if it shall be preserved.
     //
@@ -1219,6 +1240,7 @@ InternalRelocateAndCopyRelocations (
 
       ++PreservedRelocations;
     }
+
     //
     // Skip the next Relocation as instructed by
     // InternalRelocateRelocation().
@@ -1259,14 +1281,15 @@ InternalRelocateSymbol (
 
     if (AsciiStrCmp (SymbolName, "_kmod_info") == 0) {
       Result = MachoSymbolGetFileOffset (
-                MachoContext,
-                Symbol,
-                &KmodOffset,
-                &MaxSize
-                );
-      if (!Result
-      || (MaxSize < (MachoContext->Is32Bit ? sizeof (KMOD_INFO_32_V1) : sizeof (KMOD_INFO_64_V1))
-      || (KmodOffset % 4) != 0)) {
+                 MachoContext,
+                 Symbol,
+                 &KmodOffset,
+                 &MaxSize
+                 );
+      if (  !Result
+         || (  (MaxSize < (MachoContext->Is32Bit ? sizeof (KMOD_INFO_32_V1) : sizeof (KMOD_INFO_64_V1)))
+            || ((KmodOffset % 4) != 0)))
+      {
         return FALSE;
       }
 
@@ -1275,10 +1298,10 @@ InternalRelocateSymbol (
   }
 
   return MachoRelocateSymbol (
-          MachoContext,
-          LoadAddress,
-          Symbol
-          );
+           MachoContext,
+           LoadAddress,
+           Symbol
+           );
 }
 
 STATIC
@@ -1303,7 +1326,7 @@ InternalRelocateSymbols (
   //
   // Fallback to standard symbol lookup if needed for 32-bit.
   //
-  if (MachoContext->Is32Bit && NumSymbols == 0) {
+  if (MachoContext->Is32Bit && (NumSymbols == 0)) {
     Index = 0;
     while (TRUE) {
       Symbol = MachoGetSymbolByIndex (MachoContext, Index);
@@ -1312,13 +1335,13 @@ InternalRelocateSymbols (
       }
 
       SymbolType = Symbol->Symbol32.Type & MACH_N_TYPE_TYPE;
-      if (SymbolType == MACH_N_TYPE_SECT || SymbolType == MACH_N_TYPE_EXT) {
+      if ((SymbolType == MACH_N_TYPE_SECT) || (SymbolType == MACH_N_TYPE_EXT)) {
         Result = InternalRelocateSymbol (
-                  MachoContext,
-                  LoadAddress,
-                  Symbol,
-                  KmodInfoOffset
-                  );
+                   MachoContext,
+                   LoadAddress,
+                   Symbol,
+                   KmodInfoOffset
+                   );
 
         if (!Result) {
           return FALSE;
@@ -1337,12 +1360,13 @@ InternalRelocateSymbols (
     } else {
       Symbol = (MACH_NLIST_ANY *)&(&Symbols->Symbol64)[Index];
     }
+
     Result = InternalRelocateSymbol (
-              MachoContext,
-              LoadAddress,
-              Symbol,
-              KmodInfoOffset
-              );
+               MachoContext,
+               LoadAddress,
+               Symbol,
+               KmodInfoOffset
+               );
 
     if (!Result) {
       return FALSE;
@@ -1400,12 +1424,12 @@ InternalProcessSymbolPointers (
   }
 
   MachSize = MachoGetFileSize (MachoContext);
-  Result = OcOverflowMulAddU32 (
-             DySymtab->NumIndirectSymbols,
-             MachoContext->Is32Bit ? sizeof (UINT32) : sizeof (UINT64),
-             DySymtab->IndirectSymbolsOffset,
-             &OffsetTop
-             );
+  Result   = OcOverflowMulAddU32 (
+               DySymtab->NumIndirectSymbols,
+               MachoContext->Is32Bit ? sizeof (UINT32) : sizeof (UINT64),
+               DySymtab->IndirectSymbolsOffset,
+               &OffsetTop
+               );
   if (Result || (OffsetTop > MachSize)) {
     return FALSE;
   }
@@ -1426,6 +1450,7 @@ InternalProcessSymbolPointers (
   if (!OC_TYPE_ALIGNED (UINT32, Tmp)) {
     return FALSE;
   }
+
   SymIndices = (UINT32 *)Tmp + FirstSym;
 
   IndirectSymPtr = (VOID *)((UINTN)MachHeader + (MachoContext->Is32Bit ? Section->Section32.Offset : Section->Section64.Offset));
@@ -1440,9 +1465,9 @@ InternalProcessSymbolPointers (
       }
 
       if (MachoContext->Is32Bit) {
-        ((UINT32 *) IndirectSymPtr)[Index] += (UINT32) LoadAddress;
+        ((UINT32 *)IndirectSymPtr)[Index] += (UINT32)LoadAddress;
       } else {
-        ((UINT64 *) IndirectSymPtr)[Index] += LoadAddress;
+        ((UINT64 *)IndirectSymPtr)[Index] += LoadAddress;
       }
     } else {
       Symbol = MachoGetSymbolByIndex (MachoContext, SymIndices[Index]);
@@ -1451,9 +1476,9 @@ InternalProcessSymbolPointers (
       }
 
       if (MachoContext->Is32Bit) {
-        ((UINT32 *) IndirectSymPtr)[Index] += Symbol->Symbol32.Value;
+        ((UINT32 *)IndirectSymPtr)[Index] += Symbol->Symbol32.Value;
       } else {
-        ((UINT64 *) IndirectSymPtr)[Index] += Symbol->Symbol64.Value;
+        ((UINT64 *)IndirectSymPtr)[Index] += Symbol->Symbol64.Value;
       }
     }
   }
@@ -1557,23 +1582,25 @@ InternalPrelinkKext (
   MachHeader = MachoGetMachHeader (MachoContext);
   MachSize   = MachoGetFileSize (MachoContext);
 
-  IsObject32 = Context->Is32Bit && MachHeader->Header32.FileType == MachHeaderFileTypeObject; 
+  IsObject32 = Context->Is32Bit && MachHeader->Header32.FileType == MachHeaderFileTypeObject;
 
   //
   // Only perform actions when the kext is flag'd to be dynamically linked.
   //
-  if (!IsObject32
-    && ((Context->Is32Bit ? MachHeader->Header32.Flags : MachHeader->Header64.Flags) & MACH_HEADER_FLAG_DYNAMIC_LINKER_LINK) == 0) {
+  if (  !IsObject32
+     && (((Context->Is32Bit ? MachHeader->Header32.Flags : MachHeader->Header64.Flags) & MACH_HEADER_FLAG_DYNAMIC_LINKER_LINK) == 0))
+  {
     return EFI_SUCCESS;
   }
 
-  if ((!IsObject32 && LinkEditSegment == NULL) || Kext->Context.VirtualKmod == 0) {
+  if ((!IsObject32 && (LinkEditSegment == NULL)) || (Kext->Context.VirtualKmod == 0)) {
     return EFI_UNSUPPORTED;
   }
 
   if (OcOverflowAddU64 (LoadAddress, FileOffset, &LoadAddressOffset)) {
     return EFI_INVALID_PARAMETER;
   }
+
   if (Context->Is32Bit) {
     ASSERT (LoadAddressOffset < MAX_UINT32);
   }
@@ -1631,19 +1658,21 @@ InternalPrelinkKext (
     NumRelocations  = DySymtab->NumOfLocalRelocations;
     NumRelocations += DySymtab->NumExternalRelocations;
   } else {
-    NumRelocations  = 0;
+    NumRelocations = 0;
   }
+
   RelocationsSize = (NumRelocations * sizeof (MACH_RELOCATION_INFO));
 
-  LinkEdit        = Context->LinkBuffer;
-  LinkEditSize    = (SymbolTableSize + RelocationsSize + StringTableSize);
+  LinkEdit     = Context->LinkBuffer;
+  LinkEditSize = (SymbolTableSize + RelocationsSize + StringTableSize);
 
-  if (!IsObject32
-    && LinkEditSize > (Context->Is32Bit ? LinkEditSegment->Segment32.FileSize : LinkEditSegment->Segment64.FileSize)) {
+  if (  !IsObject32
+     && (LinkEditSize > (Context->Is32Bit ? LinkEditSegment->Segment32.FileSize : LinkEditSegment->Segment64.FileSize)))
+  {
     return EFI_UNSUPPORTED;
   }
 
-  SymbolTableSize  -= (NumUndefinedSymbols * (Context->Is32Bit ? sizeof (MACH_NLIST) : sizeof (MACH_NLIST_64)));
+  SymbolTableSize -= (NumUndefinedSymbols * (Context->Is32Bit ? sizeof (MACH_NLIST) : sizeof (MACH_NLIST_64)));
 
   SymbolTableOffset = 0;
   RelocationsOffset = (SymbolTableOffset + SymbolTableSize);
@@ -1655,25 +1684,25 @@ InternalPrelinkKext (
   if (!IsObject32) {
     WeakTestValue      = 0;
     NumIndirectSymbols = MachoGetIndirectSymbolTable (
-                          MachoContext,
-                          &IndirectSymtab
-                          );
+                           MachoContext,
+                           &IndirectSymtab
+                           );
     for (Index = 0; Index < NumIndirectSymbols; ++Index) {
-      Symbol     = (MACH_NLIST_ANY *) &IndirectSymtab[Index];
+      Symbol     = (MACH_NLIST_ANY *)&IndirectSymtab[Index];
       SymbolName = MachoGetIndirectSymbolName (MachoContext, Symbol);
       if (SymbolName == NULL) {
         return EFI_LOAD_ERROR;
       }
 
       Result = InternalSolveSymbol (
-                Context,
-                Kext,
-                SymbolName,
-                Symbol,
-                &WeakTestValue,
-                UndefinedSymtab,
-                NumUndefinedSymbols
-                );
+                 Context,
+                 Kext,
+                 SymbolName,
+                 Symbol,
+                 &WeakTestValue,
+                 UndefinedSymtab,
+                 NumUndefinedSymbols
+                 );
       if (!Result) {
         return EFI_LOAD_ERROR;
       }
@@ -1688,31 +1717,33 @@ InternalPrelinkKext (
   if (IsObject32) {
     NumUndefinedSymbols = NumSymbols;
   }
+
   for (Index = 0; Index < NumUndefinedSymbols; ++Index) {
     if (Context->Is32Bit) {
-      Symbol = (MACH_NLIST_ANY *) (!IsObject32 ? &(&UndefinedSymtab->Symbol32)[Index] : &(&SymbolTable->Symbol32)[Index]);
-      if (IsObject32
-        && (Symbol->Symbol32.Type & MACH_N_TYPE_TYPE) != MACH_N_TYPE_UNDF
-        && (Symbol->Symbol32.Type & MACH_N_TYPE_TYPE) != MACH_N_TYPE_INDR) {
+      Symbol = (MACH_NLIST_ANY *)(!IsObject32 ? &(&UndefinedSymtab->Symbol32)[Index] : &(&SymbolTable->Symbol32)[Index]);
+      if (  IsObject32
+         && ((Symbol->Symbol32.Type & MACH_N_TYPE_TYPE) != MACH_N_TYPE_UNDF)
+         && ((Symbol->Symbol32.Type & MACH_N_TYPE_TYPE) != MACH_N_TYPE_INDR))
+      {
         continue;
       }
     } else {
-      Symbol = (MACH_NLIST_ANY *) &(&UndefinedSymtab->Symbol64)[Index];
+      Symbol = (MACH_NLIST_ANY *)&(&UndefinedSymtab->Symbol64)[Index];
     }
 
     //
     // Undefined symbols are solved via their name.
     //
     SymbolName = MachoGetSymbolName (MachoContext, Symbol);
-    Result = InternalSolveSymbol (
-               Context,
-               Kext,
-               SymbolName,
-               Symbol,
-               &WeakTestValue,
-               !IsObject32 ? UndefinedSymtab : NULL,
-               !IsObject32 ? NumUndefinedSymbols : 0
-               );
+    Result     = InternalSolveSymbol (
+                   Context,
+                   Kext,
+                   SymbolName,
+                   Symbol,
+                   &WeakTestValue,
+                   !IsObject32 ? UndefinedSymtab : NULL,
+                   !IsObject32 ? NumUndefinedSymbols : 0
+                   );
     if (!Result) {
       DEBUG ((
         DEBUG_INFO,
@@ -1731,6 +1762,7 @@ InternalPrelinkKext (
         ));
     }
   }
+
   //
   // Create and patch the KEXT's VTables.
   //
@@ -1746,13 +1778,13 @@ InternalPrelinkKext (
   //
   KmodInfoOffset = 0;
   if (!IsObject32) {
-      Result = InternalRelocateSymbols (
-              MachoContext,
-              LoadAddressOffset,
-              NumLocalSymbols,
-              (MACH_NLIST_ANY *) LocalSymtab,
-              &KmodInfoOffset
-              );
+    Result = InternalRelocateSymbols (
+               MachoContext,
+               LoadAddressOffset,
+               NumLocalSymbols,
+               (MACH_NLIST_ANY *)LocalSymtab,
+               &KmodInfoOffset
+               );
     if (!Result) {
       return EFI_LOAD_ERROR;
     }
@@ -1762,14 +1794,14 @@ InternalPrelinkKext (
              MachoContext,
              LoadAddressOffset,
              NumExternalSymbols,
-             (MACH_NLIST_ANY *) ExternalSymtab,
+             (MACH_NLIST_ANY *)ExternalSymtab,
              &KmodInfoOffset
              );
   if (!Result || (KmodInfoOffset == 0)) {
     return EFI_LOAD_ERROR;
   }
 
-  KmodInfo     = (KMOD_INFO_ANY *)((UINTN) MachHeader + (UINTN)KmodInfoOffset);
+  KmodInfo = (KMOD_INFO_ANY *)((UINTN)MachHeader + (UINTN)KmodInfoOffset);
 
   FirstSegment = MachoGetNextSegment (MachoContext, NULL);
   if (FirstSegment == NULL) {
@@ -1786,23 +1818,23 @@ InternalPrelinkKext (
   // reference in case it has been relocated above.
   //
   TargetRelocation = (MACH_RELOCATION_INFO *)(
-                       (UINTN)LinkEdit + RelocationsOffset
-                       );
+                                              (UINTN)LinkEdit + RelocationsOffset
+                                              );
 
   //
   // Relocate and copy local and external relocations.
   //
   Relocations    = MachoContext->LocalRelocations;
   NumRelocations = !IsObject32 ? DySymtab->NumOfLocalRelocations : 0;
-  Result = InternalRelocateAndCopyRelocations (
-             Context,
-             Kext,
-             LoadAddressOffset,
-             Context->Is32Bit ? FirstSegment->Segment32.VirtualAddress : FirstSegment->Segment64.VirtualAddress,
-             Relocations,
-             &NumRelocations,
-             &TargetRelocation[0]
-             );
+  Result         = InternalRelocateAndCopyRelocations (
+                     Context,
+                     Kext,
+                     LoadAddressOffset,
+                     Context->Is32Bit ? FirstSegment->Segment32.VirtualAddress : FirstSegment->Segment64.VirtualAddress,
+                     Relocations,
+                     &NumRelocations,
+                     &TargetRelocation[0]
+                     );
   if (!Result) {
     return EFI_LOAD_ERROR;
   }
@@ -1814,19 +1846,20 @@ InternalPrelinkKext (
   if (!IsObject32) {
     Relocations     = MachoContext->ExternRelocations;
     NumRelocations2 = DySymtab->NumExternalRelocations;
-    Result = InternalRelocateAndCopyRelocations (
-              Context,
-              Kext,
-              LoadAddressOffset,
-              Context->Is32Bit ?
-                FirstSegment->Segment32.VirtualAddress : FirstSegment->Segment64.VirtualAddress,
-              Relocations,
-              &NumRelocations2,
-              &TargetRelocation[NumRelocations]
-              );
+    Result          = InternalRelocateAndCopyRelocations (
+                        Context,
+                        Kext,
+                        LoadAddressOffset,
+                        Context->Is32Bit ?
+                        FirstSegment->Segment32.VirtualAddress : FirstSegment->Segment64.VirtualAddress,
+                        Relocations,
+                        &NumRelocations2,
+                        &TargetRelocation[NumRelocations]
+                        );
     if (!Result) {
       return EFI_LOAD_ERROR;
     }
+
     NumRelocations += NumRelocations2;
     RelocationsSize = (NumRelocations * sizeof (MACH_RELOCATION_INFO));
   }
@@ -1890,7 +1923,7 @@ InternalPrelinkKext (
       LinkEditFileOffset = LinkEditSegment->Segment64.FileOffset;
       LinkEditFileSize   = LinkEditSegment->Segment64.FileSize;
     }
-    
+
     Symtab->SymbolsOffset = (UINT32)(LinkEditFileOffset + SymbolTableOffset);
     Symtab->NumSymbols    = NumSymbols;
     Symtab->StringsOffset = (UINT32)(LinkEditFileOffset + StringTableOffset);
@@ -1935,7 +1968,6 @@ InternalPrelinkKext (
     DySymtab->NumUndefinedSymbols       = 0;
     DySymtab->IndirectSymbolsOffset     = 0;
     DySymtab->NumIndirectSymbols        = 0;
-
   } else {
     if (NumUndefinedSymbols > 0) {
       //
@@ -1943,13 +1975,14 @@ InternalPrelinkKext (
       // Any symbols that point to locations before our kext are ones
       // that were previously undefined, and can be skipped.
       //
-      SymtabLinkEdit32           = (MACH_NLIST *) LinkEdit;
+      SymtabLinkEdit32           = (MACH_NLIST *)LinkEdit;
       NumSymtabLinkEdit32Symbols = 0;
       for (Index = 0; Index < NumSymbols; ++Index) {
-        Symbol = (MACH_NLIST_ANY *) &(&SymbolTable->Symbol32)[Index];
-        if (Symbol->Symbol32.Type == (MACH_N_TYPE_ABS | MACH_N_TYPE_EXT)
-          && Symbol->Symbol32.Section == NO_SECT
-          && Symbol->Symbol32.Value < LoadAddress) {
+        Symbol = (MACH_NLIST_ANY *)&(&SymbolTable->Symbol32)[Index];
+        if (  (Symbol->Symbol32.Type == (MACH_N_TYPE_ABS | MACH_N_TYPE_EXT))
+           && (Symbol->Symbol32.Section == NO_SECT)
+           && (Symbol->Symbol32.Value < LoadAddress))
+        {
           continue;
         }
 
@@ -1993,19 +2026,19 @@ InternalPrelinkKext (
     while ((Section = MachoGetNextSection (MachoContext, Segment, Section)) != NULL) {
       if (Context->Is32Bit) {
         Section->Section32.Address = ALIGN_VALUE (
-                                      (Section->Section32.Address + (UINT32) LoadAddressOffset),
-                                      (UINT32)(1U << Section->Section32.Alignment)
-                                      );
+                                       (Section->Section32.Address + (UINT32)LoadAddressOffset),
+                                       (UINT32)(1U << Section->Section32.Alignment)
+                                       );
       } else {
         Section->Section64.Address = ALIGN_VALUE (
-                                      (Section->Section64.Address + LoadAddressOffset),
-                                      (UINT64)(1U << Section->Section64.Alignment)
-                                      );
+                                       (Section->Section64.Address + LoadAddressOffset),
+                                       (UINT64)(1U << Section->Section64.Alignment)
+                                       );
       }
     }
 
     if (Context->Is32Bit) {
-      Segment->Segment32.VirtualAddress += (UINT32) LoadAddressOffset;
+      Segment->Segment32.VirtualAddress += (UINT32)LoadAddressOffset;
 
       //
       // Logically equivalent to kxld_seg_set_vm_protections.
@@ -2058,7 +2091,7 @@ InternalPrelinkKext (
     //
     // Populate kmod information.
     //
-    KmodInfo->Kmod32.Address = (UINT32) LoadAddress;
+    KmodInfo->Kmod32.Address = (UINT32)LoadAddress;
     //
     // This is a hack borrowed from XNU. Real header size is equal to:
     //   sizeof (*MachHeader) + MachHeader->CommandsSize (often aligned to 4096)
@@ -2067,8 +2100,8 @@ InternalPrelinkKext (
     // XNU makes it read only, and this prevents __TEXT from gaining executable permission.
     // See OSKext::setVMAttributes.
     //
-    KmodInfo->Kmod32.HdrSize = IsObject32 ? (UINT32) FileOffset : 0;
-    KmodInfo->Kmod32.Size    = IsObject32 ? MachSize : KmodInfo->Kmod32.HdrSize + (UINT32) SegmentVmSizes;
+    KmodInfo->Kmod32.HdrSize = IsObject32 ? (UINT32)FileOffset : 0;
+    KmodInfo->Kmod32.Size    = IsObject32 ? MachSize : KmodInfo->Kmod32.HdrSize + (UINT32)SegmentVmSizes;
     //
     // Adapt the Mach-O header to signal being prelinked.
     //
@@ -2104,12 +2137,13 @@ InternalPrelinkKext (
   // Reinitialize the Mach-O context to account for the changed __LINKEDIT
   // segment and file size.
   //
-  if (!MachoInitializeContext (MachoContext, MachHeader, MachSize, MachoContext->ContainerOffset, Context->Is32Bit)) { 
+  if (!MachoInitializeContext (MachoContext, MachHeader, MachSize, MachoContext->ContainerOffset, Context->Is32Bit)) {
     //
     // This should never failed under normal and abnormal conditions.
     //
     ASSERT (FALSE);
     return EFI_INVALID_PARAMETER;
   }
+
   return EFI_SUCCESS;
 }

@@ -27,10 +27,9 @@
 #include <Library/UefiLib.h>
 #include "OcRtcLibInternal.h"
 
-STATIC EFI_LOCK mAppleRtcRamLock;
-STATIC UINT8 mEmulatedRtcArea[APPLE_RTC_TOTAL_SIZE];
-STATIC BOOLEAN mEmulatedRtcStatus[APPLE_RTC_TOTAL_SIZE];
-
+STATIC EFI_LOCK  mAppleRtcRamLock;
+STATIC UINT8     mEmulatedRtcArea[APPLE_RTC_TOTAL_SIZE];
+STATIC BOOLEAN   mEmulatedRtcStatus[APPLE_RTC_TOTAL_SIZE];
 
 STATIC
 EFI_STATUS
@@ -39,7 +38,7 @@ SyncRtcRead (
   IN UINT8  *ValuePtr
   )
 {
-  EFI_STATUS Status;
+  EFI_STATUS  Status;
 
   if (mEmulatedRtcStatus[Address]) {
     return mEmulatedRtcArea[Address];
@@ -62,7 +61,7 @@ SyncRtcWrite (
   IN UINT8  Value
   )
 {
-  EFI_STATUS Status;
+  EFI_STATUS  Status;
 
   if (mEmulatedRtcStatus[Address]) {
     mEmulatedRtcArea[Address] = Value;
@@ -85,9 +84,9 @@ SyncRtcWaitForReady (
   VOID
   )
 {
-  EFI_STATUS Status;
-  UINTN      Count;
-  UINT8      RegisterA;
+  EFI_STATUS  Status;
+  UINTN       Count;
+  UINT8       RegisterA;
 
   for (Count = 0; Count < 100; ++Count) {
     Status = EfiAcquireLockOrFail (&mAppleRtcRamLock);
@@ -134,11 +133,12 @@ AppleRtcRamReadData (
   UINTN       Index;
   UINT8       Temp;
 
-  if (Buffer == NULL
-    || BufferSize == 0
-    || Address >= APPLE_RTC_TOTAL_SIZE
-    || BufferSize >= APPLE_RTC_TOTAL_SIZE
-    || Address + BufferSize > APPLE_RTC_TOTAL_SIZE) {
+  if (  (Buffer == NULL)
+     || (BufferSize == 0)
+     || (Address >= APPLE_RTC_TOTAL_SIZE)
+     || (BufferSize >= APPLE_RTC_TOTAL_SIZE)
+     || (Address + BufferSize > APPLE_RTC_TOTAL_SIZE))
+  {
     return EFI_INVALID_PARAMETER;
   }
 
@@ -148,7 +148,7 @@ AppleRtcRamReadData (
       return Status;
     }
 
-    Status = SyncRtcRead ((UINT8) Address, Buffer);
+    Status = SyncRtcRead ((UINT8)Address, Buffer);
     if (EFI_ERROR (Status)) {
       return Status;
     }
@@ -191,12 +191,13 @@ AppleRtcRamWriteData (
   UINTN       Index;
   UINT16      Checksum;
 
-  if (Buffer == NULL
-    || BufferSize == 0
-    || Address < APPLE_RTC_CHECKSUM_START
-    || Address >= APPLE_RTC_TOTAL_SIZE
-    || BufferSize >= APPLE_RTC_TOTAL_SIZE
-    || Address + BufferSize > APPLE_RTC_TOTAL_SIZE) {
+  if (  (Buffer == NULL)
+     || (BufferSize == 0)
+     || (Address < APPLE_RTC_CHECKSUM_START)
+     || (Address >= APPLE_RTC_TOTAL_SIZE)
+     || (BufferSize >= APPLE_RTC_TOTAL_SIZE)
+     || (Address + BufferSize > APPLE_RTC_TOTAL_SIZE))
+  {
     return EFI_INVALID_PARAMETER;
   }
 
@@ -210,7 +211,7 @@ AppleRtcRamWriteData (
       TempBuffer[Address] = *Buffer;
 
       if (Address == APPLE_RTC_BG_COLOR_ADDR) {
-        TempBuffer[APPLE_RTC_BG_COMPLEMENT_ADDR] = (UINT8) ~((UINT32) *Buffer);
+        TempBuffer[APPLE_RTC_BG_COMPLEMENT_ADDR] = (UINT8) ~((UINT32)*Buffer);
       }
     }
 
@@ -218,18 +219,18 @@ AppleRtcRamWriteData (
     ++Address;
   }
 
-  Checksum = OcRtcChecksumApple (TempBuffer, APPLE_RTC_CORE_CHECKSUM_ADDR1);
+  Checksum                                  = OcRtcChecksumApple (TempBuffer, APPLE_RTC_CORE_CHECKSUM_ADDR1);
   TempBuffer[APPLE_RTC_CORE_CHECKSUM_ADDR1] = APPLE_RTC_CORE_CHECKSUM_BYTE1 (Checksum);
   TempBuffer[APPLE_RTC_CORE_CHECKSUM_ADDR2] = APPLE_RTC_CORE_CHECKSUM_BYTE2 (Checksum);
 
   TempBuffer[APPLE_RTC_MAIN_CHECKSUM_ADDR1] = 0;
   TempBuffer[APPLE_RTC_MAIN_CHECKSUM_ADDR2] = 0;
-  Checksum = OcRtcChecksumApple (TempBuffer, APPLE_RTC_TOTAL_SIZE);
+  Checksum                                  = OcRtcChecksumApple (TempBuffer, APPLE_RTC_TOTAL_SIZE);
   TempBuffer[APPLE_RTC_MAIN_CHECKSUM_ADDR1] = APPLE_RTC_MAIN_CHECKSUM_BYTE1 (Checksum);
   TempBuffer[APPLE_RTC_MAIN_CHECKSUM_ADDR2] = APPLE_RTC_MAIN_CHECKSUM_BYTE2 (Checksum);
 
   for (Index = APPLE_RTC_CHECKSUM_START; Index < APPLE_RTC_TOTAL_SIZE; ++Index) {
-    SyncRtcWrite ((UINT8) Index, TempBuffer[Index]); ///< Does not check the error code.
+    SyncRtcWrite ((UINT8)Index, TempBuffer[Index]);  ///< Does not check the error code.
   }
 
   return EFI_SUCCESS;
@@ -251,33 +252,33 @@ AppleRtcRamReset (
   for (Index = APPLE_RTC_CHECKSUM_START; Index < APPLE_RTC_CORE_SIZE; ++Index) {
     Status = SyncRtcWaitForReady ();
     if (!EFI_ERROR (Status)) {
-      SyncRtcRead ((UINT8) Index, &Buffer[Index]);
+      SyncRtcRead ((UINT8)Index, &Buffer[Index]);
     }
   }
 
   Status = SyncRtcWaitForReady ();
   if (!EFI_ERROR (Status)) {
-    SyncRtcRead ((UINT8) APPLE_RTC_FIRMWARE_57_ADDR, &Buffer[APPLE_RTC_FIRMWARE_57_ADDR]);
+    SyncRtcRead ((UINT8)APPLE_RTC_FIRMWARE_57_ADDR, &Buffer[APPLE_RTC_FIRMWARE_57_ADDR]);
   }
 
   for (Index = APPLE_RTC_RESERVED_ADDR; Index < APPLE_RTC_RESERVED_ADDR + APPLE_RTC_RESERVED_LENGTH; ++Index) {
     Status = SyncRtcWaitForReady ();
     if (!EFI_ERROR (Status)) {
-      SyncRtcRead ((UINT8) Index, &Buffer[Index]);
+      SyncRtcRead ((UINT8)Index, &Buffer[Index]);
     }
   }
 
   return AppleRtcRamWriteData (
-    This,
-    Buffer + APPLE_RTC_CHECKSUM_START,
-    APPLE_RTC_TOTAL_SIZE - APPLE_RTC_CHECKSUM_START,
-    APPLE_RTC_CHECKSUM_START
-    );
+           This,
+           Buffer + APPLE_RTC_CHECKSUM_START,
+           APPLE_RTC_TOTAL_SIZE - APPLE_RTC_CHECKSUM_START,
+           APPLE_RTC_CHECKSUM_START
+           );
 }
 
 STATIC
 APPLE_RTC_RAM_PROTOCOL
-mAppleRtcRamProtocol = {
+  mAppleRtcRamProtocol = {
   AppleRtcGetAvailableMemory,
   AppleRtcRamReadData,
   AppleRtcRamWriteData,
@@ -306,10 +307,10 @@ OcAppleRtcRamInstallProtocol (
     }
   } else {
     Status = gBS->LocateProtocol (
-      &gAppleRtcRamProtocolGuid,
-      NULL,
-      (VOID *) &Protocol
-      );
+                    &gAppleRtcRamProtocolGuid,
+                    NULL,
+                    (VOID *)&Protocol
+                    );
 
     if (!EFI_ERROR (Status)) {
       return Protocol;
@@ -326,11 +327,11 @@ OcAppleRtcRamInstallProtocol (
     ));
 
   Status = GetVariable2 (
-    OC_RTC_BLACKLIST_VARIABLE_NAME,
-    &gOcVendorVariableGuid,
-    (VOID **) &RtcBlacklist,
-    &RtcBlacklistSize
-    );
+             OC_RTC_BLACKLIST_VARIABLE_NAME,
+             &gOcVendorVariableGuid,
+             (VOID **)&RtcBlacklist,
+             &RtcBlacklistSize
+             );
 
   if (!EFI_ERROR (Status)) {
     for (Index = 0; Index < RtcBlacklistSize; ++Index) {
@@ -353,12 +354,12 @@ OcAppleRtcRamInstallProtocol (
   // Note, Apple implementation calls AppleRtcRamReset on checksum mismatch.
   //
   NewHandle = NULL;
-  Status = gBS->InstallMultipleProtocolInterfaces (
-     &NewHandle,
-     &gAppleRtcRamProtocolGuid,
-     (VOID *) &mAppleRtcRamProtocol,
-     NULL
-     );
+  Status    = gBS->InstallMultipleProtocolInterfaces (
+                     &NewHandle,
+                     &gAppleRtcRamProtocolGuid,
+                     (VOID *)&mAppleRtcRamProtocol,
+                     NULL
+                     );
 
   if (EFI_ERROR (Status)) {
     return NULL;

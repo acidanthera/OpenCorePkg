@@ -33,23 +33,23 @@
 #pragma pack(push, 1)
 
 typedef PACKED struct {
-  VENDOR_DEFINED_DEVICE_PATH Vendor;
-  UINT64                     Length;
+  VENDOR_DEFINED_DEVICE_PATH    Vendor;
+  UINT64                        Length;
 } DMG_SIZE_DEVICE_PATH;
 
 typedef PACKED struct {
-  EFI_DEVICE_PATH_PROTOCOL Header;
+  EFI_DEVICE_PATH_PROTOCOL    Header;
   ///
   /// A NULL-terminated Path string including directory and file names.
   ///
-  CHAR16                   PathName[DMG_FILE_PATH_LEN];
+  CHAR16                      PathName[DMG_FILE_PATH_LEN];
 } DMG_FILEPATH_DEVICE_PATH;
 
 typedef PACKED struct {
-  APPLE_RAM_DISK_DP_HEADER   RamDisk;
-  DMG_FILEPATH_DEVICE_PATH   FilePath;
-  DMG_SIZE_DEVICE_PATH       Size;
-  EFI_DEVICE_PATH_PROTOCOL   End;
+  APPLE_RAM_DISK_DP_HEADER    RamDisk;
+  DMG_FILEPATH_DEVICE_PATH    FilePath;
+  DMG_SIZE_DEVICE_PATH        Size;
+  EFI_DEVICE_PATH_PROTOCOL    End;
 } DMG_DEVICE_PATH;
 
 #pragma pack(pop)
@@ -65,13 +65,13 @@ typedef PACKED struct {
     )
 
 typedef struct {
-  UINT32                      Signature;
+  UINT32                         Signature;
 
-  EFI_BLOCK_IO_PROTOCOL       BlockIo;
-  EFI_BLOCK_IO_MEDIA          BlockIoMedia;
-  DMG_DEVICE_PATH             DevicePath;
+  EFI_BLOCK_IO_PROTOCOL          BlockIo;
+  EFI_BLOCK_IO_MEDIA             BlockIoMedia;
+  DMG_DEVICE_PATH                DevicePath;
 
-  OC_APPLE_DISK_IMAGE_CONTEXT *ImageContext;
+  OC_APPLE_DISK_IMAGE_CONTEXT    *ImageContext;
 } OC_APPLE_DISK_IMAGE_MOUNTED_DATA;
 
 STATIC
@@ -94,10 +94,10 @@ DiskImageBlockIoReadBlocks (
   IN EFI_LBA                Lba,
   IN UINTN                  BufferSize,
   OUT VOID                  *Buffer
-  ) 
+  )
 {
-  OC_APPLE_DISK_IMAGE_MOUNTED_DATA *DiskImageData;
-  BOOLEAN                          Result;
+  OC_APPLE_DISK_IMAGE_MOUNTED_DATA  *DiskImageData;
+  BOOLEAN                           Result;
 
   if ((This == NULL) || (Buffer == NULL)) {
     return EFI_INVALID_PARAMETER;
@@ -150,12 +150,12 @@ EFI_STATUS
 EFIAPI
 DiskImageBlockIoFlushBlocks (
   IN EFI_BLOCK_IO_PROTOCOL  *This
-  ) 
+  )
 {
   return EFI_SUCCESS;
 }
 
-STATIC UINT32 mDmgCounter; ///< FIXME: This should exist on a protocol basis!
+STATIC UINT32  mDmgCounter; ///< FIXME: This should exist on a protocol basis!
 
 STATIC
 VOID
@@ -164,9 +164,9 @@ InternalConstructDmgDevicePath (
   IN     UINTN                             FileSize
   )
 {
-  UINT64          RamDmgAddress;
-  DMG_DEVICE_PATH *DevPath;
-  CHAR16          *UnicodeDevPath;
+  UINT64           RamDmgAddress;
+  DMG_DEVICE_PATH  *DevPath;
+  CHAR16           *UnicodeDevPath;
 
   ASSERT (DiskImageData != NULL);
   ASSERT (DiskImageData->ImageContext);
@@ -181,7 +181,7 @@ InternalConstructDmgDevicePath (
     &DevPath->RamDisk.Vendor.Vendor.Guid,
     &gAppleRamDiskProtocolGuid
     );
-  DevPath->RamDisk.Vendor.Counter               = mDmgCounter++;
+  DevPath->RamDisk.Vendor.Counter = mDmgCounter++;
   SetDevicePathNodeLength (
     &DevPath->RamDisk.Vendor,
     sizeof (DevPath->RamDisk.Vendor)
@@ -217,7 +217,7 @@ InternalConstructDmgDevicePath (
 
   DEBUG_CODE_BEGIN ();
   ASSERT (
-    IsDevicePathValid ((EFI_DEVICE_PATH_PROTOCOL *) DevPath, sizeof (*DevPath))
+    IsDevicePathValid ((EFI_DEVICE_PATH_PROTOCOL *)DevPath, sizeof (*DevPath))
     );
 
   UnicodeDevPath = ConvertDevicePathToText ((EFI_DEVICE_PATH_PROTOCOL *)DevPath, FALSE, FALSE);
@@ -225,10 +225,11 @@ InternalConstructDmgDevicePath (
   if (UnicodeDevPath != NULL) {
     FreePool (UnicodeDevPath);
   }
+
   DEBUG_CODE_END ();
 }
 
-STATIC CONST EFI_BLOCK_IO_PROTOCOL mDiskImageBlockIo = {
+STATIC CONST EFI_BLOCK_IO_PROTOCOL  mDiskImageBlockIo = {
   EFI_BLOCK_IO_PROTOCOL_REVISION,
   NULL,
   DiskImageBlockIoReset,
@@ -245,10 +246,10 @@ OcAppleDiskImageInstallBlockIo (
   OUT UINTN                           *DevicePathSize OPTIONAL
   )
 {
-  EFI_HANDLE                       BlockIoHandle;
+  EFI_HANDLE  BlockIoHandle;
 
-  EFI_STATUS                       Status;
-  OC_APPLE_DISK_IMAGE_MOUNTED_DATA *DiskImageData;
+  EFI_STATUS                        Status;
+  OC_APPLE_DISK_IMAGE_MOUNTED_DATA  *DiskImageData;
 
   ASSERT (Context != NULL);
   ASSERT (FileSize > 0);
@@ -276,14 +277,14 @@ OcAppleDiskImageInstallBlockIo (
   InternalConstructDmgDevicePath (DiskImageData, FileSize);
 
   BlockIoHandle = NULL;
-  Status = gBS->InstallMultipleProtocolInterfaces (
-                  &BlockIoHandle,
-                  &gEfiDevicePathProtocolGuid,
-                  &DiskImageData->DevicePath,
-                  &gEfiBlockIoProtocolGuid,
-                  &DiskImageData->BlockIo,
-                  NULL
-                  );
+  Status        = gBS->InstallMultipleProtocolInterfaces (
+                         &BlockIoHandle,
+                         &gEfiDevicePathProtocolGuid,
+                         &DiskImageData->DevicePath,
+                         &gEfiBlockIoProtocolGuid,
+                         &DiskImageData->BlockIo,
+                         NULL
+                         );
   if (EFI_ERROR (Status)) {
     DEBUG ((DEBUG_INFO, "OCDI: Failed to install protocols %r\n", Status));
     FreePool (DiskImageData);
@@ -310,6 +311,7 @@ OcAppleDiskImageInstallBlockIo (
       DEBUG ((DEBUG_INFO, "OCDI: Failed to uninstall protocols %r\n", Status));
       DiskImageData->Signature = 0;
     }
+
     return NULL;
   }
 
@@ -330,9 +332,9 @@ OcAppleDiskImageUninstallBlockIo (
   IN VOID                         *BlockIoHandle
   )
 {
-  EFI_STATUS                       Status;
-  EFI_BLOCK_IO_PROTOCOL            *BlockIo;
-  OC_APPLE_DISK_IMAGE_MOUNTED_DATA *DiskImageData;
+  EFI_STATUS                        Status;
+  EFI_BLOCK_IO_PROTOCOL             *BlockIo;
+  OC_APPLE_DISK_IMAGE_MOUNTED_DATA  *DiskImageData;
 
   ASSERT (Context != NULL);
   ASSERT (BlockIoHandle != NULL);
@@ -351,13 +353,13 @@ OcAppleDiskImageUninstallBlockIo (
 
   Status  = gBS->DisconnectController (BlockIoHandle, NULL, NULL);
   Status |= gBS->UninstallMultipleProtocolInterfaces (
-                  BlockIoHandle,
-                  &gEfiBlockIoProtocolGuid,
-                  &DiskImageData->BlockIo,
-                  &gEfiDevicePathProtocolGuid,
-                  &DiskImageData->DevicePath,
-                  NULL
-                  );
+                   BlockIoHandle,
+                   &gEfiBlockIoProtocolGuid,
+                   &DiskImageData->BlockIo,
+                   &gEfiDevicePathProtocolGuid,
+                   &DiskImageData->DevicePath,
+                   NULL
+                   );
   if (!EFI_ERROR (Status)) {
     FreePool (DiskImageData);
   } else {

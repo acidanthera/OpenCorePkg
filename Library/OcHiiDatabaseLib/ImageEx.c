@@ -7,7 +7,6 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 
 **/
 
-
 #include "HiiDatabase.h"
 
 /**
@@ -29,13 +28,13 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 EFI_STATUS
 EFIAPI
 HiiNewImageEx (
-  IN  CONST EFI_HII_IMAGE_EX_PROTOCOL *This,
-  IN  EFI_HII_HANDLE                  PackageList,
-  OUT EFI_IMAGE_ID                    *ImageId,
-  IN  CONST EFI_IMAGE_INPUT           *Image
+  IN  CONST EFI_HII_IMAGE_EX_PROTOCOL  *This,
+  IN  EFI_HII_HANDLE                   PackageList,
+  OUT EFI_IMAGE_ID                     *ImageId,
+  IN  CONST EFI_IMAGE_INPUT            *Image
   )
 {
-  HII_DATABASE_PRIVATE_DATA           *Private;
+  HII_DATABASE_PRIVATE_DATA  *Private;
 
   Private = HII_IMAGE_EX_DATABASE_PRIVATE_DATA_FROM_THIS (This);
   return HiiNewImage (&Private->HiiImage, PackageList, ImageId, Image);
@@ -69,18 +68,17 @@ HiiNewImageEx (
 EFI_STATUS
 EFIAPI
 HiiGetImageEx (
-  IN  CONST EFI_HII_IMAGE_EX_PROTOCOL *This,
-  IN  EFI_HII_HANDLE                  PackageList,
-  IN  EFI_IMAGE_ID                    ImageId,
-  OUT EFI_IMAGE_INPUT                 *Image
+  IN  CONST EFI_HII_IMAGE_EX_PROTOCOL  *This,
+  IN  EFI_HII_HANDLE                   PackageList,
+  IN  EFI_IMAGE_ID                     ImageId,
+  OUT EFI_IMAGE_INPUT                  *Image
   )
 {
-  HII_DATABASE_PRIVATE_DATA           *Private;
+  HII_DATABASE_PRIVATE_DATA  *Private;
 
   Private = HII_IMAGE_EX_DATABASE_PRIVATE_DATA_FROM_THIS (This);
   return IGetImage (&Private->DatabaseList, PackageList, ImageId, Image, FALSE);
 }
-
 
 /**
   Change the information about the image.
@@ -104,17 +102,17 @@ HiiGetImageEx (
 EFI_STATUS
 EFIAPI
 HiiSetImageEx (
-  IN CONST EFI_HII_IMAGE_EX_PROTOCOL *This,
-  IN EFI_HII_HANDLE                  PackageList,
-  IN EFI_IMAGE_ID                    ImageId,
-  IN CONST EFI_IMAGE_INPUT           *Image
+  IN CONST EFI_HII_IMAGE_EX_PROTOCOL  *This,
+  IN EFI_HII_HANDLE                   PackageList,
+  IN EFI_IMAGE_ID                     ImageId,
+  IN CONST EFI_IMAGE_INPUT            *Image
   )
 {
-  HII_DATABASE_PRIVATE_DATA           *Private;
+  HII_DATABASE_PRIVATE_DATA  *Private;
+
   Private = HII_IMAGE_EX_DATABASE_PRIVATE_DATA_FROM_THIS (This);
   return HiiSetImage (&Private->HiiImage, PackageList, ImageId, Image);
 }
-
 
 /**
   Renders an image to a bitmap or to the display.
@@ -147,19 +145,19 @@ HiiSetImageEx (
 EFI_STATUS
 EFIAPI
 HiiDrawImageEx (
-  IN CONST EFI_HII_IMAGE_EX_PROTOCOL *This,
-  IN EFI_HII_DRAW_FLAGS              Flags,
-  IN CONST EFI_IMAGE_INPUT           *Image,
-  IN OUT EFI_IMAGE_OUTPUT            **Blt,
-  IN UINTN                           BltX,
-  IN UINTN                           BltY
+  IN CONST EFI_HII_IMAGE_EX_PROTOCOL  *This,
+  IN EFI_HII_DRAW_FLAGS               Flags,
+  IN CONST EFI_IMAGE_INPUT            *Image,
+  IN OUT EFI_IMAGE_OUTPUT             **Blt,
+  IN UINTN                            BltX,
+  IN UINTN                            BltY
   )
 {
-  HII_DATABASE_PRIVATE_DATA           *Private;
+  HII_DATABASE_PRIVATE_DATA  *Private;
+
   Private = HII_IMAGE_EX_DATABASE_PRIVATE_DATA_FROM_THIS (This);
   return HiiDrawImage (&Private->HiiImage, Flags, Image, Blt, BltX, BltY);
 }
-
 
 /**
   Renders an image to a bitmap or the screen containing the contents of the specified
@@ -200,22 +198,22 @@ HiiDrawImageEx (
 EFI_STATUS
 EFIAPI
 HiiDrawImageIdEx (
-  IN CONST EFI_HII_IMAGE_EX_PROTOCOL *This,
-  IN EFI_HII_DRAW_FLAGS              Flags,
-  IN EFI_HII_HANDLE                  PackageList,
-  IN EFI_IMAGE_ID                    ImageId,
-  IN OUT EFI_IMAGE_OUTPUT            **Blt,
-  IN UINTN                           BltX,
-  IN UINTN                           BltY
+  IN CONST EFI_HII_IMAGE_EX_PROTOCOL  *This,
+  IN EFI_HII_DRAW_FLAGS               Flags,
+  IN EFI_HII_HANDLE                   PackageList,
+  IN EFI_IMAGE_ID                     ImageId,
+  IN OUT EFI_IMAGE_OUTPUT             **Blt,
+  IN UINTN                            BltX,
+  IN UINTN                            BltY
   )
 {
-  EFI_STATUS                          Status;
-  EFI_IMAGE_INPUT                     Image;
+  EFI_STATUS       Status;
+  EFI_IMAGE_INPUT  Image;
 
   //
   // Check input parameter.
   //
-  if (This == NULL || Blt == NULL) {
+  if ((This == NULL) || (Blt == NULL)) {
     return EFI_INVALID_PARAMETER;
   }
 
@@ -234,6 +232,7 @@ HiiDrawImageIdEx (
   if (Image.Bitmap != NULL) {
     FreePool (Image.Bitmap);
   }
+
   return Status;
 }
 
@@ -246,39 +245,40 @@ HiiDrawImageIdEx (
 **/
 EFI_HII_IMAGE_DECODER_PROTOCOL *
 LocateHiiImageDecoder (
-  UINT8                          BlockType
+  UINT8  BlockType
   )
 {
-  EFI_STATUS                     Status;
-  EFI_HII_IMAGE_DECODER_PROTOCOL *Decoder;
-  EFI_HANDLE                     *Handles;
-  UINTN                          HandleNum;
-  UINTN                          Index;
-  EFI_GUID                       *DecoderNames;
-  UINT16                         NumberOfDecoderName;
-  UINT16                         DecoderNameIndex;
-  EFI_GUID                       *DecoderName;
+  EFI_STATUS                      Status;
+  EFI_HII_IMAGE_DECODER_PROTOCOL  *Decoder;
+  EFI_HANDLE                      *Handles;
+  UINTN                           HandleNum;
+  UINTN                           Index;
+  EFI_GUID                        *DecoderNames;
+  UINT16                          NumberOfDecoderName;
+  UINT16                          DecoderNameIndex;
+  EFI_GUID                        *DecoderName;
 
   switch (BlockType) {
-  case EFI_HII_IIBT_IMAGE_JPEG:
-    DecoderName = &gEfiHiiImageDecoderNameJpegGuid;
-    break;
+    case EFI_HII_IIBT_IMAGE_JPEG:
+      DecoderName = &gEfiHiiImageDecoderNameJpegGuid;
+      break;
 
-  case EFI_HII_IIBT_IMAGE_PNG:
-    DecoderName = &gEfiHiiImageDecoderNamePngGuid;
-    break;
+    case EFI_HII_IIBT_IMAGE_PNG:
+      DecoderName = &gEfiHiiImageDecoderNamePngGuid;
+      break;
 
-  default:
-    ASSERT (FALSE);
-    return NULL;
+    default:
+      ASSERT (FALSE);
+      return NULL;
   }
 
   Status = gBS->LocateHandleBuffer (ByProtocol, &gEfiHiiImageDecoderProtocolGuid, NULL, &HandleNum, &Handles);
   if (EFI_ERROR (Status)) {
     return NULL;
   }
+
   for (Index = 0; Index < HandleNum; Index++) {
-    Status = gBS->HandleProtocol (Handles[Index], &gEfiHiiImageDecoderProtocolGuid, (VOID **) &Decoder);
+    Status = gBS->HandleProtocol (Handles[Index], &gEfiHiiImageDecoderProtocolGuid, (VOID **)&Decoder);
     if (EFI_ERROR (Status)) {
       continue;
     }
@@ -287,6 +287,7 @@ LocateHiiImageDecoder (
     if (EFI_ERROR (Status)) {
       continue;
     }
+
     for (DecoderNameIndex = 0; DecoderNameIndex < NumberOfDecoderName; DecoderNameIndex++) {
       if (CompareGuid (DecoderName, &DecoderNames[DecoderNameIndex])) {
         return Decoder;
@@ -323,29 +324,30 @@ LocateHiiImageDecoder (
 EFI_STATUS
 EFIAPI
 HiiGetImageInfo (
-  IN CONST  EFI_HII_IMAGE_EX_PROTOCOL       *This,
-  IN        EFI_HII_HANDLE                  PackageList,
-  IN        EFI_IMAGE_ID                    ImageId,
-  OUT       EFI_IMAGE_OUTPUT                *Image
+  IN CONST  EFI_HII_IMAGE_EX_PROTOCOL  *This,
+  IN        EFI_HII_HANDLE             PackageList,
+  IN        EFI_IMAGE_ID               ImageId,
+  OUT       EFI_IMAGE_OUTPUT           *Image
   )
 {
-  EFI_STATUS                              Status;
-  HII_DATABASE_PRIVATE_DATA               *Private;
-  HII_DATABASE_PACKAGE_LIST_INSTANCE      *PackageListNode;
-  HII_IMAGE_PACKAGE_INSTANCE              *ImagePackage;
-  EFI_HII_IMAGE_BLOCK                     *CurrentImageBlock;
-  EFI_HII_IMAGE_DECODER_PROTOCOL          *Decoder;
-  EFI_HII_IMAGE_DECODER_IMAGE_INFO_HEADER *ImageInfo;
+  EFI_STATUS                               Status;
+  HII_DATABASE_PRIVATE_DATA                *Private;
+  HII_DATABASE_PACKAGE_LIST_INSTANCE       *PackageListNode;
+  HII_IMAGE_PACKAGE_INSTANCE               *ImagePackage;
+  EFI_HII_IMAGE_BLOCK                      *CurrentImageBlock;
+  EFI_HII_IMAGE_DECODER_PROTOCOL           *Decoder;
+  EFI_HII_IMAGE_DECODER_IMAGE_INFO_HEADER  *ImageInfo;
 
-  if (Image == NULL || ImageId == 0) {
+  if ((Image == NULL) || (ImageId == 0)) {
     return EFI_INVALID_PARAMETER;
   }
 
-  Private = HII_IMAGE_EX_DATABASE_PRIVATE_DATA_FROM_THIS (This);
+  Private         = HII_IMAGE_EX_DATABASE_PRIVATE_DATA_FROM_THIS (This);
   PackageListNode = LocatePackageList (&Private->DatabaseList, PackageList);
   if (PackageListNode == NULL) {
     return EFI_NOT_FOUND;
   }
+
   ImagePackage = PackageListNode->ImagePkg;
   if (ImagePackage == NULL) {
     return EFI_NOT_FOUND;
@@ -360,62 +362,68 @@ HiiGetImageInfo (
   }
 
   switch (CurrentImageBlock->BlockType) {
-  case EFI_HII_IIBT_IMAGE_JPEG:
-  case EFI_HII_IIBT_IMAGE_PNG:
-    Decoder = LocateHiiImageDecoder (CurrentImageBlock->BlockType);
-    if (Decoder == NULL) {
-      return EFI_UNSUPPORTED;
-    }
-    //
-    // Use the common block code since the definition of two structures is the same.
-    //
-    ASSERT (OFFSET_OF (EFI_HII_IIBT_JPEG_BLOCK, Data) == OFFSET_OF (EFI_HII_IIBT_PNG_BLOCK, Data));
-    ASSERT (sizeof (((EFI_HII_IIBT_JPEG_BLOCK *) CurrentImageBlock)->Data) ==
-            sizeof (((EFI_HII_IIBT_PNG_BLOCK *) CurrentImageBlock)->Data));
-    ASSERT (OFFSET_OF (EFI_HII_IIBT_JPEG_BLOCK, Size) == OFFSET_OF (EFI_HII_IIBT_PNG_BLOCK, Size));
-    ASSERT (sizeof (((EFI_HII_IIBT_JPEG_BLOCK *) CurrentImageBlock)->Size) ==
-            sizeof (((EFI_HII_IIBT_PNG_BLOCK *) CurrentImageBlock)->Size));
-    Status = Decoder->GetImageInfo (
-      Decoder,
-      ((EFI_HII_IIBT_JPEG_BLOCK *) CurrentImageBlock)->Data,
-      ((EFI_HII_IIBT_JPEG_BLOCK *) CurrentImageBlock)->Size,
-      &ImageInfo
-    );
+    case EFI_HII_IIBT_IMAGE_JPEG:
+    case EFI_HII_IIBT_IMAGE_PNG:
+      Decoder = LocateHiiImageDecoder (CurrentImageBlock->BlockType);
+      if (Decoder == NULL) {
+        return EFI_UNSUPPORTED;
+      }
 
-    //
-    // Spec requires to use the first capable image decoder instance.
-    // The first image decoder instance may fail to decode the image.
-    //
-    if (!EFI_ERROR (Status)) {
-      Image->Height = ImageInfo->ImageHeight;
-      Image->Width = ImageInfo->ImageWidth;
+      //
+      // Use the common block code since the definition of two structures is the same.
+      //
+      ASSERT (OFFSET_OF (EFI_HII_IIBT_JPEG_BLOCK, Data) == OFFSET_OF (EFI_HII_IIBT_PNG_BLOCK, Data));
+      ASSERT (
+        sizeof (((EFI_HII_IIBT_JPEG_BLOCK *)CurrentImageBlock)->Data) ==
+        sizeof (((EFI_HII_IIBT_PNG_BLOCK *)CurrentImageBlock)->Data)
+        );
+      ASSERT (OFFSET_OF (EFI_HII_IIBT_JPEG_BLOCK, Size) == OFFSET_OF (EFI_HII_IIBT_PNG_BLOCK, Size));
+      ASSERT (
+        sizeof (((EFI_HII_IIBT_JPEG_BLOCK *)CurrentImageBlock)->Size) ==
+        sizeof (((EFI_HII_IIBT_PNG_BLOCK *)CurrentImageBlock)->Size)
+        );
+      Status = Decoder->GetImageInfo (
+                          Decoder,
+                          ((EFI_HII_IIBT_JPEG_BLOCK *)CurrentImageBlock)->Data,
+                          ((EFI_HII_IIBT_JPEG_BLOCK *)CurrentImageBlock)->Size,
+                          &ImageInfo
+                          );
+
+      //
+      // Spec requires to use the first capable image decoder instance.
+      // The first image decoder instance may fail to decode the image.
+      //
+      if (!EFI_ERROR (Status)) {
+        Image->Height       = ImageInfo->ImageHeight;
+        Image->Width        = ImageInfo->ImageWidth;
+        Image->Image.Bitmap = NULL;
+        FreePool (ImageInfo);
+      }
+
+      return Status;
+
+    case EFI_HII_IIBT_IMAGE_1BIT_TRANS:
+    case EFI_HII_IIBT_IMAGE_4BIT_TRANS:
+    case EFI_HII_IIBT_IMAGE_8BIT_TRANS:
+    case EFI_HII_IIBT_IMAGE_1BIT:
+    case EFI_HII_IIBT_IMAGE_4BIT:
+    case EFI_HII_IIBT_IMAGE_8BIT:
+      //
+      // Use the common block code since the definition of these structures is the same.
+      //
+      Image->Width        = ReadUnaligned16 (&((EFI_HII_IIBT_IMAGE_1BIT_BLOCK *)CurrentImageBlock)->Bitmap.Width);
+      Image->Height       = ReadUnaligned16 (&((EFI_HII_IIBT_IMAGE_1BIT_BLOCK *)CurrentImageBlock)->Bitmap.Height);
       Image->Image.Bitmap = NULL;
-      FreePool (ImageInfo);
-    }
-    return Status;
+      return EFI_SUCCESS;
 
-  case EFI_HII_IIBT_IMAGE_1BIT_TRANS:
-  case EFI_HII_IIBT_IMAGE_4BIT_TRANS:
-  case EFI_HII_IIBT_IMAGE_8BIT_TRANS:
-  case EFI_HII_IIBT_IMAGE_1BIT:
-  case EFI_HII_IIBT_IMAGE_4BIT:
-  case EFI_HII_IIBT_IMAGE_8BIT:
-    //
-    // Use the common block code since the definition of these structures is the same.
-    //
-    Image->Width = ReadUnaligned16 (&((EFI_HII_IIBT_IMAGE_1BIT_BLOCK *) CurrentImageBlock)->Bitmap.Width);
-    Image->Height = ReadUnaligned16 (&((EFI_HII_IIBT_IMAGE_1BIT_BLOCK *) CurrentImageBlock)->Bitmap.Height);
-    Image->Image.Bitmap = NULL;
-    return EFI_SUCCESS;
+    case EFI_HII_IIBT_IMAGE_24BIT_TRANS:
+    case EFI_HII_IIBT_IMAGE_24BIT:
+      Image->Width        = ReadUnaligned16 ((VOID *)&((EFI_HII_IIBT_IMAGE_24BIT_BLOCK *)CurrentImageBlock)->Bitmap.Width);
+      Image->Height       = ReadUnaligned16 ((VOID *)&((EFI_HII_IIBT_IMAGE_24BIT_BLOCK *)CurrentImageBlock)->Bitmap.Height);
+      Image->Image.Bitmap = NULL;
+      return EFI_SUCCESS;
 
-  case EFI_HII_IIBT_IMAGE_24BIT_TRANS:
-  case EFI_HII_IIBT_IMAGE_24BIT:
-    Image->Width = ReadUnaligned16 ((VOID *) &((EFI_HII_IIBT_IMAGE_24BIT_BLOCK *) CurrentImageBlock)->Bitmap.Width);
-    Image->Height = ReadUnaligned16 ((VOID *) &((EFI_HII_IIBT_IMAGE_24BIT_BLOCK *) CurrentImageBlock)->Bitmap.Height);
-    Image->Image.Bitmap = NULL;
-    return EFI_SUCCESS;
-
-  default:
-    return EFI_NOT_FOUND;
+    default:
+      return EFI_NOT_FOUND;
   }
 }

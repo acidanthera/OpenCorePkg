@@ -13,32 +13,35 @@
 //
 // Cache playback setup.
 //
-STATIC UINT64                     mOutputIndexMask = 0;
-STATIC INT8                       mGain = APPLE_SYSTEM_AUDIO_VOLUME_DB_MIN;
-STATIC EFI_AUDIO_IO_PROTOCOL_FREQ mFreq = 0;
-STATIC EFI_AUDIO_IO_PROTOCOL_BITS mBits = 0;
-STATIC UINT8                      mChannels = 0xFFU;
+STATIC UINT64                      mOutputIndexMask = 0;
+STATIC INT8                        mGain            = APPLE_SYSTEM_AUDIO_VOLUME_DB_MIN;
+STATIC EFI_AUDIO_IO_PROTOCOL_FREQ  mFreq            = 0;
+STATIC EFI_AUDIO_IO_PROTOCOL_BITS  mBits            = 0;
+STATIC UINT8                       mChannels        = 0xFFU;
 
 // HDA I/O Stream callback.
 VOID
 EFIAPI
-HdaCodecHdaIoStreamCallback(
-  IN EFI_HDA_IO_PROTOCOL_TYPE Type,
-  IN VOID *Context1,
-  IN VOID *Context2,
-  IN VOID *Context3) {
-  DEBUG((DEBUG_VERBOSE, "HdaCodecHdaIoStreamCallback(): start\n"));
+HdaCodecHdaIoStreamCallback (
+  IN EFI_HDA_IO_PROTOCOL_TYPE  Type,
+  IN VOID                      *Context1,
+  IN VOID                      *Context2,
+  IN VOID                      *Context3
+  )
+{
+  DEBUG ((DEBUG_VERBOSE, "HdaCodecHdaIoStreamCallback(): start\n"));
 
   // Create variables.
-  EFI_AUDIO_IO_PROTOCOL *AudioIo = (EFI_AUDIO_IO_PROTOCOL*)Context1;
-  EFI_AUDIO_IO_CALLBACK AudioIoCallback = (EFI_AUDIO_IO_CALLBACK)Context2;
+  EFI_AUDIO_IO_PROTOCOL  *AudioIo        = (EFI_AUDIO_IO_PROTOCOL *)Context1;
+  EFI_AUDIO_IO_CALLBACK  AudioIoCallback = (EFI_AUDIO_IO_CALLBACK)Context2;
 
   // Ensure required parameters are valid.
-  if ((AudioIo == NULL) || (AudioIoCallback == NULL))
+  if ((AudioIo == NULL) || (AudioIoCallback == NULL)) {
     return;
+  }
 
   // Invoke callback.
-  AudioIoCallback(AudioIo, Context3);
+  AudioIoCallback (AudioIo, Context3);
 }
 
 /**
@@ -53,32 +56,37 @@ HdaCodecHdaIoStreamCallback(
 **/
 EFI_STATUS
 EFIAPI
-HdaCodecAudioIoGetOutputs(
-  IN  EFI_AUDIO_IO_PROTOCOL *This,
-  OUT EFI_AUDIO_IO_PROTOCOL_PORT **OutputPorts,
-  OUT UINTN *OutputPortsCount) {
-  DEBUG((DEBUG_VERBOSE, "HdaCodecAudioIoGetOutputs(): start\n"));
+HdaCodecAudioIoGetOutputs (
+  IN  EFI_AUDIO_IO_PROTOCOL       *This,
+  OUT EFI_AUDIO_IO_PROTOCOL_PORT  **OutputPorts,
+  OUT UINTN                       *OutputPortsCount
+  )
+{
+  DEBUG ((DEBUG_VERBOSE, "HdaCodecAudioIoGetOutputs(): start\n"));
 
   // Create variables.
-  EFI_STATUS Status;
-  AUDIO_IO_PRIVATE_DATA *AudioIoPrivateData;
-  HDA_CODEC_DEV *HdaCodecDev;
-  EFI_AUDIO_IO_PROTOCOL_PORT *HdaOutputPorts;
-  UINT32 SupportedRates;
+  EFI_STATUS                  Status;
+  AUDIO_IO_PRIVATE_DATA       *AudioIoPrivateData;
+  HDA_CODEC_DEV               *HdaCodecDev;
+  EFI_AUDIO_IO_PROTOCOL_PORT  *HdaOutputPorts;
+  UINT32                      SupportedRates;
 
   // If a parameter is invalid, return error.
   if ((This == NULL) || (OutputPorts == NULL) ||
-    (OutputPortsCount == NULL))
+      (OutputPortsCount == NULL))
+  {
     return EFI_INVALID_PARAMETER;
+  }
 
   // Get private data.
-  AudioIoPrivateData = AUDIO_IO_PRIVATE_DATA_FROM_THIS(This);
-  HdaCodecDev = AudioIoPrivateData->HdaCodecDev;
+  AudioIoPrivateData = AUDIO_IO_PRIVATE_DATA_FROM_THIS (This);
+  HdaCodecDev        = AudioIoPrivateData->HdaCodecDev;
 
   // Allocate buffer.
-  HdaOutputPorts = AllocateZeroPool(sizeof(EFI_AUDIO_IO_PROTOCOL_PORT) * HdaCodecDev->OutputPortsCount);
-  if (HdaOutputPorts == NULL)
+  HdaOutputPorts = AllocateZeroPool (sizeof (EFI_AUDIO_IO_PROTOCOL_PORT) * HdaCodecDev->OutputPortsCount);
+  if (HdaOutputPorts == NULL) {
     return EFI_OUT_OF_RESOURCES;
+  }
 
   // Get output ports.
   for (UINTN i = 0; i < HdaCodecDev->OutputPortsCount; i++) {
@@ -86,7 +94,7 @@ HdaCodecAudioIoGetOutputs(
     HdaOutputPorts[i].Type = EfiAudioIoTypeOutput;
 
     // Get device type.
-    switch (HDA_VERB_GET_CONFIGURATION_DEFAULT_DEVICE(HdaCodecDev->OutputPorts[i]->DefaultConfiguration)) {
+    switch (HDA_VERB_GET_CONFIGURATION_DEFAULT_DEVICE (HdaCodecDev->OutputPorts[i]->DefaultConfiguration)) {
       case HDA_CONFIG_DEFAULT_DEVICE_LINE_OUT:
       case HDA_CONFIG_DEFAULT_DEVICE_LINE_IN:
         HdaOutputPorts[i].Device = EfiAudioIoDeviceLine;
@@ -110,14 +118,15 @@ HdaCodecAudioIoGetOutputs(
         break;
 
       default:
-        if (HdaCodecDev->OutputPorts[i]->PinCapabilities & HDA_PARAMETER_PIN_CAPS_HDMI)
+        if (HdaCodecDev->OutputPorts[i]->PinCapabilities & HDA_PARAMETER_PIN_CAPS_HDMI) {
           HdaOutputPorts[i].Device = EfiAudioIoDeviceHdmi;
-        else
+        } else {
           HdaOutputPorts[i].Device = EfiAudioIoDeviceOther;
+        }
     }
 
     // Get location.
-    switch (HDA_VERB_GET_CONFIGURATION_DEFAULT_LOC(HdaCodecDev->OutputPorts[i]->DefaultConfiguration)) {
+    switch (HDA_VERB_GET_CONFIGURATION_DEFAULT_LOC (HdaCodecDev->OutputPorts[i]->DefaultConfiguration)) {
       case HDA_CONFIG_DEFAULT_LOC_SPEC_NA:
         HdaOutputPorts[i].Location = EfiAudioIoLocationNone;
         break;
@@ -151,7 +160,7 @@ HdaCodecAudioIoGetOutputs(
     }
 
     // Get surface.
-    switch (HDA_VERB_GET_CONFIGURATION_DEFAULT_SURF(HdaCodecDev->OutputPorts[i]->DefaultConfiguration)) {
+    switch (HDA_VERB_GET_CONFIGURATION_DEFAULT_SURF (HdaCodecDev->OutputPorts[i]->DefaultConfiguration)) {
       case HDA_CONFIG_DEFAULT_LOC_SURF_EXTERNAL:
         HdaOutputPorts[i].Surface = EfiAudioIoSurfaceExternal;
         break;
@@ -165,49 +174,78 @@ HdaCodecAudioIoGetOutputs(
     }
 
     // Get supported stream formats.
-    Status = HdaCodecGetSupportedPcmRates(HdaCodecDev->OutputPorts[i], &SupportedRates);
-    if (EFI_ERROR(Status))
+    Status = HdaCodecGetSupportedPcmRates (HdaCodecDev->OutputPorts[i], &SupportedRates);
+    if (EFI_ERROR (Status)) {
       return Status;
+    }
 
     // Get supported bit depths.
     HdaOutputPorts[i].SupportedBits = 0;
-    if (SupportedRates & HDA_PARAMETER_SUPPORTED_PCM_SIZE_RATES_8BIT)
+    if (SupportedRates & HDA_PARAMETER_SUPPORTED_PCM_SIZE_RATES_8BIT) {
       HdaOutputPorts[i].SupportedBits |= EfiAudioIoBits8;
-    if (SupportedRates & HDA_PARAMETER_SUPPORTED_PCM_SIZE_RATES_16BIT)
+    }
+
+    if (SupportedRates & HDA_PARAMETER_SUPPORTED_PCM_SIZE_RATES_16BIT) {
       HdaOutputPorts[i].SupportedBits |= EfiAudioIoBits16;
-    if (SupportedRates & HDA_PARAMETER_SUPPORTED_PCM_SIZE_RATES_20BIT)
+    }
+
+    if (SupportedRates & HDA_PARAMETER_SUPPORTED_PCM_SIZE_RATES_20BIT) {
       HdaOutputPorts[i].SupportedBits |= EfiAudioIoBits20;
-    if (SupportedRates & HDA_PARAMETER_SUPPORTED_PCM_SIZE_RATES_24BIT)
+    }
+
+    if (SupportedRates & HDA_PARAMETER_SUPPORTED_PCM_SIZE_RATES_24BIT) {
       HdaOutputPorts[i].SupportedBits |= EfiAudioIoBits24;
-    if (SupportedRates & HDA_PARAMETER_SUPPORTED_PCM_SIZE_RATES_32BIT)
+    }
+
+    if (SupportedRates & HDA_PARAMETER_SUPPORTED_PCM_SIZE_RATES_32BIT) {
       HdaOutputPorts[i].SupportedBits |= EfiAudioIoBits32;
+    }
 
     // Get supported sample rates.
     HdaOutputPorts[i].SupportedFreqs = 0;
-    if (SupportedRates & HDA_PARAMETER_SUPPORTED_PCM_SIZE_RATES_8KHZ)
+    if (SupportedRates & HDA_PARAMETER_SUPPORTED_PCM_SIZE_RATES_8KHZ) {
       HdaOutputPorts[i].SupportedFreqs |= EfiAudioIoFreq8kHz;
-    if (SupportedRates & HDA_PARAMETER_SUPPORTED_PCM_SIZE_RATES_11KHZ)
+    }
+
+    if (SupportedRates & HDA_PARAMETER_SUPPORTED_PCM_SIZE_RATES_11KHZ) {
       HdaOutputPorts[i].SupportedFreqs |= EfiAudioIoFreq11kHz;
-    if (SupportedRates & HDA_PARAMETER_SUPPORTED_PCM_SIZE_RATES_16KHZ)
+    }
+
+    if (SupportedRates & HDA_PARAMETER_SUPPORTED_PCM_SIZE_RATES_16KHZ) {
       HdaOutputPorts[i].SupportedFreqs |= EfiAudioIoFreq16kHz;
-    if (SupportedRates & HDA_PARAMETER_SUPPORTED_PCM_SIZE_RATES_22KHZ)
+    }
+
+    if (SupportedRates & HDA_PARAMETER_SUPPORTED_PCM_SIZE_RATES_22KHZ) {
       HdaOutputPorts[i].SupportedFreqs |= EfiAudioIoFreq22kHz;
-    if (SupportedRates & HDA_PARAMETER_SUPPORTED_PCM_SIZE_RATES_32KHZ)
+    }
+
+    if (SupportedRates & HDA_PARAMETER_SUPPORTED_PCM_SIZE_RATES_32KHZ) {
       HdaOutputPorts[i].SupportedFreqs |= EfiAudioIoFreq32kHz;
-    if (SupportedRates & HDA_PARAMETER_SUPPORTED_PCM_SIZE_RATES_44KHZ)
+    }
+
+    if (SupportedRates & HDA_PARAMETER_SUPPORTED_PCM_SIZE_RATES_44KHZ) {
       HdaOutputPorts[i].SupportedFreqs |= EfiAudioIoFreq44kHz;
-    if (SupportedRates & HDA_PARAMETER_SUPPORTED_PCM_SIZE_RATES_48KHZ)
+    }
+
+    if (SupportedRates & HDA_PARAMETER_SUPPORTED_PCM_SIZE_RATES_48KHZ) {
       HdaOutputPorts[i].SupportedFreqs |= EfiAudioIoFreq48kHz;
-    if (SupportedRates & HDA_PARAMETER_SUPPORTED_PCM_SIZE_RATES_88KHZ)
+    }
+
+    if (SupportedRates & HDA_PARAMETER_SUPPORTED_PCM_SIZE_RATES_88KHZ) {
       HdaOutputPorts[i].SupportedFreqs |= EfiAudioIoFreq88kHz;
-    if (SupportedRates & HDA_PARAMETER_SUPPORTED_PCM_SIZE_RATES_96KHZ)
+    }
+
+    if (SupportedRates & HDA_PARAMETER_SUPPORTED_PCM_SIZE_RATES_96KHZ) {
       HdaOutputPorts[i].SupportedFreqs |= EfiAudioIoFreq96kHz;
-    if (SupportedRates & HDA_PARAMETER_SUPPORTED_PCM_SIZE_RATES_192KHZ)
+    }
+
+    if (SupportedRates & HDA_PARAMETER_SUPPORTED_PCM_SIZE_RATES_192KHZ) {
       HdaOutputPorts[i].SupportedFreqs |= EfiAudioIoFreq192kHz;
+    }
   }
 
   // Ports gotten successfully.
-  *OutputPorts = HdaOutputPorts;
+  *OutputPorts      = HdaOutputPorts;
   *OutputPortsCount = HdaCodecDev->OutputPortsCount;
   return EFI_SUCCESS;
 }
@@ -230,26 +268,26 @@ HdaCodecAudioIoGetOutputs(
 EFI_STATUS
 EFIAPI
 HdaCodecAudioIoRawGainToDecibels (
-  IN  EFI_AUDIO_IO_PROTOCOL       *This,
-  IN  UINT64                      OutputIndexMask,
-  IN  UINT8                       GainParam,
-  OUT INT8                        *Gain
+  IN  EFI_AUDIO_IO_PROTOCOL  *This,
+  IN  UINT64                 OutputIndexMask,
+  IN  UINT8                  GainParam,
+  OUT INT8                   *Gain
   )
 {
-  EFI_STATUS            Status;
-  AUDIO_IO_PRIVATE_DATA *AudioIoPrivateData;
-  HDA_CODEC_DEV         *HdaCodecDev;
-  UINTN                 Index;
-  UINT64                IndexMask;
+  EFI_STATUS             Status;
+  AUDIO_IO_PRIVATE_DATA  *AudioIoPrivateData;
+  HDA_CODEC_DEV          *HdaCodecDev;
+  UINTN                  Index;
+  UINT64                 IndexMask;
 
   // If a parameter is invalid, return error.
-  if (This == NULL || Gain == NULL) {
+  if ((This == NULL) || (Gain == NULL)) {
     return EFI_INVALID_PARAMETER;
   }
 
   // Get private data.
   AudioIoPrivateData = AUDIO_IO_PRIVATE_DATA_FROM_THIS (This);
-  HdaCodecDev = AudioIoPrivateData->HdaCodecDev;
+  HdaCodecDev        = AudioIoPrivateData->HdaCodecDev;
 
   Status = EFI_NOT_FOUND;
 
@@ -258,8 +296,9 @@ HdaCodecAudioIoRawGainToDecibels (
     if ((OutputIndexMask & IndexMask) == 0) {
       continue;
     }
+
     Status = HdaCodecWidgetRawGainToDecibels (HdaCodecDev->OutputPorts[Index], GainParam, Gain);
-    if (!EFI_ERROR (Status) || Status != EFI_NOT_FOUND) {
+    if (!EFI_ERROR (Status) || (Status != EFI_NOT_FOUND)) {
       return Status;
     }
   }
@@ -269,7 +308,7 @@ HdaCodecAudioIoRawGainToDecibels (
 
 /**
   Sets up the device to play audio data. Basic caching is implemented: no actions are taken
-  the second and subsequent times that set up is called again with exactly the same paremeters. 
+  the second and subsequent times that set up is called again with exactly the same paremeters.
 
   @param[in] This               A pointer to the EFI_AUDIO_IO_PROTOCOL instance.
   @param[in] OutputIndexMask    A mask indicating the desired outputs.
@@ -285,55 +324,56 @@ HdaCodecAudioIoRawGainToDecibels (
 **/
 EFI_STATUS
 EFIAPI
-HdaCodecAudioIoSetupPlayback(
-  IN EFI_AUDIO_IO_PROTOCOL *This,
-  IN UINT64 OutputIndexMask,
-  IN INT8 Gain,
-  IN EFI_AUDIO_IO_PROTOCOL_FREQ Freq,
-  IN EFI_AUDIO_IO_PROTOCOL_BITS Bits,
-  IN UINT8 Channels,
-  IN UINTN PlaybackDelay
+HdaCodecAudioIoSetupPlayback (
+  IN EFI_AUDIO_IO_PROTOCOL       *This,
+  IN UINT64                      OutputIndexMask,
+  IN INT8                        Gain,
+  IN EFI_AUDIO_IO_PROTOCOL_FREQ  Freq,
+  IN EFI_AUDIO_IO_PROTOCOL_BITS  Bits,
+  IN UINT8                       Channels,
+  IN UINTN                       PlaybackDelay
   )
 {
-  EFI_STATUS Status;
-  AUDIO_IO_PRIVATE_DATA *AudioIoPrivateData;
-  HDA_CODEC_DEV *HdaCodecDev;
-  EFI_HDA_IO_PROTOCOL *HdaIo;
-  UINTN Index;
-  UINT64 IndexMask;
-  UINT32 Response;
-  UINT8 NumGpios;
-  UINT8 ChannelPayload;
+  EFI_STATUS             Status;
+  AUDIO_IO_PRIVATE_DATA  *AudioIoPrivateData;
+  HDA_CODEC_DEV          *HdaCodecDev;
+  EFI_HDA_IO_PROTOCOL    *HdaIo;
+  UINTN                  Index;
+  UINT64                 IndexMask;
+  UINT32                 Response;
+  UINT8                  NumGpios;
+  UINT8                  ChannelPayload;
 
   // Widgets.
-  HDA_WIDGET_DEV *PinWidget;
-  HDA_WIDGET_DEV *OutputWidget;
-  UINT32 SupportedRates;
-  UINT8 HdaStreamId;
+  HDA_WIDGET_DEV  *PinWidget;
+  HDA_WIDGET_DEV  *OutputWidget;
+  UINT32          SupportedRates;
+  UINT8           HdaStreamId;
 
   // Stream.
-  UINT8 StreamBits;
-  UINT8 StreamDiv;
-  UINT8 StreamMult;
-  BOOLEAN StreamBase44kHz;
-  UINT16 StreamFmt;
+  UINT8    StreamBits;
+  UINT8    StreamDiv;
+  UINT8    StreamMult;
+  BOOLEAN  StreamBase44kHz;
+  UINT16   StreamFmt;
 
-  DEBUG((DEBUG_VERBOSE, "HdaCodecAudioIoSetupPlayback(): start\n"));
+  DEBUG ((DEBUG_VERBOSE, "HdaCodecAudioIoSetupPlayback(): start\n"));
 
   // Basic settings caching.
-  if (mOutputIndexMask == OutputIndexMask
-      && mGain == Gain
-      && mFreq == Freq
-      && mBits == Bits
-      && mChannels == Channels) {
+  if (  (mOutputIndexMask == OutputIndexMask)
+     && (mGain == Gain)
+     && (mFreq == Freq)
+     && (mBits == Bits)
+     && (mChannels == Channels))
+  {
     return EFI_SUCCESS;
   }
 
   mOutputIndexMask = OutputIndexMask;
-  mGain = Gain;
-  mFreq = Freq;
-  mBits = Bits;
-  mChannels = Channels;
+  mGain            = Gain;
+  mFreq            = Freq;
+  mBits            = Bits;
+  mChannels        = Channels;
 
   // If a parameter is invalid, return error.
   if (This == NULL) {
@@ -341,25 +381,26 @@ HdaCodecAudioIoSetupPlayback(
   }
 
   // Get private data.
-  AudioIoPrivateData = AUDIO_IO_PRIVATE_DATA_FROM_THIS(This);
-  HdaCodecDev = AudioIoPrivateData->HdaCodecDev;
-  HdaIo = HdaCodecDev->HdaIo;
+  AudioIoPrivateData = AUDIO_IO_PRIVATE_DATA_FROM_THIS (This);
+  HdaCodecDev        = AudioIoPrivateData->HdaCodecDev;
+  HdaIo              = HdaCodecDev->HdaIo;
 
   // Mask to only outputs which are within bounds.
   if (HdaCodecDev->OutputPortsCount > sizeof (UINT64) * OC_CHAR_BIT) {
     return EFI_UNSUPPORTED;
   }
+
   OutputIndexMask &= ~LShiftU64(MAX_UINT64, HdaCodecDev->OutputPortsCount);
 
   // Fail visibily if nothing is requested.
-  if (PcdGetBool (PcdAudioCodecErrorOnNoOutputs) && OutputIndexMask == 0) {
+  if (PcdGetBool (PcdAudioCodecErrorOnNoOutputs) && (OutputIndexMask == 0)) {
     return EFI_INVALID_PARAMETER;
   }
 
   // Avoid Coverity warnings (the bit mask checks actually ensure that these cannot be used uninitialised).
-  StreamBits = 0;
-  StreamDiv = 0;
-  StreamMult = 0;
+  StreamBits      = 0;
+  StreamDiv       = 0;
+  StreamMult      = 0;
   StreamBase44kHz = FALSE;
 
   // Expand the requested stream frequency and sample size params,
@@ -372,14 +413,15 @@ HdaCodecAudioIoSetupPlayback(
     PinWidget = HdaCodecDev->OutputPorts[Index];
 
     // Get the output DAC for the path.
-    Status = HdaCodecGetOutputDac(PinWidget, &OutputWidget);
-    if (EFI_ERROR(Status))
+    Status = HdaCodecGetOutputDac (PinWidget, &OutputWidget);
+    if (EFI_ERROR (Status)) {
       return Status;
+    }
 
     // Get supported stream formats.
-    Status = HdaCodecGetSupportedPcmRates(OutputWidget, &SupportedRates);
-    if (EFI_ERROR(Status)) {
-      DEBUG((DEBUG_INFO, "HdaCodecGetSupportedPcmRates(): failure - %r\n", Status));
+    Status = HdaCodecGetSupportedPcmRates (OutputWidget, &SupportedRates);
+    if (EFI_ERROR (Status)) {
+      DEBUG ((DEBUG_INFO, "HdaCodecGetSupportedPcmRates(): failure - %r\n", Status));
       return Status;
     }
 
@@ -387,36 +429,46 @@ HdaCodecAudioIoSetupPlayback(
     switch (Bits) {
       // 8-bit.
       case EfiAudioIoBits8:
-        if (!(SupportedRates & HDA_PARAMETER_SUPPORTED_PCM_SIZE_RATES_8BIT))
+        if (!(SupportedRates & HDA_PARAMETER_SUPPORTED_PCM_SIZE_RATES_8BIT)) {
           return EFI_UNSUPPORTED;
+        }
+
         StreamBits = HDA_CONVERTER_FORMAT_BITS_8;
         break;
 
       // 16-bit.
       case EfiAudioIoBits16:
-        if (!(SupportedRates & HDA_PARAMETER_SUPPORTED_PCM_SIZE_RATES_16BIT))
+        if (!(SupportedRates & HDA_PARAMETER_SUPPORTED_PCM_SIZE_RATES_16BIT)) {
           return EFI_UNSUPPORTED;
+        }
+
         StreamBits = HDA_CONVERTER_FORMAT_BITS_16;
         break;
 
       // 20-bit.
       case EfiAudioIoBits20:
-        if (!(SupportedRates & HDA_PARAMETER_SUPPORTED_PCM_SIZE_RATES_20BIT))
+        if (!(SupportedRates & HDA_PARAMETER_SUPPORTED_PCM_SIZE_RATES_20BIT)) {
           return EFI_UNSUPPORTED;
+        }
+
         StreamBits = HDA_CONVERTER_FORMAT_BITS_20;
         break;
 
       // 24-bit.
       case EfiAudioIoBits24:
-        if (!(SupportedRates & HDA_PARAMETER_SUPPORTED_PCM_SIZE_RATES_24BIT))
+        if (!(SupportedRates & HDA_PARAMETER_SUPPORTED_PCM_SIZE_RATES_24BIT)) {
           return EFI_UNSUPPORTED;
+        }
+
         StreamBits = HDA_CONVERTER_FORMAT_BITS_24;
         break;
 
       // 32-bit.
       case EfiAudioIoBits32:
-        if (!(SupportedRates & HDA_PARAMETER_SUPPORTED_PCM_SIZE_RATES_32BIT))
+        if (!(SupportedRates & HDA_PARAMETER_SUPPORTED_PCM_SIZE_RATES_32BIT)) {
           return EFI_UNSUPPORTED;
+        }
+
         StreamBits = HDA_CONVERTER_FORMAT_BITS_32;
         break;
 
@@ -429,92 +481,112 @@ HdaCodecAudioIoSetupPlayback(
     switch (Freq) {
       // 8 kHz.
       case EfiAudioIoFreq8kHz:
-        if (!(SupportedRates & HDA_PARAMETER_SUPPORTED_PCM_SIZE_RATES_8KHZ))
+        if (!(SupportedRates & HDA_PARAMETER_SUPPORTED_PCM_SIZE_RATES_8KHZ)) {
           return EFI_UNSUPPORTED;
+        }
+
         StreamBase44kHz = FALSE;
-        StreamDiv = 6;
-        StreamMult = 1;
+        StreamDiv       = 6;
+        StreamMult      = 1;
         break;
 
       // 11.025 kHz.
       case EfiAudioIoFreq11kHz:
-        if (!(SupportedRates & HDA_PARAMETER_SUPPORTED_PCM_SIZE_RATES_11KHZ))
+        if (!(SupportedRates & HDA_PARAMETER_SUPPORTED_PCM_SIZE_RATES_11KHZ)) {
           return EFI_UNSUPPORTED;
+        }
+
         StreamBase44kHz = FALSE; ///< TODO: Why does Clover has TRUE here?
-        StreamDiv = 4;
-        StreamMult = 1;
+        StreamDiv       = 4;
+        StreamMult      = 1;
         break;
 
       // 16 kHz.
       case EfiAudioIoFreq16kHz:
-        if (!(SupportedRates & HDA_PARAMETER_SUPPORTED_PCM_SIZE_RATES_16KHZ))
+        if (!(SupportedRates & HDA_PARAMETER_SUPPORTED_PCM_SIZE_RATES_16KHZ)) {
           return EFI_UNSUPPORTED;
+        }
+
         StreamBase44kHz = FALSE;
-        StreamDiv = 3;
-        StreamMult = 1;
+        StreamDiv       = 3;
+        StreamMult      = 1;
         break;
 
       // 22.05 kHz.
       case EfiAudioIoFreq22kHz:
-        if (!(SupportedRates & HDA_PARAMETER_SUPPORTED_PCM_SIZE_RATES_22KHZ))
+        if (!(SupportedRates & HDA_PARAMETER_SUPPORTED_PCM_SIZE_RATES_22KHZ)) {
           return EFI_UNSUPPORTED;
+        }
+
         StreamBase44kHz = FALSE; ///< TODO: Why does Clover has TRUE here?
-        StreamDiv = 2;
-        StreamMult = 1;
+        StreamDiv       = 2;
+        StreamMult      = 1;
         break;
 
       // 32 kHz.
       case EfiAudioIoFreq32kHz:
-        if (!(SupportedRates & HDA_PARAMETER_SUPPORTED_PCM_SIZE_RATES_32KHZ))
+        if (!(SupportedRates & HDA_PARAMETER_SUPPORTED_PCM_SIZE_RATES_32KHZ)) {
           return EFI_UNSUPPORTED;
+        }
+
         StreamBase44kHz = FALSE;
-        StreamDiv = 3;
-        StreamMult = 2;
+        StreamDiv       = 3;
+        StreamMult      = 2;
         break;
 
       // 44.1 kHz.
       case EfiAudioIoFreq44kHz:
-        if (!(SupportedRates & HDA_PARAMETER_SUPPORTED_PCM_SIZE_RATES_44KHZ))
+        if (!(SupportedRates & HDA_PARAMETER_SUPPORTED_PCM_SIZE_RATES_44KHZ)) {
           return EFI_UNSUPPORTED;
+        }
+
         StreamBase44kHz = TRUE;
-        StreamDiv = 1;
-        StreamMult = 1;
+        StreamDiv       = 1;
+        StreamMult      = 1;
         break;
 
       // 48 kHz.
       case EfiAudioIoFreq48kHz:
-        if (!(SupportedRates & HDA_PARAMETER_SUPPORTED_PCM_SIZE_RATES_48KHZ))
+        if (!(SupportedRates & HDA_PARAMETER_SUPPORTED_PCM_SIZE_RATES_48KHZ)) {
           return EFI_UNSUPPORTED;
+        }
+
         StreamBase44kHz = FALSE;
-        StreamDiv = 1;
-        StreamMult = 1;
+        StreamDiv       = 1;
+        StreamMult      = 1;
         break;
 
       // 88 kHz.
       case EfiAudioIoFreq88kHz:
-        if (!(SupportedRates & HDA_PARAMETER_SUPPORTED_PCM_SIZE_RATES_88KHZ))
+        if (!(SupportedRates & HDA_PARAMETER_SUPPORTED_PCM_SIZE_RATES_88KHZ)) {
           return EFI_UNSUPPORTED;
+        }
+
         StreamBase44kHz = TRUE;
-        StreamDiv = 1;
-        StreamMult = 2;
+        StreamDiv       = 1;
+        StreamMult      = 2;
         break;
 
       // 96 kHz.
       case EfiAudioIoFreq96kHz:
-        if (!(SupportedRates & HDA_PARAMETER_SUPPORTED_PCM_SIZE_RATES_96KHZ))
+        if (!(SupportedRates & HDA_PARAMETER_SUPPORTED_PCM_SIZE_RATES_96KHZ)) {
           return EFI_UNSUPPORTED;
+        }
+
         StreamBase44kHz = FALSE;
-        StreamDiv = 1;
-        StreamMult = 2;
+        StreamDiv       = 1;
+        StreamMult      = 2;
         break;
 
       // 192 kHz.
       case EfiAudioIoFreq192kHz:
-        if (!(SupportedRates & HDA_PARAMETER_SUPPORTED_PCM_SIZE_RATES_192KHZ))
+        if (!(SupportedRates & HDA_PARAMETER_SUPPORTED_PCM_SIZE_RATES_192KHZ)) {
           return EFI_UNSUPPORTED;
+        }
+
         StreamBase44kHz = FALSE;
-        StreamDiv = 1;
-        StreamMult = 4;
+        StreamDiv       = 1;
+        StreamMult      = 4;
         break;
 
       // Others.
@@ -528,15 +600,18 @@ HdaCodecAudioIoSetupPlayback(
     if ((OutputIndexMask & IndexMask) != 0) {
       continue;
     }
-    Status = HdaCodecDisableWidgetPath(HdaCodecDev->OutputPorts[Index]);
-    if (EFI_ERROR(Status))
+
+    Status = HdaCodecDisableWidgetPath (HdaCodecDev->OutputPorts[Index]);
+    if (EFI_ERROR (Status)) {
       return Status;
+    }
   }
 
   // Close stream first.
-  Status = HdaIo->CloseStream(HdaIo, EfiHdaIoTypeOutput);
-  if (EFI_ERROR(Status))
+  Status = HdaIo->CloseStream (HdaIo, EfiHdaIoTypeOutput);
+  if (EFI_ERROR (Status)) {
     return Status;
+  }
 
   // Save requested outputs.
   AudioIoPrivateData->SelectedOutputIndexMask = OutputIndexMask;
@@ -547,21 +622,29 @@ HdaCodecAudioIoSetupPlayback(
   }
 
   // Calculate stream format and setup stream.
-  StreamFmt = HDA_CONVERTER_FORMAT_SET(Channels - 1, StreamBits,
-    StreamDiv - 1, StreamMult - 1, StreamBase44kHz);
-  DEBUG((DEBUG_VERBOSE, "HdaCodecAudioIoPlay(): Stream format 0x%X\n", StreamFmt));
-  Status = HdaIo->SetupStream(HdaIo, EfiHdaIoTypeOutput, StreamFmt, &HdaStreamId);
-  if (EFI_ERROR(Status))
+  StreamFmt = HDA_CONVERTER_FORMAT_SET (
+                Channels - 1,
+                StreamBits,
+                StreamDiv - 1,
+                StreamMult - 1,
+                StreamBase44kHz
+                );
+  DEBUG ((DEBUG_VERBOSE, "HdaCodecAudioIoPlay(): Stream format 0x%X\n", StreamFmt));
+  Status = HdaIo->SetupStream (HdaIo, EfiHdaIoTypeOutput, StreamFmt, &HdaStreamId);
+  if (EFI_ERROR (Status)) {
     return Status;
+  }
 
   // Setup widget path for desired outputs.
   for (Index = 0, IndexMask = 1; Index < HdaCodecDev->OutputPortsCount; Index++, IndexMask <<= 1) {
     if ((OutputIndexMask & IndexMask) == 0) {
       continue;
     }
-    Status = HdaCodecEnableWidgetPath(HdaCodecDev->OutputPorts[Index], Gain, HdaStreamId, StreamFmt);
-    if (EFI_ERROR(Status))
+
+    Status = HdaCodecEnableWidgetPath (HdaCodecDev->OutputPorts[Index], Gain, HdaStreamId, StreamFmt);
+    if (EFI_ERROR (Status)) {
       goto CLOSE_STREAM;
+    }
   }
 
   //
@@ -597,6 +680,7 @@ HdaCodecAudioIoSetupPlayback(
         Status = EFI_INVALID_PARAMETER;
         goto CLOSE_STREAM;
       }
+
       ChannelPayload = (1 << NumGpios) - 1; ///< Enable all available pins
     }
 
@@ -605,32 +689,34 @@ HdaCodecAudioIoSetupPlayback(
 
       if ((gGpioSetupStageMask & GPIO_SETUP_STAGE_ENABLE) != 0) {
         Status = HdaIo->SendCommand (
-          HdaIo,
-          HdaCodecDev->AudioFuncGroup->NodeId,
-          HDA_CODEC_VERB (HDA_VERB_SET_GPIO_ENABLE_MASK, ChannelPayload),
-          &Response
-          );
+                          HdaIo,
+                          HdaCodecDev->AudioFuncGroup->NodeId,
+                          HDA_CODEC_VERB (HDA_VERB_SET_GPIO_ENABLE_MASK, ChannelPayload),
+                          &Response
+                          );
       }
 
-      if (!EFI_ERROR (Status)
-        && (gGpioSetupStageMask & GPIO_SETUP_STAGE_DIRECTION) != 0) {
+      if (  !EFI_ERROR (Status)
+         && ((gGpioSetupStageMask & GPIO_SETUP_STAGE_DIRECTION) != 0))
+      {
         Status = HdaIo->SendCommand (
-          HdaIo,
-          HdaCodecDev->AudioFuncGroup->NodeId,
-          HDA_CODEC_VERB (HDA_VERB_SET_GPIO_DIRECTION, ChannelPayload),
-          &Response
-          );
+                          HdaIo,
+                          HdaCodecDev->AudioFuncGroup->NodeId,
+                          HDA_CODEC_VERB (HDA_VERB_SET_GPIO_DIRECTION, ChannelPayload),
+                          &Response
+                          );
       }
 
-      if (!EFI_ERROR (Status)
-        && (gGpioSetupStageMask & GPIO_SETUP_STAGE_DATA) != 0) {
+      if (  !EFI_ERROR (Status)
+         && ((gGpioSetupStageMask & GPIO_SETUP_STAGE_DATA) != 0))
+      {
         gBS->Stall (MS_TO_MICROSECONDS (1));
         Status = HdaIo->SendCommand (
-          HdaIo,
-          HdaCodecDev->AudioFuncGroup->NodeId,
-          HDA_CODEC_VERB (HDA_VERB_SET_GPIO_DATA, ChannelPayload),
-          &Response
-          );
+                          HdaIo,
+                          HdaCodecDev->AudioFuncGroup->NodeId,
+                          HDA_CODEC_VERB (HDA_VERB_SET_GPIO_DATA, ChannelPayload),
+                          &Response
+                          );
       }
 
       DEBUG ((
@@ -640,11 +726,12 @@ HdaCodecAudioIoSetupPlayback(
         Status
         ));
 
-      if (EFI_ERROR(Status))
+      if (EFI_ERROR (Status)) {
         goto CLOSE_STREAM;
+      }
     }
   }
-  
+
   //
   // We are required to wait for some time after codec setup on some systems.
   // REF: https://github.com/acidanthera/bugtracker/issues/971
@@ -657,7 +744,7 @@ HdaCodecAudioIoSetupPlayback(
 
 CLOSE_STREAM:
   // Close stream.
-  HdaIo->CloseStream(HdaIo, EfiHdaIoTypeOutput);
+  HdaIo->CloseStream (HdaIo, EfiHdaIoTypeOutput);
   return Status;
 }
 
@@ -674,26 +761,29 @@ CLOSE_STREAM:
 **/
 EFI_STATUS
 EFIAPI
-HdaCodecAudioIoStartPlayback(
-  IN EFI_AUDIO_IO_PROTOCOL *This,
-  IN VOID *Data,
-  IN UINTN DataLength,
-  IN UINTN Position OPTIONAL) {
-  DEBUG((DEBUG_VERBOSE, "HdaCodecAudioIoStartPlayback(): start\n"));
+HdaCodecAudioIoStartPlayback (
+  IN EFI_AUDIO_IO_PROTOCOL  *This,
+  IN VOID                   *Data,
+  IN UINTN                  DataLength,
+  IN UINTN                  Position OPTIONAL
+  )
+{
+  DEBUG ((DEBUG_VERBOSE, "HdaCodecAudioIoStartPlayback(): start\n"));
 
   // Create variables.
-  EFI_STATUS Status;
-  AUDIO_IO_PRIVATE_DATA *AudioIoPrivateData;
-  EFI_HDA_IO_PROTOCOL *HdaIo;
-  BOOLEAN StreamRunning;
+  EFI_STATUS             Status;
+  AUDIO_IO_PRIVATE_DATA  *AudioIoPrivateData;
+  EFI_HDA_IO_PROTOCOL    *HdaIo;
+  BOOLEAN                StreamRunning;
 
   // If a parameter is invalid, return error.
-  if ((This == NULL) || (Data == NULL) || (DataLength == 0))
+  if ((This == NULL) || (Data == NULL) || (DataLength == 0)) {
     return EFI_INVALID_PARAMETER;
+  }
 
   // Get private data.
-  AudioIoPrivateData = AUDIO_IO_PRIVATE_DATA_FROM_THIS(This);
-  HdaIo = AudioIoPrivateData->HdaCodecDev->HdaIo;
+  AudioIoPrivateData = AUDIO_IO_PRIVATE_DATA_FROM_THIS (This);
+  HdaIo              = AudioIoPrivateData->HdaCodecDev->HdaIo;
 
   // Nothing to play.
   if (AudioIoPrivateData->SelectedOutputIndexMask == 0) {
@@ -701,23 +791,34 @@ HdaCodecAudioIoStartPlayback(
   }
 
   // Start stream.
-  Status = HdaIo->StartStream(HdaIo, EfiHdaIoTypeOutput, Data, DataLength, Position,
-    NULL, NULL, NULL, NULL);
-  if (EFI_ERROR(Status))
+  Status = HdaIo->StartStream (
+                    HdaIo,
+                    EfiHdaIoTypeOutput,
+                    Data,
+                    DataLength,
+                    Position,
+                    NULL,
+                    NULL,
+                    NULL,
+                    NULL
+                    );
+  if (EFI_ERROR (Status)) {
     return Status;
+  }
 
   // Wait for stream to stop.
   StreamRunning = TRUE;
   while (StreamRunning) {
-    Status = HdaIo->GetStream(HdaIo, EfiHdaIoTypeOutput, &StreamRunning);
-    if (EFI_ERROR(Status)) {
-      HdaIo->StopStream(HdaIo, EfiHdaIoTypeOutput);
+    Status = HdaIo->GetStream (HdaIo, EfiHdaIoTypeOutput, &StreamRunning);
+    if (EFI_ERROR (Status)) {
+      HdaIo->StopStream (HdaIo, EfiHdaIoTypeOutput);
       return Status;
     }
 
     // Wait 100ms.
-    //gBS->Stall (MS_TO_MICROSECONDS (100));
+    // gBS->Stall (MS_TO_MICROSECONDS (100));
   }
+
   return EFI_SUCCESS;
 }
 
@@ -736,31 +837,43 @@ HdaCodecAudioIoStartPlayback(
 **/
 EFI_STATUS
 EFIAPI
-HdaCodecAudioIoStartPlaybackAsync(
-  IN EFI_AUDIO_IO_PROTOCOL *This,
-  IN VOID *Data,
-  IN UINTN DataLength,
-  IN UINTN Position OPTIONAL,
-  IN EFI_AUDIO_IO_CALLBACK Callback OPTIONAL,
-  IN VOID *Context OPTIONAL) {
-  DEBUG((DEBUG_VERBOSE, "HdaCodecAudioIoStartPlaybackAsync(): start\n"));
+HdaCodecAudioIoStartPlaybackAsync (
+  IN EFI_AUDIO_IO_PROTOCOL  *This,
+  IN VOID                   *Data,
+  IN UINTN                  DataLength,
+  IN UINTN                  Position OPTIONAL,
+  IN EFI_AUDIO_IO_CALLBACK  Callback OPTIONAL,
+  IN VOID                   *Context OPTIONAL
+  )
+{
+  DEBUG ((DEBUG_VERBOSE, "HdaCodecAudioIoStartPlaybackAsync(): start\n"));
 
   // Create variables.
-  EFI_STATUS Status;
-  AUDIO_IO_PRIVATE_DATA *AudioIoPrivateData;
-  EFI_HDA_IO_PROTOCOL *HdaIo;
+  EFI_STATUS             Status;
+  AUDIO_IO_PRIVATE_DATA  *AudioIoPrivateData;
+  EFI_HDA_IO_PROTOCOL    *HdaIo;
 
   // If a parameter is invalid, return error.
-  if ((This == NULL) || (Data == NULL) || (DataLength == 0))
+  if ((This == NULL) || (Data == NULL) || (DataLength == 0)) {
     return EFI_INVALID_PARAMETER;
+  }
 
   // Get private data.
-  AudioIoPrivateData = AUDIO_IO_PRIVATE_DATA_FROM_THIS(This);
-  HdaIo = AudioIoPrivateData->HdaCodecDev->HdaIo;
+  AudioIoPrivateData = AUDIO_IO_PRIVATE_DATA_FROM_THIS (This);
+  HdaIo              = AudioIoPrivateData->HdaCodecDev->HdaIo;
 
   // Start stream.
-  Status = HdaIo->StartStream(HdaIo, EfiHdaIoTypeOutput, Data, DataLength, Position,
-    HdaCodecHdaIoStreamCallback, (VOID*)This, (VOID*)Callback, Context);
+  Status = HdaIo->StartStream (
+                    HdaIo,
+                    EfiHdaIoTypeOutput,
+                    Data,
+                    DataLength,
+                    Position,
+                    HdaCodecHdaIoStreamCallback,
+                    (VOID *)This,
+                    (VOID *)Callback,
+                    Context
+                    );
   return Status;
 }
 
@@ -774,22 +887,25 @@ HdaCodecAudioIoStartPlaybackAsync(
 **/
 EFI_STATUS
 EFIAPI
-HdaCodecAudioIoStopPlayback(
-  IN EFI_AUDIO_IO_PROTOCOL *This) {
-  DEBUG((DEBUG_VERBOSE, "HdaCodecAudioIoStopPlayback(): start\n"));
+HdaCodecAudioIoStopPlayback (
+  IN EFI_AUDIO_IO_PROTOCOL  *This
+  )
+{
+  DEBUG ((DEBUG_VERBOSE, "HdaCodecAudioIoStopPlayback(): start\n"));
 
   // Create variables.
-  AUDIO_IO_PRIVATE_DATA *AudioIoPrivateData;
-  EFI_HDA_IO_PROTOCOL *HdaIo;
+  AUDIO_IO_PRIVATE_DATA  *AudioIoPrivateData;
+  EFI_HDA_IO_PROTOCOL    *HdaIo;
 
   // If a parameter is invalid, return error.
-  if (This == NULL)
+  if (This == NULL) {
     return EFI_INVALID_PARAMETER;
+  }
 
   // Get private data.
-  AudioIoPrivateData = AUDIO_IO_PRIVATE_DATA_FROM_THIS(This);
-  HdaIo = AudioIoPrivateData->HdaCodecDev->HdaIo;
+  AudioIoPrivateData = AUDIO_IO_PRIVATE_DATA_FROM_THIS (This);
+  HdaIo              = AudioIoPrivateData->HdaCodecDev->HdaIo;
 
   // Stop stream.
-  return HdaIo->StopStream(HdaIo, EfiHdaIoTypeOutput);
+  return HdaIo->StopStream (HdaIo, EfiHdaIoTypeOutput);
 }

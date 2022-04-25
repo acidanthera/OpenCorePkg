@@ -32,26 +32,27 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 **/
 BOOLEAN
 PartitionValidMbr (
-  IN  MASTER_BOOT_RECORD      *Mbr,
-  IN  EFI_LBA                 LastLba
+  IN  MASTER_BOOT_RECORD  *Mbr,
+  IN  EFI_LBA             LastLba
   )
 {
-  UINT32  StartingLBA;
-  UINT32  EndingLBA;
-  UINT32  NewEndingLBA;
-  INTN    Index1;
-  INTN    Index2;
-  BOOLEAN MbrValid;
+  UINT32   StartingLBA;
+  UINT32   EndingLBA;
+  UINT32   NewEndingLBA;
+  INTN     Index1;
+  INTN     Index2;
+  BOOLEAN  MbrValid;
 
   if (Mbr->Signature != MBR_SIGNATURE) {
     return FALSE;
   }
+
   //
   // The BPB also has this signature, so it can not be used alone.
   //
   MbrValid = FALSE;
   for (Index1 = 0; Index1 < MAX_MBR_PARTITIONS; Index1++) {
-    if (Mbr->Partition[Index1].OSIndicator == 0x00 || UNPACK_UINT32 (Mbr->Partition[Index1].SizeInLBA) == 0) {
+    if ((Mbr->Partition[Index1].OSIndicator == 0x00) || (UNPACK_UINT32 (Mbr->Partition[Index1].SizeInLBA) == 0)) {
       continue;
     }
 
@@ -71,18 +72,18 @@ PartitionValidMbr (
       // with INT 13h
       //
 
-      DEBUG((EFI_D_INFO, "PartitionValidMbr: Bad MBR partition size EndingLBA(%1x) > LastLBA(%1x)\n", EndingLBA, LastLba));
+      DEBUG ((EFI_D_INFO, "PartitionValidMbr: Bad MBR partition size EndingLBA(%1x) > LastLBA(%1x)\n", EndingLBA, LastLba));
 
       return FALSE;
     }
 
     for (Index2 = Index1 + 1; Index2 < MAX_MBR_PARTITIONS; Index2++) {
-      if (Mbr->Partition[Index2].OSIndicator == 0x00 || UNPACK_UINT32 (Mbr->Partition[Index2].SizeInLBA) == 0) {
+      if ((Mbr->Partition[Index2].OSIndicator == 0x00) || (UNPACK_UINT32 (Mbr->Partition[Index2].SizeInLBA) == 0)) {
         continue;
       }
 
       NewEndingLBA = UNPACK_UINT32 (Mbr->Partition[Index2].StartingLBA) + UNPACK_UINT32 (Mbr->Partition[Index2].SizeInLBA) - 1;
-      if (NewEndingLBA >= StartingLBA && UNPACK_UINT32 (Mbr->Partition[Index2].StartingLBA) <= EndingLBA) {
+      if ((NewEndingLBA >= StartingLBA) && (UNPACK_UINT32 (Mbr->Partition[Index2].StartingLBA) <= EndingLBA)) {
         //
         // This region overlaps with the Index1'th region
         //
@@ -90,12 +91,12 @@ PartitionValidMbr (
       }
     }
   }
+
   //
   // None of the regions overlapped so MBR is O.K.
   //
   return MbrValid;
 }
-
 
 /**
   Install child handles if the Handle supports MBR format.
@@ -124,29 +125,29 @@ PartitionInstallMbrChildHandles (
   IN  EFI_DEVICE_PATH_PROTOCOL     *DevicePath
   )
 {
-  EFI_STATUS                   Status;
-  MASTER_BOOT_RECORD           *Mbr;
-  UINT32                       ExtMbrStartingLba;
-  UINT32                       Index;
-  HARDDRIVE_DEVICE_PATH        HdDev;
-  HARDDRIVE_DEVICE_PATH        ParentHdDev;
-  EFI_STATUS                   Found;
-  EFI_DEVICE_PATH_PROTOCOL     *DevicePathNode;
-  EFI_DEVICE_PATH_PROTOCOL     *LastDevicePathNode;
-  UINT32                       BlockSize;
-  UINT32                       MediaId;
-  EFI_LBA                      LastSector;
-  EFI_PARTITION_INFO_PROTOCOL  PartitionInfo;
-  APPLE_PARTITION_INFO_PROTOCOL ApplePartitionInfo;
+  EFI_STATUS                     Status;
+  MASTER_BOOT_RECORD             *Mbr;
+  UINT32                         ExtMbrStartingLba;
+  UINT32                         Index;
+  HARDDRIVE_DEVICE_PATH          HdDev;
+  HARDDRIVE_DEVICE_PATH          ParentHdDev;
+  EFI_STATUS                     Found;
+  EFI_DEVICE_PATH_PROTOCOL       *DevicePathNode;
+  EFI_DEVICE_PATH_PROTOCOL       *LastDevicePathNode;
+  UINT32                         BlockSize;
+  UINT32                         MediaId;
+  EFI_LBA                        LastSector;
+  EFI_PARTITION_INFO_PROTOCOL    PartitionInfo;
+  APPLE_PARTITION_INFO_PROTOCOL  ApplePartitionInfo;
 
-  Found           = EFI_NOT_FOUND;
+  Found = EFI_NOT_FOUND;
 
-  BlockSize   = BlockIo->Media->BlockSize;
-  MediaId     = BlockIo->Media->MediaId;
-  LastSector  = DivU64x32 (
-                  MultU64x32 (BlockIo->Media->LastBlock + 1, BlockSize),
-                  MBR_SIZE
-                  ) - 1;
+  BlockSize  = BlockIo->Media->BlockSize;
+  MediaId    = BlockIo->Media->MediaId;
+  LastSector = DivU64x32 (
+                 MultU64x32 (BlockIo->Media->LastBlock + 1, BlockSize),
+                 MBR_SIZE
+                 ) - 1;
 
   //
   // Ensure the block size can hold the MBR
@@ -171,9 +172,11 @@ PartitionInstallMbrChildHandles (
     Found = Status;
     goto Done;
   }
+
   if (!PartitionValidMbr (Mbr, LastSector)) {
     goto Done;
   }
+
   //
   // We have a valid mbr - add each partition
   //
@@ -184,14 +187,15 @@ PartitionInstallMbrChildHandles (
   ZeroMem (&ParentHdDev, sizeof (ParentHdDev));
   DevicePathNode = DevicePath;
   while (!IsDevicePathEnd (DevicePathNode)) {
-    LastDevicePathNode  = DevicePathNode;
-    DevicePathNode      = NextDevicePathNode (DevicePathNode);
+    LastDevicePathNode = DevicePathNode;
+    DevicePathNode     = NextDevicePathNode (DevicePathNode);
   }
 
   if (LastDevicePathNode != NULL) {
-    if (DevicePathType (LastDevicePathNode) == MEDIA_DEVICE_PATH &&
-        DevicePathSubType (LastDevicePathNode) == MEDIA_HARDDRIVE_DP
-        ) {
+    if ((DevicePathType (LastDevicePathNode) == MEDIA_DEVICE_PATH) &&
+        (DevicePathSubType (LastDevicePathNode) == MEDIA_HARDDRIVE_DP)
+        )
+    {
       CopyMem (&ParentHdDev, LastDevicePathNode, sizeof (ParentHdDev));
     } else {
       LastDevicePathNode = NULL;
@@ -199,18 +203,18 @@ PartitionInstallMbrChildHandles (
   }
 
   ZeroMem (&HdDev, sizeof (HdDev));
-  HdDev.Header.Type     = MEDIA_DEVICE_PATH;
-  HdDev.Header.SubType  = MEDIA_HARDDRIVE_DP;
+  HdDev.Header.Type    = MEDIA_DEVICE_PATH;
+  HdDev.Header.SubType = MEDIA_HARDDRIVE_DP;
   SetDevicePathNodeLength (&HdDev.Header, sizeof (HdDev));
-  HdDev.MBRType         = MBR_TYPE_PCAT;
-  HdDev.SignatureType   = SIGNATURE_TYPE_MBR;
+  HdDev.MBRType       = MBR_TYPE_PCAT;
+  HdDev.SignatureType = SIGNATURE_TYPE_MBR;
 
   if (LastDevicePathNode == NULL) {
     //
     // This is a MBR, add each partition
     //
     for (Index = 0; Index < MAX_MBR_PARTITIONS; Index++) {
-      if (Mbr->Partition[Index].OSIndicator == 0x00 || UNPACK_UINT32 (Mbr->Partition[Index].SizeInLBA) == 0) {
+      if ((Mbr->Partition[Index].OSIndicator == 0x00) || (UNPACK_UINT32 (Mbr->Partition[Index].SizeInLBA) == 0)) {
         //
         // Don't use null MBR entries
         //
@@ -238,12 +242,13 @@ PartitionInstallMbrChildHandles (
       if (Mbr->Partition[Index].OSIndicator == EFI_PARTITION) {
         PartitionInfo.System = 1;
       }
+
       CopyMem (&PartitionInfo.Info.Mbr, &Mbr->Partition[Index], sizeof (MBR_PARTITION_RECORD));
 
       ZeroMem (&ApplePartitionInfo, sizeof (APPLE_PARTITION_INFO_PROTOCOL));
-      ApplePartitionInfo.Revision      = APPLE_PARTITION_INFO_REVISION;
-      ApplePartitionInfo.MBRType       = HdDev.MBRType;
-      ApplePartitionInfo.SignatureType = HdDev.SignatureType;
+      ApplePartitionInfo.Revision        = APPLE_PARTITION_INFO_REVISION;
+      ApplePartitionInfo.MBRType         = HdDev.MBRType;
+      ApplePartitionInfo.SignatureType   = HdDev.SignatureType;
       ApplePartitionInfo.PartitionNumber = HdDev.PartitionNumber;
       ApplePartitionInfo.PartitionStart  = HdDev.PartitionStart;
       ApplePartitionInfo.PartitionSize   = HdDev.PartitionSize;
@@ -251,21 +256,21 @@ PartitionInstallMbrChildHandles (
       CopyMem (&ApplePartitionInfo.PartitionType, &Mbr->Partition[Index].OSIndicator, sizeof (UINT8));
 
       Status = PartitionInstallChildHandle (
-                This,
-                Handle,
-                DiskIo,
-                DiskIo2,
-                BlockIo,
-                BlockIo2,
-                DevicePath,
-                (EFI_DEVICE_PATH_PROTOCOL *) &HdDev,
-                &PartitionInfo,
-                &ApplePartitionInfo,
-                HdDev.PartitionStart,
-                HdDev.PartitionStart + HdDev.PartitionSize - 1,
-                MBR_SIZE,
-                ((Mbr->Partition[Index].OSIndicator == EFI_PARTITION) ? &gEfiPartTypeSystemPartGuid: NULL)
-                );
+                 This,
+                 Handle,
+                 DiskIo,
+                 DiskIo2,
+                 BlockIo,
+                 BlockIo2,
+                 DevicePath,
+                 (EFI_DEVICE_PATH_PROTOCOL *)&HdDev,
+                 &PartitionInfo,
+                 &ApplePartitionInfo,
+                 HdDev.PartitionStart,
+                 HdDev.PartitionStart + HdDev.PartitionSize - 1,
+                 MBR_SIZE,
+                 ((Mbr->Partition[Index].OSIndicator == EFI_PARTITION) ? &gEfiPartTypeSystemPartGuid : NULL)
+                 );
 
       if (!EFI_ERROR (Status)) {
         Found = EFI_SUCCESS;
@@ -280,7 +285,6 @@ PartitionInstallMbrChildHandles (
     ExtMbrStartingLba = 0;
 
     do {
-
       Status = DiskIo->ReadDisk (
                          DiskIo,
                          MediaId,
@@ -298,22 +302,25 @@ PartitionInstallMbrChildHandles (
       }
 
       if ((Mbr->Partition[0].OSIndicator == EXTENDED_DOS_PARTITION) ||
-          (Mbr->Partition[0].OSIndicator == EXTENDED_WINDOWS_PARTITION)) {
+          (Mbr->Partition[0].OSIndicator == EXTENDED_WINDOWS_PARTITION))
+      {
         ExtMbrStartingLba = UNPACK_UINT32 (Mbr->Partition[0].StartingLBA);
         continue;
       }
+
       HdDev.PartitionNumber = ++Index;
       HdDev.PartitionStart  = UNPACK_UINT32 (Mbr->Partition[0].StartingLBA) + ExtMbrStartingLba + ParentHdDev.PartitionStart;
       HdDev.PartitionSize   = UNPACK_UINT32 (Mbr->Partition[0].SizeInLBA);
       if ((HdDev.PartitionStart + HdDev.PartitionSize - 1 >= ParentHdDev.PartitionStart + ParentHdDev.PartitionSize) ||
-          (HdDev.PartitionStart <= ParentHdDev.PartitionStart)) {
+          (HdDev.PartitionStart <= ParentHdDev.PartitionStart))
+      {
         break;
       }
 
       //
       // The signature in EBR(Extended Boot Record) should always be 0.
       //
-      *((UINT32 *) &HdDev.Signature[0]) = 0;
+      *((UINT32 *)&HdDev.Signature[0]) = 0;
 
       ZeroMem (&PartitionInfo, sizeof (EFI_PARTITION_INFO_PROTOCOL));
       PartitionInfo.Revision = EFI_PARTITION_INFO_PROTOCOL_REVISION;
@@ -321,12 +328,13 @@ PartitionInstallMbrChildHandles (
       if (Mbr->Partition[0].OSIndicator == EFI_PARTITION) {
         PartitionInfo.System = 1;
       }
+
       CopyMem (&PartitionInfo.Info.Mbr, &Mbr->Partition[0], sizeof (MBR_PARTITION_RECORD));
 
       ZeroMem (&ApplePartitionInfo, sizeof (APPLE_PARTITION_INFO_PROTOCOL));
-      ApplePartitionInfo.Revision      = APPLE_PARTITION_INFO_REVISION;
-      ApplePartitionInfo.MBRType       = HdDev.MBRType;
-      ApplePartitionInfo.SignatureType = HdDev.SignatureType;
+      ApplePartitionInfo.Revision        = APPLE_PARTITION_INFO_REVISION;
+      ApplePartitionInfo.MBRType         = HdDev.MBRType;
+      ApplePartitionInfo.SignatureType   = HdDev.SignatureType;
       ApplePartitionInfo.PartitionNumber = HdDev.PartitionNumber;
       ApplePartitionInfo.PartitionStart  = HdDev.PartitionStart;
       ApplePartitionInfo.PartitionSize   = HdDev.PartitionSize;
@@ -341,13 +349,13 @@ PartitionInstallMbrChildHandles (
                  BlockIo,
                  BlockIo2,
                  DevicePath,
-                 (EFI_DEVICE_PATH_PROTOCOL *) &HdDev,
+                 (EFI_DEVICE_PATH_PROTOCOL *)&HdDev,
                  &PartitionInfo,
                  &ApplePartitionInfo,
                  HdDev.PartitionStart - ParentHdDev.PartitionStart,
                  HdDev.PartitionStart - ParentHdDev.PartitionStart + HdDev.PartitionSize - 1,
                  MBR_SIZE,
-                 ((Mbr->Partition[0].OSIndicator == EFI_PARTITION) ? &gEfiPartTypeSystemPartGuid: NULL)
+                 ((Mbr->Partition[0].OSIndicator == EFI_PARTITION) ? &gEfiPartTypeSystemPartGuid : NULL)
                  );
       if (!EFI_ERROR (Status)) {
         Found = EFI_SUCCESS;
@@ -355,7 +363,8 @@ PartitionInstallMbrChildHandles (
 
       if ((Mbr->Partition[1].OSIndicator != EXTENDED_DOS_PARTITION) &&
           (Mbr->Partition[1].OSIndicator != EXTENDED_WINDOWS_PARTITION)
-          ) {
+          )
+      {
         break;
       }
 

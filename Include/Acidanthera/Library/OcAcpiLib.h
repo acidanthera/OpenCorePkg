@@ -18,7 +18,7 @@
 #include <IndustryStandard/Acpi62.h>
 #include <Protocol/SimpleFileSystem.h>
 
-#define OC_ACPI_NAME_SIZE 4
+#define OC_ACPI_NAME_SIZE  4
 
 //
 // RSDP and XSDT table definitions not provided by EDK2 due to no
@@ -28,13 +28,13 @@
 #pragma pack(push, 1)
 
 typedef struct {
-  EFI_ACPI_DESCRIPTION_HEADER  Header;
-  UINT32                       Tables[];
+  EFI_ACPI_DESCRIPTION_HEADER    Header;
+  UINT32                         Tables[];
 } OC_ACPI_6_2_ROOT_SYSTEM_DESCRIPTION_TABLE;
 
 typedef struct {
-  EFI_ACPI_DESCRIPTION_HEADER  Header;
-  UINT64                       Tables[];
+  EFI_ACPI_DESCRIPTION_HEADER    Header;
+  UINT64                         Tables[];
 } OC_ACPI_6_2_EXTENDED_SYSTEM_DESCRIPTION_TABLE;
 
 #pragma pack(pop)
@@ -46,11 +46,11 @@ typedef struct {
   //
   // Region address.
   //
-  UINT32  Address;
+  UINT32    Address;
   //
   // Region name, not guaranteed to be null-terminated.
   //
-  CHAR8   Name[OC_ACPI_NAME_SIZE+1];
+  CHAR8     Name[OC_ACPI_NAME_SIZE+1];
 } OC_ACPI_REGION;
 
 //
@@ -60,47 +60,47 @@ typedef struct {
   //
   // Pointer to original RSDP table.
   //
-  EFI_ACPI_6_2_ROOT_SYSTEM_DESCRIPTION_POINTER   *Rsdp;
+  EFI_ACPI_6_2_ROOT_SYSTEM_DESCRIPTION_POINTER     *Rsdp;
   //
   // Pointer to active RSDT table.
   //
-  OC_ACPI_6_2_ROOT_SYSTEM_DESCRIPTION_TABLE      *Rsdt;
+  OC_ACPI_6_2_ROOT_SYSTEM_DESCRIPTION_TABLE        *Rsdt;
   //
   // Pointer to active XSDT table.
   //
-  OC_ACPI_6_2_EXTENDED_SYSTEM_DESCRIPTION_TABLE  *Xsdt;
+  OC_ACPI_6_2_EXTENDED_SYSTEM_DESCRIPTION_TABLE    *Xsdt;
   //
   // Pointer to active FADT table.
   //
-  EFI_ACPI_6_2_FIXED_ACPI_DESCRIPTION_TABLE      *Fadt;
+  EFI_ACPI_6_2_FIXED_ACPI_DESCRIPTION_TABLE        *Fadt;
   //
   // Pointer to active DSDT table.
   //
-  EFI_ACPI_DESCRIPTION_HEADER                    *Dsdt;
+  EFI_ACPI_DESCRIPTION_HEADER                      *Dsdt;
   //
   // Current list of tables allocated from heap.
   //
-  EFI_ACPI_COMMON_HEADER                         **Tables;
+  EFI_ACPI_COMMON_HEADER                           **Tables;
   //
   // Number of tables.
   //
-  UINT32                                         NumberOfTables;
+  UINT32                                           NumberOfTables;
   //
   // Number of allocated table slots.
   //
-  UINT32                                         AllocatedTables;
+  UINT32                                           AllocatedTables;
   //
   // Detected operation regions if any.
   //
-  OC_ACPI_REGION                                 *Regions;
+  OC_ACPI_REGION                                   *Regions;
   //
   // Number of regions.
   //
-  UINT32                                         NumberOfRegions;
+  UINT32                                           NumberOfRegions;
   //
   // Number of allocated region slots.
   //
-  UINT32                                         AllocatedRegions;
+  UINT32                                           AllocatedRegions;
 } OC_ACPI_CONTEXT;
 
 //
@@ -110,55 +110,55 @@ typedef struct {
   //
   // Find bytes.
   //
-  CONST UINT8  *Find;
+  CONST UINT8    *Find;
   //
   // Replace bytes.
   //
-  CONST UINT8  *Replace;
+  CONST UINT8    *Replace;
   //
   // Find mask or NULL.
   //
-  CONST UINT8  *Mask;
+  CONST UINT8    *Mask;
   //
   // Replace mask or NULL.
   //
-  CONST UINT8  *ReplaceMask;
+  CONST UINT8    *ReplaceMask;
   //
   // Fully qualified name with ACPI path (e.g. \_SB_.PCI0.GFX0).
   //
-  CONST CHAR8  *Base;
+  CONST CHAR8    *Base;
   //
   // Number of Base entries to skip before using.
   //
-  UINT32       BaseSkip;
+  UINT32         BaseSkip;
   //
   // Patch size.
   //
-  UINT32       Size;
+  UINT32         Size;
   //
   // Replace count or 0 for all.
   //
-  UINT32       Count;
+  UINT32         Count;
   //
   // Skip count or 0 to start from 1 match.
   //
-  UINT32       Skip;
+  UINT32         Skip;
   //
   // Limit replacement size to this value or 0, which assumes table size.
   //
-  UINT32       Limit;
+  UINT32         Limit;
   //
   // ACPI Table signature or 0.
   //
-  UINT32       TableSignature;
+  UINT32         TableSignature;
   //
   // ACPI Table length or 0.
   //
-  UINT32       TableLength;
+  UINT32         TableLength;
   //
   // ACPI Table Id or 0.
   //
-  UINT64       OemTableId;
+  UINT64         OemTableId;
 } OC_ACPI_PATCH;
 
 /**
@@ -339,11 +339,11 @@ AcpiDumpTables (
 **/
 EFI_STATUS
 AcpiFindEntryInMemory (
-  IN     UINT8       *Table,
-  IN     CONST CHAR8 *PathString,
-  IN     UINT8       Entry,
-     OUT UINT32      *Offset,
-  IN     UINT32      TableLength OPTIONAL
+  IN     UINT8        *Table,
+  IN     CONST CHAR8  *PathString,
+  IN     UINT8        Entry,
+  OUT UINT32          *Offset,
+  IN     UINT32       TableLength OPTIONAL
   );
 
 #endif // OC_ACPI_LIB_H

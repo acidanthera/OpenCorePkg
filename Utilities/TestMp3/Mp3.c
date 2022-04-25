@@ -29,7 +29,7 @@ ENTRY_POINT (
   UINT32  Size;
   UINT8   *Buffer;
 
-  if ((Buffer = UserReadFile (argc > 1 ? argv[1] : "test.mp3", &Size)) == NULL) {
+  if ((Buffer = UserReadFile ((argc > 1) ? argv[1] : "test.mp3", &Size)) == NULL) {
     DEBUG ((DEBUG_ERROR, "Read fail\n"));
     return -1;
   }
@@ -42,14 +42,14 @@ ENTRY_POINT (
   EFI_STATUS                  Status;
 
   Status = OcDecodeMp3 (
-    Buffer,
-    Size,
-    &OutBuffer,
-    &OutSize,
-    &Freq,
-    &Bits,
-    &Channels
-    );
+             Buffer,
+             Size,
+             &OutBuffer,
+             &OutSize,
+             &Freq,
+             &Bits,
+             &Channels
+             );
 
   FreePool (Buffer);
 
@@ -80,17 +80,18 @@ LLVMFuzzerTestOneInput (
     UINT8                       Channels;
 
     Status = OcDecodeMp3 (
-      Data,
-      Size,
-      &OutBuffer,
-      &OutSize,
-      &Freq,
-      &Bits,
-      &Channels
-      );
+               Data,
+               Size,
+               &OutBuffer,
+               &OutSize,
+               &Freq,
+               &Bits,
+               &Channels
+               );
     if (!EFI_ERROR (Status)) {
       FreePool (OutBuffer);
     }
   }
+
   return 0;
 }

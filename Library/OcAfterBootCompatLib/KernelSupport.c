@@ -86,10 +86,10 @@ ProtectRtMemoryFromRelocation (
   // Ideally boot.efi should only count RT code and RT data pages, but it is not easy to change.
   //
 
-  UINTN                   NumEntries;
-  UINTN                   Index;
-  EFI_MEMORY_DESCRIPTOR   *Desc;
-  RT_RELOC_PROTECT_INFO   *RelocInfo;
+  UINTN                  NumEntries;
+  UINTN                  Index;
+  EFI_MEMORY_DESCRIPTOR  *Desc;
+  RT_RELOC_PROTECT_INFO  *RelocInfo;
 
   Desc                = MemoryMap;
   RtReloc->NumEntries = 0;
@@ -97,18 +97,20 @@ ProtectRtMemoryFromRelocation (
   NumEntries          = MemoryMapSize / DescriptorSize;
 
   for (Index = 0; Index < NumEntries; ++Index) {
-    if ((Desc->Attribute & EFI_MEMORY_RUNTIME) != 0
-      && Desc->NumberOfPages > 0
-      && (Desc->Type == EfiRuntimeServicesCode || Desc->Type == EfiRuntimeServicesData)
-      && !AREA_WITHIN_DESCRIPTOR (Desc, SysTableArea, SysTableAreaSize)) {
-
+    if (  ((Desc->Attribute & EFI_MEMORY_RUNTIME) != 0)
+       && (Desc->NumberOfPages > 0)
+       && ((Desc->Type == EfiRuntimeServicesCode) || (Desc->Type == EfiRuntimeServicesData))
+       && !AREA_WITHIN_DESCRIPTOR (Desc, SysTableArea, SysTableAreaSize))
+    {
       if (RtReloc->NumEntries == ARRAY_SIZE (RtReloc->RelocInfo)) {
-        RUNTIME_DEBUG ((
-          DEBUG_ERROR,
-          "OCABC: Cannot save mem type for entry: %Lx (type 0x%x)\n",
-          (UINT64) Desc->PhysicalStart,
-          (UINT32) Desc->Type
-          ));
+        RUNTIME_DEBUG (
+          (
+           DEBUG_ERROR,
+           "OCABC: Cannot save mem type for entry: %Lx (type 0x%x)\n",
+           (UINT64)Desc->PhysicalStart,
+           (UINT32)Desc->Type
+          )
+          );
         return;
       }
 
@@ -201,7 +203,7 @@ PerformRtMemoryVirtualMapping (
     // The correct approach is to properly handle EfiReservedMemoryType with EFI_MEMORY_RUNTIME
     // attribute set, and not mess with the memory map passed to boot.efi. As done here.
     //
-    if (Desc->Type != EfiReservedMemoryType && (Desc->Attribute & EFI_MEMORY_RUNTIME) != 0) {
+    if ((Desc->Type != EfiReservedMemoryType) && ((Desc->Attribute & EFI_MEMORY_RUNTIME) != 0)) {
       //
       // Check if there is enough space in virtual map.
       //
@@ -219,12 +221,12 @@ PerformRtMemoryVirtualMapping (
       // Define virtual to physical mapping.
       //
       Status = VmMapVirtualPages (
-        &KernelState->VmContext,
-        PageTable,
-        Desc->VirtualStart,
-        Desc->NumberOfPages,
-        Desc->PhysicalStart
-        );
+                 &KernelState->VmContext,
+                 PageTable,
+                 Desc->VirtualStart,
+                 Desc->NumberOfPages,
+                 Desc->PhysicalStart
+                 );
       if (EFI_ERROR (Status)) {
         RUNTIME_DEBUG ((DEBUG_ERROR, "OCABC: RT mapping failure - %r\n", Status));
         return EFI_OUT_OF_RESOURCES;
@@ -246,11 +248,11 @@ PerformRtMemoryVirtualMapping (
   VmFlushCaches ();
 
   Status = gRT->SetVirtualAddressMap (
-    KernelState->VmMapSize,
-    DescriptorSize,
-    DescriptorVersion,
-    KernelState->VmMap
-    );
+                  KernelState->VmMapSize,
+                  DescriptorSize,
+                  DescriptorVersion,
+                  KernelState->VmMap
+                  );
 
   return Status;
 }
@@ -295,8 +297,9 @@ RestoreProtectedRtMemoryTypes (
       // For example, 0000000000000000-FFFFFFFFFFFFFFFF 0000000000000000 0000000000000000.
       // Execute exact comparisons as fuzzy matching often results in errors.
       //
-      if (PhysicalStart == RtReloc->RelocInfo[Index2].PhysicalStart
-        && PhysicalEnd == RtReloc->RelocInfo[Index2].PhysicalEnd)  {
+      if (  (PhysicalStart == RtReloc->RelocInfo[Index2].PhysicalStart)
+         && (PhysicalEnd == RtReloc->RelocInfo[Index2].PhysicalEnd))
+      {
         Desc->Type = RtReloc->RelocInfo[Index2].Type;
         --NumEntriesLeft;
         break;
@@ -307,12 +310,14 @@ RestoreProtectedRtMemoryTypes (
   }
 
   if (NumEntriesLeft > 0) {
-    RUNTIME_DEBUG ((
-      DEBUG_ERROR,
-      "OCABC: Failed to restore %u entries out of %u\n",
-      (UINT32) NumEntriesLeft,
-      (UINT32) RtReloc->NumEntries
-      ));
+    RUNTIME_DEBUG (
+      (
+       DEBUG_ERROR,
+       "OCABC: Failed to restore %u entries out of %u\n",
+       (UINT32)NumEntriesLeft,
+       (UINT32)RtReloc->NumEntries
+      )
+      );
   }
 }
 
@@ -329,14 +334,14 @@ AppleMapPrepareForBooting (
   IN OUT VOID                 *BootArgs
   )
 {
-  EFI_STATUS              Status;
-  DTEntry                 Chosen;
-  CHAR8                   *ArgsStr;
-  UINT32                  ArgsSize;
-  OC_BOOT_ARGUMENTS       BA;
-  UINTN                   MemoryMapSize;
-  EFI_MEMORY_DESCRIPTOR   *MemoryMap;
-  UINTN                   DescriptorSize;
+  EFI_STATUS             Status;
+  DTEntry                Chosen;
+  CHAR8                  *ArgsStr;
+  UINT32                 ArgsSize;
+  OC_BOOT_ARGUMENTS      BA;
+  UINTN                  MemoryMapSize;
+  EFI_MEMORY_DESCRIPTOR  *MemoryMap;
+  UINTN                  DescriptorSize;
 
   OcParseBootArgs (&BA, BootArgs);
 
@@ -354,24 +359,25 @@ AppleMapPrepareForBooting (
     OcRemoveArgumentFromCmd (BA.CommandLine, "-s");
   }
 
-  if (BootCompat->Settings.DisableSingleUser
-    || BootCompat->Settings.ForceBooterSignature) {
-    DTInit ((VOID *)(UINTN) *BA.DeviceTreeP, BA.DeviceTreeLength);
+  if (  BootCompat->Settings.DisableSingleUser
+     || BootCompat->Settings.ForceBooterSignature)
+  {
+    DTInit ((VOID *)(UINTN)*BA.DeviceTreeP, BA.DeviceTreeLength);
     Status = DTLookupEntry (NULL, "/chosen", &Chosen);
     if (!EFI_ERROR (Status)) {
       if (BootCompat->Settings.DisableSingleUser) {
         //
         // Second, there is a DT entry.
         //
-        Status = DTGetProperty (Chosen, "boot-args", (VOID **) &ArgsStr, &ArgsSize);
-        if (!EFI_ERROR (Status) && ArgsSize > 0) {
+        Status = DTGetProperty (Chosen, "boot-args", (VOID **)&ArgsStr, &ArgsSize);
+        if (!EFI_ERROR (Status) && (ArgsSize > 0)) {
           OcRemoveArgumentFromCmd (ArgsStr, "-s");
         }
       }
 
       if (BootCompat->Settings.ForceBooterSignature) {
-        Status = DTGetProperty (Chosen, "boot-signature", (VOID **) &ArgsStr, &ArgsSize);
-        if (!EFI_ERROR (Status) && ArgsSize == SHA1_DIGEST_SIZE) {
+        Status = DTGetProperty (Chosen, "boot-signature", (VOID **)&ArgsStr, &ArgsSize);
+        if (!EFI_ERROR (Status) && (ArgsSize == SHA1_DIGEST_SIZE)) {
           CopyMem (ArgsStr, BootCompat->Settings.BooterSignature, ArgsSize);
         }
       }
@@ -394,7 +400,7 @@ AppleMapPrepareForBooting (
 
   if (BootCompat->Settings.AvoidRuntimeDefrag) {
     MemoryMapSize  = *BA.MemoryMapSize;
-    MemoryMap      = (EFI_MEMORY_DESCRIPTOR *)(UINTN) (*BA.MemoryMap);
+    MemoryMap      = (EFI_MEMORY_DESCRIPTOR *)(UINTN)(*BA.MemoryMap);
     DescriptorSize = *BA.MemoryMapDescriptorSize;
 
     //
@@ -421,7 +427,7 @@ AppleMapPrepareForBooting (
     //
     if (BootCompat->KernelState.ConfigurationTable != NULL) {
       CopyMem (
-        (VOID*) ((UINTN) BA.SystemTable->ConfigurationTable & (BASE_1GB - 1)),
+        (VOID *)((UINTN)BA.SystemTable->ConfigurationTable & (BASE_1GB - 1)),
         BootCompat->KernelState.ConfigurationTable,
         sizeof (*BootCompat->KernelState.ConfigurationTable) * BA.SystemTable->NumberOfTableEntries
         );
@@ -449,7 +455,7 @@ AppleMapPrepareForHibernateWake (
   IOHibernateImageHeader  *ImageHeader;
   IOHibernateHandoff      *Handoff;
 
-  ImageHeader = (IOHibernateImageHeader *) EFI_PAGES_TO_SIZE (ImageHeaderPage);
+  ImageHeader = (IOHibernateImageHeader *)EFI_PAGES_TO_SIZE (ImageHeaderPage);
 
   //
   // Legacy note. In legacy implementations systemTableOffset was unconditionally overwritten
@@ -473,7 +479,7 @@ AppleMapPrepareForHibernateWake (
   //    mapping and our new memory map entries will unconditionally overwrite previous ones. In case
   //    no physical memory changes happened, this should work fine.
   //
-  Handoff = (IOHibernateHandoff *) EFI_PAGES_TO_SIZE ((UINTN) ImageHeader->handoffPages);
+  Handoff = (IOHibernateHandoff *)EFI_PAGES_TO_SIZE ((UINTN)ImageHeader->handoffPages);
   while (Handoff->type != kIOHibernateHandoffTypeEnd) {
     if (Handoff->type == kIOHibernateHandoffTypeMemoryMap) {
       if (BootCompat->Settings.DiscardHibernateMap) {
@@ -505,7 +511,7 @@ AppleMapPrepareForHibernateWake (
             &BootCompat->RtReloc,
             Handoff->bytecount,
             BootCompat->KernelState.VmMapDescSize,
-            (EFI_MEMORY_DESCRIPTOR *)(UINTN) Handoff->data
+            (EFI_MEMORY_DESCRIPTOR *)(UINTN)Handoff->data
             );
         }
       }
@@ -513,7 +519,7 @@ AppleMapPrepareForHibernateWake (
       break;
     }
 
-    Handoff = (IOHibernateHandoff *) ((UINTN) Handoff + sizeof(Handoff) + Handoff->bytecount);
+    Handoff = (IOHibernateHandoff *)((UINTN)Handoff + sizeof (Handoff) + Handoff->bytecount);
   }
 
   //
@@ -524,21 +530,22 @@ AppleMapPrepareForHibernateWake (
 
 VOID
 AppleMapPrepareMemoryPool (
-  IN OUT BOOT_COMPAT_CONTEXT   *BootCompat
+  IN OUT BOOT_COMPAT_CONTEXT  *BootCompat
   )
 {
   EFI_STATUS  Status;
 
-  if (!BootCompat->Settings.SetupVirtualMap
-    || BootCompat->KernelState.VmContext.MemoryPool != NULL) {
+  if (  !BootCompat->Settings.SetupVirtualMap
+     || (BootCompat->KernelState.VmContext.MemoryPool != NULL))
+  {
     return;
   }
 
   Status = VmAllocateMemoryPool (
-    &BootCompat->KernelState.VmContext,
-    OC_DEFAULT_VMEM_PAGE_COUNT,
-    BootCompat->ServicePtrs.GetMemoryMap
-    );
+             &BootCompat->KernelState.VmContext,
+             OC_DEFAULT_VMEM_PAGE_COUNT,
+             BootCompat->ServicePtrs.GetMemoryMap
+             );
 
   if (EFI_ERROR (Status)) {
     DEBUG ((DEBUG_ERROR, "OCABC: Memory pool allocation failure - %r\n", Status));
@@ -547,12 +554,12 @@ AppleMapPrepareMemoryPool (
 
 VOID
 AppleMapPrepareBooterState (
-  IN OUT BOOT_COMPAT_CONTEXT   *BootCompat,
-  IN OUT EFI_LOADED_IMAGE      *LoadedImage,
-  IN     EFI_GET_MEMORY_MAP    GetMemoryMap  OPTIONAL
+  IN OUT BOOT_COMPAT_CONTEXT  *BootCompat,
+  IN OUT EFI_LOADED_IMAGE     *LoadedImage,
+  IN     EFI_GET_MEMORY_MAP   GetMemoryMap  OPTIONAL
   )
 {
-  EFI_STATUS            Status;
+  EFI_STATUS  Status;
 
   //
   // Allocate memory pool if needed.
@@ -571,14 +578,14 @@ AppleMapPrepareBooterState (
       //
       BootCompat->KernelState.SysTableRtArea     = BASE_4GB;
       BootCompat->KernelState.SysTableRtAreaSize = gST->Hdr.HeaderSize;
-      Status = OcAllocatePagesFromTop (
-        EfiRuntimeServicesData,
-        EFI_SIZE_TO_PAGES (gST->Hdr.HeaderSize),
-        &BootCompat->KernelState.SysTableRtArea,
-        GetMemoryMap,
-        NULL,
-        NULL
-        );
+      Status                                     = OcAllocatePagesFromTop (
+                                                     EfiRuntimeServicesData,
+                                                     EFI_SIZE_TO_PAGES (gST->Hdr.HeaderSize),
+                                                     &BootCompat->KernelState.SysTableRtArea,
+                                                     GetMemoryMap,
+                                                     NULL,
+                                                     NULL
+                                                     );
       if (EFI_ERROR (Status)) {
         DEBUG ((
           DEBUG_ERROR,
@@ -593,7 +600,7 @@ AppleMapPrepareBooterState (
       // Copy UEFI system table to the new location.
       //
       CopyMem (
-        (VOID *)(UINTN) BootCompat->KernelState.SysTableRtArea,
+        (VOID *)(UINTN)BootCompat->KernelState.SysTableRtArea,
         gST,
         gST->Hdr.HeaderSize
         );
@@ -607,33 +614,34 @@ AppleMapPrepareBooterState (
     // Assign loaded image with custom system table.
     //
     LoadedImage->SystemTable =
-      (EFI_SYSTEM_TABLE *)(UINTN) BootCompat->KernelState.SysTableRtArea;
+      (EFI_SYSTEM_TABLE *)(UINTN)BootCompat->KernelState.SysTableRtArea;
   }
 }
 
 VOID
 AppleMapPrepareKernelJump (
-  IN OUT BOOT_COMPAT_CONTEXT    *BootCompat,
-  IN     EFI_PHYSICAL_ADDRESS   CallGate
+  IN OUT BOOT_COMPAT_CONTEXT   *BootCompat,
+  IN     EFI_PHYSICAL_ADDRESS  CallGate
   )
 {
-  CALL_GATE_JUMP           *CallGateJump;
+  CALL_GATE_JUMP  *CallGateJump;
 
   //
   // There is no reason to patch the kernel when we do not need it.
   //
-  if (!BootCompat->Settings.AvoidRuntimeDefrag
-    && !BootCompat->Settings.DiscardHibernateMap
-    && !BootCompat->Settings.AllowRelocationBlock
-    && !BootCompat->Settings.DisableSingleUser
-    && !BootCompat->Settings.ForceBooterSignature) {
+  if (  !BootCompat->Settings.AvoidRuntimeDefrag
+     && !BootCompat->Settings.DiscardHibernateMap
+     && !BootCompat->Settings.AllowRelocationBlock
+     && !BootCompat->Settings.DisableSingleUser
+     && !BootCompat->Settings.ForceBooterSignature)
+  {
     return;
   }
 
-#ifndef MDE_CPU_X64
+ #ifndef MDE_CPU_X64
   RUNTIME_DEBUG ((DEBUG_ERROR, "OCABC: Kernel trampolines are unsupported for non-X64\n"));
   CpuDeadLoop ();
-#endif
+ #endif
 
   //
   // Check whether we have address and abort if not.
@@ -643,7 +651,7 @@ AppleMapPrepareKernelJump (
     return;
   }
 
-  CallGateJump = (VOID *)(UINTN) CallGate;
+  CallGateJump = (VOID *)(UINTN)CallGate;
 
   //
   // Move call gate jump bytes front.
@@ -656,7 +664,7 @@ AppleMapPrepareKernelJump (
 
   CallGateJump->Command  = 0x25FF;
   CallGateJump->Argument = 0x0;
-  CallGateJump->Address  = (UINTN) AppleMapPrepareKernelState;
+  CallGateJump->Address  = (UINTN)AppleMapPrepareKernelState;
 }
 
 EFI_STATUS
@@ -668,7 +676,7 @@ AppleMapPrepareMemState (
   IN     EFI_MEMORY_DESCRIPTOR  *MemoryMap
   )
 {
-  EFI_STATUS         Status;
+  EFI_STATUS  Status;
 
   //
   // Protect RT areas from relocation by marking then MemMapIO.
@@ -689,19 +697,19 @@ AppleMapPrepareMemState (
   //
   if (BootCompat->Settings.SetupVirtualMap) {
     Status = PerformRtMemoryVirtualMapping (
-      &BootCompat->KernelState,
-      MemoryMapSize,
-      DescriptorSize,
-      DescriptorVersion,
-      MemoryMap
-      );
+               &BootCompat->KernelState,
+               MemoryMapSize,
+               DescriptorSize,
+               DescriptorVersion,
+               MemoryMap
+               );
   } else {
     Status = gRT->SetVirtualAddressMap (
-      MemoryMapSize,
-      DescriptorSize,
-      DescriptorVersion,
-      MemoryMap
-      );
+                    MemoryMapSize,
+                    DescriptorSize,
+                    DescriptorVersion,
+                    MemoryMap
+                    );
   }
 
   //
@@ -709,7 +717,7 @@ AppleMapPrepareMemState (
   //
   if (BootCompat->Settings.AvoidRuntimeDefrag) {
     CopyMem (
-      (VOID *)(UINTN) BootCompat->KernelState.SysTableRtArea,
+      (VOID *)(UINTN)BootCompat->KernelState.SysTableRtArea,
       gST,
       gST->Hdr.HeaderSize
       );
@@ -721,12 +729,12 @@ AppleMapPrepareMemState (
 UINTN
 EFIAPI
 AppleMapPrepareKernelState (
-  IN UINTN    Args,
-  IN UINTN    EntryPoint
+  IN UINTN  Args,
+  IN UINTN  EntryPoint
   )
 {
-  BOOT_COMPAT_CONTEXT    *BootCompatContext;
-  KERNEL_CALL_GATE       CallGate;
+  BOOT_COMPAT_CONTEXT  *BootCompatContext;
+  KERNEL_CALL_GATE     CallGate;
 
   BootCompatContext = GetBootCompatContext ();
 
@@ -738,21 +746,21 @@ AppleMapPrepareKernelState (
   } else {
     AppleMapPrepareForBooting (
       BootCompatContext,
-      (VOID *) Args
+      (VOID *)Args
       );
   }
 
-  CallGate = (KERNEL_CALL_GATE)(UINTN) (
-    BootCompatContext->ServiceState.KernelCallGate + CALL_GATE_JUMP_SIZE
-    );
+  CallGate = (KERNEL_CALL_GATE)(UINTN)(
+                                       BootCompatContext->ServiceState.KernelCallGate + CALL_GATE_JUMP_SIZE
+                                       );
 
   if (BootCompatContext->KernelState.RelocationBlock != 0) {
     return AppleRelocationCallGate (
-      BootCompatContext,
-      CallGate,
-      Args,
-      EntryPoint
-      );
+             BootCompatContext,
+             CallGate,
+             Args,
+             EntryPoint
+             );
   }
 
   return CallGate (Args, EntryPoint);

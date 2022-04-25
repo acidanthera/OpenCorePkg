@@ -7,9 +7,7 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 
 **/
 
-
 #include "Partition.h"
-
 
 /**
   Install child handles if the Handle supports El Torito format.
@@ -39,29 +37,29 @@ PartitionInstallElToritoChildHandles (
   IN  EFI_DEVICE_PATH_PROTOCOL     *DevicePath
   )
 {
-  EFI_STATUS                   Status;
-  UINT64                       VolDescriptorOffset;
-  UINT32                       Lba2KB;
-  EFI_BLOCK_IO_MEDIA           *Media;
-  CDROM_VOLUME_DESCRIPTOR      *VolDescriptor;
-  ELTORITO_CATALOG             *Catalog;
-  UINTN                        Check;
-  UINTN                        Index;
-  UINTN                        BootEntry;
-  UINTN                        MaxIndex;
-  UINT16                       *CheckBuffer;
-  CDROM_DEVICE_PATH            CdDev;
-  UINT32                       SubBlockSize;
-  UINT32                       SectorCount;
-  EFI_STATUS                   Found;
-  UINT32                       VolSpaceSize;
-  EFI_PARTITION_INFO_PROTOCOL  PartitionInfo;
-  APPLE_PARTITION_INFO_PROTOCOL ApplePartitionInfo;
+  EFI_STATUS                     Status;
+  UINT64                         VolDescriptorOffset;
+  UINT32                         Lba2KB;
+  EFI_BLOCK_IO_MEDIA             *Media;
+  CDROM_VOLUME_DESCRIPTOR        *VolDescriptor;
+  ELTORITO_CATALOG               *Catalog;
+  UINTN                          Check;
+  UINTN                          Index;
+  UINTN                          BootEntry;
+  UINTN                          MaxIndex;
+  UINT16                         *CheckBuffer;
+  CDROM_DEVICE_PATH              CdDev;
+  UINT32                         SubBlockSize;
+  UINT32                         SectorCount;
+  EFI_STATUS                     Found;
+  UINT32                         VolSpaceSize;
+  EFI_PARTITION_INFO_PROTOCOL    PartitionInfo;
+  APPLE_PARTITION_INFO_PROTOCOL  ApplePartitionInfo;
 
-  Found         = EFI_NOT_FOUND;
-  Media         = BlockIo->Media;
+  Found = EFI_NOT_FOUND;
+  Media = BlockIo->Media;
 
-  VolSpaceSize  = 0;
+  VolSpaceSize = 0;
 
   //
   // CD_ROM has the fixed block size as 2048 bytes (SIZE_2KB)
@@ -80,7 +78,7 @@ PartitionInstallElToritoChildHandles (
     return EFI_NOT_FOUND;
   }
 
-  Catalog = (ELTORITO_CATALOG *) VolDescriptor;
+  Catalog = (ELTORITO_CATALOG *)VolDescriptor;
 
   //
   // Loop: handle one volume descriptor per time
@@ -88,7 +86,8 @@ PartitionInstallElToritoChildHandles (
   //
   for (VolDescriptorOffset = SIZE_32KB;
        VolDescriptorOffset <= MultU64x32 (Media->LastBlock, Media->BlockSize);
-       VolDescriptorOffset += SIZE_2KB) {
+       VolDescriptorOffset += SIZE_2KB)
+  {
     Status = DiskIo->ReadDisk (
                        DiskIo,
                        Media->MediaId,
@@ -100,17 +99,20 @@ PartitionInstallElToritoChildHandles (
       Found = Status;
       break;
     }
+
     //
     // Check for valid volume descriptor signature
     //
-    if (VolDescriptor->Unknown.Type == CDVOL_TYPE_END ||
-        CompareMem (VolDescriptor->Unknown.Id, CDVOL_ID, sizeof (VolDescriptor->Unknown.Id)) != 0
-        ) {
+    if ((VolDescriptor->Unknown.Type == CDVOL_TYPE_END) ||
+        (CompareMem (VolDescriptor->Unknown.Id, CDVOL_ID, sizeof (VolDescriptor->Unknown.Id)) != 0)
+        )
+    {
       //
       // end of Volume descriptor list
       //
       break;
     }
+
     //
     // Read the Volume Space Size from Primary Volume Descriptor 81-88 byte,
     // the 32-bit numerical values is stored in Both-byte orders
@@ -118,12 +120,14 @@ PartitionInstallElToritoChildHandles (
     if (VolDescriptor->PrimaryVolume.Type == CDVOL_TYPE_CODED) {
       VolSpaceSize = VolDescriptor->PrimaryVolume.VolSpaceSize[0];
     }
+
     //
     // Is it an El Torito volume descriptor?
     //
     if (CompareMem (VolDescriptor->BootRecordVolume.SystemId, CDVOL_ELTORITO_ID, sizeof (CDVOL_ELTORITO_ID) - 1) != 0) {
       continue;
     }
+
     //
     // Read in the boot El Torito boot catalog
     // The LBA unit used by El Torito boot catalog is 2KB unit
@@ -145,17 +149,18 @@ PartitionInstallElToritoChildHandles (
       DEBUG ((EFI_D_ERROR, "EltCheckDevice: error reading catalog %r\n", Status));
       continue;
     }
+
     //
     // We don't care too much about the Catalog header's contents, but we do want
     // to make sure it looks like a Catalog header
     //
-    if (Catalog->Catalog.Indicator != ELTORITO_ID_CATALOG || Catalog->Catalog.Id55AA != 0xAA55) {
+    if ((Catalog->Catalog.Indicator != ELTORITO_ID_CATALOG) || (Catalog->Catalog.Id55AA != 0xAA55)) {
       DEBUG ((EFI_D_ERROR, "EltCheckBootCatalog: El Torito boot catalog header IDs not correct\n"));
       continue;
     }
 
     Check       = 0;
-    CheckBuffer = (UINT16 *) Catalog;
+    CheckBuffer = (UINT16 *)Catalog;
     for (Index = 0; Index < sizeof (ELTORITO_CATALOG) / sizeof (UINT16); Index += 1) {
       Check += CheckBuffer[Index];
     }
@@ -175,45 +180,45 @@ PartitionInstallElToritoChildHandles (
       //
       // Check this entry
       //
-      if (Catalog->Boot.Indicator != ELTORITO_ID_SECTION_BOOTABLE || Catalog->Boot.Lba == 0) {
+      if ((Catalog->Boot.Indicator != ELTORITO_ID_SECTION_BOOTABLE) || (Catalog->Boot.Lba == 0)) {
         continue;
       }
 
-      SubBlockSize  = 512;
-      SectorCount   = Catalog->Boot.SectorCount;
+      SubBlockSize = 512;
+      SectorCount  = Catalog->Boot.SectorCount;
 
       switch (Catalog->Boot.MediaType) {
+        case ELTORITO_NO_EMULATION:
+          SubBlockSize = Media->BlockSize;
+          break;
 
-      case ELTORITO_NO_EMULATION:
-        SubBlockSize = Media->BlockSize;
-        break;
+        case ELTORITO_HARD_DISK:
+          break;
 
-      case ELTORITO_HARD_DISK:
-        break;
+        case ELTORITO_12_DISKETTE:
+          SectorCount = 0x50 * 0x02 * 0x0F;
+          break;
 
-      case ELTORITO_12_DISKETTE:
-        SectorCount = 0x50 * 0x02 * 0x0F;
-        break;
+        case ELTORITO_14_DISKETTE:
+          SectorCount = 0x50 * 0x02 * 0x12;
+          break;
 
-      case ELTORITO_14_DISKETTE:
-        SectorCount = 0x50 * 0x02 * 0x12;
-        break;
+        case ELTORITO_28_DISKETTE:
+          SectorCount = 0x50 * 0x02 * 0x24;
+          break;
 
-      case ELTORITO_28_DISKETTE:
-        SectorCount = 0x50 * 0x02 * 0x24;
-        break;
-
-      default:
-        DEBUG ((EFI_D_INIT, "EltCheckDevice: unsupported El Torito boot media type %x\n", Catalog->Boot.MediaType));
-        SectorCount   = 0;
-        SubBlockSize  = Media->BlockSize;
-        break;
+        default:
+          DEBUG ((EFI_D_INIT, "EltCheckDevice: unsupported El Torito boot media type %x\n", Catalog->Boot.MediaType));
+          SectorCount  = 0;
+          SubBlockSize = Media->BlockSize;
+          break;
       }
+
       //
       // Create child device handle
       //
-      CdDev.Header.Type     = MEDIA_DEVICE_PATH;
-      CdDev.Header.SubType  = MEDIA_CDROM_DP;
+      CdDev.Header.Type    = MEDIA_DEVICE_PATH;
+      CdDev.Header.SubType = MEDIA_CDROM_DP;
       SetDevicePathNodeLength (&CdDev.Header, sizeof (CdDev));
 
       if (Index == 1) {
@@ -223,7 +228,7 @@ PartitionInstallElToritoChildHandles (
         BootEntry = 0;
       }
 
-      CdDev.BootEntry = (UINT32) BootEntry;
+      CdDev.BootEntry = (UINT32)BootEntry;
       BootEntry++;
       CdDev.PartitionStart = Catalog->Boot.Lba * (SIZE_2KB / Media->BlockSize);
       if (SectorCount < 2) {
@@ -256,21 +261,21 @@ PartitionInstallElToritoChildHandles (
       ApplePartitionInfo.PartitionSize   = CdDev.PartitionSize;
 
       Status = PartitionInstallChildHandle (
-                This,
-                Handle,
-                DiskIo,
-                DiskIo2,
-                BlockIo,
-                BlockIo2,
-                DevicePath,
-                (EFI_DEVICE_PATH_PROTOCOL *) &CdDev,
-                &PartitionInfo,
-                &ApplePartitionInfo,
-                Catalog->Boot.Lba * (SIZE_2KB / Media->BlockSize),
-                Catalog->Boot.Lba * (SIZE_2KB / Media->BlockSize) + CdDev.PartitionSize - 1,
-                SubBlockSize,
-                NULL
-                );
+                 This,
+                 Handle,
+                 DiskIo,
+                 DiskIo2,
+                 BlockIo,
+                 BlockIo2,
+                 DevicePath,
+                 (EFI_DEVICE_PATH_PROTOCOL *)&CdDev,
+                 &PartitionInfo,
+                 &ApplePartitionInfo,
+                 Catalog->Boot.Lba * (SIZE_2KB / Media->BlockSize),
+                 Catalog->Boot.Lba * (SIZE_2KB / Media->BlockSize) + CdDev.PartitionSize - 1,
+                 SubBlockSize,
+                 NULL
+                 );
       if (!EFI_ERROR (Status)) {
         Found = EFI_SUCCESS;
       }

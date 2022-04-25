@@ -28,7 +28,7 @@
 
   WARNING: This protocol is currently undergoing active design.
 **/
-#define OC_BOOT_ENTRY_PROTOCOL_REVISION 1
+#define OC_BOOT_ENTRY_PROTOCOL_REVISION  1
 
 /**
   Forward declaration of OC_BOOT_ENTRY_PROTOCOL structure.
@@ -63,11 +63,11 @@ typedef struct OC_BOOT_ENTRY_PROTOCOL_ OC_BOOT_ENTRY_PROTOCOL;
 **/
 typedef
 EFI_STATUS
-(EFIAPI *OC_GET_BOOT_ENTRIES) (
+(EFIAPI *OC_GET_BOOT_ENTRIES)(
   IN           OC_PICKER_CONTEXT        *PickerContext,
   IN     CONST EFI_HANDLE               Device,
-     OUT       OC_PICKER_ENTRY          **Entries,
-     OUT       UINTN                    *NumEntries
+  OUT       OC_PICKER_ENTRY          **Entries,
+  OUT       UINTN                    *NumEntries
   );
 
 /**
@@ -80,7 +80,7 @@ EFI_STATUS
 **/
 typedef
 VOID
-(EFIAPI *OC_FREE_BOOT_ENTRIES) (
+(EFIAPI *OC_FREE_BOOT_ENTRIES)(
   IN           OC_PICKER_ENTRY          **Entries,
   IN           UINTN                    NumEntries
   );
@@ -89,11 +89,11 @@ VOID
   The structure exposed by the OC_BOOT_ENTRY_PROTOCOL.
 **/
 struct OC_BOOT_ENTRY_PROTOCOL_ {
-  UINTN                 Revision;
-  OC_GET_BOOT_ENTRIES   GetBootEntries;
-  OC_FREE_BOOT_ENTRIES  FreeBootEntries;
+  UINTN                   Revision;
+  OC_GET_BOOT_ENTRIES     GetBootEntries;
+  OC_FREE_BOOT_ENTRIES    FreeBootEntries;
 };
 
-extern EFI_GUID gOcBootEntryProtocolGuid;
+extern EFI_GUID  gOcBootEntryProtocolGuid;
 
 #endif // OC_BOOT_ENTRY_PROTOCOL_H

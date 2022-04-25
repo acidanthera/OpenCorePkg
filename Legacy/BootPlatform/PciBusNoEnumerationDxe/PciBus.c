@@ -1,24 +1,24 @@
 /*++
 
 Copyright (c) 2005 - 2006, Intel Corporation. All rights reserved.<BR>
-This program and the accompanying materials                          
-are licensed and made available under the terms and conditions of the BSD License         
-which accompanies this distribution.  The full text of the license may be found at        
-http://opensource.org/licenses/bsd-license.php                                            
-                                                                                          
-THE PROGRAM IS DISTRIBUTED UNDER THE BSD LICENSE ON AN "AS IS" BASIS,                     
-WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.             
+This program and the accompanying materials
+are licensed and made available under the terms and conditions of the BSD License
+which accompanies this distribution.  The full text of the license may be found at
+http://opensource.org/licenses/bsd-license.php
+
+THE PROGRAM IS DISTRIBUTED UNDER THE BSD LICENSE ON AN "AS IS" BASIS,
+WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 
 Module Name:
 
   PciBus.c
-  
+
 Abstract:
 
   PCI Bus Driver
 
 Revision History
- 
+
 --*/
 
 #include "PciBus.h"
@@ -30,41 +30,40 @@ Revision History
 EFI_STATUS
 EFIAPI
 PciBusEntryPoint (
-  IN EFI_HANDLE         ImageHandle,
-  IN EFI_SYSTEM_TABLE   *SystemTable
+  IN EFI_HANDLE        ImageHandle,
+  IN EFI_SYSTEM_TABLE  *SystemTable
   );
 
 EFI_STATUS
 EFIAPI
 PciBusDriverBindingSupported (
-  IN EFI_DRIVER_BINDING_PROTOCOL    *This,
-  IN EFI_HANDLE                     Controller,
-  IN EFI_DEVICE_PATH_PROTOCOL       *RemainingDevicePath
+  IN EFI_DRIVER_BINDING_PROTOCOL  *This,
+  IN EFI_HANDLE                   Controller,
+  IN EFI_DEVICE_PATH_PROTOCOL     *RemainingDevicePath
   );
 
 EFI_STATUS
 EFIAPI
 PciBusDriverBindingStart (
-  IN EFI_DRIVER_BINDING_PROTOCOL    *This,
-  IN EFI_HANDLE                     Controller,
-  IN EFI_DEVICE_PATH_PROTOCOL       *RemainingDevicePath
+  IN EFI_DRIVER_BINDING_PROTOCOL  *This,
+  IN EFI_HANDLE                   Controller,
+  IN EFI_DEVICE_PATH_PROTOCOL     *RemainingDevicePath
   );
 
 EFI_STATUS
 EFIAPI
 PciBusDriverBindingStop (
-  IN  EFI_DRIVER_BINDING_PROTOCOL   *This,
-  IN  EFI_HANDLE                    Controller,
-  IN  UINTN                         NumberOfChildren,
-  IN  EFI_HANDLE                    *ChildHandleBuffer
+  IN  EFI_DRIVER_BINDING_PROTOCOL  *This,
+  IN  EFI_HANDLE                   Controller,
+  IN  UINTN                        NumberOfChildren,
+  IN  EFI_HANDLE                   *ChildHandleBuffer
   );
-
 
 //
 // PCI Bus Driver Global Variables
 //
 
-EFI_DRIVER_BINDING_PROTOCOL                   gPciBusDriverBinding = {
+EFI_DRIVER_BINDING_PROTOCOL  gPciBusDriverBinding = {
   PciBusDriverBindingSupported,
   PciBusDriverBindingStart,
   PciBusDriverBindingStop,
@@ -73,20 +72,21 @@ EFI_DRIVER_BINDING_PROTOCOL                   gPciBusDriverBinding = {
   NULL
 };
 
-BOOLEAN gFullEnumeration;
+BOOLEAN  gFullEnumeration;
 
-UINT64 gAllOne    = 0xFFFFFFFFFFFFFFFFULL;
-UINT64 gAllZero   = 0;
- 
+UINT64  gAllOne  = 0xFFFFFFFFFFFFFFFFULL;
+UINT64  gAllZero = 0;
+
 //
 // PCI Bus Driver Support Functions
 //
 EFI_STATUS
 EFIAPI
 PciBusEntryPoint (
-  IN EFI_HANDLE         ImageHandle,
-  IN EFI_SYSTEM_TABLE   *SystemTable
+  IN EFI_HANDLE        ImageHandle,
+  IN EFI_SYSTEM_TABLE  *SystemTable
   )
+
 /*++
 
 Routine Description:
@@ -101,12 +101,12 @@ Arguments:
 
 Returns:
 
-  EFI_SUCCESS 
-  EFI_DEVICE_ERROR 
+  EFI_SUCCESS
+  EFI_DEVICE_ERROR
 
 --*/
 {
-  EFI_STATUS         Status;
+  EFI_STATUS  Status;
 
   //
   // Initialize the EFI Driver Library
@@ -120,21 +120,22 @@ Returns:
              &gPciBusComponentName2
              );
   ASSERT_EFI_ERROR (Status);
-  
+
   InitializePciDevicePool ();
 
   gFullEnumeration = TRUE;
-  
+
   return Status;
 }
 
 EFI_STATUS
 EFIAPI
 PciBusDriverBindingSupported (
-  IN EFI_DRIVER_BINDING_PROTOCOL    *This,
-  IN EFI_HANDLE                     Controller,
-  IN EFI_DEVICE_PATH_PROTOCOL       *RemainingDevicePath
+  IN EFI_DRIVER_BINDING_PROTOCOL  *This,
+  IN EFI_HANDLE                   Controller,
+  IN EFI_DEVICE_PATH_PROTOCOL     *RemainingDevicePath
   )
+
 /*++
 
 Routine Description:
@@ -142,7 +143,7 @@ Routine Description:
   Check to see if pci bus driver supports the given controller
 
 Arguments:
-  
+
   IN EFI_DRIVER_BINDING_PROTOCOL    *This,
   IN EFI_HANDLE                     Controller,
   IN EFI_DEVICE_PATH_PROTOCOL       *RemainingDevicePath
@@ -153,26 +154,28 @@ Returns:
 
 --*/
 {
-  EFI_STATUS                      Status;
-  EFI_DEVICE_PATH_PROTOCOL        *ParentDevicePath;
-  EFI_PCI_ROOT_BRIDGE_IO_PROTOCOL *PciRootBridgeIo;
-  EFI_DEV_PATH_PTR                Node;
+  EFI_STATUS                       Status;
+  EFI_DEVICE_PATH_PROTOCOL         *ParentDevicePath;
+  EFI_PCI_ROOT_BRIDGE_IO_PROTOCOL  *PciRootBridgeIo;
+  EFI_DEV_PATH_PTR                 Node;
 
   if (RemainingDevicePath != NULL) {
     Node.DevPath = RemainingDevicePath;
-    if (Node.DevPath->Type != HARDWARE_DEVICE_PATH ||
-        Node.DevPath->SubType != HW_PCI_DP         ||
-        DevicePathNodeLength(Node.DevPath) != sizeof(PCI_DEVICE_PATH)) {
+    if ((Node.DevPath->Type != HARDWARE_DEVICE_PATH) ||
+        (Node.DevPath->SubType != HW_PCI_DP) ||
+        (DevicePathNodeLength (Node.DevPath) != sizeof (PCI_DEVICE_PATH)))
+    {
       return EFI_UNSUPPORTED;
     }
   }
+
   //
   // Open the IO Abstraction(s) needed to perform the supported test
   //
   Status = gBS->OpenProtocol (
                   Controller,
                   &gEfiDevicePathProtocolGuid,
-                  (VOID **) &ParentDevicePath,
+                  (VOID **)&ParentDevicePath,
                   This->DriverBindingHandle,
                   Controller,
                   EFI_OPEN_PROTOCOL_BY_DRIVER
@@ -186,16 +189,16 @@ Returns:
   }
 
   gBS->CloseProtocol (
-        Controller,
-        &gEfiDevicePathProtocolGuid,
-        This->DriverBindingHandle,
-        Controller
-        );
+         Controller,
+         &gEfiDevicePathProtocolGuid,
+         This->DriverBindingHandle,
+         Controller
+         );
 
   Status = gBS->OpenProtocol (
                   Controller,
                   &gEfiPciRootBridgeIoProtocolGuid,
-                  (VOID **) &PciRootBridgeIo,
+                  (VOID **)&PciRootBridgeIo,
                   This->DriverBindingHandle,
                   Controller,
                   EFI_OPEN_PROTOCOL_BY_DRIVER
@@ -225,6 +228,7 @@ PciBusDriverBindingStart (
   IN EFI_HANDLE                   Controller,
   IN EFI_DEVICE_PATH_PROTOCOL     *RemainingDevicePath
   )
+
 /*++
 
 Routine Description:
@@ -232,17 +236,17 @@ Routine Description:
   Start to management the controller passed in
 
 Arguments:
-  
+
   IN EFI_DRIVER_BINDING_PROTOCOL  *This,
   IN EFI_HANDLE                   Controller,
   IN EFI_DEVICE_PATH_PROTOCOL     *RemainingDevicePath
 
 Returns:
- 
+
 
 --*/
 {
-  EFI_STATUS                          Status;
+  EFI_STATUS  Status;
 
   //
   // Enumerate the entire host bridge
@@ -254,12 +258,12 @@ Returns:
   if (EFI_ERROR (Status)) {
     return Status;
   }
-  
+
   //
   // Enable PCI device specified by remaining device path. BDS or other driver can call the
   // start more than once.
   //
-  
+
   StartPciDevices (Controller, RemainingDevicePath);
 
   return EFI_SUCCESS;
@@ -268,11 +272,12 @@ Returns:
 EFI_STATUS
 EFIAPI
 PciBusDriverBindingStop (
-  IN  EFI_DRIVER_BINDING_PROTOCOL   *This,
-  IN  EFI_HANDLE                    Controller,
-  IN  UINTN                         NumberOfChildren,
-  IN  EFI_HANDLE                    *ChildHandleBuffer
+  IN  EFI_DRIVER_BINDING_PROTOCOL  *This,
+  IN  EFI_HANDLE                   Controller,
+  IN  UINTN                        NumberOfChildren,
+  IN  EFI_HANDLE                   *ChildHandleBuffer
   )
+
 /*++
 
 Routine Description:
@@ -281,7 +286,7 @@ Routine Description:
   if all the the children get closed, close the protocol
 
 Arguments:
-  
+
   IN  EFI_DRIVER_BINDING_PROTOCOL   *This,
   IN  EFI_HANDLE                    Controller,
   IN  UINTN                         NumberOfChildren,
@@ -289,7 +294,7 @@ Arguments:
 
 Returns:
 
-  
+
 --*/
 {
   EFI_STATUS  Status;
@@ -327,7 +332,6 @@ Returns:
   AllChildrenStopped = TRUE;
 
   for (Index = 0; Index < NumberOfChildren; Index++) {
-
     //
     // De register all the pci device
     //

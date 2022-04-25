@@ -29,9 +29,9 @@ InternalFindPattern (
   IN UINT32        *DataOff
   )
 {
-  UINT32   Index;
-  UINT32   LastOffset;
-  UINT32   CurrentOffset;
+  UINT32  Index;
+  UINT32  LastOffset;
+  UINT32  CurrentOffset;
 
   ASSERT (DataSize >= PatternSize);
 
@@ -40,7 +40,7 @@ InternalFindPattern (
   }
 
   CurrentOffset = *DataOff;
-  LastOffset = DataSize - PatternSize;
+  LastOffset    = DataSize - PatternSize;
 
   if (PatternMask == NULL) {
     while (CurrentOffset <= LastOffset) {
@@ -54,6 +54,7 @@ InternalFindPattern (
         *DataOff = CurrentOffset;
         return TRUE;
       }
+
       ++CurrentOffset;
     }
   } else {
@@ -68,6 +69,7 @@ InternalFindPattern (
         *DataOff = CurrentOffset;
         return TRUE;
       }
+
       ++CurrentOffset;
     }
   }
@@ -90,13 +92,13 @@ FindPattern (
   }
 
   return InternalFindPattern (
-    Pattern,
-    PatternMask,
-    PatternSize,
-    Data,
-    DataSize,
-    DataOff
-    );
+           Pattern,
+           PatternMask,
+           PatternSize,
+           Data,
+           DataSize,
+           DataOff
+           );
 }
 
 UINT32
@@ -112,26 +114,26 @@ ApplyPatch (
   IN UINT32        Skip
   )
 {
-  UINT32  ReplaceCount;
-  UINT32  DataOff;
-  BOOLEAN Found;
+  UINT32   ReplaceCount;
+  UINT32   DataOff;
+  BOOLEAN  Found;
 
   if (DataSize < PatternSize) {
     return 0;
   }
 
   ReplaceCount = 0;
-  DataOff = 0;
+  DataOff      = 0;
 
   while (TRUE) {
     Found = InternalFindPattern (
-      Pattern,
-      PatternMask,
-      PatternSize,
-      Data,
-      DataSize,
-      &DataOff
-      );
+              Pattern,
+              PatternMask,
+              PatternSize,
+              Data,
+              DataSize,
+              &DataOff
+              );
 
     if (!Found) {
       break;
@@ -162,6 +164,7 @@ ApplyPatch (
         Data[DataOff + Index] = (Data[DataOff + Index] & ~ReplaceMask[Index]) | (Replace[Index] & ReplaceMask[Index]);
       }
     }
+
     ++ReplaceCount;
     DataOff += PatternSize;
 

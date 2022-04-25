@@ -18,7 +18,7 @@
   Software, with or without modifications, in source and/or binary forms;
   provided that if you redistribute the Apple Software in its entirety and
   without modifications, you must retain this notice and the following
-  text and disclaimers in all such redistributions of the Apple Software. 
+  text and disclaimers in all such redistributions of the Apple Software.
   Neither the name, trademarks, service marks or logos of Apple Computer,
   Inc. may be used to endorse or promote products derived from the Apple
   Software without specific prior written permission from Apple.  Except
@@ -47,9 +47,9 @@
 #define TDM_APPROVED_GUID_H
 
 #define TDM_APPROVED_GUID        \
-	{ 0x5C38EA59, 0x554B, 0x431C,  \
+        { 0x5C38EA59, 0x554B, 0x431C,  \
     { 0xB3, 0xF5, 0xCD, 0x6E, 0xE3, 0xD4, 0x8A, 0x3E } }
 
-extern EFI_GUID gTDMApprovedGuid;
+extern EFI_GUID  gTDMApprovedGuid;
 
 #endif // TDM_APPROVED_GUID_H

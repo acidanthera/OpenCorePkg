@@ -61,20 +61,20 @@ enum {
 // APPLE_REMOTE_DATA_PACKAGE
 typedef PACKED struct {
   /// This is always 0x43f and can be used to identify an Apple Remote
-  UINT8  Vendor[11];
+  UINT8     Vendor[11];
 
   /// 0x0 for the pairing and other commands, 0xe for the different buttons
-  UINT8  CommandPage[5];
+  UINT8     CommandPage[5];
 
   /// A unique device ID, used to allow pairing of a remote to a specific
   /// device.  It can be changed with the pairing command.
-  UINT64 DeviceId;
+  UINT64    DeviceId;
 
   /// Actual command for the Command Page
-  UINT8  Command[7];
+  UINT8     Command[7];
 
   /// All 32 bits added together have to equal 1
-  UINT8  Checksum;
+  UINT8     Checksum;
 } APPLE_REMOTE_DATA_PACKAGE;
 
 #pragma pack ()

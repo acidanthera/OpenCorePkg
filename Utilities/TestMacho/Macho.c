@@ -35,27 +35,31 @@ FeedMacho (
   IN     UINT32  Size
   )
 {
-  OC_MACHO_CONTEXT Context;
+  OC_MACHO_CONTEXT  Context;
+
   if (!MachoInitializeContext64 (&Context, File, Size, 0)) {
     return -1;
   }
 
-  int Code = 0;
+  int  Code = 0;
 
-  MACH_HEADER_64 *Hdr = MachoGetMachHeader64 (&Context);
-  if (Hdr != NULL && MachoGetFileSize (&Context) > 10 && MachoGetLastAddress (&Context) != 10) {
+  MACH_HEADER_64  *Hdr = MachoGetMachHeader64 (&Context);
+
+  if ((Hdr != NULL) && (MachoGetFileSize (&Context) > 10) && (MachoGetLastAddress (&Context) != 10)) {
     CopyMem (&mHeader, Hdr, sizeof (mHeader));
     ++Code;
   }
 
-  MACH_UUID_COMMAND *Cmd = MachoGetUuid (&Context);
+  MACH_UUID_COMMAND  *Cmd = MachoGetUuid (&Context);
+
   if (Cmd != NULL) {
     CopyMem (&mUuid, Cmd, sizeof (mUuid));
     ++Code;
   }
 
-  MACH_SEGMENT_COMMAND_64 *Segment = MachoGetSegmentByName64 (&Context, "__LINKEDIT");
-  MACH_SECTION_64 *Section;
+  MACH_SEGMENT_COMMAND_64  *Segment = MachoGetSegmentByName64 (&Context, "__LINKEDIT");
+  MACH_SECTION_64          *Section;
+
   if (Segment != NULL) {
     CopyMem (&mSeg, Segment, sizeof (mSeg));
     Section = MachoGetSectionByName64 (&Context, Segment, "__objc");
@@ -65,7 +69,8 @@ FeedMacho (
     }
   }
 
-  UINT32 Index = 0;
+  UINT32  Index = 0;
+
   while ((Section = MachoGetSectionByIndex64 (&Context, Index)) != NULL) {
     CopyMem (&mSect, Section, sizeof (mSect));
     ++Index;
@@ -76,19 +81,24 @@ FeedMacho (
     ++Code;
   }
 
-  MACH_NLIST_64 *Symbol = NULL;
+  MACH_NLIST_64  *Symbol = NULL;
+
   for (Index = 0; (Symbol = MachoGetSymbolByIndex64 (&Context, Index)) != NULL; ++Index) {
-    CONST CHAR8 *Indirect = MachoGetIndirectSymbolName64 (&Context, Symbol);
-    if (AsciiStrCmp (MachoGetSymbolName64 (&Context, Symbol), "__hack") == 0
-      || (Indirect != NULL && AsciiStrCmp (Indirect, "__hack") == 0)) {
+    CONST CHAR8  *Indirect = MachoGetIndirectSymbolName64 (&Context, Symbol);
+    if (  (AsciiStrCmp (MachoGetSymbolName64 (&Context, Symbol), "__hack") == 0)
+       || ((Indirect != NULL) && (AsciiStrCmp (Indirect, "__hack") == 0)))
+    {
       ++Code;
     }
+
     if (MachoSymbolIsSection64 (Symbol)) {
       ++Code;
     }
+
     if (MachoSymbolIsDefined64 (Symbol)) {
       ++Code;
     }
+
     if (MachoSymbolIsLocalDefined64 (&Context, Symbol)) {
       ++Code;
     }
@@ -97,7 +107,7 @@ FeedMacho (
       ++Code;
     }
 
-    UINT32 Offset;
+    UINT32  Offset;
     if (MachoSymbolGetFileOffset64 (&Context, Symbol, &Offset, NULL)) {
       Code += Offset;
     }
@@ -118,9 +128,10 @@ FeedMacho (
       ++Code;
     }
 
-    char Out[64];
-    if (MachoSymbolNameIsSmcp (&Context, MachoGetSymbolName64 (&Context, Symbol))
-      && MachoGetClassNameFromSuperMetaClassPointer (&Context, MachoGetSymbolName64 (&Context, Symbol), sizeof (Out), Out)) {
+    char  Out[64];
+    if (  MachoSymbolNameIsSmcp (&Context, MachoGetSymbolName64 (&Context, Symbol))
+       && MachoGetClassNameFromSuperMetaClassPointer (&Context, MachoGetSymbolName64 (&Context, Symbol), sizeof (Out), Out))
+    {
       ++Code;
     }
 
@@ -130,29 +141,34 @@ FeedMacho (
       }
     }
 
-    if (MachoGetFunctionPrefixFromClassName (MachoGetSymbolName64 (&Context, Symbol), sizeof (Out), Out)
-      && AsciiStrCmp ("SomeReallyLongStringJustInCaseToCheckIt", Out) == 0) {
+    if (  MachoGetFunctionPrefixFromClassName (MachoGetSymbolName64 (&Context, Symbol), sizeof (Out), Out)
+       && (AsciiStrCmp ("SomeReallyLongStringJustInCaseToCheckIt", Out) == 0))
+    {
       ++Code;
     }
 
-    if (MachoSymbolNameIsMetaclassPointer (&Context, MachoGetSymbolName64 (&Context, Symbol))
-      && MachoGetClassNameFromMetaClassPointer (&Context, MachoGetSymbolName64 (&Context, Symbol), sizeof (Out), Out)
-      && AsciiStrCmp ("SomeReallyLongStringJustInCaseToCheckIt", Out) == 0) {
+    if (  MachoSymbolNameIsMetaclassPointer (&Context, MachoGetSymbolName64 (&Context, Symbol))
+       && MachoGetClassNameFromMetaClassPointer (&Context, MachoGetSymbolName64 (&Context, Symbol), sizeof (Out), Out)
+       && (AsciiStrCmp ("SomeReallyLongStringJustInCaseToCheckIt", Out) == 0))
+    {
       ++Code;
     }
 
-    if (MachoGetVtableNameFromClassName (MachoGetSymbolName64 (&Context, Symbol), sizeof (Out), Out)
-      && AsciiStrCmp ("SomeReallyLongStringJustInCaseToCheckIt", Out) == 0) {
+    if (  MachoGetVtableNameFromClassName (MachoGetSymbolName64 (&Context, Symbol), sizeof (Out), Out)
+       && (AsciiStrCmp ("SomeReallyLongStringJustInCaseToCheckIt", Out) == 0))
+    {
       ++Code;
     }
 
-    if (MachoGetMetaVtableNameFromClassName (MachoGetSymbolName64 (&Context, Symbol), sizeof (Out), Out)
-      && AsciiStrCmp ("SomeReallyLongStringJustInCaseToCheckIt", Out) == 0) {
+    if (  MachoGetMetaVtableNameFromClassName (MachoGetSymbolName64 (&Context, Symbol), sizeof (Out), Out)
+       && (AsciiStrCmp ("SomeReallyLongStringJustInCaseToCheckIt", Out) == 0))
+    {
       ++Code;
     }
 
-    if (MachoGetFinalSymbolNameFromClassName (MachoGetSymbolName64 (&Context, Symbol), sizeof (Out), Out)
-      && AsciiStrCmp ("SomeReallyLongStringJustInCaseToCheckIt", Out) == 0) {
+    if (  MachoGetFinalSymbolNameFromClassName (MachoGetSymbolName64 (&Context, Symbol), sizeof (Out), Out)
+       && (AsciiStrCmp ("SomeReallyLongStringJustInCaseToCheckIt", Out) == 0))
+    {
       ++Code;
     }
 
@@ -160,7 +176,7 @@ FeedMacho (
       ++Code;
     }
 
-    MACH_NLIST_64 *SCMP = MachoGetMetaclassSymbolFromSmcpSymbol64 (&Context, Symbol);
+    MACH_NLIST_64  *SCMP = MachoGetMetaclassSymbolFromSmcpSymbol64 (&Context, Symbol);
     if (SCMP != NULL) {
       if (AsciiStrCmp (MachoGetSymbolName64 (&Context, SCMP), "__hack") == 0) {
         ++Code;
@@ -172,29 +188,34 @@ FeedMacho (
         if (AsciiStrCmp (MachoGetSymbolName64 (&Context, Vtable), "__hack") == 0) {
           ++Code;
         }
+
         if (AsciiStrCmp (MachoGetSymbolName64 (&Context, MetaVtable), "__hack") == 0) {
           ++Code;
         }
       }
     }
 
-    MACH_NLIST_64 SSSS = *Symbol;
+    MACH_NLIST_64  SSSS = *Symbol;
     MachoRelocateSymbol64 (&Context, 0x100000000, &SSSS);
   }
 
   Symbol = MachoGetLocalDefinedSymbolByName64 (&Context, "_Assert");
   if (Symbol != NULL) {
-    CONST CHAR8 *Indirect = MachoGetIndirectSymbolName64 (&Context, Symbol);
-    if (AsciiStrCmp (MachoGetSymbolName64 (&Context, Symbol), "__hack") == 0
-      || (Indirect != NULL && AsciiStrCmp (Indirect, "__hack") == 0)) {
+    CONST CHAR8  *Indirect = MachoGetIndirectSymbolName64 (&Context, Symbol);
+    if (  (AsciiStrCmp (MachoGetSymbolName64 (&Context, Symbol), "__hack") == 0)
+       || ((Indirect != NULL) && (AsciiStrCmp (Indirect, "__hack") == 0)))
+    {
       ++Code;
     }
+
     if (MachoSymbolIsSection64 (Symbol)) {
       ++Code;
     }
+
     if (MachoSymbolIsDefined64 (Symbol)) {
       ++Code;
     }
+
     if (MachoSymbolIsLocalDefined64 (&Context, Symbol)) {
       ++Code;
     }
@@ -203,7 +224,7 @@ FeedMacho (
       ++Code;
     }
 
-    UINT32 Offset;
+    UINT32  Offset;
     if (MachoSymbolGetFileOffset64 (&Context, Symbol, &Offset, NULL)) {
       Code += Offset;
     }
@@ -224,10 +245,11 @@ FeedMacho (
       ++Code;
     }
 
-    CHAR8 Out[64];
-    if (MachoSymbolNameIsSmcp (&Context, MachoGetSymbolName64 (&Context, Symbol))
-      && MachoGetClassNameFromSuperMetaClassPointer (&Context, MachoGetSymbolName64 (&Context, Symbol), sizeof (Out), Out)
-      && AsciiStrCmp ("SomeReallyLongStringJustInCaseToCheckIt", Out) == 0) {
+    CHAR8  Out[64];
+    if (  MachoSymbolNameIsSmcp (&Context, MachoGetSymbolName64 (&Context, Symbol))
+       && MachoGetClassNameFromSuperMetaClassPointer (&Context, MachoGetSymbolName64 (&Context, Symbol), sizeof (Out), Out)
+       && (AsciiStrCmp ("SomeReallyLongStringJustInCaseToCheckIt", Out) == 0))
+    {
       ++Code;
     }
 
@@ -237,29 +259,34 @@ FeedMacho (
       }
     }
 
-    if (MachoGetFunctionPrefixFromClassName (MachoGetSymbolName64 (&Context, Symbol), sizeof (Out), Out)
-      && AsciiStrCmp ("SomeReallyLongStringJustInCaseToCheckIt", Out) == 0) {
+    if (  MachoGetFunctionPrefixFromClassName (MachoGetSymbolName64 (&Context, Symbol), sizeof (Out), Out)
+       && (AsciiStrCmp ("SomeReallyLongStringJustInCaseToCheckIt", Out) == 0))
+    {
       ++Code;
     }
 
-    if (MachoSymbolNameIsMetaclassPointer (&Context, MachoGetSymbolName64 (&Context, Symbol))
-      && MachoGetClassNameFromMetaClassPointer (&Context, MachoGetSymbolName64 (&Context, Symbol), sizeof (Out), Out)
-      && AsciiStrCmp ("SomeReallyLongStringJustInCaseToCheckIt", Out) == 0) {
+    if (  MachoSymbolNameIsMetaclassPointer (&Context, MachoGetSymbolName64 (&Context, Symbol))
+       && MachoGetClassNameFromMetaClassPointer (&Context, MachoGetSymbolName64 (&Context, Symbol), sizeof (Out), Out)
+       && (AsciiStrCmp ("SomeReallyLongStringJustInCaseToCheckIt", Out) == 0))
+    {
       ++Code;
     }
 
-    if (MachoGetVtableNameFromClassName (MachoGetSymbolName64 (&Context, Symbol), sizeof (Out), Out)
-      && AsciiStrCmp ("SomeReallyLongStringJustInCaseToCheckIt", Out) == 0) {
+    if (  MachoGetVtableNameFromClassName (MachoGetSymbolName64 (&Context, Symbol), sizeof (Out), Out)
+       && (AsciiStrCmp ("SomeReallyLongStringJustInCaseToCheckIt", Out) == 0))
+    {
       ++Code;
     }
 
-    if (MachoGetMetaVtableNameFromClassName (MachoGetSymbolName64 (&Context, Symbol), sizeof (Out), Out)
-      && AsciiStrCmp ("SomeReallyLongStringJustInCaseToCheckIt", Out) == 0) {
+    if (  MachoGetMetaVtableNameFromClassName (MachoGetSymbolName64 (&Context, Symbol), sizeof (Out), Out)
+       && (AsciiStrCmp ("SomeReallyLongStringJustInCaseToCheckIt", Out) == 0))
+    {
       ++Code;
     }
 
-    if (MachoGetFinalSymbolNameFromClassName (MachoGetSymbolName64 (&Context, Symbol), sizeof (Out), Out)
-      && AsciiStrCmp ("SomeReallyLongStringJustInCaseToCheckIt", Out) == 0) {
+    if (  MachoGetFinalSymbolNameFromClassName (MachoGetSymbolName64 (&Context, Symbol), sizeof (Out), Out)
+       && (AsciiStrCmp ("SomeReallyLongStringJustInCaseToCheckIt", Out) == 0))
+    {
       ++Code;
     }
 
@@ -268,7 +295,7 @@ FeedMacho (
     }
   }
 
-  for (UINTN i = 0x1000000; i < MAX_UINTN; i+= 0x1000000) {
+  for (UINTN i = 0x1000000; i < MAX_UINTN; i += 0x1000000) {
     if (MachoGetSymbolByRelocationOffset64 (&Context, i, &Symbol)) {
       if (AsciiStrCmp (MachoGetSymbolName64 (&Context, Symbol), "__hack") == 0) {
         ++Code;
@@ -287,7 +314,8 @@ ENTRY_POINT (
 {
   UINT32  FileSize;
   UINT8   *Buffer;
-  if ((Buffer = UserReadFile (argc > 1 ? argv[1] : "kernel", &FileSize)) == NULL) {
+
+  if ((Buffer = UserReadFile ((argc > 1) ? argv[1] : "kernel", &FileSize)) == NULL) {
     DEBUG ((DEBUG_ERROR, "Read fail\n"));
     return -1;
   }
@@ -307,7 +335,7 @@ LLVMFuzzerTestOneInput (
     NewData = AllocatePool (Size);
     if (NewData != NULL) {
       CopyMem (NewData, Data, Size);
-      FeedMacho (NewData, (UINT32) Size);
+      FeedMacho (NewData, (UINT32)Size);
       FreePool (NewData);
     }
   }

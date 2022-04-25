@@ -46,7 +46,7 @@ typedef struct EFI_AUDIO_DECODE_PROTOCOL_ EFI_AUDIO_DECODE_PROTOCOL;
 **/
 typedef
 EFI_STATUS
-(EFIAPI *EFI_AUDIO_DECODE_ANY) (
+(EFIAPI *EFI_AUDIO_DECODE_ANY)(
   IN  EFI_AUDIO_DECODE_PROTOCOL      *This,
   IN  CONST VOID                     *InBuffer,
   IN  UINT32                         InBufferSize,
@@ -78,7 +78,7 @@ EFI_STATUS
 **/
 typedef
 EFI_STATUS
-(EFIAPI *EFI_AUDIO_DECODE_WAVE) (
+(EFIAPI *EFI_AUDIO_DECODE_WAVE)(
   IN  EFI_AUDIO_DECODE_PROTOCOL      *This,
   IN  CONST VOID                     *InBuffer,
   IN  UINT32                         InBufferSize,
@@ -109,7 +109,7 @@ EFI_STATUS
 **/
 typedef
 EFI_STATUS
-(EFIAPI *EFI_AUDIO_DECODE_MP3) (
+(EFIAPI *EFI_AUDIO_DECODE_MP3)(
   IN  EFI_AUDIO_DECODE_PROTOCOL      *This,
   IN  CONST VOID                     *InBuffer,
   IN  UINT32                         InBufferSize,
@@ -124,11 +124,11 @@ EFI_STATUS
   Protocol struct.
 **/
 struct EFI_AUDIO_DECODE_PROTOCOL_ {
-  EFI_AUDIO_DECODE_ANY       DecodeAny;
-  EFI_AUDIO_DECODE_WAVE      DecodeWave;
-  EFI_AUDIO_DECODE_MP3       DecodeMp3;
+  EFI_AUDIO_DECODE_ANY     DecodeAny;
+  EFI_AUDIO_DECODE_WAVE    DecodeWave;
+  EFI_AUDIO_DECODE_MP3     DecodeMp3;
 };
 
-extern EFI_GUID gEfiAudioDecodeProtocolGuid;
+extern EFI_GUID  gEfiAudioDecodeProtocolGuid;
 
 #endif // EFI_AUDIO_DECODE_H

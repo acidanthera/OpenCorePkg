@@ -36,7 +36,7 @@ OcGopDrawQueryMode (
     return EFI_INVALID_PARAMETER;
   }
 
-  if (SizeOfInfo == NULL || Info == NULL) {
+  if ((SizeOfInfo == NULL) || (Info == NULL)) {
     DEBUG ((DEBUG_VERBOSE, "OCC: OcGopDrawQueryMode got invalid parameter SizeOfInfo or Info!\n"));
     return EFI_INVALID_PARAMETER;
   }
@@ -74,16 +74,16 @@ STATIC
 EFI_STATUS
 EFIAPI
 OcGopDrawBlt (
-  IN  EFI_GRAPHICS_OUTPUT_PROTOCOL            *This,
-  IN  EFI_GRAPHICS_OUTPUT_BLT_PIXEL           *BltBuffer    OPTIONAL,
-  IN  EFI_GRAPHICS_OUTPUT_BLT_OPERATION       BltOperation,
-  IN  UINTN                                   SourceX,
-  IN  UINTN                                   SourceY,
-  IN  UINTN                                   DestinationX,
-  IN  UINTN                                   DestinationY,
-  IN  UINTN                                   Width,
-  IN  UINTN                                   Height,
-  IN  UINTN                                   Delta         OPTIONAL
+  IN  EFI_GRAPHICS_OUTPUT_PROTOCOL       *This,
+  IN  EFI_GRAPHICS_OUTPUT_BLT_PIXEL      *BltBuffer    OPTIONAL,
+  IN  EFI_GRAPHICS_OUTPUT_BLT_OPERATION  BltOperation,
+  IN  UINTN                              SourceX,
+  IN  UINTN                              SourceY,
+  IN  UINTN                              DestinationX,
+  IN  UINTN                              DestinationY,
+  IN  UINTN                              Width,
+  IN  UINTN                              Height,
+  IN  UINTN                              Delta         OPTIONAL
   )
 {
   OC_GOP_PROTOCOL  *OcGopDraw;
@@ -91,17 +91,17 @@ OcGopDrawBlt (
   OcGopDraw = BASE_CR (This, OC_GOP_PROTOCOL, GraphicsOutput);
 
   return OcGopDraw->Uga->Blt (
-    OcGopDraw->Uga,
-    (EFI_UGA_PIXEL *) BltBuffer,
-    (EFI_UGA_BLT_OPERATION) BltOperation,
-    SourceX,
-    SourceY,
-    DestinationX,
-    DestinationY,
-    Width,
-    Height,
-    Delta
-    );
+                           OcGopDraw->Uga,
+                           (EFI_UGA_PIXEL *)BltBuffer,
+                           (EFI_UGA_BLT_OPERATION)BltOperation,
+                           SourceX,
+                           SourceY,
+                           DestinationX,
+                           DestinationY,
+                           Width,
+                           Height,
+                           Delta
+                           );
 }
 
 EFI_STATUS
@@ -136,31 +136,31 @@ OcProvideGopPassThrough (
   // REF: https://github.com/acidanthera/bugtracker/issues/1498
   //
   Status = gBS->LocateProtocol (
-    &gAppleFramebufferInfoProtocolGuid,
-    NULL,
-    (VOID *) &FramebufferInfo
-    );
+                  &gAppleFramebufferInfoProtocolGuid,
+                  NULL,
+                  (VOID *)&FramebufferInfo
+                  );
   HasAppleFramebuffer = !EFI_ERROR (Status);
 
   DEBUG_CODE_BEGIN ();
-  HandleCount = (UINT32) OcCountProtocolInstances (&gEfiGraphicsOutputProtocolGuid);
+  HandleCount = (UINT32)OcCountProtocolInstances (&gEfiGraphicsOutputProtocolGuid);
   DEBUG ((DEBUG_INFO, "OCC: Found %u handles with GOP draw\n", HandleCount));
 
-  HandleCount = (UINT32) OcCountProtocolInstances (&gAppleFramebufferInfoProtocolGuid);
+  HandleCount = (UINT32)OcCountProtocolInstances (&gAppleFramebufferInfoProtocolGuid);
   DEBUG ((DEBUG_INFO, "OCC: Found %u handles with Apple Framebuffer info\n", HandleCount));
 
   if (EFI_ERROR (Status)) {
     DEBUG ((DEBUG_INFO, "OCC: Failed to locate AppleFramebufferInfo protocol - %r\n", Status));
   } else {
     Status = FramebufferInfo->GetInfo (
-      FramebufferInfo,
-      &FramebufferBase,
-      &FramebufferSize,
-      &ScreenRowBytes,
-      &ScreenWidth,
-      &ScreenHeight,
-      &ScreenDepth
-      );
+                                FramebufferInfo,
+                                &FramebufferBase,
+                                &FramebufferSize,
+                                &ScreenRowBytes,
+                                &ScreenWidth,
+                                &ScreenHeight,
+                                &ScreenDepth
+                                );
     if (!EFI_ERROR (Status)) {
       DEBUG ((
         DEBUG_INFO,
@@ -176,59 +176,60 @@ OcProvideGopPassThrough (
       DEBUG ((DEBUG_INFO, "OCC: AppleFramebufferInfo failed to retrieve info - %r\n", Status));
     }
   }
+
   DEBUG_CODE_END ();
-  
+
   Status = gBS->LocateHandleBuffer (
-    ByProtocol,
-    &gEfiUgaDrawProtocolGuid,
-    NULL,
-    &HandleCount,
-    &HandleBuffer
-    );
+                  ByProtocol,
+                  &gEfiUgaDrawProtocolGuid,
+                  NULL,
+                  &HandleCount,
+                  &HandleBuffer
+                  );
   if (EFI_ERROR (Status)) {
     DEBUG ((DEBUG_INFO, "OCC: Failed to find handles with UGA - %r\n", Status));
     return Status;
   }
 
-  DEBUG ((DEBUG_INFO, "OCC: Found %u handles with UGA for GOP check\n", (UINT32) HandleCount));
+  DEBUG ((DEBUG_INFO, "OCC: Found %u handles with UGA for GOP check\n", (UINT32)HandleCount));
   for (Index = 0; Index < HandleCount; ++Index) {
-    DEBUG ((DEBUG_INFO, "OCC: Trying handle %u - %p\n", (UINT32) Index, HandleBuffer[Index]));
+    DEBUG ((DEBUG_INFO, "OCC: Trying handle %u - %p\n", (UINT32)Index, HandleBuffer[Index]));
 
     Status = gBS->HandleProtocol (
-      HandleBuffer[Index],
-      &gEfiUgaDrawProtocolGuid,
-      (VOID **) &UgaDraw
-      );
+                    HandleBuffer[Index],
+                    &gEfiUgaDrawProtocolGuid,
+                    (VOID **)&UgaDraw
+                    );
     if (EFI_ERROR (Status)) {
       DEBUG ((DEBUG_INFO, "OCC: No UGA protocol - %r\n", Status));
       continue;
     }
 
     Status = gBS->HandleProtocol (
-      HandleBuffer[Index],
-      &gEfiGraphicsOutputProtocolGuid,
-      (VOID **) &GraphicsOutput
-      );
+                    HandleBuffer[Index],
+                    &gEfiGraphicsOutputProtocolGuid,
+                    (VOID **)&GraphicsOutput
+                    );
     if (!EFI_ERROR (Status)) {
-      DEBUG ((DEBUG_INFO, "OCC: Skipping GOP proxying as it is already present on handle %u - %p\n", (UINT32) Index, HandleBuffer[Index]));
+      DEBUG ((DEBUG_INFO, "OCC: Skipping GOP proxying as it is already present on handle %u - %p\n", (UINT32)Index, HandleBuffer[Index]));
       continue;
     }
-    
+
     FramebufferBase = 0;
     FramebufferSize = 0;
     ScreenRowBytes  = 0;
     PixelFormat     = PixelBltOnly;
 
     Status = gBS->HandleProtocol (
-      HandleBuffer[Index],
-      &gAppleFramebufferInfoProtocolGuid,
-      (VOID **) &FramebufferInfo
-      );
+                    HandleBuffer[Index],
+                    &gAppleFramebufferInfoProtocolGuid,
+                    (VOID **)&FramebufferInfo
+                    );
     if (EFI_ERROR (Status)) {
       DEBUG ((
         DEBUG_INFO,
         "OCC: Failed to retrieve AppleFramebufferInfo protocol on handle %u - %p (%r)\n",
-        (UINT32) Index,
+        (UINT32)Index,
         HandleBuffer[Index],
         Status
         ));
@@ -239,19 +240,19 @@ OcProvideGopPassThrough (
       DEBUG ((
         DEBUG_INFO,
         "OCC: Got AppleFramebufferInfo protocol on handle %u - %p\n",
-        (UINT32) Index,
+        (UINT32)Index,
         HandleBuffer[Index]
         ));
 
       Status = FramebufferInfo->GetInfo (
-        FramebufferInfo,
-        &FramebufferBase,
-        &FramebufferSize,
-        &ScreenRowBytes,
-        &ScreenWidth,
-        &ScreenHeight,
-        &ScreenDepth
-        );
+                                  FramebufferInfo,
+                                  &FramebufferBase,
+                                  &FramebufferSize,
+                                  &ScreenRowBytes,
+                                  &ScreenWidth,
+                                  &ScreenHeight,
+                                  &ScreenDepth
+                                  );
       if (!EFI_ERROR (Status)) {
         PixelFormat = PixelRedGreenBlueReserved8BitPerColor;  ///< or PixelBlueGreenRedReserved8BitPerColor?
 
@@ -264,14 +265,14 @@ OcProvideGopPassThrough (
           ScreenWidth,
           ScreenHeight,
           ScreenDepth,
-          (UINT32) Index,
+          (UINT32)Index,
           HandleBuffer[Index]
           ));
       } else {
         DEBUG ((
           DEBUG_INFO,
           "OCC: Failed to get info from AppleFramebufferInfo protocol on handle %u - %p (%r)\n",
-          (UINT32) Index,
+          (UINT32)Index,
           HandleBuffer[Index],
           Status
           ));
@@ -282,12 +283,12 @@ OcProvideGopPassThrough (
     }
 
     Status = UgaDraw->GetMode (
-      UgaDraw,
-      &HorizontalResolution,
-      &VerticalResolution,
-      &ColorDepth,
-      &RefreshRate
-      );
+                        UgaDraw,
+                        &HorizontalResolution,
+                        &VerticalResolution,
+                        &ColorDepth,
+                        &RefreshRate
+                        );
     if (EFI_ERROR (Status)) {
       DEBUG ((DEBUG_INFO, "OCC: UGA->GetMode returns error - %r\n", Status));
       continue;
@@ -299,15 +300,16 @@ OcProvideGopPassThrough (
       continue;
     }
 
-    OcGopDraw->Uga                          = UgaDraw;
-    OcGopDraw->GraphicsOutput.QueryMode     = OcGopDrawQueryMode;
-    OcGopDraw->GraphicsOutput.SetMode       = OcGopDrawSetMode;
-    OcGopDraw->GraphicsOutput.Blt           = OcGopDrawBlt;
-    OcGopDraw->GraphicsOutput.Mode          = AllocateZeroPool (sizeof (*OcGopDraw->GraphicsOutput.Mode));
+    OcGopDraw->Uga                      = UgaDraw;
+    OcGopDraw->GraphicsOutput.QueryMode = OcGopDrawQueryMode;
+    OcGopDraw->GraphicsOutput.SetMode   = OcGopDrawSetMode;
+    OcGopDraw->GraphicsOutput.Blt       = OcGopDrawBlt;
+    OcGopDraw->GraphicsOutput.Mode      = AllocateZeroPool (sizeof (*OcGopDraw->GraphicsOutput.Mode));
     if (OcGopDraw->GraphicsOutput.Mode == NULL) {
       FreePool (OcGopDraw);
       continue;
     }
+
     //
     // Only Mode 0 is supported, so there is only one mode supported in total.
     //
@@ -315,36 +317,37 @@ OcProvideGopPassThrough (
     //
     // Again, only Mode 0 is supported.
     //
-    OcGopDraw->GraphicsOutput.Mode->Mode    = 0;
-    OcGopDraw->GraphicsOutput.Mode->Info    = AllocateZeroPool (sizeof (*OcGopDraw->GraphicsOutput.Mode->Info));
+    OcGopDraw->GraphicsOutput.Mode->Mode = 0;
+    OcGopDraw->GraphicsOutput.Mode->Info = AllocateZeroPool (sizeof (*OcGopDraw->GraphicsOutput.Mode->Info));
     if (OcGopDraw->GraphicsOutput.Mode->Info == NULL) {
       FreePool (OcGopDraw->GraphicsOutput.Mode);
       FreePool (OcGopDraw);
       continue;
     }
-    OcGopDraw->GraphicsOutput.Mode->Info->Version                       = 0;
-    OcGopDraw->GraphicsOutput.Mode->Info->HorizontalResolution          = HorizontalResolution;
-    OcGopDraw->GraphicsOutput.Mode->Info->VerticalResolution            = VerticalResolution;
-    OcGopDraw->GraphicsOutput.Mode->Info->PixelFormat                   = PixelFormat;
+
+    OcGopDraw->GraphicsOutput.Mode->Info->Version              = 0;
+    OcGopDraw->GraphicsOutput.Mode->Info->HorizontalResolution = HorizontalResolution;
+    OcGopDraw->GraphicsOutput.Mode->Info->VerticalResolution   = VerticalResolution;
+    OcGopDraw->GraphicsOutput.Mode->Info->PixelFormat          = PixelFormat;
     //
-    // No pixel mask is needed (i.e. all zero) in PixelInformation, 
+    // No pixel mask is needed (i.e. all zero) in PixelInformation,
     // plus AllocateZeroPool already assigns zero for it.
     // Skip.
-    //------------------------------------------------------------------------------
+    // ------------------------------------------------------------------------------
     // ScreenRowBytes is PixelsPerScanLine * sizeof (EFI_GRAPHICS_OUTPUT_BLT_PIXEL),
     // so here to divide it back.
     //
-    OcGopDraw->GraphicsOutput.Mode->Info->PixelsPerScanLine             = ScreenRowBytes / sizeof (EFI_GRAPHICS_OUTPUT_BLT_PIXEL);
-    OcGopDraw->GraphicsOutput.Mode->SizeOfInfo      = sizeof (*OcGopDraw->GraphicsOutput.Mode->Info);
-    OcGopDraw->GraphicsOutput.Mode->FrameBufferBase = FramebufferBase;
-    OcGopDraw->GraphicsOutput.Mode->FrameBufferSize = FramebufferSize;
+    OcGopDraw->GraphicsOutput.Mode->Info->PixelsPerScanLine = ScreenRowBytes / sizeof (EFI_GRAPHICS_OUTPUT_BLT_PIXEL);
+    OcGopDraw->GraphicsOutput.Mode->SizeOfInfo              = sizeof (*OcGopDraw->GraphicsOutput.Mode->Info);
+    OcGopDraw->GraphicsOutput.Mode->FrameBufferBase         = FramebufferBase;
+    OcGopDraw->GraphicsOutput.Mode->FrameBufferSize         = FramebufferSize;
 
     Status = gBS->InstallMultipleProtocolInterfaces (
-      &HandleBuffer[Index],
-      &gEfiGraphicsOutputProtocolGuid,
-      &OcGopDraw->GraphicsOutput,
-      NULL
-      );
+                    &HandleBuffer[Index],
+                    &gEfiGraphicsOutputProtocolGuid,
+                    &OcGopDraw->GraphicsOutput,
+                    NULL
+                    );
     if (EFI_ERROR (Status)) {
       FreePool (OcGopDraw->GraphicsOutput.Mode->Info);
       FreePool (OcGopDraw->GraphicsOutput.Mode);
@@ -355,7 +358,7 @@ OcProvideGopPassThrough (
       DEBUG_INFO,
       "OCC: Installed GOP protocol - %r (Handle %u - %p, Resolution %ux%u, FramebufferBase %Lx, PixelFormat %d)\n",
       Status,
-      (UINT32) Index,
+      (UINT32)Index,
       HandleBuffer[Index],
       HorizontalResolution,
       VerticalResolution,

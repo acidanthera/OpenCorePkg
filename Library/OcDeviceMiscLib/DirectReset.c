@@ -18,11 +18,11 @@ DirectResetCold (
   VOID
   )
 {
-  volatile UINTN Index;
+  volatile UINTN  Index;
+
   IoWrite8 (0xCF9, BIT2 | BIT1); // 1st choice: PIIX3 RCR, RCPU|SRST
 
   for (Index = 0; Index < 100; ++Index) {
-    ;
   }
 
   IoWrite8 (0x64, 0xfe);         // 2nd choice: keyboard controller

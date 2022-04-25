@@ -18,7 +18,7 @@
 
 #include "OcHashServicesLibInternal.h"
 
-STATIC EFI_SERVICE_BINDING_PROTOCOL mHashBindingProto = {
+STATIC EFI_SERVICE_BINDING_PROTOCOL  mHashBindingProto = {
   &HSCreateChild,
   &HSDestroyChild
 };
@@ -65,7 +65,7 @@ HSHash (
   HS_PRIVATE_DATA  *PrivateData;
   HS_CONTEXT_DATA  CtxCopy;
 
-  if (!This || !HashAlgorithm || !Message || !Hash || !MessageSize || MessageSize > MAX_UINTN) {
+  if (!This || !HashAlgorithm || !Message || !Hash || !MessageSize || (MessageSize > MAX_UINTN)) {
     return EFI_INVALID_PARAMETER;
   }
 
@@ -124,11 +124,11 @@ HSCreateChild (
   PrivateData->Proto.Hash        = HSHash;
 
   Status = gBS->InstallProtocolInterface (
-    ChildHandle,
-    &gEfiHashProtocolGuid,
-    EFI_NATIVE_INTERFACE,
-    &PrivateData->Proto
-    );
+                  ChildHandle,
+                  &gEfiHashProtocolGuid,
+                  EFI_NATIVE_INTERFACE,
+                  &PrivateData->Proto
+                  );
 
   if (EFI_ERROR (Status)) {
     FreePool (PrivateData);
@@ -145,28 +145,28 @@ HSDestroyChild (
   IN EFI_HANDLE                    ChildHandle
   )
 {
-  EFI_HASH_PROTOCOL *HashProto;
-  EFI_STATUS        Status;
+  EFI_HASH_PROTOCOL  *HashProto;
+  EFI_STATUS         Status;
 
   if (!This || !ChildHandle) {
     return EFI_INVALID_PARAMETER;
   }
 
   Status = gBS->HandleProtocol (
-    ChildHandle,
-    &gEfiHashProtocolGuid,
-    (VOID **) &HashProto
-    );
+                  ChildHandle,
+                  &gEfiHashProtocolGuid,
+                  (VOID **)&HashProto
+                  );
 
   if (EFI_ERROR (Status)) {
     return Status;
   }
 
   Status = gBS->UninstallProtocolInterface (
-    ChildHandle,
-    &gEfiHashProtocolGuid,
-    HashProto
-    );
+                  ChildHandle,
+                  &gEfiHashProtocolGuid,
+                  HashProto
+                  );
 
   if (EFI_ERROR (Status)) {
     return Status;
@@ -190,8 +190,8 @@ OcHashServicesInstallProtocol (
   )
 {
   EFI_STATUS                    Status;
-  EFI_HANDLE                    NewHandle        = NULL;
-  EFI_SERVICE_BINDING_PROTOCOL  *OriginalProto   = NULL;
+  EFI_HANDLE                    NewHandle      = NULL;
+  EFI_SERVICE_BINDING_PROTOCOL  *OriginalProto = NULL;
 
   if (Reinstall) {
     //
@@ -206,7 +206,8 @@ OcHashServicesInstallProtocol (
     Status = gBS->LocateProtocol (
                     &gEfiHashServiceBindingProtocolGuid,
                     NULL,
-                    (VOID **) &OriginalProto);
+                    (VOID **)&OriginalProto
+                    );
     if (!EFI_ERROR (Status)) {
       return OriginalProto;
     }

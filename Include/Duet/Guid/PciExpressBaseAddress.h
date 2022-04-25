@@ -1,18 +1,18 @@
 /** @file
 
 Copyright (c) 2006, Intel Corporation. All rights reserved.<BR>
-This program and the accompanying materials                          
-are licensed and made available under the terms and conditions of the BSD License         
-which accompanies this distribution.  The full text of the license may be found at        
-http://opensource.org/licenses/bsd-license.php                                            
-                                                                                          
-THE PROGRAM IS DISTRIBUTED UNDER THE BSD LICENSE ON AN "AS IS" BASIS,                     
-WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.             
+This program and the accompanying materials
+are licensed and made available under the terms and conditions of the BSD License
+which accompanies this distribution.  The full text of the license may be found at
+http://opensource.org/licenses/bsd-license.php
+
+THE PROGRAM IS DISTRIBUTED UNDER THE BSD LICENSE ON AN "AS IS" BASIS,
+WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 
 Module Name:
-  
+
     PciExpressBaseAddress.h
-    
+
 Abstract:
 
 
@@ -35,12 +35,12 @@ Abstract:
 //
 #pragma pack(1)
 typedef struct _EFI_PCI_EXPRESS_BASE_ADDRESS_INFORMATION {
-  UINT32       HostBridgeNumber;
-  UINT32       RootBridgeNumber;
-  UINT64       PciExpressBaseAddress;
+  UINT32    HostBridgeNumber;
+  UINT32    RootBridgeNumber;
+  UINT64    PciExpressBaseAddress;
 } EFI_PCI_EXPRESS_BASE_ADDRESS_INFORMATION;
 #pragma pack()
 
-extern EFI_GUID gEfiPciExpressBaseAddressGuid;
+extern EFI_GUID  gEfiPciExpressBaseAddressGuid;
 
 #endif

@@ -24,6 +24,6 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
   { 0x59D76AE4, 0x37E3, 0x55A7,                \
     { 0xB4, 0x60, 0xEF, 0x13, 0xD4, 0x6E, 0x60, 0x20 } }
 
-extern EFI_GUID gApfsEncryptedPartitionProtocolGuid;
+extern EFI_GUID  gApfsEncryptedPartitionProtocolGuid;
 
 #endif // APFS_ENCRYPTED_PARTITION_H

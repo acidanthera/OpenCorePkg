@@ -33,10 +33,10 @@
 STATIC
 EFI_STATUS
 ParseNameString (
-  IN OUT ACPI_PARSER_CONTEXT *Context,
-  IN OUT UINT8               **NamePathStart  OPTIONAL,
-  IN OUT UINT8               *PathLength      OPTIONAL,
-  IN OUT UINT8               *IsRootPath      OPTIONAL
+  IN OUT ACPI_PARSER_CONTEXT  *Context,
+  IN OUT UINT8                **NamePathStart  OPTIONAL,
+  IN OUT UINT8                *PathLength      OPTIONAL,
+  IN OUT UINT8                *IsRootPath      OPTIONAL
   )
 {
   CONTEXT_ENTER (Context, "NameString");
@@ -48,7 +48,7 @@ ParseNameString (
   }
 
   while (Context->CurrentOpcode[0] == AML_ROOT_CHAR || Context->CurrentOpcode[0] == AML_PARENT_PREFIX_CHAR) {
-    if (Context->CurrentOpcode[0] == AML_ROOT_CHAR && IsRootPath != NULL) {
+    if ((Context->CurrentOpcode[0] == AML_ROOT_CHAR) && (IsRootPath != NULL)) {
       *IsRootPath = 1;
     }
 
@@ -58,7 +58,7 @@ ParseNameString (
   switch (Context->CurrentOpcode[0]) {
     case AML_ZERO_OP:
       if (NamePathStart != NULL) {
-        *PathLength = 0;
+        *PathLength    = 0;
         *NamePathStart = NULL;
       }
 
@@ -70,7 +70,7 @@ ParseNameString (
       CONTEXT_PEEK_BYTES (Context, 2 * IDENT_LEN);
 
       if (NamePathStart != NULL) {
-        *PathLength = 2;
+        *PathLength    = 2;
         *NamePathStart = Context->CurrentOpcode;
       }
 
@@ -82,7 +82,7 @@ ParseNameString (
       CONTEXT_PEEK_BYTES (Context, 1 + Context->CurrentOpcode[0] * IDENT_LEN);
 
       if (NamePathStart != NULL) {
-        *PathLength = Context->CurrentOpcode[0];
+        *PathLength    = Context->CurrentOpcode[0];
         *NamePathStart = Context->CurrentOpcode + 1;
       }
 
@@ -93,7 +93,7 @@ ParseNameString (
       CONTEXT_PEEK_BYTES (Context, IDENT_LEN);
 
       if (NamePathStart != NULL) {
-        *PathLength = 1;
+        *PathLength    = 1;
         *NamePathStart = Context->CurrentOpcode;
       }
 
@@ -121,20 +121,20 @@ ParseNameString (
 STATIC
 EFI_STATUS
 ParsePkgLength (
-  IN OUT ACPI_PARSER_CONTEXT *Context,
-     OUT UINT32              *PkgLength
+  IN OUT ACPI_PARSER_CONTEXT  *Context,
+  OUT UINT32                  *PkgLength
   )
 {
-  UINT8  LeadByte;
-  UINT8  ByteCount;
-  UINT32 TotalSize;
-  UINT32 Index;
+  UINT8   LeadByte;
+  UINT8   ByteCount;
+  UINT32  TotalSize;
+  UINT32  Index;
 
   CONTEXT_ENTER (Context, "PkgLength");
   CONTEXT_HAS_WORK (Context);
   CONTEXT_INCREASE_NESTING (Context);
 
-  LeadByte = Context->CurrentOpcode[0];
+  LeadByte  = Context->CurrentOpcode[0];
   TotalSize = 0;
   ByteCount = (LeadByte & 0xC0) >> 6;
 
@@ -144,14 +144,14 @@ ParsePkgLength (
     CONTEXT_PEEK_BYTES (Context, ByteCount);
 
     for (Index = 0; Index < ByteCount; Index++) {
-      TotalSize |= (UINT32) Context->CurrentOpcode[Index] << (Index * 8U + 4);
+      TotalSize |= (UINT32)Context->CurrentOpcode[Index] << (Index * 8U + 4);
     }
 
     TotalSize |= LeadByte & 0x0F;
     *PkgLength = TotalSize;
     CONTEXT_CONSUME_BYTES (Context, ByteCount);
   } else {
-    *PkgLength = (UINT32) LeadByte;
+    *PkgLength = (UINT32)LeadByte;
   }
 
   CONTEXT_DECREASE_NESTING (Context);
@@ -170,7 +170,7 @@ ParsePkgLength (
 STATIC
 EFI_STATUS
 ParseAlias (
-  IN OUT ACPI_PARSER_CONTEXT *Context
+  IN OUT ACPI_PARSER_CONTEXT  *Context
   )
 {
   CONTEXT_ENTER (Context, "Alias");
@@ -178,22 +178,24 @@ ParseAlias (
   CONTEXT_INCREASE_NESTING (Context);
 
   if (ParseNameString (
-    Context,
-    NULL,
-    NULL,
-    NULL
-    ) != EFI_SUCCESS) {
+        Context,
+        NULL,
+        NULL,
+        NULL
+        ) != EFI_SUCCESS)
+  {
     return EFI_DEVICE_ERROR;
   }
 
   CONTEXT_PEEK_BYTES (Context, 1);
 
   if (ParseNameString (
-    Context,
-    NULL,
-    NULL,
-    NULL
-    ) != EFI_SUCCESS) {
+        Context,
+        NULL,
+        NULL,
+        NULL
+        ) != EFI_SUCCESS)
+  {
     return EFI_DEVICE_ERROR;
   }
 
@@ -217,38 +219,39 @@ ParseAlias (
 STATIC
 EFI_STATUS
 ParseScopeOrDevice (
-  IN OUT ACPI_PARSER_CONTEXT *Context,
-     OUT UINT8               **Result
+  IN OUT ACPI_PARSER_CONTEXT  *Context,
+  OUT UINT8                   **Result
   )
 {
-  UINT32     PkgLength;
-  UINT8      *ScopeStart;
-  UINT32     *CurrentPath;
-  UINT8      *ScopeEnd;
-  UINT8      *ScopeName;
-  UINT8      *ScopeNameStart;
-  UINT8      ScopeNameLength;
-  UINT8      IsRootPath;
-  EFI_STATUS Status;
-  UINT8      Index;
-  UINT8      Index2;
-  BOOLEAN    Breakout;
+  UINT32      PkgLength;
+  UINT8       *ScopeStart;
+  UINT32      *CurrentPath;
+  UINT8       *ScopeEnd;
+  UINT8       *ScopeName;
+  UINT8       *ScopeNameStart;
+  UINT8       ScopeNameLength;
+  UINT8       IsRootPath;
+  EFI_STATUS  Status;
+  UINT8       Index;
+  UINT8       Index2;
+  BOOLEAN     Breakout;
 
   CONTEXT_ENTER (Context, "Scope / Device");
   CONTEXT_HAS_WORK (Context);
   CONTEXT_INCREASE_NESTING (Context);
 
-  ScopeStart = Context->CurrentOpcode;
+  ScopeStart  = Context->CurrentOpcode;
   CurrentPath = Context->CurrentIdentifier;
 
   if (ParsePkgLength (
-    Context,
-    &PkgLength
-    ) != EFI_SUCCESS) {
+        Context,
+        &PkgLength
+        ) != EFI_SUCCESS)
+  {
     return EFI_DEVICE_ERROR;
   }
 
-  if ((UINT32) (Context->TableEnd - ScopeStart) < PkgLength) {
+  if ((UINT32)(Context->TableEnd - ScopeStart) < PkgLength) {
     return EFI_DEVICE_ERROR;
   }
 
@@ -257,11 +260,12 @@ ParseScopeOrDevice (
   CONTEXT_PEEK_BYTES (Context, 1);
 
   if (ParseNameString (
-    Context,
-    &ScopeName,
-    &ScopeNameLength,
-    &IsRootPath
-    ) != EFI_SUCCESS) {
+        Context,
+        &ScopeName,
+        &ScopeNameLength,
+        &IsRootPath
+        ) != EFI_SUCCESS)
+  {
     return EFI_DEVICE_ERROR;
   }
 
@@ -290,7 +294,7 @@ ParseScopeOrDevice (
     for (Index2 = 0; Index2 < IDENT_LEN; ++Index2) {
       if (*(ScopeName + Index2) != *((UINT8 *)Context->CurrentIdentifier + (IDENT_LEN - Index2 - 1))) {
         Context->CurrentIdentifier = Context->PathStart;
-        Breakout = TRUE;
+        Breakout                   = TRUE;
         break;
       }
     }
@@ -300,7 +304,7 @@ ParseScopeOrDevice (
     }
 
     Context->CurrentIdentifier += 1;
-    ScopeName += 4;
+    ScopeName                  += 4;
   }
 
   if (Context->CurrentIdentifier == Context->PathEnd) {
@@ -309,6 +313,7 @@ ParseScopeOrDevice (
       *Result = ScopeStart - 1;
       return EFI_SUCCESS;
     }
+
     //
     // Same issue with root-relative scopes. Retry search.
     //
@@ -319,9 +324,9 @@ ParseScopeOrDevice (
 
   while (Context->CurrentOpcode < ScopeEnd) {
     Status = InternalAcpiParseTerm (
-      Context,
-      Result
-      );
+               Context,
+               Result
+               );
 
     if (Status != EFI_NOT_FOUND) {
       return Status;
@@ -347,22 +352,23 @@ ParseScopeOrDevice (
 STATIC
 EFI_STATUS
 ParseName (
-  IN OUT ACPI_PARSER_CONTEXT *Context
+  IN OUT ACPI_PARSER_CONTEXT  *Context
   )
 {
-  UINT32 PkgLength;
-  UINT8  *CurrentOpcode;
+  UINT32  PkgLength;
+  UINT8   *CurrentOpcode;
 
   CONTEXT_ENTER (Context, "Name");
   CONTEXT_HAS_WORK (Context);
   CONTEXT_INCREASE_NESTING (Context);
 
   if (ParseNameString (
-    Context,
-    NULL,
-    NULL,
-    NULL
-    ) != EFI_SUCCESS) {
+        Context,
+        NULL,
+        NULL,
+        NULL
+        ) != EFI_SUCCESS)
+  {
     return EFI_DEVICE_ERROR;
   }
 
@@ -414,9 +420,10 @@ ParseName (
       CurrentOpcode = Context->CurrentOpcode;
 
       if (ParsePkgLength (
-        Context,
-        &PkgLength
-        ) != EFI_SUCCESS) {
+            Context,
+            &PkgLength
+            ) != EFI_SUCCESS)
+      {
         return EFI_DEVICE_ERROR;
       }
 
@@ -447,16 +454,16 @@ ParseName (
 STATIC
 EFI_STATUS
 ParseBankField (
-  IN OUT ACPI_PARSER_CONTEXT *Context,
-     OUT UINT8               **Result
+  IN OUT ACPI_PARSER_CONTEXT  *Context,
+  OUT UINT8                   **Result
   )
 {
-  UINT32 PkgLength;
-  UINT8  *BankStart;
-  UINT8  *BankEnd;
-  UINT8  *Name;
-  UINT8  NameLength;
-  UINT8  Index;
+  UINT32  PkgLength;
+  UINT8   *BankStart;
+  UINT8   *BankEnd;
+  UINT8   *Name;
+  UINT8   NameLength;
+  UINT8   Index;
 
   CONTEXT_ENTER (Context, "BankField");
   CONTEXT_HAS_WORK (Context);
@@ -465,13 +472,14 @@ ParseBankField (
   BankStart = Context->CurrentOpcode;
 
   if (ParsePkgLength (
-    Context,
-    &PkgLength
-    ) != EFI_SUCCESS) {
+        Context,
+        &PkgLength
+        ) != EFI_SUCCESS)
+  {
     return EFI_DEVICE_ERROR;
   }
 
-  if ((UINT32) (Context->TableEnd - BankStart) < PkgLength) {
+  if ((UINT32)(Context->TableEnd - BankStart) < PkgLength) {
     return EFI_DEVICE_ERROR;
   }
 
@@ -480,11 +488,12 @@ ParseBankField (
   CONTEXT_PEEK_BYTES (Context, 1);
 
   if (ParseNameString (
-    Context,
-    &Name,
-    &NameLength,
-    NULL
-    ) != EFI_SUCCESS) {
+        Context,
+        &Name,
+        &NameLength,
+        NULL
+        ) != EFI_SUCCESS)
+  {
     return EFI_DEVICE_ERROR;
   }
 
@@ -514,24 +523,27 @@ ParseBankField (
     //
     Context->CurrentIdentifier -= 1;
     if (ParseNameString (
-      Context,
-      &Name,
-      &NameLength,
-      NULL
-      ) != EFI_SUCCESS) {
+          Context,
+          &Name,
+          &NameLength,
+          NULL
+          ) != EFI_SUCCESS)
+    {
       return EFI_DEVICE_ERROR;
     }
+
     Context->CurrentOpcode = BankEnd;
     CONTEXT_DECREASE_NESTING (Context);
     return EFI_NOT_FOUND;
   }
 
   if (ParseNameString (
-    Context,
-    &Name,
-    &NameLength,
-    NULL
-    ) != EFI_SUCCESS) {
+        Context,
+        &Name,
+        &NameLength,
+        NULL
+        ) != EFI_SUCCESS)
+  {
     return EFI_DEVICE_ERROR;
   }
 
@@ -545,7 +557,7 @@ ParseBankField (
 
   for (Index = 0; Index < IDENT_LEN; ++Index) {
     if (*(Name + Index) != *((UINT8 *)Context->CurrentIdentifier + (IDENT_LEN - Index - 1))) {
-      Context->CurrentOpcode = BankEnd;
+      Context->CurrentOpcode      = BankEnd;
       Context->CurrentIdentifier -= 1;
       CONTEXT_DECREASE_NESTING (Context);
       return EFI_NOT_FOUND;
@@ -553,7 +565,7 @@ ParseBankField (
   }
 
   if (Context->CurrentIdentifier + 1 != Context->PathEnd) {
-    Context->CurrentOpcode = BankEnd;
+    Context->CurrentOpcode      = BankEnd;
     Context->CurrentIdentifier -= 1;
     CONTEXT_DECREASE_NESTING (Context);
     return EFI_NOT_FOUND;
@@ -562,7 +574,7 @@ ParseBankField (
   Context->EntriesFound += 1;
 
   if (Context->EntriesFound != Context->RequiredEntry) {
-    Context->CurrentOpcode = BankEnd;
+    Context->CurrentOpcode      = BankEnd;
     Context->CurrentIdentifier -= 1;
     CONTEXT_DECREASE_NESTING (Context);
     return EFI_NOT_FOUND;
@@ -589,8 +601,8 @@ ParseBankField (
 STATIC
 EFI_STATUS
 ParseCreateField (
-  IN OUT ACPI_PARSER_CONTEXT *Context,
-     OUT UINT8               **Result
+  IN OUT ACPI_PARSER_CONTEXT  *Context,
+  OUT UINT8                   **Result
   )
 {
   UINT8    *FieldStart;
@@ -604,7 +616,7 @@ ParseCreateField (
   CONTEXT_HAS_WORK (Context);
   CONTEXT_INCREASE_NESTING (Context);
 
-  FieldStart = Context->CurrentOpcode;
+  FieldStart  = Context->CurrentOpcode;
   FieldOpcode = Context->CurrentOpcode - 1;
 
   switch (Context->CurrentOpcode[0]) {
@@ -624,11 +636,12 @@ ParseCreateField (
       CONTEXT_PEEK_BYTES (Context, 1);
 
       if (ParseNameString (
-        Context,
-        NULL,
-        NULL,
-        NULL
-        ) != EFI_SUCCESS) {
+            Context,
+            NULL,
+            NULL,
+            NULL
+            ) != EFI_SUCCESS)
+      {
         return EFI_DEVICE_ERROR;
       }
 
@@ -638,11 +651,12 @@ ParseCreateField (
     default:
 
       if (ParseNameString (
-        Context,
-        &Name,
-        &NameLength,
-        NULL
-        ) != EFI_SUCCESS) {
+            Context,
+            &Name,
+            &NameLength,
+            NULL
+            ) != EFI_SUCCESS)
+      {
         return EFI_DEVICE_ERROR;
       }
 
@@ -690,11 +704,12 @@ ParseCreateField (
       CONTEXT_PEEK_BYTES (Context, 1);
 
       if (ParseNameString (
-        Context,
-        &Name,
-        &NameLength,
-        NULL
-        ) != EFI_SUCCESS) {
+            Context,
+            &Name,
+            &NameLength,
+            NULL
+            ) != EFI_SUCCESS)
+      {
         return EFI_DEVICE_ERROR;
       }
 
@@ -750,7 +765,7 @@ ParseCreateField (
 STATIC
 EFI_STATUS
 ParseExternal (
-  IN OUT ACPI_PARSER_CONTEXT *Context
+  IN OUT ACPI_PARSER_CONTEXT  *Context
   )
 {
   CONTEXT_ENTER (Context, "External");
@@ -758,11 +773,12 @@ ParseExternal (
   CONTEXT_INCREASE_NESTING (Context);
 
   if (ParseNameString (
-    Context,
-    NULL,
-    NULL,
-    NULL
-    ) != EFI_SUCCESS) {
+        Context,
+        NULL,
+        NULL,
+        NULL
+        ) != EFI_SUCCESS)
+  {
     return EFI_DEVICE_ERROR;
   }
 
@@ -783,7 +799,7 @@ ParseExternal (
 STATIC
 EFI_STATUS
 ParseOpRegion (
-  IN OUT ACPI_PARSER_CONTEXT *Context
+  IN OUT ACPI_PARSER_CONTEXT  *Context
   )
 {
   CONTEXT_ENTER (Context, "OpRegion");
@@ -791,11 +807,12 @@ ParseOpRegion (
   CONTEXT_INCREASE_NESTING (Context);
 
   if (ParseNameString (
-    Context,
-    NULL,
-    NULL,
-    NULL
-    ) != EFI_SUCCESS) {
+        Context,
+        NULL,
+        NULL,
+        NULL
+        ) != EFI_SUCCESS)
+  {
     return EFI_DEVICE_ERROR;
   }
 
@@ -851,13 +868,15 @@ ParseOpRegion (
 
         default:
           if (ParseNameString (
-            Context,
-            NULL,
-            NULL,
-            NULL
-            ) != EFI_SUCCESS) {
+                Context,
+                NULL,
+                NULL,
+                NULL
+                ) != EFI_SUCCESS)
+          {
             return EFI_DEVICE_ERROR;
           }
+
           break;
       }
 
@@ -887,28 +906,32 @@ ParseOpRegion (
 
         default:
           if (ParseNameString (
-            Context,
-            NULL,
-            NULL,
-            NULL
-            ) != EFI_SUCCESS) {
+                Context,
+                NULL,
+                NULL,
+                NULL
+                ) != EFI_SUCCESS)
+          {
             return EFI_DEVICE_ERROR;
           }
+
           break;
       }
 
       CONTEXT_PEEK_BYTES (Context, 1);
 
-      /* Fallthrough */
+    /* Fallthrough */
     default:
       if (ParseNameString (
-        Context,
-        NULL,
-        NULL,
-        NULL
-        ) != EFI_SUCCESS) {
+            Context,
+            NULL,
+            NULL,
+            NULL
+            ) != EFI_SUCCESS)
+      {
         return EFI_DEVICE_ERROR;
       }
+
       break;
   }
 
@@ -964,13 +987,15 @@ ParseOpRegion (
 
         default:
           if (ParseNameString (
-            Context,
-            NULL,
-            NULL,
-            NULL
-            ) != EFI_SUCCESS) {
+                Context,
+                NULL,
+                NULL,
+                NULL
+                ) != EFI_SUCCESS)
+          {
             return EFI_DEVICE_ERROR;
           }
+
           break;
       }
 
@@ -1000,28 +1025,32 @@ ParseOpRegion (
 
         default:
           if (ParseNameString (
-            Context,
-            NULL,
-            NULL,
-            NULL
-            ) != EFI_SUCCESS) {
+                Context,
+                NULL,
+                NULL,
+                NULL
+                ) != EFI_SUCCESS)
+          {
             return EFI_DEVICE_ERROR;
           }
+
           break;
       }
 
       CONTEXT_PEEK_BYTES (Context, 1);
-      /* Fallthrough */
+    /* Fallthrough */
 
     default:
       if (ParseNameString (
-        Context,
-        NULL,
-        NULL,
-        NULL
-        ) != EFI_SUCCESS) {
+            Context,
+            NULL,
+            NULL,
+            NULL
+            ) != EFI_SUCCESS)
+      {
         return EFI_DEVICE_ERROR;
       }
+
       break;
   }
 
@@ -1041,11 +1070,11 @@ ParseOpRegion (
 STATIC
 EFI_STATUS
 ParsePowerRes (
-  IN OUT ACPI_PARSER_CONTEXT *Context
+  IN OUT ACPI_PARSER_CONTEXT  *Context
   )
 {
-  UINT32 PkgLength;
-  UINT8  *CurrentOpcode;
+  UINT32  PkgLength;
+  UINT8   *CurrentOpcode;
 
   CONTEXT_ENTER (Context, "PowerRes");
   CONTEXT_HAS_WORK (Context);
@@ -1054,9 +1083,10 @@ ParsePowerRes (
   CurrentOpcode = Context->CurrentOpcode;
 
   if (ParsePkgLength (
-    Context,
-    &PkgLength
-    ) != EFI_SUCCESS) {
+        Context,
+        &PkgLength
+        ) != EFI_SUCCESS)
+  {
     return EFI_DEVICE_ERROR;
   }
 
@@ -1078,11 +1108,11 @@ ParsePowerRes (
 STATIC
 EFI_STATUS
 ParseProcessor (
-  IN OUT ACPI_PARSER_CONTEXT *Context
+  IN OUT ACPI_PARSER_CONTEXT  *Context
   )
 {
-  UINT8 *CurrentOpcode;
-  UINT32 PkgLength;
+  UINT8   *CurrentOpcode;
+  UINT32  PkgLength;
 
   CONTEXT_ENTER (Context, "Processor");
   CONTEXT_HAS_WORK (Context);
@@ -1091,9 +1121,10 @@ ParseProcessor (
   CurrentOpcode = Context->CurrentOpcode;
 
   if (ParsePkgLength (
-    Context,
-    &PkgLength
-    ) != EFI_SUCCESS) {
+        Context,
+        &PkgLength
+        ) != EFI_SUCCESS)
+  {
     return EFI_DEVICE_ERROR;
   }
 
@@ -1115,11 +1146,11 @@ ParseProcessor (
 STATIC
 EFI_STATUS
 ParseThermalZone (
-  IN OUT ACPI_PARSER_CONTEXT *Context
+  IN OUT ACPI_PARSER_CONTEXT  *Context
   )
 {
-  UINT8 *CurrentOpcode;
-  UINT32 PkgLength;
+  UINT8   *CurrentOpcode;
+  UINT32  PkgLength;
 
   CONTEXT_ENTER (Context, "ThermalZone");
   CONTEXT_HAS_WORK (Context);
@@ -1128,9 +1159,10 @@ ParseThermalZone (
   CurrentOpcode = Context->CurrentOpcode;
 
   if (ParsePkgLength (
-    Context,
-    &PkgLength
-    ) != EFI_SUCCESS) {
+        Context,
+        &PkgLength
+        ) != EFI_SUCCESS)
+  {
     return EFI_DEVICE_ERROR;
   }
 
@@ -1156,18 +1188,18 @@ ParseThermalZone (
 STATIC
 EFI_STATUS
 ParseMethod (
-  IN OUT ACPI_PARSER_CONTEXT *Context,
-     OUT UINT8               **Result
+  IN OUT ACPI_PARSER_CONTEXT  *Context,
+  OUT UINT8                   **Result
   )
 {
-  UINT8  *MethodStart;
-  UINT32 *CurrentPath;
-  UINT32 PkgLength;
-  UINT8  *MethodEnd;
-  UINT8  *MethodName;
-  UINT8  MethodNameLength;
-  UINT8  Index;
-  UINT8  Index2;
+  UINT8   *MethodStart;
+  UINT32  *CurrentPath;
+  UINT32  PkgLength;
+  UINT8   *MethodEnd;
+  UINT8   *MethodName;
+  UINT8   MethodNameLength;
+  UINT8   Index;
+  UINT8   Index2;
 
   CONTEXT_ENTER (Context, "Method");
   CONTEXT_HAS_WORK (Context);
@@ -1177,13 +1209,14 @@ ParseMethod (
   CurrentPath = Context->CurrentIdentifier;
 
   if (ParsePkgLength (
-    Context,
-    &PkgLength
-    ) != EFI_SUCCESS) {
+        Context,
+        &PkgLength
+        ) != EFI_SUCCESS)
+  {
     return EFI_DEVICE_ERROR;
   }
 
-  if ((UINT32) (Context->TableEnd - MethodStart) < PkgLength) {
+  if ((UINT32)(Context->TableEnd - MethodStart) < PkgLength) {
     return EFI_DEVICE_ERROR;
   }
 
@@ -1194,11 +1227,12 @@ ParseMethod (
   }
 
   if (ParseNameString (
-    Context,
-    &MethodName,
-    &MethodNameLength,
-    NULL
-    ) != EFI_SUCCESS) {
+        Context,
+        &MethodName,
+        &MethodNameLength,
+        NULL
+        ) != EFI_SUCCESS)
+  {
     return EFI_DEVICE_ERROR;
   }
 
@@ -1211,7 +1245,7 @@ ParseMethod (
     // If the method is within our lookup path but not at it, this is not a match.
     //
     if (Context->CurrentIdentifier == Context->PathEnd) {
-      Context->CurrentOpcode = MethodEnd;
+      Context->CurrentOpcode     = MethodEnd;
       Context->CurrentIdentifier = CurrentPath;
       CONTEXT_DECREASE_NESTING (Context);
       return EFI_NOT_FOUND;
@@ -1219,7 +1253,7 @@ ParseMethod (
 
     for (Index2 = 0; Index2 < IDENT_LEN; Index2++) {
       if (*(MethodName + Index2) != *((UINT8 *)Context->CurrentIdentifier + (IDENT_LEN - Index2 - 1))) {
-        Context->CurrentOpcode = MethodEnd;
+        Context->CurrentOpcode     = MethodEnd;
         Context->CurrentIdentifier = CurrentPath;
         CONTEXT_DECREASE_NESTING (Context);
         return EFI_NOT_FOUND;
@@ -1227,11 +1261,11 @@ ParseMethod (
     }
 
     Context->CurrentIdentifier += 1;
-    MethodName += 4;
+    MethodName                 += 4;
   }
 
   if (Context->CurrentIdentifier != Context->PathEnd) {
-    Context->CurrentOpcode = MethodEnd;
+    Context->CurrentOpcode     = MethodEnd;
     Context->CurrentIdentifier = CurrentPath;
     CONTEXT_DECREASE_NESTING (Context);
     return EFI_NOT_FOUND;
@@ -1240,7 +1274,7 @@ ParseMethod (
   Context->EntriesFound += 1;
 
   if (Context->EntriesFound != Context->RequiredEntry) {
-    Context->CurrentOpcode = MethodEnd;
+    Context->CurrentOpcode     = MethodEnd;
     Context->CurrentIdentifier = CurrentPath;
     CONTEXT_DECREASE_NESTING (Context);
     return EFI_NOT_FOUND;
@@ -1264,31 +1298,32 @@ ParseMethod (
 STATIC
 EFI_STATUS
 ParseIfElse (
-  IN OUT ACPI_PARSER_CONTEXT *Context,
-     OUT UINT8               **Result
+  IN OUT ACPI_PARSER_CONTEXT  *Context,
+  OUT UINT8                   **Result
   )
 {
-  UINT32     PkgLength;
-  UINT8      *IfStart;
-  UINT32     *CurrentPath;
-  UINT8      *IfEnd;
-  EFI_STATUS Status;
+  UINT32      PkgLength;
+  UINT8       *IfStart;
+  UINT32      *CurrentPath;
+  UINT8       *IfEnd;
+  EFI_STATUS  Status;
 
   CONTEXT_ENTER (Context, "IfElse");
   CONTEXT_HAS_WORK (Context);
   CONTEXT_INCREASE_NESTING (Context);
 
-  IfStart = Context->CurrentOpcode;
+  IfStart     = Context->CurrentOpcode;
   CurrentPath = Context->CurrentIdentifier;
 
   if (ParsePkgLength (
-    Context,
-    &PkgLength
-    ) != EFI_SUCCESS) {
+        Context,
+        &PkgLength
+        ) != EFI_SUCCESS)
+  {
     return EFI_DEVICE_ERROR;
   }
 
-  if ((UINT32) (Context->TableEnd - IfStart) < PkgLength) {
+  if ((UINT32)(Context->TableEnd - IfStart) < PkgLength) {
     return EFI_DEVICE_ERROR;
   }
 
@@ -1327,13 +1362,14 @@ ParseIfElse (
     IfStart = Context->CurrentOpcode;
 
     if (ParsePkgLength (
-      Context,
-      &PkgLength
-      ) != EFI_SUCCESS) {
+          Context,
+          &PkgLength
+          ) != EFI_SUCCESS)
+    {
       return EFI_DEVICE_ERROR;
     }
 
-    if ((UINT32) (Context->TableEnd - IfStart) < PkgLength) {
+    if ((UINT32)(Context->TableEnd - IfStart) < PkgLength) {
       return EFI_DEVICE_ERROR;
     }
 
@@ -1350,7 +1386,7 @@ ParseIfElse (
       }
     }
 
-    if (Context->CurrentOpcode > IfEnd || Status == EFI_DEVICE_ERROR) {
+    if ((Context->CurrentOpcode > IfEnd) || (Status == EFI_DEVICE_ERROR)) {
       return EFI_DEVICE_ERROR;
     }
 
@@ -1378,7 +1414,7 @@ ParseIfElse (
 STATIC
 EFI_STATUS
 ParseEvent (
-  IN OUT ACPI_PARSER_CONTEXT *Context
+  IN OUT ACPI_PARSER_CONTEXT  *Context
   )
 {
   CONTEXT_ENTER (Context, "Event");
@@ -1386,11 +1422,12 @@ ParseEvent (
   CONTEXT_INCREASE_NESTING (Context);
 
   if (ParseNameString (
-    Context,
-    NULL,
-    NULL,
-    NULL
-    ) != EFI_SUCCESS) {
+        Context,
+        NULL,
+        NULL,
+        NULL
+        ) != EFI_SUCCESS)
+  {
     return EFI_DEVICE_ERROR;
   }
 
@@ -1414,18 +1451,18 @@ ParseEvent (
 STATIC
 EFI_STATUS
 ParseField (
-  IN OUT ACPI_PARSER_CONTEXT *Context,
-     OUT UINT8               **Result
+  IN OUT ACPI_PARSER_CONTEXT  *Context,
+  OUT UINT8                   **Result
   )
 {
-  UINT8  *FieldStart;
-  UINT32 PkgLength;
-  UINT8  *FieldEnd;
-  UINT8  *FieldName;
-  UINT8  FieldNameLength;
-  UINT32 *CurrentPath;
-  UINT8  Index;
-  UINT8  Index2;
+  UINT8   *FieldStart;
+  UINT32  PkgLength;
+  UINT8   *FieldEnd;
+  UINT8   *FieldName;
+  UINT8   FieldNameLength;
+  UINT32  *CurrentPath;
+  UINT8   Index;
+  UINT8   Index2;
 
   CONTEXT_ENTER (Context, "Field");
   CONTEXT_HAS_WORK (Context);
@@ -1434,13 +1471,14 @@ ParseField (
   FieldStart = Context->CurrentOpcode;
 
   if (ParsePkgLength (
-    Context,
-    &PkgLength
-    ) != EFI_SUCCESS) {
+        Context,
+        &PkgLength
+        ) != EFI_SUCCESS)
+  {
     return EFI_DEVICE_ERROR;
   }
 
-  if ((UINT32) (Context->TableEnd - FieldStart) < PkgLength) {
+  if ((UINT32)(Context->TableEnd - FieldStart) < PkgLength) {
     return EFI_DEVICE_ERROR;
   }
 
@@ -1451,11 +1489,12 @@ ParseField (
   }
 
   if (ParseNameString (
-    Context,
-    &FieldName,
-    &FieldNameLength,
-    NULL
-    ) != EFI_SUCCESS) {
+        Context,
+        &FieldName,
+        &FieldNameLength,
+        NULL
+        ) != EFI_SUCCESS)
+  {
     return EFI_DEVICE_ERROR;
   }
 
@@ -1467,7 +1506,7 @@ ParseField (
 
   for (Index = 0; Index < FieldNameLength; Index++) {
     if (Context->CurrentIdentifier == Context->PathEnd) {
-      Context->CurrentOpcode = FieldEnd;
+      Context->CurrentOpcode     = FieldEnd;
       Context->CurrentIdentifier = CurrentPath;
       CONTEXT_DECREASE_NESTING (Context);
       return EFI_NOT_FOUND;
@@ -1475,7 +1514,7 @@ ParseField (
 
     for (Index2 = 0; Index2 < IDENT_LEN; Index2++) {
       if (*(FieldName + Index2) != *((UINT8 *)Context->CurrentIdentifier + (IDENT_LEN - Index2 - 1))) {
-        Context->CurrentOpcode = FieldEnd;
+        Context->CurrentOpcode     = FieldEnd;
         Context->CurrentIdentifier = CurrentPath;
         CONTEXT_DECREASE_NESTING (Context);
         return EFI_NOT_FOUND;
@@ -1483,11 +1522,11 @@ ParseField (
     }
 
     Context->CurrentIdentifier += 1;
-    FieldName += 4;
+    FieldName                  += 4;
   }
 
   if (Context->CurrentIdentifier != Context->PathEnd) {
-    Context->CurrentOpcode = FieldEnd;
+    Context->CurrentOpcode     = FieldEnd;
     Context->CurrentIdentifier = CurrentPath;
     CONTEXT_DECREASE_NESTING (Context);
     return EFI_NOT_FOUND;
@@ -1496,7 +1535,7 @@ ParseField (
   Context->EntriesFound += 1;
 
   if (Context->EntriesFound != Context->RequiredEntry) {
-    Context->CurrentOpcode = FieldEnd;
+    Context->CurrentOpcode     = FieldEnd;
     Context->CurrentIdentifier = CurrentPath;
     CONTEXT_DECREASE_NESTING (Context);
     return EFI_NOT_FOUND;
@@ -1518,7 +1557,7 @@ ParseField (
 STATIC
 EFI_STATUS
 ParseMutex (
-  IN OUT ACPI_PARSER_CONTEXT *Context
+  IN OUT ACPI_PARSER_CONTEXT  *Context
   )
 {
   CONTEXT_ENTER (Context, "Mutex");
@@ -1526,11 +1565,12 @@ ParseMutex (
   CONTEXT_INCREASE_NESTING (Context);
 
   if (ParseNameString (
-    Context,
-    NULL,
-    NULL,
-    NULL
-    ) != EFI_SUCCESS) {
+        Context,
+        NULL,
+        NULL,
+        NULL
+        ) != EFI_SUCCESS)
+  {
     return EFI_DEVICE_ERROR;
   }
 
@@ -1555,16 +1595,16 @@ ParseMutex (
 STATIC
 EFI_STATUS
 ParseIndexField (
-  IN OUT ACPI_PARSER_CONTEXT *Context,
-     OUT UINT8               **Result
+  IN OUT ACPI_PARSER_CONTEXT  *Context,
+  OUT UINT8                   **Result
   )
 {
-  UINT8  *FieldStart;
-  UINT32 PkgLength;
-  UINT8  *FieldEnd;
-  UINT8  *FieldName;
-  UINT8  FieldNameLength;
-  UINT8  Index;
+  UINT8   *FieldStart;
+  UINT32  PkgLength;
+  UINT8   *FieldEnd;
+  UINT8   *FieldName;
+  UINT8   FieldNameLength;
+  UINT8   Index;
 
   CONTEXT_ENTER (Context, "IndexField");
   CONTEXT_HAS_WORK (Context);
@@ -1573,13 +1613,14 @@ ParseIndexField (
   FieldStart = Context->CurrentOpcode;
 
   if (ParsePkgLength (
-    Context,
-    &PkgLength
-    ) != EFI_SUCCESS) {
+        Context,
+        &PkgLength
+        ) != EFI_SUCCESS)
+  {
     return EFI_DEVICE_ERROR;
   }
 
-  if ((UINT32) (Context->TableEnd - FieldStart) < PkgLength) {
+  if ((UINT32)(Context->TableEnd - FieldStart) < PkgLength) {
     return EFI_DEVICE_ERROR;
   }
 
@@ -1590,11 +1631,12 @@ ParseIndexField (
   }
 
   if (ParseNameString (
-    Context,
-    &FieldName,
-    &FieldNameLength,
-    NULL
-    ) != EFI_SUCCESS) {
+        Context,
+        &FieldName,
+        &FieldNameLength,
+        NULL
+        ) != EFI_SUCCESS)
+  {
     return EFI_DEVICE_ERROR;
   }
 
@@ -1609,11 +1651,12 @@ ParseIndexField (
   for (Index = 0; Index < IDENT_LEN; ++Index) {
     if (*(FieldName + Index) != *((UINT8 *)Context->CurrentIdentifier + (IDENT_LEN - Index - 1))) {
       if (ParseNameString (
-        Context,
-        &FieldName,
-        &FieldNameLength,
-        NULL
-        ) != EFI_SUCCESS) {
+            Context,
+            &FieldName,
+            &FieldNameLength,
+            NULL
+            ) != EFI_SUCCESS)
+      {
         return EFI_DEVICE_ERROR;
       }
 
@@ -1635,11 +1678,12 @@ ParseIndexField (
   CONTEXT_PEEK_BYTES (Context, 1);
 
   if (ParseNameString (
-    Context,
-    &FieldName,
-    &FieldNameLength,
-    NULL
-    ) != EFI_SUCCESS) {
+        Context,
+        &FieldName,
+        &FieldNameLength,
+        NULL
+        ) != EFI_SUCCESS)
+  {
     return EFI_DEVICE_ERROR;
   }
 
@@ -1653,7 +1697,7 @@ ParseIndexField (
 
   for (Index = 0; Index < IDENT_LEN; Index++) {
     if (*(FieldName + Index) != *((UINT8 *)Context->CurrentIdentifier + (IDENT_LEN - Index - 1))) {
-      Context->CurrentOpcode = FieldEnd;
+      Context->CurrentOpcode      = FieldEnd;
       Context->CurrentIdentifier -= 1;
       CONTEXT_DECREASE_NESTING (Context);
       return EFI_NOT_FOUND;
@@ -1661,7 +1705,7 @@ ParseIndexField (
   }
 
   if (Context->CurrentIdentifier + 1 != Context->PathEnd) {
-    Context->CurrentOpcode = FieldEnd;
+    Context->CurrentOpcode      = FieldEnd;
     Context->CurrentIdentifier -= 1;
     CONTEXT_DECREASE_NESTING (Context);
     return EFI_NOT_FOUND;
@@ -1670,7 +1714,7 @@ ParseIndexField (
   Context->EntriesFound += 1;
 
   if (Context->EntriesFound != Context->RequiredEntry) {
-    Context->CurrentOpcode = FieldEnd;
+    Context->CurrentOpcode      = FieldEnd;
     Context->CurrentIdentifier -= 1;
     CONTEXT_DECREASE_NESTING (Context);
     return EFI_NOT_FOUND;
@@ -1682,11 +1726,11 @@ ParseIndexField (
 
 EFI_STATUS
 InternalAcpiParseTerm (
-  IN OUT ACPI_PARSER_CONTEXT *Context,
-     OUT UINT8               **Result
+  IN OUT ACPI_PARSER_CONTEXT  *Context,
+  OUT UINT8                   **Result
   )
 {
-  EFI_STATUS Status;
+  EFI_STATUS  Status;
 
   CONTEXT_ENTER (Context, "Term");
   CONTEXT_HAS_WORK (Context);
@@ -1814,17 +1858,17 @@ InternalAcpiParseTerm (
 **/
 EFI_STATUS
 TranslateNameToOpcodes (
-  IN     CONST CHAR8 *Name,
-  IN     CONST CHAR8 *NameEnd,
-     OUT UINT32      *OpcodeName
+  IN     CONST CHAR8  *Name,
+  IN     CONST CHAR8  *NameEnd,
+  OUT UINT32          *OpcodeName
   )
 {
-  UINT32 CurrentOpcode;
-  UINT8  NameLength;
-  UINT8  Index;
+  UINT32  CurrentOpcode;
+  UINT8   NameLength;
+  UINT8   Index;
 
   CurrentOpcode = 0;
-  NameLength    = (UINT8) (NameEnd - Name);
+  NameLength    = (UINT8)(NameEnd - Name);
   *OpcodeName   = 0;
 
   if (NameLength > IDENT_LEN) {
@@ -1838,7 +1882,7 @@ TranslateNameToOpcodes (
       } else if ((Name[Index] >= 'A') && (Name[Index] <= 'Z')) {
         CurrentOpcode = AML_NAME_CHAR_A + (Name[Index] - 'A');
       } else if ((Name[Index] >= '0') && (Name[Index] <= '9')) {
-          // AML_EXT_REVISION_OP == AML_NAME_INTEGER_0
+        // AML_EXT_REVISION_OP == AML_NAME_INTEGER_0
         CurrentOpcode = AML_EXT_REVISION_OP + (Name[Index] - '0');
       } else if (Name[Index] == '_') {
         CurrentOpcode = AML_NAME_CHAR__;
@@ -1853,7 +1897,7 @@ TranslateNameToOpcodes (
       CurrentOpcode = AML_NAME_CHAR__;
     }
 
-    *OpcodeName = *OpcodeName << OPCODE_LEN;
+    *OpcodeName  = *OpcodeName << OPCODE_LEN;
     *OpcodeName |= CurrentOpcode;
   }
 
@@ -1871,17 +1915,17 @@ TranslateNameToOpcodes (
 **/
 EFI_STATUS
 GetOpcodeArray (
-  IN OUT ACPI_PARSER_CONTEXT *Context,
-  IN     CONST CHAR8         *PathString
+  IN OUT ACPI_PARSER_CONTEXT  *Context,
+  IN     CONST CHAR8          *PathString
   )
 {
-  EFI_STATUS  Status;
-  UINT32      Index;
-  UINT32      PathLength;
-  CHAR8       *Walker;
-  CHAR8       *IdentifierStart;
-  CONST CHAR8 *PathStringEnd;
-  UINTN       AsciiLength;
+  EFI_STATUS   Status;
+  UINT32       Index;
+  UINT32       PathLength;
+  CHAR8        *Walker;
+  CHAR8        *IdentifierStart;
+  CONST CHAR8  *PathStringEnd;
+  UINTN        AsciiLength;
 
   ASSERT (Context != NULL);
   ASSERT (PathString != NULL);
@@ -1895,7 +1939,7 @@ GetOpcodeArray (
     return EFI_INVALID_PARAMETER;
   }
 
-  PathLength = 0;
+  PathLength    = 0;
   PathStringEnd = PathString + AsciiLength;
 
   for (Index = 0; Index < AsciiLength; Index++) {
@@ -1904,15 +1948,15 @@ GetOpcodeArray (
     }
   }
 
-  PathLength += 1;
-  Context->PathStart = (UINT32 *) AllocateZeroPool (sizeof (UINT32) * PathLength);
+  PathLength        += 1;
+  Context->PathStart = (UINT32 *)AllocateZeroPool (sizeof (UINT32) * PathLength);
   if (Context->PathStart == NULL) {
     return EFI_OUT_OF_RESOURCES;
   }
 
   Context->CurrentIdentifier = Context->PathStart;
-  Walker                     = (CHAR8 *) PathString;
-  IdentifierStart            = (CHAR8 *) PathString;
+  Walker                     = (CHAR8 *)PathString;
+  IdentifierStart            = (CHAR8 *)PathString;
 
   for (Index = 0; Index < PathLength; ++Index) {
     while (*Walker != '.' && Walker < PathStringEnd) {
@@ -1924,10 +1968,10 @@ GetOpcodeArray (
     }
 
     Status = TranslateNameToOpcodes (
-      IdentifierStart,
-      Walker,
-      (UINT32 *) (Context->CurrentIdentifier + Index)
-      );
+               IdentifierStart,
+               Walker,
+               (UINT32 *)(Context->CurrentIdentifier + Index)
+               );
     if (EFI_ERROR (Status)) {
       return Status;
     }
@@ -1940,7 +1984,6 @@ GetOpcodeArray (
   return EFI_SUCCESS;
 }
 
-
 /**
   Initializes ACPI Context parser variable which stores ACPI header.
 
@@ -1948,7 +1991,7 @@ GetOpcodeArray (
 **/
 VOID
 InitContext (
-  OUT ACPI_PARSER_CONTEXT *Context
+  OUT ACPI_PARSER_CONTEXT  *Context
   )
 {
   ASSERT (Context != NULL);
@@ -1963,7 +2006,7 @@ InitContext (
 **/
 VOID
 ClearContext (
-  IN OUT ACPI_PARSER_CONTEXT *Context
+  IN OUT ACPI_PARSER_CONTEXT  *Context
   )
 {
   if (Context->PathStart != NULL) {
@@ -1979,7 +2022,7 @@ AcpiFindEntryInMemory (
   IN     UINT8        *Table,
   IN     CONST CHAR8  *PathString,
   IN     UINT8        Entry,
-     OUT UINT32       *Offset,
+  OUT UINT32          *Offset,
   IN     UINT32       TableLength OPTIONAL
   )
 {
@@ -2001,7 +2044,7 @@ AcpiFindEntryInMemory (
     // We do not check length here, mainly because TableLength > 0 is for fuzzing.
     //
   } else {
-    TableLength = ((EFI_ACPI_COMMON_HEADER *) Table)->Length;
+    TableLength = ((EFI_ACPI_COMMON_HEADER *)Table)->Length;
   }
 
   if (TableLength <= sizeof (EFI_ACPI_DESCRIPTION_HEADER)) {
@@ -2011,16 +2054,16 @@ AcpiFindEntryInMemory (
 
   InitContext (&Context);
 
-  Context.CurrentOpcode = Table;
-  Context.RequiredEntry = Entry;
-  Context.TableStart    = Table;
-  Context.TableEnd      = Table + TableLength;
+  Context.CurrentOpcode  = Table;
+  Context.RequiredEntry  = Entry;
+  Context.TableStart     = Table;
+  Context.TableEnd       = Table + TableLength;
   Context.CurrentOpcode += sizeof (EFI_ACPI_DESCRIPTION_HEADER);
 
   Status = GetOpcodeArray (
-    &Context,
-    PathString
-    );
+             &Context,
+             PathString
+             );
 
   if (EFI_ERROR (Status)) {
     ClearContext (&Context);
@@ -2031,7 +2074,7 @@ AcpiFindEntryInMemory (
     Status = InternalAcpiParseTerm (&Context, &Result);
 
     if (!EFI_ERROR (Status)) {
-      *Offset = (UINT32) (Result - Table);
+      *Offset = (UINT32)(Result - Table);
       ClearContext (&Context);
       return EFI_SUCCESS;
     }

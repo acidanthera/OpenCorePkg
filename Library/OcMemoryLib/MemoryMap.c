@@ -23,7 +23,7 @@
 #include <Library/UefiBootServicesTableLib.h>
 #include <Library/UefiLib.h>
 
-STATIC OC_MEMORY_TYPE_DESC OcMemoryTypeString [OC_MEMORY_TYPE_DESC_COUNT] = {
+STATIC OC_MEMORY_TYPE_DESC  OcMemoryTypeString[OC_MEMORY_TYPE_DESC_COUNT] = {
   {
     "Reserved",
     EfiReservedMemoryType
@@ -95,14 +95,15 @@ OcDescToMemoryType (
   UINTN       Index;
   EFI_STATUS  Status = EFI_INVALID_PARAMETER;
 
-  if (MemoryTypeDesc != NULL && MemoryType !=NULL) {
+  if ((MemoryTypeDesc != NULL) && (MemoryType != NULL)) {
     for (Index = 0; Index < OC_MEMORY_TYPE_DESC_COUNT; Index++) {
       if (AsciiStrCmp (MemoryTypeDesc, OcMemoryTypeString[Index].Name) == 0) {
-        Status = EFI_SUCCESS;
-        *MemoryType=OcMemoryTypeString[Index].Type;
+        Status      = EFI_SUCCESS;
+        *MemoryType = OcMemoryTypeString[Index].Type;
         break;
       }
     }
+
     if (EFI_ERROR (Status)) {
       Status = EFI_NOT_FOUND;
     }
@@ -113,30 +114,30 @@ OcDescToMemoryType (
 
 EFI_MEMORY_DESCRIPTOR *
 OcGetCurrentMemoryMap (
-  OUT UINTN   *MemoryMapSize,
-  OUT UINTN   *DescriptorSize,
-  OUT UINTN   *MapKey                 OPTIONAL,
-  OUT UINT32  *DescriptorVersion      OPTIONAL,
-  OUT UINTN   *OriginalMemoryMapSize  OPTIONAL,
-  IN  BOOLEAN IncludeSplitSpace
+  OUT UINTN    *MemoryMapSize,
+  OUT UINTN    *DescriptorSize,
+  OUT UINTN    *MapKey                 OPTIONAL,
+  OUT UINT32   *DescriptorVersion      OPTIONAL,
+  OUT UINTN    *OriginalMemoryMapSize  OPTIONAL,
+  IN  BOOLEAN  IncludeSplitSpace
   )
 {
-  EFI_MEMORY_DESCRIPTOR   *MemoryMap;
-  EFI_STATUS              Status;
-  UINTN                   MapKeyValue;
-  UINTN                   OriginalSize;
-  UINTN                   ExtraSize;
-  UINT32                  DescriptorVersionValue;
-  BOOLEAN                 Result;
+  EFI_MEMORY_DESCRIPTOR  *MemoryMap;
+  EFI_STATUS             Status;
+  UINTN                  MapKeyValue;
+  UINTN                  OriginalSize;
+  UINTN                  ExtraSize;
+  UINT32                 DescriptorVersionValue;
+  BOOLEAN                Result;
 
   *MemoryMapSize = 0;
-  Status = gBS->GetMemoryMap (
-    MemoryMapSize,
-    NULL,
-    &MapKeyValue,
-    DescriptorSize,
-    &DescriptorVersionValue
-    );
+  Status         = gBS->GetMemoryMap (
+                          MemoryMapSize,
+                          NULL,
+                          &MapKeyValue,
+                          DescriptorSize,
+                          &DescriptorVersionValue
+                          );
 
   if (Status != EFI_BUFFER_TOO_SMALL) {
     return NULL;
@@ -153,28 +154,28 @@ OcGetCurrentMemoryMap (
   // DescriptorSize.
   //
   Result = OcOverflowAddUN (
-    *MemoryMapSize,
-    MAX (*DescriptorSize + ExtraSize, 1024 + ExtraSize),
-    MemoryMapSize
-    );
+             *MemoryMapSize,
+             MAX (*DescriptorSize + ExtraSize, 1024 + ExtraSize),
+             MemoryMapSize
+             );
 
   if (Result) {
     return NULL;
   }
 
   OriginalSize = *MemoryMapSize;
-  MemoryMap = AllocatePool (OriginalSize);
+  MemoryMap    = AllocatePool (OriginalSize);
   if (MemoryMap == NULL) {
     return NULL;
   }
 
   Status = gBS->GetMemoryMap (
-    MemoryMapSize,
-    MemoryMap,
-    &MapKeyValue,
-    DescriptorSize,
-    &DescriptorVersionValue
-    );
+                  MemoryMapSize,
+                  MemoryMap,
+                  &MapKeyValue,
+                  DescriptorSize,
+                  &DescriptorVersionValue
+                  );
 
   if (EFI_ERROR (Status)) {
     FreePool (MemoryMap);
@@ -198,17 +199,17 @@ OcGetCurrentMemoryMap (
 
 EFI_STATUS
 OcGetCurrentMemoryMapAlloc (
-     OUT UINTN                  *MemoryMapSize,
-     OUT EFI_MEMORY_DESCRIPTOR  **MemoryMap,
-     OUT UINTN                  *MapKey,
-     OUT UINTN                  *DescriptorSize,
-     OUT UINT32                 *DescriptorVersion,
-  IN     EFI_GET_MEMORY_MAP     GetMemoryMap  OPTIONAL,
-  IN OUT EFI_PHYSICAL_ADDRESS   *TopMemory  OPTIONAL
+  OUT UINTN                    *MemoryMapSize,
+  OUT EFI_MEMORY_DESCRIPTOR    **MemoryMap,
+  OUT UINTN                    *MapKey,
+  OUT UINTN                    *DescriptorSize,
+  OUT UINT32                   *DescriptorVersion,
+  IN     EFI_GET_MEMORY_MAP    GetMemoryMap  OPTIONAL,
+  IN OUT EFI_PHYSICAL_ADDRESS  *TopMemory  OPTIONAL
   )
 {
-  EFI_STATUS           Status;
-  EFI_PHYSICAL_ADDRESS MemoryMapAlloc;
+  EFI_STATUS            Status;
+  EFI_PHYSICAL_ADDRESS  MemoryMapAlloc;
 
   *MemoryMapSize = 0;
   *MemoryMap     = NULL;
@@ -218,12 +219,12 @@ OcGetCurrentMemoryMapAlloc (
   }
 
   Status = GetMemoryMap (
-    MemoryMapSize,
-    *MemoryMap,
-    MapKey,
-    DescriptorSize,
-    DescriptorVersion
-    );
+             MemoryMapSize,
+             *MemoryMap,
+             MapKey,
+             DescriptorSize,
+             DescriptorVersion
+             );
 
   if (Status != EFI_BUFFER_TOO_SMALL) {
     DEBUG ((DEBUG_INFO, "OCMM: Insane GetMemoryMap %r\n", Status));
@@ -245,13 +246,13 @@ OcGetCurrentMemoryMapAlloc (
       *TopMemory     = EFI_SIZE_TO_PAGES (*MemoryMapSize);
 
       Status = OcAllocatePagesFromTop (
-        EfiBootServicesData,
-        (UINTN) *TopMemory,
-        &MemoryMapAlloc,
-        GetMemoryMap,
-        NULL,
-        NULL
-        );
+                 EfiBootServicesData,
+                 (UINTN)*TopMemory,
+                 &MemoryMapAlloc,
+                 GetMemoryMap,
+                 NULL,
+                 NULL
+                 );
 
       if (EFI_ERROR (Status)) {
         DEBUG ((DEBUG_INFO, "OCMM: Temp memory map allocation from top failure - %r\n", Status));
@@ -259,7 +260,7 @@ OcGetCurrentMemoryMapAlloc (
         return Status;
       }
 
-      *MemoryMap = (EFI_MEMORY_DESCRIPTOR *)(UINTN) MemoryMapAlloc;
+      *MemoryMap = (EFI_MEMORY_DESCRIPTOR *)(UINTN)MemoryMapAlloc;
     } else {
       *MemoryMap = AllocatePool (*MemoryMapSize);
       if (*MemoryMap == NULL) {
@@ -269,19 +270,19 @@ OcGetCurrentMemoryMapAlloc (
     }
 
     Status = GetMemoryMap (
-      MemoryMapSize,
-      *MemoryMap,
-      MapKey,
-      DescriptorSize,
-      DescriptorVersion
-      );
+               MemoryMapSize,
+               *MemoryMap,
+               MapKey,
+               DescriptorSize,
+               DescriptorVersion
+               );
 
     if (EFI_ERROR (Status)) {
       if (TopMemory != NULL) {
         gBS->FreePages (
-          (EFI_PHYSICAL_ADDRESS) ((UINTN) *MemoryMap),
-          (UINTN) *TopMemory
-          );
+               (EFI_PHYSICAL_ADDRESS)((UINTN)*MemoryMap),
+               (UINTN)*TopMemory
+               );
       } else {
         FreePool (*MemoryMap);
       }
@@ -304,27 +305,27 @@ OcSortMemoryMap (
   IN UINTN                      DescriptorSize
   )
 {
-  EFI_MEMORY_DESCRIPTOR       *MemoryMapEntry;
-  EFI_MEMORY_DESCRIPTOR       *NextMemoryMapEntry;
-  EFI_MEMORY_DESCRIPTOR       *MemoryMapEnd;
-  EFI_MEMORY_DESCRIPTOR       TempMemoryMap;
+  EFI_MEMORY_DESCRIPTOR  *MemoryMapEntry;
+  EFI_MEMORY_DESCRIPTOR  *NextMemoryMapEntry;
+  EFI_MEMORY_DESCRIPTOR  *MemoryMapEnd;
+  EFI_MEMORY_DESCRIPTOR  TempMemoryMap;
 
-  MemoryMapEntry = MemoryMap;
+  MemoryMapEntry     = MemoryMap;
   NextMemoryMapEntry = NEXT_MEMORY_DESCRIPTOR (MemoryMapEntry, DescriptorSize);
-  MemoryMapEnd = (EFI_MEMORY_DESCRIPTOR *) ((UINT8 *) MemoryMap + MemoryMapSize);
+  MemoryMapEnd       = (EFI_MEMORY_DESCRIPTOR *)((UINT8 *)MemoryMap + MemoryMapSize);
   while (MemoryMapEntry < MemoryMapEnd) {
     while (NextMemoryMapEntry < MemoryMapEnd) {
       if (MemoryMapEntry->PhysicalStart > NextMemoryMapEntry->PhysicalStart) {
-        CopyMem (&TempMemoryMap, MemoryMapEntry, sizeof(EFI_MEMORY_DESCRIPTOR));
-        CopyMem (MemoryMapEntry, NextMemoryMapEntry, sizeof(EFI_MEMORY_DESCRIPTOR));
-        CopyMem (NextMemoryMapEntry, &TempMemoryMap, sizeof(EFI_MEMORY_DESCRIPTOR));
+        CopyMem (&TempMemoryMap, MemoryMapEntry, sizeof (EFI_MEMORY_DESCRIPTOR));
+        CopyMem (MemoryMapEntry, NextMemoryMapEntry, sizeof (EFI_MEMORY_DESCRIPTOR));
+        CopyMem (NextMemoryMapEntry, &TempMemoryMap, sizeof (EFI_MEMORY_DESCRIPTOR));
       }
 
       NextMemoryMapEntry = NEXT_MEMORY_DESCRIPTOR (NextMemoryMapEntry, DescriptorSize);
     }
 
-    MemoryMapEntry      = NEXT_MEMORY_DESCRIPTOR (MemoryMapEntry, DescriptorSize);
-    NextMemoryMapEntry  = NEXT_MEMORY_DESCRIPTOR (MemoryMapEntry, DescriptorSize);
+    MemoryMapEntry     = NEXT_MEMORY_DESCRIPTOR (MemoryMapEntry, DescriptorSize);
+    NextMemoryMapEntry = NEXT_MEMORY_DESCRIPTOR (MemoryMapEntry, DescriptorSize);
   }
 }
 
@@ -335,14 +336,14 @@ OcShrinkMemoryMap (
   IN     UINTN                  DescriptorSize
   )
 {
-  EFI_STATUS              Status;
-  UINTN                   SizeFromDescToEnd;
-  UINT64                  Bytes;
-  EFI_MEMORY_DESCRIPTOR   *PrevDesc;
-  EFI_MEMORY_DESCRIPTOR   *Desc;
-  BOOLEAN                 CanBeJoinedFree;
-  BOOLEAN                 CanBeJoinedRt;
-  BOOLEAN                 HasEntriesToRemove;
+  EFI_STATUS             Status;
+  UINTN                  SizeFromDescToEnd;
+  UINT64                 Bytes;
+  EFI_MEMORY_DESCRIPTOR  *PrevDesc;
+  EFI_MEMORY_DESCRIPTOR  *Desc;
+  BOOLEAN                CanBeJoinedFree;
+  BOOLEAN                CanBeJoinedRt;
+  BOOLEAN                HasEntriesToRemove;
 
   Status = EFI_NOT_FOUND;
 
@@ -357,36 +358,37 @@ OcShrinkMemoryMap (
   HasEntriesToRemove = FALSE;
 
   while (SizeFromDescToEnd > 0) {
-    Bytes = EFI_PAGES_TO_SIZE (PrevDesc->NumberOfPages);
+    Bytes           = EFI_PAGES_TO_SIZE (PrevDesc->NumberOfPages);
     CanBeJoinedFree = FALSE;
     CanBeJoinedRt   = FALSE;
-    if (Desc->Attribute == PrevDesc->Attribute
-      && PrevDesc->PhysicalStart + Bytes == Desc->PhysicalStart) {
+    if (  (Desc->Attribute == PrevDesc->Attribute)
+       && (PrevDesc->PhysicalStart + Bytes == Desc->PhysicalStart))
+    {
       //
       // It *should* be safe to join this with conventional memory, because the firmware should not use
       // GetMemoryMap for allocation, and for the kernel it does not matter, since it joins them.
       //
       CanBeJoinedFree = (
-          Desc->Type == EfiBootServicesCode
-          || Desc->Type == EfiBootServicesData
-          || Desc->Type == EfiConventionalMemory
-          || Desc->Type == EfiLoaderCode
-          || Desc->Type == EfiLoaderData
-        ) && (
-          PrevDesc->Type == EfiBootServicesCode
-          || PrevDesc->Type == EfiBootServicesData
-          || PrevDesc->Type == EfiConventionalMemory
-          || PrevDesc->Type == EfiLoaderCode
-          || PrevDesc->Type == EfiLoaderData
-        );
+                           Desc->Type == EfiBootServicesCode
+                        || Desc->Type == EfiBootServicesData
+                        || Desc->Type == EfiConventionalMemory
+                        || Desc->Type == EfiLoaderCode
+                        || Desc->Type == EfiLoaderData
+                           ) && (
+                                   PrevDesc->Type == EfiBootServicesCode
+                                || PrevDesc->Type == EfiBootServicesData
+                                || PrevDesc->Type == EfiConventionalMemory
+                                || PrevDesc->Type == EfiLoaderCode
+                                || PrevDesc->Type == EfiLoaderData
+                                   );
 
       CanBeJoinedRt = (
-          Desc->Type == EfiRuntimeServicesCode
-          && PrevDesc->Type == EfiRuntimeServicesCode
-        ) || (
-          Desc->Type == EfiRuntimeServicesData
-          && PrevDesc->Type == EfiRuntimeServicesData
-        );
+                         Desc->Type == EfiRuntimeServicesCode
+                      && PrevDesc->Type == EfiRuntimeServicesCode
+                         ) || (
+                                 Desc->Type == EfiRuntimeServicesData
+                              && PrevDesc->Type == EfiRuntimeServicesData
+                                 );
     }
 
     if (CanBeJoinedFree) {
@@ -413,12 +415,12 @@ OcShrinkMemoryMap (
         // we need to copy [Desc, end of list] to PrevDesc + 1
         //
         CopyMem (PrevDesc, Desc, SizeFromDescToEnd);
-        Desc = PrevDesc;
+        Desc               = PrevDesc;
         HasEntriesToRemove = FALSE;
       }
     }
 
-    Desc = NEXT_MEMORY_DESCRIPTOR (Desc, DescriptorSize);
+    Desc               = NEXT_MEMORY_DESCRIPTOR (Desc, DescriptorSize);
     SizeFromDescToEnd -= DescriptorSize;
   }
 
@@ -439,12 +441,12 @@ OcDeduplicateDescriptors (
   IN     UINTN                  DescriptorSize
   )
 {
-  EFI_STATUS              Status;
-  UINTN                   EntriesToGo;
-  EFI_MEMORY_DESCRIPTOR   *PrevDesc;
-  EFI_MEMORY_DESCRIPTOR   *Desc;
-  BOOLEAN                 IsDuplicate;
-  BOOLEAN                 HasEntriesToRemove;
+  EFI_STATUS             Status;
+  UINTN                  EntriesToGo;
+  EFI_MEMORY_DESCRIPTOR  *PrevDesc;
+  EFI_MEMORY_DESCRIPTOR  *Desc;
+  BOOLEAN                IsDuplicate;
+  BOOLEAN                HasEntriesToRemove;
 
   Status = EFI_NOT_FOUND;
 
@@ -460,14 +462,14 @@ OcDeduplicateDescriptors (
 
   while (EntriesToGo > 0) {
     IsDuplicate = Desc->PhysicalStart == PrevDesc->PhysicalStart
-      && Desc->NumberOfPages == PrevDesc->NumberOfPages;
+                  && Desc->NumberOfPages == PrevDesc->NumberOfPages;
 
     if (IsDuplicate) {
       //
       // Two entries are duplicate, remove them.
       //
-      Status               = EFI_SUCCESS;
-      HasEntriesToRemove   = TRUE;
+      Status             = EFI_SUCCESS;
+      HasEntriesToRemove = TRUE;
     } else {
       //
       // Not duplicates - we need to move to next
@@ -480,7 +482,7 @@ OcDeduplicateDescriptors (
         // we need to copy [Desc, end of list] to PrevDesc + 1.
         //
         CopyMem (PrevDesc, Desc, EntriesToGo * DescriptorSize);
-        Desc = PrevDesc;
+        Desc               = PrevDesc;
         HasEntriesToRemove = FALSE;
       }
     }
@@ -524,9 +526,9 @@ OcUpdateDescriptors (
     }
 
     MemoryMap = NEXT_MEMORY_DESCRIPTOR (
-      MemoryMap,
-      DescriptorSize
-      );
+                  MemoryMap,
+                  DescriptorSize
+                  );
   }
 
   return EFI_NOT_FOUND;

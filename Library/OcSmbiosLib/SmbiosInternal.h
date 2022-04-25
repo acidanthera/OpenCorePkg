@@ -22,12 +22,12 @@
 //
 // 2 zero bytes required in the end of each table.
 //
-#define SMBIOS_STRUCTURE_TERMINATOR_SIZE 2
+#define SMBIOS_STRUCTURE_TERMINATOR_SIZE  2
 
 //
 // Max memory mapping slots
 //
-#define OC_SMBIOS_MAX_MAPPING 512
+#define OC_SMBIOS_MAX_MAPPING  512
 
 //
 // According to SMBIOS spec (3.2.0, page 26) SMBIOS handle is a number from 0 to 0xFF00.
@@ -104,8 +104,8 @@ STATIC_ASSERT (OcSmbiosAutomaticHandle > OcSmbiosLastReservedHandle, "Inconsiste
 // Map old handles to new ones.
 //
 typedef struct OC_SMBIOS_MAPPING_ {
-  SMBIOS_HANDLE  Old;
-  SMBIOS_HANDLE  New;
+  SMBIOS_HANDLE    Old;
+  SMBIOS_HANDLE    New;
 } OC_SMBIOS_MAPPING;
 
 /**
@@ -167,7 +167,6 @@ VOID
 SmbiosFinaliseStruct (
   IN OUT OC_SMBIOS_TABLE  *Table
   );
-
 
 /**
   Obtain string from previously validated structure.

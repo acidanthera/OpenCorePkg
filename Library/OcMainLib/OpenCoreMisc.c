@@ -68,12 +68,12 @@ OcStoreLoadPath (
   }
 
   Status = OcSetSystemVariable (
-    OC_LOG_VARIABLE_PATH,
-    OPEN_CORE_NVRAM_ATTR,
-    AsciiStrSize (OutPath),
-    OutPath,
-    NULL
-    );
+             OC_LOG_VARIABLE_PATH,
+             OPEN_CORE_NVRAM_ATTR,
+             AsciiStrSize (OutPath),
+             OutPath,
+             NULL
+             );
 
   DEBUG ((
     EFI_ERROR (Status) ? DEBUG_WARN : DEBUG_INFO,
@@ -114,12 +114,12 @@ ProduceDebugReport (
   }
 
   Status = OcSafeFileOpen (
-    Fs,
-    &SysReport,
-    L"SysReport",
-    EFI_FILE_MODE_READ | EFI_FILE_MODE_WRITE,
-    EFI_FILE_DIRECTORY
-    );
+             Fs,
+             &SysReport,
+             L"SysReport",
+             EFI_FILE_MODE_READ | EFI_FILE_MODE_WRITE,
+             EFI_FILE_DIRECTORY
+             );
   if (!EFI_ERROR (Status)) {
     DEBUG ((DEBUG_INFO, "OC: Report is already created, skipping\n"));
     SysReport->Close (SysReport);
@@ -128,12 +128,12 @@ ProduceDebugReport (
   }
 
   Status = OcSafeFileOpen (
-    Fs,
-    &SysReport,
-    L"SysReport",
-    EFI_FILE_MODE_READ | EFI_FILE_MODE_WRITE | EFI_FILE_MODE_CREATE,
-    EFI_FILE_DIRECTORY
-    );
+             Fs,
+             &SysReport,
+             L"SysReport",
+             EFI_FILE_MODE_READ | EFI_FILE_MODE_WRITE | EFI_FILE_MODE_CREATE,
+             EFI_FILE_DIRECTORY
+             );
   if (EFI_ERROR (Status)) {
     DEBUG ((DEBUG_INFO, "OC: Cannot create SysReport - %r\n", Status));
     Fs->Close (Fs);
@@ -141,73 +141,78 @@ ProduceDebugReport (
   }
 
   Status = OcSafeFileOpen (
-    SysReport,
-    &SubReport,
-    L"ACPI",
-    EFI_FILE_MODE_READ | EFI_FILE_MODE_WRITE | EFI_FILE_MODE_CREATE,
-    EFI_FILE_DIRECTORY
-    );
+             SysReport,
+             &SubReport,
+             L"ACPI",
+             EFI_FILE_MODE_READ | EFI_FILE_MODE_WRITE | EFI_FILE_MODE_CREATE,
+             EFI_FILE_DIRECTORY
+             );
   if (!EFI_ERROR (Status)) {
     DEBUG ((DEBUG_INFO, "OC: Dumping ACPI for report...\n"));
     Status = AcpiDumpTables (SubReport);
     SubReport->Close (SubReport);
   }
+
   DEBUG ((DEBUG_INFO, "OC: ACPI dumping - %r\n", Status));
 
   Status = OcSafeFileOpen (
-    SysReport,
-    &SubReport,
-    L"SMBIOS",
-    EFI_FILE_MODE_READ | EFI_FILE_MODE_WRITE | EFI_FILE_MODE_CREATE,
-    EFI_FILE_DIRECTORY
-    );
+             SysReport,
+             &SubReport,
+             L"SMBIOS",
+             EFI_FILE_MODE_READ | EFI_FILE_MODE_WRITE | EFI_FILE_MODE_CREATE,
+             EFI_FILE_DIRECTORY
+             );
   if (!EFI_ERROR (Status)) {
     DEBUG ((DEBUG_INFO, "OC: Dumping SMBIOS for report...\n"));
     Status = OcSmbiosDump (SubReport);
     SubReport->Close (SubReport);
   }
+
   DEBUG ((DEBUG_INFO, "OC: SMBIOS dumping - %r\n", Status));
 
   Status = OcSafeFileOpen (
-    SysReport,
-    &SubReport,
-    L"Audio",
-    EFI_FILE_MODE_READ | EFI_FILE_MODE_WRITE | EFI_FILE_MODE_CREATE,
-    EFI_FILE_DIRECTORY
-    );
+             SysReport,
+             &SubReport,
+             L"Audio",
+             EFI_FILE_MODE_READ | EFI_FILE_MODE_WRITE | EFI_FILE_MODE_CREATE,
+             EFI_FILE_DIRECTORY
+             );
   if (!EFI_ERROR (Status)) {
     DEBUG ((DEBUG_INFO, "OC: Dumping audio for report...\n"));
     Status = OcAudioDump (SubReport);
     SubReport->Close (SubReport);
   }
+
   DEBUG ((DEBUG_INFO, "OC: Audio dumping - %r\n", Status));
 
   Status = OcSafeFileOpen (
-    SysReport,
-    &SubReport,
-    L"CPU",
-    EFI_FILE_MODE_READ | EFI_FILE_MODE_WRITE | EFI_FILE_MODE_CREATE,
-    EFI_FILE_DIRECTORY
-    );
+             SysReport,
+             &SubReport,
+             L"CPU",
+             EFI_FILE_MODE_READ | EFI_FILE_MODE_WRITE | EFI_FILE_MODE_CREATE,
+             EFI_FILE_DIRECTORY
+             );
   if (!EFI_ERROR (Status)) {
     DEBUG ((DEBUG_INFO, "OC: Dumping CPUInfo for report...\n"));
     Status = OcCpuInfoDump (&CpuInfo, SubReport);
     SubReport->Close (SubReport);
   }
+
   DEBUG ((DEBUG_INFO, "OC: CPUInfo dumping - %r\n", Status));
 
   Status = OcSafeFileOpen (
-    SysReport,
-    &SubReport,
-    L"PCI",
-    EFI_FILE_MODE_READ | EFI_FILE_MODE_WRITE | EFI_FILE_MODE_CREATE,
-    EFI_FILE_DIRECTORY
-    );
+             SysReport,
+             &SubReport,
+             L"PCI",
+             EFI_FILE_MODE_READ | EFI_FILE_MODE_WRITE | EFI_FILE_MODE_CREATE,
+             EFI_FILE_DIRECTORY
+             );
   if (!EFI_ERROR (Status)) {
     DEBUG ((DEBUG_INFO, "OC: Dumping PCIInfo for report...\n"));
     Status = OcPciInfoDump (SubReport);
     SubReport->Close (SubReport);
   }
+
   DEBUG ((DEBUG_INFO, "OC: PCIInfo dumping - %r\n", Status));
 
   SysReport->Close (SysReport);
@@ -220,24 +225,24 @@ STATIC
 EFI_STATUS
 EFIAPI
 OcToolLoadEntry (
-  IN  OC_STORAGE_CONTEXT          *Storage,
-  IN  OC_BOOT_ENTRY               *ChosenEntry,
-  OUT VOID                        **Data,
-  OUT UINT32                      *DataSize,
-  OUT EFI_DEVICE_PATH_PROTOCOL    **DevicePath,
-  OUT EFI_HANDLE                  *StorageHandle,
-  OUT EFI_DEVICE_PATH_PROTOCOL    **StoragePath
+  IN  OC_STORAGE_CONTEXT        *Storage,
+  IN  OC_BOOT_ENTRY             *ChosenEntry,
+  OUT VOID                      **Data,
+  OUT UINT32                    *DataSize,
+  OUT EFI_DEVICE_PATH_PROTOCOL  **DevicePath,
+  OUT EFI_HANDLE                *StorageHandle,
+  OUT EFI_DEVICE_PATH_PROTOCOL  **StoragePath
   )
 {
-  EFI_STATUS          Status;
-  CHAR16              ToolPath[OC_STORAGE_SAFE_PATH_MAX];
+  EFI_STATUS  Status;
+  CHAR16      ToolPath[OC_STORAGE_SAFE_PATH_MAX];
 
   Status = OcUnicodeSafeSPrint (
-    ToolPath,
-    sizeof (ToolPath),
-    OPEN_CORE_TOOL_PATH "%s",
-    ChosenEntry->PathName
-    );
+             ToolPath,
+             sizeof (ToolPath),
+             OPEN_CORE_TOOL_PATH "%s",
+             ChosenEntry->PathName
+             );
   if (EFI_ERROR (Status)) {
     DEBUG ((
       DEBUG_ERROR,
@@ -249,10 +254,10 @@ OcToolLoadEntry (
   }
 
   *Data = OcStorageReadFileUnicode (
-    Storage,
-    ToolPath,
-    DataSize
-    );
+            Storage,
+            ToolPath,
+            DataSize
+            );
   if (*Data == NULL) {
     DEBUG ((
       DEBUG_WARN,
@@ -263,13 +268,13 @@ OcToolLoadEntry (
   }
 
   Status = OcStorageGetInfo (
-    Storage,
-    ToolPath,
-    DevicePath,
-    StorageHandle,
-    StoragePath,
-    ChosenEntry->ExposeDevicePath
-    );
+             Storage,
+             ToolPath,
+             DevicePath,
+             StorageHandle,
+             StoragePath,
+             ChosenEntry->ExposeDevicePath
+             );
   if (!EFI_ERROR (Status)) {
     DEBUG ((DEBUG_INFO, "OC: Returning tool %s\n", ToolPath));
     DebugPrintDevicePath (DEBUG_INFO, "OC: Tool path", *DevicePath);
@@ -303,18 +308,18 @@ SavePanicLog (
       PanicLogName,
       sizeof (PanicLogName),
       L"panic-%04u-%02u-%02u-%02u%02u%02u.txt",
-      (UINT32) PanicLogDate.Year,
-      (UINT32) PanicLogDate.Month,
-      (UINT32) PanicLogDate.Day,
-      (UINT32) PanicLogDate.Hour,
-      (UINT32) PanicLogDate.Minute,
-      (UINT32) PanicLogDate.Second
+      (UINT32)PanicLogDate.Year,
+      (UINT32)PanicLogDate.Month,
+      (UINT32)PanicLogDate.Day,
+      (UINT32)PanicLogDate.Hour,
+      (UINT32)PanicLogDate.Minute,
+      (UINT32)PanicLogDate.Second
       );
 
     Status = Storage->FileSystem->OpenVolume (
-      Storage->FileSystem,
-      &RootFs
-      );
+                                    Storage->FileSystem,
+                                    &RootFs
+                                    );
     if (!EFI_ERROR (Status)) {
       Status = OcSetFileData (RootFs, PanicLogName, PanicLog, PanicLogSize);
       RootFs->Close (RootFs);
@@ -347,7 +352,7 @@ OcMiscGetVersionString (
     "OPEN_CORE_TARGET must follow XYZ format, where XYZ is build target."
     );
 
-  STATIC CHAR8 mOpenCoreVersion[] = {
+  STATIC CHAR8  mOpenCoreVersion[] = {
     /* [2]:[0]    = */ OPEN_CORE_TARGET
     /* [3]        = */ "-"
     /* [6]:[4]    = */ "XXX"
@@ -357,10 +362,9 @@ OcMiscGetVersionString (
     /* [17]:[16]  = */ "DD"
   };
 
-  STATIC BOOLEAN mOpenCoreVersionReady;
+  STATIC BOOLEAN  mOpenCoreVersionReady;
 
   if (!mOpenCoreVersionReady) {
-
     mOpenCoreVersion[4] = OPEN_CORE_VERSION[0];
     mOpenCoreVersion[5] = OPEN_CORE_VERSION[2];
     mOpenCoreVersion[6] = OPEN_CORE_VERSION[4];
@@ -397,24 +401,24 @@ OcMiscGetVersionString (
 
 EFI_STATUS
 OcMiscEarlyInit (
-  IN  OC_STORAGE_CONTEXT *Storage,
-  OUT OC_GLOBAL_CONFIG   *Config,
-  IN  OC_RSA_PUBLIC_KEY  *VaultKey  OPTIONAL
+  IN  OC_STORAGE_CONTEXT  *Storage,
+  OUT OC_GLOBAL_CONFIG    *Config,
+  IN  OC_RSA_PUBLIC_KEY   *VaultKey  OPTIONAL
   )
 {
-  EFI_STATUS                Status;
-  CHAR8                     *ConfigData;
-  UINT32                    ConfigDataSize;
-  EFI_TIME                  BootTime;
-  CONST CHAR8               *AsciiVault;
-  OCS_VAULT_MODE            Vault;
-  UINTN                     PciDeviceInfoSize;
+  EFI_STATUS      Status;
+  CHAR8           *ConfigData;
+  UINT32          ConfigDataSize;
+  EFI_TIME        BootTime;
+  CONST CHAR8     *AsciiVault;
+  OCS_VAULT_MODE  Vault;
+  UINTN           PciDeviceInfoSize;
 
   ConfigData = OcStorageReadFileUnicode (
-    Storage,
-    OPEN_CORE_CONFIG_PATH,
-    &ConfigDataSize
-    );
+                 Storage,
+                 OPEN_CORE_CONFIG_PATH,
+                 &ConfigDataSize
+                 );
 
   if (ConfigData != NULL) {
     DEBUG ((DEBUG_INFO, "OC: Loaded configuration of %u bytes\n", ConfigDataSize));
@@ -451,13 +455,13 @@ OcMiscEarlyInit (
   //
   // Sanity check that the configuration is adequate.
   //
-  if (!Storage->HasVault && Vault >= OcsVaultBasic) {
+  if (!Storage->HasVault && (Vault >= OcsVaultBasic)) {
     DEBUG ((DEBUG_ERROR, "OC: Configuration requires vault but no vault provided!\n"));
     CpuDeadLoop ();
     return EFI_SECURITY_VIOLATION; ///< Should be unreachable.
   }
 
-  if (VaultKey == NULL && Vault >= OcsVaultSecure) {
+  if ((VaultKey == NULL) && (Vault >= OcsVaultSecure)) {
     DEBUG ((DEBUG_ERROR, "OC: Configuration requires signed vault but no public key provided!\n"));
     CpuDeadLoop ();
     return EFI_SECURITY_VIOLATION; ///< Should be unreachable.
@@ -503,8 +507,8 @@ OcMiscEarlyInit (
     Config->Misc.Debug.Target,
     OC_BLOB_GET (&Config->Misc.Debug.LogModules),
     Config->Misc.Debug.DisplayDelay,
-    (UINTN) Config->Misc.Debug.DisplayLevel,
-    (UINTN) Config->Misc.Security.HaltLevel,
+    (UINTN)Config->Misc.Debug.DisplayLevel,
+    (UINTN)Config->Misc.Security.HaltLevel,
     OPEN_CORE_LOG_PREFIX_PATH,
     Storage->FileSystem
     );
@@ -550,7 +554,6 @@ OcMiscEarlyInit (
 
   @returns  BootProtect bitmask.
 **/
-
 STATIC
 CHAR16 *
 BuildLauncherPath (
@@ -559,8 +562,8 @@ BuildLauncherPath (
   OUT  CONST CHAR16  **MatchSuffix
   )
 {
-  CHAR16        *BootstrapPath;
-  UINTN         BootstrapSize;
+  CHAR16  *BootstrapPath;
+  UINTN   BootstrapSize;
 
   //
   // MatchSuffix allows us to reduce option duplication when switching between
@@ -574,6 +577,7 @@ BuildLauncherPath (
     if (BootstrapPath == NULL) {
       return NULL;
     }
+
     UnicodeSPrint (BootstrapPath, BootstrapSize, L"%s\\%s", RootPath, OPEN_CORE_APP_PATH);
     *MatchSuffix = OPEN_CORE_APP_PATH;
   } else {
@@ -581,6 +585,7 @@ BuildLauncherPath (
     if (BootstrapPath == NULL) {
       return NULL;
     }
+
     *MatchSuffix = BootstrapPath;
   }
 
@@ -615,8 +620,8 @@ OcMiscMiddleInit (
   }
 
   BootProtectFlag = 0;
-  LauncherOption = OC_BLOB_GET (&Config->Misc.Boot.LauncherOption);
-  LauncherPath = OC_BLOB_GET (&Config->Misc.Boot.LauncherPath);
+  LauncherOption  = OC_BLOB_GET (&Config->Misc.Boot.LauncherOption);
+  LauncherPath    = OC_BLOB_GET (&Config->Misc.Boot.LauncherPath);
   DEBUG ((
     DEBUG_INFO,
     "OC: StorageHandle %p with %a LauncherOption pointing to %a\n",
@@ -654,10 +659,10 @@ OcMiscMiddleInit (
     //
     if (Signature != NULL) {
       Status = gBS->HandleProtocol (
-        StorageHandle,
-        &gEfiSimpleFileSystemProtocolGuid,
-        (VOID **) &FileSystem
-        );
+                      StorageHandle,
+                      &gEfiSimpleFileSystemProtocolGuid,
+                      (VOID **)&FileSystem
+                      );
       if (!EFI_ERROR (Status)) {
         LauncherData = OcReadFile (FileSystem, FullLauncherPath, &LauncherSize, BASE_32MB);
         if (LauncherData != NULL) {
@@ -679,7 +684,6 @@ OcMiscMiddleInit (
     FreePool (FullLauncherPath);
   }
 
-
   //
   // Inform about boot protection.
   //
@@ -694,8 +698,8 @@ OcMiscMiddleInit (
 
 EFI_STATUS
 OcMiscLateInit (
-  IN  OC_STORAGE_CONTEXT        *Storage,
-  IN  OC_GLOBAL_CONFIG          *Config
+  IN  OC_STORAGE_CONTEXT  *Storage,
+  IN  OC_GLOBAL_CONFIG    *Config
   )
 {
   EFI_STATUS   HibernateStatus;
@@ -738,39 +742,39 @@ OcMiscLateInit (
 
 VOID
 OcMiscLoadSystemReport (
-  IN  OC_GLOBAL_CONFIG          *Config,
-  IN  EFI_HANDLE                LoadHandle OPTIONAL
+  IN  OC_GLOBAL_CONFIG  *Config,
+  IN  EFI_HANDLE        LoadHandle OPTIONAL
   )
 {
-  if (LoadHandle != NULL && Config->Misc.Debug.SysReport) {
+  if ((LoadHandle != NULL) && Config->Misc.Debug.SysReport) {
     ProduceDebugReport (LoadHandle);
   }
 }
 
 VOID
 OcMiscBoot (
-  IN  OC_STORAGE_CONTEXT        *Storage,
-  IN  OC_GLOBAL_CONFIG          *Config,
-  IN  OC_PRIVILEGE_CONTEXT      *Privilege OPTIONAL,
-  IN  OC_IMAGE_START            StartImage,
-  IN  BOOLEAN                   CustomBootGuid,
-  IN  EFI_HANDLE                LoadHandle
+  IN  OC_STORAGE_CONTEXT    *Storage,
+  IN  OC_GLOBAL_CONFIG      *Config,
+  IN  OC_PRIVILEGE_CONTEXT  *Privilege OPTIONAL,
+  IN  OC_IMAGE_START        StartImage,
+  IN  BOOLEAN               CustomBootGuid,
+  IN  EFI_HANDLE            LoadHandle
   )
 {
-  EFI_STATUS             Status;
-  OC_PICKER_CONTEXT      *Context;
-  OC_PICKER_CMD          PickerCommand;
-  OC_PICKER_MODE         PickerMode;
-  OC_DMG_LOADING_SUPPORT DmgLoading;
-  UINTN                  ContextSize;
-  UINT32                 Index;
-  UINT32                 EntryIndex;
-  OC_INTERFACE_PROTOCOL  *Interface;
-  UINTN                  BlessOverrideSize;
-  CHAR16                 **BlessOverride;
-  CONST CHAR8            *AsciiPicker;
-  CONST CHAR8            *AsciiPickerVariant;
-  CONST CHAR8            *AsciiDmg;
+  EFI_STATUS              Status;
+  OC_PICKER_CONTEXT       *Context;
+  OC_PICKER_CMD           PickerCommand;
+  OC_PICKER_MODE          PickerMode;
+  OC_DMG_LOADING_SUPPORT  DmgLoading;
+  UINTN                   ContextSize;
+  UINT32                  Index;
+  UINT32                  EntryIndex;
+  OC_INTERFACE_PROTOCOL   *Interface;
+  UINTN                   BlessOverrideSize;
+  CHAR16                  **BlessOverride;
+  CONST CHAR8             *AsciiPicker;
+  CONST CHAR8             *AsciiPickerVariant;
+  CONST CHAR8             *AsciiDmg;
 
   AsciiPicker = OC_BLOB_GET (&Config->Misc.Boot.PickerMode);
 
@@ -807,10 +811,10 @@ OcMiscBoot (
     DEBUG ((DEBUG_INFO, "OC: Handing off to external boot controller\n"));
 
     Status = gBS->LocateProtocol (
-      &gOcInterfaceProtocolGuid,
-      NULL,
-      (VOID **) &Interface
-      );
+                    &gOcInterfaceProtocolGuid,
+                    NULL,
+                    (VOID **)&Interface
+                    );
     if (!EFI_ERROR (Status)) {
       if (Interface->Revision != OC_INTERFACE_REVISION) {
         DEBUG ((
@@ -828,15 +832,17 @@ OcMiscBoot (
   } else {
     Interface = NULL;
   }
+
   //
   // Due to the file size and sanity guarantees OcXmlLib makes,
   // adding Counts cannot overflow.
   //
   if (!OcOverflowMulAddUN (
-    sizeof (OC_PICKER_ENTRY),
-    Config->Misc.Entries.Count + Config->Misc.Tools.Count,
-    sizeof (OC_PICKER_CONTEXT),
-    &ContextSize))
+         sizeof (OC_PICKER_ENTRY),
+         Config->Misc.Entries.Count + Config->Misc.Tools.Count,
+         sizeof (OC_PICKER_CONTEXT),
+         &ContextSize
+         ))
   {
     Context = AllocateZeroPool (ContextSize);
   } else {
@@ -850,9 +856,10 @@ OcMiscBoot (
 
   if (Config->Misc.BlessOverride.Count > 0) {
     if (!OcOverflowMulUN (
-      Config->Misc.BlessOverride.Count,
-      sizeof (*BlessOverride),
-      &BlessOverrideSize))
+           Config->Misc.BlessOverride.Count,
+           sizeof (*BlessOverride),
+           &BlessOverrideSize
+           ))
     {
       BlessOverride = AllocateZeroPool (BlessOverrideSize);
     } else {
@@ -876,6 +883,7 @@ OcMiscBoot (
         for (EntryIndex = 0; EntryIndex < Index; ++EntryIndex) {
           FreePool (BlessOverride[EntryIndex]);
         }
+
         FreePool (BlessOverride);
         FreePool (Context);
         DEBUG ((DEBUG_ERROR, "OC: Failed to allocate bless overrides!\n"));
@@ -887,38 +895,38 @@ OcMiscBoot (
     Context->CustomBootPaths    = BlessOverride;
   }
 
-  Context->ScanPolicy            = Config->Misc.Security.ScanPolicy;
-  Context->DmgLoading            = DmgLoading;
-  Context->TimeoutSeconds        = Config->Misc.Boot.Timeout;
-  Context->TakeoffDelay          = Config->Misc.Boot.TakeoffDelay;
-  Context->StartImage            = StartImage;
-  Context->CustomBootGuid        = CustomBootGuid;
-  Context->LoaderHandle          = LoadHandle;
-  Context->StorageContext        = Storage;
-  Context->CustomRead            = OcToolLoadEntry;
-  Context->PrivilegeContext      = Privilege;
-  Context->RequestPrivilege      = OcShowSimplePasswordRequest;
-  Context->VerifyPassword        = OcVerifyPassword;
-  Context->ShowMenu              = OcShowSimpleBootMenu;
-  Context->GetEntryLabelImage    = OcGetBootEntryLabelImage;
-  Context->GetEntryIcon          = OcGetBootEntryIcon;
-  Context->PlayAudioFile         = OcPlayAudioFile;
-  Context->PlayAudioBeep         = OcPlayAudioBeep;
-  Context->PlayAudioEntry        = OcPlayAudioEntry;
-  Context->ToggleVoiceOver       = OcToggleVoiceOver;
-  Context->PickerMode            = PickerMode;
-  Context->ConsoleAttributes     = Config->Misc.Boot.ConsoleAttributes;
-  Context->PickerAttributes      = Config->Misc.Boot.PickerAttributes;
-  Context->PickerVariant         = AsciiPickerVariant;
-  Context->BlacklistAppleUpdate  = Config->Misc.Security.BlacklistAppleUpdate;
+  Context->ScanPolicy           = Config->Misc.Security.ScanPolicy;
+  Context->DmgLoading           = DmgLoading;
+  Context->TimeoutSeconds       = Config->Misc.Boot.Timeout;
+  Context->TakeoffDelay         = Config->Misc.Boot.TakeoffDelay;
+  Context->StartImage           = StartImage;
+  Context->CustomBootGuid       = CustomBootGuid;
+  Context->LoaderHandle         = LoadHandle;
+  Context->StorageContext       = Storage;
+  Context->CustomRead           = OcToolLoadEntry;
+  Context->PrivilegeContext     = Privilege;
+  Context->RequestPrivilege     = OcShowSimplePasswordRequest;
+  Context->VerifyPassword       = OcVerifyPassword;
+  Context->ShowMenu             = OcShowSimpleBootMenu;
+  Context->GetEntryLabelImage   = OcGetBootEntryLabelImage;
+  Context->GetEntryIcon         = OcGetBootEntryIcon;
+  Context->PlayAudioFile        = OcPlayAudioFile;
+  Context->PlayAudioBeep        = OcPlayAudioBeep;
+  Context->PlayAudioEntry       = OcPlayAudioEntry;
+  Context->ToggleVoiceOver      = OcToggleVoiceOver;
+  Context->PickerMode           = PickerMode;
+  Context->ConsoleAttributes    = Config->Misc.Boot.ConsoleAttributes;
+  Context->PickerAttributes     = Config->Misc.Boot.PickerAttributes;
+  Context->PickerVariant        = AsciiPickerVariant;
+  Context->BlacklistAppleUpdate = Config->Misc.Security.BlacklistAppleUpdate;
 
   if ((Config->Misc.Security.ExposeSensitiveData & OCS_EXPOSE_VERSION_UI) != 0) {
-    Context->TitleSuffix      = OcMiscGetVersionString ();
+    Context->TitleSuffix = OcMiscGetVersionString ();
   }
 
   Status = OcHandleRecoveryRequest (
-    &Context->RecoveryInitiator
-    );
+             &Context->RecoveryInitiator
+             );
   if (!EFI_ERROR (Status)) {
     PickerCommand = Context->PickerCommand = OcPickerBootAppleRecovery;
   } else if (Config->Misc.Boot.ShowPicker) {
@@ -965,14 +973,14 @@ OcMiscBoot (
   Context->HideAuxiliary       = Config->Misc.Boot.HideAuxiliary;
   Context->PickerAudioAssist   = Config->Misc.Boot.PickerAudioAssist;
 
-  DEBUG ((DEBUG_INFO, "OC: Ready for takeoff in %u us\n", (UINT32) Context->TakeoffDelay));
+  DEBUG ((DEBUG_INFO, "OC: Ready for takeoff in %u us\n", (UINT32)Context->TakeoffDelay));
 
   OcLoadPickerHotKeys (Context);
 
   Context->ShowToggleSip   = Config->Misc.Security.AllowToggleSip;
   Context->ShowNvramReset  = Config->Misc.Security.AllowNvramReset;
   Context->AllowSetDefault = Config->Misc.Security.AllowSetDefault;
-  if (!Config->Misc.Security.AllowNvramReset && Context->PickerCommand == OcPickerResetNvram) {
+  if (!Config->Misc.Security.AllowNvramReset && (Context->PickerCommand == OcPickerResetNvram)) {
     Context->PickerCommand = PickerCommand;
   }
 
@@ -992,13 +1000,14 @@ OcMiscBoot (
 
 VOID
 OcMiscUefiQuirksLoaded (
-  IN OC_GLOBAL_CONFIG   *Config
+  IN OC_GLOBAL_CONFIG  *Config
   )
 {
-  if (((Config->Misc.Security.ScanPolicy & OC_SCAN_FILE_SYSTEM_LOCK) == 0
-    && (Config->Misc.Security.ScanPolicy & OC_SCAN_FILE_SYSTEM_BITS) != 0)
-    || ((Config->Misc.Security.ScanPolicy & OC_SCAN_DEVICE_LOCK) == 0
-    && (Config->Misc.Security.ScanPolicy & OC_SCAN_DEVICE_BITS) != 0)) {
+  if (  (  ((Config->Misc.Security.ScanPolicy & OC_SCAN_FILE_SYSTEM_LOCK) == 0)
+        && ((Config->Misc.Security.ScanPolicy & OC_SCAN_FILE_SYSTEM_BITS) != 0))
+     || (  ((Config->Misc.Security.ScanPolicy & OC_SCAN_DEVICE_LOCK) == 0)
+        && ((Config->Misc.Security.ScanPolicy & OC_SCAN_DEVICE_BITS) != 0)))
+  {
     DEBUG ((DEBUG_ERROR, "OC: Invalid ScanPolicy %X\n", Config->Misc.Security.ScanPolicy));
     CpuDeadLoop ();
   }
@@ -1006,7 +1015,7 @@ OcMiscUefiQuirksLoaded (
   //
   // Inform drivers about our scan policy.
   //
-  OcSetSystemVariable(
+  OcSetSystemVariable (
     OC_SCAN_POLICY_VARIABLE_NAME,
     OPEN_CORE_INT_NVRAM_ATTR,
     sizeof (Config->Misc.Security.ScanPolicy),

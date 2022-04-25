@@ -37,7 +37,7 @@
 STATIC
 EFI_STATUS
 XhciReleaseOwnership (
-  IN  EFI_PCI_IO_PROTOCOL   *PciIo
+  IN  EFI_PCI_IO_PROTOCOL  *PciIo
   )
 {
   EFI_STATUS  Status;
@@ -52,25 +52,25 @@ XhciReleaseOwnership (
   //
 
   Status = PciIo->Mem.Read (
-    PciIo,
-    EfiPciIoWidthUint32,
-    XHC_USBCMD_OFFSET,
-    XHC_HCCPARAMS_OFFSET,
-    1,
-    &HcCapParams
-    );
+                        PciIo,
+                        EfiPciIoWidthUint32,
+                        XHC_USBCMD_OFFSET,
+                        XHC_HCCPARAMS_OFFSET,
+                        1,
+                        &HcCapParams
+                        );
 
   ExtendCap = EFI_ERROR (Status) ? 0 : ((HcCapParams >> 14U) & 0x3FFFCU);
 
   while (ExtendCap) {
     Status = PciIo->Mem.Read (
-      PciIo,
-      EfiPciIoWidthUint32,
-      XHC_USBCMD_OFFSET,
-      ExtendCap,
-      1,
-      &Value
-      );
+                          PciIo,
+                          EfiPciIoWidthUint32,
+                          XHC_USBCMD_OFFSET,
+                          ExtendCap,
+                          1,
+                          &Value
+                          );
 
     if (EFI_ERROR (Status)) {
       break;
@@ -87,28 +87,28 @@ XhciReleaseOwnership (
       Value |= BIT24;
 
       PciIo->Mem.Write (
-        PciIo,
-        EfiPciIoWidthUint32,
-        XHC_USBCMD_OFFSET,
-        ExtendCap,
-        1,
-        &Value
-        );
+                   PciIo,
+                   EfiPciIoWidthUint32,
+                   XHC_USBCMD_OFFSET,
+                   ExtendCap,
+                   1,
+                   &Value
+                   );
 
       TimeOut = 40;
       while (TimeOut--) {
         gBS->Stall (500);
 
         Status = PciIo->Mem.Read (
-          PciIo,
-          EfiPciIoWidthUint32,
-          XHC_USBCMD_OFFSET,
-          ExtendCap,
-          1,
-          &Value
-          );
+                              PciIo,
+                              EfiPciIoWidthUint32,
+                              XHC_USBCMD_OFFSET,
+                              ExtendCap,
+                              1,
+                              &Value
+                              );
 
-        if (EFI_ERROR(Status) || !(Value & BIT16)) {
+        if (EFI_ERROR (Status) || !(Value & BIT16)) {
           break;
         }
       }
@@ -117,15 +117,15 @@ XhciReleaseOwnership (
       // Disable all SMI in USBLEGCTLSTS
       //
       Status = PciIo->Mem.Read (
-        PciIo,
-        EfiPciIoWidthUint32,
-        XHC_USBCMD_OFFSET,
-        ExtendCap + 4,
-        1,
-        &Value
-        );
+                            PciIo,
+                            EfiPciIoWidthUint32,
+                            XHC_USBCMD_OFFSET,
+                            ExtendCap + 4,
+                            1,
+                            &Value
+                            );
 
-      if (EFI_ERROR(Status)) {
+      if (EFI_ERROR (Status)) {
         break;
       }
 
@@ -133,39 +133,39 @@ XhciReleaseOwnership (
       Value |= 0xE0000000U;
 
       PciIo->Mem.Write (
-        PciIo,
-        EfiPciIoWidthUint32,
-        XHC_USBCMD_OFFSET,
-        ExtendCap + 4,
-        1,
-        &Value
-        );
+                   PciIo,
+                   EfiPciIoWidthUint32,
+                   XHC_USBCMD_OFFSET,
+                   ExtendCap + 4,
+                   1,
+                   &Value
+                   );
 
       //
       // Clear all ownership
       //
       Status = PciIo->Mem.Read (
-        PciIo,
-        EfiPciIoWidthUint32,
-        XHC_USBCMD_OFFSET,
-        ExtendCap,
-        1,
-        &Value
-        );
+                            PciIo,
+                            EfiPciIoWidthUint32,
+                            XHC_USBCMD_OFFSET,
+                            ExtendCap,
+                            1,
+                            &Value
+                            );
 
-      if (EFI_ERROR(Status)) {
+      if (EFI_ERROR (Status)) {
         break;
       }
 
       Value &= ~(BIT24 | BIT16);
       PciIo->Mem.Write (
-        PciIo,
-        EfiPciIoWidthUint32,
-        XHC_USBCMD_OFFSET,
-        ExtendCap,
-        1,
-        &Value
-        );
+                   PciIo,
+                   EfiPciIoWidthUint32,
+                   XHC_USBCMD_OFFSET,
+                   ExtendCap,
+                   1,
+                   &Value
+                   );
 
       break;
     }
@@ -191,43 +191,43 @@ XhciReleaseOwnership (
 STATIC
 EFI_STATUS
 EhciReleaseOwnership (
-  IN  EFI_PCI_IO_PROTOCOL   *PciIo
+  IN  EFI_PCI_IO_PROTOCOL  *PciIo
   )
 {
-  EFI_STATUS       Status;
-  UINT32           Value;
-  UINT32           Base;
-  UINT32           OpAddr;
-  UINT32           ExtendCap;
-  UINT32           UsbCmd;
-  UINT32           UsbLegSup;
-  UINT32           UsbLegCtlSts;
-  UINTN            IsOsOwned;
-  UINTN            IsBiosOwned;
-  BOOLEAN          IsOwnershipConflict;
-  UINT32           HcCapParams;
-  INT32            TimeOut;
+  EFI_STATUS  Status;
+  UINT32      Value;
+  UINT32      Base;
+  UINT32      OpAddr;
+  UINT32      ExtendCap;
+  UINT32      UsbCmd;
+  UINT32      UsbLegSup;
+  UINT32      UsbLegCtlSts;
+  UINTN       IsOsOwned;
+  UINTN       IsBiosOwned;
+  BOOLEAN     IsOwnershipConflict;
+  UINT32      HcCapParams;
+  INT32       TimeOut;
 
-  Value = 0x0002;
+  Value  = 0x0002;
   Status = EFI_SUCCESS;
 
   PciIo->Pci.Write (
-    PciIo,
-    EfiPciIoWidthUint16,
-    0x04,
-    1,
-    &Value
-    );
+               PciIo,
+               EfiPciIoWidthUint16,
+               0x04,
+               1,
+               &Value
+               );
 
   Base = 0;
 
   PciIo->Pci.Read (
-    PciIo,
-    EfiPciIoWidthUint32,
-    0x10,
-    1,
-    &Base
-    );
+               PciIo,
+               EfiPciIoWidthUint32,
+               0x10,
+               1,
+               &Base
+               );
 
   if (MmioRead8 (Base) < 0x0C) {
     //
@@ -242,13 +242,13 @@ EhciReleaseOwnership (
   OpAddr = Base + MmioRead8 (Base);
 
   PciIo->Mem.Read (
-    PciIo,
-    EfiPciIoWidthUint32,
-    EHC_BAR_INDEX,
-    EHC_HCCPARAMS_OFFSET,
-    1,
-    &HcCapParams
-    );
+               PciIo,
+               EfiPciIoWidthUint32,
+               EHC_BAR_INDEX,
+               EHC_HCCPARAMS_OFFSET,
+               1,
+               &HcCapParams
+               );
 
   ExtendCap = (HcCapParams >> 8U) & 0xFFU;
 
@@ -256,12 +256,12 @@ EhciReleaseOwnership (
   // Read PCI Config 32bit USBLEGSUP (eecp+0).
   //
   PciIo->Pci.Read (
-    PciIo,
-    EfiPciIoWidthUint32,
-    ExtendCap,
-    1,
-    &UsbLegSup
-    );
+               PciIo,
+               EfiPciIoWidthUint32,
+               ExtendCap,
+               1,
+               &UsbLegSup
+               );
 
   IsBiosOwned = (UsbLegSup & BIT16) != 0;
   if (!IsBiosOwned) {
@@ -275,26 +275,26 @@ EhciReleaseOwnership (
   // Read PCI Config 32bit USBLEGCTLSTS (eecp+4).
   //
   PciIo->Pci.Read (
-    PciIo,
-    EfiPciIoWidthUint32,
-    ExtendCap + 0x4,
-    1,
-    &UsbLegCtlSts
-    );
+               PciIo,
+               EfiPciIoWidthUint32,
+               ExtendCap + 0x4,
+               1,
+               &UsbLegCtlSts
+               );
 
   //
   // Disable the SMI in USBLEGCTLSTS firstly.
   //
   UsbLegCtlSts &= 0xFFFF0000U;
   PciIo->Pci.Write (
-    PciIo,
-    EfiPciIoWidthUint32,
-    ExtendCap + 0x4,
-    1,
-    &UsbLegCtlSts
-    );
+               PciIo,
+               EfiPciIoWidthUint32,
+               ExtendCap + 0x4,
+               1,
+               &UsbLegCtlSts
+               );
 
-  UsbCmd  = MmioRead32 (OpAddr + EHC_USBCMD_OFFSET);
+  UsbCmd = MmioRead32 (OpAddr + EHC_USBCMD_OFFSET);
 
   //
   // Clear registers to default.
@@ -306,23 +306,23 @@ EhciReleaseOwnership (
 
   Value = 1;
   PciIo->Pci.Write (
-    PciIo,
-    EfiPciIoWidthUint32,
-    ExtendCap,
-    1,
-    &Value
-    );
+               PciIo,
+               EfiPciIoWidthUint32,
+               ExtendCap,
+               1,
+               &Value
+               );
 
   //
   // Read 32bit USBLEGSUP (eecp+0).
   //
   PciIo->Pci.Read (
-    PciIo,
-    EfiPciIoWidthUint32,
-    ExtendCap,
-    1,
-    &UsbLegSup
-    );
+               PciIo,
+               EfiPciIoWidthUint32,
+               ExtendCap,
+               1,
+               &UsbLegSup
+               );
 
   IsBiosOwned = (UsbLegSup & BIT16) != 0;
   IsOsOwned   = (UsbLegSup & BIT24) != 0;
@@ -331,23 +331,23 @@ EhciReleaseOwnership (
   // Read 32bit USBLEGCTLSTS (eecp+4).
   //
   PciIo->Pci.Read (
-    PciIo,
-    EfiPciIoWidthUint32,
-    ExtendCap + 0x4,
-    1,
-    &UsbLegCtlSts
-    );
+               PciIo,
+               EfiPciIoWidthUint32,
+               ExtendCap + 0x4,
+               1,
+               &UsbLegCtlSts
+               );
 
   //
   // Get EHCI Ownership from legacy bios.
   //
   PciIo->Pci.Read (
-    PciIo,
-    EfiPciIoWidthUint32,
-    ExtendCap,
-    1,
-    &UsbLegSup
-    );
+               PciIo,
+               EfiPciIoWidthUint32,
+               ExtendCap,
+               1,
+               &UsbLegSup
+               );
 
   IsOwnershipConflict = IsBiosOwned && IsOsOwned;
 
@@ -357,24 +357,24 @@ EhciReleaseOwnership (
     //
     Value = 0;
     PciIo->Pci.Write (
-      PciIo,
-      EfiPciIoWidthUint8,
-      ExtendCap + 3,
-      1,
-      &Value
-      );
+                 PciIo,
+                 EfiPciIoWidthUint8,
+                 ExtendCap + 3,
+                 1,
+                 &Value
+                 );
 
     TimeOut = 40;
     while (TimeOut--) {
       gBS->Stall (500);
 
       PciIo->Pci.Read (
-        PciIo,
-        EfiPciIoWidthUint32,
-        ExtendCap,
-        1,
-        &Value
-        );
+                   PciIo,
+                   EfiPciIoWidthUint32,
+                   ExtendCap,
+                   1,
+                   &Value
+                   );
 
       if ((Value & BIT24) == 0x0) {
         break;
@@ -383,33 +383,33 @@ EhciReleaseOwnership (
   }
 
   PciIo->Pci.Read (
-    PciIo,
-    EfiPciIoWidthUint32,
-    ExtendCap,
-    1,
-    &Value
-    );
+               PciIo,
+               EfiPciIoWidthUint32,
+               ExtendCap,
+               1,
+               &Value
+               );
 
   Value |= BIT24;
   PciIo->Pci.Write (
-    PciIo,
-    EfiPciIoWidthUint32,
-    ExtendCap,
-    1,
-    &Value
-    );
+               PciIo,
+               EfiPciIoWidthUint32,
+               ExtendCap,
+               1,
+               &Value
+               );
 
   TimeOut = 40;
   while (TimeOut--) {
     gBS->Stall (500);
 
     PciIo->Pci.Read (
-      PciIo,
-      EfiPciIoWidthUint32,
-      ExtendCap,
-      1,
-      &Value
-      );
+                 PciIo,
+                 EfiPciIoWidthUint32,
+                 ExtendCap,
+                 1,
+                 &Value
+                 );
 
     if ((Value & BIT16) == 0x0) {
       break;
@@ -423,24 +423,24 @@ EhciReleaseOwnership (
     //
     Value = 0;
     PciIo->Pci.Write (
-      PciIo,
-      EfiPciIoWidthUint8,
-      ExtendCap + 2,
-      1,
-      &Value
-      );
+                 PciIo,
+                 EfiPciIoWidthUint8,
+                 ExtendCap + 2,
+                 1,
+                 &Value
+                 );
 
     TimeOut = 40;
     while (TimeOut--) {
       gBS->Stall (500);
 
       PciIo->Pci.Read (
-        PciIo,
-        EfiPciIoWidthUint32,
-        ExtendCap,
-        1,
-        &Value
-        );
+                   PciIo,
+                   EfiPciIoWidthUint32,
+                   ExtendCap,
+                   1,
+                   &Value
+                   );
 
       if ((Value & BIT16) == 0x0) {
         break;
@@ -451,21 +451,21 @@ EhciReleaseOwnership (
     // Disable further SMI events.
     //
     PciIo->Pci.Read (
-      PciIo,
-      EfiPciIoWidthUint32,
-      ExtendCap + 0x4,
-      1,
-      &UsbLegCtlSts
-      );
+                 PciIo,
+                 EfiPciIoWidthUint32,
+                 ExtendCap + 0x4,
+                 1,
+                 &UsbLegCtlSts
+                 );
 
     UsbLegCtlSts &= 0xFFFF0000U;
     PciIo->Pci.Write (
-      PciIo,
-      EfiPciIoWidthUint32,
-      ExtendCap + 0x4,
-      1,
-      &UsbLegCtlSts
-      );
+                 PciIo,
+                 EfiPciIoWidthUint32,
+                 ExtendCap + 0x4,
+                 1,
+                 &UsbLegCtlSts
+                 );
   }
 
   if (Value & BIT16) {
@@ -489,7 +489,7 @@ EhciReleaseOwnership (
 STATIC
 EFI_STATUS
 UhciReleaseOwnership (
-  IN  EFI_PCI_IO_PROTOCOL   *PciIo
+  IN  EFI_PCI_IO_PROTOCOL  *PciIo
   )
 {
   EFI_STATUS  Status;
@@ -499,27 +499,27 @@ UhciReleaseOwnership (
 
   Base = 0;
 
-  PciIo->Pci.Read(
-    PciIo,
-    EfiPciIoWidthUint32,
-    0x20,
-    1,
-    &Base
-    );
+  PciIo->Pci.Read (
+               PciIo,
+               EfiPciIoWidthUint32,
+               0x20,
+               1,
+               &Base
+               );
 
   PortBase = (Base >> 5) & 0x07ff;
 
   Command = 0x8f00;
 
   Status = PciIo->Pci.Write (
-    PciIo,
-    EfiPciIoWidthUint16,
-    0xC0,
-    1,
-    &Command
-    );
+                        PciIo,
+                        EfiPciIoWidthUint16,
+                        0xC0,
+                        1,
+                        &Command
+                        );
 
-  if (PortBase != 0 && (PortBase & BIT0) == 0) {
+  if ((PortBase != 0) && ((PortBase & BIT0) == 0)) {
     IoWrite16 (PortBase, 0x0002);
     gBS->Stall (500);
     IoWrite16 (PortBase + 4, 0);
@@ -535,21 +535,21 @@ ReleaseUsbOwnership (
   VOID
   )
 {
-  EFI_STATUS            Result;
-  EFI_STATUS            Status;
-  EFI_HANDLE            *HandleArray;
-  UINTN                 HandleArrayCount;
-  UINTN                 Index;
-  EFI_PCI_IO_PROTOCOL   *PciIo;
-  PCI_TYPE00            Pci;
+  EFI_STATUS           Result;
+  EFI_STATUS           Status;
+  EFI_HANDLE           *HandleArray;
+  UINTN                HandleArrayCount;
+  UINTN                Index;
+  EFI_PCI_IO_PROTOCOL  *PciIo;
+  PCI_TYPE00           Pci;
 
   Status = gBS->LocateHandleBuffer (
-                    ByProtocol,
-                    &gEfiPciIoProtocolGuid,
-                    NULL,
-                    &HandleArrayCount,
-                    &HandleArray
-                    );
+                  ByProtocol,
+                  &gEfiPciIoProtocolGuid,
+                  NULL,
+                  &HandleArrayCount,
+                  &HandleArray
+                  );
 
   if (EFI_ERROR (Status)) {
     return Status;
@@ -559,26 +559,27 @@ ReleaseUsbOwnership (
 
   for (Index = 0; Index < HandleArrayCount; ++Index) {
     Status = gBS->HandleProtocol (
-      HandleArray[Index],
-      &gEfiPciIoProtocolGuid,
-      (VOID **) &PciIo
-      );
+                    HandleArray[Index],
+                    &gEfiPciIoProtocolGuid,
+                    (VOID **)&PciIo
+                    );
 
     if (EFI_ERROR (Status)) {
       continue;
     }
 
     Status = PciIo->Pci.Read (
-      PciIo,
-      EfiPciIoWidthUint32,
-      0,
-      sizeof (Pci) / sizeof (UINT32),
-      &Pci
-      );
+                          PciIo,
+                          EfiPciIoWidthUint32,
+                          0,
+                          sizeof (Pci) / sizeof (UINT32),
+                          &Pci
+                          );
 
-    if (EFI_ERROR (Status)
-      || Pci.Hdr.ClassCode[1] != PCI_CLASS_SERIAL_USB
-      || Pci.Hdr.ClassCode[2] != PCI_CLASS_SERIAL) {
+    if (  EFI_ERROR (Status)
+       || (Pci.Hdr.ClassCode[1] != PCI_CLASS_SERIAL_USB)
+       || (Pci.Hdr.ClassCode[2] != PCI_CLASS_SERIAL))
+    {
       continue;
     }
 

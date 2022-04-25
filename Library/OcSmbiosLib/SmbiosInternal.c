@@ -48,7 +48,7 @@ SmbiosExtendTable (
   if (Table->Table == NULL) {
     TableSize = 0;
   } else {
-    TableSize = (UINT32)((UINT8 *) Table->CurrentStrPtr - Table->Table);
+    TableSize = (UINT32)((UINT8 *)Table->CurrentStrPtr - Table->Table);
   }
 
   //
@@ -58,6 +58,7 @@ SmbiosExtendTable (
   if (RequestedSize > SMBIOS_TABLE_MAX_LENGTH) {
     return EFI_OUT_OF_RESOURCES;
   }
+
   //
   // Skip reallocation if region fits.
   //
@@ -81,7 +82,7 @@ SmbiosExtendTable (
   ZeroMem (NewTable + TableSize, RequestedSize - TableSize);
 
   Table->CurrentPtr.Raw     = NewTable + (Table->CurrentPtr.Raw - Table->Table);
-  Table->CurrentStrPtr      = (CHAR8 *) NewTable + TableSize;
+  Table->CurrentStrPtr      = (CHAR8 *)NewTable + TableSize;
   Table->Table              = NewTable;
   Table->AllocatedTableSize = RequestedSize;
 
@@ -104,7 +105,7 @@ SmbiosOverrideString (
     return 0;
   }
 
-  Length = (UINT32) AsciiStrLen (Override);
+  Length = (UINT32)AsciiStrLen (Override);
 
   //
   // Truncate to fit but do not error.
@@ -141,14 +142,15 @@ SmbiosAssignStructHandle (
   //
   // Support select tables to have more than 1 entry.
   //
-  if (Type == SMBIOS_TYPE_PROCESSOR_INFORMATION
-    || Type == SMBIOS_TYPE_CACHE_INFORMATION
-    || Type == SMBIOS_TYPE_PORT_CONNECTOR_INFORMATION
-    || Type == SMBIOS_TYPE_SYSTEM_SLOTS
-    || Type == SMBIOS_TYPE_PHYSICAL_MEMORY_ARRAY
-    || Type == SMBIOS_TYPE_MEMORY_ARRAY_MAPPED_ADDRESS
-    || Type == SMBIOS_TYPE_MEMORY_DEVICE
-    || Type == SMBIOS_TYPE_MEMORY_DEVICE_MAPPED_ADDRESS) {
+  if (  (Type == SMBIOS_TYPE_PROCESSOR_INFORMATION)
+     || (Type == SMBIOS_TYPE_CACHE_INFORMATION)
+     || (Type == SMBIOS_TYPE_PORT_CONNECTOR_INFORMATION)
+     || (Type == SMBIOS_TYPE_SYSTEM_SLOTS)
+     || (Type == SMBIOS_TYPE_PHYSICAL_MEMORY_ARRAY)
+     || (Type == SMBIOS_TYPE_MEMORY_ARRAY_MAPPED_ADDRESS)
+     || (Type == SMBIOS_TYPE_MEMORY_DEVICE)
+     || (Type == SMBIOS_TYPE_MEMORY_DEVICE_MAPPED_ADDRESS))
+  {
     Table->CurrentPtr.Standard.Hdr->Handle = Table->Handle++;
     return EFI_SUCCESS;
   } else if (Index != 1) {
@@ -316,12 +318,12 @@ SmbiosInitialiseStruct (
 
   Table->CurrentPtr.Standard.Hdr->Type   = Type;
   Table->CurrentPtr.Standard.Hdr->Length = MinLength;
-  Status = SmbiosAssignStructHandle (Table, Type, Index);
+  Status                                 = SmbiosAssignStructHandle (Table, Type, Index);
   if (EFI_ERROR (Status)) {
     return Status;
   }
 
-  Table->CurrentStrPtr = (CHAR8 *) Table->CurrentPtr.Standard.Raw + MinLength;
+  Table->CurrentStrPtr = (CHAR8 *)Table->CurrentPtr.Standard.Raw + MinLength;
 
   return EFI_SUCCESS;
 }
@@ -347,11 +349,11 @@ SmbiosFinaliseStruct (
   // SMBIOS spec requires 2 terminator bytes after structures without strings and 1 byte otherwise.
   // We allocate 2 extra bytes (SMBIOS_STRUCTURE_TERMINATOR_SIZE), and end up using one or two here.
   //
-  if (Table->CurrentStrPtr != (CHAR8 *) Table->CurrentPtr.Raw) {
+  if (Table->CurrentStrPtr != (CHAR8 *)Table->CurrentPtr.Raw) {
     Table->CurrentStrPtr++;
-    Table->CurrentPtr.Raw = (UINT8 *) Table->CurrentStrPtr;
+    Table->CurrentPtr.Raw = (UINT8 *)Table->CurrentStrPtr;
   } else {
-    Table->CurrentStrPtr += 2;
+    Table->CurrentStrPtr  += 2;
     Table->CurrentPtr.Raw += 2;
   }
 }
@@ -386,7 +388,7 @@ SmbiosGetString (
     }
   }
 
-  return (CHAR8*) Walker;
+  return (CHAR8 *)Walker;
 }
 
 UINT8
@@ -425,11 +427,12 @@ SmbiosGetStructureLength (
 
   SmbiosTable.Raw += Length;
   SmbiosTableSize -= Length;
-  Walker = SmbiosTable.Raw;
+  Walker           = SmbiosTable.Raw;
   while (SmbiosTableSize >= SMBIOS_STRUCTURE_TERMINATOR_SIZE) {
-    if (Walker[0] == 0 && Walker[1] == 0) {
+    if ((Walker[0] == 0) && (Walker[1] == 0)) {
       return Length + (UINT32)(Walker - SmbiosTable.Raw) + SMBIOS_STRUCTURE_TERMINATOR_SIZE;
     }
+
     Walker++;
     SmbiosTableSize--;
   }
@@ -462,7 +465,7 @@ SmbiosGetStructureOfType (
     //
     // We found the right table.
     //
-    if (SmbiosTypeIndex == Index && SmbiosTable.Standard.Hdr->Type == Type) {
+    if ((SmbiosTypeIndex == Index) && (SmbiosTable.Standard.Hdr->Type == Type)) {
       return SmbiosTable;
     }
 

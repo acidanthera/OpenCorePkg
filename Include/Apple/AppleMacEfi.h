@@ -20,18 +20,18 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 
 #ifndef ARRAY_SIZE
 
-  /**
-    Return the number of elements in an array.
+/**
+  Return the number of elements in an array.
 
-    @param  Array  An object of array type. Array is only used as an argument to
-                   the sizeof operator, therefore Array is never evaluated. The
-                   caller is responsible for ensuring that Array's type is not
-                   incomplete; that is, Array must have known constant size.
+  @param  Array  An object of array type. Array is only used as an argument to
+                 the sizeof operator, therefore Array is never evaluated. The
+                 caller is responsible for ensuring that Array's type is not
+                 incomplete; that is, Array must have known constant size.
 
-    @return The number of elements in Array. The result has type UINTN.
+  @return The number of elements in Array. The result has type UINTN.
 
-  **/
-  #define ARRAY_SIZE(Array) (sizeof (Array) / sizeof ((Array)[0]))
+**/
+#define ARRAY_SIZE(Array)  (sizeof (Array) / sizeof ((Array)[0]))
 
 #endif
 

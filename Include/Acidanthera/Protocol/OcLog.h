@@ -33,7 +33,7 @@
 #define OC_LOG_VARIABLE     BIT4
 #define OC_LOG_NONVOLATILE  BIT5
 #define OC_LOG_FILE         BIT6
-#define OC_LOG_ALL_BITS (\
+#define OC_LOG_ALL_BITS     (\
   OC_LOG_ENABLE   | OC_LOG_CONSOLE     | \
   OC_LOG_DATA_HUB | OC_LOG_SERIAL      | \
   OC_LOG_VARIABLE | OC_LOG_NONVOLATILE | \
@@ -70,14 +70,14 @@ typedef struct OC_LOG_PROTOCOL_ OC_LOG_PROTOCOL;
 **/
 typedef
 EFI_STATUS
-(EFIAPI *OC_LOG_ADD_ENTRY) (
+(EFIAPI *OC_LOG_ADD_ENTRY)(
   IN OC_LOG_PROTOCOL  *This,
   IN UINTN            ErrorLevel,
   IN CONST CHAR8      *FormatString,
   IN VA_LIST          Marker
   );
 
-/** 
+/**
   Reset the internal timers
 
   @param[in] This  This protocol.
@@ -86,7 +86,7 @@ EFI_STATUS
 **/
 typedef
 EFI_STATUS
-(EFIAPI *OC_LOG_RESET_TIMERS) (
+(EFIAPI *OC_LOG_RESET_TIMERS)(
   IN OC_LOG_PROTOCOL  *This
   );
 
@@ -100,7 +100,7 @@ EFI_STATUS
 **/
 typedef
 EFI_STATUS
-(EFIAPI *OC_LOG_GET_LOG) (
+(EFIAPI *OC_LOG_GET_LOG)(
   IN  OC_LOG_PROTOCOL  *This,
   OUT CHAR8            **OcLogBuffer
   );
@@ -116,7 +116,7 @@ EFI_STATUS
 **/
 typedef
 EFI_STATUS
-(EFIAPI *OC_LOG_SAVE_LOG) (
+(EFIAPI *OC_LOG_SAVE_LOG)(
   IN OC_LOG_PROTOCOL           *This,
   IN UINT32                    NonVolatile OPTIONAL,
   IN EFI_DEVICE_PATH_PROTOCOL  *FilePath OPTIONAL
@@ -126,21 +126,21 @@ EFI_STATUS
   The structure exposed by the OC_LOG_PROTOCOL.
 **/
 struct OC_LOG_PROTOCOL_ {
-  UINT32                  Revision;     ///< The revision of the installed protocol.
-  UINTN                   Reserved;     ///< Reserved for future extension.
-  OC_LOG_ADD_ENTRY        AddEntry;     ///< A pointer to the AddEntry function.
-  OC_LOG_GET_LOG          GetLog;       ///< A pointer to the GetLog function.
-  OC_LOG_SAVE_LOG         SaveLog;      ///< A pointer to the SaveLog function.
-  OC_LOG_RESET_TIMERS     ResetTimers;  ///< A pointer to the ResetTimers function.
-  OC_LOG_OPTIONS          Options;      ///< The current options of the installed protocol.
-  UINT32                  DisplayDelay; ///< The delay after visible onscreen message in microseconds.
-  UINTN                   DisplayLevel; ///< The error level visible onscreen.
-  UINTN                   HaltLevel;    ///< The error level causing CPU dead loop.
-  EFI_FILE_PROTOCOL       *FileSystem;  ///< Log file system root, not owned.
-  CHAR16                  *FilePath;    ///< Log file path.
+  UINT32                 Revision;      ///< The revision of the installed protocol.
+  UINTN                  Reserved;      ///< Reserved for future extension.
+  OC_LOG_ADD_ENTRY       AddEntry;      ///< A pointer to the AddEntry function.
+  OC_LOG_GET_LOG         GetLog;        ///< A pointer to the GetLog function.
+  OC_LOG_SAVE_LOG        SaveLog;       ///< A pointer to the SaveLog function.
+  OC_LOG_RESET_TIMERS    ResetTimers;   ///< A pointer to the ResetTimers function.
+  OC_LOG_OPTIONS         Options;       ///< The current options of the installed protocol.
+  UINT32                 DisplayDelay;  ///< The delay after visible onscreen message in microseconds.
+  UINTN                  DisplayLevel;  ///< The error level visible onscreen.
+  UINTN                  HaltLevel;     ///< The error level causing CPU dead loop.
+  EFI_FILE_PROTOCOL      *FileSystem;   ///< Log file system root, not owned.
+  CHAR16                 *FilePath;     ///< Log file path.
 };
 
 /// A global variable storing the GUID of the OC_LOG_PROTOCOL.
-extern EFI_GUID gOcLogProtocolGuid;
+extern EFI_GUID  gOcLogProtocolGuid;
 
 #endif // OC_LOG_PROTOCOL_H

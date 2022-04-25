@@ -72,13 +72,13 @@ ReloadPciRom (
   EFI_PCI_EXPANSION_ROM_HEADER  *EfiRomHeader;
   CHAR16                        RomFileName[32];
 
-  ImageIndex    = 0;
-  Status        = EFI_NOT_FOUND;
-  RomBarOffset  = (UINTN) RomBar;
+  ImageIndex   = 0;
+  Status       = EFI_NOT_FOUND;
+  RomBarOffset = (UINTN)RomBar;
 
   do {
     LoadROM      = FALSE;
-    EfiRomHeader = (EFI_PCI_EXPANSION_ROM_HEADER *) (UINTN) RomBarOffset;
+    EfiRomHeader = (EFI_PCI_EXPANSION_ROM_HEADER *)(UINTN)RomBarOffset;
 
     if (EfiRomHeader->Signature != PCI_EXPANSION_ROM_HEADER_SIGNATURE) {
       return EFI_VOLUME_CORRUPTED;
@@ -88,13 +88,14 @@ ReloadPciRom (
     // If the pointer to the PCI Data Structure is invalid, no further images can be located.
     // The PCI Data Structure must be DWORD aligned.
     //
-    if (EfiRomHeader->PcirOffset == 0
-      || (EfiRomHeader->PcirOffset & 3) != 0
-      || RomBarOffset - (UINTN) RomBar + EfiRomHeader->PcirOffset + sizeof (PCI_DATA_STRUCTURE) > RomSize) {
+    if (  (EfiRomHeader->PcirOffset == 0)
+       || ((EfiRomHeader->PcirOffset & 3) != 0)
+       || (RomBarOffset - (UINTN)RomBar + EfiRomHeader->PcirOffset + sizeof (PCI_DATA_STRUCTURE) > RomSize))
+    {
       break;
     }
 
-    Pcir = (PCI_DATA_STRUCTURE *) (UINTN) (RomBarOffset + EfiRomHeader->PcirOffset);
+    Pcir = (PCI_DATA_STRUCTURE *)(UINTN)(RomBarOffset + EfiRomHeader->PcirOffset);
 
     //
     // If a valid signature is not present in the PCI Data Structure, no further images can be located.
@@ -105,37 +106,38 @@ ReloadPciRom (
 
     ImageSize = Pcir->ImageLength * 512;
 
-    if (RomBarOffset - (UINTN) RomBar + ImageSize > RomSize) {
+    if (RomBarOffset - (UINTN)RomBar + ImageSize > RomSize) {
       break;
     }
 
-    if (Pcir->CodeType == PCI_CODE_TYPE_EFI_IMAGE
-      && EfiRomHeader->EfiSignature  == EFI_PCI_EXPANSION_ROM_HEADER_EFISIGNATURE
-      && (EfiRomHeader->EfiSubsystem == EFI_IMAGE_SUBSYSTEM_EFI_BOOT_SERVICE_DRIVER
-        || EfiRomHeader->EfiSubsystem  == EFI_IMAGE_SUBSYSTEM_EFI_RUNTIME_DRIVER)) {
-      ImageOffset         = EfiRomHeader->EfiImageHeaderOffset;
-      InitializationSize  = EfiRomHeader->InitializationSize * 512;
+    if (  (Pcir->CodeType == PCI_CODE_TYPE_EFI_IMAGE)
+       && (EfiRomHeader->EfiSignature  == EFI_PCI_EXPANSION_ROM_HEADER_EFISIGNATURE)
+       && (  (EfiRomHeader->EfiSubsystem == EFI_IMAGE_SUBSYSTEM_EFI_BOOT_SERVICE_DRIVER)
+          || (EfiRomHeader->EfiSubsystem  == EFI_IMAGE_SUBSYSTEM_EFI_RUNTIME_DRIVER)))
+    {
+      ImageOffset        = EfiRomHeader->EfiImageHeaderOffset;
+      InitializationSize = EfiRomHeader->InitializationSize * 512;
 
-      if (InitializationSize <= ImageSize && ImageOffset < InitializationSize) {
-        ImageBuffer             = (VOID *) (UINTN) (RomBarOffset + ImageOffset);
+      if ((InitializationSize <= ImageSize) && (ImageOffset < InitializationSize)) {
+        ImageBuffer             = (VOID *)(UINTN)(RomBarOffset + ImageOffset);
         ImageLength             = InitializationSize - ImageOffset;
         DecompressedImageBuffer = NULL;
 
         if (EfiRomHeader->CompressionType == EFI_PCI_EXPANSION_ROM_HEADER_COMPRESSED) {
           Status = gBS->LocateProtocol (
-            &gEfiDecompressProtocolGuid,
-            NULL,
-            (VOID**) &Decompress
-            );
+                          &gEfiDecompressProtocolGuid,
+                          NULL,
+                          (VOID **)&Decompress
+                          );
 
           if (!EFI_ERROR (Status)) {
             Status = Decompress->GetInfo (
-              Decompress,
-              ImageBuffer,
-              ImageLength,
-              &DestinationSize,
-              &ScratchSize
-              );
+                                   Decompress,
+                                   ImageBuffer,
+                                   ImageLength,
+                                   &DestinationSize,
+                                   &ScratchSize
+                                   );
 
             if (!EFI_ERROR (Status)) {
               DecompressedImageBuffer = AllocateZeroPool (DestinationSize);
@@ -143,14 +145,14 @@ ReloadPciRom (
                 Scratch = AllocateZeroPool (ScratchSize);
                 if (Scratch != NULL) {
                   Status = Decompress->Decompress (
-                    Decompress,
-                    ImageBuffer,
-                    ImageLength,
-                    DecompressedImageBuffer,
-                    DestinationSize,
-                    Scratch,
-                    ScratchSize
-                    );
+                                         Decompress,
+                                         ImageBuffer,
+                                         ImageLength,
+                                         DecompressedImageBuffer,
+                                         DestinationSize,
+                                         Scratch,
+                                         ScratchSize
+                                         );
 
                   if (!EFI_ERROR (Status)) {
                     LoadROM     = TRUE;
@@ -167,15 +169,15 @@ ReloadPciRom (
 
         if (LoadROM) {
           UnicodeSPrint (RomFileName, sizeof (RomFileName), L"%s[%d]", FileName, ImageIndex);
-          FilePath    = FileDevicePath (NULL, RomFileName);
-          Status      = gBS->LoadImage (
-            TRUE,
-            gImageHandle,
-            FilePath,
-            ImageBuffer,
-            ImageLength,
-            &ImageHandle
-            );
+          FilePath = FileDevicePath (NULL, RomFileName);
+          Status   = gBS->LoadImage (
+                            TRUE,
+                            gImageHandle,
+                            FilePath,
+                            ImageBuffer,
+                            ImageLength,
+                            &ImageHandle
+                            );
 
           if (!EFI_ERROR (Status)) {
             gBS->StartImage (ImageHandle, NULL, NULL);
@@ -192,7 +194,7 @@ ReloadPciRom (
 
     RomBarOffset = RomBarOffset + ImageSize;
     ImageIndex++;
-  } while ((Pcir->Indicator & 0x80) == 0x00 && RomBarOffset - (UINTN) RomBar < RomSize);
+  } while ((Pcir->Indicator & 0x80) == 0x00 && RomBarOffset - (UINTN)RomBar < RomSize);
 
   return Status;
 }
@@ -213,15 +215,15 @@ OcReloadOptionRoms (
   EFI_PCI_IO_PROTOCOL  *PciIo;
   CHAR16               RomFileName[16];
 
-  ReturnStatus        = EFI_LOAD_ERROR;
+  ReturnStatus = EFI_LOAD_ERROR;
 
   Status = gBS->LocateHandleBuffer (
-    ByProtocol,
-    &gEfiPciIoProtocolGuid,
-    NULL,
-    &HandleArrayCount,
-    &HandleArray
-    );
+                  ByProtocol,
+                  &gEfiPciIoProtocolGuid,
+                  NULL,
+                  &HandleArrayCount,
+                  &HandleArray
+                  );
 
   if (EFI_ERROR (Status)) {
     return EFI_PROTOCOL_ERROR;
@@ -229,12 +231,12 @@ OcReloadOptionRoms (
 
   for (Index = 0; Index < HandleArrayCount; Index++) {
     Status = gBS->HandleProtocol (
-      HandleArray[Index],
-      &gEfiPciIoProtocolGuid,
-      (void **) &PciIo
-      );
+                    HandleArray[Index],
+                    &gEfiPciIoProtocolGuid,
+                    (void **)&PciIo
+                    );
 
-    if (!EFI_ERROR (Status) && PciIo->RomImage != NULL && PciIo->RomSize > 0) {
+    if (!EFI_ERROR (Status) && (PciIo->RomImage != NULL) && (PciIo->RomSize > 0)) {
       BindingHandleBuffer = NULL;
       BindingHandleCount  = 0;
       PARSE_HANDLE_DATABASE_UEFI_DRIVERS (
@@ -246,7 +248,7 @@ OcReloadOptionRoms (
       if (BindingHandleCount == 0) {
         HandleIndex = InternalConvertHandleToHandleIndex (HandleArray[Index]);
         UnicodeSPrint (RomFileName, sizeof (RomFileName), L"Handle%X", HandleIndex);
-        Status = ReloadPciRom (PciIo->RomImage, (UINTN) PciIo->RomSize, RomFileName);
+        Status = ReloadPciRom (PciIo->RomImage, (UINTN)PciIo->RomSize, RomFileName);
         if (EFI_ERROR (ReturnStatus)) {
           ReturnStatus = Status;
         }

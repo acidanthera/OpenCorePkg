@@ -22,10 +22,10 @@
 #include <Library/UefiLib.h>
 #include <Library/UefiBootServicesTableLib.h>
 
-STATIC UINTN mBootVTdEnabled;
-STATIC CHAR8 *mOSName;
-STATIC CHAR8 *mOSVendor;
-STATIC BOOLEAN mAppleOSLoadedSignaled;
+STATIC UINTN    mBootVTdEnabled;
+STATIC CHAR8    *mOSName;
+STATIC CHAR8    *mOSVendor;
+STATIC BOOLEAN  mAppleOSLoadedSignaled;
 
 STATIC
 VOID
@@ -33,11 +33,11 @@ InternalOSInfoSet (
   VOID
   )
 {
-  UINTN    Index;
-  UINTN    Length;
-  CHAR8    *VersionPtr;
-  UINT32   MajorVersion;
-  UINT32   MinorVersion;
+  UINTN   Index;
+  UINTN   Length;
+  CHAR8   *VersionPtr;
+  UINT32  MajorVersion;
+  UINT32  MinorVersion;
 
   DEBUG ((
     DEBUG_INFO,
@@ -67,16 +67,17 @@ InternalOSInfoSet (
       }
     }
 
-    if (Index == Length || Index == 0 || mOSName[Index + 1] == '\0') {
+    if ((Index == Length) || (Index == 0) || (mOSName[Index + 1] == '\0')) {
       return;
     }
 
     VersionPtr = &mOSName[Index - 1];
     while (VersionPtr > mOSName) {
-      if (*VersionPtr < '0' || *VersionPtr > '9') {
+      if ((*VersionPtr < '0') || (*VersionPtr > '9')) {
         ++VersionPtr;
         break;
       }
+
       --VersionPtr;
     }
 
@@ -93,9 +94,10 @@ InternalOSInfoSet (
     VersionPtr   = &mOSName[Index + 1];
     MinorVersion = 0;
     while (*VersionPtr != '\0') {
-      if (*VersionPtr < '0' || *VersionPtr > '9') {
+      if ((*VersionPtr < '0') || (*VersionPtr > '9')) {
         break;
       }
+
       MinorVersion = MinorVersion * 10 + (*VersionPtr - '0');
       ++VersionPtr;
     }
@@ -186,7 +188,7 @@ GetBootVTdEnabled (
 
 STATIC
 EFI_OS_INFO_PROTOCOL
-mOSInfoProtocol = {
+  mOSInfoProtocol = {
   EFI_OS_INFO_PROTOCOL_REVISION,
   SetName,
   SetVendor,
@@ -199,9 +201,9 @@ OcOSInfoInstallProtocol (
   IN BOOLEAN  Reinstall
   )
 {
-  EFI_STATUS           Status;
-  EFI_OS_INFO_PROTOCOL *Protocol;
-  EFI_HANDLE           NewHandle;
+  EFI_STATUS            Status;
+  EFI_OS_INFO_PROTOCOL  *Protocol;
+  EFI_HANDLE            NewHandle;
 
   DEBUG ((DEBUG_VERBOSE, "OcOSInfoInstallProtocol\n"));
 
@@ -213,10 +215,10 @@ OcOSInfoInstallProtocol (
     }
   } else {
     Status = gBS->LocateProtocol (
-      &gEfiOSInfoProtocolGuid,
-      NULL,
-      (VOID *) &Protocol
-      );
+                    &gEfiOSInfoProtocolGuid,
+                    NULL,
+                    (VOID *)&Protocol
+                    );
 
     if (!EFI_ERROR (Status)) {
       return Protocol;
@@ -224,12 +226,12 @@ OcOSInfoInstallProtocol (
   }
 
   NewHandle = NULL;
-  Status = gBS->InstallMultipleProtocolInterfaces (
-     &NewHandle,
-     &gEfiOSInfoProtocolGuid,
-     (VOID *) &mOSInfoProtocol,
-     NULL
-     );
+  Status    = gBS->InstallMultipleProtocolInterfaces (
+                     &NewHandle,
+                     &gEfiOSInfoProtocolGuid,
+                     (VOID *)&mOSInfoProtocol,
+                     NULL
+                     );
 
   if (EFI_ERROR (Status)) {
     return NULL;

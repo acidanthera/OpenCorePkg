@@ -20,17 +20,17 @@
 /**
   Chooses the default model (most recent broadly supported).
 **/
-#define OC_SB_MODEL_DEFAULT "Default"
+#define OC_SB_MODEL_DEFAULT  "Default"
 
 /**
   No secure boot mode special value.
 **/
-#define OC_SB_MODEL_DISABLED "Disabled"
+#define OC_SB_MODEL_DISABLED  "Disabled"
 
 /**
   Legacy secure boot model (for all non-gibraltar models).
 **/
-#define OC_SB_MODEL_LEGACY   "x86legacy"
+#define OC_SB_MODEL_LEGACY  "x86legacy"
 
 /**
   Verify the signature of ImageBuffer against Type of its IMG4 Manifest.
@@ -90,7 +90,7 @@ OcAppleImg4RegisterOverride (
 **/
 CONST CHAR8 *
 OcAppleImg4GetHardwareModel (
-  IN CONST CHAR8    *ModelRequest
+  IN CONST CHAR8  *ModelRequest
   );
 
 /**
@@ -105,8 +105,8 @@ OcAppleImg4GetHardwareModel (
 **/
 EFI_STATUS
 OcAppleImg4BootstrapValues (
-  IN CONST CHAR8   *Model,
-  IN UINT64        Ecid  OPTIONAL
+  IN CONST CHAR8  *Model,
+  IN UINT64       Ecid  OPTIONAL
   );
 
 /**

@@ -24,7 +24,7 @@
 STATIC
 VOID
 PrintParserError (
-  IN EFI_STATUS Status
+  IN EFI_STATUS  Status
   )
 {
   switch (Status) {
@@ -79,7 +79,7 @@ AcpiFindEntryInFile (
   IN     CONST CHAR8  *FileName,
   IN     CONST CHAR8  *PathString,
   IN     UINT8        Entry,
-     OUT UINT32       *Offset
+  OUT UINT32          *Offset
   )
 {
   UINT8       *TableStart;
@@ -100,6 +100,7 @@ AcpiFindEntryInFile (
 }
 
 // -[f|a] , CHAR8 ** memory_location , CHAR8 ** path , UINT8 occurance
+
 /**
    Finds sought entry in ACPI table.
    Usage:
@@ -119,17 +120,17 @@ ENTRY_POINT (
   UINT32      ReturnedOffset;
   EFI_STATUS  Status;
 
-#if defined(VERBOSE) && !defined(FUZZING_TEST)
+ #if defined (VERBOSE) && !defined (FUZZING_TEST)
   PcdGet32 (PcdFixedDebugPrintErrorLevel) |= DEBUG_VERBOSE | DEBUG_INFO;
   PcdGet32 (PcdDebugPrintErrorLevel)      |= DEBUG_VERBOSE | DEBUG_INFO;
-#endif
+ #endif
 
   switch (argc) {
     case 5:
-      if ((argv[1][0] == '-' && argv[1][1] == 'f') || (argv[1][0] == '-' && argv[1][1] == 'a')) {
+      if (((argv[1][0] == '-') && (argv[1][1] == 'f')) || ((argv[1][0] == '-') && (argv[1][1] == 'a'))) {
         ReturnedOffset = 0;
 
-        if (argv[1][0] == '-' && argv[1][1] == 'f') {
+        if ((argv[1][0] == '-') && (argv[1][1] == 'f')) {
           DEBUG ((DEBUG_VERBOSE, "Entered main (file)\n"));
           Status = AcpiFindEntryInFile (
                      argv[2],
@@ -170,8 +171,8 @@ ENTRY_POINT (
       break;
 
     case 4:
-      if ((argv[1][0] == '-' && argv[1][1] == 'f') || (argv[1][0] == '-' && argv[1][1] == 'a')) {
-        if (argv[1][0] == '-' && argv[1][1] == 'f') {
+      if (((argv[1][0] == '-') && (argv[1][1] == 'f')) || ((argv[1][0] == '-') && (argv[1][1] == 'a'))) {
+        if ((argv[1][0] == '-') && (argv[1][1] == 'f')) {
           DEBUG ((DEBUG_VERBOSE, "Entered main (file)\n"));
           Status = AcpiFindEntryInFile (
                      argv[2],
@@ -228,12 +229,13 @@ LLVMFuzzerTestOneInput (
   )
 {
   if (Size > 0) {
-    UINT32 offset = 0;
+    UINT32  offset = 0;
     AcpiFindEntryInMemory (
-      (UINT8 *) Data, "_SB.PCI0.GFX0",
+      (UINT8 *)Data,
+      "_SB.PCI0.GFX0",
       1,
       &offset,
-      (UINT32) Size
+      (UINT32)Size
       );
   }
 

@@ -33,22 +33,22 @@ OcOverflowAddU16 (
   UINT16  *Result
   )
 {
-#if defined(OC_HAS_TYPE_GENERIC_BUILTINS)
-  return __builtin_add_overflow(A, B, Result);
-#else
+ #if defined (OC_HAS_TYPE_GENERIC_BUILTINS)
+  return __builtin_add_overflow (A, B, Result);
+ #else
   UINT32  Temp;
 
   //
   // I believe casting will be faster on X86 at least.
   //
   Temp    = A + B;
-  *Result = (UINT16) Temp;
+  *Result = (UINT16)Temp;
   if (Temp <= MAX_UINT16) {
     return FALSE;
   }
 
   return TRUE;
-#endif
+ #endif
 }
 
 BOOLEAN
@@ -58,17 +58,17 @@ OcOverflowSubU16 (
   UINT16  *Result
   )
 {
-#if defined(OC_HAS_TYPE_GENERIC_BUILTINS)
-  return __builtin_sub_overflow(A, B, Result);
-#else
-  *Result = (UINT16) (A - B);
+ #if defined (OC_HAS_TYPE_GENERIC_BUILTINS)
+  return __builtin_sub_overflow (A, B, Result);
+ #else
+  *Result = (UINT16)(A - B);
 
   if (A >= B) {
     return FALSE;
   }
 
   return TRUE;
-#endif
+ #endif
 }
 
 BOOLEAN
@@ -78,19 +78,19 @@ OcOverflowMulU16 (
   UINT16  *Result
   )
 {
-#if defined(OC_HAS_TYPE_GENERIC_BUILTINS)
-  return __builtin_mul_overflow(A, B, Result);
-#else
+ #if defined (OC_HAS_TYPE_GENERIC_BUILTINS)
+  return __builtin_mul_overflow (A, B, Result);
+ #else
   UINT32  Temp;
 
-  Temp    = (UINT32) A * B;
-  *Result = (UINT16) Temp;
+  Temp    = (UINT32)A * B;
+  *Result = (UINT16)Temp;
   if (Temp <= MAX_UINT32) {
     return FALSE;
   }
 
   return TRUE;
-#endif
+ #endif
 }
 
 BOOLEAN
@@ -100,11 +100,11 @@ OcOverflowAddU32 (
   UINT32  *Result
   )
 {
-#if defined(OC_HAS_TYPE_GENERIC_BUILTINS)
-  return __builtin_add_overflow(A, B, Result);
-#elif defined(OC_HAS_TYPE_SPECIFIC_BUILTINS_64)
-  return __builtin_uadd_overflow(A, B, Result);
-#else
+ #if defined (OC_HAS_TYPE_GENERIC_BUILTINS)
+  return __builtin_add_overflow (A, B, Result);
+ #elif defined (OC_HAS_TYPE_SPECIFIC_BUILTINS_64)
+  return __builtin_uadd_overflow (A, B, Result);
+ #else
   UINT32  Temp;
 
   //
@@ -117,7 +117,7 @@ OcOverflowAddU32 (
   }
 
   return TRUE;
-#endif
+ #endif
 }
 
 BOOLEAN
@@ -127,18 +127,18 @@ OcOverflowSubU32 (
   UINT32  *Result
   )
 {
-#if defined(OC_HAS_TYPE_GENERIC_BUILTINS)
-  return __builtin_sub_overflow(A, B, Result);
-#elif defined(OC_HAS_TYPE_SPECIFIC_BUILTINS)
-  return __builtin_usub_overflow(A, B, Result);
-#else
+ #if defined (OC_HAS_TYPE_GENERIC_BUILTINS)
+  return __builtin_sub_overflow (A, B, Result);
+ #elif defined (OC_HAS_TYPE_SPECIFIC_BUILTINS)
+  return __builtin_usub_overflow (A, B, Result);
+ #else
   *Result = A - B;
   if (B <= A) {
     return FALSE;
   }
 
   return TRUE;
-#endif
+ #endif
 }
 
 BOOLEAN
@@ -148,21 +148,21 @@ OcOverflowMulU32 (
   UINT32  *Result
   )
 {
-#if defined(OC_HAS_TYPE_GENERIC_BUILTINS)
-  return __builtin_mul_overflow(A, B, Result);
-#elif defined(OC_HAS_TYPE_SPECIFIC_BUILTINS)
-  return __builtin_umul_overflow(A, B, Result);
-#else
+ #if defined (OC_HAS_TYPE_GENERIC_BUILTINS)
+  return __builtin_mul_overflow (A, B, Result);
+ #elif defined (OC_HAS_TYPE_SPECIFIC_BUILTINS)
+  return __builtin_umul_overflow (A, B, Result);
+ #else
   UINT64  Temp;
 
-  Temp    = (UINT64) A * B;
-  *Result = (UINT32) Temp;
+  Temp    = (UINT64)A * B;
+  *Result = (UINT32)Temp;
   if (Temp <= MAX_UINT32) {
     return FALSE;
   }
 
   return TRUE;
-#endif
+ #endif
 }
 
 BOOLEAN
@@ -172,21 +172,21 @@ OcOverflowAddS32 (
   INT32  *Result
   )
 {
-#if defined(OC_HAS_TYPE_GENERIC_BUILTINS)
-  return __builtin_add_overflow(A, B, Result);
-#elif defined(OC_HAS_TYPE_SPECIFIC_BUILTINS)
-  return __builtin_sadd_overflow(A, B, Result);
-#else
+ #if defined (OC_HAS_TYPE_GENERIC_BUILTINS)
+  return __builtin_add_overflow (A, B, Result);
+ #elif defined (OC_HAS_TYPE_SPECIFIC_BUILTINS)
+  return __builtin_sadd_overflow (A, B, Result);
+ #else
   INT64  Temp;
 
-  Temp    = (INT64) A + B;
-  *Result = (INT32) Temp;
-  if (Temp >= MIN_INT32 && Temp <= MAX_INT32) {
+  Temp    = (INT64)A + B;
+  *Result = (INT32)Temp;
+  if ((Temp >= MIN_INT32) && (Temp <= MAX_INT32)) {
     return FALSE;
   }
 
   return TRUE;
-#endif
+ #endif
 }
 
 BOOLEAN
@@ -196,21 +196,21 @@ OcOverflowSubS32 (
   INT32  *Result
   )
 {
-#if defined(OC_HAS_TYPE_GENERIC_BUILTINS)
-  return __builtin_sub_overflow(A, B, Result);
-#elif defined(OC_HAS_TYPE_SPECIFIC_BUILTINS)
-  return __builtin_ssub_overflow(A, B, Result);
-#else
+ #if defined (OC_HAS_TYPE_GENERIC_BUILTINS)
+  return __builtin_sub_overflow (A, B, Result);
+ #elif defined (OC_HAS_TYPE_SPECIFIC_BUILTINS)
+  return __builtin_ssub_overflow (A, B, Result);
+ #else
   INT64  Temp;
 
-  Temp    = (INT64) A - B;
-  *Result = (INT32) Temp;
-  if (Temp >= MIN_INT32 && Temp <= MAX_INT32) {
+  Temp    = (INT64)A - B;
+  *Result = (INT32)Temp;
+  if ((Temp >= MIN_INT32) && (Temp <= MAX_INT32)) {
     return FALSE;
   }
 
   return TRUE;
-#endif
+ #endif
 }
 
 BOOLEAN
@@ -220,21 +220,21 @@ OcOverflowMulS32 (
   INT32  *Result
   )
 {
-#if defined(OC_HAS_TYPE_GENERIC_BUILTINS)
-  return __builtin_mul_overflow(A, B, Result);
-#elif defined(OC_HAS_TYPE_SPECIFIC_BUILTINS)
-  return __builtin_smul_overflow(A, B, Result);
-#else
+ #if defined (OC_HAS_TYPE_GENERIC_BUILTINS)
+  return __builtin_mul_overflow (A, B, Result);
+ #elif defined (OC_HAS_TYPE_SPECIFIC_BUILTINS)
+  return __builtin_smul_overflow (A, B, Result);
+ #else
   INT64  Temp;
 
   Temp    = MultS64x64 (A, B);
-  *Result = (INT32) Temp;
-  if (Temp >= MIN_INT32 && Temp <= MAX_INT32) {
+  *Result = (INT32)Temp;
+  if ((Temp >= MIN_INT32) && (Temp <= MAX_INT32)) {
     return FALSE;
   }
 
   return TRUE;
-#endif
+ #endif
 }
 
 BOOLEAN
@@ -244,11 +244,11 @@ OcOverflowAddU64 (
   UINT64  *Result
   )
 {
-#if defined(OC_HAS_TYPE_GENERIC_BUILTINS)
-  return __builtin_add_overflow(A, B, Result);
-#elif defined(OC_HAS_TYPE_SPECIFIC_BUILTINS)
-  return __builtin_uaddll_overflow(A, B, Result);
-#else
+ #if defined (OC_HAS_TYPE_GENERIC_BUILTINS)
+  return __builtin_add_overflow (A, B, Result);
+ #elif defined (OC_HAS_TYPE_SPECIFIC_BUILTINS)
+  return __builtin_uaddll_overflow (A, B, Result);
+ #else
   UINT64  Temp;
 
   Temp    = A + B;
@@ -258,7 +258,7 @@ OcOverflowAddU64 (
   }
 
   return TRUE;
-#endif
+ #endif
 }
 
 BOOLEAN
@@ -268,18 +268,18 @@ OcOverflowSubU64 (
   UINT64  *Result
   )
 {
-#if defined(OC_HAS_TYPE_GENERIC_BUILTINS)
-  return __builtin_sub_overflow(A, B, Result);
-#elif defined(OC_HAS_TYPE_SPECIFIC_BUILTINS)
-  return __builtin_usubll_overflow(A, B, Result);
-#else
+ #if defined (OC_HAS_TYPE_GENERIC_BUILTINS)
+  return __builtin_sub_overflow (A, B, Result);
+ #elif defined (OC_HAS_TYPE_SPECIFIC_BUILTINS)
+  return __builtin_usubll_overflow (A, B, Result);
+ #else
   *Result = A - B;
   if (B <= A) {
     return FALSE;
   }
 
   return TRUE;
-#endif
+ #endif
 }
 
 BOOLEAN
@@ -289,11 +289,11 @@ OcOverflowMulU64 (
   UINT64  *Result
   )
 {
-#if defined(OC_HAS_TYPE_GENERIC_BUILTINS)
-  return __builtin_mul_overflow(A, B, Result);
-#elif defined(OC_HAS_TYPE_SPECIFIC_BUILTINS)
-  return __builtin_umulll_overflow(A, B, Result);
-#else
+ #if defined (OC_HAS_TYPE_GENERIC_BUILTINS)
+  return __builtin_mul_overflow (A, B, Result);
+ #elif defined (OC_HAS_TYPE_SPECIFIC_BUILTINS)
+  return __builtin_umulll_overflow (A, B, Result);
+ #else
   UINT64   AHi;
   UINT64   ALo;
   UINT64   BHi;
@@ -315,9 +315,9 @@ OcOverflowMulU64 (
   BLo = B & MAX_UINT32;
 
   LoBits = MultU64x64 (ALo, BLo);
-  if (AHi == 0 && BHi == 0) {
+  if ((AHi == 0) && (BHi == 0)) {
     *Result = LoBits;
-    return FALSE; 
+    return FALSE;
   }
 
   Overflow = AHi > 0 && BHi > 0;
@@ -326,7 +326,7 @@ OcOverflowMulU64 (
 
   *Result = LoBits + LShiftU64 (HiBits1 + HiBits2, 32);
   return Overflow || *Result < LoBits || RShiftU64 (HiBits1, 32) != 0 || RShiftU64 (HiBits2, 32) != 0;
-#endif
+ #endif
 }
 
 BOOLEAN
@@ -336,12 +336,12 @@ OcOverflowAddS64 (
   INT64  *Result
   )
 {
-#if defined(OC_HAS_TYPE_GENERIC_BUILTINS)
-  return __builtin_add_overflow(A, B, Result);
-#elif defined(OC_HAS_TYPE_SPECIFIC_BUILTINS)
-  return __builtin_saddll_overflow(A, B, Result);
-#else
-  if ((B <= 0 || A <= MAX_INT64 - B) && (B >= 0 || A >= MIN_INT64 - B)) {
+ #if defined (OC_HAS_TYPE_GENERIC_BUILTINS)
+  return __builtin_add_overflow (A, B, Result);
+ #elif defined (OC_HAS_TYPE_SPECIFIC_BUILTINS)
+  return __builtin_saddll_overflow (A, B, Result);
+ #else
+  if (((B <= 0) || (A <= MAX_INT64 - B)) && ((B >= 0) || (A >= MIN_INT64 - B))) {
     *Result = A + B;
     return FALSE;
   }
@@ -351,7 +351,7 @@ OcOverflowAddS64 (
   //
   *Result = 0;
   return TRUE;
-#endif
+ #endif
 }
 
 BOOLEAN
@@ -361,12 +361,12 @@ OcOverflowSubS64 (
   INT64  *Result
   )
 {
-#if defined(OC_HAS_TYPE_GENERIC_BUILTINS)
-  return __builtin_sub_overflow(A, B, Result);
-#elif defined(OC_HAS_TYPE_SPECIFIC_BUILTINS)
-  return __builtin_ssubll_overflow(A, B, Result);
-#else
-  if ((B >= 0 || A <= MAX_INT64 + B) && (B <= 0 || A >= MIN_INT64 + B)) {
+ #if defined (OC_HAS_TYPE_GENERIC_BUILTINS)
+  return __builtin_sub_overflow (A, B, Result);
+ #elif defined (OC_HAS_TYPE_SPECIFIC_BUILTINS)
+  return __builtin_ssubll_overflow (A, B, Result);
+ #else
+  if (((B >= 0) || (A <= MAX_INT64 + B)) && ((B <= 0) || (A >= MIN_INT64 + B))) {
     *Result = A - B;
     return FALSE;
   }
@@ -376,7 +376,7 @@ OcOverflowSubS64 (
   //
   *Result = 0;
   return TRUE;
-#endif
+ #endif
 }
 
 BOOLEAN
@@ -390,11 +390,11 @@ OcOverflowMulS64 (
   // Intel 32-bit architectures do not have hardware signed 64-bit
   // multiplication with overflow.
   //
-#if defined(OC_HAS_TYPE_GENERIC_BUILTINS) && !defined(MDE_CPU_IA32)
-  return __builtin_mul_overflow(A, B, Result);
-#elif defined(OC_HAS_TYPE_SPECIFIC_BUILTINS) && !defined(MDE_CPU_IA32)
-  return __builtin_smulll_overflow(A, B, Result);
-#else
+ #if defined (OC_HAS_TYPE_GENERIC_BUILTINS) && !defined (MDE_CPU_IA32)
+  return __builtin_mul_overflow (A, B, Result);
+ #elif defined (OC_HAS_TYPE_SPECIFIC_BUILTINS) && !defined (MDE_CPU_IA32)
+  return __builtin_smulll_overflow (A, B, Result);
+ #else
   UINT64  AU;
   UINT64  BU;
   UINT64  ResultU;
@@ -404,7 +404,7 @@ OcOverflowMulS64 (
   // The idea taken from BaseSafeIntLib.
   //
 
-#define OC_ABS_64(X) (((X) < 0) ? (((UINT64) (-((X) + 1))) + 1) : (UINT64) (X))
+  #define OC_ABS_64(X)  (((X) < 0) ? (((UINT64) (-((X) + 1))) + 1) : (UINT64) (X))
 
   AU = OC_ABS_64 (A);
   BU = OC_ABS_64 (B);
@@ -419,12 +419,12 @@ OcOverflowMulS64 (
   //
   if ((A < 0) == (B < 0)) {
     if (ResultU <= MAX_INT64) {
-      *Result = (INT64) ResultU;
+      *Result = (INT64)ResultU;
       return FALSE;
     }
   } else {
     if (ResultU < OC_ABS_64 (MIN_INT64)) {
-      *Result = -((INT64) ResultU);
+      *Result = -((INT64)ResultU);
       return FALSE;
     } else if (ResultU == OC_ABS_64 (MIN_INT64)) {
       *Result = MIN_INT64;
@@ -432,9 +432,9 @@ OcOverflowMulS64 (
     }
   }
 
-#undef OC_ABS_64
+  #undef OC_ABS_64
 
   *Result = 0;
   return TRUE;
-#endif
+ #endif
 }

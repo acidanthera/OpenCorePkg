@@ -12,16 +12,34 @@
 #include <string.h>
 
 #ifdef COVERAGE_TEST
-#if defined(__clang__)
-void __wrap_llvm_gcda_emit_arcs (uint32_t num_counters, uint64_t *counters);
-void __real_llvm_gcda_emit_arcs (uint32_t num_counters, uint64_t *counters);
-#elif defined (__GNUC__)
+  #if defined (__clang__)
+void
+__wrap_llvm_gcda_emit_arcs (
+  uint32_t  num_counters,
+  uint64_t  *counters
+  );
+
+void
+__real_llvm_gcda_emit_arcs (
+  uint32_t  num_counters,
+  uint64_t  *counters
+  );
+
+  #elif defined (__GNUC__)
 typedef int64_t gcov_type;
 
-gcov_type __gcov_read_counter (void);
+gcov_type
+__gcov_read_counter (
+  void
+  );
 
-void __gcov_merge_add (gcov_type *counters, unsigned n_counters);
-#endif
+void
+__gcov_merge_add (
+  gcov_type  *counters,
+  unsigned   n_counters
+  );
+
+  #endif
 #endif
 
 /**
@@ -34,8 +52,8 @@ void __gcov_merge_add (gcov_type *counters, unsigned n_counters);
 **/
 UINT8 *
 UserReadFile (
-  IN  CONST CHAR8 *FileName,
-  OUT UINT32      *Size
+  IN  CONST CHAR8  *FileName,
+  OUT UINT32       *Size
   );
 
 /**
@@ -47,9 +65,9 @@ UserReadFile (
 **/
 VOID
 UserWriteFile (
-  IN  CONST CHAR8 *FileName,
-  IN  VOID        *Data,
-  IN  UINT32      Size
+  IN  CONST CHAR8  *FileName,
+  IN  VOID         *Data,
+  IN  UINT32       Size
   );
 
 #endif // OC_USER_FILE_H

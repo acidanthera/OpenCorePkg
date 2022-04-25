@@ -58,7 +58,7 @@ ActivateHpetSupport (
 
   @param[in]  CpuInfo  A pointer to the CPU info.
   @param[in]  Root     Directory to write CPU data.
-  
+
   @retval EFI_SUCCESS on success.
 **/
 EFI_STATUS
@@ -71,7 +71,7 @@ OcCpuInfoDump (
   Dump PCI info to the specified directory.
 
   @param[in]  Root     Directory to write PCI info.
-  
+
   @retval EFI_SUCCESS on success.
 **/
 EFI_STATUS
@@ -156,9 +156,9 @@ ResizeGpuBars (
 //
 #pragma pack(1)
 typedef struct {
-  UINT8                   ProgInterface;
-  UINT8                   SubClassCode;
-  UINT8                   BaseCode;
+  UINT8    ProgInterface;
+  UINT8    SubClassCode;
+  UINT8    BaseCode;
 } PCI_CLASSCODE;
 #pragma pack()
 

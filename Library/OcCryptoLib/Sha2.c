@@ -56,28 +56,27 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
            | LShiftU64 (*((str) + 0), 56);       \
   } while (0)
 
-
-#define SHFR(a, b)    (a >> b)
-#define ROTLEFT(a, b) ((a << b) | (a >> ((sizeof(a) << 3) - b)))
-#define ROTRIGHT(a, b) ((a >> b) | (a << ((sizeof(a) << 3) - b)))
-#define CH(x, y, z) (((x) & (y)) ^ (~(x) & (z)))
-#define MAJ(x, y, z) (((x) & (y)) ^ ((x) & (z)) ^ ((y) & (z)))
+#define SHFR(a, b)      (a >> b)
+#define ROTLEFT(a, b)   ((a << b) | (a >> ((sizeof(a) << 3) - b)))
+#define ROTRIGHT(a, b)  ((a >> b) | (a << ((sizeof(a) << 3) - b)))
+#define CH(x, y, z)     (((x) & (y)) ^ (~(x) & (z)))
+#define MAJ(x, y, z)    (((x) & (y)) ^ ((x) & (z)) ^ ((y) & (z)))
 
 //
 // Sha 256
 //
-#define SHA256_EP0(x)  (ROTRIGHT(x, 2)  ^ ROTRIGHT(x, 13) ^ ROTRIGHT(x, 22))
-#define SHA256_EP1(x)  (ROTRIGHT(x, 6)  ^ ROTRIGHT(x, 11) ^ ROTRIGHT(x, 25))
-#define SHA256_SIG0(x) (ROTRIGHT(x, 7)  ^ ROTRIGHT(x, 18) ^ SHFR(x, 3))
-#define SHA256_SIG1(x) (ROTRIGHT(x, 17) ^ ROTRIGHT(x, 19) ^ SHFR(x, 10))
+#define SHA256_EP0(x)   (ROTRIGHT(x, 2)  ^ ROTRIGHT(x, 13) ^ ROTRIGHT(x, 22))
+#define SHA256_EP1(x)   (ROTRIGHT(x, 6)  ^ ROTRIGHT(x, 11) ^ ROTRIGHT(x, 25))
+#define SHA256_SIG0(x)  (ROTRIGHT(x, 7)  ^ ROTRIGHT(x, 18) ^ SHFR(x, 3))
+#define SHA256_SIG1(x)  (ROTRIGHT(x, 17) ^ ROTRIGHT(x, 19) ^ SHFR(x, 10))
 
 //
 // Sha 512
 //
-#define SHA512_EP0(x)  (ROTRIGHT(x, 28) ^ ROTRIGHT(x, 34) ^ ROTRIGHT(x, 39))
-#define SHA512_EP1(x)  (ROTRIGHT(x, 14) ^ ROTRIGHT(x, 18) ^ ROTRIGHT(x, 41))
-#define SHA512_SIG0(x) (ROTRIGHT(x,  1) ^ ROTRIGHT(x,  8) ^ SHFR(x,  7))
-#define SHA512_SIG1(x) (ROTRIGHT(x, 19) ^ ROTRIGHT(x, 61) ^ SHFR(x,  6))
+#define SHA512_EP0(x)   (ROTRIGHT(x, 28) ^ ROTRIGHT(x, 34) ^ ROTRIGHT(x, 39))
+#define SHA512_EP1(x)   (ROTRIGHT(x, 14) ^ ROTRIGHT(x, 18) ^ ROTRIGHT(x, 41))
+#define SHA512_SIG0(x)  (ROTRIGHT(x,  1) ^ ROTRIGHT(x,  8) ^ SHFR(x,  7))
+#define SHA512_SIG1(x)  (ROTRIGHT(x, 19) ^ ROTRIGHT(x, 61) ^ SHFR(x,  6))
 
 #define SHA512_SCR(Index)                                   \
   do {                                                      \
@@ -85,10 +84,10 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
           + SHA512_SIG0(W[Index - 15]) + W[Index - 16];     \
   } while(0)
 
-GLOBAL_REMOVE_IF_UNREFERENCED BOOLEAN mIsAccelEnabled;
+GLOBAL_REMOVE_IF_UNREFERENCED BOOLEAN  mIsAccelEnabled;
 
 #ifdef OC_CRYPTO_SUPPORTS_SHA256
-STATIC CONST UINT32 SHA256_K[64] = {
+STATIC CONST UINT32  SHA256_K[64] = {
   0x428A2F98, 0x71374491, 0xB5C0FBCF, 0xE9B5DBA5, 0x3956C25B, 0x59F111F1, 0x923F82A4, 0xAB1C5ED5,
   0xD807AA98, 0x12835B01, 0x243185BE, 0x550C7DC3, 0x72BE5D74, 0x80DEB1FE, 0x9BDC06A7, 0xC19BF174,
   0xE49B69C1, 0xEFBE4786, 0x0FC19DC6, 0x240CA1CC, 0x2DE92C6F, 0x4A7484AA, 0x5CB0A9DC, 0x76F988DA,
@@ -100,8 +99,8 @@ STATIC CONST UINT32 SHA256_K[64] = {
 };
 #endif
 
-#if defined(OC_CRYPTO_SUPPORTS_SHA384) || defined(OC_CRYPTO_SUPPORTS_SHA512)
-CONST UINT64 SHA512_K[80] = {
+#if defined (OC_CRYPTO_SUPPORTS_SHA384) || defined (OC_CRYPTO_SUPPORTS_SHA512)
+CONST UINT64  SHA512_K[80] = {
   0x428a2f98d728ae22ULL, 0x7137449123ef65cdULL, 0xb5c0fbcfec4d3b2fULL,
   0xe9b5dba58189dbbcULL, 0x3956c25bf348b538ULL, 0x59f111f1b605d019ULL,
   0x923f82a4af194f9bULL, 0xab1c5ed5da6d8118ULL, 0xd807aa98a3030242ULL,
@@ -136,7 +135,7 @@ CONST UINT64 SHA512_K[80] = {
 //
 // Sha 256 Init State
 //
-STATIC CONST UINT32 SHA256_H0[8] = {
+STATIC CONST UINT32  SHA256_H0[8] = {
   0x6a09e667, 0xbb67ae85, 0x3c6ef372, 0xa54ff53a,
   0x510e527f, 0x9b05688c, 0x1f83d9ab, 0x5be0cd19
 };
@@ -146,7 +145,7 @@ STATIC CONST UINT32 SHA256_H0[8] = {
 //
 // Sha 384 Init State
 //
-STATIC CONST UINT64 SHA384_H0[8] = {
+STATIC CONST UINT64  SHA384_H0[8] = {
   0xcbbb9d5dc1059ed8ULL, 0x629a292a367cd507ULL,
   0x9159015a3070dd17ULL, 0x152fecd8f70e5939ULL,
   0x67332667ffc00b31ULL, 0x8eb44a8768581511ULL,
@@ -158,7 +157,7 @@ STATIC CONST UINT64 SHA384_H0[8] = {
 //
 // Sha 512 Init State
 //
-STATIC CONST UINT64 SHA512_H0[8] = {
+STATIC CONST UINT64  SHA512_H0[8] = {
   0x6a09e667f3bcc908ULL, 0xbb67ae8584caa73bULL,
   0x3c6ef372fe94f82bULL, 0xa54ff53a5f1d36f1ULL,
   0x510e527fade682d1ULL, 0x9b05688c2b3e6c1fULL,
@@ -176,8 +175,8 @@ Sha256Transform (
   CONST UINT8     *Data
   )
 {
-  UINT32 A, B, C, D, E, F, G, H, Index1, Index2, T1, T2;
-  UINT32 M[64];
+  UINT32  A, B, C, D, E, F, G, H, Index1, Index2, T1, T2;
+  UINT32  M[64];
 
   for (Index1 = 0, Index2 = 0; Index1 < 16; Index1++, Index2 += 4) {
     M[Index1] = ((UINT32)Data[Index2] << 24)
@@ -188,7 +187,7 @@ Sha256Transform (
 
   for ( ; Index1 < 64; ++Index1) {
     M[Index1] = SHA256_SIG1 (M[Index1 - 2]) + M[Index1 - 7]
-      + SHA256_SIG0 (M[Index1 - 15]) + M[Index1 - 16];
+                + SHA256_SIG0 (M[Index1 - 15]) + M[Index1 - 16];
   }
 
   A = Context->State[0];
@@ -203,14 +202,14 @@ Sha256Transform (
   for (Index1 = 0; Index1 < 64; ++Index1) {
     T1 = H + SHA256_EP1 (E) + CH (E, F, G) + SHA256_K[Index1] + M[Index1];
     T2 = SHA256_EP0 (A) + MAJ (A, B, C);
-    H = G;
-    G = F;
-    F = E;
-    E = D + T1;
-    D = C;
-    C = B;
-    B = A;
-    A = T1 + T2;
+    H  = G;
+    G  = F;
+    F  = E;
+    E  = D + T1;
+    D  = C;
+    C  = B;
+    B  = A;
+    A  = T1 + T2;
   }
 
   Context->State[0] += A;
@@ -225,25 +224,27 @@ Sha256Transform (
 
 VOID
 Sha256Init (
-  SHA256_CONTEXT *Context
+  SHA256_CONTEXT  *Context
   )
 {
-  UINTN Index;
+  UINTN  Index;
+
   for (Index = 0; Index < 8; ++Index) {
     Context->State[Index] = SHA256_H0[Index];
   }
+
   Context->DataLen = 0;
-  Context->BitLen = 0;
+  Context->BitLen  = 0;
 }
 
 VOID
 Sha256Update (
-  SHA256_CONTEXT *Context,
-  CONST UINT8    *Data,
-  UINTN          Len
+  SHA256_CONTEXT  *Context,
+  CONST UINT8     *Data,
+  UINTN           Len
   )
 {
-  UINT32 Index;
+  UINT32  Index;
 
   for (Index = 0; Index < Len; ++Index) {
     Context->Data[Context->DataLen] = Data[Index];
@@ -262,7 +263,7 @@ Sha256Final (
   UINT8           *HashDigest
   )
 {
-  UINT32 Index  = 0;
+  UINT32  Index = 0;
 
   Index = Context->DataLen;
 
@@ -283,14 +284,14 @@ Sha256Final (
   // Append to the padding the total Message's length in bits and transform.
   //
   Context->BitLen  += Context->DataLen * 8;
-  Context->Data[63] = (UINT8) Context->BitLen;
-  Context->Data[62] = (UINT8) (Context->BitLen >> 8);
-  Context->Data[61] = (UINT8) (Context->BitLen >> 16);
-  Context->Data[60] = (UINT8) (Context->BitLen >> 24);
-  Context->Data[59] = (UINT8) (Context->BitLen >> 32);
-  Context->Data[58] = (UINT8) (Context->BitLen >> 40);
-  Context->Data[57] = (UINT8) (Context->BitLen >> 48);
-  Context->Data[56] = (UINT8) (Context->BitLen >> 56);
+  Context->Data[63] = (UINT8)Context->BitLen;
+  Context->Data[62] = (UINT8)(Context->BitLen >> 8);
+  Context->Data[61] = (UINT8)(Context->BitLen >> 16);
+  Context->Data[60] = (UINT8)(Context->BitLen >> 24);
+  Context->Data[59] = (UINT8)(Context->BitLen >> 32);
+  Context->Data[58] = (UINT8)(Context->BitLen >> 40);
+  Context->Data[57] = (UINT8)(Context->BitLen >> 48);
+  Context->Data[56] = (UINT8)(Context->BitLen >> 56);
   Sha256Transform (Context, Context->Data);
 
   //
@@ -298,14 +299,14 @@ Sha256Final (
   // reverse all the bytes when copying the final State to the output hash.
   //
   for (Index = 0; Index < 4; ++Index) {
-    HashDigest[Index]      = (UINT8) ((Context->State[0] >> (24 - Index * 8)) & 0x000000FF);
-    HashDigest[Index + 4]  = (UINT8) ((Context->State[1] >> (24 - Index * 8)) & 0x000000FF);
-    HashDigest[Index + 8]  = (UINT8) ((Context->State[2] >> (24 - Index * 8)) & 0x000000FF);
-    HashDigest[Index + 12] = (UINT8) ((Context->State[3] >> (24 - Index * 8)) & 0x000000FF);
-    HashDigest[Index + 16] = (UINT8) ((Context->State[4] >> (24 - Index * 8)) & 0x000000FF);
-    HashDigest[Index + 20] = (UINT8) ((Context->State[5] >> (24 - Index * 8)) & 0x000000FF);
-    HashDigest[Index + 24] = (UINT8) ((Context->State[6] >> (24 - Index * 8)) & 0x000000FF);
-    HashDigest[Index + 28] = (UINT8) ((Context->State[7] >> (24 - Index * 8)) & 0x000000FF);
+    HashDigest[Index]      = (UINT8)((Context->State[0] >> (24 - Index * 8)) & 0x000000FF);
+    HashDigest[Index + 4]  = (UINT8)((Context->State[1] >> (24 - Index * 8)) & 0x000000FF);
+    HashDigest[Index + 8]  = (UINT8)((Context->State[2] >> (24 - Index * 8)) & 0x000000FF);
+    HashDigest[Index + 12] = (UINT8)((Context->State[3] >> (24 - Index * 8)) & 0x000000FF);
+    HashDigest[Index + 16] = (UINT8)((Context->State[4] >> (24 - Index * 8)) & 0x000000FF);
+    HashDigest[Index + 20] = (UINT8)((Context->State[5] >> (24 - Index * 8)) & 0x000000FF);
+    HashDigest[Index + 24] = (UINT8)((Context->State[6] >> (24 - Index * 8)) & 0x000000FF);
+    HashDigest[Index + 28] = (UINT8)((Context->State[7] >> (24 - Index * 8)) & 0x000000FF);
   }
 }
 
@@ -323,17 +324,18 @@ Sha256 (
   Sha256Final (&Ctx, Hash);
   ZeroMem (&Ctx, sizeof (Ctx));
 }
+
 #endif
 
-#if defined(OC_CRYPTO_SUPPORTS_SHA384) || defined(OC_CRYPTO_SUPPORTS_SHA512)
+#if defined (OC_CRYPTO_SUPPORTS_SHA384) || defined (OC_CRYPTO_SUPPORTS_SHA512)
 //
 // Sha 384 & 512 common functions
 //
 VOID
 Sha512Transform (
-  IN OUT UINT64      *State,
-  IN     CONST UINT8 *Data,
-  IN     UINTN       BlockNb
+  IN OUT UINT64       *State,
+  IN     CONST UINT8  *Data,
+  IN     UINTN        BlockNb
   )
 {
   UINT64       W[80];
@@ -373,8 +375,8 @@ Sha512Transform (
       // Calculate T1 and T2
       //
       T1 = Wv[7] + SHA512_EP1 (Wv[4])
-        + CH (Wv[4], Wv[5], Wv[6]) + SHA512_K[Index2]
-        + W[Index2];
+           + CH (Wv[4], Wv[5], Wv[6]) + SHA512_K[Index2]
+           + W[Index2];
 
       T2 = SHA512_EP0 (Wv[0]) + MAJ (Wv[0], Wv[1], Wv[2]);
 
@@ -390,6 +392,7 @@ Sha512Transform (
       Wv[1] = Wv[0];
       Wv[0] = T1 + T2;
     }
+
     //
     // Update the hash value
     //
@@ -398,6 +401,7 @@ Sha512Transform (
     }
   }
 }
+
 #endif
 
 #ifdef OC_CRYPTO_SUPPORTS_SHA512
@@ -448,7 +452,7 @@ Sha512Update (
     return;
   }
 
-  NewLen = Len - RemLen;
+  NewLen  = Len - RemLen;
   BlockNb = NewLen / SHA512_BLOCK_SIZE;
 
   ShiftedMsg = Data + RemLen;
@@ -465,7 +469,7 @@ Sha512Update (
 
   CopyMem (Context->Block, &ShiftedMsg[BlockNb << 7], RemLen);
 
-  Context->Length = RemLen;
+  Context->Length       = RemLen;
   Context->TotalLength += (BlockNb + 1) << 7;
 }
 
@@ -482,7 +486,7 @@ Sha512Final (
 
   BlockNb = ((SHA512_BLOCK_SIZE - 17) < (Context->Length % SHA512_BLOCK_SIZE)) + 1;
 
-  LenB = (Context->TotalLength + Context->Length) << 3;
+  LenB  = (Context->TotalLength + Context->Length) << 3;
   PmLen = BlockNb << 7;
 
   ZeroMem (Context->Block + Context->Length, PmLen - Context->Length);
@@ -495,7 +499,7 @@ Sha512Final (
     Sha512Transform (Context->State, Context->Block, BlockNb);
   }
 
-  for (Index = 0 ; Index < 8; ++Index) {
+  for (Index = 0; Index < 8; ++Index) {
     UNPACK64 (Context->State[Index], &HashDigest[Index << 3]);
   }
 }
@@ -514,6 +518,7 @@ Sha512 (
   Sha512Final (&Ctx, Hash);
   ZeroMem (&Ctx, sizeof (Ctx));
 }
+
 #endif
 
 #ifdef OC_CRYPTO_SUPPORTS_SHA384
@@ -527,7 +532,7 @@ Sha384Init (
 {
   CopyMem (Context->State, SHA384_H0, SHA512_DIGEST_SIZE);
 
-  Context->Length = 0;
+  Context->Length      = 0;
   Context->TotalLength = 0;
 }
 
@@ -554,7 +559,7 @@ Sha384Update (
     return;
   }
 
-  NewLen = Len - RemLen;
+  NewLen  = Len - RemLen;
   BlockNb = NewLen / SHA384_BLOCK_SIZE;
 
   ShiftedMsg = Data + RemLen;
@@ -571,7 +576,7 @@ Sha384Update (
 
   CopyMem (Context->Block, &ShiftedMsg[BlockNb << 7], RemLen);
 
-  Context->Length = RemLen;
+  Context->Length       = RemLen;
   Context->TotalLength += (BlockNb + 1) << 7;
 }
 
@@ -581,14 +586,14 @@ Sha384Final (
   UINT8           *HashDigest
   )
 {
-  UINTN    BlockNb;
-  UINTN    PmLen;
-  UINT64   LenB;
-  UINTN    Index;
+  UINTN   BlockNb;
+  UINTN   PmLen;
+  UINT64  LenB;
+  UINTN   Index;
 
   BlockNb = ((SHA384_BLOCK_SIZE - 17) < (Context->Length % SHA384_BLOCK_SIZE)) + 1;
 
-  LenB = (Context->TotalLength + Context->Length) << 3;
+  LenB  = (Context->TotalLength + Context->Length) << 3;
   PmLen = BlockNb << 7;
 
   ZeroMem (Context->Block + Context->Length, PmLen - Context->Length);
@@ -602,7 +607,7 @@ Sha384Final (
     Sha512Transform (Context->State, Context->Block, BlockNb);
   }
 
-  for (Index = 0 ; Index < 6; ++Index) {
+  for (Index = 0; Index < 6; ++Index) {
     UNPACK64 (Context->State[Index], &HashDigest[Index << 3]);
   }
 }
@@ -614,11 +619,12 @@ Sha384 (
   UINTN        Len
   )
 {
-  SHA384_CONTEXT Ctx;
+  SHA384_CONTEXT  Ctx;
 
   Sha384Init (&Ctx);
   Sha384Update (&Ctx, Data, Len);
   Sha384Final (&Ctx, Hash);
   SecureZeroMem (&Ctx, sizeof (Ctx));
 }
+
 #endif

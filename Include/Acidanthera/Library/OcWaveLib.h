@@ -34,13 +34,13 @@
 **/
 EFI_STATUS
 OcDecodeWave (
-  IN  UINT8                          *Buffer,
-  IN  UINTN                          BufferSize,
-  OUT UINT8                          **RawBuffer,
-  OUT UINT32                         *RawBufferSize,
-  OUT EFI_AUDIO_IO_PROTOCOL_FREQ     *Frequency,
-  OUT EFI_AUDIO_IO_PROTOCOL_BITS     *Bits,
-  OUT UINT8                          *Channels
+  IN  UINT8                       *Buffer,
+  IN  UINTN                       BufferSize,
+  OUT UINT8                       **RawBuffer,
+  OUT UINT32                      *RawBufferSize,
+  OUT EFI_AUDIO_IO_PROTOCOL_FREQ  *Frequency,
+  OUT EFI_AUDIO_IO_PROTOCOL_BITS  *Bits,
+  OUT UINT8                       *Channels
   );
 
 #endif // OC_WAVE_LIB_H

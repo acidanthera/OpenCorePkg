@@ -5,18 +5,18 @@
 
 #include <UserPcd.h>
 
-#define _PCD_VALUE_PcdUefiLibMaxPrintBufferSize               320U
-#define _PCD_VALUE_PcdUgaConsumeSupport                       ((BOOLEAN)1U)
-#define _PCD_VALUE_PcdDebugPropertyMask                       0x23U
-#define _PCD_VALUE_PcdDebugClearMemoryValue                   0xAFU
-#define _PCD_VALUE_PcdFixedDebugPrintErrorLevel               0x80000002U
-#define _PCD_VALUE_PcdDebugPrintErrorLevel                    0x80000002U
-#define _PCD_VALUE_PcdMaximumAsciiStringLength                0U
-#define _PCD_VALUE_PcdMaximumUnicodeStringLength              1000000U
-#define _PCD_VALUE_PcdMaximumLinkedListLength                 1000000U
-#define _PCD_VALUE_PcdVerifyNodeInList                        ((BOOLEAN)0U)
-#define _PCD_VALUE_PcdCpuNumberOfReservedVariableMtrrs        0x2U
-#define _PCD_VALUE_PcdMaximumDevicePathNodeCount              0U
+#define _PCD_VALUE_PcdUefiLibMaxPrintBufferSize         320U
+#define _PCD_VALUE_PcdUgaConsumeSupport                 ((BOOLEAN)1U)
+#define _PCD_VALUE_PcdDebugPropertyMask                 0x23U
+#define _PCD_VALUE_PcdDebugClearMemoryValue             0xAFU
+#define _PCD_VALUE_PcdFixedDebugPrintErrorLevel         0x80000002U
+#define _PCD_VALUE_PcdDebugPrintErrorLevel              0x80000002U
+#define _PCD_VALUE_PcdMaximumAsciiStringLength          0U
+#define _PCD_VALUE_PcdMaximumUnicodeStringLength        1000000U
+#define _PCD_VALUE_PcdMaximumLinkedListLength           1000000U
+#define _PCD_VALUE_PcdVerifyNodeInList                  ((BOOLEAN)0U)
+#define _PCD_VALUE_PcdCpuNumberOfReservedVariableMtrrs  0x2U
+#define _PCD_VALUE_PcdMaximumDevicePathNodeCount        0U
 
 UINT32   _gPcd_FixedAtBuild_PcdUefiLibMaxPrintBufferSize             = _PCD_VALUE_PcdUefiLibMaxPrintBufferSize;
 BOOLEAN  _gPcd_FixedAtBuild_PcdUgaConsumeSupport                     = _PCD_VALUE_PcdUgaConsumeSupport;

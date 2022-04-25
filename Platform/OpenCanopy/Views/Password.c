@@ -31,28 +31,28 @@
 #define PASSWORD_BOX_SPACE  30U
 
 typedef struct {
-  CHAR8 Password[OC_PASSWORD_MAX_LEN];
-  UINT8 PasswordLen;
+  CHAR8    Password[OC_PASSWORD_MAX_LEN];
+  UINT8    PasswordLen;
 } GUI_PASSWORD_INFO;
 
 typedef struct {
-  GUI_OBJ_CHILD     Hdr;
-  GUI_PASSWORD_INFO PasswordInfo;
-  BOOLEAN           RequestConfirm;
-  UINT8             MaxPasswordDots;
+  GUI_OBJ_CHILD        Hdr;
+  GUI_PASSWORD_INFO    PasswordInfo;
+  BOOLEAN              RequestConfirm;
+  UINT8                MaxPasswordDots;
 } GUI_PASSWORD_BOX;
 
-extern GUI_KEY_CONTEXT   *mKeyContext;
+extern GUI_KEY_CONTEXT  *mKeyContext;
 
-extern GUI_PASSWORD_BOX  mPasswordBox;
-extern GUI_OBJ_CLICKABLE mPasswordEnter;
-extern GUI_OBJ_CHILD     mPasswordLock;
-extern GUI_OBJ_CHILD     mPasswordBoxContainer;
+extern GUI_PASSWORD_BOX   mPasswordBox;
+extern GUI_OBJ_CLICKABLE  mPasswordEnter;
+extern GUI_OBJ_CHILD      mPasswordLock;
+extern GUI_OBJ_CHILD      mPasswordBoxContainer;
 
 // FIXME: Create one context for drawing, pointers, and keys.
-extern GUI_POINTER_CONTEXT *mPointerContext;
+extern GUI_POINTER_CONTEXT  *mPointerContext;
 
-STATIC GUI_INTERPOLATION mPasswordIncorrectInterpol = {
+STATIC GUI_INTERPOLATION  mPasswordIncorrectInterpol = {
   GuiInterpolTypeLinear,
   0,
   3,
@@ -61,17 +61,17 @@ STATIC GUI_INTERPOLATION mPasswordIncorrectInterpol = {
   0
 };
 
-STATIC GUI_OBJ *mPasswordFocusList[] = {
+STATIC GUI_OBJ  *mPasswordFocusList[] = {
   &mPasswordBoxContainer.Obj,
   &mCommonRestart.Hdr.Obj,
   &mCommonShutDown.Hdr.Obj
 };
 
-STATIC GUI_OBJ *mPasswordFocusListMinimal[] = {
+STATIC GUI_OBJ  *mPasswordFocusListMinimal[] = {
   &mPasswordBoxContainer.Obj
 };
 
-STATIC UINT8 mPasswordNumTries = 0;
+STATIC UINT8  mPasswordNumTries = 0;
 
 STATIC
 VOID
@@ -86,37 +86,37 @@ InternalInitPasswordIncorrectInterpol (
 
 BOOLEAN
 InternalPasswordAnimateIncorrect (
-  IN     BOOT_PICKER_GUI_CONTEXT *Context,
-  IN OUT GUI_DRAWING_CONTEXT     *DrawContext,
-  IN     UINT64                  CurrentTime
+  IN     BOOT_PICKER_GUI_CONTEXT  *Context,
+  IN OUT GUI_DRAWING_CONTEXT      *DrawContext,
+  IN     UINT64                   CurrentTime
   )
 {
-  STATIC UINT32  LastOff   = 0;
-  STATIC BOOLEAN Left      = FALSE;
-  STATIC UINT8   Iteration = 0;
+  STATIC UINT32   LastOff   = 0;
+  STATIC BOOLEAN  Left      = FALSE;
+  STATIC UINT8    Iteration = 0;
 
-  UINT32 DeltaOrig;
-  UINT32 DeltaAdd;
-  
+  UINT32  DeltaOrig;
+  UINT32  DeltaAdd;
+
   DeltaOrig = GuiGetInterpolatedValue (
-    &mPasswordIncorrectInterpol,
-    CurrentTime
-    );
+                &mPasswordIncorrectInterpol,
+                CurrentTime
+                );
   DeltaAdd = DeltaOrig - LastOff;
   LastOff  = DeltaOrig;
 
   if (Left) {
     mPasswordBoxContainer.Obj.OffsetX -= DeltaAdd;
     GuiRequestDraw (
-      (UINT32) mPasswordBoxContainer.Obj.OffsetX,
-      (UINT32) mPasswordBoxContainer.Obj.OffsetY,
+      (UINT32)mPasswordBoxContainer.Obj.OffsetX,
+      (UINT32)mPasswordBoxContainer.Obj.OffsetY,
       mPasswordBoxContainer.Obj.Width + DeltaAdd,
       mPasswordBoxContainer.Obj.Height
       );
   } else {
     GuiRequestDraw (
-      (UINT32) mPasswordBoxContainer.Obj.OffsetX,
-      (UINT32) mPasswordBoxContainer.Obj.OffsetY,
+      (UINT32)mPasswordBoxContainer.Obj.OffsetX,
+      (UINT32)mPasswordBoxContainer.Obj.OffsetY,
       mPasswordBoxContainer.Obj.Width + DeltaAdd,
       mPasswordBoxContainer.Obj.Height
       );
@@ -125,9 +125,9 @@ InternalPasswordAnimateIncorrect (
 
   if (CurrentTime - mPasswordIncorrectInterpol.StartTime >= mPasswordIncorrectInterpol.Duration) {
     LastOff = 0;
-    
+
     if (Iteration == 5) {
-      Iteration = 0;
+      Iteration                      = 0;
       mPasswordEnter.Hdr.Obj.Opacity = 0xFF;
       return TRUE;
     }
@@ -139,7 +139,7 @@ InternalPasswordAnimateIncorrect (
     //
     Left = !Left;
   }
-  
+
   return FALSE;
 }
 
@@ -149,11 +149,12 @@ InternalQueueIncorrectPassword (
   OUT GUI_DRAWING_CONTEXT  *DrawContext
   )
 {
-  STATIC GUI_ANIMATION PwAnim = {
+  STATIC GUI_ANIMATION  PwAnim = {
     INITIALIZE_LIST_HEAD_VARIABLE (PwAnim.Link),
     NULL,
     InternalPasswordAnimateIncorrect
   };
+
   if (!IsNodeInList (&PwAnim.Link, &DrawContext->Animations)) {
     InternalInitPasswordIncorrectInterpol (DrawContext, DrawContext->FrameTime);
     InsertHeadList (&DrawContext->Animations, &PwAnim.Link);
@@ -167,8 +168,8 @@ InternalRedrawPaswordBox (
   )
 {
   GuiRequestDraw (
-    (UINT32) mPasswordBoxContainer.Obj.OffsetX,
-    (UINT32) mPasswordBoxContainer.Obj.OffsetY,
+    (UINT32)mPasswordBoxContainer.Obj.OffsetX,
+    (UINT32)mPasswordBoxContainer.Obj.OffsetY,
     mPasswordBoxContainer.Obj.Width,
     mPasswordBoxContainer.Obj.Height
     );
@@ -180,9 +181,9 @@ InternalConfirmPassword (
   IN     CONST BOOT_PICKER_GUI_CONTEXT  *Context
   )
 {
-  BOOLEAN                    Result;
-  CONST OC_PRIVILEGE_CONTEXT *Privilege;
-  GUI_PTR_POSITION           PtrPosition;
+  BOOLEAN                     Result;
+  CONST OC_PRIVILEGE_CONTEXT  *Privilege;
+  GUI_PTR_POSITION            PtrPosition;
 
   if (mPointerContext != NULL) {
     GuiPointerGetPosition (mPointerContext, &PtrPosition);
@@ -191,16 +192,17 @@ InternalConfirmPassword (
   Privilege = Context->PickerContext->PrivilegeContext;
 
   Result = Context->PickerContext->VerifyPassword (
-    (CONST UINT8 *) mPasswordBox.PasswordInfo.Password,
-    mPasswordBox.PasswordInfo.PasswordLen,
-    Privilege
-    );
-  
+                                     (CONST UINT8 *)mPasswordBox.PasswordInfo.Password,
+                                     mPasswordBox.PasswordInfo.PasswordLen,
+                                     Privilege
+                                     );
+
   GuiKeyReset (mKeyContext);
   if (mPointerContext != NULL) {
     GuiPointerReset (mPointerContext);
     GuiPointerSetPosition (mPointerContext, &PtrPosition);
   }
+
   DrawContext->CursorOpacity = 0xFF;
 
   SecureZeroMem (mPasswordBox.PasswordInfo.Password, mPasswordBox.PasswordInfo.PasswordLen);
@@ -208,34 +210,35 @@ InternalConfirmPassword (
   if (Result) {
     if (Context->PickerContext->PickerAudioAssist) {
       Context->PickerContext->PlayAudioFile (
-        Context->PickerContext,
-        OcVoiceOverAudioFilePasswordAccepted,
-        TRUE
-        );
+                                Context->PickerContext,
+                                OcVoiceOverAudioFilePasswordAccepted,
+                                TRUE
+                                );
     }
 
     mPasswordNumTries = 0;
     return TRUE;
   }
-  
+
   if (Context->PickerContext->PickerAudioAssist) {
     Context->PickerContext->PlayAudioFile (
-      Context->PickerContext,
-      OcVoiceOverAudioFilePasswordIncorrect,
-      TRUE
-      );
+                              Context->PickerContext,
+                              OcVoiceOverAudioFilePasswordIncorrect,
+                              TRUE
+                              );
   }
 
   ++mPasswordNumTries;
   if (mPasswordNumTries == OC_PASSWORD_MAX_RETRIES) {
     if (Context->PickerContext->PickerAudioAssist) {
       Context->PickerContext->PlayAudioFile (
-        Context->PickerContext,
-        OcVoiceOverAudioFilePasswordRetryLimit,
-        TRUE
-        );
+                                Context->PickerContext,
+                                OcVoiceOverAudioFilePasswordRetryLimit,
+                                TRUE
+                                );
       DEBUG ((DEBUG_WARN, "OCB: User failed to verify password %d times running\n", OC_PASSWORD_MAX_RETRIES));
     }
+
     //
     // Hide all UI except the password lock when retries have been exceeded.
     //
@@ -244,8 +247,8 @@ InternalConfirmPassword (
 
     mCommonActionButtonsContainer.Obj.Opacity = 0;
     GuiRequestDraw (
-      (UINT32) mCommonActionButtonsContainer.Obj.OffsetX,
-      (UINT32) mCommonActionButtonsContainer.Obj.OffsetY,
+      (UINT32)mCommonActionButtonsContainer.Obj.OffsetX,
+      (UINT32)mCommonActionButtonsContainer.Obj.OffsetY,
       mCommonActionButtonsContainer.Obj.Width,
       mCommonActionButtonsContainer.Obj.Height
       );
@@ -262,13 +265,13 @@ InternalRequestPasswordConfirmation (
   IN OUT GUI_DRAWING_CONTEXT  *DrawContext
   )
 {
-  DrawContext->CursorOpacity = 0;
+  DrawContext->CursorOpacity     = 0;
   mPasswordEnter.Hdr.Obj.Opacity = 0x100 / 2;
-  mPasswordBox.RequestConfirm = TRUE;
+  mPasswordBox.RequestConfirm    = TRUE;
   InternalRedrawPaswordBox ();
-    GuiRequestDraw (
-    (UINT32) (mPasswordBoxContainer.Obj.OffsetX + mPasswordEnter.Hdr.Obj.OffsetX),
-    (UINT32) (mPasswordBoxContainer.Obj.OffsetY + mPasswordEnter.Hdr.Obj.OffsetY),
+  GuiRequestDraw (
+    (UINT32)(mPasswordBoxContainer.Obj.OffsetX + mPasswordEnter.Hdr.Obj.OffsetX),
+    (UINT32)(mPasswordBoxContainer.Obj.OffsetY + mPasswordEnter.Hdr.Obj.OffsetY),
     mPasswordEnter.Hdr.Obj.Width,
     mPasswordEnter.Hdr.Obj.Height
     );
@@ -276,10 +279,10 @@ InternalRequestPasswordConfirmation (
 
 VOID
 InternalPasswordBoxKeyEvent (
-  IN OUT GUI_OBJ                 *This,
-  IN OUT GUI_DRAWING_CONTEXT     *DrawContext,
-  IN     BOOT_PICKER_GUI_CONTEXT *Context,
-  IN     CONST GUI_KEY_EVENT     *KeyEvent
+  IN OUT GUI_OBJ                  *This,
+  IN OUT GUI_DRAWING_CONTEXT      *DrawContext,
+  IN     BOOT_PICKER_GUI_CONTEXT  *Context,
+  IN     CONST GUI_KEY_EVENT      *KeyEvent
   )
 {
   if (KeyEvent->UnicodeChar == CHAR_CARRIAGE_RETURN) {
@@ -301,15 +304,16 @@ InternalPasswordBoxKeyEvent (
 
     if (Context->PickerContext->PickerAudioAssist) {
       Context->PickerContext->PlayAudioFile (
-        Context->PickerContext,
-        AppleVoiceOverAudioFileBeep,
-        TRUE
-        );
+                                Context->PickerContext,
+                                AppleVoiceOverAudioFileBeep,
+                                TRUE
+                                );
     }
-  } else if (KeyEvent->UnicodeChar != CHAR_NULL
-   && KeyEvent->UnicodeChar == (CHAR8) KeyEvent->UnicodeChar
-   && mPasswordBox.PasswordInfo.PasswordLen < ARRAY_SIZE (mPasswordBox.PasswordInfo.Password)) {
-    mPasswordBox.PasswordInfo.Password[mPasswordBox.PasswordInfo.PasswordLen] = (CHAR8) KeyEvent->UnicodeChar;
+  } else if (  (KeyEvent->UnicodeChar != CHAR_NULL)
+            && (KeyEvent->UnicodeChar == (CHAR8)KeyEvent->UnicodeChar)
+            && (mPasswordBox.PasswordInfo.PasswordLen < ARRAY_SIZE (mPasswordBox.PasswordInfo.Password)))
+  {
+    mPasswordBox.PasswordInfo.Password[mPasswordBox.PasswordInfo.PasswordLen] = (CHAR8)KeyEvent->UnicodeChar;
     ++mPasswordBox.PasswordInfo.PasswordLen;
   } else {
     //
@@ -317,11 +321,11 @@ InternalPasswordBoxKeyEvent (
     //
     if (Context->PickerContext->PickerAudioAssist) {
       Context->PickerContext->PlayAudioBeep (
-        Context->PickerContext,
-        OC_VOICE_OVER_SIGNALS_ERROR,
-        OC_VOICE_OVER_SIGNAL_ERROR_MS,
-        OC_VOICE_OVER_SILENCE_ERROR_MS
-        );
+                                Context->PickerContext,
+                                OC_VOICE_OVER_SIGNALS_ERROR,
+                                OC_VOICE_OVER_SIGNAL_ERROR_MS,
+                                OC_VOICE_OVER_SILENCE_ERROR_MS
+                                );
     }
 
     return;
@@ -333,8 +337,8 @@ InternalPasswordBoxKeyEvent (
   ASSERT (mPasswordBoxContainer.Obj.OffsetX + mPasswordBoxContainer.Obj.Width <= DrawContext->Screen.Width);
   ASSERT (mPasswordBoxContainer.Obj.OffsetX + mPasswordBoxContainer.Obj.Height <= DrawContext->Screen.Height);
   GuiRequestDraw (
-    (UINT32) mPasswordBoxContainer.Obj.OffsetX,
-    (UINT32) mPasswordBoxContainer.Obj.OffsetY,
+    (UINT32)mPasswordBoxContainer.Obj.OffsetX,
+    (UINT32)mPasswordBoxContainer.Obj.OffsetY,
     mPasswordBoxContainer.Obj.Width,
     mPasswordBoxContainer.Obj.Height
     );
@@ -351,7 +355,7 @@ InternalPasswordBoxFocus (
     mPasswordBoxContainer.Obj.Opacity = 0xFF;
 
     DrawContext->GuiContext->AudioPlaybackTimeout = 0;
-    DrawContext->GuiContext->VoAction = CanopyVoFocusPassword;
+    DrawContext->GuiContext->VoAction             = CanopyVoFocusPassword;
   } else {
     mPasswordBoxContainer.Obj.Opacity = 0x100 / 2;
   }
@@ -361,10 +365,10 @@ InternalPasswordBoxFocus (
 
 VOID
 InternalPasswordViewKeyEvent (
-  IN OUT GUI_OBJ                 *This,
-  IN OUT GUI_DRAWING_CONTEXT     *DrawContext,
-  IN     BOOT_PICKER_GUI_CONTEXT *Context,
-  IN     CONST GUI_KEY_EVENT     *KeyEvent
+  IN OUT GUI_OBJ                  *This,
+  IN OUT GUI_DRAWING_CONTEXT      *DrawContext,
+  IN     BOOT_PICKER_GUI_CONTEXT  *Context,
+  IN     CONST GUI_KEY_EVENT      *KeyEvent
   )
 {
   //
@@ -376,9 +380,9 @@ InternalPasswordViewKeyEvent (
 
   if (KeyEvent->OcKeyCode == OC_INPUT_VOICE_OVER) {
     DrawContext->GuiContext->PickerContext->ToggleVoiceOver (
-      DrawContext->GuiContext->PickerContext,
-      OcVoiceOverAudioFileEnterPassword
-      );
+                                              DrawContext->GuiContext->PickerContext,
+                                              OcVoiceOverAudioFileEnterPassword
+                                              );
     return;
   }
 
@@ -391,12 +395,12 @@ InternalPasswordViewKeyEvent (
 
 GUI_OBJ *
 InternalPasswordViewPtrEvent (
-  IN OUT GUI_OBJ                 *This,
-  IN OUT GUI_DRAWING_CONTEXT     *DrawContext,
-  IN     BOOT_PICKER_GUI_CONTEXT *Context,
-  IN     INT64                   BaseX,
-  IN     INT64                   BaseY,
-  IN     CONST GUI_PTR_EVENT     *Event
+  IN OUT GUI_OBJ                  *This,
+  IN OUT GUI_DRAWING_CONTEXT      *DrawContext,
+  IN     BOOT_PICKER_GUI_CONTEXT  *Context,
+  IN     INT64                    BaseX,
+  IN     INT64                    BaseY,
+  IN     CONST GUI_PTR_EVENT      *Event
   )
 {
   //
@@ -407,27 +411,27 @@ InternalPasswordViewPtrEvent (
   }
 
   return InternalCommonViewPtrEvent (
-    This,
-    DrawContext,
-    Context,
-    BaseX,
-    BaseY,
-    Event
-    );
+           This,
+           DrawContext,
+           Context,
+           BaseX,
+           BaseY,
+           Event
+           );
 }
 
 VOID
 InternalPasswordLockDraw (
-  IN OUT GUI_OBJ                 *This,
-  IN OUT GUI_DRAWING_CONTEXT     *DrawContext,
-  IN     BOOT_PICKER_GUI_CONTEXT *Context,
-  IN     INT64                   BaseX,
-  IN     INT64                   BaseY,
-  IN     UINT32                  OffsetX,
-  IN     UINT32                  OffsetY,
-  IN     UINT32                  Width,
-  IN     UINT32                  Height,
-  IN     UINT8                   Opacity
+  IN OUT GUI_OBJ                  *This,
+  IN OUT GUI_DRAWING_CONTEXT      *DrawContext,
+  IN     BOOT_PICKER_GUI_CONTEXT  *Context,
+  IN     INT64                    BaseX,
+  IN     INT64                    BaseY,
+  IN     UINT32                   OffsetX,
+  IN     UINT32                   OffsetY,
+  IN     UINT32                   Width,
+  IN     UINT32                   Height,
+  IN     UINT8                    Opacity
   )
 {
   GuiDrawToBuffer (
@@ -445,21 +449,21 @@ InternalPasswordLockDraw (
 
 VOID
 InternalPasswordBoxDraw (
-  IN OUT GUI_OBJ                 *This,
-  IN OUT GUI_DRAWING_CONTEXT     *DrawContext,
-  IN     BOOT_PICKER_GUI_CONTEXT *Context,
-  IN     INT64                   BaseX,
-  IN     INT64                   BaseY,
-  IN     UINT32                  OffsetX,
-  IN     UINT32                  OffsetY,
-  IN     UINT32                  Width,
-  IN     UINT32                  Height,
-  IN     UINT8                   Opacity
+  IN OUT GUI_OBJ                  *This,
+  IN OUT GUI_DRAWING_CONTEXT      *DrawContext,
+  IN     BOOT_PICKER_GUI_CONTEXT  *Context,
+  IN     INT64                    BaseX,
+  IN     INT64                    BaseY,
+  IN     UINT32                   OffsetX,
+  IN     UINT32                   OffsetY,
+  IN     UINT32                   Width,
+  IN     UINT32                   Height,
+  IN     UINT8                    Opacity
   )
 {
-  CONST GUI_IMAGE *BoxImage;
-  CONST GUI_IMAGE *DotImage;
-  UINT8           DotIndex;
+  CONST GUI_IMAGE  *BoxImage;
+  CONST GUI_IMAGE  *DotImage;
+  UINT8            DotIndex;
 
   BoxImage = &Context->Icons[ICON_PASSWORD][ICON_TYPE_BASE];
   DotImage = &Context->Icons[ICON_DOT][ICON_TYPE_BASE];
@@ -479,10 +483,11 @@ InternalPasswordBoxDraw (
   // Selective drawing is unlikely worth it.
   //
   for (
-    DotIndex = 0;
-    DotIndex < MIN (mPasswordBox.PasswordInfo.PasswordLen, mPasswordBox.MaxPasswordDots);
-    ++DotIndex
-    ) {
+       DotIndex = 0;
+       DotIndex < MIN (mPasswordBox.PasswordInfo.PasswordLen, mPasswordBox.MaxPasswordDots);
+       ++DotIndex
+       )
+  {
     GuiDrawChildImage (
       DotImage,
       Opacity,
@@ -501,30 +506,30 @@ InternalPasswordBoxDraw (
 
 GUI_OBJ *
 InternalPasswordEnterPtrEvent (
-  IN OUT GUI_OBJ                 *This,
-  IN OUT GUI_DRAWING_CONTEXT     *DrawContext,
-  IN     BOOT_PICKER_GUI_CONTEXT *Context,
-  IN     INT64                   BaseX,
-  IN     INT64                   BaseY,
-  IN     CONST GUI_PTR_EVENT     *Event
+  IN OUT GUI_OBJ                  *This,
+  IN OUT GUI_DRAWING_CONTEXT      *DrawContext,
+  IN     BOOT_PICKER_GUI_CONTEXT  *Context,
+  IN     INT64                    BaseX,
+  IN     INT64                    BaseY,
+  IN     CONST GUI_PTR_EVENT      *Event
   )
 {
-  UINT8 Result;
+  UINT8  Result;
 
   Result = InternalCommonSimpleButtonPtrEvent (
-    This,
-    DrawContext,
-    Context,
-    BaseX,
-    BaseY,
-    Event
-    );
+             This,
+             DrawContext,
+             Context,
+             BaseX,
+             BaseY,
+             Event
+             );
   switch (Result) {
     case CommonPtrNotHit:
     {
       return NULL;
     }
-    
+
     case CommonPtrAction:
     {
       InternalRequestPasswordConfirmation (DrawContext);
@@ -548,7 +553,7 @@ InternalPasswordExitLoop (
   IN     BOOT_PICKER_GUI_CONTEXT  *Context
   )
 {
-  BOOLEAN Confirmed;
+  BOOLEAN  Confirmed;
 
   ASSERT (Context != NULL);
   //
@@ -575,18 +580,18 @@ InternalPasswordExitLoop (
   return FALSE;
 }
 
-STATIC GUI_OBJ_CHILD *mPasswordViewChildren[] = {
+STATIC GUI_OBJ_CHILD  *mPasswordViewChildren[] = {
   &mPasswordLock,
   &mPasswordBoxContainer,
   &mCommonActionButtonsContainer
 };
 
-STATIC GUI_OBJ_CHILD *mPasswordViewChildrenMinimal[] = {
+STATIC GUI_OBJ_CHILD  *mPasswordViewChildrenMinimal[] = {
   &mPasswordLock,
   &mPasswordBoxContainer
 };
 
-STATIC GUI_VIEW_CONTEXT mPasswordViewContext = {
+STATIC GUI_VIEW_CONTEXT  mPasswordViewContext = {
   InternalCommonViewDraw,
   InternalPasswordViewPtrEvent,
   ARRAY_SIZE (mPasswordViewChildren),
@@ -598,7 +603,7 @@ STATIC GUI_VIEW_CONTEXT mPasswordViewContext = {
   ARRAY_SIZE (mPasswordFocusList)
 };
 
-STATIC GUI_VIEW_CONTEXT mPasswordViewContextMinimal = {
+STATIC GUI_VIEW_CONTEXT  mPasswordViewContextMinimal = {
   InternalCommonViewDraw,
   InternalPasswordViewPtrEvent,
   ARRAY_SIZE (mPasswordViewChildrenMinimal),
@@ -610,7 +615,7 @@ STATIC GUI_VIEW_CONTEXT mPasswordViewContextMinimal = {
   ARRAY_SIZE (mPasswordFocusListMinimal)
 };
 
-GLOBAL_REMOVE_IF_UNREFERENCED GUI_OBJ_CHILD mPasswordLock = {
+GLOBAL_REMOVE_IF_UNREFERENCED GUI_OBJ_CHILD  mPasswordLock = {
   {
     0, 0, 0, 0, 0xFF,
     InternalPasswordLockDraw,
@@ -623,7 +628,7 @@ GLOBAL_REMOVE_IF_UNREFERENCED GUI_OBJ_CHILD mPasswordLock = {
   NULL
 };
 
-GLOBAL_REMOVE_IF_UNREFERENCED GUI_PASSWORD_BOX mPasswordBox = {
+GLOBAL_REMOVE_IF_UNREFERENCED GUI_PASSWORD_BOX  mPasswordBox = {
   {
     {
       0, 0, 0, 0, 0xFF,
@@ -636,12 +641,14 @@ GLOBAL_REMOVE_IF_UNREFERENCED GUI_PASSWORD_BOX mPasswordBox = {
     },
     &mPasswordBoxContainer.Obj
   },
-  { { '\0' }, 0 },
+  {
+    { '\0' }, 0
+  },
   FALSE,
   0
 };
 
-GLOBAL_REMOVE_IF_UNREFERENCED GUI_OBJ_CLICKABLE mPasswordEnter = {
+GLOBAL_REMOVE_IF_UNREFERENCED GUI_OBJ_CLICKABLE  mPasswordEnter = {
   {
     {
       0, 0, 0, 0, 0xFF,
@@ -658,12 +665,12 @@ GLOBAL_REMOVE_IF_UNREFERENCED GUI_OBJ_CLICKABLE mPasswordEnter = {
   0
 };
 
-STATIC GUI_OBJ_CHILD *mPasswordBoxContainerChildren[] = {
+STATIC GUI_OBJ_CHILD  *mPasswordBoxContainerChildren[] = {
   &mPasswordBox.Hdr,
   &mPasswordEnter.Hdr
 };
 
-GLOBAL_REMOVE_IF_UNREFERENCED GUI_OBJ_CHILD mPasswordBoxContainer = {
+GLOBAL_REMOVE_IF_UNREFERENCED GUI_OBJ_CHILD  mPasswordBoxContainer = {
   {
     0, 0, 0, 0, 0xFF,
     GuiObjDrawDelegate,
@@ -678,42 +685,42 @@ GLOBAL_REMOVE_IF_UNREFERENCED GUI_OBJ_CHILD mPasswordBoxContainer = {
 
 BOOLEAN
 InternalPasswordAnimateIntro (
-  IN     BOOT_PICKER_GUI_CONTEXT *Context,
-  IN OUT GUI_DRAWING_CONTEXT     *DrawContext,
-  IN     UINT64                  CurrentTime
+  IN     BOOT_PICKER_GUI_CONTEXT  *Context,
+  IN OUT GUI_DRAWING_CONTEXT      *DrawContext,
+  IN     UINT64                   CurrentTime
   )
 {
-  UINT8 Opacity;
+  UINT8  Opacity;
 
-  Opacity = (UINT8) GuiGetInterpolatedValue (
-    &mCommonIntroOpacityInterpol,
-    CurrentTime
-    );
+  Opacity = (UINT8)GuiGetInterpolatedValue (
+                     &mCommonIntroOpacityInterpol,
+                     CurrentTime
+                     );
   DrawContext->Screen.Opacity = Opacity;
 
   GuiRequestDraw (
-    (UINT32) mPasswordLock.Obj.OffsetX,
-    (UINT32) mPasswordLock.Obj.OffsetY,
+    (UINT32)mPasswordLock.Obj.OffsetX,
+    (UINT32)mPasswordLock.Obj.OffsetY,
     mPasswordLock.Obj.Width,
     mPasswordLock.Obj.Height
     );
   GuiRequestDraw (
-    (UINT32) mPasswordBoxContainer.Obj.OffsetX,
-    (UINT32) mPasswordBoxContainer.Obj.OffsetY,
+    (UINT32)mPasswordBoxContainer.Obj.OffsetX,
+    (UINT32)mPasswordBoxContainer.Obj.OffsetY,
     mPasswordBoxContainer.Obj.Width,
     mPasswordBoxContainer.Obj.Height
     );
   GuiRequestDraw (
-    (UINT32) mCommonActionButtonsContainer.Obj.OffsetX,
-    (UINT32) mCommonActionButtonsContainer.Obj.OffsetY,
+    (UINT32)mCommonActionButtonsContainer.Obj.OffsetX,
+    (UINT32)mCommonActionButtonsContainer.Obj.OffsetY,
     mCommonActionButtonsContainer.Obj.Width,
     mCommonActionButtonsContainer.Obj.Height
     );
-  
+
   return CurrentTime - mCommonIntroOpacityInterpol.StartTime >= mCommonIntroOpacityInterpol.Duration;
 }
 
-STATIC GUI_ANIMATION mPasswordIntroAnimation = {
+STATIC GUI_ANIMATION  mPasswordIntroAnimation = {
   INITIALIZE_LIST_HEAD_VARIABLE (mPasswordIntroAnimation.Link),
   NULL,
   InternalPasswordAnimateIntro
@@ -725,15 +732,15 @@ PasswordViewInitialize (
   IN  BOOT_PICKER_GUI_CONTEXT  *GuiContext
   )
 {
-  CONST GUI_IMAGE *LockImage;
-  CONST GUI_IMAGE *BoxImage;
-  CONST GUI_IMAGE *DotImage;
-  CONST GUI_IMAGE *EnterImage;
-  UINT32          EnterOffset;
-  UINT32          BoxOffset;
-  UINT32          ImageMidOffset;
-  UINT32          FirstOffset;
-  UINT32          EnterInternalOffset;
+  CONST GUI_IMAGE  *LockImage;
+  CONST GUI_IMAGE  *BoxImage;
+  CONST GUI_IMAGE  *DotImage;
+  CONST GUI_IMAGE  *EnterImage;
+  UINT32           EnterOffset;
+  UINT32           BoxOffset;
+  UINT32           ImageMidOffset;
+  UINT32           FirstOffset;
+  UINT32           EnterInternalOffset;
 
   mKeyContext->KeyFilter = OC_PICKER_KEYS_FOR_TYPING;
 
@@ -765,10 +772,11 @@ PasswordViewInitialize (
 
   ImageMidOffset = (EnterImage->Height / 2) * EnterImage->Width;
   for (
-    FirstOffset = ImageMidOffset;
-    FirstOffset < ImageMidOffset + EnterImage->Width;
-    ++FirstOffset
-  ) {
+       FirstOffset = ImageMidOffset;
+       FirstOffset < ImageMidOffset + EnterImage->Width;
+       ++FirstOffset
+       )
+  {
     if (EnterImage->Buffer[FirstOffset].Reserved > 0) {
       break;
     }
@@ -784,9 +792,9 @@ PasswordViewInitialize (
   mPasswordBox.Hdr.Obj.Height  = BoxImage->Height;
   mPasswordBox.Hdr.Obj.OffsetX = 0;
   mPasswordBox.Hdr.Obj.OffsetY = BoxOffset;
-  mPasswordBox.MaxPasswordDots  = (UINT8) (
-    (mPasswordBox.Hdr.Obj.Width - EnterInternalOffset - (PASSWORD_FIRST_DOT_SPACE + PASSWORD_LAST_DOT_SPACE - PASSWORD_INTER_DOT_SPACE) * DrawContext->Scale) / (DotImage->Width + PASSWORD_INTER_DOT_SPACE * DrawContext->Scale)
-    );
+  mPasswordBox.MaxPasswordDots = (UINT8)(
+                                         (mPasswordBox.Hdr.Obj.Width - EnterInternalOffset - (PASSWORD_FIRST_DOT_SPACE + PASSWORD_LAST_DOT_SPACE - PASSWORD_INTER_DOT_SPACE) * DrawContext->Scale) / (DotImage->Width + PASSWORD_INTER_DOT_SPACE * DrawContext->Scale)
+                                         );
 
   mPasswordEnter.Hdr.Obj.Width   = EnterImage->Width;
   mPasswordEnter.Hdr.Obj.Height  = EnterImage->Height;
@@ -806,8 +814,9 @@ PasswordViewInitialize (
     //
     DrawContext->Screen.Opacity = 0;
 
-    InsertHeadList (&DrawContext->Animations, &mPasswordIntroAnimation.Link);  
+    InsertHeadList (&DrawContext->Animations, &mPasswordIntroAnimation.Link);
   }
+
   //
   // Action Buttons fade-in is handled by screen opacity.
   //
@@ -815,10 +824,10 @@ PasswordViewInitialize (
 
   if (GuiContext->PickerContext->PickerAudioAssist) {
     GuiContext->PickerContext->PlayAudioFile (
-      GuiContext->PickerContext,
-      OcVoiceOverAudioFileEnterPassword,
-      TRUE
-      );
+                                 GuiContext->PickerContext,
+                                 OcVoiceOverAudioFileEnterPassword,
+                                 TRUE
+                                 );
   }
 
   return EFI_SUCCESS;

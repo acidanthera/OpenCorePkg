@@ -18,17 +18,17 @@
 //
 // Maximum characters for valid Mac-like product name.
 //
-#define OC_OEM_NAME_MAX 48
+#define OC_OEM_NAME_MAX  48
 
 //
 // Maximum characters for valid Mac-like serial name.
 //
-#define OC_OEM_SERIAL_MAX 24
+#define OC_OEM_SERIAL_MAX  24
 
 //
 // Maximum characters for ROM address.
 //
-#define OC_OEM_ROM_MAX 6
+#define OC_OEM_ROM_MAX  6
 
 typedef struct MAC_INFO_DATA_SMBIOS_ {
   //
@@ -76,36 +76,36 @@ typedef struct MAC_INFO_DATA_SMBIOS_ {
 } MAC_INFO_DATA_SMBIOS;
 
 typedef struct MAC_INFO_DATA_DATAHUB_ {
-  CONST CHAR8   *PlatformName;
-  CONST CHAR8   *SystemProductName;
-  CONST CHAR8   *BoardProduct;
-  CONST UINT8   *BoardRevision;
-  CONST UINT32  *DevicePathsSupported;
-  CONST UINT8   *SmcRevision;
-  CONST UINT8   *SmcBranch;
-  CONST UINT8   *SmcPlatform;
+  CONST CHAR8     *PlatformName;
+  CONST CHAR8     *SystemProductName;
+  CONST CHAR8     *BoardProduct;
+  CONST UINT8     *BoardRevision;
+  CONST UINT32    *DevicePathsSupported;
+  CONST UINT8     *SmcRevision;
+  CONST UINT8     *SmcBranch;
+  CONST UINT8     *SmcPlatform;
 } MAC_INFO_DATA_DATAHUB;
 
 typedef struct MAC_INFO_DATA_OEM_ {
-  CHAR8         SystemSerialNumber[OC_OEM_SERIAL_MAX];
-  CHAR8         Mlb[OC_OEM_SERIAL_MAX];
-  UINT8         Rom[OC_OEM_ROM_MAX];
-  EFI_GUID      SystemUuid;
+  CHAR8       SystemSerialNumber[OC_OEM_SERIAL_MAX];
+  CHAR8       Mlb[OC_OEM_SERIAL_MAX];
+  UINT8       Rom[OC_OEM_ROM_MAX];
+  EFI_GUID    SystemUuid;
 } MAC_INFO_DATA_OEM;
 
 typedef struct MAC_INFO_DATA_ {
   ///
   /// DataHub data.
   ///
-  MAC_INFO_DATA_DATAHUB DataHub;
+  MAC_INFO_DATA_DATAHUB    DataHub;
   ///
   /// SMBIOS data.
   ///
-  MAC_INFO_DATA_SMBIOS  Smbios;
+  MAC_INFO_DATA_SMBIOS     Smbios;
   ///
   /// Serial data.
   ///
-  MAC_INFO_DATA_OEM     Oem;
+  MAC_INFO_DATA_OEM        Oem;
 } MAC_INFO_DATA;
 
 /**
@@ -132,7 +132,7 @@ GetMacInfo (
 **/
 CONST CHAR8 *
 GetSecureBootModel (
-  IN CONST CHAR8   *ProductName
+  IN CONST CHAR8  *ProductName
   );
 
 /**
@@ -146,7 +146,7 @@ GetSecureBootModel (
 **/
 CONST CHAR8 *
 GetSecureBootModelFromBoardId (
-  IN CONST CHAR8   *BoardId
+  IN CONST CHAR8  *BoardId
   );
 
 /**
@@ -158,7 +158,7 @@ GetSecureBootModelFromBoardId (
 **/
 BOOLEAN
 HasMacInfo (
-  IN CONST CHAR8     *ProductName
+  IN CONST CHAR8  *ProductName
   );
 
 /**
@@ -172,8 +172,8 @@ HasMacInfo (
 **/
 BOOLEAN
 IsMacModel64BitCompatible (
-  IN CONST CHAR8    *ProductName,
-  IN UINT32         KernelVersion
+  IN CONST CHAR8  *ProductName,
+  IN UINT32       KernelVersion
   );
 
 #endif // OC_MAC_INFO_LIB_H

@@ -18,8 +18,8 @@
 
 #include <Protocol/AppleEvent.h>
 
-#define POINTER_POLL_DEFAULT    0
-#define POINTER_POLL_ALL_MASK   (UINT32)(-1)
+#define POINTER_POLL_DEFAULT   0
+#define POINTER_POLL_ALL_MASK  (UINT32)(-1)
 
 /**
   Install and initialise Apple Event protocol.

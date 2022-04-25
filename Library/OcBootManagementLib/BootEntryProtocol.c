@@ -17,19 +17,19 @@
 
 VOID
 LocateBootEntryProtocolHandles (
-  IN OUT EFI_HANDLE        **EntryProtocolHandles,
-  IN OUT UINTN             *EntryProtocolHandleCount
+  IN OUT EFI_HANDLE  **EntryProtocolHandles,
+  IN OUT UINTN       *EntryProtocolHandleCount
   )
 {
-  EFI_STATUS        Status;
+  EFI_STATUS  Status;
 
   Status = gBS->LocateHandleBuffer (
-    ByProtocol,
-    &gOcBootEntryProtocolGuid,
-    NULL,
-    EntryProtocolHandleCount,
-    EntryProtocolHandles
-    );
+                  ByProtocol,
+                  &gOcBootEntryProtocolGuid,
+                  NULL,
+                  EntryProtocolHandleCount,
+                  EntryProtocolHandles
+                  );
 
   if (EFI_ERROR (Status)) {
     //
@@ -40,13 +40,13 @@ LocateBootEntryProtocolHandles (
     }
 
     *EntryProtocolHandleCount = 0;
-    *EntryProtocolHandles = NULL;
+    *EntryProtocolHandles     = NULL;
   }
 }
 
 VOID
 FreeBootEntryProtocolHandles (
-  EFI_HANDLE        **EntryProtocolHandles
+  EFI_HANDLE  **EntryProtocolHandles
   )
 {
   if (*EntryProtocolHandles == NULL) {
@@ -59,26 +59,27 @@ FreeBootEntryProtocolHandles (
 
 EFI_STATUS
 AddEntriesFromBootEntryProtocol (
-  IN OUT OC_BOOT_CONTEXT      *BootContext,
-  IN OUT OC_BOOT_FILESYSTEM   *FileSystem,
-  IN     EFI_HANDLE           *EntryProtocolHandles,
-  IN     UINTN                EntryProtocolHandleCount,
-  IN     CONST CHAR16         *DefaultEntryId,           OPTIONAL
+  IN OUT OC_BOOT_CONTEXT *BootContext,
+  IN OUT OC_BOOT_FILESYSTEM *FileSystem,
+  IN     EFI_HANDLE *EntryProtocolHandles,
+  IN     UINTN EntryProtocolHandleCount,
+  IN     CONST CHAR16 *DefaultEntryId, OPTIONAL
   IN     CONST BOOLEAN        CreateDefault
   )
 {
-  EFI_STATUS                    ReturnStatus;
-  EFI_STATUS                    Status;
-  UINTN                         Index;
-  UINTN                         EntryIndex;
-  OC_BOOT_ENTRY_PROTOCOL        *BootEntryProtocol;
-  OC_PICKER_ENTRY               *Entries;
-  UINTN                         NumEntries;
+  EFI_STATUS              ReturnStatus;
+  EFI_STATUS              Status;
+  UINTN                   Index;
+  UINTN                   EntryIndex;
+  OC_BOOT_ENTRY_PROTOCOL  *BootEntryProtocol;
+  OC_PICKER_ENTRY         *Entries;
+  UINTN                   NumEntries;
 
   DEBUG_CODE_BEGIN ();
   if (CreateDefault) {
     ASSERT ((DefaultEntryId != NULL));
   }
+
   DEBUG_CODE_END ();
 
   ReturnStatus = EFI_NOT_FOUND;
@@ -92,10 +93,10 @@ AddEntriesFromBootEntryProtocol (
     }
 
     Status = gBS->HandleProtocol (
-      EntryProtocolHandles[Index],
-      &gOcBootEntryProtocolGuid,
-      (VOID **) &BootEntryProtocol
-      );
+                    EntryProtocolHandles[Index],
+                    &gOcBootEntryProtocolGuid,
+                    (VOID **)&BootEntryProtocol
+                    );
 
     if (EFI_ERROR (Status)) {
       DEBUG ((DEBUG_ERROR, "BEP: HandleProtocol failed - %r\n", Status));
@@ -114,11 +115,11 @@ AddEntriesFromBootEntryProtocol (
     }
 
     Status = BootEntryProtocol->GetBootEntries (
-      BootContext->PickerContext,
-      FileSystem->Handle == OC_CUSTOM_FS_HANDLE ? NULL : FileSystem->Handle,
-      &Entries,
-      &NumEntries
-      );
+                                  BootContext->PickerContext,
+                                  FileSystem->Handle == OC_CUSTOM_FS_HANDLE ? NULL : FileSystem->Handle,
+                                  &Entries,
+                                  &NumEntries
+                                  );
 
     if (EFI_ERROR (Status)) {
       //
@@ -127,6 +128,7 @@ AddEntriesFromBootEntryProtocol (
       if (Status != EFI_NOT_FOUND) {
         DEBUG ((DEBUG_WARN, "BEP: Unable to fetch boot entries - %r\n", Status));
       }
+
       continue;
     }
 
@@ -134,15 +136,17 @@ AddEntriesFromBootEntryProtocol (
       if (Entries[EntryIndex].Id == NULL) {
         DEBUG ((DEBUG_WARN, "BEP: Entry->Id is required, ignoring entry.\n"));
       }
-      if (DefaultEntryId == NULL ||
-        (MixedStrCmp (DefaultEntryId, Entries[EntryIndex].Id) == 0) == CreateDefault) {
+
+      if ((DefaultEntryId == NULL) ||
+          ((MixedStrCmp (DefaultEntryId, Entries[EntryIndex].Id) == 0) == CreateDefault))
+      {
         Status = InternalAddBootEntryFromCustomEntry (
-          BootContext,
-          FileSystem,
-          &Entries[EntryIndex],
-          TRUE
-          );
-          
+                   BootContext,
+                   FileSystem,
+                   &Entries[EntryIndex],
+                   TRUE
+                   );
+
         if (EFI_ERROR (Status)) {
           //
           // EFI_UNSUPPORTED is auxiliary entry when HideAuxiliary=true.
@@ -153,7 +157,7 @@ AddEntriesFromBootEntryProtocol (
           }
         } else {
           ReturnStatus = EFI_SUCCESS;
-        
+
           //
           // Stop searching after first match for default entry. Possible additional
           // matches, e.g. older versions of Linux kernel, are normal.
@@ -171,11 +175,11 @@ AddEntriesFromBootEntryProtocol (
         }
       }
     }
-    
+
     BootEntryProtocol->FreeBootEntries (
-      &Entries,
-      NumEntries
-      );
+                         &Entries,
+                         NumEntries
+                         );
 
     //
     // If not found, keep hunting for default entry on other installed drivers.
@@ -184,13 +188,14 @@ AddEntriesFromBootEntryProtocol (
       if (ReturnStatus == EFI_NOT_FOUND) {
         continue;
       }
+
       break;
     }
 
     //
     // On other error adding entry (should not fail), abort.
     //
-    if (EFI_ERROR (Status) && Status != EFI_UNSUPPORTED) {
+    if (EFI_ERROR (Status) && (Status != EFI_UNSUPPORTED)) {
       break;
     }
   }

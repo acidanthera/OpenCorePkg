@@ -26,7 +26,7 @@ OcStringSplit (
 
   ASSERT (String != NULL);
 
-  if (IsUnicode ? ((CHAR16 *) String)[0] == CHAR_NULL : ((CHAR8 *) String)[0] == '\0') {
+  if (IsUnicode ? (((CHAR16 *)String)[0] == CHAR_NULL) : (((CHAR8 *)String)[0] == '\0')) {
     return NULL;
   }
 
@@ -37,9 +37,9 @@ OcStringSplit (
 
   NextToken = NULL;
   do {
-    Ch = IsUnicode ? *((CHAR16 *) String) : *((CHAR8 *) String);
+    Ch = IsUnicode ? *((CHAR16 *)String) : *((CHAR8 *)String);
 
-    if (Ch == Delim || OcIsSpace (Ch) || Ch == CHAR_NULL) {
+    if ((Ch == Delim) || OcIsSpace (Ch) || (Ch == CHAR_NULL)) {
       if (NextToken != NULL) {
         Pointer = OcFlexArrayAddItem (Tokens);
         if (Pointer == NULL) {
@@ -47,28 +47,28 @@ OcStringSplit (
           return NULL;
         }
 
-        AllocateSize = (UINT8 *) String - (UINT8 *) NextToken + (IsUnicode ? sizeof (CHAR16) : sizeof (CHAR8));
-        *Pointer = AllocateCopyPool (AllocateSize, NextToken);
+        AllocateSize = (UINT8 *)String - (UINT8 *)NextToken + (IsUnicode ? sizeof (CHAR16) : sizeof (CHAR8));
+        *Pointer     = AllocateCopyPool (AllocateSize, NextToken);
         if (*Pointer == NULL) {
           OcFlexArrayFree (&Tokens);
           return NULL;
         }
 
         if (IsUnicode) {
-          *(CHAR16 *) ((UINT8 *) (*Pointer) + ((UINT8 *) String - (UINT8 *) NextToken)) = CHAR_NULL;
+          *(CHAR16 *)((UINT8 *)(*Pointer) + ((UINT8 *)String - (UINT8 *)NextToken)) = CHAR_NULL;
         } else {
-          *(CHAR8 *)  ((UINT8 *) (*Pointer) + ((UINT8 *) String - (UINT8 *) NextToken)) = '\0';
+          *(CHAR8 *)((UINT8 *)(*Pointer) + ((UINT8 *)String - (UINT8 *)NextToken)) = '\0';
         }
 
         NextToken = NULL;
       }
     } else {
       if (NextToken == NULL) {
-        NextToken = (VOID *) String;
+        NextToken = (VOID *)String;
       }
     }
 
-    String = (UINT8 *) String + (IsUnicode ? sizeof (CHAR16) : sizeof (CHAR8));
+    String = (UINT8 *)String + (IsUnicode ? sizeof (CHAR16) : sizeof (CHAR8));
   } while (Ch != CHAR_NULL);
 
   return Tokens;

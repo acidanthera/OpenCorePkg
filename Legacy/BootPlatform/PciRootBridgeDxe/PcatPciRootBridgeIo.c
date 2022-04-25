@@ -1,17 +1,17 @@
 /*++
 
 Copyright (c) 2005 - 2012, Intel Corporation. All rights reserved.<BR>
-This program and the accompanying materials                          
-are licensed and made available under the terms and conditions of the BSD License         
-which accompanies this distribution.  The full text of the license may be found at        
-http://opensource.org/licenses/bsd-license.php                                            
-                                                                                          
-THE PROGRAM IS DISTRIBUTED UNDER THE BSD LICENSE ON AN "AS IS" BASIS,                     
-WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.             
+This program and the accompanying materials
+are licensed and made available under the terms and conditions of the BSD License
+which accompanies this distribution.  The full text of the license may be found at
+http://opensource.org/licenses/bsd-license.php
+
+THE PROGRAM IS DISTRIBUTED UNDER THE BSD LICENSE ON AN "AS IS" BASIS,
+WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 
 Module Name:
     PcatPciRootBridgeIo.c
-    
+
 Abstract:
 
     EFI PC AT PCI Root Bridge Io Protocol
@@ -27,7 +27,7 @@ Revision History
 //
 EFI_STATUS
 EFIAPI
-PcatRootBridgeIoPollMem ( 
+PcatRootBridgeIoPollMem (
   IN  EFI_PCI_ROOT_BRIDGE_IO_PROTOCOL        *This,
   IN  EFI_PCI_ROOT_BRIDGE_IO_PROTOCOL_WIDTH  Width,
   IN  UINT64                                 Address,
@@ -36,10 +36,10 @@ PcatRootBridgeIoPollMem (
   IN  UINT64                                 Delay,
   OUT UINT64                                 *Result
   );
-  
+
 EFI_STATUS
 EFIAPI
-PcatRootBridgeIoPollIo ( 
+PcatRootBridgeIoPollIo (
   IN  EFI_PCI_ROOT_BRIDGE_IO_PROTOCOL        *This,
   IN  EFI_PCI_ROOT_BRIDGE_IO_PROTOCOL_WIDTH  Width,
   IN  UINT64                                 Address,
@@ -48,7 +48,7 @@ PcatRootBridgeIoPollIo (
   IN  UINT64                                 Delay,
   OUT UINT64                                 *Result
   );
-  
+
 EFI_STATUS
 EFIAPI
 PcatRootBridgeIoMemRead (
@@ -156,8 +156,8 @@ PcatRootBridgeIoSetAttributes (
   IN     EFI_PCI_ROOT_BRIDGE_IO_PROTOCOL  *This,
   IN     UINT64                           Attributes,
   IN OUT UINT64                           *ResourceBase,
-  IN OUT UINT64                           *ResourceLength 
-  ); 
+  IN OUT UINT64                           *ResourceLength
+  );
 
 EFI_STATUS
 EFIAPI
@@ -185,6 +185,7 @@ PcatRootBridgeIoConstructor (
   IN EFI_PCI_ROOT_BRIDGE_IO_PROTOCOL  *Protocol,
   IN UINTN                            SegmentNumber
   )
+
 /*++
 
 Routine Description:
@@ -194,50 +195,50 @@ Routine Description:
 Arguments:
 
     Protocol - protocol to initialize
-    
+
 Returns:
 
     None
 
 --*/
 {
-  Protocol->ParentHandle   = NULL;
+  Protocol->ParentHandle = NULL;
 
-  Protocol->PollMem        = PcatRootBridgeIoPollMem;
-  Protocol->PollIo         = PcatRootBridgeIoPollIo;
+  Protocol->PollMem = PcatRootBridgeIoPollMem;
+  Protocol->PollIo  = PcatRootBridgeIoPollIo;
 
-  Protocol->Mem.Read       = PcatRootBridgeIoMemRead;
-  Protocol->Mem.Write      = PcatRootBridgeIoMemWrite;
+  Protocol->Mem.Read  = PcatRootBridgeIoMemRead;
+  Protocol->Mem.Write = PcatRootBridgeIoMemWrite;
 
-  Protocol->Io.Read        = PcatRootBridgeIoIoRead;
-  Protocol->Io.Write       = PcatRootBridgeIoIoWrite;
+  Protocol->Io.Read  = PcatRootBridgeIoIoRead;
+  Protocol->Io.Write = PcatRootBridgeIoIoWrite;
 
-  Protocol->CopyMem        = PcatRootBridgeIoCopyMem;
+  Protocol->CopyMem = PcatRootBridgeIoCopyMem;
 
-  Protocol->Pci.Read       = PcatRootBridgeIoPciRead;
-  Protocol->Pci.Write      = PcatRootBridgeIoPciWrite;
+  Protocol->Pci.Read  = PcatRootBridgeIoPciRead;
+  Protocol->Pci.Write = PcatRootBridgeIoPciWrite;
 
-  Protocol->Map            = PcatRootBridgeIoMap;
-  Protocol->Unmap          = PcatRootBridgeIoUnmap;
+  Protocol->Map   = PcatRootBridgeIoMap;
+  Protocol->Unmap = PcatRootBridgeIoUnmap;
 
   Protocol->AllocateBuffer = PcatRootBridgeIoAllocateBuffer;
   Protocol->FreeBuffer     = PcatRootBridgeIoFreeBuffer;
 
-  Protocol->Flush          = PcatRootBridgeIoFlush;
+  Protocol->Flush = PcatRootBridgeIoFlush;
 
-  Protocol->GetAttributes  = PcatRootBridgeIoGetAttributes;
-  Protocol->SetAttributes  = PcatRootBridgeIoSetAttributes;
+  Protocol->GetAttributes = PcatRootBridgeIoGetAttributes;
+  Protocol->SetAttributes = PcatRootBridgeIoSetAttributes;
 
-  Protocol->Configuration  = PcatRootBridgeIoConfiguration;
+  Protocol->Configuration = PcatRootBridgeIoConfiguration;
 
-  Protocol->SegmentNumber  = (UINT32)SegmentNumber;
+  Protocol->SegmentNumber = (UINT32)SegmentNumber;
 
   return EFI_SUCCESS;
 }
 
 EFI_STATUS
 EFIAPI
-PcatRootBridgeIoPollMem ( 
+PcatRootBridgeIoPollMem (
   IN  EFI_PCI_ROOT_BRIDGE_IO_PROTOCOL        *This,
   IN  EFI_PCI_ROOT_BRIDGE_IO_PROTOCOL_WIDTH  Width,
   IN  UINT64                                 Address,
@@ -255,53 +256,54 @@ PcatRootBridgeIoPollMem (
     return EFI_INVALID_PARAMETER;
   }
 
-
   if ((UINT32)Width > EfiPciWidthUint64) {
     return EFI_INVALID_PARAMETER;
   }
+
   //
   // No matter what, always do a single poll.
   //
   Status = This->Mem.Read (This, Width, Address, 1, Result);
-  if ( EFI_ERROR(Status) ) {
+  if ( EFI_ERROR (Status)) {
     return Status;
-  }    
-  if ( (*Result & Mask) == Value ) {
+  }
+
+  if ((*Result & Mask) == Value ) {
     return EFI_SUCCESS;
   }
 
   if (Delay == 0) {
     return EFI_SUCCESS;
   } else {
-
     NumberOfTicks = DivU64x32Remainder (Delay, 100, &Remainder);
-    if ( Remainder !=0 ) {
+    if ( Remainder != 0 ) {
       NumberOfTicks += 1;
     }
-    NumberOfTicks += 1;
-  
-    while ( NumberOfTicks ) {
 
+    NumberOfTicks += 1;
+
+    while ( NumberOfTicks ) {
       gBS->Stall (10);
 
       Status = This->Mem.Read (This, Width, Address, 1, Result);
-      if ( EFI_ERROR(Status) ) {
+      if ( EFI_ERROR (Status)) {
         return Status;
       }
-    
-      if ( (*Result & Mask) == Value ) {
+
+      if ((*Result & Mask) == Value ) {
         return EFI_SUCCESS;
       }
 
       NumberOfTicks -= 1;
     }
   }
+
   return EFI_TIMEOUT;
 }
-  
+
 EFI_STATUS
 EFIAPI
-PcatRootBridgeIoPollIo ( 
+PcatRootBridgeIoPollIo (
   IN  EFI_PCI_ROOT_BRIDGE_IO_PROTOCOL        *This,
   IN  EFI_PCI_ROOT_BRIDGE_IO_PROTOCOL_WIDTH  Width,
   IN  UINT64                                 Address,
@@ -313,7 +315,7 @@ PcatRootBridgeIoPollIo (
 {
   EFI_STATUS  Status;
   UINT64      NumberOfTicks;
-  UINT32       Remainder;
+  UINT32      Remainder;
 
   if (Result == NULL) {
     return EFI_INVALID_PARAMETER;
@@ -322,43 +324,45 @@ PcatRootBridgeIoPollIo (
   if ((UINT32)Width > EfiPciWidthUint64) {
     return EFI_INVALID_PARAMETER;
   }
+
   //
   // No matter what, always do a single poll.
   //
   Status = This->Io.Read (This, Width, Address, 1, Result);
-  if ( EFI_ERROR(Status) ) {
+  if ( EFI_ERROR (Status)) {
     return Status;
-  }    
-  if ( (*Result & Mask) == Value ) {
+  }
+
+  if ((*Result & Mask) == Value ) {
     return EFI_SUCCESS;
   }
 
   if (Delay == 0) {
     return EFI_SUCCESS;
   } else {
-
     NumberOfTicks = DivU64x32Remainder (Delay, 100, &Remainder);
-    if ( Remainder !=0 ) {
+    if ( Remainder != 0 ) {
       NumberOfTicks += 1;
     }
-    NumberOfTicks += 1;
-  
-    while ( NumberOfTicks ) {
 
-      gBS->Stall(10);
-    
+    NumberOfTicks += 1;
+
+    while ( NumberOfTicks ) {
+      gBS->Stall (10);
+
       Status = This->Io.Read (This, Width, Address, 1, Result);
-      if ( EFI_ERROR(Status) ) {
+      if ( EFI_ERROR (Status)) {
         return Status;
       }
-    
-      if ( (*Result & Mask) == Value ) {
+
+      if ((*Result & Mask) == Value ) {
         return EFI_SUCCESS;
       }
 
       NumberOfTicks -= 1;
     }
   }
+
   return EFI_TIMEOUT;
 }
 
@@ -371,6 +375,7 @@ PcatRootBridgeMemAddressValid (
   if ((Address >= PrivateData->PciExpressBaseAddress) && (Address < PrivateData->PciExpressBaseAddress + 0x10000000)) {
     return TRUE;
   }
+
   if ((Address >= PrivateData->MemBase) && (Address < PrivateData->MemLimit)) {
     return TRUE;
   }
@@ -396,8 +401,8 @@ PcatRootBridgeIoMemRead (
   if ( Buffer == NULL ) {
     return EFI_INVALID_PARAMETER;
   }
-  
-  PrivateData = DRIVER_INSTANCE_FROM_PCI_ROOT_BRIDGE_IO_THIS(This);
+
+  PrivateData = DRIVER_INSTANCE_FROM_PCI_ROOT_BRIDGE_IO_THIS (This);
 
   if (!PcatRootBridgeMemAddressValid (PrivateData, Address)) {
     return EFI_INVALID_PARAMETER;
@@ -411,14 +416,16 @@ PcatRootBridgeIoMemRead (
   Address += PrivateData->PhysicalMemoryBase;
 
   In.buf  = Buffer;
-  Out.buf = (VOID *)(UINTN) Address;
+  Out.buf = (VOID *)(UINTN)Address;
   if ((UINT32)Width <= EfiPciWidthUint64) {
     return PcatRootBridgeIoMemRW (Width, Count, TRUE, In, TRUE, Out);
   }
-  if (Width >= EfiPciWidthFifoUint8 && Width <= EfiPciWidthFifoUint64) {
+
+  if ((Width >= EfiPciWidthFifoUint8) && (Width <= EfiPciWidthFifoUint64)) {
     return PcatRootBridgeIoMemRW (Width, Count, TRUE, In, FALSE, Out);
   }
-  if (Width >= EfiPciWidthFillUint8 && Width <= EfiPciWidthFillUint64) {
+
+  if ((Width >= EfiPciWidthFillUint8) && (Width <= EfiPciWidthFillUint64)) {
     return PcatRootBridgeIoMemRW (Width, Count, FALSE, In, TRUE, Out);
   }
 
@@ -435,16 +442,16 @@ PcatRootBridgeIoMemWrite (
   IN OUT VOID                                   *Buffer
   )
 {
-  PCAT_PCI_ROOT_BRIDGE_INSTANCE *PrivateData;
-  UINTN  AlignMask;
-  PTR    In;
-  PTR    Out;
+  PCAT_PCI_ROOT_BRIDGE_INSTANCE  *PrivateData;
+  UINTN                          AlignMask;
+  PTR                            In;
+  PTR                            Out;
 
   if ( Buffer == NULL ) {
     return EFI_INVALID_PARAMETER;
   }
-  
-  PrivateData = DRIVER_INSTANCE_FROM_PCI_ROOT_BRIDGE_IO_THIS(This);
+
+  PrivateData = DRIVER_INSTANCE_FROM_PCI_ROOT_BRIDGE_IO_THIS (This);
 
   if (!PcatRootBridgeMemAddressValid (PrivateData, Address)) {
     return EFI_INVALID_PARAMETER;
@@ -457,15 +464,17 @@ PcatRootBridgeIoMemWrite (
 
   Address += PrivateData->PhysicalMemoryBase;
 
-  In.buf  = (VOID *)(UINTN) Address;
+  In.buf  = (VOID *)(UINTN)Address;
   Out.buf = Buffer;
   if ((UINT32)Width <= EfiPciWidthUint64) {
     return PcatRootBridgeIoMemRW (Width, Count, TRUE, In, TRUE, Out);
   }
-  if (Width >= EfiPciWidthFifoUint8 && Width <= EfiPciWidthFifoUint64) {
+
+  if ((Width >= EfiPciWidthFifoUint8) && (Width <= EfiPciWidthFifoUint64)) {
     return PcatRootBridgeIoMemRW (Width, Count, FALSE, In, TRUE, Out);
   }
-  if (Width >= EfiPciWidthFillUint8 && Width <= EfiPciWidthFillUint64) {
+
+  if ((Width >= EfiPciWidthFillUint8) && (Width <= EfiPciWidthFillUint64)) {
     return PcatRootBridgeIoMemRW (Width, Count, TRUE, In, FALSE, Out);
   }
 
@@ -491,7 +500,7 @@ PcatRootBridgeIoCopyMem (
 
   if ((UINT32)Width > EfiPciWidthUint64) {
     return EFI_INVALID_PARAMETER;
-  }       
+  }
 
   if (DestAddress == SrcAddress) {
     return EFI_SUCCESS;
@@ -506,7 +515,7 @@ PcatRootBridgeIoCopyMem (
     DestAddress = DestAddress + (Count-1) * Stride;
   }
 
-  for (Index = 0;Index < Count;Index++) {
+  for (Index = 0; Index < Count; Index++) {
     Status = PcatRootBridgeIoMemRead (
                This,
                Width,
@@ -517,6 +526,7 @@ PcatRootBridgeIoCopyMem (
     if (EFI_ERROR (Status)) {
       return Status;
     }
+
     Status = PcatRootBridgeIoMemWrite (
                This,
                Width,
@@ -527,6 +537,7 @@ PcatRootBridgeIoCopyMem (
     if (EFI_ERROR (Status)) {
       return Status;
     }
+
     if (Direction) {
       SrcAddress  += Stride;
       DestAddress += Stride;
@@ -535,6 +546,7 @@ PcatRootBridgeIoCopyMem (
       DestAddress -= Stride;
     }
   }
+
   return EFI_SUCCESS;
 }
 
@@ -568,7 +580,7 @@ PcatRootBridgeIoPciWrite (
   if (Buffer == NULL) {
     return EFI_INVALID_PARAMETER;
   }
-  
+
   return PcatRootBridgeIoPciRW (This, TRUE, Width, Address, Count, Buffer);
 }
 
@@ -584,22 +596,22 @@ PcatRootBridgeIoMap (
   )
 
 {
-  EFI_STATUS            Status;
-  EFI_PHYSICAL_ADDRESS  PhysicalAddress;
-  MAP_INFO              *MapInfo;
-  MAP_INFO_INSTANCE    *MapInstance;
-  PCAT_PCI_ROOT_BRIDGE_INSTANCE *PrivateData;
+  EFI_STATUS                     Status;
+  EFI_PHYSICAL_ADDRESS           PhysicalAddress;
+  MAP_INFO                       *MapInfo;
+  MAP_INFO_INSTANCE              *MapInstance;
+  PCAT_PCI_ROOT_BRIDGE_INSTANCE  *PrivateData;
 
-  if ( HostAddress == NULL || NumberOfBytes == NULL || 
-       DeviceAddress == NULL || Mapping == NULL ) {
-    
+  if ((HostAddress == NULL) || (NumberOfBytes == NULL) ||
+      (DeviceAddress == NULL) || (Mapping == NULL))
+  {
     return EFI_INVALID_PARAMETER;
   }
 
   //
   // Perform a fence operation to make sure all memory operations are flushed
   //
-  MemoryFence();
+  MemoryFence ();
 
   //
   // Initialize the return values to their defaults
@@ -620,13 +632,12 @@ PcatRootBridgeIoMap (
   //
   PhysicalAddress = (EFI_PHYSICAL_ADDRESS)(UINTN)HostAddress;
   if ((PhysicalAddress + *NumberOfBytes) > 0x100000000ULL) {
-
     //
     // Common Buffer operations can not be remapped.  If the common buffer
-    // if above 4GB, then it is not possible to generate a mapping, so return 
+    // if above 4GB, then it is not possible to generate a mapping, so return
     // an error.
     //
-    if (Operation == EfiPciOperationBusMasterCommonBuffer || Operation == EfiPciOperationBusMasterCommonBuffer64) {
+    if ((Operation == EfiPciOperationBusMasterCommonBuffer) || (Operation == EfiPciOperationBusMasterCommonBuffer64)) {
       return EFI_UNSUPPORTED;
     }
 
@@ -635,8 +646,8 @@ PcatRootBridgeIoMap (
     // called later.
     //
     Status = gBS->AllocatePool (
-                    EfiBootServicesData, 
-                    sizeof(MAP_INFO), 
+                    EfiBootServicesData,
+                    sizeof (MAP_INFO),
                     (VOID **)&MapInfo
                     );
     if (EFI_ERROR (Status)) {
@@ -654,7 +665,7 @@ PcatRootBridgeIoMap (
     //
     MapInfo->Operation         = Operation;
     MapInfo->NumberOfBytes     = *NumberOfBytes;
-    MapInfo->NumberOfPages     = EFI_SIZE_TO_PAGES(*NumberOfBytes);
+    MapInfo->NumberOfPages     = EFI_SIZE_TO_PAGES (*NumberOfBytes);
     MapInfo->HostAddress       = PhysicalAddress;
     MapInfo->MappedHostAddress = 0x00000000ffffffff;
 
@@ -662,12 +673,12 @@ PcatRootBridgeIoMap (
     // Allocate a buffer below 4GB to map the transfer to.
     //
     Status = gBS->AllocatePages (
-                    AllocateMaxAddress, 
-                    EfiBootServicesData, 
+                    AllocateMaxAddress,
+                    EfiBootServicesData,
                     MapInfo->NumberOfPages,
                     &MapInfo->MappedHostAddress
                     );
-    if (EFI_ERROR(Status)) {
+    if (EFI_ERROR (Status)) {
       gBS->FreePool (MapInfo);
       *NumberOfBytes = 0;
       return Status;
@@ -678,32 +689,31 @@ PcatRootBridgeIoMap (
     // then copy the contents of the real buffer into the mapped buffer
     // so the Bus Master can read the contents of the real buffer.
     //
-    if (Operation == EfiPciOperationBusMasterRead || Operation == EfiPciOperationBusMasterRead64) {
+    if ((Operation == EfiPciOperationBusMasterRead) || (Operation == EfiPciOperationBusMasterRead64)) {
       CopyMem (
-        (VOID *)(UINTN)MapInfo->MappedHostAddress, 
+        (VOID *)(UINTN)MapInfo->MappedHostAddress,
         (VOID *)(UINTN)MapInfo->HostAddress,
         MapInfo->NumberOfBytes
         );
     }
 
-
-  Status =gBS->AllocatePool (
-                    EfiBootServicesData, 
-                    sizeof(MAP_INFO_INSTANCE), 
+    Status = gBS->AllocatePool (
+                    EfiBootServicesData,
+                    sizeof (MAP_INFO_INSTANCE),
                     (VOID **)&MapInstance
-                    );                    
-    if (EFI_ERROR(Status)) {
-      gBS->FreePages (MapInfo->MappedHostAddress,MapInfo->NumberOfPages);
+                    );
+    if (EFI_ERROR (Status)) {
+      gBS->FreePages (MapInfo->MappedHostAddress, MapInfo->NumberOfPages);
       gBS->FreePool (MapInfo);
       *NumberOfBytes = 0;
       return Status;
     }
 
-    MapInstance->Map=MapInfo;
-    PrivateData = DRIVER_INSTANCE_FROM_PCI_ROOT_BRIDGE_IO_THIS(This);
-    InsertTailList(&PrivateData->MapInfo,&MapInstance->Link);
-    
-  //
+    MapInstance->Map = MapInfo;
+    PrivateData      = DRIVER_INSTANCE_FROM_PCI_ROOT_BRIDGE_IO_THIS (This);
+    InsertTailList (&PrivateData->MapInfo, &MapInstance->Link);
+
+    //
     // The DeviceAddress is the address of the maped buffer below 4GB
     //
     *DeviceAddress = MapInfo->MappedHostAddress;
@@ -717,7 +727,7 @@ PcatRootBridgeIoMap (
   //
   // Perform a fence operation to make sure all memory operations are flushed
   //
-  MemoryFence();
+  MemoryFence ();
 
   return EFI_SUCCESS;
 }
@@ -730,16 +740,16 @@ PcatRootBridgeIoUnmap (
   )
 
 {
-  MAP_INFO    *MapInfo;
-  PCAT_PCI_ROOT_BRIDGE_INSTANCE *PrivateData;
-  LIST_ENTRY *Link;
+  MAP_INFO                       *MapInfo;
+  PCAT_PCI_ROOT_BRIDGE_INSTANCE  *PrivateData;
+  LIST_ENTRY                     *Link;
 
   //
   // Perform a fence operation to make sure all memory operations are flushed
   //
-  MemoryFence();
+  MemoryFence ();
 
-  PrivateData = DRIVER_INSTANCE_FROM_PCI_ROOT_BRIDGE_IO_THIS(This);
+  PrivateData = DRIVER_INSTANCE_FROM_PCI_ROOT_BRIDGE_IO_THIS (This);
   //
   // See if the Map() operation associated with this Unmap() required a mapping buffer.
   // If a mapping buffer was not required, then this function simply returns EFI_SUCCESS.
@@ -750,27 +760,28 @@ PcatRootBridgeIoUnmap (
     //
     MapInfo = (MAP_INFO *)Mapping;
 
-  for (Link = PrivateData->MapInfo.ForwardLink; Link != &PrivateData->MapInfo; Link = Link->ForwardLink) {
-      if (((MAP_INFO_INSTANCE*)Link)->Map == MapInfo)
+    for (Link = PrivateData->MapInfo.ForwardLink; Link != &PrivateData->MapInfo; Link = Link->ForwardLink) {
+      if (((MAP_INFO_INSTANCE *)Link)->Map == MapInfo) {
         break;
+      }
     }
 
     if (Link == &PrivateData->MapInfo) {
       return EFI_INVALID_PARAMETER;
-  }
+    }
 
-    RemoveEntryList(Link);
-    ((MAP_INFO_INSTANCE*)Link)->Map = NULL;
-    gBS->FreePool((MAP_INFO_INSTANCE*)Link);
+    RemoveEntryList (Link);
+    ((MAP_INFO_INSTANCE *)Link)->Map = NULL;
+    gBS->FreePool ((MAP_INFO_INSTANCE *)Link);
 
     //
     // If this is a write operation from the Bus Master's point of view,
     // then copy the contents of the mapped buffer into the real buffer
     // so the processor can read the contents of the real buffer.
     //
-    if (MapInfo->Operation == EfiPciOperationBusMasterWrite || MapInfo->Operation == EfiPciOperationBusMasterWrite64) {
+    if ((MapInfo->Operation == EfiPciOperationBusMasterWrite) || (MapInfo->Operation == EfiPciOperationBusMasterWrite64)) {
       CopyMem (
-        (VOID *)(UINTN)MapInfo->HostAddress, 
+        (VOID *)(UINTN)MapInfo->HostAddress,
         (VOID *)(UINTN)MapInfo->MappedHostAddress,
         MapInfo->NumberOfBytes
         );
@@ -786,7 +797,7 @@ PcatRootBridgeIoUnmap (
   //
   // Perform a fence operation to make sure all memory operations are flushed
   //
-  MemoryFence();
+  MemoryFence ();
 
   return EFI_SUCCESS;
 }
@@ -822,7 +833,7 @@ PcatRootBridgeIoAllocateBuffer (
   //
   // The only valid memory types are EfiBootServicesData and EfiRuntimeServicesData
   //
-  if (MemoryType != EfiBootServicesData && MemoryType != EfiRuntimeServicesData) {
+  if ((MemoryType != EfiBootServicesData) && (MemoryType != EfiRuntimeServicesData)) {
     return EFI_INVALID_PARAMETER;
   }
 
@@ -850,10 +861,10 @@ PcatRootBridgeIoFreeBuffer (
   )
 
 {
+  if ( HostAddress == NULL ) {
+    return EFI_INVALID_PARAMETER;
+  }
 
-  if( HostAddress == NULL ){
-     return EFI_INVALID_PARAMETER;
-  } 
   return gBS->FreePages ((EFI_PHYSICAL_ADDRESS)(UINTN)HostAddress, Pages);
 }
 
@@ -867,7 +878,7 @@ PcatRootBridgeIoFlush (
   //
   // Perform a fence operation to make sure all memory operations are flushed
   //
-  MemoryFence();
+  MemoryFence ();
 
   return EFI_SUCCESS;
 }
@@ -875,17 +886,17 @@ PcatRootBridgeIoFlush (
 EFI_STATUS
 EFIAPI
 PcatRootBridgeIoGetAttributes (
-  IN  EFI_PCI_ROOT_BRIDGE_IO_PROTOCOL  *This,
-  OUT UINT64                           *Supported,  OPTIONAL
+  IN  EFI_PCI_ROOT_BRIDGE_IO_PROTOCOL *This,
+  OUT UINT64 *Supported, OPTIONAL
   OUT UINT64                           *Attributes
   )
 
 {
-  PCAT_PCI_ROOT_BRIDGE_INSTANCE *PrivateData;
+  PCAT_PCI_ROOT_BRIDGE_INSTANCE  *PrivateData;
 
-  PrivateData = DRIVER_INSTANCE_FROM_PCI_ROOT_BRIDGE_IO_THIS(This);
+  PrivateData = DRIVER_INSTANCE_FROM_PCI_ROOT_BRIDGE_IO_THIS (This);
 
-  if (Attributes == NULL && Supported == NULL) {
+  if ((Attributes == NULL) && (Supported == NULL)) {
     return EFI_INVALID_PARAMETER;
   }
 
@@ -895,8 +906,8 @@ PcatRootBridgeIoGetAttributes (
   if (Supported) {
     //
     // This is a generic driver for a PC-AT class system.  It does not have any
-    // chipset specific knowlegde, so none of the attributes can be set or 
-    // cleared.  Any attempt to set attribute that are already set will succeed, 
+    // chipset specific knowlegde, so none of the attributes can be set or
+    // cleared.  Any attempt to set attribute that are already set will succeed,
     // and any attempt to set an attribute that is not supported will fail.
     //
     *Supported = PrivateData->Attributes;
@@ -905,12 +916,11 @@ PcatRootBridgeIoGetAttributes (
   //
   // Set Attrbutes to the attributes detected when the PCI Root Bridge was initialized
   //
-  
+
   if (Attributes) {
     *Attributes = PrivateData->Attributes;
   }
-  
-   
+
   return EFI_SUCCESS;
 }
 
@@ -920,18 +930,18 @@ PcatRootBridgeIoSetAttributes (
   IN     EFI_PCI_ROOT_BRIDGE_IO_PROTOCOL  *This,
   IN     UINT64                           Attributes,
   IN OUT UINT64                           *ResourceBase,
-  IN OUT UINT64                           *ResourceLength 
+  IN OUT UINT64                           *ResourceLength
   )
 
 {
-  PCAT_PCI_ROOT_BRIDGE_INSTANCE   *PrivateData;
-  
-  PrivateData = DRIVER_INSTANCE_FROM_PCI_ROOT_BRIDGE_IO_THIS(This);
+  PCAT_PCI_ROOT_BRIDGE_INSTANCE  *PrivateData;
+
+  PrivateData = DRIVER_INSTANCE_FROM_PCI_ROOT_BRIDGE_IO_THIS (This);
 
   //
   // This is a generic driver for a PC-AT class system.  It does not have any
-  // chipset specific knowlegde, so none of the attributes can be set or 
-  // cleared.  Any attempt to set attribute that are already set will succeed, 
+  // chipset specific knowlegde, so none of the attributes can be set or
+  // cleared.  Any attempt to set attribute that are already set will succeed,
   // and any attempt to set an attribute that is not supported will fail.
   //
   if (Attributes & (~PrivateData->Attributes)) {
@@ -949,9 +959,9 @@ PcatRootBridgeIoConfiguration (
   )
 
 {
-  PCAT_PCI_ROOT_BRIDGE_INSTANCE   *PrivateData;
-  
-  PrivateData = DRIVER_INSTANCE_FROM_PCI_ROOT_BRIDGE_IO_THIS(This);
+  PCAT_PCI_ROOT_BRIDGE_INSTANCE  *PrivateData;
+
+  PrivateData = DRIVER_INSTANCE_FROM_PCI_ROOT_BRIDGE_IO_THIS (This);
 
   *Resources = PrivateData->Configuration;
 
@@ -972,6 +982,7 @@ PcatRootBridgeIoMemRW (
   IN  BOOLEAN                                OutStrideFlag,
   OUT PTR                                    Out
   )
+
 /*++
 
 Routine Description:
@@ -996,8 +1007,7 @@ Returns:
   UINTN  InStride;
   UINTN  OutStride;
 
-
-  Width     = (EFI_PCI_ROOT_BRIDGE_IO_PROTOCOL_WIDTH) (Width & 0x03);
+  Width     = (EFI_PCI_ROOT_BRIDGE_IO_PROTOCOL_WIDTH)(Width & 0x03);
   Stride    = (UINTN)1 << Width;
   InStride  = InStrideFlag  ? Stride : 0;
   OutStride = OutStrideFlag ? Stride : 0;
@@ -1006,31 +1016,33 @@ Returns:
   // Loop for each iteration and move the data
   //
   switch (Width) {
-  case EfiPciWidthUint8:
-    for (;Count > 0; Count--, In.buf += InStride, Out.buf += OutStride) {
-      MemoryFence();
-      *In.ui8 = *Out.ui8;
-      MemoryFence();
-    }
-    break;
-  case EfiPciWidthUint16:
-    for (;Count > 0; Count--, In.buf += InStride, Out.buf += OutStride) {
-      MemoryFence();
-      *In.ui16 = *Out.ui16;
-      MemoryFence();
-    }
-    break;
-  case EfiPciWidthUint32:
-    for (;Count > 0; Count--, In.buf += InStride, Out.buf += OutStride) {
-      MemoryFence();
-      *In.ui32 = *Out.ui32;
-      MemoryFence();
-    }
-    break;
-  default:
-    return EFI_INVALID_PARAMETER;
+    case EfiPciWidthUint8:
+      for ( ; Count > 0; Count--, In.buf += InStride, Out.buf += OutStride) {
+        MemoryFence ();
+        *In.ui8 = *Out.ui8;
+        MemoryFence ();
+      }
+
+      break;
+    case EfiPciWidthUint16:
+      for ( ; Count > 0; Count--, In.buf += InStride, Out.buf += OutStride) {
+        MemoryFence ();
+        *In.ui16 = *Out.ui16;
+        MemoryFence ();
+      }
+
+      break;
+    case EfiPciWidthUint32:
+      for ( ; Count > 0; Count--, In.buf += InStride, Out.buf += OutStride) {
+        MemoryFence ();
+        *In.ui32 = *Out.ui32;
+        MemoryFence ();
+      }
+
+      break;
+    default:
+      return EFI_INVALID_PARAMETER;
   }
 
   return EFI_SUCCESS;
 }
-

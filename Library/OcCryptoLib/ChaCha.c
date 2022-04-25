@@ -26,13 +26,13 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 #include <Library/BaseMemoryLib.h>
 #include <Library/OcCryptoLib.h>
 
-#define U32V(v) ((UINT32)(v) & 0xFFFFFFFFU)
-#define ROTATE(v, c) (LRotU32 ((v), (c)))
-#define XOR(v, w) ((v) ^ (w))
-#define PLUS(v, w) (U32V((v) + (w)))
-#define PLUSONE(v) (PLUS((v), 1))
-#define LOAD32_LE(a) (ReadUnaligned32 ((UINT32 *)(a)))
-#define STORE32_LE(a, v) (WriteUnaligned32 ((UINT32 *)(a), (v)))
+#define U32V(v)           ((UINT32)(v) & 0xFFFFFFFFU)
+#define ROTATE(v, c)      (LRotU32 ((v), (c)))
+#define XOR(v, w)         ((v) ^ (w))
+#define PLUS(v, w)        (U32V((v) + (w)))
+#define PLUSONE(v)        (PLUS((v), 1))
+#define LOAD32_LE(a)      (ReadUnaligned32 ((UINT32 *)(a)))
+#define STORE32_LE(a, v)  (WriteUnaligned32 ((UINT32 *)(a), (v)))
 
 #define QUARTERROUND(a, b, c, d) \
   a = PLUS(a, b);                \
@@ -74,7 +74,7 @@ VOID
 ChaChaCryptBuffer (
   IN OUT CHACHA_CONTEXT  *Context,
   IN     CONST UINT8     *Source,
-     OUT UINT8           *Destination,
+  OUT UINT8              *Destination,
   IN     UINT32          Length
   )
 {
@@ -164,26 +164,26 @@ ChaChaCryptBuffer (
     X15 = J15;
 
     for (Index = 20; Index > 0; Index -= 2) {
-      QUARTERROUND (X0, X4, X8,  X12)
-      QUARTERROUND (X1, X5, X9,  X13)
+      QUARTERROUND (X0, X4, X8, X12)
+      QUARTERROUND (X1, X5, X9, X13)
       QUARTERROUND (X2, X6, X10, X14)
       QUARTERROUND (X3, X7, X11, X15)
       QUARTERROUND (X0, X5, X10, X15)
       QUARTERROUND (X1, X6, X11, X12)
-      QUARTERROUND (X2, X7, X8,  X13)
-      QUARTERROUND (X3, X4, X9,  X14)
+      QUARTERROUND (X2, X7, X8, X13)
+      QUARTERROUND (X3, X4, X9, X14)
     }
 
-    X0  = PLUS (X0,  J0);
-    X1  = PLUS (X1,  J1);
-    X2  = PLUS (X2,  J2);
-    X3  = PLUS (X3,  J3);
-    X4  = PLUS (X4,  J4);
-    X5  = PLUS (X5,  J5);
-    X6  = PLUS (X6,  J6);
-    X7  = PLUS (X7,  J7);
-    X8  = PLUS (X8,  J8);
-    X9  = PLUS (X9,  J9);
+    X0  = PLUS (X0, J0);
+    X1  = PLUS (X1, J1);
+    X2  = PLUS (X2, J2);
+    X3  = PLUS (X3, J3);
+    X4  = PLUS (X4, J4);
+    X5  = PLUS (X5, J5);
+    X6  = PLUS (X6, J6);
+    X7  = PLUS (X7, J7);
+    X8  = PLUS (X8, J8);
+    X9  = PLUS (X9, J9);
     X10 = PLUS (X10, J10);
     X11 = PLUS (X11, J11);
     X12 = PLUS (X12, J12);
@@ -191,16 +191,16 @@ ChaChaCryptBuffer (
     X14 = PLUS (X14, J14);
     X15 = PLUS (X15, J15);
 
-    X0  = XOR (X0,  LOAD32_LE (Source + 0));
-    X1  = XOR (X1,  LOAD32_LE (Source + 4));
-    X2  = XOR (X2,  LOAD32_LE (Source + 8));
-    X3  = XOR (X3,  LOAD32_LE (Source + 12));
-    X4  = XOR (X4,  LOAD32_LE (Source + 16));
-    X5  = XOR (X5,  LOAD32_LE (Source + 20));
-    X6  = XOR (X6,  LOAD32_LE (Source + 24));
-    X7  = XOR (X7,  LOAD32_LE (Source + 28));
-    X8  = XOR (X8,  LOAD32_LE (Source + 32));
-    X9  = XOR (X9,  LOAD32_LE (Source + 36));
+    X0  = XOR (X0, LOAD32_LE (Source + 0));
+    X1  = XOR (X1, LOAD32_LE (Source + 4));
+    X2  = XOR (X2, LOAD32_LE (Source + 8));
+    X3  = XOR (X3, LOAD32_LE (Source + 12));
+    X4  = XOR (X4, LOAD32_LE (Source + 16));
+    X5  = XOR (X5, LOAD32_LE (Source + 20));
+    X6  = XOR (X6, LOAD32_LE (Source + 24));
+    X7  = XOR (X7, LOAD32_LE (Source + 28));
+    X8  = XOR (X8, LOAD32_LE (Source + 32));
+    X9  = XOR (X9, LOAD32_LE (Source + 36));
     X10 = XOR (X10, LOAD32_LE (Source + 40));
     X11 = XOR (X11, LOAD32_LE (Source + 44));
     X12 = XOR (X12, LOAD32_LE (Source + 48));
@@ -214,9 +214,9 @@ ChaChaCryptBuffer (
       J13 = PLUSONE (J13);
     }
 
-    STORE32_LE (Destination + 0,  X0);
-    STORE32_LE (Destination + 4,  X1);
-    STORE32_LE (Destination + 8,  X2);
+    STORE32_LE (Destination + 0, X0);
+    STORE32_LE (Destination + 4, X1);
+    STORE32_LE (Destination + 8, X2);
     STORE32_LE (Destination + 12, X3);
     STORE32_LE (Destination + 16, X4);
     STORE32_LE (Destination + 20, X5);

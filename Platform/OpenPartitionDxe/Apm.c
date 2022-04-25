@@ -82,16 +82,17 @@ PartitionInstallAppleChildHandles (
   // Read the APM Driver Descriptor Map from LBA #0
   //
   Status = BlockIo->ReadBlocks (
-    BlockIo,
-    BlockIo->Media->MediaId,
-    0,
-    BlockIo->Media->BlockSize,
-    Apm
-    );
+                      BlockIo,
+                      BlockIo->Media->MediaId,
+                      0,
+                      BlockIo->Media->BlockSize,
+                      Apm
+                      );
   if (EFI_ERROR (Status)) {
     gBS->FreePool (Apm);
     return Status;
   }
+
   //
   // Verify that the APM Driver Descriptor Map is valid
   //
@@ -116,21 +117,23 @@ PartitionInstallAppleChildHandles (
   // Read the APM from LBA #1
   //
   Status = DiskIo->ReadDisk (
-    DiskIo,
-    BlockIo->Media->MediaId,
-    BlockSize,
-    BlockSize,
-    ApmEntry
-    );
+                     DiskIo,
+                     BlockIo->Media->MediaId,
+                     BlockSize,
+                     BlockSize,
+                     ApmEntry
+                     );
   if (EFI_ERROR (Status)) {
     ApmStatus = Status;
     goto Done;
   }
+
   //
   // Verify that the APM is valid
   //
-  if (ApmEntry->Signature != APM_ENTRY_SIGNATURE
-    || CompareMem (ApmEntry->PartitionType, APM_ENTRY_TYPE_APM, sizeof (APM_ENTRY_TYPE_APM)) != 0) {
+  if (  (ApmEntry->Signature != APM_ENTRY_SIGNATURE)
+     || (CompareMem (ApmEntry->PartitionType, APM_ENTRY_TYPE_APM, sizeof (APM_ENTRY_TYPE_APM)) != 0))
+  {
     goto Done;
   }
 
@@ -150,33 +153,35 @@ PartitionInstallAppleChildHandles (
   //
   for (Index = 1; Index < NumberOfPartitionEntries; ++Index, Offset += BlockSize) {
     Status = DiskIo->ReadDisk (
-      DiskIo,
-      BlockIo->Media->MediaId,
-      Offset,
-      BlockSize,
-      ApmEntry
-      );
+                       DiskIo,
+                       BlockIo->Media->MediaId,
+                       Offset,
+                       BlockSize,
+                       ApmEntry
+                       );
 
-    if (EFI_ERROR (Status)
-      || ApmEntry->Signature != APM_ENTRY_SIGNATURE) {
+    if (  EFI_ERROR (Status)
+       || (ApmEntry->Signature != APM_ENTRY_SIGNATURE))
+    {
       goto Done;
     }
 
     //
     // Verify that the Apple Partition Entry is valid
     //
-    if (CompareMem (ApmEntry->PartitionType, APM_ENTRY_TYPE_FREE, sizeof (APM_ENTRY_TYPE_FREE)) == 0
-      || SwapBytes32 (ApmEntry->PartitionSize) == 0) {
+    if (  (CompareMem (ApmEntry->PartitionType, APM_ENTRY_TYPE_FREE, sizeof (APM_ENTRY_TYPE_FREE)) == 0)
+       || (SwapBytes32 (ApmEntry->PartitionSize) == 0))
+    {
       continue;
     }
 
     PartitionStart = SwapBytes32 (ApmEntry->PartitionStart);
 
     StartingLBA = DivU64x32Remainder (
-      MultU64x32 (PartitionStart, BlockSize),
-      BlockIo->Media->BlockSize,
-      &Remainder
-      );
+                    MultU64x32 (PartitionStart, BlockSize),
+                    BlockIo->Media->BlockSize,
+                    &Remainder
+                    );
 
     if (Remainder != 0) {
       continue;
@@ -186,10 +191,10 @@ PartitionInstallAppleChildHandles (
     PartitionSize = SwapBytes32 (ApmEntry->PartitionSize);
 
     LBASize = DivU64x32Remainder (
-      MultU64x32 (PartitionSize, BlockSize),
-      BlockIo->Media->BlockSize,
-      &Remainder
-      );
+                MultU64x32 (PartitionSize, BlockSize),
+                BlockIo->Media->BlockSize,
+                &Remainder
+                );
 
     if (Remainder != 0) {
       continue;
@@ -202,11 +207,11 @@ PartitionInstallAppleChildHandles (
     }
 
     ZeroMem (&HdDev, sizeof (HdDev));
-    HdDev.Header.Type     = MEDIA_DEVICE_PATH;
-    HdDev.Header.SubType  = MEDIA_HARDDRIVE_DP;
+    HdDev.Header.Type    = MEDIA_DEVICE_PATH;
+    HdDev.Header.SubType = MEDIA_HARDDRIVE_DP;
     SetDevicePathNodeLength (&HdDev.Header, sizeof (HdDev));
 
-    HdDev.PartitionNumber = (UINT32) Index + 1;
+    HdDev.PartitionNumber = (UINT32)Index + 1;
     HdDev.MBRType         = MBR_TYPE_APPLE_PARTITION_TABLE_HEADER;
     HdDev.PartitionStart  = StartingLBA;
     HdDev.PartitionSize   = LBASize;
@@ -229,24 +234,24 @@ PartitionInstallAppleChildHandles (
     ApplePartitionInfo.PartitionStart  = HdDev.PartitionStart;
     ApplePartitionInfo.PartitionSize   = HdDev.PartitionSize;
 
-    CopyMem (&ApplePartitionInfo.PartitionType, ApmEntry->PartitionType, sizeof(EFI_GUID));
+    CopyMem (&ApplePartitionInfo.PartitionType, ApmEntry->PartitionType, sizeof (EFI_GUID));
 
     Status = PartitionInstallChildHandle (
-      This,
-      Handle,
-      DiskIo,
-      DiskIo2,
-      BlockIo,
-      BlockIo2,
-      DevicePath,
-      (EFI_DEVICE_PATH_PROTOCOL *) &HdDev,
-      &PartitionInfo,
-      &ApplePartitionInfo,
-      StartingLBA,
-      EndingLBA,
-      BlockIo->Media->BlockSize,
-      (EFI_GUID *) &ApplePartitionInfo.PartitionType
-      );
+               This,
+               Handle,
+               DiskIo,
+               DiskIo2,
+               BlockIo,
+               BlockIo2,
+               DevicePath,
+               (EFI_DEVICE_PATH_PROTOCOL *)&HdDev,
+               &PartitionInfo,
+               &ApplePartitionInfo,
+               StartingLBA,
+               EndingLBA,
+               BlockIo->Media->BlockSize,
+               (EFI_GUID *)&ApplePartitionInfo.PartitionType
+               );
 
     if (!EFI_ERROR (Status)) {
       ApmStatus = EFI_SUCCESS;

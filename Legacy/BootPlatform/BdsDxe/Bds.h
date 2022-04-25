@@ -26,8 +26,8 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 EFI_STATUS
 EFIAPI
 BdsInitialize (
-  IN EFI_HANDLE                     ImageHandle,
-  IN EFI_SYSTEM_TABLE               *SystemTable
+  IN EFI_HANDLE        ImageHandle,
+  IN EFI_SYSTEM_TABLE  *SystemTable
   );
 
 /**
@@ -41,7 +41,7 @@ BdsInitialize (
 VOID
 EFIAPI
 BdsEntry (
-  IN  EFI_BDS_ARCH_PROTOCOL *This
+  IN  EFI_BDS_ARCH_PROTOCOL  *This
   );
 
 #endif

@@ -54,7 +54,6 @@ BdsLibConnectAll (
   BdsLibConnectAllDefaultConsoles ();
 }
 
-
 /**
   This function will connect all the system drivers to all controllers
   first, and then connect all the console devices the system current
@@ -111,14 +110,14 @@ BdsLibConnectDevicePath (
     return EFI_SUCCESS;
   }
 
-  CurrentTpl  = EfiGetCurrentTpl ();
+  CurrentTpl = EfiGetCurrentTpl ();
 
-  DevicePath        = DuplicateDevicePath (DevicePathToConnect);
+  DevicePath = DuplicateDevicePath (DevicePathToConnect);
   if (DevicePath == NULL) {
     return EFI_OUT_OF_RESOURCES;
   }
 
-  CopyOfDevicePath  = DevicePath;
+  CopyOfDevicePath = DevicePath;
 
   do {
     //
@@ -127,13 +126,13 @@ BdsLibConnectDevicePath (
     //
     // After this call DevicePath points to the next Instance
     //
-    Instance  = GetNextDevicePathInstance (&DevicePath, &Size);
+    Instance = GetNextDevicePathInstance (&DevicePath, &Size);
     if (Instance == NULL) {
       FreePool (CopyOfDevicePath);
       return EFI_OUT_OF_RESOURCES;
     }
 
-    Next      = Instance;
+    Next = Instance;
     while (!IsDevicePathEndType (Next)) {
       Next = NextDevicePathNode (Next);
     }
@@ -166,7 +165,7 @@ BdsLibConnectDevicePath (
             //
             // Dispatch calls LoadImage/StartImage which cannot run at TPL > TPL_APPLICATION
             //
-          Status = gDS->Dispatch ();
+            Status = gDS->Dispatch ();
           } else {
             //
             // Always return EFI_NOT_FOUND here
@@ -196,16 +195,17 @@ BdsLibConnectDevicePath (
           gBS->ConnectController (Handle, NULL, RemainingDevicePath, FALSE);
         }
       }
+
       //
       // Loop until RemainingDevicePath is an empty device path
       //
     } while (!EFI_ERROR (Status) && !IsDevicePathEnd (RemainingDevicePath));
-
   } while (DevicePath != NULL);
 
   if (CopyOfDevicePath != NULL) {
     FreePool (CopyOfDevicePath);
   }
+
   //
   // All handle with DevicePath exists in the handle database
   //
@@ -330,10 +330,8 @@ BdsLibConnectAllDriversToAllControllers (
     // the connect again.
     //
     Status = gDS->Dispatch ();
-
   } while (!EFI_ERROR (Status));
 }
-
 
 /**
   Connect the specific Usb device which match the short form device path,
@@ -354,18 +352,18 @@ BdsLibConnectAllDriversToAllControllers (
 **/
 EFI_STATUS
 EFIAPI
-BdsLibConnectUsbDevByShortFormDP(
-  IN UINT8                      HostControllerPI,
-  IN EFI_DEVICE_PATH_PROTOCOL   *RemainingDevicePath
+BdsLibConnectUsbDevByShortFormDP (
+  IN UINT8                     HostControllerPI,
+  IN EFI_DEVICE_PATH_PROTOCOL  *RemainingDevicePath
   )
 {
-  EFI_STATUS                            Status;
-  EFI_HANDLE                            *HandleArray;
-  UINTN                                 HandleArrayCount;
-  UINTN                                 Index;
-  EFI_PCI_IO_PROTOCOL                   *PciIo;
-  UINT8                                 Class[3];
-  BOOLEAN                               AtLeastOneConnected;
+  EFI_STATUS           Status;
+  EFI_HANDLE           *HandleArray;
+  UINTN                HandleArrayCount;
+  UINTN                Index;
+  EFI_PCI_IO_PROTOCOL  *PciIo;
+  UINT8                Class[3];
+  BOOLEAN              AtLeastOneConnected;
 
   //
   // Check the passed in parameters
@@ -375,17 +373,19 @@ BdsLibConnectUsbDevByShortFormDP(
   }
 
   if ((DevicePathType (RemainingDevicePath) != MESSAGING_DEVICE_PATH) ||
-      ((DevicePathSubType (RemainingDevicePath) != MSG_USB_CLASS_DP)
+      (  (DevicePathSubType (RemainingDevicePath) != MSG_USB_CLASS_DP)
       && (DevicePathSubType (RemainingDevicePath) != MSG_USB_WWID_DP)
-      )) {
+      ))
+  {
     return EFI_INVALID_PARAMETER;
   }
 
-  if (HostControllerPI != 0xFF &&
-      HostControllerPI != 0x00 &&
-      HostControllerPI != 0x10 &&
-      HostControllerPI != 0x20 &&
-      HostControllerPI != 0x30) {
+  if ((HostControllerPI != 0xFF) &&
+      (HostControllerPI != 0x00) &&
+      (HostControllerPI != 0x10) &&
+      (HostControllerPI != 0x20) &&
+      (HostControllerPI != 0x30))
+  {
     return EFI_INVALID_PARAMETER;
   }
 
@@ -393,13 +393,13 @@ BdsLibConnectUsbDevByShortFormDP(
   // Find the usb host controller firstly, then connect with the remaining device path
   //
   AtLeastOneConnected = FALSE;
-  Status = gBS->LocateHandleBuffer (
-                  ByProtocol,
-                  &gEfiPciIoProtocolGuid,
-                  NULL,
-                  &HandleArrayCount,
-                  &HandleArray
-                  );
+  Status              = gBS->LocateHandleBuffer (
+                               ByProtocol,
+                               &gEfiPciIoProtocolGuid,
+                               NULL,
+                               &HandleArrayCount,
+                               &HandleArray
+                               );
   if (!EFI_ERROR (Status)) {
     for (Index = 0; Index < HandleArrayCount; Index++) {
       Status = gBS->HandleProtocol (
@@ -414,15 +414,16 @@ BdsLibConnectUsbDevByShortFormDP(
         Status = PciIo->Pci.Read (PciIo, EfiPciIoWidthUint8, 0x09, 3, &Class);
         if (!EFI_ERROR (Status)) {
           if ((PCI_CLASS_SERIAL == Class[2]) &&
-              (PCI_CLASS_SERIAL_USB == Class[1])) {
-            if (HostControllerPI == Class[0] || HostControllerPI == 0xFF) {
+              (PCI_CLASS_SERIAL_USB == Class[1]))
+          {
+            if ((HostControllerPI == Class[0]) || (HostControllerPI == 0xFF)) {
               Status = gBS->ConnectController (
                               HandleArray[Index],
                               NULL,
                               RemainingDevicePath,
                               FALSE
                               );
-              if (!EFI_ERROR(Status)) {
+              if (!EFI_ERROR (Status)) {
                 AtLeastOneConnected = TRUE;
               }
             }

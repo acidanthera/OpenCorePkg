@@ -22,6 +22,6 @@
   { 0x94E46BC2, 0x9127, 0x11DF,         \
     { 0xBF, 0xCE, 0xE7, 0x83, 0xCA, 0x2A, 0x34, 0xBE } }
 
-extern EFI_GUID gVMwareHdaProtocolGuid;
+extern EFI_GUID  gVMwareHdaProtocolGuid;
 
 #endif // VMWARE_HDA_H

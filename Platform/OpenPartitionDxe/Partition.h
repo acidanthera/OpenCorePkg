@@ -43,37 +43,37 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 //
 #define PARTITION_PRIVATE_DATA_SIGNATURE  SIGNATURE_32 ('P', 'a', 'r', 't')
 typedef struct {
-  UINT64                       Signature;
+  UINT64                           Signature;
 
-  EFI_HANDLE                   Handle;
-  EFI_DEVICE_PATH_PROTOCOL     *DevicePath;
-  EFI_BLOCK_IO_PROTOCOL        BlockIo;
-  EFI_BLOCK_IO2_PROTOCOL       BlockIo2;
-  EFI_BLOCK_IO_MEDIA           Media;
-  EFI_BLOCK_IO_MEDIA           Media2;//For BlockIO2
-  EFI_PARTITION_INFO_PROTOCOL  PartitionInfo;
+  EFI_HANDLE                       Handle;
+  EFI_DEVICE_PATH_PROTOCOL         *DevicePath;
+  EFI_BLOCK_IO_PROTOCOL            BlockIo;
+  EFI_BLOCK_IO2_PROTOCOL           BlockIo2;
+  EFI_BLOCK_IO_MEDIA               Media;
+  EFI_BLOCK_IO_MEDIA               Media2;// For BlockIO2
+  EFI_PARTITION_INFO_PROTOCOL      PartitionInfo;
 
-  EFI_DISK_IO_PROTOCOL         *DiskIo;
-  EFI_DISK_IO2_PROTOCOL        *DiskIo2;
-  EFI_BLOCK_IO_PROTOCOL        *ParentBlockIo;
-  EFI_BLOCK_IO2_PROTOCOL       *ParentBlockIo2;
-  UINT64                       Start;
-  UINT64                       End;
-  UINT32                       BlockSize;
-  BOOLEAN                      InStop;
+  EFI_DISK_IO_PROTOCOL             *DiskIo;
+  EFI_DISK_IO2_PROTOCOL            *DiskIo2;
+  EFI_BLOCK_IO_PROTOCOL            *ParentBlockIo;
+  EFI_BLOCK_IO2_PROTOCOL           *ParentBlockIo2;
+  UINT64                           Start;
+  UINT64                           End;
+  UINT32                           BlockSize;
+  BOOLEAN                          InStop;
 
-  EFI_GUID                     TypeGuid;
+  EFI_GUID                         TypeGuid;
 
-  APPLE_PARTITION_INFO_PROTOCOL ApplePartitionInfo;
+  APPLE_PARTITION_INFO_PROTOCOL    ApplePartitionInfo;
 } PARTITION_PRIVATE_DATA;
 
 typedef struct {
-  EFI_DISK_IO2_TOKEN           DiskIo2Token;
-  EFI_BLOCK_IO2_TOKEN          *BlockIo2Token;
+  EFI_DISK_IO2_TOKEN     DiskIo2Token;
+  EFI_BLOCK_IO2_TOKEN    *BlockIo2Token;
 } PARTITION_ACCESS_TASK;
 
-#define PARTITION_DEVICE_FROM_BLOCK_IO_THIS(a)  CR (a, PARTITION_PRIVATE_DATA, BlockIo, PARTITION_PRIVATE_DATA_SIGNATURE)
-#define PARTITION_DEVICE_FROM_BLOCK_IO2_THIS(a) CR (a, PARTITION_PRIVATE_DATA, BlockIo2, PARTITION_PRIVATE_DATA_SIGNATURE)
+#define PARTITION_DEVICE_FROM_BLOCK_IO_THIS(a)   CR (a, PARTITION_PRIVATE_DATA, BlockIo, PARTITION_PRIVATE_DATA_SIGNATURE)
+#define PARTITION_DEVICE_FROM_BLOCK_IO2_THIS(a)  CR (a, PARTITION_PRIVATE_DATA, BlockIo2, PARTITION_PRIVATE_DATA_SIGNATURE)
 
 //
 // Global Variables
@@ -85,7 +85,7 @@ extern EFI_COMPONENT_NAME2_PROTOCOL  gPartitionComponentName2;
 //
 // Extract INT32 from char array
 //
-#define UNPACK_INT32(a) (INT32)( (((UINT8 *) a)[0] <<  0) |    \
+#define UNPACK_INT32(a)  (INT32)( (((UINT8 *) a)[0] <<  0) |   \
                                  (((UINT8 *) a)[1] <<  8) |    \
                                  (((UINT8 *) a)[2] << 16) |    \
                                  (((UINT8 *) a)[3] << 24) )
@@ -93,24 +93,24 @@ extern EFI_COMPONENT_NAME2_PROTOCOL  gPartitionComponentName2;
 //
 // Extract UINT32 from char array
 //
-#define UNPACK_UINT32(a) (UINT32)( (((UINT8 *) a)[0] <<  0) |    \
+#define UNPACK_UINT32(a)  (UINT32)( (((UINT8 *) a)[0] <<  0) |   \
                                    (((UINT8 *) a)[1] <<  8) |    \
                                    (((UINT8 *) a)[2] << 16) |    \
                                    (((UINT8 *) a)[3] << 24) )
-
 
 //
 // GPT Partition Entry Status
 //
 typedef struct {
-  BOOLEAN OutOfRange;
-  BOOLEAN Overlap;
-  BOOLEAN OsSpecific;
+  BOOLEAN    OutOfRange;
+  BOOLEAN    Overlap;
+  BOOLEAN    OsSpecific;
 } EFI_PARTITION_ENTRY_STATUS;
 
 //
 // Function Prototypes
 //
+
 /**
   Test to see if this driver supports ControllerHandle. Any ControllerHandle
   than contains a BlockIo and DiskIo protocol can be supported.
@@ -173,15 +173,16 @@ PartitionDriverBindingStart (
 EFI_STATUS
 EFIAPI
 PartitionDriverBindingStop (
-  IN  EFI_DRIVER_BINDING_PROTOCOL   *This,
-  IN  EFI_HANDLE                    ControllerHandle,
-  IN  UINTN                         NumberOfChildren,
-  IN  EFI_HANDLE                    *ChildHandleBuffer
+  IN  EFI_DRIVER_BINDING_PROTOCOL  *This,
+  IN  EFI_HANDLE                   ControllerHandle,
+  IN  UINTN                        NumberOfChildren,
+  IN  EFI_HANDLE                   *ChildHandleBuffer
   );
 
 //
 // EFI Component Name Functions
 //
+
 /**
   Retrieves a Unicode string that is the user readable name of the driver.
 
@@ -228,7 +229,6 @@ PartitionComponentNameGetDriverName (
   IN  CHAR8                        *Language,
   OUT CHAR16                       **DriverName
   );
-
 
 /**
   Retrieves a Unicode string that is the user readable name of the controller
@@ -301,13 +301,12 @@ PartitionComponentNameGetDriverName (
 EFI_STATUS
 EFIAPI
 PartitionComponentNameGetControllerName (
-  IN  EFI_COMPONENT_NAME_PROTOCOL                     *This,
-  IN  EFI_HANDLE                                      ControllerHandle,
-  IN  EFI_HANDLE                                      ChildHandle        OPTIONAL,
-  IN  CHAR8                                           *Language,
-  OUT CHAR16                                          **ControllerName
+  IN  EFI_COMPONENT_NAME_PROTOCOL  *This,
+  IN  EFI_HANDLE                   ControllerHandle,
+  IN  EFI_HANDLE                   ChildHandle        OPTIONAL,
+  IN  CHAR8                        *Language,
+  OUT CHAR16                       **ControllerName
   );
-
 
 /**
   Create a child handle for a logical block device that represents the
@@ -334,20 +333,20 @@ PartitionComponentNameGetControllerName (
 **/
 EFI_STATUS
 PartitionInstallChildHandle (
-  IN  EFI_DRIVER_BINDING_PROTOCOL  *This,
-  IN  EFI_HANDLE                   ParentHandle,
-  IN  EFI_DISK_IO_PROTOCOL         *ParentDiskIo,
-  IN  EFI_DISK_IO2_PROTOCOL        *ParentDiskIo2,
-  IN  EFI_BLOCK_IO_PROTOCOL        *ParentBlockIo,
-  IN  EFI_BLOCK_IO2_PROTOCOL       *ParentBlockIo2,
-  IN  EFI_DEVICE_PATH_PROTOCOL     *ParentDevicePath,
-  IN  EFI_DEVICE_PATH_PROTOCOL     *DevicePathNode,
-  IN  EFI_PARTITION_INFO_PROTOCOL  *PartitionInfo,
-  IN  APPLE_PARTITION_INFO_PROTOCOL *ApplePartitionInfo,
-  IN  EFI_LBA                      Start,
-  IN  EFI_LBA                      End,
-  IN  UINT32                       BlockSize,
-  IN  EFI_GUID                     *TypeGuid
+  IN  EFI_DRIVER_BINDING_PROTOCOL    *This,
+  IN  EFI_HANDLE                     ParentHandle,
+  IN  EFI_DISK_IO_PROTOCOL           *ParentDiskIo,
+  IN  EFI_DISK_IO2_PROTOCOL          *ParentDiskIo2,
+  IN  EFI_BLOCK_IO_PROTOCOL          *ParentBlockIo,
+  IN  EFI_BLOCK_IO2_PROTOCOL         *ParentBlockIo2,
+  IN  EFI_DEVICE_PATH_PROTOCOL       *ParentDevicePath,
+  IN  EFI_DEVICE_PATH_PROTOCOL       *DevicePathNode,
+  IN  EFI_PARTITION_INFO_PROTOCOL    *PartitionInfo,
+  IN  APPLE_PARTITION_INFO_PROTOCOL  *ApplePartitionInfo,
+  IN  EFI_LBA                        Start,
+  IN  EFI_LBA                        End,
+  IN  UINT32                         BlockSize,
+  IN  EFI_GUID                       *TypeGuid
   );
 
 /**
@@ -361,7 +360,7 @@ PartitionInstallChildHandle (
 **/
 BOOLEAN
 HasChildren (
-  IN EFI_HANDLE           ControllerHandle
+  IN EFI_HANDLE  ControllerHandle
   );
 
 /**

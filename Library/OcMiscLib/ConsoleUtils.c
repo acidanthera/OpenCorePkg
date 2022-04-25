@@ -14,8 +14,8 @@ OcConsoleFlush (
   VOID
   )
 {
-  EFI_STATUS          Status;
-  EFI_INPUT_KEY       EfiKey;
+  EFI_STATUS     Status;
+  EFI_INPUT_KEY  EfiKey;
 
   do {
     Status = gST->ConIn->ReadKeyStroke (gST->ConIn, &EfiKey);

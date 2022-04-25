@@ -25,13 +25,13 @@
 //
 // Root.
 //
-#define ROOT_DIR    L"\\"
+#define ROOT_DIR  L"\\"
 //
 // Required where the BTRFS subvolume is /boot, as this looks like a
 // normal directory within EFI. Note that scanning / and then /boot
 // is how blscfg behaves by default too.
 //
-#define BOOT_DIR    L"\\boot"
+#define BOOT_DIR  L"\\boot"
 //
 // Don't add missing root= option unless this directory is present at root.
 //
@@ -41,13 +41,13 @@
 // No leading slash so they can be relative to root or
 // additional scan dir.
 //
-#define LOADER_ENTRIES_DIR    L"loader\\entries"
-#define GRUB2_GRUB_CFG        L"grub2\\grub.cfg"
-#define GRUB2_GRUBENV         L"grub2\\grubenv"
-#define GRUB2_GRUBENV_SIZE    SIZE_1KB
+#define LOADER_ENTRIES_DIR  L"loader\\entries"
+#define GRUB2_GRUB_CFG      L"grub2\\grub.cfg"
+#define GRUB2_GRUBENV       L"grub2\\grubenv"
+#define GRUB2_GRUBENV_SIZE  SIZE_1KB
 
-#define BLSPEC_SUFFIX_CONF    L".conf"
-#define BLSPEC_PREFIX_AUTO    L"auto-"
+#define BLSPEC_SUFFIX_CONF  L".conf"
+#define BLSPEC_PREFIX_AUTO  L"auto-"
 
 //
 // Put a limit on entry name length, since the base part of the filename
@@ -56,8 +56,8 @@
 // Since we are using pure EFISTUB loading, initrd file paths have to be passed
 // in kernel args (which have an unknown max. length of 256-4096 bytes).
 //
-#define MAX_LOADER_ENTRY_NAME_LEN           (127)
-#define MAX_LOADER_ENTRY_FILE_INFO_SIZE     (                                         \
+#define MAX_LOADER_ENTRY_NAME_LEN        (127)
+#define MAX_LOADER_ENTRY_FILE_INFO_SIZE  (                                            \
   SIZE_OF_EFI_FILE_INFO +                                                             \
   (MAX_LOADER_ENTRY_NAME_LEN + L_STR_LEN (BLSPEC_SUFFIX_CONF) + 1) * sizeof (CHAR16)  \
   )
@@ -66,11 +66,11 @@
 // Might as well put an upper limit for some kind of sanity check.
 // Typical files are ~350 bytes.
 //
-#define MAX_LOADER_ENTRY_FILE_SIZE        SIZE_4KB
+#define MAX_LOADER_ENTRY_FILE_SIZE  SIZE_4KB
 
 STATIC
 BOOLEAN
-mIsGrub2;
+  mIsGrub2;
 
 /*
   loader entry processing states
@@ -91,7 +91,7 @@ typedef enum ENTRY_PARSE_STATE_ {
 //
 STATIC
 CHAR8 *
-mLinuxVariants[] = {
+  mLinuxVariants[] = {
   "Arch",
   "Astra",
   "CentOS",
@@ -124,11 +124,11 @@ mLinuxVariants[] = {
 STATIC
 CHAR8 *
 ExtractVariantFrom (
-  IN  CHAR8     *String
-)
+  IN  CHAR8  *String
+  )
 {
-  UINTN       Index;
-  CHAR8       *Variant;
+  UINTN  Index;
+  CHAR8  *Variant;
 
   Variant = NULL;
   for (Index = 0; Index < ARRAY_SIZE (mLinuxVariants); Index++) {
@@ -148,100 +148,106 @@ ExtractVariantFrom (
 STATIC
 EFI_STATUS
 GetLoaderEntryLine (
-  IN     CONST CHAR16           *FileName,
-  IN OUT       CHAR8            *Content,
-  IN OUT       UINTN            *Pos,
-     OUT       CHAR8            **Key,
-     OUT       CHAR8            **Value
+  IN     CONST CHAR16  *FileName,
+  IN OUT       CHAR8   *Content,
+  IN OUT       UINTN   *Pos,
+  OUT       CHAR8      **Key,
+  OUT       CHAR8      **Value
   )
 {
-  ENTRY_PARSE_STATE     State;
-  CHAR8                 *LastSpace;
-  CHAR8                 Ch;
-  BOOLEAN               IsComplete;
+  ENTRY_PARSE_STATE  State;
+  CHAR8              *LastSpace;
+  CHAR8              Ch;
+  BOOLEAN            IsComplete;
 
-  *Key        = NULL;
-  *Value      = NULL;
-  State       = ENTRY_LEADING_SPACE;
-  IsComplete  = FALSE;
+  *Key       = NULL;
+  *Value     = NULL;
+  State      = ENTRY_LEADING_SPACE;
+  IsComplete = FALSE;
 
   do {
     Ch = Content[*Pos];
-    
-    if (!(Ch == '\0' || Ch == '\t' || Ch == '\n' || (Ch >= 20 && Ch < 128))) {
-     DEBUG ((DEBUG_WARN, "LNX: Invalid char 0x%x in %s\n", Ch, FileName));
-     return EFI_INVALID_PARAMETER;
+
+    if (!((Ch == '\0') || (Ch == '\t') || (Ch == '\n') || ((Ch >= 20) && (Ch < 128)))) {
+      DEBUG ((DEBUG_WARN, "LNX: Invalid char 0x%x in %s\n", Ch, FileName));
+      return EFI_INVALID_PARAMETER;
     }
 
     switch (State) {
       case ENTRY_LEADING_SPACE:
-        if (Ch == '\n' || Ch == '\0') {
+        if ((Ch == '\n') || (Ch == '\0')) {
           //
           // Skip empty line
           //
-        } else if (Ch == ' ' || Ch == '\t') {
+        } else if ((Ch == ' ') || (Ch == '\t')) {
         } else if (Ch == '#') {
           State = ENTRY_COMMENT;
         } else {
-          *Key = &Content[*Pos];
+          *Key  = &Content[*Pos];
           State = ENTRY_KEY;
         }
+
         break;
 
       case ENTRY_COMMENT:
         if (Ch == '\n') {
           State = ENTRY_LEADING_SPACE;
         }
+
         break;
 
       case ENTRY_KEY:
-        if (Ch == '\n' || Ch == '\0') {
+        if ((Ch == '\n') || (Ch == '\0')) {
           //
           // No value, skip line
           //
-        } else if (Ch == ' ' || Ch == '\t') {
+        } else if ((Ch == ' ') || (Ch == '\t')) {
           Content[*Pos] = '\0';
-          State = ENTRY_KEY_VALUE_SPACE;
+          State         = ENTRY_KEY_VALUE_SPACE;
         }
+
         break;
 
       case ENTRY_KEY_VALUE_SPACE:
-        if (Ch == '\n' || Ch == '\0') {
+        if ((Ch == '\n') || (Ch == '\0')) {
           //
           // No value, skip line
           //
-        } else if (Ch == ' ' || Ch == '\t') {
+        } else if ((Ch == ' ') || (Ch == '\t')) {
         } else {
-          *Value = &Content[*Pos];
-          State = ENTRY_VALUE;
+          *Value    = &Content[*Pos];
+          State     = ENTRY_VALUE;
           LastSpace = NULL;
         }
+
         break;
 
       case ENTRY_VALUE:
-        if (Ch == '\n' || Ch == '\0') {
+        if ((Ch == '\n') || (Ch == '\0')) {
           if (LastSpace != NULL) {
             *LastSpace = '\0';
           } else {
             Content[*Pos] = '\0';
           }
+
           IsComplete = TRUE;
-        } else if (Ch == ' ' || Ch == '\t' ) {
+        } else if ((Ch == ' ') || (Ch == '\t')) {
           LastSpace = &Content[*Pos];
         } else {
           LastSpace = NULL;
         }
+
         break;
 
       default:
         ASSERT (FALSE);
         return EFI_INVALID_PARAMETER;
     }
+
     if (Ch != '\0') {
       ++(*Pos);
     }
-  }
-  while (Ch != '\0' && !IsComplete);
+  } while (Ch != '\0' && !IsComplete);
 
   if (!IsComplete) {
     return EFI_NOT_FOUND;
@@ -255,7 +261,7 @@ InternalAllocateLoaderEntry (
   VOID
   )
 {
-  LOADER_ENTRY      *Entry;
+  LOADER_ENTRY  *Entry;
 
   Entry = OcFlexArrayAddItem (gLoaderEntries);
 
@@ -280,7 +286,7 @@ InternalAllocateLoaderEntry (
 
 VOID
 InternalFreeLoaderEntry (
-  LOADER_ENTRY    *Entry
+  LOADER_ENTRY  *Entry
   )
 {
   ASSERT (Entry != NULL);
@@ -292,17 +298,21 @@ InternalFreeLoaderEntry (
   if (Entry->Title) {
     FreePool (Entry->Title);
   }
+
   if (Entry->Version) {
     FreePool (Entry->Version);
   }
+
   if (Entry->Linux) {
     FreePool (Entry->Linux);
   }
+
   OcFlexArrayFree (&Entry->Initrds);
   OcFlexArrayFree (&Entry->Options);
   if (Entry->OcId != NULL) {
     FreePool (Entry->OcId);
   }
+
   if (Entry->OcFlavour != NULL) {
     FreePool (Entry->OcFlavour);
   }
@@ -316,29 +326,31 @@ EntryCopySingleValue (
   IN     CONST CHAR8    *Value
   )
 {
-  if (!Grub2 || *Target == NULL) {
+  if (!Grub2 || (*Target == NULL)) {
     if (*Target != NULL) {
       FreePool (*Target);
     }
+
     *Target = AllocateCopyPool (AsciiStrSize (Value), Value);
     if (*Target == NULL) {
       return EFI_OUT_OF_RESOURCES;
     }
   }
+
   return EFI_SUCCESS;
 }
 
 STATIC
 EFI_STATUS
 EntryCopyMultipleValue (
-  IN     CONST BOOLEAN              Grub2,
-  IN           OC_FLEX_ARRAY        *Array,
-  IN     CONST CHAR8                *Value
+  IN     CONST BOOLEAN        Grub2,
+  IN           OC_FLEX_ARRAY  *Array,
+  IN     CONST CHAR8          *Value
   )
 {
-  VOID          **NewItem;
+  VOID  **NewItem;
 
-  if (Grub2 && Array->Items != NULL) {
+  if (Grub2 && (Array->Items != NULL)) {
     return EFI_SUCCESS;
   }
 
@@ -357,21 +369,21 @@ EntryCopyMultipleValue (
 
 EFI_STATUS
 InternalProcessLoaderEntryFile (
-  IN     CONST CHAR16           *FileName,
-  IN OUT       CHAR8            *Content,
-     OUT       LOADER_ENTRY     *Entry,
-  IN     CONST BOOLEAN          Grub2
+  IN     CONST CHAR16     *FileName,
+  IN OUT       CHAR8      *Content,
+  OUT       LOADER_ENTRY  *Entry,
+  IN     CONST BOOLEAN    Grub2
   )
 {
-  EFI_STATUS    Status;
-  UINTN         Pos;
-  CHAR8         *Key;
-  CHAR8         *Value;
+  EFI_STATUS  Status;
+  UINTN       Pos;
+  CHAR8       *Key;
+  CHAR8       *Value;
 
   ASSERT (Content != NULL);
 
   Status = EFI_SUCCESS;
-  Pos = 0;
+  Pos    = 0;
 
   //
   // Grub2 blscfg module uses first only (even for options,
@@ -382,7 +394,7 @@ InternalProcessLoaderEntryFile (
   // Both use multiple for initrd.
   //
   while (TRUE) {
-    Status = GetLoaderEntryLine(FileName, Content, &Pos, &Key, &Value);
+    Status = GetLoaderEntryLine (FileName, Content, &Pos, &Key, &Value);
     if (Status == EFI_NOT_FOUND) {
       break;
     }
@@ -414,13 +426,13 @@ InternalProcessLoaderEntryFile (
 STATIC
 EFI_STATUS
 ExpandReplaceOptions (
-  IN OUT LOADER_ENTRY *Entry
+  IN OUT LOADER_ENTRY  *Entry
   )
 {
-  EFI_STATUS          Status;
-  CHAR8               **Options;
-  CHAR8               *NewOptions;
-  GRUB_VAR            *DefaultOptionsVar;
+  EFI_STATUS  Status;
+  CHAR8       **Options;
+  CHAR8       *NewOptions;
+  GRUB_VAR    *DefaultOptionsVar;
 
   if (Entry->Options->Count > 0) {
     //
@@ -452,11 +464,13 @@ ExpandReplaceOptions (
       if (EFI_ERROR (Status)) {
         return Status;
       }
+
       Options = OcFlexArrayAddItem (Entry->Options);
       if (Options == NULL) {
         FreePool (NewOptions);
         return EFI_OUT_OF_RESOURCES;
       }
+
       *Options = NewOptions;
     }
   }
@@ -467,10 +481,10 @@ ExpandReplaceOptions (
 STATIC
 EFI_STATUS
 DoFilterLoaderEntry (
-  EFI_FILE_HANDLE   Directory,
-  EFI_FILE_INFO     *FileInfo,
-  UINTN             FileInfoSize,
-  VOID              *Context        OPTIONAL
+  EFI_FILE_HANDLE  Directory,
+  EFI_FILE_INFO    *FileInfo,
+  UINTN            FileInfoSize,
+  VOID             *Context        OPTIONAL
   )
 {
   if ((FileInfo->Attribute & EFI_FILE_DIRECTORY) != 0) {
@@ -481,8 +495,9 @@ DoFilterLoaderEntry (
   // Skip ".*" and case sensitive "auto-*" files,
   // follows systemd-boot logic.
   //
-  if (FileInfo->FileName[0] == L'.' ||
-    StrnCmp (FileInfo->FileName, BLSPEC_PREFIX_AUTO, L_STR_LEN (BLSPEC_PREFIX_AUTO)) == 0) {
+  if ((FileInfo->FileName[0] == L'.') ||
+      (StrnCmp (FileInfo->FileName, BLSPEC_PREFIX_AUTO, L_STR_LEN (BLSPEC_PREFIX_AUTO)) == 0))
+  {
     return EFI_NOT_FOUND;
   }
 
@@ -509,19 +524,19 @@ InternalIdVersionFromFileName (
   IN     CHAR16        *FileName
   )
 {
-  EFI_STATUS          Status;
-  UINTN               NumCopied;
+  EFI_STATUS  Status;
+  UINTN       NumCopied;
 
-  CHAR16              *Split;
-  CHAR16              *IdEnd;
-  CHAR16              *VersionStart;
-  CHAR16              *VersionEnd;
-  CHAR8               *OcId;
-  CHAR8               *Version;
+  CHAR16  *Split;
+  CHAR16  *IdEnd;
+  CHAR16  *VersionStart;
+  CHAR16  *VersionEnd;
+  CHAR8   *OcId;
+  CHAR8   *Version;
 
   ASSERT (Entry    != NULL);
   ASSERT (FileName != NULL);
-  
+
   Split = NULL;
 
   Split = OcStrChr (FileName, L'-');
@@ -534,13 +549,13 @@ InternalIdVersionFromFileName (
   //
   // Will not happen with sane filenames.
   //
-  if (Split != NULL && (Split == FileName || VersionEnd == Split + 1)) {
+  if ((Split != NULL) && ((Split == FileName) || (VersionEnd == Split + 1))) {
     Split = NULL;
   }
 
   if (Split == NULL) {
     VersionStart = FileName;
-    IdEnd = VersionEnd;
+    IdEnd        = VersionEnd;
   } else {
     VersionStart = Split + 1;
 
@@ -558,7 +573,7 @@ InternalIdVersionFromFileName (
 
   Status = UnicodeStrnToAsciiStrS (FileName, IdEnd - FileName, OcId, IdEnd - FileName + 1, &NumCopied);
   ASSERT (!EFI_ERROR (Status));
-  ASSERT (NumCopied == (UINTN) (IdEnd - FileName));
+  ASSERT (NumCopied == (UINTN)(IdEnd - FileName));
 
   Entry->OcId = OcId;
 
@@ -570,7 +585,7 @@ InternalIdVersionFromFileName (
 
     Status = UnicodeStrnToAsciiStrS (VersionStart, VersionEnd - VersionStart, Version, VersionEnd - VersionStart + 1, &NumCopied);
     ASSERT (!EFI_ERROR (Status));
-    ASSERT (NumCopied == (UINTN) (VersionEnd - VersionStart));
+    ASSERT (NumCopied == (UINTN)(VersionEnd - VersionStart));
 
     Entry->Version = Version;
   }
@@ -595,19 +610,19 @@ FindLoaderFile (
   IN OUT       CHAR8            **FileName
   )
 {
-  EFI_STATUS        Status;
-  EFI_FILE_PROTOCOL *File;
-  UINTN             FileNameLen;
-  UINTN             DirNameLen;
-  CHAR16            *Path;
-  UINTN             MaxPathSize;
+  EFI_STATUS         Status;
+  EFI_FILE_PROTOCOL  *File;
+  UINTN              FileNameLen;
+  UINTN              DirNameLen;
+  CHAR16             *Path;
+  UINTN              MaxPathSize;
 
   ASSERT (DirName != NULL);
   ASSERT (FileName != NULL);
   ASSERT (*FileName != NULL);
 
   FileNameLen = AsciiStrLen (*FileName);
-  DirNameLen = StrLen (DirName);
+  DirNameLen  = StrLen (DirName);
 
   MaxPathSize = (DirNameLen + FileNameLen + 1) * sizeof (CHAR16);
 
@@ -656,15 +671,15 @@ FindLoaderFile (
 STATIC
 BOOLEAN
 HasRootOption (
-  IN           OC_FLEX_ARRAY      *Options
+  IN           OC_FLEX_ARRAY  *Options
   )
 {
-  EFI_STATUS            Status;
-  UINTN                 Index;
-  CHAR8                 **Option;
-  CHAR8                 *OptionCopy;
-  OC_FLEX_ARRAY         *ParsedVars;
-  BOOLEAN               HasRoot;
+  EFI_STATUS     Status;
+  UINTN          Index;
+  CHAR8          **Option;
+  CHAR8          *OptionCopy;
+  OC_FLEX_ARRAY  *ParsedVars;
+  BOOLEAN        HasRoot;
 
   ASSERT (Options != NULL);
 
@@ -704,11 +719,11 @@ HasRootOption (
 STATIC
 BOOLEAN
 HasOstreeDir (
-  EFI_FILE_HANDLE   Directory
+  EFI_FILE_HANDLE  Directory
   )
 {
-  EFI_STATUS            Status;
-  EFI_FILE_PROTOCOL     *OstreeFile;
+  EFI_STATUS         Status;
+  EFI_FILE_PROTOCOL  *OstreeFile;
 
   Status = OcSafeFileOpen (Directory, &OstreeFile, OSTREE_DIR, EFI_FILE_MODE_READ, 0);
   if (EFI_ERROR (Status)) {
@@ -719,33 +734,34 @@ HasOstreeDir (
   if (EFI_ERROR (Status)) {
     DEBUG ((DEBUG_WARN, "LNX: %s found but not a %a - %r\n", OSTREE_DIR, "directory", Status));
   }
+
   OstreeFile->Close (OstreeFile);
 
-  return !EFI_ERROR(Status);
+  return !EFI_ERROR (Status);
 }
 
 STATIC
 EFI_STATUS
 DoProcessLoaderEntry (
-  EFI_FILE_HANDLE   Directory,
-  EFI_FILE_INFO     *FileInfo,
-  UINTN             FileInfoSize,
-  VOID              *Context        OPTIONAL
+  EFI_FILE_HANDLE  Directory,
+  EFI_FILE_INFO    *FileInfo,
+  UINTN            FileInfoSize,
+  VOID             *Context        OPTIONAL
   )
 {
-  EFI_STATUS            Status;
-  CHAR8                 *Content;
-  LOADER_ENTRY          *Entry;
-  CHAR16                SaveChar;
-  CHAR16                *DirName;
-  CHAR8                 **Initrd;
-  UINTN                 Index;
+  EFI_STATUS    Status;
+  CHAR8         *Content;
+  LOADER_ENTRY  *Entry;
+  CHAR16        SaveChar;
+  CHAR16        *DirName;
+  CHAR8         **Initrd;
+  UINTN         Index;
 
   ASSERT (Context != NULL);
   DirName = Context;
 
   if (FileInfoSize > MAX_LOADER_ENTRY_FILE_INFO_SIZE) {
-    SaveChar = FileInfo->FileName[MAX_LOADER_ENTRY_NAME_LEN];
+    SaveChar                                      = FileInfo->FileName[MAX_LOADER_ENTRY_NAME_LEN];
     FileInfo->FileName[MAX_LOADER_ENTRY_NAME_LEN] = CHAR_NULL;
     DEBUG ((DEBUG_WARN, "LNX: Entry filename overlong: %s...\n", FileInfo->FileName));
     FileInfo->FileName[MAX_LOADER_ENTRY_NAME_LEN] = SaveChar;
@@ -757,8 +773,11 @@ DoProcessLoaderEntry (
     return EFI_NOT_FOUND;
   }
 
-  DEBUG (((gLinuxBootFlags & LINUX_BOOT_LOG_VERBOSE) == 0 ? DEBUG_VERBOSE : DEBUG_INFO,
-    "LNX: Reading %s...\n", FileInfo->FileName));
+  DEBUG ((
+    (gLinuxBootFlags & LINUX_BOOT_LOG_VERBOSE) == 0 ? DEBUG_VERBOSE : DEBUG_INFO,
+    "LNX: Reading %s...\n",
+    FileInfo->FileName
+    ));
 
   Content = OcReadFileFromDirectory (Directory, FileInfo->FileName, NULL, 0);
   if (Content == NULL) {
@@ -777,8 +796,10 @@ DoProcessLoaderEntry (
   }
 
   if (Entry->Linux == NULL) {
-    DEBUG (((gLinuxBootFlags & LINUX_BOOT_LOG_VERBOSE) == 0 ? DEBUG_VERBOSE : DEBUG_INFO,
-      "LNX: No linux line, ignoring\n"));
+    DEBUG ((
+      (gLinuxBootFlags & LINUX_BOOT_LOG_VERBOSE) == 0 ? DEBUG_VERBOSE : DEBUG_INFO,
+      "LNX: No linux line, ignoring\n"
+      ));
     OcFlexArrayDiscardItem (gLoaderEntries, TRUE);
     return EFI_NOT_FOUND;
   }
@@ -793,6 +814,7 @@ DoProcessLoaderEntry (
       }
     }
   }
+
   if (EFI_ERROR (Status)) {
     OcFlexArrayDiscardItem (gLoaderEntries, TRUE);
     return Status;
@@ -810,8 +832,9 @@ DoProcessLoaderEntry (
   // Need to understand other reasons to apply this fix (if any),
   // so not automatically applying unless we recognise the layout.
   //
-  if ((gLinuxBootFlags & LINUX_BOOT_ALLOW_CONF_AUTO_ROOT) != 0
-    && !HasRootOption (Entry->Options)) {
+  if (  ((gLinuxBootFlags & LINUX_BOOT_ALLOW_CONF_AUTO_ROOT) != 0)
+     && !HasRootOption (Entry->Options))
+  {
     if (!HasOstreeDir (Directory)) {
       DEBUG ((DEBUG_WARN, "LNX: Missing root option, %s %afound - %afixing\n", OSTREE_DIR, "not ", "not "));
     } else {
@@ -839,10 +862,10 @@ DoProcessLoaderEntry (
 STATIC
 EFI_STATUS
 ProcessLoaderEntry (
-  EFI_FILE_HANDLE   Directory,
-  EFI_FILE_INFO     *FileInfo,
-  UINTN             FileInfoSize,
-  VOID              *Context        OPTIONAL
+  EFI_FILE_HANDLE  Directory,
+  EFI_FILE_INFO    *FileInfo,
+  UINTN            FileInfoSize,
+  VOID             *Context        OPTIONAL
   )
 {
   EFI_STATUS  Status;
@@ -869,37 +892,37 @@ ProcessLoaderEntry (
 STATIC
 EFI_STATUS
 ScanLoaderEntriesAtDirectory (
-  IN   EFI_FILE_PROTOCOL        *RootDirectory,
-  IN   CHAR16                   *DirName,
-  OUT  OC_PICKER_ENTRY          **Entries,
-  OUT  UINTN                    *NumEntries
+  IN   EFI_FILE_PROTOCOL  *RootDirectory,
+  IN   CHAR16             *DirName,
+  OUT  OC_PICKER_ENTRY    **Entries,
+  OUT  UINTN              *NumEntries
   )
 {
-  EFI_STATUS                      Status;
-  EFI_FILE_PROTOCOL               *EntriesDirectory;
-  CHAR8                           *GrubCfg;
-  CHAR8                           *GrubEnv;
-  GRUB_VAR                        *EarlyInitrdVar;
+  EFI_STATUS         Status;
+  EFI_FILE_PROTOCOL  *EntriesDirectory;
+  CHAR8              *GrubCfg;
+  CHAR8              *GrubEnv;
+  GRUB_VAR           *EarlyInitrdVar;
 
   Status = OcSafeFileOpen (RootDirectory, &EntriesDirectory, LOADER_ENTRIES_DIR, EFI_FILE_MODE_READ, 0);
   if (EFI_ERROR (Status)) {
     return Status;
   }
 
-  Status              = EFI_SUCCESS;
-  GrubEnv             = NULL;
-  mIsGrub2            = FALSE;
-  gLoaderEntries      = NULL;
+  Status         = EFI_SUCCESS;
+  GrubEnv        = NULL;
+  mIsGrub2       = FALSE;
+  gLoaderEntries = NULL;
 
   //
   // Only treat as GRUB2 if grub2/grub.cfg exists.
   //
-  GrubCfg   = OcReadFileFromDirectory (RootDirectory, GRUB2_GRUB_CFG, NULL, 0);
+  GrubCfg = OcReadFileFromDirectory (RootDirectory, GRUB2_GRUB_CFG, NULL, 0);
   if (GrubCfg == NULL) {
     DEBUG ((DEBUG_INFO, "LNX: %s not found\n", GRUB2_GRUB_CFG));
   } else {
-    mIsGrub2  = TRUE;
-    Status = InternalInitGrubVars ();
+    mIsGrub2 = TRUE;
+    Status   = InternalInitGrubVars ();
     if (!EFI_ERROR (Status)) {
       //
       // Read grubenv first, since vars in grub.cfg should overwrite it.
@@ -908,13 +931,20 @@ ScanLoaderEntriesAtDirectory (
       if (GrubEnv == NULL) {
         DEBUG ((DEBUG_WARN, "LNX: %s not found\n", GRUB2_GRUBENV));
       } else {
-        DEBUG (((gLinuxBootFlags & LINUX_BOOT_LOG_VERBOSE) == 0 ? DEBUG_VERBOSE : DEBUG_INFO,
-          "LNX: Reading %s\n", GRUB2_GRUBENV));
+        DEBUG ((
+          (gLinuxBootFlags & LINUX_BOOT_LOG_VERBOSE) == 0 ? DEBUG_VERBOSE : DEBUG_INFO,
+          "LNX: Reading %s\n",
+          GRUB2_GRUBENV
+          ));
         Status = InternalProcessGrubEnv (GrubEnv, GRUB2_GRUBENV_SIZE);
       }
+
       if (!EFI_ERROR (Status)) {
-        DEBUG (((gLinuxBootFlags & LINUX_BOOT_LOG_VERBOSE) == 0 ? DEBUG_VERBOSE : DEBUG_INFO,
-          "LNX: Reading %s\n", GRUB2_GRUB_CFG));
+        DEBUG ((
+          (gLinuxBootFlags & LINUX_BOOT_LOG_VERBOSE) == 0 ? DEBUG_VERBOSE : DEBUG_INFO,
+          "LNX: Reading %s\n",
+          GRUB2_GRUB_CFG
+          ));
         Status = InternalProcessGrubCfg (GrubCfg);
       }
     }
@@ -930,10 +960,11 @@ ScanLoaderEntriesAtDirectory (
   if (!EFI_ERROR (Status)) {
     if (mIsGrub2) {
       EarlyInitrdVar = InternalGetGrubVar ("early_initrd");
-      if (EarlyInitrdVar != NULL &&
-        EarlyInitrdVar->Value != NULL &&
-        EarlyInitrdVar->Value[0] != '\0'
-        ) {
+      if ((EarlyInitrdVar != NULL) &&
+          (EarlyInitrdVar->Value != NULL) &&
+          (EarlyInitrdVar->Value[0] != '\0')
+          )
+      {
         DEBUG ((DEBUG_INFO, "LNX: grub var $%a is present but currently unsupported - aborting\n", "early_initrd"));
         Status = EFI_INVALID_PARAMETER;
       }
@@ -941,7 +972,7 @@ ScanLoaderEntriesAtDirectory (
   }
 
   if (!EFI_ERROR (Status)) {
-    gLoaderEntries = OcFlexArrayInit (sizeof (LOADER_ENTRY), (OC_FLEX_ARRAY_FREE_ITEM) InternalFreeLoaderEntry);
+    gLoaderEntries = OcFlexArrayInit (sizeof (LOADER_ENTRY), (OC_FLEX_ARRAY_FREE_ITEM)InternalFreeLoaderEntry);
     if (gLoaderEntries == NULL) {
       Status = EFI_OUT_OF_RESOURCES;
     } else {
@@ -952,10 +983,10 @@ ScanLoaderEntriesAtDirectory (
       ASSERT (gLoaderEntries->Count > 0);
 
       Status = InternalConvertLoaderEntriesToBootEntries (
-        RootDirectory,
-        Entries,
-        NumEntries
-      );
+                 RootDirectory,
+                 Entries,
+                 NumEntries
+                 );
     }
 
     OcFlexArrayFree (&gLoaderEntries);
@@ -966,6 +997,7 @@ ScanLoaderEntriesAtDirectory (
   if (GrubEnv != NULL) {
     FreePool (GrubEnv);
   }
+
   if (GrubCfg != NULL) {
     FreePool (GrubCfg);
   }
@@ -978,13 +1010,13 @@ ScanLoaderEntriesAtDirectory (
 STATIC
 EFI_STATUS
 DoScanLoaderEntries (
-  IN   EFI_FILE_PROTOCOL        *Directory,
-  IN   CHAR16                   *DirName,
-  OUT  OC_PICKER_ENTRY          **Entries,
-  OUT  UINTN                    *NumEntries
+  IN   EFI_FILE_PROTOCOL  *Directory,
+  IN   CHAR16             *DirName,
+  OUT  OC_PICKER_ENTRY    **Entries,
+  OUT  UINTN              *NumEntries
   )
 {
-  EFI_STATUS                      Status;
+  EFI_STATUS  Status;
 
   Status = ScanLoaderEntriesAtDirectory (Directory, DirName, Entries, NumEntries);
 
@@ -994,19 +1026,19 @@ DoScanLoaderEntries (
     DirName,
     Status
     ));
-    
+
   return Status;
 }
 
 EFI_STATUS
 InternalScanLoaderEntries (
-  IN   EFI_FILE_PROTOCOL        *RootDirectory,
-  OUT  OC_PICKER_ENTRY          **Entries,
-  OUT  UINTN                    *NumEntries
+  IN   EFI_FILE_PROTOCOL  *RootDirectory,
+  OUT  OC_PICKER_ENTRY    **Entries,
+  OUT  UINTN              *NumEntries
   )
 {
-  EFI_STATUS                    Status;
-  EFI_FILE_PROTOCOL             *AdditionalScanDirectory;
+  EFI_STATUS         Status;
+  EFI_FILE_PROTOCOL  *AdditionalScanDirectory;
 
   Status = DoScanLoaderEntries (RootDirectory, ROOT_DIR, Entries, NumEntries);
   if (EFI_ERROR (Status)) {
@@ -1016,30 +1048,30 @@ InternalScanLoaderEntries (
       AdditionalScanDirectory->Close (AdditionalScanDirectory);
     }
   }
-  
+
   return Status;
 }
 
 STATIC
 EFI_STATUS
 DoConvertLoaderEntriesToBootEntries (
-  OUT  OC_PICKER_ENTRY          **Entries,
-  OUT  UINTN                    *NumEntries
+  OUT  OC_PICKER_ENTRY  **Entries,
+  OUT  UINTN            *NumEntries
   )
 {
-  EFI_STATUS                Status;
-  UINTN                     Index;
-  UINTN                     OptionsIndex;
-  LOADER_ENTRY              *Entry;
-  OC_FLEX_ARRAY             *PickerEntries;
-  OC_PICKER_ENTRY           *PickerEntry;
-  OC_STRING_BUFFER          *StringBuffer;
-  CHAR8                     **Options;
-  UINTN                     OptionsLength;
+  EFI_STATUS        Status;
+  UINTN             Index;
+  UINTN             OptionsIndex;
+  LOADER_ENTRY      *Entry;
+  OC_FLEX_ARRAY     *PickerEntries;
+  OC_PICKER_ENTRY   *PickerEntry;
+  OC_STRING_BUFFER  *StringBuffer;
+  CHAR8             **Options;
+  UINTN             OptionsLength;
 
   StringBuffer = NULL;
 
-  PickerEntries = OcFlexArrayInit (sizeof (OC_PICKER_ENTRY), (OC_FLEX_ARRAY_FREE_ITEM) InternalFreePickerEntry);
+  PickerEntries = OcFlexArrayInit (sizeof (OC_PICKER_ENTRY), (OC_FLEX_ARRAY_FREE_ITEM)InternalFreePickerEntry);
   if (PickerEntries == NULL) {
     return EFI_OUT_OF_RESOURCES;
   }
@@ -1071,14 +1103,16 @@ DoConvertLoaderEntriesToBootEntries (
 
     for (OptionsIndex = 0; OptionsIndex < Entry->Initrds->Count; OptionsIndex++) {
       Options = OcFlexArrayItemAt (Entry->Initrds, OptionsIndex);
-      Status = OcAsciiStringBufferAppend (StringBuffer, "initrd=");
+      Status  = OcAsciiStringBufferAppend (StringBuffer, "initrd=");
       if (EFI_ERROR (Status)) {
         break;
       }
+
       Status = OcAsciiStringBufferAppend (StringBuffer, *Options);
       if (EFI_ERROR (Status)) {
         break;
       }
+
       Status = OcAsciiStringBufferAppend (StringBuffer, " ");
       if (EFI_ERROR (Status)) {
         break;
@@ -1090,19 +1124,22 @@ DoConvertLoaderEntriesToBootEntries (
     }
 
     for (OptionsIndex = 0; OptionsIndex < Entry->Options->Count; OptionsIndex++) {
-      Options = OcFlexArrayItemAt (Entry->Options, OptionsIndex);
+      Options       = OcFlexArrayItemAt (Entry->Options, OptionsIndex);
       OptionsLength = AsciiStrLen (*Options);
       ASSERT (OptionsLength != 0);
       if (OptionsLength == 0) {
         continue;
       }
+
       if ((*Options)[OptionsLength - 1] == ' ') {
         --OptionsLength;
       }
+
       Status = OcAsciiStringBufferAppendN (StringBuffer, *Options, OptionsLength);
       if (EFI_ERROR (Status)) {
         break;
       }
+
       if (OptionsIndex < Entry->Options->Count - 1) {
         Status = OcAsciiStringBufferAppend (StringBuffer, " ");
         if (EFI_ERROR (Status)) {
@@ -1125,6 +1162,7 @@ DoConvertLoaderEntriesToBootEntries (
       Status = EFI_OUT_OF_RESOURCES;
       break;
     }
+
     if ((gLinuxBootFlags & LINUX_BOOT_ADD_DEBUG_INFO) != 0) {
       //
       // Show file system type and enough of PARTUUID to help distinguish one partition from another.
@@ -1135,16 +1173,18 @@ DoConvertLoaderEntriesToBootEntries (
       }
 
       OcAsciiToLower (&StringBuffer->String[StringBuffer->StringLength] - sizeof (gPartuuid.Data1) * 2);
-      
+
       Status = OcAsciiStringBufferAppend (StringBuffer, ": ");
       if (EFI_ERROR (Status)) {
         break;
       }
     }
+
     Status = OcAsciiStringBufferAppend (StringBuffer, Entry->Title);
     if (EFI_ERROR (Status)) {
       break;
     }
+
     PickerEntry->Name = OcAsciiStringBufferFreeContainer (&StringBuffer);
 
     ASSERT (Entry->OcFlavour != NULL);
@@ -1163,19 +1203,20 @@ DoConvertLoaderEntriesToBootEntries (
 
     PickerEntry->Auxiliary = Entry->OcAuxiliary;
 
-    PickerEntry->RealPath  = TRUE;
-    PickerEntry->TextMode  = FALSE;
-    PickerEntry->Tool      = FALSE;
+    PickerEntry->RealPath = TRUE;
+    PickerEntry->TextMode = FALSE;
+    PickerEntry->Tool     = FALSE;
   }
 
   if (EFI_ERROR (Status)) {
     if (StringBuffer != NULL) {
       OcAsciiStringBufferFree (&StringBuffer);
     }
+
     OcFlexArrayFree (&PickerEntries);
   } else {
     ASSERT (StringBuffer == NULL);
-    OcFlexArrayFreeContainer (&PickerEntries, (VOID **) Entries, NumEntries);
+    OcFlexArrayFreeContainer (&PickerEntries, (VOID **)Entries, NumEntries);
   }
 
   return Status;
@@ -1184,7 +1225,7 @@ DoConvertLoaderEntriesToBootEntries (
 STATIC
 EFI_STATUS
 AppendVersion (
-  LOADER_ENTRY      *Entry
+  LOADER_ENTRY  *Entry
   )
 {
   EFI_STATUS        Status;
@@ -1192,7 +1233,7 @@ AppendVersion (
 
   ASSERT (Entry->Title != NULL);
 
-  if (Entry->Version == NULL || AsciiStrStr (Entry->Title, Entry->Version) != NULL) {
+  if ((Entry->Version == NULL) || (AsciiStrStr (Entry->Title, Entry->Version) != NULL)) {
     return EFI_SUCCESS;
   }
 
@@ -1214,17 +1255,17 @@ AppendVersions (
   VOID
   )
 {
-  EFI_STATUS          Status;
-  UINTN               Index;
-  LOADER_ENTRY        *Entry;
+  EFI_STATUS    Status;
+  UINTN         Index;
+  LOADER_ENTRY  *Entry;
 
-  if (gPickerContext->HideAuxiliary && (gLinuxBootFlags & LINUX_BOOT_USE_LATEST) != 0) {
+  if (gPickerContext->HideAuxiliary && ((gLinuxBootFlags & LINUX_BOOT_USE_LATEST) != 0)) {
     return EFI_SUCCESS;
   }
 
   for (Index = 0; Index < gLoaderEntries->Count; Index++) {
     Entry = OcFlexArrayItemAt (gLoaderEntries, Index);
-    
+
     Status = AppendVersion (Entry);
     if (EFI_ERROR (Status)) {
       return Status;
@@ -1240,10 +1281,10 @@ DisambiguateDuplicates (
   VOID
   )
 {
-  UINTN               Index;
-  UINTN               MatchIndex;
-  LOADER_ENTRY        *Entry;
-  LOADER_ENTRY        *MatchEntry;
+  UINTN         Index;
+  UINTN         MatchIndex;
+  LOADER_ENTRY  *Entry;
+  LOADER_ENTRY  *MatchEntry;
 
   //
   // This check should not be strictly necessary, since there shouldn't
@@ -1268,7 +1309,7 @@ DisambiguateDuplicates (
           //
           // Everything but the first id duplicate becomes auxiliary.
           //
-          MatchEntry->OcAuxiliary = TRUE;
+          MatchEntry->OcAuxiliary        = TRUE;
           MatchEntry->DuplicateIdScanned = TRUE;
         }
       }
@@ -1281,13 +1322,13 @@ DisambiguateDuplicates (
 STATIC
 EFI_STATUS
 EntryApplyDefaults (
-  IN  EFI_FILE_PROTOCOL   *RootDirectory,
-  IN  LOADER_ENTRY        *Entry
+  IN  EFI_FILE_PROTOCOL  *RootDirectory,
+  IN  LOADER_ENTRY       *Entry
   )
 {
-  CHAR8               *Variant;
-  UINTN               Length;
-  UINTN               NumPrinted;
+  CHAR8  *Variant;
+  UINTN  Length;
+  UINTN  NumPrinted;
 
   Variant = NULL;
 
@@ -1308,7 +1349,7 @@ EntryApplyDefaults (
     NumPrinted = AsciiSPrint (Entry->OcFlavour, Length + 1, "%a:%a", Variant, "Linux");
     ASSERT (NumPrinted == Length);
   } else {
-    Variant = "Linux";
+    Variant          = "Linux";
     Entry->OcFlavour = AllocateCopyPool (AsciiStrSize (Variant), Variant);
     if (Entry->OcFlavour == NULL) {
       return EFI_OUT_OF_RESOURCES;
@@ -1328,12 +1369,12 @@ EntryApplyDefaults (
 STATIC
 EFI_STATUS
 ApplyDefaults (
-  IN   EFI_FILE_PROTOCOL        *RootDirectory
+  IN   EFI_FILE_PROTOCOL  *RootDirectory
   )
 {
-  EFI_STATUS          Status;
-  UINTN               Index;
-  LOADER_ENTRY        *Entry;
+  EFI_STATUS    Status;
+  UINTN         Index;
+  LOADER_ENTRY  *Entry;
 
   Status = EFI_SUCCESS;
 
@@ -1354,12 +1395,12 @@ ApplyDefaults (
 //
 EFI_STATUS
 InternalConvertLoaderEntriesToBootEntries (
-  IN   EFI_FILE_PROTOCOL        *RootDirectory,
-  OUT  OC_PICKER_ENTRY          **Entries,
-  OUT  UINTN                    *NumEntries
+  IN   EFI_FILE_PROTOCOL  *RootDirectory,
+  OUT  OC_PICKER_ENTRY    **Entries,
+  OUT  UINTN              *NumEntries
   )
 {
-  EFI_STATUS      Status;
+  EFI_STATUS  Status;
 
   Status = EFI_SUCCESS;
 
@@ -1392,9 +1433,9 @@ InternalConvertLoaderEntriesToBootEntries (
 
   if (!EFI_ERROR (Status)) {
     Status = DoConvertLoaderEntriesToBootEntries (
-      Entries,
-      NumEntries
-    );
+               Entries,
+               NumEntries
+               );
   }
 
   return Status;

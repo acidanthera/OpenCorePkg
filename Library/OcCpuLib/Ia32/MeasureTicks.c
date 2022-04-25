@@ -26,11 +26,11 @@ AsmMeasureTicks (
   OUT UINT64  *TscTicksDelta
   )
 {
-  UINT32      AcpiTick0;
-  UINT32      AcpiTick1;
-  UINT32      AcpiCurrentDelta;
-  UINT64      Tsc0;
-  UINT64      Tsc1;
+  UINT32  AcpiTick0;
+  UINT32  AcpiTick1;
+  UINT32  AcpiCurrentDelta;
+  UINT64  Tsc0;
+  UINT64  Tsc1;
 
   AcpiTick0 = IoRead32 (TimerAddr);
   Tsc0      = AsmReadTsc ();
@@ -72,6 +72,6 @@ AsmMeasureTicks (
   // despite disabling all events. Divide by actual time passed as suggested
   // by asava's Clover patch r2668.
   //
-  *TscTicksDelta = Tsc1 - Tsc0;
+  *TscTicksDelta  = Tsc1 - Tsc0;
   *AcpiTicksDelta = AcpiCurrentDelta;
 }

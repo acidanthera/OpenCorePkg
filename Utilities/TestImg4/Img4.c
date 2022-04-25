@@ -34,7 +34,7 @@ InternalDebugEnvInfo (
     "EffectiveSecurityMode: %x\n"
     "InternalUseOnlyUnit: %x\n"
     "Xugs: %x\n\n",
-    (UINT64) Env->ecid,
+    (UINT64)Env->ecid,
     Env->boardId,
     Env->chipId,
     Env->certificateEpoch,
@@ -99,10 +99,10 @@ DebugManifest (
       DEBUG ((
         DEBUG_ERROR,
         "Manifest has %c%c%c%c\n",
-        ((CHAR8 *) &Objs[Index])[3],
-        ((CHAR8 *) &Objs[Index])[2],
-        ((CHAR8 *) &Objs[Index])[1],
-        ((CHAR8 *) &Objs[Index])[0]
+        ((CHAR8 *)&Objs[Index])[3],
+        ((CHAR8 *)&Objs[Index])[2],
+        ((CHAR8 *)&Objs[Index])[1],
+        ((CHAR8 *)&Objs[Index])[0]
         ));
       InternalDebugEnvInfo (&ManInfo.environment);
       ++Success;
@@ -197,7 +197,7 @@ ENTRY_POINT (
   INT32  RetVal;
   INT32  Index;
 
-  if (argc < 2 || ((argc % 3) != 1 && argc != 2)) {
+  if ((argc < 2) || (((argc % 3) != 1) && (argc != 2))) {
     DEBUG ((DEBUG_ERROR, "Usage: ./Img4 ([image path] [manifest path] [object type])*\n"));
     DEBUG ((DEBUG_ERROR, "Usage: Img4 [manifest path]\n"));
     return -1;
@@ -249,7 +249,7 @@ LLVMFuzzerTestOneInput (
   DERImg4ManifestInfo  ManInfo;
   UINTN                Index;
 
-  if (Data == NULL || Size == 0) {
+  if ((Data == NULL) || (Size == 0)) {
     return 0;
   }
 

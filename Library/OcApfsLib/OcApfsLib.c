@@ -23,7 +23,7 @@
 #include <Protocol/BlockIo.h>
 #include <Protocol/PartitionInfo.h>
 
-STATIC VOID *mApfsNewPartitionsEventKey;
+STATIC VOID  *mApfsNewPartitionsEventKey;
 
 STATIC
 VOID
@@ -33,19 +33,19 @@ ApfsNewPartitionArrived (
   IN VOID       *Context
   )
 {
-  EFI_STATUS   Status;
-  UINTN        BufferSize;
-  EFI_HANDLE   Handle;
+  EFI_STATUS  Status;
+  UINTN       BufferSize;
+  EFI_HANDLE  Handle;
 
   while (TRUE) {
     BufferSize = sizeof (EFI_HANDLE);
-    Status = gBS->LocateHandle (
-      ByRegisterNotify,
-      NULL,
-      mApfsNewPartitionsEventKey,
-      &BufferSize,
-      &Handle
-      );
+    Status     = gBS->LocateHandle (
+                        ByRegisterNotify,
+                        NULL,
+                        mApfsNewPartitionsEventKey,
+                        &BufferSize,
+                        &Handle
+                        );
     if (!EFI_ERROR (Status)) {
       OcApfsConnectHandle (Handle, TRUE);
     } else {
@@ -64,19 +64,19 @@ ApfsMonitorNewPartitions (
   EFI_EVENT   Event;
 
   Status = gBS->CreateEvent (
-    EVT_NOTIFY_SIGNAL,
-    TPL_CALLBACK,
-    ApfsNewPartitionArrived,
-    NULL,
-    &Event
-    );
+                  EVT_NOTIFY_SIGNAL,
+                  TPL_CALLBACK,
+                  ApfsNewPartitionArrived,
+                  NULL,
+                  &Event
+                  );
 
   if (!EFI_ERROR (Status)) {
     Status = gBS->RegisterProtocolNotify (
-      &gEfiBlockIoProtocolGuid,
-      Event,
-      &mApfsNewPartitionsEventKey
-      );
+                    &gEfiBlockIoProtocolGuid,
+                    Event,
+                    &mApfsNewPartitionsEventKey
+                    );
 
     if (EFI_ERROR (Status)) {
       gBS->CloseEvent (Event);
@@ -102,22 +102,22 @@ OcApfsConnectParentDevice (
   UINTN            PrefixLength;
 
   HandleCount = 0;
-  Status = gBS->LocateHandleBuffer (
-    ByProtocol,
-    &gEfiBlockIoProtocolGuid,
-    NULL,
-    &HandleCount,
-    &HandleBuffer
-    );
+  Status      = gBS->LocateHandleBuffer (
+                       ByProtocol,
+                       &gEfiBlockIoProtocolGuid,
+                       NULL,
+                       &HandleCount,
+                       &HandleBuffer
+                       );
 
   ParentDevicePath = NULL;
-  PrefixLength = 0;
+  PrefixLength     = 0;
   if (Handle != NULL) {
     Status2 = gBS->HandleProtocol (
-      Handle,
-      &gEfiDevicePathProtocolGuid,
-      (VOID **) &ParentDevicePath
-      );
+                     Handle,
+                     &gEfiDevicePathProtocolGuid,
+                     (VOID **)&ParentDevicePath
+                     );
     if (!EFI_ERROR (Status2)) {
       PrefixLength = GetDevicePathSize (ParentDevicePath) - END_DEVICE_PATH_LENGTH;
     } else {
@@ -130,12 +130,12 @@ OcApfsConnectParentDevice (
     Status = EFI_NOT_FOUND;
 
     for (Index = 0; Index < HandleCount; ++Index) {
-      if (ParentDevicePath != NULL && PrefixLength > 0) {
+      if ((ParentDevicePath != NULL) && (PrefixLength > 0)) {
         Status2 = gBS->HandleProtocol (
-          HandleBuffer[Index],
-          &gEfiDevicePathProtocolGuid,
-          (VOID **) &ChildDevicePath
-          );
+                         HandleBuffer[Index],
+                         &gEfiDevicePathProtocolGuid,
+                         (VOID **)&ChildDevicePath
+                         );
         if (EFI_ERROR (Status2)) {
           DEBUG ((DEBUG_INFO, "OCJS: No child device path - %r\n", Status2));
           continue;
@@ -149,9 +149,9 @@ OcApfsConnectParentDevice (
       }
 
       Status2 = OcApfsConnectHandle (
-        HandleBuffer[Index],
-        VerifyPolicy
-        );
+                  HandleBuffer[Index],
+                  VerifyPolicy
+                  );
       if (!EFI_ERROR (Status2)) {
         Status = Status2;
       }
@@ -175,10 +175,10 @@ OcApfsConnectDevices (
 
   DEBUG_CODE_BEGIN ();
   Status = gBS->LocateProtocol (
-    &gEfiPartitionInfoProtocolGuid,
-    NULL,
-    &PartitionInfoInterface
-    );
+                  &gEfiPartitionInfoProtocolGuid,
+                  NULL,
+                  &PartitionInfoInterface
+                  );
   DEBUG ((DEBUG_INFO, "OCJS: PartitionInfo is %r\n", Status));
   DEBUG_CODE_END ();
 

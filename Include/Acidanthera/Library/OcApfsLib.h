@@ -18,32 +18,32 @@
 /**
   Latest known from High Sierra version 10.13.6 (17G66).
 **/
-#define OC_APFS_VERSION_HIGH_SIERRA 748077008000000ULL   /* 748077012000000ULL, 17G12034 */
-#define OC_APFS_DATE_HIGH_SIERRA    20180621U            /* 20200219U, 17G12034 */
+#define OC_APFS_VERSION_HIGH_SIERRA  748077008000000ULL  /* 748077012000000ULL, 17G12034 */
+#define OC_APFS_DATE_HIGH_SIERRA     20180621U           /* 20200219U, 17G12034 */
 
 /**
   Latest known APFS from Mojave 10.14.6 (18G103).
 **/
-#define OC_APFS_VERSION_MOJAVE      945275007000000ULL   /* 945275008000000ULL, 18G4032 */
-#define OC_APFS_DATE_MOJAVE         20190820U            /* 20200211U, 18G4032 */
+#define OC_APFS_VERSION_MOJAVE  945275007000000ULL       /* 945275008000000ULL, 18G4032 */
+#define OC_APFS_DATE_MOJAVE     20190820U                /* 20200211U, 18G4032 */
 
 /**
   Latest known APFS from Catalina 10.15.4 (19E287).
 **/
-#define OC_APFS_VERSION_CATALINA    1412101001000000ULL
-#define OC_APFS_DATE_CATALINA       20200306U
+#define OC_APFS_VERSION_CATALINA  1412101001000000ULL
+#define OC_APFS_DATE_CATALINA     20200306U
 
 /**
   Latest known APFS from Big Sur 11.4 (20F71).
 **/
-#define OC_APFS_VERSION_BIG_SUR     1677120009000000ULL
-#define OC_APFS_DATE_BIG_SUR        20210508U
+#define OC_APFS_VERSION_BIG_SUR  1677120009000000ULL
+#define OC_APFS_DATE_BIG_SUR     20210508U
 
 /**
   Default version subject to increase.
 **/
-#define OC_APFS_VERSION_DEFAULT     1600000000000000ULL
-#define OC_APFS_DATE_DEFAULT        20210101U
+#define OC_APFS_VERSION_DEFAULT  1600000000000000ULL
+#define OC_APFS_DATE_DEFAULT     20210101U
 
 /**
   Use default version as a minimal.
@@ -54,8 +54,8 @@
 /**
   Use any version, not recommended.
 **/
-#define OC_APFS_VERSION_ANY ((UINT64) (-1))
-#define OC_APFS_DATE_ANY    ((UINT32) (-1))
+#define OC_APFS_VERSION_ANY  ((UINT64) (-1))
+#define OC_APFS_DATE_ANY     ((UINT32) (-1))
 
 /**
   Configure APFS driver loading for subsequent connections.
@@ -114,7 +114,7 @@ OcApfsConnectHandle (
 **/
 EFI_STATUS
 OcApfsConnectDevices (
-  IN BOOLEAN      Monitor
+  IN BOOLEAN  Monitor
   );
 
 #endif // OC_APFS_LIB_H

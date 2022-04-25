@@ -54,9 +54,9 @@ typedef enum {
   Verb list structure.
 **/
 typedef struct {
-  UINT32 Count;
-  UINT32 *Verbs ;
-  UINT32 *Responses;
+  UINT32    Count;
+  UINT32    *Verbs;
+  UINT32    *Responses;
 } EFI_HDA_IO_VERB_LIST;
 
 /**
@@ -64,7 +64,7 @@ typedef struct {
 **/
 typedef
 VOID
-(EFIAPI* EFI_HDA_IO_STREAM_CALLBACK) (
+(EFIAPI *EFI_HDA_IO_STREAM_CALLBACK)(
   IN EFI_HDA_IO_PROTOCOL_TYPE   Type,
   IN VOID                       *Context1,
   IN VOID                       *Context2,
@@ -82,7 +82,7 @@ VOID
 **/
 typedef
 EFI_STATUS
-(EFIAPI *EFI_HDA_IO_GET_ADDRESS) (
+(EFIAPI *EFI_HDA_IO_GET_ADDRESS)(
   IN  EFI_HDA_IO_PROTOCOL       *This,
   OUT UINT8                     *CodecAddress
   );
@@ -100,7 +100,7 @@ EFI_STATUS
 **/
 typedef
 EFI_STATUS
-(EFIAPI *EFI_HDA_IO_SEND_COMMAND) (
+(EFIAPI *EFI_HDA_IO_SEND_COMMAND)(
   IN  EFI_HDA_IO_PROTOCOL       *This,
   IN  UINT8                     Node,
   IN  UINT32                    Verb,
@@ -119,7 +119,7 @@ EFI_STATUS
 **/
 typedef
 EFI_STATUS
-(EFIAPI *EFI_HDA_IO_SEND_COMMANDS) (
+(EFIAPI *EFI_HDA_IO_SEND_COMMANDS)(
   IN     EFI_HDA_IO_PROTOCOL    *This,
   IN     UINT8                  Node,
   IN OUT EFI_HDA_IO_VERB_LIST   *Verbs
@@ -127,7 +127,7 @@ EFI_STATUS
 
 typedef
 EFI_STATUS
-(EFIAPI *EFI_HDA_IO_SETUP_STREAM) (
+(EFIAPI *EFI_HDA_IO_SETUP_STREAM)(
   IN  EFI_HDA_IO_PROTOCOL       *This,
   IN  EFI_HDA_IO_PROTOCOL_TYPE  Type,
   IN  UINT16                    Format,
@@ -136,14 +136,14 @@ EFI_STATUS
 
 typedef
 EFI_STATUS
-(EFIAPI *EFI_HDA_IO_CLOSE_STREAM) (
+(EFIAPI *EFI_HDA_IO_CLOSE_STREAM)(
   IN EFI_HDA_IO_PROTOCOL         *This,
   IN EFI_HDA_IO_PROTOCOL_TYPE    Type
   );
 
 typedef
 EFI_STATUS
-(EFIAPI *EFI_HDA_IO_GET_STREAM) (
+(EFIAPI *EFI_HDA_IO_GET_STREAM)(
   IN  EFI_HDA_IO_PROTOCOL        *This,
   IN  EFI_HDA_IO_PROTOCOL_TYPE   Type,
   OUT BOOLEAN                    *State
@@ -151,7 +151,7 @@ EFI_STATUS
 
 typedef
 EFI_STATUS
-(EFIAPI *EFI_HDA_IO_START_STREAM) (
+(EFIAPI *EFI_HDA_IO_START_STREAM)(
   IN EFI_HDA_IO_PROTOCOL         *This,
   IN EFI_HDA_IO_PROTOCOL_TYPE    Type,
   IN VOID                        *Buffer,
@@ -165,7 +165,7 @@ EFI_STATUS
 
 typedef
 EFI_STATUS
-(EFIAPI *EFI_HDA_IO_STOP_STREAM) (
+(EFIAPI *EFI_HDA_IO_STOP_STREAM)(
   IN EFI_HDA_IO_PROTOCOL         *This,
   IN EFI_HDA_IO_PROTOCOL_TYPE    Type
   );
@@ -184,7 +184,7 @@ struct EFI_HDA_IO_PROTOCOL_ {
   EFI_HDA_IO_STOP_STREAM      StopStream;
 };
 
-extern EFI_GUID gEfiHdaIoProtocolGuid;
+extern EFI_GUID  gEfiHdaIoProtocolGuid;
 
 //
 // HDA I/O Device Path protocol.
@@ -204,21 +204,21 @@ typedef struct {
   ///
   /// Vendor-specific device path fields.
   ///
-  EFI_DEVICE_PATH_PROTOCOL  Header;
-  EFI_GUID                  Guid;
+  EFI_DEVICE_PATH_PROTOCOL    Header;
+  EFI_GUID                    Guid;
   ///
   /// Codec address.
   ///
-  UINT32                    Address;
+  UINT32                      Address;
 } EFI_HDA_IO_DEVICE_PATH;
 
 STATIC_ASSERT (
-  sizeof(EFI_HDA_IO_DEVICE_PATH)
-  == sizeof(EFI_DEVICE_PATH_PROTOCOL) + sizeof (EFI_GUID) + sizeof (UINT32),
+  sizeof (EFI_HDA_IO_DEVICE_PATH)
+  == sizeof (EFI_DEVICE_PATH_PROTOCOL) + sizeof (EFI_GUID) + sizeof (UINT32),
   "Unexpected EFI_HDA_IO_DEVICE_PATH size"
   );
 
-extern EFI_GUID gEfiHdaIoDevicePathGuid;
+extern EFI_GUID  gEfiHdaIoDevicePathGuid;
 
 /**
   Template for HDA I/O Device Path protocol.

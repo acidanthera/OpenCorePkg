@@ -1,13 +1,13 @@
 /*++
 
-Copyright (c) 2004, Intel Corporation                                                         
-All rights reserved. This program and the accompanying materials                          
-are licensed and made available under the terms and conditions of the BSD License         
-which accompanies this distribution.  The full text of the license may be found at        
-http://opensource.org/licenses/bsd-license.php                                            
-                                                                                          
-THE PROGRAM IS DISTRIBUTED UNDER THE BSD LICENSE ON AN "AS IS" BASIS,                     
-WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.             
+Copyright (c) 2004, Intel Corporation
+All rights reserved. This program and the accompanying materials
+are licensed and made available under the terms and conditions of the BSD License
+which accompanies this distribution.  The full text of the license may be found at
+http://opensource.org/licenses/bsd-license.php
+
+THE PROGRAM IS DISTRIBUTED UNDER THE BSD LICENSE ON AN "AS IS" BASIS,
+WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 
 Module Name:
 
@@ -60,8 +60,8 @@ typedef enum {
 typedef
 EFI_STATUS
 EFIAPI
-(EFIAPI *EFI_CPU_IO_PROTOCOL_IO_MEM) (
-  IN EFI_CPU_IO_PROTOCOL                * This,
+(EFIAPI *EFI_CPU_IO_PROTOCOL_IO_MEM)(
+  IN EFI_CPU_IO_PROTOCOL                *This,
   IN  EFI_CPU_IO_PROTOCOL_WIDTH         Width,
   IN  UINT64                            Address,
   IN  UINTN                             Count,
@@ -74,8 +74,8 @@ EFIAPI
 // *******************************************************
 //
 typedef struct {
-  EFI_CPU_IO_PROTOCOL_IO_MEM  Read;
-  EFI_CPU_IO_PROTOCOL_IO_MEM  Write;
+  EFI_CPU_IO_PROTOCOL_IO_MEM    Read;
+  EFI_CPU_IO_PROTOCOL_IO_MEM    Write;
 } EFI_CPU_IO_PROTOCOL_ACCESS;
 
 //
@@ -84,10 +84,10 @@ typedef struct {
 // *******************************************************
 //
 typedef struct EFI_CPU_IO_PROTOCOL_ {
-  EFI_CPU_IO_PROTOCOL_ACCESS  Mem;
-  EFI_CPU_IO_PROTOCOL_ACCESS  Io;
+  EFI_CPU_IO_PROTOCOL_ACCESS    Mem;
+  EFI_CPU_IO_PROTOCOL_ACCESS    Io;
 } EFI_CPU_IO_PROTOCOL;
 
-extern EFI_GUID gEfiCpuIoProtocolGuid;
+extern EFI_GUID  gEfiCpuIoProtocolGuid;
 
 #endif

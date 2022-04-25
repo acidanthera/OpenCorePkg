@@ -17,36 +17,36 @@
 
 #include <Library/DebugLib.h>
 
-KEXT_PRECEDENCE mKextPrecedence[] = {
-  { "VirtualSMC.kext",                                                  "Lilu.kext" },
-  { "WhateverGreen.kext",                                               "Lilu.kext" },
-  { "SMCBatteryManager.kext",                                           "VirtualSMC.kext" },
-  { "SMCDellSensors.kext",                                              "VirtualSMC.kext" },
-  { "SMCLightSensor.kext",                                              "VirtualSMC.kext" },
-  { "SMCProcessor.kext",                                                "VirtualSMC.kext" },
-  { "SMCSuperIO.kext",                                                  "VirtualSMC.kext" },
-  { "AppleALC.kext",                                                    "Lilu.kext" },
-  { "AppleALCU.kext",                                                   "Lilu.kext" },
-  { "AirportBrcmFixup.kext",                                            "Lilu.kext" },
-  { "BrightnessKeys.kext",                                              "Lilu.kext" },
-  { "CpuTscSync.kext",                                                  "Lilu.kext" },
-  { "CPUFriend.kext",                                                   "Lilu.kext" },
-  { "CPUFriendDataProvider.kext",                                       "CPUFriend.kext" },
-  { "DebugEnhancer.kext",                                               "Lilu.kext" },
-  { "HibernationFixup.kext",                                            "Lilu.kext" },
-  { "NVMeFix.kext",                                                     "Lilu.kext" },
-  { "RestrictEvents.kext",                                              "Lilu.kext" },
-  { "RTCMemoryFixup.kext",                                              "Lilu.kext" },
-  { "FeatureUnlock.kext",                                               "Lilu.kext" },
-  { "MacHyperVSupport.kext",                                            "Lilu.kext" },
-  { "BlueToolFixup.kext",                                               "Lilu.kext" },
+KEXT_PRECEDENCE  mKextPrecedence[] = {
+  { "VirtualSMC.kext",                                                  "Lilu.kext"                },
+  { "WhateverGreen.kext",                                               "Lilu.kext"                },
+  { "SMCBatteryManager.kext",                                           "VirtualSMC.kext"          },
+  { "SMCDellSensors.kext",                                              "VirtualSMC.kext"          },
+  { "SMCLightSensor.kext",                                              "VirtualSMC.kext"          },
+  { "SMCProcessor.kext",                                                "VirtualSMC.kext"          },
+  { "SMCSuperIO.kext",                                                  "VirtualSMC.kext"          },
+  { "AppleALC.kext",                                                    "Lilu.kext"                },
+  { "AppleALCU.kext",                                                   "Lilu.kext"                },
+  { "AirportBrcmFixup.kext",                                            "Lilu.kext"                },
+  { "BrightnessKeys.kext",                                              "Lilu.kext"                },
+  { "CpuTscSync.kext",                                                  "Lilu.kext"                },
+  { "CPUFriend.kext",                                                   "Lilu.kext"                },
+  { "CPUFriendDataProvider.kext",                                       "CPUFriend.kext"           },
+  { "DebugEnhancer.kext",                                               "Lilu.kext"                },
+  { "HibernationFixup.kext",                                            "Lilu.kext"                },
+  { "NVMeFix.kext",                                                     "Lilu.kext"                },
+  { "RestrictEvents.kext",                                              "Lilu.kext"                },
+  { "RTCMemoryFixup.kext",                                              "Lilu.kext"                },
+  { "FeatureUnlock.kext",                                               "Lilu.kext"                },
+  { "MacHyperVSupport.kext",                                            "Lilu.kext"                },
+  { "BlueToolFixup.kext",                                               "Lilu.kext"                },
   { "VoodooPS2Controller.kext/Contents/PlugIns/VoodooPS2Keyboard.kext", "VoodooPS2Controller.kext" },
   { "VoodooPS2Controller.kext/Contents/PlugIns/VoodooPS2Mouse.kext",    "VoodooPS2Controller.kext" },
   { "VoodooPS2Controller.kext/Contents/PlugIns/VoodooPS2Trackpad.kext", "VoodooPS2Controller.kext" },
 };
-UINTN mKextPrecedenceSize = ARRAY_SIZE (mKextPrecedence);
+UINTN            mKextPrecedenceSize = ARRAY_SIZE (mKextPrecedence);
 
-KEXT_INFO mKextInfo[] = {
+KEXT_INFO  mKextInfo[] = {
   //
   // NOTE: Index of Lilu should always be 0. Please add entries after this if necessary.
   //
@@ -99,7 +99,7 @@ KEXT_INFO mKextInfo[] = {
   { "VoodooPS2Controller.kext/Contents/PlugIns/VoodooPS2Trackpad.kext",     "Contents/MacOS/VoodooPS2Trackpad",   "Contents/Info.plist" },
   { "VoodooPS2Controller.kext/Contents/PlugIns/VoodooInput.kext",           "Contents/MacOS/VoodooInput",         "Contents/Info.plist" },
 };
-UINTN mKextInfoSize = ARRAY_SIZE (mKextInfo);
+UINTN      mKextInfoSize = ARRAY_SIZE (mKextInfo);
 
 VOID
 ValidateKextInfo (
@@ -108,7 +108,7 @@ ValidateKextInfo (
 {
   //
   // Ensure Lilu and VirtualSMC to be always placed where it is supposed to be.
-  // 
+  //
   ASSERT (AsciiStrCmp (mKextInfo[INDEX_KEXT_LILU].KextBundlePath, "Lilu.kext") == 0);
   ASSERT (AsciiStrCmp (mKextInfo[INDEX_KEXT_LILU].KextExecutablePath, "Contents/MacOS/Lilu") == 0);
   ASSERT (AsciiStrCmp (mKextInfo[INDEX_KEXT_LILU].KextPlistPath, "Contents/Info.plist") == 0);

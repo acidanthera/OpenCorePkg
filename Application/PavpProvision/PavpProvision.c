@@ -35,9 +35,9 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 #include <IndustryStandard/HeciMsg.h>
 #include <IndustryStandard/HeciClientMsg.h>
 
-#define FORCE_PROVISIONING 1
-#define SA_MC_BUS   0x00
-#define R_SA_PAVPC (0x58)
+#define FORCE_PROVISIONING  1
+#define SA_MC_BUS           0x00
+#define R_SA_PAVPC          (0x58)
 
 #define MmPciAddress(Segment, Bus, Device, Function, Register) \
     ((UINTN) (PciRead32 (PCI_LIB_ADDRESS (0,0,0,0x60)) & 0xFC000000) + \
@@ -47,21 +47,21 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 #define MmPci32(Segment, Bus, Device, Function, Register) \
    *((volatile UINT32 *) MmPciAddress (Segment, Bus, Device, Function, Register))
 
-STATIC UINT8 mMeClientMap[HBM_ME_CLIENT_MAX];
-STATIC UINT8 mMeClientActiveCount;
+STATIC UINT8  mMeClientMap[HBM_ME_CLIENT_MAX];
+STATIC UINT8  mMeClientActiveCount;
 
-extern UINT8 gDefaultAppleEpidCertificate[];
-extern UINTN gDefaultAppleEpidCertificateSize;
+extern UINT8  gDefaultAppleEpidCertificate[];
+extern UINTN  gDefaultAppleEpidCertificateSize;
 
-extern UINT8 gDefaultAppleGroupPublicKeys[];
-extern UINTN gDefaultAppleGroupPublicKeysSize;
+extern UINT8  gDefaultAppleGroupPublicKeys[];
+extern UINTN  gDefaultAppleGroupPublicKeysSize;
 
 STATIC
 EFI_STATUS
 ReadProvisioningDataFile (
-  IN  EFI_GUID         *FvNameGuid,
-  OUT VOID             **Buffer,
-  OUT UINTN            *BufferSize
+  IN  EFI_GUID  *FvNameGuid,
+  OUT VOID      **Buffer,
+  OUT UINTN     *BufferSize
   )
 {
   UINTN                         Index;
@@ -72,38 +72,38 @@ ReadProvisioningDataFile (
   EFI_HANDLE                    *HandleBuffer;
 
   Status = gBS->LocateHandleBuffer (
-    ByProtocol,
-    &gEfiFirmwareVolumeProtocolGuid,
-    NULL,
-    &NumOfHandles,
-    &HandleBuffer
-    );
+                  ByProtocol,
+                  &gEfiFirmwareVolumeProtocolGuid,
+                  NULL,
+                  &NumOfHandles,
+                  &HandleBuffer
+                  );
 
   if (!EFI_ERROR (Status)) {
     for (Index = 0; Index < NumOfHandles; ++Index) {
       Status = gBS->HandleProtocol (
-        HandleBuffer[Index],
-        &gEfiFirmwareVolumeProtocolGuid,
-        (VOID **) &FirmwareVolumeInterface
-        );
+                      HandleBuffer[Index],
+                      &gEfiFirmwareVolumeProtocolGuid,
+                      (VOID **)&FirmwareVolumeInterface
+                      );
 
       if (EFI_ERROR (Status)) {
         gBS->FreePool (HandleBuffer);
         return Status;
       }
 
-      *Buffer = NULL;
+      *Buffer     = NULL;
       *BufferSize = 0;
 
       Status = FirmwareVolumeInterface->ReadSection (
-        FirmwareVolumeInterface,
-        FvNameGuid,
-        EFI_SECTION_RAW,
-        0,
-        Buffer,
-        BufferSize,
-        &AuthenticationStatus
-        );
+                                          FirmwareVolumeInterface,
+                                          FvNameGuid,
+                                          EFI_SECTION_RAW,
+                                          0,
+                                          Buffer,
+                                          BufferSize,
+                                          &AuthenticationStatus
+                                          );
 
       if (!EFI_ERROR (Status)) {
         gBS->FreePool (HandleBuffer);
@@ -122,10 +122,10 @@ ReadProvisioningDataFile (
     DEBUG ((DEBUG_INFO, "OCPAVP: No %g in firmware, using default - %r\n", FvNameGuid, Status));
 
     if (CompareGuid (&gAppleEpidCertificateFileGuid, FvNameGuid)) {
-      *Buffer = AllocateCopyPool (gDefaultAppleEpidCertificateSize, gDefaultAppleEpidCertificate);
+      *Buffer     = AllocateCopyPool (gDefaultAppleEpidCertificateSize, gDefaultAppleEpidCertificate);
       *BufferSize = gDefaultAppleEpidCertificateSize;
     } else if (CompareGuid (&gAppleEpidGroupPublicKeysFileGuid, FvNameGuid)) {
-      *Buffer = AllocateCopyPool (gDefaultAppleGroupPublicKeysSize, gDefaultAppleGroupPublicKeys);
+      *Buffer     = AllocateCopyPool (gDefaultAppleGroupPublicKeysSize, gDefaultAppleGroupPublicKeys);
       *BufferSize = gDefaultAppleGroupPublicKeysSize;
     } else {
       *Buffer = NULL;
@@ -154,29 +154,30 @@ ReadProvisioningData (
   UINTN       EpidGroupPublicKeysSize;
 
   Status = ReadProvisioningDataFile (
-    &gAppleEpidCertificateFileGuid,
-    (VOID **) EpidCertificate,
-    &EpidCertificateSize
-    );
+             &gAppleEpidCertificateFileGuid,
+             (VOID **)EpidCertificate,
+             &EpidCertificateSize
+             );
 
   if (EFI_ERROR (Status)) {
     return Status;
   }
 
   Status = ReadProvisioningDataFile (
-    &gAppleEpidGroupPublicKeysFileGuid,
-    (VOID **) EpidGroupPublicKeys,
-    &EpidGroupPublicKeysSize
-    );
+             &gAppleEpidGroupPublicKeysFileGuid,
+             (VOID **)EpidGroupPublicKeys,
+             &EpidGroupPublicKeysSize
+             );
 
   if (EFI_ERROR (Status)) {
     gBS->FreePool (*EpidGroupPublicKeys);
     return Status;
   }
 
-  if (EpidCertificateSize == EPID_CERTIFICATE_SIZE
-    && EpidGroupPublicKeysSize % EPID_GROUP_PUBLIC_KEY_SIZE == 0) {
-    *EpidGroupPublicKeysCount = (UINT32) (EpidGroupPublicKeysSize / EPID_GROUP_PUBLIC_KEY_SIZE);
+  if (  (EpidCertificateSize == EPID_CERTIFICATE_SIZE)
+     && (EpidGroupPublicKeysSize % EPID_GROUP_PUBLIC_KEY_SIZE == 0))
+  {
+    *EpidGroupPublicKeysCount = (UINT32)(EpidGroupPublicKeysSize / EPID_GROUP_PUBLIC_KEY_SIZE);
     return EFI_SUCCESS;
   }
 
@@ -192,18 +193,18 @@ SetProvisioningVariable (
   IN UINT32  Value
   )
 {
-#ifdef FORCE_PROVISIONING
-  (VOID) Variable;
-  (VOID) Value;
-#else
+ #ifdef FORCE_PROVISIONING
+  (VOID)Variable;
+  (VOID)Value;
+ #else
   gRT->SetVariable (
-    Variable,
-    &gEfiGlobalVariableGuid,
-    EFI_VARIABLE_BOOTSERVICE_ACCESS | EFI_VARIABLE_RUNTIME_ACCESS | EFI_VARIABLE_NON_VOLATILE,
-    sizeof (Value),
-    &Value
-    );
-#endif
+         Variable,
+         &gEfiGlobalVariableGuid,
+         EFI_VARIABLE_BOOTSERVICE_ACCESS | EFI_VARIABLE_RUNTIME_ACCESS | EFI_VARIABLE_NON_VOLATILE,
+         sizeof (Value),
+         &Value
+         );
+ #endif
 }
 
 STATIC
@@ -241,10 +242,10 @@ IsBuiltinGpuAvailable (
   EFI_PCI_ROOT_BRIDGE_IO_PROTOCOL  *Interface;
 
   Status = gBS->LocateProtocol (
-    &gEfiPciRootBridgeIoProtocolGuid,
-    NULL,
-    (VOID **) &Interface
-    );
+                  &gEfiPciRootBridgeIoProtocolGuid,
+                  NULL,
+                  (VOID **)&Interface
+                  );
 
   if (EFI_ERROR (Status)) {
     DEBUG ((DEBUG_INFO, "OCPAVP: Failed to find PCI root protocol - %r\n", Status));
@@ -258,12 +259,12 @@ IsBuiltinGpuAvailable (
   // See EFI_PCI_ADDRESS
   //
   Status = Interface->Pci.Read (
-    Interface,
-    EfiPciWidthUint32,
-    0x20000,
-    1,
-    &Value
-    );
+                            Interface,
+                            EfiPciWidthUint32,
+                            0x20000,
+                            1,
+                            &Value
+                            );
 
   if (EFI_ERROR (Status)) {
     DEBUG ((DEBUG_INFO, "OCPAVP: Failed to read from IGPU device - %r\n", Status));
@@ -285,22 +286,22 @@ NeedsEpidProvisioning (
   UINT32      Data;
   UINTN       DataSize;
 
-  if (IsBuiltinGpuAvailable()) {
+  if (IsBuiltinGpuAvailable ()) {
     DataSize = sizeof (Data);
 
     Status = gRT->GetVariable (
-      APPLE_EPID_PROVISIONED_VARIABLE_NAME,
-      &gEfiGlobalVariableGuid,
-      NULL,
-      &DataSize,
-      &Data
-      );
+                    APPLE_EPID_PROVISIONED_VARIABLE_NAME,
+                    &gEfiGlobalVariableGuid,
+                    NULL,
+                    &DataSize,
+                    &Data
+                    );
 
-#ifdef FORCE_PROVISIONING
+ #ifdef FORCE_PROVISIONING
     Data = 0;
-#endif
+ #endif
 
-    if (EFI_ERROR (Status) || Data != 1) {
+    if (EFI_ERROR (Status) || (Data != 1)) {
       return EFI_SUCCESS;
     }
   }
@@ -319,25 +320,25 @@ NeedsFpfProvisioning (
   UINTN                        DataSize;
   APPLE_FPF_CONFIGURATION_HOB  *Hob;
 
-#if 0
+ #if 0
   Hob = GetFirstGuidHob (&gAppleFpfConfigurationHobGuid);
-#else
+ #else
   Hob = NULL;
-#endif
+ #endif
 
   DEBUG ((DEBUG_INFO, "OCPAVP: HOB for FPF is %p\n", Hob));
 
-  if (Hob == NULL || Hob->ShouldProvision) {
+  if ((Hob == NULL) || Hob->ShouldProvision) {
     DataSize = sizeof (Data);
-    Status = gRT->GetVariable (
-      APPLE_FPF_PROVISIONED_VARIABLE_NAME,
-      &gEfiGlobalVariableGuid,
-      NULL,
-      &DataSize,
-      &Data
-      );
+    Status   = gRT->GetVariable (
+                      APPLE_FPF_PROVISIONED_VARIABLE_NAME,
+                      &gEfiGlobalVariableGuid,
+                      NULL,
+                      &DataSize,
+                      &Data
+                      );
 
-    if (EFI_ERROR (Status) || Data != 1) {
+    if (EFI_ERROR (Status) || (Data != 1)) {
       return EFI_SUCCESS;
     }
 
@@ -376,10 +377,10 @@ OcPerformEpidProvisioning (
   }
 
   Status = ReadProvisioningData (
-    &EpidCertificate,
-    &EpidGroupPublicKeys,
-    &EpidGroupPublicKeysCount
-    );
+             &EpidCertificate,
+             &EpidGroupPublicKeys,
+             &EpidGroupPublicKeysCount
+             );
   DEBUG ((DEBUG_INFO, "OCPAVP: Provisioning data - %r\n", Status));
   if (EFI_ERROR (Status)) {
     return Status;
@@ -399,14 +400,14 @@ OcPerformEpidProvisioning (
 
   for (Index = 0; Index < mMeClientActiveCount; ++Index) {
     Status = HeciGetClientProperties (
-      mMeClientMap[Index],
-      &Properties
-      );
+               mMeClientMap[Index],
+               &Properties
+               );
 
     DEBUG ((
       DEBUG_INFO,
       "OCPAVP: Client %u has %g protocol - %r\n",
-      (UINT32) Index,
+      (UINT32)Index,
       Properties.ProtocolName,
       Status
       ));
@@ -420,29 +421,27 @@ OcPerformEpidProvisioning (
     }
   }
 
-  if (!EFI_ERROR (Status) && Index != mMeClientActiveCount) {
-    DEBUG ((DEBUG_INFO, "OCPAVP: Found application at %u\n", (UINT32) Index));
+  if (!EFI_ERROR (Status) && (Index != mMeClientActiveCount)) {
+    DEBUG ((DEBUG_INFO, "OCPAVP: Found application at %u\n", (UINT32)Index));
 
     Status = HeciConnectToClient (mMeClientMap[Index]);
     if (!EFI_ERROR (Status)) {
-
       EpidStatus = EpidGroupId = 0;
-      Status = HeciPavpRequestProvisioning (&EpidStatus, &EpidGroupId);
+      Status     = HeciPavpRequestProvisioning (&EpidStatus, &EpidGroupId);
 
       DEBUG ((DEBUG_INFO, "OCPAVP: Got EPID status %X and group id %x - %r\n", EpidStatus, EpidGroupId, Status));
     }
 
     if (!EFI_ERROR (Status)) {
-
       if (EpidStatus == EPID_STATUS_PROVISIONED) {
         SetProvisioningVariable (APPLE_EPID_PROVISIONED_VARIABLE_NAME, 1);
       } else if (EpidStatus == EPID_STATUS_CAN_PROVISION) {
         Status = GetGroupPublicKey (
-          EpidGroupPublicKeys,
-          EpidGroupPublicKeysCount,
-          EpidGroupId,
-          &EpidCurrentGroupPublicKey
-          );
+                   EpidGroupPublicKeys,
+                   EpidGroupPublicKeysCount,
+                   EpidGroupId,
+                   &EpidCurrentGroupPublicKey
+                   );
 
         DEBUG ((DEBUG_INFO, "OCPAVP: Got EPID group public key - %r\n", Status));
 
@@ -512,14 +511,14 @@ OcPerformFpfProvisioning (
 
   for (Index = 0; Index < mMeClientActiveCount; ++Index) {
     Status = HeciGetClientProperties (
-      mMeClientMap[Index],
-      &Properties
-      );
+               mMeClientMap[Index],
+               &Properties
+               );
 
     DEBUG ((
       DEBUG_INFO,
       "OCPAVP: Client %u has %g protocol - %r\n",
-      (UINT32) Index,
+      (UINT32)Index,
       Properties.ProtocolName,
       Status
       ));
@@ -533,8 +532,8 @@ OcPerformFpfProvisioning (
     }
   }
 
-  if (!EFI_ERROR (Status) && Index != mMeClientActiveCount) {
-    DEBUG ((DEBUG_INFO, "OCPAVP: Found application at %u\n", (UINT32) Index));
+  if (!EFI_ERROR (Status) && (Index != mMeClientActiveCount)) {
+    DEBUG ((DEBUG_INFO, "OCPAVP: Found application at %u\n", (UINT32)Index));
 
     Status = HeciConnectToClient (mMeClientMap[Index]);
 
@@ -549,7 +548,7 @@ OcPerformFpfProvisioning (
         if (FpfStatus == 250) {
           Status = HeciFpfProvision (&FpfStatus);
           DEBUG ((DEBUG_INFO, "OCPAVP: Got FPF provisioning %u - %r\n", FpfStatus, Status));
-          if (!EFI_ERROR (Status) && FpfStatus == 0) {
+          if (!EFI_ERROR (Status) && (FpfStatus == 0)) {
             SetProvisioningVariable (APPLE_FPF_PROVISIONED_VARIABLE_NAME, 1);
           } else {
             Status = EFI_DEVICE_ERROR;
@@ -587,13 +586,13 @@ OcPerformProvisioning (
 
   DEBUG ((DEBUG_INFO, "OCPAVP: Checking PAVPC register...\n"));
 
-  UINT32 PAVPC = MmPci32 (0, SA_MC_BUS, 0, 0, R_SA_PAVPC);
+  UINT32  PAVPC = MmPci32 (0, SA_MC_BUS, 0, 0, R_SA_PAVPC);
 
   DEBUG ((DEBUG_INFO, "OCPAVP: Current PAVPC is %X\n", PAVPC));
 
   if ((PAVPC & BIT2) == 0) {
     MmPci32 (0, SA_MC_BUS, 0, 0, R_SA_PAVPC) = (PAVPC & (~BIT2)) | BIT4;
-    PAVPC = MmPci32 (0, SA_MC_BUS, 0, 0, R_SA_PAVPC);
+    PAVPC                                    = MmPci32 (0, SA_MC_BUS, 0, 0, R_SA_PAVPC);
     DEBUG ((DEBUG_INFO, "OCPAVP: New PAVPC is %X\n", PAVPC));
   }
 
@@ -603,15 +602,14 @@ OcPerformProvisioning (
 
   DEBUG ((DEBUG_INFO, "OCPAVP: Done EPID provisioning - %r\n", Status));
 
-#if 0
+ #if 0
   DEBUG ((DEBUG_INFO, "OCPAVP: Starting FPF provisioning\n"));
 
   Status = OcPerformFpfProvisioning ();
 
   DEBUG ((DEBUG_INFO, "OCPAVP: Done FPF provisioning - %r\n", Status));
-#endif
+ #endif
 }
-
 
 EFI_STATUS
 EFIAPI

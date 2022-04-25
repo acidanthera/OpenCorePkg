@@ -27,8 +27,8 @@ STATIC
 EFI_STATUS
 EFIAPI
 NullTextReset (
-  IN EFI_SIMPLE_TEXT_OUTPUT_PROTOCOL *This,
-  IN BOOLEAN                         ExtendedVerification
+  IN EFI_SIMPLE_TEXT_OUTPUT_PROTOCOL  *This,
+  IN BOOLEAN                          ExtendedVerification
   )
 {
   return EFI_SUCCESS;
@@ -38,8 +38,8 @@ STATIC
 EFI_STATUS
 EFIAPI
 NullTextOutputString (
-  IN EFI_SIMPLE_TEXT_OUTPUT_PROTOCOL *This,
-  IN CHAR16                          *String
+  IN EFI_SIMPLE_TEXT_OUTPUT_PROTOCOL  *This,
+  IN CHAR16                           *String
   )
 {
   return EFI_SUCCESS;
@@ -49,8 +49,8 @@ STATIC
 EFI_STATUS
 EFIAPI
 NullTextTestString (
-  IN EFI_SIMPLE_TEXT_OUTPUT_PROTOCOL *This,
-  IN CHAR16                          *String
+  IN EFI_SIMPLE_TEXT_OUTPUT_PROTOCOL  *This,
+  IN CHAR16                           *String
   )
 {
   return EFI_SUCCESS;
@@ -60,10 +60,10 @@ STATIC
 EFI_STATUS
 EFIAPI
 NullTextQueryMode (
-  IN  EFI_SIMPLE_TEXT_OUTPUT_PROTOCOL *This,
-  IN  UINTN                           ModeNumber,
-  OUT UINTN                           *Columns,
-  OUT UINTN                           *Rows
+  IN  EFI_SIMPLE_TEXT_OUTPUT_PROTOCOL  *This,
+  IN  UINTN                            ModeNumber,
+  OUT UINTN                            *Columns,
+  OUT UINTN                            *Rows
   )
 {
   return EFI_UNSUPPORTED;
@@ -73,8 +73,8 @@ STATIC
 EFI_STATUS
 EFIAPI
 NullTextSetMode (
-  IN EFI_SIMPLE_TEXT_OUTPUT_PROTOCOL *This,
-  IN UINTN                           ModeNumber
+  IN EFI_SIMPLE_TEXT_OUTPUT_PROTOCOL  *This,
+  IN UINTN                            ModeNumber
   )
 {
   return EFI_SUCCESS;
@@ -84,8 +84,8 @@ STATIC
 EFI_STATUS
 EFIAPI
 NullTextSetAttribute (
-  IN EFI_SIMPLE_TEXT_OUTPUT_PROTOCOL *This,
-  IN UINTN                           Attribute
+  IN EFI_SIMPLE_TEXT_OUTPUT_PROTOCOL  *This,
+  IN UINTN                            Attribute
   )
 {
   return EFI_SUCCESS;
@@ -95,7 +95,7 @@ STATIC
 EFI_STATUS
 EFIAPI
 NullTextClearScreen (
-  IN EFI_SIMPLE_TEXT_OUTPUT_PROTOCOL *This
+  IN EFI_SIMPLE_TEXT_OUTPUT_PROTOCOL  *This
   )
 {
   return EFI_SUCCESS;
@@ -105,9 +105,9 @@ STATIC
 EFI_STATUS
 EFIAPI
 NullTextSetCursorPosition (
-  IN EFI_SIMPLE_TEXT_OUTPUT_PROTOCOL *This,
-  IN UINTN                           Column,
-  IN UINTN                           Row
+  IN EFI_SIMPLE_TEXT_OUTPUT_PROTOCOL  *This,
+  IN UINTN                            Column,
+  IN UINTN                            Row
   )
 {
   return EFI_SUCCESS;
@@ -117,8 +117,8 @@ STATIC
 EFI_STATUS
 EFIAPI
 NullTextEnableCursor (
-  IN EFI_SIMPLE_TEXT_OUTPUT_PROTOCOL *This,
-  IN BOOLEAN                         Visible
+  IN EFI_SIMPLE_TEXT_OUTPUT_PROTOCOL  *This,
+  IN BOOLEAN                          Visible
   )
 {
   return EFI_SUCCESS;
@@ -126,11 +126,11 @@ NullTextEnableCursor (
 
 STATIC
 EFI_SIMPLE_TEXT_OUTPUT_MODE
-mNullTextOutputMode;
+  mNullTextOutputMode;
 
 STATIC
 EFI_SIMPLE_TEXT_OUTPUT_PROTOCOL
-mNullTextOutputProtocol = {
+  mNullTextOutputProtocol = {
   NullTextReset,
   NullTextOutputString,
   NullTextTestString,
@@ -154,21 +154,21 @@ AllocateNullTextOutSystemTable (
   //
   // Patch verbose
   //
-  NewSystemTable = (EFI_SYSTEM_TABLE *) AllocateZeroPool (SystemTable->Hdr.HeaderSize);
+  NewSystemTable = (EFI_SYSTEM_TABLE *)AllocateZeroPool (SystemTable->Hdr.HeaderSize);
 
   if (NewSystemTable == NULL) {
     return NULL;
   }
 
-  CopyMem ((VOID *) NewSystemTable, SystemTable, SystemTable->Hdr.HeaderSize);
-  NewSystemTable->ConOut = &mNullTextOutputProtocol;
+  CopyMem ((VOID *)NewSystemTable, SystemTable, SystemTable->Hdr.HeaderSize);
+  NewSystemTable->ConOut    = &mNullTextOutputProtocol;
   NewSystemTable->Hdr.CRC32 = 0;
 
   Status = gBS->CalculateCrc32 (
-    NewSystemTable,
-    NewSystemTable->Hdr.HeaderSize,
-    &NewSystemTable->Hdr.CRC32
-    );
+                  NewSystemTable,
+                  NewSystemTable->Hdr.HeaderSize,
+                  &NewSystemTable->Hdr.CRC32
+                  );
 
   if (EFI_ERROR (Status)) {
     DEBUG ((DEBUG_WARN, "OCC: Failed to calculated new system table CRC32 with Status: %r\n", Status));

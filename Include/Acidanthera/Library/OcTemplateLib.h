@@ -36,17 +36,17 @@ VOID
 //
 
 #define PRIV_OC_STRUCTOR_IGNORE(...)
-#define PRIV_OC_STRUCTOR_EXPAND(...) __VA_ARGS__
+#define PRIV_OC_STRUCTOR_EXPAND(...)  __VA_ARGS__
 
-#define PRIV_OC_SELECT_NEXT_INNER(Dummy, Next, ...) Next
+#define PRIV_OC_SELECT_NEXT_INNER(Dummy, Next, ...)  Next
 //
 // Without this layer of indirection, MSVC evaluates __VA_ARGS__ early and
 // PRIV_OC_SELECT_NEXT_INNER receives only two arguments, the second always
 // being Unused as per PRIV_OC_SELECT_NEXT.
 //
-#define PRIV_OC_SELECT_NEXT_INNER_INDIR(...) PRIV_OC_SELECT_NEXT_INNER __VA_ARGS__
-#define PRIV_OC_SELECT_NEXT(...) PRIV_OC_SELECT_NEXT_INNER_INDIR((__VA_ARGS__, Unused))
-#define PRIV_OC_REMOVE_NEXT(...) , do { } while (0),
+#define PRIV_OC_SELECT_NEXT_INNER_INDIR(...)  PRIV_OC_SELECT_NEXT_INNER __VA_ARGS__
+#define PRIV_OC_SELECT_NEXT(...)              PRIV_OC_SELECT_NEXT_INNER_INDIR((__VA_ARGS__, Unused))
+#define PRIV_OC_REMOVE_NEXT(...)              , do { } while (0),
 
 #define PRIV_OC_DECLARE_STRUCT_MEMBER(Type, Name, Suffix, Constructor, Destructor)   \
   Type Name Suffix;
@@ -60,7 +60,7 @@ VOID
 #define PRIV_OC_INVOKE_DESTRUCTOR(Destructor, Obj, Size)                             \
   PRIV_OC_SELECT_NEXT(PRIV_OC_REMOVE_NEXT Destructor, Destructor(Obj, Size))
 
-#define PRIV_NO_KEY_TYPE UINT8
+#define PRIV_NO_KEY_TYPE  UINT8
 
 //
 // Declare structure type NAME. Construction and destruction interfaces will also be
@@ -112,12 +112,12 @@ VOID
 // changes the expansion order. The right fix here is to entirely remove the mess
 // and use external tool for template generation.
 //
-#define OC_CONSTR(A, _, __)  {A ## _FIELDS(_, __)}
-#define OC_CONSTR1(A, _, __) {A ## _FIELDS(_, __)}
-#define OC_CONSTR2(A, _, __) {A ## _FIELDS(_, __)}
-#define OC_CONSTR3(A, _, __) {A ## _FIELDS(_, __)}
-#define OC_CONSTR5(A, _, __) {A ## _FIELDS(_, __)}
-#define OC_DESTR(A) A ## _DESTRUCT
+#define OC_CONSTR(A, _, __)   {A ## _FIELDS(_, __)}
+#define OC_CONSTR1(A, _, __)  {A ## _FIELDS(_, __)}
+#define OC_CONSTR2(A, _, __)  {A ## _FIELDS(_, __)}
+#define OC_CONSTR3(A, _, __)  {A ## _FIELDS(_, __)}
+#define OC_CONSTR5(A, _, __)  {A ## _FIELDS(_, __)}
+#define OC_DESTR(A)           A ## _DESTRUCT
 
 //
 // Generate array-like blob (string, data, metadata) of type Type,
@@ -141,7 +141,7 @@ VOID
 #if 0
 #define CONT_FIELDS(_, __) \
   OC_MAP (KEY, ELEM, _, __)
-  OC_DECLARE (CONT)
+OC_DECLARE (CONT)
 #endif
 //
 
@@ -166,7 +166,7 @@ VOID
 #if 0
 #define CONT_FIELDS(_, __) \
   OC_ARRAY (ELEM, _, __)
-  OC_DECLARE (CONT)
+OC_DECLARE (CONT)
 #endif
 //
 
@@ -244,7 +244,7 @@ OcBlobAllocate (
 //
 // Obtain blob value
 //
-#define OC_BLOB_GET(Blob) (((Blob)->DynValue) != NULL ? ((Blob)->DynValue) : ((Blob)->Value))
+#define OC_BLOB_GET(Blob)  (((Blob)->DynValue) != NULL ? ((Blob)->DynValue) : ((Blob)->Value))
 
 //
 // Insert new empty element into the OC_MAP or OC_ARRAY, depending
@@ -252,9 +252,9 @@ OcBlobAllocate (
 //
 BOOLEAN
 OcListEntryAllocate (
-  VOID            *Pointer,
-  VOID            **Value,
-  VOID            **Key
+  VOID  *Pointer,
+  VOID  **Value,
+  VOID  **Key
   );
 
 //
@@ -265,7 +265,7 @@ OcListEntryAllocate (
 //
 #define OC_STRING_FIELDS(_, __) \
   OC_BLOB (CHAR8, [64], {0}, _, __)
-  OC_DECLARE (OC_STRING)
+OC_DECLARE (OC_STRING)
 
 #define OC_STRING_CONSTR(Constructor, _, __) \
   OC_BLOB_CONSTR (OC_STRING, __(Constructor), sizeof (Constructor), _, __)
@@ -275,7 +275,7 @@ OcListEntryAllocate (
 
 #define OC_DATA_FIELDS(_, __) \
   OC_BLOB (UINT8, [64], {0}, _, __)
-  OC_DECLARE (OC_DATA)
+OC_DECLARE (OC_DATA)
 
 #define OC_EDATA_CONSTR(_, __) \
   OC_BLOB_CONSTR (OC_DATA, __({0}), 0, _, __)
@@ -285,6 +285,6 @@ OcListEntryAllocate (
 
 #define OC_ASSOC_FIELDS(_, __) \
   OC_MAP (OC_STRING, OC_DATA, _, __)
-  OC_DECLARE (OC_ASSOC)
+OC_DECLARE (OC_ASSOC)
 
 #endif // OC_TEMPLATE_LIB_H

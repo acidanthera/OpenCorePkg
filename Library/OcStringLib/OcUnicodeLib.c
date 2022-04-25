@@ -72,13 +72,14 @@ OcStrniCmp (
   //
   ASSERT (StrSize (FirstString) != 0);
   ASSERT (StrSize (SecondString) != 0);
-  
+
   UpperFirstString  = CharToUpper (*FirstString);
   UpperSecondString = CharToUpper (*SecondString);
   while ((*FirstString != L'\0') &&
          (*SecondString != L'\0') &&
          (UpperFirstString == UpperSecondString) &&
-         (Length > 1)) {
+         (Length > 1))
+  {
     FirstString++;
     SecondString++;
     UpperFirstString  = CharToUpper (*FirstString);
@@ -92,12 +93,12 @@ OcStrniCmp (
 CHAR16 *
 EFIAPI
 OcStriStr (
-  IN      CONST CHAR16              *String,
-  IN      CONST CHAR16              *SearchString
+  IN      CONST CHAR16  *String,
+  IN      CONST CHAR16  *SearchString
   )
 {
-  CONST CHAR16 *FirstMatch;
-  CONST CHAR16 *SearchStringTmp;
+  CONST CHAR16  *FirstMatch;
+  CONST CHAR16  *SearchStringTmp;
 
   //
   // ASSERT both strings are less long than PcdMaximumUnicodeStringLength.
@@ -107,21 +108,22 @@ OcStriStr (
   ASSERT (StrSize (SearchString) != 0);
 
   if (*SearchString == L'\0') {
-    return (CHAR16 *) String;
+    return (CHAR16 *)String;
   }
 
   while (*String != L'\0') {
     SearchStringTmp = SearchString;
-    FirstMatch = String;
+    FirstMatch      = String;
 
-    while ((CharToUpper (*String) == CharToUpper (*SearchStringTmp))
-            && (*String != L'\0')) {
+    while (  (CharToUpper (*String) == CharToUpper (*SearchStringTmp))
+          && (*String != L'\0'))
+    {
       String++;
       SearchStringTmp++;
     }
 
     if (*SearchStringTmp == L'\0') {
-      return (CHAR16 *) FirstMatch;
+      return (CHAR16 *)FirstMatch;
     }
 
     if (*String == L'\0') {
@@ -153,17 +155,18 @@ OcStrStrLength (
   // REF: http://www-igm.univ-mlv.fr/~lecroq/string/node13.html#SECTION00130
   //
 
-  if (SearchStringLength > StringLength
-    || SearchStringLength == 0
-    || StringLength == 0) {
+  if (  (SearchStringLength > StringLength)
+     || (SearchStringLength == 0)
+     || (StringLength == 0))
+  {
     return NULL;
   }
 
   if (SearchStringLength > 1) {
     Index = 0;
 
-    Y = (CONST CHAR16 *) String;
-    X = (CONST CHAR16 *) SearchString;
+    Y = (CONST CHAR16 *)String;
+    X = (CONST CHAR16 *)SearchString;
 
     if (X[0] == X[1]) {
       Index2 = 2;
@@ -178,7 +181,7 @@ OcStrStrLength (
         Index += Index2;
       } else {
         CmpResult = CompareMem (X+2, Y+Index+2, (SearchStringLength - 2) * sizeof (*SearchString));
-        if (CmpResult == 0 && X[0] == Y[Index]) {
+        if ((CmpResult == 0) && (X[0] == Y[Index])) {
           return &Y[Index];
         }
 
@@ -195,8 +198,8 @@ OcStrStrLength (
 CHAR16 *
 EFIAPI
 OcStrChr (
-  IN      CONST CHAR16              *String,
-  IN            CHAR16              Char
+  IN      CONST CHAR16  *String,
+  IN            CHAR16  Char
   )
 {
   ASSERT (StrSize (String) != 0);
@@ -206,7 +209,7 @@ OcStrChr (
     // Return immediately when matching first occurrence of Char.
     //
     if (*String == Char) {
-      return (CHAR16 *) String;
+      return (CHAR16 *)String;
     }
 
     ++String;
@@ -218,11 +221,11 @@ OcStrChr (
 CHAR16 *
 EFIAPI
 OcStrrChr (
-  IN      CONST CHAR16              *String,
-  IN            CHAR16              Char
+  IN      CONST CHAR16  *String,
+  IN            CHAR16  Char
   )
 {
-  CHAR16 *Save;
+  CHAR16  *Save;
 
   ASSERT (StrSize (String) != 0);
 
@@ -233,7 +236,7 @@ OcStrrChr (
     // Record the last occurrence of Char.
     //
     if (*String == Char) {
-      Save = (CHAR16 *) String;
+      Save = (CHAR16 *)String;
     }
 
     ++String;
@@ -267,7 +270,7 @@ UnicodeGetParentDirectory (
   //
   // Drop starting slash (as it cannot be passed to some drivers).
   //
-  if (String[0] == '\\' || String[0] == '/') {
+  if ((String[0] == '\\') || (String[0] == '/')) {
     CopyMem (&String[0], &String[1], Length * sizeof (String[0]));
     --Length;
   }
@@ -282,7 +285,7 @@ UnicodeGetParentDirectory (
   //
   // Drop trailing slash when getting a directory.
   //
-  if (String[Length - 1] == '\\' || String[Length - 1] == '/') {
+  if ((String[Length - 1] == '\\') || (String[Length - 1] == '/')) {
     --Length;
     //
     // Paths with just one slash have no root directory (e.g. \\/).
@@ -326,13 +329,13 @@ UnicodeFilterString (
       // Remove all unicode characters.
       //
       *String = L'_';
-    } else if (SingleLine && (*String == L'\r' || *String == L'\n')) {
+    } else if (SingleLine && ((*String == L'\r') || (*String == L'\n'))) {
       //
       // Stop after printing one line.
       //
       *String = L'\0';
       break;
-    } else if (*String < 0x20 || *String == 0x7F) {
+    } else if ((*String < 0x20) || (*String == 0x7F)) {
       //
       // Drop all unprintable spaces but space including tabs.
       //
@@ -354,11 +357,11 @@ UnicodeIsFilteredString (
       return FALSE;
     }
 
-    if (SingleLine && (*String == L'\r' || *String == L'\n')) {
+    if (SingleLine && ((*String == L'\r') || (*String == L'\n'))) {
       return FALSE;
     }
 
-    if (*String < 0x20 || *String == 0x7F) {
+    if ((*String < 0x20) || (*String == 0x7F)) {
       return FALSE;
     }
 
@@ -407,34 +410,35 @@ OcUnicodeSafeSPrint (
 BOOLEAN
 EFIAPI
 OcUnicodeEndsWith (
-  IN CONST CHAR16     *String,
-  IN CONST CHAR16     *SearchString,
-  IN BOOLEAN          CaseInsensitiveMatch
+  IN CONST CHAR16  *String,
+  IN CONST CHAR16  *SearchString,
+  IN BOOLEAN       CaseInsensitiveMatch
   )
 {
-  UINTN   StringLength;
-  UINTN   SearchStringLength;
+  UINTN  StringLength;
+  UINTN  SearchStringLength;
 
   ASSERT (String != NULL);
   ASSERT (SearchString != NULL);
 
-  StringLength        = StrLen (String);
-  SearchStringLength  = StrLen (SearchString);
+  StringLength       = StrLen (String);
+  SearchStringLength = StrLen (SearchString);
 
   if (CaseInsensitiveMatch) {
     return StringLength >= SearchStringLength
-      && OcStrniCmp (&String[StringLength - SearchStringLength], SearchString, SearchStringLength) == 0;
+           && OcStrniCmp (&String[StringLength - SearchStringLength], SearchString, SearchStringLength) == 0;
   }
+
   return StringLength >= SearchStringLength
-    && StrnCmp (&String[StringLength - SearchStringLength], SearchString, SearchStringLength) == 0;
+         && StrnCmp (&String[StringLength - SearchStringLength], SearchString, SearchStringLength) == 0;
 }
 
 BOOLEAN
 EFIAPI
 OcUnicodeStartsWith (
-  IN CONST CHAR16     *String,
-  IN CONST CHAR16     *SearchString,
-  IN BOOLEAN          CaseInsensitiveMatch
+  IN CONST CHAR16  *String,
+  IN CONST CHAR16  *SearchString,
+  IN BOOLEAN       CaseInsensitiveMatch
   )
 {
   CHAR16  First;
@@ -444,18 +448,21 @@ OcUnicodeStartsWith (
   ASSERT (SearchString != NULL);
 
   while (TRUE) {
-    First = *String++;
+    First  = *String++;
     Second = *SearchString++;
     if (Second == '\0') {
       return TRUE;
     }
+
     if (First == '\0') {
       return FALSE;
     }
+
     if (CaseInsensitiveMatch) {
       First  = CharToUpper (First);
       Second = CharToUpper (Second);
     }
+
     if (First != Second) {
       return FALSE;
     }
@@ -477,13 +484,14 @@ HasValidGuidStringPrefix (
   }
 
   for (Index = 0; Index < GuidLength; ++Index) {
-    if (Index == 8 || Index == 13 || Index == 18 || Index == 23) {
+    if ((Index == 8) || (Index == 13) || (Index == 18) || (Index == 23)) {
       if (String[Index] != '-') {
         return FALSE;
       }
-    } else if (!(String[Index] >= L'0' && String[Index] <= L'9')
-      && !(String[Index] >= L'A' && String[Index] <= L'F')
-      && !(String[Index] >= L'a' && String[Index] <= L'f')) {
+    } else if (  !((String[Index] >= L'0') && (String[Index] <= L'9'))
+              && !((String[Index] >= L'A') && (String[Index] <= L'F'))
+              && !((String[Index] >= L'a') && (String[Index] <= L'f')))
+    {
       return FALSE;
     }
   }
@@ -508,8 +516,8 @@ MixedStrCmp (
 INTN
 EFIAPI
 OcReverseStringCompare (
-  IN  CONST VOID                *Buffer1,
-  IN  CONST VOID                *Buffer2
+  IN  CONST VOID  *Buffer1,
+  IN  CONST VOID  *Buffer2
   )
 {
   return -StringCompare (Buffer1, Buffer2);
@@ -517,7 +525,7 @@ OcReverseStringCompare (
 
 BOOLEAN
 OcIsSpace (
-  CHAR16    Ch
+  CHAR16  Ch
   )
 {
   return (Ch == L' ') || (Ch == L'\t') || (Ch == L'\r') || (Ch == L'\n') || (Ch == L'\v')  || (Ch == L'\f');

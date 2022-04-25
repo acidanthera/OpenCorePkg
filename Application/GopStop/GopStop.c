@@ -32,10 +32,10 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 STATIC
 VOID
 AnalyzeGopHandle (
-  IN  EFI_HANDLE        Handle,
-  IN  UINTN             GopIndex,
-  IN  UINTN             HandleCount,
-  OUT CHAR8             *Report
+  IN  EFI_HANDLE  Handle,
+  IN  UINTN       GopIndex,
+  IN  UINTN       HandleCount,
+  OUT CHAR8       *Report
   )
 {
   EFI_STATUS                            Status;
@@ -49,10 +49,10 @@ AnalyzeGopHandle (
   INTN                                  NewMode;
 
   Status = gBS->HandleProtocol (
-    Handle,
-    &gEfiGraphicsOutputProtocolGuid,
-    (VOID **) &Gop
-    );
+                  Handle,
+                  &gEfiGraphicsOutputProtocolGuid,
+                  (VOID **)&Gop
+                  );
 
   //
   // GOP report:
@@ -61,8 +61,8 @@ AnalyzeGopHandle (
     Tmp,
     sizeof (Tmp),
     "GOP #%u of total %u, %a - %r\n",
-    (UINT32) (GopIndex + 1),
-    (UINT32) HandleCount,
+    (UINT32)(GopIndex + 1),
+    (UINT32)HandleCount,
     gST->ConsoleOutHandle == Handle ? "console" : "auxiliary",
     Status
     );
@@ -79,8 +79,8 @@ AnalyzeGopHandle (
     "Current mode %u, max mode %u, FB: %p, FBS: %LX\n",
     Gop->Mode->Mode,
     Gop->Mode->MaxMode,
-    (UINT64) Gop->Mode->FrameBufferBase,
-    (UINT32) Gop->Mode->FrameBufferSize
+    (UINT64)Gop->Mode->FrameBufferBase,
+    (UINT32)Gop->Mode->FrameBufferSize
     );
   DEBUG ((DEBUG_WARN, "GSTT: %a", Tmp));
   AsciiStrCatS (Report, EFI_PAGE_SIZE, Tmp);
@@ -108,11 +108,11 @@ AnalyzeGopHandle (
 
   for (Index = 0; Index < Gop->Mode->MaxMode; ++Index) {
     Status = Gop->QueryMode (
-      Gop,
-      Index,
-      &InfoSize,
-      &Info
-      );
+                    Gop,
+                    Index,
+                    &InfoSize,
+                    &Info
+                    );
 
     if (EFI_ERROR (Status)) {
       AsciiSPrint (
@@ -144,11 +144,12 @@ AnalyzeGopHandle (
     DEBUG ((DEBUG_WARN, "GSTT: %a", Tmp));
     AsciiStrCatS (Report, EFI_PAGE_SIZE, Tmp);
 
-    if (Info->HorizontalResolution > Width
-      || (Info->HorizontalResolution == Width && Info->VerticalResolution > Height)) {
+    if (  (Info->HorizontalResolution > Width)
+       || ((Info->HorizontalResolution == Width) && (Info->VerticalResolution > Height)))
+    {
       Width   = Info->HorizontalResolution;
       Height  = Info->VerticalResolution;
-      NewMode = (INTN) Index;
+      NewMode = (INTN)Index;
     }
 
     FreePool (Info);
@@ -156,20 +157,20 @@ AnalyzeGopHandle (
 
   if (NewMode >= 0) {
     Status = Gop->SetMode (
-      Gop,
-      (UINT32) NewMode
-      );
+                    Gop,
+                    (UINT32)NewMode
+                    );
 
     Info = Gop->Mode->Info;
     AsciiSPrint (
       Tmp,
       sizeof (Tmp),
       "New %u <-> %u: max mode %u, FB: %p, FBS: %LX - %r\n",
-      (UINT32) NewMode,
+      (UINT32)NewMode,
       Gop->Mode->Mode,
       Gop->Mode->MaxMode,
-      (UINT64) Gop->Mode->FrameBufferBase,
-      (UINT32) Gop->Mode->FrameBufferSize,
+      (UINT64)Gop->Mode->FrameBufferBase,
+      (UINT32)Gop->Mode->FrameBufferSize,
       Status
       );
     DEBUG ((DEBUG_WARN, "GSTT: %a", Tmp));
@@ -178,7 +179,7 @@ AnalyzeGopHandle (
       Tmp,
       sizeof (Tmp),
       "New %u <-> %u: %u x %u, pixel %d (%X %X %X %X), scan: %u\n",
-      (UINT32) NewMode,
+      (UINT32)NewMode,
       Gop->Mode->Mode,
       Info->HorizontalResolution,
       Info->VerticalResolution,
@@ -209,51 +210,51 @@ RunGopTest (
   UINT32                        ChunkH;
   UINT32                        ColorIndex;
 
-
   Status = gBS->HandleProtocol (
-    Handle,
-    &gEfiGraphicsOutputProtocolGuid,
-    (VOID **) &Gop
-    );
+                  Handle,
+                  &gEfiGraphicsOutputProtocolGuid,
+                  (VOID **)&Gop
+                  );
 
-  if (EFI_ERROR (Status)
-    || Gop->Mode->Info->HorizontalResolution == 0
-    || Gop->Mode->Info->VerticalResolution == 0) {
+  if (  EFI_ERROR (Status)
+     || (Gop->Mode->Info->HorizontalResolution == 0)
+     || (Gop->Mode->Info->VerticalResolution == 0))
+  {
     return;
   }
 
-  STATIC EFI_GRAPHICS_OUTPUT_BLT_PIXEL mGraphicsEfiColors[16] = {
+  STATIC EFI_GRAPHICS_OUTPUT_BLT_PIXEL  mGraphicsEfiColors[16] = {
     //
     // B    G    R   reserved
     //
-    {0x00, 0x00, 0x00, 0x00},  //  0 - BLACK
-    {0x98, 0x00, 0x00, 0x00},  //  1 - LIGHTBLUE
-    {0x00, 0x98, 0x00, 0x00},  //  2 - LIGHGREEN
-    {0x98, 0x98, 0x00, 0x00},  //  3 - LIGHCYAN
-    {0x00, 0x00, 0x98, 0x00},  //  4 - LIGHRED
-    {0x98, 0x00, 0x98, 0x00},  //  5 - MAGENTA
-    {0x00, 0x98, 0x98, 0x00},  //  6 - BROWN
-    {0x98, 0x98, 0x98, 0x00},  //  7 - LIGHTGRAY
-    {0x30, 0x30, 0x30, 0x00},  //  8 - DARKGRAY - BRIGHT BLACK
-    {0xff, 0x00, 0x00, 0x00},  //  9 - BLUE
-    {0x00, 0xff, 0x00, 0x00},  // 10 - LIME
-    {0xff, 0xff, 0x00, 0x00},  // 11 - CYAN
-    {0x00, 0x00, 0xff, 0x00},  // 12 - RED
-    {0xff, 0x00, 0xff, 0x00},  // 13 - FUCHSIA
-    {0x00, 0xff, 0xff, 0x00},  // 14 - YELLOW
-    {0xff, 0xff, 0xff, 0x00}   // 15 - WHITE
+    { 0x00, 0x00, 0x00, 0x00 },  //  0 - BLACK
+    { 0x98, 0x00, 0x00, 0x00 },  //  1 - LIGHTBLUE
+    { 0x00, 0x98, 0x00, 0x00 },  //  2 - LIGHGREEN
+    { 0x98, 0x98, 0x00, 0x00 },  //  3 - LIGHCYAN
+    { 0x00, 0x00, 0x98, 0x00 },  //  4 - LIGHRED
+    { 0x98, 0x00, 0x98, 0x00 },  //  5 - MAGENTA
+    { 0x00, 0x98, 0x98, 0x00 },  //  6 - BROWN
+    { 0x98, 0x98, 0x98, 0x00 },  //  7 - LIGHTGRAY
+    { 0x30, 0x30, 0x30, 0x00 },  //  8 - DARKGRAY - BRIGHT BLACK
+    { 0xff, 0x00, 0x00, 0x00 },  //  9 - BLUE
+    { 0x00, 0xff, 0x00, 0x00 },  // 10 - LIME
+    { 0xff, 0xff, 0x00, 0x00 },  // 11 - CYAN
+    { 0x00, 0x00, 0xff, 0x00 },  // 12 - RED
+    { 0xff, 0x00, 0xff, 0x00 },  // 13 - FUCHSIA
+    { 0x00, 0xff, 0xff, 0x00 },  // 14 - YELLOW
+    { 0xff, 0xff, 0xff, 0x00 }   // 15 - WHITE
   };
 
-  STATIC UINT32 mColorsTest[9] = {12, 10, 9, 15, 7, 0, 11, 5, 14};
+  STATIC UINT32  mColorsTest[9] = { 12, 10, 9, 15, 7, 0, 11, 5, 14 };
 
   if (Gop->Mode->FrameBufferBase != 0) {
     //
     // 1. Fill screen with Red (#FF0000) in direct mode.
     //
     SetMem32 (
-      (VOID *)(UINTN) Gop->Mode->FrameBufferBase,
+      (VOID *)(UINTN)Gop->Mode->FrameBufferBase,
       Gop->Mode->Info->VerticalResolution * Gop->Mode->Info->PixelsPerScanLine * sizeof (UINT32),
-      *(UINT32 *) &mGraphicsEfiColors[mColorsTest[0]]
+      *(UINT32 *)&mGraphicsEfiColors[mColorsTest[0]]
       );
 
     //
@@ -269,23 +270,23 @@ RunGopTest (
   // 3. Fill screen with 4 Red (#FF0000) / Green (#00FF00) / Blue (#0000FF) / White (#FFFFFF) rectangles.
   // The user should visually ensure that the colours match and that rectangles equally split the screen in 4 parts.
   //
-  ChunkW = Gop->Mode->Info->HorizontalResolution / 2;
-  ChunkH = Gop->Mode->Info->VerticalResolution / 2;
+  ChunkW     = Gop->Mode->Info->HorizontalResolution / 2;
+  ChunkH     = Gop->Mode->Info->VerticalResolution / 2;
   ColorIndex = 0;
   for (ChunkY = 0; ChunkY + ChunkH <= Gop->Mode->Info->VerticalResolution; ChunkY += ChunkH) {
     for (ChunkX = 0; ChunkX + ChunkW <= Gop->Mode->Info->HorizontalResolution; ChunkX += ChunkW) {
       Gop->Blt (
-        Gop,
-        &mGraphicsEfiColors[mColorsTest[ColorIndex]],
-        EfiBltVideoFill,
-        0,
-        0,
-        ChunkX,
-        ChunkY,
-        ChunkW,
-        ChunkH,
-        0
-        );
+             Gop,
+             &mGraphicsEfiColors[mColorsTest[ColorIndex]],
+             EfiBltVideoFill,
+             0,
+             0,
+             ChunkX,
+             ChunkY,
+             ChunkW,
+             ChunkH,
+             0
+             );
       ++ColorIndex;
     }
   }
@@ -321,23 +322,23 @@ RunGopTest (
   // Light Grey (#989898), Black (#000000), Cyan (#00FFFF), Magenta (#FF00FF), Yellow (#FFFF00). The user should
   // visually ensure that the colours match and that rectangles equally split the screen in 9 parts.
   //
-  ChunkW = Gop->Mode->Info->HorizontalResolution / 3;
-  ChunkH = Gop->Mode->Info->VerticalResolution / 3;
+  ChunkW     = Gop->Mode->Info->HorizontalResolution / 3;
+  ChunkH     = Gop->Mode->Info->VerticalResolution / 3;
   ColorIndex = 0;
   for (ChunkY = 0; ChunkY + ChunkH <= Gop->Mode->Info->VerticalResolution; ChunkY += ChunkH) {
     for (ChunkX = 0; ChunkX + ChunkW <= Gop->Mode->Info->HorizontalResolution; ChunkX += ChunkW) {
       Gop->Blt (
-        Gop,
-        &mGraphicsEfiColors[mColorsTest[ColorIndex]],
-        EfiBltVideoFill,
-        0,
-        0,
-        ChunkX,
-        ChunkY,
-        ChunkW,
-        ChunkH,
-        0
-        );
+             Gop,
+             &mGraphicsEfiColors[mColorsTest[ColorIndex]],
+             EfiBltVideoFill,
+             0,
+             0,
+             ChunkX,
+             ChunkY,
+             ChunkW,
+             ChunkH,
+             0
+             );
       ++ColorIndex;
     }
   }
@@ -358,14 +359,15 @@ UefiMain (
   IN EFI_SYSTEM_TABLE  *SystemTable
   )
 {
-  EFI_STATUS                           Status;
-  UINTN                                HandleCount;
-  EFI_HANDLE                           *HandleBuffer;
-  UINTN                                Index;
-  CHAR8                                (*Reports)[EFI_PAGE_SIZE];
-  CHAR8                                *FinalReport;
-  CHAR16                               Filename[64];
-  EFI_TIME                             Date;
+  EFI_STATUS  Status;
+  UINTN       HandleCount;
+  EFI_HANDLE  *HandleBuffer;
+  UINTN       Index;
+
+  CHAR8 (*Reports)[EFI_PAGE_SIZE];
+  CHAR8     *FinalReport;
+  CHAR16    Filename[64];
+  EFI_TIME  Date;
 
   //
   // 1. Disable watchdog timer.
@@ -376,18 +378,18 @@ UefiMain (
   // 2. Gather all N available GOP protocols.
   //
   HandleCount = 0;
-  Status = gBS->LocateHandleBuffer (
-    ByProtocol,
-    &gEfiGraphicsOutputProtocolGuid,
-    NULL,
-    &HandleCount,
-    &HandleBuffer
-    );
+  Status      = gBS->LocateHandleBuffer (
+                       ByProtocol,
+                       &gEfiGraphicsOutputProtocolGuid,
+                       NULL,
+                       &HandleCount,
+                       &HandleBuffer
+                       );
 
   DEBUG ((
     DEBUG_WARN,
     "GSTT: Found %u handles with GOP protocol - %r\n",
-    (UINT32) HandleCount,
+    (UINT32)HandleCount,
     Status
     ));
 
@@ -431,15 +433,15 @@ UefiMain (
       Filename,
       sizeof (Filename),
       L"gop-%04u-%02u-%02u-%02u%02u%02u.txt",
-      (UINT32) Date.Year,
-      (UINT32) Date.Month,
-      (UINT32) Date.Day,
-      (UINT32) Date.Hour,
-      (UINT32) Date.Minute,
-      (UINT32) Date.Second
+      (UINT32)Date.Year,
+      (UINT32)Date.Month,
+      (UINT32)Date.Day,
+      (UINT32)Date.Hour,
+      (UINT32)Date.Minute,
+      (UINT32)Date.Second
       );
 
-    OcSetFileData (NULL, Filename, FinalReport, (UINT32) AsciiStrLen (FinalReport));
+    OcSetFileData (NULL, Filename, FinalReport, (UINT32)AsciiStrLen (FinalReport));
 
     FreePool (FinalReport);
   } else {

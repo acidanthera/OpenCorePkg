@@ -37,7 +37,7 @@
 #define DEFAULT_CURSOR_OFFSET_X  BOOT_CURSOR_OFFSET
 #define DEFAULT_CURSOR_OFFSET_Y  112U
 
-extern BOOT_PICKER_GUI_CONTEXT mGuiContext;
+extern BOOT_PICKER_GUI_CONTEXT  mGuiContext;
 
 STATIC GUI_DRAWING_CONTEXT              mDrawContext;
 STATIC EFI_CONSOLE_CONTROL_SCREEN_MODE  mPreviousMode;
@@ -51,10 +51,10 @@ OcShowMenuByOcEnter (
   EFI_STATUS  Status;
 
   Status = GuiLibConstruct (
-    GuiContext,
-    mGuiContext.CursorOffsetX,
-    mGuiContext.CursorOffsetY
-    );
+             GuiContext,
+             mGuiContext.CursorOffsetX,
+             mGuiContext.CursorOffsetY
+             );
   if (EFI_ERROR (Status)) {
     return Status;
   }
@@ -100,21 +100,21 @@ OcSetInitialCursorOffset (
 EFI_STATUS
 EFIAPI
 OcShowMenuByOc (
-  IN     OC_BOOT_CONTEXT          *BootContext,
-  IN     OC_BOOT_ENTRY            **BootEntries,
-  OUT    OC_BOOT_ENTRY            **ChosenBootEntry
+  IN     OC_BOOT_CONTEXT  *BootContext,
+  IN     OC_BOOT_ENTRY    **BootEntries,
+  OUT    OC_BOOT_ENTRY    **ChosenBootEntry
   )
 {
-  EFI_STATUS    Status;
-  UINTN         Index;
+  EFI_STATUS  Status;
+  UINTN       Index;
 
   *ChosenBootEntry = NULL;
-  OcSetInitialCursorOffset();
-  mGuiContext.BootEntry = NULL;
-  mGuiContext.ReadyToBoot = FALSE;
-  mGuiContext.HideAuxiliary = BootContext->PickerContext->HideAuxiliary;
-  mGuiContext.Refresh = FALSE;
-  mGuiContext.PickerContext = BootContext->PickerContext;
+  OcSetInitialCursorOffset ();
+  mGuiContext.BootEntry            = NULL;
+  mGuiContext.ReadyToBoot          = FALSE;
+  mGuiContext.HideAuxiliary        = BootContext->PickerContext->HideAuxiliary;
+  mGuiContext.Refresh              = FALSE;
+  mGuiContext.PickerContext        = BootContext->PickerContext;
   mGuiContext.AudioPlaybackTimeout = -1;
 
   Status = OcShowMenuByOcEnter (&mGuiContext);
@@ -131,11 +131,11 @@ OcShowMenuByOc (
   }
 
   Status = BootPickerViewInitialize (
-    &mDrawContext,
-    &mGuiContext,
-    InternalGetCursorImage,
-    (UINT8) BootContext->BootEntryCount
-    );
+             &mDrawContext,
+             &mGuiContext,
+             InternalGetCursorImage,
+             (UINT8)BootContext->BootEntryCount
+             );
   if (EFI_ERROR (Status)) {
     OcShowMenuByOcLeave ();
     return Status;
@@ -143,11 +143,11 @@ OcShowMenuByOc (
 
   for (Index = 0; Index < BootContext->BootEntryCount; ++Index) {
     Status = BootPickerEntriesSet (
-      BootContext->PickerContext,
-      &mGuiContext,
-      BootEntries[Index],
-      (UINT8) Index
-      );
+               BootContext->PickerContext,
+               &mGuiContext,
+               BootEntries[Index],
+               (UINT8)Index
+               );
     if (EFI_ERROR (Status)) {
       OcShowMenuByOcLeave ();
       return Status;
@@ -157,36 +157,37 @@ OcShowMenuByOc (
   BootPickerViewLateInitialize (
     &mDrawContext,
     &mGuiContext,
-    (UINT8) BootContext->DefaultEntry->EntryIndex - 1
+    (UINT8)BootContext->DefaultEntry->EntryIndex - 1
     );
 
   GuiRedrawAndFlushScreen (&mDrawContext);
 
   if (BootContext->PickerContext->PickerAudioAssist) {
     BootContext->PickerContext->PlayAudioFile (
-      BootContext->PickerContext,
-      OcVoiceOverAudioFileChooseOS,
-      FALSE
-      );
+                                  BootContext->PickerContext,
+                                  OcVoiceOverAudioFileChooseOS,
+                                  FALSE
+                                  );
     for (Index = 0; Index < BootContext->BootEntryCount; ++Index) {
       BootContext->PickerContext->PlayAudioEntry (
-        BootContext->PickerContext,
-        BootEntries[Index]
-        );
-      if (BootContext->PickerContext->TimeoutSeconds > 0 && BootContext->DefaultEntry->EntryIndex - 1 == Index) {
+                                    BootContext->PickerContext,
+                                    BootEntries[Index]
+                                    );
+      if ((BootContext->PickerContext->TimeoutSeconds > 0) && (BootContext->DefaultEntry->EntryIndex - 1 == Index)) {
         BootContext->PickerContext->PlayAudioFile (
-          BootContext->PickerContext,
-          OcVoiceOverAudioFileDefault,
-          FALSE
-          );
+                                      BootContext->PickerContext,
+                                      OcVoiceOverAudioFileDefault,
+                                      FALSE
+                                      );
       }
     }
+
     BootContext->PickerContext->PlayAudioBeep (
-      BootContext->PickerContext,
-      OC_VOICE_OVER_SIGNALS_NORMAL,
-      OC_VOICE_OVER_SIGNAL_NORMAL_MS,
-      OC_VOICE_OVER_SILENCE_NORMAL_MS
-      );
+                                  BootContext->PickerContext,
+                                  OC_VOICE_OVER_SIGNALS_NORMAL,
+                                  OC_VOICE_OVER_SIGNAL_NORMAL_MS,
+                                  OC_VOICE_OVER_SILENCE_NORMAL_MS
+                                  );
   }
 
   GuiDrawLoop (&mDrawContext);
@@ -198,6 +199,7 @@ OcShowMenuByOc (
     //
     GuiClearScreen (&mDrawContext, &mGuiContext.BackgroundColor.Pixel);
   }
+
   //
   // Note, it is important to destruct GUI here, as we must ensure
   // that keyboard/mouse polling does not conflict with FV2 ui.
@@ -205,11 +207,12 @@ OcShowMenuByOc (
   BootPickerViewDeinitialize (&mDrawContext, &mGuiContext);
   OcShowMenuByOcLeave ();
 
-  *ChosenBootEntry = mGuiContext.BootEntry;
+  *ChosenBootEntry                          = mGuiContext.BootEntry;
   BootContext->PickerContext->HideAuxiliary = mGuiContext.HideAuxiliary;
   if (mGuiContext.Refresh) {
     return EFI_ABORTED;
   }
+
   return EFI_SUCCESS;
 }
 
@@ -220,13 +223,14 @@ OcShowPasswordByOc (
   IN OC_PRIVILEGE_LEVEL  Level
   )
 {
-  EFI_STATUS    Status;
+  EFI_STATUS  Status;
+
   OcSetInitialCursorOffset ();
-  mGuiContext.BootEntry = NULL;
-  mGuiContext.ReadyToBoot = FALSE;
-  mGuiContext.HideAuxiliary = TRUE;
-  mGuiContext.Refresh = FALSE;
-  mGuiContext.PickerContext = Context;
+  mGuiContext.BootEntry            = NULL;
+  mGuiContext.ReadyToBoot          = FALSE;
+  mGuiContext.HideAuxiliary        = TRUE;
+  mGuiContext.Refresh              = FALSE;
+  mGuiContext.PickerContext        = Context;
   mGuiContext.AudioPlaybackTimeout = -1;
 
   Status = OcShowMenuByOcEnter (&mGuiContext);
@@ -244,9 +248,9 @@ OcShowPasswordByOc (
   }
 
   Status = PasswordViewInitialize (
-    &mDrawContext,
-    &mGuiContext
-    );
+             &mDrawContext,
+             &mGuiContext
+             );
   if (EFI_ERROR (Status)) {
     OcShowMenuByOcLeave ();
     return Status;
@@ -261,6 +265,7 @@ OcShowPasswordByOc (
   if (Context->PickerCommand != OcPickerShowPicker) {
     GuiClearScreen (&mDrawContext, &mGuiContext.BackgroundColor.Pixel);
   }
+
   //
   // Note, it is important to destruct GUI here, as we must ensure
   // that keyboard/mouse polling does not conflict with FV2 ui.
@@ -287,7 +292,7 @@ GuiOcInterfacePopulate (
   IN OC_PICKER_CONTEXT      *Context
   )
 {
-  EFI_STATUS Status;
+  EFI_STATUS  Status;
 
   Status = InternalContextConstruct (&mGuiContext, Storage, Context);
   if (EFI_ERROR (Status)) {
@@ -300,7 +305,7 @@ GuiOcInterfacePopulate (
   return EFI_SUCCESS;
 }
 
-STATIC OC_INTERFACE_PROTOCOL mOcInterface = {
+STATIC OC_INTERFACE_PROTOCOL  mOcInterface = {
   OC_INTERFACE_REVISION,
   GuiOcInterfacePopulate
 };
@@ -320,10 +325,10 @@ UefiMain (
   // Check for previous GUI protocols.
   //
   Status = gBS->LocateProtocol (
-    &gOcInterfaceProtocolGuid,
-    NULL,
-    &PrevInterface
-    );
+                  &gOcInterfaceProtocolGuid,
+                  NULL,
+                  &PrevInterface
+                  );
 
   if (!EFI_ERROR (Status)) {
     DEBUG ((DEBUG_WARN, "OCUI: Another GUI is already present\n"));
@@ -334,12 +339,12 @@ UefiMain (
   // Install new GUI protocol
   //
   NewHandle = NULL;
-  Status = gBS->InstallMultipleProtocolInterfaces (
-    &NewHandle,
-    &gOcInterfaceProtocolGuid,
-    &mOcInterface,
-    NULL
-    );
+  Status    = gBS->InstallMultipleProtocolInterfaces (
+                     &NewHandle,
+                     &gOcInterfaceProtocolGuid,
+                     &mOcInterface,
+                     NULL
+                     );
 
   if (!EFI_ERROR (Status)) {
     DEBUG ((DEBUG_INFO, "OCUI: Registered custom GUI protocol\n"));

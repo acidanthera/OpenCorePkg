@@ -28,13 +28,13 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 //
 typedef
 BOOLEAN
-(EFIAPI *APPLE_LOAD_IMAGE_CALLBACK) (
+(EFIAPI *APPLE_LOAD_IMAGE_CALLBACK)(
   VOID
   );
 
 typedef
 EFI_STATUS
-(EFIAPI *APPLE_LOAD_IMAGE) (
+(EFIAPI *APPLE_LOAD_IMAGE)(
   IN  BOOLEAN                    BootPolicy,
   IN  EFI_HANDLE                 ParentImageHandle,
   IN  EFI_DEVICE_PATH_PROTOCOL   *DevicePath,
@@ -42,12 +42,12 @@ EFI_STATUS
   IN  UINTN                      SourceSize,
   OUT EFI_HANDLE                 *ImageHandle,
   IN  APPLE_LOAD_IMAGE_CALLBACK  Callback OPTIONAL
-);
+  );
 
 typedef struct {
-  APPLE_LOAD_IMAGE  LoadImage;
+  APPLE_LOAD_IMAGE    LoadImage;
 } APPLE_LOAD_IMAGE_PROTOCOL;
 
-extern EFI_GUID gAppleLoadImageProtocolGuid;
+extern EFI_GUID  gAppleLoadImageProtocolGuid;
 
 #endif // APPLE_LOAD_IMAGE_PROTOCOL_H

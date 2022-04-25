@@ -6,7 +6,6 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 
 **/
 
-
 #include <PiPei.h>
 
 //
@@ -61,10 +60,9 @@ _ModuleEntryPointReal (
   //
   // Should never return
   //
-  ASSERT(FALSE);
+  ASSERT (FALSE);
   CpuDeadLoop ();
 }
-
 
 /**
   Required by the EBC compiler and identical in functionality to _ModuleEntryPoint().

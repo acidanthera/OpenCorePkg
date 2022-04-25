@@ -54,26 +54,26 @@ OcGetPngDims (
     return EFI_INVALID_PARAMETER;
   }
 
-  *Width  = (UINT32) W;
-  *Height = (UINT32) H;
+  *Width  = (UINT32)W;
+  *Height = (UINT32)H;
 
   return EFI_SUCCESS;
 }
 
 EFI_STATUS
 OcDecodePng (
-  IN   VOID    *Buffer,
-  IN   UINTN   Size,
-  OUT  VOID    **RawData,
-  OUT  UINT32  *Width,
-  OUT  UINT32  *Height,
-  OUT  BOOLEAN *HasAlphaType OPTIONAL
+  IN   VOID     *Buffer,
+  IN   UINTN    Size,
+  OUT  VOID     **RawData,
+  OUT  UINT32   *Width,
+  OUT  UINT32   *Height,
+  OUT  BOOLEAN  *HasAlphaType OPTIONAL
   )
 {
-  LodePNGState      State;
-  unsigned          Error;
-  unsigned          W;
-  unsigned          H;
+  LodePNGState  State;
+  unsigned      Error;
+  unsigned      W;
+  unsigned      H;
 
   //
   // Init lodepng state
@@ -88,7 +88,7 @@ OcDecodePng (
   //
   // It should return 0 on success
   //
-  Error = lodepng_decode ((unsigned char **) RawData, &W, &H, &State, Buffer, Size);
+  Error = lodepng_decode ((unsigned char **)RawData, &W, &H, &State, Buffer, Size);
 
   if (Error != 0) {
     DEBUG ((DEBUG_INFO, "OCPNG: Error while decoding PNG image - %u\n", Error));
@@ -96,8 +96,8 @@ OcDecodePng (
     return EFI_INVALID_PARAMETER;
   }
 
-  *Width  = (UINT32) W;
-  *Height = (UINT32) H;
+  *Width  = (UINT32)W;
+  *Height = (UINT32)H;
 
   if (HasAlphaType != NULL) {
     //
@@ -123,12 +123,12 @@ OcEncodePng (
   OUT UINTN   *BufferSize
   )
 {
-  unsigned          Error;
+  unsigned  Error;
 
   //
   // It should return 0 on success
   //
-  Error = lodepng_encode32 ((unsigned char **) Buffer, BufferSize, RawData, Width, Height);
+  Error = lodepng_encode32 ((unsigned char **)Buffer, BufferSize, RawData, Width, Height);
 
   if (Error != 0) {
     DEBUG ((DEBUG_INFO, "OCPNG: Error while encoding PNG image\n"));

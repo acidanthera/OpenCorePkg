@@ -62,7 +62,7 @@ MachoSymbolNameIsSmcp (
   IN     CONST CHAR8       *SymbolName
   )
 {
-  CONST CHAR8 *Suffix;
+  CONST CHAR8  *Suffix;
 
   ASSERT (Context != NULL);
   ASSERT (SymbolName != NULL);
@@ -74,9 +74,10 @@ MachoSymbolNameIsSmcp (
   //
   Suffix = AsciiStrStr (SymbolName, SMCP_TOKEN);
 
-  if ((Suffix == NULL)
-   || (AsciiStrnCmp (SymbolName, OSOBJ_PREFIX, L_STR_LEN (OSOBJ_PREFIX)) != 0)
-   || ((UINTN)(Suffix - SymbolName) <= L_STR_LEN (OSOBJ_PREFIX))) {
+  if (  (Suffix == NULL)
+     || (AsciiStrnCmp (SymbolName, OSOBJ_PREFIX, L_STR_LEN (OSOBJ_PREFIX)) != 0)
+     || ((UINTN)(Suffix - SymbolName) <= L_STR_LEN (OSOBJ_PREFIX)))
+  {
     return FALSE;
   }
 
@@ -89,7 +90,7 @@ MachoSymbolNameIsMetaclassPointer (
   IN     CONST CHAR8       *SymbolName
   )
 {
-  CONST CHAR8 *Suffix;
+  CONST CHAR8  *Suffix;
 
   ASSERT (Context != NULL);
   ASSERT (SymbolName != NULL);
@@ -101,9 +102,10 @@ MachoSymbolNameIsMetaclassPointer (
   //
   Suffix = AsciiStrStr (SymbolName, METACLASS_TOKEN);
 
-  if ((Suffix == NULL)
-   || (AsciiStrnCmp (SymbolName, OSOBJ_PREFIX, L_STR_LEN (OSOBJ_PREFIX)) != 0)
-   || ((UINTN)(Suffix - SymbolName) <= L_STR_LEN (OSOBJ_PREFIX))) {
+  if (  (Suffix == NULL)
+     || (AsciiStrnCmp (SymbolName, OSOBJ_PREFIX, L_STR_LEN (OSOBJ_PREFIX)) != 0)
+     || ((UINTN)(Suffix - SymbolName) <= L_STR_LEN (OSOBJ_PREFIX)))
+  {
     return FALSE;
   }
 
@@ -112,15 +114,15 @@ MachoSymbolNameIsMetaclassPointer (
 
 BOOLEAN
 MachoGetClassNameFromSuperMetaClassPointer (
-  IN OUT OC_MACHO_CONTEXT     *Context,
-  IN     CONST CHAR8          *SmcpName,
-  IN     UINTN                ClassNameSize,
-  OUT    CHAR8                *ClassName
+  IN OUT OC_MACHO_CONTEXT  *Context,
+  IN     CONST CHAR8       *SmcpName,
+  IN     UINTN             ClassNameSize,
+  OUT    CHAR8             *ClassName
   )
 {
-  UINTN                  PrefixSize;
-  UINTN                  SuffixSize;
-  UINTN                  OutputSize;
+  UINTN  PrefixSize;
+  UINTN  SuffixSize;
+  UINTN  OutputSize;
 
   ASSERT (Context != NULL);
   ASSERT (SmcpName != NULL);
@@ -166,10 +168,10 @@ MachoGetFunctionPrefixFromClassName (
   OUT CHAR8        *FunctionPrefix
   )
 {
-  UINTN   Index;
-  UINTN   BodySize;
-  BOOLEAN Result;
-  UINTN   TotalSize;
+  UINTN    Index;
+  UINTN    BodySize;
+  BOOLEAN  Result;
+  UINTN    TotalSize;
 
   ASSERT (ClassName != NULL);
   ASSERT (FunctionPrefixSize > 0);
@@ -200,15 +202,15 @@ MachoGetFunctionPrefixFromClassName (
 
 BOOLEAN
 MachoGetClassNameFromMetaClassPointer (
-  IN OUT OC_MACHO_CONTEXT     *Context,
-  IN     CONST CHAR8          *MetaClassName,
-  IN     UINTN                ClassNameSize,
-  OUT    CHAR8                *ClassName
+  IN OUT OC_MACHO_CONTEXT  *Context,
+  IN     CONST CHAR8       *MetaClassName,
+  IN     UINTN             ClassNameSize,
+  OUT    CHAR8             *ClassName
   )
 {
-  UINTN                  PrefixSize;
-  UINTN                  SuffixSize;
-  UINTN                  ClassNameLength;
+  UINTN  PrefixSize;
+  UINTN  SuffixSize;
+  UINTN  ClassNameLength;
 
   ASSERT (Context != NULL);
   ASSERT (MetaClassName != NULL);
@@ -240,10 +242,10 @@ MachoGetVtableNameFromClassName (
   OUT CHAR8        *VtableName
   )
 {
-  UINTN   Index;
-  UINTN   BodySize;
-  BOOLEAN Result;
-  UINTN   TotalSize;
+  UINTN    Index;
+  UINTN    BodySize;
+  BOOLEAN  Result;
+  UINTN    TotalSize;
 
   ASSERT (ClassName != NULL);
   ASSERT (VtableNameSize > 0);
@@ -280,10 +282,10 @@ MachoGetMetaVtableNameFromClassName (
   OUT CHAR8        *VtableName
   )
 {
-  UINTN   BodyLength;
-  BOOLEAN Result;
-  UINTN   TotalSize;
-  UINTN   Index;
+  UINTN    BodyLength;
+  BOOLEAN  Result;
+  UINTN    TotalSize;
+  UINTN    Index;
 
   ASSERT (ClassName != NULL);
   ASSERT (VtableNameSize > 0);
@@ -328,10 +330,10 @@ MachoGetFinalSymbolNameFromClassName (
   OUT CHAR8        *FinalSymbolName
   )
 {
-  UINTN   BodyLength;
-  BOOLEAN Result;
-  UINTN   TotalSize;
-  UINTN   Index;
+  UINTN    BodyLength;
+  BOOLEAN  Result;
+  UINTN    TotalSize;
+  UINTN    Index;
 
   ASSERT (ClassName != NULL);
   ASSERT (FinalSymbolNameSize > 0);
@@ -375,7 +377,7 @@ MachoGetFinalSymbolNameFromClassName (
 
 BOOLEAN
 MachoSymbolNameIsVtable (
-  IN     CONST CHAR8       *SymbolName
+  IN     CONST CHAR8  *SymbolName
   )
 {
   ASSERT (SymbolName != NULL);
@@ -396,28 +398,28 @@ MachoSymbolNameIsCxx (
 
 MACH_NLIST_ANY *
 MachoGetMetaclassSymbolFromSmcpSymbol (
-  IN OUT OC_MACHO_CONTEXT     *Context,
+  IN OUT OC_MACHO_CONTEXT      *Context,
   IN     CONST MACH_NLIST_ANY  *Smcp
   )
 {
   ASSERT (Context != NULL);
 
   return Context->Is32Bit ?
-    (MACH_NLIST_ANY *) MachoGetMetaclassSymbolFromSmcpSymbol32 (Context, &Smcp->Symbol32) :
-    (MACH_NLIST_ANY *) MachoGetMetaclassSymbolFromSmcpSymbol64 (Context, &Smcp->Symbol64);
+         (MACH_NLIST_ANY *)MachoGetMetaclassSymbolFromSmcpSymbol32 (Context, &Smcp->Symbol32) :
+         (MACH_NLIST_ANY *)MachoGetMetaclassSymbolFromSmcpSymbol64 (Context, &Smcp->Symbol64);
 }
 
 BOOLEAN
 MachoGetVtableSymbolsFromSmcp (
-  IN OUT OC_MACHO_CONTEXT     *Context,
-  IN     CONST CHAR8          *SmcpName,
-  OUT    CONST MACH_NLIST_ANY **Vtable,
-  OUT    CONST MACH_NLIST_ANY **MetaVtable
+  IN OUT OC_MACHO_CONTEXT      *Context,
+  IN     CONST CHAR8           *SmcpName,
+  OUT    CONST MACH_NLIST_ANY  **Vtable,
+  OUT    CONST MACH_NLIST_ANY  **MetaVtable
   )
 {
   ASSERT (Context != NULL);
 
   return Context->Is32Bit ?
-    MachoGetVtableSymbolsFromSmcp32 (Context, SmcpName, (CONST MACH_NLIST **) Vtable, (CONST MACH_NLIST **) MetaVtable) :
-    MachoGetVtableSymbolsFromSmcp64 (Context, SmcpName, (CONST MACH_NLIST_64 **) Vtable, (CONST MACH_NLIST_64 **) MetaVtable);
+         MachoGetVtableSymbolsFromSmcp32 (Context, SmcpName, (CONST MACH_NLIST **)Vtable, (CONST MACH_NLIST **)MetaVtable) :
+         MachoGetVtableSymbolsFromSmcp64 (Context, SmcpName, (CONST MACH_NLIST_64 **)Vtable, (CONST MACH_NLIST_64 **)MetaVtable);
 }

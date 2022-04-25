@@ -20,7 +20,7 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 //
 // Maximum amount of keys queued for non-Apple protocols
 //
-#define AIK_DATA_BUFFER_SIZE 12
+#define AIK_DATA_BUFFER_SIZE  12
 
 typedef struct {
   //
@@ -44,8 +44,8 @@ AIKDataEmpty (
 
 EFI_STATUS
 AIKDataReadEntry (
-  IN OUT AIK_DATA          *Data,
-     OUT AMI_EFI_KEY_DATA  *KeyData
+  IN OUT AIK_DATA       *Data,
+  OUT AMI_EFI_KEY_DATA  *KeyData
   );
 
 VOID

@@ -217,123 +217,123 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
     { 0xBD, 0x03, 0x5A, 0xEA, 0x03, 0x32, 0x3C, 0x67 } }
 
 // gAppleImageListGuid
-extern EFI_GUID gAppleImageListGuid;
+extern EFI_GUID  gAppleImageListGuid;
 
 // gAppleArrowCursorImageGuid
-extern EFI_GUID gAppleArrowCursorImageGuid;
+extern EFI_GUID  gAppleArrowCursorImageGuid;
 
 // gAppleArrowCursor2xImageGuid
-extern EFI_GUID gAppleArrowCursor2xImageGuid;
+extern EFI_GUID  gAppleArrowCursor2xImageGuid;
 
 // gAppleBackButtonSmallImageGuid
-extern EFI_GUID gAppleBackButtonSmallImageGuid;
+extern EFI_GUID  gAppleBackButtonSmallImageGuid;
 
 // gAppleBatteryState0ImageGuid
-extern EFI_GUID gAppleBatteryState0ImageGuid;
+extern EFI_GUID  gAppleBatteryState0ImageGuid;
 
 // gAppleBatteryState1ImageGuid
-extern EFI_GUID gAppleBatteryState1ImageGuid;
+extern EFI_GUID  gAppleBatteryState1ImageGuid;
 
 // gAppleBatteryState2ImageGuid
-extern EFI_GUID gAppleBatteryState2ImageGuid;
+extern EFI_GUID  gAppleBatteryState2ImageGuid;
 
 // gAppleBatteryState3ImageGuid
-extern EFI_GUID gAppleBatteryState3ImageGuid;
+extern EFI_GUID  gAppleBatteryState3ImageGuid;
 
 // gAppleBatteryState4ImageGuid
-extern EFI_GUID gAppleBatteryState4ImageGuid;
+extern EFI_GUID  gAppleBatteryState4ImageGuid;
 
 // gAppleBatteryState5ImageGuid
-extern EFI_GUID gAppleBatteryState5ImageGuid;
+extern EFI_GUID  gAppleBatteryState5ImageGuid;
 
 // gAppleBatteryState6ImageGuid
-extern EFI_GUID gAppleBatteryState6ImageGuid;
+extern EFI_GUID  gAppleBatteryState6ImageGuid;
 
 // gAppleBeginBootButtonImageGuid
-extern EFI_GUID gAppleBeginBootButtonImageGuid;
+extern EFI_GUID  gAppleBeginBootButtonImageGuid;
 
 // gAppleBeginStickyBootButtonImageGuid
-extern EFI_GUID gAppleBeginStickyBootButtonImageGuid;
+extern EFI_GUID  gAppleBeginStickyBootButtonImageGuid;
 
 // gAppleContinueButtonSmallImageGuid
-extern EFI_GUID gAppleContinueButtonSmallImageGuid;
+extern EFI_GUID  gAppleContinueButtonSmallImageGuid;
 
 // gAppleBootNameLabelImageGuid
-extern EFI_GUID gAppleBootNameLabelImageGuid;
+extern EFI_GUID  gAppleBootNameLabelImageGuid;
 
 // gAppleBrokenBootImageGuid
-extern EFI_GUID gAppleBrokenBootImageGuid;
+extern EFI_GUID  gAppleBrokenBootImageGuid;
 
 // gAppleFireWireHDImageGuid
-extern EFI_GUID gAppleFireWireHDImageGuid;
+extern EFI_GUID  gAppleFireWireHDImageGuid;
 
 // gAppleGenericCDImageGuid
-extern EFI_GUID gAppleGenericCDImageGuid;
+extern EFI_GUID  gAppleGenericCDImageGuid;
 
 // gAppleGenericExternalHDImageGuid
-extern EFI_GUID gAppleGenericExternalHDImageGuid;
+extern EFI_GUID  gAppleGenericExternalHDImageGuid;
 
 // gAppleInternalHDImageGuid
-extern EFI_GUID gAppleInternalHDImageGuid;
+extern EFI_GUID  gAppleInternalHDImageGuid;
 
 // gAppleNetBootImageGuid
-extern EFI_GUID gAppleNetBootImageGuid;
+extern EFI_GUID  gAppleNetBootImageGuid;
 
 // gAppleNetworkRecoveryImageGuid
-extern EFI_GUID gAppleNetworkRecoveryImageGuid;
+extern EFI_GUID  gAppleNetworkRecoveryImageGuid;
 
 // gAppleNetworkVolumeImageGuid
-extern EFI_GUID gAppleNetworkVolumeImageGuid;
+extern EFI_GUID  gAppleNetworkVolumeImageGuid;
 
 // gApplePasswordLockImageGuid
-extern EFI_GUID gApplePasswordLockImageGuid;
+extern EFI_GUID  gApplePasswordLockImageGuid;
 
 // gAppleSDImageGuid
-extern EFI_GUID gAppleSDImageGuid;
+extern EFI_GUID  gAppleSDImageGuid;
 
 // gAppleSelectedImageGuid
-extern EFI_GUID gAppleSelectedImageGuid;
+extern EFI_GUID  gAppleSelectedImageGuid;
 
 // gAppleUsbHDImageGuid
-extern EFI_GUID gAppleUsbHDImageGuid;
+extern EFI_GUID  gAppleUsbHDImageGuid;
 
 // gAppleWirelessSmallImageGuid
-extern EFI_GUID gAppleWirelessSmallImageGuid;
+extern EFI_GUID  gAppleWirelessSmallImageGuid;
 
 // gAppleLogoImageGuid
-extern EFI_GUID gAppleLogoImageGuid;
+extern EFI_GUID  gAppleLogoImageGuid;
 
 // gApplePasswordEmptyImageGuid
-extern EFI_GUID gApplePasswordEmptyImageGuid;
+extern EFI_GUID  gApplePasswordEmptyImageGuid;
 
 // gApplePasswordFillImageGuid
-extern EFI_GUID gApplePasswordFillImageGuid;
+extern EFI_GUID  gApplePasswordFillImageGuid;
 
 // gApplePasswordProceedImageGuid
-extern EFI_GUID gApplePasswordProceedImageGuid;
+extern EFI_GUID  gApplePasswordProceedImageGuid;
 
 // gAppleLogo1394ImageGuid
-extern EFI_GUID gAppleLogo1394ImageGuid;
+extern EFI_GUID  gAppleLogo1394ImageGuid;
 
 // gAppleLogoThunderboltImageGuid
-extern EFI_GUID gAppleLogoThunderboltImageGuid;
+extern EFI_GUID  gAppleLogoThunderboltImageGuid;
 
 // gAppleClockImageGuid
-extern EFI_GUID gAppleClockImageGuid;
+extern EFI_GUID  gAppleClockImageGuid;
 
 // gAppleErrorGlobeBorderImageGuid
-extern EFI_GUID gAppleErrorGlobeBorderImageGuid;
+extern EFI_GUID  gAppleErrorGlobeBorderImageGuid;
 
 // gAppleErrorGlobeTitleImageGuid
-extern EFI_GUID gAppleErrorGlobeTitleImageGuid;
+extern EFI_GUID  gAppleErrorGlobeTitleImageGuid;
 
 // gAppleErrorTriangleImageGuid
-extern EFI_GUID gAppleErrorTriangleImageGuid;
+extern EFI_GUID  gAppleErrorTriangleImageGuid;
 
 // gAppleGlobeBorderImageGuid
-extern EFI_GUID gAppleGlobeBorderImageGuid;
+extern EFI_GUID  gAppleGlobeBorderImageGuid;
 
 // gAppleGlobeMaskImageGuid
-extern EFI_GUID gAppleGlobeMaskImageGuid;
+extern EFI_GUID  gAppleGlobeMaskImageGuid;
 
 #endif // APPLE_FIRMWARE_VOLUME_H

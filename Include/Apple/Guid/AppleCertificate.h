@@ -45,13 +45,13 @@ typedef struct APPLE_EFI_CERTIFICATE_INFO_ {
 // Certificate which encapsulates a GUID-specific digital signature
 //
 typedef struct APPLE_EFI_CERTIFICATE_ {
-  UINT32                          CertSize;
-  UINT16                          CompressionType;
-  UINT16                          CertType;
-  EFI_GUID                        AppleSignatureGuid;
-  EFI_CERT_BLOCK_RSA_2048_SHA256  CertData;
+  UINT32                            CertSize;
+  UINT16                            CompressionType;
+  UINT16                            CertType;
+  EFI_GUID                          AppleSignatureGuid;
+  EFI_CERT_BLOCK_RSA_2048_SHA256    CertData;
 } APPLE_EFI_CERTIFICATE;
 
-extern EFI_GUID gAppleEfiCertificateGuid;
+extern EFI_GUID  gAppleEfiCertificateGuid;
 
 #endif // APPLE_CERTIFICATE_H

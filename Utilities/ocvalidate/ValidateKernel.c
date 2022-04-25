@@ -34,13 +34,13 @@ KernelAddHasDuplication (
   IN  CONST VOID  *SecondaryEntry
   )
 {
-  CONST OC_KERNEL_ADD_ENTRY          *KernelAddPrimaryEntry;
-  CONST OC_KERNEL_ADD_ENTRY          *KernelAddSecondaryEntry;
-  CONST CHAR8                        *KernelAddPrimaryBundlePathString;
-  CONST CHAR8                        *KernelAddSecondaryBundlePathString;
+  CONST OC_KERNEL_ADD_ENTRY  *KernelAddPrimaryEntry;
+  CONST OC_KERNEL_ADD_ENTRY  *KernelAddSecondaryEntry;
+  CONST CHAR8                *KernelAddPrimaryBundlePathString;
+  CONST CHAR8                *KernelAddSecondaryBundlePathString;
 
-  KernelAddPrimaryEntry              = *(CONST OC_KERNEL_ADD_ENTRY **) PrimaryEntry;
-  KernelAddSecondaryEntry            = *(CONST OC_KERNEL_ADD_ENTRY **) SecondaryEntry;
+  KernelAddPrimaryEntry              = *(CONST OC_KERNEL_ADD_ENTRY **)PrimaryEntry;
+  KernelAddSecondaryEntry            = *(CONST OC_KERNEL_ADD_ENTRY **)SecondaryEntry;
   KernelAddPrimaryBundlePathString   = OC_BLOB_GET (&KernelAddPrimaryEntry->BundlePath);
   KernelAddSecondaryBundlePathString = OC_BLOB_GET (&KernelAddSecondaryEntry->BundlePath);
 
@@ -66,13 +66,13 @@ KernelBlockHasDuplication (
   IN  CONST VOID  *SecondaryEntry
   )
 {
-  CONST OC_KERNEL_BLOCK_ENTRY          *KernelBlockPrimaryEntry;
-  CONST OC_KERNEL_BLOCK_ENTRY          *KernelBlockSecondaryEntry;
-  CONST CHAR8                          *KernelBlockPrimaryIdentifierString;
-  CONST CHAR8                          *KernelBlockSecondaryIdentifierString;
+  CONST OC_KERNEL_BLOCK_ENTRY  *KernelBlockPrimaryEntry;
+  CONST OC_KERNEL_BLOCK_ENTRY  *KernelBlockSecondaryEntry;
+  CONST CHAR8                  *KernelBlockPrimaryIdentifierString;
+  CONST CHAR8                  *KernelBlockSecondaryIdentifierString;
 
-  KernelBlockPrimaryEntry              = *(CONST OC_KERNEL_BLOCK_ENTRY **) PrimaryEntry;
-  KernelBlockSecondaryEntry            = *(CONST OC_KERNEL_BLOCK_ENTRY **) SecondaryEntry;
+  KernelBlockPrimaryEntry              = *(CONST OC_KERNEL_BLOCK_ENTRY **)PrimaryEntry;
+  KernelBlockSecondaryEntry            = *(CONST OC_KERNEL_BLOCK_ENTRY **)SecondaryEntry;
   KernelBlockPrimaryIdentifierString   = OC_BLOB_GET (&KernelBlockPrimaryEntry->Identifier);
   KernelBlockSecondaryIdentifierString = OC_BLOB_GET (&KernelBlockSecondaryEntry->Identifier);
 
@@ -101,13 +101,13 @@ KernelForceHasDuplication (
   //
   // NOTE: Add and Force share the same constructor.
   //
-  CONST OC_KERNEL_ADD_ENTRY            *KernelForcePrimaryEntry;
-  CONST OC_KERNEL_ADD_ENTRY            *KernelForceSecondaryEntry;
-  CONST CHAR8                          *KernelForcePrimaryBundlePathString;
-  CONST CHAR8                          *KernelForceSecondaryBundlePathString;
+  CONST OC_KERNEL_ADD_ENTRY  *KernelForcePrimaryEntry;
+  CONST OC_KERNEL_ADD_ENTRY  *KernelForceSecondaryEntry;
+  CONST CHAR8                *KernelForcePrimaryBundlePathString;
+  CONST CHAR8                *KernelForceSecondaryBundlePathString;
 
-  KernelForcePrimaryEntry              = *(CONST OC_KERNEL_ADD_ENTRY **) PrimaryEntry;
-  KernelForceSecondaryEntry            = *(CONST OC_KERNEL_ADD_ENTRY **) SecondaryEntry;
+  KernelForcePrimaryEntry              = *(CONST OC_KERNEL_ADD_ENTRY **)PrimaryEntry;
+  KernelForceSecondaryEntry            = *(CONST OC_KERNEL_ADD_ENTRY **)SecondaryEntry;
   KernelForcePrimaryBundlePathString   = OC_BLOB_GET (&KernelForcePrimaryEntry->BundlePath);
   KernelForceSecondaryBundlePathString = OC_BLOB_GET (&KernelForceSecondaryEntry->BundlePath);
 
@@ -124,39 +124,39 @@ CheckKernelAdd (
   IN  OC_GLOBAL_CONFIG  *Config
   )
 {
-  UINT32            ErrorCount;
-  UINT32            Index;
-  CONST CHAR8       *Arch;
-  CONST CHAR8       *BundlePath;
-  UINTN             BundlePathSumSize;
-  CONST CHAR8       *Comment;
-  CONST CHAR8       *ExecutablePath;
-  UINTN             ExecutableFixedSize;
-  UINTN             ExecutablePathSumSize;
-  CONST CHAR8       *MaxKernel;
-  CONST CHAR8       *MinKernel;
-  CONST CHAR8       *PlistPath;
-  UINTN             PlistFixedSize;
-  UINTN             PlistPathSumSize;
-  BOOLEAN           IsLiluUsed;
-  BOOLEAN           IsDisableLinkeditJettisonEnabled;
-  UINTN             IndexKextInfo;
-  UINTN             IndexKextPrecedence;
-  BOOLEAN           HasParent;
-  CONST CHAR8       *CurrentKext;
-  CONST CHAR8       *ParentKext;
-  CONST CHAR8       *ChildKext;
+  UINT32       ErrorCount;
+  UINT32       Index;
+  CONST CHAR8  *Arch;
+  CONST CHAR8  *BundlePath;
+  UINTN        BundlePathSumSize;
+  CONST CHAR8  *Comment;
+  CONST CHAR8  *ExecutablePath;
+  UINTN        ExecutableFixedSize;
+  UINTN        ExecutablePathSumSize;
+  CONST CHAR8  *MaxKernel;
+  CONST CHAR8  *MinKernel;
+  CONST CHAR8  *PlistPath;
+  UINTN        PlistFixedSize;
+  UINTN        PlistPathSumSize;
+  BOOLEAN      IsLiluUsed;
+  BOOLEAN      IsDisableLinkeditJettisonEnabled;
+  UINTN        IndexKextInfo;
+  UINTN        IndexKextPrecedence;
+  BOOLEAN      HasParent;
+  CONST CHAR8  *CurrentKext;
+  CONST CHAR8  *ParentKext;
+  CONST CHAR8  *ChildKext;
 
-  ErrorCount        = 0;
+  ErrorCount = 0;
 
   for (Index = 0; Index < Config->Kernel.Add.Count; ++Index) {
-    Arch            = OC_BLOB_GET (&Config->Kernel.Add.Values[Index]->Arch);
-    BundlePath      = OC_BLOB_GET (&Config->Kernel.Add.Values[Index]->BundlePath);
-    Comment         = OC_BLOB_GET (&Config->Kernel.Add.Values[Index]->Comment);
-    ExecutablePath  = OC_BLOB_GET (&Config->Kernel.Add.Values[Index]->ExecutablePath);
-    MaxKernel       = OC_BLOB_GET (&Config->Kernel.Add.Values[Index]->MaxKernel);
-    MinKernel       = OC_BLOB_GET (&Config->Kernel.Add.Values[Index]->MinKernel);
-    PlistPath       = OC_BLOB_GET (&Config->Kernel.Add.Values[Index]->PlistPath);
+    Arch           = OC_BLOB_GET (&Config->Kernel.Add.Values[Index]->Arch);
+    BundlePath     = OC_BLOB_GET (&Config->Kernel.Add.Values[Index]->BundlePath);
+    Comment        = OC_BLOB_GET (&Config->Kernel.Add.Values[Index]->Comment);
+    ExecutablePath = OC_BLOB_GET (&Config->Kernel.Add.Values[Index]->ExecutablePath);
+    MaxKernel      = OC_BLOB_GET (&Config->Kernel.Add.Values[Index]->MaxKernel);
+    MinKernel      = OC_BLOB_GET (&Config->Kernel.Add.Values[Index]->MinKernel);
+    PlistPath      = OC_BLOB_GET (&Config->Kernel.Add.Values[Index]->PlistPath);
 
     //
     // Sanitise strings.
@@ -165,11 +165,13 @@ CheckKernelAdd (
       DEBUG ((DEBUG_WARN, "Kernel->Add[%u]->Arch is borked (Can only be Any, i386, and x86_64)!\n", Index));
       ++ErrorCount;
     }
+
     if (!AsciiFileSystemPathIsLegal (BundlePath)) {
       DEBUG ((DEBUG_WARN, "Kernel->Add[%u]->BundlePath contains illegal character!\n", Index));
       ++ErrorCount;
       continue;
     }
+
     //
     // Valid BundlePath must contain .kext suffix.
     //
@@ -177,20 +179,24 @@ CheckKernelAdd (
       DEBUG ((DEBUG_WARN, "Kernel->Add[%u]->BundlePath does NOT contain .kext suffix!\n", Index));
       ++ErrorCount;
     }
+
     if (!AsciiCommentIsLegal (Comment)) {
       DEBUG ((DEBUG_WARN, "Kernel->Add[%u]->Comment contains illegal character!\n", Index));
       ++ErrorCount;
     }
+
     if (!AsciiFileSystemPathIsLegal (ExecutablePath)) {
       DEBUG ((DEBUG_WARN, "Kernel->Add[%u]->ExecutablePath contains illegal character!\n", Index));
       ++ErrorCount;
       continue;
     }
+
     if (!AsciiFileSystemPathIsLegal (PlistPath)) {
       DEBUG ((DEBUG_WARN, "Kernel->Add[%u]->PlistPath contains illegal character!\n", Index));
       ++ErrorCount;
       continue;
     }
+
     //
     // Valid PlistPath must contain .plist suffix.
     //
@@ -213,6 +219,7 @@ CheckKernelAdd (
         ));
       ++ErrorCount;
     }
+
     //
     // There is one missing '\\' after the concatenation of BundlePath and ExecutablePath. Append one.
     //
@@ -228,6 +235,7 @@ CheckKernelAdd (
         ));
       ++ErrorCount;
     }
+
     //
     // There is one missing '\\' after the concatenation of BundlePath and PlistPath. Append one.
     //
@@ -255,11 +263,12 @@ CheckKernelAdd (
     //
     // FIXME: Handle correct kernel version checking.
     //
-    if (MaxKernel[0] != '\0' && OcParseDarwinVersion (MaxKernel) == 0) {
+    if ((MaxKernel[0] != '\0') && (OcParseDarwinVersion (MaxKernel) == 0)) {
       DEBUG ((DEBUG_WARN, "Kernel->Add[%u]->MaxKernel (currently set to %a) is borked!\n", Index, MaxKernel));
       ++ErrorCount;
     }
-    if (MinKernel[0] != '\0' && OcParseDarwinVersion (MinKernel) == 0) {
+
+    if ((MinKernel[0] != '\0') && (OcParseDarwinVersion (MinKernel) == 0)) {
       DEBUG ((DEBUG_WARN, "Kernel->Add[%u]->MinKernel (currently set to %a) is borked!\n", Index, MinKernel));
       ++ErrorCount;
     }
@@ -269,13 +278,14 @@ CheckKernelAdd (
         //
         // BundlePath matched. Continue checking ExecutablePath and PlistPath.
         //
-        if (AsciiStrCmp (ExecutablePath, mKextInfo[IndexKextInfo].KextExecutablePath) == 0
-          && AsciiStrCmp (PlistPath, mKextInfo[IndexKextInfo].KextPlistPath) == 0) {
+        if (  (AsciiStrCmp (ExecutablePath, mKextInfo[IndexKextInfo].KextExecutablePath) == 0)
+           && (AsciiStrCmp (PlistPath, mKextInfo[IndexKextInfo].KextPlistPath) == 0))
+        {
           //
           // Special check for Lilu and Quirks->DisableLinkeditJettison.
           //
           if (IndexKextInfo == INDEX_KEXT_LILU) {
-            IsLiluUsed = Config->Kernel.Add.Values[Index]->Enabled;
+            IsLiluUsed                       = Config->Kernel.Add.Values[Index]->Enabled;
             IsDisableLinkeditJettisonEnabled = Config->Kernel.Quirks.DisableLinkeditJettison;
             if (IsLiluUsed && !IsDisableLinkeditJettisonEnabled) {
               DEBUG ((DEBUG_WARN, "Lilu.kext is loaded at Kernel->Add[%u], but DisableLinkeditJettison is not enabled at Kernel->Quirks!\n", Index));
@@ -315,6 +325,7 @@ CheckKernelAdd (
           DEBUG ((DEBUG_WARN, "Kernel->Add[%u] discovers %a, but its Parent (%a) is either placed after it or is missing!\n", Index, CurrentKext, ParentKext));
           ++ErrorCount;
         }
+
         //
         // Parent is already found before Child as guaranteed by the first if. Done.
         //
@@ -327,11 +338,11 @@ CheckKernelAdd (
   // Check duplicated entries in Kernel->Add.
   //
   ErrorCount += FindArrayDuplication (
-    Config->Kernel.Add.Values,
-    Config->Kernel.Add.Count,
-    sizeof (Config->Kernel.Add.Values[0]),
-    KernelAddHasDuplication
-    );
+                  Config->Kernel.Add.Values,
+                  Config->Kernel.Add.Count,
+                  sizeof (Config->Kernel.Add.Values[0]),
+                  KernelAddHasDuplication
+                  );
 
   return ErrorCount;
 }
@@ -342,25 +353,25 @@ CheckKernelBlock (
   IN  OC_GLOBAL_CONFIG  *Config
   )
 {
-  UINT32            ErrorCount;
-  UINT32            Index;
-  CONST CHAR8       *Arch;
-  CONST CHAR8       *Comment;
-  CONST CHAR8       *MaxKernel;
-  CONST CHAR8       *MinKernel;
-  CONST CHAR8       *Identifier;
-  CONST CHAR8       *Strategy;
+  UINT32       ErrorCount;
+  UINT32       Index;
+  CONST CHAR8  *Arch;
+  CONST CHAR8  *Comment;
+  CONST CHAR8  *MaxKernel;
+  CONST CHAR8  *MinKernel;
+  CONST CHAR8  *Identifier;
+  CONST CHAR8  *Strategy;
 
-  ErrorCount        = 0;
+  ErrorCount = 0;
 
   for (Index = 0; Index < Config->Kernel.Block.Count; ++Index) {
-    Arch            = OC_BLOB_GET (&Config->Kernel.Block.Values[Index]->Arch);
-    Comment         = OC_BLOB_GET (&Config->Kernel.Block.Values[Index]->Comment);
-    Identifier      = OC_BLOB_GET (&Config->Kernel.Block.Values[Index]->Identifier);
-    MaxKernel       = OC_BLOB_GET (&Config->Kernel.Block.Values[Index]->MaxKernel);
-    MinKernel       = OC_BLOB_GET (&Config->Kernel.Block.Values[Index]->MinKernel);
-    Strategy        = OC_BLOB_GET (&Config->Kernel.Block.Values[Index]->Strategy);
-    
+    Arch       = OC_BLOB_GET (&Config->Kernel.Block.Values[Index]->Arch);
+    Comment    = OC_BLOB_GET (&Config->Kernel.Block.Values[Index]->Comment);
+    Identifier = OC_BLOB_GET (&Config->Kernel.Block.Values[Index]->Identifier);
+    MaxKernel  = OC_BLOB_GET (&Config->Kernel.Block.Values[Index]->MaxKernel);
+    MinKernel  = OC_BLOB_GET (&Config->Kernel.Block.Values[Index]->MinKernel);
+    Strategy   = OC_BLOB_GET (&Config->Kernel.Block.Values[Index]->Strategy);
+
     //
     // Sanitise strings.
     //
@@ -368,10 +379,12 @@ CheckKernelBlock (
       DEBUG ((DEBUG_WARN, "Kernel->Block[%u]->Arch is borked (Can only be Any, i386, and x86_64)!\n", Index));
       ++ErrorCount;
     }
+
     if (!AsciiCommentIsLegal (Comment)) {
       DEBUG ((DEBUG_WARN, "Kernel->Block[%u]->Comment contains illegal character!\n", Index));
       ++ErrorCount;
     }
+
     if (!AsciiIdentifierIsLegal (Identifier, TRUE)) {
       DEBUG ((DEBUG_WARN, "Kernel->Block[%u]->Identifier contains illegal character!\n", Index));
       ++ErrorCount;
@@ -388,17 +401,19 @@ CheckKernelBlock (
     //
     // FIXME: Handle correct kernel version checking.
     //
-    if (MaxKernel[0] != '\0' && OcParseDarwinVersion (MaxKernel) == 0) {
+    if ((MaxKernel[0] != '\0') && (OcParseDarwinVersion (MaxKernel) == 0)) {
       DEBUG ((DEBUG_WARN, "Kernel->Block[%u]->MaxKernel (currently set to %a) is borked!\n", Index, MaxKernel));
       ++ErrorCount;
     }
-    if (MinKernel[0] != '\0' && OcParseDarwinVersion (MinKernel) == 0) {
+
+    if ((MinKernel[0] != '\0') && (OcParseDarwinVersion (MinKernel) == 0)) {
       DEBUG ((DEBUG_WARN, "Kernel->Block[%u]->MinKernel (currently set to %a) is borked!\n", Index, MinKernel));
       ++ErrorCount;
     }
 
-    if (AsciiStrCmp (Strategy, "Disable") != 0
-      && AsciiStrCmp (Strategy, "Exclude") != 0) {
+    if (  (AsciiStrCmp (Strategy, "Disable") != 0)
+       && (AsciiStrCmp (Strategy, "Exclude") != 0))
+    {
       DEBUG ((DEBUG_WARN, "Kernel->Block[%u]->Strategy is borked (Can only be Disable or Exclude)!\n", Index));
       ++ErrorCount;
     }
@@ -408,11 +423,11 @@ CheckKernelBlock (
   // Check duplicated entries in Kernel->Block.
   //
   ErrorCount += FindArrayDuplication (
-    Config->Kernel.Block.Values,
-    Config->Kernel.Block.Count,
-    sizeof (Config->Kernel.Block.Values[0]),
-    KernelBlockHasDuplication
-    );
+                  Config->Kernel.Block.Values,
+                  Config->Kernel.Block.Count,
+                  sizeof (Config->Kernel.Block.Values[0]),
+                  KernelBlockHasDuplication
+                  );
 
   return ErrorCount;
 }
@@ -423,12 +438,12 @@ CheckKernelEmulate (
   IN  OC_GLOBAL_CONFIG  *Config
   )
 {
-  UINT32              ErrorCount;
-  CONST CHAR8         *MaxKernel;
-  CONST CHAR8         *MinKernel;
-  BOOLEAN             Result;
+  UINT32       ErrorCount;
+  CONST CHAR8  *MaxKernel;
+  CONST CHAR8  *MinKernel;
+  BOOLEAN      Result;
 
-  ErrorCount          = 0;
+  ErrorCount = 0;
 
   MaxKernel = OC_BLOB_GET (&Config->Kernel.Emulate.MaxKernel);
   MinKernel = OC_BLOB_GET (&Config->Kernel.Emulate.MinKernel);
@@ -440,24 +455,26 @@ CheckKernelEmulate (
     DEBUG ((DEBUG_WARN, "Kernel->Emulate->MinKernel has a Darwin version %a, which is below 8 (macOS 10.4)!\n", MinKernel));
     ++ErrorCount;
   }
+
   //
   // FIXME: Handle correct kernel version checking.
   //
-  if (MaxKernel[0] != '\0' && OcParseDarwinVersion (MaxKernel) == 0) {
+  if ((MaxKernel[0] != '\0') && (OcParseDarwinVersion (MaxKernel) == 0)) {
     DEBUG ((DEBUG_WARN, "Kernel->Emulate->MaxKernel (currently set to %a) is borked!\n", MaxKernel));
     ++ErrorCount;
   }
-  if (MinKernel[0] != '\0' && OcParseDarwinVersion (MinKernel) == 0) {
+
+  if ((MinKernel[0] != '\0') && (OcParseDarwinVersion (MinKernel) == 0)) {
     DEBUG ((DEBUG_WARN, "Kernel->Emulate->MinKernel (currently set to %a) is borked!\n", MinKernel));
     ++ErrorCount;
   }
 
   Result = DataHasProperMasking (
-    Config->Kernel.Emulate.Cpuid1Data,
-    Config->Kernel.Emulate.Cpuid1Mask,
-    sizeof (Config->Kernel.Emulate.Cpuid1Data),
-    sizeof (Config->Kernel.Emulate.Cpuid1Mask)
-    );
+             Config->Kernel.Emulate.Cpuid1Data,
+             Config->Kernel.Emulate.Cpuid1Mask,
+             sizeof (Config->Kernel.Emulate.Cpuid1Data),
+             sizeof (Config->Kernel.Emulate.Cpuid1Mask)
+             );
 
   if (!Result) {
     DEBUG ((DEBUG_WARN, "Kernel->Emulate->Cpuid1Data requires Cpuid1Mask to be active for replaced bits!\n"));
@@ -473,28 +490,28 @@ CheckKernelForce (
   IN  OC_GLOBAL_CONFIG  *Config
   )
 {
-  UINT32            ErrorCount;
-  UINT32            Index;
-  CONST CHAR8       *Arch;
-  CONST CHAR8       *BundlePath;
-  CONST CHAR8       *Comment;
-  CONST CHAR8       *ExecutablePath;
-  CONST CHAR8       *Identifier;
-  CONST CHAR8       *MaxKernel;
-  CONST CHAR8       *MinKernel;
-  CONST CHAR8       *PlistPath;
+  UINT32       ErrorCount;
+  UINT32       Index;
+  CONST CHAR8  *Arch;
+  CONST CHAR8  *BundlePath;
+  CONST CHAR8  *Comment;
+  CONST CHAR8  *ExecutablePath;
+  CONST CHAR8  *Identifier;
+  CONST CHAR8  *MaxKernel;
+  CONST CHAR8  *MinKernel;
+  CONST CHAR8  *PlistPath;
 
-  ErrorCount        = 0;
+  ErrorCount = 0;
 
   for (Index = 0; Index < Config->Kernel.Force.Count; ++Index) {
-    Arch            = OC_BLOB_GET (&Config->Kernel.Force.Values[Index]->Arch);
-    BundlePath      = OC_BLOB_GET (&Config->Kernel.Force.Values[Index]->BundlePath);
-    Comment         = OC_BLOB_GET (&Config->Kernel.Force.Values[Index]->Comment);
-    ExecutablePath  = OC_BLOB_GET (&Config->Kernel.Force.Values[Index]->ExecutablePath);
-    Identifier      = OC_BLOB_GET (&Config->Kernel.Force.Values[Index]->Identifier);
-    MaxKernel       = OC_BLOB_GET (&Config->Kernel.Force.Values[Index]->MaxKernel);
-    MinKernel       = OC_BLOB_GET (&Config->Kernel.Force.Values[Index]->MinKernel);
-    PlistPath       = OC_BLOB_GET (&Config->Kernel.Force.Values[Index]->PlistPath);
+    Arch           = OC_BLOB_GET (&Config->Kernel.Force.Values[Index]->Arch);
+    BundlePath     = OC_BLOB_GET (&Config->Kernel.Force.Values[Index]->BundlePath);
+    Comment        = OC_BLOB_GET (&Config->Kernel.Force.Values[Index]->Comment);
+    ExecutablePath = OC_BLOB_GET (&Config->Kernel.Force.Values[Index]->ExecutablePath);
+    Identifier     = OC_BLOB_GET (&Config->Kernel.Force.Values[Index]->Identifier);
+    MaxKernel      = OC_BLOB_GET (&Config->Kernel.Force.Values[Index]->MaxKernel);
+    MinKernel      = OC_BLOB_GET (&Config->Kernel.Force.Values[Index]->MinKernel);
+    PlistPath      = OC_BLOB_GET (&Config->Kernel.Force.Values[Index]->PlistPath);
 
     //
     // Sanitise strings.
@@ -503,15 +520,18 @@ CheckKernelForce (
       DEBUG ((DEBUG_WARN, "Kernel->Force[%u]->Arch is borked (Can only be Any, i386, and x86_64)!\n", Index));
       ++ErrorCount;
     }
+
     if (!AsciiIdentifierIsLegal (Identifier, TRUE)) {
       DEBUG ((DEBUG_WARN, "Kernel->Force[%u]->Identifier contains illegal character!\n", Index));
       ++ErrorCount;
     }
+
     if (!AsciiFileSystemPathIsLegal (BundlePath)) {
       DEBUG ((DEBUG_WARN, "Kernel->Force[%u]->BundlePath contains illegal character!\n", Index));
       ++ErrorCount;
       continue;
     }
+
     //
     // Valid BundlePath must contain .kext suffix.
     //
@@ -519,20 +539,24 @@ CheckKernelForce (
       DEBUG ((DEBUG_WARN, "Kernel->Force[%u]->BundlePath does NOT contain .kext suffix!\n", Index));
       ++ErrorCount;
     }
+
     if (!AsciiCommentIsLegal (Comment)) {
       DEBUG ((DEBUG_WARN, "Kernel->Force[%u]->Comment contains illegal character!\n", Index));
       ++ErrorCount;
     }
+
     if (!AsciiFileSystemPathIsLegal (ExecutablePath)) {
       DEBUG ((DEBUG_WARN, "Kernel->Force[%u]->ExecutablePath contains illegal character!\n", Index));
       ++ErrorCount;
       continue;
     }
+
     if (!AsciiFileSystemPathIsLegal (PlistPath)) {
       DEBUG ((DEBUG_WARN, "Kernel->Force[%u]->PlistPath contains illegal character!\n", Index));
       ++ErrorCount;
       continue;
     }
+
     //
     // Valid PlistPath must contain .plist suffix.
     //
@@ -552,11 +576,12 @@ CheckKernelForce (
     //
     // FIXME: Handle correct kernel version checking.
     //
-    if (MaxKernel[0] != '\0' && OcParseDarwinVersion (MaxKernel) == 0) {
+    if ((MaxKernel[0] != '\0') && (OcParseDarwinVersion (MaxKernel) == 0)) {
       DEBUG ((DEBUG_WARN, "Kernel->Force[%u]->MaxKernel (currently set to %a) is borked!\n", Index, MaxKernel));
       ++ErrorCount;
     }
-    if (MinKernel[0] != '\0' && OcParseDarwinVersion (MinKernel) == 0) {
+
+    if ((MinKernel[0] != '\0') && (OcParseDarwinVersion (MinKernel) == 0)) {
       DEBUG ((DEBUG_WARN, "Kernel->Force[%u]->MinKernel (currently set to %a) is borked!\n", Index, MinKernel));
       ++ErrorCount;
     }
@@ -566,11 +591,11 @@ CheckKernelForce (
   // Check duplicated entries in Kernel->Force.
   //
   ErrorCount += FindArrayDuplication (
-    Config->Kernel.Force.Values,
-    Config->Kernel.Force.Count,
-    sizeof (Config->Kernel.Force.Values[0]),
-    KernelForceHasDuplication
-    );
+                  Config->Kernel.Force.Values,
+                  Config->Kernel.Force.Count,
+                  sizeof (Config->Kernel.Force.Values[0]),
+                  KernelForceHasDuplication
+                  );
 
   return ErrorCount;
 }
@@ -581,40 +606,40 @@ CheckKernelPatch (
   IN  OC_GLOBAL_CONFIG  *Config
   )
 {
-  UINT32              ErrorCount;
-  UINT32              Index;
-  CONST CHAR8         *Arch;
-  CONST CHAR8         *Comment;
-  CONST CHAR8         *MaxKernel;
-  CONST CHAR8         *MinKernel;
-  CONST CHAR8         *Identifier;
-  CONST CHAR8         *Base;
-  CONST UINT8         *Find;
-  UINT32              FindSize;
-  CONST UINT8         *Replace;
-  UINT32              ReplaceSize;
-  CONST UINT8         *Mask;
-  UINT32              MaskSize;
-  CONST UINT8         *ReplaceMask;
-  UINT32              ReplaceMaskSize;
+  UINT32       ErrorCount;
+  UINT32       Index;
+  CONST CHAR8  *Arch;
+  CONST CHAR8  *Comment;
+  CONST CHAR8  *MaxKernel;
+  CONST CHAR8  *MinKernel;
+  CONST CHAR8  *Identifier;
+  CONST CHAR8  *Base;
+  CONST UINT8  *Find;
+  UINT32       FindSize;
+  CONST UINT8  *Replace;
+  UINT32       ReplaceSize;
+  CONST UINT8  *Mask;
+  UINT32       MaskSize;
+  CONST UINT8  *ReplaceMask;
+  UINT32       ReplaceMaskSize;
 
-  ErrorCount          = 0;
+  ErrorCount = 0;
 
   for (Index = 0; Index < Config->Kernel.Patch.Count; ++Index) {
-    Base              = OC_BLOB_GET (&Config->Kernel.Patch.Values[Index]->Base);
-    Comment           = OC_BLOB_GET (&Config->Kernel.Patch.Values[Index]->Comment);
-    Arch              = OC_BLOB_GET (&Config->Kernel.Patch.Values[Index]->Arch);
-    Identifier        = OC_BLOB_GET (&Config->Kernel.Patch.Values[Index]->Identifier);
-    Find              = OC_BLOB_GET (&Config->Kernel.Patch.Values[Index]->Find);
-    FindSize          = Config->Kernel.Patch.Values[Index]->Find.Size;
-    Replace           = OC_BLOB_GET (&Config->Kernel.Patch.Values[Index]->Replace);
-    ReplaceSize       = Config->Kernel.Patch.Values[Index]->Replace.Size;
-    Mask              = OC_BLOB_GET (&Config->Kernel.Patch.Values[Index]->Mask);
-    MaskSize          = Config->Kernel.Patch.Values[Index]->Mask.Size;
-    ReplaceMask       = OC_BLOB_GET (&Config->Kernel.Patch.Values[Index]->ReplaceMask);
-    ReplaceMaskSize   = Config->Kernel.Patch.Values[Index]->ReplaceMask.Size;
-    MaxKernel         = OC_BLOB_GET (&Config->Kernel.Patch.Values[Index]->MaxKernel);
-    MinKernel         = OC_BLOB_GET (&Config->Kernel.Patch.Values[Index]->MinKernel);
+    Base            = OC_BLOB_GET (&Config->Kernel.Patch.Values[Index]->Base);
+    Comment         = OC_BLOB_GET (&Config->Kernel.Patch.Values[Index]->Comment);
+    Arch            = OC_BLOB_GET (&Config->Kernel.Patch.Values[Index]->Arch);
+    Identifier      = OC_BLOB_GET (&Config->Kernel.Patch.Values[Index]->Identifier);
+    Find            = OC_BLOB_GET (&Config->Kernel.Patch.Values[Index]->Find);
+    FindSize        = Config->Kernel.Patch.Values[Index]->Find.Size;
+    Replace         = OC_BLOB_GET (&Config->Kernel.Patch.Values[Index]->Replace);
+    ReplaceSize     = Config->Kernel.Patch.Values[Index]->Replace.Size;
+    Mask            = OC_BLOB_GET (&Config->Kernel.Patch.Values[Index]->Mask);
+    MaskSize        = Config->Kernel.Patch.Values[Index]->Mask.Size;
+    ReplaceMask     = OC_BLOB_GET (&Config->Kernel.Patch.Values[Index]->ReplaceMask);
+    ReplaceMaskSize = Config->Kernel.Patch.Values[Index]->ReplaceMask.Size;
+    MaxKernel       = OC_BLOB_GET (&Config->Kernel.Patch.Values[Index]->MaxKernel);
+    MinKernel       = OC_BLOB_GET (&Config->Kernel.Patch.Values[Index]->MinKernel);
 
     //
     // Sanitise strings.
@@ -623,10 +648,12 @@ CheckKernelPatch (
       DEBUG ((DEBUG_WARN, "Kernel->Patch[%u]->Comment contains illegal character!\n", Index));
       ++ErrorCount;
     }
+
     if (!AsciiArchIsLegal (Arch, FALSE)) {
       DEBUG ((DEBUG_WARN, "Kernel->Patch[%u]->Arch is borked (Can only be Any, i386, and x86_64)!\n", Index));
       ++ErrorCount;
     }
+
     if (!AsciiIdentifierIsLegal (Identifier, TRUE)) {
       DEBUG ((DEBUG_WARN, "Kernel->Patch[%u]->Identifier contains illegal character!\n", Index));
       ++ErrorCount;
@@ -643,11 +670,12 @@ CheckKernelPatch (
     //
     // FIXME: Handle correct kernel version checking.
     //
-    if (MaxKernel[0] != '\0' && OcParseDarwinVersion (MaxKernel) == 0) {
+    if ((MaxKernel[0] != '\0') && (OcParseDarwinVersion (MaxKernel) == 0)) {
       DEBUG ((DEBUG_WARN, "Kernel->Patch[%u]->MaxKernel (currently set to %a) is borked!\n", Index, MaxKernel));
       ++ErrorCount;
     }
-    if (MinKernel[0] != '\0' && OcParseDarwinVersion (MinKernel) == 0) {
+
+    if ((MinKernel[0] != '\0') && (OcParseDarwinVersion (MinKernel) == 0)) {
       DEBUG ((DEBUG_WARN, "Kernel->Patch[%u]->MinKernel (currently set to %a) is borked!\n", Index, MinKernel));
       ++ErrorCount;
     }
@@ -656,18 +684,18 @@ CheckKernelPatch (
     // Checks for size.
     //
     ErrorCount += ValidatePatch (
-      "Kernel->Patch",
-      Index,
-      Base[0] != '\0' && FindSize == 0,
-      Find,
-      FindSize,
-      Replace,
-      ReplaceSize,
-      Mask,
-      MaskSize,
-      ReplaceMask,
-      ReplaceMaskSize
-      );
+                    "Kernel->Patch",
+                    Index,
+                    Base[0] != '\0' && FindSize == 0,
+                    Find,
+                    FindSize,
+                    Replace,
+                    ReplaceSize,
+                    Mask,
+                    MaskSize,
+                    ReplaceMask,
+                    ReplaceMaskSize
+                    );
   }
 
   return ErrorCount;
@@ -679,26 +707,27 @@ CheckKernelQuirks (
   IN  OC_GLOBAL_CONFIG  *Config
   )
 {
-  UINT32              ErrorCount;
-  BOOLEAN             IsCustomSMBIOSGuidEnabled;
-  CONST CHAR8         *UpdateSMBIOSMode;
-  INT64               SetApfsTrimTimeout;
+  UINT32       ErrorCount;
+  BOOLEAN      IsCustomSMBIOSGuidEnabled;
+  CONST CHAR8  *UpdateSMBIOSMode;
+  INT64        SetApfsTrimTimeout;
 
-  ErrorCount          = 0;
+  ErrorCount = 0;
 
   //
   // CustomSMBIOSGuid quirk requires UpdateSMBIOSMode at PlatformInfo set to Custom.
   //
   IsCustomSMBIOSGuidEnabled = Config->Kernel.Quirks.CustomSmbiosGuid;
   UpdateSMBIOSMode          = OC_BLOB_GET (&Config->PlatformInfo.UpdateSmbiosMode);
-  if (IsCustomSMBIOSGuidEnabled && AsciiStrCmp (UpdateSMBIOSMode, "Custom") != 0) {
+  if (IsCustomSMBIOSGuidEnabled && (AsciiStrCmp (UpdateSMBIOSMode, "Custom") != 0)) {
     DEBUG ((DEBUG_WARN, "Kernel->Quirks->CustomSMBIOSGuid is enabled, but PlatformInfo->UpdateSMBIOSMode is not set to Custom!\n"));
     ++ErrorCount;
   }
 
   SetApfsTrimTimeout = Config->Kernel.Quirks.SetApfsTrimTimeout;
-  if (SetApfsTrimTimeout  > MAX_UINT32
-    || SetApfsTrimTimeout < -1) {
+  if (  (SetApfsTrimTimeout  > MAX_UINT32)
+     || (SetApfsTrimTimeout < -1))
+  {
     DEBUG ((DEBUG_WARN, "Kernel->Quirks->SetApfsTrimTimeout is invalid value %d!\n", SetApfsTrimTimeout));
     ++ErrorCount;
   }
@@ -712,11 +741,11 @@ CheckKernelScheme (
   IN  OC_GLOBAL_CONFIG  *Config
   )
 {
-  UINT32              ErrorCount;
-  CONST CHAR8         *Arch;
-  CONST CHAR8         *KernelCache;
+  UINT32       ErrorCount;
+  CONST CHAR8  *Arch;
+  CONST CHAR8  *KernelCache;
 
-  ErrorCount          = 0;
+  ErrorCount = 0;
 
   //
   // Sanitise Kernel->Scheme keys.
@@ -728,10 +757,11 @@ CheckKernelScheme (
   }
 
   KernelCache = OC_BLOB_GET (&Config->Kernel.Scheme.KernelCache);
-  if (AsciiStrCmp (KernelCache, "Auto") != 0
-    && AsciiStrCmp (KernelCache, "Cacheless") != 0
-    && AsciiStrCmp (KernelCache, "Mkext") != 0
-    && AsciiStrCmp (KernelCache, "Prelinked") != 0) {
+  if (  (AsciiStrCmp (KernelCache, "Auto") != 0)
+     && (AsciiStrCmp (KernelCache, "Cacheless") != 0)
+     && (AsciiStrCmp (KernelCache, "Mkext") != 0)
+     && (AsciiStrCmp (KernelCache, "Prelinked") != 0))
+  {
     DEBUG ((DEBUG_WARN, "Kernel->Scheme->KernelCache is borked (Can only be Auto, Cacheless, Mkext, or Prelinked)!\n"));
     ++ErrorCount;
   }
@@ -766,7 +796,7 @@ CheckKernel (
   ValidateKextInfo ();
 
   for (Index = 0; Index < ARRAY_SIZE (KernelCheckers); ++Index) {
-    ErrorCount += KernelCheckers[Index] (Config);
+    ErrorCount += KernelCheckers[Index](Config);
   }
 
   return ReportError (__func__, ErrorCount);

@@ -36,33 +36,33 @@ OcSmbiosDump (
   IN EFI_FILE_PROTOCOL  *Root
   )
 {
-  EFI_STATUS                      Status;
-  SMBIOS_TABLE_ENTRY_POINT        *OriginalSmbios;
-  SMBIOS_TABLE_3_0_ENTRY_POINT    *OriginalSmbios3;
+  EFI_STATUS                    Status;
+  SMBIOS_TABLE_ENTRY_POINT      *OriginalSmbios;
+  SMBIOS_TABLE_3_0_ENTRY_POINT  *OriginalSmbios3;
 
-  Status  = EfiGetSystemConfigurationTable (
-    &gEfiSmbiosTableGuid,
-    (VOID **) &OriginalSmbios
-    );
+  Status = EfiGetSystemConfigurationTable (
+             &gEfiSmbiosTableGuid,
+             (VOID **)&OriginalSmbios
+             );
 
   if (!EFI_ERROR (Status)) {
     Status = OcSetFileData (Root, L"EntryV1.bin", OriginalSmbios, OriginalSmbios->EntryPointLength);
     DEBUG ((DEBUG_INFO, "OCSMB: Dumped V1 EP (%u bytes) - %r\n", OriginalSmbios->EntryPointLength, Status));
-    Status = OcSetFileData (Root, L"DataV1.bin", (VOID *) (UINTN) OriginalSmbios->TableAddress, OriginalSmbios->TableLength);
+    Status = OcSetFileData (Root, L"DataV1.bin", (VOID *)(UINTN)OriginalSmbios->TableAddress, OriginalSmbios->TableLength);
     DEBUG ((DEBUG_INFO, "OCSMB: Dumped V1 DATA (%u bytes) - %r\n", OriginalSmbios->TableLength, Status));
   } else {
     DEBUG ((DEBUG_INFO, "OCSMB: No SMBIOS V1 - %r\n", Status));
   }
 
-  Status  = EfiGetSystemConfigurationTable (
-    &gEfiSmbios3TableGuid,
-    (VOID **) &OriginalSmbios3
-    );
+  Status = EfiGetSystemConfigurationTable (
+             &gEfiSmbios3TableGuid,
+             (VOID **)&OriginalSmbios3
+             );
 
   if (!EFI_ERROR (Status)) {
     Status = OcSetFileData (Root, L"EntryV3.bin", OriginalSmbios3, OriginalSmbios3->EntryPointLength);
     DEBUG ((DEBUG_INFO, "OCSMB: Dumped V3 EP (%u bytes) - %r\n", OriginalSmbios3->EntryPointLength, Status));
-    Status = OcSetFileData (Root, L"DataV3.bin", (VOID *) (UINTN) OriginalSmbios3->TableAddress, OriginalSmbios3->TableMaximumSize);
+    Status = OcSetFileData (Root, L"DataV3.bin", (VOID *)(UINTN)OriginalSmbios3->TableAddress, OriginalSmbios3->TableMaximumSize);
     DEBUG ((DEBUG_INFO, "OCSMB: Dumped V3 DATA (%u bytes) - %r\n", OriginalSmbios3->TableMaximumSize, Status));
   } else {
     DEBUG ((DEBUG_INFO, "OCSMB: No SMBIOS V3 - %r\n", Status));

@@ -37,22 +37,22 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 
 // APPLE_EVENT_QUEUE
 typedef struct {
-  UINT32                  Signature;     ///<
-  LIST_ENTRY              Link;          ///<
-  APPLE_EVENT_INFORMATION *Information;  ///<
+  UINT32                     Signature;    ///<
+  LIST_ENTRY                 Link;         ///<
+  APPLE_EVENT_INFORMATION    *Information; ///<
 } APPLE_EVENT_QUEUE;
 
 // mQueueEvent
-STATIC EFI_EVENT mQueueEvent = NULL;
+STATIC EFI_EVENT  mQueueEvent = NULL;
 
 // mQueueEventCreated
-STATIC BOOLEAN mQueueEventCreated = FALSE;
+STATIC BOOLEAN  mQueueEventCreated = FALSE;
 
 // mEventQueueList
-STATIC LIST_ENTRY mQueue = INITIALIZE_LIST_HEAD_VARIABLE (mQueue);
+STATIC LIST_ENTRY  mQueue = INITIALIZE_LIST_HEAD_VARIABLE (mQueue);
 
 // mQueueLock
-STATIC EFI_LOCK mQueueLock = {
+STATIC EFI_LOCK  mQueueLock = {
   0,
   0,
   FALSE
@@ -82,16 +82,15 @@ InternalQueueEventNotifyFunction (
   IN VOID       *Context
   )
 {
-  EFI_STATUS        Status;
-  LIST_ENTRY        *EventQueueEntry;
-  APPLE_EVENT_QUEUE *EventQueue;
+  EFI_STATUS         Status;
+  LIST_ENTRY         *EventQueueEntry;
+  APPLE_EVENT_QUEUE  *EventQueue;
 
   DEBUG ((DEBUG_VERBOSE, "InternalQueueEventNotifyFunction\n"));
 
   if (mQueueEventCreated) {
     do {
       Status = EfiAcquireLockOrFail (&mQueueLock);
-
     } while (EFI_ERROR (Status));
 
     InternalFlagAllEventsReady ();
@@ -103,8 +102,9 @@ InternalQueueEventNotifyFunction (
 
       InternalSignalEvents (EventQueue->Information);
 
-      if (((EventQueue->Information->EventType & APPLE_ALL_KEYBOARD_EVENTS) != 0)
-       && (EventQueue->Information->EventData.KeyData != NULL)) {
+      if (  ((EventQueue->Information->EventType & APPLE_ALL_KEYBOARD_EVENTS) != 0)
+         && (EventQueue->Information->EventData.KeyData != NULL))
+      {
         FreePool (
           (VOID *)EventQueue->Information->EventData.KeyData
           );
@@ -126,7 +126,7 @@ InternalCreateQueueEvent (
   VOID
   )
 {
-  EFI_STATUS Status;
+  EFI_STATUS  Status;
 
   DEBUG ((DEBUG_VERBOSE, "InternalCreateQueueEvent\n"));
 
@@ -145,7 +145,6 @@ InternalCreateQueueEvent (
   }
 }
 
-
 // EventCreateAppleEventQueueInfo
 APPLE_EVENT_INFORMATION *
 EventCreateAppleEventQueueInfo (
@@ -155,8 +154,8 @@ EventCreateAppleEventQueueInfo (
   IN APPLE_MODIFIER_MAP  Modifiers
   )
 {
-  APPLE_EVENT_INFORMATION *QueueInfo;
-  EFI_TIME                CreationTime;
+  APPLE_EVENT_INFORMATION  *QueueInfo;
+  EFI_TIME                 CreationTime;
 
   DEBUG ((DEBUG_VERBOSE, "EventCreateAppleEventQueueInfo\n"));
 
@@ -196,8 +195,8 @@ EventAddEventToQueue (
   IN APPLE_EVENT_INFORMATION  *Information
   )
 {
-  EFI_STATUS        Status;
-  APPLE_EVENT_QUEUE *EventQueue;
+  EFI_STATUS         Status;
+  APPLE_EVENT_QUEUE  *EventQueue;
 
   DEBUG ((DEBUG_VERBOSE, "EventAddEventToQueue\n"));
 
@@ -230,14 +229,14 @@ EventCreateEventQueue (
   IN APPLE_MODIFIER_MAP  Modifiers
   )
 {
-  EFI_STATUS                    Status;
-  APPLE_EVENT_INFORMATION       *Information;
+  EFI_STATUS               Status;
+  APPLE_EVENT_INFORMATION  *Information;
 
   DEBUG ((DEBUG_VERBOSE, "EventCreateEventQueue\n"));
 
   Status = EFI_INVALID_PARAMETER;
 
-  if (EventData.Raw != 0 || Modifiers != 0) {
+  if ((EventData.Raw != 0) || (Modifiers != 0)) {
     Information = EventCreateAppleEventQueueInfo (
                     EventData,
                     EventType,

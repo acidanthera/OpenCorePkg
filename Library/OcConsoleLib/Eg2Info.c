@@ -25,14 +25,14 @@
 #include <Library/UefiBootServicesTableLib.h>
 #include <Library/UefiRuntimeServicesTableLib.h>
 
-STATIC UINT32 mRotation = AppleDisplayRotate0;
+STATIC UINT32  mRotation = AppleDisplayRotate0;
 
 STATIC
 EFI_STATUS
 EFIAPI
 AppleEg2Unknown1 (
-  IN   APPLE_EG2_INFO_PROTOCOL      *This,
-  IN   EFI_HANDLE                   GpuHandle
+  IN   APPLE_EG2_INFO_PROTOCOL  *This,
+  IN   EFI_HANDLE               GpuHandle
   )
 {
   return EFI_UNSUPPORTED;
@@ -42,10 +42,10 @@ STATIC
 EFI_STATUS
 EFIAPI
 AppleEg2GetPlatformInfo (
-  IN   APPLE_EG2_INFO_PROTOCOL      *This,
-  IN   EFI_HANDLE                   GpuHandle,
-  OUT  VOID                         *Data,
-  OUT  UINTN                        *Size
+  IN   APPLE_EG2_INFO_PROTOCOL  *This,
+  IN   EFI_HANDLE               GpuHandle,
+  OUT  VOID                     *Data,
+  OUT  UINTN                    *Size
   )
 {
   return EFI_UNSUPPORTED;
@@ -55,11 +55,11 @@ STATIC
 EFI_STATUS
 EFIAPI
 AppleEg2StartupDisplay (
-  IN   APPLE_EG2_INFO_PROTOCOL      *This,
-  IN   EFI_HANDLE                   GpuHandle,
-  OUT  VOID                         *Unk1,
-  OUT  VOID                         *Unk2,
-  OUT  VOID                         *Unk3
+  IN   APPLE_EG2_INFO_PROTOCOL  *This,
+  IN   EFI_HANDLE               GpuHandle,
+  OUT  VOID                     *Unk1,
+  OUT  VOID                     *Unk2,
+  OUT  VOID                     *Unk3
   )
 {
   return EFI_UNSUPPORTED;
@@ -69,8 +69,8 @@ STATIC
 EFI_STATUS
 EFIAPI
 AppleEg2GetHibernation (
-  IN   APPLE_EG2_INFO_PROTOCOL      *This,
-  OUT  BOOLEAN                      *Hibernated
+  IN   APPLE_EG2_INFO_PROTOCOL  *This,
+  OUT  BOOLEAN                  *Hibernated
   )
 {
   return EFI_UNSUPPORTED;
@@ -80,11 +80,11 @@ STATIC
 EFI_STATUS
 EFIAPI
 AppleEg2GetRotation (
-  IN   APPLE_EG2_INFO_PROTOCOL      *This,
-  OUT  UINT32                       *Rotation
+  IN   APPLE_EG2_INFO_PROTOCOL  *This,
+  OUT  UINT32                   *Rotation
   )
 {
-  if (This == NULL || Rotation == NULL) {
+  if ((This == NULL) || (Rotation == NULL)) {
     return EFI_INVALID_PARAMETER;
   }
 
@@ -94,7 +94,7 @@ AppleEg2GetRotation (
 
 STATIC
 APPLE_EG2_INFO_PROTOCOL
-mAppleEg2Info = {
+  mAppleEg2Info = {
   APPLE_EG2_INFO_PROTOCOL_REVISION,
   NULL,
   AppleEg2Unknown1,
@@ -109,12 +109,12 @@ OcAppleEg2InfoInstallProtocol (
   IN BOOLEAN  Reinstall
   )
 {
-  EFI_STATUS                      Status;
-  APPLE_EG2_INFO_PROTOCOL         *Protocol;
-  EFI_HANDLE                      NewHandle;
-  UINTN                           Size;
-  UINT32                          Attributes;
-  UINT32                          Rotation;
+  EFI_STATUS               Status;
+  APPLE_EG2_INFO_PROTOCOL  *Protocol;
+  EFI_HANDLE               NewHandle;
+  UINTN                    Size;
+  UINT32                   Attributes;
+  UINT32                   Rotation;
 
   DEBUG ((DEBUG_VERBOSE, "OcAppleEg2InfoInstallProtocol\n"));
 
@@ -126,10 +126,10 @@ OcAppleEg2InfoInstallProtocol (
     }
   } else {
     Status = gBS->LocateProtocol (
-      &gAppleEg2InfoProtocolGuid,
-      NULL,
-      (VOID *) &Protocol
-      );
+                    &gAppleEg2InfoProtocolGuid,
+                    NULL,
+                    (VOID *)&Protocol
+                    );
 
     if (!EFI_ERROR (Status)) {
       return Protocol;
@@ -137,14 +137,14 @@ OcAppleEg2InfoInstallProtocol (
   }
 
   Attributes = 0;
-  Size = sizeof (Rotation);
-  Status = gRT->GetVariable (
-    APPLE_FORCE_DISPLAY_ROTATION_VARIABLE_NAME,
-    &gAppleBootVariableGuid,
-    &Attributes,
-    &Size,
-    &Rotation
-    );
+  Size       = sizeof (Rotation);
+  Status     = gRT->GetVariable (
+                      APPLE_FORCE_DISPLAY_ROTATION_VARIABLE_NAME,
+                      &gAppleBootVariableGuid,
+                      &Attributes,
+                      &Size,
+                      &Rotation
+                      );
   if (!EFI_ERROR (Status)) {
     DEBUG ((DEBUG_INFO, "OCOS: Discovered rotate NVRAM override to %u\n", Rotation));
     if (Rotation == 90) {
@@ -157,12 +157,12 @@ OcAppleEg2InfoInstallProtocol (
   }
 
   NewHandle = NULL;
-  Status = gBS->InstallMultipleProtocolInterfaces (
-     &NewHandle,
-     &gAppleEg2InfoProtocolGuid,
-     (VOID *) &mAppleEg2Info,
-     NULL
-     );
+  Status    = gBS->InstallMultipleProtocolInterfaces (
+                     &NewHandle,
+                     &gAppleEg2InfoProtocolGuid,
+                     (VOID *)&mAppleEg2Info,
+                     NULL
+                     );
 
   if (EFI_ERROR (Status)) {
     return NULL;

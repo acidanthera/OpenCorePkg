@@ -31,13 +31,13 @@
 
 EFI_STATUS
 OcSetConsoleResolutionForProtocol (
-  IN  EFI_GRAPHICS_OUTPUT_PROTOCOL    *GraphicsOutput,
-  IN  UINT32                          Width  OPTIONAL,
-  IN  UINT32                          Height OPTIONAL,
-  IN  UINT32                          Bpp    OPTIONAL
+  IN  EFI_GRAPHICS_OUTPUT_PROTOCOL  *GraphicsOutput,
+  IN  UINT32                        Width  OPTIONAL,
+  IN  UINT32                        Height OPTIONAL,
+  IN  UINT32                        Bpp    OPTIONAL
   )
 {
-  EFI_STATUS                            Status;
+  EFI_STATUS  Status;
 
   UINT32                                MaxMode;
   UINT32                                ModeIndex;
@@ -55,15 +55,15 @@ OcSetConsoleResolutionForProtocol (
     Height,
     Bpp,
     SetMax,
-    (UINT32) GraphicsOutput->Mode->Mode,
-    (UINT32) GraphicsOutput->Mode->MaxMode
+    (UINT32)GraphicsOutput->Mode->Mode,
+    (UINT32)GraphicsOutput->Mode->MaxMode
     ));
 
   DEBUG ((
     DEBUG_INFO,
     "OCC: Current FB at 0x%LX (0x%X), format %d, res %ux%u scan %u\n",
     GraphicsOutput->Mode->FrameBufferBase,
-    (UINT32) GraphicsOutput->Mode->FrameBufferSize,
+    (UINT32)GraphicsOutput->Mode->FrameBufferSize,
     GraphicsOutput->Mode->Info != NULL ? GraphicsOutput->Mode->Info->PixelFormat : -1,
     GraphicsOutput->Mode->Info != NULL ? GraphicsOutput->Mode->Info->HorizontalResolution : 0,
     GraphicsOutput->Mode->Info != NULL ? GraphicsOutput->Mode->Info->VerticalResolution : 0,
@@ -77,11 +77,11 @@ OcSetConsoleResolutionForProtocol (
   MaxMode    = GraphicsOutput->Mode->MaxMode;
   for (ModeIndex = 0; ModeIndex < MaxMode; ++ModeIndex) {
     Status = GraphicsOutput->QueryMode (
-      GraphicsOutput,
-      ModeIndex,
-      &SizeOfInfo,
-      &Info
-      );
+                               GraphicsOutput,
+                               ModeIndex,
+                               &SizeOfInfo,
+                               &Info
+                               );
 
     if (EFI_ERROR (Status)) {
       DEBUG ((DEBUG_INFO, "OCC: Mode %u failure - %r\n", ModeIndex, Status));
@@ -101,25 +101,27 @@ OcSetConsoleResolutionForProtocol (
       //
       // Custom resolution is requested.
       //
-      if (Info->HorizontalResolution == Width
-        && Info->VerticalResolution == Height
-        && (Bpp == 0 || Bpp == 24 || Bpp == 32)
-        && (Info->PixelFormat == PixelRedGreenBlueReserved8BitPerColor
-          || Info->PixelFormat == PixelBlueGreenRedReserved8BitPerColor
-          || (Info->PixelFormat == PixelBitMask
-            && (Info->PixelInformation.RedMask  == 0xFF000000U
-              || Info->PixelInformation.RedMask == 0xFF0000U
-              || Info->PixelInformation.RedMask == 0xFF00U
-              || Info->PixelInformation.RedMask == 0xFFU))
-          || Info->PixelFormat == PixelBltOnly)) {
+      if (  (Info->HorizontalResolution == Width)
+         && (Info->VerticalResolution == Height)
+         && ((Bpp == 0) || (Bpp == 24) || (Bpp == 32))
+         && (  (Info->PixelFormat == PixelRedGreenBlueReserved8BitPerColor)
+            || (Info->PixelFormat == PixelBlueGreenRedReserved8BitPerColor)
+            || (  (Info->PixelFormat == PixelBitMask)
+               && (  (Info->PixelInformation.RedMask  == 0xFF000000U)
+                  || (Info->PixelInformation.RedMask == 0xFF0000U)
+                  || (Info->PixelInformation.RedMask == 0xFF00U)
+                  || (Info->PixelInformation.RedMask == 0xFFU)))
+            || (Info->PixelFormat == PixelBltOnly)))
+      {
         ModeNumber = ModeIndex;
         FreePool (Info);
         break;
       }
-    } else if (Info->HorizontalResolution > Width
-      || (Info->HorizontalResolution == Width && Info->VerticalResolution > Height)) {
-      Width = Info->HorizontalResolution;
-      Height   = Info->VerticalResolution;
+    } else if (  (Info->HorizontalResolution > Width)
+              || ((Info->HorizontalResolution == Width) && (Info->VerticalResolution > Height)))
+    {
+      Width      = Info->HorizontalResolution;
+      Height     = Info->VerticalResolution;
       ModeNumber = ModeIndex;
     }
 
@@ -132,7 +134,7 @@ OcSetConsoleResolutionForProtocol (
   }
 
   if (ModeNumber == GraphicsOutput->Mode->Mode) {
-    DEBUG ((DEBUG_INFO, "OCC: Current mode matches desired mode %u\n", (UINT32) ModeNumber));
+    DEBUG ((DEBUG_INFO, "OCC: Current mode matches desired mode %u\n", (UINT32)ModeNumber));
     return EFI_ALREADY_STARTED;
   }
 
@@ -143,25 +145,25 @@ OcSetConsoleResolutionForProtocol (
   DEBUG ((
     DEBUG_INFO,
     "OCC: Setting mode %u with %ux%u resolution\n",
-    (UINT32) ModeNumber,
+    (UINT32)ModeNumber,
     Width,
     Height
     ));
 
-  Status = GraphicsOutput->SetMode (GraphicsOutput, (UINT32) ModeNumber);
+  Status = GraphicsOutput->SetMode (GraphicsOutput, (UINT32)ModeNumber);
   if (EFI_ERROR (Status)) {
     DEBUG ((
       DEBUG_WARN,
       "OCC: Failed to set mode %u (prev %u) with %ux%u resolution\n",
-      (UINT32) ModeNumber,
-      (UINT32) GraphicsOutput->Mode->Mode,
+      (UINT32)ModeNumber,
+      (UINT32)GraphicsOutput->Mode->Mode,
       Width,
       Height
       ));
     return Status;
   }
 
-  DEBUG ((DEBUG_INFO, "OCC: Changed resolution mode to %u\n", (UINT32) GraphicsOutput->Mode->Mode));
+  DEBUG ((DEBUG_INFO, "OCC: Changed resolution mode to %u\n", (UINT32)GraphicsOutput->Mode->Mode));
 
   return Status;
 }
@@ -189,8 +191,8 @@ OcSetConsoleModeForProtocol (
     Width,
     Height,
     SetMax,
-    (UINT32) TextOut->Mode->Mode,
-    (UINT32) TextOut->Mode->MaxMode
+    (UINT32)TextOut->Mode->Mode,
+    (UINT32)TextOut->Mode->MaxMode
     ));
 
   //
@@ -200,11 +202,11 @@ OcSetConsoleModeForProtocol (
   MaxMode    = TextOut->Mode->MaxMode;
   for (ModeIndex = 0; ModeIndex < MaxMode; ++ModeIndex) {
     Status = TextOut->QueryMode (
-      TextOut,
-      ModeIndex,
-      &Columns,
-      &Rows
-      );
+                        TextOut,
+                        ModeIndex,
+                        &Columns,
+                        &Rows
+                        );
 
     if (EFI_ERROR (Status)) {
       continue;
@@ -214,22 +216,23 @@ OcSetConsoleModeForProtocol (
       DEBUG_INFO,
       "OCC: Mode %u - %ux%u\n",
       ModeIndex,
-      (UINT32) Columns,
-      (UINT32) Rows
+      (UINT32)Columns,
+      (UINT32)Rows
       ));
 
     if (!SetMax) {
       //
       // Custom mode is requested.
       //
-      if (Columns == Width && Rows == Height) {
+      if ((Columns == Width) && (Rows == Height)) {
         ModeNumber = ModeIndex;
         break;
       }
-    } else if ((UINT32) Columns > Width
-      || ((UINT32) Columns == Width && (UINT32) Rows > Height)) {
-      Width      = (UINT32) Columns;
-      Height     = (UINT32) Rows;
+    } else if (  ((UINT32)Columns > Width)
+              || (((UINT32)Columns == Width) && ((UINT32)Rows > Height)))
+    {
+      Width      = (UINT32)Columns;
+      Height     = (UINT32)Rows;
       ModeNumber = ModeIndex;
     }
   }
@@ -247,7 +250,7 @@ OcSetConsoleModeForProtocol (
     DEBUG ((
       DEBUG_INFO,
       "OCC: Current console mode matches desired mode %u, forcing update\n",
-      (UINT32) ModeNumber
+      (UINT32)ModeNumber
       ));
   }
 
@@ -258,35 +261,35 @@ OcSetConsoleModeForProtocol (
   DEBUG ((
     DEBUG_INFO,
     "OCC: Setting mode %u (prev %u) with %ux%u console mode\n",
-    (UINT32) ModeNumber,
-    (UINT32) TextOut->Mode->Mode,
+    (UINT32)ModeNumber,
+    (UINT32)TextOut->Mode->Mode,
     Width,
     Height
     ));
 
-  Status = TextOut->SetMode (TextOut, (UINTN) ModeNumber);
+  Status = TextOut->SetMode (TextOut, (UINTN)ModeNumber);
   if (EFI_ERROR (Status)) {
     DEBUG ((
       DEBUG_WARN,
       "OCC: Failed to set mode %u with %ux%u console mode\n",
-      (UINT32) ModeNumber,
+      (UINT32)ModeNumber,
       Width,
       Height
       ));
     return Status;
   }
 
-  DEBUG ((DEBUG_INFO, "OCC: Changed console mode to %u\n", (UINT32) TextOut->Mode->Mode));
+  DEBUG ((DEBUG_INFO, "OCC: Changed console mode to %u\n", (UINT32)TextOut->Mode->Mode));
 
   return EFI_SUCCESS;
 }
 
 EFI_STATUS
 OcSetConsoleResolution (
-  IN  UINT32              Width  OPTIONAL,
-  IN  UINT32              Height OPTIONAL,
-  IN  UINT32              Bpp    OPTIONAL,
-  IN  BOOLEAN             Force
+  IN  UINT32   Width  OPTIONAL,
+  IN  UINT32   Height OPTIONAL,
+  IN  UINT32   Bpp    OPTIONAL,
+  IN  BOOLEAN  Force
   )
 {
   EFI_STATUS                    Result;
@@ -298,10 +301,10 @@ OcSetConsoleResolution (
   //
   if (Force) {
     Result = gBS->LocateProtocol (
-      &gOcForceResolutionProtocolGuid,
-      NULL,
-      (VOID **) &OcForceResolution
-      );
+                    &gOcForceResolutionProtocolGuid,
+                    NULL,
+                    (VOID **)&OcForceResolution
+                    );
 
     if (!EFI_ERROR (Result)) {
       Result = OcForceResolution->SetResolution (OcForceResolution, Width, Height);
@@ -313,33 +316,33 @@ OcSetConsoleResolution (
     }
   }
 
-#ifdef OC_CONSOLE_CHANGE_ALL_RESOLUTIONS
-  EFI_STATUS                    Status;
-  UINTN                         HandleCount;
-  EFI_HANDLE                    *HandleBuffer;
-  UINTN                         Index;
+ #ifdef OC_CONSOLE_CHANGE_ALL_RESOLUTIONS
+  EFI_STATUS  Status;
+  UINTN       HandleCount;
+  EFI_HANDLE  *HandleBuffer;
+  UINTN       Index;
 
   Result = gBS->LocateHandleBuffer (
-    ByProtocol,
-    &gEfiGraphicsOutputProtocolGuid,
-    NULL,
-    &HandleCount,
-    &HandleBuffer
-    );
+                  ByProtocol,
+                  &gEfiGraphicsOutputProtocolGuid,
+                  NULL,
+                  &HandleCount,
+                  &HandleBuffer
+                  );
 
   if (!EFI_ERROR (Result)) {
     Result = EFI_NOT_FOUND;
 
-    DEBUG ((DEBUG_INFO, "OCC: Found %u handles with GOP\n", (UINT32) HandleCount));
+    DEBUG ((DEBUG_INFO, "OCC: Found %u handles with GOP\n", (UINT32)HandleCount));
 
     for (Index = 0; Index < HandleCount; ++Index) {
-      DEBUG ((DEBUG_INFO, "OCC: Trying handle %u - %p\n", (UINT32) Index, HandleBuffer[Index]));
+      DEBUG ((DEBUG_INFO, "OCC: Trying handle %u - %p\n", (UINT32)Index, HandleBuffer[Index]));
 
       Status = gBS->HandleProtocol (
-        HandleBuffer[Index],
-        &gEfiGraphicsOutputProtocolGuid,
-        (VOID **) &GraphicsOutput
-        );
+                      HandleBuffer[Index],
+                      &gEfiGraphicsOutputProtocolGuid,
+                      (VOID **)&GraphicsOutput
+                      );
 
       if (EFI_ERROR (Status)) {
         DEBUG ((DEBUG_WARN, "OCC: Missing GOP on console - %r\n", Status));
@@ -353,12 +356,13 @@ OcSetConsoleResolution (
   } else {
     DEBUG ((DEBUG_INFO, "OCC: Failed to find handles with GOP - %r\n", Result));
   }
-#else
+
+ #else
   Result = gBS->HandleProtocol (
-    gST->ConsoleOutHandle,
-    &gEfiGraphicsOutputProtocolGuid,
-    (VOID **) &GraphicsOutput
-    );
+                  gST->ConsoleOutHandle,
+                  &gEfiGraphicsOutputProtocolGuid,
+                  (VOID **)&GraphicsOutput
+                  );
 
   if (EFI_ERROR (Result)) {
     DEBUG ((DEBUG_WARN, "OCC: Missing GOP on ConOut - %r\n", Result));
@@ -366,15 +370,15 @@ OcSetConsoleResolution (
   }
 
   Result = OcSetConsoleResolutionForProtocol (GraphicsOutput, Width, Height, Bpp);
-#endif
+ #endif
 
   return Result;
 }
 
 EFI_STATUS
 OcSetConsoleMode (
-  IN  UINT32                       Width,
-  IN  UINT32                       Height
+  IN  UINT32  Width,
+  IN  UINT32  Height
   )
 {
   return OcSetConsoleModeForProtocol (gST->ConOut, Width, Height);
@@ -382,11 +386,11 @@ OcSetConsoleMode (
 
 VOID
 OcSetupConsole (
-  IN OC_CONSOLE_RENDERER          Renderer,
-  IN BOOLEAN                      IgnoreTextOutput,
-  IN BOOLEAN                      SanitiseClearScreen,
-  IN BOOLEAN                      ClearScreenOnModeSwitch,
-  IN BOOLEAN                      ReplaceTabWithSpace
+  IN OC_CONSOLE_RENDERER  Renderer,
+  IN BOOLEAN              IgnoreTextOutput,
+  IN BOOLEAN              SanitiseClearScreen,
+  IN BOOLEAN              ClearScreenOnModeSwitch,
+  IN BOOLEAN              ReplaceTabWithSpace
   )
 {
   if (Renderer == OcConsoleRendererBuiltinGraphics) {

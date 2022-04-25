@@ -21,14 +21,14 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 
 #include "CryptoInternal.h"
 
-extern BOOLEAN mIsAccelEnabled;
+extern BOOLEAN  mIsAccelEnabled;
 
 VOID
 EFIAPI
 Sha512TransformAccel (
-  IN OUT UINT64      *State,
-  IN     CONST UINT8 *Data,
-  IN     UINTN       BlockNb
+  IN OUT UINT64       *State,
+  IN     CONST UINT8  *Data,
+  IN     UINTN        BlockNb
   );
 
 #endif // OC_SHA2_INTERNAL_H

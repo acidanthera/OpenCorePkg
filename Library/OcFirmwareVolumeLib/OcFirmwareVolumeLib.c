@@ -96,14 +96,14 @@ ReadFileEx (
 
   if (mReadFile != NULL) {
     Status = mReadFile (
-      This,
-      NameGuid,
-      Buffer,
-      BufferSize,
-      FoundType,
-      FileAttributes,
-      AuthenticationStatus
-      );
+               This,
+               NameGuid,
+               Buffer,
+               BufferSize,
+               FoundType,
+               FileAttributes,
+               AuthenticationStatus
+               );
   } else {
     //
     // The firmware volume is configured to disallow reads.
@@ -111,7 +111,6 @@ ReadFileEx (
     //
     Status = EFI_ACCESS_DENIED;
   }
-
 
   return Status;
 }
@@ -129,7 +128,7 @@ ReadSectionEx (
   OUT    UINT32                        *AuthenticationStatus
   )
 {
-  EFI_STATUS Status;
+  EFI_STATUS  Status;
 
   if (!Buffer || !BufferSize || !AuthenticationStatus) {
     return EFI_INVALID_PARAMETER;
@@ -137,27 +136,25 @@ ReadSectionEx (
 
   if (CompareGuid (NameGuid, &gAppleArrowCursorImageGuid)) {
     *BufferSize = sizeof (mAppleArrowCursorImage);
-    Status = gBS->AllocatePool (EfiBootServicesData, *BufferSize, (VOID **)Buffer);
+    Status      = gBS->AllocatePool (EfiBootServicesData, *BufferSize, (VOID **)Buffer);
     if (!EFI_ERROR (Status)) {
       gBS->CopyMem (*Buffer, &mAppleArrowCursorImage, *BufferSize);
     }
 
     *AuthenticationStatus = 0;
     return Status;
-
   } else if (CompareGuid (NameGuid, &gAppleArrowCursor2xImageGuid)) {
     *BufferSize = sizeof (mAppleArrowCursor2xImage);
-    Status = gBS->AllocatePool (EfiBootServicesData, *BufferSize, (VOID **)Buffer);
+    Status      = gBS->AllocatePool (EfiBootServicesData, *BufferSize, (VOID **)Buffer);
     if (!EFI_ERROR (Status)) {
       gBS->CopyMem (*Buffer, &mAppleArrowCursor2xImage, *BufferSize);
     }
 
     *AuthenticationStatus = 0;
     return Status;
-
   } else if (CompareGuid (NameGuid, &gAppleImageListGuid)) {
     *BufferSize = sizeof (mAppleImageTable);
-    Status = gBS->AllocatePool (EfiBootServicesData, *BufferSize, (VOID **)Buffer);
+    Status      = gBS->AllocatePool (EfiBootServicesData, *BufferSize, (VOID **)Buffer);
     if (!EFI_ERROR (Status)) {
       gBS->CopyMem (*Buffer, &mAppleImageTable, *BufferSize);
     }
@@ -165,16 +162,17 @@ ReadSectionEx (
     *AuthenticationStatus = 0;
     return Status;
   }
+
   if (mReadSection != NULL) {
     Status = mReadSection (
-      This,
-      NameGuid,
-      SectionType,
-      SectionInstance,
-      Buffer,
-      BufferSize,
-      AuthenticationStatus
-      );
+               This,
+               NameGuid,
+               SectionType,
+               SectionInstance,
+               Buffer,
+               BufferSize,
+               AuthenticationStatus
+               );
   } else {
     //
     // The firmware volume is configured to disallow reads.
@@ -196,15 +194,15 @@ WriteFileEx (
   IN FRAMEWORK_EFI_FV_WRITE_FILE_DATA  *FileData
   )
 {
-  EFI_STATUS Status;
+  EFI_STATUS  Status;
 
   if (mWriteFile != NULL) {
     Status = mWriteFile (This, NumberOfFiles, WritePolicy, FileData);
   } else {
-      //
-      // The firmware volume is configured to disallow writes.
-      // According UEFI PI Specification 1.6, page 101
-      //
+    //
+    // The firmware volume is configured to disallow writes.
+    // According UEFI PI Specification 1.6, page 101
+    //
     Status = EFI_WRITE_PROTECTED;
   }
 
@@ -223,7 +221,7 @@ GetNextFileEx (
   OUT    UINTN                         *Size
   )
 {
-  EFI_STATUS Status;
+  EFI_STATUS  Status;
 
   if (mGetNextFile != NULL) {
     Status = mGetNextFile (This, Key, FileType, NameGuid, Attributes, Size);
@@ -238,7 +236,7 @@ GetNextFileEx (
   return Status;
 }
 
-STATIC EFI_FIRMWARE_VOLUME_PROTOCOL mFirmwareVolume = {
+STATIC EFI_FIRMWARE_VOLUME_PROTOCOL  mFirmwareVolume = {
   GetVolumeAttributesEx,
   SetVolumeAttributesEx,
   ReadFileEx,
@@ -270,7 +268,7 @@ OcFirmwareVolumeInstallProtocol (
   Status = gBS->LocateProtocol (
                   &gEfiFirmwareVolumeProtocolGuid,
                   NULL,
-                  (VOID **) &FirmwareVolumeInterface
+                  (VOID **)&FirmwareVolumeInterface
                   );
 
   if (EFI_ERROR (Status)) {
@@ -289,7 +287,7 @@ OcFirmwareVolumeInstallProtocol (
     Status = gBS->LocateProtocol (
                     &gEfiFirmwareVolume2ProtocolGuid,
                     NULL,
-                    (VOID **) &FirmwareVolume2Interface
+                    (VOID **)&FirmwareVolume2Interface
                     );
 
     if (!EFI_ERROR (Status)) {

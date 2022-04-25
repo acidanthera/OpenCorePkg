@@ -15,23 +15,23 @@
 // section 6.1; The HostAddress and MEAddress fields in the HECI_MESSAGE_HEADER
 // will be 0x0 and 0x0, respectively.
 //
-#define HBM_HOST_ADDRESS   0x00
-#define HBM_ME_ADDRESS     0x00
-#define HBM_CLIENT_ADDRESS 0x01
+#define HBM_HOST_ADDRESS    0x00
+#define HBM_ME_ADDRESS      0x00
+#define HBM_CLIENT_ADDRESS  0x01
 
 //
 // See: Table 9-2 - HECI Bus Message Command Summary, HECI Version 0x0001
 // Page 76
 //
-#define HOST_VERSION_REQUEST            0x01
-#define HOST_STOP_REQUEST               0x02
-#define ME_STOP_REQUEST                 0x03
-#define HOST_ENUMERATION_REQUEST        0x04
-#define HOST_CLIENT_PROPERTIES_REQUEST  0x05
-#define CLIENT_CONNECT_REQUEST          0x06
-#define CLIENT_DISCONNECT_REQUEST       0x07
-#define FLOW_CONTROL                    0x08
-#define CLIENT_CONNECTION_RESET_REQUEST 0x09
+#define HOST_VERSION_REQUEST             0x01
+#define HOST_STOP_REQUEST                0x02
+#define ME_STOP_REQUEST                  0x03
+#define HOST_ENUMERATION_REQUEST         0x04
+#define HOST_CLIENT_PROPERTIES_REQUEST   0x05
+#define CLIENT_CONNECT_REQUEST           0x06
+#define CLIENT_DISCONNECT_REQUEST        0x07
+#define FLOW_CONTROL                     0x08
+#define CLIENT_CONNECTION_RESET_REQUEST  0x09
 
 #pragma pack(1)
 
@@ -41,16 +41,16 @@
 //
 
 typedef union {
-  UINT8 Data;
+  UINT8    Data;
   struct {
-    UINT8 Command    : 7;
-    UINT8 IsResponse : 1;
+    UINT8    Command    : 7;
+    UINT8    IsResponse : 1;
   } Fields;
 } HBM_COMMAND;
 
 typedef struct {
-  HBM_COMMAND Command;
-  UINT8 CommandSpecificData[];
+  HBM_COMMAND    Command;
+  UINT8          CommandSpecificData[];
 } HECI_BUS_MESSAGE;
 
 //
@@ -60,25 +60,25 @@ typedef struct {
 //
 
 typedef struct {
-  UINT8 MinorVersion;
-  UINT8 MajorVersion;
+  UINT8    MinorVersion;
+  UINT8    MajorVersion;
 } HBM_VERSION;
 
 typedef struct {
-  HBM_COMMAND Command;
-  UINT8       Reserved;
-  HBM_VERSION HostVersion;
+  HBM_COMMAND    Command;
+  UINT8          Reserved;
+  HBM_VERSION    HostVersion;
 } HBM_HOST_VERSION_REQUEST;
 
 typedef struct {
-  HBM_COMMAND Command;
-  UINT8       HostVersionSupported;
-  HBM_VERSION MeMaxVersion;
+  HBM_COMMAND    Command;
+  UINT8          HostVersionSupported;
+  HBM_VERSION    MeMaxVersion;
 } HBM_HOST_VERSION_RESPONSE;
 
 typedef union {
-  HBM_HOST_VERSION_REQUEST  Request;
-  HBM_HOST_VERSION_RESPONSE Response;
+  HBM_HOST_VERSION_REQUEST     Request;
+  HBM_HOST_VERSION_RESPONSE    Response;
 } HBM_HOST_VERSION_BUFFER;
 
 //
@@ -88,19 +88,19 @@ typedef union {
 //
 
 typedef struct {
-  HBM_COMMAND Command;
-  UINT8       Reason;
-  UINT8       Reserved[2];
+  HBM_COMMAND    Command;
+  UINT8          Reason;
+  UINT8          Reserved[2];
 } HBM_HOST_STOP_REQUEST;
 
 typedef struct {
-  HBM_COMMAND Command;
-  UINT8       Reserved[3];
+  HBM_COMMAND    Command;
+  UINT8          Reserved[3];
 } HBM_HOST_STOP_RESPONSE;
 
 typedef union {
-  HBM_HOST_STOP_REQUEST  Request;
-  HBM_HOST_STOP_RESPONSE Response;
+  HBM_HOST_STOP_REQUEST     Request;
+  HBM_HOST_STOP_RESPONSE    Response;
 } HBM_HOST_STOP_BUFFER;
 
 //
@@ -110,9 +110,9 @@ typedef union {
 //
 
 typedef struct {
-  HBM_COMMAND Command;
-  UINT8       Reason;
-  UINT8       Reserved[2];
+  HBM_COMMAND    Command;
+  UINT8          Reason;
+  UINT8          Reserved[2];
 } HBM_ME_STOP_REQUEST;
 
 //
@@ -122,21 +122,21 @@ typedef struct {
 //
 
 typedef struct {
-  HBM_COMMAND Command;
-  UINT8       Reserved[3];
+  HBM_COMMAND    Command;
+  UINT8          Reserved[3];
 } HBM_HOST_ENUMERATION_REQUEST;
 
 typedef struct {
-  HBM_COMMAND Command;
-  UINT8       Reserved[3];
-  UINT8       ValidAddresses[32];
+  HBM_COMMAND    Command;
+  UINT8          Reserved[3];
+  UINT8          ValidAddresses[32];
 } HBM_HOST_ENUMERATION_RESPONSE;
 
-#define HBM_ME_CLIENT_MAX 256
+#define HBM_ME_CLIENT_MAX  256
 
 typedef union {
-  HBM_HOST_ENUMERATION_REQUEST  Request;
-  HBM_HOST_ENUMERATION_RESPONSE Response;
+  HBM_HOST_ENUMERATION_REQUEST     Request;
+  HBM_HOST_ENUMERATION_RESPONSE    Response;
 } HBM_HOST_ENUMERATION_BUFFER;
 
 //
@@ -146,31 +146,31 @@ typedef union {
 //
 
 typedef struct {
-  HBM_COMMAND Command;
-  UINT8       Address;
-  UINT8       Reserved[2];
+  HBM_COMMAND    Command;
+  UINT8          Address;
+  UINT8          Reserved[2];
 } HBM_HOST_CLIENT_PROPERTIES_REQUEST;
 
 typedef struct {
-  EFI_GUID ProtocolName;
-  UINT8    ProtocolVersion;
-  UINT8    MaxNumberOfConnections;
-  UINT8    FixedAddress;
-  UINT8    SingleReceiveBuffer;
-  UINT32   MaxMessageLength;
+  EFI_GUID    ProtocolName;
+  UINT8       ProtocolVersion;
+  UINT8       MaxNumberOfConnections;
+  UINT8       FixedAddress;
+  UINT8       SingleReceiveBuffer;
+  UINT32      MaxMessageLength;
 } HECI_CLIENT_PROPERTIES;
 
 typedef struct {
-  HBM_COMMAND            Command;
-  UINT8                  Address;
-  UINT8                  Status;
-  UINT8                  Reserved;
-  HECI_CLIENT_PROPERTIES ClientProperties;
+  HBM_COMMAND               Command;
+  UINT8                     Address;
+  UINT8                     Status;
+  UINT8                     Reserved;
+  HECI_CLIENT_PROPERTIES    ClientProperties;
 } HBM_HOST_CLIENT_PROPERTIES_RESPONSE;
 
 typedef union {
-  HBM_HOST_CLIENT_PROPERTIES_REQUEST  Request;
-  HBM_HOST_CLIENT_PROPERTIES_RESPONSE Response;
+  HBM_HOST_CLIENT_PROPERTIES_REQUEST     Request;
+  HBM_HOST_CLIENT_PROPERTIES_RESPONSE    Response;
 } HBM_HOST_CLIENT_PROPERTIES_BUFFER;
 
 //
@@ -180,22 +180,22 @@ typedef union {
 //
 
 typedef struct {
-  HBM_COMMAND Command;
-  UINT8       MeAddress;
-  UINT8       HostAddress;
-  UINT8       Reserved;
+  HBM_COMMAND    Command;
+  UINT8          MeAddress;
+  UINT8          HostAddress;
+  UINT8          Reserved;
 } HBM_CLIENT_CONNECT_REQUEST;
 
 typedef struct {
-  HBM_COMMAND Command;
-  UINT8       MeAddress;
-  UINT8       HostAddress;
-  UINT8       Status;
+  HBM_COMMAND    Command;
+  UINT8          MeAddress;
+  UINT8          HostAddress;
+  UINT8          Status;
 } HBM_CLIENT_CONNECT_RESPONSE;
 
 typedef union {
-  HBM_CLIENT_CONNECT_REQUEST  Request;
-  HBM_CLIENT_CONNECT_RESPONSE Response;
+  HBM_CLIENT_CONNECT_REQUEST     Request;
+  HBM_CLIENT_CONNECT_RESPONSE    Response;
 } HBM_CLIENT_CONNECT_BUFFER;
 
 #define HBM_CLIENT_CONNECT_SUCCESS            0x00
@@ -211,27 +211,27 @@ typedef union {
 //
 
 typedef struct {
-  HBM_COMMAND Command;
-  UINT8       MeAddress;
-  UINT8       HostAddress;
-  UINT8       Reserved;
+  HBM_COMMAND    Command;
+  UINT8          MeAddress;
+  UINT8          HostAddress;
+  UINT8          Reserved;
 } HBM_CLIENT_DISCONNECT_REQUEST;
 
 typedef struct {
-  HBM_COMMAND Command;
-  UINT8       MeAddress;
-  UINT8       HostAddress;
-  UINT8       Status;
+  HBM_COMMAND    Command;
+  UINT8          MeAddress;
+  UINT8          HostAddress;
+  UINT8          Status;
   //
   // This field is added only for HECI 2.
   // It is not clear whether it is valid to pass it to HECI 1.
   //
-  UINT32      Reserved;
+  UINT32         Reserved;
 } HBM_CLIENT_DISCONNECT_RESPONSE;
 
 typedef union {
-  HBM_CLIENT_DISCONNECT_REQUEST  Request;
-  HBM_CLIENT_DISCONNECT_RESPONSE Response;
+  HBM_CLIENT_DISCONNECT_REQUEST     Request;
+  HBM_CLIENT_DISCONNECT_RESPONSE    Response;
 } HBM_CLIENT_DISCONNECT_BUFFER;
 
 //
@@ -241,10 +241,10 @@ typedef union {
 //
 
 typedef struct {
-  HBM_COMMAND Command;
-  UINT8       MeAddress;
-  UINT8       HostAddress;
-  UINT8       Reserved[5];
+  HBM_COMMAND    Command;
+  UINT8          MeAddress;
+  UINT8          HostAddress;
+  UINT8          Reserved[5];
 } HBM_FLOW_CONTROL;
 
 //
@@ -254,22 +254,22 @@ typedef struct {
 //
 
 typedef struct {
-  HBM_COMMAND Command;
-  UINT8       MEAddress;
-  UINT8       HostAddress;
-  UINT8       Reserved;
+  HBM_COMMAND    Command;
+  UINT8          MEAddress;
+  UINT8          HostAddress;
+  UINT8          Reserved;
 } HBM_CLIENT_CONNECTION_RESET_REQUEST;
 
 typedef struct {
-  HBM_COMMAND Command;
-  UINT8       MEAddress;
-  UINT8       HostAddress;
-  UINT8       Status;
+  HBM_COMMAND    Command;
+  UINT8          MEAddress;
+  UINT8          HostAddress;
+  UINT8          Status;
 } HBM_CLIENT_CONNECTION_RESET_RESPONSE;
 
 typedef union {
-  HBM_CLIENT_CONNECTION_RESET_REQUEST  Request;
-  HBM_CLIENT_CONNECTION_RESET_RESPONSE Response;
+  HBM_CLIENT_CONNECTION_RESET_REQUEST     Request;
+  HBM_CLIENT_CONNECTION_RESET_RESPONSE    Response;
 } HBM_CLIENT_CONNECTION_RESET_BUFFER;
 
 #pragma pack()

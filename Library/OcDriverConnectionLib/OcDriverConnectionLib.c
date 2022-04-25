@@ -21,24 +21,24 @@
 //
 // NULL-terminated list of driver handles that will be served by EFI_PLATFORM_DRIVER_OVERRIDE_PROTOCOL.
 //
-STATIC EFI_HANDLE *mPriorityDrivers;
+STATIC EFI_HANDLE  *mPriorityDrivers;
 
 //
 // Saved original EFI_PLATFORM_DRIVER_OVERRIDE_PROTOCOL.GetDriver when doing override.
 //
-STATIC EFI_PLATFORM_DRIVER_OVERRIDE_GET_DRIVER mOrgPlatformGetDriver;
+STATIC EFI_PLATFORM_DRIVER_OVERRIDE_GET_DRIVER  mOrgPlatformGetDriver;
 
 STATIC
 EFI_STATUS
 EFIAPI
 OcPlatformGetDriver (
-  IN     EFI_PLATFORM_DRIVER_OVERRIDE_PROTOCOL          *This,
-  IN     EFI_HANDLE                                     ControllerHandle,
-  IN OUT EFI_HANDLE                                     *DriverImageHandle
+  IN     EFI_PLATFORM_DRIVER_OVERRIDE_PROTOCOL  *This,
+  IN     EFI_HANDLE                             ControllerHandle,
+  IN OUT EFI_HANDLE                             *DriverImageHandle
   )
 {
-  EFI_HANDLE     *HandlePtr;
-  BOOLEAN        FoundLast;
+  EFI_HANDLE  *HandlePtr;
+  BOOLEAN     FoundLast;
 
   if (ControllerHandle == NULL) {
     return EFI_INVALID_PARAMETER;
@@ -47,7 +47,7 @@ OcPlatformGetDriver (
   //
   // We have no custom overrides.
   //
-  if (mPriorityDrivers == NULL || mPriorityDrivers[0] == NULL) {
+  if ((mPriorityDrivers == NULL) || (mPriorityDrivers[0] == NULL)) {
     //
     // Forward request to the original driver if we have it.
     //
@@ -133,9 +133,9 @@ STATIC
 EFI_STATUS
 EFIAPI
 OcPlatformGetDriverPath (
-  IN     EFI_PLATFORM_DRIVER_OVERRIDE_PROTOCOL          *This,
-  IN     EFI_HANDLE                                     ControllerHandle,
-  IN OUT EFI_DEVICE_PATH_PROTOCOL                       **DriverImagePath
+  IN     EFI_PLATFORM_DRIVER_OVERRIDE_PROTOCOL  *This,
+  IN     EFI_HANDLE                             ControllerHandle,
+  IN OUT EFI_DEVICE_PATH_PROTOCOL               **DriverImagePath
   )
 {
   return EFI_UNSUPPORTED;
@@ -145,10 +145,10 @@ STATIC
 EFI_STATUS
 EFIAPI
 OcPlatformDriverLoaded (
-  IN EFI_PLATFORM_DRIVER_OVERRIDE_PROTOCOL          *This,
-  IN EFI_HANDLE                                     ControllerHandle,
-  IN EFI_DEVICE_PATH_PROTOCOL                       *DriverImagePath,
-  IN EFI_HANDLE                                     DriverImageHandle
+  IN EFI_PLATFORM_DRIVER_OVERRIDE_PROTOCOL  *This,
+  IN EFI_HANDLE                             ControllerHandle,
+  IN EFI_DEVICE_PATH_PROTOCOL               *DriverImagePath,
+  IN EFI_HANDLE                             DriverImageHandle
   )
 {
   return EFI_UNSUPPORTED;
@@ -156,7 +156,7 @@ OcPlatformDriverLoaded (
 
 STATIC
 EFI_PLATFORM_DRIVER_OVERRIDE_PROTOCOL
-mOcPlatformDriverOverrideProtocol = {
+  mOcPlatformDriverOverrideProtocol = {
   OcPlatformGetDriver,
   OcPlatformGetDriverPath,
   OcPlatformDriverLoaded
@@ -174,25 +174,25 @@ OcRegisterDriversToHighestPriority (
   ASSERT (PriorityDrivers != NULL);
 
   mPriorityDrivers = PriorityDrivers;
-  Status = gBS->LocateProtocol (
-    &gEfiPlatformDriverOverrideProtocolGuid,
-    NULL,
-    (VOID **) &PlatformDriverOverride
-    );
+  Status           = gBS->LocateProtocol (
+                            &gEfiPlatformDriverOverrideProtocolGuid,
+                            NULL,
+                            (VOID **)&PlatformDriverOverride
+                            );
 
-  if (!EFI_ERROR(Status)) {
-    mOrgPlatformGetDriver = PlatformDriverOverride->GetDriver;
+  if (!EFI_ERROR (Status)) {
+    mOrgPlatformGetDriver             = PlatformDriverOverride->GetDriver;
     PlatformDriverOverride->GetDriver = OcPlatformGetDriver;
     return Status;
   }
 
   NewHandle = NULL;
   return gBS->InstallMultipleProtocolInterfaces (
-    &NewHandle,
-    &gEfiPlatformDriverOverrideProtocolGuid,
-    &mOcPlatformDriverOverrideProtocol,
-    NULL
-    );
+                &NewHandle,
+                &gEfiPlatformDriverOverrideProtocolGuid,
+                &mOcPlatformDriverOverrideProtocol,
+                NULL
+                );
 }
 
 EFI_STATUS
@@ -218,12 +218,12 @@ OcConnectDrivers (
   // will crash APTIO IV.
   //
   Status = gBS->LocateHandleBuffer (
-    ByProtocol,
-    &gEfiDevicePathProtocolGuid,
-    NULL,
-    &HandleCount,
-    &HandleBuffer
-    );
+                  ByProtocol,
+                  &gEfiDevicePathProtocolGuid,
+                  NULL,
+                  &HandleCount,
+                  &HandleBuffer
+                  );
 
   if (EFI_ERROR (Status)) {
     return Status;
@@ -241,10 +241,10 @@ OcConnectDrivers (
       // Retrieve the list of all the protocols on each handle
       //
       Status = gBS->ProtocolsPerHandle (
-        HandleBuffer[HandleIndex],
-        &ProtocolGuids,
-        &ProtocolCount
-        );
+                      HandleBuffer[HandleIndex],
+                      &ProtocolGuids,
+                      &ProtocolCount
+                      );
 
       if (EFI_ERROR (Status)) {
         continue;
@@ -255,19 +255,21 @@ OcConnectDrivers (
         // Retrieve the list of agents that have opened each protocol
         //
         Status = gBS->OpenProtocolInformation (
-          HandleBuffer[HandleIndex],
-          ProtocolGuids[ProtocolIndex],
-          &ProtocolInfos,
-          &ProtocolInfoCount
-          );
+                        HandleBuffer[HandleIndex],
+                        ProtocolGuids[ProtocolIndex],
+                        &ProtocolInfos,
+                        &ProtocolInfoCount
+                        );
 
         if (!EFI_ERROR (Status)) {
           for (InfoIndex = 0; InfoIndex < ProtocolInfoCount && Connect; ++InfoIndex) {
-            if (ProtocolInfos[InfoIndex].ControllerHandle == HandleBuffer[DeviceIndex]
-              && (ProtocolInfos[InfoIndex].Attributes & EFI_OPEN_PROTOCOL_BY_CHILD_CONTROLLER) == EFI_OPEN_PROTOCOL_BY_CHILD_CONTROLLER) {
+            if (  (ProtocolInfos[InfoIndex].ControllerHandle == HandleBuffer[DeviceIndex])
+               && ((ProtocolInfos[InfoIndex].Attributes & EFI_OPEN_PROTOCOL_BY_CHILD_CONTROLLER) == EFI_OPEN_PROTOCOL_BY_CHILD_CONTROLLER))
+            {
               Connect = FALSE;
             }
           }
+
           FreePool (ProtocolInfos);
         }
       }

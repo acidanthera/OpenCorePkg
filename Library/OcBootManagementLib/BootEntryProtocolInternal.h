@@ -17,8 +17,8 @@
 **/
 VOID
 LocateBootEntryProtocolHandles (
-  IN OUT EFI_HANDLE        **EntryProtocolHandles,
-  IN OUT UINTN             *EntryProtocolHandleCount
+  IN OUT EFI_HANDLE  **EntryProtocolHandles,
+  IN OUT UINTN       *EntryProtocolHandleCount
   );
 
 /**
@@ -28,7 +28,7 @@ LocateBootEntryProtocolHandles (
 **/
 VOID
 FreeBootEntryProtocolHandles (
-  EFI_HANDLE        **EntryProtocolHandles
+  EFI_HANDLE  **EntryProtocolHandles
   );
 
 /**
@@ -45,11 +45,11 @@ FreeBootEntryProtocolHandles (
 **/
 EFI_STATUS
 AddEntriesFromBootEntryProtocol (
-  IN OUT OC_BOOT_CONTEXT      *BootContext,
-  IN OUT OC_BOOT_FILESYSTEM   *FileSystem,
-  IN     EFI_HANDLE           *EntryProtocolHandles,
-  IN     UINTN                EntryProtocolHandleCount,
-  IN     CONST CHAR16         *DefaultEntryId,           OPTIONAL
+  IN OUT OC_BOOT_CONTEXT *BootContext,
+  IN OUT OC_BOOT_FILESYSTEM *FileSystem,
+  IN     EFI_HANDLE *EntryProtocolHandles,
+  IN     UINTN EntryProtocolHandleCount,
+  IN     CONST CHAR16 *DefaultEntryId, OPTIONAL
   IN     CONST BOOLEAN        CreateDefault
   );
 

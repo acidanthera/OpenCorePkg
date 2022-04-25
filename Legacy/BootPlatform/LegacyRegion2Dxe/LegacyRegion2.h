@@ -28,50 +28,49 @@
 #include <Library/MemoryAllocationLib.h>
 #include <Library/UefiBootServicesTableLib.h>
 
-#define PAM_PCI_BUS        0
-#define PAM_PCI_DEV        0
-#define PAM_PCI_FUNC       0
+#define PAM_PCI_BUS   0
+#define PAM_PCI_DEV   0
+#define PAM_PCI_FUNC  0
 
-#define REG_PAM0_OFFSET_NH     0x40    // Programmable Attribute Map 0
-#define REG_PAM1_OFFSET_NH     0x41    // Programmable Attribute Map 1
-#define REG_PAM2_OFFSET_NH     0x42    // Programmable Attribute Map 2
-#define REG_PAM3_OFFSET_NH     0x43    // Programmable Attribute Map 3
-#define REG_PAM4_OFFSET_NH     0x44    // Programmable Attribute Map 4
-#define REG_PAM5_OFFSET_NH     0x45    // Programmable Attribute Map 5
-#define REG_PAM6_OFFSET_NH     0x46    // Programmable Attribute Map 6
+#define REG_PAM0_OFFSET_NH  0x40       // Programmable Attribute Map 0
+#define REG_PAM1_OFFSET_NH  0x41       // Programmable Attribute Map 1
+#define REG_PAM2_OFFSET_NH  0x42       // Programmable Attribute Map 2
+#define REG_PAM3_OFFSET_NH  0x43       // Programmable Attribute Map 3
+#define REG_PAM4_OFFSET_NH  0x44       // Programmable Attribute Map 4
+#define REG_PAM5_OFFSET_NH  0x45       // Programmable Attribute Map 5
+#define REG_PAM6_OFFSET_NH  0x46       // Programmable Attribute Map 6
 
+#define REG_PAM0_OFFSET_830  0x59      // Programmable Attribute Map 0
+#define REG_PAM1_OFFSET_830  0x5a      // Programmable Attribute Map 1
+#define REG_PAM2_OFFSET_830  0x5b      // Programmable Attribute Map 2
+#define REG_PAM3_OFFSET_830  0x5c      // Programmable Attribute Map 3
+#define REG_PAM4_OFFSET_830  0x5d      // Programmable Attribute Map 4
+#define REG_PAM5_OFFSET_830  0x5e      // Programmable Attribute Map 5
+#define REG_PAM6_OFFSET_830  0x5f      // Programmable Attribute Map 6
 
-#define REG_PAM0_OFFSET_830    0x59    // Programmable Attribute Map 0
-#define REG_PAM1_OFFSET_830    0x5a    // Programmable Attribute Map 1
-#define REG_PAM2_OFFSET_830    0x5b    // Programmable Attribute Map 2
-#define REG_PAM3_OFFSET_830    0x5c    // Programmable Attribute Map 3
-#define REG_PAM4_OFFSET_830    0x5d    // Programmable Attribute Map 4
-#define REG_PAM5_OFFSET_830    0x5e    // Programmable Attribute Map 5
-#define REG_PAM6_OFFSET_830    0x5f    // Programmable Attribute Map 6
+#define REG_PAM0_OFFSET_S4  0x90       // Programmable Attribute Map 0
+#define REG_PAM1_OFFSET_S4  0x91       // Programmable Attribute Map 1
+#define REG_PAM2_OFFSET_S4  0x92       // Programmable Attribute Map 2
+#define REG_PAM3_OFFSET_S4  0x93       // Programmable Attribute Map 3
+#define REG_PAM4_OFFSET_S4  0x94       // Programmable Attribute Map 4
+#define REG_PAM5_OFFSET_S4  0x95       // Programmable Attribute Map 5
+#define REG_PAM6_OFFSET_S4  0x96       // Programmable Attribute Map 6
 
-#define REG_PAM0_OFFSET_S4     0x90    // Programmable Attribute Map 0
-#define REG_PAM1_OFFSET_S4     0x91    // Programmable Attribute Map 1
-#define REG_PAM2_OFFSET_S4     0x92    // Programmable Attribute Map 2
-#define REG_PAM3_OFFSET_S4     0x93    // Programmable Attribute Map 3
-#define REG_PAM4_OFFSET_S4     0x94    // Programmable Attribute Map 4
-#define REG_PAM5_OFFSET_S4     0x95    // Programmable Attribute Map 5
-#define REG_PAM6_OFFSET_S4     0x96    // Programmable Attribute Map 6
+#define REG_PAM0_OFFSET_CP  0x80       // Programmable Attribute Map 0
+#define REG_PAM1_OFFSET_CP  0x81       // Programmable Attribute Map 1
+#define REG_PAM2_OFFSET_CP  0x82       // Programmable Attribute Map 2
+#define REG_PAM3_OFFSET_CP  0x83       // Programmable Attribute Map 3
+#define REG_PAM4_OFFSET_CP  0x84       // Programmable Attribute Map 4
+#define REG_PAM5_OFFSET_CP  0x85       // Programmable Attribute Map 5
+#define REG_PAM6_OFFSET_CP  0x86       // Programmable Attribute Map 6
 
-#define REG_PAM0_OFFSET_CP     0x80    // Programmable Attribute Map 0
-#define REG_PAM1_OFFSET_CP     0x81    // Programmable Attribute Map 1
-#define REG_PAM2_OFFSET_CP     0x82    // Programmable Attribute Map 2
-#define REG_PAM3_OFFSET_CP     0x83    // Programmable Attribute Map 3
-#define REG_PAM4_OFFSET_CP     0x84    // Programmable Attribute Map 4
-#define REG_PAM5_OFFSET_CP     0x85    // Programmable Attribute Map 5
-#define REG_PAM6_OFFSET_CP     0x86    // Programmable Attribute Map 6
-
-#define REG_PAM0_OFFSET_NV     0xC0    // Programmable Attribute Map 0
-#define REG_PAM1_OFFSET_NV     0xC1    // Programmable Attribute Map 1
-#define REG_PAM2_OFFSET_NV     0xC2    // Programmable Attribute Map 2
-#define REG_PAM3_OFFSET_NV     0xC3    // Programmable Attribute Map 3
-#define REG_PAM4_OFFSET_NV     0xC4    // Programmable Attribute Map 4
-#define REG_PAM5_OFFSET_NV     0xC5    // Programmable Attribute Map 5
-#define REG_PAM6_OFFSET_NV     0xC6    // Programmable Attribute Map 6
+#define REG_PAM0_OFFSET_NV  0xC0       // Programmable Attribute Map 0
+#define REG_PAM1_OFFSET_NV  0xC1       // Programmable Attribute Map 1
+#define REG_PAM2_OFFSET_NV  0xC2       // Programmable Attribute Map 2
+#define REG_PAM3_OFFSET_NV  0xC3       // Programmable Attribute Map 3
+#define REG_PAM4_OFFSET_NV  0xC4       // Programmable Attribute Map 4
+#define REG_PAM5_OFFSET_NV  0xC5       // Programmable Attribute Map 5
+#define REG_PAM6_OFFSET_NV  0xC6       // Programmable Attribute Map 6
 
 #define PAM_BASE_ADDRESS   0xc0000
 #define PAM_LIMIT_ADDRESS  BASE_1MB
@@ -80,19 +79,19 @@
 // Describes Legacy Region blocks and status.
 //
 typedef struct {
-  UINT32  Start;
-  UINT32  Length;
-  BOOLEAN ReadEnabled;
-  BOOLEAN WriteEnabled;
+  UINT32     Start;
+  UINT32     Length;
+  BOOLEAN    ReadEnabled;
+  BOOLEAN    WriteEnabled;
 } LEGACY_MEMORY_SECTION_INFO;
 
 //
 // Provides a map of the PAM registers and bits used to set Read/Write access.
 //
 typedef struct {
-  UINT8   PAMRegOffset;
-  UINT8   ReadEnableData;
-  UINT8   WriteEnableData;
+  UINT8    PAMRegOffset;
+  UINT8    ReadEnableData;
+  UINT8    WriteEnableData;
 } PAM_REGISTER_VALUE;
 
 /**
@@ -152,10 +151,10 @@ LegacyRegion2Decode (
 EFI_STATUS
 EFIAPI
 LegacyRegion2Lock (
-  IN  EFI_LEGACY_REGION2_PROTOCOL *This,
-  IN  UINT32                      Start,
-  IN  UINT32                      Length,
-  OUT UINT32                      *Granularity
+  IN  EFI_LEGACY_REGION2_PROTOCOL  *This,
+  IN  UINT32                       Start,
+  IN  UINT32                       Length,
+  OUT UINT32                       *Granularity
   );
 
 /**
@@ -186,10 +185,10 @@ LegacyRegion2Lock (
 EFI_STATUS
 EFIAPI
 LegacyRegion2BootLock (
-  IN EFI_LEGACY_REGION2_PROTOCOL          *This,
-  IN  UINT32                              Start,
-  IN  UINT32                              Length,
-  OUT UINT32                              *Granularity
+  IN EFI_LEGACY_REGION2_PROTOCOL  *This,
+  IN  UINT32                      Start,
+  IN  UINT32                      Length,
+  OUT UINT32                      *Granularity
   );
 
 /**

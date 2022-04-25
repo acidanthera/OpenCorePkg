@@ -15,57 +15,57 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 #ifndef CRYPTO_SAMPLES_H
 #define CRYPTO_SAMPLES_H
 
-#define HASH_SAMPLES_NUM 4
-#define AES_SAMPLE_DATA_LEN 64
-#define SIGNED_DATA_LEN 512
+#define HASH_SAMPLES_NUM     4
+#define AES_SAMPLE_DATA_LEN  64
+#define SIGNED_DATA_LEN      512
 
 //
 // Data samples for hash algorithms
 //
-const CHAR8 Sample1 [] = "Test string\0";
-const CHAR8 Sample2 [] = "Test string test\0";
-const CHAR8 Sample3 [] = "Test string test test\0";
-const CHAR8 Sample4 [] = "Test string test test. Test?"\
-                        " Or test? Maybe test? Give me some test\0";
+const CHAR8  Sample1[] = "Test string\0";
+const CHAR8  Sample2[] = "Test string test\0";
+const CHAR8  Sample3[] = "Test string test test\0";
+const CHAR8  Sample4[] = "Test string test test. Test?" \
+                         " Or test? Maybe test? Give me some test\0";
 
 //
 // Data structures for samples
 //
 typedef struct AES_128_CBC_SAMPLE_ {
-  UINT8  IV[AES_BLOCK_SIZE];
-  UINT8  PlainText[AES_SAMPLE_DATA_LEN];
-  UINT8  CipherText[AES_SAMPLE_DATA_LEN];
-  UINT8  Key[CONFIG_AES_KEY_SIZE];
+  UINT8    IV[AES_BLOCK_SIZE];
+  UINT8    PlainText[AES_SAMPLE_DATA_LEN];
+  UINT8    CipherText[AES_SAMPLE_DATA_LEN];
+  UINT8    Key[CONFIG_AES_KEY_SIZE];
 } AES_128_CBC_SAMPLE;
 
 typedef struct AES_128_CTR_SAMPLE_ {
-  UINT8  IV[AES_BLOCK_SIZE];
-  UINT8  PlainText[AES_SAMPLE_DATA_LEN];
-  UINT8  CipherText[AES_SAMPLE_DATA_LEN];
-  UINT8  Key[CONFIG_AES_KEY_SIZE];
+  UINT8    IV[AES_BLOCK_SIZE];
+  UINT8    PlainText[AES_SAMPLE_DATA_LEN];
+  UINT8    CipherText[AES_SAMPLE_DATA_LEN];
+  UINT8    Key[CONFIG_AES_KEY_SIZE];
 } AES_128_CTR_SAMPLE;
 
 typedef struct HASH_SAMPLE_ {
-  UINT8  *PlainText;
-  UINTN  PlainTextLen;
-  UINT8  Md5Hash[MD5_DIGEST_SIZE];
-  UINT8  Sha1Hash[SHA1_DIGEST_SIZE];
-  UINT8  Sha256Hash[SHA256_DIGEST_SIZE];
-  UINT8  Sha512Hash[SHA512_DIGEST_SIZE];
-  UINT8  Sha384Hash[SHA384_DIGEST_SIZE];
+  UINT8    *PlainText;
+  UINTN    PlainTextLen;
+  UINT8    Md5Hash[MD5_DIGEST_SIZE];
+  UINT8    Sha1Hash[SHA1_DIGEST_SIZE];
+  UINT8    Sha256Hash[SHA256_DIGEST_SIZE];
+  UINT8    Sha512Hash[SHA512_DIGEST_SIZE];
+  UINT8    Sha384Hash[SHA384_DIGEST_SIZE];
 } HASH_SAMPLE;
 
 typedef struct RSA2048SHA256_SIGN_SAMPLE_ {
-  UINT8 Data[SIGNED_DATA_LEN];
-  UINT8 Signature[256];
-  UINT8 PublicKey[528];
+  UINT8    Data[SIGNED_DATA_LEN];
+  UINT8    Signature[256];
+  UINT8    PublicKey[528];
 } RSA2048SHA256_SIGN_SAMPLE;
 
 //
 // RSA2048SHA256
 // Signature
 //
-STATIC RSA2048SHA256_SIGN_SAMPLE Rsa2048Sha256Sample = {
+STATIC RSA2048SHA256_SIGN_SAMPLE  Rsa2048Sha256Sample = {
   //
   // Data
   //
@@ -303,7 +303,7 @@ STATIC RSA2048SHA256_SIGN_SAMPLE Rsa2048Sha256Sample = {
 //
 // AES-128-CBC data sample
 //
-STATIC AES_128_CBC_SAMPLE AesCbcSample = {
+STATIC AES_128_CBC_SAMPLE  AesCbcSample = {
   //
   // IV
   //
@@ -354,8 +354,7 @@ STATIC AES_128_CBC_SAMPLE AesCbcSample = {
   }
 };
 
-
-STATIC AES_128_CTR_SAMPLE AesCtrSample = {
+STATIC AES_128_CTR_SAMPLE  AesCtrSample = {
   //
   // IV
   //
@@ -409,9 +408,9 @@ STATIC AES_128_CTR_SAMPLE AesCtrSample = {
 //
 // Hash algorithms samples
 //
-STATIC HASH_SAMPLE HashSamples[4] = {
+STATIC HASH_SAMPLE  HashSamples[4] = {
   {
-    (UINT8 *) Sample1,
+    (UINT8 *)Sample1,
     11,
     {
       0x0f, 0xd3, 0xdb, 0xec, 0x97, 0x30,
@@ -448,7 +447,7 @@ STATIC HASH_SAMPLE HashSamples[4] = {
     }
   },
   {
-    (UINT8 *) Sample2,
+    (UINT8 *)Sample2,
     16,
     {
       0x85, 0x3d, 0x68, 0xf8, 0x8d, 0x64,
@@ -485,7 +484,7 @@ STATIC HASH_SAMPLE HashSamples[4] = {
     }
   },
   {
-    (UINT8 *) Sample3,
+    (UINT8 *)Sample3,
     21,
     {
       0x26, 0xc7, 0x17, 0xc6, 0x48, 0x26,
@@ -522,7 +521,7 @@ STATIC HASH_SAMPLE HashSamples[4] = {
     }
   },
   {
-    (UINT8 *) Sample4,
+    (UINT8 *)Sample4,
     67,
     {
       0x3a, 0x60, 0x2a, 0x62, 0x6f, 0xd8,
@@ -560,21 +559,21 @@ STATIC HASH_SAMPLE HashSamples[4] = {
   }
 };
 
-STATIC UINT8 CONST ChaChaEncryptionKey[] = {
+STATIC UINT8 CONST  ChaChaEncryptionKey[] = {
   0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
   0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
   0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
   0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01
 };
 
-STATIC UINT8 CONST ChaChaInitVector[] = {
+STATIC UINT8 CONST  ChaChaInitVector[] = {
   0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
   0x00, 0x00, 0x00, 0x02
 };
 
-STATIC UINT32 CONST ChaChaCounter = 1;
+STATIC UINT32 CONST  ChaChaCounter = 1;
 
-STATIC UINT8 CONST ChaChaPlainText[375] = {
+STATIC UINT8 CONST  ChaChaPlainText[375] = {
   0x41, 0x6E, 0x79, 0x20, 0x73, 0x75, 0x62, 0x6D, 0x69, 0x73, 0x73, 0x69, 0x6F, 0x6E, 0x20, 0x74,
   0x6F, 0x20, 0x74, 0x68, 0x65, 0x20, 0x49, 0x45, 0x54, 0x46, 0x20, 0x69, 0x6E, 0x74, 0x65, 0x6E,
   0x64, 0x65, 0x64, 0x20, 0x62, 0x79, 0x20, 0x74, 0x68, 0x65, 0x20, 0x43, 0x6F, 0x6E, 0x74, 0x72,
@@ -598,10 +597,10 @@ STATIC UINT8 CONST ChaChaPlainText[375] = {
   0x74, 0x69, 0x6F, 0x6E, 0x73, 0x20, 0x6D, 0x61, 0x64, 0x65, 0x20, 0x61, 0x74, 0x20, 0x61, 0x6E,
   0x79, 0x20, 0x74, 0x69, 0x6D, 0x65, 0x20, 0x6F, 0x72, 0x20, 0x70, 0x6C, 0x61, 0x63, 0x65, 0x2C,
   0x20, 0x77, 0x68, 0x69, 0x63, 0x68, 0x20, 0x61, 0x72, 0x65, 0x20, 0x61, 0x64, 0x64, 0x72, 0x65,
-  0x73, 0x73, 0x65, 0x64, 0x20, 0x74, 0x6F 
+  0x73, 0x73, 0x65, 0x64, 0x20, 0x74, 0x6F
 };
 
-STATIC UINT8 CONST ChaChaCipherText[375] = {
+STATIC UINT8 CONST  ChaChaCipherText[375] = {
   0xA3, 0xFB, 0xF0, 0x7D, 0xF3, 0xFA, 0x2F, 0xDE, 0x4F, 0x37, 0x6C, 0xA2, 0x3E, 0x82, 0x73, 0x70,
   0x41, 0x60, 0x5D, 0x9F, 0x4F, 0x4F, 0x57, 0xBD, 0x8C, 0xFF, 0x2C, 0x1D, 0x4B, 0x79, 0x55, 0xEC,
   0x2A, 0x97, 0x94, 0x8B, 0xD3, 0x72, 0x29, 0x15, 0xC8, 0xF3, 0xD3, 0x37, 0xF7, 0xD3, 0x70, 0x05,
@@ -625,7 +624,7 @@ STATIC UINT8 CONST ChaChaCipherText[375] = {
   0x98, 0xCE, 0xD7, 0x59, 0xC3, 0xFF, 0x9B, 0x64, 0x77, 0x33, 0x8F, 0x3D, 0xA4, 0xF9, 0xCD, 0x85,
   0x14, 0xEA, 0x99, 0x82, 0xCC, 0xAF, 0xB3, 0x41, 0xB2, 0x38, 0x4D, 0xD9, 0x02, 0xF3, 0xD1, 0xAB,
   0x7A, 0xC6, 0x1D, 0xD2, 0x9C, 0x6F, 0x21, 0xBA, 0x5B, 0x86, 0x2F, 0x37, 0x30, 0xE3, 0x7C, 0xFD,
-  0xC4, 0xFD, 0x80, 0x6C, 0x22, 0xF2, 0x21 
+  0xC4, 0xFD, 0x80, 0x6C, 0x22, 0xF2, 0x21
 };
 
 #endif // CRYPTO_SAMPLES_H

@@ -46,7 +46,7 @@ CheckConfig (
   // Pass config structure to all checkers.
   //
   for (Index = 0; Index < ARRAY_SIZE (ConfigCheckers); ++Index) {
-    CurrErrorCount = ConfigCheckers[Index] (Config);
+    CurrErrorCount = ConfigCheckers[Index](Config);
 
     if (CurrErrorCount != 0) {
       //
@@ -66,20 +66,20 @@ ENTRY_POINT (
   char  *argv[]
   )
 {
-  UINT8              *ConfigFileBuffer;
-  UINT32             ConfigFileSize;
-  CONST CHAR8        *ConfigFileName;
-  INT64              ExecTimeStart;
-  OC_GLOBAL_CONFIG   Config;
-  EFI_STATUS         Status;
-  UINT32             ErrorCount;
+  UINT8             *ConfigFileBuffer;
+  UINT32            ConfigFileSize;
+  CONST CHAR8       *ConfigFileName;
+  INT64             ExecTimeStart;
+  OC_GLOBAL_CONFIG  Config;
+  EFI_STATUS        Status;
+  UINT32            ErrorCount;
 
   ErrorCount = 0;
 
   //
   // Enable PCD debug logging.
   //
-  PcdGet8  (PcdDebugPropertyMask)         |= DEBUG_PROPERTY_DEBUG_CODE_ENABLED;
+  PcdGet8 (PcdDebugPropertyMask)          |= DEBUG_PROPERTY_DEBUG_CODE_ENABLED;
   PcdGet32 (PcdFixedDebugPrintErrorLevel) |= DEBUG_INFO;
   PcdGet32 (PcdDebugPrintErrorLevel)      |= DEBUG_INFO;
 
@@ -116,6 +116,7 @@ ENTRY_POINT (
     DEBUG ((DEBUG_ERROR, "Invalid config\n"));
     return -1;
   }
+
   if (ErrorCount > 0) {
     DEBUG ((DEBUG_ERROR, "Serialisation returns %u %a!\n", ErrorCount, ErrorCount > 1 ? "errors" : "error"));
   }

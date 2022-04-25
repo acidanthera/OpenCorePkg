@@ -35,30 +35,30 @@
 //
 // These are custom and match VirtualSMC, FakeSMC, and Clover.
 //
-#define OC_SMC_REVISION            L"REV"
-#define OC_SMC_BRANCH              L"RBr"
-#define OC_SMC_PLATFORM            L"RPlt"
+#define OC_SMC_REVISION  L"REV"
+#define OC_SMC_BRANCH    L"RBr"
+#define OC_SMC_PLATFORM  L"RPlt"
 
-#define OC_SMC_REVISION_SIZE         6U
-#define OC_SMC_BRANCH_SIZE           8U
-#define OC_SMC_PLATFORM_SIZE         8U
+#define OC_SMC_REVISION_SIZE  6U
+#define OC_SMC_BRANCH_SIZE    8U
+#define OC_SMC_PLATFORM_SIZE  8U
 
 typedef struct {
-  CONST CHAR8   *PlatformName;
-  CONST CHAR8   *SystemProductName;
-  CONST CHAR8   *SystemSerialNumber;
-  CONST GUID    *SystemUUID;
-  CONST CHAR8   *BoardProduct;
-  CONST UINT8   *BoardRevision;
-  CONST UINT64  *StartupPowerEvents;
-  CONST UINT64  *InitialTSC;
-  CONST UINT64  *FSBFrequency;
-  CONST UINT64  *ARTFrequency;
-  CONST UINT32  *DevicePathsSupported;
-  CONST UINT8   *SmcRevision;
-  CONST UINT8   *SmcBranch;
-  CONST UINT8   *SmcPlatform;
-  CONST UINT32  *CoprocessorVersion;
+  CONST CHAR8     *PlatformName;
+  CONST CHAR8     *SystemProductName;
+  CONST CHAR8     *SystemSerialNumber;
+  CONST GUID      *SystemUUID;
+  CONST CHAR8     *BoardProduct;
+  CONST UINT8     *BoardRevision;
+  CONST UINT64    *StartupPowerEvents;
+  CONST UINT64    *InitialTSC;
+  CONST UINT64    *FSBFrequency;
+  CONST UINT64    *ARTFrequency;
+  CONST UINT32    *DevicePathsSupported;
+  CONST UINT8     *SmcRevision;
+  CONST UINT8     *SmcBranch;
+  CONST UINT8     *SmcPlatform;
+  CONST UINT32    *CoprocessorVersion;
 } OC_DATA_HUB_DATA;
 
 /**

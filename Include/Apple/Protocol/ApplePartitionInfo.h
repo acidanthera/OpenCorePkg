@@ -18,23 +18,23 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
   { 0x68425EE5, 0x1C43, 0x4BAA,             \
     { 0x84, 0xF7, 0x9A, 0xA8, 0xA4, 0xD8, 0xE1, 0x1E } }
 
-#define APPLE_PARTITION_INFO_REVISION 0x010000
+#define APPLE_PARTITION_INFO_REVISION  0x010000
 
 // APPLE_PARTITION_INFO_PROTOCOL
 typedef struct {
-  UINT32   Revision;
-  UINT32   PartitionNumber;
-  UINT64   PartitionStart;
-  UINT64   PartitionSize;
-  UINT8    Signature[16];
-  UINT8    MBRType;
-  UINT8    SignatureType;
-  UINT64   Attributes;
-  CHAR16   PartitionName[36];
-  UINT8    PartitionType[16];
+  UINT32    Revision;
+  UINT32    PartitionNumber;
+  UINT64    PartitionStart;
+  UINT64    PartitionSize;
+  UINT8     Signature[16];
+  UINT8     MBRType;
+  UINT8     SignatureType;
+  UINT64    Attributes;
+  CHAR16    PartitionName[36];
+  UINT8     PartitionType[16];
 } APPLE_PARTITION_INFO_PROTOCOL;
 
 // gApplePartitionInfoProtocolGuid
-extern EFI_GUID gApplePartitionInfoProtocolGuid;
+extern EFI_GUID  gApplePartitionInfoProtocolGuid;
 
 #endif // APPLE_PARTITION_INFO_H

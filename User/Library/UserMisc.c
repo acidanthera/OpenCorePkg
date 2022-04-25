@@ -16,7 +16,8 @@ CpuBreakpoint (
 {
   ASSERT (FALSE);
 
-  while (TRUE);
+  while (TRUE) {
+  }
 }
 
 VOID
@@ -45,120 +46,132 @@ EnableInterrupts (
 
 UINT32
 AsmCpuid (
-  IN      UINT32                    Index,
-  OUT     UINT32                    *Eax,  OPTIONAL
-  OUT     UINT32                    *Ebx,  OPTIONAL
-  OUT     UINT32                    *Ecx,  OPTIONAL
+  IN      UINT32 Index,
+  OUT     UINT32 *Eax, OPTIONAL
+  OUT     UINT32                    *Ebx, OPTIONAL
+  OUT     UINT32                    *Ecx, OPTIONAL
   OUT     UINT32                    *Edx   OPTIONAL
   )
 {
-#if defined(__i386__) || defined(__x86_64__)
+ #if defined (__i386__) || defined (__x86_64__)
   UINT32  EaxVal;
   UINT32  EbxVal;
   UINT32  EcxVal;
   UINT32  EdxVal;
 
-  EaxVal  = 0;
-  EbxVal  = 0;
-  EcxVal  = 0;
-  EdxVal  = 0;
+  EaxVal = 0;
+  EbxVal = 0;
+  EcxVal = 0;
+  EdxVal = 0;
 
   asm (
     "cpuid\n"
     : "=a" (EaxVal), "=b" (EbxVal), "=c" (EcxVal), "=d" (EdxVal)
     : "0" (Index)
-    );
+  );
 
   if (Eax != NULL) {
     *Eax = EaxVal;
   }
+
   if (Ebx != NULL) {
     *Ebx = EbxVal;
   }
+
   if (Ecx != NULL) {
     *Ecx = EcxVal;
   }
+
   if (Edx != NULL) {
     *Edx = EdxVal;
   }
 
   return Index;
-#else
+ #else
   if (Eax != NULL) {
     *Eax = 0;
   }
+
   if (Ebx != NULL) {
     *Ebx = 0;
   }
+
   if (Ecx != NULL) {
     *Ecx = 0;
   }
+
   if (Edx != NULL) {
     *Edx = 0;
   }
 
   return 0;
-#endif
+ #endif
 }
 
 UINT32
 AsmCpuidEx (
-  IN      UINT32                    Index,
-  IN      UINT32                    SubIndex,
-  OUT     UINT32                    *Eax,  OPTIONAL
-  OUT     UINT32                    *Ebx,  OPTIONAL
-  OUT     UINT32                    *Ecx,  OPTIONAL
+  IN      UINT32 Index,
+  IN      UINT32 SubIndex,
+  OUT     UINT32 *Eax, OPTIONAL
+  OUT     UINT32                    *Ebx, OPTIONAL
+  OUT     UINT32                    *Ecx, OPTIONAL
   OUT     UINT32                    *Edx   OPTIONAL
   )
 {
-#if defined(__i386__) || defined(__x86_64__)
+ #if defined (__i386__) || defined (__x86_64__)
   UINT32  EaxVal;
   UINT32  EbxVal;
   UINT32  EcxVal;
   UINT32  EdxVal;
 
-  EaxVal  = 0;
-  EbxVal  = 0;
-  EcxVal  = 0;
-  EdxVal  = 0;
+  EaxVal = 0;
+  EbxVal = 0;
+  EcxVal = 0;
+  EdxVal = 0;
 
   asm (
     "cpuid\n"
     : "=a" (EaxVal), "=b" (EbxVal), "=c" (EcxVal), "=d" (EdxVal)
     : "0"  (Index),
     "2"    (SubIndex)
-    );
+  );
 
   if (Eax != NULL) {
     *Eax = EaxVal;
   }
+
   if (Ebx != NULL) {
     *Ebx = EbxVal;
   }
+
   if (Ecx != NULL) {
     *Ecx = EcxVal;
   }
+
   if (Edx != NULL) {
     *Edx = EdxVal;
   }
 
   return Index;
-#else
+ #else
   if (Eax != NULL) {
     *Eax = 0;
   }
+
   if (Ebx != NULL) {
     *Ebx = 0;
   }
+
   if (Ecx != NULL) {
     *Ecx = 0;
   }
+
   if (Edx != NULL) {
     *Edx = 0;
   }
 
   return 0;
-#endif
+ #endif
 }
 
 UINT32
@@ -211,7 +224,7 @@ AsmReadEflags (
 UINT64
 EFIAPI
 AsmReadMsr64 (
-  IN      UINT32                    Index
+  IN      UINT32  Index
   )
 {
   return 0;
@@ -238,8 +251,8 @@ AsmWriteCr4 (
 UINT64
 EFIAPI
 AsmWriteMsr64 (
-  IN      UINT32                    Index,
-  IN      UINT64                    Value
+  IN      UINT32  Index,
+  IN      UINT64  Value
   )
 {
   return 0;
@@ -248,9 +261,9 @@ AsmWriteMsr64 (
 UINT64
 EFIAPI
 AsmMsrAndThenOr64 (
-  IN      UINT32                    Index,
-  IN      UINT64                    AndData,
-  IN      UINT64                    OrData
+  IN      UINT32  Index,
+  IN      UINT64  AndData,
+  IN      UINT64  OrData
   )
 {
   //
@@ -286,7 +299,7 @@ CpuFlushTlb (
 UINT8
 EFIAPI
 IoRead8 (
-  IN      UINTN                     Port
+  IN      UINTN  Port
   )
 {
   return 0;
@@ -295,18 +308,18 @@ IoRead8 (
 UINT8
 EFIAPI
 IoWrite8 (
-  IN      UINTN                     Port,
-  IN      UINT8                     Value
+  IN      UINTN  Port,
+  IN      UINT8  Value
   )
 {
-  (void) Port;
+  (void)Port;
   return Value;
 }
 
 UINT32
 EFIAPI
 IoRead32 (
-  IN      UINTN                     Port
+  IN      UINTN  Port
   )
 {
   ASSERT ((Port & 3) == 0);
@@ -317,20 +330,20 @@ IoRead32 (
 UINT32
 EFIAPI
 IoWrite32 (
-  IN      UINTN                     Port,
-  IN      UINT32                    Value
+  IN      UINTN   Port,
+  IN      UINT32  Value
   )
 {
   ASSERT ((Port & 3) == 0);
-  
+
   return Value;
 }
 
 UINT16
 EFIAPI
 MmioAnd16 (
-  IN      UINTN                     Address,
-  IN      UINT16                    AndData
+  IN      UINTN   Address,
+  IN      UINT16  AndData
   )
 {
   return 0;
@@ -339,8 +352,8 @@ MmioAnd16 (
 UINT32
 EFIAPI
 MmioAnd32 (
-  IN      UINTN                     Address,
-  IN      UINT16                    AndData
+  IN      UINTN   Address,
+  IN      UINT16  AndData
   )
 {
   return 0;
@@ -349,8 +362,8 @@ MmioAnd32 (
 UINT8
 EFIAPI
 MmioAnd8 (
-  IN      UINTN                     Address,
-  IN      UINT8                     AndData
+  IN      UINTN  Address,
+  IN      UINT8  AndData
   )
 {
   return 0;
@@ -359,9 +372,9 @@ MmioAnd8 (
 UINT16
 EFIAPI
 MmioAndThenOr16 (
-  IN      UINTN                     Address,
-  IN      UINT16                    AndData,
-  IN      UINT16                    OrData
+  IN      UINTN   Address,
+  IN      UINT16  AndData,
+  IN      UINT16  OrData
   )
 {
   return 0;
@@ -370,9 +383,9 @@ MmioAndThenOr16 (
 UINT32
 EFIAPI
 MmioAndThenOr32 (
-  IN      UINTN                     Address,
-  IN      UINT32                    AndData,
-  IN      UINT32                    OrData
+  IN      UINTN   Address,
+  IN      UINT32  AndData,
+  IN      UINT32  OrData
   )
 {
   return 0;
@@ -381,9 +394,9 @@ MmioAndThenOr32 (
 UINT8
 EFIAPI
 MmioAndThenOr8 (
-  IN      UINTN                     Address,
-  IN      UINT8                     AndData,
-  IN      UINT8                     OrData
+  IN      UINTN  Address,
+  IN      UINT8  AndData,
+  IN      UINT8  OrData
   )
 {
   return 0;
@@ -392,10 +405,10 @@ MmioAndThenOr8 (
 UINT16
 EFIAPI
 MmioBitFieldAnd16 (
-  IN      UINTN                     Address,
-  IN      UINTN                     StartBit,
-  IN      UINTN                     EndBit,
-  IN      UINT16                    AndData
+  IN      UINTN   Address,
+  IN      UINTN   StartBit,
+  IN      UINTN   EndBit,
+  IN      UINT16  AndData
   )
 {
   return 0;
@@ -404,10 +417,10 @@ MmioBitFieldAnd16 (
 UINT32
 EFIAPI
 MmioBitFieldAnd32 (
-  IN      UINTN                     Address,
-  IN      UINTN                     StartBit,
-  IN      UINTN                     EndBit,
-  IN      UINT32                    AndData
+  IN      UINTN   Address,
+  IN      UINTN   StartBit,
+  IN      UINTN   EndBit,
+  IN      UINT32  AndData
   )
 {
   return 0;
@@ -416,10 +429,10 @@ MmioBitFieldAnd32 (
 UINT8
 EFIAPI
 MmioBitFieldAnd8 (
-  IN      UINTN                     Address,
-  IN      UINTN                     StartBit,
-  IN      UINTN                     EndBit,
-  IN      UINT8                     AndData
+  IN      UINTN  Address,
+  IN      UINTN  StartBit,
+  IN      UINTN  EndBit,
+  IN      UINT8  AndData
   )
 {
   return 0;
@@ -428,11 +441,11 @@ MmioBitFieldAnd8 (
 UINT16
 EFIAPI
 MmioBitFieldAndThenOr16 (
-  IN      UINTN                     Address,
-  IN      UINTN                     StartBit,
-  IN      UINTN                     EndBit,
-  IN      UINT16                    AndData,
-  IN      UINT16                    OrData
+  IN      UINTN   Address,
+  IN      UINTN   StartBit,
+  IN      UINTN   EndBit,
+  IN      UINT16  AndData,
+  IN      UINT16  OrData
   )
 {
   return 0;
@@ -441,11 +454,11 @@ MmioBitFieldAndThenOr16 (
 UINT32
 EFIAPI
 MmioBitFieldAndThenOr32 (
-  IN      UINTN                     Address,
-  IN      UINTN                     StartBit,
-  IN      UINTN                     EndBit,
-  IN      UINT32                    AndData,
-  IN      UINT32                    OrData
+  IN      UINTN   Address,
+  IN      UINTN   StartBit,
+  IN      UINTN   EndBit,
+  IN      UINT32  AndData,
+  IN      UINT32  OrData
   )
 {
   return 0;
@@ -454,11 +467,11 @@ MmioBitFieldAndThenOr32 (
 UINT8
 EFIAPI
 MmioBitFieldAndThenOr8 (
-  IN      UINTN                     Address,
-  IN      UINTN                     StartBit,
-  IN      UINTN                     EndBit,
-  IN      UINT8                     AndData,
-  IN      UINT8                     OrData
+  IN      UINTN  Address,
+  IN      UINTN  StartBit,
+  IN      UINTN  EndBit,
+  IN      UINT8  AndData,
+  IN      UINT8  OrData
   )
 {
   return 0;
@@ -467,10 +480,10 @@ MmioBitFieldAndThenOr8 (
 UINT16
 EFIAPI
 MmioBitFieldOr16 (
-  IN      UINTN                     Address,
-  IN      UINTN                     StartBit,
-  IN      UINTN                     EndBit,
-  IN      UINT16                    OrData
+  IN      UINTN   Address,
+  IN      UINTN   StartBit,
+  IN      UINTN   EndBit,
+  IN      UINT16  OrData
   )
 {
   return 0;
@@ -479,10 +492,10 @@ MmioBitFieldOr16 (
 UINT32
 EFIAPI
 MmioBitFieldOr32 (
-  IN      UINTN                     Address,
-  IN      UINTN                     StartBit,
-  IN      UINTN                     EndBit,
-  IN      UINT32                    OrData
+  IN      UINTN   Address,
+  IN      UINTN   StartBit,
+  IN      UINTN   EndBit,
+  IN      UINT32  OrData
   )
 {
   return 0;
@@ -491,10 +504,10 @@ MmioBitFieldOr32 (
 UINT8
 EFIAPI
 MmioBitFieldOr8 (
-  IN      UINTN                     Address,
-  IN      UINTN                     StartBit,
-  IN      UINTN                     EndBit,
-  IN      UINT8                     OrData
+  IN      UINTN  Address,
+  IN      UINTN  StartBit,
+  IN      UINTN  EndBit,
+  IN      UINT8  OrData
   )
 {
   return 0;
@@ -503,9 +516,9 @@ MmioBitFieldOr8 (
 UINT16
 EFIAPI
 MmioBitFieldRead16 (
-  IN      UINTN                     Address,
-  IN      UINTN                     StartBit,
-  IN      UINTN                     EndBit
+  IN      UINTN  Address,
+  IN      UINTN  StartBit,
+  IN      UINTN  EndBit
   )
 {
   return 0;
@@ -514,9 +527,9 @@ MmioBitFieldRead16 (
 UINT32
 EFIAPI
 MmioBitFieldRead32 (
-  IN      UINTN                     Address,
-  IN      UINTN                     StartBit,
-  IN      UINTN                     EndBit
+  IN      UINTN  Address,
+  IN      UINTN  StartBit,
+  IN      UINTN  EndBit
   )
 {
   return 0;
@@ -525,9 +538,9 @@ MmioBitFieldRead32 (
 UINT8
 EFIAPI
 MmioBitFieldRead8 (
-  IN      UINTN                     Address,
-  IN      UINTN                     StartBit,
-  IN      UINTN                     EndBit
+  IN      UINTN  Address,
+  IN      UINTN  StartBit,
+  IN      UINTN  EndBit
   )
 {
   return 0;
@@ -536,10 +549,10 @@ MmioBitFieldRead8 (
 UINT16
 EFIAPI
 MmioBitFieldWrite16 (
-  IN      UINTN                     Address,
-  IN      UINTN                     StartBit,
-  IN      UINTN                     EndBit,
-  IN      UINT16                    Value
+  IN      UINTN   Address,
+  IN      UINTN   StartBit,
+  IN      UINTN   EndBit,
+  IN      UINT16  Value
   )
 {
   return 0;
@@ -548,10 +561,10 @@ MmioBitFieldWrite16 (
 UINT32
 EFIAPI
 MmioBitFieldWrite32 (
-  IN      UINTN                     Address,
-  IN      UINTN                     StartBit,
-  IN      UINTN                     EndBit,
-  IN      UINT32                    Value
+  IN      UINTN   Address,
+  IN      UINTN   StartBit,
+  IN      UINTN   EndBit,
+  IN      UINT32  Value
   )
 {
   return 0;
@@ -560,10 +573,10 @@ MmioBitFieldWrite32 (
 UINT8
 EFIAPI
 MmioBitFieldWrite8 (
-  IN      UINTN                     Address,
-  IN      UINTN                     StartBit,
-  IN      UINTN                     EndBit,
-  IN      UINT8                     Value
+  IN      UINTN  Address,
+  IN      UINTN  StartBit,
+  IN      UINTN  EndBit,
+  IN      UINT8  Value
   )
 {
   return 0;
@@ -572,8 +585,8 @@ MmioBitFieldWrite8 (
 UINT16
 EFIAPI
 MmioOr16 (
-  IN      UINTN                     Address,
-  IN      UINT16                    OrData
+  IN      UINTN   Address,
+  IN      UINT16  OrData
   )
 {
   return 0;
@@ -582,8 +595,8 @@ MmioOr16 (
 UINT32
 EFIAPI
 MmioOr32 (
-  IN      UINTN                     Address,
-  IN      UINT32                    OrData
+  IN      UINTN   Address,
+  IN      UINT32  OrData
   )
 {
   return 0;
@@ -592,8 +605,8 @@ MmioOr32 (
 UINT8
 EFIAPI
 MmioOr8 (
-  IN      UINTN                     Address,
-  IN      UINT8                     OrData
+  IN      UINTN  Address,
+  IN      UINT8  OrData
   )
 {
   return 0;
@@ -602,7 +615,7 @@ MmioOr8 (
 UINT16
 EFIAPI
 MmioRead16 (
-  IN      UINTN                     Address
+  IN      UINTN  Address
   )
 {
   return 0;
@@ -611,7 +624,7 @@ MmioRead16 (
 UINT32
 EFIAPI
 MmioRead32 (
-  IN      UINTN                     Address
+  IN      UINTN  Address
   )
 {
   return 0;
@@ -620,7 +633,7 @@ MmioRead32 (
 UINT8
 EFIAPI
 MmioRead8 (
-  IN      UINTN                     Address
+  IN      UINTN  Address
   )
 {
   return 0;
@@ -629,8 +642,8 @@ MmioRead8 (
 UINT16
 EFIAPI
 MmioWrite16 (
-  IN      UINTN                     Address,
-  IN      UINT16                    Value
+  IN      UINTN   Address,
+  IN      UINT16  Value
   )
 {
   return 0;
@@ -639,8 +652,8 @@ MmioWrite16 (
 UINT32
 EFIAPI
 MmioWrite32 (
-  IN      UINTN                     Address,
-  IN      UINT32                    Value
+  IN      UINTN   Address,
+  IN      UINT32  Value
   )
 {
   return 0;
@@ -649,8 +662,8 @@ MmioWrite32 (
 UINT8
 EFIAPI
 MmioWrite8 (
-  IN      UINTN                     Address,
-  IN      UINT8                     Value
+  IN      UINTN  Address,
+  IN      UINT8  Value
   )
 {
   return 0;
@@ -659,7 +672,7 @@ MmioWrite8 (
 VOID *
 EFIAPI
 GetFirstGuidHob (
-  IN CONST EFI_GUID         *Guid
+  IN CONST EFI_GUID  *Guid
   )
 {
   return NULL;
@@ -668,7 +681,7 @@ GetFirstGuidHob (
 EFI_DEVICE_PATH_PROTOCOL *
 EFIAPI
 DevicePathFromHandle (
-  IN EFI_HANDLE                      Handle
+  IN EFI_HANDLE  Handle
   )
 {
   return NULL;
@@ -676,8 +689,8 @@ DevicePathFromHandle (
 
 EFI_FILE_PROTOCOL *
 OcLocateRootVolume (
-  IN  EFI_HANDLE                         DeviceHandle  OPTIONAL,
-  IN  EFI_DEVICE_PATH_PROTOCOL           *FilePath     OPTIONAL
+  IN  EFI_HANDLE                DeviceHandle  OPTIONAL,
+  IN  EFI_DEVICE_PATH_PROTOCOL  *FilePath     OPTIONAL
   )
 {
   return NULL;

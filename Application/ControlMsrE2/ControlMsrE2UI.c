@@ -14,7 +14,7 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 
 #include "ControlMsrE2.h"
 
-UINTN           mArgumentFlags;
+UINTN  mArgumentFlags;
 
 /*
   Read up to Length -1 Characters from keyboard.
@@ -26,8 +26,8 @@ UINTN           mArgumentFlags;
 */
 UINT32
 ReadLine (
-  OUT CHAR16   *Buffer,
-  IN  UINT32   Length
+  OUT CHAR16  *Buffer,
+  IN  UINT32  Length
   )
 {
   EFI_STATUS     Status;
@@ -44,7 +44,7 @@ ReadLine (
 
   gST->ConOut->EnableCursor (gST->ConOut, TRUE);
 
-  StartRow = gST->ConOut->Mode->CursorRow;
+  StartRow    = gST->ConOut->Mode->CursorRow;
   StartColumn = gST->ConOut->Mode->CursorColumn;
 
   do {
@@ -59,6 +59,7 @@ ReadLine (
       if (Status == EFI_NOT_READY) {
         continue;
       }
+
       break;
     }
 
@@ -70,6 +71,7 @@ ReadLine (
           gST->ConOut->OutputString (gST->ConOut, L" ");
           gST->ConOut->SetCursorPosition (gST->ConOut, StartColumn + Pos, StartRow);
         }
+
         break;
 
       case CHAR_ESC:
@@ -79,11 +81,13 @@ ReadLine (
           for (Index = 1; Index < Length; ++Index) {
             gST->ConOut->OutputString (gST->ConOut, L" ");
           }
+
           gST->ConOut->SetCursorPosition (gST->ConOut, StartColumn + Pos, StartRow);
         } else {
           Buffer[Pos] = 0;
           return Pos;
         }
+
         break;
 
       case CHAR_CARRIAGE_RETURN:
@@ -102,6 +106,7 @@ ReadLine (
           Buffer[Pos] = 0;
           return Pos;
         }
+
         break;
     }
   } while (TRUE);
@@ -114,7 +119,8 @@ ReadAnyKey (
   VOID
   )
 {
-  CHAR16 Keys[2];
+  CHAR16  Keys[2];
+
   ReadLine (Keys, 2);
   return Keys[0];
 }
@@ -124,7 +130,8 @@ ReadYN (
   VOID
   )
 {
-  CHAR16 Key;
+  CHAR16  Key;
+
   do {
     Key = ReadAnyKey ();
   } while (Key != 'y' && Key != 'Y' && Key != 'n' && Key != 'N');
@@ -132,7 +139,7 @@ ReadYN (
   return Key == 'y' || Key == 'Y';
 }
 
-#define TOKENLENGTH 32
+#define TOKENLENGTH  32
 
 EFI_STATUS
 InterpretArguments (
@@ -192,8 +199,10 @@ InterpretArguments (
         Status = EFI_INVALID_PARAMETER;
         break;
       }
+
       ++ParameterCount;
     }
+
     FreePool (Token);
   }
 
@@ -212,10 +221,10 @@ InterpretArguments (
 
 VOID
 ModifySearchString (
-  IN OUT EFI_STRING *SearchString
+  IN OUT EFI_STRING  *SearchString
   )
 {
-  BOOLEAN   Result;
+  BOOLEAN  Result;
 
   do {
     Print (L"\nCurrent search string: %s\n", *SearchString);
@@ -225,7 +234,7 @@ ModifySearchString (
     if (Result) {
       Print (L"Enter search string:\n");
 
-      CHAR16 *Buffer = AllocatePool (BUFFER_LENGTH * sizeof (CHAR16));
+      CHAR16  *Buffer = AllocatePool (BUFFER_LENGTH * sizeof (CHAR16));
 
       if (Buffer != NULL) {
         if (ReadLine (Buffer, BUFFER_LENGTH) == 0) {

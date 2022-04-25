@@ -20,9 +20,9 @@ GLOBAL_REMOVE_IF_UNREFERENCED EFI_COMPONENT_NAME_PROTOCOL  gPartitionComponentNa
 //
 // EFI Component Name 2 Protocol
 //
-GLOBAL_REMOVE_IF_UNREFERENCED EFI_COMPONENT_NAME2_PROTOCOL gPartitionComponentName2 = {
-  (EFI_COMPONENT_NAME2_GET_DRIVER_NAME) PartitionComponentNameGetDriverName,
-  (EFI_COMPONENT_NAME2_GET_CONTROLLER_NAME) PartitionComponentNameGetControllerName,
+GLOBAL_REMOVE_IF_UNREFERENCED EFI_COMPONENT_NAME2_PROTOCOL  gPartitionComponentName2 = {
+  (EFI_COMPONENT_NAME2_GET_DRIVER_NAME)PartitionComponentNameGetDriverName,
+  (EFI_COMPONENT_NAME2_GET_CONTROLLER_NAME)PartitionComponentNameGetControllerName,
   "en"
 };
 
@@ -30,7 +30,7 @@ GLOBAL_REMOVE_IF_UNREFERENCED EFI_COMPONENT_NAME2_PROTOCOL gPartitionComponentNa
 // Driver name table for Partition module.
 // It is shared by the implementation of ComponentName & ComponentName2 Protocol.
 //
-GLOBAL_REMOVE_IF_UNREFERENCED EFI_UNICODE_STRING_TABLE mPartitionDriverNameTable[] = {
+GLOBAL_REMOVE_IF_UNREFERENCED EFI_UNICODE_STRING_TABLE  mPartitionDriverNameTable[] = {
   {
     "eng;en",
     L"Partition Driver(MBR/GPT/El Torito)"
@@ -40,8 +40,6 @@ GLOBAL_REMOVE_IF_UNREFERENCED EFI_UNICODE_STRING_TABLE mPartitionDriverNameTable
     NULL
   }
 };
-
-
 
 /**
   Retrieves a Unicode string that is the user readable name of the driver.
@@ -98,7 +96,6 @@ PartitionComponentNameGetDriverName (
            (BOOLEAN)(This == &gPartitionComponentName)
            );
 }
-
 
 /**
   Retrieves a Unicode string that is the user readable name of the controller
@@ -171,11 +168,11 @@ PartitionComponentNameGetDriverName (
 EFI_STATUS
 EFIAPI
 PartitionComponentNameGetControllerName (
-  IN  EFI_COMPONENT_NAME_PROTOCOL                     *This,
-  IN  EFI_HANDLE                                      ControllerHandle,
-  IN  EFI_HANDLE                                      ChildHandle        OPTIONAL,
-  IN  CHAR8                                           *Language,
-  OUT CHAR16                                          **ControllerName
+  IN  EFI_COMPONENT_NAME_PROTOCOL  *This,
+  IN  EFI_HANDLE                   ControllerHandle,
+  IN  EFI_HANDLE                   ChildHandle        OPTIONAL,
+  IN  CHAR8                        *Language,
+  OUT CHAR16                       **ControllerName
   )
 {
   return EFI_UNSUPPORTED;

@@ -22,6 +22,7 @@
 #include <Library/OcStringLib.h>
 
 // IsAsciiPrint
+
 /** Check if character is printable
 
   @param[in] Char  The ascii character to check if is printable.
@@ -37,6 +38,7 @@ IsAsciiPrint (
 }
 
 // IsAsciiAlpha
+
 /** Check if character is alphabetical.
 
   @param[in] Char  The ascii character to check if is alphabetical.
@@ -52,6 +54,7 @@ IsAsciiAlpha (
 }
 
 // IsAsciiSpace
+
 /** Check if character is a white space character.
 
   @param[in] Char  The ascii character to check if is white space.
@@ -63,12 +66,12 @@ IsAsciiSpace (
   IN CHAR8  Char
   )
 {
-  return ((Char == ' ')
-       || (Char == '\t')
-       || (Char == '\v')
-       || (Char == '\f')
-       || (Char == '\r')
-       || (Char == '\n'));
+  return (  (Char == ' ')
+         || (Char == '\t')
+         || (Char == '\v')
+         || (Char == '\f')
+         || (Char == '\r')
+         || (Char == '\n'));
 }
 
 BOOLEAN
@@ -81,7 +84,7 @@ IsAsciiNumber (
 
 VOID
 AsciiUefiSlashes (
-  IN OUT CHAR8    *String
+  IN OUT CHAR8  *String
   )
 {
   CHAR8  *Needle;
@@ -94,7 +97,7 @@ AsciiUefiSlashes (
 
 VOID
 AsciiUnixSlashes (
-  IN OUT CHAR8    *String
+  IN OUT CHAR8  *String
   )
 {
   CHAR8  *Needle;
@@ -114,8 +117,8 @@ AsciiUnixSlashes (
 **/
 CHAR16 *
 AsciiStrCopyToUnicode (
-  IN  CONST CHAR8   *AsciiString,
-  IN  UINTN         Length
+  IN  CONST CHAR8  *AsciiString,
+  IN  UINTN        Length
   )
 {
   CHAR16  *UnicodeString;
@@ -129,13 +132,14 @@ AsciiStrCopyToUnicode (
   }
 
   UnicodeStringSize = (Length + 1) * sizeof (CHAR16);
-  UnicodeString = AllocatePool (UnicodeStringSize);
+  UnicodeString     = AllocatePool (UnicodeStringSize);
 
   if (UnicodeString != NULL) {
     UnicodeStringWalker = UnicodeString;
     while (*AsciiString != '\0' && Length--) {
       *(UnicodeStringWalker++) = *(AsciiString++);
     }
+
     *UnicodeStringWalker = L'\0';
   }
 
@@ -158,13 +162,13 @@ AsciiUint64ToLowerHex (
     return FALSE;
   }
 
-  *Buffer++   = '0';
-  *Buffer++   = 'x';
+  *Buffer++ = '0';
+  *Buffer++ = 'x';
 
   if (Value > 0) {
     BufferSize -= 2;
     for (Printed = FALSE, Index = MaxShifts; Index <= MaxShifts; Index -= 4) {
-      Curr     = (UINT8) (RShiftU64 (Value, Index) & 0xFU);
+      Curr     = (UINT8)(RShiftU64 (Value, Index) & 0xFU);
       Printed |= Curr > 0;
       if (Printed) {
         *Buffer++ = "0123456789abcdef"[Curr];
@@ -184,9 +188,9 @@ AsciiUint64ToLowerHex (
 EFI_STATUS
 EFIAPI
 OcAsciiSafeSPrint (
-  OUT CHAR8         *StartOfBuffer,
-  IN  UINTN         BufferSize,
-  IN  CONST CHAR8   *FormatString,
+  OUT CHAR8        *StartOfBuffer,
+  IN  UINTN        BufferSize,
+  IN  CONST CHAR8  *FormatString,
   ...
   )
 {
@@ -220,9 +224,9 @@ OcAsciiSafeSPrint (
 INTN
 EFIAPI
 OcAsciiStrniCmp (
-  IN CONST CHAR8   *FirstString,
-  IN CONST CHAR8   *SecondString,
-  IN UINTN         Length
+  IN CONST CHAR8  *FirstString,
+  IN CONST CHAR8  *SecondString,
+  IN UINTN        Length
   )
 {
   CHAR8  UpperFirstString;
@@ -244,7 +248,8 @@ OcAsciiStrniCmp (
   while ((*FirstString != '\0') &&
          (*SecondString != '\0') &&
          (UpperFirstString == UpperSecondString) &&
-         (Length > 1)) {
+         (Length > 1))
+  {
     FirstString++;
     SecondString++;
     UpperFirstString  = AsciiCharToUpper (*FirstString);
@@ -258,55 +263,59 @@ OcAsciiStrniCmp (
 BOOLEAN
 EFIAPI
 OcAsciiEndsWith (
-  IN CONST CHAR8      *String,
-  IN CONST CHAR8      *SearchString,
-  IN BOOLEAN          CaseInsensitiveMatch
+  IN CONST CHAR8  *String,
+  IN CONST CHAR8  *SearchString,
+  IN BOOLEAN      CaseInsensitiveMatch
   )
 {
-  UINTN   StringLength;
-  UINTN   SearchStringLength;
+  UINTN  StringLength;
+  UINTN  SearchStringLength;
 
   ASSERT (String != NULL);
   ASSERT (SearchString != NULL);
 
-  StringLength        = AsciiStrLen (String);
-  SearchStringLength  = AsciiStrLen (SearchString);
+  StringLength       = AsciiStrLen (String);
+  SearchStringLength = AsciiStrLen (SearchString);
 
   if (CaseInsensitiveMatch) {
     return StringLength >= SearchStringLength
-      && OcAsciiStrniCmp (&String[StringLength - SearchStringLength], SearchString, SearchStringLength) == 0;
+           && OcAsciiStrniCmp (&String[StringLength - SearchStringLength], SearchString, SearchStringLength) == 0;
   }
+
   return StringLength >= SearchStringLength
-    && AsciiStrnCmp (&String[StringLength - SearchStringLength], SearchString, SearchStringLength) == 0;
+         && AsciiStrnCmp (&String[StringLength - SearchStringLength], SearchString, SearchStringLength) == 0;
 }
 
 BOOLEAN
 EFIAPI
 OcAsciiStartsWith (
-  IN CONST CHAR8      *String,
-  IN CONST CHAR8      *SearchString,
-  IN BOOLEAN          CaseInsensitiveMatch
+  IN CONST CHAR8  *String,
+  IN CONST CHAR8  *SearchString,
+  IN BOOLEAN      CaseInsensitiveMatch
   )
 {
-  CHAR8   First;
-  CHAR8   Second;
+  CHAR8  First;
+  CHAR8  Second;
 
   ASSERT (String != NULL);
   ASSERT (SearchString != NULL);
 
   while (TRUE) {
-    First = *String++;
+    First  = *String++;
     Second = *SearchString++;
     if (Second == '\0') {
       return TRUE;
     }
+
     if (First == '\0') {
       return FALSE;
     }
+
     if (CaseInsensitiveMatch) {
       First  = AsciiCharToUpper (First);
       Second = AsciiCharToUpper (Second);
     }
+
     if (First != Second) {
       return FALSE;
     }
@@ -316,32 +325,33 @@ OcAsciiStartsWith (
 CHAR8 *
 EFIAPI
 OcAsciiStriStr (
-  IN      CONST CHAR8              *String,
-  IN      CONST CHAR8              *SearchString
+  IN      CONST CHAR8  *String,
+  IN      CONST CHAR8  *SearchString
   )
 {
-  CONST CHAR8 *FirstMatch;
-  CONST CHAR8 *SearchStringTmp;
+  CONST CHAR8  *FirstMatch;
+  CONST CHAR8  *SearchStringTmp;
 
   ASSERT (AsciiStrSize (String) != 0);
   ASSERT (AsciiStrSize (SearchString) != 0);
 
   if (*SearchString == '\0') {
-    return (CHAR8 *) String;
+    return (CHAR8 *)String;
   }
 
   while (*String != '\0') {
     SearchStringTmp = SearchString;
-    FirstMatch = String;
+    FirstMatch      = String;
 
-    while ((AsciiCharToUpper (*String) == AsciiCharToUpper (*SearchStringTmp))
-            && (*String != '\0')) {
+    while (  (AsciiCharToUpper (*String) == AsciiCharToUpper (*SearchStringTmp))
+          && (*String != '\0'))
+    {
       String++;
       SearchStringTmp++;
     }
 
     if (*SearchStringTmp == '\0') {
-      return (CHAR8 *) FirstMatch;
+      return (CHAR8 *)FirstMatch;
     }
 
     if (*String == '\0') {
@@ -357,8 +367,8 @@ OcAsciiStriStr (
 CHAR8 *
 EFIAPI
 OcAsciiStrChr (
-  IN      CONST CHAR8              *String,
-  IN            CHAR8              Char
+  IN      CONST CHAR8  *String,
+  IN            CHAR8  Char
   )
 {
   ASSERT (AsciiStrSize (String) != 0);
@@ -368,7 +378,7 @@ OcAsciiStrChr (
     // Return immediately when matching first occurrence of Char.
     //
     if (*String == Char) {
-      return (CHAR8 *) String;
+      return (CHAR8 *)String;
     }
 
     ++String;
@@ -380,11 +390,11 @@ OcAsciiStrChr (
 CHAR8 *
 EFIAPI
 OcAsciiStrrChr (
-  IN      CONST CHAR8              *String,
-  IN            CHAR8              Char
+  IN      CONST CHAR8  *String,
+  IN            CHAR8  Char
   )
 {
-  CHAR8 *Save;
+  CHAR8  *Save;
 
   ASSERT (AsciiStrSize (String) != 0);
 
@@ -395,7 +405,7 @@ OcAsciiStrrChr (
     // Record the last occurrence of Char.
     //
     if (*String == Char) {
-      Save = (CHAR8 *) String;
+      Save = (CHAR8 *)String;
     }
 
     ++String;
@@ -446,8 +456,8 @@ OcAsciiStringNPrintable (
 EFI_STATUS
 EFIAPI
 OcAsciiStrToRawGuid (
-  IN  CONST CHAR8        *String,
-  OUT GUID               *Guid
+  IN  CONST CHAR8  *String,
+  OUT GUID         *Guid
   )
 {
   EFI_STATUS  Status;
@@ -478,13 +488,13 @@ AsciiFilterString (
       // Remove all unicode characters.
       //
       *String = '_';
-    } else if (SingleLine && (*String == '\r' || *String == '\n')) {
+    } else if (SingleLine && ((*String == '\r') || (*String == '\n'))) {
       //
       // Stop after printing one line.
       //
       *String = '\0';
       break;
-    } else if (*String < 0x20 || *String == 0x7F) {
+    } else if ((*String < 0x20) || (*String == 0x7F)) {
       //
       // Drop all unprintable spaces but space including tabs.
       //
@@ -523,6 +533,7 @@ OcAsciiPrintBuffer (
     if (OcOverflowMulUN (*AsciiBufferSize, 2, &NewBufferSize)) {
       return;
     }
+
     NewBuffer = ReallocatePool (*AsciiBufferSize, NewBufferSize, *AsciiBuffer);
     if (NewBuffer == NULL) {
       FreePool (*AsciiBuffer);
@@ -533,8 +544,8 @@ OcAsciiPrintBuffer (
       return;
     }
 
-    *AsciiBuffer      = NewBuffer;
-    *AsciiBufferSize  = NewBufferSize;
+    *AsciiBuffer     = NewBuffer;
+    *AsciiBufferSize = NewBufferSize;
 
     AsciiStrCatS (*AsciiBuffer, *AsciiBufferSize, Tmp);
   }
@@ -542,17 +553,18 @@ OcAsciiPrintBuffer (
 
 CHAR8 *
 OcAsciiToLower (
-  CHAR8 *Str
+  CHAR8  *Str
   )
 {
-  UINTN Index;
+  UINTN  Index;
 
   ASSERT (Str != NULL);
 
   for (Index = 0; Str[Index] != '\0'; ++Index) {
-    if (Str[Index] >= 'A' && Str[Index] <= 'Z') {
+    if ((Str[Index] >= 'A') && (Str[Index] <= 'Z')) {
       Str[Index] -= ('A' - 'a');
     }
   }
+
   return Str;
 }

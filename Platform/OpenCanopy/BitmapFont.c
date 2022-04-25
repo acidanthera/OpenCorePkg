@@ -22,11 +22,11 @@ BmfGetChar (
   IN UINT32             Char
   )
 {
-  CONST BMF_CHAR *Chars;
-  UINTN          Left;
-  UINTN          Right;
-  UINTN          Median;
-  UINTN          Index;
+  CONST BMF_CHAR  *Chars;
+  UINTN           Left;
+  UINTN           Right;
+  UINTN           Median;
+  UINTN           Index;
 
   ASSERT (Context != NULL);
 
@@ -36,7 +36,7 @@ BmfGetChar (
     //
     // Binary Search for the character as the list is sorted.
     //
-    Left  = 0;
+    Left = 0;
     //
     // As duplicates are not allowed, Right can be ceiled with Char.
     //
@@ -49,7 +49,7 @@ BmfGetChar (
       if (Chars[Median].id == Char) {
         return &Chars[Median];
       } else if (Chars[Median].id < Char) {
-        Left  = Median + 1;
+        Left = Median + 1;
       } else {
         Right = Median - 1;
       }
@@ -74,13 +74,13 @@ BmfGetKerningPair (
   IN CHAR16             Char2
   )
 {
-  CONST BMF_KERNING_PAIR *Pairs;
+  CONST BMF_KERNING_PAIR  *Pairs;
 
-  UINTN                  Left;
-  UINTN                  Right;
-  UINTN                  Median;
+  UINTN  Left;
+  UINTN  Right;
+  UINTN  Median;
 
-  UINTN                  Index;
+  UINTN  Index;
 
   ASSERT (Context != NULL);
 
@@ -109,10 +109,11 @@ BmfGetKerningPair (
         return &Pairs[Median];
       } else if (Pairs[Median].second < Char2) {
         for (
-          Index = Median + 1;
-          Index < Context->NumKerningPairs && Pairs[Index].first == Char1;
-          ++Index
-          ) {
+             Index = Median + 1;
+             Index < Context->NumKerningPairs && Pairs[Index].first == Char1;
+             ++Index
+             )
+        {
           if (Pairs[Index].second == Char2) {
             return &Pairs[Index];
           }
@@ -133,7 +134,7 @@ BmfGetKerningPair (
 
       break;
     } else if (Pairs[Median].first < Char1) {
-      Left  = Median + 1;
+      Left = Median + 1;
     } else {
       Right = Median - 1;
     }
@@ -149,20 +150,20 @@ BmfContextInitialize (
   IN  UINT32       FileSize
   )
 {
-  BOOLEAN                Result;
+  BOOLEAN  Result;
 
-  CONST BMF_HEADER       *Header;
-  CONST BMF_BLOCK_HEADER *Block;
-  UINTN                  Index;
+  CONST BMF_HEADER        *Header;
+  CONST BMF_BLOCK_HEADER  *Block;
+  UINTN                   Index;
 
-  UINT16                 MaxHeight;
-  INT32                  Height;
-  INT32                  Width;
-  INT32                  Advance;
-  CONST BMF_CHAR         *Chars;
-  CONST BMF_KERNING_PAIR *Pairs;
+  UINT16                  MaxHeight;
+  INT32                   Height;
+  INT32                   Width;
+  INT32                   Advance;
+  CONST BMF_CHAR          *Chars;
+  CONST BMF_KERNING_PAIR  *Pairs;
 
-  CONST BMF_CHAR         *Char;
+  CONST BMF_CHAR  *Char;
 
   ASSERT (Context    != NULL);
   ASSERT (FileBuffer != NULL);
@@ -173,15 +174,16 @@ BmfContextInitialize (
   // Limit file size for sanity reason and to guarantee wrapping around in BS
   // is not going to happen.
   //
-  if (FileSize < sizeof (*Header) || FileSize > BASE_2MB) {
+  if ((FileSize < sizeof (*Header)) || (FileSize > BASE_2MB)) {
     DEBUG ((DEBUG_WARN, "BMF: FileSize insane\n"));
     return FALSE;
   }
 
-  if (Header->signature[0] != 'B'
-   || Header->signature[1] != 'M'
-   || Header->signature[2] != 'F'
-   || Header->version      != 3) {
+  if (  (Header->signature[0] != 'B')
+     || (Header->signature[1] != 'M')
+     || (Header->signature[2] != 'F')
+     || (Header->version      != 3))
+  {
     DEBUG ((DEBUG_WARN, "BMF: Header insane\n"));
     return FALSE;
   }
@@ -189,7 +191,7 @@ BmfContextInitialize (
   ZeroMem (Context, sizeof (*Context));
 
   FileSize -= sizeof (*Header);
-  Block = (CONST BMF_BLOCK_HEADER *)(Header + 1);
+  Block     = (CONST BMF_BLOCK_HEADER *)(Header + 1);
 
   while (FileSize >= sizeof (*Block)) {
     FileSize -= sizeof (*Block);
@@ -197,6 +199,7 @@ BmfContextInitialize (
       DEBUG ((DEBUG_WARN, "BMF: Block insane %u vs %u\n", FileSize, Block->size));
       return FALSE;
     }
+
     FileSize -= Block->size;
 
     switch (Block->identifier) {
@@ -322,8 +325,8 @@ BmfContextInitialize (
     return FALSE;
   }
 
-  Chars = Context->Chars;
-  MaxHeight  = 0;
+  Chars     = Context->Chars;
+  MaxHeight = 0;
 
   for (Index = 0; Index < Context->NumChars; ++Index) {
     Result = OcOverflowAddS32 (
@@ -332,20 +335,21 @@ BmfContextInitialize (
                &Height
                );
     Result |= OcOverflowAddS32 (
-               Chars[Index].xoffset,
-               Chars[Index].width,
-               &Width
-               );
+                Chars[Index].xoffset,
+                Chars[Index].width,
+                &Width
+                );
     Result |= OcOverflowAddS32 (
-               Chars[Index].xoffset,
-               Chars[Index].xadvance,
-               &Advance
-               );
-    if (Result
-     || 0 > Height || Height > MAX_UINT16
-     || 0 > Width || Width > MAX_UINT16
-     || 0 > Advance || Advance > MAX_UINT16
-     || Chars[Index].xadvance < 0) {
+                Chars[Index].xoffset,
+                Chars[Index].xadvance,
+                &Advance
+                );
+    if (  Result
+       || (0 > Height) || (Height > MAX_UINT16)
+       || (0 > Width) || (Width > MAX_UINT16)
+       || (0 > Advance) || (Advance > MAX_UINT16)
+       || (Chars[Index].xadvance < 0))
+    {
       DEBUG ((
         DEBUG_WARN,
         "BMF: Char insane\n"
@@ -373,7 +377,7 @@ BmfContextInitialize (
       return FALSE;
     }
 
-    MaxHeight = MAX (MaxHeight, (UINT16) Height);
+    MaxHeight = MAX (MaxHeight, (UINT16)Height);
     //
     // This only yields unexpected but not undefined behaviour when not met,
     // hence it is fine verifying it only DEBUG mode.
@@ -388,13 +392,15 @@ BmfContextInitialize (
         return FALSE;
       }
     }
+
     DEBUG_CODE_END ();
   }
 
-  Context->Height  = (UINT16) MaxHeight;
+  Context->Height = (UINT16)MaxHeight;
 
   Pairs = Context->KerningPairs;
-  if (Pairs != NULL) { // According to the docs, kerning pairs are optional
+  if (Pairs != NULL) {
+    // According to the docs, kerning pairs are optional
     for (Index = 0; Index < Context->NumKerningPairs; ++Index) {
       Char = BmfGetChar (Context, Pairs[Index].first);
       if (Char == NULL) {
@@ -416,19 +422,21 @@ BmfContextInitialize (
                   Pairs[Index].amount,
                   &Advance
                   );
-      if (Result
-       || 0 > Width || Width > MAX_UINT16
-       || 0 > Advance || Advance > MAX_UINT16) {
-         DEBUG ((
-           DEBUG_WARN,
-           "BMF: Pair at index %d insane: first %u, second %u, amount %d\n",
-           Index,
-           Pairs[Index].first,
-           Pairs[Index].second,
-           Pairs[Index].amount
-           ));
+      if (  Result
+         || (0 > Width) || (Width > MAX_UINT16)
+         || (0 > Advance) || (Advance > MAX_UINT16))
+      {
+        DEBUG ((
+          DEBUG_WARN,
+          "BMF: Pair at index %d insane: first %u, second %u, amount %d\n",
+          Index,
+          Pairs[Index].first,
+          Pairs[Index].second,
+          Pairs[Index].amount
+          ));
         return FALSE;
       }
+
       //
       // This only yields unexpected but not undefined behaviour when not met,
       // hence it is fine verifying it only DEBUG mode.
@@ -445,12 +453,14 @@ BmfContextInitialize (
             DEBUG ((DEBUG_WARN, "BMF: Second Character IDs are not sorted\n"));
             return FALSE;
           }
+
           if (Pairs[Index - 1].second == Pairs[Index].second) {
             DEBUG ((DEBUG_WARN, "BMF: Second Character ID duplicate\n"));
             return FALSE;
           }
         }
       }
+
       DEBUG_CODE_END ();
     }
   }
@@ -459,11 +469,11 @@ BmfContextInitialize (
 }
 
 typedef struct {
-  UINT16                 Width;
-  UINT16                 Height;
-  INT16                  OffsetY;
-  CONST BMF_CHAR         *Chars[];
-//CONST BMF_KERNING_PAIR *KerningPairs[];
+  UINT16            Width;
+  UINT16            Height;
+  INT16             OffsetY;
+  CONST BMF_CHAR    *Chars[];
+  // CONST BMF_KERNING_PAIR *KerningPairs[];
 } BMF_TEXT_INFO;
 
 BMF_TEXT_INFO *
@@ -475,17 +485,17 @@ BmfGetTextInfo (
   IN UINT8              PosY
   )
 {
-  BOOLEAN                Result;
+  BOOLEAN  Result;
 
-  BMF_TEXT_INFO          *TextInfo;
-  CONST BMF_KERNING_PAIR **InfoPairs;
+  BMF_TEXT_INFO           *TextInfo;
+  CONST BMF_KERNING_PAIR  **InfoPairs;
 
-  INT32                  Width;
-  INT32                  CurWidth;
+  INT32  Width;
+  INT32  CurWidth;
 
-  CONST BMF_CHAR         *Char;
-  CONST BMF_KERNING_PAIR *Pair;
-  UINTN                  Index;
+  CONST BMF_CHAR          *Char;
+  CONST BMF_KERNING_PAIR  *Pair;
+  UINTN                   Index;
 
   ASSERT (Context != NULL);
   ASSERT (String  != NULL);
@@ -504,17 +514,18 @@ BmfGetTextInfo (
 
   TextInfo = AllocatePool (
                sizeof (*TextInfo)
-                 + StringLen * sizeof (BMF_CHAR *)
-                 + StringLen * sizeof (BMF_BLOCK_KERNING_PAIRS *)
+               + StringLen * sizeof (BMF_CHAR *)
+               + StringLen * sizeof (BMF_BLOCK_KERNING_PAIRS *)
                );
   if (TextInfo == NULL) {
     DEBUG ((DEBUG_WARN, "BMF: Out of res\n"));
     return NULL;
   }
+
   InfoPairs = (CONST BMF_KERNING_PAIR **)&TextInfo->Chars[StringLen];
 
   TextInfo->Chars[0] = Char;
-  Width = (INT32) PosX + Char->xadvance;
+  Width              = (INT32)PosX + Char->xadvance;
 
   for (Index = 1; Index < StringLen; ++Index) {
     ASSERT (String[Index] != 0);
@@ -525,6 +536,7 @@ BmfGetTextInfo (
       FreePool (TextInfo);
       return NULL;
     }
+
     CurWidth = Char->xadvance;
 
     Pair = BmfGetKerningPair (Context, String[Index - 1], String[Index]);
@@ -553,7 +565,7 @@ BmfGetTextInfo (
     return NULL;
   }
 
-  TextInfo->Width   = (UINT16)Width;
+  TextInfo->Width = (UINT16)Width;
   ASSERT (PosY + Context->Height >= PosY);
   TextInfo->Height  = PosY + Context->Height;
   TextInfo->OffsetY = PosY;
@@ -562,19 +574,19 @@ BmfGetTextInfo (
 
 STATIC
 EFI_GRAPHICS_OUTPUT_BLT_PIXEL
-mBlack = { 0, 0, 0, 255 };
+  mBlack = { 0, 0, 0, 255 };
 
 STATIC
 EFI_GRAPHICS_OUTPUT_BLT_PIXEL
-mWhite = { 255, 255, 255, 255 };
+  mWhite = { 255, 255, 255, 255 };
 
 STATIC
 VOID
 BlendMem (
-  EFI_GRAPHICS_OUTPUT_BLT_PIXEL *Dst,
-  EFI_GRAPHICS_OUTPUT_BLT_PIXEL *AlphaSrc,
-  EFI_GRAPHICS_OUTPUT_BLT_PIXEL *Color,
-  UINTN                         PixelCount
+  EFI_GRAPHICS_OUTPUT_BLT_PIXEL  *Dst,
+  EFI_GRAPHICS_OUTPUT_BLT_PIXEL  *AlphaSrc,
+  EFI_GRAPHICS_OUTPUT_BLT_PIXEL  *Color,
+  UINTN                          PixelCount
   )
 {
   UINTN  Index;
@@ -585,8 +597,9 @@ BlendMem (
       // We assume that the font is generated by dpFontBaker
       // and has only gray channel, which should be interpreted as alpha.
       //
-      GuiBlendPixel(Dst, Color, AlphaSrc->Red);
+      GuiBlendPixel (Dst, Color, AlphaSrc->Red);
     }
+
     ++Dst;
     ++AlphaSrc;
   }
@@ -601,36 +614,36 @@ GuiGetLabel (
   IN  BOOLEAN                 Inverted
   )
 {
-  EFI_GRAPHICS_OUTPUT_BLT_PIXEL *Buffer;
-  BMF_TEXT_INFO                 *TextInfo;
-  CONST BMF_KERNING_PAIR        **InfoPairs;
-  UINTN                         Index;
+  EFI_GRAPHICS_OUTPUT_BLT_PIXEL  *Buffer;
+  BMF_TEXT_INFO                  *TextInfo;
+  CONST BMF_KERNING_PAIR         **InfoPairs;
+  UINTN                          Index;
 
-  UINT16                        RowIndex;
-  UINT32                        SourceRowOffset;
-  UINT32                        TargetRowOffset;
-  INT32                         TargetCharX;
-  INT32                         InitialCharX;
-  INT32                         InitialWidthOffset;
-  INT32                         OffsetY;
+  UINT16  RowIndex;
+  UINT32  SourceRowOffset;
+  UINT32  TargetRowOffset;
+  INT32   TargetCharX;
+  INT32   InitialCharX;
+  INT32   InitialWidthOffset;
+  INT32   OffsetY;
 
   ASSERT (LabelImage != NULL);
   ASSERT (Context    != NULL);
   ASSERT (String     != NULL);
 
   TextInfo = BmfGetTextInfo (
-    &Context->BmfContext,
-    String,
-    StringLen,
-    BOOT_ENTRY_LABEL_TEXT_OFFSET * Context->Scale,
-    BOOT_ENTRY_LABEL_TEXT_OFFSET * Context->Scale
-    );
+               &Context->BmfContext,
+               String,
+               StringLen,
+               BOOT_ENTRY_LABEL_TEXT_OFFSET * Context->Scale,
+               BOOT_ENTRY_LABEL_TEXT_OFFSET * Context->Scale
+               );
   if (TextInfo == NULL) {
     DEBUG ((DEBUG_WARN, "BMF: GetTextInfo failed\n"));
     return FALSE;
   }
 
-  Buffer = AllocateZeroPool ((UINT32) TextInfo->Width * (UINT32) TextInfo->Height * sizeof (*Buffer));
+  Buffer = AllocateZeroPool ((UINT32)TextInfo->Width * (UINT32)TextInfo->Height * sizeof (*Buffer));
   if (Buffer == NULL) {
     DEBUG ((DEBUG_WARN, "BMF: out of res\n"));
     FreePool (TextInfo);
@@ -654,18 +667,19 @@ GuiGetLabel (
         -OffsetY
         ));
     }
+
     ASSERT (TextInfo->Chars[Index]->yoffset + TextInfo->OffsetY >= 0);
 
     for (
-      RowIndex = 0,
-        SourceRowOffset = TextInfo->Chars[Index]->y * Context->FontImage.Width,
-        TargetRowOffset = OffsetY * TextInfo->Width;
-      RowIndex < TextInfo->Chars[Index]->height;
-      ++RowIndex,
-        SourceRowOffset += Context->FontImage.Width,
-        TargetRowOffset += TextInfo->Width
-      ) {
-
+         RowIndex = 0,
+         SourceRowOffset = TextInfo->Chars[Index]->y * Context->FontImage.Width,
+         TargetRowOffset = OffsetY * TextInfo->Width;
+         RowIndex < TextInfo->Chars[Index]->height;
+         ++RowIndex,
+         SourceRowOffset += Context->FontImage.Width,
+         TargetRowOffset += TextInfo->Width
+         )
+    {
       if (Inverted) {
         BlendMem (
           &Buffer[TargetRowOffset + TargetCharX + TextInfo->Chars[Index]->xoffset + InitialCharX],
@@ -710,8 +724,8 @@ GuiFontConstruct (
   IN  UINT8             Scale
   )
 {
-  EFI_STATUS    Status;
-  BOOLEAN       Result;
+  EFI_STATUS  Status;
+  BOOLEAN     Result;
 
   ASSERT (Context       != NULL);
   ASSERT (FontImage     != NULL);
@@ -722,12 +736,12 @@ GuiFontConstruct (
   ZeroMem (Context, sizeof (*Context));
 
   Context->KerningData = FileBuffer;
-  Status = GuiPngToImage (
-    &Context->FontImage,
-    FontImage,
-    FontImageSize,
-    FALSE
-    );
+  Status               = GuiPngToImage (
+                           &Context->FontImage,
+                           FontImage,
+                           FontImageSize,
+                           FALSE
+                           );
   FreePool (FontImage);
 
   if (EFI_ERROR (Status)) {
@@ -757,6 +771,7 @@ GuiFontDestruct (
     FreePool (Context->FontImage.Buffer);
     Context->FontImage.Buffer = NULL;
   }
+
   if (Context->KerningData != NULL) {
     FreePool (Context->KerningData);
     Context->KerningData = NULL;

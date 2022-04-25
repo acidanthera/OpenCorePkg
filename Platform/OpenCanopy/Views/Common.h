@@ -4,9 +4,9 @@
 #include "../GuiApp.h"
 
 typedef struct {
-  GUI_OBJ_CHILD Hdr;
-  UINT8         ImageId;
-  UINT8         ImageState;
+  GUI_OBJ_CHILD    Hdr;
+  UINT8            ImageId;
+  UINT8            ImageState;
 } GUI_OBJ_CLICKABLE;
 
 VOID
@@ -47,40 +47,40 @@ CommonViewInitialize (
 
 VOID
 InternalCommonViewDraw (
-  IN OUT GUI_OBJ                 *This,
-  IN OUT GUI_DRAWING_CONTEXT     *DrawContext,
-  IN     BOOT_PICKER_GUI_CONTEXT *Context,
-  IN     INT64                   BaseX,
-  IN     INT64                   BaseY,
-  IN     UINT32                  OffsetX,
-  IN     UINT32                  OffsetY,
-  IN     UINT32                  Width,
-  IN     UINT32                  Height,
-  IN     UINT8                   Opacity
+  IN OUT GUI_OBJ                  *This,
+  IN OUT GUI_DRAWING_CONTEXT      *DrawContext,
+  IN     BOOT_PICKER_GUI_CONTEXT  *Context,
+  IN     INT64                    BaseX,
+  IN     INT64                    BaseY,
+  IN     UINT32                   OffsetX,
+  IN     UINT32                   OffsetY,
+  IN     UINT32                   Width,
+  IN     UINT32                   Height,
+  IN     UINT8                    Opacity
   );
 
 GUI_OBJ *
 InternalCommonViewPtrEvent (
-  IN OUT GUI_OBJ                 *This,
-  IN OUT GUI_DRAWING_CONTEXT     *DrawContext,
-  IN     BOOT_PICKER_GUI_CONTEXT *Context,
-  IN     INT64                   BaseX,
-  IN     INT64                   BaseY,
-  IN     CONST GUI_PTR_EVENT     *Event
+  IN OUT GUI_OBJ                  *This,
+  IN OUT GUI_DRAWING_CONTEXT      *DrawContext,
+  IN     BOOT_PICKER_GUI_CONTEXT  *Context,
+  IN     INT64                    BaseX,
+  IN     INT64                    BaseY,
+  IN     CONST GUI_PTR_EVENT      *Event
   );
 
 VOID
 InternalCommonSimpleButtonDraw (
-  IN OUT GUI_OBJ                 *This,
-  IN OUT GUI_DRAWING_CONTEXT     *DrawContext,
-  IN     BOOT_PICKER_GUI_CONTEXT *Context,
-  IN     INT64                   BaseX,
-  IN     INT64                   BaseY,
-  IN     UINT32                  OffsetX,
-  IN     UINT32                  OffsetY,
-  IN     UINT32                  Width,
-  IN     UINT32                  Height,
-  IN     UINT8                   Opacity
+  IN OUT GUI_OBJ                  *This,
+  IN OUT GUI_DRAWING_CONTEXT      *DrawContext,
+  IN     BOOT_PICKER_GUI_CONTEXT  *Context,
+  IN     INT64                    BaseX,
+  IN     INT64                    BaseY,
+  IN     UINT32                   OffsetX,
+  IN     UINT32                   OffsetY,
+  IN     UINT32                   Width,
+  IN     UINT32                   Height,
+  IN     UINT8                    Opacity
   );
 
 typedef enum {
@@ -91,18 +91,18 @@ typedef enum {
 
 UINT8
 InternalCommonSimpleButtonPtrEvent (
-  IN OUT GUI_OBJ                 *This,
-  IN OUT GUI_DRAWING_CONTEXT     *DrawContext,
-  IN     BOOT_PICKER_GUI_CONTEXT *Context,
-  IN     INT64                   BaseX,
-  IN     INT64                   BaseY,
-  IN     CONST GUI_PTR_EVENT     *Event
+  IN OUT GUI_OBJ                  *This,
+  IN OUT GUI_DRAWING_CONTEXT      *DrawContext,
+  IN     BOOT_PICKER_GUI_CONTEXT  *Context,
+  IN     INT64                    BaseX,
+  IN     INT64                    BaseY,
+  IN     CONST GUI_PTR_EVENT      *Event
   );
 
-extern GUI_OBJ_CHILD     mCommonActionButtonsContainer;
-extern GUI_OBJ_CLICKABLE mCommonRestart;
-extern GUI_OBJ_CLICKABLE mCommonShutDown;
+extern GUI_OBJ_CHILD      mCommonActionButtonsContainer;
+extern GUI_OBJ_CLICKABLE  mCommonRestart;
+extern GUI_OBJ_CLICKABLE  mCommonShutDown;
 
-extern GUI_INTERPOLATION mCommonIntroOpacityInterpol;
+extern GUI_INTERPOLATION  mCommonIntroOpacityInterpol;
 
 #endif // VIEWS_COMMON_H_

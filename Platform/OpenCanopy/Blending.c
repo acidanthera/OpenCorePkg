@@ -27,7 +27,7 @@ InternalBlendPixel (
   IN     CONST EFI_GRAPHICS_OUTPUT_BLT_PIXEL  *FrontPixel
   )
 {
-  UINT8 InvFrontOpacity;
+  UINT8  InvFrontOpacity;
 
   InvFrontOpacity = (0xFF - FrontPixel->Reserved);
 
@@ -63,7 +63,8 @@ GuiBlendPixelOpaque (
   IN     UINT8                                Opacity
   )
 {
-  EFI_GRAPHICS_OUTPUT_BLT_PIXEL OpacFrontPixel;
+  EFI_GRAPHICS_OUTPUT_BLT_PIXEL  OpacFrontPixel;
+
   //
   // FIXME: Optimise with SIMD or such.
   // qt_blend_argb32_on_argb32 in QT
@@ -86,9 +87,9 @@ GuiBlendPixelOpaque (
     }
   }
 
-  OpacFrontPixel.Blue     = RGB_APPLY_OPACITY (FrontPixel->Blue,  Opacity);
-  OpacFrontPixel.Green    = RGB_APPLY_OPACITY (FrontPixel->Green, Opacity);
-  OpacFrontPixel.Red      = RGB_APPLY_OPACITY (FrontPixel->Red,   Opacity);
+  OpacFrontPixel.Blue  = RGB_APPLY_OPACITY (FrontPixel->Blue, Opacity);
+  OpacFrontPixel.Green = RGB_APPLY_OPACITY (FrontPixel->Green, Opacity);
+  OpacFrontPixel.Red   = RGB_APPLY_OPACITY (FrontPixel->Red, Opacity);
 
   InternalBlendPixel (BackPixel, &OpacFrontPixel);
 }

@@ -104,16 +104,17 @@ MemoryFreeAbove4G.Physicalstart <-----------------------------------------------
 
 VOID
 EnterDxeMain (
-  IN VOID *StackTop,
-  IN VOID *DxeCoreEntryPoint,
-  IN VOID *Hob,
-  IN VOID *PageTable
+  IN VOID  *StackTop,
+  IN VOID  *DxeCoreEntryPoint,
+  IN VOID  *Hob,
+  IN VOID  *PageTable
   );
 
 VOID
 DxeInit (
   IN EFILDRHANDOFF  *Handoff
   )
+
 /*++
 
   Routine Description:
@@ -129,15 +130,15 @@ Returns:
 
 --*/
 {
-  VOID                  *StackTop;
-  VOID                  *StackBottom;
-  VOID                  *PageTableBase;
-  VOID                  *MemoryTopOnDescriptor;
-  VOID                  *MemoryDescriptor;
-  VOID                  *NvStorageBase;
-  EFILDRHANDOFF         HandoffCopy;
+  VOID           *StackTop;
+  VOID           *StackBottom;
+  VOID           *PageTableBase;
+  VOID           *MemoryTopOnDescriptor;
+  VOID           *MemoryDescriptor;
+  VOID           *NvStorageBase;
+  EFILDRHANDOFF  HandoffCopy;
 
-  CopyMem ((VOID*) &HandoffCopy, (VOID*) Handoff, sizeof (EFILDRHANDOFF));
+  CopyMem ((VOID *)&HandoffCopy, (VOID *)Handoff, sizeof (EFILDRHANDOFF));
   Handoff = &HandoffCopy;
 
   //
@@ -164,7 +165,7 @@ Returns:
   //   3.1 NV data
   NvStorageBase = PrepareHobNvStorage (MemoryTopOnDescriptor);
   //   3.2 Stack
-  StackTop = NvStorageBase;
+  StackTop    = NvStorageBase;
   StackBottom = PrepareHobStack (StackTop);
   //   3.3 Page Table
   PageTableBase = PreparePageTable (StackBottom, gHob->Cpu.SizeOfMemorySpace);
@@ -200,6 +201,6 @@ _ModuleEntryPointReal (
   IN EFILDRHANDOFF  *Handoff
   )
 {
-  DxeInit(Handoff);
+  DxeInit (Handoff);
   return EFI_SUCCESS;
 }

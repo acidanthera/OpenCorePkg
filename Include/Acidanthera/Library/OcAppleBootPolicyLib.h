@@ -94,10 +94,10 @@ OcBootPolicyGetBootFile (
 **/
 EFI_STATUS
 OcBootPolicyGetBootFileEx (
-  IN  EFI_HANDLE                      Device,
-  IN  CONST CHAR16                    **PredefinedPaths,
-  IN  UINTN                           NumPredefinedPaths,
-  OUT EFI_DEVICE_PATH_PROTOCOL        **FilePath
+  IN  EFI_HANDLE                Device,
+  IN  CONST CHAR16              **PredefinedPaths,
+  IN  UINTN                     NumPredefinedPaths,
+  OUT EFI_DEVICE_PATH_PROTOCOL  **FilePath
   );
 
 /**
@@ -173,16 +173,16 @@ OcBootPolicyGetAllApfsRecoveryFilePath (
   OUT UINTN       *NumberOfEntries
   );
 
-extern CONST CHAR16 *gAppleBootPolicyPredefinedPaths[];
+extern CONST CHAR16  *gAppleBootPolicyPredefinedPaths[];
 
 ///
 /// All Apple Boot Policy predefined booter paths.
 ///
-extern CONST UINTN gAppleBootPolicyNumPredefinedPaths;
+extern CONST UINTN  gAppleBootPolicyNumPredefinedPaths;
 
 ///
 /// Core Apple Boot Policy predefined booter paths.
 ///
-extern CONST UINTN gAppleBootPolicyCoreNumPredefinedPaths;
+extern CONST UINTN  gAppleBootPolicyCoreNumPredefinedPaths;
 
 #endif // OC_APPLE_BOOT_POLICY_LIB_H

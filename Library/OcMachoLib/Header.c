@@ -35,13 +35,13 @@ MachoInitializeContext (
   )
 {
   return Is32Bit ?
-    MachoInitializeContext32 (Context, FileData, FileSize, ContainerOffset) :
-    MachoInitializeContext64 (Context, FileData, FileSize, ContainerOffset);
+         MachoInitializeContext32 (Context, FileData, FileSize, ContainerOffset) :
+         MachoInitializeContext64 (Context, FileData, FileSize, ContainerOffset);
 }
 
 MACH_HEADER_ANY *
 MachoGetMachHeader (
-  IN OUT OC_MACHO_CONTEXT   *Context
+  IN OUT OC_MACHO_CONTEXT  *Context
   )
 {
   ASSERT (Context != NULL);
@@ -69,7 +69,7 @@ MachoGetVmSize (
   ASSERT (Context != NULL);
 
   return Context->Is32Bit ?
-    InternalMachoGetVmSize32 (Context) : InternalMachoGetVmSize64 (Context);
+         InternalMachoGetVmSize32 (Context) : InternalMachoGetVmSize64 (Context);
 }
 
 UINT64
@@ -80,7 +80,7 @@ MachoGetLastAddress (
   ASSERT (Context != NULL);
 
   return Context->Is32Bit ?
-    InternalMachoGetLastAddress32 (Context) : InternalMachoGetLastAddress64 (Context);
+         InternalMachoGetLastAddress32 (Context) : InternalMachoGetLastAddress64 (Context);
 }
 
 MACH_LOAD_COMMAND *
@@ -93,8 +93,8 @@ MachoGetNextCommand (
   ASSERT (Context != NULL);
 
   return Context->Is32Bit ?
-    InternalMachoGetNextCommand32 (Context, LoadCommandType, LoadCommand) :
-    InternalMachoGetNextCommand64 (Context, LoadCommandType, LoadCommand);
+         InternalMachoGetNextCommand32 (Context, LoadCommandType, LoadCommand) :
+         InternalMachoGetNextCommand64 (Context, LoadCommandType, LoadCommand);
 }
 
 MACH_UUID_COMMAND *
@@ -102,7 +102,7 @@ MachoGetUuid (
   IN OUT OC_MACHO_CONTEXT  *Context
   )
 {
-  MACH_UUID_COMMAND *UuidCommand;
+  MACH_UUID_COMMAND  *UuidCommand;
 
   ASSERT (Context != NULL);
 
@@ -121,43 +121,44 @@ MachoGetUuid (
       );
   }
 
-  UuidCommand = (MACH_UUID_COMMAND *) (VOID *) MachoGetNextCommand (
-    Context,
-    MACH_LOAD_COMMAND_UUID,
-    NULL
-    );
-  if (UuidCommand == NULL || UuidCommand->CommandSize != sizeof (*UuidCommand)) {
+  UuidCommand = (MACH_UUID_COMMAND *)(VOID *)MachoGetNextCommand (
+                                               Context,
+                                               MACH_LOAD_COMMAND_UUID,
+                                               NULL
+                                               );
+  if ((UuidCommand == NULL) || (UuidCommand->CommandSize != sizeof (*UuidCommand))) {
     return NULL;
   }
+
   return UuidCommand;
 }
 
 MACH_SEGMENT_COMMAND_ANY *
 MachoGetNextSegment (
-  IN OUT OC_MACHO_CONTEXT               *Context,
-  IN     CONST MACH_SEGMENT_COMMAND_ANY *Segment  OPTIONAL
+  IN OUT OC_MACHO_CONTEXT                *Context,
+  IN     CONST MACH_SEGMENT_COMMAND_ANY  *Segment  OPTIONAL
   )
 {
   ASSERT (Context != NULL);
 
   return Context->Is32Bit ?
-    (MACH_SEGMENT_COMMAND_ANY *) MachoGetNextSegment32 (Context, Segment != NULL ? &Segment->Segment32 : NULL) :
-    (MACH_SEGMENT_COMMAND_ANY *) MachoGetNextSegment64 (Context, Segment != NULL ? &Segment->Segment64 : NULL);
+         (MACH_SEGMENT_COMMAND_ANY *)MachoGetNextSegment32 (Context, Segment != NULL ? &Segment->Segment32 : NULL) :
+         (MACH_SEGMENT_COMMAND_ANY *)MachoGetNextSegment64 (Context, Segment != NULL ? &Segment->Segment64 : NULL);
 }
 
 MACH_SECTION_ANY *
 MachoGetNextSection (
-  IN OUT OC_MACHO_CONTEXT         *Context,
-  IN     MACH_SEGMENT_COMMAND_ANY *Segment,
-  IN     MACH_SECTION_ANY         *Section  OPTIONAL
+  IN OUT OC_MACHO_CONTEXT          *Context,
+  IN     MACH_SEGMENT_COMMAND_ANY  *Segment,
+  IN     MACH_SECTION_ANY          *Section  OPTIONAL
   )
 {
   ASSERT (Context != NULL);
   ASSERT (Segment != NULL);
 
   return Context->Is32Bit ?
-    (MACH_SECTION_ANY *) MachoGetNextSection32 (Context, &Segment->Segment32, Section != NULL ? &Section->Section32 : NULL) :
-    (MACH_SECTION_ANY *) MachoGetNextSection64 (Context, &Segment->Segment64, Section != NULL ? &Section->Section64 : NULL);
+         (MACH_SECTION_ANY *)MachoGetNextSection32 (Context, &Segment->Segment32, Section != NULL ? &Section->Section32 : NULL) :
+         (MACH_SECTION_ANY *)MachoGetNextSection64 (Context, &Segment->Segment64, Section != NULL ? &Section->Section64 : NULL);
 }
 
 MACH_SECTION_ANY *
@@ -169,8 +170,8 @@ MachoGetSectionByIndex (
   ASSERT (Context != NULL);
 
   return Context->Is32Bit ?
-    (MACH_SECTION_ANY *) MachoGetSectionByIndex32 (Context, Index) :
-    (MACH_SECTION_ANY *) MachoGetSectionByIndex64 (Context, Index);
+         (MACH_SECTION_ANY *)MachoGetSectionByIndex32 (Context, Index) :
+         (MACH_SECTION_ANY *)MachoGetSectionByIndex64 (Context, Index);
 }
 
 MACH_SEGMENT_COMMAND_ANY *
@@ -182,22 +183,22 @@ MachoGetSegmentByName (
   ASSERT (Context != NULL);
 
   return Context->Is32Bit ?
-    (MACH_SEGMENT_COMMAND_ANY *) MachoGetSegmentByName32 (Context, SegmentName) :
-    (MACH_SEGMENT_COMMAND_ANY *) MachoGetSegmentByName64 (Context, SegmentName);
+         (MACH_SEGMENT_COMMAND_ANY *)MachoGetSegmentByName32 (Context, SegmentName) :
+         (MACH_SEGMENT_COMMAND_ANY *)MachoGetSegmentByName64 (Context, SegmentName);
 }
 
 MACH_SECTION_ANY *
 MachoGetSectionByName (
-  IN OUT OC_MACHO_CONTEXT         *Context,
-  IN     MACH_SEGMENT_COMMAND_ANY *Segment,
-  IN     CONST CHAR8              *SectionName
+  IN OUT OC_MACHO_CONTEXT          *Context,
+  IN     MACH_SEGMENT_COMMAND_ANY  *Segment,
+  IN     CONST CHAR8               *SectionName
   )
 {
   ASSERT (Context != NULL);
 
   return Context->Is32Bit ?
-    (MACH_SECTION_ANY *) MachoGetSectionByName32 (Context, &Segment->Segment32, SectionName) :
-    (MACH_SECTION_ANY *) MachoGetSectionByName64 (Context, &Segment->Segment64, SectionName);
+         (MACH_SECTION_ANY *)MachoGetSectionByName32 (Context, &Segment->Segment32, SectionName) :
+         (MACH_SECTION_ANY *)MachoGetSectionByName64 (Context, &Segment->Segment64, SectionName);
 }
 
 MACH_SECTION_ANY *
@@ -210,8 +211,8 @@ MachoGetSegmentSectionByName (
   ASSERT (Context != NULL);
 
   return Context->Is32Bit ?
-    (MACH_SECTION_ANY *) MachoGetSegmentSectionByName32 (Context, SegmentName, SectionName) :
-    (MACH_SECTION_ANY *) MachoGetSegmentSectionByName64 (Context, SegmentName, SectionName);
+         (MACH_SECTION_ANY *)MachoGetSegmentSectionByName32 (Context, SegmentName, SectionName) :
+         (MACH_SECTION_ANY *)MachoGetSegmentSectionByName64 (Context, SegmentName, SectionName);
 }
 
 /**
@@ -232,13 +233,13 @@ InternalInitialiseSymtabs (
   IN     MACH_DYSYMTAB_COMMAND  *DySymtab
   )
 {
-  UINTN                 MachoAddress;
-  CHAR8                 *StringTable;
-  UINT32                FileSize;
-  UINT32                SymbolsOffset;
-  UINT32                StringsOffset;
-  UINT32                OffsetTop;
-  BOOLEAN               Result;
+  UINTN    MachoAddress;
+  CHAR8    *StringTable;
+  UINT32   FileSize;
+  UINT32   SymbolsOffset;
+  UINT32   StringsOffset;
+  UINT32   OffsetTop;
+  BOOLEAN  Result;
 
   UINT32                IndirectSymbolsOffset;
   UINT32                LocalRelocationsOffset;
@@ -248,14 +249,14 @@ InternalInitialiseSymtabs (
   MACH_RELOCATION_INFO  *LocalRelocations;
   MACH_RELOCATION_INFO  *ExternRelocations;
 
-  VOID                  *Tmp;
+  VOID  *Tmp;
 
   ASSERT (Context != NULL);
   ASSERT (Context->MachHeader != NULL);
   ASSERT (Context->FileSize > 0);
   ASSERT (Context->SymbolTable == NULL);
 
-  FileSize  = Context->FileSize;
+  FileSize = Context->FileSize;
 
   Result = OcOverflowSubU32 (
              Symtab->SymbolsOffset,
@@ -289,7 +290,7 @@ InternalInitialiseSymtabs (
   MachoAddress = (UINTN)Context->MachHeader;
   StringTable  = (CHAR8 *)(MachoAddress + StringsOffset);
 
-  if (Symtab->StringsSize == 0 || StringTable[Symtab->StringsSize - 1] != '\0') {
+  if ((Symtab->StringsSize == 0) || (StringTable[Symtab->StringsSize - 1] != '\0')) {
     return FALSE;
   }
 
@@ -337,7 +338,7 @@ InternalInitialiseSymtabs (
     // We additionally check for offset validity here, as KC kexts have some garbage
     // in their DySymtab, but it is "valid" for symbols.
     //
-    if (DySymtab->NumIndirectSymbols > 0 && DySymtab->IndirectSymbolsOffset != 0) {
+    if ((DySymtab->NumIndirectSymbols > 0) && (DySymtab->IndirectSymbolsOffset != 0)) {
       Result = OcOverflowSubU32 (
                  DySymtab->IndirectSymbolsOffset,
                  Context->ContainerOffset,
@@ -357,10 +358,11 @@ InternalInitialiseSymtabs (
       if (!(Context->Is32Bit ? OC_TYPE_ALIGNED (MACH_NLIST, Tmp) : OC_TYPE_ALIGNED (MACH_NLIST_64, Tmp))) {
         return FALSE;
       }
+
       IndirectSymtab = (MACH_NLIST_ANY *)Tmp;
     }
 
-    if (DySymtab->NumOfLocalRelocations > 0 && DySymtab->LocalRelocationsOffset != 0) {
+    if ((DySymtab->NumOfLocalRelocations > 0) && (DySymtab->LocalRelocationsOffset != 0)) {
       Result = OcOverflowSubU32 (
                  DySymtab->LocalRelocationsOffset,
                  Context->ContainerOffset,
@@ -380,10 +382,11 @@ InternalInitialiseSymtabs (
       if (!OC_TYPE_ALIGNED (MACH_RELOCATION_INFO, Tmp)) {
         return FALSE;
       }
+
       LocalRelocations = (MACH_RELOCATION_INFO *)Tmp;
     }
 
-    if (DySymtab->NumExternalRelocations > 0 && DySymtab->ExternalRelocationsOffset != 0) {
+    if ((DySymtab->NumExternalRelocations > 0) && (DySymtab->ExternalRelocationsOffset != 0)) {
       Result = OcOverflowSubU32 (
                  DySymtab->ExternalRelocationsOffset,
                  Context->ContainerOffset,
@@ -403,6 +406,7 @@ InternalInitialiseSymtabs (
       if (!OC_TYPE_ALIGNED (MACH_RELOCATION_INFO, Tmp)) {
         return FALSE;
       }
+
       ExternRelocations = (MACH_RELOCATION_INFO *)Tmp;
     }
   }
@@ -414,10 +418,10 @@ InternalInitialiseSymtabs (
   Context->StringTable = StringTable;
   Context->DySymtab    = DySymtab;
 
-  Context->LocalRelocations     = LocalRelocations;
-  Context->ExternRelocations    = ExternRelocations;
-  Context->SymbolTable          = SymbolTable;
-  Context->IndirectSymbolTable  = IndirectSymtab;
+  Context->LocalRelocations    = LocalRelocations;
+  Context->ExternRelocations   = ExternRelocations;
+  Context->SymbolTable         = SymbolTable;
+  Context->IndirectSymbolTable = IndirectSymtab;
 
   return TRUE;
 }
@@ -428,11 +432,11 @@ MachoInitialiseSymtabsExternal (
   IN     OC_MACHO_CONTEXT  *SymsContext
   )
 {
-  MACH_SYMTAB_COMMAND   *Symtab;
-  MACH_DYSYMTAB_COMMAND *DySymtab;
-  BOOLEAN               IsDyld;
-  MACH_HEADER_FLAGS     MachFlags;
-  MACH_HEADER_FLAGS     SymsMachFlags;
+  MACH_SYMTAB_COMMAND    *Symtab;
+  MACH_DYSYMTAB_COMMAND  *DySymtab;
+  BOOLEAN                IsDyld;
+  MACH_HEADER_FLAGS      MachFlags;
+  MACH_HEADER_FLAGS      SymsMachFlags;
 
   ASSERT (Context != NULL);
   ASSERT (Context->MachHeader != NULL);
@@ -443,19 +447,20 @@ MachoInitialiseSymtabsExternal (
   }
 
   MachFlags = Context->Is32Bit ?
-    Context->MachHeader->Header32.Flags :
-    Context->MachHeader->Header64.Flags;
+              Context->MachHeader->Header32.Flags :
+              Context->MachHeader->Header64.Flags;
   SymsMachFlags = SymsContext->Is32Bit ?
-    SymsContext->MachHeader->Header32.Flags :
-    SymsContext->MachHeader->Header64.Flags;
+                  SymsContext->MachHeader->Header32.Flags :
+                  SymsContext->MachHeader->Header64.Flags;
 
   //
   // We cannot use SymsContext's symbol tables if Context is flagged for DYLD
   // and SymsContext is not.
   //
   IsDyld = (MachFlags & MACH_HEADER_FLAG_DYNAMIC_LINKER_LINK) != 0;
-  if (IsDyld
-   && (SymsMachFlags & MACH_HEADER_FLAG_DYNAMIC_LINKER_LINK) == 0) {
+  if (  IsDyld
+     && ((SymsMachFlags & MACH_HEADER_FLAG_DYNAMIC_LINKER_LINK) == 0))
+  {
     return FALSE;
   }
 
@@ -470,12 +475,12 @@ MachoInitialiseSymtabsExternal (
   //
   // Retrieve SYMTAB.
   //
-  Symtab = (MACH_SYMTAB_COMMAND *) (VOID *) MachoGetNextCommand (
-    SymsContext,
-    MACH_LOAD_COMMAND_SYMTAB,
-    NULL
-    );
-  if (Symtab == NULL || Symtab->CommandSize != sizeof (*Symtab)) {
+  Symtab = (MACH_SYMTAB_COMMAND *)(VOID *)MachoGetNextCommand (
+                                            SymsContext,
+                                            MACH_LOAD_COMMAND_SYMTAB,
+                                            NULL
+                                            );
+  if ((Symtab == NULL) || (Symtab->CommandSize != sizeof (*Symtab))) {
     return FALSE;
   }
 
@@ -493,12 +498,12 @@ MachoInitialiseSymtabsExternal (
     //
     // Retrieve DYSYMTAB.
     //
-    DySymtab = (MACH_DYSYMTAB_COMMAND *) (VOID *) MachoGetNextCommand (
-      SymsContext,
-      MACH_LOAD_COMMAND_DYSYMTAB,
-      NULL
-      );
-    if (DySymtab == NULL || DySymtab->CommandSize != sizeof (*DySymtab)) {
+    DySymtab = (MACH_DYSYMTAB_COMMAND *)(VOID *)MachoGetNextCommand (
+                                                  SymsContext,
+                                                  MACH_LOAD_COMMAND_DYSYMTAB,
+                                                  NULL
+                                                  );
+    if ((DySymtab == NULL) || (DySymtab->CommandSize != sizeof (*DySymtab))) {
       return FALSE;
     }
   }
@@ -519,55 +524,55 @@ InternalRetrieveSymtabs (
 
 UINT32
 MachoGetSymbolTable (
-  IN OUT OC_MACHO_CONTEXT     *Context,
-     OUT CONST MACH_NLIST_ANY **SymbolTable,
-     OUT CONST CHAR8          **StringTable OPTIONAL,
-     OUT CONST MACH_NLIST_ANY **LocalSymbols OPTIONAL,
-     OUT UINT32               *NumLocalSymbols OPTIONAL,
-     OUT CONST MACH_NLIST_ANY **ExternalSymbols OPTIONAL,
-     OUT UINT32               *NumExternalSymbols OPTIONAL,
-     OUT CONST MACH_NLIST_ANY **UndefinedSymbols OPTIONAL,
-     OUT UINT32               *NumUndefinedSymbols OPTIONAL
+  IN OUT OC_MACHO_CONTEXT   *Context,
+  OUT CONST MACH_NLIST_ANY  **SymbolTable,
+  OUT CONST CHAR8           **StringTable OPTIONAL,
+  OUT CONST MACH_NLIST_ANY  **LocalSymbols OPTIONAL,
+  OUT UINT32                *NumLocalSymbols OPTIONAL,
+  OUT CONST MACH_NLIST_ANY  **ExternalSymbols OPTIONAL,
+  OUT UINT32                *NumExternalSymbols OPTIONAL,
+  OUT CONST MACH_NLIST_ANY  **UndefinedSymbols OPTIONAL,
+  OUT UINT32                *NumUndefinedSymbols OPTIONAL
   )
 {
   ASSERT (Context != NULL);
 
   return Context->Is32Bit ?
-    MachoGetSymbolTable32 (
-      Context,
-      (CONST MACH_NLIST **) SymbolTable,
-      StringTable,
-      (CONST MACH_NLIST **) LocalSymbols,
-      NumLocalSymbols,
-      (CONST MACH_NLIST **) ExternalSymbols,
-      NumExternalSymbols, 
-      (CONST MACH_NLIST **) UndefinedSymbols,
-      NumUndefinedSymbols
-      ) :
-    MachoGetSymbolTable64 (
-      Context,
-      (CONST MACH_NLIST_64 **) SymbolTable,
-      StringTable,
-      (CONST MACH_NLIST_64 **) LocalSymbols,
-      NumLocalSymbols,
-      (CONST MACH_NLIST_64 **) ExternalSymbols,
-      NumExternalSymbols, 
-      (CONST MACH_NLIST_64 **) UndefinedSymbols,
-      NumUndefinedSymbols
-      );
+         MachoGetSymbolTable32 (
+           Context,
+           (CONST MACH_NLIST **)SymbolTable,
+           StringTable,
+           (CONST MACH_NLIST **)LocalSymbols,
+           NumLocalSymbols,
+           (CONST MACH_NLIST **)ExternalSymbols,
+           NumExternalSymbols,
+           (CONST MACH_NLIST **)UndefinedSymbols,
+           NumUndefinedSymbols
+           ) :
+         MachoGetSymbolTable64 (
+           Context,
+           (CONST MACH_NLIST_64 **)SymbolTable,
+           StringTable,
+           (CONST MACH_NLIST_64 **)LocalSymbols,
+           NumLocalSymbols,
+           (CONST MACH_NLIST_64 **)ExternalSymbols,
+           NumExternalSymbols,
+           (CONST MACH_NLIST_64 **)UndefinedSymbols,
+           NumUndefinedSymbols
+           );
 }
 
 UINT32
 MachoGetIndirectSymbolTable (
-  IN OUT OC_MACHO_CONTEXT     *Context,
-     OUT CONST MACH_NLIST_ANY **SymbolTable
+  IN OUT OC_MACHO_CONTEXT   *Context,
+  OUT CONST MACH_NLIST_ANY  **SymbolTable
   )
 {
   ASSERT (Context != NULL);
 
   return Context->Is32Bit ?
-    MachoGetIndirectSymbolTable32 (Context, (CONST MACH_NLIST **) SymbolTable) :
-    MachoGetIndirectSymbolTable64 (Context, (CONST MACH_NLIST_64 **) SymbolTable);
+         MachoGetIndirectSymbolTable32 (Context, (CONST MACH_NLIST **)SymbolTable) :
+         MachoGetIndirectSymbolTable64 (Context, (CONST MACH_NLIST_64 **)SymbolTable);
 }
 
 UINT64
@@ -575,17 +580,17 @@ MachoRuntimeGetEntryAddress (
   IN VOID  *Image
   )
 {
-  MACH_HEADER_ANY         *Header;
-  BOOLEAN                 Is64Bit;
-  UINT32                  NumCmds;
-  MACH_LOAD_COMMAND       *Cmd;
-  UINTN                   Index;
-  MACH_THREAD_COMMAND     *ThreadCmd;
-  MACH_X86_THREAD_STATE   *ThreadState;
-  UINT64                  Address;
+  MACH_HEADER_ANY        *Header;
+  BOOLEAN                Is64Bit;
+  UINT32                 NumCmds;
+  MACH_LOAD_COMMAND      *Cmd;
+  UINTN                  Index;
+  MACH_THREAD_COMMAND    *ThreadCmd;
+  MACH_X86_THREAD_STATE  *ThreadState;
+  UINT64                 Address;
 
   Address = 0;
-  Header  = (MACH_HEADER_ANY *) Image;
+  Header  = (MACH_HEADER_ANY *)Image;
 
   if (Header->Signature == MACH_HEADER_SIGNATURE) {
     //
@@ -613,9 +618,9 @@ MachoRuntimeGetEntryAddress (
   //
   for (Index = 0; Index < NumCmds; ++Index) {
     if (Cmd->CommandType == MACH_LOAD_COMMAND_UNIX_THREAD) {
-      ThreadCmd     = (MACH_THREAD_COMMAND *) Cmd;
-      ThreadState   = (MACH_X86_THREAD_STATE *) &ThreadCmd->ThreadState[0];
-      Address       = Is64Bit ? ThreadState->State64.rip : ThreadState->State32.eip;
+      ThreadCmd   = (MACH_THREAD_COMMAND *)Cmd;
+      ThreadState = (MACH_X86_THREAD_STATE *)&ThreadCmd->ThreadState[0];
+      Address     = Is64Bit ? ThreadState->State64.rip : ThreadState->State32.eip;
       break;
     }
 
@@ -639,47 +644,47 @@ MachoGetFilePointerByAddress (
   }
 
   return Context->Is32Bit ?
-    InternalMachoGetFilePointerByAddress32 (Context, (UINT32) Address, MaxSize) :
-    InternalMachoGetFilePointerByAddress64 (Context, Address, MaxSize);
+         InternalMachoGetFilePointerByAddress32 (Context, (UINT32)Address, MaxSize) :
+         InternalMachoGetFilePointerByAddress64 (Context, Address, MaxSize);
 }
 
 UINT32
 MachoExpandImage (
-  IN  OC_MACHO_CONTEXT   *Context,
-  OUT UINT8              *Destination,
-  IN  UINT32             DestinationSize,
-  IN  BOOLEAN            Strip,
-  OUT UINT64             *FileOffset OPTIONAL
+  IN  OC_MACHO_CONTEXT  *Context,
+  OUT UINT8             *Destination,
+  IN  UINT32            DestinationSize,
+  IN  BOOLEAN           Strip,
+  OUT UINT64            *FileOffset OPTIONAL
   )
 {
   ASSERT (Context != NULL);
 
   return Context->Is32Bit ?
-    InternalMachoExpandImage32 (Context, FALSE, Destination, DestinationSize, Strip, FileOffset) :
-    InternalMachoExpandImage64 (Context, FALSE, Destination, DestinationSize, Strip, FileOffset);
+         InternalMachoExpandImage32 (Context, FALSE, Destination, DestinationSize, Strip, FileOffset) :
+         InternalMachoExpandImage64 (Context, FALSE, Destination, DestinationSize, Strip, FileOffset);
 }
 
 UINT32
 MachoGetExpandedImageSize (
-  IN  OC_MACHO_CONTEXT   *Context
+  IN  OC_MACHO_CONTEXT  *Context
   )
 {
   ASSERT (Context != NULL);
 
   return Context->Is32Bit ?
-    MACHO_ALIGN (InternalMachoExpandImage32 (Context, TRUE, NULL, 0, FALSE, NULL)) :
-    MACHO_ALIGN (InternalMachoExpandImage64 (Context, TRUE, NULL, 0, FALSE, NULL));
+         MACHO_ALIGN (InternalMachoExpandImage32 (Context, TRUE, NULL, 0, FALSE, NULL)) :
+         MACHO_ALIGN (InternalMachoExpandImage64 (Context, TRUE, NULL, 0, FALSE, NULL));
 }
 
 BOOLEAN
 MachoMergeSegments (
-  IN OUT OC_MACHO_CONTEXT     *Context,
-  IN     CONST CHAR8          *Prefix
+  IN OUT OC_MACHO_CONTEXT  *Context,
+  IN     CONST CHAR8       *Prefix
   )
 {
   ASSERT (Context != NULL);
 
   return Context->Is32Bit ?
-    InternalMachoMergeSegments32 (Context, Prefix) :
-    InternalMachoMergeSegments64 (Context, Prefix);
+         InternalMachoMergeSegments32 (Context, Prefix) :
+         InternalMachoMergeSegments64 (Context, Prefix);
 }

@@ -31,7 +31,7 @@
 
 #include "OcRngInternals.h"
 
-STATIC OC_RNG_CONTEXT mRng;
+STATIC OC_RNG_CONTEXT  mRng;
 
 STATIC
 VOID
@@ -56,7 +56,7 @@ ChaChaRngStir (
   //
   // Do not reseed if we are initialised and do not yet need a reseed.
   //
-  if (mRng.PrngInitialised && mRng.BytesTillReseed >= BytesNeeded) {
+  if (mRng.PrngInitialised && (mRng.BytesTillReseed >= BytesNeeded)) {
     mRng.BytesTillReseed -= BytesNeeded;
     return;
   }
@@ -95,6 +95,7 @@ ChaChaRngStir (
     for (Index = 0; Index < ARRAY_SIZE (KeySeed); ++Index) {
       mRng.Buffer[Index] ^= KeySeed[Index];
     }
+
     for (Index = 0; Index < ARRAY_SIZE (IvSeed); ++Index) {
       mRng.Buffer[ARRAY_SIZE (KeySeed) + Index] ^= IvSeed[Index];
     }
@@ -105,13 +106,13 @@ ChaChaRngStir (
   //
   // Setup ChaCha context.
   //
-  ChaChaInitCtx (&mRng.ChaCha, (UINT8 *) KeySeed, (UINT8 *) IvSeed, 0);
+  ChaChaInitCtx (&mRng.ChaCha, (UINT8 *)KeySeed, (UINT8 *)IvSeed, 0);
 
   SecureZeroMem (KeySeed, sizeof (KeySeed));
   SecureZeroMem (IvSeed, sizeof (IvSeed));
 
   mRng.BytesTillReseed = MAX_BYTES_TO_EMIT - BytesNeeded;
-  mRng.BytesInBuffer = 0;
+  mRng.BytesInBuffer   = 0;
 
   ZeroMem (mRng.Buffer, sizeof (mRng.Buffer));
 }
@@ -201,7 +202,7 @@ OcRngLibConstructor (
   VOID
   )
 {
-  CPUID_VERSION_INFO_ECX RegEcx;
+  CPUID_VERSION_INFO_ECX  RegEcx;
 
   //
   // Determine RDRAND support by examining bit 30 of the ECX register returned by
@@ -232,7 +233,7 @@ OcRngLibConstructor (
 BOOLEAN
 EFIAPI
 GetRandomNumber16 (
-  OUT     UINT16                    *Rand
+  OUT     UINT16  *Rand
   )
 {
   UINT32  Index;
@@ -250,7 +251,7 @@ GetRandomNumber16 (
     }
   }
 
-  *Rand = (UINT16) GetEntropyBits (sizeof (UINT16) * OC_CHAR_BIT);
+  *Rand = (UINT16)GetEntropyBits (sizeof (UINT16) * OC_CHAR_BIT);
   return TRUE;
 }
 
@@ -268,7 +269,7 @@ GetRandomNumber16 (
 BOOLEAN
 EFIAPI
 GetRandomNumber32 (
-  OUT     UINT32                    *Rand
+  OUT     UINT32  *Rand
   )
 {
   UINT32  Index;
@@ -286,7 +287,7 @@ GetRandomNumber32 (
     }
   }
 
-  *Rand = (UINT32) GetEntropyBits (sizeof (UINT32) * OC_CHAR_BIT);
+  *Rand = (UINT32)GetEntropyBits (sizeof (UINT32) * OC_CHAR_BIT);
   return TRUE;
 }
 
@@ -304,7 +305,7 @@ GetRandomNumber32 (
 BOOLEAN
 EFIAPI
 GetRandomNumber64 (
-  OUT     UINT64                    *Rand
+  OUT     UINT64  *Rand
   )
 {
   UINT32  Index;
@@ -340,7 +341,7 @@ GetRandomNumber64 (
 BOOLEAN
 EFIAPI
 GetRandomNumber128 (
-  OUT     UINT64                    *Rand
+  OUT     UINT64  *Rand
   )
 {
   ASSERT (Rand != NULL);
@@ -349,8 +350,9 @@ GetRandomNumber128 (
     //
     // Read 64 bits twice
     //
-    if (GetRandomNumber64 (&Rand[0])
-      && GetRandomNumber64 (&Rand[1])) {
+    if (  GetRandomNumber64 (&Rand[0])
+       && GetRandomNumber64 (&Rand[1]))
+    {
       return TRUE;
     }
   }
@@ -373,7 +375,7 @@ GetPseudoRandomNumber16 (
 {
   UINT16  Rand;
 
-  ChaChaRngGenerate ((UINT8 *) &Rand, sizeof (Rand));
+  ChaChaRngGenerate ((UINT8 *)&Rand, sizeof (Rand));
 
   return Rand;
 }
@@ -391,7 +393,7 @@ GetPseudoRandomNumber32 (
 {
   UINT32  Rand;
 
-  ChaChaRngGenerate ((UINT8 *) &Rand, sizeof (Rand));
+  ChaChaRngGenerate ((UINT8 *)&Rand, sizeof (Rand));
 
   return Rand;
 }
@@ -409,7 +411,7 @@ GetPseudoRandomNumber64 (
 {
   UINT64  Rand;
 
-  ChaChaRngGenerate ((UINT8 *) &Rand, sizeof (Rand));
+  ChaChaRngGenerate ((UINT8 *)&Rand, sizeof (Rand));
 
   return Rand;
 }

@@ -12,21 +12,21 @@
 #include "OpenCanopy.h"
 
 typedef struct {
-  CONST BMF_BLOCK_INFO          *Info;
-  CONST BMF_BLOCK_COMMON        *Common;
-  CONST BMF_BLOCK_PAGES         *Pages;
-  CONST BMF_BLOCK_CHARS         *Chars;
-  CONST BMF_BLOCK_KERNING_PAIRS *KerningPairs;
-  UINT32                        NumChars;
-  UINT32                        NumKerningPairs;
-  UINT16                        Height;
+  CONST BMF_BLOCK_INFO             *Info;
+  CONST BMF_BLOCK_COMMON           *Common;
+  CONST BMF_BLOCK_PAGES            *Pages;
+  CONST BMF_BLOCK_CHARS            *Chars;
+  CONST BMF_BLOCK_KERNING_PAIRS    *KerningPairs;
+  UINT32                           NumChars;
+  UINT32                           NumKerningPairs;
+  UINT16                           Height;
 } BMF_CONTEXT;
 
 typedef struct {
-  GUI_IMAGE   FontImage;
-  BMF_CONTEXT BmfContext;
-  VOID        *KerningData;
-  UINT8       Scale;
+  GUI_IMAGE      FontImage;
+  BMF_CONTEXT    BmfContext;
+  VOID           *KerningData;
+  UINT8          Scale;
 } GUI_FONT_CONTEXT;
 
 BOOLEAN

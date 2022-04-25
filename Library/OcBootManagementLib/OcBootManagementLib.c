@@ -44,16 +44,17 @@
 STATIC
 EFI_STATUS
 RunShowMenu (
-  IN  OC_BOOT_CONTEXT             *BootContext,
-  OUT OC_BOOT_ENTRY               **ChosenBootEntry
+  IN  OC_BOOT_CONTEXT  *BootContext,
+  OUT OC_BOOT_ENTRY    **ChosenBootEntry
   )
 {
-  EFI_STATUS      Status;
-  OC_BOOT_ENTRY   **BootEntries;
-  UINT32          EntryReason;
+  EFI_STATUS     Status;
+  OC_BOOT_ENTRY  **BootEntries;
+  UINT32         EntryReason;
 
-  if (!BootContext->PickerContext->ApplePickerUnsupported
-    && BootContext->PickerContext->PickerMode == OcPickerModeApple) {
+  if (  !BootContext->PickerContext->ApplePickerUnsupported
+     && (BootContext->PickerContext->PickerMode == OcPickerModeApple))
+  {
     Status = OcRunFirmwareApplication (&gAppleBootPickerFileGuid, TRUE);
     //
     // This should not return on success.
@@ -72,7 +73,7 @@ RunShowMenu (
   // However, if default entry is a tool or a system entry, never autoboot it.
   //
   if (BootContext->DefaultEntry == NULL) {
-    BootContext->DefaultEntry = BootEntries[0];
+    BootContext->DefaultEntry                  = BootEntries[0];
     BootContext->PickerContext->TimeoutSeconds = 0;
   }
 
@@ -81,24 +82,24 @@ RunShowMenu (
   //
   EntryReason = ApplePickerEntryReasonUnknown;
   gRT->SetVariable (
-    APPLE_PICKER_ENTRY_REASON_VARIABLE_NAME,
-    &gAppleVendorVariableGuid,
-    EFI_VARIABLE_BOOTSERVICE_ACCESS,
-    sizeof (EntryReason),
-    &EntryReason
-    );
+         APPLE_PICKER_ENTRY_REASON_VARIABLE_NAME,
+         &gAppleVendorVariableGuid,
+         EFI_VARIABLE_BOOTSERVICE_ACCESS,
+         sizeof (EntryReason),
+         &EntryReason
+         );
 
   Status = OcInitHotKeys (BootContext->PickerContext);
-  if (EFI_ERROR(Status)) {
+  if (EFI_ERROR (Status)) {
     FreePool (BootEntries);
     return Status;
   }
-      
+
   Status = BootContext->PickerContext->ShowMenu (
-    BootContext,
-    BootEntries,
-    ChosenBootEntry
-    );
+                                         BootContext,
+                                         BootEntries,
+                                         ChosenBootEntry
+                                         );
 
   OcFreeHotKeys (BootContext->PickerContext);
 
@@ -110,20 +111,20 @@ RunShowMenu (
 BOOLEAN
 EFIAPI
 OcVerifyPassword (
-  IN CONST UINT8                  *Password,
-  IN UINT32                       PasswordSize,
-  IN CONST OC_PRIVILEGE_CONTEXT   *PrivilegeContext
+  IN CONST UINT8                 *Password,
+  IN UINT32                      PasswordSize,
+  IN CONST OC_PRIVILEGE_CONTEXT  *PrivilegeContext
   )
 {
-  BOOLEAN   Result;
+  BOOLEAN  Result;
 
   Result = OcVerifyPasswordSha512 (
-    Password,
-    PasswordSize,
-    PrivilegeContext->Salt,
-    PrivilegeContext->SaltSize,
-    PrivilegeContext->Hash
-    );
+             Password,
+             PasswordSize,
+             PrivilegeContext->Salt,
+             PrivilegeContext->SaltSize,
+             PrivilegeContext->Hash
+             );
 
   return Result;
 }
@@ -134,27 +135,28 @@ InternalRunRequestPrivilege (
   IN OC_PRIVILEGE_LEVEL  Level
   )
 {
-  EFI_STATUS Status;
-  BOOLEAN    HotKeysAlreadyLive;
+  EFI_STATUS  Status;
+  BOOLEAN     HotKeysAlreadyLive;
 
-  if (PickerContext->PrivilegeContext == NULL
-   || PickerContext->PrivilegeContext->CurrentLevel >= Level) {
-     return EFI_SUCCESS;
+  if (  (PickerContext->PrivilegeContext == NULL)
+     || (PickerContext->PrivilegeContext->CurrentLevel >= Level))
+  {
+    return EFI_SUCCESS;
   }
 
   HotKeysAlreadyLive = (PickerContext->HotKeyContext != NULL);
 
   if (!HotKeysAlreadyLive) {
     Status = OcInitHotKeys (PickerContext);
-    if (EFI_ERROR(Status)) {
+    if (EFI_ERROR (Status)) {
       return Status;
     }
   }
 
   Status = PickerContext->RequestPrivilege (
-    PickerContext,
-    OcPrivilegeAuthorized
-    );
+                            PickerContext,
+                            OcPrivilegeAuthorized
+                            );
   if (!EFI_ERROR (Status)) {
     PickerContext->PrivilegeContext->CurrentLevel = Level;
   }
@@ -210,13 +212,13 @@ OcRunBootPicker (
     }
   }
 
-  if (Context->PickerCommand == OcPickerShowPicker && Context->PickerMode == OcPickerModeApple) {
+  if ((Context->PickerCommand == OcPickerShowPicker) && (Context->PickerMode == OcPickerModeApple)) {
     Status = OcRunFirmwareApplication (&gAppleBootPickerFileGuid, TRUE);
     DEBUG ((DEBUG_INFO, "OCB: Apple BootPicker failed - %r, fallback to builtin\n", Status));
     Context->ApplePickerUnsupported = TRUE;
   }
 
-  if (Context->PickerCommand != OcPickerShowPicker && Context->PickerCommand != OcPickerDefault) {
+  if ((Context->PickerCommand != OcPickerShowPicker) && (Context->PickerCommand != OcPickerDefault)) {
     //
     // We cannot ignore auxiliary entries for all other modes.
     //
@@ -232,8 +234,8 @@ OcRunBootPicker (
     } else {
       ASSERT (
         Context->PickerCommand == OcPickerShowPicker
-        || Context->PickerCommand == OcPickerBootApple
-        || Context->PickerCommand == OcPickerBootAppleRecovery
+             || Context->PickerCommand == OcPickerBootApple
+             || Context->PickerCommand == OcPickerBootAppleRecovery
         );
 
       BootContext = OcScanForBootEntries (Context);
@@ -269,16 +271,16 @@ OcRunBootPicker (
 
       Status = RunShowMenu (BootContext, &Chosen);
 
-      if (EFI_ERROR (Status) && Status != EFI_ABORTED) {
+      if (EFI_ERROR (Status) && (Status != EFI_ABORTED)) {
         if (BootContext->PickerContext->ShowMenu != OcShowSimpleBootMenu) {
           DEBUG ((DEBUG_WARN, "OCB: External interface ShowMenu failure, fallback to builtin - %r\n", Status));
-          BootContext->PickerContext->ShowMenu = OcShowSimpleBootMenu;
+          BootContext->PickerContext->ShowMenu         = OcShowSimpleBootMenu;
           BootContext->PickerContext->RequestPrivilege = OcShowSimplePasswordRequest;
-          Status = RunShowMenu (BootContext, &Chosen);
+          Status                                       = RunShowMenu (BootContext, &Chosen);
         }
       }
 
-      if (EFI_ERROR (Status) && Status != EFI_ABORTED) {
+      if (EFI_ERROR (Status) && (Status != EFI_ABORTED)) {
         DEBUG ((DEBUG_ERROR, "OCB: ShowMenu failed - %r\n", Status));
         OcFreeBootContext (BootContext);
         return Status;
@@ -324,6 +326,7 @@ OcRunBootPicker (
             OcPlayAudioFile (Context, OcVoiceOverAudioFileDefault, FALSE);
             OcPlayAudioEntry (Context, Chosen);
           }
+
           Status = OcSetDefaultBootEntry (Context, Chosen);
           DEBUG ((DEBUG_INFO, "OCB: Setting default - %r\n", Status));
         }
@@ -353,10 +356,10 @@ OcRunBootPicker (
       }
 
       Status = OcLoadBootEntry (
-        Context,
-        Chosen,
-        gImageHandle
-        );
+                 Context,
+                 Chosen,
+                 gImageHandle
+                 );
 
       //
       // Do not wait on successful return code.
@@ -389,10 +392,10 @@ OcRunFirmwareApplication (
   IN BOOLEAN   SetReason
   )
 {
-  EFI_STATUS                           Status;
-  EFI_HANDLE                           NewHandle;
-  EFI_DEVICE_PATH_PROTOCOL             *Dp;
-  APPLE_PICKER_ENTRY_REASON            PickerEntryReason;
+  EFI_STATUS                 Status;
+  EFI_HANDLE                 NewHandle;
+  EFI_DEVICE_PATH_PROTOCOL   *Dp;
+  APPLE_PICKER_ENTRY_REASON  PickerEntryReason;
 
   DEBUG ((DEBUG_INFO, "OCB: run fw app attempting to find %g...\n", ApplicationGuid));
 
@@ -400,14 +403,14 @@ OcRunFirmwareApplication (
   if (Dp != NULL) {
     DEBUG ((DEBUG_INFO, "OCB: run fw app attempting to load %g...\n", ApplicationGuid));
     NewHandle = NULL;
-    Status = gBS->LoadImage (
-      FALSE,
-      gImageHandle,
-      Dp,
-      NULL,
-      0,
-      &NewHandle
-      );
+    Status    = gBS->LoadImage (
+                       FALSE,
+                       gImageHandle,
+                       Dp,
+                       NULL,
+                       0,
+                       &NewHandle
+                       );
     if (EFI_ERROR (Status)) {
       Status = EFI_INVALID_PARAMETER;
     }
@@ -418,13 +421,13 @@ OcRunFirmwareApplication (
   if (!EFI_ERROR (Status)) {
     if (SetReason) {
       PickerEntryReason = ApplePickerEntryReasonUnknown;
-      Status = gRT->SetVariable (
-        APPLE_PICKER_ENTRY_REASON_VARIABLE_NAME,
-        &gAppleVendorVariableGuid,
-        EFI_VARIABLE_BOOTSERVICE_ACCESS,
-        sizeof (PickerEntryReason),
-        &PickerEntryReason
-        );
+      Status            = gRT->SetVariable (
+                                 APPLE_PICKER_ENTRY_REASON_VARIABLE_NAME,
+                                 &gAppleVendorVariableGuid,
+                                 EFI_VARIABLE_BOOTSERVICE_ACCESS,
+                                 sizeof (PickerEntryReason),
+                                 &PickerEntryReason
+                                 );
     }
 
     DEBUG ((
@@ -435,10 +438,10 @@ OcRunFirmwareApplication (
       Status
       ));
     Status = gBS->StartImage (
-      NewHandle,
-      NULL,
-      NULL
-      );
+                    NewHandle,
+                    NULL,
+                    NULL
+                    );
 
     if (EFI_ERROR (Status)) {
       Status = EFI_UNSUPPORTED;

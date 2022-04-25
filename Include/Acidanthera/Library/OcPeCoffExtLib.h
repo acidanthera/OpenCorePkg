@@ -24,8 +24,8 @@
 **/
 EFI_STATUS
 PeCoffVerifyAppleSignature (
-  IN OUT VOID                                *PeImage,
-  IN OUT UINT32                              *ImageSize
+  IN OUT VOID    *PeImage,
+  IN OUT UINT32  *ImageSize
   );
 
 /**

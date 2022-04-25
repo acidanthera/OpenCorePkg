@@ -19,6 +19,6 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
   { 0xA9FBF34B, 0xE2A2, 0x41D1,        \
     { 0xBA, 0x00, 0xA2, 0x74, 0xA5, 0x5C, 0xD1, 0x64 } }
 
-extern EFI_GUID gAppleDiagLedProtocolGuid;
+extern EFI_GUID  gAppleDiagLedProtocolGuid;
 
 #endif // APPLE_DIAG_LED_PROTOCOL_H

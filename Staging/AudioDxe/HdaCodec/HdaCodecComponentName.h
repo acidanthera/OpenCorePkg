@@ -30,21 +30,23 @@
 
 EFI_STATUS
 EFIAPI
-HdaCodecComponentNameGetDriverName(
-  IN EFI_COMPONENT_NAME_PROTOCOL *This,
-  IN CHAR8 *Language,
-  OUT CHAR16 **DriverName);
+HdaCodecComponentNameGetDriverName (
+  IN EFI_COMPONENT_NAME_PROTOCOL  *This,
+  IN CHAR8                        *Language,
+  OUT CHAR16                      **DriverName
+  );
 
 EFI_STATUS
 EFIAPI
-HdaCodecComponentNameGetControllerName(
-  IN EFI_COMPONENT_NAME_PROTOCOL *This,
-  IN EFI_HANDLE ControllerHandle,
-  IN EFI_HANDLE ChildHandle OPTIONAL,
-  IN CHAR8 *Language,
-  OUT CHAR16 **ControllerName);
+HdaCodecComponentNameGetControllerName (
+  IN EFI_COMPONENT_NAME_PROTOCOL  *This,
+  IN EFI_HANDLE                   ControllerHandle,
+  IN EFI_HANDLE                   ChildHandle OPTIONAL,
+  IN CHAR8                        *Language,
+  OUT CHAR16                      **ControllerName
+  );
 
-extern EFI_COMPONENT_NAME_PROTOCOL gHdaCodecComponentName;
-extern EFI_COMPONENT_NAME2_PROTOCOL gHdaCodecComponentName2;
+extern EFI_COMPONENT_NAME_PROTOCOL   gHdaCodecComponentName;
+extern EFI_COMPONENT_NAME2_PROTOCOL  gHdaCodecComponentName2;
 
 #endif

@@ -7,7 +7,6 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 
 **/
 
-
 #include "HiiDatabase.h"
 
 #include <Library/OcBootServicesTableLib.h>
@@ -15,18 +14,18 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 //
 // Global variables
 //
-EFI_EVENT gHiiKeyboardLayoutChanged;
-BOOLEAN   gExportAfterReadyToBoot = FALSE;
+EFI_EVENT  gHiiKeyboardLayoutChanged;
+BOOLEAN    gExportAfterReadyToBoot = FALSE;
 
-HII_DATABASE_PRIVATE_DATA mPrivate = {
+HII_DATABASE_PRIVATE_DATA  mPrivate = {
   HII_DATABASE_PRIVATE_DATA_SIGNATURE,
   {
-    (LIST_ENTRY *) NULL,
-    (LIST_ENTRY *) NULL
+    (LIST_ENTRY *)NULL,
+    (LIST_ENTRY *)NULL
   },
   {
-    (LIST_ENTRY *) NULL,
-    (LIST_ENTRY *) NULL
+    (LIST_ENTRY *)NULL,
+    (LIST_ENTRY *)NULL
   },
   {
     HiiStringToImage,
@@ -82,20 +81,20 @@ HII_DATABASE_PRIVATE_DATA mPrivate = {
     EfiConfigKeywordHandlerGetData
   },
   {
-    (LIST_ENTRY *) NULL,
-    (LIST_ENTRY *) NULL
+    (LIST_ENTRY *)NULL,
+    (LIST_ENTRY *)NULL
   },
   0,
   {
-    (LIST_ENTRY *) NULL,
-    (LIST_ENTRY *) NULL
+    (LIST_ENTRY *)NULL,
+    (LIST_ENTRY *)NULL
   },
-  EFI_TEXT_ATTR (EFI_LIGHTGRAY, EFI_BLACK),
+  EFI_TEXT_ATTR (EFI_LIGHTGRAY,       EFI_BLACK),
   {
     0x00000000,
     0x0000,
     0x0000,
-    {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00}
+    { 0x00,                           0x00, 0x00,0x00, 0x00, 0x00, 0x00, 0x00 }
   },
   NULL
 };
@@ -113,8 +112,8 @@ HII_DATABASE_PRIVATE_DATA mPrivate = {
 VOID
 EFIAPI
 KeyboardLayoutChangeNullEvent (
-  IN EFI_EVENT                Event,
-  IN VOID                     *Context
+  IN EFI_EVENT  Event,
+  IN VOID       *Context
   )
 {
   return;
@@ -132,8 +131,8 @@ KeyboardLayoutChangeNullEvent (
 VOID
 EFIAPI
 OnReadyToBoot (
-  IN      EFI_EVENT                         Event,
-  IN      VOID                              *Context
+  IN      EFI_EVENT  Event,
+  IN      VOID       *Context
   )
 {
   //
@@ -166,12 +165,12 @@ OnReadyToBoot (
 EFI_STATUS
 EFIAPI
 OcHiiDatabaseLocalLibConstructor (
-  IN EFI_HANDLE           ImageHandle,
-  IN EFI_SYSTEM_TABLE     *SystemTable
+  IN EFI_HANDLE        ImageHandle,
+  IN EFI_SYSTEM_TABLE  *SystemTable
   )
 {
-  EFI_STATUS                             Status;
-  VOID                                   *HiiDatabase;
+  EFI_STATUS  Status;
+  VOID        *HiiDatabase;
 
   //
   // There will be only one HII Database in the system
@@ -180,10 +179,10 @@ OcHiiDatabaseLocalLibConstructor (
   //
 
   Status = gBS->LocateProtocol (
-    &gEfiHiiDatabaseProtocolGuid,
-    NULL,
-    &HiiDatabase
-    );
+                  &gEfiHiiDatabaseProtocolGuid,
+                  NULL,
+                  &HiiDatabase
+                  );
   if (!EFI_ERROR (Status)) {
     return Status;
   }
@@ -193,7 +192,7 @@ OcHiiDatabaseLocalLibConstructor (
   InitializeListHead (&mPrivate.HiiHandleList);
   InitializeListHead (&mPrivate.FontInfoList);
 
-#if 0
+ #if 0
   //
   // Create a event with EFI_HII_SET_KEYBOARD_LAYOUT_EVENT_GUID group type.
   // FIXME: Check UEFI version and install on supported configurations.
@@ -209,7 +208,8 @@ OcHiiDatabaseLocalLibConstructor (
   if (EFI_ERROR (Status)) {
     return Status;
   }
-#endif
+
+ #endif
 
   Status = OcRegisterBootServicesProtocol (&gEfiHiiFontProtocolGuid, &mPrivate.HiiFont, FALSE);
   ASSERT_EFI_ERROR (Status);

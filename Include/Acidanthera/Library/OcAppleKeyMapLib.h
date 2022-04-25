@@ -11,38 +11,38 @@
 #include <Protocol/AppleKeyMapAggregator.h>
 #include <Library/DebugLib.h>
 
-#if !defined(OC_TRACE_UPDOWNKEYS)
-#define OC_TRACE_UPDOWNKEYS DEBUG_VERBOSE
+#if !defined (OC_TRACE_UPDOWNKEYS)
+#define OC_TRACE_UPDOWNKEYS  DEBUG_VERBOSE
 #endif
 
 /**
   Default buffer size for key map.
 **/
-#define OC_KEY_MAP_DEFAULT_SIZE 8
+#define OC_KEY_MAP_DEFAULT_SIZE  8
 
 /**
   Default buffer size for held keys in downkeys support.
 **/
-#define OC_HELD_KEYS_DEFAULT_SIZE 8
+#define OC_HELD_KEYS_DEFAULT_SIZE  8
 
 /**
   Default initial and subsequent key repeat delays in milliseconds.
 **/
-#define OC_DOWNKEYS_DEFAULT_INITIAL_DELAY    350
-#define OC_DOWNKEYS_DEFAULT_SUBSEQUENT_DELAY 80
+#define OC_DOWNKEYS_DEFAULT_INITIAL_DELAY     350
+#define OC_DOWNKEYS_DEFAULT_SUBSEQUENT_DELAY  80
 
 /**
   Repeat key context.
 **/
 typedef struct {
-  UINT64                             InitialDelay;
-  UINT64                             SubsequentDelay;
-  UINT64                             PreviousTime;
-  APPLE_KEY_MAP_AGGREGATOR_PROTOCOL  *KeyMap;
-  APPLE_KEY_CODE                     *KeysHeld;
-  INT64                              *KeyHeldTimes;
-  UINTN                              NumKeysHeld;
-  UINTN                              MaxKeysHeld;
+  UINT64                               InitialDelay;
+  UINT64                               SubsequentDelay;
+  UINT64                               PreviousTime;
+  APPLE_KEY_MAP_AGGREGATOR_PROTOCOL    *KeyMap;
+  APPLE_KEY_CODE                       *KeysHeld;
+  INT64                                *KeyHeldTimes;
+  UINTN                                NumKeysHeld;
+  UINTN                                MaxKeysHeld;
 } OC_KEY_REPEAT_CONTEXT;
 
 /** Free key repeat context.
@@ -51,7 +51,7 @@ typedef struct {
 **/
 VOID
 OcFreeKeyRepeatContext (
-  OC_KEY_REPEAT_CONTEXT               **Context
+  OC_KEY_REPEAT_CONTEXT  **Context
   );
 
 /** Initialise key repeat context.
@@ -73,7 +73,7 @@ OcFreeKeyRepeatContext (
 **/
 EFI_STATUS
 OcInitKeyRepeatContext (
-     OUT OC_KEY_REPEAT_CONTEXT              **Context,
+  OUT OC_KEY_REPEAT_CONTEXT                 **Context,
   IN     APPLE_KEY_MAP_AGGREGATOR_PROTOCOL  *KeyMap,
   IN     UINTN                              MaxKeysHeld,
   IN     UINT64                             InitialDelay,
@@ -113,13 +113,13 @@ OcInitKeyRepeatContext (
 EFI_STATUS
 EFIAPI
 OcGetUpDownKeys (
-  IN OUT OC_KEY_REPEAT_CONTEXT              *RepeatContext,
-     OUT APPLE_MODIFIER_MAP                 *Modifiers,
-  IN OUT UINTN                              *NumKeysUp,
-     OUT APPLE_KEY_CODE                     *KeysUp       OPTIONAL,
-  IN OUT UINTN                              *NumKeysDown,
-     OUT APPLE_KEY_CODE                     *KeysDown     OPTIONAL,
-  IN     UINT64                             CurrentTime
+  IN OUT OC_KEY_REPEAT_CONTEXT  *RepeatContext,
+  OUT APPLE_MODIFIER_MAP        *Modifiers,
+  IN OUT UINTN                  *NumKeysUp,
+  OUT APPLE_KEY_CODE            *KeysUp       OPTIONAL,
+  IN OUT UINTN                  *NumKeysDown,
+  OUT APPLE_KEY_CODE            *KeysDown     OPTIONAL,
+  IN     UINT64                 CurrentTime
   );
 
 /**

@@ -16,7 +16,7 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 //
 // Hack to avoid the need of framework headers.
 //
-typedef UINT16  STRING_REF;
+typedef UINT16 STRING_REF;
 
 #include <Guid/DataHubRecords.h>
 
@@ -90,59 +90,59 @@ typedef UINT16  STRING_REF;
 
 // APPLE_PLATFORM_DATA_RECORD
 typedef struct {
-  EFI_SUBCLASS_TYPE1_HEADER Header;
-  UINT32                    KeySize;
-  UINT32                    ValueSize;
-  UINT8                     Data[];
-// CHAR16                    Key[];
-// UINT8                     Value[];
+  EFI_SUBCLASS_TYPE1_HEADER    Header;
+  UINT32                       KeySize;
+  UINT32                       ValueSize;
+  UINT8                        Data[];
+  // CHAR16                    Key[];
+  // UINT8                     Value[];
 } APPLE_PLATFORM_DATA_RECORD;
 
 // APPLE_ROM_RECORD
 typedef struct {
-  EFI_SUBCLASS_TYPE1_HEADER Header;
-  UINT8                     Reserved1;
-  UINT64                    Rom;
-  UINT8                     Reserved2[3];
+  EFI_SUBCLASS_TYPE1_HEADER    Header;
+  UINT8                        Reserved1;
+  UINT64                       Rom;
+  UINT8                        Reserved2[3];
 } APPLE_ROM_RECORD;
 
 // gApplePlatformProducerNameGuid
-extern EFI_GUID gApplePlatformProducerNameGuid;
+extern EFI_GUID  gApplePlatformProducerNameGuid;
 
 // gAppleRomProducerNameGuid
-extern EFI_GUID gAppleRomProducerNameGuid;
+extern EFI_GUID  gAppleRomProducerNameGuid;
 
 // gAppleRomDataRecordGuid
-extern EFI_GUID gAppleRomDataRecordGuid;
+extern EFI_GUID  gAppleRomDataRecordGuid;
 
 // gAppleSystemSerialNumbrDataRecordGuid
-extern EFI_GUID gAppleSystemSerialNumbrDataRecordGuid;
+extern EFI_GUID  gAppleSystemSerialNumbrDataRecordGuid;
 
 // gAppleSystemIdDataRecordGuid
-extern EFI_GUID gAppleSystemIdDataRecordGuid;
+extern EFI_GUID  gAppleSystemIdDataRecordGuid;
 
 // gAppleModelDataRecordGuid
-extern EFI_GUID gAppleModelDataRecordGuid;
+extern EFI_GUID  gAppleModelDataRecordGuid;
 
 // gAppleDevicePathsSupportedDataRecordGuid
-extern EFI_GUID gAppleDevicePathsSupportedDataRecordGuid;
+extern EFI_GUID  gAppleDevicePathsSupportedDataRecordGuid;
 
 // gAppleMachinePersonalityDataRecordGuid
-extern EFI_GUID gAppleMachinePersonalityDataRecordGuid;
+extern EFI_GUID  gAppleMachinePersonalityDataRecordGuid;
 
 // gAppleBoardIdDataRecordGuid
-extern EFI_GUID gAppleBoardIdDataRecordGuid;
+extern EFI_GUID  gAppleBoardIdDataRecordGuid;
 
 // gAppleBoardRevisionDataRecordGuid
-extern EFI_GUID gAppleBoardRevisionDataRecordGuid;
+extern EFI_GUID  gAppleBoardRevisionDataRecordGuid;
 
 // gAppleInitialTscDataRecordGuid
-extern EFI_GUID gAppleInitialTscDataRecordGuid;
+extern EFI_GUID  gAppleInitialTscDataRecordGuid;
 
 // gAppleStartupPowerEventsDataRecordGuid
-extern EFI_GUID gAppleStartupPowerEventsDataRecordGuid;
+extern EFI_GUID  gAppleStartupPowerEventsDataRecordGuid;
 
 // gAppleCoprocessorVersionDataRecordGuid
-extern EFI_GUID gAppleCoprocessorVersionDataRecordGuid;
+extern EFI_GUID  gAppleCoprocessorVersionDataRecordGuid;
 
 #endif // APPLE_DATA_HUB_H

@@ -39,24 +39,24 @@
 //
 // Structs.
 //
-typedef struct _HDA_CONTROLLER_DEV HDA_CONTROLLER_DEV;
-typedef struct _HDA_IO_PRIVATE_DATA HDA_IO_PRIVATE_DATA;
-typedef struct _HDA_CONTROLLER_INFO_PRIVATE_DATA HDA_CONTROLLER_INFO_PRIVATE_DATA;
+typedef struct _HDA_CONTROLLER_DEV                HDA_CONTROLLER_DEV;
+typedef struct _HDA_IO_PRIVATE_DATA               HDA_IO_PRIVATE_DATA;
+typedef struct _HDA_CONTROLLER_INFO_PRIVATE_DATA  HDA_CONTROLLER_INFO_PRIVATE_DATA;
 
 // Signature for private data structures.
-#define HDA_CONTROLLER_PRIVATE_DATA_SIGNATURE SIGNATURE_32('H','d','a','C')
+#define HDA_CONTROLLER_PRIVATE_DATA_SIGNATURE  SIGNATURE_32('H','d','a','C')
 
 //
 // PCI support.
 //
 
 // HDA controller is accessed via MMIO on BAR #0.
-#define PCI_HDA_BAR 0
+#define PCI_HDA_BAR  0
 
 // Min supported version.
-#define HDA_VERSION_MIN_MAJOR   0x1
-#define HDA_VERSION_MIN_MINOR   0x0
-#define HDA_MAX_CODECS 15
+#define HDA_VERSION_MIN_MAJOR  0x1
+#define HDA_VERSION_MIN_MINOR  0x0
+#define HDA_MAX_CODECS         15
 
 #define PCI_HDA_TCSEL_OFFSET    0x44
 #define PCI_HDA_TCSEL_TC0_MASK  ~(BIT0 | BIT1 | BIT2)
@@ -67,14 +67,14 @@ typedef struct _HDA_CONTROLLER_INFO_PRIVATE_DATA HDA_CONTROLLER_INFO_PRIVATE_DAT
 // CORB and RIRB.
 //
 // Entry sizes.
-#define HDA_CORB_ENTRY_SIZE sizeof(UINT32)
-#define HDA_RIRB_ENTRY_SIZE sizeof(UINT64)
+#define HDA_CORB_ENTRY_SIZE  sizeof(UINT32)
+#define HDA_RIRB_ENTRY_SIZE  sizeof(UINT64)
 
 // Misc.
-#define HDA_CORB_VERB(Cad, Nid, Verb) ((((UINT32)Cad) << 28) | (((UINT32)Nid) << 20) | (Verb & 0xFFFFF))
-#define HDA_RIRB_RESP(Response)     ((UINT32)Response)
-#define HDA_RIRB_CAD(Response)      ((Response >> 32) & 0xF)
-#define HDA_RIRB_UNSOL(Response)    ((Response >> 36) & 0x1)
+#define HDA_CORB_VERB(Cad, Nid, Verb)  ((((UINT32)Cad) << 28) | (((UINT32)Nid) << 20) | (Verb & 0xFFFFF))
+#define HDA_RIRB_RESP(Response)        ((UINT32)Response)
+#define HDA_RIRB_CAD(Response)         ((Response >> 32) & 0xF)
+#define HDA_RIRB_UNSOL(Response)       ((Response >> 36) & 0x1)
 
 //
 // Streams.
@@ -82,28 +82,28 @@ typedef struct _HDA_CONTROLLER_INFO_PRIVATE_DATA HDA_CONTROLLER_INFO_PRIVATE_DAT
 // Buffer Descriptor List Entry.
 #pragma pack(1)
 typedef struct {
-  UINT32 Address;
-  UINT32 AddressHigh;
-  UINT32 Length;
-  UINT32 InterruptOnCompletion;
+  UINT32    Address;
+  UINT32    AddressHigh;
+  UINT32    Length;
+  UINT32    InterruptOnCompletion;
 } HDA_BDL_ENTRY;
 #pragma pack()
 
 // Buffer Descriptor List sizes. Max number of entries is 256, min is 2.
-#define HDA_BDL_ENTRY_IOC       BIT0
-#define HDA_BDL_ENTRY_COUNT     2
-#define HDA_BDL_SIZE            (sizeof(HDA_BDL_ENTRY) * HDA_BDL_ENTRY_COUNT)
-#define HDA_BDL_ENTRY_HALF      ((HDA_BDL_ENTRY_COUNT / 2) - 1)
-#define HDA_BDL_ENTRY_LAST      (HDA_BDL_ENTRY_COUNT - 1)
+#define HDA_BDL_ENTRY_IOC    BIT0
+#define HDA_BDL_ENTRY_COUNT  2
+#define HDA_BDL_SIZE         (sizeof(HDA_BDL_ENTRY) * HDA_BDL_ENTRY_COUNT)
+#define HDA_BDL_ENTRY_HALF   ((HDA_BDL_ENTRY_COUNT / 2) - 1)
+#define HDA_BDL_ENTRY_LAST   (HDA_BDL_ENTRY_COUNT - 1)
 
 // Buffer size and block size.
-#define HDA_STREAM_BUF_SIZE         BASE_512KB
-#define HDA_STREAM_BUF_SIZE_HALF    (HDA_STREAM_BUF_SIZE / 2)
-#define HDA_BDL_BLOCKSIZE           (HDA_STREAM_BUF_SIZE / HDA_BDL_ENTRY_COUNT)
-#define HDA_STREAM_POLL_TIME        (EFI_TIMER_PERIOD_MILLISECONDS(1))
-#define HDA_STREAM_BUFFER_PADDING   0x200 // 512 byte pad.
+#define HDA_STREAM_BUF_SIZE        BASE_512KB
+#define HDA_STREAM_BUF_SIZE_HALF   (HDA_STREAM_BUF_SIZE / 2)
+#define HDA_BDL_BLOCKSIZE          (HDA_STREAM_BUF_SIZE / HDA_BDL_ENTRY_COUNT)
+#define HDA_STREAM_POLL_TIME       (EFI_TIMER_PERIOD_MILLISECONDS(1))
+#define HDA_STREAM_BUFFER_PADDING  0x200  // 512 byte pad.
 
-#define HDA_STREAM_DMA_CHECK_THRESH 5
+#define HDA_STREAM_DMA_CHECK_THRESH  5
 
 //
 // DMA position structure.
@@ -113,16 +113,16 @@ typedef struct {
   //
   // Current DMA position of hardware.
   //
-  UINT32 Position;
+  UINT32    Position;
   //
   // Reserved.
   //
-  UINT32 Reserved;
+  UINT32    Reserved;
 } HDA_DMA_POS_ENTRY;
 #pragma pack()
 
-#define HDA_STREAM_ID_MIN       1
-#define HDA_STREAM_ID_MAX       15
+#define HDA_STREAM_ID_MIN  1
+#define HDA_STREAM_ID_MAX  15
 
 //
 // Stream structure. All streams are assumed to be output
@@ -132,87 +132,85 @@ typedef struct {
   //
   // Parent HDA controller.
   //
-  HDA_CONTROLLER_DEV      *HdaDev;
+  HDA_CONTROLLER_DEV            *HdaDev;
   //
   // Stream index. This value is zero-based from the first stream on the controller.
   //
-  UINT8                   Index;
+  UINT8                         Index;
   //
   // TRUE once Index is valid. Required for tearing down streams safely if there is
   // an error while setting them up. Assume nothing else for this or following streams
   // is set up or allocated if this is FALSE.
   //
-  BOOLEAN                 HasIndex;
+  BOOLEAN                       HasIndex;
   //
   // Bidirectional stream? This requires a bit to set during reset to enable output.
   //
-  BOOLEAN                 IsBidirectional;
+  BOOLEAN                       IsBidirectional;
   //
   // Use LPIB register instead of DMA position buffer.
   //
-  BOOLEAN                 UseLpib;
+  BOOLEAN                       UseLpib;
   //
   // Count of times DMA position buffer usability is checked.
   //
-  UINT32                  DmaCheckCount;
+  UINT32                        DmaCheckCount;
   //
   // Indicates whether DMA position buffer usability is complete.
   //   Ensures we don't accidentally fallback to LPIB if the stream position happens to be zero later on.
   //
-  BOOLEAN                 DmaCheckComplete;
+  BOOLEAN                       DmaCheckComplete;
   //
   // Buffer Descriptor List.
   //
-  HDA_BDL_ENTRY           *BufferList;
+  HDA_BDL_ENTRY                 *BufferList;
   //
   // PCI memory mapping for BDL.
   //
-  VOID                    *BufferListMapping;
+  VOID                          *BufferListMapping;
   //
   // Physical address of BDL.
   //
-  EFI_PHYSICAL_ADDRESS    BufferListPhysAddr;
+  EFI_PHYSICAL_ADDRESS          BufferListPhysAddr;
   //
   // Buffer fed to BDL.
   //
-  UINT8                   *BufferData;
+  UINT8                         *BufferData;
   //
   // PCI memory mapping of BDL buffer.
   //
-  VOID                    *BufferDataMapping;
+  VOID                          *BufferDataMapping;
   //
   // Physical address of BDL buffer.
   //
-  EFI_PHYSICAL_ADDRESS    BufferDataPhysAddr;
+  EFI_PHYSICAL_ADDRESS          BufferDataPhysAddr;
   //
   // Pointer to source data buffer.
   //
-  UINT8                   *BufferSource;
+  UINT8                         *BufferSource;
   //
   // Length of source data buffer.
   //
-  UINT32                  BufferSourceLength;
+  UINT32                        BufferSourceLength;
   //
   // Current position in source data buffer.
   //
-  UINT32                  BufferSourcePosition;
+  UINT32                        BufferSourcePosition;
   //
   // Source buffer currently active?
   //
-  BOOLEAN                 BufferActive;
-  
-  
-  
-  UINT32  DmaPositionLast;
-  UINT32  DmaPositionTotal;
-  UINT32 DmaPositionChangedMax;
+  BOOLEAN                       BufferActive;
+
+  UINT32                        DmaPositionLast;
+  UINT32                        DmaPositionTotal;
+  UINT32                        DmaPositionChangedMax;
 
   // Timing elements for buffer filling.
-  EFI_EVENT PollTimer;
-  EFI_HDA_IO_STREAM_CALLBACK Callback;
-  VOID *CallbackContext1;
-  VOID *CallbackContext2;
-  VOID *CallbackContext3;
+  EFI_EVENT                     PollTimer;
+  EFI_HDA_IO_STREAM_CALLBACK    Callback;
+  VOID                          *CallbackContext1;
+  VOID                          *CallbackContext2;
+  VOID                          *CallbackContext3;
 } HDA_STREAM;
 
 //
@@ -233,41 +231,41 @@ typedef struct {
   //
   // Parent HDA controller.
   //
-  HDA_CONTROLLER_DEV    *HdaDev;
+  HDA_CONTROLLER_DEV      *HdaDev;
   //
   // Ring buffer type.
   //
-  HDA_RING_BUFFER_TYPE  Type;
+  HDA_RING_BUFFER_TYPE    Type;
   //
   // Buffer backing.
   //
-  VOID                  *Buffer;
+  VOID                    *Buffer;
   //
   // Buffer size.
   //
-  UINTN                 BufferSize;
+  UINTN                   BufferSize;
   //
   // Number of ring buffer entries.
   //
-  UINT32                EntryCount;
+  UINT32                  EntryCount;
   //
   // Ring buffer PCI mapping.
   //
-  VOID                  *Mapping;
+  VOID                    *Mapping;
   //
   // Physical address of ring buffer.
   //
-  EFI_PHYSICAL_ADDRESS  PhysAddr;
+  EFI_PHYSICAL_ADDRESS    PhysAddr;
   //
   // Pointer to current entry.
   //
-  UINT16                Pointer;
+  UINT16                  Pointer;
 } HDA_RING_BUFFER;
 
 typedef struct {
-  EFI_HANDLE Handle;
-  HDA_IO_PRIVATE_DATA *PrivateData;
-  EFI_DEVICE_PATH_PROTOCOL *DevicePath;
+  EFI_HANDLE                  Handle;
+  HDA_IO_PRIVATE_DATA         *PrivateData;
+  EFI_DEVICE_PATH_PROTOCOL    *DevicePath;
 } HDA_IO_CHILD;
 
 //
@@ -288,13 +286,13 @@ typedef struct {
 // Only available work-around:
 //  https://github.com/qemu/qemu/blob/a3607d/hw/audio/intel-hda.c#L561
 //
-#define HDA_CONTROLLER_QUIRK_QEMU_1               BIT0
+#define HDA_CONTROLLER_QUIRK_QEMU_1  BIT0
 
 //
 // Stream reset does not stay high when set.
 // REF: https://gitlab.com/qemu-project/qemu/-/issues/757
 //
-#define HDA_CONTROLLER_QUIRK_QEMU_2               BIT1
+#define HDA_CONTROLLER_QUIRK_QEMU_2  BIT1
 
 //
 // CORB reset does not stay high when set; affects VMware Fusion, but also
@@ -303,7 +301,7 @@ typedef struct {
 // For some years AudioDxe had this as default behaviour, and despite not
 // being to Intel HDA spec., it seems like retaining this may work best.
 //
-#define HDA_CONTROLLER_QUIRK_CORB_NO_POLL_RESET   BIT2
+#define HDA_CONTROLLER_QUIRK_CORB_NO_POLL_RESET  BIT2
 
 #define HDA_CONTROLLER_QUIRK_INITIAL  ( \
   HDA_CONTROLLER_QUIRK_QEMU_1 | HDA_CONTROLLER_QUIRK_CORB_NO_POLL_RESET \
@@ -311,87 +309,89 @@ typedef struct {
 
 struct _HDA_CONTROLLER_DEV {
   // Signature.
-  UINTN Signature;
+  UINTN                               Signature;
 
   // Consumed protocols and handles.
-  EFI_PCI_IO_PROTOCOL *PciIo;
-  EFI_DEVICE_PATH_PROTOCOL *DevicePath;
-  EFI_DRIVER_BINDING_PROTOCOL *DriverBinding;
-  EFI_HANDLE ControllerHandle;
-  UINT32  OpenMode;
+  EFI_PCI_IO_PROTOCOL                 *PciIo;
+  EFI_DEVICE_PATH_PROTOCOL            *DevicePath;
+  EFI_DRIVER_BINDING_PROTOCOL         *DriverBinding;
+  EFI_HANDLE                          ControllerHandle;
+  UINT32                              OpenMode;
 
   // PCI.
-  UINT64 OriginalPciAttributes;
-  BOOLEAN OriginalPciAttributesSaved;
-  UINT16 OriginalPciDeviceControl;
-  BOOLEAN OriginalPciDeviceControlSaved;
+  UINT64                              OriginalPciAttributes;
+  BOOLEAN                             OriginalPciAttributesSaved;
+  UINT16                              OriginalPciDeviceControl;
+  BOOLEAN                             OriginalPciDeviceControlSaved;
 
   // Published info protocol.
-  HDA_CONTROLLER_INFO_PRIVATE_DATA *HdaControllerInfoData;
-  HDA_IO_CHILD HdaIoChildren[HDA_MAX_CODECS];
+  HDA_CONTROLLER_INFO_PRIVATE_DATA    *HdaControllerInfoData;
+  HDA_IO_CHILD                        HdaIoChildren[HDA_MAX_CODECS];
 
   // Capabilites.
-  UINT32 VendorId;
-  CHAR16 *Name;
-  UINT8 MajorVersion;
-  UINT8 MinorVersion;
-  UINT16 Capabilities;
+  UINT32                              VendorId;
+  CHAR16                              *Name;
+  UINT8                               MajorVersion;
+  UINT8                               MinorVersion;
+  UINT16                              Capabilities;
 
-  HDA_RING_BUFFER Corb;
-  HDA_RING_BUFFER Rirb;
+  HDA_RING_BUFFER                     Corb;
+  HDA_RING_BUFFER                     Rirb;
 
   // Streams.
-  UINT8 StreamsCount;
-  HDA_STREAM *Streams;
+  UINT8                               StreamsCount;
+  HDA_STREAM                          *Streams;
 
   // DMA positions.
-  HDA_DMA_POS_ENTRY     *DmaPositions;
-  UINT32                DmaPositionsSize;
-  VOID                  *DmaPositionsMapping;
-  EFI_PHYSICAL_ADDRESS  DmaPositionsPhysAddr;
+  HDA_DMA_POS_ENTRY                   *DmaPositions;
+  UINT32                              DmaPositionsSize;
+  VOID                                *DmaPositionsMapping;
+  EFI_PHYSICAL_ADDRESS                DmaPositionsPhysAddr;
 
   // Bitmap for stream ID allocation.
-  UINT16 StreamIdMapping;
+  UINT16                              StreamIdMapping;
 
   // Events.
-  EFI_EVENT ResponsePollTimer;
-  EFI_EVENT ExitBootServicesEvent;
-  SPIN_LOCK SpinLock;
+  EFI_EVENT                           ResponsePollTimer;
+  EFI_EVENT                           ExitBootServicesEvent;
+  SPIN_LOCK                           SpinLock;
 
-  // Required quirks. 
-  UINTN Quirks;
+  // Required quirks.
+  UINTN                               Quirks;
 };
 
 // HDA I/O private data.
 struct _HDA_IO_PRIVATE_DATA {
   // Signature.
-  UINTN Signature;
+  UINTN                  Signature;
 
   // HDA I/O protocol.
-  EFI_HDA_IO_PROTOCOL HdaIo;
-  UINT8 HdaCodecAddress;
+  EFI_HDA_IO_PROTOCOL    HdaIo;
+  UINT8                  HdaCodecAddress;
 
   // Assigned streams.
-  HDA_STREAM *HdaOutputStream;
-  HDA_STREAM *HdaInputStream;
+  HDA_STREAM             *HdaOutputStream;
+  HDA_STREAM             *HdaInputStream;
 
   // HDA controller device.
-  HDA_CONTROLLER_DEV *HdaControllerDev;
+  HDA_CONTROLLER_DEV     *HdaControllerDev;
 };
+
 #define HDA_IO_PRIVATE_DATA_FROM_THIS(This) \
   CR(This, HDA_IO_PRIVATE_DATA, HdaIo, HDA_CONTROLLER_PRIVATE_DATA_SIGNATURE)
 
 // HDA Codec Info private data.
 struct _HDA_CONTROLLER_INFO_PRIVATE_DATA {
   // Signature.
-  UINTN Signature;
+  UINTN                               Signature;
 
   // HDA Codec Info protocol.
-  EFI_HDA_CONTROLLER_INFO_PROTOCOL HdaControllerInfo;
+  EFI_HDA_CONTROLLER_INFO_PROTOCOL    HdaControllerInfo;
 
   // HDA controller device.
-  HDA_CONTROLLER_DEV *HdaControllerDev;
+  HDA_CONTROLLER_DEV                  *HdaControllerDev;
 };
+
 #define HDA_CONTROLLER_INFO_PRIVATE_DATA_FROM_THIS(This) \
   CR(This, HDA_CONTROLLER_INFO_PRIVATE_DATA, HdaControllerInfo, HDA_CONTROLLER_PRIVATE_DATA_SIGNATURE)
 
@@ -401,70 +401,70 @@ struct _HDA_CONTROLLER_INFO_PRIVATE_DATA {
 EFI_STATUS
 EFIAPI
 HdaControllerHdaIoGetAddress (
-  IN  EFI_HDA_IO_PROTOCOL *This,
-  OUT UINT8 *CodecAddress
+  IN  EFI_HDA_IO_PROTOCOL  *This,
+  OUT UINT8                *CodecAddress
   );
 
 EFI_STATUS
 EFIAPI
 HdaControllerHdaIoSendCommand (
-  IN  EFI_HDA_IO_PROTOCOL *This,
-  IN  UINT8 Node,
-  IN  UINT32 Verb,
-  OUT UINT32 *Response
+  IN  EFI_HDA_IO_PROTOCOL  *This,
+  IN  UINT8                Node,
+  IN  UINT32               Verb,
+  OUT UINT32               *Response
   );
 
 EFI_STATUS
 EFIAPI
 HdaControllerHdaIoSendCommands (
-  IN EFI_HDA_IO_PROTOCOL *This,
-  IN UINT8 Node,
-  IN EFI_HDA_IO_VERB_LIST *Verbs
+  IN EFI_HDA_IO_PROTOCOL   *This,
+  IN UINT8                 Node,
+  IN EFI_HDA_IO_VERB_LIST  *Verbs
   );
 
 EFI_STATUS
 EFIAPI
 HdaControllerHdaIoSetupStream (
-  IN  EFI_HDA_IO_PROTOCOL *This,
-  IN  EFI_HDA_IO_PROTOCOL_TYPE Type,
-  IN  UINT16 Format,
-  OUT UINT8 *StreamId
+  IN  EFI_HDA_IO_PROTOCOL       *This,
+  IN  EFI_HDA_IO_PROTOCOL_TYPE  Type,
+  IN  UINT16                    Format,
+  OUT UINT8                     *StreamId
   );
 
 EFI_STATUS
 EFIAPI
 HdaControllerHdaIoCloseStream (
-  IN EFI_HDA_IO_PROTOCOL *This,
-  IN EFI_HDA_IO_PROTOCOL_TYPE Type
+  IN EFI_HDA_IO_PROTOCOL       *This,
+  IN EFI_HDA_IO_PROTOCOL_TYPE  Type
   );
 
 EFI_STATUS
 EFIAPI
 HdaControllerHdaIoGetStream (
-  IN  EFI_HDA_IO_PROTOCOL *This,
-  IN  EFI_HDA_IO_PROTOCOL_TYPE Type,
-  OUT BOOLEAN *State
+  IN  EFI_HDA_IO_PROTOCOL       *This,
+  IN  EFI_HDA_IO_PROTOCOL_TYPE  Type,
+  OUT BOOLEAN                   *State
   );
 
 EFI_STATUS
 EFIAPI
 HdaControllerHdaIoStartStream (
-  IN EFI_HDA_IO_PROTOCOL *This,
-  IN EFI_HDA_IO_PROTOCOL_TYPE Type,
-  IN VOID *Buffer,
-  IN UINTN BufferLength,
-  IN UINTN BufferPosition OPTIONAL,
-  IN EFI_HDA_IO_STREAM_CALLBACK Callback OPTIONAL,
-  IN VOID *Context1 OPTIONAL,
-  IN VOID *Context2 OPTIONAL,
-  IN VOID *Context3 OPTIONAL
+  IN EFI_HDA_IO_PROTOCOL         *This,
+  IN EFI_HDA_IO_PROTOCOL_TYPE    Type,
+  IN VOID                        *Buffer,
+  IN UINTN                       BufferLength,
+  IN UINTN                       BufferPosition OPTIONAL,
+  IN EFI_HDA_IO_STREAM_CALLBACK  Callback OPTIONAL,
+  IN VOID                        *Context1 OPTIONAL,
+  IN VOID                        *Context2 OPTIONAL,
+  IN VOID                        *Context3 OPTIONAL
   );
 
 EFI_STATUS
 EFIAPI
 HdaControllerHdaIoStopStream (
-  IN EFI_HDA_IO_PROTOCOL *This,
-  IN EFI_HDA_IO_PROTOCOL_TYPE Type
+  IN EFI_HDA_IO_PROTOCOL       *This,
+  IN EFI_HDA_IO_PROTOCOL_TYPE  Type
   );
 
 //
@@ -490,24 +490,24 @@ HdaControllerInfoGetVendorId (
 VOID
 EFIAPI
 HdaControllerStreamOutputPollTimerHandler (
-  IN EFI_EVENT Event,
-  IN VOID *Context
+  IN EFI_EVENT  Event,
+  IN VOID       *Context
   );
 
 EFI_STATUS
 EFIAPI
 HdaControllerReset (
-  IN HDA_CONTROLLER_DEV *HdaControllerDev,
-  IN BOOLEAN            Restart
+  IN HDA_CONTROLLER_DEV  *HdaControllerDev,
+  IN BOOLEAN             Restart
   );
 
 EFI_STATUS
 EFIAPI
 HdaControllerSendCommands (
-  IN HDA_CONTROLLER_DEV *HdaDev,
-  IN UINT8 CodecAddress,
-  IN UINT8 Node,
-  IN EFI_HDA_IO_VERB_LIST *Verbs
+  IN HDA_CONTROLLER_DEV    *HdaDev,
+  IN UINT8                 CodecAddress,
+  IN UINT8                 Node,
+  IN EFI_HDA_IO_VERB_LIST  *Verbs
   );
 
 //
@@ -516,106 +516,106 @@ HdaControllerSendCommands (
 EFI_STATUS
 EFIAPI
 HdaControllerDriverBindingSupported (
-  IN EFI_DRIVER_BINDING_PROTOCOL *This,
-  IN EFI_HANDLE ControllerHandle,
-  IN EFI_DEVICE_PATH_PROTOCOL *RemainingDevicePath OPTIONAL
+  IN EFI_DRIVER_BINDING_PROTOCOL  *This,
+  IN EFI_HANDLE                   ControllerHandle,
+  IN EFI_DEVICE_PATH_PROTOCOL     *RemainingDevicePath OPTIONAL
   );
 
 EFI_STATUS
 EFIAPI
 HdaControllerDriverBindingStart (
-  IN EFI_DRIVER_BINDING_PROTOCOL *This,
-  IN EFI_HANDLE ControllerHandle,
-  IN EFI_DEVICE_PATH_PROTOCOL *RemainingDevicePath OPTIONAL
+  IN EFI_DRIVER_BINDING_PROTOCOL  *This,
+  IN EFI_HANDLE                   ControllerHandle,
+  IN EFI_DEVICE_PATH_PROTOCOL     *RemainingDevicePath OPTIONAL
   );
 
 EFI_STATUS
 EFIAPI
 HdaControllerDriverBindingStop (
-  IN EFI_DRIVER_BINDING_PROTOCOL *This,
-  IN EFI_HANDLE ControllerHandle,
-  IN UINTN NumberOfChildren,
-  IN EFI_HANDLE *ChildHandleBuffer OPTIONAL
+  IN EFI_DRIVER_BINDING_PROTOCOL  *This,
+  IN EFI_HANDLE                   ControllerHandle,
+  IN UINTN                        NumberOfChildren,
+  IN EFI_HANDLE                   *ChildHandleBuffer OPTIONAL
   );
 
 EFI_STATUS
 HdaControllerInitRingBuffer (
-  IN HDA_RING_BUFFER    *HdaRingBuffer,
-  IN HDA_CONTROLLER_DEV *HdaDev,
-  IN HDA_RING_BUFFER_TYPE Type
+  IN HDA_RING_BUFFER       *HdaRingBuffer,
+  IN HDA_CONTROLLER_DEV    *HdaDev,
+  IN HDA_RING_BUFFER_TYPE  Type
   );
 
 VOID
 HdaControllerCleanupRingBuffer (
-  IN HDA_RING_BUFFER      *HdaRingBuffer,
-  IN HDA_RING_BUFFER_TYPE Type
+  IN HDA_RING_BUFFER       *HdaRingBuffer,
+  IN HDA_RING_BUFFER_TYPE  Type
   );
 
 EFI_STATUS
 HdaControllerSetRingBufferState (
-  IN HDA_RING_BUFFER      *HdaRingBuffer,
-  IN BOOLEAN              Enable,
-  IN HDA_RING_BUFFER_TYPE Type
+  IN HDA_RING_BUFFER       *HdaRingBuffer,
+  IN BOOLEAN               Enable,
+  IN HDA_RING_BUFFER_TYPE  Type
   );
 
 EFI_STATUS
 HdaControllerResetRingBuffer (
-  IN HDA_RING_BUFFER    *HdaRingBuffer
+  IN HDA_RING_BUFFER  *HdaRingBuffer
   );
 
 EFI_STATUS
 HdaControllerInitStreams (
-  IN HDA_CONTROLLER_DEV *HdaDev
+  IN HDA_CONTROLLER_DEV  *HdaDev
   );
 
 BOOLEAN
 HdaControllerResetStream (
-  IN HDA_STREAM *HdaStream
+  IN HDA_STREAM  *HdaStream
   );
 
 VOID
 HdaControllerCleanupStreams (
-  IN HDA_CONTROLLER_DEV *HdaDev
+  IN HDA_CONTROLLER_DEV  *HdaDev
   );
 
 BOOLEAN
 HdaControllerGetStreamState (
-  IN  HDA_STREAM *HdaStream,
-  OUT BOOLEAN *Run
+  IN  HDA_STREAM  *HdaStream,
+  OUT BOOLEAN     *Run
   );
 
 BOOLEAN
 HdaControllerSetStreamState (
-  IN HDA_STREAM *HdaStream,
-  IN BOOLEAN Run
+  IN HDA_STREAM  *HdaStream,
+  IN BOOLEAN     Run
   );
 
 BOOLEAN
 HdaControllerGetStreamLinkPos (
-  IN  HDA_STREAM *HdaStream,
-  OUT UINT32 *Position
+  IN  HDA_STREAM  *HdaStream,
+  OUT UINT32      *Position
   );
 
 BOOLEAN
 HdaControllerGetStreamId (
-  IN  HDA_STREAM *HdaStream,
-  OUT UINT8 *Index
+  IN  HDA_STREAM  *HdaStream,
+  OUT UINT8       *Index
   );
 
 BOOLEAN
 HdaControllerSetStreamId (
-  IN HDA_STREAM *HdaStream,
-  IN UINT8 Index
+  IN HDA_STREAM  *HdaStream,
+  IN UINT8       Index
   );
 
 VOID
 HdaControllerStreamIdle (
-  IN HDA_STREAM *HdaStream
+  IN HDA_STREAM  *HdaStream
   );
 
 VOID
 HdaControllerStreamAbort (
-  IN HDA_STREAM *HdaStream
+  IN HDA_STREAM  *HdaStream
   );
 
 #endif

@@ -35,36 +35,36 @@ GetFvFileData (
   OUT UINT32            *FileSize   OPTIONAL
   )
 {
-  UINTN                         Index;
-  EFI_STATUS                    Status;
-  UINT32                        AuthenticationStatus;
-  EFI_FIRMWARE_VOLUME_PROTOCOL  *Fv;
-  EFI_FIRMWARE_VOLUME2_PROTOCOL *Fv2;
-  UINTN                         NumOfHandles;
-  EFI_HANDLE                    *HandleBuffer;
-  EFI_FV_FILETYPE               Type;
-  UINTN                         Size;
-  EFI_FV_FILE_ATTRIBUTES        Attributes;
-  EFI_HANDLE                    CurrentVolume;
-  BOOLEAN                       UseFv2;
+  UINTN                          Index;
+  EFI_STATUS                     Status;
+  UINT32                         AuthenticationStatus;
+  EFI_FIRMWARE_VOLUME_PROTOCOL   *Fv;
+  EFI_FIRMWARE_VOLUME2_PROTOCOL  *Fv2;
+  UINTN                          NumOfHandles;
+  EFI_HANDLE                     *HandleBuffer;
+  EFI_FV_FILETYPE                Type;
+  UINTN                          Size;
+  EFI_FV_FILE_ATTRIBUTES         Attributes;
+  EFI_HANDLE                     CurrentVolume;
+  BOOLEAN                        UseFv2;
 
   UseFv2 = FALSE;
   Status = gBS->LocateHandleBuffer (
-    ByProtocol,
-    &gEfiFirmwareVolumeProtocolGuid,
-    NULL,
-    &NumOfHandles,
-    &HandleBuffer
-    );
+                  ByProtocol,
+                  &gEfiFirmwareVolumeProtocolGuid,
+                  NULL,
+                  &NumOfHandles,
+                  &HandleBuffer
+                  );
 
   if (EFI_ERROR (Status)) {
     Status = gBS->LocateHandleBuffer (
-      ByProtocol,
-      &gEfiFirmwareVolume2ProtocolGuid,
-      NULL,
-      &NumOfHandles,
-      &HandleBuffer
-      );
+                    ByProtocol,
+                    &gEfiFirmwareVolume2ProtocolGuid,
+                    NULL,
+                    &NumOfHandles,
+                    &HandleBuffer
+                    );
     UseFv2 = TRUE;
   }
 
@@ -77,16 +77,16 @@ GetFvFileData (
 
     if (UseFv2) {
       Status = gBS->HandleProtocol (
-        CurrentVolume,
-        &gEfiFirmwareVolume2ProtocolGuid,
-        (VOID **) &Fv2
-        );
+                      CurrentVolume,
+                      &gEfiFirmwareVolume2ProtocolGuid,
+                      (VOID **)&Fv2
+                      );
     } else {
       Status = gBS->HandleProtocol (
-        CurrentVolume,
-        &gEfiFirmwareVolumeProtocolGuid,
-        (VOID **) &Fv
-        );
+                      CurrentVolume,
+                      &gEfiFirmwareVolumeProtocolGuid,
+                      (VOID **)&Fv
+                      );
     }
 
     if (EFI_ERROR (Status)) {
@@ -95,24 +95,24 @@ GetFvFileData (
 
     if (UseFv2) {
       Status = Fv2->ReadFile (
-        Fv2,
-        FvNameGuid,
-        NULL,
-        &Size,
-        &Type,
-        &Attributes,
-        &AuthenticationStatus
-        );
+                      Fv2,
+                      FvNameGuid,
+                      NULL,
+                      &Size,
+                      &Type,
+                      &Attributes,
+                      &AuthenticationStatus
+                      );
     } else {
       Status = Fv->ReadFile (
-        Fv,
-        FvNameGuid,
-        NULL,
-        &Size,
-        &Type,
-        &Attributes,
-        &AuthenticationStatus
-        );
+                     Fv,
+                     FvNameGuid,
+                     NULL,
+                     &Size,
+                     &Type,
+                     &Attributes,
+                     &AuthenticationStatus
+                     );
     }
 
     if (!EFI_ERROR (Status)) {
@@ -124,28 +124,28 @@ GetFvFileData (
         *FileData = NULL;
         if (UseFv2) {
           Status = Fv2->ReadSection (
-            Fv2,
-            FvNameGuid,
-            SectionType,
-            0,
-            FileData,
-            &Size,
-            &AuthenticationStatus
-            );
+                          Fv2,
+                          FvNameGuid,
+                          SectionType,
+                          0,
+                          FileData,
+                          &Size,
+                          &AuthenticationStatus
+                          );
         } else {
           Status = Fv->ReadSection (
-            Fv,
-            FvNameGuid,
-            SectionType,
-            0,
-            FileData,
-            &Size,
-            &AuthenticationStatus
-            );
+                         Fv,
+                         FvNameGuid,
+                         SectionType,
+                         0,
+                         FileData,
+                         &Size,
+                         &AuthenticationStatus
+                         );
         }
 
         if (!EFI_ERROR (Status)) {
-          *FileSize = (UINT32) Size;
+          *FileSize = (UINT32)Size;
         } else {
           CurrentVolume = NULL;
         }
@@ -179,18 +179,18 @@ OcCreateFvFileDevicePath (
   }
 
   EfiInitializeFwVolDevicepathNode (&FvFileNode, FileGuid);
-  return AppendDevicePathNode (VolumeDevicePath, (EFI_DEVICE_PATH_PROTOCOL *) &FvFileNode);
+  return AppendDevicePathNode (VolumeDevicePath, (EFI_DEVICE_PATH_PROTOCOL *)&FvFileNode);
 }
 
 VOID *
 OcReadFvFileSection (
-  IN  EFI_GUID          *FileGuid,
-  IN  UINT8             SectionType,
-  OUT UINT32            *FileSize
+  IN  EFI_GUID  *FileGuid,
+  IN  UINT8     SectionType,
+  OUT UINT32    *FileSize
   )
 {
-  EFI_HANDLE                         VolumeHandle;
-  VOID                               *FileData;
+  EFI_HANDLE  VolumeHandle;
+  VOID        *FileData;
 
   //
   // TODO: This is quite an ugly interface, redesign.

@@ -16,13 +16,13 @@
 
 UINT32
 DecompressMaskedRLE24 (
-  OUT UINT8   *Dst,
-  IN  UINT32  DstLen,
-  IN  UINT8   *Src,
-  IN  UINT32  SrcLen,
-  IN  UINT8   *Mask,
-  IN  UINT32  MaskLen,
-  IN  BOOLEAN Premultiply
+  OUT UINT8    *Dst,
+  IN  UINT32   DstLen,
+  IN  UINT8    *Src,
+  IN  UINT32   SrcLen,
+  IN  UINT8    *Mask,
+  IN  UINT32   MaskLen,
+  IN  BOOLEAN  Premultiply
   )
 {
   //
@@ -46,7 +46,7 @@ DecompressMaskedRLE24 (
   UINT8  DstValue;
   UINT8  RunIndex;
 
-  if (SrcLen < 2 || MaskLen != DstLen / sizeof (UINT32)) {
+  if ((SrcLen < 2) || (MaskLen != DstLen / sizeof (UINT32))) {
     return 0;
   }
 
@@ -78,7 +78,7 @@ DecompressMaskedRLE24 (
         //
         // Early exit on not enough bytes to fill.
         //
-        if ((UINT32) (DstEnd - DstCur) < ControlValue * sizeof (UINT32)) {
+        if ((UINT32)(DstEnd - DstCur) < ControlValue * sizeof (UINT32)) {
           return 0;
         }
 
@@ -93,7 +93,7 @@ DecompressMaskedRLE24 (
         //
         // Early exit on not enough bytes to read or fill.
         //
-        if ((UINT32) (SrcEnd - Src) < ControlValue || (UINT32) (DstEnd - DstCur) < ControlValue * sizeof (UINT32)) {
+        if (((UINT32)(SrcEnd - Src) < ControlValue) || ((UINT32)(DstEnd - DstCur) < ControlValue * sizeof (UINT32))) {
           return 0;
         }
 
@@ -121,9 +121,9 @@ DecompressMaskedRLE24 (
     SrcEnd = Mask + MaskLen;
     while (Mask < SrcEnd) {
       DstValue  = *Mask++;
-      DstCur[0] = (UINT8) ((DstCur[0] * DstValue) / 0xFF);
-      DstCur[1] = (UINT8) ((DstCur[1] * DstValue) / 0xFF);
-      DstCur[2] = (UINT8) ((DstCur[2] * DstValue) / 0xFF);
+      DstCur[0] = (UINT8)((DstCur[0] * DstValue) / 0xFF);
+      DstCur[1] = (UINT8)((DstCur[1] * DstValue) / 0xFF);
+      DstCur[2] = (UINT8)((DstCur[2] * DstValue) / 0xFF);
       DstCur[3] = DstValue;
       DstCur   += sizeof (UINT32);
     }

@@ -27,7 +27,7 @@ OcOverflowAlignUpU32 (
   UINT32  *Result
   )
 {
-  BOOLEAN Status;
+  BOOLEAN  Status;
 
   Status   = OcOverflowAddU32 (Value, Alignment - 1U, Result);
   *Result &= ~(Alignment - 1U);

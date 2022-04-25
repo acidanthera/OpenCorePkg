@@ -28,19 +28,19 @@ OcOverflowAddUN (
   UINTN  *Result
   )
 {
-#if defined(OC_HAS_TYPE_GENERIC_BUILTINS)
-  return __builtin_add_overflow(A, B, Result);
-#elif defined(OC_HAS_TYPE_SPECIFIC_BUILTINS_64)
-  return __builtin_uaddll_overflow(A, B, Result);
-#elif defined(OC_HAS_TYPE_SPECIFIC_BUILTINS_32)
-  return __builtin_uadd_overflow(A, B, Result);
-#else
+ #if defined (OC_HAS_TYPE_GENERIC_BUILTINS)
+  return __builtin_add_overflow (A, B, Result);
+ #elif defined (OC_HAS_TYPE_SPECIFIC_BUILTINS_64)
+  return __builtin_uaddll_overflow (A, B, Result);
+ #elif defined (OC_HAS_TYPE_SPECIFIC_BUILTINS_32)
+  return __builtin_uadd_overflow (A, B, Result);
+ #else
   if (sizeof (UINTN) == sizeof (UINT64)) {
     return OcOverflowAddU64 (A, B, (UINT64 *)Result);
   }
 
   return OcOverflowAddU32 ((UINT32)A, (UINT32)B, (UINT32 *)Result);
-#endif
+ #endif
 }
 
 BOOLEAN
@@ -50,19 +50,19 @@ OcOverflowSubUN (
   UINTN  *Result
   )
 {
-#if defined(OC_HAS_TYPE_GENERIC_BUILTINS)
-  return __builtin_sub_overflow(A, B, Result);
-#elif defined(OC_HAS_TYPE_SPECIFIC_BUILTINS_64)
-  return __builtin_usubll_overflow(A, B, Result);
-#elif defined(OC_HAS_TYPE_SPECIFIC_BUILTINS_32)
-  return __builtin_usub_overflow(A, B, Result);
-#else
+ #if defined (OC_HAS_TYPE_GENERIC_BUILTINS)
+  return __builtin_sub_overflow (A, B, Result);
+ #elif defined (OC_HAS_TYPE_SPECIFIC_BUILTINS_64)
+  return __builtin_usubll_overflow (A, B, Result);
+ #elif defined (OC_HAS_TYPE_SPECIFIC_BUILTINS_32)
+  return __builtin_usub_overflow (A, B, Result);
+ #else
   if (sizeof (UINTN) == sizeof (UINT64)) {
     return OcOverflowSubU64 (A, B, (UINT64 *)Result);
   }
 
   return OcOverflowSubU32 ((UINT32)A, (UINT32)B, (UINT32 *)Result);
-#endif
+ #endif
 }
 
 BOOLEAN
@@ -72,19 +72,19 @@ OcOverflowMulUN (
   UINTN  *Result
   )
 {
-#if defined(OC_HAS_TYPE_GENERIC_BUILTINS)
-  return __builtin_mul_overflow(A, B, Result);
-#elif defined(OC_HAS_TYPE_SPECIFIC_BUILTINS_64)
-  return __builtin_umulll_overflow(A, B, Result);
-#elif defined(OC_HAS_TYPE_SPECIFIC_BUILTINS_32)
-  return __builtin_umul_overflow(A, B, Result);
-#else
+ #if defined (OC_HAS_TYPE_GENERIC_BUILTINS)
+  return __builtin_mul_overflow (A, B, Result);
+ #elif defined (OC_HAS_TYPE_SPECIFIC_BUILTINS_64)
+  return __builtin_umulll_overflow (A, B, Result);
+ #elif defined (OC_HAS_TYPE_SPECIFIC_BUILTINS_32)
+  return __builtin_umul_overflow (A, B, Result);
+ #else
   if (sizeof (UINTN) == sizeof (UINT64)) {
     return OcOverflowMulU64 (A, B, (UINT64 *)Result);
   }
 
   return OcOverflowMulU32 ((UINT32)A, (UINT32)B, (UINT32 *)Result);
-#endif
+ #endif
 }
 
 BOOLEAN
@@ -94,19 +94,19 @@ OcOverflowAddSN (
   INTN  *Result
   )
 {
-#if defined(OC_HAS_TYPE_GENERIC_BUILTINS)
-  return __builtin_add_overflow(A, B, Result);
-#elif defined(OC_HAS_TYPE_SPECIFIC_BUILTINS_64)
-  return __builtin_saddll_overflow(A, B, Result);
-#elif defined(OC_HAS_TYPE_SPECIFIC_BUILTINS_32)
-  return __builtin_sadd_overflow(A, B, Result);
-#else
+ #if defined (OC_HAS_TYPE_GENERIC_BUILTINS)
+  return __builtin_add_overflow (A, B, Result);
+ #elif defined (OC_HAS_TYPE_SPECIFIC_BUILTINS_64)
+  return __builtin_saddll_overflow (A, B, Result);
+ #elif defined (OC_HAS_TYPE_SPECIFIC_BUILTINS_32)
+  return __builtin_sadd_overflow (A, B, Result);
+ #else
   if (sizeof (INTN) == sizeof (INT64)) {
     return OcOverflowAddS64 (A, B, (INT64 *)Result);
   }
 
   return OcOverflowAddS32 ((INT32)A, (INT32)B, (INT32 *)Result);
-#endif
+ #endif
 }
 
 BOOLEAN
@@ -116,19 +116,19 @@ OcOverflowSubSN (
   INTN  *Result
   )
 {
-#if defined(OC_HAS_TYPE_GENERIC_BUILTINS)
-  return __builtin_sub_overflow(A, B, Result);
-#elif defined(OC_HAS_TYPE_SPECIFIC_BUILTINS_64)
-  return __builtin_ssubll_overflow(A, B, Result);
-#elif defined(OC_HAS_TYPE_SPECIFIC_BUILTINS_32)
-  return __builtin_ssub_overflow(A, B, Result);
-#else
+ #if defined (OC_HAS_TYPE_GENERIC_BUILTINS)
+  return __builtin_sub_overflow (A, B, Result);
+ #elif defined (OC_HAS_TYPE_SPECIFIC_BUILTINS_64)
+  return __builtin_ssubll_overflow (A, B, Result);
+ #elif defined (OC_HAS_TYPE_SPECIFIC_BUILTINS_32)
+  return __builtin_ssub_overflow (A, B, Result);
+ #else
   if (sizeof (INTN) == sizeof (INT64)) {
     return OcOverflowSubS64 (A, B, (INT64 *)Result);
   }
 
   return OcOverflowSubS32 ((INT32)A, (INT32)B, (INT32 *)Result);
-#endif
+ #endif
 }
 
 BOOLEAN
@@ -138,17 +138,17 @@ OcOverflowMulSN (
   INTN  *Result
   )
 {
-#if defined(OC_HAS_TYPE_GENERIC_BUILTINS)
-  return __builtin_mul_overflow(A, B, Result);
-#elif defined(OC_HAS_TYPE_SPECIFIC_BUILTINS_64)
-  return __builtin_smulll_overflow(A, B, Result);
-#elif defined(OC_HAS_TYPE_SPECIFIC_BUILTINS_32)
-  return __builtin_smul_overflow(A, B, Result);
-#else
+ #if defined (OC_HAS_TYPE_GENERIC_BUILTINS)
+  return __builtin_mul_overflow (A, B, Result);
+ #elif defined (OC_HAS_TYPE_SPECIFIC_BUILTINS_64)
+  return __builtin_smulll_overflow (A, B, Result);
+ #elif defined (OC_HAS_TYPE_SPECIFIC_BUILTINS_32)
+  return __builtin_smul_overflow (A, B, Result);
+ #else
   if (sizeof (INTN) == sizeof (INT64)) {
     return OcOverflowMulS64 (A, B, (INT64 *)Result);
   }
 
   return OcOverflowMulS32 ((INT32)A, (INT32)B, (INT32 *)Result);
-#endif
+ #endif
 }

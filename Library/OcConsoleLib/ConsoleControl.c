@@ -35,10 +35,10 @@ OcConsoleControlSetMode (
   EFI_CONSOLE_CONTROL_SCREEN_MODE  OldMode;
 
   Status = OcHandleProtocolFallback (
-    &gST->ConsoleOutHandle,
-    &gEfiConsoleControlProtocolGuid,
-    (VOID *) &ConsoleControl
-    );
+             &gST->ConsoleOutHandle,
+             &gEfiConsoleControlProtocolGuid,
+             (VOID *)&ConsoleControl
+             );
 
   //
   // No console control, assume already set.
@@ -48,24 +48,24 @@ OcConsoleControlSetMode (
   }
 
   Status = ConsoleControl->GetMode (
-    ConsoleControl,
-    &OldMode,
-    NULL,
-    NULL
-    );
+                             ConsoleControl,
+                             &OldMode,
+                             NULL,
+                             NULL
+                             );
 
   //
   // Cannot get mode, assume already set.
   // Same mode, do not waste time.
   //
-  if (EFI_ERROR (Status) || OldMode == Mode) {
+  if (EFI_ERROR (Status) || (OldMode == Mode)) {
     return Mode;
   }
 
   ConsoleControl->SetMode (
-    ConsoleControl,
-    Mode
-    );
+                    ConsoleControl,
+                    Mode
+                    );
 
   return OldMode;
 }
@@ -81,10 +81,10 @@ OcConsoleControlInstallProtocol (
   EFI_CONSOLE_CONTROL_PROTOCOL  *ConsoleControl;
 
   Status = OcHandleProtocolFallback (
-    &gST->ConsoleOutHandle,
-    &gEfiConsoleControlProtocolGuid,
-    (VOID *) &ConsoleControl
-    );
+             &gST->ConsoleOutHandle,
+             &gEfiConsoleControlProtocolGuid,
+             (VOID *)&ConsoleControl
+             );
 
   DEBUG ((
     DEBUG_INFO,
@@ -124,11 +124,11 @@ OcConsoleControlInstallProtocol (
   }
 
   Status = gBS->InstallMultipleProtocolInterfaces (
-    &gST->ConsoleOutHandle,
-    &gEfiConsoleControlProtocolGuid,
-    NewProtocol,
-    NULL
-    );
+                  &gST->ConsoleOutHandle,
+                  &gEfiConsoleControlProtocolGuid,
+                  NewProtocol,
+                  NULL
+                  );
 
   DEBUG ((DEBUG_INFO, "OCC: Install console control, new - %r\n", Status));
 

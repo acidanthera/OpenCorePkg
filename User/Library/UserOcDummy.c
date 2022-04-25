@@ -7,8 +7,8 @@
 
 EFI_DEVICE_PATH_PROTOCOL *
 OcGetNextLoadOptionDevicePath (
-  IN  EFI_DEVICE_PATH_PROTOCOL          *FilePath,
-  IN  EFI_DEVICE_PATH_PROTOCOL          *FullPath
+  IN  EFI_DEVICE_PATH_PROTOCOL  *FilePath,
+  IN  EFI_DEVICE_PATH_PROTOCOL  *FullPath
   )
 {
   return NULL;

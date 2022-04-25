@@ -19,7 +19,11 @@
 
 #include "HandleParsingMin.h"
 
-STATIC HANDLE_INDEX_LIST mHandleList = {{{NULL,NULL},0,0},0};
+STATIC HANDLE_INDEX_LIST  mHandleList = {
+  {
+    { NULL, NULL }, 0, 0
+  }, 0
+};
 
 /**
   Function to initialize the file global mHandleList object for use in
@@ -29,7 +33,7 @@ STATIC HANDLE_INDEX_LIST mHandleList = {{{NULL,NULL},0,0},0};
 **/
 STATIC
 EFI_STATUS
-InternalShellInitHandleList(
+InternalShellInitHandleList (
   VOID
   )
 {
@@ -41,28 +45,31 @@ InternalShellInitHandleList(
   if (mHandleList.NextIndex != 0) {
     return EFI_SUCCESS;
   }
-  InitializeListHead(&mHandleList.List.Link);
+
+  InitializeListHead (&mHandleList.List.Link);
   mHandleList.NextIndex = 1;
-  Status = gBS->LocateHandleBuffer (
-                AllHandles,
-                NULL,
-                NULL,
-                &HandleCount,
-                &HandleBuffer
-               );
-  ASSERT_EFI_ERROR(Status);
-  if (EFI_ERROR(Status)) {
+  Status                = gBS->LocateHandleBuffer (
+                                 AllHandles,
+                                 NULL,
+                                 NULL,
+                                 &HandleCount,
+                                 &HandleBuffer
+                                 );
+  ASSERT_EFI_ERROR (Status);
+  if (EFI_ERROR (Status)) {
     return (Status);
   }
-  for (mHandleList.NextIndex = 1 ; mHandleList.NextIndex <= HandleCount ; mHandleList.NextIndex++){
-    ListWalker = AllocateZeroPool(sizeof(HANDLE_LIST));
+
+  for (mHandleList.NextIndex = 1; mHandleList.NextIndex <= HandleCount; mHandleList.NextIndex++) {
+    ListWalker = AllocateZeroPool (sizeof (HANDLE_LIST));
     if (ListWalker != NULL) {
       ListWalker->TheHandle = HandleBuffer[mHandleList.NextIndex - 1];
-      ListWalker->TheIndex = mHandleList.NextIndex;
+      ListWalker->TheIndex  = mHandleList.NextIndex;
       InsertTailList (&mHandleList.List.Link, &ListWalker->Link);
     }
   }
-  FreePool(HandleBuffer);
+
+  FreePool (HandleBuffer);
   return (EFI_SUCCESS);
 }
 
@@ -79,8 +86,8 @@ InternalShellInitHandleList(
 **/
 UINTN
 EFIAPI
-InternalConvertHandleToHandleIndex(
-  IN CONST EFI_HANDLE TheHandle
+InternalConvertHandleToHandleIndex (
+  IN CONST EFI_HANDLE  TheHandle
   )
 {
   EFI_STATUS   Status;
@@ -92,17 +99,18 @@ InternalConvertHandleToHandleIndex(
     return 0;
   }
 
-  InternalShellInitHandleList();
+  InternalShellInitHandleList ();
 
-  for (ListWalker = (HANDLE_LIST*)GetFirstNode(&mHandleList.List.Link)
-    ;  !IsNull(&mHandleList.List.Link,&ListWalker->Link)
-    ;  ListWalker = (HANDLE_LIST*)GetNextNode(&mHandleList.List.Link,&ListWalker->Link)
-   ){
+  for (ListWalker = (HANDLE_LIST *)GetFirstNode (&mHandleList.List.Link)
+       ; !IsNull (&mHandleList.List.Link, &ListWalker->Link)
+       ; ListWalker = (HANDLE_LIST *)GetNextNode (&mHandleList.List.Link, &ListWalker->Link)
+       )
+  {
     if (ListWalker->TheHandle == TheHandle) {
       //
       // Verify that TheHandle is still present in the Handle Database
       //
-      Status = gBS->ProtocolsPerHandle(TheHandle, &ProtocolBuffer, &ProtocolCount);
+      Status = gBS->ProtocolsPerHandle (TheHandle, &ProtocolBuffer, &ProtocolCount);
       if (EFI_ERROR (Status)) {
         //
         // TheHandle is not present in the Handle Database, so delete from the handle list
@@ -110,6 +118,7 @@ InternalConvertHandleToHandleIndex(
         RemoveEntryList (&ListWalker->Link);
         return 0;
       }
+
       FreePool (ProtocolBuffer);
       return (ListWalker->TheIndex);
     }
@@ -118,22 +127,24 @@ InternalConvertHandleToHandleIndex(
   //
   // Verify that TheHandle is valid handle
   //
-  Status = gBS->ProtocolsPerHandle(TheHandle, &ProtocolBuffer, &ProtocolCount);
+  Status = gBS->ProtocolsPerHandle (TheHandle, &ProtocolBuffer, &ProtocolCount);
   if (EFI_ERROR (Status)) {
     //
     // TheHandle is not valid, so do not add to handle list
     //
     return 0;
   }
+
   FreePool (ProtocolBuffer);
 
-  ListWalker = AllocateZeroPool(sizeof(HANDLE_LIST));
+  ListWalker = AllocateZeroPool (sizeof (HANDLE_LIST));
   if (ListWalker == NULL) {
     return 0;
   }
+
   ListWalker->TheHandle = TheHandle;
   ListWalker->TheIndex  = mHandleList.NextIndex++;
-  InsertTailList(&mHandleList.List.Link,&ListWalker->Link);
+  InsertTailList (&mHandleList.List.Link, &ListWalker->Link);
   return (ListWalker->TheIndex);
 }
 
@@ -167,43 +178,43 @@ STATIC
 EFI_STATUS
 EFIAPI
 ParseHandleDatabaseByRelationshipWithType (
-  IN CONST EFI_HANDLE DriverBindingHandle OPTIONAL,
-  IN CONST EFI_HANDLE ControllerHandle OPTIONAL,
-  IN UINTN            *HandleCount,
-  OUT EFI_HANDLE      **HandleBuffer,
-  OUT UINTN           **HandleType
+  IN CONST EFI_HANDLE  DriverBindingHandle OPTIONAL,
+  IN CONST EFI_HANDLE  ControllerHandle OPTIONAL,
+  IN UINTN             *HandleCount,
+  OUT EFI_HANDLE       **HandleBuffer,
+  OUT UINTN            **HandleType
   )
 {
-  EFI_STATUS                          Status;
-  UINTN                               HandleIndex;
-  EFI_GUID                            **ProtocolGuidArray;
-  UINTN                               ArrayCount;
-  UINTN                               ProtocolIndex;
-  EFI_OPEN_PROTOCOL_INFORMATION_ENTRY *OpenInfo;
-  UINTN                               OpenInfoCount;
-  UINTN                               OpenInfoIndex;
-  UINTN                               ChildIndex;
-  INTN                                DriverBindingHandleIndex;
+  EFI_STATUS                           Status;
+  UINTN                                HandleIndex;
+  EFI_GUID                             **ProtocolGuidArray;
+  UINTN                                ArrayCount;
+  UINTN                                ProtocolIndex;
+  EFI_OPEN_PROTOCOL_INFORMATION_ENTRY  *OpenInfo;
+  UINTN                                OpenInfoCount;
+  UINTN                                OpenInfoIndex;
+  UINTN                                ChildIndex;
+  INTN                                 DriverBindingHandleIndex;
 
-  ASSERT(HandleCount  != NULL);
-  ASSERT(HandleBuffer != NULL);
-  ASSERT(HandleType   != NULL);
-  ASSERT(DriverBindingHandle != NULL || ControllerHandle != NULL);
+  ASSERT (HandleCount  != NULL);
+  ASSERT (HandleBuffer != NULL);
+  ASSERT (HandleType   != NULL);
+  ASSERT (DriverBindingHandle != NULL || ControllerHandle != NULL);
 
-  *HandleCount                  = 0;
-  *HandleBuffer                 = NULL;
-  *HandleType                   = NULL;
+  *HandleCount  = 0;
+  *HandleBuffer = NULL;
+  *HandleType   = NULL;
 
   //
   // Retrieve the list of all handles from the handle database
   //
   Status = gBS->LocateHandleBuffer (
-                AllHandles,
-                NULL,
-                NULL,
-                HandleCount,
-                HandleBuffer
-               );
+                  AllHandles,
+                  NULL,
+                  NULL,
+                  HandleCount,
+                  HandleBuffer
+                  );
   if (EFI_ERROR (Status)) {
     return (Status);
   }
@@ -214,13 +225,14 @@ ParseHandleDatabaseByRelationshipWithType (
       FreePool (*HandleBuffer);
       *HandleBuffer = NULL;
     }
+
     *HandleCount = 0;
     return EFI_OUT_OF_RESOURCES;
   }
 
   DriverBindingHandleIndex = -1;
   for (HandleIndex = 0; HandleIndex < *HandleCount; HandleIndex++) {
-    if (DriverBindingHandle != NULL && (*HandleBuffer)[HandleIndex] == DriverBindingHandle) {
+    if ((DriverBindingHandle != NULL) && ((*HandleBuffer)[HandleIndex] == DriverBindingHandle)) {
       DriverBindingHandleIndex = (INTN)HandleIndex;
     }
   }
@@ -230,38 +242,38 @@ ParseHandleDatabaseByRelationshipWithType (
     // Retrieve the list of all the protocols on each handle
     //
     Status = gBS->ProtocolsPerHandle (
-                  (*HandleBuffer)[HandleIndex],
-                  &ProtocolGuidArray,
-                  &ArrayCount
-                 );
+                    (*HandleBuffer)[HandleIndex],
+                    &ProtocolGuidArray,
+                    &ArrayCount
+                    );
     if (EFI_ERROR (Status)) {
       continue;
     }
 
     for (ProtocolIndex = 0; ProtocolIndex < ArrayCount; ProtocolIndex++) {
-
       //
       // Set the bit describing what this handle has
       //
-      if        (CompareGuid (ProtocolGuidArray[ProtocolIndex], &gEfiLoadedImageProtocolGuid)         ) {
+      if (CompareGuid (ProtocolGuidArray[ProtocolIndex], &gEfiLoadedImageProtocolGuid)) {
         (*HandleType)[HandleIndex] |= (UINTN)HR_IMAGE_HANDLE;
-      } else if (CompareGuid (ProtocolGuidArray[ProtocolIndex], &gEfiDriverBindingProtocolGuid)       ) {
+      } else if (CompareGuid (ProtocolGuidArray[ProtocolIndex], &gEfiDriverBindingProtocolGuid)) {
         (*HandleType)[HandleIndex] |= (UINTN)HR_DRIVER_BINDING_HANDLE;
       } else if (CompareGuid (ProtocolGuidArray[ProtocolIndex], &gEfiDriverConfiguration2ProtocolGuid)) {
         (*HandleType)[HandleIndex] |= (UINTN)HR_DRIVER_CONFIGURATION_HANDLE;
-      } else if (CompareGuid (ProtocolGuidArray[ProtocolIndex], &gEfiDriverConfigurationProtocolGuid) ) {
+      } else if (CompareGuid (ProtocolGuidArray[ProtocolIndex], &gEfiDriverConfigurationProtocolGuid)) {
         (*HandleType)[HandleIndex] |= (UINTN)HR_DRIVER_CONFIGURATION_HANDLE;
-      } else if (CompareGuid (ProtocolGuidArray[ProtocolIndex], &gEfiDriverDiagnostics2ProtocolGuid)  ) {
+      } else if (CompareGuid (ProtocolGuidArray[ProtocolIndex], &gEfiDriverDiagnostics2ProtocolGuid)) {
         (*HandleType)[HandleIndex] |= (UINTN)HR_DRIVER_DIAGNOSTICS_HANDLE;
-      } else if (CompareGuid (ProtocolGuidArray[ProtocolIndex], &gEfiDriverDiagnosticsProtocolGuid)   ) {
+      } else if (CompareGuid (ProtocolGuidArray[ProtocolIndex], &gEfiDriverDiagnosticsProtocolGuid)) {
         (*HandleType)[HandleIndex] |= (UINTN)HR_DRIVER_DIAGNOSTICS_HANDLE;
-      } else if (CompareGuid (ProtocolGuidArray[ProtocolIndex], &gEfiComponentName2ProtocolGuid)      ) {
+      } else if (CompareGuid (ProtocolGuidArray[ProtocolIndex], &gEfiComponentName2ProtocolGuid)) {
         (*HandleType)[HandleIndex] |= (UINTN)HR_COMPONENT_NAME_HANDLE;
-      } else if (CompareGuid (ProtocolGuidArray[ProtocolIndex], &gEfiComponentNameProtocolGuid)       ) {
+      } else if (CompareGuid (ProtocolGuidArray[ProtocolIndex], &gEfiComponentNameProtocolGuid)) {
         (*HandleType)[HandleIndex] |= (UINTN)HR_COMPONENT_NAME_HANDLE;
-      } else if (CompareGuid (ProtocolGuidArray[ProtocolIndex], &gEfiDevicePathProtocolGuid)          ) {
+      } else if (CompareGuid (ProtocolGuidArray[ProtocolIndex], &gEfiDevicePathProtocolGuid)) {
         (*HandleType)[HandleIndex] |= (UINTN)HR_DEVICE_HANDLE;
       }
+
       //
       // Retrieve the list of agents that have opened each protocol
       //
@@ -270,7 +282,7 @@ ParseHandleDatabaseByRelationshipWithType (
                       ProtocolGuidArray[ProtocolIndex],
                       &OpenInfo,
                       &OpenInfoCount
-                     );
+                      );
       if (EFI_ERROR (Status)) {
         continue;
       }
@@ -281,17 +293,19 @@ ParseHandleDatabaseByRelationshipWithType (
         // Return information on all the controller handles that the driver specified by DriverBindingHandle is managing
         //
         for (OpenInfoIndex = 0; OpenInfoIndex < OpenInfoCount; OpenInfoIndex++) {
-          if (OpenInfo[OpenInfoIndex].AgentHandle == DriverBindingHandle && (OpenInfo[OpenInfoIndex].Attributes & EFI_OPEN_PROTOCOL_BY_DRIVER) != 0) {
+          if ((OpenInfo[OpenInfoIndex].AgentHandle == DriverBindingHandle) && ((OpenInfo[OpenInfoIndex].Attributes & EFI_OPEN_PROTOCOL_BY_DRIVER) != 0)) {
             (*HandleType)[HandleIndex] |= (UINTN)(HR_DEVICE_HANDLE | HR_CONTROLLER_HANDLE);
             if (DriverBindingHandleIndex != -1) {
               (*HandleType)[DriverBindingHandleIndex] |= (UINTN)HR_DEVICE_DRIVER;
             }
           }
-          if (OpenInfo[OpenInfoIndex].AgentHandle == DriverBindingHandle && (OpenInfo[OpenInfoIndex].Attributes & EFI_OPEN_PROTOCOL_BY_CHILD_CONTROLLER) != 0) {
+
+          if ((OpenInfo[OpenInfoIndex].AgentHandle == DriverBindingHandle) && ((OpenInfo[OpenInfoIndex].Attributes & EFI_OPEN_PROTOCOL_BY_CHILD_CONTROLLER) != 0)) {
             (*HandleType)[HandleIndex] |= (UINTN)(HR_DEVICE_HANDLE | HR_CONTROLLER_HANDLE);
             if (DriverBindingHandleIndex != -1) {
               (*HandleType)[DriverBindingHandleIndex] |= (UINTN)(HR_BUS_DRIVER | HR_DEVICE_DRIVER);
             }
+
             for (ChildIndex = 0; ChildIndex < *HandleCount; ChildIndex++) {
               if (OpenInfo[OpenInfoIndex].ControllerHandle == (*HandleBuffer)[ChildIndex]) {
                 (*HandleType)[ChildIndex] |= (UINTN)(HR_DEVICE_HANDLE | HR_CHILD_HANDLE);
@@ -300,7 +314,8 @@ ParseHandleDatabaseByRelationshipWithType (
           }
         }
       }
-      if (DriverBindingHandle == NULL && ControllerHandle != NULL) {
+
+      if ((DriverBindingHandle == NULL) && (ControllerHandle != NULL)) {
         if (ControllerHandle == (*HandleBuffer)[HandleIndex]) {
           (*HandleType)[HandleIndex] |= (UINTN)(HR_DEVICE_HANDLE | HR_CONTROLLER_HANDLE);
           for (OpenInfoIndex = 0; OpenInfoIndex < OpenInfoCount; OpenInfoIndex++) {
@@ -311,11 +326,13 @@ ParseHandleDatabaseByRelationshipWithType (
                 }
               }
             }
+
             if ((OpenInfo[OpenInfoIndex].Attributes & EFI_OPEN_PROTOCOL_BY_CHILD_CONTROLLER) != 0) {
               for (ChildIndex = 0; ChildIndex < *HandleCount; ChildIndex++) {
                 if (OpenInfo[OpenInfoIndex].AgentHandle == (*HandleBuffer)[ChildIndex]) {
                   (*HandleType)[ChildIndex] |= (UINTN)(HR_BUS_DRIVER | HR_DEVICE_DRIVER);
                 }
+
                 if (OpenInfo[OpenInfoIndex].ControllerHandle == (*HandleBuffer)[ChildIndex]) {
                   (*HandleType)[ChildIndex] |= (UINTN)(HR_DEVICE_HANDLE | HR_CHILD_HANDLE);
                 }
@@ -332,7 +349,8 @@ ParseHandleDatabaseByRelationshipWithType (
           }
         }
       }
-      if (DriverBindingHandle != NULL && ControllerHandle != NULL) {
+
+      if ((DriverBindingHandle != NULL) && (ControllerHandle != NULL)) {
         if (ControllerHandle == (*HandleBuffer)[HandleIndex]) {
           (*HandleType)[HandleIndex] |= (UINTN)(HR_DEVICE_HANDLE | HR_CONTROLLER_HANDLE);
           for (OpenInfoIndex = 0; OpenInfoIndex < OpenInfoCount; OpenInfoIndex++) {
@@ -343,6 +361,7 @@ ParseHandleDatabaseByRelationshipWithType (
                 }
               }
             }
+
             if ((OpenInfo[OpenInfoIndex].Attributes & EFI_OPEN_PROTOCOL_BY_CHILD_CONTROLLER) != 0) {
               if (OpenInfo[OpenInfoIndex].AgentHandle == DriverBindingHandle) {
                 for (ChildIndex = 0; ChildIndex < *HandleCount; ChildIndex++) {
@@ -369,10 +388,13 @@ ParseHandleDatabaseByRelationshipWithType (
           }
         }
       }
+
       FreePool (OpenInfo);
     }
+
     FreePool (ProtocolGuidArray);
   }
+
   return EFI_SUCCESS;
 }
 
@@ -407,27 +429,27 @@ ParseHandleDatabaseByRelationshipWithType (
 EFI_STATUS
 EFIAPI
 InternalParseHandleDatabaseByRelationship (
-  IN CONST EFI_HANDLE       DriverBindingHandle OPTIONAL,
-  IN CONST EFI_HANDLE       ControllerHandle OPTIONAL,
-  IN CONST UINTN            Mask,
-  IN UINTN                  *MatchingHandleCount,
-  OUT EFI_HANDLE            **MatchingHandleBuffer OPTIONAL
+  IN CONST EFI_HANDLE  DriverBindingHandle OPTIONAL,
+  IN CONST EFI_HANDLE  ControllerHandle OPTIONAL,
+  IN CONST UINTN       Mask,
+  IN UINTN             *MatchingHandleCount,
+  OUT EFI_HANDLE       **MatchingHandleBuffer OPTIONAL
   )
 {
-  EFI_STATUS            Status;
-  UINTN                 HandleCount;
-  EFI_HANDLE            *HandleBuffer;
-  UINTN                 *HandleType;
-  UINTN                 HandleIndex;
+  EFI_STATUS  Status;
+  UINTN       HandleCount;
+  EFI_HANDLE  *HandleBuffer;
+  UINTN       *HandleType;
+  UINTN       HandleIndex;
 
-  ASSERT(MatchingHandleCount != NULL);
-  ASSERT(DriverBindingHandle != NULL || ControllerHandle != NULL);
+  ASSERT (MatchingHandleCount != NULL);
+  ASSERT (DriverBindingHandle != NULL || ControllerHandle != NULL);
 
   if ((Mask & HR_VALID_MASK) != Mask) {
     return (EFI_INVALID_PARAMETER);
   }
 
-  if ((Mask & HR_CHILD_HANDLE) != 0 && DriverBindingHandle == NULL) {
+  if (((Mask & HR_CHILD_HANDLE) != 0) && (DriverBindingHandle == NULL)) {
     return (EFI_INVALID_PARAMETER);
   }
 
@@ -436,16 +458,16 @@ InternalParseHandleDatabaseByRelationship (
     *MatchingHandleBuffer = NULL;
   }
 
-  HandleBuffer  = NULL;
-  HandleType    = NULL;
+  HandleBuffer = NULL;
+  HandleType   = NULL;
 
   Status = ParseHandleDatabaseByRelationshipWithType (
-            DriverBindingHandle,
-            ControllerHandle,
-            &HandleCount,
-            &HandleBuffer,
-            &HandleType
-           );
+             DriverBindingHandle,
+             ControllerHandle,
+             &HandleCount,
+             &HandleBuffer,
+             &HandleType
+             );
   if (!EFI_ERROR (Status)) {
     //
     // Count the number of handles that match the attributes in Mask
@@ -455,13 +477,13 @@ InternalParseHandleDatabaseByRelationship (
         (*MatchingHandleCount)++;
       }
     }
+
     //
     // If no handles match the attributes in Mask then return EFI_NOT_FOUND
     //
     if (*MatchingHandleCount == 0) {
       Status = EFI_NOT_FOUND;
     } else {
-
       if (MatchingHandleBuffer == NULL) {
         //
         // Someone just wanted the count...
@@ -476,9 +498,10 @@ InternalParseHandleDatabaseByRelationship (
           Status = EFI_OUT_OF_RESOURCES;
         } else {
           for (HandleIndex = 0, *MatchingHandleCount = 0
-               ;  HandleIndex < HandleCount
-               ;  HandleIndex++
-               ) {
+               ; HandleIndex < HandleCount
+               ; HandleIndex++
+               )
+          {
             //
             // Fill the allocated buffer with the handles that matched the attributes in Mask
             //
@@ -506,8 +529,10 @@ InternalParseHandleDatabaseByRelationship (
     FreePool (HandleType);
   }
 
-  ASSERT ((MatchingHandleBuffer == NULL) ||
-          (*MatchingHandleCount == 0 && *MatchingHandleBuffer == NULL) ||
-          (*MatchingHandleCount != 0 && *MatchingHandleBuffer != NULL));
+  ASSERT (
+    (MatchingHandleBuffer == NULL) ||
+    (*MatchingHandleCount == 0 && *MatchingHandleBuffer == NULL) ||
+    (*MatchingHandleCount != 0 && *MatchingHandleBuffer != NULL)
+    );
   return Status;
 }

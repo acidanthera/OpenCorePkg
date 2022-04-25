@@ -40,7 +40,7 @@
 
 UINTN
 InternalGetPmTimerAddr (
-  OUT CONST CHAR8 **Type  OPTIONAL
+  OUT CONST CHAR8  **Type  OPTIONAL
   )
 {
   UINTN   TimerAddr;
@@ -112,8 +112,8 @@ InternalGetPmTimerAddr (
 
     if (CpuVendor == CPUID_VENDOR_AMD) {
       TimerAddr = MmioRead32 (
-        R_AMD_ACPI_MMIO_BASE + R_AMD_ACPI_MMIO_PMIO_BASE + R_AMD_ACPI_PM_TMR_BLOCK
-        );
+                    R_AMD_ACPI_MMIO_BASE + R_AMD_ACPI_MMIO_PMIO_BASE + R_AMD_ACPI_PM_TMR_BLOCK
+                    );
       if (Type != NULL) {
         *Type = "AMD";
       }
@@ -133,7 +133,7 @@ InternalCalculateTSCFromPMTimer (
   // this frequency on module entry to initialise a TimerLib instance, and at
   // a later point in time to gather CPU information.
   //
-  STATIC UINT64 TSCFrequency = 0;
+  STATIC UINT64  TSCFrequency = 0;
 
   UINT16      TimerAddr;
   UINTN       VariableSize;
@@ -158,13 +158,13 @@ InternalCalculateTSCFromPMTimer (
   //
   if (TSCFrequency == 0) {
     VariableSize = sizeof (TSCFrequency);
-    Status = gRT->GetVariable (
-      OC_ACPI_CPU_FREQUENCY_VARIABLE_NAME,
-      &gOcVendorVariableGuid,
-      NULL,
-      &VariableSize,
-      &TSCFrequency
-      );
+    Status       = gRT->GetVariable (
+                          OC_ACPI_CPU_FREQUENCY_VARIABLE_NAME,
+                          &gOcVendorVariableGuid,
+                          NULL,
+                          &VariableSize,
+                          &TSCFrequency
+                          );
   } else {
     Status = EFI_ALREADY_STARTED;
   }
@@ -174,7 +174,7 @@ InternalCalculateTSCFromPMTimer (
   }
 
   if (TSCFrequency == 0) {
-    TimerAddr       = (UINT16) InternalGetPmTimerAddr (NULL);
+    TimerAddr = (UINT16)InternalGetPmTimerAddr (NULL);
 
     if (TimerAddr != 0) {
       //
@@ -198,17 +198,19 @@ InternalCalculateTSCFromPMTimer (
         //
         // Disable all events to ensure that nobody interrupts us.
         //
-        PrevTpl   = gBS->RaiseTPL (TPL_HIGH_LEVEL);
+        PrevTpl       = gBS->RaiseTPL (TPL_HIGH_LEVEL);
         HasInterrupts = SaveAndDisableInterrupts ();
         AsmMeasureTicks (AcpiTicksDuration, TimerAddr, &AcpiTicksDelta, &TscTicksDelta);
         if (HasInterrupts) {
           EnableInterrupts ();
         }
+
         gBS->RestoreTPL (PrevTpl);
 
         TSCFrequency = DivU64x32 (
-          MultU64x32 (TscTicksDelta, V_ACPI_TMR_FREQUENCY), AcpiTicksDelta
-          );
+                         MultU64x32 (TscTicksDelta, V_ACPI_TMR_FREQUENCY),
+                         AcpiTicksDelta
+                         );
       }
     }
 
@@ -217,18 +219,18 @@ InternalCalculateTSCFromPMTimer (
     //
     // Set the variable if not present and valid.
     //
-    if (TSCFrequency != 0 && Status == EFI_NOT_FOUND) {
+    if ((TSCFrequency != 0) && (Status == EFI_NOT_FOUND)) {
       //
       // Do not use OcSetSystemVariable() as this may be called by a
       // constructor.
       //
       gRT->SetVariable (
-        OC_ACPI_CPU_FREQUENCY_VARIABLE_NAME,
-        &gOcVendorVariableGuid,
-        EFI_VARIABLE_BOOTSERVICE_ACCESS,
-        sizeof (TSCFrequency),
-        &TSCFrequency
-        );
+             OC_ACPI_CPU_FREQUENCY_VARIABLE_NAME,
+             &gOcVendorVariableGuid,
+             EFI_VARIABLE_BOOTSERVICE_ACCESS,
+             sizeof (TSCFrequency),
+             &TSCFrequency
+             );
     }
   }
 
@@ -242,7 +244,7 @@ InternalSelectAppleFsbFrequency (
   IN UINT32  FsbFrequncyCount
   )
 {
-  UINT32               Pll;
+  UINT32  Pll;
 
   if (FsbFrequncyCount < 5) {
     return 0 /* Invalid */;
@@ -269,21 +271,27 @@ InternalSelectAppleFsbFrequency (
   if (Pll == 16) {
     return FsbFrequency[0];
   }
-  if (Pll >= 1063 && Pll <= 1069) {
+
+  if ((Pll >= 1063) && (Pll <= 1069)) {
     return FsbFrequency[0];
   }
-  if (Pll >= 530 && Pll <= 536) {
+
+  if ((Pll >= 530) && (Pll <= 536)) {
     return FsbFrequency[1];
   }
-  if (Pll >= 797 && Pll <= 803) {
+
+  if ((Pll >= 797) && (Pll <= 803)) {
     return FsbFrequency[2];
   }
-  if (Pll >= 663 && Pll <= 669) {
+
+  if ((Pll >= 663) && (Pll <= 669)) {
     return FsbFrequency[3];
   }
-  if (Pll >= 1330 && Pll <= 1336) {
+
+  if ((Pll >= 1330) && (Pll <= 1336)) {
     return FsbFrequency[4];
   }
+
   return 0 /* Invalid */;
 }
 
@@ -296,9 +304,9 @@ InternalCalculateTSCFromApplePlatformInfo (
   //
   // Cache the result to speed up multiple calls.
   //
-  STATIC BOOLEAN ObtainedFreqs = FALSE;
-  STATIC UINT64  FsbFreq       = 0;
-  STATIC UINT64  TscFreq       = 0;
+  STATIC BOOLEAN  ObtainedFreqs = FALSE;
+  STATIC UINT64   FsbFreq       = 0;
+  STATIC UINT64   TscFreq       = 0;
 
   EFI_STATUS                             Status;
   APPLE_PLATFORM_INFO_DATABASE_PROTOCOL  *PlatformInfo;
@@ -320,39 +328,39 @@ InternalCalculateTSCFromApplePlatformInfo (
     Size          = sizeof (FsbFreq);
 
     Status = gBS->LocateProtocol (
-      &gApplePlatformInfoDatabaseProtocolGuid,
-      NULL,
-      (VOID **) &PlatformInfo
-      );
+                    &gApplePlatformInfoDatabaseProtocolGuid,
+                    NULL,
+                    (VOID **)&PlatformInfo
+                    );
     if (!EFI_ERROR (Status)) {
       Status = OcReadApplePlatformFirstData (
-        PlatformInfo,
-        &gAppleFsbFrequencyPlatformInfoGuid,
-        &Size,
-        &FsbFreq
-        );
+                 PlatformInfo,
+                 &gAppleFsbFrequencyPlatformInfoGuid,
+                 &Size,
+                 &FsbFreq
+                 );
 
       if (EFI_ERROR (Status)) {
         DEBUG ((DEBUG_INFO, "OCCPU: Failed to get FSBFrequency first data - %r, trying HOB method\n", Status));
         Status = OcReadApplePlatformData (
-          PlatformInfo,
-          &gAppleFsbFrequencyPlatformInfoGuid,
-          &gAppleFsbFrequencyPlatformInfoIndexHobGuid,
-          &Size,
-          &FsbFreq
-          );
+                   PlatformInfo,
+                   &gAppleFsbFrequencyPlatformInfoGuid,
+                   &gAppleFsbFrequencyPlatformInfoIndexHobGuid,
+                   &Size,
+                   &FsbFreq
+                   );
       }
 
       if (EFI_ERROR (Status)) {
         DEBUG ((DEBUG_INFO, "OCCPU: Failed to get FSBFrequency data using HOB method - %r, trying legacy\n", Status));
         Status = OcReadApplePlatformFirstDataAlloc (
-          PlatformInfo,
-          &gAppleFsbFrequencyListPlatformInfoGuid,
-          &Size,
-          (VOID **) &FsbFreqs
-          );
+                   PlatformInfo,
+                   &gAppleFsbFrequencyListPlatformInfoGuid,
+                   &Size,
+                   (VOID **)&FsbFreqs
+                   );
         if (!EFI_ERROR (Status)) {
-          if (Size >= sizeof (UINT64) && Size % sizeof (UINT64) == 0) {
+          if ((Size >= sizeof (UINT64)) && (Size % sizeof (UINT64) == 0)) {
             FsbFreq = InternalSelectAppleFsbFrequency (FsbFreqs, Size / sizeof (UINT64));
           } else {
             DEBUG ((DEBUG_INFO, "OCCPU: Invalid FSBFrequency list size %u - %r\n", Size, Status));
@@ -372,7 +380,7 @@ InternalCalculateTSCFromApplePlatformInfo (
     //
     if (EFI_ERROR (Status)) {
       DEBUG ((DEBUG_INFO, "OCCPU: Failed to get FSBFrequency data using Apple Platform Info - %r\n", Status));
-      
+
       if (MmioRead16 (B_NVIDIA_MCP_MC_BASE) == V_NVIDIA_MCP_MC_VENDOR) {
         Un44 = MmioRead32 (B_NVIDIA_MCP_MC_BASE + R_NVIDIA_MCP_MC_UN44);
         Un78 = MmioRead32 (B_NVIDIA_MCP_MC_BASE + R_NVIDIA_MCP_MC_UN78);
@@ -405,7 +413,7 @@ InternalCalculateTSCFromApplePlatformInfo (
 
     TscFreq = InternalConvertAppleFSBToTSCFrequency (FsbFreq);
   }
-  
+
   //
   // Optionally update FSBFrequency.
   //
@@ -428,20 +436,20 @@ InternalCalculateARTFrequencyIntel (
   // this frequency on module entry to initialise a TimerLib instance, and at
   // a later point in time to gather CPU information.
   //
-  STATIC UINT64 ARTFrequency        = 0;
-  STATIC UINT64 CPUFrequencyFromART = 0;
+  STATIC UINT64  ARTFrequency        = 0;
+  STATIC UINT64  CPUFrequencyFromART = 0;
 
-  UINT32                                            MaxId;
-  UINT32                                            CpuVendor;
+  UINT32  MaxId;
+  UINT32  CpuVendor;
 
-  UINT32                                            CpuidDenominatorEax;
-  UINT32                                            CpuidNumeratorEbx;
-  UINT32                                            CpuidARTFrequencyEcx;
-  CPUID_PROCESSOR_FREQUENCY_EAX                     CpuidFrequencyEax;
-  UINT64                                            TscAdjust;
-  UINT64                                            CPUFrequencyFromTSC;
-  CPUID_VERSION_INFO_EAX                            CpuidVerEax;
-  UINT8                                             Model;
+  UINT32                         CpuidDenominatorEax;
+  UINT32                         CpuidNumeratorEbx;
+  UINT32                         CpuidARTFrequencyEcx;
+  CPUID_PROCESSOR_FREQUENCY_EAX  CpuidFrequencyEax;
+  UINT64                         TscAdjust;
+  UINT64                         CPUFrequencyFromTSC;
+  CPUID_VERSION_INFO_EAX         CpuidVerEax;
+  UINT8                          Model;
 
   if (Recalculate) {
     ARTFrequency        = 0;
@@ -456,7 +464,7 @@ InternalCalculateARTFrequencyIntel (
     //
     // Determine our core crystal clock frequency
     //
-    if (CpuVendor == CPUID_VENDOR_INTEL && MaxId >= CPUID_TIME_STAMP_COUNTER) {
+    if ((CpuVendor == CPUID_VENDOR_INTEL) && (MaxId >= CPUID_TIME_STAMP_COUNTER)) {
       TscAdjust = AsmReadMsr64 (MSR_IA32_TSC_ADJUST);
       DEBUG ((DEBUG_INFO, "OCCPU: TSC Adjust %Lu\n", TscAdjust));
 
@@ -476,7 +484,7 @@ InternalCalculateARTFrequencyIntel (
         DEBUG ((DEBUG_INFO, "OCCPU: Queried Core Crystal Clock Frequency %11LuHz\n", ARTFrequency));
       } else {
         AsmCpuid (CPUID_VERSION_INFO, &CpuidVerEax.Uint32, NULL, NULL, NULL);
-        Model = (UINT8) CpuidVerEax.Bits.Model | (UINT8) (CpuidVerEax.Bits.ExtendedModelId << 4U);
+        Model = (UINT8)CpuidVerEax.Bits.Model | (UINT8)(CpuidVerEax.Bits.ExtendedModelId << 4U);
         //
         // Fall back to identifying ART frequency based on known models
         //
@@ -494,24 +502,25 @@ InternalCalculateARTFrequencyIntel (
             ARTFrequency = ATOM_ART_CLOCK_SOURCE; // 19.2 Mhz
             break;
         }
+
         if (ARTFrequency > 0) {
           DEBUG ((DEBUG_INFO, "OCCPU: Known Model Core Crystal Clock Frequency %11LuHz\n", ARTFrequency));
         }
       }
 
-      if (CpuidDenominatorEax > 0 && CpuidNumeratorEbx > 0) {
+      if ((CpuidDenominatorEax > 0) && (CpuidNumeratorEbx > 0)) {
         //
         // Some Intel chips don't report their core crystal clock frequency.
         // Calculate it by dividing the TSC frequency by the TSC ratio.
         //
-        if (ARTFrequency == 0 && MaxId >= CPUID_PROCESSOR_FREQUENCY) {
+        if ((ARTFrequency == 0) && (MaxId >= CPUID_PROCESSOR_FREQUENCY)) {
           CPUFrequencyFromTSC = InternalCalculateTSCFromPMTimer (Recalculate);
-          ARTFrequency = MultThenDivU64x64x32(
-            CPUFrequencyFromTSC,
-            CpuidDenominatorEax,
-            CpuidNumeratorEbx,
-            NULL
-            );
+          ARTFrequency        = MultThenDivU64x64x32 (
+                                  CPUFrequencyFromTSC,
+                                  CpuidDenominatorEax,
+                                  CpuidNumeratorEbx,
+                                  NULL
+                                  );
           if (ARTFrequency > 0ULL) {
             DEBUG ((
               DEBUG_INFO,
@@ -541,12 +550,13 @@ InternalCalculateARTFrequencyIntel (
         ASSERT (ARTFrequency > 0ULL);
         if (CPUFrequencyFromART == 0ULL) {
           CPUFrequencyFromART = MultThenDivU64x64x32 (
-            ARTFrequency,
-            CpuidNumeratorEbx,
-            CpuidDenominatorEax,
-            NULL
-            );
+                                  ARTFrequency,
+                                  CpuidNumeratorEbx,
+                                  CpuidDenominatorEax,
+                                  NULL
+                                  );
         }
+
         ASSERT (CPUFrequencyFromART > 0ULL);
         DEBUG ((
           DEBUG_INFO,
@@ -577,8 +587,8 @@ InternalCalculateVMTFrequency (
   UINT32                  CpuidEdx;
   CPUID_VERSION_INFO_ECX  CpuidVerEcx;
 
-  CHAR8                   HvVendor[13];
-  UINT64                  Msr;
+  CHAR8   HvVendor[13];
+  UINT64  Msr;
 
   AsmCpuid (
     CPUID_VERSION_INFO,
@@ -649,7 +659,7 @@ InternalCalculateVMTFrequency (
   }
 
   AsmCpuid (0x40000010, &CpuidEax, &CpuidEbx, NULL, NULL);
-  if (CpuidEax == 0 || CpuidEbx == 0) {
+  if ((CpuidEax == 0) || (CpuidEbx == 0)) {
     return 0;
   }
 
@@ -668,7 +678,8 @@ OcGetTSCFrequency (
   VOID
   )
 {
-  UINT64 CPUFrequency;
+  UINT64  CPUFrequency;
+
   //
   // For Intel platforms (the vendor check is covered by the callee), prefer
   // the CPU Frequency derieved from the ART, as the PM timer might not be
@@ -691,6 +702,7 @@ OcGetTSCFrequency (
       }
     }
   }
+
   //
   // For all known models with an invariant TSC, its frequency is equal to the
   // CPU's specified base clock.

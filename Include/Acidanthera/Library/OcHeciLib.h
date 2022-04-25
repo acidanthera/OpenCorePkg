@@ -14,17 +14,17 @@
 
 EFI_STATUS
 HeciReadMessage (
-  IN      UINT32           Blocking,
-  IN      UINT32           *MessageBody,
-  IN OUT  UINT32           *Length
+  IN      UINT32  Blocking,
+  IN      UINT32  *MessageBody,
+  IN OUT  UINT32  *Length
   );
 
 EFI_STATUS
 HeciSendMessage (
-  IN      UINT32           *Message,
-  IN      UINT32           Length,
-  IN      UINT8            HostAddress,
-  IN      UINT8            MEAddress
+  IN      UINT32  *Message,
+  IN      UINT32  Length,
+  IN      UINT8   HostAddress,
+  IN      UINT8   MEAddress
   );
 
 EFI_STATUS
@@ -93,12 +93,12 @@ HeciPavpPerformProvisioning (
 
 EFI_STATUS
 HeciFpfGetStatus (
-  OUT  UINT32 *FpfStatus
+  OUT  UINT32  *FpfStatus
   );
 
 EFI_STATUS
 HeciFpfProvision (
-  OUT  UINT32 *FpfStatus
+  OUT  UINT32  *FpfStatus
   );
 
 #endif // OC_HECI_LIB_H

@@ -36,11 +36,11 @@ InternalGetAppleDiskLabel (
   IN  CONST CHAR16                     *LabelFilename
   )
 {
-  CHAR16   *DiskLabelPath;
-  UINTN    DiskLabelPathSize;
-  CHAR8    *AsciiDiskLabel;
-  CHAR16   *UnicodeDiskLabel;
-  UINT32   DiskLabelLength;
+  CHAR16  *DiskLabelPath;
+  UINTN   DiskLabelPathSize;
+  CHAR8   *AsciiDiskLabel;
+  CHAR16  *UnicodeDiskLabel;
+  UINT32  DiskLabelLength;
 
   DiskLabelPathSize = StrSize (BootDirectoryName) + StrSize (LabelFilename) - sizeof (CHAR16);
   DiskLabelPath     = AllocatePool (DiskLabelPathSize);
@@ -52,7 +52,7 @@ InternalGetAppleDiskLabel (
   UnicodeSPrint (DiskLabelPath, DiskLabelPathSize, L"%s%s", BootDirectoryName, LabelFilename);
   DEBUG ((DEBUG_INFO, "OCB: Trying to get label from %s\n", DiskLabelPath));
 
-  AsciiDiskLabel = (CHAR8 *) OcReadFile (FileSystem, DiskLabelPath, &DiskLabelLength, OC_MAX_VOLUME_LABEL_SIZE);
+  AsciiDiskLabel = (CHAR8 *)OcReadFile (FileSystem, DiskLabelPath, &DiskLabelLength, OC_MAX_VOLUME_LABEL_SIZE);
   FreePool (DiskLabelPath);
 
   if (AsciiDiskLabel != NULL) {
@@ -60,6 +60,7 @@ InternalGetAppleDiskLabel (
     if (UnicodeDiskLabel != NULL) {
       UnicodeFilterString (UnicodeDiskLabel, TRUE);
     }
+
     FreePool (AsciiDiskLabel);
   } else {
     UnicodeDiskLabel = NULL;
@@ -75,10 +76,10 @@ InternalGetContentFlavour (
   IN  CONST CHAR16                     *FlavourFilename
   )
 {
-  CHAR16   *ContentFlavourPath;
-  UINTN    ContentFlavourPathSize;
-  CHAR8    *AsciiContentFlavour;
-  UINT32   ContentFlavourLength;
+  CHAR16  *ContentFlavourPath;
+  UINTN   ContentFlavourPathSize;
+  CHAR8   *AsciiContentFlavour;
+  UINT32  ContentFlavourLength;
 
   ContentFlavourPathSize = StrSize (BootDirectoryName) + StrSize (FlavourFilename) - sizeof (CHAR16);
   ContentFlavourPath     = AllocatePool (ContentFlavourPathSize);
@@ -90,7 +91,7 @@ InternalGetContentFlavour (
   UnicodeSPrint (ContentFlavourPath, ContentFlavourPathSize, L"%s%s", BootDirectoryName, FlavourFilename);
   DEBUG ((DEBUG_INFO, "OCB: Trying to get flavour from %s\n", ContentFlavourPath));
 
-  AsciiContentFlavour = (CHAR8 *) OcReadFile (FileSystem, ContentFlavourPath, &ContentFlavourLength, OC_MAX_CONTENT_FLAVOUR_SIZE);
+  AsciiContentFlavour = (CHAR8 *)OcReadFile (FileSystem, ContentFlavourPath, &ContentFlavourLength, OC_MAX_CONTENT_FLAVOUR_SIZE);
   FreePool (ContentFlavourPath);
 
   if (AsciiContentFlavour != NULL) {
@@ -109,8 +110,8 @@ InternalGetAppleImage (
   OUT UINT32                           *DataSize
   )
 {
-  CHAR16   *ImagePath;
-  UINTN    ImagePathSize;
+  CHAR16  *ImagePath;
+  UINTN   ImagePathSize;
 
   ImagePathSize = StrSize (DirectoryName) + StrSize (LabelFilename) - sizeof (CHAR16);
   ImagePath     = AllocatePool (ImagePathSize);
@@ -145,19 +146,19 @@ InternalGetAppleImage (
 STATIC
 EFI_STATUS
 GetAppleVersionFromPlist (
-  IN  CHAR8     *SystemVersionData,
-  IN  UINT32    SystemVersionDataSize,
-  OUT CHAR8     *AppleVersion
+  IN  CHAR8   *SystemVersionData,
+  IN  UINT32  SystemVersionDataSize,
+  OUT CHAR8   *AppleVersion
   )
 {
-  EFI_STATUS          Status;
-  XML_DOCUMENT        *Document;
-  XML_NODE            *RootDict;
-  UINT32              DictSize;
-  UINT32              Index;
-  CONST CHAR8         *CurrentKey;
-  XML_NODE            *CurrentValue;
-  CONST CHAR8         *Version;
+  EFI_STATUS    Status;
+  XML_DOCUMENT  *Document;
+  XML_NODE      *RootDict;
+  UINT32        DictSize;
+  UINT32        Index;
+  CONST CHAR8   *CurrentKey;
+  XML_NODE      *CurrentValue;
+  CONST CHAR8   *Version;
 
   Document = XmlDocumentParse (SystemVersionData, SystemVersionDataSize, FALSE);
 
@@ -178,7 +179,7 @@ GetAppleVersionFromPlist (
   for (Index = 0; Index < DictSize; Index++) {
     CurrentKey = PlistKeyValue (PlistDictChild (RootDict, Index, &CurrentValue));
 
-    if (CurrentKey == NULL || AsciiStrCmp (CurrentKey, "ProductUserVisibleVersion") != 0) {
+    if ((CurrentKey == NULL) || (AsciiStrCmp (CurrentKey, "ProductUserVisibleVersion") != 0)) {
       continue;
     }
 
@@ -203,17 +204,17 @@ GetAppleVersionFromPlist (
 STATIC
 CHAR16 *
 InternalGetAppleRecoveryName (
-  IN  CHAR8     *Version
+  IN  CHAR8  *Version
   )
 {
-  CHAR16              *RecoveryName;
-  UINTN               RecoveryNameSize;
+  CHAR16  *RecoveryName;
+  UINTN   RecoveryNameSize;
 
   RecoveryName = NULL;
 
   if (Version[0] != '\0') {
-    RecoveryNameSize = L_STR_SIZE(L"Recovery ") + AsciiStrLen (Version) * sizeof (CHAR16);
-    RecoveryName = AllocatePool (RecoveryNameSize);
+    RecoveryNameSize = L_STR_SIZE (L"Recovery ") + AsciiStrLen (Version) * sizeof (CHAR16);
+    RecoveryName     = AllocatePool (RecoveryNameSize);
     if (RecoveryName != NULL) {
       UnicodeSPrint (RecoveryName, RecoveryNameSize, L"Recovery %a", Version);
       UnicodeFilterString (RecoveryName, TRUE);
@@ -231,11 +232,11 @@ InternalGetAppleVersion (
   OUT CHAR8                            *AppleVersion
   )
 {
-  EFI_STATUS      Status;
-  CHAR16          *SystemVersionPath;
-  UINTN           SystemVersionPathSize;
-  CHAR8           *SystemVersionData;
-  UINT32          SystemVersionDataSize;
+  EFI_STATUS  Status;
+  CHAR16      *SystemVersionPath;
+  UINTN       SystemVersionPathSize;
+  CHAR8       *SystemVersionData;
+  UINT32      SystemVersionDataSize;
 
   SystemVersionPathSize = StrSize (DirectoryName) + L_STR_SIZE_NT (L"SystemVersion.plist");
   SystemVersionPath     = AllocatePool (SystemVersionPathSize);
@@ -246,7 +247,7 @@ InternalGetAppleVersion (
 
   UnicodeSPrint (SystemVersionPath, SystemVersionPathSize, L"%s%s", DirectoryName, L"SystemVersion.plist");
   DEBUG ((DEBUG_INFO, "OCB: Trying to get Apple version from %s\n", SystemVersionPath));
-  SystemVersionData = (CHAR8 *) OcReadFile (FileSystem, SystemVersionPath, &SystemVersionDataSize, BASE_1MB);
+  SystemVersionData = (CHAR8 *)OcReadFile (FileSystem, SystemVersionPath, &SystemVersionDataSize, BASE_1MB);
   FreePool (SystemVersionPath);
 
   if (SystemVersionData != NULL) {
@@ -276,10 +277,10 @@ InternalGetRecoveryOsBooter (
   CHAR16                           *DevicePathText;
 
   Status = gBS->HandleProtocol (
-    Device,
-    &gEfiSimpleFileSystemProtocolGuid,
-    (VOID **) &FileSystem
-    );
+                  Device,
+                  &gEfiSimpleFileSystemProtocolGuid,
+                  (VOID **)&FileSystem
+                  );
   if (EFI_ERROR (Status)) {
     return Status;
   }
@@ -292,12 +293,12 @@ InternalGetRecoveryOsBooter (
   FilePathSize = 0;
 
   if (!Basic) {
-    *FilePath = (EFI_DEVICE_PATH_PROTOCOL *) OcGetFileInfo (
-                  Root,
-                  &gAppleBlessedOsxFolderInfoGuid,
-                  sizeof (EFI_DEVICE_PATH_PROTOCOL),
-                  &FilePathSize
-                  );
+    *FilePath = (EFI_DEVICE_PATH_PROTOCOL *)OcGetFileInfo (
+                                              Root,
+                                              &gAppleBlessedOsxFolderInfoGuid,
+                                              sizeof (EFI_DEVICE_PATH_PROTOCOL),
+                                              &FilePathSize
+                                              );
   } else {
     //
     // Requested basic recovery support, i.e. only com.apple.recovery.boot folder check.
@@ -313,21 +314,23 @@ InternalGetRecoveryOsBooter (
       // This is to prevent recovery and volume duplicates on HFS+ systems.
       //
 
-      TmpPath = (EFI_DEVICE_PATH_PROTOCOL *) OcGetFileInfo (
-        Root,
-        &gAppleBlessedSystemFolderInfoGuid,
-        sizeof (EFI_DEVICE_PATH_PROTOCOL),
-        &TmpPathSize
-        );
+      TmpPath = (EFI_DEVICE_PATH_PROTOCOL *)OcGetFileInfo (
+                                              Root,
+                                              &gAppleBlessedSystemFolderInfoGuid,
+                                              sizeof (EFI_DEVICE_PATH_PROTOCOL),
+                                              &TmpPathSize
+                                              );
 
       if (TmpPath != NULL) {
-        if (IsDevicePathValid (TmpPath, TmpPathSize)
-          && IsDevicePathEqual (TmpPath, *FilePath)) {
+        if (  IsDevicePathValid (TmpPath, TmpPathSize)
+           && IsDevicePathEqual (TmpPath, *FilePath))
+        {
           DEBUG ((DEBUG_INFO, "Skipping equal alternate device path %p\n", Device));
           Status = EFI_ALREADY_STARTED;
           FreePool (*FilePath);
           *FilePath = NULL;
         }
+
         FreePool (TmpPath);
       }
 
@@ -346,7 +349,7 @@ InternalGetRecoveryOsBooter (
     } else {
       FreePool (*FilePath);
       *FilePath = NULL;
-      Status = EFI_NOT_FOUND;
+      Status    = EFI_NOT_FOUND;
     }
   } else {
     //
@@ -362,8 +365,8 @@ InternalGetRecoveryOsBooter (
       // Do not do any extra checks for simplicity, as they will be done later either way.
       //
       Root->Close (Recovery);
-      Status    = EFI_NOT_FOUND;
-      TmpPath   = DevicePathFromHandle (Device);
+      Status  = EFI_NOT_FOUND;
+      TmpPath = DevicePathFromHandle (Device);
 
       if (TmpPath != NULL) {
         *FilePath = AppendFileNameDevicePath (TmpPath, L"\\com.apple.recovery.boot\\");
@@ -374,6 +377,7 @@ InternalGetRecoveryOsBooter (
             DEBUG ((DEBUG_INFO, "OCB: Got recovery dp %s\n", DevicePathText));
             FreePool (DevicePathText);
           }
+
           DEBUG_CODE_END ();
           Status = EFI_SUCCESS;
         }
@@ -391,11 +395,11 @@ InternalGetRecoveryOsBooter (
 EFI_STATUS
 EFIAPI
 OcGetBootEntryLabelImage (
-  IN  OC_PICKER_CONTEXT          *Context,
-  IN  OC_BOOT_ENTRY              *BootEntry,
-  IN  UINT8                      Scale,
-  OUT VOID                       **ImageData,
-  OUT UINT32                     *DataLength
+  IN  OC_PICKER_CONTEXT  *Context,
+  IN  OC_BOOT_ENTRY      *BootEntry,
+  IN  UINT8              Scale,
+  OUT VOID               **ImageData,
+  OUT UINT32             *DataLength
   )
 {
   EFI_STATUS                       Status;
@@ -403,30 +407,30 @@ OcGetBootEntryLabelImage (
   EFI_HANDLE                       Device;
   EFI_SIMPLE_FILE_SYSTEM_PROTOCOL  *FileSystem;
 
-  *ImageData = NULL;
+  *ImageData  = NULL;
   *DataLength = 0;
 
-  if (BootEntry->Type == OC_BOOT_EXTERNAL_TOOL || (BootEntry->Type & OC_BOOT_SYSTEM) != 0) {
+  if ((BootEntry->Type == OC_BOOT_EXTERNAL_TOOL) || ((BootEntry->Type & OC_BOOT_SYSTEM) != 0)) {
     return EFI_NOT_FOUND;
   }
 
   ASSERT (BootEntry->DevicePath != NULL);
 
   Status = OcBootPolicyDevicePathToDirPath (
-    BootEntry->DevicePath,
-    &BootDirectoryName,
-    &Device
-    );
+             BootEntry->DevicePath,
+             &BootDirectoryName,
+             &Device
+             );
 
   if (EFI_ERROR (Status)) {
     return Status;
   }
 
   Status = gBS->HandleProtocol (
-    Device,
-    &gEfiSimpleFileSystemProtocolGuid,
-    (VOID **) &FileSystem
-    );
+                  Device,
+                  &gEfiSimpleFileSystemProtocolGuid,
+                  (VOID **)&FileSystem
+                  );
 
   if (EFI_ERROR (Status)) {
     FreePool (BootDirectoryName);
@@ -434,12 +438,12 @@ OcGetBootEntryLabelImage (
   }
 
   Status = InternalGetAppleImage (
-    FileSystem,
-    BootDirectoryName,
-    Scale == 2 ? L".disk_label_2x" : L".disk_label",
-    ImageData,
-    DataLength
-    );
+             FileSystem,
+             BootDirectoryName,
+             Scale == 2 ? L".disk_label_2x" : L".disk_label",
+             ImageData,
+             DataLength
+             );
 
   DEBUG ((DEBUG_INFO, "OCB: Get normal label %s - %r\n", BootEntry->Name, Status));
   FreePool (BootDirectoryName);
@@ -450,10 +454,10 @@ OcGetBootEntryLabelImage (
 EFI_STATUS
 EFIAPI
 OcGetBootEntryIcon (
-  IN  OC_PICKER_CONTEXT          *Context,
-  IN  OC_BOOT_ENTRY              *BootEntry,
-  OUT VOID                       **ImageData,
-  OUT UINT32                     *DataLength
+  IN  OC_PICKER_CONTEXT  *Context,
+  IN  OC_BOOT_ENTRY      *BootEntry,
+  OUT VOID               **ImageData,
+  OUT UINT32             *DataLength
   )
 {
   EFI_STATUS                       Status;
@@ -462,37 +466,37 @@ OcGetBootEntryIcon (
   EFI_HANDLE                       Device;
   EFI_SIMPLE_FILE_SYSTEM_PROTOCOL  *FileSystem;
 
-  *ImageData = NULL;
+  *ImageData  = NULL;
   *DataLength = 0;
 
-  if (BootEntry->Type == OC_BOOT_EXTERNAL_TOOL || (BootEntry->Type & OC_BOOT_SYSTEM) != 0) {
+  if ((BootEntry->Type == OC_BOOT_EXTERNAL_TOOL) || ((BootEntry->Type & OC_BOOT_SYSTEM) != 0)) {
     return EFI_NOT_FOUND;
   }
 
   ASSERT (BootEntry->DevicePath != NULL);
 
   Status = OcBootPolicyDevicePathToDirPath (
-    BootEntry->DevicePath,
-    &BootDirectoryName,
-    &Device
-    );
+             BootEntry->DevicePath,
+             &BootDirectoryName,
+             &Device
+             );
 
   if (EFI_ERROR (Status)) {
     return Status;
   }
 
   GuidPrefix = BootDirectoryName[0] == '\\' ? &BootDirectoryName[1] : &BootDirectoryName[0];
-  if (HasValidGuidStringPrefix (GuidPrefix) && GuidPrefix[GUID_STRING_LENGTH] == '\\') {
+  if (HasValidGuidStringPrefix (GuidPrefix) && (GuidPrefix[GUID_STRING_LENGTH] == '\\')) {
     GuidPrefix[GUID_STRING_LENGTH+1] = '\0';
   } else {
     GuidPrefix = NULL;
   }
 
   Status = gBS->HandleProtocol (
-    Device,
-    &gEfiSimpleFileSystemProtocolGuid,
-    (VOID **) &FileSystem
-    );
+                  Device,
+                  &gEfiSimpleFileSystemProtocolGuid,
+                  (VOID **)&FileSystem
+                  );
 
   if (EFI_ERROR (Status)) {
     FreePool (BootDirectoryName);
@@ -505,12 +509,12 @@ OcGetBootEntryIcon (
   //
   if (GuidPrefix != NULL) {
     Status = InternalGetAppleImage (
-      FileSystem,
-      GuidPrefix,
-      L".VolumeIcon.icns",
-      ImageData,
-      DataLength
-      );
+               FileSystem,
+               GuidPrefix,
+               L".VolumeIcon.icns",
+               ImageData,
+               DataLength
+               );
   } else {
     Status = EFI_UNSUPPORTED;
   }
@@ -521,12 +525,12 @@ OcGetBootEntryIcon (
   //
   if (EFI_ERROR (Status)) {
     Status = InternalGetAppleImage (
-      FileSystem,
-      L"",
-      L".VolumeIcon.icns",
-      ImageData,
-      DataLength
-      );
+               FileSystem,
+               L"",
+               L".VolumeIcon.icns",
+               ImageData,
+               DataLength
+               );
   }
 
   DEBUG ((
@@ -548,25 +552,26 @@ OcGetBootEntryIcon (
 STATIC
 CHAR8 *
 InternalAddAppleVersion (
-  IN CHAR8 *Flavour,
-  IN CHAR8 *Version)
+  IN CHAR8  *Flavour,
+  IN CHAR8  *Version
+  )
 {
-  UINTN     VersionLength;
-  UINTN     FlavourLength;
-  UINTN     SepCount;
-  UINTN     Size;
-  UINTN     Index;
-  CHAR8     *NewFlavour;
-  CHAR8     *Start;
-  CHAR8     *End;
-  CHAR8     *Pos;
+  UINTN  VersionLength;
+  UINTN  FlavourLength;
+  UINTN  SepCount;
+  UINTN  Size;
+  UINTN  Index;
+  CHAR8  *NewFlavour;
+  CHAR8  *Start;
+  CHAR8  *End;
+  CHAR8  *Pos;
 
   ASSERT (Flavour  != NULL);
   ASSERT (Version  != NULL);
 
   VersionLength = AsciiStrLen (Version);
   FlavourLength = AsciiStrLen (Flavour);
-  SepCount = 0;
+  SepCount      = 0;
   for (Index = 0; Index < FlavourLength; Index++) {
     if (Flavour[Index] == ':') {
       ++SepCount;
@@ -587,16 +592,19 @@ InternalAddAppleVersion (
   Pos = NewFlavour;
   End = Flavour - 1;
   do {
-    for (Start = ++End; *End != '\0' && *End != ':'; ++End);
+    for (Start = ++End; *End != '\0' && *End != ':'; ++End) {
+    }
+
     AsciiStrnCpyS (Pos, Size - (Pos - NewFlavour), Start, End - Start);
     Pos += End - Start;
     AsciiStrnCpyS (Pos, Size - (Pos - NewFlavour), Version, VersionLength);
-    Pos += VersionLength;
+    Pos   += VersionLength;
     *Pos++ = ':';
     AsciiStrnCpyS (Pos, Size - (Pos - NewFlavour), Start, End - Start);
-    Pos += End - Start;
+    Pos   += End - Start;
     *Pos++ = ':';
   } while (*End != '\0');
+
   *(Pos - 1) = '\0';
 
   ASSERT ((UINTN)(Pos - NewFlavour) == Size);
@@ -627,25 +635,25 @@ InternalDescribeBootEntry (
   //
   // Custom entries need no special description.
   //
-  if (BootEntry->Type == OC_BOOT_EXTERNAL_OS || BootEntry->Type == OC_BOOT_EXTERNAL_TOOL) {
+  if ((BootEntry->Type == OC_BOOT_EXTERNAL_OS) || (BootEntry->Type == OC_BOOT_EXTERNAL_TOOL)) {
     return EFI_SUCCESS;
   }
 
   Status = OcBootPolicyDevicePathToDirPath (
-    BootEntry->DevicePath,
-    &BootDirectoryName,
-    &Device
-    );
+             BootEntry->DevicePath,
+             &BootDirectoryName,
+             &Device
+             );
 
   if (EFI_ERROR (Status)) {
     return Status;
   }
 
   Status = gBS->HandleProtocol (
-    Device,
-    &gEfiSimpleFileSystemProtocolGuid,
-    (VOID **) &FileSystem
-    );
+                  Device,
+                  &gEfiSimpleFileSystemProtocolGuid,
+                  (VOID **)&FileSystem
+                  );
 
   if (EFI_ERROR (Status)) {
     FreePool (BootDirectoryName);
@@ -678,7 +686,7 @@ InternalDescribeBootEntry (
   //
   // Windows boot entry may have a custom name, so ensure OC_BOOT_WINDOWS is set correctly.
   //
-  if (BootEntry->Type == OC_BOOT_UNKNOWN && BootEntry->IsGeneric) {
+  if ((BootEntry->Type == OC_BOOT_UNKNOWN) && BootEntry->IsGeneric) {
     DEBUG ((DEBUG_INFO, "OCB: Trying to detect Microsoft BCD\n"));
     Status = OcReadFileSize (FileSystem, L"\\EFI\\Microsoft\\Boot\\BCD", &BcdSize);
     if (!EFI_ERROR (Status)) {
@@ -686,7 +694,7 @@ InternalDescribeBootEntry (
     }
   }
 
-  if (BootEntry->Type == OC_BOOT_WINDOWS && BootEntry->Name == NULL) {
+  if ((BootEntry->Type == OC_BOOT_WINDOWS) && (BootEntry->Name == NULL)) {
     BootEntry->Name = AllocateCopyPool (sizeof (L"Windows"), L"Windows");
   }
 
@@ -701,11 +709,13 @@ InternalDescribeBootEntry (
     } else {
       BootEntry->Name = OcGetVolumeLabel (FileSystem);
       if (BootEntry->Name != NULL) {
-        if (StrCmp (BootEntry->Name, L"Recovery HD") == 0
-          || StrCmp (BootEntry->Name, L"Recovery") == 0) {
-          if (BootEntry->Type == OC_BOOT_UNKNOWN || BootEntry->Type == OC_BOOT_APPLE_OS) {
+        if (  (StrCmp (BootEntry->Name, L"Recovery HD") == 0)
+           || (StrCmp (BootEntry->Name, L"Recovery") == 0))
+        {
+          if ((BootEntry->Type == OC_BOOT_UNKNOWN) || (BootEntry->Type == OC_BOOT_APPLE_OS)) {
             BootEntry->Type = OC_BOOT_APPLE_RECOVERY;
           }
+
           Status = InternalGetAppleVersion (FileSystem, BootDirectoryName, AppleVersion);
           if (EFI_ERROR (Status)) {
             TmpBootName = NULL;
@@ -746,25 +756,26 @@ InternalDescribeBootEntry (
     BootEntry->Flavour = InternalGetContentFlavour (FileSystem, BootDirectoryName, L".contentFlavour");
   }
 
-  if (BootEntry->Flavour == NULL || AsciiStrCmp (BootEntry->Flavour, OC_FLAVOUR_AUTO) == 0) {
+  if ((BootEntry->Flavour == NULL) || (AsciiStrCmp (BootEntry->Flavour, OC_FLAVOUR_AUTO) == 0)) {
     switch (BootEntry->Type) {
       case OC_BOOT_APPLE_OS:
-        ContentFlavour = AllocateCopyPool(sizeof (OC_FLAVOUR_APPLE_OS), OC_FLAVOUR_APPLE_OS);
+        ContentFlavour = AllocateCopyPool (sizeof (OC_FLAVOUR_APPLE_OS), OC_FLAVOUR_APPLE_OS);
         if ((BootContext->PickerContext->PickerAttributes & OC_ATTR_USE_FLAVOUR_ICON) != 0) {
           InternalGetAppleVersion (FileSystem, BootDirectoryName, AppleVersion);
         }
+
         break;
       case OC_BOOT_APPLE_FW_UPDATE:
-        ContentFlavour = AllocateCopyPool(sizeof (OC_FLAVOUR_APPLE_FW), OC_FLAVOUR_APPLE_FW);
+        ContentFlavour = AllocateCopyPool (sizeof (OC_FLAVOUR_APPLE_FW), OC_FLAVOUR_APPLE_FW);
         break;
       case OC_BOOT_APPLE_RECOVERY:
-        ContentFlavour = AllocateCopyPool(sizeof (OC_FLAVOUR_APPLE_RECOVERY), OC_FLAVOUR_APPLE_RECOVERY);
+        ContentFlavour = AllocateCopyPool (sizeof (OC_FLAVOUR_APPLE_RECOVERY), OC_FLAVOUR_APPLE_RECOVERY);
         break;
       case OC_BOOT_APPLE_TIME_MACHINE:
-        ContentFlavour = AllocateCopyPool(sizeof (OC_FLAVOUR_APPLE_TIME_MACHINE), OC_FLAVOUR_APPLE_TIME_MACHINE);
+        ContentFlavour = AllocateCopyPool (sizeof (OC_FLAVOUR_APPLE_TIME_MACHINE), OC_FLAVOUR_APPLE_TIME_MACHINE);
         break;
       case OC_BOOT_WINDOWS:
-        ContentFlavour = AllocateCopyPool(sizeof (OC_FLAVOUR_WINDOWS), OC_FLAVOUR_WINDOWS);
+        ContentFlavour = AllocateCopyPool (sizeof (OC_FLAVOUR_WINDOWS), OC_FLAVOUR_WINDOWS);
         break;
       case OC_BOOT_UNKNOWN:
         ContentFlavour = NULL;
@@ -774,22 +785,25 @@ InternalDescribeBootEntry (
         ContentFlavour = NULL;
         break;
     }
+
     if ((BootEntry->Type & OC_BOOT_APPLE_ANY) != 0) {
       if (ContentFlavour == NULL) {
         ASSERT (FALSE);
-      } else if (AppleVersion[0] != '\0'
-        && (BootContext->PickerContext->PickerAttributes & OC_ATTR_USE_FLAVOUR_ICON) != 0
-        ) {
+      } else if (  (AppleVersion[0] != '\0')
+                && ((BootContext->PickerContext->PickerAttributes & OC_ATTR_USE_FLAVOUR_ICON) != 0)
+                   )
+      {
         //
         // If 10.x(.y) remove .y and replace first . with _, otherwise remove from first .
         //
         Dot = AsciiStrStr (AppleVersion, ".");
         if (Dot != NULL) {
-          if (Dot - AppleVersion == sizeof ("10") - 1
-            && OcAsciiStartsWith (AppleVersion, "10", FALSE)
-            ) {
+          if (  (Dot - AppleVersion == sizeof ("10") - 1)
+             && OcAsciiStartsWith (AppleVersion, "10", FALSE)
+                )
+          {
             *Dot++ = '_';
-            Dot = AsciiStrStr (Dot, ".");
+            Dot    = AsciiStrStr (Dot, ".");
             if (Dot != NULL) {
               *Dot = '\0';
             }
@@ -797,16 +811,20 @@ InternalDescribeBootEntry (
             *Dot = '\0';
           }
         }
+
         ContentFlavour = InternalAddAppleVersion (ContentFlavour, AppleVersion);
       }
     }
-    if (ContentFlavour == NULL && BootEntry->Flavour == NULL) {
-      ContentFlavour = AllocateCopyPool(sizeof(OC_FLAVOUR_AUTO), OC_FLAVOUR_AUTO);
+
+    if ((ContentFlavour == NULL) && (BootEntry->Flavour == NULL)) {
+      ContentFlavour = AllocateCopyPool (sizeof (OC_FLAVOUR_AUTO), OC_FLAVOUR_AUTO);
     }
+
     if (ContentFlavour != NULL) {
       if (BootEntry->Flavour != NULL) {
         FreePool (BootEntry->Flavour);
       }
+
       BootEntry->Flavour = ContentFlavour;
     }
   }

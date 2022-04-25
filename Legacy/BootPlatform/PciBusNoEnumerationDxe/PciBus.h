@@ -1,18 +1,18 @@
 /*++
 
 Copyright (c) 2005 - 2007, Intel Corporation. All rights reserved.<BR>
-This program and the accompanying materials                          
-are licensed and made available under the terms and conditions of the BSD License         
-which accompanies this distribution.  The full text of the license may be found at        
-http://opensource.org/licenses/bsd-license.php                                            
-                                                                                          
-THE PROGRAM IS DISTRIBUTED UNDER THE BSD LICENSE ON AN "AS IS" BASIS,                     
-WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.             
+This program and the accompanying materials
+are licensed and made available under the terms and conditions of the BSD License
+which accompanies this distribution.  The full text of the license may be found at
+http://opensource.org/licenses/bsd-license.php
+
+THE PROGRAM IS DISTRIBUTED UNDER THE BSD LICENSE ON AN "AS IS" BASIS,
+WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 
 Module Name:
 
   PciBus.h
-  
+
 Abstract:
 
   PCI Bus Driver
@@ -53,11 +53,11 @@ Revision History
 // Driver Produced Protocol Prototypes
 //
 
-#define VGABASE1  0x3B0
-#define VGALIMIT1 0x3BB
+#define VGABASE1   0x3B0
+#define VGALIMIT1  0x3BB
 
-#define VGABASE2  0x3C0
-#define VGALIMIT2 0x3DF
+#define VGABASE2   0x3C0
+#define VGALIMIT2  0x3DF
 
 #define ISABASE   0x100
 #define ISALIMIT  0x3FF
@@ -76,97 +76,94 @@ typedef enum {
 } PCI_BAR_TYPE;
 
 typedef struct {
-  UINT64        BaseAddress;
-  UINT64        Length;
-  UINT64        Alignment;
-  PCI_BAR_TYPE  BarType;
-  BOOLEAN       Prefetchable;
-  UINT8         MemType;
-  UINT8         Offset;
+  UINT64          BaseAddress;
+  UINT64          Length;
+  UINT64          Alignment;
+  PCI_BAR_TYPE    BarType;
+  BOOLEAN         Prefetchable;
+  UINT8           MemType;
+  UINT8           Offset;
 } PCI_BAR;
 
-#define PCI_IO_DEVICE_SIGNATURE   SIGNATURE_32 ('p','c','i','o')
+#define PCI_IO_DEVICE_SIGNATURE  SIGNATURE_32 ('p','c','i','o')
 
-#define EFI_BRIDGE_IO32_DECODE_SUPPORTED        0x0001 
-#define EFI_BRIDGE_PMEM32_DECODE_SUPPORTED      0x0002 
-#define EFI_BRIDGE_PMEM64_DECODE_SUPPORTED      0x0004 
-#define EFI_BRIDGE_IO16_DECODE_SUPPORTED        0x0008  
-#define EFI_BRIDGE_PMEM_MEM_COMBINE_SUPPORTED   0x0010  
-#define EFI_BRIDGE_MEM64_DECODE_SUPPORTED       0x0020
-#define EFI_BRIDGE_MEM32_DECODE_SUPPORTED       0x0040
-
+#define EFI_BRIDGE_IO32_DECODE_SUPPORTED       0x0001
+#define EFI_BRIDGE_PMEM32_DECODE_SUPPORTED     0x0002
+#define EFI_BRIDGE_PMEM64_DECODE_SUPPORTED     0x0004
+#define EFI_BRIDGE_IO16_DECODE_SUPPORTED       0x0008
+#define EFI_BRIDGE_PMEM_MEM_COMBINE_SUPPORTED  0x0010
+#define EFI_BRIDGE_MEM64_DECODE_SUPPORTED      0x0020
+#define EFI_BRIDGE_MEM32_DECODE_SUPPORTED      0x0040
 
 typedef struct _PCI_IO_DEVICE {
-  UINT32                                    Signature;
-  EFI_HANDLE                                Handle;
-  EFI_PCI_IO_PROTOCOL                       PciIo;
-  LIST_ENTRY                            Link;
+  UINT32                             Signature;
+  EFI_HANDLE                         Handle;
+  EFI_PCI_IO_PROTOCOL                PciIo;
+  LIST_ENTRY                         Link;
 
-  EFI_DEVICE_PATH_PROTOCOL                  *DevicePath;
-  EFI_PCI_ROOT_BRIDGE_IO_PROTOCOL           *PciRootBridgeIo;
+  EFI_DEVICE_PATH_PROTOCOL           *DevicePath;
+  EFI_PCI_ROOT_BRIDGE_IO_PROTOCOL    *PciRootBridgeIo;
 
   //
   // PCI configuration space header type
   //
-  PCI_TYPE00                                Pci;
+  PCI_TYPE00                         Pci;
 
   //
   // Bus number, Device number, Function number
   //
-  UINT8                                     BusNumber;
-  UINT8                                     DeviceNumber;
-  UINT8                                     FunctionNumber;
+  UINT8                              BusNumber;
+  UINT8                              DeviceNumber;
+  UINT8                              FunctionNumber;
 
   //
   // BAR for this PCI Device
   //
-  PCI_BAR                                   PciBar[PCI_MAX_BAR];
+  PCI_BAR                            PciBar[PCI_MAX_BAR];
 
   //
   // The bridge device this pci device is subject to
   //
-  struct _PCI_IO_DEVICE                     *Parent;
+  struct _PCI_IO_DEVICE              *Parent;
 
   //
   // A linked list for children Pci Device if it is bridge device
   //
-  LIST_ENTRY                            ChildList;
+  LIST_ENTRY                         ChildList;
 
   //
   // TRUE if the PCI bus driver creates the handle for this PCI device
   //
-  BOOLEAN                                   Registered;
+  BOOLEAN                            Registered;
 
   //
   // TRUE if the PCI bus driver successfully allocates the resource required by
   // this PCI device
   //
-  BOOLEAN                                   Allocated;
+  BOOLEAN                            Allocated;
 
   //
   // The attribute this PCI device currently set
   //
-  UINT64                                    Attributes;
+  UINT64                             Attributes;
 
   //
   // The attributes this PCI device actually supports
   //
-  UINT64                                    Supports;
+  UINT64                             Supports;
 
   //
   // The resource decode the bridge supports
   //
-  UINT32                                    Decodes;
+  UINT32                             Decodes;
 
   //
   //  A list tracking reserved resource on a bridge device
   //
-  LIST_ENTRY                            ReservedResourceList;
+  LIST_ENTRY                         ReservedResourceList;
 
-  BOOLEAN                                   IsPciExp;
-
+  BOOLEAN                            IsPciExp;
 } PCI_IO_DEVICE;
-
 
 #define PCI_IO_DEVICE_FROM_PCI_IO_THIS(a) \
   CR (a, PCI_IO_DEVICE, PciIo, PCI_IO_DEVICE_SIGNATURE)
@@ -177,13 +174,13 @@ typedef struct _PCI_IO_DEVICE {
 //
 // Global Variables
 //
-extern EFI_COMPONENT_NAME_PROTOCOL gPciBusComponentName;
+extern EFI_COMPONENT_NAME_PROTOCOL   gPciBusComponentName;
 extern EFI_COMPONENT_NAME2_PROTOCOL  gPciBusComponentName2;
-extern EFI_DRIVER_BINDING_PROTOCOL  gPciBusDriverBinding;
+extern EFI_DRIVER_BINDING_PROTOCOL   gPciBusDriverBinding;
 
-extern BOOLEAN                     gFullEnumeration;
-extern UINT64                      gAllOne;
-extern UINT64                      gAllZero;
+extern BOOLEAN  gFullEnumeration;
+extern UINT64   gAllOne;
+extern UINT64   gAllZero;
 
 #include "PciIo.h"
 #include "PciCommand.h"
@@ -192,9 +189,8 @@ extern UINT64                      gAllZero;
 #include "PciEnumeratorSupport.h"
 #include "PciPowerManagement.h"
 
-
-#define IS_ISA_BRIDGE(_p)       IS_CLASS2 (_p, PCI_CLASS_BRIDGE, PCI_CLASS_BRIDGE_ISA)  
-#define IS_INTEL_ISA_BRIDGE(_p) (IS_CLASS2 (_p, PCI_CLASS_BRIDGE, PCI_CLASS_BRIDGE_ISA_PDECODE) && ((_p)->Hdr.VendorId == 0x8086) && ((_p)->Hdr.DeviceId == 0x7110))
-#define IS_PCI_GFX(_p)     IS_CLASS2 (_p, PCI_CLASS_DISPLAY, PCI_CLASS_DISPLAY_OTHER)
+#define IS_ISA_BRIDGE(_p)        IS_CLASS2 (_p, PCI_CLASS_BRIDGE, PCI_CLASS_BRIDGE_ISA)
+#define IS_INTEL_ISA_BRIDGE(_p)  (IS_CLASS2 (_p, PCI_CLASS_BRIDGE, PCI_CLASS_BRIDGE_ISA_PDECODE) && ((_p)->Hdr.VendorId == 0x8086) && ((_p)->Hdr.DeviceId == 0x7110))
+#define IS_PCI_GFX(_p)           IS_CLASS2 (_p, PCI_CLASS_DISPLAY, PCI_CLASS_DISPLAY_OTHER)
 
 #endif

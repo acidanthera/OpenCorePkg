@@ -31,9 +31,9 @@ HdaControllerInfoGetName (
   OUT CONST CHAR16                      **Name
   )
 {
-  HDA_CONTROLLER_INFO_PRIVATE_DATA    *HdaPrivateData;
+  HDA_CONTROLLER_INFO_PRIVATE_DATA  *HdaPrivateData;
 
-  if (This == NULL || Name == NULL) {
+  if ((This == NULL) || (Name == NULL)) {
     return EFI_INVALID_PARAMETER;
   }
 
@@ -50,9 +50,9 @@ HdaControllerInfoGetVendorId (
   OUT UINT32                            *VendorId
   )
 {
-  HDA_CONTROLLER_INFO_PRIVATE_DATA    *HdaPrivateData;
+  HDA_CONTROLLER_INFO_PRIVATE_DATA  *HdaPrivateData;
 
-  if (This == NULL || VendorId == NULL) {
+  if ((This == NULL) || (VendorId == NULL)) {
     return EFI_INVALID_PARAMETER;
   }
 

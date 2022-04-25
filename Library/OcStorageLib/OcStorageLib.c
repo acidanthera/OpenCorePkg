@@ -33,14 +33,14 @@ OC_STRUCTORS (OC_STORAGE_VAULT, ())
 #pragma pack(push, 1)
 
 typedef PACKED struct {
-  VENDOR_DEFINED_DEVICE_PATH Vendor;
-  EFI_DEVICE_PATH_PROTOCOL   End;
+  VENDOR_DEFINED_DEVICE_PATH    Vendor;
+  EFI_DEVICE_PATH_PROTOCOL      End;
 } DUMMY_BOOT_DEVICE_PATH;
 
 typedef PACKED struct {
-  VENDOR_DEFINED_DEVICE_PATH Vendor;
-  VENDOR_DEFINED_DEVICE_PATH VendorFile;
-  EFI_DEVICE_PATH_PROTOCOL   End;
+  VENDOR_DEFINED_DEVICE_PATH    Vendor;
+  VENDOR_DEFINED_DEVICE_PATH    VendorFile;
+  EFI_DEVICE_PATH_PROTOCOL      End;
 } DUMMY_BOOT_DEVICE_FILE_PATH;
 
 #pragma pack(pop)
@@ -57,68 +57,67 @@ typedef PACKED struct {
 
 STATIC
 DUMMY_BOOT_DEVICE_PATH
-mDummyBootDevicePath = {
-  .Vendor = {
-    .Header = {
+  mDummyBootDevicePath = {
+  .Vendor      = {
+    .Header    = {
       .Type    = HARDWARE_DEVICE_PATH,
       .SubType = HW_VENDOR_DP,
-      .Length  = {sizeof (VENDOR_DEFINED_DEVICE_PATH), 0}
+      .Length  = { sizeof (VENDOR_DEFINED_DEVICE_PATH), 0 }
     },
-    .Guid = INTERNAL_STORAGE_GUID
+    .Guid      = INTERNAL_STORAGE_GUID
   },
-  .End = {
+  .End         = {
     .Type    = END_DEVICE_PATH_TYPE,
     .SubType = END_ENTIRE_DEVICE_PATH_SUBTYPE,
-    .Length  = {END_DEVICE_PATH_LENGTH, 0}
+    .Length  = { END_DEVICE_PATH_LENGTH,      0         }
   }
 };
 
 STATIC
 DUMMY_BOOT_DEVICE_FILE_PATH
-mDummyBootDeviceFilePath = {
-  .Vendor = {
-    .Header = {
+  mDummyBootDeviceFilePath = {
+  .Vendor      = {
+    .Header    = {
       .Type    = HARDWARE_DEVICE_PATH,
       .SubType = HW_VENDOR_DP,
-      .Length  = {sizeof (VENDOR_DEFINED_DEVICE_PATH), 0}
+      .Length  = { sizeof (VENDOR_DEFINED_DEVICE_PATH), 0 }
     },
-    .Guid = INTERNAL_STORAGE_GUID
+    .Guid      = INTERNAL_STORAGE_GUID
   },
-  .VendorFile = {
-    .Header = {
+  .VendorFile  = {
+    .Header    = {
       .Type    = HARDWARE_DEVICE_PATH,
       .SubType = HW_VENDOR_DP,
-      .Length  = {sizeof (VENDOR_DEFINED_DEVICE_PATH), 0}
+      .Length  = { sizeof (VENDOR_DEFINED_DEVICE_PATH), 0 }
     },
-    .Guid = INTERNAL_STORAGE_FILE_GUID
+    .Guid      = INTERNAL_STORAGE_FILE_GUID
   },
-  .End = {
+  .End         = {
     .Type    = END_DEVICE_PATH_TYPE,
     .SubType = END_ENTIRE_DEVICE_PATH_SUBTYPE,
-    .Length  = {END_DEVICE_PATH_LENGTH, 0}
+    .Length  = { END_DEVICE_PATH_LENGTH,      0         }
   }
 };
 
 STATIC
 OC_SCHEMA
-mVaultFilesSchema = OC_SCHEMA_DATAF (NULL, UINT8 [SHA256_DIGEST_SIZE]);
+  mVaultFilesSchema = OC_SCHEMA_DATAF (NULL, UINT8[SHA256_DIGEST_SIZE]);
 
 ///
 /// WARNING: Field list must be alpabetically ordered here!
 ///
 STATIC
 OC_SCHEMA
-mVaultNodesSchema[] = {
-  OC_SCHEMA_MAP_IN     ("Files",   OC_STORAGE_VAULT, Files, &mVaultFilesSchema),
+  mVaultNodesSchema[] = {
+  OC_SCHEMA_MAP_IN ("Files",       OC_STORAGE_VAULT, Files,    &mVaultFilesSchema),
   OC_SCHEMA_INTEGER_IN ("Version", OC_STORAGE_VAULT, Version),
 };
 
 STATIC
 OC_SCHEMA_INFO
-mVaultSchema = {
-  .Dict = {mVaultNodesSchema, ARRAY_SIZE (mVaultNodesSchema)}
+  mVaultSchema = {
+  .Dict = { mVaultNodesSchema, ARRAY_SIZE (mVaultNodesSchema) }
 };
-
 
 STATIC
 EFI_STATUS
@@ -133,8 +132,7 @@ OcStorageInitializeVault (
 {
   VOID  *Scratch;
 
-
-  if (Signature != NULL && Vault == NULL) {
+  if ((Signature != NULL) && (Vault == NULL)) {
     DEBUG ((DEBUG_ERROR, "OCST: Missing vault with signature\n"));
     return EFI_SECURITY_VIOLATION;
   }
@@ -148,8 +146,8 @@ OcStorageInitializeVault (
     ASSERT (StorageKey != NULL);
 
     Scratch = AllocatePool (
-      RSA_SCRATCH_BUFFER_SIZE (StorageKey->Hdr.NumQwords * sizeof (UINT64))
-      );
+                RSA_SCRATCH_BUFFER_SIZE (StorageKey->Hdr.NumQwords * sizeof (UINT64))
+                );
 
     if (Scratch == NULL) {
       return EFI_SECURITY_VIOLATION;
@@ -194,10 +192,10 @@ OcStorageGetDigest (
   IN     CONST CHAR16        *Filename
   )
 {
-  UINT32             Index;
-  UINTN              StrIndex;
-  CHAR8              *VaultFilePath;
-  UINTN              FilenameSize;
+  UINT32  Index;
+  UINTN   StrIndex;
+  CHAR8   *VaultFilePath;
+  UINTN   FilenameSize;
 
   if (!Context->HasVault) {
     return NULL;
@@ -206,7 +204,7 @@ OcStorageGetDigest (
   FilenameSize = StrLen (Filename) + 1;
 
   for (Index = 0; Index < Context->Vault.Files.Count; ++Index) {
-    if (Context->Vault.Files.Keys[Index]->Size != (UINT32) FilenameSize) {
+    if (Context->Vault.Files.Keys[Index]->Size != (UINT32)FilenameSize) {
       continue;
     }
 
@@ -258,12 +256,12 @@ OcStorageInitFromFs (
   }
 
   Status = OcSafeFileOpen (
-    RootVolume,
-    &Context->Storage,
-    (CHAR16 *) StorageRoot,
-    EFI_FILE_MODE_READ,
-    0
-    );
+             RootVolume,
+             &Context->Storage,
+             (CHAR16 *)StorageRoot,
+             EFI_FILE_MODE_READ,
+             0
+             );
 
   RootVolume->Close (RootVolume);
 
@@ -276,10 +274,10 @@ OcStorageInitFromFs (
 
   if (StorageKey) {
     Signature = OcStorageReadFileUnicode (
-      Context,
-      OC_STORAGE_VAULT_SIGNATURE_PATH,
-      &SignatureSize
-      );
+                  Context,
+                  OC_STORAGE_VAULT_SIGNATURE_PATH,
+                  &SignatureSize
+                  );
 
     if (Signature == NULL) {
       DEBUG ((DEBUG_ERROR, "OCS: Missing vault signature\n"));
@@ -291,11 +289,11 @@ OcStorageInitFromFs (
   }
 
   DataSize = 0;
-  Vault = OcStorageReadFileUnicode (
-    Context,
-    OC_STORAGE_VAULT_PATH,
-    &DataSize
-    );
+  Vault    = OcStorageReadFileUnicode (
+               Context,
+               OC_STORAGE_VAULT_PATH,
+               &DataSize
+               );
 
   Status = OcStorageInitializeVault (Context, Vault, DataSize, StorageKey, Signature, SignatureSize);
 
@@ -304,11 +302,11 @@ OcStorageInitFromFs (
   }
 
   gBS->InstallProtocolInterface (
-    &Context->DummyStorageHandle,
-    &gEfiDevicePathProtocolGuid,
-    EFI_NATIVE_INTERFACE,
-    &mDummyBootDevicePath
-    );
+         &Context->DummyStorageHandle,
+         &gEfiDevicePathProtocolGuid,
+         EFI_NATIVE_INTERFACE,
+         &mDummyBootDevicePath
+         );
   Context->StorageHandle   = StorageHandle;
   Context->StoragePath     = StoragePath;
   Context->StorageRoot     = StorageRoot;
@@ -328,15 +326,15 @@ OcStorageInitFromFs (
 
 VOID
 OcStorageFree (
-  IN OUT OC_STORAGE_CONTEXT            *Context
+  IN OUT OC_STORAGE_CONTEXT  *Context
   )
 {
   if (Context->DummyStorageHandle != NULL) {
     gBS->UninstallProtocolInterface (
-      Context->DummyStorageHandle,
-      &gEfiDevicePathProtocolGuid,
-      &mDummyBootDevicePath
-      );
+           Context->DummyStorageHandle,
+           &gEfiDevicePathProtocolGuid,
+           &mDummyBootDevicePath
+           );
     Context->DummyStorageHandle = NULL;
   }
 
@@ -353,8 +351,8 @@ OcStorageFree (
 
 BOOLEAN
 OcStorageExistsFileUnicode (
-  IN  OC_STORAGE_CONTEXT               *Context,
-  IN  CONST CHAR16                     *FilePath
+  IN  OC_STORAGE_CONTEXT  *Context,
+  IN  CONST CHAR16        *FilePath
   )
 {
   EFI_STATUS         Status;
@@ -379,12 +377,12 @@ OcStorageExistsFileUnicode (
   }
 
   Status = OcSafeFileOpen (
-    Context->Storage,
-    &File,
-    (CHAR16 *) FilePath,
-    EFI_FILE_MODE_READ,
-    0
-    );
+             Context->Storage,
+             &File,
+             (CHAR16 *)FilePath,
+             EFI_FILE_MODE_READ,
+             0
+             );
 
   if (!EFI_ERROR (Status)) {
     File->Close (File);
@@ -396,9 +394,9 @@ OcStorageExistsFileUnicode (
 
 VOID *
 OcStorageReadFileUnicode (
-  IN  OC_STORAGE_CONTEXT               *Context,
-  IN  CONST CHAR16                     *FilePath,
-  OUT UINT32                           *FileSize OPTIONAL
+  IN  OC_STORAGE_CONTEXT  *Context,
+  IN  CONST CHAR16        *FilePath,
+  OUT UINT32              *FileSize OPTIONAL
   )
 {
   EFI_STATUS         Status;
@@ -417,7 +415,7 @@ OcStorageReadFileUnicode (
 
   VaultDigest = OcStorageGetDigest (Context, FilePath);
 
-  if (Context->HasVault && VaultDigest == NULL) {
+  if (Context->HasVault && (VaultDigest == NULL)) {
     DEBUG ((DEBUG_ERROR, "OCST: Aborting %s file access not present in vault\n", FilePath));
     return NULL;
   }
@@ -430,19 +428,19 @@ OcStorageReadFileUnicode (
   }
 
   Status = OcSafeFileOpen (
-    Context->Storage,
-    &File,
-    (CHAR16 *) FilePath,
-    EFI_FILE_MODE_READ,
-    0
-    );
+             Context->Storage,
+             &File,
+             (CHAR16 *)FilePath,
+             EFI_FILE_MODE_READ,
+             0
+             );
 
   if (EFI_ERROR (Status)) {
     return NULL;
   }
 
   Status = OcGetFileSize (File, &Size);
-  if (EFI_ERROR (Status) || Size >= MAX_UINT32 - 1) {
+  if (EFI_ERROR (Status) || (Size >= MAX_UINT32 - 1)) {
     File->Close (File);
     return NULL;
   }
@@ -481,23 +479,23 @@ OcStorageReadFileUnicode (
 
 EFI_STATUS
 OcStorageGetInfo (
-  IN  OC_STORAGE_CONTEXT               *Context,
-  IN  CONST CHAR16                     *FilePath,
-  OUT EFI_DEVICE_PATH_PROTOCOL         **DevicePath   OPTIONAL,
-  OUT EFI_HANDLE                       *StorageHandle OPTIONAL,
-  OUT EFI_DEVICE_PATH_PROTOCOL         **StoragePath  OPTIONAL,
-  IN  BOOLEAN                          RealPath
+  IN  OC_STORAGE_CONTEXT        *Context,
+  IN  CONST CHAR16              *FilePath,
+  OUT EFI_DEVICE_PATH_PROTOCOL  **DevicePath   OPTIONAL,
+  OUT EFI_HANDLE                *StorageHandle OPTIONAL,
+  OUT EFI_DEVICE_PATH_PROTOCOL  **StoragePath  OPTIONAL,
+  IN  BOOLEAN                   RealPath
   )
 {
-  CHAR16   *FullPath;
-  UINTN    RootLength;
-  UINTN    FileSize;
+  CHAR16  *FullPath;
+  UINTN   RootLength;
+  UINTN   FileSize;
 
-  if (RealPath
-    && Context->StorageHandle != NULL
-    && Context->StorageRoot != NULL
-    && Context->StoragePath != NULL) {
-
+  if (  RealPath
+     && (Context->StorageHandle != NULL)
+     && (Context->StorageRoot != NULL)
+     && (Context->StoragePath != NULL))
+  {
     //
     // Set the storage handle right away.
     //

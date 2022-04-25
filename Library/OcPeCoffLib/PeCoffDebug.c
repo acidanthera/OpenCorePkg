@@ -18,27 +18,27 @@ PeCoffLoaderRetrieveCodeViewInfo (
   IN     UINT32                 FileSize
   )
 {
-  BOOLEAN                               Result;
+  BOOLEAN  Result;
 
-  CONST EFI_IMAGE_DATA_DIRECTORY        *DebugDir;
-  CONST EFI_TE_IMAGE_HEADER             *TeHdr;
-  CONST EFI_IMAGE_NT_HEADERS32          *Pe32Hdr;
-  CONST EFI_IMAGE_NT_HEADERS64          *Pe32PlusHdr;
+  CONST EFI_IMAGE_DATA_DIRECTORY  *DebugDir;
+  CONST EFI_TE_IMAGE_HEADER       *TeHdr;
+  CONST EFI_IMAGE_NT_HEADERS32    *Pe32Hdr;
+  CONST EFI_IMAGE_NT_HEADERS64    *Pe32PlusHdr;
 
-  CONST EFI_IMAGE_DEBUG_DIRECTORY_ENTRY *DebugEntries;
-  UINT32                                NumDebugEntries;
-  UINT32                                DebugIndex;
-  CONST EFI_IMAGE_DEBUG_DIRECTORY_ENTRY *CodeViewEntry;
+  CONST EFI_IMAGE_DEBUG_DIRECTORY_ENTRY  *DebugEntries;
+  UINT32                                 NumDebugEntries;
+  UINT32                                 DebugIndex;
+  CONST EFI_IMAGE_DEBUG_DIRECTORY_ENTRY  *CodeViewEntry;
 
-  UINT32                                DebugDirTop;
-  UINT32                                DebugDirFileOffset;
-  UINT32                                DebugDirSectionOffset;
-  UINT32                                DebugDirSectionRawTop;
-  UINT32                                DebugEntryTopOffset;
-  CONST EFI_IMAGE_SECTION_HEADER        *Sections;
-  UINT16                                SectIndex;
+  UINT32                          DebugDirTop;
+  UINT32                          DebugDirFileOffset;
+  UINT32                          DebugDirSectionOffset;
+  UINT32                          DebugDirSectionRawTop;
+  UINT32                          DebugEntryTopOffset;
+  CONST EFI_IMAGE_SECTION_HEADER  *Sections;
+  UINT16                          SectIndex;
 
-  UINT32                                DebugSizeOfImage;
+  UINT32  DebugSizeOfImage;
 
   ASSERT (Context != NULL);
   ASSERT (Context->SizeOfImageDebugAdd == 0);
@@ -49,19 +49,20 @@ PeCoffLoaderRetrieveCodeViewInfo (
   //
   // Retrieve the Debug Directory information of the Image.
   //
-  switch (Context->ImageType) { /* LCOV_EXCL_BR_LINE */
+  switch (Context->ImageType) {
+    /* LCOV_EXCL_BR_LINE */
     case ImageTypeTe:
-      TeHdr = (CONST EFI_TE_IMAGE_HEADER *) (CONST VOID *) (
-                (CONST CHAR8 *) Context->FileBuffer
-                );
+      TeHdr = (CONST EFI_TE_IMAGE_HEADER *)(CONST VOID *)(
+                                                          (CONST CHAR8 *)Context->FileBuffer
+                                                          );
 
       DebugDir = &TeHdr->DataDirectory[1];
       break;
 
     case ImageTypePe32:
-      Pe32Hdr = (CONST EFI_IMAGE_NT_HEADERS32 *) (CONST VOID *) (
-                  (CONST CHAR8 *) Context->FileBuffer + Context->ExeHdrOffset
-                  );
+      Pe32Hdr = (CONST EFI_IMAGE_NT_HEADERS32 *)(CONST VOID *)(
+                                                               (CONST CHAR8 *)Context->FileBuffer + Context->ExeHdrOffset
+                                                               );
 
       if (Pe32Hdr->NumberOfRvaAndSizes <= EFI_IMAGE_DIRECTORY_ENTRY_DEBUG) {
         return;
@@ -71,9 +72,9 @@ PeCoffLoaderRetrieveCodeViewInfo (
       break;
 
     case ImageTypePe32Plus:
-      Pe32PlusHdr = (CONST EFI_IMAGE_NT_HEADERS64 *) (CONST VOID *) (
-                      (CONST CHAR8 *) Context->FileBuffer + Context->ExeHdrOffset
-                      );
+      Pe32PlusHdr = (CONST EFI_IMAGE_NT_HEADERS64 *)(CONST VOID *)(
+                                                                   (CONST CHAR8 *)Context->FileBuffer + Context->ExeHdrOffset
+                                                                   );
 
       if (Pe32PlusHdr->NumberOfRvaAndSizes <= EFI_IMAGE_DIRECTORY_ENTRY_DEBUG) {
         return;
@@ -82,11 +83,12 @@ PeCoffLoaderRetrieveCodeViewInfo (
       DebugDir = &Pe32PlusHdr->DataDirectory[EFI_IMAGE_DIRECTORY_ENTRY_DEBUG];
       break;
 
-  /* LCOV_EXCL_START */
+    /* LCOV_EXCL_START */
     default:
       ASSERT (FALSE);
       UNREACHABLE ();
   }
+
   /* LCOV_EXCL_STOP */
 
   Result = BaseOverflowAddU32 (
@@ -94,23 +96,25 @@ PeCoffLoaderRetrieveCodeViewInfo (
              DebugDir->Size,
              &DebugDirTop
              );
-  if (Result || DebugDirTop > Context->SizeOfImage) {
+  if (Result || (DebugDirTop > Context->SizeOfImage)) {
     return;
   }
+
   //
   // Determine the file offset of the debug directory...  This means we walk
   // the sections to find which section contains the RVA of the debug
   // directory
   //
-  Sections = (CONST EFI_IMAGE_SECTION_HEADER *) (CONST VOID *) (
-               (CONST CHAR8 *) Context->FileBuffer + Context->SectionsOffset
-               );
+  Sections = (CONST EFI_IMAGE_SECTION_HEADER *)(CONST VOID *)(
+                                                              (CONST CHAR8 *)Context->FileBuffer + Context->SectionsOffset
+                                                              );
 
   for (SectIndex = 0; SectIndex < Context->NumberOfSections; ++SectIndex) {
-    if (DebugDir->VirtualAddress >= Sections[SectIndex].VirtualAddress
-     && DebugDirTop <= Sections[SectIndex].VirtualAddress + Sections[SectIndex].VirtualSize) {
-       break;
-     }
+    if (  (DebugDir->VirtualAddress >= Sections[SectIndex].VirtualAddress)
+       && (DebugDirTop <= Sections[SectIndex].VirtualAddress + Sections[SectIndex].VirtualSize))
+    {
+      break;
+    }
   }
 
   if (SectIndex == Context->NumberOfSections) {
@@ -129,9 +133,9 @@ PeCoffLoaderRetrieveCodeViewInfo (
     return;
   }
 
-  DebugEntries = (CONST EFI_IMAGE_DEBUG_DIRECTORY_ENTRY *) (CONST VOID *) (
-                  (CONST CHAR8 *) Context->FileBuffer + DebugDirFileOffset
-                  );
+  DebugEntries = (CONST EFI_IMAGE_DEBUG_DIRECTORY_ENTRY *)(CONST VOID *)(
+                                                                         (CONST CHAR8 *)Context->FileBuffer + DebugDirFileOffset
+                                                                         );
 
   NumDebugEntries = DebugDir->Size / sizeof (*DebugEntries);
 
@@ -158,46 +162,46 @@ PeCoffLoaderRetrieveCodeViewInfo (
   //
   if (CodeViewEntry->RVA == 0) {
     Result = BaseOverflowSubU32 (
-              CodeViewEntry->FileOffset,
-              Context->TeStrippedOffset,
-              &DebugEntryTopOffset
-              );
+               CodeViewEntry->FileOffset,
+               Context->TeStrippedOffset,
+               &DebugEntryTopOffset
+               );
     if (Result) {
       return;
     }
 
     Result = BaseOverflowAddU32 (
-              DebugEntryTopOffset,
-              CodeViewEntry->SizeOfData,
-              &DebugEntryTopOffset
-              );
-    if (Result || DebugEntryTopOffset > FileSize) {
+               DebugEntryTopOffset,
+               CodeViewEntry->SizeOfData,
+               &DebugEntryTopOffset
+               );
+    if (Result || (DebugEntryTopOffset > FileSize)) {
       return;
     }
 
     Result = BaseOverflowAlignUpU32 (
-                Context->SizeOfImage,
-                OC_ALIGNOF (UINT32),
-                &DebugSizeOfImage
-                );
+               Context->SizeOfImage,
+               OC_ALIGNOF (UINT32),
+               &DebugSizeOfImage
+               );
     if (Result) {
       return;
     }
 
     Result = BaseOverflowAddU32 (
-                DebugSizeOfImage,
-                CodeViewEntry->SizeOfData,
-                &DebugSizeOfImage
-                );
+               DebugSizeOfImage,
+               CodeViewEntry->SizeOfData,
+               &DebugSizeOfImage
+               );
     if (Result) {
       return;
     }
 
     Result = BaseOverflowAlignUpU32 (
-                DebugSizeOfImage,
-                Context->SectionAlignment,
-                &DebugSizeOfImage
-                );
+               DebugSizeOfImage,
+               Context->SectionAlignment,
+               &DebugSizeOfImage
+               );
     if (Result) {
       return;
     }
@@ -211,10 +215,10 @@ PeCoffLoaderLoadCodeView (
   IN OUT PE_COFF_IMAGE_CONTEXT  *Context
   )
 {
-  BOOLEAN                         Result;
+  BOOLEAN  Result;
 
-  EFI_IMAGE_DEBUG_DIRECTORY_ENTRY *CodeViewEntry;
-  UINT32                          DebugEntryRvaTop;
+  EFI_IMAGE_DEBUG_DIRECTORY_ENTRY  *CodeViewEntry;
+  UINT32                           DebugEntryRvaTop;
 
   ASSERT (Context != NULL);
 
@@ -222,9 +226,9 @@ PeCoffLoaderLoadCodeView (
     return;
   }
 
-  CodeViewEntry = (EFI_IMAGE_DEBUG_DIRECTORY_ENTRY *) (VOID *) (
-                    (CHAR8 *) Context->ImageBuffer + Context->CodeViewRva
-                    );
+  CodeViewEntry = (EFI_IMAGE_DEBUG_DIRECTORY_ENTRY *)(VOID *)(
+                                                              (CHAR8 *)Context->ImageBuffer + Context->CodeViewRva
+                                                              );
   //
   // Load the Codeview information if present
   //
@@ -234,14 +238,16 @@ PeCoffLoaderLoadCodeView (
                CodeViewEntry->SizeOfData,
                &DebugEntryRvaTop
                );
-    if (Result || DebugEntryRvaTop > Context->SizeOfImage
-     || !IS_ALIGNED (CodeViewEntry->RVA, OC_ALIGNOF (UINT32))) {
+    if (  Result || (DebugEntryRvaTop > Context->SizeOfImage)
+       || !IS_ALIGNED (CodeViewEntry->RVA, OC_ALIGNOF (UINT32)))
+    {
       Context->CodeViewRva = 0;
       return;
     }
   } else {
-    if (!PcdGetBool (PcdImageLoaderForceLoadDebug)
-     || Context->SizeOfImageDebugAdd == 0) {
+    if (  !PcdGetBool (PcdImageLoaderForceLoadDebug)
+       || (Context->SizeOfImageDebugAdd == 0))
+    {
       Context->CodeViewRva = 0;
       return;
     }
@@ -251,8 +257,8 @@ PeCoffLoaderLoadCodeView (
     ASSERT (Context->SizeOfImageDebugAdd >= (CodeViewEntry->RVA - Context->SizeOfImage) + CodeViewEntry->SizeOfData);
 
     CopyMem (
-      (CHAR8 *) Context->ImageBuffer + CodeViewEntry->RVA,
-      (CONST CHAR8 *) Context->FileBuffer + (CodeViewEntry->FileOffset - Context->TeStrippedOffset),
+      (CHAR8 *)Context->ImageBuffer + CodeViewEntry->RVA,
+      (CONST CHAR8 *)Context->FileBuffer + (CodeViewEntry->FileOffset - Context->TeStrippedOffset),
       CodeViewEntry->SizeOfData
       );
   }
@@ -269,11 +275,11 @@ PeCoffGetPdbPath (
   OUT UINT32                       *PdbPathSize
   )
 {
-  BOOLEAN                         Result;
+  BOOLEAN  Result;
 
-  EFI_IMAGE_DEBUG_DIRECTORY_ENTRY *CodeViewEntry;
-  CONST CHAR8                     *CodeView;
-  UINT32                          PdbOffset;
+  EFI_IMAGE_DEBUG_DIRECTORY_ENTRY  *CodeViewEntry;
+  CONST CHAR8                      *CodeView;
+  UINT32                           PdbOffset;
 
   ASSERT (Context != NULL);
   ASSERT (PdbPath != NULL);
@@ -283,11 +289,11 @@ PeCoffGetPdbPath (
     return RETURN_UNSUPPORTED;
   }
 
-  CodeViewEntry = (EFI_IMAGE_DEBUG_DIRECTORY_ENTRY *) (VOID *) (
-                    (CHAR8 *) Context->ImageBuffer + Context->CodeViewRva
-                    );
+  CodeViewEntry = (EFI_IMAGE_DEBUG_DIRECTORY_ENTRY *)(VOID *)(
+                                                              (CHAR8 *)Context->ImageBuffer + Context->CodeViewRva
+                                                              );
 
-  CodeView = (CONST CHAR8 *) Context->ImageBuffer + CodeViewEntry->RVA;
+  CodeView = (CONST CHAR8 *)Context->ImageBuffer + CodeViewEntry->RVA;
 
   switch (READ_ALIGNED_32 (CodeView)) {
     case CODEVIEW_SIGNATURE_NB10:
@@ -330,6 +336,6 @@ PeCoffGetPdbPath (
     return RETURN_UNSUPPORTED;
   }
 
-  *PdbPath = (CHAR8 *) Context->ImageBuffer + CodeViewEntry->RVA + PdbOffset;
+  *PdbPath = (CHAR8 *)Context->ImageBuffer + CodeViewEntry->RVA + PdbOffset;
   return RETURN_SUCCESS;
 }

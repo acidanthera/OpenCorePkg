@@ -25,8 +25,8 @@ OcConsoleControlEntryModeConstructor (
   IN EFI_SYSTEM_TABLE  *SystemTable
   )
 {
-  EFI_STATUS                   Status;
-  EFI_CONSOLE_CONTROL_PROTOCOL *ConsoleControl;
+  EFI_STATUS                    Status;
+  EFI_CONSOLE_CONTROL_PROTOCOL  *ConsoleControl;
 
   if (FixedPcdGet8 (PcdConsoleControlEntryMode) < EfiConsoleControlScreenMaxValue) {
     //
@@ -34,23 +34,23 @@ OcConsoleControlEntryModeConstructor (
     // switch to text mode, otherwise a black screen will be shown.
     //
     Status = gBS->HandleProtocol (
-      gST->ConsoleOutHandle,
-      &gEfiConsoleControlProtocolGuid,
-      (VOID **) &ConsoleControl
-      );
+                    gST->ConsoleOutHandle,
+                    &gEfiConsoleControlProtocolGuid,
+                    (VOID **)&ConsoleControl
+                    );
     if (EFI_ERROR (Status)) {
       Status = gBS->LocateProtocol (
-      &gEfiConsoleControlProtocolGuid,
-      NULL,
-      (VOID **) &ConsoleControl
-      );
+                      &gEfiConsoleControlProtocolGuid,
+                      NULL,
+                      (VOID **)&ConsoleControl
+                      );
     }
 
     if (!EFI_ERROR (Status)) {
       ConsoleControl->SetMode (
-        ConsoleControl,
-        FixedPcdGet8 (PcdConsoleControlEntryMode)
-        );
+                        ConsoleControl,
+                        FixedPcdGet8 (PcdConsoleControlEntryMode)
+                        );
     }
   }
 

@@ -65,7 +65,7 @@ INT32
 VerifySignature (
   IN  OUT  UINT8          *Image,
   IN       UINT32         ImageSize,
-      OUT  BOOLEAN        *IsFat,
+  OUT  BOOLEAN            *IsFat,
   IN       PE_IMAGE_ARCH  Arch
   )
 {
@@ -78,10 +78,10 @@ VerifySignature (
 
   if (Arch == PE_ARCH_32) {
     Status = FatFilterArchitecture32 (&Image, &ImageSize);
-    Slice = "32-bit";
+    Slice  = "32-bit";
   } else if (Arch == PE_ARCH_64) {
     Status = FatFilterArchitecture64 (&Image, &ImageSize);
-    Slice = "64-bit";
+    Slice  = "64-bit";
   } else {
     Slice = "raw";
   }
@@ -90,7 +90,7 @@ VerifySignature (
     return 0;
   }
 
-  if (OrgImageSize == ImageSize && Arch != PE_ARCH_ANY) {
+  if ((OrgImageSize == ImageSize) && (Arch != PE_ARCH_ANY)) {
     return 0;
   }
 
@@ -100,10 +100,10 @@ VerifySignature (
 
   DEBUG ((DEBUG_ERROR, "SIGN: Discovered %a slice\n", Slice));
   OrgImageSize = ImageSize;
-  Status = PeCoffVerifyAppleSignature (
-    Image,
-    &ImageSize
-    );
+  Status       = PeCoffVerifyAppleSignature (
+                   Image,
+                   &ImageSize
+                   );
   DEBUG ((
     DEBUG_ERROR,
     "SIGN: Signature check - %r (%u -> %u)\n",
@@ -183,30 +183,31 @@ LLVMFuzzerTestOneInput (
   size_t         Size
   )
 {
-#if 0
+ #if 0
   APFS_DRIVER_VERSION  *DriverVersion;
   EFI_STATUS           Status;
   volatile UINTN       Walker;
   UINTN                Index;
 
-  Status = PeCoffGetApfsDriverVersion ((UINT8 *) Data, (UINT32) Size, &DriverVersion);
+  Status = PeCoffGetApfsDriverVersion ((UINT8 *)Data, (UINT32)Size, &DriverVersion);
   if (!EFI_ERROR (Status)) {
     Walker = 0;
     for (Index = 0; Index < sizeof (*DriverVersion); ++Index) {
-      Walker += ((UINT8 *) DriverVersion)[Index];
+      Walker += ((UINT8 *)DriverVersion)[Index];
     }
   }
-#endif
+
+ #endif
 
   VOID    *Copy;
   UINT32  NewSize;
 
-  if (Size > 0 && Size <= 1024*1024*1024) {
+  if ((Size > 0) && (Size <= 1024*1024*1024)) {
     Copy = AllocatePool (Size);
     if (Copy != NULL) {
       CopyMem (Copy, Data, Size);
-      
-      NewSize = (UINT32) Size;
+
+      NewSize = (UINT32)Size;
       PeCoffVerifyAppleSignature (Copy, &NewSize);
       FreePool (Copy);
     }

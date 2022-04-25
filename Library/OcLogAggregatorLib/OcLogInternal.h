@@ -32,23 +32,23 @@
   (CR (a, OC_LOG_PRIVATE_DATA, OcLog, OC_LOG_PRIVATE_DATA_SIGNATURE))
 
 typedef struct {
-  UINT64                 Signature;
-  UINT64                 TscFrequency;
-  UINT64                 TscStart;
-  UINT64                 TscLast;
-  CHAR8                  TimingTxt[OC_LOG_TIMING_BUFFER_SIZE];
-  CHAR8                  LineBuffer[OC_LOG_LINE_BUFFER_SIZE];
-  CHAR16                 UnicodeLineBuffer[OC_LOG_LINE_BUFFER_SIZE];
-  CHAR8                  AsciiBuffer[OC_LOG_BUFFER_SIZE];
-  UINTN                  AsciiBufferSize;
-  CHAR8                  NvramBuffer[OC_LOG_NVRAM_BUFFER_SIZE];
-  UINTN                  NvramBufferSize;
-  UINT32                 LogCounter;
-  CHAR16                 *LogFilePathName;
-  EFI_DATA_HUB_PROTOCOL  *DataHub;
-  OC_FLEX_ARRAY          *FlexFilters;
-  BOOLEAN                BlacklistFiltering;
-  OC_LOG_PROTOCOL        OcLog;
+  UINT64                   Signature;
+  UINT64                   TscFrequency;
+  UINT64                   TscStart;
+  UINT64                   TscLast;
+  CHAR8                    TimingTxt[OC_LOG_TIMING_BUFFER_SIZE];
+  CHAR8                    LineBuffer[OC_LOG_LINE_BUFFER_SIZE];
+  CHAR16                   UnicodeLineBuffer[OC_LOG_LINE_BUFFER_SIZE];
+  CHAR8                    AsciiBuffer[OC_LOG_BUFFER_SIZE];
+  UINTN                    AsciiBufferSize;
+  CHAR8                    NvramBuffer[OC_LOG_NVRAM_BUFFER_SIZE];
+  UINTN                    NvramBufferSize;
+  UINT32                   LogCounter;
+  CHAR16                   *LogFilePathName;
+  EFI_DATA_HUB_PROTOCOL    *DataHub;
+  OC_FLEX_ARRAY            *FlexFilters;
+  BOOLEAN                  BlacklistFiltering;
+  OC_LOG_PROTOCOL          OcLog;
 } OC_LOG_PRIVATE_DATA;
 
 OC_LOG_PROTOCOL *

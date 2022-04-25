@@ -30,11 +30,11 @@ BiosVideoComponentNameGetDriverName (
 EFI_STATUS
 EFIAPI
 BiosVideoComponentNameGetControllerName (
-  IN  EFI_COMPONENT_NAME_PROTOCOL                     *This,
-  IN  EFI_HANDLE                                      ControllerHandle,
-  IN  EFI_HANDLE                                      ChildHandle        OPTIONAL,
-  IN  CHAR8                                           *Language,
-  OUT CHAR16                                          **ControllerName
+  IN  EFI_COMPONENT_NAME_PROTOCOL  *This,
+  IN  EFI_HANDLE                   ControllerHandle,
+  IN  EFI_HANDLE                   ChildHandle        OPTIONAL,
+  IN  CHAR8                        *Language,
+  OUT CHAR16                       **ControllerName
   );
 
 //
@@ -47,14 +47,13 @@ GLOBAL_REMOVE_IF_UNREFERENCED EFI_COMPONENT_NAME_PROTOCOL  gBiosVideoComponentNa
   "eng"
 };
 
-GLOBAL_REMOVE_IF_UNREFERENCED EFI_COMPONENT_NAME2_PROTOCOL gBiosVideoComponentName2 = {
-  (EFI_COMPONENT_NAME2_GET_DRIVER_NAME) BiosVideoComponentNameGetDriverName,
-  (EFI_COMPONENT_NAME2_GET_CONTROLLER_NAME) BiosVideoComponentNameGetControllerName,
+GLOBAL_REMOVE_IF_UNREFERENCED EFI_COMPONENT_NAME2_PROTOCOL  gBiosVideoComponentName2 = {
+  (EFI_COMPONENT_NAME2_GET_DRIVER_NAME)BiosVideoComponentNameGetDriverName,
+  (EFI_COMPONENT_NAME2_GET_CONTROLLER_NAME)BiosVideoComponentNameGetControllerName,
   "en"
 };
 
-
-static EFI_UNICODE_STRING_TABLE mBiosVideoDriverNameTable[] = {
+static EFI_UNICODE_STRING_TABLE  mBiosVideoDriverNameTable[] = {
   {
     "eng;en",
     L"BIOS[INT10] Video Driver"
@@ -72,6 +71,7 @@ BiosVideoComponentNameGetDriverName (
   IN  CHAR8                        *Language,
   OUT CHAR16                       **DriverName
   )
+
 /*++
 
   Routine Description:
@@ -111,12 +111,13 @@ BiosVideoComponentNameGetDriverName (
 EFI_STATUS
 EFIAPI
 BiosVideoComponentNameGetControllerName (
-  IN  EFI_COMPONENT_NAME_PROTOCOL                     *This,
-  IN  EFI_HANDLE                                      ControllerHandle,
-  IN  EFI_HANDLE                                      ChildHandle        OPTIONAL,
-  IN  CHAR8                                           *Language,
-  OUT CHAR16                                          **ControllerName
+  IN  EFI_COMPONENT_NAME_PROTOCOL  *This,
+  IN  EFI_HANDLE                   ControllerHandle,
+  IN  EFI_HANDLE                   ChildHandle        OPTIONAL,
+  IN  CHAR8                        *Language,
+  OUT CHAR16                       **ControllerName
   )
+
 /*++
 
   Routine Description:

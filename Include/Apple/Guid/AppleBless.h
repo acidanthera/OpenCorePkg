@@ -56,14 +56,14 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 
 // gAppleBlessedSystemFileInfoGuid
 /// A global variable storing the GUID of the APPLE_BLESSED_SYSTEM_FILE_INFO_GUID.
-extern EFI_GUID gAppleBlessedSystemFileInfoGuid;
+extern EFI_GUID  gAppleBlessedSystemFileInfoGuid;
 
 // gAppleBlessedSystemFolderInfoGuid
 /// A global variable storing the GUID of the APPLE_BLESSED_SYSTEM_FOLDER_INFO_GUID.
-extern EFI_GUID gAppleBlessedSystemFolderInfoGuid;
+extern EFI_GUID  gAppleBlessedSystemFolderInfoGuid;
 
 // gAppleBlessedOsxFolderInfoGuid
 /// A global variable storing the GUID of the APPLE_BLESSED_OSX_FOLDER_INFO_GUID.
-extern EFI_GUID gAppleBlessedOsxFolderInfoGuid;
+extern EFI_GUID  gAppleBlessedOsxFolderInfoGuid;
 
 #endif // APPLE_BLESS_H

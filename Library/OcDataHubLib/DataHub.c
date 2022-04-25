@@ -13,7 +13,7 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 //  Since this driver will only ever produce one instance of the Logging Hub
 //  protocol you are not required to dynamically allocate the PrivateData.
 //
-DATA_HUB_INSTANCE mPrivateData;
+DATA_HUB_INSTANCE  mPrivateData;
 
 /**
   Log data record into the data logging hub
@@ -32,12 +32,12 @@ DATA_HUB_INSTANCE mPrivateData;
 EFI_STATUS
 EFIAPI
 DataHubLogData (
-  IN  EFI_DATA_HUB_PROTOCOL   *This,
-  IN  EFI_GUID                *DataRecordGuid,
-  IN  EFI_GUID                *ProducerName,
-  IN  UINT64                  DataRecordClass,
-  IN  VOID                    *RawData,
-  IN  UINT32                  RawDataSize
+  IN  EFI_DATA_HUB_PROTOCOL  *This,
+  IN  EFI_GUID               *DataRecordGuid,
+  IN  EFI_GUID               *ProducerName,
+  IN  UINT64                 DataRecordClass,
+  IN  VOID                   *RawData,
+  IN  UINT32                 RawDataSize
   )
 {
   EFI_STATUS              Status;
@@ -60,14 +60,14 @@ DataHubLogData (
   //  to Record so we don't what it to be the thing that was allocated from
   //  pool, so the consumer can't free an data record by mistake.
   //
-  RecordSize  = sizeof (EFI_DATA_RECORD_HEADER) + RawDataSize;
-  TotalSize   = sizeof (EFI_DATA_ENTRY) + RecordSize;
+  RecordSize = sizeof (EFI_DATA_RECORD_HEADER) + RawDataSize;
+  TotalSize  = sizeof (EFI_DATA_ENTRY) + RecordSize;
 
   //
   // First try to get log time at TPL level <= TPL_CALLBACK.
   //
   ZeroMem (&LogTime, sizeof (LogTime));
-  if (EfiGetCurrentTpl() <= TPL_CALLBACK) {
+  if (EfiGetCurrentTpl () <= TPL_CALLBACK) {
     gRT->GetTime (&LogTime, NULL);
   }
 
@@ -93,18 +93,18 @@ DataHubLogData (
 
   ZeroMem (LogEntry, TotalSize);
 
-  Record  = (EFI_DATA_RECORD_HEADER *) (LogEntry + 1);
-  Raw     = (VOID *) (Record + 1);
+  Record = (EFI_DATA_RECORD_HEADER *)(LogEntry + 1);
+  Raw    = (VOID *)(Record + 1);
 
   //
   // Build Standard Log Header
   //
-  Record->Version     = EFI_DATA_RECORD_HEADER_VERSION;
-  Record->HeaderSize  = (UINT16) sizeof (EFI_DATA_RECORD_HEADER);
-  Record->RecordSize  = RecordSize;
+  Record->Version    = EFI_DATA_RECORD_HEADER_VERSION;
+  Record->HeaderSize = (UINT16)sizeof (EFI_DATA_RECORD_HEADER);
+  Record->RecordSize = RecordSize;
   CopyMem (&Record->DataRecordGuid, DataRecordGuid, sizeof (EFI_GUID));
   CopyMem (&Record->ProducerName, ProducerName, sizeof (EFI_GUID));
-  Record->DataRecordClass   = DataRecordClass;
+  Record->DataRecordClass = DataRecordClass;
 
   //
   // Ensure LogMonotonicCount is not zero
@@ -116,9 +116,9 @@ DataHubLogData (
   //
   // Insert log into the internal linked list.
   //
-  LogEntry->Signature   = EFI_DATA_ENTRY_SIGNATURE;
-  LogEntry->Record      = Record;
-  LogEntry->RecordSize  = sizeof (EFI_DATA_ENTRY) + RawDataSize;
+  LogEntry->Signature  = EFI_DATA_ENTRY_SIGNATURE;
+  LogEntry->Record     = Record;
+  LogEntry->RecordSize = sizeof (EFI_DATA_ENTRY) + RawDataSize;
   InsertTailList (&Private->DataListHead, &LogEntry->Link);
 
   CopyMem (Raw, RawData, RawDataSize);
@@ -130,11 +130,12 @@ DataHubLogData (
   //  in the record's class and guid.
   //
   Head = &Private->FilterDriverListHead;
-  for (Link = GetFirstNode(Head); Link != Head; Link = GetNextNode(Head, Link)) {
+  for (Link = GetFirstNode (Head); Link != Head; Link = GetNextNode (Head, Link)) {
     FilterEntry = FILTER_ENTRY_FROM_LINK (Link);
     if (((FilterEntry->ClassFilter & DataRecordClass) != 0) &&
         (IsZeroGuid (&FilterEntry->FilterDataRecordGuid) ||
-         CompareGuid (&FilterEntry->FilterDataRecordGuid, DataRecordGuid))) {
+         CompareGuid (&FilterEntry->FilterDataRecordGuid, DataRecordGuid)))
+    {
       gBS->SignalEvent (FilterEntry->Event);
     }
   }
@@ -158,9 +159,9 @@ DataHubLogData (
 **/
 EFI_DATA_RECORD_HEADER *
 GetNextDataRecord (
-  IN  LIST_ENTRY          *Head,
-  IN  UINT64              ClassFilter,
-  IN OUT  UINT64          *PtrCurrentMTC
+  IN  LIST_ENTRY  *Head,
+  IN  UINT64      ClassFilter,
+  IN OUT  UINT64  *PtrCurrentMTC
   )
 
 {
@@ -173,10 +174,10 @@ GetNextDataRecord (
   //
   // If MonotonicCount == 0 just return the first one
   //
-  ReturnFirstEntry  = (BOOLEAN) (*PtrCurrentMTC == 0);
+  ReturnFirstEntry = (BOOLEAN)(*PtrCurrentMTC == 0);
 
-  Record            = NULL;
-  for (Link = GetFirstNode(Head); Link != Head; Link = GetNextNode(Head, Link)) {
+  Record = NULL;
+  for (Link = GetFirstNode (Head); Link != Head; Link = GetNextNode (Head, Link)) {
     LogEntry = DATA_ENTRY_FROM_LINK (Link);
     if ((LogEntry->Record->DataRecordClass & ClassFilter) == 0) {
       //
@@ -196,7 +197,7 @@ GetNextDataRecord (
       // MTC to zero.
       //
       *PtrCurrentMTC = 0;
-      for (Link = GetNextNode(Head, Link); Link != Head; Link = GetNextNode(Head, Link)) {
+      for (Link = GetNextNode (Head, Link); Link != Head; Link = GetNextNode (Head, Link)) {
         NextLogEntry = DATA_ENTRY_FROM_LINK (Link);
         if ((NextLogEntry->Record->DataRecordClass & ClassFilter) != 0) {
           //
@@ -206,6 +207,7 @@ GetNextDataRecord (
           break;
         }
       }
+
       //
       // Record found exit loop and return
       //
@@ -229,14 +231,14 @@ GetNextDataRecord (
 **/
 DATA_HUB_FILTER_DRIVER *
 FindFilterDriverByEvent (
-  IN  LIST_ENTRY      *Head,
-  IN  EFI_EVENT       Event
+  IN  LIST_ENTRY  *Head,
+  IN  EFI_EVENT   Event
   )
 {
   DATA_HUB_FILTER_DRIVER  *FilterEntry;
   LIST_ENTRY              *Link;
 
-  for (Link = GetFirstNode(Head); Link != Head; Link = GetNextNode(Head, Link)) {
+  for (Link = GetFirstNode (Head); Link != Head; Link = GetNextNode (Head, Link)) {
     FilterEntry = FILTER_ENTRY_FROM_LINK (Link);
     if (FilterEntry->Event == Event) {
       return FilterEntry;
@@ -278,9 +280,9 @@ FindFilterDriverByEvent (
 EFI_STATUS
 EFIAPI
 DataHubGetNextRecord (
-  IN EFI_DATA_HUB_PROTOCOL            *This,
-  IN OUT UINT64                       *MonotonicCount,
-  IN EFI_EVENT                        *FilterDriverEvent, OPTIONAL
+  IN EFI_DATA_HUB_PROTOCOL *This,
+  IN OUT UINT64 *MonotonicCount,
+  IN EFI_EVENT *FilterDriverEvent, OPTIONAL
   OUT EFI_DATA_RECORD_HEADER          **Record
   )
 {
@@ -288,13 +290,13 @@ DataHubGetNextRecord (
   DATA_HUB_FILTER_DRIVER  *FilterDriver;
   UINT64                  ClassFilter;
 
-  Private               = DATA_HUB_INSTANCE_FROM_THIS (This);
+  Private = DATA_HUB_INSTANCE_FROM_THIS (This);
 
-  FilterDriver          = NULL;
-  ClassFilter = EFI_DATA_RECORD_CLASS_DEBUG |
-    EFI_DATA_RECORD_CLASS_ERROR |
-    EFI_DATA_RECORD_CLASS_DATA |
-    EFI_DATA_RECORD_CLASS_PROGRESS_CODE;
+  FilterDriver = NULL;
+  ClassFilter  = EFI_DATA_RECORD_CLASS_DEBUG |
+                 EFI_DATA_RECORD_CLASS_ERROR |
+                 EFI_DATA_RECORD_CLASS_DATA |
+                 EFI_DATA_RECORD_CLASS_PROGRESS_CODE;
 
   //
   // If FilterDriverEvent is NULL, then return the next record
@@ -304,6 +306,7 @@ DataHubGetNextRecord (
     if (*Record == NULL) {
       return EFI_NOT_FOUND;
     }
+
     return EFI_SUCCESS;
   }
 
@@ -313,12 +316,13 @@ DataHubGetNextRecord (
   // to get the data.
   //
   FilterDriver = FindFilterDriverByEvent (
-                  &Private->FilterDriverListHead,
-                  *FilterDriverEvent
-                  );
+                   &Private->FilterDriverListHead,
+                   *FilterDriverEvent
+                   );
   if (FilterDriver == NULL) {
     return EFI_INVALID_PARAMETER;
   }
+
   //
   // Use the Class filter the event was created with.
   //
@@ -327,7 +331,7 @@ DataHubGetNextRecord (
   //
   // Retrieve the next record or the first record.
   //
-  if (*MonotonicCount != 0 || FilterDriver->GetNextMonotonicCount == 0) {
+  if ((*MonotonicCount != 0) || (FilterDriver->GetNextMonotonicCount == 0)) {
     *Record = GetNextDataRecord (&Private->DataListHead, ClassFilter, MonotonicCount);
     if (*Record == NULL) {
       return EFI_NOT_FOUND;
@@ -344,6 +348,7 @@ DataHubGetNextRecord (
       //
       FilterDriver->GetNextMonotonicCount = (*Record)->LogMonotonicCount;
     }
+
     return EFI_SUCCESS;
   }
 
@@ -412,23 +417,24 @@ DataHubGetNextRecord (
 EFI_STATUS
 EFIAPI
 DataHubRegisterFilterDriver (
-  IN EFI_DATA_HUB_PROTOCOL    * This,
-  IN EFI_EVENT                FilterEvent,
-  IN EFI_TPL                  FilterTpl,
-  IN UINT64                   FilterClass,
-  IN EFI_GUID                 * FilterDataRecordGuid OPTIONAL
+  IN EFI_DATA_HUB_PROTOCOL  *This,
+  IN EFI_EVENT              FilterEvent,
+  IN EFI_TPL                FilterTpl,
+  IN UINT64                 FilterClass,
+  IN EFI_GUID               *FilterDataRecordGuid OPTIONAL
   )
 
 {
   DATA_HUB_INSTANCE       *Private;
   DATA_HUB_FILTER_DRIVER  *FilterDriver;
 
-  Private       = DATA_HUB_INSTANCE_FROM_THIS (This);
+  Private = DATA_HUB_INSTANCE_FROM_THIS (This);
 
-  FilterDriver  = (DATA_HUB_FILTER_DRIVER *) AllocateZeroPool (sizeof (DATA_HUB_FILTER_DRIVER));
+  FilterDriver = (DATA_HUB_FILTER_DRIVER *)AllocateZeroPool (sizeof (DATA_HUB_FILTER_DRIVER));
   if (FilterDriver == NULL) {
     return EFI_OUT_OF_RESOURCES;
   }
+
   //
   // Initialize filter driver info
   //
@@ -438,9 +444,9 @@ DataHubRegisterFilterDriver (
   FilterDriver->GetNextMonotonicCount = 0;
   if (FilterClass == 0) {
     FilterDriver->ClassFilter = EFI_DATA_RECORD_CLASS_DEBUG |
-      EFI_DATA_RECORD_CLASS_ERROR |
-      EFI_DATA_RECORD_CLASS_DATA |
-      EFI_DATA_RECORD_CLASS_PROGRESS_CODE;
+                                EFI_DATA_RECORD_CLASS_ERROR |
+                                EFI_DATA_RECORD_CLASS_DATA |
+                                EFI_DATA_RECORD_CLASS_PROGRESS_CODE;
   } else {
     FilterDriver->ClassFilter = FilterClass;
   }
@@ -448,6 +454,7 @@ DataHubRegisterFilterDriver (
   if (FilterDataRecordGuid != NULL) {
     CopyMem (&FilterDriver->FilterDataRecordGuid, FilterDataRecordGuid, sizeof (EFI_GUID));
   }
+
   //
   // Search for duplicate entries
   //
@@ -455,6 +462,7 @@ DataHubRegisterFilterDriver (
     FreePool (FilterDriver);
     return EFI_ALREADY_STARTED;
   }
+
   //
   // Make insertion an atomic operation with the lock.
   //
@@ -488,8 +496,8 @@ DataHubRegisterFilterDriver (
 EFI_STATUS
 EFIAPI
 DataHubUnregisterFilterDriver (
-  IN EFI_DATA_HUB_PROTOCOL    *This,
-  IN EFI_EVENT                FilterEvent
+  IN EFI_DATA_HUB_PROTOCOL  *This,
+  IN EFI_EVENT              FilterEvent
   )
 {
   DATA_HUB_INSTANCE       *Private;
@@ -501,12 +509,13 @@ DataHubUnregisterFilterDriver (
   // Search for duplicate entries
   //
   FilterDriver = FindFilterDriverByEvent (
-                  &Private->FilterDriverListHead,
-                  FilterEvent
-                  );
+                   &Private->FilterDriverListHead,
+                   FilterEvent
+                   );
   if (FilterDriver == NULL) {
     return EFI_NOT_FOUND;
   }
+
   //
   // Make removal an atomic operation with the lock
   //
@@ -517,10 +526,10 @@ DataHubUnregisterFilterDriver (
   return EFI_SUCCESS;
 }
 
-
 //
 // CHANGE: Function prototype has been adapted to fit the other OC APIs.
 //
+
 /**
   Driver's Entry point routine that install Driver to produce Data Hub protocol.
 
@@ -558,18 +567,19 @@ DataHubInstall (
     //
     mPrivateData.GlobalMonotonicCount = 0;
   } else {
-    mPrivateData.GlobalMonotonicCount = LShiftU64 ((UINT64) HighMontonicCount, 32);
+    mPrivateData.GlobalMonotonicCount = LShiftU64 ((UINT64)HighMontonicCount, 32);
   }
+
   //
   // Make a new handle and install the protocol
   //
   mPrivateData.Handle = NULL;
-  Status = gBS->InstallProtocolInterface (
-                  &mPrivateData.Handle,
-                  &gEfiDataHubProtocolGuid,
-                  EFI_NATIVE_INTERFACE,
-                  &mPrivateData.DataHub
-                  );
+  Status              = gBS->InstallProtocolInterface (
+                               &mPrivateData.Handle,
+                               &gEfiDataHubProtocolGuid,
+                               EFI_NATIVE_INTERFACE,
+                               &mPrivateData.DataHub
+                               );
   //
   // CHANGE: Return the interface instead of the install status.
   //
@@ -579,4 +589,3 @@ DataHubInstall (
 
   return &mPrivateData.DataHub;
 }
-

@@ -48,4 +48,3 @@ AIKShimWaitForKeyHandler (
   );
 
 #endif
-

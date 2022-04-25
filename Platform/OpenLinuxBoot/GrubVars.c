@@ -15,7 +15,7 @@
 
 #include <Protocol/OcBootEntry.h>
 
-STATIC OC_FLEX_ARRAY *mGrubVars = NULL;
+STATIC OC_FLEX_ARRAY  *mGrubVars = NULL;
 
 EFI_STATUS
 InternalInitGrubVars (
@@ -26,6 +26,7 @@ InternalInitGrubVars (
   if (mGrubVars == NULL) {
     return EFI_OUT_OF_RESOURCES;
   }
+
   return EFI_SUCCESS;
 }
 
@@ -41,14 +42,14 @@ InternalFreeGrubVars (
 
 EFI_STATUS
 InternalSetGrubVar (
-  CHAR8 *Key,
-  CHAR8 *Value,
-  UINTN Errors
+  CHAR8  *Key,
+  CHAR8  *Value,
+  UINTN  Errors
   )
 {
-  GRUB_VAR    *Var;
-  UINTN       Index;
-  UINTN       WereErrors;
+  GRUB_VAR  *Var;
+  UINTN     Index;
+  UINTN     WereErrors;
 
   ASSERT (mGrubVars != NULL);
   ASSERT (Key[0] != '\0');
@@ -80,7 +81,8 @@ InternalSetGrubVar (
     //
     Var->Errors |= Errors;
 
-    DEBUG ((OC_TRACE_GRUB_VARS,
+    DEBUG ((
+      OC_TRACE_GRUB_VARS,
       "LNX: Repeated %a=%a (0x%x->0x%x)\n",
       Key,
       Value,
@@ -97,7 +99,8 @@ InternalSetGrubVar (
     Var->Value  = Value;
     Var->Errors = Errors;
 
-    DEBUG ((OC_TRACE_GRUB_VARS,
+    DEBUG ((
+      OC_TRACE_GRUB_VARS,
       "LNX: Added %a=%a (0x%x)\n",
       Key,
       Value,
@@ -115,7 +118,7 @@ InternalSetGrubVar (
 //
 BOOLEAN
 InternalHasGrubVars (
-  CHAR8 *Value
+  CHAR8  *Value
   )
 {
   return OcAsciiStrChr (Value, '$') != NULL;
@@ -123,7 +126,7 @@ InternalHasGrubVars (
 
 GRUB_VAR *
 InternalGetGrubVar (
-  IN     CONST CHAR8 *Key
+  IN     CONST CHAR8  *Key
   )
 {
   UINTN     Index;
@@ -141,7 +144,7 @@ InternalGetGrubVar (
 
 EFI_STATUS
 InternalExpandGrubVarsForArray (
-  IN OUT       OC_FLEX_ARRAY *Options
+  IN OUT       OC_FLEX_ARRAY  *Options
   )
 {
   EFI_STATUS  Status;
@@ -156,6 +159,7 @@ InternalExpandGrubVarsForArray (
       if (EFI_ERROR (Status)) {
         return Status;
       }
+
       FreePool (*Value);
       *Value = Result;
     }
@@ -166,19 +170,19 @@ InternalExpandGrubVarsForArray (
 
 EFI_STATUS
 InternalExpandGrubVars (
-  IN     CONST CHAR8 *Value,
-  IN OUT       CHAR8 **Result
+  IN     CONST CHAR8  *Value,
+  IN OUT       CHAR8  **Result
   )
 {
-  EFI_STATUS          Status;
-  UINTN               Pos;
-  UINTN               LastPos;
-  BOOLEAN             InVar;
-  BOOLEAN             Retake;
-  GRUB_VAR            *Var;
-  CHAR8               Ch;
-  UINTN               VarLength;
-  OC_STRING_BUFFER    *StringBuffer;
+  EFI_STATUS        Status;
+  UINTN             Pos;
+  UINTN             LastPos;
+  BOOLEAN           InVar;
+  BOOLEAN           Retake;
+  GRUB_VAR          *Var;
+  CHAR8             Ch;
+  UINTN             VarLength;
+  OC_STRING_BUFFER  *StringBuffer;
 
   ASSERT (Value  != NULL);
   ASSERT (Result != NULL);
@@ -207,15 +211,15 @@ InternalExpandGrubVars (
   do {
     Ch = Value[Pos];
     if (!InVar) {
-      if (Ch == '$' || Ch == '\0') {
+      if ((Ch == '$') || (Ch == '\0')) {
         Status = OcAsciiStringBufferAppendN (StringBuffer, &Value[LastPos], Pos - LastPos);
 
-        InVar = TRUE;
+        InVar   = TRUE;
         LastPos = Pos + 1;
       }
-    } else if (!(Ch == '_' || IS_DIGIT (Ch) || IS_ALPHA (Ch))) {
+    } else if (!((Ch == '_') || IS_DIGIT (Ch) || IS_ALPHA (Ch))) {
       ((CHAR8 *)Value)[Pos] = '\0';
-      Var = InternalGetGrubVar (&Value[LastPos]);
+      Var                   = InternalGetGrubVar (&Value[LastPos]);
       if (Var == NULL) {
         DEBUG ((DEBUG_WARN, "LNX: Missing required grub var $%a\n", &Value[LastPos]));
         Status = EFI_INVALID_PARAMETER;
@@ -223,6 +227,7 @@ InternalExpandGrubVars (
         DEBUG ((DEBUG_WARN, "LNX: Unusable grub var $%a - 0x%x\n", &Value[LastPos], Var->Errors));
         Status = EFI_INVALID_PARAMETER;
       }
+
       ((CHAR8 *)Value)[Pos] = Ch;
 
       //
@@ -235,19 +240,20 @@ InternalExpandGrubVars (
       if (!EFI_ERROR (Status)) {
         if (Var->Value != NULL) {
           VarLength = AsciiStrLen (Var->Value);
-          if (VarLength > 0 && Var->Value[VarLength - 1] == ' ') {
+          if ((VarLength > 0) && (Var->Value[VarLength - 1] == ' ')) {
             --VarLength;
           }
         }
+
         Status = OcAsciiStringBufferAppendN (StringBuffer, Var->Value, VarLength);
       }
 
-      if (!EFI_ERROR (Status) && !(Ch == ' ' || Ch == '\0')) {
+      if (!EFI_ERROR (Status) && !((Ch == ' ') || (Ch == '\0'))) {
         Status = OcAsciiStringBufferAppend (StringBuffer, " ");
       }
-        
-      InVar = FALSE;
-      Retake = TRUE;
+
+      InVar   = FALSE;
+      Retake  = TRUE;
       LastPos = Pos;
     }
 
@@ -256,8 +262,7 @@ InternalExpandGrubVars (
     } else {
       ++Pos;
     }
-  }
-  while (Ch != '\0' && !EFI_ERROR (Status));
+  } while (Ch != '\0' && !EFI_ERROR (Status));
 
   *Result = OcAsciiStringBufferFreeContainer (&StringBuffer);
 

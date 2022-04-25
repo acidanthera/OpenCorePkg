@@ -25,30 +25,30 @@
 #define IS_ALIGNED(v, a)  (((v) & ((a) - 1U)) == 0U)
 #define IS_POW2(v)        ((v) != 0 && ((v) & ((v) - 1U)) == 0)
 
-#define PTR_TO_ADDR(Ptr, Size) ((UINTN) Ptr)
+#define PTR_TO_ADDR(Ptr, Size)  ((UINTN) Ptr)
 
 #define COMPOSE_32(High, Low)  \
     ((UINT32) ((UINT32) (Low) + ((UINT32) (High) * 65536U)))
 
-#define READ_ALIGNED_16(x)     (*(CONST UINT16 *) (CONST VOID *) (x))
-#define WRITE_ALIGNED_16(x, y) do { *(UINT16 *) (VOID *) (x) = (y); } while (FALSE)
-#define READ_ALIGNED_32(x)     (*(CONST UINT32 *) (CONST VOID *) (x))
-#define WRITE_ALIGNED_32(x, y) do { *(UINT32 *) (VOID *) (x) = (y); } while (FALSE)
-#define READ_ALIGNED_64(x)     (*(CONST UINT64 *) (CONST VOID *) (x))
-#define WRITE_ALIGNED_64(x, y) do { *(UINT64 *) (VOID *) (x) = (y); } while (FALSE)
+#define READ_ALIGNED_16(x)      (*(CONST UINT16 *) (CONST VOID *) (x))
+#define WRITE_ALIGNED_16(x, y)  do { *(UINT16 *) (VOID *) (x) = (y); } while (FALSE)
+#define READ_ALIGNED_32(x)      (*(CONST UINT32 *) (CONST VOID *) (x))
+#define WRITE_ALIGNED_32(x, y)  do { *(UINT32 *) (VOID *) (x) = (y); } while (FALSE)
+#define READ_ALIGNED_64(x)      (*(CONST UINT64 *) (CONST VOID *) (x))
+#define WRITE_ALIGNED_64(x, y)  do { *(UINT64 *) (VOID *) (x) = (y); } while (FALSE)
 
-#define BaseOverflowSubU16 OcOverflowSubU16
-#define BaseOverflowAddU32 OcOverflowAddU32
-#define BaseOverflowSubU32 OcOverflowSubU32
-#define BaseOverflowMulU32 OcOverflowMulU32
-#define BaseOverflowAlignUpU32 OcOverflowAlignUpU32
+#define BaseOverflowSubU16      OcOverflowSubU16
+#define BaseOverflowAddU32      OcOverflowAddU32
+#define BaseOverflowSubU32      OcOverflowSubU32
+#define BaseOverflowMulU32      OcOverflowMulU32
+#define BaseOverflowAlignUpU32  OcOverflowAlignUpU32
 
 /**
   Returns the type of a Base Relocation.
 
   @param[in] Relocation  The composite Base Relocation value.
 **/
-#define IMAGE_RELOC_TYPE(Relocation)    ((Relocation) >> 12U)
+#define IMAGE_RELOC_TYPE(Relocation)  ((Relocation) >> 12U)
 
 /**
   Returns the target offset of a Base Relocation.
@@ -65,7 +65,6 @@
 #define IMAGE_IS_EFI_SUBYSYSTEM(Subsystem) \
   ((Subsystem) >= EFI_IMAGE_SUBSYSTEM_EFI_APPLICATION && \
    (Subsystem) <= EFI_IMAGE_SUBSYSTEM_SAL_RUNTIME_DRIVER)
-
 
 #define IMAGE_RELOC_TYPE_SUPPORTED(Type) \
   (((Type) == EFI_IMAGE_REL_BASED_ABSOLUTE) || \

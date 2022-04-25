@@ -42,21 +42,21 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 // Keyboard protocol arrival event.
 //
-STATIC EFI_EVENT mProtocolNotification;
+STATIC EFI_EVENT  mProtocolNotification;
 
 STATIC
 EFI_STATUS
 EFIAPI
 ShowStatus (
-  IN UINT8 Red,
-  IN UINT8 Green,
-  IN UINT8 Blue
+  IN UINT8  Red,
+  IN UINT8  Green,
+  IN UINT8  Blue
   )
 {
   //
   // Determines the size of status square.
   //
-  #define STATUS_SQUARE_SIDE 5
+  #define STATUS_SQUARE_SIDE  5
 
   EFI_STATUS                     Status;
   EFI_GRAPHICS_OUTPUT_PROTOCOL   *GraphicsOutput;
@@ -65,10 +65,10 @@ ShowStatus (
   UINTN                          Index;
 
   Status = OcHandleProtocolFallback (
-    gST->ConsoleOutHandle,
-    &gEfiGraphicsOutputProtocolGuid,
-    (VOID **) &GraphicsOutput
-    );
+             gST->ConsoleOutHandle,
+             &gEfiGraphicsOutputProtocolGuid,
+             (VOID **)&GraphicsOutput
+             );
   if (EFI_ERROR (Status)) {
     DEBUG ((DEBUG_INFO, "OCSCR: Graphics output protocol not found for status - %r\n", Status));
     return EFI_UNSUPPORTED;
@@ -88,33 +88,33 @@ ShowStatus (
   // Backup current image.
   //
   GraphicsOutput->Blt (
-    GraphicsOutput,
-    Backup,
-    EfiBltVideoToBltBuffer,
-    0,
-    0,
-    0,
-    0,
-    STATUS_SQUARE_SIDE,
-    STATUS_SQUARE_SIDE,
-    0
-    );
+                    GraphicsOutput,
+                    Backup,
+                    EfiBltVideoToBltBuffer,
+                    0,
+                    0,
+                    0,
+                    0,
+                    STATUS_SQUARE_SIDE,
+                    STATUS_SQUARE_SIDE,
+                    0
+                    );
 
   //
   // Draw the status square.
   //
   GraphicsOutput->Blt (
-    GraphicsOutput,
-    Square,
-    EfiBltBufferToVideo,
-    0,
-    0,
-    0,
-    0,
-    STATUS_SQUARE_SIDE,
-    STATUS_SQUARE_SIDE,
-    0
-    );
+                    GraphicsOutput,
+                    Square,
+                    EfiBltBufferToVideo,
+                    0,
+                    0,
+                    0,
+                    0,
+                    STATUS_SQUARE_SIDE,
+                    STATUS_SQUARE_SIDE,
+                    0
+                    );
 
   //
   // Wait 500 ms.
@@ -125,17 +125,17 @@ ShowStatus (
   // Restore the backup.
   //
   GraphicsOutput->Blt (
-    GraphicsOutput,
-    Backup,
-    EfiBltBufferToVideo,
-    0,
-    0,
-    0,
-    0,
-    STATUS_SQUARE_SIDE,
-    STATUS_SQUARE_SIDE,
-    0
-    );
+                    GraphicsOutput,
+                    Backup,
+                    EfiBltBufferToVideo,
+                    0,
+                    0,
+                    0,
+                    0,
+                    STATUS_SQUARE_SIDE,
+                    STATUS_SQUARE_SIDE,
+                    0
+                    );
 
   return EFI_SUCCESS;
 }
@@ -144,22 +144,22 @@ STATIC
 EFI_STATUS
 EFIAPI
 TakeScreenshot (
-  IN EFI_KEY_DATA *KeyData
+  IN EFI_KEY_DATA  *KeyData
   )
 {
-  EFI_FILE_PROTOCOL             *Fs;
-  EFI_GRAPHICS_OUTPUT_PROTOCOL  *GraphicsOutput;
-  EFI_GRAPHICS_OUTPUT_BLT_PIXEL *Image;
-  UINTN                         ImageSize;         ///< Size in pixels
-  VOID                          *PngFile;
-  UINTN                         PngFileSize;       ///< Size in bytes
-  EFI_STATUS                    Status;
-  UINT32                        ScreenWidth;
-  UINT32                        ScreenHeight;
-  CHAR16                        FileName[16];
-  EFI_TIME                      Time;
-  UINTN                         Index;
-  UINT8                         Temp;
+  EFI_FILE_PROTOCOL              *Fs;
+  EFI_GRAPHICS_OUTPUT_PROTOCOL   *GraphicsOutput;
+  EFI_GRAPHICS_OUTPUT_BLT_PIXEL  *Image;
+  UINTN                          ImageSize;        ///< Size in pixels
+  VOID                           *PngFile;
+  UINTN                          PngFileSize;      ///< Size in bytes
+  EFI_STATUS                     Status;
+  UINT32                         ScreenWidth;
+  UINT32                         ScreenHeight;
+  CHAR16                         FileName[16];
+  EFI_TIME                       Time;
+  UINTN                          Index;
+  UINT8                          Temp;
 
   Status = OcFindWritableOcFileSystem (&Fs);
   if (EFI_ERROR (Status)) {
@@ -169,10 +169,10 @@ TakeScreenshot (
   }
 
   Status = OcHandleProtocolFallback (
-    gST->ConsoleOutHandle,
-    &gEfiGraphicsOutputProtocolGuid,
-    (VOID **) &GraphicsOutput
-    );
+             gST->ConsoleOutHandle,
+             &gEfiGraphicsOutputProtocolGuid,
+             (VOID **)&GraphicsOutput
+             );
   if (EFI_ERROR (Status)) {
     DEBUG ((DEBUG_INFO, "OCSCR: Graphics output protocol not found for screen - %r\n", Status));
     Fs->Close (Fs);
@@ -184,7 +184,7 @@ TakeScreenshot (
   //
   ScreenWidth  = GraphicsOutput->Mode->Info->HorizontalResolution;
   ScreenHeight = GraphicsOutput->Mode->Info->VerticalResolution;
-  ImageSize    = (UINTN) ScreenWidth * ScreenHeight;
+  ImageSize    = (UINTN)ScreenWidth * ScreenHeight;
 
   if (ImageSize == 0) {
     DEBUG ((DEBUG_INFO, "OCSCR: Empty screen size\n"));
@@ -196,9 +196,9 @@ TakeScreenshot (
   // Get current time.
   //
   Status = gRT->GetTime (
-    &Time,
-    NULL
-    );
+                  &Time,
+                  NULL
+                  );
   if (!EFI_ERROR (Status)) {
     //
     // Set file name to current day and time
@@ -223,10 +223,10 @@ TakeScreenshot (
   // Allocate memory for screenshot.
   //
   Status = gBS->AllocatePool (
-    EfiBootServicesData,
-    ImageSize * sizeof(EFI_GRAPHICS_OUTPUT_BLT_PIXEL),
-    (VOID **) &Image
-    );
+                  EfiBootServicesData,
+                  ImageSize * sizeof (EFI_GRAPHICS_OUTPUT_BLT_PIXEL),
+                  (VOID **)&Image
+                  );
   if (EFI_ERROR (Status)) {
     DEBUG ((DEBUG_INFO, "CRSCR: gBS->AllocatePool returned %r\n", Status));
     ShowStatus (0xFF, 0x00, 0x00); ///< Red
@@ -238,18 +238,18 @@ TakeScreenshot (
   // Take screenshot.
   //
   Status = GraphicsOutput->Blt (
-    GraphicsOutput,
-    Image,
-    EfiBltVideoToBltBuffer,
-    0,
-    0,
-    0,
-    0,
-    ScreenWidth,
-    ScreenHeight,
-    0
-    );
-  if (EFI_ERROR(Status)) {
+                             GraphicsOutput,
+                             Image,
+                             EfiBltVideoToBltBuffer,
+                             0,
+                             0,
+                             0,
+                             0,
+                             ScreenWidth,
+                             ScreenHeight,
+                             0
+                             );
+  if (EFI_ERROR (Status)) {
     DEBUG ((DEBUG_INFO, "CRSCR: GraphicsOutput->Blt returned %r\n", Status));
     gBS->FreePool (Image);
     ShowStatus (0xFF, 0x00, 0x00); ///< Red
@@ -268,12 +268,12 @@ TakeScreenshot (
   }
 
   Status = OcEncodePng (
-    Image,
-    ScreenWidth,
-    ScreenHeight,
-    &PngFile,
-    &PngFileSize
-    );
+             Image,
+             ScreenWidth,
+             ScreenHeight,
+             &PngFile,
+             &PngFileSize
+             );
   gBS->FreePool (Image);
   if (EFI_ERROR (Status)) {
     DEBUG ((DEBUG_INFO, "CRSCR: OcEncodePng returned %r\n", Status));
@@ -285,7 +285,7 @@ TakeScreenshot (
   //
   // Write PNG image into the file.
   //
-  Status = OcSetFileData (Fs, FileName, PngFile, (UINT32) PngFileSize);
+  Status = OcSetFileData (Fs, FileName, PngFile, (UINT32)PngFileSize);
   gBS->FreePool (PngFile);
   Fs->Close (Fs);
   if (EFI_ERROR (Status)) {
@@ -313,12 +313,12 @@ AppleEventKeyHandler (
   //
   // Mark the context argument as used.
   //
-  (VOID) NotifyContext;
+  (VOID)NotifyContext;
 
   //
   // Ignore invalid information if it happened to arrive.
   //
-  if (Information == NULL || (Information->EventType & APPLE_EVENT_TYPE_KEY_UP) == 0) {
+  if ((Information == NULL) || ((Information->EventType & APPLE_EVENT_TYPE_KEY_UP) == 0)) {
     return;
   }
 
@@ -354,21 +354,21 @@ InstallKeyHandler (
   // This is because we want key swap to take precedence.
   //
   Status = gBS->LocateHandleBuffer (
-    ByProtocol,
-    &gAppleEventProtocolGuid,
-    NULL,
-    &HandleCount,
-    &HandleBuffer
-    );
+                  ByProtocol,
+                  &gAppleEventProtocolGuid,
+                  NULL,
+                  &HandleCount,
+                  &HandleBuffer
+                  );
   if (!EFI_ERROR (Status)) {
     for (Index = 0; Index < HandleCount; ++Index) {
-      Status = gBS->HandleProtocol (HandleBuffer[Index], &gAppleEventProtocolGuid, (VOID **) &AppleEvent);
+      Status = gBS->HandleProtocol (HandleBuffer[Index], &gAppleEventProtocolGuid, (VOID **)&AppleEvent);
 
       if (EFI_ERROR (Status)) {
         DEBUG ((
           DEBUG_INFO,
           "CRSCR: gBS->HandleProtocol[%u] AppleEvent returned %r\n",
-          (UINT32) Index,
+          (UINT32)Index,
           Status
           ));
         continue;
@@ -378,9 +378,9 @@ InstallKeyHandler (
         DEBUG ((
           DEBUG_INFO,
           "CRSCR: AppleEvent[%u] has outdated revision %u, expected %u\n",
-          (UINT32) Index,
-          (UINT32) AppleEvent->Revision,
-          (UINT32) APPLE_EVENT_PROTOCOL_REVISION_MINIMUM
+          (UINT32)Index,
+          (UINT32)AppleEvent->Revision,
+          (UINT32)APPLE_EVENT_PROTOCOL_REVISION_MINIMUM
           ));
         continue;
       }
@@ -389,11 +389,11 @@ InstallKeyHandler (
       // Register key handler, which will later determine the combination.
       //
       Status = AppleEvent->RegisterHandler (
-        APPLE_EVENT_TYPE_KEY_UP,
-        AppleEventKeyHandler,
-        &AppleEventHandle,
-        NULL
-        );
+                             APPLE_EVENT_TYPE_KEY_UP,
+                             AppleEventKeyHandler,
+                             &AppleEventHandle,
+                             NULL
+                             );
       if (!EFI_ERROR (Status)) {
         Installed = TRUE;
       }
@@ -401,7 +401,7 @@ InstallKeyHandler (
       DEBUG ((
         DEBUG_INFO,
         "CRSCR: AppleEvent->RegisterHandler[%u] returned %r\n",
-        (UINT32) Index,
+        (UINT32)Index,
         Status
         ));
     }
@@ -417,12 +417,12 @@ InstallKeyHandler (
 
   if (!Installed) {
     Status = gBS->LocateHandleBuffer (
-      ByProtocol,
-      &gEfiSimpleTextInputExProtocolGuid,
-      NULL,
-      &HandleCount,
-      &HandleBuffer
-      );
+                    ByProtocol,
+                    &gEfiSimpleTextInputExProtocolGuid,
+                    NULL,
+                    &HandleCount,
+                    &HandleBuffer
+                    );
     if (EFI_ERROR (Status)) {
       DEBUG ((
         DEBUG_INFO,
@@ -442,27 +442,27 @@ InstallKeyHandler (
 
     for (Index = 0; Index < HandleCount; ++Index) {
       Status = gBS->HandleProtocol (
-        HandleBuffer[Index],
-        &gEfiSimpleTextInputExProtocolGuid,
-        (VOID **) &SimpleTextInEx
-        );
+                      HandleBuffer[Index],
+                      &gEfiSimpleTextInputExProtocolGuid,
+                      (VOID **)&SimpleTextInEx
+                      );
 
       if (EFI_ERROR (Status)) {
         DEBUG ((
           DEBUG_INFO,
           "CRSCR: gBS->HandleProtocol[%u] SimpleTextInputEx returned %r\n",
-          (UINT32) Index,
+          (UINT32)Index,
           Status
           ));
         continue;
       }
 
       Status = SimpleTextInEx->RegisterKeyNotify (
-        SimpleTextInEx,
-        &SimpleTextInExKeyStroke,
-        TakeScreenshot,
-        &SimpleTextInExHandle
-        );
+                                 SimpleTextInEx,
+                                 &SimpleTextInExKeyStroke,
+                                 TakeScreenshot,
+                                 &SimpleTextInExHandle
+                                 );
 
       if (!EFI_ERROR (Status)) {
         Installed = TRUE;
@@ -471,7 +471,7 @@ InstallKeyHandler (
       DEBUG ((
         DEBUG_INFO,
         "CRSCR: SimpleTextInEx->RegisterKeyNotify[%u] returned %r\n",
-        (UINT32) Index,
+        (UINT32)Index,
         Status
         ));
     }
@@ -496,8 +496,8 @@ InstallKeyHandlerWrapper (
 EFI_STATUS
 EFIAPI
 CrScreenshotDxeEntry (
-  IN EFI_HANDLE         ImageHandle,
-  IN EFI_SYSTEM_TABLE   *SystemTable
+  IN EFI_HANDLE        ImageHandle,
+  IN EFI_SYSTEM_TABLE  *SystemTable
   )
 {
   EFI_STATUS  Status;
@@ -506,25 +506,25 @@ CrScreenshotDxeEntry (
   Status = InstallKeyHandler ();
   if (EFI_ERROR (Status)) {
     Status = gBS->CreateEvent (
-      EVT_NOTIFY_SIGNAL,
-      TPL_CALLBACK,
-      InstallKeyHandlerWrapper,
-      NULL,
-      &mProtocolNotification
-      );
+                    EVT_NOTIFY_SIGNAL,
+                    TPL_CALLBACK,
+                    InstallKeyHandlerWrapper,
+                    NULL,
+                    &mProtocolNotification
+                    );
 
     if (!EFI_ERROR (Status)) {
       gBS->RegisterProtocolNotify (
-        &gEfiSimpleTextInputExProtocolGuid,
-        mProtocolNotification,
-        &Registration
-        );
+             &gEfiSimpleTextInputExProtocolGuid,
+             mProtocolNotification,
+             &Registration
+             );
 
       gBS->RegisterProtocolNotify (
-        &gAppleEventProtocolGuid,
-        mProtocolNotification,
-        &Registration
-        );
+             &gAppleEventProtocolGuid,
+             mProtocolNotification,
+             &Registration
+             );
     } else {
       DEBUG ((
         DEBUG_INFO,

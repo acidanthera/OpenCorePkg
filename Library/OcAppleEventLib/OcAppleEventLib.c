@@ -41,22 +41,22 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 
 // APPLE_EVENT_HANDLE_PRIVATE
 typedef struct {
-  UINT32                      Signature;       ///<
-  LIST_ENTRY                  Link;            ///<
-  BOOLEAN                     Ready;           ///<
-  BOOLEAN                     Registered;      ///<
-  APPLE_EVENT_TYPE            EventType;       ///<
-  APPLE_EVENT_NOTIFY_FUNCTION NotifyFunction;  ///<
-  VOID                        *NotifyContext;  ///<
-  CHAR8                       *Name;           ///<
+  UINT32                         Signature;      ///<
+  LIST_ENTRY                     Link;           ///<
+  BOOLEAN                        Ready;          ///<
+  BOOLEAN                        Registered;     ///<
+  APPLE_EVENT_TYPE               EventType;      ///<
+  APPLE_EVENT_NOTIFY_FUNCTION    NotifyFunction; ///<
+  VOID                           *NotifyContext; ///<
+  CHAR8                          *Name;          ///<
 } APPLE_EVENT_HANDLE_PRIVATE;
 
 // mEventHandles
 STATIC
-LIST_ENTRY mEventHandles = INITIALIZE_LIST_HEAD_VARIABLE (mEventHandles);
+LIST_ENTRY  mEventHandles = INITIALIZE_LIST_HEAD_VARIABLE (mEventHandles);
 
 // mNumberOfEventHandles
-STATIC UINTN mNumberOfEventHandles = 0;
+STATIC UINTN  mNumberOfEventHandles = 0;
 
 // EventLibCreateTimerEvent
 EFI_EVENT
@@ -68,8 +68,8 @@ EventLibCreateTimerEvent (
   IN EFI_TPL           NotifyTpl
   )
 {
-  EFI_EVENT  Event;
-  EFI_STATUS Status;
+  EFI_EVENT   Event;
+  EFI_STATUS  Status;
 
   DEBUG ((DEBUG_VERBOSE, "EventLibCreateTimerEvent\n"));
 
@@ -130,7 +130,7 @@ EventLibCancelEvent (
   IN EFI_EVENT  Event
   )
 {
-  EFI_STATUS Status;
+  EFI_STATUS  Status;
 
   DEBUG ((DEBUG_VERBOSE, "EventLibCancelEvent\n"));
 
@@ -147,8 +147,8 @@ EventSignalEvents (
   IN APPLE_EVENT_INFORMATION  *EventInformation
   )
 {
-  LIST_ENTRY                 *EventHandleEntry;
-  APPLE_EVENT_HANDLE_PRIVATE *EventHandle;
+  LIST_ENTRY                  *EventHandleEntry;
+  APPLE_EVENT_HANDLE_PRIVATE  *EventHandle;
 
   DEBUG ((DEBUG_VERBOSE, "EventSignalEvents\n"));
 
@@ -159,14 +159,15 @@ EventSignalEvents (
                     EventHandleEntry
                     );
 
-    if (EventHandle->Registered
-      && EventHandle->Ready
-      && ((EventInformation->EventType & EventHandle->EventType) != 0)
-      && (EventHandle->NotifyFunction != NULL)) {
+    if (  EventHandle->Registered
+       && EventHandle->Ready
+       && ((EventInformation->EventType & EventHandle->EventType) != 0)
+       && (EventHandle->NotifyFunction != NULL))
+    {
       EventHandle->NotifyFunction (
-                      EventInformation,
-                      EventHandle->NotifyContext
-                      );
+                     EventInformation,
+                     EventHandle->NotifyContext
+                     );
     }
 
     EventHandleEntry = GetNextNode (&mEventHandles, EventHandleEntry);
@@ -179,8 +180,8 @@ InternalFlagAllEventsReady (
   VOID
   )
 {
-  LIST_ENTRY                 *EventHandleEntry;
-  APPLE_EVENT_HANDLE_PRIVATE *EventHandle;
+  LIST_ENTRY                  *EventHandleEntry;
+  APPLE_EVENT_HANDLE_PRIVATE  *EventHandle;
 
   DEBUG ((DEBUG_VERBOSE, "InternalFlagAllEventsReady\n"));
 
@@ -205,8 +206,8 @@ InternalSignalEvents (
   IN APPLE_EVENT_INFORMATION  *Information
   )
 {
-  LIST_ENTRY                 *EventHandleEntry;
-  APPLE_EVENT_HANDLE_PRIVATE *EventHandle;
+  LIST_ENTRY                  *EventHandleEntry;
+  APPLE_EVENT_HANDLE_PRIVATE  *EventHandle;
 
   DEBUG ((DEBUG_VERBOSE, "InternalSignalEvents\n"));
 
@@ -218,13 +219,14 @@ InternalSignalEvents (
                       EventHandleEntry
                       );
 
-      if (EventHandle->Registered && EventHandle->Ready
-        && (EventHandle->EventType & Information->EventType)
-        && EventHandle->NotifyFunction != NULL) {
+      if (  EventHandle->Registered && EventHandle->Ready
+         && (EventHandle->EventType & Information->EventType)
+         && (EventHandle->NotifyFunction != NULL))
+      {
         EventHandle->NotifyFunction (
-          Information,
-          EventHandle->NotifyContext
-          );
+                       Information,
+                       EventHandle->NotifyContext
+                       );
       }
 
       EventHandleEntry = GetNextNode (&mEventHandles, EventHandleEntry);
@@ -238,9 +240,9 @@ InternalRemoveUnregisteredEvents (
   VOID
   )
 {
-  LIST_ENTRY                 *EventHandleEntry;
-  LIST_ENTRY                 *NextEventHandleEntry;
-  APPLE_EVENT_HANDLE_PRIVATE *EventHandle;
+  LIST_ENTRY                  *EventHandleEntry;
+  LIST_ENTRY                  *NextEventHandleEntry;
+  APPLE_EVENT_HANDLE_PRIVATE  *EventHandle;
 
   DEBUG ((DEBUG_VERBOSE, "InternalRemoveUnregisteredEvents\n"));
 
@@ -275,7 +277,7 @@ InternalCreatePollEvents (
   VOID
   )
 {
-  EFI_STATUS Status;
+  EFI_STATUS  Status;
 
   DEBUG ((DEBUG_VERBOSE, "InternalCreatePollEvents\n"));
 
@@ -314,16 +316,17 @@ EventRegisterHandler (
   IN  VOID                         *NotifyContext
   )
 {
-  EFI_STATUS                 Status;
-  APPLE_EVENT_HANDLE_PRIVATE *EventHandle;
+  EFI_STATUS                  Status;
+  APPLE_EVENT_HANDLE_PRIVATE  *EventHandle;
 
   DEBUG ((DEBUG_VERBOSE, "EventRegisterHandler\n"));
 
   Status = EFI_INVALID_PARAMETER;
 
-  if ((Handle != NULL)
-   && (NotifyFunction != NULL)
-   && (Type != APPLE_EVENT_TYPE_NONE)) {
+  if (  (Handle != NULL)
+     && (NotifyFunction != NULL)
+     && (Type != APPLE_EVENT_TYPE_NONE))
+  {
     *Handle = NULL;
 
     InternalRemoveUnregisteredEvents ();
@@ -372,9 +375,9 @@ EventUnregisterHandler (
   IN APPLE_EVENT_HANDLE  Handle
   )
 {
-  EFI_STATUS                 Status;
-  LIST_ENTRY                 *EventHandleEntry;
-  APPLE_EVENT_HANDLE_PRIVATE *EventHandle;
+  EFI_STATUS                  Status;
+  LIST_ENTRY                  *EventHandleEntry;
+  APPLE_EVENT_HANDLE_PRIVATE  *EventHandle;
 
   DEBUG ((DEBUG_VERBOSE, "EventUnregisterHandler\n"));
 
@@ -387,8 +390,9 @@ EventUnregisterHandler (
                     EventHandleEntry
                     );
 
-    if (((UINTN)EventHandle == (UINTN)Handle)
-      || ((UINTN)Handle == (UINTN)-1)) {
+    if (  ((UINTN)EventHandle == (UINTN)Handle)
+       || ((UINTN)Handle == (UINTN)-1))
+    {
       EventHandle->Registered = FALSE;
       --mNumberOfEventHandles;
 
@@ -410,6 +414,7 @@ EventUnregisterHandler (
 }
 
 // EventSetCursorPosition
+
 /** This function is used to change the position of the cursor on the screen.
 
   @param[in] Position  The position where to position the cursor.
@@ -428,6 +433,7 @@ EventSetCursorPosition (
 }
 
 // EventSetEventName
+
 /** This function is used to assign a name to an event.
 
   @param[in,out]  Handle
@@ -445,9 +451,9 @@ EventSetEventName (
   IN     CHAR8               *Name
   )
 {
-  EFI_STATUS Status;
-  UINTN      AllocationSize;
-  CHAR8      *EventName;
+  EFI_STATUS  Status;
+  UINTN       AllocationSize;
+  CHAR8       *EventName;
 
   DEBUG ((DEBUG_VERBOSE, "EventSetEventName\n"));
 
@@ -471,6 +477,7 @@ EventSetEventName (
 }
 
 // EventIsCapsLockOnImpl
+
 /** Retrieves the state of the CapsLock key.
 
   @param[in,out]  CLockOn  This parameter indicates the state of the CapsLock
@@ -510,7 +517,7 @@ InternalUnregisterHandlers (
 }
 
 // mAppleEventProtocol
-STATIC APPLE_EVENT_PROTOCOL mAppleEventProtocol = {
+STATIC APPLE_EVENT_PROTOCOL  mAppleEventProtocol = {
   APPLE_EVENT_PROTOCOL_REVISION,
   EventRegisterHandler,
   EventUnregisterHandler,
@@ -526,7 +533,7 @@ AppleEventUnload (
   VOID
   )
 {
-  EFI_STATUS Status;
+  EFI_STATUS  Status;
 
   DEBUG ((DEBUG_VERBOSE, "AppleEventUnload\n"));
 
@@ -537,10 +544,10 @@ AppleEventUnload (
   InternalCancelPollEvents ();
 
   Status = gBS->UninstallMultipleProtocolInterfaces (
-    gImageHandle,
-    &gAppleEventProtocolGuid,
-    (VOID *) &mAppleEventProtocol
-    );
+                  gImageHandle,
+                  &gAppleEventProtocolGuid,
+                  (VOID *)&mAppleEventProtocol
+                  );
 
   return Status;
 }
@@ -560,33 +567,33 @@ OcAppleEventInstallProtocol (
   IN UINT16   PointerSpeedMul
   )
 {
-  EFI_STATUS                    Status;
-  APPLE_EVENT_PROTOCOL          *AppleEvent;
+  EFI_STATUS            Status;
+  APPLE_EVENT_PROTOCOL  *AppleEvent;
 
   DEBUG ((DEBUG_VERBOSE, "OcAppleEventInstallProtocol\n"));
 
   if (!Reinstall) {
     Status = gBS->LocateProtocol (
-      &gAppleEventProtocolGuid,
-      NULL,
-      (VOID *) &AppleEvent
-      );
+                    &gAppleEventProtocolGuid,
+                    NULL,
+                    (VOID *)&AppleEvent
+                    );
 
     if (!EFI_ERROR (Status)) {
       if (AppleEvent->Revision < APPLE_EVENT_PROTOCOL_REVISION_MINIMUM) {
         DEBUG ((
           DEBUG_INFO,
           "OCAE: Not using OEM revision %u, does not meet required minimum %u\n",
-          (UINT32) AppleEvent->Revision,
-          (UINT32) APPLE_EVENT_PROTOCOL_REVISION_MINIMUM
+          (UINT32)AppleEvent->Revision,
+          (UINT32)APPLE_EVENT_PROTOCOL_REVISION_MINIMUM
           ));
         Reinstall = TRUE;
       } else {
         DEBUG ((
           DEBUG_INFO,
           "OCAE: Using OEM revision %u, meets required minimum %u\n",
-          (UINT32) AppleEvent->Revision,
-          (UINT32) APPLE_EVENT_PROTOCOL_REVISION_MINIMUM
+          (UINT32)AppleEvent->Revision,
+          (UINT32)APPLE_EVENT_PROTOCOL_REVISION_MINIMUM
           ));
         return AppleEvent;
       }
@@ -615,11 +622,11 @@ OcAppleEventInstallProtocol (
   InternalSetPointerSpeed (PointerSpeedDiv, PointerSpeedMul);
 
   Status = gBS->InstallMultipleProtocolInterfaces (
-    &gImageHandle,
-    &gAppleEventProtocolGuid,
-    &mAppleEventProtocol,
-    NULL
-    );
+                  &gImageHandle,
+                  &gAppleEventProtocolGuid,
+                  &mAppleEventProtocol,
+                  NULL
+                  );
 
   if (!EFI_ERROR (Status)) {
     InternalCreateQueueEvent ();

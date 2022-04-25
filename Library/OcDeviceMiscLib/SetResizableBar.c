@@ -30,9 +30,9 @@
 STATIC
 EFI_STATUS
 LocatePciCapability (
-  IN  EFI_PCI_IO_PROTOCOL *PciIo,
-  IN  UINT16              CapId,
-  OUT UINT32              *Offset
+  IN  EFI_PCI_IO_PROTOCOL  *PciIo,
+  IN  UINT16               CapId,
+  OUT UINT32               *Offset
   )
 {
   EFI_STATUS  Status;
@@ -47,13 +47,13 @@ LocatePciCapability (
     // Mask it to DWORD alignment per PCI spec
     //
     CapabilityPtr &= 0xFFC;
-    Status = PciIo->Pci.Read (
-      PciIo,
-      EfiPciIoWidthUint32,
-      CapabilityPtr,
-      1,
-      &CapabilityEntry
-      );
+    Status         = PciIo->Pci.Read (
+                                  PciIo,
+                                  EfiPciIoWidthUint32,
+                                  CapabilityPtr,
+                                  1,
+                                  &CapabilityEntry
+                                  );
     if (EFI_ERROR (Status)) {
       DEBUG ((DEBUG_INFO, "OCDM: Capability I/O error - %r\n", Status));
       return EFI_DEVICE_ERROR;
@@ -64,7 +64,7 @@ LocatePciCapability (
       return EFI_INVALID_PARAMETER;
     }
 
-    CapabilityID = (UINT16) CapabilityEntry;
+    CapabilityID = (UINT16)CapabilityEntry;
 
     if (CapabilityID == CapId) {
       DEBUG ((DEBUG_VERBOSE, "OCDM: Found CAP 0x%X at 0x%X\n", CapabilityID, CapabilityPtr));
@@ -103,25 +103,25 @@ SetResizableBarOnDevice (
   ChangedBars = FALSE;
 
   Status = LocatePciCapability (
-    PciIo,
-    PCI_EXPRESS_EXTENDED_CAPABILITY_RESIZABLE_BAR_ID,
-    &ResizableBarOffset
-    );
+             PciIo,
+             PCI_EXPRESS_EXTENDED_CAPABILITY_RESIZABLE_BAR_ID,
+             &ResizableBarOffset
+             );
   if (EFI_ERROR (Status)) {
     DEBUG ((DEBUG_INFO, "OCDM: RBAR is unsupported by device - %r\n", Status));
     return EFI_UNSUPPORTED;
   }
 
   ResizableBarControl.Uint32 = 0;
-  Offset = ResizableBarOffset + sizeof (PCI_EXPRESS_EXTENDED_CAPABILITIES_HEADER)
-    + sizeof (PCI_EXPRESS_EXTENDED_CAPABILITIES_RESIZABLE_BAR_CAPABILITY);
+  Offset                     = ResizableBarOffset + sizeof (PCI_EXPRESS_EXTENDED_CAPABILITIES_HEADER)
+                               + sizeof (PCI_EXPRESS_EXTENDED_CAPABILITIES_RESIZABLE_BAR_CAPABILITY);
   Status = PciIo->Pci.Read (
-    PciIo,
-    EfiPciIoWidthUint8,
-    Offset,
-    sizeof (PCI_EXPRESS_EXTENDED_CAPABILITIES_RESIZABLE_BAR_CONTROL),
-    &ResizableBarControl
-    );
+                        PciIo,
+                        EfiPciIoWidthUint8,
+                        Offset,
+                        sizeof (PCI_EXPRESS_EXTENDED_CAPABILITIES_RESIZABLE_BAR_CONTROL),
+                        &ResizableBarControl
+                        );
 
   DEBUG ((
     DEBUG_INFO,
@@ -138,24 +138,24 @@ SetResizableBarOnDevice (
   ResizableBarNumber = MIN (ResizableBarControl.Bits.ResizableBarNumber, PCI_MAX_BAR);
 
   Status = PciIo->Pci.Read (
-    PciIo,
-    EfiPciIoWidthUint8,
-    ResizableBarOffset + sizeof (PCI_EXPRESS_EXTENDED_CAPABILITIES_HEADER),
-    sizeof (PCI_EXPRESS_EXTENDED_CAPABILITIES_RESIZABLE_BAR_ENTRY) * ResizableBarNumber,
-    (VOID *) Entries
-    );
+                        PciIo,
+                        EfiPciIoWidthUint8,
+                        ResizableBarOffset + sizeof (PCI_EXPRESS_EXTENDED_CAPABILITIES_HEADER),
+                        sizeof (PCI_EXPRESS_EXTENDED_CAPABILITIES_RESIZABLE_BAR_ENTRY) * ResizableBarNumber,
+                        (VOID *)Entries
+                        );
   if (EFI_ERROR (Status)) {
     DEBUG ((DEBUG_INFO, "OCDM: RBAR caps cannot be read - %r\n", Status));
     return EFI_UNSUPPORTED;
   }
 
   Status = PciIo->Pci.Read (
-    PciIo,
-    EfiPciIoWidthUint32,
-    OFFSET_OF (PCI_TYPE00, Device.Bar),
-    PCI_MAX_BAR,
-    (VOID *) OldBar
-    );
+                        PciIo,
+                        EfiPciIoWidthUint32,
+                        OFFSET_OF (PCI_TYPE00, Device.Bar),
+                        PCI_MAX_BAR,
+                        (VOID *)OldBar
+                        );
   if (EFI_ERROR (Status)) {
     ZeroMem (OldBar, sizeof (OldBar));
   }
@@ -198,7 +198,7 @@ SetResizableBarOnDevice (
     //     ResizableBarControl            0802
     //
     NewCapabilities = Capabilities = LShiftU64 (Entries[Index].ResizableBarControl.Bits.BarSizeCapability, 28)
-      | Entries[Index].ResizableBarCapability.Bits.BarSizeCapability;
+                                     | Entries[Index].ResizableBarCapability.Bits.BarSizeCapability;
 
     //
     // Restrict supported BARs to specified value.
@@ -216,8 +216,9 @@ SetResizableBarOnDevice (
     //
     // If requested BAR size is too low, choose the lowest available BAR size.
     //
-    if (NewCapabilities == 0
-      && Entries[Index].ResizableBarControl.Bits.BarSize > (UINT32) Size) {
+    if (  (NewCapabilities == 0)
+       && (Entries[Index].ResizableBarControl.Bits.BarSize > (UINT32)Size))
+    {
       Bit = LowBitSet64 (Capabilities);
     } else {
       Bit = HighBitSet64 (NewCapabilities);
@@ -232,28 +233,28 @@ SetResizableBarOnDevice (
       Size,
       Increase,
       Entries[Index].ResizableBarControl.Bits.BarSize,
-      (INT32) Bit
+      (INT32)Bit
       ));
 
     //
     // If we have no supported configuration, just skip.
     //
-    if (Bit < 0 || Entries[Index].ResizableBarControl.Bits.BarSize == (UINT32) Bit) {
+    if ((Bit < 0) || (Entries[Index].ResizableBarControl.Bits.BarSize == (UINT32)Bit)) {
       continue;
     }
 
     Offset = ResizableBarOffset + sizeof (PCI_EXPRESS_EXTENDED_CAPABILITIES_HEADER)
-            + Index * sizeof (PCI_EXPRESS_EXTENDED_CAPABILITIES_RESIZABLE_BAR_ENTRY)
-            + OFFSET_OF (PCI_EXPRESS_EXTENDED_CAPABILITIES_RESIZABLE_BAR_ENTRY, ResizableBarControl);
+             + Index * sizeof (PCI_EXPRESS_EXTENDED_CAPABILITIES_RESIZABLE_BAR_ENTRY)
+             + OFFSET_OF (PCI_EXPRESS_EXTENDED_CAPABILITIES_RESIZABLE_BAR_ENTRY, ResizableBarControl);
 
-    Entries[Index].ResizableBarControl.Bits.BarSize = (UINT32) Bit;
+    Entries[Index].ResizableBarControl.Bits.BarSize = (UINT32)Bit;
     PciIo->Pci.Write (
-      PciIo,
-      EfiPciIoWidthUint32,
-      Offset,
-      1,
-      &Entries[Index].ResizableBarControl.Uint32
-      );
+                 PciIo,
+                 EfiPciIoWidthUint32,
+                 Offset,
+                 1,
+                 &Entries[Index].ResizableBarControl.Uint32
+                 );
 
     ChangedBars = TRUE;
   }
@@ -262,12 +263,12 @@ SetResizableBarOnDevice (
     DEBUG_CODE_BEGIN ();
 
     Status = PciIo->Pci.Read (
-      PciIo,
-      EfiPciIoWidthUint32,
-      OFFSET_OF (PCI_TYPE00, Device.Bar),
-      PCI_MAX_BAR,
-      (VOID *) NewBar
-      );
+                          PciIo,
+                          EfiPciIoWidthUint32,
+                          OFFSET_OF (PCI_TYPE00, Device.Bar),
+                          PCI_MAX_BAR,
+                          (VOID *)NewBar
+                          );
     if (EFI_ERROR (Status)) {
       ZeroMem (NewBar, sizeof (NewBar));
     }
@@ -295,12 +296,12 @@ SetResizableBarOnDevice (
     //
     if (!IsZeroBuffer (OldBar, sizeof (OldBar))) {
       Status = PciIo->Pci.Write (
-        PciIo,
-        EfiPciIoWidthUint32,
-        OFFSET_OF (PCI_TYPE00, Device.Bar),
-        PCI_MAX_BAR,
-        (VOID *) OldBar
-        );
+                            PciIo,
+                            EfiPciIoWidthUint32,
+                            OFFSET_OF (PCI_TYPE00, Device.Bar),
+                            PCI_MAX_BAR,
+                            (VOID *)OldBar
+                            );
       DEBUG ((DEBUG_INFO, "OCDM: Reprogrammed BARs to original - %r\n", Status));
     }
   }
@@ -327,12 +328,12 @@ ResizeGpuBars (
   HasSuccess = FALSE;
 
   Status = gBS->LocateHandleBuffer (
-    ByProtocol,
-    &gEfiPciIoProtocolGuid,
-    NULL,
-    &HandleCount,
-    &HandleBuffer
-    );
+                  ByProtocol,
+                  &gEfiPciIoProtocolGuid,
+                  NULL,
+                  &HandleCount,
+                  &HandleBuffer
+                  );
 
   if (EFI_ERROR (Status)) {
     DEBUG ((DEBUG_INFO, "OCDM: No PCI devices for RBAR support - %r\n", Status));
@@ -341,22 +342,22 @@ ResizeGpuBars (
 
   for (Index = 0; Index < HandleCount; ++Index) {
     Status = gBS->HandleProtocol (
-      HandleBuffer[Index],
-      &gEfiPciIoProtocolGuid,
-      (VOID **) &PciIo
-      );
+                    HandleBuffer[Index],
+                    &gEfiPciIoProtocolGuid,
+                    (VOID **)&PciIo
+                    );
 
     if (EFI_ERROR (Status)) {
       continue;
     }
 
     Status = PciIo->Pci.Read (
-      PciIo,
-      EfiPciIoWidthUint8,
-      PCI_CLASSCODE_OFFSET,
-      sizeof (PCI_CLASSCODE) / sizeof (UINT8),
-      &ClassCode
-      );
+                          PciIo,
+                          EfiPciIoWidthUint8,
+                          PCI_CLASSCODE_OFFSET,
+                          sizeof (PCI_CLASSCODE) / sizeof (UINT8),
+                          &ClassCode
+                          );
     if (EFI_ERROR (Status)) {
       continue;
     }

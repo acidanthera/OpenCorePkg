@@ -26,16 +26,17 @@ ThumbMovtImmediateAddress (
   IN CONST VOID  *Instruction
   )
 {
-  UINT32 Movt;
-  UINT16 Movt1;
-  UINT16 Movt2;
-  UINT16 Address;
+  UINT32  Movt;
+  UINT16  Movt1;
+  UINT16  Movt2;
+  UINT16  Address;
+
   //
   // Thumb2 is two separate 16-bit instructions working together, e.g.
   // MOVT R0, #0 is 0x0000f2c0 or 0xf2c0 0x0000
   //
   Movt1 = READ_ALIGNED_16 (Instruction);
-  Movt2 = READ_ALIGNED_16 ((CONST CHAR8 *) Instruction + sizeof (UINT16));
+  Movt2 = READ_ALIGNED_16 ((CONST CHAR8 *)Instruction + sizeof (UINT16));
   Movt  = COMPOSE_32 (Movt1, Movt2);
   //
   // imm16 = imm4:i:imm3:imm8
@@ -44,9 +45,9 @@ ThumbMovtImmediateAddress (
   //         imm3 -> Bit14:Bit12
   //         imm8 -> Bit7:Bit0
   //
-  Address  = (UINT16) (Movt & 0x000000FFU);         // imm8
-  Address |= (UINT16) ((Movt >> 4U) & 0x0000F700U); // imm4 imm3
-  Address |= (UINT16) ((Movt & BIT26) >> 15U);      // i, Bit26->11
+  Address  = (UINT16)(Movt & 0x000000FFU);          // imm8
+  Address |= (UINT16)((Movt >> 4U) & 0x0000F700U);  // imm4 imm3
+  Address |= (UINT16)((Movt & BIT26) >> 15U);       // i, Bit26->11
   return Address;
 }
 
@@ -64,8 +65,9 @@ ThumbMovtImmediatePatch (
   IN     UINT16  Address
   )
 {
-  UINT16 Patch;
-  UINT16 PatchedInstruction;
+  UINT16  Patch;
+  UINT16  PatchedInstruction;
+
   //
   // First 16-bit chunk of instruction.
   //
@@ -75,19 +77,19 @@ ThumbMovtImmediatePatch (
   // Mask out instruction bits and or in address.
   //
   PatchedInstruction = READ_ALIGNED_16 (Instruction);
-  WRITE_ALIGNED_16 (Instruction, (PatchedInstruction & ~(UINT16) 0x040FU) | Patch);
+  WRITE_ALIGNED_16 (Instruction, (PatchedInstruction & ~(UINT16)0x040FU) | Patch);
   //
   // Second 16-bit chunk of instruction.
   //
   Patch  = Address & 0x000000FFU;                  // imm8
-  Patch |= ((UINT32) Address << 4U) & 0x00007000U; // imm3
+  Patch |= ((UINT32)Address << 4U) & 0x00007000U;  // imm3
   //
   // Mask out instruction bits and or in address.
   //
-  PatchedInstruction = READ_ALIGNED_16 ((CHAR8 *) Instruction + sizeof (UINT16));
+  PatchedInstruction = READ_ALIGNED_16 ((CHAR8 *)Instruction + sizeof (UINT16));
   WRITE_ALIGNED_16 (
-    (CHAR8 *) Instruction + sizeof (UINT16),
-    (PatchedInstruction & ~(UINT16) 0x70FFU) | Patch
+    (CHAR8 *)Instruction + sizeof (UINT16),
+    (PatchedInstruction & ~(UINT16)0x70FFU) | Patch
     );
 }
 
@@ -104,13 +106,13 @@ ThumbMovwMovtImmediateAddress (
   IN CONST VOID  *Instructions
   )
 {
-  CONST CHAR8 *Word;
-  CONST CHAR8 *Top;
+  CONST CHAR8  *Word;
+  CONST CHAR8  *Top;
 
-  Word = Instructions;                                // MOVW
-  Top  = (CONST CHAR8 *) Instructions + 2 * sizeof (UINT16);  // MOVT
+  Word = Instructions;                                      // MOVW
+  Top  = (CONST CHAR8 *)Instructions + 2 * sizeof (UINT16); // MOVT
 
-  return (UINT32) (((UINT32) ThumbMovtImmediateAddress (Top) << 16U) | ThumbMovtImmediateAddress (Word));
+  return (UINT32)(((UINT32)ThumbMovtImmediateAddress (Top) << 16U) | ThumbMovtImmediateAddress (Word));
 }
 
 /**
@@ -126,13 +128,13 @@ ThumbMovwMovtImmediatePatch (
   IN     UINT32  Address
   )
 {
-  CHAR8 *Word;
-  CHAR8 *Top;
+  CHAR8  *Word;
+  CHAR8  *Top;
 
   Word = Instructions;                                  // MOVW
-  Top  = (CHAR8 *) Instructions + 2 * sizeof (UINT16);  // MOVT
-  ThumbMovtImmediatePatch (Word, (UINT16) (Address & 0x0000FFFFU));
-  ThumbMovtImmediatePatch (Top, (UINT16) ((Address & 0xFFFF0000U) >> 16U));
+  Top  = (CHAR8 *)Instructions + 2 * sizeof (UINT16);   // MOVT
+  ThumbMovtImmediatePatch (Word, (UINT16)(Address & 0x0000FFFFU));
+  ThumbMovtImmediatePatch (Top, (UINT16)((Address & 0xFFFF0000U) >> 16U));
 }
 
 /**
@@ -148,14 +150,16 @@ ThumbMovwMovtImmediateFixup (
   IN     UINT64  Adjust
   )
 {
-  UINT32 Fixup32;
-  Fixup32 = ThumbMovwMovtImmediateAddress (Fixup) + (UINT32) Adjust;
+  UINT32  Fixup32;
+
+  Fixup32 = ThumbMovwMovtImmediateAddress (Fixup) + (UINT32)Adjust;
   ThumbMovwMovtImmediatePatch (Fixup, Fixup32);
 }
 
 //
 // TODO: Prove Relocation Directory memory is not assigned.
 //
+
 /**
   Apply an Image Base Relocation.
 
@@ -184,17 +188,17 @@ InternalApplyRelocation (
   OUT UINT64                                 *FixupData OPTIONAL
   )
 {
-  UINT16  RelocType;
-  UINT16  RelocOff;
-  BOOLEAN Result;
-  UINT32  RelocTarget;
-  UINT32  RemRelocTargetSize;
-  UINT32  Fixup32;
-  UINT64  Fixup64;
-  CHAR8   *Fixup;
+  UINT16   RelocType;
+  UINT16   RelocOff;
+  BOOLEAN  Result;
+  UINT32   RelocTarget;
+  UINT32   RemRelocTargetSize;
+  UINT32   Fixup32;
+  UINT64   Fixup64;
+  CHAR8    *Fixup;
 
   RelocType = IMAGE_RELOC_TYPE (RelocBlock->Relocations[RelocIndex]);
-  RelocOff = IMAGE_RELOC_OFFSET (RelocBlock->Relocations[RelocIndex]);
+  RelocOff  = IMAGE_RELOC_OFFSET (RelocBlock->Relocations[RelocIndex]);
   //
   // Absolute Base Relocations are used for padding any must be skipped.
   //
@@ -203,8 +207,10 @@ InternalApplyRelocation (
     if (FixupData != NULL) {
       FixupData[RelocIndex] = 0;
     }
+
     return RETURN_SUCCESS;
   }
+
   //
   // Determine the Base Relocation target address.
   //
@@ -227,7 +233,7 @@ InternalApplyRelocation (
     return RETURN_UNSUPPORTED;
   }
 
-  Fixup = (CHAR8 *) Context->ImageBuffer + RelocTarget;
+  Fixup = (CHAR8 *)Context->ImageBuffer + RelocTarget;
   //
   // Apply the Base Relocation fixup per type.
   // If RelocationData is not NULL, store the current value of the fixup
@@ -247,18 +253,20 @@ InternalApplyRelocation (
       if (sizeof (UINT32) > RemRelocTargetSize) {
         return RETURN_UNSUPPORTED;
       }
+
       //
       // Ensure the Base Relocation does not target the Relocation Directory.
       //
-      if (RelocTarget + sizeof (UINT32) > Context->RelocDirRva
-       && Context->RelocDirRva + Context->RelocDirSize > RelocTarget) {
+      if (  (RelocTarget + sizeof (UINT32) > Context->RelocDirRva)
+         && (Context->RelocDirRva + Context->RelocDirSize > RelocTarget))
+      {
         return RETURN_UNSUPPORTED;
       }
 
-      Fixup32 = ReadUnaligned32 ((CONST VOID *) Fixup);
-      Fixup32 += (UINT32) Adjust;
+      Fixup32  = ReadUnaligned32 ((CONST VOID *)Fixup);
+      Fixup32 += (UINT32)Adjust;
 
-      WriteUnaligned32 ((VOID *) Fixup, Fixup32);
+      WriteUnaligned32 ((VOID *)Fixup, Fixup32);
 
       if (FixupData != NULL) {
         FixupData[RelocIndex] = Fixup32;
@@ -271,19 +279,21 @@ InternalApplyRelocation (
       if (sizeof (UINT64) > RemRelocTargetSize) {
         return RETURN_UNSUPPORTED;
       }
+
       //
       // Ensure the Base Relocation does not target the Relocation Directory.
       //
 
-      if (RelocTarget + sizeof (UINT64) > Context->RelocDirRva
-       && Context->RelocDirRva + Context->RelocDirSize > RelocTarget) {
+      if (  (RelocTarget + sizeof (UINT64) > Context->RelocDirRva)
+         && (Context->RelocDirRva + Context->RelocDirSize > RelocTarget))
+      {
         return RETURN_UNSUPPORTED;
       }
 
-      Fixup64 = ReadUnaligned64 ((CONST VOID *) Fixup);
+      Fixup64  = ReadUnaligned64 ((CONST VOID *)Fixup);
       Fixup64 += Adjust;
 
-      WriteUnaligned64 ((VOID *) Fixup, Fixup64);
+      WriteUnaligned64 ((VOID *)Fixup, Fixup64);
 
       if (FixupData != NULL) {
         FixupData[RelocIndex] = Fixup64;
@@ -311,15 +321,16 @@ InternalApplyRelocation (
       // Ensure the Base Relocation does not target the Relocation Directory.
       //
 
-      if (RelocTarget + sizeof (UINT64) > Context->RelocDirRva
-       && Context->RelocDirRva + Context->RelocDirSize > RelocTarget) {
+      if (  (RelocTarget + sizeof (UINT64) > Context->RelocDirRva)
+         && (Context->RelocDirRva + Context->RelocDirSize > RelocTarget))
+      {
         return RETURN_UNSUPPORTED;
       }
 
       ThumbMovwMovtImmediateFixup (Fixup, Adjust);
 
       if (FixupData != NULL) {
-        FixupData[RelocIndex] = ReadUnaligned64 ((CONST VOID *) Fixup);
+        FixupData[RelocIndex] = ReadUnaligned64 ((CONST VOID *)Fixup);
       }
 
       break;
@@ -339,23 +350,23 @@ PeCoffRelocateImage (
   IN  UINT32                       RelocationDataSize
   )
 {
-  BOOLEAN                               Result;
-  RETURN_STATUS                         Status;
+  BOOLEAN        Result;
+  RETURN_STATUS  Status;
 
-  UINT64                                Adjust;
-  CONST EFI_IMAGE_BASE_RELOCATION_BLOCK *RelocWalker;
+  UINT64                                 Adjust;
+  CONST EFI_IMAGE_BASE_RELOCATION_BLOCK  *RelocWalker;
 
-  UINT32                                SizeOfRelocs;
-  UINT32                                NumRelocs;
+  UINT32  SizeOfRelocs;
+  UINT32  NumRelocs;
 
-  UINT32                                RelocDataIndex;
+  UINT32  RelocDataIndex;
 
-  UINT32                                RelocOffset;
-  UINT32                                RelocMax;
+  UINT32  RelocOffset;
+  UINT32  RelocMax;
 
-  UINT32                                RelocIndex;
+  UINT32  RelocIndex;
 
-  UINT64                                *WalkerFixupData;
+  UINT64  *WalkerFixupData;
 
   ASSERT (Context != NULL);
   ASSERT (!Context->RelocsStripped);
@@ -375,12 +386,12 @@ PeCoffRelocateImage (
   // prefered location.
   //
 
-  if (RelocationData == NULL && Adjust == 0) {
+  if ((RelocationData == NULL) && (Adjust == 0)) {
     return RETURN_SUCCESS;
   }
 
   if (RelocationData != NULL) {
-    RelocationData->RelocDirRva = Context->RelocDirRva;
+    RelocationData->RelocDirRva  = Context->RelocDirRva;
     RelocationData->RelocDirSize = Context->RelocDirSize;
   }
 
@@ -388,8 +399,8 @@ PeCoffRelocateImage (
   // Apply Base Relocation fixups to the image.
   //
 
-  RelocOffset = Context->RelocDirRva;
-  RelocMax = Context->RelocDirRva + Context->RelocDirSize - sizeof (EFI_IMAGE_BASE_RELOCATION_BLOCK);
+  RelocOffset    = Context->RelocDirRva;
+  RelocMax       = Context->RelocDirRva + Context->RelocDirSize - sizeof (EFI_IMAGE_BASE_RELOCATION_BLOCK);
   RelocDataIndex = 0;
 
   //
@@ -397,9 +408,9 @@ PeCoffRelocateImage (
   //
 
   while (RelocOffset <= RelocMax) {
-    RelocWalker = (CONST EFI_IMAGE_BASE_RELOCATION_BLOCK *) (CONST VOID *) (
-                    (CONST CHAR8 *) Context->ImageBuffer + RelocOffset
-                    );
+    RelocWalker = (CONST EFI_IMAGE_BASE_RELOCATION_BLOCK *)(CONST VOID *)(
+                                                                          (CONST CHAR8 *)Context->ImageBuffer + RelocOffset
+                                                                          );
 
     Result = BaseOverflowSubU32 (
                RelocWalker->SizeOfBlock,
@@ -467,7 +478,7 @@ PeCoffRelocateImage (
     }
 
     RelocDataIndex += NumRelocs;
-    RelocOffset += RelocWalker->SizeOfBlock;
+    RelocOffset    += RelocWalker->SizeOfBlock;
   }
 
   //
@@ -507,7 +518,6 @@ PeCoffRelocateImage (
   @retval RETURN_SUCCESS  The Base Relocation has been applied successfully.
   @retval other           The Base Relocation could not be applied successfully.
 **/
-
 STATIC
 RETURN_STATUS
 InternalApplyRelocationRuntime (
@@ -517,24 +527,28 @@ InternalApplyRelocationRuntime (
   IN     UINT64  FixupData
   )
 {
-  UINT32       Fixup32;
-  UINT64       Fixup64;
+  UINT32  Fixup32;
+  UINT64  Fixup64;
 
   ASSERT (Fixup != NULL);
-  ASSERT (IMAGE_RELOC_TYPE_SUPPORTED (RelocType)
-       && RelocType != EFI_IMAGE_REL_BASED_ABSOLUTE);
+  ASSERT (
+    IMAGE_RELOC_TYPE_SUPPORTED (RelocType)
+         && RelocType != EFI_IMAGE_REL_BASED_ABSOLUTE
+    );
 
-  switch (RelocType) { /* LCOV_EXCL_BR_LINE */
+  switch (RelocType) {
+    /* LCOV_EXCL_BR_LINE */
     case EFI_IMAGE_REL_BASED_HIGHLOW:
       Fixup32 = ReadUnaligned32 (Fixup);
       if (FixupData != Fixup32) {
         if (PcdGetBool (PcdImageLoaderRtRelocAllowTargetMismatch)) {
           return RETURN_SUCCESS;
         }
+
         return RETURN_UNSUPPORTED;
       }
 
-      Fixup32 += (UINT32) Adjust;
+      Fixup32 += (UINT32)Adjust;
       WriteUnaligned32 (Fixup, Fixup32);
       break;
 
@@ -544,6 +558,7 @@ InternalApplyRelocationRuntime (
         if (PcdGetBool (PcdImageLoaderRtRelocAllowTargetMismatch)) {
           return RETURN_SUCCESS;
         }
+
         return RETURN_UNSUPPORTED;
       }
 
@@ -558,16 +573,18 @@ InternalApplyRelocationRuntime (
         if (PcdGetBool (PcdImageLoaderRtRelocAllowTargetMismatch)) {
           return RETURN_SUCCESS;
         }
+
         return RETURN_UNSUPPORTED;
       }
 
       ThumbMovwMovtImmediateFixup (Fixup, Adjust);
       break;
 
-  /* LCOV_EXCL_START */
+    /* LCOV_EXCL_START */
     default:
       ASSERT (FALSE);
   }
+
   /* LCOV_EXCL_STOP */
 
   return RETURN_SUCCESS;
@@ -579,7 +596,7 @@ PeCoffRelocationDataSize (
   OUT UINT32                       *Size
   )
 {
-  BOOLEAN Result;
+  BOOLEAN  Result;
 
   ASSERT (Context != NULL);
   ASSERT (Size != NULL);
@@ -624,20 +641,20 @@ PeCoffRelocateImageForRuntime (
   IN     CONST PE_COFF_RUNTIME_CONTEXT  *RelocationData
   )
 {
-  UINTN                                 ImageAddress;
-  UINT32                                FixupDataIndex;
-  CONST EFI_IMAGE_BASE_RELOCATION_BLOCK *RelocWalker;
-  UINT64                                Adjust;
-  RETURN_STATUS                         Status;
+  UINTN                                  ImageAddress;
+  UINT32                                 FixupDataIndex;
+  CONST EFI_IMAGE_BASE_RELOCATION_BLOCK  *RelocWalker;
+  UINT64                                 Adjust;
+  RETURN_STATUS                          Status;
 
-  UINT32                                RelocOffset;
-  UINT32                                SizeOfRelocs;
-  UINT32                                NumRelocs;
-  UINT32                                RelocIndex;
-  UINT32                                RelocTarget;
-  UINT32                                RelocSuboffset;
+  UINT32  RelocOffset;
+  UINT32  SizeOfRelocs;
+  UINT32  NumRelocs;
+  UINT32  RelocIndex;
+  UINT32  RelocTarget;
+  UINT32  RelocSuboffset;
 
-  (VOID) ImageSize;
+  (VOID)ImageSize;
 
   ASSERT (Image != NULL);
   ASSERT (BaseAddress != 0);
@@ -655,19 +672,19 @@ PeCoffRelocateImageForRuntime (
   }
 
   FixupDataIndex = 0;
-  RelocOffset = RelocationData->RelocDirRva;
+  RelocOffset    = RelocationData->RelocDirRva;
 
   while (RelocOffset < RelocationData->RelocDirRva + RelocationData->RelocDirSize) {
-    RelocWalker = (CONST EFI_IMAGE_BASE_RELOCATION_BLOCK *) (CONST VOID *) (
-                    (CONST CHAR8 *) Image + RelocOffset
-                    );
+    RelocWalker = (CONST EFI_IMAGE_BASE_RELOCATION_BLOCK *)(CONST VOID *)(
+                                                                          (CONST CHAR8 *)Image + RelocOffset
+                                                                          );
 
     STATIC_ASSERT (
       (sizeof (UINT32) % OC_ALIGNOF (EFI_IMAGE_BASE_RELOCATION_BLOCK)) == 0,
       "The following accesses must be performed unaligned."
       );
 
-    ASSERT ((UINT32) sizeof (EFI_IMAGE_BASE_RELOCATION_BLOCK) <= (MAX_UINT32 - RelocWalker->SizeOfBlock));
+    ASSERT ((UINT32)sizeof (EFI_IMAGE_BASE_RELOCATION_BLOCK) <= (MAX_UINT32 - RelocWalker->SizeOfBlock));
 
     SizeOfRelocs = RelocWalker->SizeOfBlock - sizeof (EFI_IMAGE_BASE_RELOCATION_BLOCK);
 
@@ -695,13 +712,13 @@ PeCoffRelocateImageForRuntime (
       RelocTarget = RelocWalker->VirtualAddress + RelocSuboffset;
 
       Status = InternalApplyRelocationRuntime (
-                 (CHAR8 *) Image + RelocTarget,
+                 (CHAR8 *)Image + RelocTarget,
                  IMAGE_RELOC_TYPE (RelocWalker->Relocations[RelocIndex]),
                  Adjust,
                  RelocationData->FixupData[FixupDataIndex]
                  );
 
-      if (!PcdGetBool (PcdImageLoaderRtRelocAllowTargetMismatch) && Status != RETURN_SUCCESS) {
+      if (!PcdGetBool (PcdImageLoaderRtRelocAllowTargetMismatch) && (Status != RETURN_SUCCESS)) {
         return Status;
       }
 

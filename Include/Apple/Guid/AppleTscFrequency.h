@@ -19,6 +19,6 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
     { 0x98, 0x8E, 0xB8, 0xE8, 0x56, 0x2C, 0xBA, 0xFA } }
 
 // gAppleTscFrequencyGuid
-extern EFI_GUID gAppleTscFrequencyGuid;
+extern EFI_GUID  gAppleTscFrequencyGuid;
 
 #endif // APPLE_TSC_FREQUENCY_GUID_H

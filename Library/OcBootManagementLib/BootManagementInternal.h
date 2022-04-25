@@ -24,7 +24,7 @@
 #include <Protocol/DevicePath.h>
 #include <Protocol/SimpleFileSystem.h>
 
-#define OC_CUSTOM_FS_HANDLE ((EFI_HANDLE)(UINTN) 0x2007C5F5U)
+#define OC_CUSTOM_FS_HANDLE  ((EFI_HANDLE)(UINTN) 0x2007C5F5U)
 
 ///
 /// Identifies the DevicePath structure for OpenCore custom entries.
@@ -46,8 +46,8 @@
 /// DevicePath to describe OpenCore custom entries.
 ///
 typedef PACKED struct {
-  VENDOR_DEVICE_PATH   Hdr;
-  FILEPATH_DEVICE_PATH EntryName;
+  VENDOR_DEVICE_PATH      Hdr;
+  FILEPATH_DEVICE_PATH    EntryName;
 } OC_CUSTOM_BOOT_DEVICE_PATH;
 
 ///
@@ -55,9 +55,9 @@ typedef PACKED struct {
 /// Include partuuid of boot drive in VenHw custom memory.
 ///
 typedef PACKED struct {
-  VENDOR_DEVICE_PATH   Hdr;
-  EFI_GUID             Partuuid;
-  FILEPATH_DEVICE_PATH EntryName;
+  VENDOR_DEVICE_PATH      Hdr;
+  EFI_GUID                Partuuid;
+  FILEPATH_DEVICE_PATH    EntryName;
 } OC_ENTRY_PROTOCOL_DEVICE_PATH;
 
 //
@@ -66,17 +66,17 @@ typedef PACKED struct {
 // alternative.
 //
 typedef PACKED struct {
-  VENDOR_DEVICE_PATH       Header;
-  EFI_DEVICE_PATH_PROTOCOL EntryName;
+  VENDOR_DEVICE_PATH          Header;
+  EFI_DEVICE_PATH_PROTOCOL    EntryName;
 } OC_CUSTOM_BOOT_DEVICE_PATH_DECL;
 
 //
 // Version not including first char of path name.
 //
 typedef PACKED struct {
-  VENDOR_DEVICE_PATH       Header;
-  EFI_GUID                 Partuuid;
-  EFI_DEVICE_PATH_PROTOCOL EntryName;
+  VENDOR_DEVICE_PATH          Header;
+  EFI_GUID                    Partuuid;
+  EFI_DEVICE_PATH_PROTOCOL    EntryName;
 } OC_ENTRY_PROTOCOL_DEVICE_PATH_DECL;
 
 #pragma pack()
@@ -96,7 +96,7 @@ typedef PACKED struct {
 //
 // Max. supported Apple version string size
 //
-#define OC_APPLE_VERSION_MAX_SIZE (16)
+#define OC_APPLE_VERSION_MAX_SIZE  (16)
 
 typedef struct {
   EFI_DEVICE_PATH_PROTOCOL       *DevicePath;
@@ -105,26 +105,26 @@ typedef struct {
 } INTERNAL_DMG_LOAD_CONTEXT;
 
 typedef struct {
-  EFI_HANDLE               Device;
-  UINTN                    NumBootInstances;
-  UINTN                    HdPrefixSize;
-  EFI_DEVICE_PATH_PROTOCOL *HdDevicePath;
-  EFI_DEVICE_PATH_PROTOCOL *BootDevicePath;
-  BOOLEAN                  IsExternal;
-  BOOLEAN                  SkipRecovery;
+  EFI_HANDLE                  Device;
+  UINTN                       NumBootInstances;
+  UINTN                       HdPrefixSize;
+  EFI_DEVICE_PATH_PROTOCOL    *HdDevicePath;
+  EFI_DEVICE_PATH_PROTOCOL    *BootDevicePath;
+  BOOLEAN                     IsExternal;
+  BOOLEAN                     SkipRecovery;
 } INTERNAL_DEV_PATH_SCAN_INFO;
 
 EFI_STATUS
 InternalCheckScanPolicy (
-  IN  EFI_HANDLE                       Handle,
-  IN  UINT32                           Policy,
-  OUT BOOLEAN                          *External OPTIONAL
+  IN  EFI_HANDLE  Handle,
+  IN  UINT32      Policy,
+  OUT BOOLEAN     *External OPTIONAL
   );
 
 EFI_DEVICE_PATH_PROTOCOL *
 InternalLoadDmg (
-  IN OUT INTERNAL_DMG_LOAD_CONTEXT   *Context,
-  IN     OC_DMG_LOADING_SUPPORT      DmgLoading
+  IN OUT INTERNAL_DMG_LOAD_CONTEXT  *Context,
+  IN     OC_DMG_LOADING_SUPPORT     DmgLoading
   );
 
 VOID
@@ -164,11 +164,11 @@ InternalGetRecoveryOsBooter (
 
 EFI_STATUS
 InternalLoadBootEntry (
-  IN  OC_PICKER_CONTEXT           *Context,
-  IN  OC_BOOT_ENTRY               *BootEntry,
-  IN  EFI_HANDLE                  ParentHandle,
-  OUT EFI_HANDLE                  *EntryHandle,
-  OUT INTERNAL_DMG_LOAD_CONTEXT   *DmgLoadContext
+  IN  OC_PICKER_CONTEXT          *Context,
+  IN  OC_BOOT_ENTRY              *BootEntry,
+  IN  EFI_HANDLE                 ParentHandle,
+  OUT EFI_HANDLE                 *EntryHandle,
+  OUT INTERNAL_DMG_LOAD_CONTEXT  *DmgLoadContext
   );
 
 UINT16 *
@@ -180,9 +180,9 @@ InternalGetBootOrderForBooting (
 
 VOID
 InternalDebugBootEnvironment (
-  IN CONST UINT16             *BootOrder,
-  IN EFI_GUID                 *BootGuid,
-  IN UINTN                    BootOrderCount
+  IN CONST UINT16  *BootOrder,
+  IN EFI_GUID      *BootGuid,
+  IN UINTN         BootOrderCount
   );
 
 EFI_LOAD_OPTION *

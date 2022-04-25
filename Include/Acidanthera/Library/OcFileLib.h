@@ -27,16 +27,16 @@
 /**
   Maximum safe volume label size.
 **/
-#define OC_MAX_VOLUME_LABEL_SIZE 64
+#define OC_MAX_VOLUME_LABEL_SIZE  64
 
 /**
   Maximum safe content flavour size.
 **/
-#define OC_MAX_CONTENT_FLAVOUR_SIZE 64
+#define OC_MAX_CONTENT_FLAVOUR_SIZE  64
 
 typedef struct {
-  UINT32  PreviousTime;
-  UINTN   PreviousIndex;
+  UINT32    PreviousTime;
+  UINTN     PreviousIndex;
 } DIRECTORY_SEARCH_CONTEXT;
 
 /**
@@ -49,8 +49,8 @@ typedef struct {
 **/
 EFI_SIMPLE_FILE_SYSTEM_PROTOCOL *
 OcLocateFileSystem (
-  IN  EFI_HANDLE                         DeviceHandle  OPTIONAL,
-  IN  EFI_DEVICE_PATH_PROTOCOL           *FilePath     OPTIONAL
+  IN  EFI_HANDLE                DeviceHandle  OPTIONAL,
+  IN  EFI_DEVICE_PATH_PROTOCOL  *FilePath     OPTIONAL
   );
 
 /**
@@ -63,8 +63,8 @@ OcLocateFileSystem (
 **/
 EFI_FILE_PROTOCOL *
 OcLocateRootVolume (
-  IN  EFI_HANDLE                         DeviceHandle  OPTIONAL,
-  IN  EFI_DEVICE_PATH_PROTOCOL           *FilePath     OPTIONAL
+  IN  EFI_HANDLE                DeviceHandle  OPTIONAL,
+  IN  EFI_DEVICE_PATH_PROTOCOL  *FilePath     OPTIONAL
   );
 
 /**
@@ -117,7 +117,7 @@ OcGetVolumeLabel (
 EFI_STATUS
 OcSafeFileOpen (
   IN     CONST EFI_FILE_PROTOCOL  *Protocol,
-     OUT       EFI_FILE_PROTOCOL  **NewHandle,
+  OUT       EFI_FILE_PROTOCOL     **NewHandle,
   IN     CONST CHAR16             *FileName,
   IN     CONST UINT64             OpenMode,
   IN     CONST UINT64             Attributes
@@ -139,7 +139,7 @@ VOID *
 OcReadFile (
   IN     CONST EFI_SIMPLE_FILE_SYSTEM_PROTOCOL  *FileSystem,
   IN     CONST CHAR16                           *FilePath,
-     OUT       UINT32                           *FileSize OPTIONAL,
+  OUT       UINT32                              *FileSize OPTIONAL,
   IN     CONST UINT32                           MaxFileSize OPTIONAL
   );
 
@@ -157,10 +157,10 @@ OcReadFile (
 **/
 VOID *
 OcReadFileFromDirectory (
-  IN      CONST EFI_FILE_PROTOCOL   *RootDirectory,
-  IN      CONST CHAR16              *FilePath,
-      OUT       UINT32              *FileSize   OPTIONAL,
-  IN            UINT32              MaxFileSize OPTIONAL
+  IN      CONST EFI_FILE_PROTOCOL  *RootDirectory,
+  IN      CONST CHAR16             *FilePath,
+  OUT       UINT32                 *FileSize   OPTIONAL,
+  IN            UINT32             MaxFileSize OPTIONAL
   );
 
 /**
@@ -239,7 +239,7 @@ OcAllocateCopyFileData (
 **/
 VOID
 OcDirectorySeachContextInit (
-  IN OUT DIRECTORY_SEARCH_CONTEXT *Context
+  IN OUT DIRECTORY_SEARCH_CONTEXT  *Context
   );
 
 /**
@@ -254,10 +254,10 @@ OcDirectorySeachContextInit (
 **/
 EFI_STATUS
 OcGetNewestFileFromDirectory (
-  IN OUT DIRECTORY_SEARCH_CONTEXT *Context,
-  IN     EFI_FILE_PROTOCOL        *Directory,
-  IN     CHAR16                   *FileNameStartsWith OPTIONAL,
-     OUT EFI_FILE_INFO            **FileInfo
+  IN OUT DIRECTORY_SEARCH_CONTEXT  *Context,
+  IN     EFI_FILE_PROTOCOL         *Directory,
+  IN     CHAR16                    *FileNameStartsWith OPTIONAL,
+  OUT EFI_FILE_INFO                **FileInfo
   );
 
 /**
@@ -271,8 +271,8 @@ OcGetNewestFileFromDirectory (
 **/
 EFI_STATUS
 OcEnsureDirectoryFile (
-  IN     EFI_FILE_PROTOCOL        *File,
-  IN     BOOLEAN                  IsDirectory
+  IN     EFI_FILE_PROTOCOL  *File,
+  IN     BOOLEAN            IsDirectory
   );
 
 /**
@@ -280,7 +280,7 @@ OcEnsureDirectoryFile (
 
   NB Successful processing must return EFI_SUCCESS or EFI_NOT_FOUND, or further
   processing will be aborted.
-  
+
   Return EFI_NOT_FOUND to continue processing but act if no file found.
 
   @param[in]      Directory             Parent directory file handle.
@@ -297,10 +297,10 @@ OcEnsureDirectoryFile (
 typedef
 EFI_STATUS
 (*OC_PROCESS_DIRECTORY_ENTRY) (
-  EFI_FILE_HANDLE   Directory,
-  EFI_FILE_INFO     *FileInfo,
-  UINTN             FileInfoSize,
-  VOID              *Context        OPTIONAL
+  EFI_FILE_HANDLE  Directory,
+  EFI_FILE_INFO    *FileInfo,
+  UINTN            FileInfoSize,
+  VOID             *Context        OPTIONAL
   );
 
 /**
@@ -317,9 +317,9 @@ EFI_STATUS
 **/
 EFI_STATUS
 OcScanDirectory (
-  IN      EFI_FILE_HANDLE                 Directory,
-  IN      OC_PROCESS_DIRECTORY_ENTRY      ProcessEntry,
-  IN OUT  VOID                            *Context            OPTIONAL
+  IN      EFI_FILE_HANDLE             Directory,
+  IN      OC_PROCESS_DIRECTORY_ENTRY  ProcessEntry,
+  IN OUT  VOID                        *Context            OPTIONAL
   );
 
 /**
@@ -367,7 +367,6 @@ OcGetFileModificationTime (
   IN  EFI_FILE_PROTOCOL  *File,
   OUT EFI_TIME           *Time
   );
-
 
 /**
   Check if filesystem is writable.
@@ -485,10 +484,10 @@ OcDiskFindSystemPartitionPath (
   Disk I/O context.
 **/
 typedef struct {
-  EFI_BLOCK_IO_PROTOCOL      *BlockIo;
-  EFI_BLOCK_IO2_PROTOCOL     *BlockIo2;
-  UINT32                     MediaId;
-  UINT32                     BlockSize;
+  EFI_BLOCK_IO_PROTOCOL     *BlockIo;
+  EFI_BLOCK_IO2_PROTOCOL    *BlockIo2;
+  UINT32                    MediaId;
+  UINT32                    BlockSize;
 } OC_DISK_CONTEXT;
 
 /**
@@ -529,9 +528,9 @@ OcDiskRead (
   OC partition list.
 **/
 typedef struct {
-  UINT32              NumPartitions;
-  UINT32              PartitionEntrySize;
-  EFI_PARTITION_ENTRY FirstEntry[];
+  UINT32                 NumPartitions;
+  UINT32                 PartitionEntrySize;
+  EFI_PARTITION_ENTRY    FirstEntry[];
 } OC_PARTITION_ENTRIES;
 
 /**
@@ -586,9 +585,9 @@ OcCreateFvFileDevicePath (
 **/
 VOID *
 OcReadFvFileSection (
-  IN  EFI_GUID          *FileGuid,
-  IN  UINT8             SectionType,
-  OUT UINT32            *FileSize
+  IN  EFI_GUID  *FileGuid,
+  IN  UINT8     SectionType,
+  OUT UINT32    *FileSize
   );
 
 #endif // OC_FILE_LIB_H

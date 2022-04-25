@@ -13,7 +13,6 @@
   WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 **/
 
-
 #include <Uefi.h>
 
 #include <Library/BaseLib.h>
@@ -35,7 +34,7 @@
 // VA_LIST can not initialize to NULL for all compiler, so we use this to
 // indicate a null VA_LIST
 //
-VA_LIST     mVaListNull;
+VA_LIST  mVaListNull;
 
 /**
   The constructor function initialize the Serial Port Library
@@ -100,13 +99,13 @@ DebugPrint (
 **/
 VOID
 DebugPrintMarker (
-  IN  UINTN         ErrorLevel,
-  IN  CONST CHAR8   *Format,
-  IN  VA_LIST       VaListMarker,
-  IN  BASE_LIST     BaseListMarker
+  IN  UINTN        ErrorLevel,
+  IN  CONST CHAR8  *Format,
+  IN  VA_LIST      VaListMarker,
+  IN  BASE_LIST    BaseListMarker
   )
 {
-  CHAR8    Buffer[MAX_DEBUG_MESSAGE_LENGTH];
+  CHAR8  Buffer[MAX_DEBUG_MESSAGE_LENGTH];
 
   //
   // If Format is NULL, then ASSERT().
@@ -132,9 +131,8 @@ DebugPrintMarker (
   //
   // Send the print string to a Serial Port
   //
-  SerialPortWrite ((UINT8 *) Buffer, AsciiStrLen (Buffer));
+  SerialPortWrite ((UINT8 *)Buffer, AsciiStrLen (Buffer));
 }
-
 
 /**
   Prints a debug message to the debug output device if the specified
@@ -154,14 +152,13 @@ DebugPrintMarker (
 VOID
 EFIAPI
 DebugVPrint (
-  IN  UINTN         ErrorLevel,
-  IN  CONST CHAR8   *Format,
-  IN  VA_LIST       VaListMarker
+  IN  UINTN        ErrorLevel,
+  IN  CONST CHAR8  *Format,
+  IN  VA_LIST      VaListMarker
   )
 {
   DebugPrintMarker (ErrorLevel, Format, VaListMarker, NULL);
 }
-
 
 /**
   Prints a debug message to the debug output device if the specified
@@ -183,14 +180,13 @@ DebugVPrint (
 VOID
 EFIAPI
 DebugBPrint (
-  IN  UINTN         ErrorLevel,
-  IN  CONST CHAR8   *Format,
-  IN  BASE_LIST     BaseListMarker
+  IN  UINTN        ErrorLevel,
+  IN  CONST CHAR8  *Format,
+  IN  BASE_LIST    BaseListMarker
   )
 {
   DebugPrintMarker (ErrorLevel, Format, mVaListNull, BaseListMarker);
 }
-
 
 /**
   Prints an assert message containing a filename, line number, and description.
@@ -233,7 +229,7 @@ DebugAssert (
   //
   // Send the print string to the Console Output device
   //
-  SerialPortWrite ((UINT8 *) Buffer, AsciiStrLen (Buffer));
+  SerialPortWrite ((UINT8 *)Buffer, AsciiStrLen (Buffer));
 
   //
   // Generate a Breakpoint, DeadLoop, or NOP based on PCD settings
@@ -244,7 +240,6 @@ DebugAssert (
     CpuDeadLoop ();
   }
 }
-
 
 /**
   Fills a target buffer with PcdDebugClearMemoryValue, and returns the target buffer.
@@ -278,7 +273,6 @@ DebugClearMemory (
   return SetMem (Buffer, Length, PcdGet8 (PcdDebugClearMemoryValue));
 }
 
-
 /**
   Returns TRUE if ASSERT() macros are enabled.
 
@@ -295,9 +289,8 @@ DebugAssertEnabled (
   VOID
   )
 {
-  return (BOOLEAN) ((PcdGet8 (PcdDebugPropertyMask) & DEBUG_PROPERTY_DEBUG_ASSERT_ENABLED) != 0);
+  return (BOOLEAN)((PcdGet8 (PcdDebugPropertyMask) & DEBUG_PROPERTY_DEBUG_ASSERT_ENABLED) != 0);
 }
-
 
 /**
   Returns TRUE if DEBUG() macros are enabled.
@@ -315,9 +308,8 @@ DebugPrintEnabled (
   VOID
   )
 {
-  return (BOOLEAN) ((PcdGet8 (PcdDebugPropertyMask) & DEBUG_PROPERTY_DEBUG_PRINT_ENABLED) != 0);
+  return (BOOLEAN)((PcdGet8 (PcdDebugPropertyMask) & DEBUG_PROPERTY_DEBUG_PRINT_ENABLED) != 0);
 }
-
 
 /**
   Returns TRUE if DEBUG_CODE() macros are enabled.
@@ -335,9 +327,8 @@ DebugCodeEnabled (
   VOID
   )
 {
-  return (BOOLEAN) ((PcdGet8 (PcdDebugPropertyMask) & DEBUG_PROPERTY_DEBUG_CODE_ENABLED) != 0);
+  return (BOOLEAN)((PcdGet8 (PcdDebugPropertyMask) & DEBUG_PROPERTY_DEBUG_CODE_ENABLED) != 0);
 }
-
 
 /**
   Returns TRUE if DEBUG_CLEAR_MEMORY() macro is enabled.
@@ -355,9 +346,8 @@ DebugClearMemoryEnabled (
   VOID
   )
 {
-  return (BOOLEAN) ((PcdGet8 (PcdDebugPropertyMask) & DEBUG_PROPERTY_CLEAR_MEMORY_ENABLED) != 0);
+  return (BOOLEAN)((PcdGet8 (PcdDebugPropertyMask) & DEBUG_PROPERTY_CLEAR_MEMORY_ENABLED) != 0);
 }
-
 
 /**
   Returns TRUE if any one of the bit is set both in ErrorLevel and PcdFixedDebugPrintErrorLevel.
@@ -371,10 +361,10 @@ DebugClearMemoryEnabled (
 BOOLEAN
 EFIAPI
 DebugPrintLevelEnabled (
-  IN  CONST UINTN        ErrorLevel
+  IN  CONST UINTN  ErrorLevel
   )
 {
-  return (BOOLEAN) ((ErrorLevel & PcdGet32 (PcdFixedDebugPrintErrorLevel)) != 0);
+  return (BOOLEAN)((ErrorLevel & PcdGet32 (PcdFixedDebugPrintErrorLevel)) != 0);
 }
 
 /**
@@ -387,20 +377,19 @@ DebugPrintLevelEnabled (
 VOID
 EFIAPI
 OcPrintScreen (
-  IN  CONST CHAR16   *Format,
+  IN  CONST CHAR16  *Format,
   ...
   )
 {
 }
 
 VOID
-#if defined(__GNUC__) || defined(__clang__)
+#if defined (__GNUC__) || defined (__clang__)
 __attribute__ ((noinline))
 #endif
 DebugBreak (
   VOID
-  )
-{
+  ) {
   //
   // This function has no code, debuggers may break on it.
   //
@@ -408,7 +397,7 @@ DebugBreak (
 
 VOID
 WaitForKeyPress (
-  CONST CHAR16 *Message
+  CONST CHAR16  *Message
   )
 {
 }
@@ -424,19 +413,19 @@ DebugPrintDevicePath (
 
 VOID
 DebugPrintDevicePathForHandle (
-  IN UINTN                     ErrorLevel,
-  IN CONST CHAR8               *Message,
-  IN EFI_HANDLE                Handle       OPTIONAL
+  IN UINTN        ErrorLevel,
+  IN CONST CHAR8  *Message,
+  IN EFI_HANDLE   Handle       OPTIONAL
   )
 {
 }
 
 VOID
 DebugPrintHexDump (
-  IN UINTN                     ErrorLevel,
-  IN CONST CHAR8               *Message,
-  IN UINT8                     *Bytes,
-  IN UINTN                     Size
+  IN UINTN        ErrorLevel,
+  IN CONST CHAR8  *Message,
+  IN UINT8        *Bytes,
+  IN UINTN        Size
   )
 {
 }
@@ -458,7 +447,7 @@ OcAppleDebugLogConfigure (
 
 VOID
 OcAppleDebugLogPerfAllocated (
-  IN OUT VOID  *PerfBuffer,
+  IN OUT VOID   *PerfBuffer,
   IN     UINTN  PerfBufferSize
   )
 {

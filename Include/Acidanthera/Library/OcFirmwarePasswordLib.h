@@ -25,8 +25,8 @@
 
 EFI_STATUS
 OcFirmwarePasswordInstallProtocol (
-  IN  EFI_HANDLE ImageHandle,
-  IN  EFI_SYSTEM_TABLE *SystemTable
+  IN  EFI_HANDLE        ImageHandle,
+  IN  EFI_SYSTEM_TABLE  *SystemTable
   );
 
 #endif // OC_FIRMWARE_PASSWORD_LIB_H

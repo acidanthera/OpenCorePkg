@@ -35,12 +35,12 @@ GetTextBaseOffset (
   OUT UINT64            *Offset
   )
 {
-  MACH_SEGMENT_COMMAND      *Segment32;
-  MACH_SECTION              *Section32;
-  MACH_SEGMENT_COMMAND_64   *Segment64;
+  MACH_SEGMENT_COMMAND     *Segment32;
+  MACH_SECTION             *Section32;
+  MACH_SEGMENT_COMMAND_64  *Segment64;
 
-  UINT64                    VirtualAddress;
-  UINT64                    FileOffset;
+  UINT64  VirtualAddress;
+  UINT64  FileOffset;
 
   //
   // 32-bit can be of type MH_OBJECT, which has all sections in a single unnamed segment.
@@ -54,36 +54,34 @@ GetTextBaseOffset (
 
     if (AsciiStrCmp (Segment32->SegmentName, "") == 0) {
       Section32 = MachoGetSectionByName32 (
-        ExecutableContext,
-        Segment32,
-        "__text"
-        );
+                    ExecutableContext,
+                    Segment32,
+                    "__text"
+                    );
       if (Section32 == NULL) {
         return FALSE;
       }
 
       VirtualAddress = Section32->Address;
       FileOffset     = Section32->Offset;
-
     } else {
       Segment32 = MachoGetSegmentByName32 (
-        ExecutableContext,
-        "__TEXT"
-        );
-      if (Segment32 == NULL || Segment32->VirtualAddress < Segment32->FileOffset) {
+                    ExecutableContext,
+                    "__TEXT"
+                    );
+      if ((Segment32 == NULL) || (Segment32->VirtualAddress < Segment32->FileOffset)) {
         return FALSE;
       }
 
       VirtualAddress = Segment32->VirtualAddress;
       FileOffset     = Segment32->FileOffset;
     }
-
   } else {
     Segment64 = MachoGetSegmentByName64 (
-      ExecutableContext,
-      "__TEXT"
-      );
-    if (Segment64 == NULL || Segment64->VirtualAddress < Segment64->FileOffset) {
+                  ExecutableContext,
+                  "__TEXT"
+                  );
+    if ((Segment64 == NULL) || (Segment64->VirtualAddress < Segment64->FileOffset)) {
       return FALSE;
     }
 
@@ -91,8 +89,8 @@ GetTextBaseOffset (
     FileOffset     = Segment64->FileOffset;
   }
 
-  *Address  = VirtualAddress;
-  *Offset   = FileOffset;
+  *Address = VirtualAddress;
+  *Offset  = FileOffset;
 
   return TRUE;
 }
@@ -116,10 +114,10 @@ PatcherInitContextFromPrelinked (
 }
 
 EFI_STATUS
-PatcherInitContextFromMkext(
-  IN OUT PATCHER_CONTEXT    *Context,
-  IN OUT MKEXT_CONTEXT      *Mkext,
-  IN     CONST CHAR8        *Name
+PatcherInitContextFromMkext (
+  IN OUT PATCHER_CONTEXT  *Context,
+  IN OUT MKEXT_CONTEXT    *Mkext,
+  IN     CONST CHAR8      *Name
   )
 {
   MKEXT_KEXT  *Kext;
@@ -134,17 +132,17 @@ PatcherInitContextFromMkext(
 
 EFI_STATUS
 PatcherInitContextFromBuffer (
-  IN OUT PATCHER_CONTEXT    *Context,
-  IN OUT UINT8              *Buffer,
-  IN     UINT32             BufferSize,
-  IN     BOOLEAN            Is32Bit
+  IN OUT PATCHER_CONTEXT  *Context,
+  IN OUT UINT8            *Buffer,
+  IN     UINT32           BufferSize,
+  IN     BOOLEAN          Is32Bit
   )
 {
-  EFI_STATUS                Status;
-  OC_MACHO_CONTEXT          InnerContext;
+  EFI_STATUS        Status;
+  OC_MACHO_CONTEXT  InnerContext;
 
-  UINT64                    VirtualAddress;
-  UINT64                    FileOffset;
+  UINT64  VirtualAddress;
+  UINT64  FileOffset;
 
   ASSERT (Context != NULL);
   ASSERT (Buffer != NULL);
@@ -162,7 +160,7 @@ PatcherInitContextFromBuffer (
       DEBUG_INFO,
       "OCAK: %a-bit patcher init from buffer %p %u has unsupported mach-o\n",
       Is32Bit ? "32" : "64",
-      Buffer, 
+      Buffer,
       BufferSize
       ));
     return EFI_INVALID_PARAMETER;
@@ -189,12 +187,12 @@ PatcherInitContextFromBuffer (
 
   if (!Context->Is32Bit) {
     Status = InternalConnectExternalSymtab (
-      &Context->MachContext,
-      &InnerContext,
-      Buffer,
-      BufferSize,
-      NULL
-      );
+               &Context->MachContext,
+               &InnerContext,
+               Buffer,
+               BufferSize,
+               NULL
+               );
     if (EFI_ERROR (Status)) {
       return Status;
     }
@@ -214,9 +212,9 @@ PatcherInitContextFromBuffer (
 
 EFI_STATUS
 PatcherGetSymbolAddress (
-  IN OUT PATCHER_CONTEXT    *Context,
-  IN     CONST CHAR8        *Name,
-  IN OUT UINT8              **Address
+  IN OUT PATCHER_CONTEXT  *Context,
+  IN     CONST CHAR8      *Name,
+  IN OUT UINT8            **Address
   )
 {
   MACH_NLIST_ANY  *Symbol;
@@ -236,17 +234,17 @@ PatcherGetSymbolAddress (
       //
       // If we have KxldState, use it.
       //
-      if (Index == 0 && Context->KxldState != NULL) {
+      if ((Index == 0) && (Context->KxldState != NULL)) {
         SymbolAddress = InternalKxldSolveSymbol (
-          Context->Is32Bit,
-          Context->KxldState,
-          Context->KxldStateSize,
-          Name
-          );
+                          Context->Is32Bit,
+                          Context->KxldState,
+                          Context->KxldStateSize,
+                          Name
+                          );
         //
         // If we have a symbol, get its ondisk offset.
         //
-        if (SymbolAddress != 0 && MachoSymbolGetDirectFileOffset (&Context->MachContext, SymbolAddress, &Offset, NULL)) {
+        if ((SymbolAddress != 0) && MachoSymbolGetDirectFileOffset (&Context->MachContext, SymbolAddress, &Offset, NULL)) {
           //
           // Proceed to success.
           //
@@ -258,7 +256,7 @@ PatcherGetSymbolAddress (
     }
 
     SymbolName = MachoGetSymbolName (&Context->MachContext, Symbol);
-    if (SymbolName != NULL && AsciiStrCmp (Name, SymbolName) == 0) {
+    if ((SymbolName != NULL) && (AsciiStrCmp (Name, SymbolName) == 0)) {
       //
       // Once we have a symbol, get its ondisk offset.
       //
@@ -275,7 +273,7 @@ PatcherGetSymbolAddress (
     Index++;
   }
 
-  *Address = (UINT8 *) MachoGetMachHeader (&Context->MachContext) + Offset;
+  *Address = (UINT8 *)MachoGetMachHeader (&Context->MachContext) + Offset;
   return EFI_SUCCESS;
 }
 
@@ -285,12 +283,12 @@ PatcherApplyGenericPatch (
   IN     PATCHER_GENERIC_PATCH  *Patch
   )
 {
-  EFI_STATUS     Status;
-  UINT8          *Base;
-  UINT32         Size;
-  UINT32         ReplaceCount;
+  EFI_STATUS  Status;
+  UINT8       *Base;
+  UINT32      Size;
+  UINT32      ReplaceCount;
 
-  Base = (UINT8 *) MachoGetMachHeader (&Context->MachContext);
+  Base = (UINT8 *)MachoGetMachHeader (&Context->MachContext);
   Size = MachoGetFileSize (&Context->MachContext);
   if (Patch->Base != NULL) {
     Status = PatcherGetSymbolAddress (Context, Patch->Base, &Base);
@@ -305,7 +303,7 @@ PatcherApplyGenericPatch (
       return Status;
     }
 
-    Size -= (UINT32)(Base - (UINT8 *) MachoGetMachHeader (&Context->MachContext));
+    Size -= (UINT32)(Base - (UINT8 *)MachoGetMachHeader (&Context->MachContext));
   }
 
   if (Patch->Find == NULL) {
@@ -318,25 +316,26 @@ PatcherApplyGenericPatch (
         ));
       return EFI_NOT_FOUND;
     }
+
     CopyMem (Base, Patch->Replace, Patch->Size);
     return EFI_SUCCESS;
   }
 
-  if (Patch->Limit > 0 && Patch->Limit < Size) {
+  if ((Patch->Limit > 0) && (Patch->Limit < Size)) {
     Size = Patch->Limit;
   }
 
   ReplaceCount = ApplyPatch (
-    Patch->Find,
-    Patch->Mask,
-    Patch->Size,
-    Patch->Replace,
-    Patch->ReplaceMask,
-    Base,
-    Size,
-    Patch->Count,
-    Patch->Skip
-    );
+                   Patch->Find,
+                   Patch->Mask,
+                   Patch->Size,
+                   Patch->Replace,
+                   Patch->ReplaceMask,
+                   Base,
+                   Size,
+                   Patch->Count,
+                   Patch->Skip
+                   );
 
   DEBUG ((
     DEBUG_INFO,
@@ -346,7 +345,7 @@ PatcherApplyGenericPatch (
     ReplaceCount
     ));
 
-  if (ReplaceCount > 0 && Patch->Count > 0 && ReplaceCount != Patch->Count) {
+  if ((ReplaceCount > 0) && (Patch->Count > 0) && (ReplaceCount != Patch->Count)) {
     DEBUG ((
       DEBUG_INFO,
       "OCAK: %a-bit %a performed only %u replacements out of %u\n",
@@ -366,9 +365,9 @@ PatcherApplyGenericPatch (
 
 EFI_STATUS
 PatcherExcludePrelinkedKext (
-  IN     CONST CHAR8            *Identifier,
-  IN OUT PATCHER_CONTEXT        *PatcherContext,
-  IN OUT PRELINKED_CONTEXT      *PrelinkedContext
+  IN     CONST CHAR8        *Identifier,
+  IN OUT PATCHER_CONTEXT    *PatcherContext,
+  IN OUT PRELINKED_CONTEXT  *PrelinkedContext
   )
 {
   MACH_SEGMENT_COMMAND_ANY  *Segment;
@@ -378,15 +377,15 @@ PatcherExcludePrelinkedKext (
   UINT64                    Size;
   UINT64                    MaxSize;
 
-  UINT32                    KextCount;
-  UINT32                    Index;
-  UINT32                    Index2;
-  XML_NODE                  *KextPlist;
-  UINT32                    KextPlistCount;
-  CONST CHAR8               *KextPlistKey;
-  XML_NODE                  *KextPlistValue;
-  CONST CHAR8               *KextIdentifier;
-  EFI_STATUS                Status;
+  UINT32       KextCount;
+  UINT32       Index;
+  UINT32       Index2;
+  XML_NODE     *KextPlist;
+  UINT32       KextPlistCount;
+  CONST CHAR8  *KextPlistKey;
+  XML_NODE     *KextPlistValue;
+  CONST CHAR8  *KextIdentifier;
+  EFI_STATUS   Status;
 
   ASSERT (Identifier       != NULL);
   ASSERT (PatcherContext   != NULL);
@@ -399,26 +398,28 @@ PatcherExcludePrelinkedKext (
   while ((Segment = MachoGetNextSegment (&PatcherContext->MachContext, Segment)) != NULL) {
     VirtualAddress = PatcherContext->Is32Bit ? Segment->Segment32.VirtualAddress : Segment->Segment64.VirtualAddress;
 
-    if (AddressMax != 0 && AddressMax != VirtualAddress) {
+    if ((AddressMax != 0) && (AddressMax != VirtualAddress)) {
       break;
     }
 
     Size       = PatcherContext->Is32Bit ? Segment->Segment32.Size : Segment->Segment64.Size;
     AddressMax = MAX (VirtualAddress + Size, AddressMax);
   }
+
   MaxSize = AddressMax - PatcherContext->VirtualBase;
 
   //
   // Zero out kext memory through PatcherContext->MachContext.
   //
   KextData = MachoGetFilePointerByAddress (
-    &PatcherContext->MachContext,
-    PatcherContext->VirtualBase,
-    NULL
-    );
+               &PatcherContext->MachContext,
+               PatcherContext->VirtualBase,
+               NULL
+               );
   if (KextData == NULL) {
     return EFI_UNSUPPORTED;
   }
+
   DEBUG ((
     DEBUG_INFO,
     "OCAK: Excluding %a - VirtualBase %Lx, MaxSize %Lx\n",
@@ -426,7 +427,7 @@ PatcherExcludePrelinkedKext (
     PatcherContext->VirtualBase,
     MaxSize
     ));
-  ZeroMem (KextData, (UINTN) MaxSize);
+  ZeroMem (KextData, (UINTN)MaxSize);
 
   //
   // Find kext info to be removed in prelinked context.
@@ -451,7 +452,7 @@ PatcherExcludePrelinkedKext (
 
       if (AsciiStrCmp (KextPlistKey, INFO_BUNDLE_IDENTIFIER_KEY) == 0) {
         KextIdentifier = XmlNodeContent (KextPlistValue);
-        if (PlistNodeCast (KextPlistValue, PLIST_NODE_TYPE_STRING) == NULL || KextIdentifier == NULL) {
+        if ((PlistNodeCast (KextPlistValue, PLIST_NODE_TYPE_STRING) == NULL) || (KextIdentifier == NULL)) {
           DEBUG ((
             DEBUG_INFO,
             "OCAK: Plist value cannot be interpreted as string, or current kext identifier is null (dict index %u, plist %p, plist index %u)\n",
@@ -500,54 +501,56 @@ PatcherExcludePrelinkedKext (
 
 EFI_STATUS
 PatcherBlockKext (
-  IN OUT PATCHER_CONTEXT        *Context
+  IN OUT PATCHER_CONTEXT  *Context
   )
 {
-  UINT8             *MachBase;
-  UINT32            MachSize;
-  UINT64            KmodOffset;
-  UINT64            StartAddr;
-  UINT64            TmpOffset;
-  UINT8             *KmodInfo;
-  UINT8             *PatchAddr;
+  UINT8   *MachBase;
+  UINT32  MachSize;
+  UINT64  KmodOffset;
+  UINT64  StartAddr;
+  UINT64  TmpOffset;
+  UINT8   *KmodInfo;
+  UINT8   *PatchAddr;
 
   //
   // Kernel has 0 kmod.
   //
-  if (Context->VirtualKmod == 0 || Context->VirtualBase > Context->VirtualKmod) {
+  if ((Context->VirtualKmod == 0) || (Context->VirtualBase > Context->VirtualKmod)) {
     return EFI_UNSUPPORTED;
   }
 
-  MachBase = (UINT8 *) MachoGetMachHeader (&Context->MachContext);
+  MachBase = (UINT8 *)MachoGetMachHeader (&Context->MachContext);
   MachSize = MachoGetFileSize (&Context->MachContext);
 
   //
   // Determine offset of kmod within file.
   //
   KmodOffset = Context->VirtualKmod - Context->VirtualBase;
-  if (OcOverflowAddU64 (KmodOffset, Context->FileOffset, &KmodOffset)
-    || OcOverflowAddU64 (KmodOffset, Context->Is32Bit ? sizeof (KMOD_INFO_32_V1) : sizeof (KMOD_INFO_64_V1), &TmpOffset)
-    || TmpOffset > MachSize) {
+  if (  OcOverflowAddU64 (KmodOffset, Context->FileOffset, &KmodOffset)
+     || OcOverflowAddU64 (KmodOffset, Context->Is32Bit ? sizeof (KMOD_INFO_32_V1) : sizeof (KMOD_INFO_64_V1), &TmpOffset)
+     || (TmpOffset > MachSize))
+  {
     return EFI_INVALID_PARAMETER;
   }
 
   KmodInfo = MachBase + KmodOffset;
   if (Context->Is32Bit) {
-    StartAddr = ((KMOD_INFO_32_V1 *) KmodInfo)->StartAddr;
+    StartAddr = ((KMOD_INFO_32_V1 *)KmodInfo)->StartAddr;
   } else {
-    StartAddr = ((KMOD_INFO_64_V1 *) KmodInfo)->StartAddr;
+    StartAddr = ((KMOD_INFO_64_V1 *)KmodInfo)->StartAddr;
     if (Context->IsKernelCollection) {
       StartAddr = KcFixupValue (StartAddr, NULL);
     }
   }
 
-  if (StartAddr == 0 || Context->VirtualBase > StartAddr) {
+  if ((StartAddr == 0) || (Context->VirtualBase > StartAddr)) {
     return EFI_INVALID_PARAMETER;
   }
 
   TmpOffset = StartAddr - Context->VirtualBase;
-  if (OcOverflowAddU64 (TmpOffset, Context->FileOffset, &TmpOffset)
-    || TmpOffset > MachSize - 6) {
+  if (  OcOverflowAddU64 (TmpOffset, Context->FileOffset, &TmpOffset)
+     || (TmpOffset > MachSize - 6))
+  {
     return EFI_BUFFER_TOO_SMALL;
   }
 
@@ -582,12 +585,12 @@ KextFindKmodAddress (
   OUT UINT64            *Kmod
   )
 {
-  BOOLEAN                   Is32Bit;
-  MACH_NLIST_ANY            *Symbol;
-  CONST CHAR8               *SymbolName;
-  UINT64                    Address;
-  UINT64                    FileOffset;
-  UINT32                    Index;
+  BOOLEAN         Is32Bit;
+  MACH_NLIST_ANY  *Symbol;
+  CONST CHAR8     *SymbolName;
+  UINT64          Address;
+  UINT64          FileOffset;
+  UINT32          Index;
 
   Is32Bit = ExecutableContext->Is32Bit;
   Index   = 0;
@@ -601,10 +604,11 @@ KextFindKmodAddress (
 
     if (((Is32Bit ? Symbol->Symbol32.Type : Symbol->Symbol64.Type) & MACH_N_TYPE_STAB) == 0) {
       SymbolName = MachoGetSymbolName (ExecutableContext, Symbol);
-      if (SymbolName && AsciiStrCmp (SymbolName, "_kmod_info") == 0) {
+      if (SymbolName && (AsciiStrCmp (SymbolName, "_kmod_info") == 0)) {
         if (!MachoIsSymbolValueInRange (ExecutableContext, Symbol)) {
           return FALSE;
         }
+
         break;
       }
     }
@@ -616,9 +620,10 @@ KextFindKmodAddress (
     return FALSE;
   }
 
-  if (OcOverflowTriAddU64 (Address, LoadAddress, Is32Bit ? Symbol->Symbol32.Value : Symbol->Symbol64.Value, &Address)
-    || Address > LoadAddress + Size - (Is32Bit ? sizeof (KMOD_INFO_32_V1) : sizeof (KMOD_INFO_64_V1))
-    || (Is32Bit && Address > MAX_UINT32)) {
+  if (  OcOverflowTriAddU64 (Address, LoadAddress, Is32Bit ? Symbol->Symbol32.Value : Symbol->Symbol64.Value, &Address)
+     || (Address > LoadAddress + Size - (Is32Bit ? sizeof (KMOD_INFO_32_V1) : sizeof (KMOD_INFO_64_V1)))
+     || (Is32Bit && (Address > MAX_UINT32)))
+  {
     return FALSE;
   }
 

@@ -17,25 +17,25 @@
 //
 // Limit bytes per pixel to most common value for simplicity.
 //
-#define BYTES_PER_PIXEL sizeof (EFI_GRAPHICS_OUTPUT_BLT_PIXEL)
+#define BYTES_PER_PIXEL  sizeof (EFI_GRAPHICS_OUTPUT_BLT_PIXEL)
 STATIC_ASSERT (BYTES_PER_PIXEL == sizeof (UINT32), "Non 4-byte pixels are unsupported!");
 
 //
 // Read-only structure for the frame buffer configure.
 //
 typedef struct OC_BLIT_CONFIGURE {
-  UINT32                          PixelsPerScanLine;
-  UINT32                          Width;
-  UINT32                          Height;
-  UINT32                          RotatedWidth;
-  UINT32                          RotatedHeight;
-  UINT32                          Rotation;
-  UINT8                           *FrameBuffer;
-  EFI_GRAPHICS_PIXEL_FORMAT       PixelFormat;
-  EFI_PIXEL_BITMASK               PixelMasks;
-  INT8                            PixelShl[4]; // R-G-B-Rsvd
-  INT8                            PixelShr[4]; // R-G-B-Rsvd
-  OC_ALIGNAS(64) UINT8            LineBuffer[];
+  UINT32                       PixelsPerScanLine;
+  UINT32                       Width;
+  UINT32                       Height;
+  UINT32                       RotatedWidth;
+  UINT32                       RotatedHeight;
+  UINT32                       Rotation;
+  UINT8                        *FrameBuffer;
+  EFI_GRAPHICS_PIXEL_FORMAT    PixelFormat;
+  EFI_PIXEL_BITMASK            PixelMasks;
+  INT8                         PixelShl[4];    // R-G-B-Rsvd
+  INT8                         PixelShr[4];    // R-G-B-Rsvd
+  OC_ALIGNAS (64) UINT8            LineBuffer[];
 } OC_BLIT_CONFIGURE;
 
 /**

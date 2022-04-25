@@ -28,13 +28,13 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 // Starting with this version scaled interfaces wered added.
 // Older versions had none.
 //
-#define APPLE_IMAGE_CONVERSION_PROTOCOL_REVISION 0x20000
+#define APPLE_IMAGE_CONVERSION_PROTOCOL_REVISION  0x20000
 
 //
 // Generic protocol extension capable of opening any file,
 // possibly by chainloading other files
 //
-#define APPLE_IMAGE_CONVERSION_PROTOCOL_ANY_EXTENSION 0
+#define APPLE_IMAGE_CONVERSION_PROTOCOL_ANY_EXTENSION  0
 
 /**
   Recognise image passed through the buffer.
@@ -49,7 +49,7 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 **/
 typedef
 EFI_STATUS
-(EFIAPI* RECOGNIZE_IMAGE_DATA) (
+(EFIAPI *RECOGNIZE_IMAGE_DATA)(
   IN VOID                 *ImageBuffer,
   IN UINTN                ImageSize
   );
@@ -71,7 +71,7 @@ EFI_STATUS
 **/
 typedef
 EFI_STATUS
-(EFIAPI* GET_IMAGE_DIMS) (
+(EFIAPI *GET_IMAGE_DIMS)(
   IN  VOID                *ImageBuffer,
   IN  UINTN               ImageSize,
   OUT UINT32              *ImageWidth,
@@ -102,7 +102,7 @@ EFI_STATUS
 **/
 typedef
 EFI_STATUS
-(EFIAPI* DECODE_IMAGE_DATA) (
+(EFIAPI *DECODE_IMAGE_DATA)(
   IN     VOID            *ImageBuffer,
   IN     UINTN           ImageSize,
   IN OUT EFI_UGA_PIXEL   **RawImageData,
@@ -130,7 +130,7 @@ EFI_STATUS
 **/
 typedef
 EFI_STATUS
-(EFIAPI* GET_IMAGE_DIMS_EX) (
+(EFIAPI *GET_IMAGE_DIMS_EX)(
   IN  VOID               *ImageBuffer,
   IN  UINTN              ImageSize,
   IN  UINTN              Scale,
@@ -165,7 +165,7 @@ EFI_STATUS
 **/
 typedef
 EFI_STATUS
-(EFIAPI* DECODE_IMAGE_DATA_EX) (
+(EFIAPI *DECODE_IMAGE_DATA_EX)(
   IN     VOID            *ImageBuffer,
   IN     UINTN           ImageSize,
   IN     UINTN           Scale,
@@ -177,15 +177,15 @@ EFI_STATUS
   Apple image conversion protocol definition.
 **/
 typedef struct APPLE_IMAGE_CONVERSION_PROTOCOL_ {
-  UINT64                 Revision;
-  UINTN                  FileExt;
-  RECOGNIZE_IMAGE_DATA   RecognizeImageData;
-  GET_IMAGE_DIMS         GetImageDims;
-  DECODE_IMAGE_DATA      DecodeImageData;
-  GET_IMAGE_DIMS_EX      GetImageDimsEx;
-  DECODE_IMAGE_DATA_EX   DecodeImageDataEx;
+  UINT64                  Revision;
+  UINTN                   FileExt;
+  RECOGNIZE_IMAGE_DATA    RecognizeImageData;
+  GET_IMAGE_DIMS          GetImageDims;
+  DECODE_IMAGE_DATA       DecodeImageData;
+  GET_IMAGE_DIMS_EX       GetImageDimsEx;
+  DECODE_IMAGE_DATA_EX    DecodeImageDataEx;
 } APPLE_IMAGE_CONVERSION_PROTOCOL;
 
-extern EFI_GUID gAppleImageConversionProtocolGuid;
+extern EFI_GUID  gAppleImageConversionProtocolGuid;
 
 #endif //APPLE_IMAGE_CONVERSION_H

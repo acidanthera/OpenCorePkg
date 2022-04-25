@@ -33,35 +33,35 @@ VOID *
 OcReadFile (
   IN     CONST EFI_SIMPLE_FILE_SYSTEM_PROTOCOL  *FileSystem,
   IN     CONST CHAR16                           *FilePath,
-     OUT       UINT32                           *FileSize OPTIONAL,
+  OUT       UINT32                              *FileSize OPTIONAL,
   IN     CONST UINT32                           MaxFileSize OPTIONAL
   )
 {
-  EFI_STATUS                      Status;
-  EFI_FILE_HANDLE                 Volume;
-  EFI_FILE_HANDLE                 FileHandle;
-  UINT8                           *FileBuffer;
-  UINT32                          FileBufferSize;
-  UINT32                          FileReadSize;
+  EFI_STATUS       Status;
+  EFI_FILE_HANDLE  Volume;
+  EFI_FILE_HANDLE  FileHandle;
+  UINT8            *FileBuffer;
+  UINT32           FileBufferSize;
+  UINT32           FileReadSize;
 
   ASSERT (FileSystem != NULL);
   ASSERT (FilePath != NULL);
 
   Status = FileSystem->OpenVolume (
-    (EFI_SIMPLE_FILE_SYSTEM_PROTOCOL *) FileSystem,
-    &Volume
-    );
+                         (EFI_SIMPLE_FILE_SYSTEM_PROTOCOL *)FileSystem,
+                         &Volume
+                         );
   if (EFI_ERROR (Status)) {
     return NULL;
   }
 
   Status = OcSafeFileOpen (
-    Volume,
-    &FileHandle,
-    FilePath,
-    EFI_FILE_MODE_READ,
-    0
-    );
+             Volume,
+             &FileHandle,
+             FilePath,
+             EFI_FILE_MODE_READ,
+             0
+             );
 
   Volume->Close (Volume);
 
@@ -70,12 +70,13 @@ OcReadFile (
   }
 
   Status = OcGetFileSize (
-    FileHandle,
-    &FileReadSize
-    );
-  if (EFI_ERROR (Status)
-    || OcOverflowAddU32 (FileReadSize, sizeof (CHAR16), &FileBufferSize)
-    || (MaxFileSize > 0 && FileReadSize > MaxFileSize)) {
+             FileHandle,
+             &FileReadSize
+             );
+  if (  EFI_ERROR (Status)
+     || OcOverflowAddU32 (FileReadSize, sizeof (CHAR16), &FileBufferSize)
+     || ((MaxFileSize > 0) && (FileReadSize > MaxFileSize)))
+  {
     FileHandle->Close (FileHandle);
     return NULL;
   }
@@ -83,14 +84,14 @@ OcReadFile (
   FileBuffer = AllocatePool (FileBufferSize);
   if (FileBuffer != NULL) {
     Status = OcGetFileData (
-      FileHandle,
-      0,
-      FileReadSize,
-      FileBuffer
-      );
+               FileHandle,
+               0,
+               FileReadSize,
+               FileBuffer
+               );
 
     if (!EFI_ERROR (Status)) {
-      FileBuffer[FileReadSize] = 0;
+      FileBuffer[FileReadSize]     = 0;
       FileBuffer[FileReadSize + 1] = 0;
       if (FileSize != NULL) {
         *FileSize = FileReadSize;
@@ -112,29 +113,29 @@ OcReadFileSize (
   OUT UINT32                           *Size
   )
 {
-  EFI_STATUS                      Status;
-  EFI_FILE_HANDLE                 Volume;
-  EFI_FILE_HANDLE                 FileHandle;
+  EFI_STATUS       Status;
+  EFI_FILE_HANDLE  Volume;
+  EFI_FILE_HANDLE  FileHandle;
 
   ASSERT (FileSystem != NULL);
   ASSERT (FilePath != NULL);
   ASSERT (Size != NULL);
 
   Status = FileSystem->OpenVolume (
-    FileSystem,
-    &Volume
-    );
+                         FileSystem,
+                         &Volume
+                         );
   if (EFI_ERROR (Status)) {
     return Status;
   }
 
   Status = OcSafeFileOpen (
-    Volume,
-    &FileHandle,
-    (CHAR16 *) FilePath,
-    EFI_FILE_MODE_READ,
-    0
-    );
+             Volume,
+             &FileHandle,
+             (CHAR16 *)FilePath,
+             EFI_FILE_MODE_READ,
+             0
+             );
 
   Volume->Close (Volume);
 
@@ -143,45 +144,46 @@ OcReadFileSize (
   }
 
   Status = OcGetFileSize (
-    FileHandle,
-    Size
-    );
+             FileHandle,
+             Size
+             );
 
   return Status;
 }
 
 VOID *
 OcReadFileFromDirectory (
-  IN      CONST EFI_FILE_PROTOCOL   *RootDirectory,
-  IN      CONST CHAR16              *FilePath,
-      OUT       UINT32              *FileSize OPTIONAL,
-  IN            UINT32              MaxFileSize OPTIONAL
+  IN      CONST EFI_FILE_PROTOCOL  *RootDirectory,
+  IN      CONST CHAR16             *FilePath,
+  OUT       UINT32                 *FileSize OPTIONAL,
+  IN            UINT32             MaxFileSize OPTIONAL
   )
 {
-  EFI_STATUS            Status;
-  EFI_FILE_PROTOCOL     *File;
-  UINT32                Size;
-  UINT8                 *FileBuffer;
+  EFI_STATUS         Status;
+  EFI_FILE_PROTOCOL  *File;
+  UINT32             Size;
+  UINT8              *FileBuffer;
 
   ASSERT (RootDirectory != NULL);
   ASSERT (FilePath != NULL);
 
   Status = OcSafeFileOpen (
-    RootDirectory,
-    &File,
-    FilePath,
-    EFI_FILE_MODE_READ,
-    0
-    );
+             RootDirectory,
+             &File,
+             FilePath,
+             EFI_FILE_MODE_READ,
+             0
+             );
 
   if (EFI_ERROR (Status)) {
     return NULL;
   }
 
   Status = OcGetFileSize (File, &Size);
-  if (EFI_ERROR (Status)
-    || Size >= MAX_UINT32 - 1
-    || (MaxFileSize > 0 && Size > MaxFileSize)) {
+  if (  EFI_ERROR (Status)
+     || (Size >= MAX_UINT32 - 1)
+     || ((MaxFileSize > 0) && (Size > MaxFileSize)))
+  {
     File->Close (File);
     return NULL;
   }

@@ -20,37 +20,37 @@
 #include <IndustryStandard/HeciMsg.h>
 #include <IndustryStandard/HeciClientMsg.h>
 
-STATIC UINT8 mCurrentMeClientRequestedReceiveMsg;
-STATIC UINT8 mCurrentMeClientCanReceiveMsg;
-STATIC UINT8 mCurrentMeClientAddress;
+STATIC UINT8  mCurrentMeClientRequestedReceiveMsg;
+STATIC UINT8  mCurrentMeClientCanReceiveMsg;
+STATIC UINT8  mCurrentMeClientAddress;
 
-STATIC EFI_HECI_PROTOCOL *mHeci;
-STATIC EFI_HECI2_PROTOCOL *mHeci2;
-STATIC BOOLEAN mSendingHeciCommand;
-STATIC BOOLEAN mSendingHeciCommandPerClient;
+STATIC EFI_HECI_PROTOCOL   *mHeci;
+STATIC EFI_HECI2_PROTOCOL  *mHeci2;
+STATIC BOOLEAN             mSendingHeciCommand;
+STATIC BOOLEAN             mSendingHeciCommandPerClient;
 
 EFI_STATUS
 HeciReadMessage (
-  IN      UINT32           Blocking,
-  IN      UINT32           *MessageBody,
-  IN OUT  UINT32           *Length
+  IN      UINT32  Blocking,
+  IN      UINT32  *MessageBody,
+  IN OUT  UINT32  *Length
   )
 {
   if (mHeci != NULL) {
     return mHeci->ReadMsg (
-      Blocking,
-      MessageBody,
-      Length
-      );
+                    Blocking,
+                    MessageBody,
+                    Length
+                    );
   }
 
   if (mHeci2 != NULL) {
     return mHeci2->ReadMsg (
-      HECI_DEFAULT_DEVICE,
-      Blocking,
-      MessageBody,
-      Length
-      );
+                     HECI_DEFAULT_DEVICE,
+                     Blocking,
+                     MessageBody,
+                     Length
+                     );
   }
 
   DEBUG ((DEBUG_INFO, "OCME: No ME protocol loaded, cannot read message\n"));
@@ -59,29 +59,29 @@ HeciReadMessage (
 
 EFI_STATUS
 HeciSendMessage (
-  IN      UINT32           *Message,
-  IN      UINT32           Length,
-  IN      UINT8            HostAddress,
-  IN      UINT8            MEAddress
+  IN      UINT32  *Message,
+  IN      UINT32  Length,
+  IN      UINT8   HostAddress,
+  IN      UINT8   MEAddress
   )
 {
   if (mHeci != NULL) {
     return mHeci->SendMsg (
-      Message,
-      Length,
-      HostAddress,
-      MEAddress
-      );
+                    Message,
+                    Length,
+                    HostAddress,
+                    MEAddress
+                    );
   }
 
   if (mHeci2 != NULL) {
     return mHeci2->SendMsg (
-      HECI_DEFAULT_DEVICE,
-      Message,
-      Length,
-      HostAddress,
-      MEAddress
-      );
+                     HECI_DEFAULT_DEVICE,
+                     Message,
+                     Length,
+                     HostAddress,
+                     MEAddress
+                     );
   }
 
   DEBUG ((DEBUG_INFO, "OCME: No ME protocol loaded, cannot send message\n"));
@@ -95,15 +95,15 @@ HeciLocateProtocol (
 {
   EFI_STATUS  Status;
 
-  if (mHeci != NULL || mHeci2 != NULL) {
+  if ((mHeci != NULL) || (mHeci2 != NULL)) {
     return EFI_SUCCESS;
   }
 
   Status = gBS->LocateProtocol (
-    &gEfiHeciProtocolGuid,
-    NULL,
-    (VOID **) &mHeci
-    );
+                  &gEfiHeciProtocolGuid,
+                  NULL,
+                  (VOID **)&mHeci
+                  );
 
   if (EFI_ERROR (Status)) {
     DEBUG ((DEBUG_INFO, "OCME: Falling back to HECI 2 protocol - %r\n", Status));
@@ -114,10 +114,10 @@ HeciLocateProtocol (
     mHeci = NULL;
 
     Status = gBS->LocateProtocol (
-      &gEfiHeci2ProtocolGuid,
-      NULL,
-      (VOID **) &mHeci2
-      );
+                    &gEfiHeci2ProtocolGuid,
+                    NULL,
+                    (VOID **)&mHeci2
+                    );
   }
 
   if (EFI_ERROR (Status)) {
@@ -138,14 +138,14 @@ HeciUpdateReceiveMsgStatus (
 
   if (mSendingHeciCommandPerClient) {
     ZeroMem (&Command, sizeof (Command));
-    Size = sizeof (Command);
+    Size   = sizeof (Command);
     Status = HeciReadMessage (
-      BLOCKING,
-      (UINT32 *) &Command,
-      &Size
-      );
+               BLOCKING,
+               (UINT32 *)&Command,
+               &Size
+               );
 
-    if (!EFI_ERROR (Status) && Command.Command.Fields.Command == FLOW_CONTROL) {
+    if (!EFI_ERROR (Status) && (Command.Command.Fields.Command == FLOW_CONTROL)) {
       ++mCurrentMeClientCanReceiveMsg;
     }
   }
@@ -178,11 +178,11 @@ HeciGetResponse (
       Command.HostAddress            = HBM_CLIENT_ADDRESS;
 
       Status = HeciSendMessage (
-        (UINT32 *) &Command,
-        sizeof (Command),
-        HBM_HOST_ADDRESS,
-        HBM_ME_ADDRESS
-        );
+                 (UINT32 *)&Command,
+                 sizeof (Command),
+                 HBM_HOST_ADDRESS,
+                 HBM_ME_ADDRESS
+                 );
 
       if (!EFI_ERROR (Status)) {
         ++mCurrentMeClientRequestedReceiveMsg;
@@ -190,10 +190,10 @@ HeciGetResponse (
     }
 
     Status = HeciReadMessage (
-      BLOCKING,
-      MessageData,
-      &ResponseSize
-      );
+               BLOCKING,
+               MessageData,
+               &ResponseSize
+               );
 
     if (!EFI_ERROR (Status)) {
       --mCurrentMeClientRequestedReceiveMsg;
@@ -216,21 +216,22 @@ HeciSendMessageWithResponse (
 
   mSendingHeciCommand = TRUE;
 
-  Message = (HECI_BUS_MESSAGE *) MessageData;
+  Message = (HECI_BUS_MESSAGE *)MessageData;
   Command = Message->Command;
 
   Status = HeciSendMessage (
-    MessageData,
-    RequestSize,
-    HBM_HOST_ADDRESS,
-    HBM_ME_ADDRESS
-    );
+             MessageData,
+             RequestSize,
+             HBM_HOST_ADDRESS,
+             HBM_ME_ADDRESS
+             );
 
   if (!EFI_ERROR (Status)) {
     Status = HeciGetResponse (MessageData, ResponseSize);
 
-    if (!EFI_ERROR (Status)
-      && Command.Fields.Command != Message->Command.Fields.Command) {
+    if (  !EFI_ERROR (Status)
+       && (Command.Fields.Command != Message->Command.Fields.Command))
+    {
       Status = EFI_PROTOCOL_ERROR;
     }
   }
@@ -267,10 +268,10 @@ HeciGetClientMap (
   Command.Request.Command.Fields.Command = HOST_ENUMERATION_REQUEST;
 
   Status = HeciSendMessageWithResponse (
-    &Command,
-    sizeof (Command.Request),
-    sizeof (Command.Response)
-    );
+             &Command,
+             sizeof (Command.Request),
+             sizeof (Command.Response)
+             );
 
   if (EFI_ERROR (Status)) {
     return Status;
@@ -282,7 +283,7 @@ HeciGetClientMap (
 
     for (Index2 = 0; Index2 < OC_CHAR_BIT; Index2++) {
       if ((ValidAddresses & (1U << Index2)) != 0) {
-        ClientMap[*ClientActiveCount] = (UINT8) (Index + Index2);
+        ClientMap[*ClientActiveCount] = (UINT8)(Index + Index2);
         ++(*ClientActiveCount);
       }
     }
@@ -315,10 +316,10 @@ HeciGetClientProperties (
   Command.Request.Address                = Address;
 
   Status = HeciSendMessageWithResponse (
-    &Command,
-    sizeof (Command.Request),
-    sizeof (Command.Response)
-    );
+             &Command,
+             sizeof (Command.Request),
+             sizeof (Command.Response)
+             );
 
   CopyMem (
     Properties,
@@ -350,10 +351,10 @@ HeciConnectToClient (
   Command.Request.HostAddress            = HBM_CLIENT_ADDRESS;
 
   Status = HeciSendMessageWithResponse (
-    &Command,
-    sizeof (Command.Request),
-    sizeof (Command.Response)
-    );
+             &Command,
+             sizeof (Command.Request),
+             sizeof (Command.Response)
+             );
 
   DEBUG ((DEBUG_INFO, "OCME: Connect to client %X code %d - %r\n", Address, Command.Response.Status, Status));
 
@@ -389,17 +390,17 @@ HeciSendMessagePerClient (
 
   Status = EFI_SUCCESS;
 
-  if (mSendingHeciCommandPerClient)  {
+  if (mSendingHeciCommandPerClient) {
     if (!mCurrentMeClientCanReceiveMsg) {
-      HeciUpdateReceiveMsgStatus();
+      HeciUpdateReceiveMsgStatus ();
     }
 
     Status = HeciSendMessage (
-      Message,
-      Size,
-      HBM_CLIENT_ADDRESS,
-      mCurrentMeClientAddress
-      );
+               Message,
+               Size,
+               HBM_CLIENT_ADDRESS,
+               mCurrentMeClientAddress
+               );
 
     if (!EFI_ERROR (Status)) {
       --mCurrentMeClientCanReceiveMsg;
@@ -428,7 +429,7 @@ HeciDisconnectFromClients (
     STATIC_ASSERT (sizeof (Command.Response) == 8, "Invalid ME command rsp size");
 
     if (!mCurrentMeClientCanReceiveMsg) {
-      HeciUpdateReceiveMsgStatus();
+      HeciUpdateReceiveMsgStatus ();
     }
 
     ZeroMem (&Command, sizeof (Command));
@@ -440,10 +441,10 @@ HeciDisconnectFromClients (
     ++mCurrentMeClientRequestedReceiveMsg;
 
     Status = HeciSendMessageWithResponse (
-      &Command,
-      sizeof (Command.Request),
-      sizeof (Command.Response)
-      );
+               &Command,
+               sizeof (Command.Request),
+               sizeof (Command.Response)
+               );
 
     DEBUG ((
       DEBUG_INFO,
@@ -554,7 +555,7 @@ HeciPavpPerformProvisioning (
 
 EFI_STATUS
 HeciFpfGetStatus (
-  OUT  UINT32 *FpfStatus
+  OUT  UINT32  *FpfStatus
   )
 {
   EFI_STATUS  Status;
@@ -577,12 +578,12 @@ HeciFpfGetStatus (
 
 EFI_STATUS
 HeciFpfProvision (
-  OUT  UINT32 *FpfStatus
+  OUT  UINT32  *FpfStatus
   )
 {
-  EFI_STATUS Status;
-  UINT32     Response[2];
-  UINT32     Request[3];
+  EFI_STATUS  Status;
+  UINT32      Response[2];
+  UINT32      Request[3];
 
   ZeroMem (Request, sizeof (Request));
   Request[0] = 5;

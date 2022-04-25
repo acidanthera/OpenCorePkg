@@ -69,37 +69,39 @@ CheckPlatformInfoGeneric (
   IN  OC_GLOBAL_CONFIG  *Config
   )
 {
-  UINT32              ErrorCount;
-  CONST CHAR8         *SystemProductName;
-  CONST CHAR8         *SystemMemoryStatus;
-  CONST CHAR8         *AsciiSystemUUID;
-  UINT16              ProcessorType;
+  UINT32       ErrorCount;
+  CONST CHAR8  *SystemProductName;
+  CONST CHAR8  *SystemMemoryStatus;
+  CONST CHAR8  *AsciiSystemUUID;
+  UINT16       ProcessorType;
 
-  ErrorCount          = 0;
+  ErrorCount = 0;
 
-  SystemProductName   = OC_BLOB_GET (&Config->PlatformInfo.Generic.SystemProductName);
+  SystemProductName = OC_BLOB_GET (&Config->PlatformInfo.Generic.SystemProductName);
   if (!HasMacInfo (SystemProductName)) {
     DEBUG ((DEBUG_WARN, "PlatformInfo->Generic->SystemProductName has unknown model set!\n"));
     ++ErrorCount;
   }
 
-  SystemMemoryStatus  = OC_BLOB_GET (&Config->PlatformInfo.Generic.SystemMemoryStatus);
-  if (AsciiStrCmp (SystemMemoryStatus, "Auto") != 0
-    && AsciiStrCmp (SystemMemoryStatus, "Upgradable") != 0
-    && AsciiStrCmp (SystemMemoryStatus, "Soldered") != 0) {
+  SystemMemoryStatus = OC_BLOB_GET (&Config->PlatformInfo.Generic.SystemMemoryStatus);
+  if (  (AsciiStrCmp (SystemMemoryStatus, "Auto") != 0)
+     && (AsciiStrCmp (SystemMemoryStatus, "Upgradable") != 0)
+     && (AsciiStrCmp (SystemMemoryStatus, "Soldered") != 0))
+  {
     DEBUG ((DEBUG_WARN, "PlatformInfo->Generic->SystemMemoryStatus is borked (Can only be Auto, Upgradable, or Soldered)!\n"));
     ++ErrorCount;
   }
 
-  AsciiSystemUUID     = OC_BLOB_GET (&Config->PlatformInfo.Generic.SystemUuid);
-  if (AsciiSystemUUID[0] != '\0'
-    && AsciiStrCmp (AsciiSystemUUID, "OEM") != 0
-    && !AsciiGuidIsLegal (AsciiSystemUUID)) {
+  AsciiSystemUUID = OC_BLOB_GET (&Config->PlatformInfo.Generic.SystemUuid);
+  if (  (AsciiSystemUUID[0] != '\0')
+     && (AsciiStrCmp (AsciiSystemUUID, "OEM") != 0)
+     && !AsciiGuidIsLegal (AsciiSystemUUID))
+  {
     DEBUG ((DEBUG_WARN, "PlatformInfo->Generic->SystemUUID is borked (Can only be empty, special string OEM or valid UUID)!\n"));
     ++ErrorCount;
   }
 
-  ProcessorType       = Config->PlatformInfo.Generic.ProcessorType;
+  ProcessorType = Config->PlatformInfo.Generic.ProcessorType;
   if (!ValidateProcessorType (ProcessorType)) {
     DEBUG ((DEBUG_WARN, "PlatformInfo->Generic->ProcessorType is borked!\n"));
     ++ErrorCount;
@@ -127,17 +129,18 @@ CheckPlatformInfo (
 
   DEBUG ((DEBUG_VERBOSE, "config loaded into %a!\n", __func__));
 
-  ErrorCount          = 0;
-  
-  UpdateSMBIOSMode    = OC_BLOB_GET (&Config->PlatformInfo.UpdateSmbiosMode);
-  if (AsciiStrCmp (UpdateSMBIOSMode, "TryOverwrite") != 0
-    && AsciiStrCmp (UpdateSMBIOSMode, "Create") != 0
-    && AsciiStrCmp (UpdateSMBIOSMode, "Overwrite") != 0
-    && AsciiStrCmp (UpdateSMBIOSMode, "Custom") != 0) {
+  ErrorCount = 0;
+
+  UpdateSMBIOSMode = OC_BLOB_GET (&Config->PlatformInfo.UpdateSmbiosMode);
+  if (  (AsciiStrCmp (UpdateSMBIOSMode, "TryOverwrite") != 0)
+     && (AsciiStrCmp (UpdateSMBIOSMode, "Create") != 0)
+     && (AsciiStrCmp (UpdateSMBIOSMode, "Overwrite") != 0)
+     && (AsciiStrCmp (UpdateSMBIOSMode, "Custom") != 0))
+  {
     DEBUG ((DEBUG_WARN, "PlatformInfo->UpdateSMBIOSMode is borked (Can only be TryOverwrite, Create, Overwrite, or Custom)!\n"));
     ++ErrorCount;
   }
-  
+
   IsAutomaticEnabled = Config->PlatformInfo.Automatic;
   if (!IsAutomaticEnabled) {
     //
@@ -147,7 +150,7 @@ CheckPlatformInfo (
   }
 
   for (Index = 0; Index < ARRAY_SIZE (PlatformInfoCheckers); ++Index) {
-    ErrorCount += PlatformInfoCheckers[Index] (Config);
+    ErrorCount += PlatformInfoCheckers[Index](Config);
   }
 
   return ReportError (__func__, ErrorCount);

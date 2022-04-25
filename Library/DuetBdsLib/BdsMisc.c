@@ -18,7 +18,6 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 #include <Library/MemoryAllocationLib.h>
 #include <Library/UefiRuntimeServicesTableLib.h>
 
-
 /**
   Read the EFI variable (VendorGuid/Name) and return a dynamically allocated
   buffer, and the size of the buffer. If failure return NULL.
@@ -35,9 +34,9 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 VOID *
 EFIAPI
 BdsLibGetVariableAndSize (
-  IN  CHAR16              *Name,
-  IN  EFI_GUID            *VendorGuid,
-  OUT UINTN               *VariableSize
+  IN  CHAR16    *Name,
+  IN  EFI_GUID  *VendorGuid,
+  OUT UINTN     *VariableSize
   )
 {
   EFI_STATUS  Status;
@@ -49,8 +48,8 @@ BdsLibGetVariableAndSize (
   //
   // Pass in a zero size buffer to find the required buffer size.
   //
-  BufferSize  = 0;
-  Status      = gRT->GetVariable (Name, VendorGuid, NULL, &BufferSize, Buffer);
+  BufferSize = 0;
+  Status     = gRT->GetVariable (Name, VendorGuid, NULL, &BufferSize, Buffer);
   if (Status == EFI_BUFFER_TOO_SMALL) {
     //
     // Allocate the buffer to return
@@ -60,6 +59,7 @@ BdsLibGetVariableAndSize (
       *VariableSize = 0;
       return NULL;
     }
+
     //
     // Read variable into the allocated buffer.
     //
@@ -105,16 +105,15 @@ BdsLibDelPartMatchInstance (
   NewDevicePath     = NULL;
   TempNewDevicePath = NULL;
 
-  if (Multi == NULL || Single == NULL) {
+  if ((Multi == NULL) || (Single == NULL)) {
     return Multi;
   }
 
-  Instance        =  GetNextDevicePathInstance (&Multi, &InstanceSize);
-  SingleDpSize    =  GetDevicePathSize (Single) - END_DEVICE_PATH_LENGTH;
-  InstanceSize    -= END_DEVICE_PATH_LENGTH;
+  Instance      =  GetNextDevicePathInstance (&Multi, &InstanceSize);
+  SingleDpSize  =  GetDevicePathSize (Single) - END_DEVICE_PATH_LENGTH;
+  InstanceSize -= END_DEVICE_PATH_LENGTH;
 
   while (Instance != NULL) {
-
     Size = (SingleDpSize < InstanceSize) ? SingleDpSize : InstanceSize;
 
     if ((CompareMem (Instance, Single, Size) != 0)) {
@@ -122,14 +121,15 @@ BdsLibDelPartMatchInstance (
       // Append the device path instance which does not match with Single
       //
       TempNewDevicePath = NewDevicePath;
-      NewDevicePath = AppendDevicePathInstance (NewDevicePath, Instance);
+      NewDevicePath     = AppendDevicePathInstance (NewDevicePath, Instance);
       if (TempNewDevicePath != NULL) {
-        FreePool(TempNewDevicePath);
+        FreePool (TempNewDevicePath);
       }
     }
-    FreePool(Instance);
-    Instance = GetNextDevicePathInstance (&Multi, &InstanceSize);
-    InstanceSize  -= END_DEVICE_PATH_LENGTH;
+
+    FreePool (Instance);
+    Instance      = GetNextDevicePathInstance (&Multi, &InstanceSize);
+    InstanceSize -= END_DEVICE_PATH_LENGTH;
   }
 
   return NewDevicePath;
@@ -159,12 +159,12 @@ BdsLibMatchDevicePaths (
   EFI_DEVICE_PATH_PROTOCOL  *DevicePathInst;
   UINTN                     Size;
 
-  if (Multi == NULL || Single  == NULL) {
+  if ((Multi == NULL) || (Single  == NULL)) {
     return FALSE;
   }
 
-  DevicePath      = Multi;
-  DevicePathInst  = GetNextDevicePathInstance (&DevicePath, &Size);
+  DevicePath     = Multi;
+  DevicePathInst = GetNextDevicePathInstance (&DevicePath, &Size);
 
   //
   // Search for the match of 'Single' in 'Multi'

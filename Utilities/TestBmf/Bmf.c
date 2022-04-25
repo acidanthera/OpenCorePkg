@@ -43,12 +43,13 @@ GuiBmpToImage (
   if (EFI_ERROR (Status)) {
     return Status;
   }
-  // TODO: Update the lib?
-  ASSERT ((UINT32) BmpHeight == BmpHeight);
-  ASSERT ((UINT32) BmpWidth  == BmpWidth);
 
-  Image->Height = (UINT32) BmpHeight;
-  Image->Width  = (UINT32) BmpWidth;
+  // TODO: Update the lib?
+  ASSERT ((UINT32)BmpHeight == BmpHeight);
+  ASSERT ((UINT32)BmpWidth  == BmpWidth);
+
+  Image->Height = (UINT32)BmpHeight;
+  Image->Width  = (UINT32)BmpWidth;
   Image->Buffer = Buffer;
   return EFI_SUCCESS;
 }
@@ -93,13 +94,13 @@ ENTRY_POINT (
 
   BmpImage     = NULL;
   BmpImageSize = 0;
-  Status = TranslateGopBltToBmp (
-             Label.Buffer,
-             Label.Height,
-             Label.Width,
-             &BmpImage,
-             &BmpImageSize
-             );
+  Status       = TranslateGopBltToBmp (
+                   Label.Buffer,
+                   Label.Height,
+                   Label.Width,
+                   &BmpImage,
+                   &BmpImageSize
+                   );
   if (EFI_ERROR (Status)) {
     return -1;
   }

@@ -32,8 +32,8 @@ OcRtcRead (
 
 VOID
 OcRtcWrite (
-  IN UINT8 Offset,
-  IN UINT8 Value
+  IN UINT8  Offset,
+  IN UINT8  Value
   );
 
 /**
@@ -60,8 +60,8 @@ OcRtcWrite (
 **/
 UINT16
 OcRtcChecksumApple (
-  IN CONST VOID   *Data,
-  IN UINTN        Size
+  IN CONST VOID  *Data,
+  IN UINTN       Size
   );
 
 /**
@@ -87,8 +87,8 @@ OcRtcReadIvy (
 
 VOID
 OcRtcWriteIvy (
-  IN UINT8 Offset,
-  IN UINT8 Value
+  IN UINT8  Offset,
+  IN UINT8  Value
   );
 
 #endif // OC_RTC_LIB_H

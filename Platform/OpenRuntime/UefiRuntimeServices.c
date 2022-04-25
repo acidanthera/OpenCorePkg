@@ -54,13 +54,13 @@ OC_FWRT_CONFIG  *gCurrentConfig;
 /**
   Boot phase accessible variables.
 **/
-STATIC EFI_EVENT                     mTranslateEvent;
-STATIC EFI_GET_VARIABLE              mCustomGetVariable;
-STATIC EFI_SET_VIRTUAL_ADDRESS_MAP   mCustomSetVirtualAddressMap;
-STATIC BOOLEAN                       mCustomSetVirtualAddressMapEnabled;
-STATIC BOOLEAN                       mKernelStarted;
+STATIC EFI_EVENT                    mTranslateEvent;
+STATIC EFI_GET_VARIABLE             mCustomGetVariable;
+STATIC EFI_SET_VIRTUAL_ADDRESS_MAP  mCustomSetVirtualAddressMap;
+STATIC BOOLEAN                      mCustomSetVirtualAddressMapEnabled;
+STATIC BOOLEAN                      mKernelStarted;
 #ifdef OC_DEBUG_VAR_SERVICE ///< For file logging disable TPL checking in OcLogAddEntry.
-STATIC BOOLEAN                       mInsideVarService;
+STATIC BOOLEAN  mInsideVarService;
 #endif
 
 STATIC
@@ -76,7 +76,7 @@ WriteUnprotectorPrologue (
     *Ints     = SaveAndDisableInterrupts ();
     Cr0.UintN = AsmReadCr0 ();
     if (Cr0.Bits.WP == 1) {
-      *Wp = TRUE;
+      *Wp         = TRUE;
       Cr0.Bits.WP = 0;
       AsmWriteCr0 (Cr0.UintN);
     } else {
@@ -225,9 +225,9 @@ WrapGetTime (
   WriteUnprotectorPrologue (&Ints, &Wp);
 
   Status = mStoredGetTime (
-    Time,
-    Capabilities
-    );
+             Time,
+             Capabilities
+             );
 
   if (!EFI_ERROR (Status)) {
     //
@@ -261,8 +261,8 @@ WrapSetTime (
   WriteUnprotectorPrologue (&Ints, &Wp);
 
   Status = mStoredSetTime (
-    Time
-    );
+             Time
+             );
 
   WriteUnprotectorEpilogue (Ints, Wp);
 
@@ -273,9 +273,9 @@ STATIC
 EFI_STATUS
 EFIAPI
 WrapGetWakeupTime (
-  OUT BOOLEAN    *Enabled,
-  OUT BOOLEAN    *Pending,
-  OUT EFI_TIME   *Time
+  OUT BOOLEAN   *Enabled,
+  OUT BOOLEAN   *Pending,
+  OUT EFI_TIME  *Time
   )
 {
   EFI_STATUS  Status;
@@ -285,10 +285,10 @@ WrapGetWakeupTime (
   WriteUnprotectorPrologue (&Ints, &Wp);
 
   Status = mStoredGetWakeupTime (
-    Enabled,
-    Pending,
-    Time
-    );
+             Enabled,
+             Pending,
+             Time
+             );
 
   WriteUnprotectorEpilogue (Ints, Wp);
 
@@ -310,9 +310,9 @@ WrapSetWakeupTime (
   WriteUnprotectorPrologue (&Ints, &Wp);
 
   Status = mStoredSetWakeupTime (
-    Enable,
-    Time
-    );
+             Enable,
+             Time
+             );
 
   WriteUnprotectorEpilogue (Ints, Wp);
 
@@ -338,27 +338,30 @@ WrapGetVariable (
   //
   // Perform early checks for speedup.
   //
-  if (VariableName == NULL
-    || VendorGuid == NULL
-    || DataSize == NULL
-    || (Data == NULL && *DataSize != 0)) {
+  if (  (VariableName == NULL)
+     || (VendorGuid == NULL)
+     || (DataSize == NULL)
+     || ((Data == NULL) && (*DataSize != 0)))
+  {
     return EFI_INVALID_PARAMETER;
   }
 
-#ifdef OC_DEBUG_VAR_SERVICE
-  if (!mInsideVarService && StrCmp (VariableName, L"EfiTime") != 0) {
+ #ifdef OC_DEBUG_VAR_SERVICE
+  if (!mInsideVarService && (StrCmp (VariableName, L"EfiTime") != 0)) {
     mInsideVarService = TRUE;
-    DEBUG ((DEBUG_INFO, "GETVAR %g:%s (%u)\n", VendorGuid, VariableName, (UINT32) *DataSize));
+    DEBUG ((DEBUG_INFO, "GETVAR %g:%s (%u)\n", VendorGuid, VariableName, (UINT32)*DataSize));
     mInsideVarService = FALSE;
   }
-#endif
+
+ #endif
 
   //
   // Abort access to write-only variables.
   //
-  if (gCurrentConfig->RestrictedVariables
-    && mKernelStarted
-    && CompareGuid (VendorGuid, &gOcWriteOnlyVariableGuid)) {
+  if (  gCurrentConfig->RestrictedVariables
+     && mKernelStarted
+     && CompareGuid (VendorGuid, &gOcWriteOnlyVariableGuid))
+  {
     return EFI_SECURITY_VIOLATION;
   }
 
@@ -367,18 +370,18 @@ WrapGetVariable (
   //
   if (gCurrentConfig->BootVariableRedirect && IsEfiBootVar (VariableName, VendorGuid, TempName)) {
     VariableName = TempName;
-    VendorGuid = &gOcVendorVariableGuid;
+    VendorGuid   = &gOcVendorVariableGuid;
   }
 
   WriteUnprotectorPrologue (&Ints, &Wp);
 
-  Status = (mCustomGetVariable != NULL ? mCustomGetVariable : mStoredGetVariable) (
-    VariableName,
-    VendorGuid,
-    Attributes,
-    DataSize,
-    Data
-    );
+  Status = (mCustomGetVariable != NULL ? mCustomGetVariable : mStoredGetVariable)(
+  VariableName,
+  VendorGuid,
+  Attributes,
+  DataSize,
+  Data
+  );
 
   WriteUnprotectorEpilogue (Ints, Wp);
 
@@ -403,20 +406,21 @@ WrapGetNextVariableName (
   BOOLEAN     Ints;
   BOOLEAN     Wp;
 
-#ifdef OC_DEBUG_VAR_SERVICE
+ #ifdef OC_DEBUG_VAR_SERVICE
   if (!mInsideVarService) {
     mInsideVarService = TRUE;
-    DEBUG ((DEBUG_INFO, "NEXVAR %g:%s (%u/%u)\n", VendorGuid, VariableName, (UINT32) *VariableNameSize));
+    DEBUG ((DEBUG_INFO, "NEXVAR %g:%s (%u/%u)\n", VendorGuid, VariableName, (UINT32)*VariableNameSize));
     mInsideVarService = FALSE;
   }
-#endif
+
+ #endif
 
   //
   // Perform initial checks as per spec. Last check is part of:
   // Null-terminator is not found in the first VariableNameSize
   // bytes of the input VariableName buffer.
   //
-  if (VariableNameSize == NULL || VariableName == NULL || VendorGuid == NULL) {
+  if ((VariableNameSize == NULL) || (VariableName == NULL) || (VendorGuid == NULL)) {
     return EFI_INVALID_PARAMETER;
   }
 
@@ -434,7 +438,7 @@ WrapGetNextVariableName (
   //
   // Also assume that too large variables do not exist, as we cannot work with them anyway.
   //
-  if (Size == 0 || Size > sizeof (TempName)) {
+  if ((Size == 0) || (Size > sizeof (TempName))) {
     return EFI_INVALID_PARAMETER;
   }
 
@@ -572,13 +576,13 @@ WrapGetNextVariableName (
             StrLen (TempName)
             );
           *VariableNameSize = Size; ///< This is NOT explicitly required by the spec.
-          Status = EFI_SUCCESS;
+          Status            = EFI_SUCCESS;
         } else {
           //
           // Request more space.
           //
           *VariableNameSize = Size;
-          Status = EFI_BUFFER_TOO_SMALL;
+          Status            = EFI_BUFFER_TOO_SMALL;
         }
 
         WriteUnprotectorEpilogue (Ints, Wp);
@@ -615,27 +619,29 @@ WrapSetVariable (
   BOOLEAN     Ints;
   BOOLEAN     Wp;
 
-#ifdef OC_DEBUG_VAR_SERVICE
+ #ifdef OC_DEBUG_VAR_SERVICE
   if (!mInsideVarService) {
     mInsideVarService = TRUE;
-    DEBUG ((DEBUG_INFO, "SETVAR %g:%s (%u/%u)\n", VendorGuid, VariableName, (UINT32) DataSize, Attributes));
+    DEBUG ((DEBUG_INFO, "SETVAR %g:%s (%u/%u)\n", VendorGuid, VariableName, (UINT32)DataSize, Attributes));
     mInsideVarService = FALSE;
   }
-#endif
+
+ #endif
 
   //
   // Abort access when running with read-only NVRAM.
   //
-  if (gCurrentConfig->WriteProtection && (Attributes & EFI_VARIABLE_NON_VOLATILE) != 0) {
+  if (gCurrentConfig->WriteProtection && ((Attributes & EFI_VARIABLE_NON_VOLATILE) != 0)) {
     return EFI_SECURITY_VIOLATION;
   }
 
   //
   // Abort access to read-only variables.
   //
-  if (gCurrentConfig->RestrictedVariables
-    && mKernelStarted
-    && CompareGuid (VendorGuid, &gOcReadOnlyVariableGuid)) {
+  if (  gCurrentConfig->RestrictedVariables
+     && mKernelStarted
+     && CompareGuid (VendorGuid, &gOcReadOnlyVariableGuid))
+  {
     return EFI_SECURITY_VIOLATION;
   }
 
@@ -644,15 +650,17 @@ WrapSetVariable (
   //
   if (gCurrentConfig->ProtectSecureBoot) {
     if (CompareGuid (VendorGuid, &gEfiGlobalVariableGuid)) {
-      if (StrCmp (VariableName, EFI_PLATFORM_KEY_NAME) == 0
-        || StrCmp (VariableName, EFI_KEY_EXCHANGE_KEY_NAME) == 0) {
+      if (  (StrCmp (VariableName, EFI_PLATFORM_KEY_NAME) == 0)
+         || (StrCmp (VariableName, EFI_KEY_EXCHANGE_KEY_NAME) == 0))
+      {
         return EFI_SECURITY_VIOLATION;
       }
     } else if (CompareGuid (VendorGuid, &gEfiImageSecurityDatabaseGuid)) {
-      if (StrCmp (VariableName, EFI_IMAGE_SECURITY_DATABASE) == 0
-        || StrCmp (VariableName, EFI_IMAGE_SECURITY_DATABASE1) == 0
-        || StrCmp (VariableName, EFI_IMAGE_SECURITY_DATABASE2) == 0
-        || StrCmp (VariableName, L"dbr" /* EFI_IMAGE_SECURITY_DATABASE3 */) == 0) {
+      if (  (StrCmp (VariableName, EFI_IMAGE_SECURITY_DATABASE) == 0)
+         || (StrCmp (VariableName, EFI_IMAGE_SECURITY_DATABASE1) == 0)
+         || (StrCmp (VariableName, EFI_IMAGE_SECURITY_DATABASE2) == 0)
+         || (StrCmp (VariableName, L"dbr" /* EFI_IMAGE_SECURITY_DATABASE3 */) == 0))
+      {
         return EFI_SECURITY_VIOLATION;
       }
     } else if (CompareGuid (VendorGuid, &gMicrosoftVariableGuid)) {
@@ -666,21 +674,22 @@ WrapSetVariable (
   //
   // Redirect Boot-prefixed variables to our own GUID.
   //
-  if (gCurrentConfig->BootVariableRedirect
-    && IsEfiBootVar (VariableName, VendorGuid, TempName)) {
+  if (  gCurrentConfig->BootVariableRedirect
+     && IsEfiBootVar (VariableName, VendorGuid, TempName))
+  {
     VariableName = TempName;
-    VendorGuid = &gOcVendorVariableGuid;
+    VendorGuid   = &gOcVendorVariableGuid;
   }
 
   WriteUnprotectorPrologue (&Ints, &Wp);
 
   Status = mStoredSetVariable (
-    VariableName,
-    VendorGuid,
-    Attributes,
-    DataSize,
-    Data
-    );
+             VariableName,
+             VendorGuid,
+             Attributes,
+             DataSize,
+             Data
+             );
 
   WriteUnprotectorEpilogue (Ints, Wp);
 
@@ -701,8 +710,8 @@ WrapGetNextHighMonotonicCount (
   WriteUnprotectorPrologue (&Ints, &Wp);
 
   Status = mStoredGetNextHighMonotonicCount (
-    Count
-    );
+             Count
+             );
 
   WriteUnprotectorEpilogue (Ints, Wp);
 
@@ -744,7 +753,7 @@ WrapSetVirtualAddressMap (
   IN EFI_MEMORY_DESCRIPTOR  *MemoryMap
   )
 {
-  EFI_STATUS   Status;
+  EFI_STATUS  Status;
 
   //
   // This is the time for us to remove our hacks.
@@ -752,23 +761,23 @@ WrapSetVirtualAddressMap (
   // We do not need to recover BS, since they already are invalid.
   //
   gRT->SetVirtualAddressMap = mSetVirtualAddressMap;
-  gRT->Hdr.CRC32 = 0;
-  gRT->Hdr.CRC32 = CalculateCrc32 (gRT, gRT->Hdr.HeaderSize);
+  gRT->Hdr.CRC32            = 0;
+  gRT->Hdr.CRC32            = CalculateCrc32 (gRT, gRT->Hdr.HeaderSize);
 
   if (!mCustomSetVirtualAddressMapEnabled) {
     Status = gRT->SetVirtualAddressMap (
-      MemoryMapSize,
-      DescriptorSize,
-      DescriptorVersion,
-      MemoryMap
-      );
+                    MemoryMapSize,
+                    DescriptorSize,
+                    DescriptorVersion,
+                    MemoryMap
+                    );
   } else {
     Status = mCustomSetVirtualAddressMap (
-      MemoryMapSize,
-      DescriptorSize,
-      DescriptorVersion,
-      MemoryMap
-      );
+               MemoryMapSize,
+               DescriptorSize,
+               DescriptorVersion,
+               MemoryMap
+               );
   }
 
   return Status;
@@ -823,23 +832,23 @@ TranslateAddressesHandler (
   IN VOID       *Context
   )
 {
-  gRT->ConvertPointer (0, (VOID **) &mStoredGetTime);
-  gRT->ConvertPointer (0, (VOID **) &mStoredSetTime);
-  gRT->ConvertPointer (0, (VOID **) &mStoredGetWakeupTime);
-  gRT->ConvertPointer (0, (VOID **) &mStoredSetWakeupTime);
-  gRT->ConvertPointer (0, (VOID **) &mStoredGetVariable);
-  gRT->ConvertPointer (0, (VOID **) &mStoredGetNextVariableName);
-  gRT->ConvertPointer (0, (VOID **) &mStoredSetVariable);
-  gRT->ConvertPointer (0, (VOID **) &mStoredGetNextHighMonotonicCount);
-  gRT->ConvertPointer (0, (VOID **) &mStoredResetSystem);
+  gRT->ConvertPointer (0, (VOID **)&mStoredGetTime);
+  gRT->ConvertPointer (0, (VOID **)&mStoredSetTime);
+  gRT->ConvertPointer (0, (VOID **)&mStoredGetWakeupTime);
+  gRT->ConvertPointer (0, (VOID **)&mStoredSetWakeupTime);
+  gRT->ConvertPointer (0, (VOID **)&mStoredGetVariable);
+  gRT->ConvertPointer (0, (VOID **)&mStoredGetNextVariableName);
+  gRT->ConvertPointer (0, (VOID **)&mStoredSetVariable);
+  gRT->ConvertPointer (0, (VOID **)&mStoredGetNextHighMonotonicCount);
+  gRT->ConvertPointer (0, (VOID **)&mStoredResetSystem);
 
-  gRT->ConvertPointer (0, (VOID **) &gCurrentConfig);
+  gRT->ConvertPointer (0, (VOID **)&gCurrentConfig);
   mCustomGetVariable = NULL;
 
   //
   // Ideally we do that from ExitBootServices, but VirtualAddressChange is fine as well.
   //
-  mKernelStarted     = TRUE;
+  mKernelStarted = TRUE;
 }
 
 VOID
@@ -860,27 +869,27 @@ RedirectRuntimeServices (
   mStoredResetSystem               = gRT->ResetSystem;
   mSetVirtualAddressMap            = gRT->SetVirtualAddressMap;
 
-  gRT->GetTime                     = WrapGetTime;
-  gRT->SetTime                     = WrapSetTime;
-  gRT->GetWakeupTime               = WrapGetWakeupTime;
-  gRT->SetWakeupTime               = WrapSetWakeupTime;
-  gRT->GetVariable                 = WrapGetVariable;
-  gRT->GetNextVariableName         = WrapGetNextVariableName;
-  gRT->SetVariable                 = WrapSetVariable;
-  gRT->GetNextHighMonotonicCount   = WrapGetNextHighMonotonicCount;
-  gRT->ResetSystem                 = WrapResetSystem;
-  gRT->SetVirtualAddressMap        = WrapSetVirtualAddressMap;
+  gRT->GetTime                   = WrapGetTime;
+  gRT->SetTime                   = WrapSetTime;
+  gRT->GetWakeupTime             = WrapGetWakeupTime;
+  gRT->SetWakeupTime             = WrapSetWakeupTime;
+  gRT->GetVariable               = WrapGetVariable;
+  gRT->GetNextVariableName       = WrapGetNextVariableName;
+  gRT->SetVariable               = WrapSetVariable;
+  gRT->GetNextHighMonotonicCount = WrapGetNextHighMonotonicCount;
+  gRT->ResetSystem               = WrapResetSystem;
+  gRT->SetVirtualAddressMap      = WrapSetVirtualAddressMap;
 
   gRT->Hdr.CRC32 = 0;
   gBS->CalculateCrc32 (gRT, gRT->Hdr.HeaderSize, &gRT->Hdr.CRC32);
 
   Status = gBS->CreateEvent (
-    EVT_SIGNAL_VIRTUAL_ADDRESS_CHANGE,
-    TPL_CALLBACK,
-    TranslateAddressesHandler,
-    NULL,
-    &mTranslateEvent
-    );
+                  EVT_SIGNAL_VIRTUAL_ADDRESS_CHANGE,
+                  TPL_CALLBACK,
+                  TranslateAddressesHandler,
+                  NULL,
+                  &mTranslateEvent
+                  );
 
   ASSERT_EFI_ERROR (Status);
 }

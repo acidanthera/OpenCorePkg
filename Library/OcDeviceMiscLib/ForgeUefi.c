@@ -29,41 +29,41 @@ STATIC
 EFI_STATUS
 EFIAPI
 OcCreateEventEx (
-  IN       UINT32                 Type,
-  IN       EFI_TPL                NotifyTpl,
-  IN       EFI_EVENT_NOTIFY       NotifyFunction OPTIONAL,
-  IN CONST VOID                   *NotifyContext OPTIONAL,
-  IN CONST EFI_GUID               *EventGroup    OPTIONAL,
-  OUT      EFI_EVENT              *Event
+  IN       UINT32            Type,
+  IN       EFI_TPL           NotifyTpl,
+  IN       EFI_EVENT_NOTIFY  NotifyFunction OPTIONAL,
+  IN CONST VOID              *NotifyContext OPTIONAL,
+  IN CONST EFI_GUID          *EventGroup    OPTIONAL,
+  OUT      EFI_EVENT         *Event
   )
 {
-  if (Type == EVT_NOTIFY_SIGNAL && CompareGuid (EventGroup, &gEfiEventExitBootServicesGuid)) {
+  if ((Type == EVT_NOTIFY_SIGNAL) && CompareGuid (EventGroup, &gEfiEventExitBootServicesGuid)) {
     return gBS->CreateEvent (
-      EVT_SIGNAL_EXIT_BOOT_SERVICES,
-      NotifyTpl,
-      NotifyFunction,
-      (VOID *) NotifyContext,
-      Event
-      );
+                  EVT_SIGNAL_EXIT_BOOT_SERVICES,
+                  NotifyTpl,
+                  NotifyFunction,
+                  (VOID *)NotifyContext,
+                  Event
+                  );
   }
 
-  if (Type == EVT_NOTIFY_SIGNAL && CompareGuid (EventGroup, &gEfiEventVirtualAddressChangeGuid)) {
+  if ((Type == EVT_NOTIFY_SIGNAL) && CompareGuid (EventGroup, &gEfiEventVirtualAddressChangeGuid)) {
     return gBS->CreateEvent (
-      EVT_SIGNAL_VIRTUAL_ADDRESS_CHANGE,
-      NotifyTpl,
-      NotifyFunction,
-      (VOID *) NotifyContext,
-      Event
-      );
+                  EVT_SIGNAL_VIRTUAL_ADDRESS_CHANGE,
+                  NotifyTpl,
+                  NotifyFunction,
+                  (VOID *)NotifyContext,
+                  Event
+                  );
   }
 
   gBS->CreateEvent (
-    Type,
-    NotifyTpl,
-    NotifyFunction,
-    (VOID *) NotifyContext,
-    Event
-    );
+         Type,
+         NotifyTpl,
+         NotifyFunction,
+         (VOID *)NotifyContext,
+         Event
+         );
   return EFI_SUCCESS;
 }
 
@@ -72,14 +72,14 @@ OcForgeUefiSupport (
   VOID
   )
 {
-  EFI_BOOT_SERVICES *NewBS;
+  EFI_BOOT_SERVICES  *NewBS;
 
   DEBUG ((
     DEBUG_INFO,
     "OCDM: Found 0x%X UEFI version (%u bytes, rebuilding to %u)\n",
     gST->Hdr.Revision,
     gBS->Hdr.HeaderSize,
-    (UINT32) sizeof (EFI_BOOT_SERVICES)
+    (UINT32)sizeof (EFI_BOOT_SERVICES)
     ));
 
   //
@@ -101,17 +101,17 @@ OcForgeUefiSupport (
 
   CopyMem (NewBS, gBS, gBS->Hdr.HeaderSize);
 
-  NewBS->CreateEventEx = OcCreateEventEx;
+  NewBS->CreateEventEx  = OcCreateEventEx;
   NewBS->Hdr.HeaderSize = sizeof (EFI_BOOT_SERVICES);
-  NewBS->Hdr.Revision = EFI_2_30_SYSTEM_TABLE_REVISION;
-  NewBS->Hdr.CRC32 = 0;
-  NewBS->Hdr.CRC32 = CalculateCrc32 (NewBS, NewBS->Hdr.HeaderSize);
-  gBS = NewBS;
+  NewBS->Hdr.Revision   = EFI_2_30_SYSTEM_TABLE_REVISION;
+  NewBS->Hdr.CRC32      = 0;
+  NewBS->Hdr.CRC32      = CalculateCrc32 (NewBS, NewBS->Hdr.HeaderSize);
+  gBS                   = NewBS;
 
   gST->BootServices = NewBS;
   gST->Hdr.Revision = EFI_2_30_SYSTEM_TABLE_REVISION;
-  gST->Hdr.CRC32 = 0;
-  gST->Hdr.CRC32 = CalculateCrc32 (gST, gST->Hdr.HeaderSize);
+  gST->Hdr.CRC32    = 0;
+  gST->Hdr.CRC32    = CalculateCrc32 (gST, gST->Hdr.HeaderSize);
 
   return EFI_SUCCESS;
 }

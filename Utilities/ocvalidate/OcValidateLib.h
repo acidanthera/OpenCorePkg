@@ -23,7 +23,7 @@
 
 /**
   Get current timestamp in milliseconds.
-  
+
   @return     Current timestamp in milliseconds.
 **/
 INT64
@@ -65,8 +65,8 @@ AsciiCommentIsLegal (
 **/
 BOOLEAN
 AsciiIdentifierIsLegal (
-  IN  CONST CHAR8    *Identifier,
-  IN  BOOLEAN        IsKernelIdentifier
+  IN  CONST CHAR8  *Identifier,
+  IN  BOOLEAN      IsKernelIdentifier
   );
 
 /**
@@ -79,8 +79,8 @@ AsciiIdentifierIsLegal (
 **/
 BOOLEAN
 AsciiArchIsLegal (
-  IN  CONST CHAR8    *Arch,
-  IN  BOOLEAN        IsKernelArch
+  IN  CONST CHAR8  *Arch,
+  IN  BOOLEAN      IsKernelArch
   );
 
 /**
@@ -148,10 +148,10 @@ AsciiGuidIsLegal (
 **/
 BOOLEAN
 DataHasProperMasking (
-  IN  CONST VOID   *Data,
-  IN  CONST VOID   *Mask,
-  IN  UINTN        DataSize,
-  IN  UINTN        MaskSize
+  IN  CONST VOID  *Data,
+  IN  CONST VOID  *Mask,
+  IN  UINTN       DataSize,
+  IN  UINTN       MaskSize
   );
 
 /**
@@ -177,17 +177,17 @@ DataHasProperMasking (
 **/
 UINT32
 ValidatePatch (
-  IN   CONST   CHAR8   *PatchSection,
-  IN   UINT32          PatchIndex,
-  IN   BOOLEAN         FindSizeCanBeZero,
-  IN   CONST   UINT8   *Find,
-  IN   UINT32          FindSize,
-  IN   CONST   UINT8   *Replace,
-  IN   UINT32          ReplaceSize,
-  IN   CONST   UINT8   *Mask,
-  IN   UINT32          MaskSize,
-  IN   CONST   UINT8   *ReplaceMask,
-  IN   UINT32          ReplaceMaskSize
+  IN   CONST   CHAR8  *PatchSection,
+  IN   UINT32         PatchIndex,
+  IN   BOOLEAN        FindSizeCanBeZero,
+  IN   CONST   UINT8  *Find,
+  IN   UINT32         FindSize,
+  IN   CONST   UINT8  *Replace,
+  IN   UINT32         ReplaceSize,
+  IN   CONST   UINT8  *Mask,
+  IN   UINT32         MaskSize,
+  IN   CONST   UINT8  *ReplaceMask,
+  IN   UINT32         ReplaceMaskSize
   );
 
 /**
@@ -231,7 +231,7 @@ BOOLEAN
 StringIsDuplicated (
   IN  CONST CHAR8  *EntrySection,
   IN  CONST CHAR8  *FirstString,
-  IN  CONST CHAR8  *SecondString  
+  IN  CONST CHAR8  *SecondString
   );
 
 /**

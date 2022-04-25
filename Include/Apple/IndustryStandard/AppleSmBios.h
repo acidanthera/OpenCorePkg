@@ -26,7 +26,7 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 
 #define APPLE_NUMBER_OF_FLASHMAP_ENTRIES  8
 
-#define APPLE_SMBIOS_SMC_VERSION_SIZE     16
+#define APPLE_SMBIOS_SMC_VERSION_SIZE  16
 
 // APPLE_REGION_TYPE
 enum {
@@ -42,30 +42,30 @@ typedef UINT8 APPLE_REGION_TYPE;
 
 // APPLE_FIRMWARE_REGION_INFO
 typedef PACKED struct {
-  UINT32 StartAddress;
-  UINT32 EndAddress;
+  UINT32    StartAddress;
+  UINT32    EndAddress;
 } APPLE_FIRMWARE_REGION_INFO;
 
 // APPLE_SMBIOS_TABLE_TYPE128
 typedef PACKED struct {
-  SMBIOS_STRUCTURE           Hdr;
-  UINT8                      NumberOfRegions;
-  UINT8                      Reserved[3];
-  UINT32                     FirmwareFeatures;
-  UINT32                     FirmwareFeaturesMask;
-  APPLE_REGION_TYPE          RegionTypeMap[APPLE_NUMBER_OF_FLASHMAP_ENTRIES];
-  APPLE_FIRMWARE_REGION_INFO FlashMap[APPLE_NUMBER_OF_FLASHMAP_ENTRIES];
-  UINT32                     ExtendedFirmwareFeatures;
-  UINT32                     ExtendedFirmwareFeaturesMask;
+  SMBIOS_STRUCTURE              Hdr;
+  UINT8                         NumberOfRegions;
+  UINT8                         Reserved[3];
+  UINT32                        FirmwareFeatures;
+  UINT32                        FirmwareFeaturesMask;
+  APPLE_REGION_TYPE             RegionTypeMap[APPLE_NUMBER_OF_FLASHMAP_ENTRIES];
+  APPLE_FIRMWARE_REGION_INFO    FlashMap[APPLE_NUMBER_OF_FLASHMAP_ENTRIES];
+  UINT32                        ExtendedFirmwareFeatures;
+  UINT32                        ExtendedFirmwareFeaturesMask;
 } APPLE_SMBIOS_TABLE_TYPE128;
 
 // APPLE_SMBIOS_TABLE_TYPE130
 typedef struct {
-  SMBIOS_STRUCTURE Hdr;
-  UINT16           MemoryDeviceHandle;
-  UINT16           Offset;
-  UINT16           Size;
-  UINT16           Data[];
+  SMBIOS_STRUCTURE    Hdr;
+  UINT16              MemoryDeviceHandle;
+  UINT16              Offset;
+  UINT16              Size;
+  UINT16              Data[];
 } APPLE_SMBIOS_TABLE_TYPE130;
 
 //
@@ -163,60 +163,60 @@ enum {
   AppleProcessorTypeXeonPenrynType2 = 0x0402,
   AppleProcessorTypeXeon            = 0x0501,
   AppleProcessorTypeXeonE5          = 0x0A01,
-  
-  AppleProcessorTypeCorei5Type1     = 0x0601,
-  AppleProcessorTypeCorei7Type1     = 0x0701,
-  AppleProcessorTypeCorei3Type1     = 0x0901,
-  
-  AppleProcessorTypeCorei5Type2     = 0x0602,
-  AppleProcessorTypeCorei7Type2     = 0x0702,
-  AppleProcessorTypeCorei3Type2     = 0x0902,
-  
-  AppleProcessorTypeCorei5Type3     = 0x0603,
-  AppleProcessorTypeCorei7Type3     = 0x0703,
-  AppleProcessorTypeCorei3Type3     = 0x0903,
-  
-  AppleProcessorTypeCorei5Type4     = 0x0604,
-  AppleProcessorTypeCorei7Type4     = 0x0704,
-  AppleProcessorTypeCorei3Type4     = 0x0904,
-  
-  AppleProcessorTypeCorei5Type5     = 0x0605, // NOTE: we are putting 0x0609 on IM191 (i5-8600), although it should be 0x0605.
-  AppleProcessorTypeCorei7Type5     = 0x0705,
-  AppleProcessorTypeCorei3Type5     = 0x0905,
-  
-  AppleProcessorTypeCorei5Type6     = 0x0606, // i5 5250U (iMac16,1, MacBookAir7,1 and 7,2), i5 5675R (iMac16,2), i5 5257U (MacBookPro12,1)
-  AppleProcessorTypeCorei7Type6     = 0x0706, // ideal value for Broadwell i7, need confirmation
-  AppleProcessorTypeCorei3Type6     = 0x0906, // ideal value for Broadwell i3, need confirmation
-  
+
+  AppleProcessorTypeCorei5Type1 = 0x0601,
+  AppleProcessorTypeCorei7Type1 = 0x0701,
+  AppleProcessorTypeCorei3Type1 = 0x0901,
+
+  AppleProcessorTypeCorei5Type2 = 0x0602,
+  AppleProcessorTypeCorei7Type2 = 0x0702,
+  AppleProcessorTypeCorei3Type2 = 0x0902,
+
+  AppleProcessorTypeCorei5Type3 = 0x0603,
+  AppleProcessorTypeCorei7Type3 = 0x0703,
+  AppleProcessorTypeCorei3Type3 = 0x0903,
+
+  AppleProcessorTypeCorei5Type4 = 0x0604,
+  AppleProcessorTypeCorei7Type4 = 0x0704,
+  AppleProcessorTypeCorei3Type4 = 0x0904,
+
+  AppleProcessorTypeCorei5Type5 = 0x0605,     // NOTE: we are putting 0x0609 on IM191 (i5-8600), although it should be 0x0605.
+  AppleProcessorTypeCorei7Type5 = 0x0705,
+  AppleProcessorTypeCorei3Type5 = 0x0905,
+
+  AppleProcessorTypeCorei5Type6 = 0x0606,     // i5 5250U (iMac16,1, MacBookAir7,1 and 7,2), i5 5675R (iMac16,2), i5 5257U (MacBookPro12,1)
+  AppleProcessorTypeCorei7Type6 = 0x0706,     // ideal value for Broadwell i7, need confirmation
+  AppleProcessorTypeCorei3Type6 = 0x0906,     // ideal value for Broadwell i3, need confirmation
+
   // placeholder for i5Type7 (maybe 0x0607 ???)
-  AppleProcessorTypeCorei7Type7     = 0x0707, // i7 6700HQ (MacBookPro13,3)
+  AppleProcessorTypeCorei7Type7 = 0x0707,     // i7 6700HQ (MacBookPro13,3)
   // placeholder for i3Type7 (maybe 0x0907 ???)
-  
-  AppleProcessorTypeCorei5Type8     = 0x0608, // i5 8210Y (MacBookAir8,1)
+
+  AppleProcessorTypeCorei5Type8 = 0x0608,     // i5 8210Y (MacBookAir8,1)
   // placeholder for i7Type8 (maybe 0x0708 ???)
   // placeholder for i3Type8 (maybe 0x0908 ???)
-  
-  AppleProcessorTypeCorei5Type9     = 0x0609, // i5 8259U (MacBookPro15,2), i5 8500B (Macmini8,1)
-  AppleProcessorTypeCorei7Type9     = 0x0709, // i7 8850H (MacBookPro15,1), i7 8700B (Macmini8,1)
+
+  AppleProcessorTypeCorei5Type9 = 0x0609,     // i5 8259U (MacBookPro15,2), i5 8500B (Macmini8,1)
+  AppleProcessorTypeCorei7Type9 = 0x0709,     // i7 8850H (MacBookPro15,1), i7 8700B (Macmini8,1)
   // placeholder for i3Type9 (maybe 0x0909 ???)
-  
-  AppleProcessorTypeCoreMType1      = 0x0B01, // may not be used
-  AppleProcessorTypeCoreMType6      = 0x0B06, // M 5Y51 (MacBook8,1)
 
-  AppleProcessorTypeCoreM3Type1     = 0x0C01, // may not be used
-  AppleProcessorTypeCoreM3Type7     = 0x0C07, // m3-7Y32 (MacBook10,1)
+  AppleProcessorTypeCoreMType1 = 0x0B01,      // may not be used
+  AppleProcessorTypeCoreMType6 = 0x0B06,      // M 5Y51 (MacBook8,1)
 
-  AppleProcessorTypeCoreM5Type1     = 0x0D01, // may not be used
-  AppleProcessorTypeCoreM5Type7     = 0x0D07, // m5-6Y54 (MacBook9,1)
+  AppleProcessorTypeCoreM3Type1 = 0x0C01,     // may not be used
+  AppleProcessorTypeCoreM3Type7 = 0x0C07,     // m3-7Y32 (MacBook10,1)
 
-  AppleProcessorTypeCoreM7Type1     = 0x0E01, // may not be used
-  AppleProcessorTypeCoreM7Type7     = 0x0E07, // might be used on Core m7 (SKL), need confirmation
+  AppleProcessorTypeCoreM5Type1 = 0x0D01,     // may not be used
+  AppleProcessorTypeCoreM5Type7 = 0x0D07,     // m5-6Y54 (MacBook9,1)
 
-  AppleProcessorTypeXeonW           = 0x0F01, // iMacPro1,1
-  
-  AppleProcessorTypeCorei9Type1     = 0x1001, // may not be used
-  AppleProcessorTypeCorei9Type5     = 0x1005, // SKL-X i9, most likely to be invalid!
-  AppleProcessorTypeCorei9Type9     = 0x1009  // ideal value for Coffee Lake i9, need confirmation
+  AppleProcessorTypeCoreM7Type1 = 0x0E01,     // may not be used
+  AppleProcessorTypeCoreM7Type7 = 0x0E07,     // might be used on Core m7 (SKL), need confirmation
+
+  AppleProcessorTypeXeonW = 0x0F01,           // iMacPro1,1
+
+  AppleProcessorTypeCorei9Type1 = 0x1001,     // may not be used
+  AppleProcessorTypeCorei9Type5 = 0x1005,     // SKL-X i9, most likely to be invalid!
+  AppleProcessorTypeCorei9Type9 = 0x1009      // ideal value for Coffee Lake i9, need confirmation
 };
 
 // APPLE_PROCESSOR_TYPE_CLASS
@@ -240,50 +240,50 @@ enum {
 };
 
 typedef struct {
-  UINT8 MinorType;
-  UINT8 MajorType;
+  UINT8    MinorType;
+  UINT8    MajorType;
 } APPLE_PROCESSOR_TYPE_INFO;
 
 typedef union {
-  APPLE_PROCESSOR_TYPE_INFO  Detail;
-  UINT16                     Type;
+  APPLE_PROCESSOR_TYPE_INFO    Detail;
+  UINT16                       Type;
 } APPLE_PROCESSOR_TYPE;
 
 // APPLE_SMBIOS_TABLE_TYPE131
 typedef PACKED struct {
-  SMBIOS_STRUCTURE     Hdr;
-  APPLE_PROCESSOR_TYPE ProcessorType;
-  UINT8                Reserved[2];
+  SMBIOS_STRUCTURE        Hdr;
+  APPLE_PROCESSOR_TYPE    ProcessorType;
+  UINT8                   Reserved[2];
 } APPLE_SMBIOS_TABLE_TYPE131;
 
 // APPLE_SMBIOS_TABLE_TYPE132
 typedef struct {
-  SMBIOS_STRUCTURE Hdr;
-  UINT16           ProcessorBusSpeed;
+  SMBIOS_STRUCTURE    Hdr;
+  UINT16              ProcessorBusSpeed;
 } APPLE_SMBIOS_TABLE_TYPE132;
 
 // APPLE_SMBIOS_TABLE_TYPE133
 typedef struct {
-  SMBIOS_STRUCTURE Hdr;
-  UINT64           PlatformFeature;
+  SMBIOS_STRUCTURE    Hdr;
+  UINT64              PlatformFeature;
 } APPLE_SMBIOS_TABLE_TYPE133;
 
 // APPLE_SMBIOS_TABLE_TYPE134
 typedef PACKED struct {
-  SMBIOS_STRUCTURE Hdr;
-  UINT8            SmcVersion[APPLE_SMBIOS_SMC_VERSION_SIZE];
+  SMBIOS_STRUCTURE    Hdr;
+  UINT8               SmcVersion[APPLE_SMBIOS_SMC_VERSION_SIZE];
 } APPLE_SMBIOS_TABLE_TYPE134;
 
 // APPLE_SMBIOS_STRUCTURE_POINTER
 typedef union {
-  SMBIOS_STRUCTURE_POINTER   Standard;
-  APPLE_SMBIOS_TABLE_TYPE128 *Type128;
-  APPLE_SMBIOS_TABLE_TYPE130 *Type130;
-  APPLE_SMBIOS_TABLE_TYPE131 *Type131;
-  APPLE_SMBIOS_TABLE_TYPE132 *Type132;
-  APPLE_SMBIOS_TABLE_TYPE133 *Type133;
-  APPLE_SMBIOS_TABLE_TYPE134 *Type134;
-  UINT8                      *Raw;
+  SMBIOS_STRUCTURE_POINTER      Standard;
+  APPLE_SMBIOS_TABLE_TYPE128    *Type128;
+  APPLE_SMBIOS_TABLE_TYPE130    *Type130;
+  APPLE_SMBIOS_TABLE_TYPE131    *Type131;
+  APPLE_SMBIOS_TABLE_TYPE132    *Type132;
+  APPLE_SMBIOS_TABLE_TYPE133    *Type133;
+  APPLE_SMBIOS_TABLE_TYPE134    *Type134;
+  UINT8                         *Raw;
 } APPLE_SMBIOS_STRUCTURE_POINTER;
 
 #pragma pack ()

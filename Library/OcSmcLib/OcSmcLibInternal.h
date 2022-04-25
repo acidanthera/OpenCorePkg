@@ -19,14 +19,14 @@
 #include <Protocol/AppleSmcIo.h>
 
 typedef struct {
-	SMC_KEY             Key;
-	SMC_KEY_TYPE        Type;
-	SMC_DATA_SIZE       Size;
-	SMC_KEY_ATTRIBUTES  Attributes;
-	SMC_DATA            Data[SMC_MAX_DATA_SIZE];
+  SMC_KEY               Key;
+  SMC_KEY_TYPE          Type;
+  SMC_DATA_SIZE         Size;
+  SMC_KEY_ATTRIBUTES    Attributes;
+  SMC_DATA              Data[SMC_MAX_DATA_SIZE];
 } VIRTUALSMC_KEY_VALUE;
 
-#define VIRTUALSMC_STATUS_KEY           L"vsmc-status"
-#define VIRTUALSMC_ENCRYPTION_KEY       L"vsmc-key"
+#define VIRTUALSMC_STATUS_KEY      L"vsmc-status"
+#define VIRTUALSMC_ENCRYPTION_KEY  L"vsmc-key"
 
 #endif // OC_SMC_LIB_INTERNAL_H

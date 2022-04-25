@@ -30,10 +30,10 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 #include <Protocol/DevicePath.h>
 #include <Protocol/GraphicsOutput.h>
 
-#define NUM_COLORS 5
-#define NUM_BLITS  200
+#define NUM_COLORS  5
+#define NUM_BLITS   200
 
-STATIC UINT32 mColors[NUM_COLORS] = {
+STATIC UINT32  mColors[NUM_COLORS] = {
   0xFFFFFFFF,
   0xFFFFFF00,
   0xFFFF00FF,
@@ -47,45 +47,46 @@ PerfConsoleGop (
   VOID
   )
 {
-  EFI_STATUS                            Status;
-  EFI_GRAPHICS_OUTPUT_PROTOCOL          *Gop;
-  VOID                                  *Pools[NUM_COLORS];
-  UINTN                                 Index;
-  UINTN                                 Index2;
-  UINT64                                PerfStart;
-  UINT64                                PerfResult;
-  UINT64                                FrameTimeNs;
-  UINT64                                FpMs;
-  UINT64                                Fps;
-  UINT64                                Remainder;
-  EFI_TPL                               OldTpl;
-  BOOLEAN                               HasInterrupts;
+  EFI_STATUS                    Status;
+  EFI_GRAPHICS_OUTPUT_PROTOCOL  *Gop;
+  VOID                          *Pools[NUM_COLORS];
+  UINTN                         Index;
+  UINTN                         Index2;
+  UINT64                        PerfStart;
+  UINT64                        PerfResult;
+  UINT64                        FrameTimeNs;
+  UINT64                        FpMs;
+  UINT64                        Fps;
+  UINT64                        Remainder;
+  EFI_TPL                       OldTpl;
+  BOOLEAN                       HasInterrupts;
 
   Status = OcHandleProtocolFallback (
-    gST->ConsoleOutHandle,
-    &gEfiGraphicsOutputProtocolGuid,
-    (VOID **) &Gop
-    );
+             gST->ConsoleOutHandle,
+             &gEfiGraphicsOutputProtocolGuid,
+             (VOID **)&Gop
+             );
   if (EFI_ERROR (Status)) {
     DEBUG ((DEBUG_WARN, "GPF: No GOP - %r\n", Status));
     return Status;
   }
 
-  if (Gop->Mode == NULL || Gop->Mode->Info == NULL) {
+  if ((Gop->Mode == NULL) || (Gop->Mode->Info == NULL)) {
     DEBUG ((DEBUG_WARN, "GPF: Invalid GOP\n"));
     return EFI_INVALID_PARAMETER;
   }
 
-  if (Gop->Mode->Info->HorizontalResolution == 0
-    || Gop->Mode->Info->VerticalResolution == 0) {
+  if (  (Gop->Mode->Info->HorizontalResolution == 0)
+     || (Gop->Mode->Info->VerticalResolution == 0))
+  {
     DEBUG ((DEBUG_WARN, "GPF: Empty resolution on GOP\n"));
     return EFI_UNSUPPORTED;
   }
 
   for (Index = 0; Index < NUM_COLORS; ++Index) {
     Pools[Index] = AllocatePool (
-      Gop->Mode->Info->HorizontalResolution * Gop->Mode->Info->VerticalResolution * sizeof (UINT32)
-      );
+                     Gop->Mode->Info->HorizontalResolution * Gop->Mode->Info->VerticalResolution * sizeof (UINT32)
+                     );
     ASSERT (Pools[Index] != NULL);
     SetMem32 (
       Pools[Index],
@@ -94,7 +95,7 @@ PerfConsoleGop (
       );
   }
 
-  OldTpl = gBS->RaiseTPL (TPL_NOTIFY);
+  OldTpl        = gBS->RaiseTPL (TPL_NOTIFY);
   HasInterrupts = SaveAndDisableInterrupts ();
 
   PerfStart = GetPerformanceCounter ();
@@ -102,17 +103,17 @@ PerfConsoleGop (
   for (Index = 0; Index < NUM_BLITS; ++Index) {
     for (Index2 = 0; Index2 < NUM_COLORS; ++Index2) {
       Gop->Blt (
-        Gop,
-        Pools[Index2],
-        EfiBltBufferToVideo,
-        0,
-        0,
-        0,
-        0,
-        Gop->Mode->Info->HorizontalResolution,
-        Gop->Mode->Info->VerticalResolution,
-        0
-        );
+             Gop,
+             Pools[Index2],
+             EfiBltBufferToVideo,
+             0,
+             0,
+             0,
+             0,
+             Gop->Mode->Info->HorizontalResolution,
+             Gop->Mode->Info->VerticalResolution,
+             0
+             );
     }
   }
 
@@ -121,15 +122,15 @@ PerfConsoleGop (
   if (HasInterrupts) {
     EnableInterrupts ();
   }
+
   gBS->RestoreTPL (OldTpl);
 
   if (GetTimeInNanoSecond (PerfResult) != 0) {
-
     FrameTimeNs = DivU64x64Remainder (
-      GetTimeInNanoSecond (PerfResult),
-      (UINT64) NUM_BLITS * NUM_COLORS,
-      NULL
-      );
+                    GetTimeInNanoSecond (PerfResult),
+                    (UINT64)NUM_BLITS * NUM_COLORS,
+                    NULL
+                    );
 
     FpMs = DivU64x64Remainder (1000000000ULL * 1000ULL, FrameTimeNs, NULL);
     Fps  = DivU64x64Remainder (FpMs, 1000, &Remainder);
@@ -137,7 +138,7 @@ PerfConsoleGop (
     DEBUG ((
       DEBUG_WARN,
       "GPF: Total blits %Lu on %ux%u over %Lu ms, about %Lu.%03Lu FPS, %Lu ms TPF\n",
-      (UINT64) NUM_BLITS * NUM_COLORS,
+      (UINT64)NUM_BLITS * NUM_COLORS,
       Gop->Mode->Info->HorizontalResolution,
       Gop->Mode->Info->VerticalResolution,
       DivU64x64Remainder (GetTimeInNanoSecond (PerfResult), 1000000ULL, NULL),
@@ -148,7 +149,6 @@ PerfConsoleGop (
   } else {
     DEBUG ((DEBUG_WARN, "GPF: Unable to measure time\n"));
   }
-
 
   for (Index = 0; Index < NUM_COLORS; ++Index) {
     FreePool (Pools[Index]);

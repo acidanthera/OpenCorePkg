@@ -22,9 +22,9 @@
 
 BOOLEAN
 OcAppleChunklistInitializeContext (
-     OUT OC_APPLE_CHUNKLIST_CONTEXT  *Context,
-  IN OUT VOID                        *Buffer,
-  IN     UINT32                      BufferSize
+  OUT OC_APPLE_CHUNKLIST_CONTEXT  *Context,
+  IN OUT VOID                     *Buffer,
+  IN     UINT32                   BufferSize
   )
 {
   APPLE_CHUNKLIST_HEADER  *ChunklistHeader;
@@ -38,7 +38,7 @@ OcAppleChunklistInitializeContext (
   ASSERT (BufferSize > 0);
   ASSERT (Context != NULL);
 
-  ChunklistHeader = (APPLE_CHUNKLIST_HEADER *) Buffer;
+  ChunklistHeader = (APPLE_CHUNKLIST_HEADER *)Buffer;
 
   if (BufferSize < sizeof (APPLE_CHUNKLIST_HEADER)) {
     return FALSE;
@@ -47,19 +47,21 @@ OcAppleChunklistInitializeContext (
   //
   // Ensure the header is compatible.
   //
-  if (ChunklistHeader->Magic != APPLE_CHUNKLIST_MAGIC
-    || ChunklistHeader->Length != sizeof (APPLE_CHUNKLIST_HEADER)
-    || ChunklistHeader->FileVersion != APPLE_CHUNKLIST_FILE_VERSION_10
-    || ChunklistHeader->ChunkMethod != APPLE_CHUNKLIST_CHUNK_METHOD_10
-    || ChunklistHeader->SigMethod != APPLE_CHUNKLIST_SIG_METHOD_10) {
+  if (  (ChunklistHeader->Magic != APPLE_CHUNKLIST_MAGIC)
+     || (ChunklistHeader->Length != sizeof (APPLE_CHUNKLIST_HEADER))
+     || (ChunklistHeader->FileVersion != APPLE_CHUNKLIST_FILE_VERSION_10)
+     || (ChunklistHeader->ChunkMethod != APPLE_CHUNKLIST_CHUNK_METHOD_10)
+     || (ChunklistHeader->SigMethod != APPLE_CHUNKLIST_SIG_METHOD_10))
+  {
     return FALSE;
   }
 
   //
   // Ensure that chunk and signature addresses are valid in the first place.
   //
-  if (OcOverflowAddUN ((UINTN) Buffer, (UINTN) ChunklistHeader->ChunkOffset, (UINTN *) &Context->Chunks)
-    || OcOverflowAddUN ((UINTN) Buffer, (UINTN) ChunklistHeader->SigOffset, (UINTN *) &Context->Signature)) {
+  if (  OcOverflowAddUN ((UINTN)Buffer, (UINTN)ChunklistHeader->ChunkOffset, (UINTN *)&Context->Chunks)
+     || OcOverflowAddUN ((UINTN)Buffer, (UINTN)ChunklistHeader->SigOffset, (UINTN *)&Context->Signature))
+  {
     return FALSE;
   }
 
@@ -72,10 +74,11 @@ OcAppleChunklistInitializeContext (
 
   Context->ChunkCount = (UINTN)ChunklistHeader->ChunkCount;
 
-  if (OcOverflowMulAddUN (sizeof (APPLE_CHUNKLIST_CHUNK), Context->ChunkCount, (UINTN) Context->Chunks, &DataEnd)
-    || DataEnd > (UINTN) Buffer + BufferSize
-    || OcOverflowAddUN (sizeof (APPLE_CHUNKLIST_SIG), (UINTN) Context->Signature, &DataEnd)
-    || DataEnd != (UINTN) Buffer + BufferSize) {
+  if (  OcOverflowMulAddUN (sizeof (APPLE_CHUNKLIST_CHUNK), Context->ChunkCount, (UINTN)Context->Chunks, &DataEnd)
+     || (DataEnd > (UINTN)Buffer + BufferSize)
+     || OcOverflowAddUN (sizeof (APPLE_CHUNKLIST_SIG), (UINTN)Context->Signature, &DataEnd)
+     || (DataEnd != (UINTN)Buffer + BufferSize))
+  {
     return FALSE;
   }
 
@@ -102,15 +105,15 @@ OcAppleChunklistVerifySignature (
   IN     CONST OC_RSA_PUBLIC_KEY     *PublicKey
   )
 {
-  VOID    *Scratch;
-  BOOLEAN Result;
+  VOID     *Scratch;
+  BOOLEAN  Result;
 
   ASSERT (Context != NULL);
   ASSERT (Context->Signature != NULL);
 
   Scratch = AllocatePool (
-    RSA_SCRATCH_BUFFER_SIZE (PublicKey->Hdr.NumQwords * sizeof (UINT64))
-    );
+              RSA_SCRATCH_BUFFER_SIZE (PublicKey->Hdr.NumQwords * sizeof (UINT64))
+              );
 
   if (Scratch == NULL) {
     return FALSE;
@@ -132,6 +135,7 @@ OcAppleChunklistVerifySignature (
   if (Result) {
     Context->Signature = NULL;
   }
+
   DEBUG_CODE_END ();
 
   return Result;
@@ -143,15 +147,15 @@ OcAppleChunklistVerifyData (
   IN     CONST APPLE_RAM_DISK_EXTENT_TABLE  *ExtentTable
   )
 {
-  BOOLEAN                     Result;
+  BOOLEAN  Result;
 
-  UINTN                       Index;
-  UINT8                       ChunkHash[SHA256_DIGEST_SIZE];
-  CONST APPLE_CHUNKLIST_CHUNK *CurrentChunk;
-  UINTN                       CurrentOffset;
+  UINTN                        Index;
+  UINT8                        ChunkHash[SHA256_DIGEST_SIZE];
+  CONST APPLE_CHUNKLIST_CHUNK  *CurrentChunk;
+  UINTN                        CurrentOffset;
 
-  UINT32                      ChunkDataSize;
-  VOID                        *ChunkData;
+  UINT32  ChunkDataSize;
+  VOID    *ChunkData;
 
   ASSERT (Context != NULL);
   ASSERT (Context->Chunks != NULL);
@@ -188,11 +192,16 @@ OcAppleChunklistVerifyData (
       FreePool (ChunkData);
       return FALSE;
     }
+
     //
     // Calculate checksum of data and ensure they match.
     //
-    DEBUG ((DEBUG_VERBOSE, "OCCL: Validating chunk %lu of %lu\n",
-      (UINT64)Index + 1, (UINT64)Context->ChunkCount));
+    DEBUG ((
+      DEBUG_VERBOSE,
+      "OCCL: Validating chunk %lu of %lu\n",
+      (UINT64)Index + 1,
+      (UINT64)Context->ChunkCount
+      ));
     Sha256 (ChunkHash, ChunkData, CurrentChunk->Length);
     if (CompareMem (ChunkHash, CurrentChunk->Checksum, SHA256_DIGEST_SIZE) != 0) {
       FreePool (ChunkData);

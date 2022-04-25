@@ -27,17 +27,17 @@ GetArguments (
   OUT CHAR16  ***Argv
   )
 {
-  STATIC CHAR16 *StArgv[2] = { L"Self", NULL };
+  STATIC CHAR16  *StArgv[2] = { L"Self", NULL };
 
   EFI_STATUS                     Status;
   EFI_SHELL_PARAMETERS_PROTOCOL  *ShellParameters;
   EFI_LOADED_IMAGE_PROTOCOL      *LoadedImage;
 
   Status = gBS->HandleProtocol (
-    gImageHandle,
-    &gEfiShellParametersProtocolGuid,
-    (VOID **) &ShellParameters
-    );
+                  gImageHandle,
+                  &gEfiShellParametersProtocolGuid,
+                  (VOID **)&ShellParameters
+                  );
   if (!EFI_ERROR (Status)) {
     *Argc = ShellParameters->Argc;
     *Argv = ShellParameters->Argv;
@@ -45,24 +45,24 @@ GetArguments (
   }
 
   Status = gBS->HandleProtocol (
-    gImageHandle,
-    &gEfiLoadedImageProtocolGuid,
-    (VOID **) &LoadedImage
-    );
+                  gImageHandle,
+                  &gEfiLoadedImageProtocolGuid,
+                  (VOID **)&LoadedImage
+                  );
 
   if (EFI_ERROR (Status)) {
     DEBUG ((DEBUG_WARN, "OCM: LoadedImage cannot be located - %r\n", Status));
   }
 
-  if (EFI_ERROR (Status) || LoadedImage->LoadOptions == NULL) {
+  if (EFI_ERROR (Status) || (LoadedImage->LoadOptions == NULL)) {
     *Argc = 1;
     *Argv = StArgv;
     return EFI_SUCCESS;
   }
 
   StArgv[1] = LoadedImage->LoadOptions;
-  *Argc = ARRAY_SIZE (StArgv);
-  *Argv = StArgv;
+  *Argc     = ARRAY_SIZE (StArgv);
+  *Argv     = StArgv;
   return EFI_SUCCESS;
 }
 
@@ -71,19 +71,19 @@ OcUninstallAllProtocolInstances (
   EFI_GUID  *Protocol
   )
 {
-  EFI_STATUS      Status;
-  EFI_HANDLE      *Handles;
-  UINTN           Index;
-  UINTN           NoHandles;
-  VOID            *OriginalProto;
+  EFI_STATUS  Status;
+  EFI_HANDLE  *Handles;
+  UINTN       Index;
+  UINTN       NoHandles;
+  VOID        *OriginalProto;
 
   Status = gBS->LocateHandleBuffer (
-    ByProtocol,
-    Protocol,
-    NULL,
-    &NoHandles,
-    &Handles
-    );
+                  ByProtocol,
+                  Protocol,
+                  NULL,
+                  &NoHandles,
+                  &Handles
+                  );
 
   if (Status == EFI_NOT_FOUND) {
     return EFI_SUCCESS;
@@ -95,20 +95,20 @@ OcUninstallAllProtocolInstances (
 
   for (Index = 0; Index < NoHandles; ++Index) {
     Status = gBS->HandleProtocol (
-      Handles[Index],
-      Protocol,
-      &OriginalProto
-      );
+                    Handles[Index],
+                    Protocol,
+                    &OriginalProto
+                    );
 
     if (EFI_ERROR (Status)) {
       break;
     }
 
     Status = gBS->UninstallProtocolInterface (
-      Handles[Index],
-      Protocol,
-      OriginalProto
-      );
+                    Handles[Index],
+                    Protocol,
+                    OriginalProto
+                    );
 
     if (EFI_ERROR (Status)) {
       break;
@@ -127,19 +127,19 @@ OcHandleProtocolFallback (
   OUT VOID        **Interface
   )
 {
-  EFI_STATUS Status;
+  EFI_STATUS  Status;
 
   Status = gBS->HandleProtocol (
-    Handle,
-    Protocol,
-    Interface
-    );
+                  Handle,
+                  Protocol,
+                  Interface
+                  );
   if (EFI_ERROR (Status)) {
     Status = gBS->LocateProtocol (
-      Protocol,
-      NULL,
-      Interface
-      );
+                    Protocol,
+                    NULL,
+                    Interface
+                    );
   }
 
   return Status;
@@ -157,12 +157,12 @@ OcCountProtocolInstances (
   HandleCount = 0;
 
   Status = gBS->LocateHandleBuffer (
-    ByProtocol,
-    Protocol,
-    NULL,
-    &HandleCount,
-    &HandleBuffer
-    );
+                  ByProtocol,
+                  Protocol,
+                  NULL,
+                  &HandleCount,
+                  &HandleBuffer
+                  );
   if (EFI_ERROR (Status)) {
     //
     // No instance can be found on error.
@@ -177,20 +177,20 @@ OcCountProtocolInstances (
 
 VOID *
 OcGetProtocol (
-  IN  EFI_GUID      *Protocol,
-  IN  UINTN         ErrorLevel,
-  IN  CONST CHAR8   *CallerName     OPTIONAL,
-  IN  CONST CHAR8   *ProtocolName   OPTIONAL
+  IN  EFI_GUID     *Protocol,
+  IN  UINTN        ErrorLevel,
+  IN  CONST CHAR8  *CallerName     OPTIONAL,
+  IN  CONST CHAR8  *ProtocolName   OPTIONAL
   )
 {
-  EFI_STATUS        Status;
-  VOID              *Instance;
+  EFI_STATUS  Status;
+  VOID        *Instance;
 
   Status = gBS->LocateProtocol (
-    Protocol,
-    NULL,
-    (VOID **) &Instance
-    );
+                  Protocol,
+                  NULL,
+                  (VOID **)&Instance
+                  );
 
   if (EFI_ERROR (Status)) {
     Instance = NULL;

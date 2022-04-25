@@ -22,11 +22,11 @@
 
 #include <Protocol/OcBootEntry.h>
 
-#define GRUB_DEFAULT_FILE     L"\\etc\\default\\grub"
-#define OS_RELEASE_FILE       L"\\etc\\os-release"
-#define AUTODETECT_DIR        L"\\boot"
-#define ROOT_DIR              L"\\"
-#define ROOT_FS_FILE          L"\\bin\\sh"
+#define GRUB_DEFAULT_FILE  L"\\etc\\default\\grub"
+#define OS_RELEASE_FILE    L"\\etc\\os-release"
+#define AUTODETECT_DIR     L"\\boot"
+#define ROOT_DIR           L"\\"
+#define ROOT_FS_FILE       L"\\bin\\sh"
 
 STATIC
 OC_FLEX_ARRAY
@@ -83,10 +83,10 @@ CHAR16
 STATIC
 EFI_STATUS
 ProcessVmlinuzFile (
-  EFI_FILE_HANDLE   Directory,
-  EFI_FILE_INFO     *FileInfo,
-  UINTN             FileInfoSize,
-  VOID              *Context        OPTIONAL
+  EFI_FILE_HANDLE  Directory,
+  EFI_FILE_INFO    *FileInfo,
+  UINTN            FileInfoSize,
+  VOID             *Context        OPTIONAL
   )
 {
   CHAR16        *Dash;
@@ -103,7 +103,7 @@ ProcessVmlinuzFile (
   // fine from them).
   //
   Dash = OcStrChr (FileInfo->FileName, L'-');
-  if (Dash == NULL || Dash[1] == L'\0') {
+  if ((Dash == NULL) || (Dash[1] == L'\0')) {
     return EFI_NOT_FOUND;
   }
 
@@ -134,7 +134,7 @@ ProcessVmlinuzFile (
   }
 
   VmlinuzFile->Version = &VmlinuzFile->FileName[&Dash[1] - FileInfo->FileName];
-  VmlinuzFile->StrLen = StrLen (FileInfo->FileName);
+  VmlinuzFile->StrLen  = StrLen (FileInfo->FileName);
 
   return EFI_SUCCESS;
 }
@@ -142,15 +142,15 @@ ProcessVmlinuzFile (
 STATIC
 EFI_STATUS
 CreateAsciiRelativePath (
-  CHAR8           **Dest,
-  CHAR16          *DirectoryPath,
-  UINTN           DirectoryPathLength,
-  CHAR16          *FilePath,
-  UINTN           FilePathLength
+  CHAR8   **Dest,
+  CHAR16  *DirectoryPath,
+  UINTN   DirectoryPathLength,
+  CHAR16  *FilePath,
+  UINTN   FilePathLength
   )
 {
-  UINTN           Size;
-  BOOLEAN         UseDir;
+  UINTN    Size;
+  BOOLEAN  UseDir;
 
   UseDir = !(DirectoryPathLength == 1 && DirectoryPath[0] == L'\\');
 
@@ -169,11 +169,11 @@ CreateAsciiRelativePath (
 STATIC
 EFI_STATUS
 CreateRootPartuuid (
-  CHAR8           **Dest
+  CHAR8  **Dest
   )
 {
-  UINTN           Length;
-  UINTN           NumPrinted;
+  UINTN  Length;
+  UINTN  NumPrinted;
 
   Length = L_STR_LEN ("root=PARTUUID=") + GUID_STRING_LENGTH;
 
@@ -199,8 +199,8 @@ AutodetectTitle (
   VOID
   )
 {
-  UINTN             Index;
-  BOOLEAN           Found;
+  UINTN    Index;
+  BOOLEAN  Found;
 
   if (mEtcOsReleaseOptions != NULL) {
     //
@@ -208,12 +208,13 @@ AutodetectTitle (
     //
     Found = FALSE;
     for (Index = 0; Index < 2; Index++) {
-      if (OcParsedVarsGetAsciiStr (
-        mEtcOsReleaseOptions,
-        Index == 0 ? "PRETTY_NAME" : "NAME",
-        &mPrettyName
-        )
-        && mPrettyName != NULL) {
+      if (  OcParsedVarsGetAsciiStr (
+              mEtcOsReleaseOptions,
+              (Index == 0) ? "PRETTY_NAME" : "NAME",
+              &mPrettyName
+              )
+         && (mPrettyName != NULL))
+      {
         Found = TRUE;
         break;
       }
@@ -234,16 +235,16 @@ AutodetectTitle (
 STATIC
 EFI_STATUS
 LoadOsRelease (
-  IN     CONST EFI_FILE_PROTOCOL        *RootDirectory,
-  IN     CONST BOOLEAN                  IsStandaloneBoot
+  IN     CONST EFI_FILE_PROTOCOL  *RootDirectory,
+  IN     CONST BOOLEAN            IsStandaloneBoot
   )
 {
-  EFI_STATUS        Status;
-  BOOLEAN           TryReading;
+  EFI_STATUS  Status;
+  BOOLEAN     TryReading;
 
-  mEtcOsReleaseOptions        = NULL;
-  mEtcOsReleaseFileContents   = NULL;
-  mPrettyName                 = NULL;
+  mEtcOsReleaseOptions      = NULL;
+  mEtcOsReleaseFileContents = NULL;
+  mPrettyName               = NULL;
 
   TryReading = (mDiskLabel == NULL);
 
@@ -294,11 +295,11 @@ LoadOsRelease (
 STATIC
 EFI_STATUS
 LoadDefaultGrub (
-  IN     CONST EFI_FILE_PROTOCOL        *RootDirectory,
-  IN     CONST BOOLEAN                  IsStandaloneBoot
+  IN     CONST EFI_FILE_PROTOCOL  *RootDirectory,
+  IN     CONST BOOLEAN            IsStandaloneBoot
   )
 {
-  EFI_STATUS        Status;
+  EFI_STATUS  Status;
 
   mEtcDefaultGrubOptions      = NULL;
   mEtcDefaultGrubFileContents = NULL;
@@ -385,16 +386,16 @@ FreeEtcFiles (
 STATIC
 EFI_STATUS
 InsertOption (
-  IN     CONST UINTN              InsertIndex,
-  IN           OC_FLEX_ARRAY      *Options,
-  IN     CONST VOID               *Value,
-  IN     CONST BOOLEAN            IsUnicode
+  IN     CONST UINTN          InsertIndex,
+  IN           OC_FLEX_ARRAY  *Options,
+  IN     CONST VOID           *Value,
+  IN     CONST BOOLEAN        IsUnicode
   )
 {
-  EFI_STATUS                      Status;
-  UINTN                           OptionsLength;
-  UINTN                           CopiedLength;
-  CHAR8                           **Option;
+  EFI_STATUS  Status;
+  UINTN       OptionsLength;
+  UINTN       CopiedLength;
+  CHAR8       **Option;
 
   if (IsUnicode) {
     OptionsLength = StrLen (Value);
@@ -431,9 +432,9 @@ InsertOption (
 STATIC
 EFI_STATUS
 AddOption (
-  IN           OC_FLEX_ARRAY      *Options,
-  IN     CONST VOID               *Value,
-  IN     CONST BOOLEAN            IsUnicode
+  IN           OC_FLEX_ARRAY  *Options,
+  IN     CONST VOID           *Value,
+  IN     CONST BOOLEAN        IsUnicode
   )
 {
   return InsertOption (Options->Count, Options, Value, IsUnicode);
@@ -441,10 +442,10 @@ AddOption (
 
 EFI_STATUS
 InsertRootOption (
-  IN           OC_FLEX_ARRAY      *Options
+  IN           OC_FLEX_ARRAY  *Options
   )
 {
-  CHAR8             **NewOption;
+  CHAR8  **NewOption;
 
   DEBUG ((
     (gLinuxBootFlags & LINUX_BOOT_LOG_VERBOSE) == 0 ? DEBUG_VERBOSE : DEBUG_INFO,
@@ -466,8 +467,8 @@ GetCurrentPartuuidAutoOpts (
   VOID
   )
 {
-  UINTN             Index;
-  AUTOOPTS          *AutoOpts;
+  UINTN     Index;
+  AUTOOPTS  *AutoOpts;
 
   mCurrentPartuuidAutoOpts     = NULL;
   mCurrentPartuuidAutoOptsPlus = NULL;
@@ -478,7 +479,7 @@ GetCurrentPartuuidAutoOpts (
       if (AutoOpts->PlusOpts) {
         mCurrentPartuuidAutoOptsPlus = AutoOpts->Opts;
       } else {
-        mCurrentPartuuidAutoOpts     = AutoOpts->Opts;
+        mCurrentPartuuidAutoOpts = AutoOpts->Opts;
       }
     }
   }
@@ -486,13 +487,13 @@ GetCurrentPartuuidAutoOpts (
 
 EFI_STATUS
 InternalPreloadAutoOpts (
-  IN           OC_FLEX_ARRAY            *Options
+  IN           OC_FLEX_ARRAY  *Options
   )
 {
-  EFI_STATUS        Status;
-  UINTN             Index;
-  OC_PARSED_VAR     *Option;
-  AUTOOPTS          *AutoOpts;
+  EFI_STATUS     Status;
+  UINTN          Index;
+  OC_PARSED_VAR  *Option;
+  AUTOOPTS       *AutoOpts;
 
   mGlobalAutoOpts     = NULL;
   mGlobalAutoOptsPlus = NULL;
@@ -531,7 +532,7 @@ InternalPreloadAutoOpts (
         continue;
       }
 
-      AutoOpts->Opts = Option->Unicode.Value;
+      AutoOpts->Opts     = Option->Unicode.Value;
       AutoOpts->PlusOpts = OcUnicodeEndsWith (Option->Unicode.Name, L"+", FALSE);
     } else if (StrCmp (Option->Unicode.Name, L"autoopts") == 0) {
       if (Option->Unicode.Value == NULL) {
@@ -562,18 +563,18 @@ InternalPreloadAutoOpts (
 STATIC
 EFI_STATUS
 AutodetectBootOptions (
-  IN     CONST BOOLEAN                  IsRescue,
-  IN     CONST BOOLEAN                  IsStandaloneBoot,
-  IN           OC_FLEX_ARRAY            *Options
-)
+  IN     CONST BOOLEAN        IsRescue,
+  IN     CONST BOOLEAN        IsStandaloneBoot,
+  IN           OC_FLEX_ARRAY  *Options
+  )
 {
-  EFI_STATUS        Status;
-  UINTN             Index;
-  UINTN             InsertIndex;
-  CHAR8             *AsciiStrValue;
-  CHAR8             *GrubVarName;
-  BOOLEAN           FoundOptions;
-  CHAR8             *AddRxOption;
+  EFI_STATUS  Status;
+  UINTN       Index;
+  UINTN       InsertIndex;
+  CHAR8       *AsciiStrValue;
+  CHAR8       *GrubVarName;
+  BOOLEAN     FoundOptions;
+  CHAR8       *AddRxOption;
 
   FoundOptions = FALSE;
 
@@ -591,7 +592,7 @@ AutodetectBootOptions (
     Status = AddOption (Options, mCurrentPartuuidAutoOpts, TRUE);
     return Status;
   }
-  
+
   if (mCurrentPartuuidAutoOptsPlus) {
     DEBUG ((
       (gLinuxBootFlags & LINUX_BOOT_LOG_VERBOSE) == 0 ? DEBUG_VERBOSE : DEBUG_INFO,
@@ -604,9 +605,10 @@ AutodetectBootOptions (
     if (EFI_ERROR (Status)) {
       return Status;
     }
+
     FoundOptions = TRUE;
   }
-  
+
   //
   // Don't use autoopts if partition specific autoopts:{partuuid} already found.
   //
@@ -664,13 +666,14 @@ AutodetectBootOptions (
       } else {
         GrubVarName = "GRUB_CMDLINE_LINUX_DEFAULT";
       }
-      if (OcParsedVarsGetAsciiStr (
-        mEtcDefaultGrubOptions,
-        GrubVarName,
-        &AsciiStrValue
-        )
-        && AsciiStrValue != NULL) {
 
+      if (  OcParsedVarsGetAsciiStr (
+              mEtcDefaultGrubOptions,
+              GrubVarName,
+              &AsciiStrValue
+              )
+         && (AsciiStrValue != NULL))
+      {
         DEBUG ((
           (gLinuxBootFlags & LINUX_BOOT_LOG_VERBOSE) == 0 ? DEBUG_VERBOSE : DEBUG_INFO,
           "LNX: Using %a=\"%a\"\n",
@@ -683,6 +686,7 @@ AutodetectBootOptions (
           if (EFI_ERROR (Status)) {
             return Status;
           }
+
           //
           // Must not increment insert index if empty option.
           //
@@ -708,13 +712,14 @@ AutodetectBootOptions (
     return EFI_INVALID_PARAMETER;
   }
 
-#if !defined(LINUX_ALLOW_MBR)
+ #if !defined (LINUX_ALLOW_MBR)
   if (CompareGuid (&gPartuuid, &gEfiPartTypeUnusedGuid)) {
     Status = EFI_UNSUPPORTED;
     DEBUG ((DEBUG_WARN, "LNX: Cannot autodetect root on MBR partition - %r\n", Status));
     return Status;
   }
-#endif
+
+ #endif
 
   //
   // Insert "root=PARTUUID=..." option, followed by "ro" if requested, only if we get to here.
@@ -723,6 +728,7 @@ AutodetectBootOptions (
   if (EFI_ERROR (Status)) {
     return Status;
   }
+
   InsertIndex = 1;
 
   AddRxOption = NULL;
@@ -731,6 +737,7 @@ AutodetectBootOptions (
   } else if ((gLinuxBootFlags & LINUX_BOOT_ADD_RO) != 0) {
     AddRxOption = "ro";
   }
+
   if (AddRxOption != NULL) {
     DEBUG ((
       (gLinuxBootFlags & LINUX_BOOT_LOG_VERBOSE) == 0 ? DEBUG_VERBOSE : DEBUG_INFO,
@@ -746,21 +753,21 @@ AutodetectBootOptions (
 STATIC
 EFI_STATUS
 GenerateEntriesForVmlinuzFiles (
-  IN     CHAR16                   *DirectoryPath,
-  IN     CONST BOOLEAN            IsStandaloneBoot
+  IN     CHAR16         *DirectoryPath,
+  IN     CONST BOOLEAN  IsStandaloneBoot
   )
 {
-  EFI_STATUS                      Status;
-  UINTN                           VmlinuzIndex;
-  UINTN                           InitrdIndex;
-  UINTN                           ShortestMatch;
-  UINTN                           DirectoryPathLength;
-  LOADER_ENTRY                    *Entry;
-  VMLINUZ_FILE                    *VmlinuzFile;
-  VMLINUZ_FILE                    *InitrdFile;
-  VMLINUZ_FILE                    *InitrdMatch;
-  CHAR8                           **Option;
-  BOOLEAN                         IsRescue;
+  EFI_STATUS    Status;
+  UINTN         VmlinuzIndex;
+  UINTN         InitrdIndex;
+  UINTN         ShortestMatch;
+  UINTN         DirectoryPathLength;
+  LOADER_ENTRY  *Entry;
+  VMLINUZ_FILE  *VmlinuzFile;
+  VMLINUZ_FILE  *InitrdFile;
+  VMLINUZ_FILE  *InitrdMatch;
+  CHAR8         **Option;
+  BOOLEAN       IsRescue;
 
   ASSERT (DirectoryPath != NULL);
   ASSERT (mVmlinuzFiles->Count > 0);
@@ -771,8 +778,9 @@ GenerateEntriesForVmlinuzFiles (
     VmlinuzFile = OcFlexArrayItemAt (mVmlinuzFiles, VmlinuzIndex);
 
     IsRescue = FALSE;
-    if (OcUnicodeStartsWith (VmlinuzFile->Version, L"0", FALSE)
-      || StrStr (VmlinuzFile->Version, L"rescue") != NULL) {
+    if (  OcUnicodeStartsWith (VmlinuzFile->Version, L"0", FALSE)
+       || (StrStr (VmlinuzFile->Version, L"rescue") != NULL))
+    {
       //
       // We might have to scan /boot/grb/grub.cfg as grub os-prober does if
       // we want to find rescue version options, or we need to find a way
@@ -794,7 +802,7 @@ GenerateEntriesForVmlinuzFiles (
       InitrdFile = OcFlexArrayItemAt (mInitrdFiles, InitrdIndex);
       if (InitrdFile->StrLen < ShortestMatch) {
         if (StrStr (InitrdFile->Version, VmlinuzFile->Version) != NULL) {
-          InitrdMatch = InitrdFile;
+          InitrdMatch   = InitrdFile;
           ShortestMatch = InitrdFile->StrLen;
         }
       }
@@ -809,12 +817,12 @@ GenerateEntriesForVmlinuzFiles (
     // Linux.
     //
     Status = CreateAsciiRelativePath (
-      &Entry->Linux,
-      DirectoryPath,
-      DirectoryPathLength,
-      VmlinuzFile->FileName,
-      VmlinuzFile->StrLen
-      );
+               &Entry->Linux,
+               DirectoryPath,
+               DirectoryPathLength,
+               VmlinuzFile->FileName,
+               VmlinuzFile->StrLen
+               );
     if (EFI_ERROR (Status)) {
       return Status;
     }
@@ -851,13 +859,14 @@ GenerateEntriesForVmlinuzFiles (
       if (Option == NULL) {
         return EFI_OUT_OF_RESOURCES;
       }
+
       Status = CreateAsciiRelativePath (
-        Option,
-        DirectoryPath,
-        DirectoryPathLength,
-        InitrdMatch->FileName,
-        InitrdMatch->StrLen
-        );
+                 Option,
+                 DirectoryPath,
+                 DirectoryPathLength,
+                 InitrdMatch->FileName,
+                 InitrdMatch->StrLen
+                 );
       if (EFI_ERROR (Status)) {
         return Status;
       }
@@ -878,16 +887,16 @@ GenerateEntriesForVmlinuzFiles (
 STATIC
 EFI_STATUS
 AutodetectLinuxAtDirectory (
-  IN   EFI_FILE_PROTOCOL        *RootDirectory,
-  IN   EFI_FILE_PROTOCOL        *VmlinuzDirectory,
-  IN   CHAR16                   *AutodetectDir,
-  IN   CONST BOOLEAN            IsStandaloneBoot,
-  OUT  OC_PICKER_ENTRY          **Entries,
-  OUT  UINTN                    *NumEntries
+  IN   EFI_FILE_PROTOCOL  *RootDirectory,
+  IN   EFI_FILE_PROTOCOL  *VmlinuzDirectory,
+  IN   CHAR16             *AutodetectDir,
+  IN   CONST BOOLEAN      IsStandaloneBoot,
+  OUT  OC_PICKER_ENTRY    **Entries,
+  OUT  UINTN              *NumEntries
   )
 {
-  EFI_STATUS                      Status;
-  EFI_FILE_PROTOCOL               *RootFsFile;
+  EFI_STATUS         Status;
+  EFI_FILE_PROTOCOL  *RootFsFile;
 
   mVmlinuzFiles = NULL;
   mInitrdFiles  = NULL;
@@ -901,8 +910,10 @@ AutodetectLinuxAtDirectory (
       if (EFI_ERROR (Status)) {
         DEBUG ((DEBUG_WARN, "LNX: %s found but not a %a - %r\n", ROOT_FS_FILE, "file", Status));
       }
+
       RootFsFile->Close (RootFsFile);
     }
+
     if (EFI_ERROR (Status)) {
       DEBUG ((DEBUG_WARN, "LNX: AutodetectLinux not root fs - %r\n", Status));
     }
@@ -928,7 +939,7 @@ AutodetectLinuxAtDirectory (
   if (!EFI_ERROR (Status)) {
     Status = OcScanDirectory (VmlinuzDirectory, ProcessVmlinuzFile, NULL);
 
-    if (!EFI_ERROR (Status) && mVmlinuzFiles->Count == 0) {
+    if (!EFI_ERROR (Status) && (mVmlinuzFiles->Count == 0)) {
       //
       // If initrd files but no vmlinuz files are present in autodetect dir.
       //
@@ -938,9 +949,9 @@ AutodetectLinuxAtDirectory (
 
   if (!EFI_ERROR (Status)) {
     gLoaderEntries = OcFlexArrayInit (
-      sizeof (LOADER_ENTRY),
-      (OC_FLEX_ARRAY_FREE_ITEM)InternalFreeLoaderEntry
-      );
+                       sizeof (LOADER_ENTRY),
+                       (OC_FLEX_ARRAY_FREE_ITEM)InternalFreeLoaderEntry
+                       );
     if (gLoaderEntries == NULL) {
       Status = EFI_OUT_OF_RESOURCES;
     } else {
@@ -949,18 +960,20 @@ AutodetectLinuxAtDirectory (
       if (!EFI_ERROR (Status)) {
         Status = LoadDefaultGrub (RootDirectory, IsStandaloneBoot);
       }
+
       if (!EFI_ERROR (Status)) {
         Status = GenerateEntriesForVmlinuzFiles (AutodetectDir, IsStandaloneBoot);
       }
+
       FreeEtcFiles ();
     }
 
     if (!EFI_ERROR (Status)) {
       Status = InternalConvertLoaderEntriesToBootEntries (
-        RootDirectory,
-        Entries,
-        NumEntries
-      );
+                 RootDirectory,
+                 Entries,
+                 NumEntries
+                 );
     }
 
     OcFlexArrayFree (&gLoaderEntries);
@@ -980,15 +993,15 @@ AutodetectLinuxAtDirectory (
 STATIC
 EFI_STATUS
 DoAutodetectLinux (
-  IN   EFI_FILE_PROTOCOL        *RootDirectory,
-  IN   EFI_FILE_PROTOCOL        *VmlinuzDirectory,
-  IN   CHAR16                   *AutodetectDir,
-  IN   CONST BOOLEAN            IsStandaloneBoot,
-  OUT  OC_PICKER_ENTRY          **Entries,
-  OUT  UINTN                    *NumEntries
+  IN   EFI_FILE_PROTOCOL  *RootDirectory,
+  IN   EFI_FILE_PROTOCOL  *VmlinuzDirectory,
+  IN   CHAR16             *AutodetectDir,
+  IN   CONST BOOLEAN      IsStandaloneBoot,
+  OUT  OC_PICKER_ENTRY    **Entries,
+  OUT  UINTN              *NumEntries
   )
 {
-  EFI_STATUS                      Status;
+  EFI_STATUS  Status;
 
   Status = AutodetectLinuxAtDirectory (RootDirectory, VmlinuzDirectory, AutodetectDir, IsStandaloneBoot, Entries, NumEntries);
 
@@ -1004,13 +1017,13 @@ DoAutodetectLinux (
 
 EFI_STATUS
 InternalAutodetectLinux (
-  IN   EFI_FILE_PROTOCOL        *RootDirectory,
-  OUT  OC_PICKER_ENTRY          **Entries,
-  OUT  UINTN                    *NumEntries
+  IN   EFI_FILE_PROTOCOL  *RootDirectory,
+  OUT  OC_PICKER_ENTRY    **Entries,
+  OUT  UINTN              *NumEntries
   )
 {
-  EFI_STATUS                      Status;
-  EFI_FILE_PROTOCOL               *VmlinuzDirectory;
+  EFI_STATUS         Status;
+  EFI_FILE_PROTOCOL  *VmlinuzDirectory;
 
   GetCurrentPartuuidAutoOpts ();
 
@@ -1029,7 +1042,7 @@ InternalAutodetectLinux (
   // boot entries, and even then not all standalone boot setups have it).
   //
   if (EFI_ERROR (Status)) {
-    if (mCurrentPartuuidAutoOpts != NULL || (mGlobalAutoOpts != NULL && mCurrentPartuuidAutoOptsPlus == NULL)) {
+    if ((mCurrentPartuuidAutoOpts != NULL) || ((mGlobalAutoOpts != NULL) && (mCurrentPartuuidAutoOptsPlus == NULL))) {
       Status = DoAutodetectLinux (RootDirectory, RootDirectory, ROOT_DIR, TRUE, Entries, NumEntries);
     } else {
       DEBUG ((

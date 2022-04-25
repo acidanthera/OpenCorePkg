@@ -31,13 +31,13 @@ UefiMain (
   IN EFI_SYSTEM_TABLE  *SystemTable
   )
 {
-  EFI_STATUS                            Status;
-  UINTN                                 Argc;
-  CHAR16                                **Argv;
-  UINTN                                 Addr;
-  UINTN                                 Value;
-  UINTN                                 Index;
-  UINT8                                 Rtc[256];
+  EFI_STATUS  Status;
+  UINTN       Argc;
+  CHAR16      **Argv;
+  UINTN       Addr;
+  UINTN       Value;
+  UINTN       Index;
+  UINT8       Rtc[256];
 
   gBS->SetWatchdogTimer (0, 0, 0, NULL);
 
@@ -48,14 +48,14 @@ UefiMain (
   OcSetConsoleResolution (0, 0, 0, FALSE);
 
   Status = GetArguments (&Argc, &Argv);
-  if (!EFI_ERROR (Status) && Argc >= 2) {
-    if (OcStriCmp (Argv[1], L"dump") == 0 && Argc == 2) {
+  if (!EFI_ERROR (Status) && (Argc >= 2)) {
+    if ((OcStriCmp (Argv[1], L"dump") == 0) && (Argc == 2)) {
       for (Index = 0; Index < ARRAY_SIZE (Rtc); ++Index) {
-        Rtc[Index] = OcRtcRead ((UINT8) Index);
+        Rtc[Index] = OcRtcRead ((UINT8)Index);
       }
 
       for (Index = 0; Index < ARRAY_SIZE (Rtc); Index += 16) {
-        Print(
+        Print (
           L"%02Xh: %02X %02X %02X %02X %02X %02X %02X %02X %02X %02X %02X %02X %02X %02X %02X %02X\n",
           Index,
           Rtc[Index+0],
@@ -80,37 +80,37 @@ UefiMain (
       return EFI_SUCCESS;
     }
 
-    if (OcStriCmp (Argv[1], L"read") == 0 && Argc == 3)  {
+    if ((OcStriCmp (Argv[1], L"read") == 0) && (Argc == 3)) {
       Status = StrHexToUintnS (Argv[2], NULL, &Addr);
-      if (EFI_ERROR (Status) || Addr > 0xFF) {
-        Print (L"Invalid addr %LX - %r\n", (UINT64) Addr, Status);
+      if (EFI_ERROR (Status) || (Addr > 0xFF)) {
+        Print (L"Invalid addr %LX - %r\n", (UINT64)Addr, Status);
         return EFI_SUCCESS;
       }
 
-      Print (L"Rtc[0x%Xh] = 0x%02X\n", (UINT32) Addr, OcRtcRead ((UINT8) Addr));
+      Print (L"Rtc[0x%Xh] = 0x%02X\n", (UINT32)Addr, OcRtcRead ((UINT8)Addr));
       return EFI_SUCCESS;
     }
 
-    if (OcStriCmp (Argv[1], L"write") == 0 && Argc == 4)  {
+    if ((OcStriCmp (Argv[1], L"write") == 0) && (Argc == 4)) {
       Status = StrHexToUintnS (Argv[2], NULL, &Addr);
-      if (EFI_ERROR (Status) || Addr > 0xFF) {
-        Print (L"Invalid addr %LX - %r\n", (UINT64) Addr, Status);
+      if (EFI_ERROR (Status) || (Addr > 0xFF)) {
+        Print (L"Invalid addr %LX - %r\n", (UINT64)Addr, Status);
         return EFI_SUCCESS;
       }
 
       Status = StrHexToUintnS (Argv[3], NULL, &Value);
-      if (EFI_ERROR (Status) || Value > 0xFF) {
-        Print (L"Invalid value %LX - %r\n", (UINT64) Value, Status);
+      if (EFI_ERROR (Status) || (Value > 0xFF)) {
+        Print (L"Invalid value %LX - %r\n", (UINT64)Value, Status);
         return EFI_SUCCESS;
       }
 
       Print (
         L"Rtc[0x%X] = 0x%02X -> 0x%02X\n",
-        (UINT32) Addr,
-        OcRtcRead ((UINT8) Addr),
-        (UINT8) Value
+        (UINT32)Addr,
+        OcRtcRead ((UINT8)Addr),
+        (UINT8)Value
         );
-      OcRtcWrite ((UINT8) Addr, (UINT8) Value);
+      OcRtcWrite ((UINT8)Addr, (UINT8)Value);
       return EFI_SUCCESS;
     }
   }

@@ -25,7 +25,7 @@ typedef
 EFI_STATUS
 (EFIAPI *DIAG_ACCESS_GET)(
   IN     CHAR16     *Key,
-     OUT VOID       *Value,
+  OUT VOID       *Value,
   IN OUT UINTN      *Length
   );
 
@@ -38,13 +38,13 @@ EFI_STATUS
   );
 
 typedef struct {
-  UINTN            Revision;
-  DIAG_ACCESS_GET  GetValue;
-  DIAG_ACCESS_SET  SetValue;
+  UINTN              Revision;
+  DIAG_ACCESS_GET    GetValue;
+  DIAG_ACCESS_SET    SetValue;
 } APPLE_DIAG_VARIABLE_ACCESS_PROTOCOL;
 
 // Note, both these GUIDs are also exposed as a configuration table with the same GUID and is used by AppleEFINVRAM.kext.
-extern EFI_GUID gAppleDiagVariableAccessProtocolGuid;
-extern EFI_GUID gAppleDiagVaultProtocolGuid;
+extern EFI_GUID  gAppleDiagVariableAccessProtocolGuid;
+extern EFI_GUID  gAppleDiagVaultProtocolGuid;
 
 #endif // APPLE_DIAG_ACCESS_H

@@ -41,12 +41,12 @@ ActivateHpetSupport (
   UINT32               Hptc;
 
   Status = gBS->LocateHandleBuffer (
-    ByProtocol,
-    &gEfiPciIoProtocolGuid,
-    NULL,
-    &HandleCount,
-    &HandleBuffer
-    );
+                  ByProtocol,
+                  &gEfiPciIoProtocolGuid,
+                  NULL,
+                  &HandleCount,
+                  &HandleBuffer
+                  );
 
   if (EFI_ERROR (Status)) {
     DEBUG ((DEBUG_INFO, "OCDM: No PCI devices for HPET support - %r\n", Status));
@@ -55,27 +55,27 @@ ActivateHpetSupport (
 
   for (Index = 0; Index < HandleCount; ++Index) {
     Status = gBS->HandleProtocol (
-      HandleBuffer[Index],
-      &gEfiPciIoProtocolGuid,
-      (VOID **) &PciIo
-      );
+                    HandleBuffer[Index],
+                    &gEfiPciIoProtocolGuid,
+                    (VOID **)&PciIo
+                    );
 
     if (EFI_ERROR (Status)) {
       continue;
     }
 
     Status = PciIo->Pci.Read (
-      PciIo,
-      EfiPciIoWidthUint8,
-      PCI_CLASSCODE_OFFSET,
-      sizeof (PCI_CLASSCODE) / sizeof (UINT8),
-      &ClassCode
-      );
+                          PciIo,
+                          EfiPciIoWidthUint8,
+                          PCI_CLASSCODE_OFFSET,
+                          sizeof (PCI_CLASSCODE) / sizeof (UINT8),
+                          &ClassCode
+                          );
     if (EFI_ERROR (Status)) {
       continue;
     }
 
-    if (ClassCode.BaseCode == PCI_CLASS_BRIDGE && ClassCode.SubClassCode == PCI_CLASS_BRIDGE_ISA) {
+    if ((ClassCode.BaseCode == PCI_CLASS_BRIDGE) && (ClassCode.SubClassCode == PCI_CLASS_BRIDGE_ISA)) {
       Status = PciIo->Pci.Read (PciIo, EfiPciIoWidthUint32, PCI_BRIDGE_RCBA_OFFSET, 1, &Rcba);
       if (EFI_ERROR (Status)) {
         continue;
@@ -84,8 +84,8 @@ ActivateHpetSupport (
       DEBUG ((
         DEBUG_INFO,
         "OCDM: Discovered RCBA device at %u/%u at 0x%X\n",
-        (UINT32) (Index + 1),
-        (UINT32) HandleCount,
+        (UINT32)(Index + 1),
+        (UINT32)HandleCount,
         Rcba
         ));
 

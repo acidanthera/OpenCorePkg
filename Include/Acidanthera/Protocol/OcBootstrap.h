@@ -30,7 +30,7 @@
 ///
 /// OC_BOOTSTRAP_PROTOCOL revision
 ///
-#define OC_BOOTSTRAP_PROTOCOL_REVISION 7
+#define OC_BOOTSTRAP_PROTOCOL_REVISION  7
 
 ///
 /// Forward declaration of OC_BOOTSTRAP_PROTOCOL structure.
@@ -47,7 +47,7 @@ typedef struct OC_BOOTSTRAP_PROTOCOL_ OC_BOOTSTRAP_PROTOCOL;
 **/
 typedef
 EFI_HANDLE
-(EFIAPI *OC_GET_LOAD_HANDLE) (
+(EFIAPI *OC_GET_LOAD_HANDLE)(
   IN OC_BOOTSTRAP_PROTOCOL            *This
   );
 
@@ -55,10 +55,10 @@ EFI_HANDLE
 /// The structure exposed by the OC_BOOTSTRAP_PROTOCOL.
 ///
 struct OC_BOOTSTRAP_PROTOCOL_ {
-  UINTN               Revision;
-  OC_GET_LOAD_HANDLE  GetLoadHandle;
+  UINTN                 Revision;
+  OC_GET_LOAD_HANDLE    GetLoadHandle;
 };
 
-extern EFI_GUID gOcBootstrapProtocolGuid;
+extern EFI_GUID  gOcBootstrapProtocolGuid;
 
 #endif // OC_BOOTSTRAP_PROTOCOL_H

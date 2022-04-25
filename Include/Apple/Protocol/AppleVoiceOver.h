@@ -29,8 +29,7 @@ typedef struct APPLE_VOICE_OVER_AUDIO_PROTOCOL_ APPLE_VOICE_OVER_AUDIO_PROTOCOL;
 /**
   Apple VoiceOver Audio protocol revision.
 **/
-#define APPLE_VOICE_OVER_AUDIO_PROTOCOL_REVISION 0x10000
-
+#define APPLE_VOICE_OVER_AUDIO_PROTOCOL_REVISION  0x10000
 
 /**
   These files can be found either on BridgeOS volume:
@@ -110,7 +109,7 @@ typedef enum {
 **/
 typedef
 EFI_STATUS
-(EFIAPI *APPLE_VOICE_OVER_AUDIO_PLAY) (
+(EFIAPI *APPLE_VOICE_OVER_AUDIO_PLAY)(
   IN     APPLE_VOICE_OVER_AUDIO_PROTOCOL  *This,
   IN     UINT8                            File
   );
@@ -126,7 +125,7 @@ EFI_STATUS
 **/
 typedef
 EFI_STATUS
-(EFIAPI *APPLE_VOICE_OVER_AUDIO_SET_LANGUAGE_CODE) (
+(EFIAPI *APPLE_VOICE_OVER_AUDIO_SET_LANGUAGE_CODE)(
   IN     APPLE_VOICE_OVER_AUDIO_PROTOCOL  *This,
   IN     UINT8                            LanguageCode
   );
@@ -142,7 +141,7 @@ EFI_STATUS
 **/
 typedef
 EFI_STATUS
-(EFIAPI *APPLE_VOICE_OVER_AUDIO_SET_LANGUAGE_STRING) (
+(EFIAPI *APPLE_VOICE_OVER_AUDIO_SET_LANGUAGE_STRING)(
   IN     APPLE_VOICE_OVER_AUDIO_PROTOCOL  *This,
   IN     CONST CHAR8                      *LanguageString
   );
@@ -159,7 +158,7 @@ EFI_STATUS
 **/
 typedef
 EFI_STATUS
-(EFIAPI *APPLE_VOICE_OVER_AUDIO_GET_LANGUAGE) (
+(EFIAPI *APPLE_VOICE_OVER_AUDIO_GET_LANGUAGE)(
   IN     APPLE_VOICE_OVER_AUDIO_PROTOCOL  *This,
   OUT    UINT8                            *LanguageCode,
   OUT    CONST CHAR8                      **LanguageString
@@ -169,13 +168,13 @@ EFI_STATUS
   VoiceOver protocol.
 **/
 struct APPLE_VOICE_OVER_AUDIO_PROTOCOL_ {
-  UINTN Revision;
-  APPLE_VOICE_OVER_AUDIO_PLAY                 Play;
-  APPLE_VOICE_OVER_AUDIO_SET_LANGUAGE_CODE    SetLanguageCode;
-  APPLE_VOICE_OVER_AUDIO_SET_LANGUAGE_STRING  SetLanguageString;
-  APPLE_VOICE_OVER_AUDIO_GET_LANGUAGE         GetLanguage;
+  UINTN                                         Revision;
+  APPLE_VOICE_OVER_AUDIO_PLAY                   Play;
+  APPLE_VOICE_OVER_AUDIO_SET_LANGUAGE_CODE      SetLanguageCode;
+  APPLE_VOICE_OVER_AUDIO_SET_LANGUAGE_STRING    SetLanguageString;
+  APPLE_VOICE_OVER_AUDIO_GET_LANGUAGE           GetLanguage;
 };
 
-extern EFI_GUID gAppleVOAudioProtocolGuid;
+extern EFI_GUID  gAppleVOAudioProtocolGuid;
 
 #endif // APPLE_VO_AUDIO_H

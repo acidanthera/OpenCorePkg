@@ -34,8 +34,10 @@ OcRealMemoryType (
   IN EFI_MEMORY_DESCRIPTOR  *MemoryAttribte
   )
 {
-  ASSERT (MemoryAttribte->Type == EfiRuntimeServicesCode
-    || MemoryAttribte->Type == EfiRuntimeServicesData);
+  ASSERT (
+    MemoryAttribte->Type == EfiRuntimeServicesCode
+         || MemoryAttribte->Type == EfiRuntimeServicesData
+    );
 
   //
   // Use code for write-protected areas.
@@ -99,7 +101,7 @@ OcSplitMemoryEntryByAttribute (
     }
 
     NewMemoryMapEntry = NEXT_MEMORY_DESCRIPTOR (MemoryMapEntry, DescriptorSize);
-    DiffPages         = (UINTN) EFI_SIZE_TO_PAGES (MemoryAttribute->PhysicalStart - MemoryMapEntry->PhysicalStart);
+    DiffPages         = (UINTN)EFI_SIZE_TO_PAGES (MemoryAttribute->PhysicalStart - MemoryMapEntry->PhysicalStart);
     CopyMem (
       NewMemoryMapEntry,
       MemoryMapEntry,
@@ -127,7 +129,7 @@ OcSplitMemoryEntryByAttribute (
   //
   if (MemoryMapEntry->NumberOfPages == MemoryAttribute->NumberOfPages) {
     MemoryMapEntry->Type = OcRealMemoryType (MemoryAttribute);
-    *RetMemoryMapEntry = MemoryMapEntry;
+    *RetMemoryMapEntry   = MemoryMapEntry;
     return EFI_SUCCESS;
   }
 
@@ -172,7 +174,7 @@ OcExpandAttributeWrite (
   IN     EFI_PHYSICAL_ADDRESS         CurrentMapAddress
   )
 {
-  EFI_PHYSICAL_ADDRESS    NextMatAddress;
+  EFI_PHYSICAL_ADDRESS  NextMatAddress;
 
   //
   // Simply abort on failing to write any new entry.
@@ -195,7 +197,7 @@ OcExpandAttributeWrite (
       NEXT_MEMORY_DESCRIPTOR (MemoryAttributesEntry, MemoryAttributesTable->DescriptorSize),
       MemoryAttributesEntry,
       MemoryAttributesTable->NumberOfEntries * MemoryAttributesTable->DescriptorSize
-        - ((UINTN) MemoryAttributesEntry - (UINTN) MemoryAttributesTable - sizeof (*MemoryAttributesTable))
+      - ((UINTN)MemoryAttributesEntry - (UINTN)MemoryAttributesTable - sizeof (*MemoryAttributesTable))
       );
 
     //
@@ -216,8 +218,8 @@ OcExpandAttributeWrite (
     //
     // Append to the end of MAT table.
     //
-    MemoryAttributesEntry = (VOID *) ((UINTN) MemoryAttributesTable + sizeof (*MemoryAttributesTable)
-      + MemoryAttributesTable->NumberOfEntries * MemoryAttributesTable->DescriptorSize);
+    MemoryAttributesEntry = (VOID *)((UINTN)MemoryAttributesTable + sizeof (*MemoryAttributesTable)
+                                     + MemoryAttributesTable->NumberOfEntries * MemoryAttributesTable->DescriptorSize);
     NextMatAddress = LAST_DESCRIPTOR_ADDR (MemoryMapEntry) + 1;
   }
 
@@ -265,12 +267,12 @@ OcExpandAttributesByMap (
   IN     UINTN                        DescriptorSize
   )
 {
-  EFI_STATUS             Status;
-  UINTN                  MapIndex;
-  UINTN                  MatIndex;
-  EFI_PHYSICAL_ADDRESS   NextMapAddress;
-  EFI_PHYSICAL_ADDRESS   LastMatAddress;
-  EFI_PHYSICAL_ADDRESS   CurrentMapAddress;
+  EFI_STATUS            Status;
+  UINTN                 MapIndex;
+  UINTN                 MatIndex;
+  EFI_PHYSICAL_ADDRESS  NextMapAddress;
+  EFI_PHYSICAL_ADDRESS  LastMatAddress;
+  EFI_PHYSICAL_ADDRESS  CurrentMapAddress;
 
   MatIndex = 0;
   Status   = EFI_NOT_FOUND;
@@ -279,8 +281,9 @@ OcExpandAttributesByMap (
     //
     // Skip MAP entries, which are not RTCode or RTData.
     //
-    if (MemoryMap->Type != EfiRuntimeServicesCode
-      && MemoryMap->Type != EfiRuntimeServicesData) {
+    if (  (MemoryMap->Type != EfiRuntimeServicesCode)
+       && (MemoryMap->Type != EfiRuntimeServicesData))
+    {
       goto NEXT_MEMORY_MAP_DESCRIPTOR;
     }
 
@@ -291,13 +294,15 @@ OcExpandAttributesByMap (
     // Iterate MAT entries till we are over them or till
     // we finish iterating this MAP entry memory.
     //
-    while (MatIndex < MemoryAttributesTable->NumberOfEntries
-      && CurrentMapAddress < NextMapAddress) {
+    while (  MatIndex < MemoryAttributesTable->NumberOfEntries
+          && CurrentMapAddress < NextMapAddress)
+    {
       //
       // Skip MAT entries, which are not RTCode or RTData.
       //
-      if (MemoryAttributesEntry->Type != EfiRuntimeServicesCode
-        && MemoryAttributesEntry->Type != EfiRuntimeServicesData) {
+      if (  (MemoryAttributesEntry->Type != EfiRuntimeServicesCode)
+         && (MemoryAttributesEntry->Type != EfiRuntimeServicesData))
+      {
         goto NEXT_MEMORY_ATTRIBUTE_DESCRIPTOR;
       }
 
@@ -332,12 +337,12 @@ OcExpandAttributesByMap (
       // and the MAT entry. Fill it in.
       //
       Status = OcExpandAttributeWrite (
-        MemoryAttributesTable,
-        MemoryAttributesEntry,
-        MaxDescriptors,
-        MemoryMap,
-        CurrentMapAddress
-        );
+                 MemoryAttributesTable,
+                 MemoryAttributesEntry,
+                 MaxDescriptors,
+                 MemoryMap,
+                 CurrentMapAddress
+                 );
       if (EFI_ERROR (Status)) {
         return Status;
       }
@@ -350,9 +355,9 @@ OcExpandAttributesByMap (
 
 NEXT_MEMORY_ATTRIBUTE_DESCRIPTOR:
       MemoryAttributesEntry = NEXT_MEMORY_DESCRIPTOR (
-        MemoryAttributesEntry,
-        MemoryAttributesTable->DescriptorSize
-        );
+                                MemoryAttributesEntry,
+                                MemoryAttributesTable->DescriptorSize
+                                );
       ++MatIndex;
     }
 
@@ -372,12 +377,12 @@ NEXT_MEMORY_ATTRIBUTE_DESCRIPTOR:
     ASSERT (CurrentMapAddress < NextMapAddress);
     ASSERT (MatIndex == MemoryAttributesTable->NumberOfEntries);
     Status = OcExpandAttributeWrite (
-      MemoryAttributesTable,
-      NULL,
-      MaxDescriptors,
-      MemoryMap,
-      CurrentMapAddress
-      );
+               MemoryAttributesTable,
+               NULL,
+               MaxDescriptors,
+               MemoryMap,
+               CurrentMapAddress
+               );
     if (EFI_ERROR (Status)) {
       return Status;
     }
@@ -392,9 +397,9 @@ NEXT_MEMORY_ATTRIBUTE_DESCRIPTOR:
 
 NEXT_MEMORY_MAP_DESCRIPTOR:
     MemoryMap = NEXT_MEMORY_DESCRIPTOR (
-      MemoryMap,
-      DescriptorSize
-      );
+                  MemoryMap,
+                  DescriptorSize
+                  );
   }
 
   return Status;
@@ -412,8 +417,9 @@ OcGetMemoryAttributes (
     if (CompareGuid (&gST->ConfigurationTable[Index].VendorGuid, &gEfiMemoryAttributesTableGuid)) {
       MemoryAttributesTable = gST->ConfigurationTable[Index].VendorTable;
       if (MemoryAttributesEntry != NULL) {
-        *MemoryAttributesEntry = (EFI_MEMORY_DESCRIPTOR *) (MemoryAttributesTable + 1);
+        *MemoryAttributesEntry = (EFI_MEMORY_DESCRIPTOR *)(MemoryAttributesTable + 1);
       }
+
       return MemoryAttributesTable;
     }
   }
@@ -427,18 +433,18 @@ OcRebuildAttributes (
   IN EFI_GET_MEMORY_MAP    GetMemoryMap  OPTIONAL
   )
 {
-  EFI_STATUS                         Status;
-  EFI_MEMORY_ATTRIBUTES_TABLE        *MemoryAttributesTable;
-  EFI_MEMORY_DESCRIPTOR              *MemoryAttributesEntry;
-  UINTN                              MaxDescriptors;
-  UINTN                              MemoryMapSize;
-  EFI_MEMORY_DESCRIPTOR              *MemoryMap;
-  UINTN                              DescriptorSize;
-  UINTN                              MapKey;
-  UINT32                             DescriptorVersion;
+  EFI_STATUS                   Status;
+  EFI_MEMORY_ATTRIBUTES_TABLE  *MemoryAttributesTable;
+  EFI_MEMORY_DESCRIPTOR        *MemoryAttributesEntry;
+  UINTN                        MaxDescriptors;
+  UINTN                        MemoryMapSize;
+  EFI_MEMORY_DESCRIPTOR        *MemoryMap;
+  UINTN                        DescriptorSize;
+  UINTN                        MapKey;
+  UINT32                       DescriptorVersion;
 
   MemoryAttributesTable = OcGetMemoryAttributes (&MemoryAttributesEntry);
-  if (MemoryAttributesTable == NULL || MemoryAttributesTable->NumberOfEntries == 0) {
+  if ((MemoryAttributesTable == NULL) || (MemoryAttributesTable->NumberOfEntries == 0)) {
     return EFI_UNSUPPORTED;
   }
 
@@ -458,16 +464,16 @@ OcRebuildAttributes (
   // REF: https://github.com/acidanthera/bugtracker/issues/491#issuecomment-609014334
   //
   MaxDescriptors = MemoryAttributesTable->NumberOfEntries;
-  Status = OcDeduplicateDescriptors (
-    &MemoryAttributesTable->NumberOfEntries,
-    MemoryAttributesEntry,
-    MemoryAttributesTable->DescriptorSize
-    );
+  Status         = OcDeduplicateDescriptors (
+                     &MemoryAttributesTable->NumberOfEntries,
+                     MemoryAttributesEntry,
+                     MemoryAttributesTable->DescriptorSize
+                     );
   if (!EFI_ERROR (Status)) {
     //
     // Statically allocate memory for the memory map to avoid allocations.
     //
-    STATIC UINT8 mMemoryMap[OC_DEFAULT_MEMORY_MAP_SIZE];
+    STATIC UINT8  mMemoryMap[OC_DEFAULT_MEMORY_MAP_SIZE];
 
     //
     // Assume effected and add missing entries.
@@ -477,15 +483,15 @@ OcRebuildAttributes (
     }
 
     MemoryMapSize = sizeof (mMemoryMap);
-    MemoryMap     = (EFI_MEMORY_DESCRIPTOR *) mMemoryMap;
+    MemoryMap     = (EFI_MEMORY_DESCRIPTOR *)mMemoryMap;
 
     Status = GetMemoryMap (
-      &MemoryMapSize,
-      MemoryMap,
-      &MapKey,
-      &DescriptorSize,
-      &DescriptorVersion
-      );
+               &MemoryMapSize,
+               MemoryMap,
+               &MapKey,
+               &DescriptorSize,
+               &DescriptorVersion
+               );
 
     if (!EFI_ERROR (Status)) {
       OcSortMemoryMap (
@@ -518,14 +524,14 @@ OcRebuildAttributes (
   //
   if (Address != 0) {
     Status = OcUpdateDescriptors (
-      MemoryAttributesTable->NumberOfEntries * MemoryAttributesTable->DescriptorSize,
-      MemoryAttributesEntry,
-      MemoryAttributesTable->DescriptorSize,
-      Address,
-      EfiRuntimeServicesCode,
-      EFI_MEMORY_RO,
-      EFI_MEMORY_XP
-      );
+               MemoryAttributesTable->NumberOfEntries * MemoryAttributesTable->DescriptorSize,
+               MemoryAttributesEntry,
+               MemoryAttributesTable->DescriptorSize,
+               Address,
+               EfiRuntimeServicesCode,
+               EFI_MEMORY_RO,
+               EFI_MEMORY_XP
+               );
   }
 
   return Status;
@@ -536,10 +542,10 @@ OcCountSplitDescriptors (
   VOID
   )
 {
-  UINTN                             Index;
-  UINTN                             DescriptorCount;
-  CONST EFI_MEMORY_ATTRIBUTES_TABLE *MemoryAttributesTable;
-  EFI_MEMORY_DESCRIPTOR             *MemoryAttributesEntry;
+  UINTN                              Index;
+  UINTN                              DescriptorCount;
+  CONST EFI_MEMORY_ATTRIBUTES_TABLE  *MemoryAttributesTable;
+  EFI_MEMORY_DESCRIPTOR              *MemoryAttributesEntry;
 
   MemoryAttributesTable = OcGetMemoryAttributes (&MemoryAttributesEntry);
   if (MemoryAttributesTable == NULL) {
@@ -548,15 +554,16 @@ OcCountSplitDescriptors (
 
   DescriptorCount = 0;
   for (Index = 0; Index < MemoryAttributesTable->NumberOfEntries; ++Index) {
-    if (MemoryAttributesEntry->Type == EfiRuntimeServicesCode
-      || MemoryAttributesEntry->Type == EfiRuntimeServicesData) {
+    if (  (MemoryAttributesEntry->Type == EfiRuntimeServicesCode)
+       || (MemoryAttributesEntry->Type == EfiRuntimeServicesData))
+    {
       ++DescriptorCount;
     }
 
     MemoryAttributesEntry = NEXT_MEMORY_DESCRIPTOR (
-      MemoryAttributesEntry,
-      MemoryAttributesTable->DescriptorSize
-      );
+                              MemoryAttributesEntry,
+                              MemoryAttributesTable->DescriptorSize
+                              );
   }
 
   return DescriptorCount;
@@ -607,24 +614,28 @@ OcSplitMemoryMapByAttributes (
     // Split entry by as many attributes as possible.
     //
     CanSplit = TRUE;
-    while ((MemoryMapEntry->Type == EfiRuntimeServicesCode
-      || MemoryMapEntry->Type == EfiRuntimeServicesData) && CanSplit) {
+    while ((  MemoryMapEntry->Type == EfiRuntimeServicesCode
+           || MemoryMapEntry->Type == EfiRuntimeServicesData) && CanSplit)
+    {
       //
       // Find corresponding memory attribute.
       //
-      InDescAttrs = FALSE;
+      InDescAttrs           = FALSE;
       MemoryAttributesEntry = LastAttributeEntry;
       for (Index2 = LastAttributeIndex; Index2 < AttributeCount; ++Index2) {
-        if (MemoryAttributesEntry->Type == EfiRuntimeServicesCode
-          || MemoryAttributesEntry->Type == EfiRuntimeServicesData) {
+        if (  (MemoryAttributesEntry->Type == EfiRuntimeServicesCode)
+           || (MemoryAttributesEntry->Type == EfiRuntimeServicesData))
+        {
           //
           // UEFI spec says attribute entries are fully within memory map entries.
           // Find first one of a different type.
           //
           if (AREA_WITHIN_DESCRIPTOR (
-            MemoryMapEntry,
-            MemoryAttributesEntry->PhysicalStart,
-            EFI_PAGES_TO_SIZE (MemoryAttributesEntry->NumberOfPages))) {
+                MemoryMapEntry,
+                MemoryAttributesEntry->PhysicalStart,
+                EFI_PAGES_TO_SIZE (MemoryAttributesEntry->NumberOfPages)
+                ))
+          {
             //
             // We are within descriptor attribute sequence.
             //
@@ -637,9 +648,9 @@ OcSplitMemoryMapByAttributes (
               // Start with the next attribute on the second iteration.
               //
               LastAttributeEntry = NEXT_MEMORY_DESCRIPTOR (
-                MemoryAttributesEntry,
-                MemoryAttributesTable->DescriptorSize
-                );
+                                     MemoryAttributesEntry,
+                                     MemoryAttributesTable->DescriptorSize
+                                     );
               LastAttributeIndex = Index2 + 1;
               break;
             }
@@ -653,27 +664,28 @@ OcSplitMemoryMapByAttributes (
         }
 
         MemoryAttributesEntry = NEXT_MEMORY_DESCRIPTOR (
-          MemoryAttributesEntry,
-          MemoryAttributesTable->DescriptorSize
-          );
+                                  MemoryAttributesEntry,
+                                  MemoryAttributesTable->DescriptorSize
+                                  );
       }
 
-      if (Index2 < AttributeCount && InDescAttrs) {
+      if ((Index2 < AttributeCount) && InDescAttrs) {
         //
         // Split current memory map entry.
         //
         Status = OcSplitMemoryEntryByAttribute (
-          &MemoryMapEntry,
-          &Index,
-          &CurrentEntryCount,
-          TotalEntryCount,
-          MemoryAttributesEntry,
-          DescriptorSize
-          );
+                   &MemoryMapEntry,
+                   &Index,
+                   &CurrentEntryCount,
+                   TotalEntryCount,
+                   MemoryAttributesEntry,
+                   DescriptorSize
+                   );
         if (EFI_ERROR (Status)) {
           *MemoryMapSize = CurrentEntryCount * DescriptorSize;
           return Status;
         }
+
         continue;
       } else {
         //
@@ -684,9 +696,9 @@ OcSplitMemoryMapByAttributes (
     }
 
     MemoryMapEntry = NEXT_MEMORY_DESCRIPTOR (
-      MemoryMapEntry,
-      DescriptorSize
-      );
+                       MemoryMapEntry,
+                       DescriptorSize
+                       );
     ++Index;
   }
 

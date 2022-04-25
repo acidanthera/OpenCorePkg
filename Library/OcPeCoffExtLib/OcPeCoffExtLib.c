@@ -45,19 +45,19 @@ PeCoffGetSecurityDirectoryEntry (
   OUT CONST EFI_IMAGE_DATA_DIRECTORY  **DirectoryEntry
   )
 {
-  CONST EFI_IMAGE_NT_HEADERS32          *Pe32Hdr;
-  CONST EFI_IMAGE_NT_HEADERS64          *Pe32PlusHdr;
-  UINT32                                EntryTop;
-  BOOLEAN                               Result;
+  CONST EFI_IMAGE_NT_HEADERS32  *Pe32Hdr;
+  CONST EFI_IMAGE_NT_HEADERS64  *Pe32PlusHdr;
+  UINT32                        EntryTop;
+  BOOLEAN                       Result;
 
   ASSERT (Context != NULL);
   ASSERT (DirectoryEntry != NULL);
 
   switch (Context->ImageType) {
     case ImageTypePe32:
-      Pe32Hdr = (CONST EFI_IMAGE_NT_HEADERS32 *) (CONST VOID *) (
-                  (CONST CHAR8 *) Context->FileBuffer + Context->ExeHdrOffset
-                  );
+      Pe32Hdr = (CONST EFI_IMAGE_NT_HEADERS32 *)(CONST VOID *)(
+                                                               (CONST CHAR8 *)Context->FileBuffer + Context->ExeHdrOffset
+                                                               );
 
       if (Pe32Hdr->NumberOfRvaAndSizes <= EFI_IMAGE_DIRECTORY_ENTRY_SECURITY) {
         return RETURN_UNSUPPORTED;
@@ -67,9 +67,9 @@ PeCoffGetSecurityDirectoryEntry (
       break;
 
     case ImageTypePe32Plus:
-      Pe32PlusHdr = (CONST EFI_IMAGE_NT_HEADERS64 *) (CONST VOID *) (
-                      (CONST CHAR8 *) Context->FileBuffer + Context->ExeHdrOffset
-                      );
+      Pe32PlusHdr = (CONST EFI_IMAGE_NT_HEADERS64 *)(CONST VOID *)(
+                                                                   (CONST CHAR8 *)Context->FileBuffer + Context->ExeHdrOffset
+                                                                   );
 
       if (Pe32PlusHdr->NumberOfRvaAndSizes <= EFI_IMAGE_DIRECTORY_ENTRY_SECURITY) {
         return RETURN_UNSUPPORTED;
@@ -97,7 +97,7 @@ PeCoffGetSecurityDirectoryEntry (
              (*DirectoryEntry)->Size,
              &EntryTop
              );
-  if (Result || EntryTop > FileSize) {
+  if (Result || (EntryTop > FileSize)) {
     return RETURN_INVALID_PARAMETER;
   }
 
@@ -107,11 +107,11 @@ PeCoffGetSecurityDirectoryEntry (
 STATIC
 EFI_STATUS
 PeCoffGetAppleCertificateInfo (
-  IN  PE_COFF_IMAGE_CONTEXT           *Context,
-  IN  UINT32                          FileSize,
-  OUT APPLE_EFI_CERTIFICATE_INFO      **CertInfo,
-  OUT UINT32                          *SecDirOffset,
-  OUT UINT32                          *SignedFileSize
+  IN  PE_COFF_IMAGE_CONTEXT       *Context,
+  IN  UINT32                      FileSize,
+  OUT APPLE_EFI_CERTIFICATE_INFO  **CertInfo,
+  OUT UINT32                      *SecDirOffset,
+  OUT UINT32                      *SignedFileSize
   )
 {
   EFI_STATUS                      Status;
@@ -119,16 +119,16 @@ PeCoffGetAppleCertificateInfo (
   UINT32                          EndOffset;
 
   Status = PeCoffGetSecurityDirectoryEntry (
-    Context,
-    FileSize,
-    &SecDir
-    );
+             Context,
+             FileSize,
+             &SecDir
+             );
   if (EFI_ERROR (Status)) {
     DEBUG ((DEBUG_INFO, "OCPE: PeCoff has no SecDir - %r\n", Status));
     return EFI_NOT_FOUND;
   }
 
-  *SecDirOffset = (UINT32) ((UINT8 *) SecDir - (UINT8 *) Context->FileBuffer);
+  *SecDirOffset = (UINT32)((UINT8 *)SecDir - (UINT8 *)Context->FileBuffer);
 
   if (SecDir->Size != sizeof (APPLE_EFI_CERTIFICATE_INFO)) {
     DEBUG ((DEBUG_INFO, "OCPE: Certificate info size mismatch\n"));
@@ -143,11 +143,12 @@ PeCoffGetAppleCertificateInfo (
   //
   // Obtain certificate info.
   //
-  *CertInfo = (APPLE_EFI_CERTIFICATE_INFO *) (
-    (UINT8 *) Context->FileBuffer + SecDir->VirtualAddress
-    );
-  if (OcOverflowAddU32 ((*CertInfo)->CertOffset, (*CertInfo)->CertSize, &EndOffset)
-    || EndOffset > FileSize) {
+  *CertInfo = (APPLE_EFI_CERTIFICATE_INFO *)(
+                                             (UINT8 *)Context->FileBuffer + SecDir->VirtualAddress
+                                             );
+  if (  OcOverflowAddU32 ((*CertInfo)->CertOffset, (*CertInfo)->CertSize, &EndOffset)
+     || (EndOffset > FileSize))
+  {
     DEBUG ((DEBUG_INFO, "OCPE: Certificate entry is beyond file area\n"));
     return EFI_INVALID_PARAMETER;
   }
@@ -163,14 +164,14 @@ PeCoffGetAppleCertificateInfo (
 STATIC
 EFI_STATUS
 PeCoffGetAppleSignature (
-  IN  PE_COFF_IMAGE_CONTEXT           *Context,
-  IN  APPLE_EFI_CERTIFICATE_INFO      *CertInfo,
-  OUT APPLE_SIGNATURE_CONTEXT         *SignatureContext
+  IN  PE_COFF_IMAGE_CONTEXT       *Context,
+  IN  APPLE_EFI_CERTIFICATE_INFO  *CertInfo,
+  OUT APPLE_SIGNATURE_CONTEXT     *SignatureContext
   )
 {
-  UINTN                           Index;
-  UINT8                           PublicKeyHash[SHA256_DIGEST_SIZE];
-  APPLE_EFI_CERTIFICATE           *Cert;
+  UINTN                  Index;
+  UINT8                  PublicKeyHash[SHA256_DIGEST_SIZE];
+  APPLE_EFI_CERTIFICATE  *Cert;
 
   //
   // Check that certificate is expected.
@@ -188,9 +189,9 @@ PeCoffGetAppleSignature (
   //
   // Extract signature directory
   //
-  Cert = (APPLE_EFI_CERTIFICATE *) (
-    (UINT8 *) Context->FileBuffer + CertInfo->CertOffset
-    );
+  Cert = (APPLE_EFI_CERTIFICATE *)(
+                                   (UINT8 *)Context->FileBuffer + CertInfo->CertOffset
+                                   );
 
   //
   // Compare size of signature directory with value from PE SecDir header
@@ -238,7 +239,7 @@ PeCoffGetAppleSignature (
   //
   for (Index = 0; Index < NUM_OF_PK; ++Index) {
     if (CompareMem (PkDataBase[Index].Hash, PublicKeyHash, sizeof (PublicKeyHash)) == 0) {
-      SignatureContext->PublicKey = (OC_RSA_PUBLIC_KEY *) PkDataBase[Index].PublicKey;
+      SignatureContext->PublicKey = (OC_RSA_PUBLIC_KEY *)PkDataBase[Index].PublicKey;
       break;
     }
   }
@@ -262,10 +263,10 @@ PeCoffGetAppleSignature (
 STATIC
 EFI_STATUS
 PeCoffSanitiseAppleImage (
-  IN  PE_COFF_IMAGE_CONTEXT           *Context,
-  IN  UINT32                          SecDirOffset,
-  IN  UINT32                          SignedFileSize,
-  IN  UINT32                          FileSize
+  IN  PE_COFF_IMAGE_CONTEXT  *Context,
+  IN  UINT32                 SecDirOffset,
+  IN  UINT32                 SignedFileSize,
+  IN  UINT32                 FileSize
   )
 {
   //
@@ -273,8 +274,9 @@ PeCoffSanitiseAppleImage (
   // one might add more PE types in the future technically.
   // Restrict file type as early as possible.
   //
-  if (Context->ImageType != ImageTypePe32
-    && Context->ImageType != ImageTypePe32Plus) {
+  if (  (Context->ImageType != ImageTypePe32)
+     && (Context->ImageType != ImageTypePe32Plus))
+  {
     DEBUG ((DEBUG_INFO, "OCPE: Unsupported image type %d for Apple Image\n", Context->ImageType));
     return EFI_UNSUPPORTED;
   }
@@ -293,7 +295,7 @@ PeCoffSanitiseAppleImage (
   // Zero memory between DOS and optional header.
   //
   ZeroMem (
-    (UINT8 *) Context->FileBuffer + sizeof (EFI_IMAGE_DOS_HEADER),
+    (UINT8 *)Context->FileBuffer + sizeof (EFI_IMAGE_DOS_HEADER),
     Context->ExeHdrOffset - sizeof (EFI_IMAGE_DOS_HEADER)
     );
 
@@ -301,7 +303,7 @@ PeCoffSanitiseAppleImage (
   // Zero checksum as we do not hash it.
   //
   ZeroMem (
-    (UINT8 *) Context->FileBuffer + Context->ExeHdrOffset + APPLE_CHECKSUM_OFFSET,
+    (UINT8 *)Context->FileBuffer + Context->ExeHdrOffset + APPLE_CHECKSUM_OFFSET,
     APPLE_CHECKSUM_SIZE
     );
 
@@ -309,7 +311,7 @@ PeCoffSanitiseAppleImage (
   // Zero sec entry as we do not hash it as well.
   //
   ZeroMem (
-    (UINT8 *) Context->FileBuffer + SecDirOffset,
+    (UINT8 *)Context->FileBuffer + SecDirOffset,
     sizeof (EFI_IMAGE_DATA_DIRECTORY)
     );
 
@@ -317,7 +319,7 @@ PeCoffSanitiseAppleImage (
   // Zero signature as we do not hash it.
   //
   ZeroMem (
-    (UINT8 *) Context->FileBuffer + SignedFileSize,
+    (UINT8 *)Context->FileBuffer + SignedFileSize,
     FileSize - SignedFileSize
     );
 
@@ -327,15 +329,15 @@ PeCoffSanitiseAppleImage (
 STATIC
 VOID
 PeCoffHashAppleImage (
-  IN  PE_COFF_IMAGE_CONTEXT           *Context,
-  IN  UINT32                          SecDirOffset,
-  IN  UINT32                          SignedFileSize,
-  OUT UINT8                           *Hash
+  IN  PE_COFF_IMAGE_CONTEXT  *Context,
+  IN  UINT32                 SecDirOffset,
+  IN  UINT32                 SignedFileSize,
+  OUT UINT8                  *Hash
   )
 {
-  UINTN                    HashSize;
-  UINT8                    *HashBase;
-  SHA256_CONTEXT           HashContext;
+  UINTN           HashSize;
+  UINT8           *HashBase;
+  SHA256_CONTEXT  HashContext;
 
   //
   // Initialise a SHA hash context
@@ -345,7 +347,7 @@ PeCoffHashAppleImage (
   //
   // Hash DOS header and without DOS stub.
   //
-  HashBase = (UINT8 *) Context->FileBuffer;
+  HashBase = (UINT8 *)Context->FileBuffer;
   HashSize = sizeof (EFI_IMAGE_DOS_HEADER);
   Sha256Update (&HashContext, HashBase, HashSize);
 
@@ -353,21 +355,21 @@ PeCoffHashAppleImage (
   // Hash optional header prior to checksum.
   //
   HashBase += Context->ExeHdrOffset;
-  HashSize = APPLE_CHECKSUM_OFFSET;
+  HashSize  = APPLE_CHECKSUM_OFFSET;
   Sha256Update (&HashContext, HashBase, HashSize);
 
   //
   // Hash the rest of the header up to security directory.
   //
   HashBase += HashSize + APPLE_CHECKSUM_SIZE;
-  HashSize = SecDirOffset - (UINT32) (HashBase - (UINT8 *) Context->FileBuffer);
+  HashSize  = SecDirOffset - (UINT32)(HashBase - (UINT8 *)Context->FileBuffer);
   Sha256Update (&HashContext, HashBase, HashSize);
 
   //
   // Hash the rest of the image skipping security directory.
   //
   HashBase += HashSize + sizeof (EFI_IMAGE_DATA_DIRECTORY);
-  HashSize = SignedFileSize - (UINT32) (HashBase - (UINT8 *) Context->FileBuffer);
+  HashSize  = SignedFileSize - (UINT32)(HashBase - (UINT8 *)Context->FileBuffer);
   Sha256Update (&HashContext, HashBase, HashSize);
 
   Sha256Final (&HashContext, Hash);
@@ -375,58 +377,58 @@ PeCoffHashAppleImage (
 
 EFI_STATUS
 PeCoffVerifyAppleSignature (
-  IN OUT VOID                                *PeImage,
-  IN OUT UINT32                              *ImageSize
+  IN OUT VOID    *PeImage,
+  IN OUT UINT32  *ImageSize
   )
 {
-  EFI_STATUS                      ImageStatus;
-  PE_COFF_IMAGE_CONTEXT           ImageContext;
-  APPLE_SIGNATURE_CONTEXT         SignatureContext;
-  UINT8                           Hash[SHA256_DIGEST_SIZE];
-  BOOLEAN                         Success;
-  APPLE_EFI_CERTIFICATE_INFO      *CertInfo;
-  UINT32                          SecDirOffset;
-  UINT32                          SignedFileSize;
-  VOID                            *Scratch;
+  EFI_STATUS                  ImageStatus;
+  PE_COFF_IMAGE_CONTEXT       ImageContext;
+  APPLE_SIGNATURE_CONTEXT     SignatureContext;
+  UINT8                       Hash[SHA256_DIGEST_SIZE];
+  BOOLEAN                     Success;
+  APPLE_EFI_CERTIFICATE_INFO  *CertInfo;
+  UINT32                      SecDirOffset;
+  UINT32                      SignedFileSize;
+  VOID                        *Scratch;
 
   ImageStatus = PeCoffInitializeContext (
-    &ImageContext,
-    PeImage,
-    *ImageSize
-    );
+                  &ImageContext,
+                  PeImage,
+                  *ImageSize
+                  );
   if (EFI_ERROR (ImageStatus)) {
     DEBUG ((DEBUG_INFO, "OCPE: PeCoff init failure - %r\n", ImageStatus));
     return EFI_UNSUPPORTED;
   }
 
   ImageStatus = PeCoffGetAppleCertificateInfo (
-    &ImageContext,
-    *ImageSize,
-    &CertInfo,
-    &SecDirOffset,
-    &SignedFileSize
-    );
+                  &ImageContext,
+                  *ImageSize,
+                  &CertInfo,
+                  &SecDirOffset,
+                  &SignedFileSize
+                  );
   if (EFI_ERROR (ImageStatus)) {
     DEBUG ((DEBUG_INFO, "OCPE: PeCoff no cert info - %r\n", ImageStatus));
     return EFI_UNSUPPORTED;
   }
 
   ImageStatus = PeCoffGetAppleSignature (
-    &ImageContext,
-    CertInfo,
-    &SignatureContext
-    );
+                  &ImageContext,
+                  CertInfo,
+                  &SignatureContext
+                  );
   if (EFI_ERROR (ImageStatus)) {
     DEBUG ((DEBUG_INFO, "OCPE: PeCoff no valid signature - %r\n", ImageStatus));
     return EFI_UNSUPPORTED;
   }
 
   ImageStatus = PeCoffSanitiseAppleImage (
-    &ImageContext,
-    SecDirOffset,
-    SignedFileSize,
-    *ImageSize
-    );
+                  &ImageContext,
+                  SecDirOffset,
+                  SignedFileSize,
+                  *ImageSize
+                  );
   if (EFI_ERROR (ImageStatus)) {
     DEBUG ((DEBUG_INFO, "OCPE: PeCoff cannot be sanitised - %r\n", ImageStatus));
     return EFI_UNSUPPORTED;
@@ -442,10 +444,10 @@ PeCoffVerifyAppleSignature (
     );
 
   Scratch = AllocatePool (
-    RSA_SCRATCH_BUFFER_SIZE (
-      SignatureContext.PublicKey->Hdr.NumQwords * sizeof (UINT64)
-      )
-    );
+              RSA_SCRATCH_BUFFER_SIZE (
+                SignatureContext.PublicKey->Hdr.NumQwords * sizeof (UINT64)
+                )
+              );
   if (Scratch == NULL) {
     return EFI_OUT_OF_RESOURCES;
   }
@@ -454,14 +456,14 @@ PeCoffVerifyAppleSignature (
   // Verify signature
   //
   Success = RsaVerifySigHashFromKey (
-    SignatureContext.PublicKey,
-    SignatureContext.Signature,
-    sizeof (SignatureContext.Signature),
-    &Hash[0],
-    sizeof (Hash),
-    OcSigHashTypeSha256,
-    Scratch
-    );
+              SignatureContext.PublicKey,
+              SignatureContext.Signature,
+              sizeof (SignatureContext.Signature),
+              &Hash[0],
+              sizeof (Hash),
+              OcSigHashTypeSha256,
+              Scratch
+              );
 
   FreePool (Scratch);
 
@@ -491,18 +493,19 @@ PeCoffGetApfsDriverVersion (
   UINT32                    ImageVersion;
 
   ImageStatus = PeCoffInitializeContext (
-    &ImageContext,
-    DriverBuffer,
-    DriverSize
-    );
+                  &ImageContext,
+                  DriverBuffer,
+                  DriverSize
+                  );
   if (EFI_ERROR (ImageStatus)) {
     DEBUG ((DEBUG_INFO, "OCPE: PeCoff init apfs failure - %r\n", ImageStatus));
     return EFI_UNSUPPORTED;
   }
 
-  if (ImageContext.Machine != IMAGE_FILE_MACHINE_X64
-    || ImageContext.ImageType != ImageTypePe32Plus
-    || ImageContext.Subsystem != EFI_IMAGE_SUBSYSTEM_EFI_BOOT_SERVICE_DRIVER) {
+  if (  (ImageContext.Machine != IMAGE_FILE_MACHINE_X64)
+     || (ImageContext.ImageType != ImageTypePe32Plus)
+     || (ImageContext.Subsystem != EFI_IMAGE_SUBSYSTEM_EFI_BOOT_SERVICE_DRIVER))
+  {
     DEBUG ((DEBUG_INFO, "OCPE: PeCoff unsupported image\n"));
     return EFI_UNSUPPORTED;
   }
@@ -511,22 +514,22 @@ PeCoffGetApfsDriverVersion (
   // Get image version. The header is already verified for us.
   //
   OptionalHeader = (EFI_IMAGE_NT_HEADERS64 *)(
-    (CONST UINT8 *) ImageContext.FileBuffer
-    + ImageContext.ExeHdrOffset
-    );
-  ImageVersion = (UINT32) OptionalHeader->MajorImageVersion << 16
-    | (UINT32) OptionalHeader->MinorImageVersion;
+                                              (CONST UINT8 *)ImageContext.FileBuffer
+                                              + ImageContext.ExeHdrOffset
+                                              );
+  ImageVersion = (UINT32)OptionalHeader->MajorImageVersion << 16
+                 | (UINT32)OptionalHeader->MinorImageVersion;
 
   //
   // Get .text contents. The sections are already verified for us,
   // but it can be smaller than APFS version.
   //
   SectionHeader = (EFI_IMAGE_SECTION_HEADER *)(
-    (CONST UINT8 *) ImageContext.FileBuffer
-    + ImageContext.SectionsOffset
-    );
+                                               (CONST UINT8 *)ImageContext.FileBuffer
+                                               + ImageContext.SectionsOffset
+                                               );
 
-  if (AsciiStrnCmp ((CHAR8*) SectionHeader->Name, ".text", sizeof (SectionHeader->Name)) != 0) {
+  if (AsciiStrnCmp ((CHAR8 *)SectionHeader->Name, ".text", sizeof (SectionHeader->Name)) != 0) {
     return EFI_UNSUPPORTED;
   }
 
@@ -538,12 +541,13 @@ PeCoffGetApfsDriverVersion (
   // Finally get driver version.
   //
   DriverVersion = (APFS_DRIVER_VERSION  *)(
-    (CONST UINT8 *) ImageContext.FileBuffer
-    + SectionHeader->PointerToRawData
-    );
+                                           (CONST UINT8 *)ImageContext.FileBuffer
+                                           + SectionHeader->PointerToRawData
+                                           );
 
-  if (DriverVersion->Magic != APFS_DRIVER_VERSION_MAGIC
-    || DriverVersion->ImageVersion != ImageVersion) {
+  if (  (DriverVersion->Magic != APFS_DRIVER_VERSION_MAGIC)
+     || (DriverVersion->ImageVersion != ImageVersion))
+  {
     return EFI_INVALID_PARAMETER;
   }
 

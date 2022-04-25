@@ -55,40 +55,40 @@
 #include <Protocol/HdaControllerInfo.h>
 
 // Driver version
-#define AUDIODXE_VERSION        0xD
-#define AUDIODXE_PKG_VERSION    1
+#define AUDIODXE_VERSION      0xD
+#define AUDIODXE_PKG_VERSION  1
 
 // Driver Bindings.
-extern EFI_DRIVER_BINDING_PROTOCOL gHdaControllerDriverBinding;
-extern EFI_DRIVER_BINDING_PROTOCOL gHdaCodecDriverBinding;
-extern EFI_AUDIO_DECODE_PROTOCOL   gEfiAudioDecodeProtocol;
+extern EFI_DRIVER_BINDING_PROTOCOL  gHdaControllerDriverBinding;
+extern EFI_DRIVER_BINDING_PROTOCOL  gHdaCodecDriverBinding;
+extern EFI_AUDIO_DECODE_PROTOCOL    gEfiAudioDecodeProtocol;
 
 // Cannot raise TPL above this value round any code which calls gBS->SetTimer
 // (using the DxeCore implementation of it, e.g. at least OVMF).
 // REF: MdeModulePkg/Core/Dxe/Event/Timer.c
-#define TPL_DXE_CORE_TIMER      (TPL_HIGH_LEVEL - 1)
+#define TPL_DXE_CORE_TIMER  (TPL_HIGH_LEVEL - 1)
 
 // GPIO setup stages.
-#define GPIO_SETUP_STAGE_DATA           BIT0
-#define GPIO_SETUP_STAGE_DIRECTION      BIT1
-#define GPIO_SETUP_STAGE_ENABLE         BIT2
+#define GPIO_SETUP_STAGE_DATA       BIT0
+#define GPIO_SETUP_STAGE_DIRECTION  BIT1
+#define GPIO_SETUP_STAGE_ENABLE     BIT2
 
-#define GPIO_SETUP_STAGE_NONE           0
+#define GPIO_SETUP_STAGE_NONE  0
 
-#define GPIO_SETUP_STAGE_ALL    ( \
+#define GPIO_SETUP_STAGE_ALL  (   \
   GPIO_SETUP_STAGE_DATA         | \
   GPIO_SETUP_STAGE_DIRECTION    | \
   GPIO_SETUP_STAGE_ENABLE       \
   )
 
 // GPIO setup pin mask.
-#define GPIO_PIN_MASK_AUTO              0  ///< Auto: use all reported available pins.
+#define GPIO_PIN_MASK_AUTO  0              ///< Auto: use all reported available pins.
 
 //
 // Stored parsed config.
 //
-extern UINTN	 gGpioSetupStageMask;
-extern UINTN	 gGpioPinMask;
-extern BOOLEAN gRestoreNoSnoop;
+extern UINTN    gGpioSetupStageMask;
+extern UINTN    gGpioPinMask;
+extern BOOLEAN  gRestoreNoSnoop;
 
 #endif // EFI_AUDIODXE_H

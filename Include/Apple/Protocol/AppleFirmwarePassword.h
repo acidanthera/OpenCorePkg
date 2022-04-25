@@ -34,7 +34,7 @@ typedef struct APPLE_FIRMWARE_PASSWORD_PROTOCOL_ APPLE_FIRMWARE_PASSWORD_PROTOCO
 
 typedef
 EFI_STATUS
-(EFIAPI *APPLE_FIRMWARE_PASSWORD_CHECK) (
+(EFIAPI *APPLE_FIRMWARE_PASSWORD_CHECK)(
   IN     APPLE_FIRMWARE_PASSWORD_PROTOCOL  *This,
   IN OUT UINTN                             *Arg1
   );
@@ -43,18 +43,17 @@ EFI_STATUS
 /// The structure exposed by the APPLE_FIRMWARE_PASSWORD_PROTOCOL.
 
 struct APPLE_FIRMWARE_PASSWORD_PROTOCOL_ {
-  UINTN Revision;
-  UINTN Unknown01;
-  UINTN Unknown02;
-  UINTN Unknown03;
-  APPLE_FIRMWARE_PASSWORD_CHECK Check;
+  UINTN                            Revision;
+  UINTN                            Unknown01;
+  UINTN                            Unknown02;
+  UINTN                            Unknown03;
+  APPLE_FIRMWARE_PASSWORD_CHECK    Check;
 };
 
 //
 // gAppleFirmwarePasswordProtocolGuid
 /// A global variable storing the GUID of the _APPLE_FIRMWARE_PASSWORD_PROTOCOL.
 
-extern EFI_GUID gAppleFirmwarePasswordProtocolGuid;
+extern EFI_GUID  gAppleFirmwarePasswordProtocolGuid;
 
 #endif /* APPLE_FIRMWARE_PASSWORD_PROTOCOL_H_ */
-

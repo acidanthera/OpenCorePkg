@@ -69,14 +69,14 @@ FwGetExecArea (
   //
   // FIXME: This is not accurate, but it does not need to be for now.
   //
-  *BaseAddress = (EFI_PHYSICAL_ADDRESS)(UINTN) FwGetCurrent;
+  *BaseAddress = (EFI_PHYSICAL_ADDRESS)(UINTN)FwGetCurrent;
   *Pages       = 1;
   return EFI_SUCCESS;
 }
 
 STATIC
 OC_FIRMWARE_RUNTIME_PROTOCOL
-mOcFirmwareRuntimeProtocol = {
+  mOcFirmwareRuntimeProtocol = {
   OC_FIRMWARE_RUNTIME_REVISION,
   FwGetCurrent,
   FwSetMain,
@@ -93,15 +93,15 @@ UefiEntrypoint (
   IN EFI_SYSTEM_TABLE  *SystemTable
   )
 {
-  EFI_STATUS   Status;
-  VOID         *Interface;
-  EFI_HANDLE   Handle;
+  EFI_STATUS  Status;
+  VOID        *Interface;
+  EFI_HANDLE  Handle;
 
   Status = gBS->LocateProtocol (
-    &gOcFirmwareRuntimeProtocolGuid,
-    NULL,
-    &Interface
-    );
+                  &gOcFirmwareRuntimeProtocolGuid,
+                  NULL,
+                  &Interface
+                  );
 
   if (!EFI_ERROR (Status)) {
     //
@@ -119,11 +119,11 @@ UefiEntrypoint (
 
   Handle = NULL;
   Status = gBS->InstallMultipleProtocolInterfaces (
-    &Handle,
-    &gOcFirmwareRuntimeProtocolGuid,
-    &mOcFirmwareRuntimeProtocol,
-    NULL
-    );
+                  &Handle,
+                  &gOcFirmwareRuntimeProtocolGuid,
+                  &mOcFirmwareRuntimeProtocol,
+                  NULL
+                  );
 
   ASSERT_EFI_ERROR (Status);
 

@@ -21,6 +21,6 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
   { 0xA196A7CA, 0x14C6, 0x11E7,            \
     { 0xB9, 0x06, 0xB8, 0xE8, 0x56, 0x2C, 0xBA, 0xFA } }
 
-extern EFI_GUID gApfsUnsupportedBdsProtocolGuid;
+extern EFI_GUID  gApfsUnsupportedBdsProtocolGuid;
 
 #endif // APFS_UNSUPPORTED_BDS_PROTOCOL_H

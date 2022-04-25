@@ -34,9 +34,9 @@ ReadMsrE2 (
   IN  VOID  *Buffer
   )
 {
-  UINTN                                           ProcNum = 0;
-  MSR_BROADWELL_PKG_CST_CONFIG_CONTROL_REGISTER   Value;
-  EFI_STATUS                                      Status;
+  UINTN                                          ProcNum = 0;
+  MSR_BROADWELL_PKG_CST_CONFIG_CONTROL_REGISTER  Value;
+  EFI_STATUS                                     Status;
 
   Status = mMpServices->WhoAmI (mMpServices, &ProcNum);
 
@@ -66,7 +66,7 @@ VerifyMSRE2 (
 
   Print (L"Looking up EFI_MP_SERVICES_PROTOCOL...\n");
 
-  Status = gBS->LocateProtocol (&gEfiMpServiceProtocolGuid, NULL, (VOID **) &mMpServices);
+  Status = gBS->LocateProtocol (&gEfiMpServiceProtocolGuid, NULL, (VOID **)&mMpServices);
   if (EFI_ERROR (Status)) {
     Print (L"Failed to find EFI_MP_SERVICES_PROTOCOL - %r\n", Status);
     return Status;

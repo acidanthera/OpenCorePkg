@@ -26,13 +26,13 @@
 
 EFI_STATUS
 OcDecodeWave (
-  IN  UINT8                          *Buffer,
-  IN  UINTN                          BufferSize,
-  OUT UINT8                          **RawBuffer,
-  OUT UINT32                         *RawBufferSize,
-  OUT EFI_AUDIO_IO_PROTOCOL_FREQ     *Frequency,
-  OUT EFI_AUDIO_IO_PROTOCOL_BITS     *Bits,
-  OUT UINT8                          *Channels
+  IN  UINT8                       *Buffer,
+  IN  UINTN                       BufferSize,
+  OUT UINT8                       **RawBuffer,
+  OUT UINT32                      *RawBufferSize,
+  OUT EFI_AUDIO_IO_PROTOCOL_FREQ  *Frequency,
+  OUT EFI_AUDIO_IO_PROTOCOL_BITS  *Bits,
+  OUT UINT8                       *Channels
   )
 {
   RIFF_CHUNK        *TmpChunk;
@@ -45,7 +45,7 @@ OcDecodeWave (
     return EFI_UNSUPPORTED;
   }
 
-  TmpChunk = (RIFF_CHUNK *) Buffer;
+  TmpChunk = (RIFF_CHUNK *)Buffer;
 
   //
   // Ensure:
@@ -53,9 +53,10 @@ OcDecodeWave (
   // - Chunk ID is RIFF
   // - First 4 bytes of data are WAVE.
   //
-  if ((UINT64) TmpChunk->Size + sizeof (RIFF_CHUNK) != BufferSize
-    || AsciiStrnCmp (TmpChunk->Id, RIFF_CHUNK_ID, RIFF_CHUNK_ID_SIZE) != 0
-    || AsciiStrnCmp ((CHAR8*) TmpChunk->Data, WAVE_CHUNK_ID, RIFF_CHUNK_ID_SIZE) != 0) {
+  if (  ((UINT64)TmpChunk->Size + sizeof (RIFF_CHUNK) != BufferSize)
+     || (AsciiStrnCmp (TmpChunk->Id, RIFF_CHUNK_ID, RIFF_CHUNK_ID_SIZE) != 0)
+     || (AsciiStrnCmp ((CHAR8 *)TmpChunk->Data, WAVE_CHUNK_ID, RIFF_CHUNK_ID_SIZE) != 0))
+  {
     return EFI_UNSUPPORTED;
   }
 
@@ -68,12 +69,12 @@ OcDecodeWave (
   // Find format and data chunks.
   //
   while (BufferEnd - BufferPtr >= sizeof (RIFF_CHUNK)) {
-    TmpChunk = (RIFF_CHUNK *) BufferPtr;
+    TmpChunk = (RIFF_CHUNK *)BufferPtr;
 
     //
     // If chunk size exceeds file size, abort.
     //
-    if ((UINT64) TmpChunk->Size + sizeof (RIFF_CHUNK) > (UINTN) (BufferEnd - BufferPtr)) {
+    if ((UINT64)TmpChunk->Size + sizeof (RIFF_CHUNK) > (UINTN)(BufferEnd - BufferPtr)) {
       return EFI_INVALID_PARAMETER;
     }
 
@@ -81,19 +82,20 @@ OcDecodeWave (
       if (TmpChunk->Size < sizeof (WAVE_FORMAT_DATA)) {
         return EFI_INVALID_PARAMETER;
       }
-      WaveFormat = (WAVE_FORMAT_DATA *) TmpChunk->Data;
+
+      WaveFormat = (WAVE_FORMAT_DATA *)TmpChunk->Data;
     } else if (AsciiStrnCmp (TmpChunk->Id, WAVE_DATA_CHUNK_ID, RIFF_CHUNK_ID_SIZE) == 0) {
-      DataChunk   = TmpChunk;
+      DataChunk = TmpChunk;
     }
 
-    if (WaveFormat != NULL && DataChunk != NULL) {
+    if ((WaveFormat != NULL) && (DataChunk != NULL)) {
       break;
     }
 
     BufferPtr += TmpChunk->Size + sizeof (RIFF_CHUNK);
   }
 
-  if (WaveFormat == NULL || DataChunk == NULL) {
+  if ((WaveFormat == NULL) || (DataChunk == NULL)) {
     return EFI_UNSUPPORTED;
   }
 
@@ -155,7 +157,7 @@ OcDecodeWave (
       return EFI_UNSUPPORTED;
   }
 
-  *Channels = (UINT8) WaveFormat->Channels;
+  *Channels = (UINT8)WaveFormat->Channels;
 
   return EFI_SUCCESS;
 }

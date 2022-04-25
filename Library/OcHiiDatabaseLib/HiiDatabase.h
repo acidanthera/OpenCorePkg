@@ -41,21 +41,21 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 #include <Library/UefiRuntimeServicesTableLib.h>
 #include <Library/PrintLib.h>
 
-#define MAX_STRING_LENGTH                  1024
-#define MAX_FONT_NAME_LEN                  256
-#define NARROW_BASELINE                    15
-#define WIDE_BASELINE                      14
-#define SYS_FONT_INFO_MASK                 0x37
-#define REPLACE_UNKNOWN_GLYPH              0xFFFD
-#define PROPORTIONAL_GLYPH                 0x80
-#define NARROW_GLYPH                       0x40
+#define MAX_STRING_LENGTH      1024
+#define MAX_FONT_NAME_LEN      256
+#define NARROW_BASELINE        15
+#define WIDE_BASELINE          14
+#define SYS_FONT_INFO_MASK     0x37
+#define REPLACE_UNKNOWN_GLYPH  0xFFFD
+#define PROPORTIONAL_GLYPH     0x80
+#define NARROW_GLYPH           0x40
 
-#define BITMAP_LEN_1_BIT(Width, Height)  (((UINT32) (Width) + 7) / 8 * (UINT32) (Height))
-#define BITMAP_LEN_4_BIT(Width, Height)  (((UINT32) (Width) + 1) / 2 * (UINT32) (Height))
-#define BITMAP_LEN_8_BIT(Width, Height)  ((UINT32) (Width) * (UINT32) (Height))
-#define BITMAP_LEN_24_BIT(Width, Height) ((UINT32) (Width) * (UINT32) (Height) * 3)
+#define BITMAP_LEN_1_BIT(Width, Height)   (((UINT32) (Width) + 7) / 8 * (UINT32) (Height))
+#define BITMAP_LEN_4_BIT(Width, Height)   (((UINT32) (Width) + 1) / 2 * (UINT32) (Height))
+#define BITMAP_LEN_8_BIT(Width, Height)   ((UINT32) (Width) * (UINT32) (Height))
+#define BITMAP_LEN_24_BIT(Width, Height)  ((UINT32) (Width) * (UINT32) (Height) * 3)
 
-extern EFI_LOCK mHiiDatabaseLock;
+extern EFI_LOCK  mHiiDatabaseLock;
 
 //
 // IFR data structure
@@ -63,32 +63,32 @@ extern EFI_LOCK mHiiDatabaseLock;
 // BASE_CR (a, IFR_DEFAULT_VALUE_DATA, Entry) to get the whole structure.
 
 typedef struct {
-  LIST_ENTRY            Entry;             // Link to VarStorage Default Data
-  UINT16                DefaultId;
-  VARIABLE_STORE_HEADER *VariableStorage;
+  LIST_ENTRY               Entry;          // Link to VarStorage Default Data
+  UINT16                   DefaultId;
+  VARIABLE_STORE_HEADER    *VariableStorage;
 } VARSTORAGE_DEFAULT_DATA;
 
 typedef struct {
-  LIST_ENTRY          Entry;             // Link to VarStorage
-  EFI_GUID            Guid;
-  CHAR16              *Name;
-  UINT16              Size;
-  UINT8               Type;
-  LIST_ENTRY          BlockEntry;        // Link to its Block array
+  LIST_ENTRY    Entry;                   // Link to VarStorage
+  EFI_GUID      Guid;
+  CHAR16        *Name;
+  UINT16        Size;
+  UINT8         Type;
+  LIST_ENTRY    BlockEntry;              // Link to its Block array
 } IFR_VARSTORAGE_DATA;
 
 typedef struct {
-  LIST_ENTRY          Entry;             // Link to Block array
-  UINT16              Offset;
-  UINT16              Width;
-  UINT16              BitOffset;
-  UINT16              BitWidth;
-  EFI_QUESTION_ID     QuestionId;
-  UINT8               OpCode;
-  UINT8               Scope;
-  LIST_ENTRY          DefaultValueEntry; // Link to its default value array
-  CHAR16              *Name;
-  BOOLEAN             IsBitVar;
+  LIST_ENTRY         Entry;              // Link to Block array
+  UINT16             Offset;
+  UINT16             Width;
+  UINT16             BitOffset;
+  UINT16             BitWidth;
+  EFI_QUESTION_ID    QuestionId;
+  UINT8              OpCode;
+  UINT8              Scope;
+  LIST_ENTRY         DefaultValueEntry;  // Link to its default value array
+  CHAR16             *Name;
+  BOOLEAN            IsBitVar;
 } IFR_BLOCK_DATA;
 
 //
@@ -103,157 +103,155 @@ typedef enum {
 } DEFAULT_VALUE_TYPE;
 
 typedef struct {
-  LIST_ENTRY          Entry;
-  DEFAULT_VALUE_TYPE  Type;
-  BOOLEAN             Cleaned;       // Whether this value is cleaned
+  LIST_ENTRY            Entry;
+  DEFAULT_VALUE_TYPE    Type;
+  BOOLEAN               Cleaned;     // Whether this value is cleaned
                                      // TRUE  Cleaned, the value can't be used
                                      // FALSE Not cleaned, the value can  be used.
-  UINT16              DefaultId;
-  EFI_IFR_TYPE_VALUE  Value;
+  UINT16                DefaultId;
+  EFI_IFR_TYPE_VALUE    Value;
 } IFR_DEFAULT_DATA;
 
 //
 // Storage types
 //
-#define EFI_HII_VARSTORE_BUFFER              0
-#define EFI_HII_VARSTORE_NAME_VALUE          1
-#define EFI_HII_VARSTORE_EFI_VARIABLE        2
-#define EFI_HII_VARSTORE_EFI_VARIABLE_BUFFER 3
+#define EFI_HII_VARSTORE_BUFFER               0
+#define EFI_HII_VARSTORE_NAME_VALUE           1
+#define EFI_HII_VARSTORE_EFI_VARIABLE         2
+#define EFI_HII_VARSTORE_EFI_VARIABLE_BUFFER  3
 
 //
 // Keyword handler protocol filter type.
 //
-#define EFI_KEYWORD_FILTER_READONY           0x01
-#define EFI_KEYWORD_FILTER_REAWRITE          0x02
-#define EFI_KEYWORD_FILTER_BUFFER            0x10
-#define EFI_KEYWORD_FILTER_NUMERIC           0x20
-#define EFI_KEYWORD_FILTER_NUMERIC_1         0x30
-#define EFI_KEYWORD_FILTER_NUMERIC_2         0x40
-#define EFI_KEYWORD_FILTER_NUMERIC_4         0x50
-#define EFI_KEYWORD_FILTER_NUMERIC_8         0x60
+#define EFI_KEYWORD_FILTER_READONY    0x01
+#define EFI_KEYWORD_FILTER_REAWRITE   0x02
+#define EFI_KEYWORD_FILTER_BUFFER     0x10
+#define EFI_KEYWORD_FILTER_NUMERIC    0x20
+#define EFI_KEYWORD_FILTER_NUMERIC_1  0x30
+#define EFI_KEYWORD_FILTER_NUMERIC_2  0x40
+#define EFI_KEYWORD_FILTER_NUMERIC_4  0x50
+#define EFI_KEYWORD_FILTER_NUMERIC_8  0x60
 
-
-#define HII_FORMSET_STORAGE_SIGNATURE           SIGNATURE_32 ('H', 'S', 'T', 'G')
+#define HII_FORMSET_STORAGE_SIGNATURE  SIGNATURE_32 ('H', 'S', 'T', 'G')
 typedef struct {
-  UINTN               Signature;
-  LIST_ENTRY          Entry;
+  UINTN             Signature;
+  LIST_ENTRY        Entry;
 
-  EFI_HII_HANDLE      HiiHandle;
-  EFI_HANDLE          DriverHandle;
+  EFI_HII_HANDLE    HiiHandle;
+  EFI_HANDLE        DriverHandle;
 
-  UINT8               Type;   // EFI_HII_VARSTORE_BUFFER, EFI_HII_VARSTORE_NAME_VALUE, EFI_HII_VARSTORE_EFI_VARIABLE
-  EFI_GUID            Guid;
-  CHAR16              *Name;
-  UINT16              Size;
+  UINT8             Type;     // EFI_HII_VARSTORE_BUFFER, EFI_HII_VARSTORE_NAME_VALUE, EFI_HII_VARSTORE_EFI_VARIABLE
+  EFI_GUID          Guid;
+  CHAR16            *Name;
+  UINT16            Size;
 } HII_FORMSET_STORAGE;
-
 
 //
 // String Package definitions
 //
-#define HII_STRING_PACKAGE_SIGNATURE    SIGNATURE_32 ('h','i','s','p')
+#define HII_STRING_PACKAGE_SIGNATURE  SIGNATURE_32 ('h','i','s','p')
 typedef struct _HII_STRING_PACKAGE_INSTANCE {
-  UINTN                                 Signature;
-  EFI_HII_STRING_PACKAGE_HDR            *StringPkgHdr;
-  UINT8                                 *StringBlock;
-  LIST_ENTRY                            StringEntry;
-  LIST_ENTRY                            FontInfoList;  // local font info list
-  UINT8                                 FontId;
-  EFI_STRING_ID                         MaxStringId;   // record StringId
+  UINTN                         Signature;
+  EFI_HII_STRING_PACKAGE_HDR    *StringPkgHdr;
+  UINT8                         *StringBlock;
+  LIST_ENTRY                    StringEntry;
+  LIST_ENTRY                    FontInfoList;          // local font info list
+  UINT8                         FontId;
+  EFI_STRING_ID                 MaxStringId;           // record StringId
 } HII_STRING_PACKAGE_INSTANCE;
 
 //
 // Form Package definitions
 //
-#define HII_IFR_PACKAGE_SIGNATURE       SIGNATURE_32 ('h','f','r','p')
+#define HII_IFR_PACKAGE_SIGNATURE  SIGNATURE_32 ('h','f','r','p')
 typedef struct _HII_IFR_PACKAGE_INSTANCE {
-  UINTN                                 Signature;
-  EFI_HII_PACKAGE_HEADER                FormPkgHdr;
-  UINT8                                 *IfrData;
-  LIST_ENTRY                            IfrEntry;
+  UINTN                     Signature;
+  EFI_HII_PACKAGE_HEADER    FormPkgHdr;
+  UINT8                     *IfrData;
+  LIST_ENTRY                IfrEntry;
 } HII_IFR_PACKAGE_INSTANCE;
 
 //
 // Simple Font Package definitions
 //
-#define HII_S_FONT_PACKAGE_SIGNATURE    SIGNATURE_32 ('h','s','f','p')
+#define HII_S_FONT_PACKAGE_SIGNATURE  SIGNATURE_32 ('h','s','f','p')
 typedef struct _HII_SIMPLE_FONT_PACKAGE_INSTANCE {
-  UINTN                                 Signature;
-  EFI_HII_SIMPLE_FONT_PACKAGE_HDR       *SimpleFontPkgHdr;
-  LIST_ENTRY                            SimpleFontEntry;
+  UINTN                              Signature;
+  EFI_HII_SIMPLE_FONT_PACKAGE_HDR    *SimpleFontPkgHdr;
+  LIST_ENTRY                         SimpleFontEntry;
 } HII_SIMPLE_FONT_PACKAGE_INSTANCE;
 
 //
 // Font Package definitions
 //
-#define HII_FONT_PACKAGE_SIGNATURE      SIGNATURE_32 ('h','i','f','p')
+#define HII_FONT_PACKAGE_SIGNATURE  SIGNATURE_32 ('h','i','f','p')
 typedef struct _HII_FONT_PACKAGE_INSTANCE {
-  UINTN                                 Signature;
-  EFI_HII_FONT_PACKAGE_HDR              *FontPkgHdr;
-  UINT16                                Height;
-  UINT16                                BaseLine;
-  UINT8                                 *GlyphBlock;
-  LIST_ENTRY                            FontEntry;
-  LIST_ENTRY                            GlyphInfoList;
+  UINTN                       Signature;
+  EFI_HII_FONT_PACKAGE_HDR    *FontPkgHdr;
+  UINT16                      Height;
+  UINT16                      BaseLine;
+  UINT8                       *GlyphBlock;
+  LIST_ENTRY                  FontEntry;
+  LIST_ENTRY                  GlyphInfoList;
 } HII_FONT_PACKAGE_INSTANCE;
 
-#define HII_GLYPH_INFO_SIGNATURE        SIGNATURE_32 ('h','g','i','s')
+#define HII_GLYPH_INFO_SIGNATURE  SIGNATURE_32 ('h','g','i','s')
 typedef struct _HII_GLYPH_INFO {
-  UINTN                                 Signature;
-  LIST_ENTRY                            Entry;
-  CHAR16                                CharId;
-  EFI_HII_GLYPH_INFO                    Cell;
+  UINTN                 Signature;
+  LIST_ENTRY            Entry;
+  CHAR16                CharId;
+  EFI_HII_GLYPH_INFO    Cell;
 } HII_GLYPH_INFO;
 
-#define HII_FONT_INFO_SIGNATURE         SIGNATURE_32 ('h','l','f','i')
+#define HII_FONT_INFO_SIGNATURE  SIGNATURE_32 ('h','l','f','i')
 typedef struct _HII_FONT_INFO {
-  UINTN                                 Signature;
-  LIST_ENTRY                            Entry;
-  LIST_ENTRY                            *GlobalEntry;
-  UINT8                                 FontId;
+  UINTN         Signature;
+  LIST_ENTRY    Entry;
+  LIST_ENTRY    *GlobalEntry;
+  UINT8         FontId;
 } HII_FONT_INFO;
 
 #define HII_GLOBAL_FONT_INFO_SIGNATURE  SIGNATURE_32 ('h','g','f','i')
 typedef struct _HII_GLOBAL_FONT_INFO {
-  UINTN                                 Signature;
-  LIST_ENTRY                            Entry;
-  HII_FONT_PACKAGE_INSTANCE             *FontPackage;
-  UINTN                                 FontInfoSize;
-  EFI_FONT_INFO                         *FontInfo;
+  UINTN                        Signature;
+  LIST_ENTRY                   Entry;
+  HII_FONT_PACKAGE_INSTANCE    *FontPackage;
+  UINTN                        FontInfoSize;
+  EFI_FONT_INFO                *FontInfo;
 } HII_GLOBAL_FONT_INFO;
 
 //
 // Image Package definitions
 //
 
-#define HII_PIXEL_MASK                  0x80
+#define HII_PIXEL_MASK  0x80
 
 typedef struct _HII_IMAGE_PACKAGE_INSTANCE {
-  EFI_HII_IMAGE_PACKAGE_HDR             ImagePkgHdr;
-  UINT32                                ImageBlockSize;
-  UINT32                                PaletteInfoSize;
-  EFI_HII_IMAGE_BLOCK                   *ImageBlock;
-  UINT8                                 *PaletteBlock;
+  EFI_HII_IMAGE_PACKAGE_HDR    ImagePkgHdr;
+  UINT32                       ImageBlockSize;
+  UINT32                       PaletteInfoSize;
+  EFI_HII_IMAGE_BLOCK          *ImageBlock;
+  UINT8                        *PaletteBlock;
 } HII_IMAGE_PACKAGE_INSTANCE;
 
 //
 // Keyboard Layout Package definitions
 //
-#define HII_KB_LAYOUT_PACKAGE_SIGNATURE SIGNATURE_32 ('h','k','l','p')
+#define HII_KB_LAYOUT_PACKAGE_SIGNATURE  SIGNATURE_32 ('h','k','l','p')
 typedef struct _HII_KEYBOARD_LAYOUT_PACKAGE_INSTANCE {
-  UINTN                                 Signature;
-  UINT8                                 *KeyboardPkg;
-  LIST_ENTRY                            KeyboardEntry;
+  UINTN         Signature;
+  UINT8         *KeyboardPkg;
+  LIST_ENTRY    KeyboardEntry;
 } HII_KEYBOARD_LAYOUT_PACKAGE_INSTANCE;
 
 //
 // Guid Package definitions
 //
-#define HII_GUID_PACKAGE_SIGNATURE      SIGNATURE_32 ('h','i','g','p')
+#define HII_GUID_PACKAGE_SIGNATURE  SIGNATURE_32 ('h','i','g','p')
 typedef struct _HII_GUID_PACKAGE_INSTANCE {
-  UINTN                                 Signature;
-  UINT8                                 *GuidPkg;
-  LIST_ENTRY                            GuidEntry;
+  UINTN         Signature;
+  UINT8         *GuidPkg;
+  LIST_ENTRY    GuidEntry;
 } HII_GUID_PACKAGE_INSTANCE;
 
 //
@@ -261,26 +259,26 @@ typedef struct _HII_GUID_PACKAGE_INSTANCE {
 // This rule also applies to image package since ImageId can not be duplicate.
 //
 typedef struct _HII_DATABASE_PACKAGE_LIST_INSTANCE {
-  EFI_HII_PACKAGE_LIST_HEADER           PackageListHdr;
-  LIST_ENTRY                            GuidPkgHdr;
-  LIST_ENTRY                            FormPkgHdr;
-  LIST_ENTRY                            KeyboardLayoutHdr;
-  LIST_ENTRY                            StringPkgHdr;
-  LIST_ENTRY                            FontPkgHdr;
-  HII_IMAGE_PACKAGE_INSTANCE            *ImagePkg;
-  LIST_ENTRY                            SimpleFontPkgHdr;
-  UINT8                                 *DevicePathPkg;
+  EFI_HII_PACKAGE_LIST_HEADER    PackageListHdr;
+  LIST_ENTRY                     GuidPkgHdr;
+  LIST_ENTRY                     FormPkgHdr;
+  LIST_ENTRY                     KeyboardLayoutHdr;
+  LIST_ENTRY                     StringPkgHdr;
+  LIST_ENTRY                     FontPkgHdr;
+  HII_IMAGE_PACKAGE_INSTANCE     *ImagePkg;
+  LIST_ENTRY                     SimpleFontPkgHdr;
+  UINT8                          *DevicePathPkg;
 } HII_DATABASE_PACKAGE_LIST_INSTANCE;
 
-#define HII_HANDLE_SIGNATURE            SIGNATURE_32 ('h','i','h','l')
+#define HII_HANDLE_SIGNATURE  SIGNATURE_32 ('h','i','h','l')
 
 typedef struct {
-  UINTN               Signature;
-  LIST_ENTRY          Handle;
-  UINTN               Key;
+  UINTN         Signature;
+  LIST_ENTRY    Handle;
+  UINTN         Key;
 } HII_HANDLE;
 
-#define HII_DATABASE_RECORD_SIGNATURE   SIGNATURE_32 ('h','i','d','r')
+#define HII_DATABASE_RECORD_SIGNATURE  SIGNATURE_32 ('h','i','d','r')
 
 typedef struct _HII_DATABASE_RECORD {
   UINTN                                 Signature;
@@ -290,37 +288,37 @@ typedef struct _HII_DATABASE_RECORD {
   LIST_ENTRY                            DatabaseEntry;
 } HII_DATABASE_RECORD;
 
-#define HII_DATABASE_NOTIFY_SIGNATURE   SIGNATURE_32 ('h','i','d','n')
+#define HII_DATABASE_NOTIFY_SIGNATURE  SIGNATURE_32 ('h','i','d','n')
 
 typedef struct _HII_DATABASE_NOTIFY {
-  UINTN                                 Signature;
-  EFI_HANDLE                            NotifyHandle;
-  UINT8                                 PackageType;
-  EFI_GUID                              *PackageGuid;
-  EFI_HII_DATABASE_NOTIFY               PackageNotifyFn;
-  EFI_HII_DATABASE_NOTIFY_TYPE          NotifyType;
-  LIST_ENTRY                            DatabaseNotifyEntry;
+  UINTN                           Signature;
+  EFI_HANDLE                      NotifyHandle;
+  UINT8                           PackageType;
+  EFI_GUID                        *PackageGuid;
+  EFI_HII_DATABASE_NOTIFY         PackageNotifyFn;
+  EFI_HII_DATABASE_NOTIFY_TYPE    NotifyType;
+  LIST_ENTRY                      DatabaseNotifyEntry;
 } HII_DATABASE_NOTIFY;
 
-#define HII_DATABASE_PRIVATE_DATA_SIGNATURE SIGNATURE_32 ('H', 'i', 'D', 'p')
+#define HII_DATABASE_PRIVATE_DATA_SIGNATURE  SIGNATURE_32 ('H', 'i', 'D', 'p')
 
 typedef struct _HII_DATABASE_PRIVATE_DATA {
-  UINTN                                 Signature;
-  LIST_ENTRY                            DatabaseList;
-  LIST_ENTRY                            DatabaseNotifyList;
-  EFI_HII_FONT_PROTOCOL                 HiiFont;
-  EFI_HII_IMAGE_PROTOCOL                HiiImage;
-  EFI_HII_IMAGE_EX_PROTOCOL             HiiImageEx;
-  EFI_HII_STRING_PROTOCOL               HiiString;
-  EFI_HII_DATABASE_PROTOCOL             HiiDatabase;
-  EFI_HII_CONFIG_ROUTING_PROTOCOL       ConfigRouting;
-  EFI_CONFIG_KEYWORD_HANDLER_PROTOCOL   ConfigKeywordHandler;
-  LIST_ENTRY                            HiiHandleList;
-  INTN                                  HiiHandleCount;
-  LIST_ENTRY                            FontInfoList;  // global font info list
-  UINTN                                 Attribute;     // default system color
-  EFI_GUID                              CurrentLayoutGuid;
-  EFI_HII_KEYBOARD_LAYOUT               *CurrentLayout;
+  UINTN                                  Signature;
+  LIST_ENTRY                             DatabaseList;
+  LIST_ENTRY                             DatabaseNotifyList;
+  EFI_HII_FONT_PROTOCOL                  HiiFont;
+  EFI_HII_IMAGE_PROTOCOL                 HiiImage;
+  EFI_HII_IMAGE_EX_PROTOCOL              HiiImageEx;
+  EFI_HII_STRING_PROTOCOL                HiiString;
+  EFI_HII_DATABASE_PROTOCOL              HiiDatabase;
+  EFI_HII_CONFIG_ROUTING_PROTOCOL        ConfigRouting;
+  EFI_CONFIG_KEYWORD_HANDLER_PROTOCOL    ConfigKeywordHandler;
+  LIST_ENTRY                             HiiHandleList;
+  INTN                                   HiiHandleCount;
+  LIST_ENTRY                             FontInfoList; // global font info list
+  UINTN                                  Attribute;    // default system color
+  EFI_GUID                               CurrentLayoutGuid;
+  EFI_HII_KEYBOARD_LAYOUT                *CurrentLayout;
 } HII_DATABASE_PRIVATE_DATA;
 
 #define HII_FONT_DATABASE_PRIVATE_DATA_FROM_THIS(a) \
@@ -400,11 +398,11 @@ typedef struct _HII_DATABASE_PRIVATE_DATA {
 **/
 VOID
 GenerateSubStr (
-  IN CONST EFI_STRING              String,
-  IN  UINTN                        BufferLen,
-  IN  VOID                         *Buffer,
-  IN  UINT8                        Flag,
-  OUT EFI_STRING                   *SubStr
+  IN CONST EFI_STRING  String,
+  IN  UINTN            BufferLen,
+  IN  VOID             *Buffer,
+  IN  UINT8            Flag,
+  OUT EFI_STRING       *SubStr
   );
 
 /**
@@ -418,9 +416,8 @@ GenerateSubStr (
 **/
 BOOLEAN
 IsHiiHandleValid (
-  EFI_HII_HANDLE Handle
+  EFI_HII_HANDLE  Handle
   );
-
 
 /**
   This function checks whether EFI_FONT_INFO exists in current database. If
@@ -447,9 +444,9 @@ IsHiiHandleValid (
 BOOLEAN
 IsFontInfoExisted (
   IN  HII_DATABASE_PRIVATE_DATA *Private,
-  IN  EFI_FONT_INFO             *FontInfo,
-  IN  EFI_FONT_INFO_MASK        *FontInfoMask,   OPTIONAL
-  IN  EFI_FONT_HANDLE           FontHandle,      OPTIONAL
+  IN  EFI_FONT_INFO *FontInfo,
+  IN  EFI_FONT_INFO_MASK *FontInfoMask, OPTIONAL
+  IN  EFI_FONT_HANDLE           FontHandle, OPTIONAL
   OUT HII_GLOBAL_FONT_INFO      **GlobalFontInfo OPTIONAL
   );
 
@@ -470,11 +467,11 @@ IsFontInfoExisted (
 **/
 EFI_STATUS
 InvokeRegisteredFunction (
-  IN HII_DATABASE_PRIVATE_DATA    *Private,
-  IN EFI_HII_DATABASE_NOTIFY_TYPE NotifyType,
-  IN VOID                         *PackageInstance,
-  IN UINT8                        PackageType,
-  IN EFI_HII_HANDLE               Handle
+  IN HII_DATABASE_PRIVATE_DATA     *Private,
+  IN EFI_HII_DATABASE_NOTIFY_TYPE  NotifyType,
+  IN VOID                          *PackageInstance,
+  IN UINT8                         PackageType,
+  IN EFI_HII_HANDLE                Handle
   )
 ;
 
@@ -495,11 +492,10 @@ InvokeRegisteredFunction (
 **/
 EFI_STATUS
 GetSystemFont (
-  IN  HII_DATABASE_PRIVATE_DATA      *Private,
-  OUT EFI_FONT_DISPLAY_INFO          **FontInfo,
-  OUT UINTN                          *FontInfoSize OPTIONAL
+  IN  HII_DATABASE_PRIVATE_DATA  *Private,
+  OUT EFI_FONT_DISPLAY_INFO      **FontInfo,
+  OUT UINTN                      *FontInfoSize OPTIONAL
   );
-
 
 /**
   Parse all string blocks to find a String block specified by StringId.
@@ -529,16 +525,15 @@ GetSystemFont (
 **/
 EFI_STATUS
 FindStringBlock (
-  IN HII_DATABASE_PRIVATE_DATA        *Private,
-  IN  HII_STRING_PACKAGE_INSTANCE     *StringPackage,
-  IN  EFI_STRING_ID                   StringId,
-  OUT UINT8                           *BlockType, OPTIONAL
+  IN HII_DATABASE_PRIVATE_DATA *Private,
+  IN  HII_STRING_PACKAGE_INSTANCE *StringPackage,
+  IN  EFI_STRING_ID StringId,
+  OUT UINT8 *BlockType, OPTIONAL
   OUT UINT8                           **StringBlockAddr, OPTIONAL
   OUT UINTN                           *StringTextOffset, OPTIONAL
   OUT EFI_STRING_ID                   *LastStringId, OPTIONAL
   OUT EFI_STRING_ID                   *StartStringId OPTIONAL
   );
-
 
 /**
   Parse all glyph blocks to find a glyph block specified by CharValue.
@@ -563,9 +558,9 @@ FindStringBlock (
 **/
 EFI_STATUS
 FindGlyphBlock (
-  IN  HII_FONT_PACKAGE_INSTANCE      *FontPackage,
-  IN  CHAR16                         CharValue,
-  OUT UINT8                          **GlyphBuffer, OPTIONAL
+  IN  HII_FONT_PACKAGE_INSTANCE *FontPackage,
+  IN  CHAR16 CharValue,
+  OUT UINT8 **GlyphBuffer, OPTIONAL
   OUT EFI_HII_GLYPH_INFO             *Cell, OPTIONAL
   OUT UINTN                          *GlyphBufferLen OPTIONAL
   );
@@ -589,19 +584,18 @@ FindGlyphBlock (
 **/
 EFI_STATUS
 ExportFormPackages (
-  IN HII_DATABASE_PRIVATE_DATA          *Private,
-  IN EFI_HII_HANDLE                     Handle,
-  IN HII_DATABASE_PACKAGE_LIST_INSTANCE *PackageList,
-  IN UINTN                              UsedSize,
-  IN UINTN                              BufferSize,
-  IN OUT VOID                           *Buffer,
-  IN OUT UINTN                          *ResultSize
+  IN HII_DATABASE_PRIVATE_DATA           *Private,
+  IN EFI_HII_HANDLE                      Handle,
+  IN HII_DATABASE_PACKAGE_LIST_INSTANCE  *PackageList,
+  IN UINTN                               UsedSize,
+  IN UINTN                               BufferSize,
+  IN OUT VOID                            *Buffer,
+  IN OUT UINTN                           *ResultSize
   );
 
 //
 // EFI_HII_FONT_PROTOCOL protocol interfaces
 //
-
 
 /**
   Renders a string to a bitmap or to the display.
@@ -660,18 +654,17 @@ ExportFormPackages (
 EFI_STATUS
 EFIAPI
 HiiStringToImage (
-  IN  CONST EFI_HII_FONT_PROTOCOL    *This,
-  IN  EFI_HII_OUT_FLAGS              Flags,
-  IN  CONST EFI_STRING               String,
-  IN  CONST EFI_FONT_DISPLAY_INFO    *StringInfo       OPTIONAL,
-  IN  OUT EFI_IMAGE_OUTPUT           **Blt,
-  IN  UINTN                          BltX,
-  IN  UINTN                          BltY,
-  OUT EFI_HII_ROW_INFO               **RowInfoArray    OPTIONAL,
-  OUT UINTN                          *RowInfoArraySize OPTIONAL,
-  OUT UINTN                          *ColumnInfoArray  OPTIONAL
+  IN  CONST EFI_HII_FONT_PROTOCOL  *This,
+  IN  EFI_HII_OUT_FLAGS            Flags,
+  IN  CONST EFI_STRING             String,
+  IN  CONST EFI_FONT_DISPLAY_INFO  *StringInfo       OPTIONAL,
+  IN  OUT EFI_IMAGE_OUTPUT         **Blt,
+  IN  UINTN                        BltX,
+  IN  UINTN                        BltY,
+  OUT EFI_HII_ROW_INFO             **RowInfoArray    OPTIONAL,
+  OUT UINTN                        *RowInfoArraySize OPTIONAL,
+  OUT UINTN                        *ColumnInfoArray  OPTIONAL
   );
-
 
 /**
   Render a string to a bitmap or the screen containing the contents of the specified string.
@@ -737,20 +730,19 @@ HiiStringToImage (
 EFI_STATUS
 EFIAPI
 HiiStringIdToImage (
-  IN  CONST EFI_HII_FONT_PROTOCOL    *This,
-  IN  EFI_HII_OUT_FLAGS              Flags,
-  IN  EFI_HII_HANDLE                 PackageList,
-  IN  EFI_STRING_ID                  StringId,
-  IN  CONST CHAR8*                   Language,
-  IN  CONST EFI_FONT_DISPLAY_INFO    *StringInfo       OPTIONAL,
-  IN  OUT EFI_IMAGE_OUTPUT           **Blt,
-  IN  UINTN                          BltX,
-  IN  UINTN                          BltY,
-  OUT EFI_HII_ROW_INFO               **RowInfoArray    OPTIONAL,
-  OUT UINTN                          *RowInfoArraySize OPTIONAL,
-  OUT UINTN                          *ColumnInfoArray  OPTIONAL
+  IN  CONST EFI_HII_FONT_PROTOCOL  *This,
+  IN  EFI_HII_OUT_FLAGS            Flags,
+  IN  EFI_HII_HANDLE               PackageList,
+  IN  EFI_STRING_ID                StringId,
+  IN  CONST CHAR8                  *Language,
+  IN  CONST EFI_FONT_DISPLAY_INFO  *StringInfo       OPTIONAL,
+  IN  OUT EFI_IMAGE_OUTPUT         **Blt,
+  IN  UINTN                        BltX,
+  IN  UINTN                        BltY,
+  OUT EFI_HII_ROW_INFO             **RowInfoArray    OPTIONAL,
+  OUT UINTN                        *RowInfoArraySize OPTIONAL,
+  OUT UINTN                        *ColumnInfoArray  OPTIONAL
   );
-
 
 /**
   Convert the glyph for a single character into a bitmap.
@@ -777,13 +769,12 @@ HiiStringIdToImage (
 EFI_STATUS
 EFIAPI
 HiiGetGlyph (
-  IN  CONST EFI_HII_FONT_PROTOCOL    *This,
-  IN  CHAR16                         Char,
-  IN  CONST EFI_FONT_DISPLAY_INFO    *StringInfo,
-  OUT EFI_IMAGE_OUTPUT               **Blt,
-  OUT UINTN                          *Baseline OPTIONAL
+  IN  CONST EFI_HII_FONT_PROTOCOL  *This,
+  IN  CHAR16                       Char,
+  IN  CONST EFI_FONT_DISPLAY_INFO  *StringInfo,
+  OUT EFI_IMAGE_OUTPUT             **Blt,
+  OUT UINTN                        *Baseline OPTIONAL
   );
-
 
 /**
   This function iterates through fonts which match the specified font, using
@@ -819,9 +810,9 @@ HiiGetGlyph (
 EFI_STATUS
 EFIAPI
 HiiGetFontInfo (
-  IN  CONST EFI_HII_FONT_PROTOCOL    *This,
-  IN  OUT   EFI_FONT_HANDLE          *FontHandle,
-  IN  CONST EFI_FONT_DISPLAY_INFO    *StringInfoIn, OPTIONAL
+  IN  CONST EFI_HII_FONT_PROTOCOL *This,
+  IN  OUT   EFI_FONT_HANDLE *FontHandle,
+  IN  CONST EFI_FONT_DISPLAY_INFO *StringInfoIn, OPTIONAL
   OUT       EFI_FONT_DISPLAY_INFO    **StringInfoOut,
   IN  CONST EFI_STRING               String OPTIONAL
   );
@@ -846,8 +837,8 @@ HiiGetFontInfo (
 **/
 EFI_HII_IMAGE_BLOCK *
 GetImageIdOrAddress (
-  IN EFI_HII_IMAGE_BLOCK *ImageBlocks,
-  IN OUT EFI_IMAGE_ID    *ImageId
+  IN EFI_HII_IMAGE_BLOCK  *ImageBlocks,
+  IN OUT EFI_IMAGE_ID     *ImageId
   );
 
 /**
@@ -860,8 +851,8 @@ GetImageIdOrAddress (
 **/
 HII_DATABASE_PACKAGE_LIST_INSTANCE *
 LocatePackageList (
-  IN  LIST_ENTRY                     *Database,
-  IN  EFI_HII_HANDLE                 PackageList
+  IN  LIST_ENTRY      *Database,
+  IN  EFI_HII_HANDLE  PackageList
   );
 
 /**
@@ -888,11 +879,11 @@ LocatePackageList (
 **/
 EFI_STATUS
 IGetImage (
-  IN  LIST_ENTRY                     *Database,
-  IN  EFI_HII_HANDLE                 PackageList,
-  IN  EFI_IMAGE_ID                   ImageId,
-  OUT EFI_IMAGE_INPUT                *Image,
-  IN  BOOLEAN                        BitmapOnly
+  IN  LIST_ENTRY       *Database,
+  IN  EFI_HII_HANDLE   PackageList,
+  IN  EFI_IMAGE_ID     ImageId,
+  OUT EFI_IMAGE_INPUT  *Image,
+  IN  BOOLEAN          BitmapOnly
   );
 
 /**
@@ -904,7 +895,7 @@ IGetImage (
 **/
 EFI_HII_IMAGE_DECODER_PROTOCOL *
 LocateHiiImageDecoder (
-  UINT8                          BlockType
+  UINT8  BlockType
   );
 
 /**
@@ -928,12 +919,11 @@ LocateHiiImageDecoder (
 EFI_STATUS
 EFIAPI
 HiiNewImage (
-  IN  CONST EFI_HII_IMAGE_PROTOCOL   *This,
-  IN  EFI_HII_HANDLE                 PackageList,
-  OUT EFI_IMAGE_ID                   *ImageId,
-  IN  CONST EFI_IMAGE_INPUT          *Image
+  IN  CONST EFI_HII_IMAGE_PROTOCOL  *This,
+  IN  EFI_HII_HANDLE                PackageList,
+  OUT EFI_IMAGE_ID                  *ImageId,
+  IN  CONST EFI_IMAGE_INPUT         *Image
   );
-
 
 /**
   This function retrieves the image specified by ImageId which is associated with
@@ -959,12 +949,11 @@ HiiNewImage (
 EFI_STATUS
 EFIAPI
 HiiGetImage (
-  IN  CONST EFI_HII_IMAGE_PROTOCOL   *This,
-  IN  EFI_HII_HANDLE                 PackageList,
-  IN  EFI_IMAGE_ID                   ImageId,
-  OUT EFI_IMAGE_INPUT                *Image
+  IN  CONST EFI_HII_IMAGE_PROTOCOL  *This,
+  IN  EFI_HII_HANDLE                PackageList,
+  IN  EFI_IMAGE_ID                  ImageId,
+  OUT EFI_IMAGE_INPUT               *Image
   );
-
 
 /**
   This function updates the image specified by ImageId in the specified PackageListHandle to
@@ -985,12 +974,11 @@ HiiGetImage (
 EFI_STATUS
 EFIAPI
 HiiSetImage (
-  IN CONST EFI_HII_IMAGE_PROTOCOL    *This,
-  IN EFI_HII_HANDLE                  PackageList,
-  IN EFI_IMAGE_ID                    ImageId,
-  IN CONST EFI_IMAGE_INPUT           *Image
+  IN CONST EFI_HII_IMAGE_PROTOCOL  *This,
+  IN EFI_HII_HANDLE                PackageList,
+  IN EFI_IMAGE_ID                  ImageId,
+  IN CONST EFI_IMAGE_INPUT         *Image
   );
-
 
 /**
   This function renders an image to a bitmap or the screen using the specified
@@ -1024,14 +1012,13 @@ HiiSetImage (
 EFI_STATUS
 EFIAPI
 HiiDrawImage (
-  IN CONST EFI_HII_IMAGE_PROTOCOL    *This,
-  IN EFI_HII_DRAW_FLAGS              Flags,
-  IN CONST EFI_IMAGE_INPUT           *Image,
-  IN OUT EFI_IMAGE_OUTPUT            **Blt,
-  IN UINTN                           BltX,
-  IN UINTN                           BltY
+  IN CONST EFI_HII_IMAGE_PROTOCOL  *This,
+  IN EFI_HII_DRAW_FLAGS            Flags,
+  IN CONST EFI_IMAGE_INPUT         *Image,
+  IN OUT EFI_IMAGE_OUTPUT          **Blt,
+  IN UINTN                         BltX,
+  IN UINTN                         BltY
   );
-
 
 /**
   This function renders an image to a bitmap or the screen using the specified
@@ -1070,13 +1057,13 @@ HiiDrawImage (
 EFI_STATUS
 EFIAPI
 HiiDrawImageId (
-  IN CONST EFI_HII_IMAGE_PROTOCOL    *This,
-  IN EFI_HII_DRAW_FLAGS              Flags,
-  IN EFI_HII_HANDLE                  PackageList,
-  IN EFI_IMAGE_ID                    ImageId,
-  IN OUT EFI_IMAGE_OUTPUT            **Blt,
-  IN UINTN                           BltX,
-  IN UINTN                           BltY
+  IN CONST EFI_HII_IMAGE_PROTOCOL  *This,
+  IN EFI_HII_DRAW_FLAGS            Flags,
+  IN EFI_HII_HANDLE                PackageList,
+  IN EFI_IMAGE_ID                  ImageId,
+  IN OUT EFI_IMAGE_OUTPUT          **Blt,
+  IN UINTN                         BltX,
+  IN UINTN                         BltY
   );
 
 /**
@@ -1098,10 +1085,10 @@ HiiDrawImageId (
 EFI_STATUS
 EFIAPI
 HiiNewImageEx (
-  IN  CONST EFI_HII_IMAGE_EX_PROTOCOL *This,
-  IN  EFI_HII_HANDLE                  PackageList,
-  OUT EFI_IMAGE_ID                    *ImageId,
-  IN  CONST EFI_IMAGE_INPUT           *Image
+  IN  CONST EFI_HII_IMAGE_EX_PROTOCOL  *This,
+  IN  EFI_HII_HANDLE                   PackageList,
+  OUT EFI_IMAGE_ID                     *ImageId,
+  IN  CONST EFI_IMAGE_INPUT            *Image
   );
 
 /**
@@ -1132,10 +1119,10 @@ HiiNewImageEx (
 EFI_STATUS
 EFIAPI
 HiiGetImageEx (
-  IN  CONST EFI_HII_IMAGE_EX_PROTOCOL *This,
-  IN  EFI_HII_HANDLE                  PackageList,
-  IN  EFI_IMAGE_ID                    ImageId,
-  OUT EFI_IMAGE_INPUT                 *Image
+  IN  CONST EFI_HII_IMAGE_EX_PROTOCOL  *This,
+  IN  EFI_HII_HANDLE                   PackageList,
+  IN  EFI_IMAGE_ID                     ImageId,
+  OUT EFI_IMAGE_INPUT                  *Image
   );
 
 /**
@@ -1160,10 +1147,10 @@ HiiGetImageEx (
 EFI_STATUS
 EFIAPI
 HiiSetImageEx (
-  IN CONST EFI_HII_IMAGE_EX_PROTOCOL *This,
-  IN EFI_HII_HANDLE                  PackageList,
-  IN EFI_IMAGE_ID                    ImageId,
-  IN CONST EFI_IMAGE_INPUT           *Image
+  IN CONST EFI_HII_IMAGE_EX_PROTOCOL  *This,
+  IN EFI_HII_HANDLE                   PackageList,
+  IN EFI_IMAGE_ID                     ImageId,
+  IN CONST EFI_IMAGE_INPUT            *Image
   );
 
 /**
@@ -1197,12 +1184,12 @@ HiiSetImageEx (
 EFI_STATUS
 EFIAPI
 HiiDrawImageEx (
-  IN CONST EFI_HII_IMAGE_EX_PROTOCOL *This,
-  IN EFI_HII_DRAW_FLAGS              Flags,
-  IN CONST EFI_IMAGE_INPUT           *Image,
-  IN OUT EFI_IMAGE_OUTPUT            **Blt,
-  IN UINTN                           BltX,
-  IN UINTN                           BltY
+  IN CONST EFI_HII_IMAGE_EX_PROTOCOL  *This,
+  IN EFI_HII_DRAW_FLAGS               Flags,
+  IN CONST EFI_IMAGE_INPUT            *Image,
+  IN OUT EFI_IMAGE_OUTPUT             **Blt,
+  IN UINTN                            BltX,
+  IN UINTN                            BltY
   );
 
 /**
@@ -1244,13 +1231,13 @@ HiiDrawImageEx (
 EFI_STATUS
 EFIAPI
 HiiDrawImageIdEx (
-  IN CONST EFI_HII_IMAGE_EX_PROTOCOL *This,
-  IN EFI_HII_DRAW_FLAGS              Flags,
-  IN EFI_HII_HANDLE                  PackageList,
-  IN EFI_IMAGE_ID                    ImageId,
-  IN OUT EFI_IMAGE_OUTPUT            **Blt,
-  IN UINTN                           BltX,
-  IN UINTN                           BltY
+  IN CONST EFI_HII_IMAGE_EX_PROTOCOL  *This,
+  IN EFI_HII_DRAW_FLAGS               Flags,
+  IN EFI_HII_HANDLE                   PackageList,
+  IN EFI_IMAGE_ID                     ImageId,
+  IN OUT EFI_IMAGE_OUTPUT             **Blt,
+  IN UINTN                            BltX,
+  IN UINTN                            BltY
   );
 
 /**
@@ -1279,15 +1266,15 @@ HiiDrawImageIdEx (
 EFI_STATUS
 EFIAPI
 HiiGetImageInfo (
-  IN CONST  EFI_HII_IMAGE_EX_PROTOCOL       *This,
-  IN        EFI_HII_HANDLE                  PackageList,
-  IN        EFI_IMAGE_ID                    ImageId,
-  OUT       EFI_IMAGE_OUTPUT                *Image
+  IN CONST  EFI_HII_IMAGE_EX_PROTOCOL  *This,
+  IN        EFI_HII_HANDLE             PackageList,
+  IN        EFI_IMAGE_ID               ImageId,
+  OUT       EFI_IMAGE_OUTPUT           *Image
   );
+
 //
 // EFI_HII_STRING_PROTOCOL
 //
-
 
 /**
   This function adds the string String to the group of strings owned by PackageList, with the
@@ -1323,15 +1310,14 @@ HiiGetImageInfo (
 EFI_STATUS
 EFIAPI
 HiiNewString (
-  IN  CONST EFI_HII_STRING_PROTOCOL   *This,
-  IN  EFI_HII_HANDLE                  PackageList,
-  OUT EFI_STRING_ID                   *StringId,
-  IN  CONST CHAR8                     *Language,
-  IN  CONST CHAR16                    *LanguageName, OPTIONAL
+  IN  CONST EFI_HII_STRING_PROTOCOL *This,
+  IN  EFI_HII_HANDLE PackageList,
+  OUT EFI_STRING_ID *StringId,
+  IN  CONST CHAR8 *Language,
+  IN  CONST CHAR16 *LanguageName, OPTIONAL
   IN  CONST EFI_STRING                String,
   IN  CONST EFI_FONT_INFO             *StringFontInfo OPTIONAL
   );
-
 
 /**
   This function retrieves the string specified by StringId which is associated
@@ -1371,15 +1357,14 @@ HiiNewString (
 EFI_STATUS
 EFIAPI
 InternalHiiGetString (
-  IN  CONST EFI_HII_STRING_PROTOCOL   *This,
-  IN  CONST CHAR8                     *Language,
-  IN  EFI_HII_HANDLE                  PackageList,
-  IN  EFI_STRING_ID                   StringId,
-  OUT EFI_STRING                      String,
-  IN  OUT UINTN                       *StringSize,
-  OUT EFI_FONT_INFO                   **StringFontInfo OPTIONAL
+  IN  CONST EFI_HII_STRING_PROTOCOL  *This,
+  IN  CONST CHAR8                    *Language,
+  IN  EFI_HII_HANDLE                 PackageList,
+  IN  EFI_STRING_ID                  StringId,
+  OUT EFI_STRING                     String,
+  IN  OUT UINTN                      *StringSize,
+  OUT EFI_FONT_INFO                  **StringFontInfo OPTIONAL
   );
-
 
 /**
   This function updates the string specified by StringId in the specified PackageList to the text
@@ -1406,14 +1391,13 @@ InternalHiiGetString (
 EFI_STATUS
 EFIAPI
 InternalHiiSetString (
-  IN CONST EFI_HII_STRING_PROTOCOL    *This,
-  IN EFI_HII_HANDLE                   PackageList,
-  IN EFI_STRING_ID                    StringId,
-  IN CONST CHAR8                      *Language,
-  IN CONST EFI_STRING                 String,
-  IN CONST EFI_FONT_INFO              *StringFontInfo OPTIONAL
+  IN CONST EFI_HII_STRING_PROTOCOL  *This,
+  IN EFI_HII_HANDLE                 PackageList,
+  IN EFI_STRING_ID                  StringId,
+  IN CONST CHAR8                    *Language,
+  IN CONST EFI_STRING               String,
+  IN CONST EFI_FONT_INFO            *StringFontInfo OPTIONAL
   );
-
 
 /**
   This function returns the list of supported languages, in the format specified
@@ -1441,12 +1425,11 @@ InternalHiiSetString (
 EFI_STATUS
 EFIAPI
 HiiGetLanguages (
-  IN CONST EFI_HII_STRING_PROTOCOL    *This,
-  IN EFI_HII_HANDLE                   PackageList,
-  IN OUT CHAR8                        *Languages,
-  IN OUT UINTN                        *LanguagesSize
+  IN CONST EFI_HII_STRING_PROTOCOL  *This,
+  IN EFI_HII_HANDLE                 PackageList,
+  IN OUT CHAR8                      *Languages,
+  IN OUT UINTN                      *LanguagesSize
   );
-
 
 /**
   Each string package has associated with it a single primary language and zero
@@ -1486,17 +1469,16 @@ HiiGetLanguages (
 EFI_STATUS
 EFIAPI
 HiiGetSecondaryLanguages (
-  IN CONST EFI_HII_STRING_PROTOCOL   *This,
-  IN EFI_HII_HANDLE                  PackageList,
-  IN CONST CHAR8                     *PrimaryLanguage,
-  IN OUT CHAR8                       *SecondaryLanguages,
-  IN OUT UINTN                       *SecondaryLanguagesSize
+  IN CONST EFI_HII_STRING_PROTOCOL  *This,
+  IN EFI_HII_HANDLE                 PackageList,
+  IN CONST CHAR8                    *PrimaryLanguage,
+  IN OUT CHAR8                      *SecondaryLanguages,
+  IN OUT UINTN                      *SecondaryLanguagesSize
   );
 
 //
 // EFI_HII_DATABASE_PROTOCOL protocol interfaces
 //
-
 
 /**
   This function adds the packages in the package list to the database and returns a handle. If there is a
@@ -1522,12 +1504,11 @@ HiiGetSecondaryLanguages (
 EFI_STATUS
 EFIAPI
 HiiNewPackageList (
-  IN CONST EFI_HII_DATABASE_PROTOCOL    *This,
-  IN CONST EFI_HII_PACKAGE_LIST_HEADER  *PackageList,
-  IN CONST EFI_HANDLE                   DriverHandle, OPTIONAL
+  IN CONST EFI_HII_DATABASE_PROTOCOL *This,
+  IN CONST EFI_HII_PACKAGE_LIST_HEADER *PackageList,
+  IN CONST EFI_HANDLE DriverHandle, OPTIONAL
   OUT EFI_HII_HANDLE                    *Handle
   );
-
 
 /**
   This function removes the package list that is associated with a handle Handle
@@ -1547,10 +1528,9 @@ HiiNewPackageList (
 EFI_STATUS
 EFIAPI
 HiiRemovePackageList (
-  IN CONST EFI_HII_DATABASE_PROTOCOL    *This,
-  IN EFI_HII_HANDLE                     Handle
+  IN CONST EFI_HII_DATABASE_PROTOCOL  *This,
+  IN EFI_HII_HANDLE                   Handle
   );
-
 
 /**
   This function updates the existing package list (which has the specified Handle)
@@ -1577,7 +1557,6 @@ HiiUpdatePackageList (
   IN EFI_HII_HANDLE                     Handle,
   IN CONST EFI_HII_PACKAGE_LIST_HEADER  *PackageList
   );
-
 
 /**
   This function returns a list of the package handles of the specified type
@@ -1617,13 +1596,12 @@ HiiUpdatePackageList (
 EFI_STATUS
 EFIAPI
 HiiListPackageLists (
-  IN  CONST EFI_HII_DATABASE_PROTOCOL   *This,
-  IN  UINT8                             PackageType,
-  IN  CONST EFI_GUID                    *PackageGuid,
-  IN  OUT UINTN                         *HandleBufferLength,
-  OUT EFI_HII_HANDLE                    *Handle
+  IN  CONST EFI_HII_DATABASE_PROTOCOL  *This,
+  IN  UINT8                            PackageType,
+  IN  CONST EFI_GUID                   *PackageGuid,
+  IN  OUT UINTN                        *HandleBufferLength,
+  OUT EFI_HII_HANDLE                   *Handle
   );
-
 
 /**
   This function will export one or all package lists in the database to a buffer.
@@ -1657,12 +1635,11 @@ HiiListPackageLists (
 EFI_STATUS
 EFIAPI
 HiiExportPackageLists (
-  IN  CONST EFI_HII_DATABASE_PROTOCOL   *This,
-  IN  EFI_HII_HANDLE                    Handle,
-  IN  OUT UINTN                         *BufferSize,
-  OUT EFI_HII_PACKAGE_LIST_HEADER       *Buffer
+  IN  CONST EFI_HII_DATABASE_PROTOCOL  *This,
+  IN  EFI_HII_HANDLE                   Handle,
+  IN  OUT UINTN                        *BufferSize,
+  OUT EFI_HII_PACKAGE_LIST_HEADER      *Buffer
   );
-
 
 /**
   This function registers a function which will be called when specified actions related to packages of
@@ -1703,14 +1680,13 @@ HiiExportPackageLists (
 EFI_STATUS
 EFIAPI
 HiiRegisterPackageNotify (
-  IN  CONST EFI_HII_DATABASE_PROTOCOL   *This,
-  IN  UINT8                             PackageType,
-  IN  CONST EFI_GUID                    *PackageGuid,
-  IN  CONST EFI_HII_DATABASE_NOTIFY     PackageNotifyFn,
-  IN  EFI_HII_DATABASE_NOTIFY_TYPE      NotifyType,
-  OUT EFI_HANDLE                        *NotifyHandle
+  IN  CONST EFI_HII_DATABASE_PROTOCOL  *This,
+  IN  UINT8                            PackageType,
+  IN  CONST EFI_GUID                   *PackageGuid,
+  IN  CONST EFI_HII_DATABASE_NOTIFY    PackageNotifyFn,
+  IN  EFI_HII_DATABASE_NOTIFY_TYPE     NotifyType,
+  OUT EFI_HANDLE                       *NotifyHandle
   );
-
 
 /**
   Removes the specified HII database package-related notification.
@@ -1728,10 +1704,9 @@ HiiRegisterPackageNotify (
 EFI_STATUS
 EFIAPI
 HiiUnregisterPackageNotify (
-  IN CONST EFI_HII_DATABASE_PROTOCOL    *This,
-  IN EFI_HANDLE                         NotificationHandle
+  IN CONST EFI_HII_DATABASE_PROTOCOL  *This,
+  IN EFI_HANDLE                       NotificationHandle
   );
-
 
 /**
   This routine retrieves an array of GUID values for each keyboard layout that
@@ -1760,11 +1735,10 @@ HiiUnregisterPackageNotify (
 EFI_STATUS
 EFIAPI
 HiiFindKeyboardLayouts (
-  IN  CONST EFI_HII_DATABASE_PROTOCOL   *This,
-  IN  OUT UINT16                        *KeyGuidBufferLength,
-  OUT EFI_GUID                          *KeyGuidBuffer
+  IN  CONST EFI_HII_DATABASE_PROTOCOL  *This,
+  IN  OUT UINT16                       *KeyGuidBufferLength,
+  OUT EFI_GUID                         *KeyGuidBuffer
   );
-
 
 /**
   This routine retrieves the requested keyboard layout. The layout is a physical description of the keys
@@ -1790,12 +1764,11 @@ HiiFindKeyboardLayouts (
 EFI_STATUS
 EFIAPI
 HiiGetKeyboardLayout (
-  IN  CONST EFI_HII_DATABASE_PROTOCOL   *This,
-  IN  CONST EFI_GUID                          *KeyGuid,
-  IN OUT UINT16                         *KeyboardLayoutLength,
-  OUT EFI_HII_KEYBOARD_LAYOUT           *KeyboardLayout
+  IN  CONST EFI_HII_DATABASE_PROTOCOL  *This,
+  IN  CONST EFI_GUID                   *KeyGuid,
+  IN OUT UINT16                        *KeyboardLayoutLength,
+  OUT EFI_HII_KEYBOARD_LAYOUT          *KeyboardLayout
   );
-
 
 /**
   This routine sets the default keyboard layout to the one referenced by KeyGuid. When this routine
@@ -1817,10 +1790,9 @@ HiiGetKeyboardLayout (
 EFI_STATUS
 EFIAPI
 HiiSetKeyboardLayout (
-  IN CONST EFI_HII_DATABASE_PROTOCOL          *This,
-  IN CONST EFI_GUID                           *KeyGuid
+  IN CONST EFI_HII_DATABASE_PROTOCOL  *This,
+  IN CONST EFI_GUID                   *KeyGuid
   );
-
 
 /**
   Return the EFI handle associated with a package list.
@@ -1841,15 +1813,14 @@ HiiSetKeyboardLayout (
 EFI_STATUS
 EFIAPI
 HiiGetPackageListHandle (
-  IN  CONST EFI_HII_DATABASE_PROTOCOL         *This,
-  IN  EFI_HII_HANDLE                    PackageListHandle,
-  OUT EFI_HANDLE                        *DriverHandle
+  IN  CONST EFI_HII_DATABASE_PROTOCOL  *This,
+  IN  EFI_HII_HANDLE                   PackageListHandle,
+  OUT EFI_HANDLE                       *DriverHandle
   );
 
 //
 // EFI_HII_CONFIG_ROUTING_PROTOCOL interfaces
 //
-
 
 /**
   This function allows a caller to extract the current configuration
@@ -1899,7 +1870,6 @@ HiiConfigRoutingExtractConfig (
   OUT EFI_STRING                             *Results
   );
 
-
 /**
   This function allows the caller to request the current configuration for the
   entirety of the current HII database and returns the data in a null-terminated Unicode string.
@@ -1927,7 +1897,6 @@ HiiConfigRoutingExportConfig (
   IN  CONST EFI_HII_CONFIG_ROUTING_PROTOCOL  *This,
   OUT EFI_STRING                             *Results
   );
-
 
 /**
   This function processes the results of processing forms and routes it to the
@@ -1961,8 +1930,6 @@ HiiConfigRoutingRouteConfig (
   IN  CONST EFI_STRING                       Configuration,
   OUT EFI_STRING                             *Progress
   );
-
-
 
 /**
   This helper function is to be called by drivers to map configuration data stored
@@ -2013,7 +1980,6 @@ HiiBlockToConfig (
   OUT EFI_STRING                             *Config,
   OUT EFI_STRING                             *Progress
   );
-
 
 /**
   This helper function is to be called by drivers to map configuration strings
@@ -2067,13 +2033,12 @@ HiiBlockToConfig (
 EFI_STATUS
 EFIAPI
 HiiConfigToBlock (
-  IN     CONST EFI_HII_CONFIG_ROUTING_PROTOCOL *This,
-  IN     CONST EFI_STRING                      ConfigResp,
-  IN OUT UINT8                                 *Block,
-  IN OUT UINTN                                 *BlockSize,
-  OUT    EFI_STRING                            *Progress
+  IN     CONST EFI_HII_CONFIG_ROUTING_PROTOCOL  *This,
+  IN     CONST EFI_STRING                       ConfigResp,
+  IN OUT UINT8                                  *Block,
+  IN OUT UINTN                                  *BlockSize,
+  OUT    EFI_STRING                             *Progress
   );
-
 
 /**
   This helper function is to be called by drivers to extract portions of
@@ -2118,13 +2083,13 @@ HiiConfigToBlock (
 EFI_STATUS
 EFIAPI
 HiiGetAltCfg (
-  IN  CONST EFI_HII_CONFIG_ROUTING_PROTOCOL    *This,
-  IN  CONST EFI_STRING                         Configuration,
-  IN  CONST EFI_GUID                           *Guid,
-  IN  CONST EFI_STRING                         Name,
-  IN  CONST EFI_DEVICE_PATH_PROTOCOL           *DevicePath,
-  IN  CONST UINT16                             *AltCfgId,
-  OUT EFI_STRING                               *AltCfgResp
+  IN  CONST EFI_HII_CONFIG_ROUTING_PROTOCOL  *This,
+  IN  CONST EFI_STRING                       Configuration,
+  IN  CONST EFI_GUID                         *Guid,
+  IN  CONST EFI_STRING                       Name,
+  IN  CONST EFI_DEVICE_PATH_PROTOCOL         *DevicePath,
+  IN  CONST UINT16                           *AltCfgId,
+  OUT EFI_STRING                             *AltCfgResp
   );
 
 /**
@@ -2189,10 +2154,10 @@ HiiGetAltCfg (
 EFI_STATUS
 EFIAPI
 EfiConfigKeywordHandlerSetData (
-  IN EFI_CONFIG_KEYWORD_HANDLER_PROTOCOL *This,
-  IN CONST EFI_STRING                    KeywordString,
-  OUT EFI_STRING                         *Progress,
-  OUT UINT32                             *ProgressErr
+  IN EFI_CONFIG_KEYWORD_HANDLER_PROTOCOL  *This,
+  IN CONST EFI_STRING                     KeywordString,
+  OUT EFI_STRING                          *Progress,
+  OUT UINT32                              *ProgressErr
   );
 
 /**
@@ -2267,8 +2232,8 @@ EfiConfigKeywordHandlerSetData (
 EFI_STATUS
 EFIAPI
 EfiConfigKeywordHandlerGetData (
-  IN EFI_CONFIG_KEYWORD_HANDLER_PROTOCOL  *This,
-  IN CONST EFI_STRING                     NameSpaceId, OPTIONAL
+  IN EFI_CONFIG_KEYWORD_HANDLER_PROTOCOL *This,
+  IN CONST EFI_STRING NameSpaceId, OPTIONAL
   IN CONST EFI_STRING                     KeywordString, OPTIONAL
   OUT EFI_STRING                          *Progress,
   OUT UINT32                              *ProgressErr,
@@ -2312,7 +2277,7 @@ HiiCompareLanguage (
 **/
 CHAR8 *
 GetSupportedLanguages (
-  IN EFI_HII_HANDLE           HiiHandle
+  IN EFI_HII_HANDLE  HiiHandle
   );
 
 /**
@@ -2326,7 +2291,7 @@ This function mainly use to get HiiDatabase information.
 **/
 EFI_STATUS
 HiiGetDatabaseInfo (
-  IN CONST EFI_HII_DATABASE_PROTOCOL        *This
+  IN CONST EFI_HII_DATABASE_PROTOCOL  *This
   );
 
 /**
@@ -2340,13 +2305,13 @@ This function mainly use to get and update ConfigResp string.
 **/
 EFI_STATUS
 HiiGetConfigRespInfo (
-  IN CONST EFI_HII_DATABASE_PROTOCOL        *This
+  IN CONST EFI_HII_DATABASE_PROTOCOL  *This
   );
 
 //
 // Global variables
 //
-extern EFI_EVENT gHiiKeyboardLayoutChanged;
-extern BOOLEAN   gExportAfterReadyToBoot;
+extern EFI_EVENT  gHiiKeyboardLayoutChanged;
+extern BOOLEAN    gExportAfterReadyToBoot;
 
 #endif

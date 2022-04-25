@@ -34,17 +34,17 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
   Apple single file protocol version.
   Versions other than 1 take EFI_FILE_INFO as a FileInfo argument.
 **/
-#define APPLE_SINGLE_FILE_VERSION    1U
+#define APPLE_SINGLE_FILE_VERSION  1U
 
 /**
   Default file system name when FileInfo is not provided at creation.
 **/
-#define APPLE_SINGLE_FILE_DEFAULT_FILESYSTEM_NAME L"Single File System"
+#define APPLE_SINGLE_FILE_DEFAULT_FILESYSTEM_NAME  L"Single File System"
 
 /**
   Default file name when FileInfo is not provided at creation.
 **/
-#define APPLE_SINGLE_FILE_DEFAULT_FILE_NAME L"SomeLonelyFile"
+#define APPLE_SINGLE_FILE_DEFAULT_FILE_NAME  L"SomeLonelyFile"
 
 /**
   Apple single file info.
@@ -53,19 +53,19 @@ typedef struct {
   ///
   /// Unused, possibly zero.
   ///
-  UINT64 Reserved;
+  UINT64    Reserved;
   ///
   /// File size in bytes.
   ///
-  UINT64 FileSize;
+  UINT64    FileSize;
   ///
   /// File name.
   ///
-  CHAR16 FileName[32];
+  CHAR16    FileName[32];
   ///
   /// File system name, optional.
   ///
-  CHAR16 FileSystemName[32];
+  CHAR16    FileSystemName[32];
 } APPLE_SINGLE_FILE_INFO;
 
 /**
@@ -81,7 +81,7 @@ typedef struct {
 **/
 typedef
 EFI_STATUS
-(EFIAPI *APPLE_SINGLE_FILE_CREATE) (
+(EFIAPI *APPLE_SINGLE_FILE_CREATE)(
   IN  EFI_HANDLE              Handle,
   OUT APPLE_SINGLE_FILE_INFO  *FileInfo  OPTIONAL
   );
@@ -95,6 +95,6 @@ typedef struct {
   APPLE_SINGLE_FILE_CREATE    CreateFile;
 } APPLE_SINGLE_FILE_PROTOCOL;
 
-extern gAppleSingleFileProtocolGuid;
+extern  gAppleSingleFileProtocolGuid;
 
 #endif // APPLE_SINGLE_FILE_PROTOCOL_H

@@ -9,6 +9,7 @@ THE PROGRAM IS DISTRIBUTED UNDER THE BSD LICENSE ON AN "AS IS" BASIS,
 WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 
 **/
+
 #ifndef APPLE_SMC_H
 #define APPLE_SMC_H
 
@@ -32,8 +33,8 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 
 // PMIO
 
-#define SMC_PORT_BASE            0x0300
-#define SMC_PORT_LENGTH          0x0020
+#define SMC_PORT_BASE    0x0300
+#define SMC_PORT_LENGTH  0x0020
 
 #define SMC_PORT_OFFSET_DATA     0x00
 #define SMC_PORT_OFFSET_COMMAND  0x04
@@ -80,9 +81,9 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 #define SMC_MMIO_READ_RESULT  \
   (SMC_MMIO_DATA_FIXED + SMC_MMIO_OFFSET_RESULT)
 
-#define SMC_MMIO_READ_EVENT_STATUS 0x4000
-#define SMC_MMIO_READ_UNKNOWN1     0x4004
-#define SMC_MMIO_READ_KEY_STATUS   0x4005
+#define SMC_MMIO_READ_EVENT_STATUS  0x4000
+#define SMC_MMIO_READ_UNKNOWN1      0x4004
+#define SMC_MMIO_READ_KEY_STATUS    0x4005
 
 // Write addresses
 
@@ -145,21 +146,21 @@ typedef UINT8 SMC_FLASH_MODE;
 // Commands
 
 enum {
-  SmcCmdReadValue            = 0x10,
-  SmcCmdWriteValue           = 0x11,
-  SmcCmdGetKeyFromIndex      = 0x12,
-  SmcCmdGetKeyInfo           = 0x13,
-  SmcCmdReset                = 0x14,
-  SmcCmdWriteValueAtIndex    = 0x15,
-  SmcCmdReadValueAtIndex     = 0x16,
-  SmcCmdGetSramAddress       = 0x17,
-  SmcCmdReadPKey             = 0x20, // response based on payload submitted
-  SmcCmdUnknown1             = 0x77,
-  SmcCmdFlashWrite           = 0xF1,
-  SmcCmdFlashAuth            = 0xF2,
-  SmcCmdFlashType            = 0xF4,
-  SmcCmdFlashWriteMoreData   = 0xF5, // write more data than available at once
-  SmcCmdFlashAuthMoreData    = 0xF6  // auth more data than available at once
+  SmcCmdReadValue          = 0x10,
+  SmcCmdWriteValue         = 0x11,
+  SmcCmdGetKeyFromIndex    = 0x12,
+  SmcCmdGetKeyInfo         = 0x13,
+  SmcCmdReset              = 0x14,
+  SmcCmdWriteValueAtIndex  = 0x15,
+  SmcCmdReadValueAtIndex   = 0x16,
+  SmcCmdGetSramAddress     = 0x17,
+  SmcCmdReadPKey           = 0x20,   // response based on payload submitted
+  SmcCmdUnknown1           = 0x77,
+  SmcCmdFlashWrite         = 0xF1,
+  SmcCmdFlashAuth          = 0xF2,
+  SmcCmdFlashType          = 0xF4,
+  SmcCmdFlashWriteMoreData = 0xF5,   // write more data than available at once
+  SmcCmdFlashAuthMoreData  = 0xF6    // auth more data than available at once
 };
 
 typedef UINT8 SMC_COMMAND;
@@ -179,22 +180,22 @@ typedef UINT8 SMC_COMMAND;
 typedef UINT8 SMC_STATUS;
 
 enum {
-  SmcSuccess               = 0,
-  SmcError                 = 1,
+  SmcSuccess = 0,
+  SmcError   = 1,
 
-  SmcCommCollision         = 128,
-  SmcSpuriousData          = 129,
-  SmcBadCommand            = 130,
-  SmcBadParameter          = 131,
-  SmcNotFound              = 132,
-  SmcNotReadable           = 133,
-  SmcNotWritable           = 134,
-  SmcKeySizeMismatch       = 135,
-  SmcFramingError          = 136,
-  SmcBadArgumentError      = 137,
+  SmcCommCollision    = 128,
+  SmcSpuriousData     = 129,
+  SmcBadCommand       = 130,
+  SmcBadParameter     = 131,
+  SmcNotFound         = 132,
+  SmcNotReadable      = 133,
+  SmcNotWritable      = 134,
+  SmcKeySizeMismatch  = 135,
+  SmcFramingError     = 136,
+  SmcBadArgumentError = 137,
 
-  SmcTimeoutError          = 183,
-  SmcKeyIndexRangeError    = 184,
+  SmcTimeoutError       = 183,
+  SmcKeyIndexRangeError = 184,
 
   SmcBadFunctionParameter  = 192,
   SmcEventBufferWrongOrder = 196,
@@ -203,30 +204,30 @@ enum {
   SmcUnsupportedFeature    = 203,
   SmcSmbAccessError        = 204,
 
-  SmcInvalidSize           = 206
+  SmcInvalidSize = 206
 };
 
-#define SMC_ERROR(a) (((UINTN)(a)) > 0)
+#define SMC_ERROR(a)  (((UINTN)(a)) > 0)
 
 #define EFI_STATUS_FROM_SMC_RESULT(x)  \
   ((((UINTN)(x)) == SmcSuccess) ? EFI_SUCCESS : EFIERR ((UINTN)(x)))
 
-#define EFI_SMC_SUCCESS                   SmcSuccess
-#define EFI_SMC_ERROR                     EFIERR (SmcError)
+#define EFI_SMC_SUCCESS  SmcSuccess
+#define EFI_SMC_ERROR    EFIERR (SmcError)
 
-#define EFI_SMC_COMM_COLLISION            EFIERR (SmcCommCollision)
-#define EFI_SMC_SPURIOUS_DATA             EFIERR (SmcSpuriousData)
-#define EFI_SMC_BAD_COMMAND               EFIERR (SmcBadCommand)
-#define EFI_SMC_BAD_PARAMETER             EFIERR (SmcBadParameter)
-#define EFI_SMC_NOT_FOUND                 EFIERR (SmcNotFound)
-#define EFI_SMC_NOT_READABLE              EFIERR (SmcNotReadable)
-#define EFI_SMC_NOT_WRITABLE              EFIERR (SmcNotWritable)
-#define EFI_SMC_KEY_MISMATCH              EFIERR (SmcKeySizeMismatch)
-#define EFI_SMC_FRAMING_ERROR             EFIERR (SmcFramingError)
-#define EFI_SMC_BAD_ARGUMENT_ERROR        EFIERR (SmcBadArgumentError)
+#define EFI_SMC_COMM_COLLISION      EFIERR (SmcCommCollision)
+#define EFI_SMC_SPURIOUS_DATA       EFIERR (SmcSpuriousData)
+#define EFI_SMC_BAD_COMMAND         EFIERR (SmcBadCommand)
+#define EFI_SMC_BAD_PARAMETER       EFIERR (SmcBadParameter)
+#define EFI_SMC_NOT_FOUND           EFIERR (SmcNotFound)
+#define EFI_SMC_NOT_READABLE        EFIERR (SmcNotReadable)
+#define EFI_SMC_NOT_WRITABLE        EFIERR (SmcNotWritable)
+#define EFI_SMC_KEY_MISMATCH        EFIERR (SmcKeySizeMismatch)
+#define EFI_SMC_FRAMING_ERROR       EFIERR (SmcFramingError)
+#define EFI_SMC_BAD_ARGUMENT_ERROR  EFIERR (SmcBadArgumentError)
 
-#define EFI_SMC_TIMEOUT_ERROR             EFIERR (SmcTimeoutError)
-#define EFI_SMC_KEY_INDEX_RANGE_ERROR     EFIERR (SmcKeyIndexRangeError)
+#define EFI_SMC_TIMEOUT_ERROR          EFIERR (SmcTimeoutError)
+#define EFI_SMC_KEY_INDEX_RANGE_ERROR  EFIERR (SmcKeyIndexRangeError)
 
 #define EFI_SMC_BAD_FUNCTION_PARAMETER    EFIERR (SmcBadFunctionParameter)
 #define EFI_SMC_EVENT_BUFFER_WRONG_ORDER  EFIERR (SmcEventBufferWrongOrder)
@@ -235,14 +236,14 @@ enum {
 #define EFI_SMC_UNSUPPORTED_FEATURE       EFIERR (SmcUnsupportedFeature)
 #define EFI_SMB_ACCESS_ERROR              EFIERR (SmcSmbAccessError)
 
-#define EFI_SMC_INVALID_SIZE              EFIERR (SmcInvalidSize)
+#define EFI_SMC_INVALID_SIZE  EFIERR (SmcInvalidSize)
 
 // SMC_RESULT
 typedef UINT8 SMC_RESULT;
 
 // Key Types
 
-#define SMC_MAKE_KEY_TYPE(A, B, C, D) SMC_MAKE_IDENTIFIER ((A), (B), (C), (D))
+#define SMC_MAKE_KEY_TYPE(A, B, C, D)  SMC_MAKE_IDENTIFIER ((A), (B), (C), (D))
 
 enum {
   SmcKeyTypeCh8s   = SMC_MAKE_KEY_TYPE ('c', 'h', '8', '*'),
@@ -322,18 +323,17 @@ typedef UINT32 SMC_KEY_TYPE;
 
 // Key Attributes
 
-#define SMC_KEY_ATTRIBUTE_PRIVATE_WRITE   BIT0
-#define SMC_KEY_ATTRIBUTE_PRIVATE_READ    BIT1
-#define SMC_KEY_ATTRIBUTE_ATOMIC          BIT2
-#define SMC_KEY_ATTRIBUTE_CONST           BIT3
-#define SMC_KEY_ATTRIBUTE_FUNCTION        BIT4
-#define SMC_KEY_ATTRIBUTE_UKN_0x20        BIT5
-#define SMC_KEY_ATTRIBUTE_WRITE           BIT6
-#define SMC_KEY_ATTRIBUTE_READ            BIT7
+#define SMC_KEY_ATTRIBUTE_PRIVATE_WRITE  BIT0
+#define SMC_KEY_ATTRIBUTE_PRIVATE_READ   BIT1
+#define SMC_KEY_ATTRIBUTE_ATOMIC         BIT2
+#define SMC_KEY_ATTRIBUTE_CONST          BIT3
+#define SMC_KEY_ATTRIBUTE_FUNCTION       BIT4
+#define SMC_KEY_ATTRIBUTE_UKN_0x20       BIT5
+#define SMC_KEY_ATTRIBUTE_WRITE          BIT6
+#define SMC_KEY_ATTRIBUTE_READ           BIT7
 
 // SMC_KEY_ATTRIBUTES
 typedef UINT8 SMC_KEY_ATTRIBUTES;
-
 
 // Data
 
@@ -345,21 +345,21 @@ typedef UINT8 SMC_DATA_SIZE;
 // Keys
 
 // SMC_KEY_IS_VALID_CHAR
-#define SMC_KEY_IS_VALID_CHAR(x) (((x) >= 0x20) && ((x) <= 0x7E))
+#define SMC_KEY_IS_VALID_CHAR(x)  (((x) >= 0x20) && ((x) <= 0x7E))
 
 // SMC_MAKE_KEY
-#define SMC_MAKE_KEY(A, B, C, D) SMC_MAKE_IDENTIFIER ((A), (B), (C), (D))
+#define SMC_MAKE_KEY(A, B, C, D)  SMC_MAKE_IDENTIFIER ((A), (B), (C), (D))
 
-#define SMC_KEY_NUM      SMC_MAKE_KEY ('$', 'N', 'u', 'm')
-#define SMC_KEY_ADR      SMC_MAKE_KEY ('$', 'A', 'd', 'r')
-#define SMC_KEY_LDKN     SMC_MAKE_KEY ('L', 'D', 'K', 'N')
-#define SMC_KEY_HBKP     SMC_MAKE_KEY ('H', 'B', 'K', 'P')
-#define SMC_KEY_KEY      SMC_MAKE_KEY ('#', 'K', 'E', 'Y')
-#define SMC_KEY_RMde     SMC_MAKE_KEY ('R', 'M', 'd', 'e')
-#define SMC_KEY_BRSC     SMC_MAKE_KEY ('B', 'R', 'S', 'C')
-#define SMC_KEY_MSLD     SMC_MAKE_KEY ('M', 'S', 'L', 'D')
-#define SMC_KEY_BATP     SMC_MAKE_KEY ('B', 'A', 'T', 'P')
-#define SMC_KEY_BBIN     SMC_MAKE_KEY ('B', 'B', 'I', 'N')
+#define SMC_KEY_NUM   SMC_MAKE_KEY ('$', 'N', 'u', 'm')
+#define SMC_KEY_ADR   SMC_MAKE_KEY ('$', 'A', 'd', 'r')
+#define SMC_KEY_LDKN  SMC_MAKE_KEY ('L', 'D', 'K', 'N')
+#define SMC_KEY_HBKP  SMC_MAKE_KEY ('H', 'B', 'K', 'P')
+#define SMC_KEY_KEY   SMC_MAKE_KEY ('#', 'K', 'E', 'Y')
+#define SMC_KEY_RMde  SMC_MAKE_KEY ('R', 'M', 'd', 'e')
+#define SMC_KEY_BRSC  SMC_MAKE_KEY ('B', 'R', 'S', 'C')
+#define SMC_KEY_MSLD  SMC_MAKE_KEY ('M', 'S', 'L', 'D')
+#define SMC_KEY_BATP  SMC_MAKE_KEY ('B', 'A', 'T', 'P')
+#define SMC_KEY_BBIN  SMC_MAKE_KEY ('B', 'B', 'I', 'N')
 
 typedef UINT32 SMC_KEY;
 typedef UINT32 SMC_KEY_INDEX;
@@ -377,36 +377,36 @@ typedef UINT16 SMC_FLASH_SIZE;
 // Events
 
 enum {
-  SmcEventALSChange             = 0x2A,
-  SmcEventShutdownImminent      = 0x40,
-  SmcEventBridgeOSPanic         = 0x41,
-  SmcEventLogMessage            = 0x4C,
-  SmcEventKeyDone               = 0x4B,
-  SmcEventPThermalLevelChanged  = 0x54,
-  SmcEventCallPlatformFunction  = 0x55,
-  SmcEventSMSDrop               = 0x60,
-  SmcEventUnknown6A             = 0x6A, // Bug??
-  SmcEventSMSOrientation        = 0x69,
-  SmcEventSMSShock              = 0x6F,
-  SmcEventSystemStateNotify     = 0x70,
-  SmcEventPowerStateNotify      = 0x71,
-  SmcEventHidEventNotify        = 0x72,
-  SmcEventPLimitChange          = 0x80,
-  SmcEventPCIeReady             = 0x83, // Not certain
+  SmcEventALSChange            = 0x2A,
+  SmcEventShutdownImminent     = 0x40,
+  SmcEventBridgeOSPanic        = 0x41,
+  SmcEventLogMessage           = 0x4C,
+  SmcEventKeyDone              = 0x4B,
+  SmcEventPThermalLevelChanged = 0x54,
+  SmcEventCallPlatformFunction = 0x55,
+  SmcEventSMSDrop              = 0x60,
+  SmcEventUnknown6A            = 0x6A,  // Bug??
+  SmcEventSMSOrientation       = 0x69,
+  SmcEventSMSShock             = 0x6F,
+  SmcEventSystemStateNotify    = 0x70,
+  SmcEventPowerStateNotify     = 0x71,
+  SmcEventHidEventNotify       = 0x72,
+  SmcEventPLimitChange         = 0x80,
+  SmcEventPCIeReady            = 0x83,  // Not certain
 };
 
 // SmcEventSystemStateNotify subtypes, not always certain
 // Mostly from bridgeOS kernelcache and ramrod.
 // Check SMCRegisterForSubTypeNotification in libSMC.dylib.
 enum {
-  SmcSystemStateNotifyMacOsPanicCause            = 4,  // Name unclear
-  SmcSystemStateNotifyPrepareForS0               = 6,
-  SmcSystemStateNotifyMacOsPanicDone             = 10,
-  SmcSystemStateNotifyRestart                    = 15,
-  SmcSystemStateNotifyMacEfiFirmwareUpdated      = 16,
-  SmcSystemStateNotifyQuiesceDevices             = 17,
-  SmcSystemStateNotifyResumeDevices              = 18,
-  SmcSystemStateNotifyGPUPanelPowerOn            = 19,
+  SmcSystemStateNotifyMacOsPanicCause       = 4,       // Name unclear
+  SmcSystemStateNotifyPrepareForS0          = 6,
+  SmcSystemStateNotifyMacOsPanicDone        = 10,
+  SmcSystemStateNotifyRestart               = 15,
+  SmcSystemStateNotifyMacEfiFirmwareUpdated = 16,
+  SmcSystemStateNotifyQuiesceDevices        = 17,
+  SmcSystemStateNotifyResumeDevices         = 18,
+  SmcSystemStateNotifyGPUPanelPowerOn       = 19,
 };
 
 // SmcSystemStateNotifyMacOsPanicCause values, received after PanicDone

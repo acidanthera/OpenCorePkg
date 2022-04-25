@@ -16,7 +16,7 @@
 #define BASE_256B  0x0100U
 #define SIZE_512B  0x0200U
 
-#define DMG_SECTOR_START_ABS(b, c) (((b)->SectorNumber) + ((c)->SectorNumber))
+#define DMG_SECTOR_START_ABS(b, c)  (((b)->SectorNumber) + ((c)->SectorNumber))
 
 #define DMG_PLIST_RESOURCE_FORK_KEY  "resource-fork"
 #define DMG_PLIST_BLOCK_LIST_KEY     "blkx"

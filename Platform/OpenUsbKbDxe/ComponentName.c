@@ -6,7 +6,6 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 
 **/
 
-
 #include "KeyBoard.h"
 
 //
@@ -21,16 +20,15 @@ GLOBAL_REMOVE_IF_UNREFERENCED EFI_COMPONENT_NAME_PROTOCOL  gUsbKeyboardComponent
 //
 // EFI Component Name 2 Protocol
 //
-GLOBAL_REMOVE_IF_UNREFERENCED EFI_COMPONENT_NAME2_PROTOCOL gUsbKeyboardComponentName2 = {
-  (EFI_COMPONENT_NAME2_GET_DRIVER_NAME) UsbKeyboardComponentNameGetDriverName,
-  (EFI_COMPONENT_NAME2_GET_CONTROLLER_NAME) UsbKeyboardComponentNameGetControllerName,
+GLOBAL_REMOVE_IF_UNREFERENCED EFI_COMPONENT_NAME2_PROTOCOL  gUsbKeyboardComponentName2 = {
+  (EFI_COMPONENT_NAME2_GET_DRIVER_NAME)UsbKeyboardComponentNameGetDriverName,
+  (EFI_COMPONENT_NAME2_GET_CONTROLLER_NAME)UsbKeyboardComponentNameGetControllerName,
   "en"
 };
 
-
-GLOBAL_REMOVE_IF_UNREFERENCED EFI_UNICODE_STRING_TABLE mUsbKeyboardDriverNameTable[] = {
+GLOBAL_REMOVE_IF_UNREFERENCED EFI_UNICODE_STRING_TABLE  mUsbKeyboardDriverNameTable[] = {
   { "eng;en", L"Usb Keyboard Driver" },
-  { NULL , NULL }
+  { NULL,     NULL                   }
 };
 
 /**
@@ -145,17 +143,18 @@ UsbKeyboardComponentNameGetDriverName (
 EFI_STATUS
 EFIAPI
 UsbKeyboardComponentNameGetControllerName (
-  IN  EFI_COMPONENT_NAME_PROTOCOL                     *This,
-  IN  EFI_HANDLE                                      ControllerHandle,
-  IN  EFI_HANDLE                                      ChildHandle        OPTIONAL,
-  IN  CHAR8                                           *Language,
-  OUT CHAR16                                          **ControllerName
+  IN  EFI_COMPONENT_NAME_PROTOCOL  *This,
+  IN  EFI_HANDLE                   ControllerHandle,
+  IN  EFI_HANDLE                   ChildHandle        OPTIONAL,
+  IN  CHAR8                        *Language,
+  OUT CHAR16                       **ControllerName
   )
 {
-  EFI_STATUS                  Status;
-  USB_KB_DEV                  *UsbKbDev;
-  EFI_SIMPLE_TEXT_INPUT_PROTOCOL *SimpleTxtIn;
-  EFI_USB_IO_PROTOCOL         *UsbIoProtocol;
+  EFI_STATUS                      Status;
+  USB_KB_DEV                      *UsbKbDev;
+  EFI_SIMPLE_TEXT_INPUT_PROTOCOL  *SimpleTxtIn;
+  EFI_USB_IO_PROTOCOL             *UsbIoProtocol;
+
   //
   // This is a device driver, so ChildHandle must be NULL.
   //
@@ -169,7 +168,7 @@ UsbKeyboardComponentNameGetControllerName (
   Status = gBS->OpenProtocol (
                   ControllerHandle,
                   &gEfiUsbIoProtocolGuid,
-                  (VOID **) &UsbIoProtocol,
+                  (VOID **)&UsbIoProtocol,
                   gUsbKeyboardDriverBinding.DriverBindingHandle,
                   ControllerHandle,
                   EFI_OPEN_PROTOCOL_BY_DRIVER
@@ -188,13 +187,14 @@ UsbKeyboardComponentNameGetControllerName (
   if (Status != EFI_ALREADY_STARTED) {
     return EFI_UNSUPPORTED;
   }
+
   //
   // Get the device context
   //
   Status = gBS->OpenProtocol (
                   ControllerHandle,
                   &gEfiSimpleTextInProtocolGuid,
-                  (VOID **) &SimpleTxtIn,
+                  (VOID **)&SimpleTxtIn,
                   gUsbKeyboardDriverBinding.DriverBindingHandle,
                   ControllerHandle,
                   EFI_OPEN_PROTOCOL_GET_PROTOCOL
@@ -213,5 +213,4 @@ UsbKeyboardComponentNameGetControllerName (
            ControllerName,
            (BOOLEAN)(This == &gUsbKeyboardComponentName)
            );
-
 }

@@ -16,7 +16,7 @@
 ///
 /// Header types.
 ///
-#define APPLE_ICNS_MAGIC SIGNATURE_32 ('i', 'c', 'n', 's')
+#define APPLE_ICNS_MAGIC  SIGNATURE_32 ('i', 'c', 'n', 's')
 
 ///
 /// Record types.
@@ -29,7 +29,7 @@
 ///
 /// Normal disk icon dimension.
 ///
-#define APPLE_DISK_ICON_DIMENSION 128U
+#define APPLE_DISK_ICON_DIMENSION  128U
 
 #pragma pack(push, 1)
 
@@ -37,9 +37,9 @@
 /// Apple .icns record, all fields are Big Endian.
 ///
 typedef struct APPLE_ICNS_RECORD_ {
-  UINT32  Type;
-  UINT32  Size;
-  UINT8   Data[];
+  UINT32    Type;
+  UINT32    Size;
+  UINT8     Data[];
 } APPLE_ICNS_RECORD;
 
 #pragma pack(pop)

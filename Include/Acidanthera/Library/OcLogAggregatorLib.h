@@ -76,7 +76,7 @@ OcAppleDebugLogConfigure (
 **/
 VOID
 OcAppleDebugLogPerfAllocated (
-  IN OUT VOID  *PerfBuffer,
+  IN OUT VOID   *PerfBuffer,
   IN     UINTN  PerfBufferSize
   );
 
@@ -90,7 +90,7 @@ OcAppleDebugLogPerfAllocated (
 VOID
 EFIAPI
 OcPrintScreen (
-  IN  CONST CHAR16   *Format,
+  IN  CONST CHAR16  *Format,
   ...
   );
 

@@ -1,18 +1,18 @@
 /*++
- 
+
  Created by HermitCrabs on 26/4/2015.
  Copyright 2010-2014 The HermitCrab Labs. All rights reserved.
- 
+
  Module Name:
- 
+
  AppleGraphicsDriver.h
- 
+
  Abstract:
- 
+
  Revision History
- 
+
  1.0 Initial Version
- 
+
  --*/
 
 #ifndef APPLE_GRAPHICS_DRIVER_H
@@ -61,13 +61,13 @@ EFI_STATUS
   );
 
 struct APPLE_GRAPHICS_DRIVER_PROTOCOL {
-	UINTN                                          Revision;
-	APPLE_GRAPHICS_DRIVER_SET_PROPERTY		         SetProperty;
-	APPLE_GRAPHICS_DRIVER_GET_PROPERTY		         GetProperty;
-	APPLE_GRAPHICS_DRIVER_SET_PROPERTY_BY_FUNCTION SetPropertyByFunction;
-	APPLE_GRAPHICS_DRIVER_GET_PROPERTY_BY_FUNCTION GetPropertyByFunction;
+  UINTN                                             Revision;
+  APPLE_GRAPHICS_DRIVER_SET_PROPERTY                SetProperty;
+  APPLE_GRAPHICS_DRIVER_GET_PROPERTY                GetProperty;
+  APPLE_GRAPHICS_DRIVER_SET_PROPERTY_BY_FUNCTION    SetPropertyByFunction;
+  APPLE_GRAPHICS_DRIVER_GET_PROPERTY_BY_FUNCTION    GetPropertyByFunction;
 };
 
-extern EFI_GUID gAppleGraphicsDriverProtocolGuid;
+extern EFI_GUID  gAppleGraphicsDriverProtocolGuid;
 
 #endif // APPLE_GRAPHICS_DRIVER_H

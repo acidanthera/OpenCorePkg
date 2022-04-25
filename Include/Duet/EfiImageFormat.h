@@ -1,13 +1,13 @@
 /*++
 
 Copyright (c) 2004, Intel Corporation. All rights reserved.<BR>
-This program and the accompanying materials                          
-are licensed and made available under the terms and conditions of the BSD License         
-which accompanies this distribution.  The full text of the license may be found at        
-http://opensource.org/licenses/bsd-license.php                                            
-                                                                                          
-THE PROGRAM IS DISTRIBUTED UNDER THE BSD LICENSE ON AN "AS IS" BASIS,                     
-WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.             
+This program and the accompanying materials
+are licensed and made available under the terms and conditions of the BSD License
+which accompanies this distribution.  The full text of the license may be found at
+http://opensource.org/licenses/bsd-license.php
+
+THE PROGRAM IS DISTRIBUTED UNDER THE BSD LICENSE ON AN "AS IS" BASIS,
+WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 
 Module Name:
 
@@ -49,7 +49,7 @@ typedef UINT8 EFI_FV_FILETYPE;
 //
 // File type 0x0A is reserved and should not be used
 //
-#define EFI_FV_FILETYPE_FIRMWARE_VOLUME_IMAGE 0x0B
+#define EFI_FV_FILETYPE_FIRMWARE_VOLUME_IMAGE  0x0B
 
 //
 // ////////////////////////////////////////////////////////////////////////////
@@ -65,7 +65,7 @@ typedef UINT8 EFI_SECTION_TYPE;
 // type EFI_SECTION_ALL matches all section types.
 // ************************************************************
 //
-#define EFI_SECTION_ALL 0x00
+#define EFI_SECTION_ALL  0x00
 
 //
 // ************************************************************
@@ -80,19 +80,19 @@ typedef UINT8 EFI_SECTION_TYPE;
 // Leaf section Type values
 // ************************************************************
 //
-#define EFI_SECTION_FIRST_LEAF_SECTION_TYPE 0x10
+#define EFI_SECTION_FIRST_LEAF_SECTION_TYPE  0x10
 
-#define EFI_SECTION_PE32                    0x10
-#define EFI_SECTION_PIC                     0x11
-#define EFI_SECTION_TE                      0x12
-#define EFI_SECTION_DXE_DEPEX               0x13
-#define EFI_SECTION_VERSION                 0x14
-#define EFI_SECTION_USER_INTERFACE          0x15
-#define EFI_SECTION_COMPATIBILITY16         0x16
-#define EFI_SECTION_FIRMWARE_VOLUME_IMAGE   0x17
-#define EFI_SECTION_FREEFORM_SUBTYPE_GUID   0x18
-#define EFI_SECTION_RAW                     0x19
-#define EFI_SECTION_PEI_DEPEX               0x1B
+#define EFI_SECTION_PE32                   0x10
+#define EFI_SECTION_PIC                    0x11
+#define EFI_SECTION_TE                     0x12
+#define EFI_SECTION_DXE_DEPEX              0x13
+#define EFI_SECTION_VERSION                0x14
+#define EFI_SECTION_USER_INTERFACE         0x15
+#define EFI_SECTION_COMPATIBILITY16        0x16
+#define EFI_SECTION_FIRMWARE_VOLUME_IMAGE  0x17
+#define EFI_SECTION_FREEFORM_SUBTYPE_GUID  0x18
+#define EFI_SECTION_RAW                    0x19
+#define EFI_SECTION_PEI_DEPEX              0x1B
 
 #define EFI_SECTION_LAST_LEAF_SECTION_TYPE  0x1B
 #define EFI_SECTION_LAST_SECTION_TYPE       0x1B
@@ -103,8 +103,8 @@ typedef UINT8 EFI_SECTION_TYPE;
 // Common section header
 //
 typedef struct {
-  UINT8 Size[3];
-  UINT8 Type;
+  UINT8    Size[3];
+  UINT8    Type;
 } EFI_COMMON_SECTION_HEADER;
 
 #define SECTION_SIZE(SectionHeaderPtr) \
@@ -123,9 +123,9 @@ typedef struct {
 #define EFI_CUSTOMIZED_COMPRESSION  0x02
 
 typedef struct {
-  EFI_COMMON_SECTION_HEADER CommonHeader;
-  UINT32                    UncompressedLength;
-  UINT8                     CompressionType;
+  EFI_COMMON_SECTION_HEADER    CommonHeader;
+  UINT32                       UncompressedLength;
+  UINT8                        CompressionType;
 } EFI_COMPRESSION_SECTION;
 
 //
@@ -134,10 +134,10 @@ typedef struct {
 // GUID defined section
 //
 typedef struct {
-  EFI_COMMON_SECTION_HEADER CommonHeader;
-  EFI_GUID                  SectionDefinitionGuid;
-  UINT16                    DataOffset;
-  UINT16                    Attributes;
+  EFI_COMMON_SECTION_HEADER    CommonHeader;
+  EFI_GUID                     SectionDefinitionGuid;
+  UINT16                       DataOffset;
+  UINT16                       Attributes;
 } EFI_GUID_DEFINED_SECTION;
 
 //
@@ -149,17 +149,17 @@ typedef struct {
 //
 // Bit values for AuthenticationStatus
 //
-#define EFI_AGGREGATE_AUTH_STATUS_PLATFORM_OVERRIDE 0x000001
-#define EFI_AGGREGATE_AUTH_STATUS_IMAGE_SIGNED      0x000002
-#define EFI_AGGREGATE_AUTH_STATUS_NOT_TESTED        0x000004
-#define EFI_AGGREGATE_AUTH_STATUS_TEST_FAILED       0x000008
-#define EFI_AGGREGATE_AUTH_STATUS_ALL               0x00000f
+#define EFI_AGGREGATE_AUTH_STATUS_PLATFORM_OVERRIDE  0x000001
+#define EFI_AGGREGATE_AUTH_STATUS_IMAGE_SIGNED       0x000002
+#define EFI_AGGREGATE_AUTH_STATUS_NOT_TESTED         0x000004
+#define EFI_AGGREGATE_AUTH_STATUS_TEST_FAILED        0x000008
+#define EFI_AGGREGATE_AUTH_STATUS_ALL                0x00000f
 
-#define EFI_LOCAL_AUTH_STATUS_PLATFORM_OVERRIDE     0x010000
-#define EFI_LOCAL_AUTH_STATUS_IMAGE_SIGNED          0x020000
-#define EFI_LOCAL_AUTH_STATUS_NOT_TESTED            0x040000
-#define EFI_LOCAL_AUTH_STATUS_TEST_FAILED           0x080000
-#define EFI_LOCAL_AUTH_STATUS_ALL                   0x0f0000
+#define EFI_LOCAL_AUTH_STATUS_PLATFORM_OVERRIDE  0x010000
+#define EFI_LOCAL_AUTH_STATUS_IMAGE_SIGNED       0x020000
+#define EFI_LOCAL_AUTH_STATUS_NOT_TESTED         0x040000
+#define EFI_LOCAL_AUTH_STATUS_TEST_FAILED        0x080000
+#define EFI_LOCAL_AUTH_STATUS_ALL                0x0f0000
 
 //
 // ////////////////////////////////////////////////////////////////////////////
@@ -167,7 +167,7 @@ typedef struct {
 // PE32+ section
 //
 typedef struct {
-  EFI_COMMON_SECTION_HEADER CommonHeader;
+  EFI_COMMON_SECTION_HEADER    CommonHeader;
 } EFI_PE32_SECTION;
 
 //
@@ -176,7 +176,7 @@ typedef struct {
 // PIC section
 //
 typedef struct {
-  EFI_COMMON_SECTION_HEADER CommonHeader;
+  EFI_COMMON_SECTION_HEADER    CommonHeader;
 } EFI_PIC_SECTION;
 
 //
@@ -185,7 +185,7 @@ typedef struct {
 // PEIM header section
 //
 typedef struct {
-  EFI_COMMON_SECTION_HEADER CommonHeader;
+  EFI_COMMON_SECTION_HEADER    CommonHeader;
 } EFI_PEIM_HEADER_SECTION;
 
 //
@@ -194,7 +194,7 @@ typedef struct {
 // DEPEX section
 //
 typedef struct {
-  EFI_COMMON_SECTION_HEADER CommonHeader;
+  EFI_COMMON_SECTION_HEADER    CommonHeader;
 } EFI_DEPEX_SECTION;
 
 //
@@ -203,9 +203,9 @@ typedef struct {
 // Version section
 //
 typedef struct {
-  EFI_COMMON_SECTION_HEADER CommonHeader;
-  UINT16                    BuildNumber;
-  INT16                     VersionString[1];
+  EFI_COMMON_SECTION_HEADER    CommonHeader;
+  UINT16                       BuildNumber;
+  INT16                        VersionString[1];
 } EFI_VERSION_SECTION;
 
 //
@@ -214,8 +214,8 @@ typedef struct {
 // User interface section
 //
 typedef struct {
-  EFI_COMMON_SECTION_HEADER CommonHeader;
-  INT16                     FileNameString[1];
+  EFI_COMMON_SECTION_HEADER    CommonHeader;
+  INT16                        FileNameString[1];
 } EFI_USER_INTERFACE_SECTION;
 
 //
@@ -224,7 +224,7 @@ typedef struct {
 // Code16 section
 //
 typedef struct {
-  EFI_COMMON_SECTION_HEADER CommonHeader;
+  EFI_COMMON_SECTION_HEADER    CommonHeader;
 } EFI_CODE16_SECTION;
 
 //
@@ -233,7 +233,7 @@ typedef struct {
 // Firmware Volume Image section
 //
 typedef struct {
-  EFI_COMMON_SECTION_HEADER CommonHeader;
+  EFI_COMMON_SECTION_HEADER    CommonHeader;
 } EFI_FIRMWARE_VOLUME_IMAGE_SECTION;
 
 //
@@ -242,8 +242,8 @@ typedef struct {
 // Freeform subtype GUID section
 //
 typedef struct {
-  EFI_COMMON_SECTION_HEADER CommonHeader;
-  EFI_GUID                  SubTypeGuid;
+  EFI_COMMON_SECTION_HEADER    CommonHeader;
+  EFI_GUID                     SubTypeGuid;
 } EFI_FREEFORM_SUBTYPE_GUID_SECTION;
 
 //
@@ -252,7 +252,7 @@ typedef struct {
 // Raw section
 //
 typedef struct {
-  EFI_COMMON_SECTION_HEADER CommonHeader;
+  EFI_COMMON_SECTION_HEADER    CommonHeader;
 } EFI_RAW_SECTION;
 
 //
@@ -261,36 +261,34 @@ typedef struct {
 #pragma pack()
 
 typedef union {
-  EFI_COMMON_SECTION_HEADER         *CommonHeader;
-  EFI_COMPRESSION_SECTION           *CompressionSection;
-  EFI_GUID_DEFINED_SECTION          *GuidDefinedSection;
-  EFI_PE32_SECTION                  *Pe32Section;
-  EFI_PIC_SECTION                   *PicSection;
-  EFI_PEIM_HEADER_SECTION           *PeimHeaderSection;
-  EFI_DEPEX_SECTION                 *DependencySection;
-  EFI_VERSION_SECTION               *VersionSection;
-  EFI_USER_INTERFACE_SECTION        *UISection;
-  EFI_CODE16_SECTION                *Code16Section;
-  EFI_FIRMWARE_VOLUME_IMAGE_SECTION *FVImageSection;
-  EFI_FREEFORM_SUBTYPE_GUID_SECTION *FreeformSubtypeSection;
-  EFI_RAW_SECTION                   *RawSection;
+  EFI_COMMON_SECTION_HEADER            *CommonHeader;
+  EFI_COMPRESSION_SECTION              *CompressionSection;
+  EFI_GUID_DEFINED_SECTION             *GuidDefinedSection;
+  EFI_PE32_SECTION                     *Pe32Section;
+  EFI_PIC_SECTION                      *PicSection;
+  EFI_PEIM_HEADER_SECTION              *PeimHeaderSection;
+  EFI_DEPEX_SECTION                    *DependencySection;
+  EFI_VERSION_SECTION                  *VersionSection;
+  EFI_USER_INTERFACE_SECTION           *UISection;
+  EFI_CODE16_SECTION                   *Code16Section;
+  EFI_FIRMWARE_VOLUME_IMAGE_SECTION    *FVImageSection;
+  EFI_FREEFORM_SUBTYPE_GUID_SECTION    *FreeformSubtypeSection;
+  EFI_RAW_SECTION                      *RawSection;
 } EFI_FILE_SECTION_POINTER;
 
 //
 // EFI_FV_ATTRIBUTES bit definitions
 //
-typedef UINT64  EFI_FV_ATTRIBUTES;
-typedef UINT32  EFI_FV_FILE_ATTRIBUTES;
-typedef UINT32  EFI_FV_WRITE_POLICY;
-
+typedef UINT64 EFI_FV_ATTRIBUTES;
+typedef UINT32 EFI_FV_FILE_ATTRIBUTES;
+typedef UINT32 EFI_FV_WRITE_POLICY;
 
 typedef struct {
-  EFI_GUID                *NameGuid;
-  EFI_FV_FILETYPE         Type;
-  EFI_FV_FILE_ATTRIBUTES  FileAttributes;
-  VOID                    *Buffer;
-  UINT32                  BufferSize;
+  EFI_GUID                  *NameGuid;
+  EFI_FV_FILETYPE           Type;
+  EFI_FV_FILE_ATTRIBUTES    FileAttributes;
+  VOID                      *Buffer;
+  UINT32                    BufferSize;
 } EFI_FV_WRITE_FILE_DATA;
-
 
 #endif

@@ -28,9 +28,9 @@
   Let the compiler do it for us.
 **/
 #ifdef MDE_CPU_X64
-  #define APFS_MOD_MAX_UINT32(Value, Result) do { *(Result) = ((Value) % MAX_UINT32); } while (0)
+#define APFS_MOD_MAX_UINT32(Value, Result)  do { *(Result) = ((Value) % MAX_UINT32); } while (0)
 #else
-  #define APFS_MOD_MAX_UINT32(Value, Result) do { DivU64x32Remainder ((Value), MAX_UINT32, (Result)); } while (0)
+#define APFS_MOD_MAX_UINT32(Value, Result)  do { DivU64x32Remainder ((Value), MAX_UINT32, (Result)); } while (0)
 #endif
 
 typedef struct APFS_PRIVATE_DATA_ APFS_PRIVATE_DATA;
@@ -106,22 +106,22 @@ InternalApfsReadSuperBlock (
 
 EFI_STATUS
 InternalApfsReadDriver (
-  IN  APFS_PRIVATE_DATA    *PrivateData,
-  OUT UINT32               *DriverSize,
-  OUT VOID                 **DriverBuffer
+  IN  APFS_PRIVATE_DATA  *PrivateData,
+  OUT UINT32             *DriverSize,
+  OUT VOID               **DriverBuffer
   );
 
 VOID
 InternalApfsInitFusionData (
-  IN  APFS_NX_SUPERBLOCK   *SuperBlock,
-  OUT APFS_PRIVATE_DATA    *PrivateData
+  IN  APFS_NX_SUPERBLOCK  *SuperBlock,
+  OUT APFS_PRIVATE_DATA   *PrivateData
   );
 
 EFI_BLOCK_IO_PROTOCOL *
 InternalApfsTranslateBlock (
-  IN  APFS_PRIVATE_DATA    *PrivateData,
-  IN  UINT64               Block,
-  OUT EFI_LBA              *Lba
+  IN  APFS_PRIVATE_DATA  *PrivateData,
+  IN  UINT64             Block,
+  OUT EFI_LBA            *Lba
   );
 
 #endif // OC_APFS_INTERNAL_H

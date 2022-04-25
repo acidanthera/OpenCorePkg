@@ -1,21 +1,21 @@
 /*++
 
 Copyright (c) 2005 - 2006, Intel Corporation. All rights reserved.<BR>
-This program and the accompanying materials                          
-are licensed and made available under the terms and conditions of the BSD License         
-which accompanies this distribution.  The full text of the license may be found at        
-http://opensource.org/licenses/bsd-license.php                                            
-                                                                                          
-THE PROGRAM IS DISTRIBUTED UNDER THE BSD LICENSE ON AN "AS IS" BASIS,                     
-WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.             
+This program and the accompanying materials
+are licensed and made available under the terms and conditions of the BSD License
+which accompanies this distribution.  The full text of the license may be found at
+http://opensource.org/licenses/bsd-license.php
+
+THE PROGRAM IS DISTRIBUTED UNDER THE BSD LICENSE ON AN "AS IS" BASIS,
+WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 
 Module Name:
 
   PciDeviceSupport.h
-  
+
 Abstract:
 
-  
+
 
 Revision History
 
@@ -28,6 +28,7 @@ EFI_STATUS
 InitializePciDevicePool (
   VOID
   )
+
 /*++
 
 Routine Description:
@@ -47,9 +48,10 @@ Returns:
 
 EFI_STATUS
 InsertPciDevice (
-  PCI_IO_DEVICE *Bridge,
-  PCI_IO_DEVICE *PciDeviceNode
+  PCI_IO_DEVICE  *Bridge,
+  PCI_IO_DEVICE  *PciDeviceNode
   )
+
 /*++
 
 Routine Description:
@@ -70,8 +72,9 @@ Returns:
 
 EFI_STATUS
 DestroyPciDeviceTree (
-  IN PCI_IO_DEVICE *Bridge
+  IN PCI_IO_DEVICE  *Bridge
   )
+
 /*++
 
 Routine Description:
@@ -91,8 +94,9 @@ Returns:
 
 EFI_STATUS
 DestroyRootBridgeByHandle (
-  EFI_HANDLE Controller
+  EFI_HANDLE  Controller
   )
+
 /*++
 
 Routine Description:
@@ -112,15 +116,16 @@ Returns:
 
 EFI_STATUS
 RegisterPciDevice (
-  IN  EFI_HANDLE                     Controller,
-  IN  PCI_IO_DEVICE                  *PciIoDevice,
-  OUT EFI_HANDLE                     *Handle OPTIONAL
+  IN  EFI_HANDLE     Controller,
+  IN  PCI_IO_DEVICE  *PciIoDevice,
+  OUT EFI_HANDLE     *Handle OPTIONAL
   )
+
 /*++
 
 Routine Description:
 
-  This function registers the PCI IO device. It creates a handle for this PCI IO device 
+  This function registers the PCI IO device. It creates a handle for this PCI IO device
   (if the handle does not exist), attaches appropriate protocols onto the handle, does
   necessary initialization, and sets up parent/child relationship with its bus controller.
 
@@ -140,9 +145,10 @@ Returns:
 
 EFI_STATUS
 DeRegisterPciDevice (
-  IN  EFI_HANDLE                     Controller,
-  IN  EFI_HANDLE                     Handle
+  IN  EFI_HANDLE  Controller,
+  IN  EFI_HANDLE  Handle
   )
+
 /*++
 
 Routine Description:
@@ -163,9 +169,10 @@ Returns:
 
 EFI_STATUS
 StartPciDevices (
-  IN EFI_HANDLE                         Controller,
-  IN EFI_DEVICE_PATH_PROTOCOL           *RemainingDevicePath
+  IN EFI_HANDLE                Controller,
+  IN EFI_DEVICE_PATH_PROTOCOL  *RemainingDevicePath
   )
+
 /*++
 
 Routine Description:
@@ -186,8 +193,9 @@ Returns:
 
 PCI_IO_DEVICE *
 CreateRootBridge (
-  IN EFI_HANDLE RootBridgeHandle
+  IN EFI_HANDLE  RootBridgeHandle
   )
+
 /*++
 
 Routine Description:
@@ -207,8 +215,9 @@ Returns:
 
 PCI_IO_DEVICE *
 GetRootBridgeByHandle (
-  EFI_HANDLE RootBridgeHandle
+  EFI_HANDLE  RootBridgeHandle
   )
+
 /*++
 
 Routine Description:
@@ -226,20 +235,21 @@ Returns:
 --*/
 ;
 
-EFI_STATUS 
+EFI_STATUS
 InsertRootBridge (
-  PCI_IO_DEVICE *RootBridge
-);
+  PCI_IO_DEVICE  *RootBridge
+  );
 
-EFI_STATUS 
-DestroyRootBridge ( 
-   IN PCI_IO_DEVICE *RootBridge 
-);
+EFI_STATUS
+DestroyRootBridge (
+  IN PCI_IO_DEVICE  *RootBridge
+  );
 
 BOOLEAN
 RootBridgeExisted (
-  IN EFI_HANDLE RootBridgeHandle
+  IN EFI_HANDLE  RootBridgeHandle
   )
+
 /*++
 
 Routine Description:
@@ -259,9 +269,10 @@ Returns:
 
 BOOLEAN
 PciDeviceExisted (
-  IN PCI_IO_DEVICE    *Bridge,
-  IN PCI_IO_DEVICE    *PciIoDevice
+  IN PCI_IO_DEVICE  *Bridge,
+  IN PCI_IO_DEVICE  *PciIoDevice
   )
+
 /*++
 
 Routine Description:
@@ -282,8 +293,9 @@ Returns:
 
 PCI_IO_DEVICE *
 ActiveVGADeviceOnTheSameSegment (
-  IN PCI_IO_DEVICE        *VgaDevice
+  IN PCI_IO_DEVICE  *VgaDevice
   )
+
 /*++
 
 Routine Description:
@@ -303,8 +315,9 @@ Returns:
 
 PCI_IO_DEVICE *
 ActiveVGADeviceOnTheRootBridge (
-  IN PCI_IO_DEVICE        *RootBridge
+  IN PCI_IO_DEVICE  *RootBridge
   )
+
 /*++
 
 Routine Description:
@@ -321,4 +334,5 @@ Returns:
 
 --*/
 ;
+
 #endif

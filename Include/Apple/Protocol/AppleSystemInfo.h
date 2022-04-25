@@ -34,15 +34,15 @@ typedef struct APPLE_SYSTEM_INFO_PROTOCOL_ APPLE_SYSTEM_INFO_PROTOCOL;
 **/
 typedef
 BOOLEAN
-(EFIAPI *APPLE_SYSTEM_INFO_IS_GIBRALTAR) (
+(EFIAPI *APPLE_SYSTEM_INFO_IS_GIBRALTAR)(
   VOID
   );
 
 struct APPLE_SYSTEM_INFO_PROTOCOL_ {
-  UINTN                                         Revision;
-  APPLE_SYSTEM_INFO_IS_GIBRALTAR                IsGibraltar;
+  UINTN                             Revision;
+  APPLE_SYSTEM_INFO_IS_GIBRALTAR    IsGibraltar;
 };
 
-extern EFI_GUID gAppleSystemInfoProtocolGuid;
+extern EFI_GUID  gAppleSystemInfoProtocolGuid;
 
 #endif // APPLE_SYSTEM_INFO_H

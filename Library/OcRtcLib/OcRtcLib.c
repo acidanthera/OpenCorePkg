@@ -31,11 +31,11 @@ OcRtcRead (
   UINT8  RtcIndexNmi;
 
   if (Offset < RTC_BANK_SIZE) {
-    RtcIndexPort  = R_PCH_RTC_INDEX;
-    RtcDataPort   = R_PCH_RTC_TARGET;
+    RtcIndexPort = R_PCH_RTC_INDEX;
+    RtcDataPort  = R_PCH_RTC_TARGET;
   } else {
-    RtcIndexPort  = R_PCH_RTC_EXT_INDEX;
-    RtcDataPort   = R_PCH_RTC_EXT_TARGET;
+    RtcIndexPort = R_PCH_RTC_EXT_INDEX;
+    RtcDataPort  = R_PCH_RTC_EXT_TARGET;
   }
 
   RtcIndexNmi = IoRead8 (RtcIndexPort) & RTC_NMI_MASK;
@@ -45,8 +45,8 @@ OcRtcRead (
 
 VOID
 OcRtcWrite (
-  IN UINT8 Offset,
-  IN UINT8 Value
+  IN UINT8  Offset,
+  IN UINT8  Value
   )
 {
   UINT8  RtcIndexPort;
@@ -54,11 +54,11 @@ OcRtcWrite (
   UINT8  RtcIndexNmi;
 
   if (Offset < RTC_BANK_SIZE) {
-    RtcIndexPort  = R_PCH_RTC_INDEX;
-    RtcDataPort   = R_PCH_RTC_TARGET;
+    RtcIndexPort = R_PCH_RTC_INDEX;
+    RtcDataPort  = R_PCH_RTC_TARGET;
   } else {
-    RtcIndexPort  = R_PCH_RTC_EXT_INDEX;
-    RtcDataPort   = R_PCH_RTC_EXT_TARGET;
+    RtcIndexPort = R_PCH_RTC_EXT_INDEX;
+    RtcDataPort  = R_PCH_RTC_EXT_TARGET;
   }
 
   RtcIndexNmi = IoRead8 (RtcIndexPort) & RTC_NMI_MASK;
@@ -68,14 +68,14 @@ OcRtcWrite (
 
 UINT16
 OcRtcChecksumApple (
-  IN CONST VOID   *Data,
-  IN UINTN        Size
+  IN CONST VOID  *Data,
+  IN UINTN       Size
   )
 {
-  CONST UINT8   *Buffer;
-  CONST UINT8   *BufferEnd;
-  UINT16        Checksum;
-  UINTN         Index;
+  CONST UINT8  *Buffer;
+  CONST UINT8  *BufferEnd;
+  UINT16       Checksum;
+  UINTN        Index;
 
   Buffer    = Data;
   BufferEnd = Buffer + Size;
@@ -108,11 +108,11 @@ OcRtcReadIvy (
   // CMOS access registers (using alternative access not to handle NMI bit)
   //
   if (Offset < RTC_BANK_SIZE) {
-    RtcIndexPort  = R_PCH_RTC_INDEX_ALT;
-    RtcDataPort   = R_PCH_RTC_TARGET_ALT;
+    RtcIndexPort = R_PCH_RTC_INDEX_ALT;
+    RtcDataPort  = R_PCH_RTC_TARGET_ALT;
   } else {
-    RtcIndexPort  = R_PCH_RTC_EXT_INDEX_ALT;
-    RtcDataPort   = R_PCH_RTC_EXT_TARGET_ALT;
+    RtcIndexPort = R_PCH_RTC_EXT_INDEX_ALT;
+    RtcDataPort  = R_PCH_RTC_EXT_TARGET_ALT;
   }
 
   IoWrite8 (RtcIndexPort, Offset & RTC_DATA_MASK);
@@ -121,8 +121,8 @@ OcRtcReadIvy (
 
 VOID
 OcRtcWriteIvy (
-  IN UINT8 Offset,
-  IN UINT8 Value
+  IN UINT8  Offset,
+  IN UINT8  Value
   )
 {
   UINT8  RtcIndexPort;
@@ -132,11 +132,11 @@ OcRtcWriteIvy (
   // CMOS access registers (using alternative access not to handle NMI bit)
   //
   if (Offset < RTC_BANK_SIZE) {
-    RtcIndexPort  = R_PCH_RTC_INDEX_ALT;
-    RtcDataPort   = R_PCH_RTC_TARGET_ALT;
+    RtcIndexPort = R_PCH_RTC_INDEX_ALT;
+    RtcDataPort  = R_PCH_RTC_TARGET_ALT;
   } else {
-    RtcIndexPort  = R_PCH_RTC_EXT_INDEX_ALT;
-    RtcDataPort   = R_PCH_RTC_EXT_TARGET_ALT;
+    RtcIndexPort = R_PCH_RTC_EXT_INDEX_ALT;
+    RtcDataPort  = R_PCH_RTC_EXT_TARGET_ALT;
   }
 
   IoWrite8 (RtcIndexPort, Offset & RTC_DATA_MASK);

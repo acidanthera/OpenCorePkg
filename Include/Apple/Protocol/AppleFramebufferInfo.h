@@ -24,7 +24,7 @@ typedef struct APPLE_FRAMEBUFFER_INFO_PROTOCOL_ APPLE_FRAMEBUFFER_INFO_PROTOCOL;
 
 typedef
 EFI_STATUS
-(EFIAPI *APPLE_FRAMEBUFFER_INFO_GET_INFO) (
+(EFIAPI *APPLE_FRAMEBUFFER_INFO_GET_INFO)(
   IN   APPLE_FRAMEBUFFER_INFO_PROTOCOL  *This,
   OUT  EFI_PHYSICAL_ADDRESS             *FramebufferBase,
   OUT  UINT32                           *FramebufferSize,
@@ -35,9 +35,9 @@ EFI_STATUS
   );
 
 struct APPLE_FRAMEBUFFER_INFO_PROTOCOL_ {
-  APPLE_FRAMEBUFFER_INFO_GET_INFO     GetInfo;
+  APPLE_FRAMEBUFFER_INFO_GET_INFO    GetInfo;
 };
 
-extern EFI_GUID gAppleFramebufferInfoProtocolGuid;
+extern EFI_GUID  gAppleFramebufferInfoProtocolGuid;
 
 #endif // APPLE_FRAMEBUFFER_INFO_H

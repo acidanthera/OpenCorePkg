@@ -15,9 +15,9 @@
 #include <Library/OcVariableLib.h>
 #include <Library/UefiRuntimeServicesTableLib.h>
 
-STATIC BOOLEAN mForceOcWriteFlash = FALSE;
+STATIC BOOLEAN  mForceOcWriteFlash = FALSE;
 
-STATIC BOOLEAN mDebugInitialized = FALSE;
+STATIC BOOLEAN  mDebugInitialized = FALSE;
 
 VOID
 OcVariableInit (
@@ -40,13 +40,13 @@ OcSetSystemVariable (
   IN EFI_GUID  *VendorGuid  OPTIONAL
   )
 {
-  EFI_STATUS Status;
-  INTN       CmpResult;
+  EFI_STATUS  Status;
+  INTN        CmpResult;
 
-  UINTN      OldDataSize;
-  VOID       *OldData;
+  UINTN  OldDataSize;
+  VOID   *OldData;
 
-  UINT8      StackBuffer[256];
+  UINT8  StackBuffer[256];
 
   if (VendorGuid == NULL) {
     VendorGuid = &gOcVendorVariableGuid;
@@ -72,12 +72,12 @@ OcSetSystemVariable (
     OldData     = StackBuffer;
 
     Status = gRT->GetVariable (
-      VariableName,
-      VendorGuid,
-      NULL,
-      &OldDataSize,
-      OldData
-      );
+                    VariableName,
+                    VendorGuid,
+                    NULL,
+                    &OldDataSize,
+                    OldData
+                    );
     if (Status == EFI_BUFFER_TOO_SMALL) {
       //
       // If the stack buffer is too small, allocate dynamically and retry.
@@ -85,12 +85,12 @@ OcSetSystemVariable (
       OldData = AllocatePool (OldDataSize);
       if (OldData != NULL) {
         Status = gRT->GetVariable (
-          VariableName,
-          VendorGuid,
-          NULL,
-          &OldDataSize,
-          OldData
-          );
+                        VariableName,
+                        VendorGuid,
+                        NULL,
+                        &OldDataSize,
+                        OldData
+                        );
         if (EFI_ERROR (Status)) {
           FreePool (OldData);
         }
@@ -113,6 +113,7 @@ OcSetSystemVariable (
       if (OldData != StackBuffer) {
         FreePool (OldData);
       }
+
       //
       // If the old data is equal to the new data, skip the write.
       //
@@ -120,6 +121,7 @@ OcSetSystemVariable (
         return EFI_SUCCESS;
       }
     }
+
     //
     // Force-write the OC system variable.
     //
@@ -127,10 +129,10 @@ OcSetSystemVariable (
   }
 
   return gRT->SetVariable (
-    VariableName,
-    VendorGuid,
-    Attributes,
-    DataSize,
-    Data
-    );
+                VariableName,
+                VendorGuid,
+                Attributes,
+                DataSize,
+                Data
+                );
 }

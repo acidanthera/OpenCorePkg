@@ -22,8 +22,8 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 #include <Library/OcXmlLib.h>
 #include <Library/OcTemplateLib.h>
 
-typedef struct OC_SCHEMA_ OC_SCHEMA;
-typedef union OC_SCHEMA_INFO_ OC_SCHEMA_INFO;
+typedef struct OC_SCHEMA_      OC_SCHEMA;
+typedef union OC_SCHEMA_INFO_  OC_SCHEMA_INFO;
 
 //
 // Generic applier interface that knows how to provide Info with data from Node.
@@ -31,7 +31,7 @@ typedef union OC_SCHEMA_INFO_ OC_SCHEMA_INFO;
 typedef
 VOID
 (*OC_APPLY) (
-      OUT  VOID            *Serialized,
+  OUT  VOID                *Serialized,
   IN       XML_NODE        *Node,
   IN       OC_SCHEMA_INFO  *Info,
   IN       CONST CHAR8     *Context     OPTIONAL,
@@ -45,11 +45,11 @@ typedef struct {
   //
   // Nested schema list.
   //
-  OC_SCHEMA         *Schema;
+  OC_SCHEMA    *Schema;
   //
   // Nested schema list size.
   //
-  UINT32            SchemaSize;
+  UINT32       SchemaSize;
 } OC_SCHEMA_DICT;
 
 //
@@ -68,15 +68,15 @@ typedef struct {
   //
   // Value pointer.
   //
-  UINTN                 Field;
+  UINTN                   Field;
   //
   // Value size.
   //
-  UINT32                FieldSize;
+  UINT32                  FieldSize;
   //
   // Source type.
   //
-  OC_SCHEMA_VALUE_TYPE  Type;
+  OC_SCHEMA_VALUE_TYPE    Type;
 } OC_SCHEMA_VALUE;
 
 //
@@ -93,11 +93,11 @@ typedef struct {
   //
   // Blob pointer.
   //
-  UINTN                 Field;
+  UINTN                  Field;
   //
   // Source type.
   //
-  OC_SCHEMA_BLOB_TYPE   Type;
+  OC_SCHEMA_BLOB_TYPE    Type;
 } OC_SCHEMA_BLOB;
 
 //
@@ -107,21 +107,21 @@ typedef struct {
   //
   // List pointer.
   //
-  UINTN                 Field;
+  UINTN        Field;
   //
   // List entry schema.
   //
-  OC_SCHEMA             *Schema;
+  OC_SCHEMA    *Schema;
 } OC_SCHEMA_LIST;
 
 //
 // All standard variants of schema info
 //
 union OC_SCHEMA_INFO_ {
-  OC_SCHEMA_DICT   Dict;
-  OC_SCHEMA_VALUE  Value;
-  OC_SCHEMA_BLOB   Blob;
-  OC_SCHEMA_LIST   List;
+  OC_SCHEMA_DICT     Dict;
+  OC_SCHEMA_VALUE    Value;
+  OC_SCHEMA_BLOB     Blob;
+  OC_SCHEMA_LIST     List;
 };
 
 //
@@ -131,24 +131,24 @@ struct OC_SCHEMA_ {
   //
   // Key name to match against in the dictionary.
   //
-  CONST CHAR8          *Name;
+  CONST CHAR8        *Name;
   //
   // Node type required to match to be able to call Apply.
   // PLIST_NODE_TYPE_ANY could be specified if Apply does the validation.
   //
-  PLIST_NODE_TYPE      Type;
+  PLIST_NODE_TYPE    Type;
   //
   // Whether this node is optional to use.
   //
-  BOOLEAN              Optional;
+  BOOLEAN            Optional;
   //
   // Apply handler that will merge Node data into object.
   //
-  OC_APPLY             Apply;
+  OC_APPLY           Apply;
   //
   // Information about Node to object bridge.
   //
-  OC_SCHEMA_INFO       Info;
+  OC_SCHEMA_INFO     Info;
 };
 
 //
@@ -156,9 +156,9 @@ struct OC_SCHEMA_ {
 //
 OC_SCHEMA *
 LookupConfigSchema (
-  IN OC_SCHEMA      *SortedList,
-  IN UINT32         Size,
-  IN CONST CHAR8    *Name
+  IN OC_SCHEMA    *SortedList,
+  IN UINT32       Size,
+  IN CONST CHAR8  *Name
   );
 
 //
@@ -166,7 +166,7 @@ LookupConfigSchema (
 //
 VOID
 ParseSerializedDict (
-      OUT  VOID            *Serialized,
+  OUT  VOID                *Serialized,
   IN       XML_NODE        *Node,
   IN       OC_SCHEMA_INFO  *Info,
   IN       CONST CHAR8     *Context     OPTIONAL,
@@ -178,7 +178,7 @@ ParseSerializedDict (
 //
 VOID
 ParseSerializedValue (
-      OUT  VOID            *Serialized,
+  OUT  VOID                *Serialized,
   IN       XML_NODE        *Node,
   IN       OC_SCHEMA_INFO  *Info,
   IN       CONST CHAR8     *Context     OPTIONAL,
@@ -190,7 +190,7 @@ ParseSerializedValue (
 //
 VOID
 ParseSerializedBlob (
-      OUT  VOID            *Serialized,
+  OUT  VOID                *Serialized,
   IN       XML_NODE        *Node,
   IN       OC_SCHEMA_INFO  *Info,
   IN       CONST CHAR8     *Context     OPTIONAL,
@@ -203,7 +203,7 @@ ParseSerializedBlob (
 //
 VOID
 ParseSerializedMap (
-      OUT  VOID            *Serialized,
+  OUT  VOID                *Serialized,
   IN       XML_NODE        *Node,
   IN       OC_SCHEMA_INFO  *Info,
   IN       CONST CHAR8     *Context     OPTIONAL,
@@ -215,7 +215,7 @@ ParseSerializedMap (
 //
 VOID
 ParseSerializedArray (
-      OUT  VOID            *Serialized,
+  OUT  VOID                *Serialized,
   IN       XML_NODE        *Node,
   IN       OC_SCHEMA_INFO  *Info,
   IN       CONST CHAR8     *Context     OPTIONAL,
@@ -228,11 +228,11 @@ ParseSerializedArray (
 //
 BOOLEAN
 ParseSerialized (
-      OUT  VOID                *Serialized,
-  IN       OC_SCHEMA_INFO      *RootSchema,
-  IN       VOID                *PlistBuffer,
-  IN       UINT32              PlistSize,
-  IN  OUT  UINT32              *ErrorCount  OPTIONAL
+  OUT  VOID                *Serialized,
+  IN       OC_SCHEMA_INFO  *RootSchema,
+  IN       VOID            *PlistBuffer,
+  IN       UINT32          PlistSize,
+  IN  OUT  UINT32          *ErrorCount  OPTIONAL
   );
 
 //

@@ -29,17 +29,17 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 
 #include "CryptoInternal.h"
 
-#define ROTLEFT(a, b) ((a << b) | (a >> (32 - b)))
+#define ROTLEFT(a, b)  ((a << b) | (a >> (32 - b)))
 
 #ifdef OC_CRYPTO_SUPPORTS_SHA1
 
 VOID
 Sha1Transform (
-  SHA1_CONTEXT *Ctx,
-  CONST UINT8  *Data
+  SHA1_CONTEXT  *Ctx,
+  CONST UINT8   *Data
   )
 {
-  UINT32 A, B, C, D, E, Index1, Index2, T, M[80];
+  UINT32  A, B, C, D, E, Index1, Index2, T, M[80];
 
   for (Index1 = 0, Index2 = 0; Index1 < 16; ++Index1, Index2 += 4) {
     M[Index1] = (Data[Index2] << 24) + (Data[Index2 + 1] << 16)
@@ -65,6 +65,7 @@ Sha1Transform (
     B = A;
     A = T;
   }
+
   for ( ; Index1 < 40; ++Index1) {
     T = ROTLEFT (A, 5) + (B ^ C ^ D) + E + Ctx->K[1] + M[Index1];
     E = D;
@@ -73,6 +74,7 @@ Sha1Transform (
     B = A;
     A = T;
   }
+
   for ( ; Index1 < 60; ++Index1) {
     T = ROTLEFT (A, 5) + ((B & C) ^ (B & D) ^ (C & D))  + E + Ctx->K[2] + M[Index1];
     E = D;
@@ -81,6 +83,7 @@ Sha1Transform (
     B = A;
     A = T;
   }
+
   for ( ; Index1 < 80; ++Index1) {
     T = ROTLEFT (A, 5) + (B ^ C ^ D) + E + Ctx->K[3] + M[Index1];
     E = D;
@@ -102,27 +105,27 @@ Sha1Init (
   SHA1_CONTEXT  *Ctx
   )
 {
-  Ctx->DataLen = 0;
-  Ctx->BitLen = 0;
+  Ctx->DataLen  = 0;
+  Ctx->BitLen   = 0;
   Ctx->State[0] = 0x67452301;
   Ctx->State[1] = 0xEFCDAB89;
   Ctx->State[2] = 0x98BADCFE;
   Ctx->State[3] = 0x10325476;
   Ctx->State[4] = 0xC3D2E1F0;
-  Ctx->K[0] = 0x5A827999;
-  Ctx->K[1] = 0x6ED9EBA1;
-  Ctx->K[2] = 0x8F1BBCDC;
-  Ctx->K[3] = 0xCA62C1D6;
+  Ctx->K[0]     = 0x5A827999;
+  Ctx->K[1]     = 0x6ED9EBA1;
+  Ctx->K[2]     = 0x8F1BBCDC;
+  Ctx->K[3]     = 0xCA62C1D6;
 }
 
 VOID
 Sha1Update (
-  SHA1_CONTEXT *Ctx,
-  CONST UINT8  *Data,
-  UINTN        Len
+  SHA1_CONTEXT  *Ctx,
+  CONST UINT8   *Data,
+  UINTN         Len
   )
 {
-  UINTN Index = 0;
+  UINTN  Index = 0;
 
   for (Index = 0; Index < Len; ++Index) {
     Ctx->Data[Ctx->DataLen] = Data[Index];
@@ -141,7 +144,7 @@ Sha1Final (
   UINT8         *Hash
   )
 {
-  UINT32 Index = Ctx->DataLen;
+  UINT32  Index = Ctx->DataLen;
 
   //
   // Pad whatever Data is left in the buffer.
@@ -159,15 +162,15 @@ Sha1Final (
   //
   // Append to the padding the total message's length in bits and transform.
   //
-  Ctx->BitLen += Ctx->DataLen * 8;
-  Ctx->Data[63] = (UINT8) (Ctx->BitLen);
-  Ctx->Data[62] = (UINT8) (Ctx->BitLen >> 8);
-  Ctx->Data[61] = (UINT8) (Ctx->BitLen >> 16);
-  Ctx->Data[60] = (UINT8) (Ctx->BitLen >> 24);
-  Ctx->Data[59] = (UINT8) (Ctx->BitLen >> 32);
-  Ctx->Data[58] = (UINT8) (Ctx->BitLen >> 40);
-  Ctx->Data[57] = (UINT8) (Ctx->BitLen >> 48);
-  Ctx->Data[56] = (UINT8) (Ctx->BitLen >> 56);
+  Ctx->BitLen  += Ctx->DataLen * 8;
+  Ctx->Data[63] = (UINT8)(Ctx->BitLen);
+  Ctx->Data[62] = (UINT8)(Ctx->BitLen >> 8);
+  Ctx->Data[61] = (UINT8)(Ctx->BitLen >> 16);
+  Ctx->Data[60] = (UINT8)(Ctx->BitLen >> 24);
+  Ctx->Data[59] = (UINT8)(Ctx->BitLen >> 32);
+  Ctx->Data[58] = (UINT8)(Ctx->BitLen >> 40);
+  Ctx->Data[57] = (UINT8)(Ctx->BitLen >> 48);
+  Ctx->Data[56] = (UINT8)(Ctx->BitLen >> 56);
   Sha1Transform (Ctx, Ctx->Data);
 
   //
@@ -175,11 +178,11 @@ Sha1Final (
   // reverse all the bytes when copying the final State to the output Hash.
   //
   for (Index = 0; Index < 4; ++Index) {
-    Hash[Index]      = (UINT8) ((Ctx->State[0] >> (24 - Index * 8)) & 0x000000FF);
-    Hash[Index + 4]  = (UINT8) ((Ctx->State[1] >> (24 - Index * 8)) & 0x000000FF);
-    Hash[Index + 8]  = (UINT8) ((Ctx->State[2] >> (24 - Index * 8)) & 0x000000FF);
-    Hash[Index + 12] = (UINT8) ((Ctx->State[3] >> (24 - Index * 8)) & 0x000000FF);
-    Hash[Index + 16] = (UINT8) ((Ctx->State[4] >> (24 - Index * 8)) & 0x000000FF);
+    Hash[Index]      = (UINT8)((Ctx->State[0] >> (24 - Index * 8)) & 0x000000FF);
+    Hash[Index + 4]  = (UINT8)((Ctx->State[1] >> (24 - Index * 8)) & 0x000000FF);
+    Hash[Index + 8]  = (UINT8)((Ctx->State[2] >> (24 - Index * 8)) & 0x000000FF);
+    Hash[Index + 12] = (UINT8)((Ctx->State[3] >> (24 - Index * 8)) & 0x000000FF);
+    Hash[Index + 16] = (UINT8)((Ctx->State[4] >> (24 - Index * 8)) & 0x000000FF);
   }
 }
 
@@ -190,11 +193,11 @@ Sha1 (
   UINTN  Len
   )
 {
-  SHA1_CONTEXT Ctx;
+  SHA1_CONTEXT  Ctx;
 
   Sha1Init (&Ctx);
   Sha1Update (&Ctx, Data, Len);
-  Sha1Final (&Ctx,Hash);
+  Sha1Final (&Ctx, Hash);
   SecureZeroMem (&Ctx, sizeof (Ctx));
 }
 

@@ -1,13 +1,13 @@
 /*++
 
 Copyright (c) 2006, Intel Corporation. All rights reserved.<BR>
-This program and the accompanying materials                          
-are licensed and made available under the terms and conditions of the BSD License         
-which accompanies this distribution.  The full text of the license may be found at        
-http://opensource.org/licenses/bsd-license.php                                            
-                                                                                          
-THE PROGRAM IS DISTRIBUTED UNDER THE BSD LICENSE ON AN "AS IS" BASIS,                     
-WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.             
+This program and the accompanying materials
+are licensed and made available under the terms and conditions of the BSD License
+which accompanies this distribution.  The full text of the license may be found at
+http://opensource.org/licenses/bsd-license.php
+
+THE PROGRAM IS DISTRIBUTED UNDER THE BSD LICENSE ON AN "AS IS" BASIS,
+WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 
 Module Name:
   Support.c
@@ -21,18 +21,18 @@ Revision History:
 #include <FlashLayout.h>
 
 EFI_STATUS
-EfiAddMemoryDescriptor(
-  UINTN                 *NoDesc,
-  EFI_MEMORY_DESCRIPTOR *Desc,
-  EFI_MEMORY_TYPE       Type,
-  EFI_PHYSICAL_ADDRESS  BaseAddress,
-  UINT64                NoPages,
-  UINT64                Attribute
+EfiAddMemoryDescriptor (
+  UINTN                  *NoDesc,
+  EFI_MEMORY_DESCRIPTOR  *Desc,
+  EFI_MEMORY_TYPE        Type,
+  EFI_PHYSICAL_ADDRESS   BaseAddress,
+  UINT64                 NoPages,
+  UINT64                 Attribute
   )
 {
-  UINTN  NumberOfDesc;
-  UINT64 Temp;
-  UINTN  Index;
+  UINTN   NumberOfDesc;
+  UINT64  Temp;
+  UINTN   Index;
 
   if (NoPages == 0) {
     return EFI_SUCCESS;
@@ -44,9 +44,7 @@ EfiAddMemoryDescriptor(
 
   NumberOfDesc = *NoDesc;
   for (Index = 0; Index < NumberOfDesc; Index++) {
-
     if (Desc[Index].Type == EfiConventionalMemory) {
-
       Temp = DivU64x32 ((BaseAddress - Desc[Index].PhysicalStart), EFI_PAGE_SIZE) + NoPages;
 
       if ((Desc[Index].PhysicalStart < BaseAddress) && (Desc[Index].NumberOfPages >= Temp)) {
@@ -56,8 +54,9 @@ EfiAddMemoryDescriptor(
           Desc[*NoDesc].NumberOfPages = Desc[Index].NumberOfPages - Temp;
           Desc[*NoDesc].VirtualStart  = 0;
           Desc[*NoDesc].Attribute     = Desc[Index].Attribute;
-          *NoDesc = *NoDesc + 1;
+          *NoDesc                     = *NoDesc + 1;
         }
+
         Desc[Index].NumberOfPages = Temp - NoPages;
       }
 
@@ -83,67 +82,70 @@ EfiAddMemoryDescriptor(
   Desc[*NoDesc].NumberOfPages = NoPages;
   Desc[*NoDesc].VirtualStart  = 0;
   Desc[*NoDesc].Attribute     = Attribute;
-  *NoDesc = *NoDesc + 1;
+  *NoDesc                     = *NoDesc + 1;
 
   return EFI_SUCCESS;
 }
 
 UINTN
 FindSpace (
-  UINTN                       NoPages,
-  IN UINTN                    *NumberOfMemoryMapEntries,
-  IN EFI_MEMORY_DESCRIPTOR    *EfiMemoryDescriptor,
-  EFI_MEMORY_TYPE             Type,
-  UINT64                      Attribute
+  UINTN                     NoPages,
+  IN UINTN                  *NumberOfMemoryMapEntries,
+  IN EFI_MEMORY_DESCRIPTOR  *EfiMemoryDescriptor,
+  EFI_MEMORY_TYPE           Type,
+  UINT64                    Attribute
   )
 {
-  EFI_PHYSICAL_ADDRESS        MaxPhysicalStart;
-  UINT64                      MaxNoPages;
-  UINTN                       Index;
-  EFI_MEMORY_DESCRIPTOR       *CurrentMemoryDescriptor;
+  EFI_PHYSICAL_ADDRESS   MaxPhysicalStart;
+  UINT64                 MaxNoPages;
+  UINTN                  Index;
+  EFI_MEMORY_DESCRIPTOR  *CurrentMemoryDescriptor;
 
-  MaxPhysicalStart = 0;
-  MaxNoPages       = 0;
+  MaxPhysicalStart        = 0;
+  MaxNoPages              = 0;
   CurrentMemoryDescriptor = NULL;
   for (Index = 0; Index < *NumberOfMemoryMapEntries; Index++) {
     if (EfiMemoryDescriptor[Index].PhysicalStart + LShiftU64 (EfiMemoryDescriptor[Index].NumberOfPages, EFI_PAGE_SHIFT) <= BASE_1MB) {
       continue;
     }
 
-    if ((EfiMemoryDescriptor[Index].Type == EfiConventionalMemory) && 
-        (EfiMemoryDescriptor[Index].NumberOfPages >= NoPages)) {
+    if ((EfiMemoryDescriptor[Index].Type == EfiConventionalMemory) &&
+        (EfiMemoryDescriptor[Index].NumberOfPages >= NoPages))
+    {
       if (EfiMemoryDescriptor[Index].PhysicalStart > MaxPhysicalStart) {
         if (EfiMemoryDescriptor[Index].PhysicalStart + LShiftU64 (EfiMemoryDescriptor[Index].NumberOfPages, EFI_PAGE_SHIFT) <= BASE_4GB) {
-          MaxPhysicalStart = EfiMemoryDescriptor[Index].PhysicalStart;
-          MaxNoPages       = EfiMemoryDescriptor[Index].NumberOfPages;
+          MaxPhysicalStart        = EfiMemoryDescriptor[Index].PhysicalStart;
+          MaxNoPages              = EfiMemoryDescriptor[Index].NumberOfPages;
           CurrentMemoryDescriptor = &EfiMemoryDescriptor[Index];
         }
       }
     }
 
-    if (EfiMemoryDescriptor[Index].Type == EfiReservedMemoryType
-     || EfiMemoryDescriptor[Index].Type >= EfiACPIReclaimMemory) {
+    if (  (EfiMemoryDescriptor[Index].Type == EfiReservedMemoryType)
+       || (EfiMemoryDescriptor[Index].Type >= EfiACPIReclaimMemory))
+    {
       continue;
     }
 
-    if (EfiMemoryDescriptor[Index].Type == EfiRuntimeServicesCode
-      || EfiMemoryDescriptor[Index].Type == EfiRuntimeServicesData) {
+    if (  (EfiMemoryDescriptor[Index].Type == EfiRuntimeServicesCode)
+       || (EfiMemoryDescriptor[Index].Type == EfiRuntimeServicesData))
+    {
       break;
     }
   }
- 
+
   if (MaxPhysicalStart == 0) {
     return 0;
   }
 
   if (MaxNoPages != NoPages) {
-    CurrentMemoryDescriptor->NumberOfPages = MaxNoPages - NoPages;
+    CurrentMemoryDescriptor->NumberOfPages                       = MaxNoPages - NoPages;
     EfiMemoryDescriptor[*NumberOfMemoryMapEntries].Type          = Type;
     EfiMemoryDescriptor[*NumberOfMemoryMapEntries].PhysicalStart = MaxPhysicalStart + LShiftU64 (MaxNoPages - NoPages, EFI_PAGE_SHIFT);
     EfiMemoryDescriptor[*NumberOfMemoryMapEntries].NumberOfPages = NoPages;
     EfiMemoryDescriptor[*NumberOfMemoryMapEntries].VirtualStart  = 0;
     EfiMemoryDescriptor[*NumberOfMemoryMapEntries].Attribute     = Attribute;
-    *NumberOfMemoryMapEntries = *NumberOfMemoryMapEntries + 1;
+    *NumberOfMemoryMapEntries                                    = *NumberOfMemoryMapEntries + 1;
   } else {
     CurrentMemoryDescriptor->Type      = Type;
     CurrentMemoryDescriptor->Attribute = Attribute;
@@ -154,20 +156,20 @@ FindSpace (
 
 VOID
 GenMemoryMap (
-  UINTN                 *NumberOfMemoryMapEntries,
-  EFI_MEMORY_DESCRIPTOR *EfiMemoryDescriptor,
-  BIOS_MEMORY_MAP       *BiosMemoryMap
+  UINTN                  *NumberOfMemoryMapEntries,
+  EFI_MEMORY_DESCRIPTOR  *EfiMemoryDescriptor,
+  BIOS_MEMORY_MAP        *BiosMemoryMap
   )
 {
-  UINT64                BaseAddress;
-  UINT64                Length;
-  EFI_MEMORY_TYPE       Type;
-  UINTN                 Index;
-  UINTN                 Attr;
-  UINT64                Ceiling;
-  UINT64                EBDAaddr;
-  UINT64                EBDAmax;
-  UINT64                EBDAsize;
+  UINT64           BaseAddress;
+  UINT64           Length;
+  EFI_MEMORY_TYPE  Type;
+  UINTN            Index;
+  UINTN            Attr;
+  UINT64           Ceiling;
+  UINT64           EBDAaddr;
+  UINT64           EBDAmax;
+  UINT64           EBDAsize;
 
   //
   // ** CHANGE START **
@@ -175,47 +177,48 @@ GenMemoryMap (
   // EBDA memory protection
   //
   EBDAaddr = LShiftU64 ((UINT64)(*(volatile UINT16 *)(UINTN)(0x40E)), 4);
-  if (EBDAaddr < 0x90000 || EBDAaddr > 0x9F800) {
+  if ((EBDAaddr < 0x90000) || (EBDAaddr > 0x9F800)) {
     EBDAaddr = 0x9A000;
   }
-  EBDAmax = 0x100000;
+
+  EBDAmax  = 0x100000;
   EBDAsize = 2;
   //
   // ** CHANGE END **
   //
 
   Ceiling = 0xFFFFFFFF;
-  for (Index = 0; Index < BiosMemoryMap->MemoryMapSize / sizeof(BIOS_MEMORY_MAP_ENTRY); Index++) {
-
-    switch (BiosMemoryMap->MemoryMapEntry[Index].Type) { 
-    case (INT15_E820_AddressRangeMemory):
-      Type = EfiConventionalMemory;
-      Attr = EFI_MEMORY_WB;
-      break;
-    case (INT15_E820_AddressRangeReserved):
-      Type = EfiReservedMemoryType;
-      Attr = EFI_MEMORY_UC;
-      break;
-    case (INT15_E820_AddressRangeACPI):
-      Type = EfiACPIReclaimMemory;
-      Attr = EFI_MEMORY_WB;
-      break;
-    case (INT15_E820_AddressRangeNVS):
-      Type = EfiACPIMemoryNVS;
-      Attr = EFI_MEMORY_UC;
-      break;
-    default:
-      // We should not get here, according to ACPI 2.0 Spec.
-      // BIOS behaviour of the Int15h, E820h
-      Type = EfiReservedMemoryType;
-      Attr = EFI_MEMORY_UC;
-      break;
+  for (Index = 0; Index < BiosMemoryMap->MemoryMapSize / sizeof (BIOS_MEMORY_MAP_ENTRY); Index++) {
+    switch (BiosMemoryMap->MemoryMapEntry[Index].Type) {
+      case (INT15_E820_AddressRangeMemory):
+        Type = EfiConventionalMemory;
+        Attr = EFI_MEMORY_WB;
+        break;
+      case (INT15_E820_AddressRangeReserved):
+        Type = EfiReservedMemoryType;
+        Attr = EFI_MEMORY_UC;
+        break;
+      case (INT15_E820_AddressRangeACPI):
+        Type = EfiACPIReclaimMemory;
+        Attr = EFI_MEMORY_WB;
+        break;
+      case (INT15_E820_AddressRangeNVS):
+        Type = EfiACPIMemoryNVS;
+        Attr = EFI_MEMORY_UC;
+        break;
+      default:
+        // We should not get here, according to ACPI 2.0 Spec.
+        // BIOS behaviour of the Int15h, E820h
+        Type = EfiReservedMemoryType;
+        Attr = EFI_MEMORY_UC;
+        break;
     }
+
     if (Type == EfiConventionalMemory) {
       BaseAddress = BiosMemoryMap->MemoryMapEntry[Index].BaseAddress;
       Length      = BiosMemoryMap->MemoryMapEntry[Index].Length;
       if (BaseAddress & EFI_PAGE_MASK) {
-        Length      = Length + (BaseAddress & EFI_PAGE_MASK) - EFI_PAGE_SIZE;
+        Length = Length + (BaseAddress & EFI_PAGE_MASK) - EFI_PAGE_SIZE;
         //
         // ** CHANGE **
         // Formerly was LShiftU64 (RShiftU64 (BaseAddress, EFI_PAGE_SHIFT) + 1.
@@ -229,6 +232,7 @@ GenMemoryMap (
       if (Length & EFI_PAGE_MASK) {
         Length = LShiftU64 (RShiftU64 (Length, EFI_PAGE_SHIFT) + 1, EFI_PAGE_SHIFT);
       }
+
       //
       // Update Memory Ceiling
       //
@@ -237,6 +241,7 @@ GenMemoryMap (
           Ceiling = BaseAddress;
         }
       }
+
       //
       // ** CHANGE START **
       // Ignore the EBDA and bios rom area
@@ -248,6 +253,7 @@ GenMemoryMap (
       } else if (BaseAddress < EBDAmax) {
         continue;
       }
+
       //
       // ** CHANGE END **
       //
@@ -260,7 +266,7 @@ GenMemoryMap (
       NumberOfMemoryMapEntries,
       EfiMemoryDescriptor,
       Type,
-      (EFI_PHYSICAL_ADDRESS) BaseAddress,
+      (EFI_PHYSICAL_ADDRESS)BaseAddress,
       RShiftU64 (Length, EFI_PAGE_SHIFT),
       Attr
       );
@@ -287,7 +293,7 @@ GenMemoryMap (
     NumberOfMemoryMapEntries,
     EfiMemoryDescriptor,
     EfiReservedMemoryType,
-    (EFI_PHYSICAL_ADDRESS) BOOT1_BASE,
+    (EFI_PHYSICAL_ADDRESS)BOOT1_BASE,
     1,
     EFI_MEMORY_UC
     );
@@ -295,7 +301,7 @@ GenMemoryMap (
   //
   // Update MemoryMap according to Ceiling
   //
-#if 0
+ #if 0
   //
   // We'll leave BIOS mem map untouched and add those EfiConventionalMemory
   // areas to UEFI mem map in BdsPlatformLib:UpdateMemoryMap().
@@ -303,14 +309,16 @@ GenMemoryMap (
   //
   for (Index = 0; Index < *NumberOfMemoryMapEntries; Index++) {
     if ((EfiMemoryDescriptor[Index].Type == EfiConventionalMemory) &&
-        (EfiMemoryDescriptor[Index].PhysicalStart > 0x100000ULL) && 
-        (EfiMemoryDescriptor[Index].PhysicalStart < 0x100000000ULL)) {
+        (EfiMemoryDescriptor[Index].PhysicalStart > 0x100000ULL) &&
+        (EfiMemoryDescriptor[Index].PhysicalStart < 0x100000000ULL))
+    {
       if (EfiMemoryDescriptor[Index].PhysicalStart >= Ceiling) {
         EfiMemoryDescriptor[Index].Type = EfiReservedMemoryType;
       }
     }
   }
-#endif
+
+ #endif
   //
   // ** CHANGE END **
   //

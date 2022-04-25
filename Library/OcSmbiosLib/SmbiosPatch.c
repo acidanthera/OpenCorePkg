@@ -72,7 +72,7 @@ STATIC UINT32                          mOriginalTableSize;
     } else if ((Fallback) != NULL) { \
       CopyMem (&(((Table)->CurrentPtr).Field), (Fallback), sizeof ((((Table)->CurrentPtr).Field))); \
     } else { \
-      /* No ZeroMem call as written area is guaranteed to be 0 */ \
+  /* No ZeroMem call as written area is guaranteed to be 0 */ \
     } \
   } while (0)
 
@@ -82,8 +82,8 @@ STATIC UINT32                          mOriginalTableSize;
 STATIC
 APPLE_SMBIOS_STRUCTURE_POINTER
 SmbiosGetOriginalStructure (
-  IN  SMBIOS_TYPE   Type,
-  IN  UINT16        Index
+  IN  SMBIOS_TYPE  Type,
+  IN  UINT16       Index
   )
 {
   if (mOriginalTable.Raw == NULL) {
@@ -96,7 +96,7 @@ SmbiosGetOriginalStructure (
 STATIC
 UINT16
 SmbiosGetOriginalStructureCount (
-  IN  SMBIOS_TYPE   Type
+  IN  SMBIOS_TYPE  Type
   )
 {
   if (mOriginalTable.Raw == NULL) {
@@ -113,8 +113,8 @@ SmbiosHasValidOemFormFactor (
   )
 {
   return Original.Raw != NULL
-    && SMBIOS_ACCESSIBLE (Original, Standard.Type17->FormFactor)
-    && Original.Standard.Type17->FormFactor != 0;
+         && SMBIOS_ACCESSIBLE (Original, Standard.Type17->FormFactor)
+         && Original.Standard.Type17->FormFactor != 0;
 }
 
 STATIC
@@ -135,6 +135,7 @@ SmbiosGetFormFactor (
     if (SmbiosHasValidOemFormFactor (Original)) {
       return Original.Standard.Type17->FormFactor;
     }
+
     //
     // If not, use the value from database.
     //
@@ -149,6 +150,7 @@ SmbiosGetFormFactor (
   if (Data->MemoryFormFactor != NULL) {
     return *Data->MemoryFormFactor;
   }
+
   //
   // If the value is not available from config, then try to use the original value.
   //
@@ -173,8 +175,8 @@ SmbiosGetFormFactor (
 STATIC
 BOOLEAN
 PatchBiosInformation (
-  IN OUT OC_SMBIOS_TABLE *Table,
-  IN     OC_SMBIOS_DATA  *Data
+  IN OUT OC_SMBIOS_TABLE  *Table,
+  IN     OC_SMBIOS_DATA   *Data
   )
 {
   APPLE_SMBIOS_STRUCTURE_POINTER  Original;
@@ -209,7 +211,7 @@ PatchBiosInformation (
 
   Vendor = SmbiosGetString (Table->CurrentPtr, (Table->CurrentPtr).Standard.Type0->Vendor);
 
-  if (Vendor != NULL && AsciiStrStr (Vendor, "Apple") != NULL) {
+  if ((Vendor != NULL) && (AsciiStrStr (Vendor, "Apple") != NULL)) {
     IsApple = TRUE;
   }
 
@@ -228,8 +230,8 @@ PatchBiosInformation (
 STATIC
 VOID
 PatchSystemInformation (
-  IN OUT OC_SMBIOS_TABLE *Table,
-  IN     OC_SMBIOS_DATA  *Data
+  IN OUT OC_SMBIOS_TABLE  *Table,
+  IN     OC_SMBIOS_DATA   *Data
   )
 {
   APPLE_SMBIOS_STRUCTURE_POINTER  Original;
@@ -264,17 +266,17 @@ PatchSystemInformation (
 STATIC
 VOID
 PatchBaseboardInformation (
-  IN OUT OC_SMBIOS_TABLE *Table,
-  IN     OC_SMBIOS_DATA  *Data
+  IN OUT OC_SMBIOS_TABLE  *Table,
+  IN     OC_SMBIOS_DATA   *Data
   )
 {
   APPLE_SMBIOS_STRUCTURE_POINTER  Original;
   UINT8                           MinLength;
   UINT8                           StringIndex;
 
-  Original      = SmbiosGetOriginalStructure (SMBIOS_TYPE_BASEBOARD_INFORMATION, 1);
-  MinLength     = sizeof (*Original.Standard.Type2);
-  StringIndex   = 0;
+  Original    = SmbiosGetOriginalStructure (SMBIOS_TYPE_BASEBOARD_INFORMATION, 1);
+  MinLength   = sizeof (*Original.Standard.Type2);
+  StringIndex = 0;
 
   //
   // Hack for EDK 2 not using flexible array members adding extra data at struct end.
@@ -314,17 +316,17 @@ PatchBaseboardInformation (
 STATIC
 VOID
 PatchSystemEnclosure (
-  IN OUT OC_SMBIOS_TABLE *Table,
-  IN     OC_SMBIOS_DATA  *Data
+  IN OUT OC_SMBIOS_TABLE  *Table,
+  IN     OC_SMBIOS_DATA   *Data
   )
 {
   APPLE_SMBIOS_STRUCTURE_POINTER  Original;
   UINT8                           MinLength;
   UINT8                           StringIndex;
 
-  Original      = SmbiosGetOriginalStructure (SMBIOS_TYPE_SYSTEM_ENCLOSURE, 1);
-  MinLength     = sizeof (*Original.Standard.Type3);
-  StringIndex   = 0;
+  Original    = SmbiosGetOriginalStructure (SMBIOS_TYPE_SYSTEM_ENCLOSURE, 1);
+  MinLength   = sizeof (*Original.Standard.Type3);
+  StringIndex = 0;
 
   //
   // Hack for EDK 2 not using flexible array members adding extra data at struct end.
@@ -385,7 +387,7 @@ PatchCacheInformation (
   IN     OC_SMBIOS_DATA   *Data,
   IN OUT UINT16           *Index,
   IN     SMBIOS_HANDLE    OriginalHandle,
-     OUT SMBIOS_HANDLE    *NewHandle
+  OUT SMBIOS_HANDLE       *NewHandle
   )
 {
   APPLE_SMBIOS_STRUCTURE_POINTER  Original;
@@ -404,21 +406,22 @@ PatchCacheInformation (
 
   NumberEntries = SmbiosGetOriginalStructureCount (SMBIOS_TYPE_CACHE_INFORMATION);
 
-  DEBUG ((DEBUG_INFO, "OCSMB: Number of CPU cache entries is %u\n", (UINT32) NumberEntries));
+  DEBUG ((DEBUG_INFO, "OCSMB: Number of CPU cache entries is %u\n", (UINT32)NumberEntries));
 
   //
   // Locate original cache data specified by the handle.
   //
   for (EntryNo = 1; EntryNo <= NumberEntries; ++EntryNo) {
     Original = SmbiosGetOriginalStructure (SMBIOS_TYPE_CACHE_INFORMATION, EntryNo);
-    if (Original.Raw == NULL
-      || !SMBIOS_ACCESSIBLE (Original, Standard.Type7->CacheConfiguration)
-      || Original.Standard.Type7->Hdr.Handle != OriginalHandle) {
+    if (  (Original.Raw == NULL)
+       || !SMBIOS_ACCESSIBLE (Original, Standard.Type7->CacheConfiguration)
+       || (Original.Standard.Type7->Hdr.Handle != OriginalHandle))
+    {
       continue;
     }
 
-    MinLength     = sizeof (*Original.Standard.Type7);
-    StringIndex   = 0;
+    MinLength   = sizeof (*Original.Standard.Type7);
+    StringIndex = 0;
 
     if (EFI_ERROR (SmbiosInitialiseStruct (Table, SMBIOS_TYPE_CACHE_INFORMATION, MinLength, *Index))) {
       return;
@@ -464,9 +467,9 @@ PatchCacheInformation (
 STATIC
 VOID
 PatchProcessorInformation (
-  IN OUT OC_SMBIOS_TABLE *Table,
-  IN     OC_SMBIOS_DATA  *Data,
-  IN     OC_CPU_INFO     *CpuInfo
+  IN OUT OC_SMBIOS_TABLE  *Table,
+  IN     OC_SMBIOS_DATA   *Data,
+  IN     OC_CPU_INFO      *CpuInfo
   )
 {
   APPLE_SMBIOS_STRUCTURE_POINTER  Original;
@@ -477,10 +480,10 @@ PatchProcessorInformation (
   UINT8                           TmpCount;
   UINT16                          MhzSpeed;
 
-  SMBIOS_HANDLE                   HandleL1Cache;
-  SMBIOS_HANDLE                   HandleL2Cache;
-  SMBIOS_HANDLE                   HandleL3Cache;
-  UINT16                          CacheIndex;
+  SMBIOS_HANDLE  HandleL1Cache;
+  SMBIOS_HANDLE  HandleL2Cache;
+  SMBIOS_HANDLE  HandleL3Cache;
+  UINT16         CacheIndex;
 
   NumberEntries = SmbiosGetOriginalStructureCount (SMBIOS_TYPE_PROCESSOR_INFORMATION);
   CacheIndex    = 0;
@@ -498,8 +501,8 @@ PatchProcessorInformation (
     PatchCacheInformation (Table, Data, &CacheIndex, Original.Standard.Type4->L2CacheHandle, &HandleL2Cache);
     PatchCacheInformation (Table, Data, &CacheIndex, Original.Standard.Type4->L3CacheHandle, &HandleL3Cache);
 
-    MinLength     = sizeof (*Original.Standard.Type4);
-    StringIndex   = 0;
+    MinLength   = sizeof (*Original.Standard.Type4);
+    StringIndex = 0;
 
     if (EFI_ERROR (SmbiosInitialiseStruct (Table, SMBIOS_TYPE_PROCESSOR_INFORMATION, MinLength, EntryNo))) {
       continue;
@@ -518,8 +521,8 @@ PatchProcessorInformation (
 
     DEBUG ((DEBUG_INFO, "OCSMB: CPU%u display frequency is %uMHz\n", EntryNo, MhzSpeed));
 
-    Table->CurrentPtr.Standard.Type4->MaxSpeed      = MhzSpeed;
-    Table->CurrentPtr.Standard.Type4->CurrentSpeed  = Table->CurrentPtr.Standard.Type4->MaxSpeed;
+    Table->CurrentPtr.Standard.Type4->MaxSpeed     = MhzSpeed;
+    Table->CurrentPtr.Standard.Type4->CurrentSpeed = Table->CurrentPtr.Standard.Type4->MaxSpeed;
 
     SMBIOS_OVERRIDE_V (Table, Standard.Type4->Status, Original, NULL, NULL);
     SMBIOS_OVERRIDE_V (Table, Standard.Type4->ProcessorUpgrade, Original, NULL, NULL);
@@ -535,10 +538,10 @@ PatchProcessorInformation (
     SMBIOS_OVERRIDE_S (Table, Standard.Type4->AssetTag, Original, NULL, &StringIndex, NULL);
     SMBIOS_OVERRIDE_S (Table, Standard.Type4->PartNumber, Original, NULL, &StringIndex, NULL);
 
-    TmpCount = (UINT8) (CpuInfo->CoreCount < 256 ? CpuInfo->CoreCount : 0xFF);
+    TmpCount = (UINT8)(CpuInfo->CoreCount < 256 ? CpuInfo->CoreCount : 0xFF);
     SMBIOS_OVERRIDE_V (Table, Standard.Type4->CoreCount, Original, NULL, &TmpCount);
     SMBIOS_OVERRIDE_V (Table, Standard.Type4->EnabledCoreCount, Original, NULL, &TmpCount);
-    TmpCount = (UINT8) (CpuInfo->ThreadCount < 256 ? CpuInfo->ThreadCount : 0xFF);
+    TmpCount = (UINT8)(CpuInfo->ThreadCount < 256 ? CpuInfo->ThreadCount : 0xFF);
     SMBIOS_OVERRIDE_V (Table, Standard.Type4->ThreadCount, Original, NULL, &TmpCount);
     SMBIOS_OVERRIDE_V (Table, Standard.Type4->ProcessorCharacteristics, Original, NULL, NULL);
     SMBIOS_OVERRIDE_V (Table, Standard.Type4->ProcessorFamily2, Original, NULL, NULL);
@@ -576,8 +579,8 @@ PatchSystemPorts (
       continue;
     }
 
-    MinLength     = sizeof (*Original.Standard.Type8);
-    StringIndex   = 0;
+    MinLength   = sizeof (*Original.Standard.Type8);
+    StringIndex = 0;
 
     if (EFI_ERROR (SmbiosInitialiseStruct (Table, SMBIOS_TYPE_PORT_CONNECTOR_INFORMATION, MinLength, EntryNo))) {
       continue;
@@ -618,10 +621,10 @@ PatchSystemSlots (
   CONST CHAR8                      *SlotDesignation;
 
   Status = gBS->LocateProtocol (
-    &gEfiPciRootBridgeIoProtocolGuid,
-    NULL,
-    (VOID **) &PciRootBridgeIo
-    );
+                  &gEfiPciRootBridgeIoProtocolGuid,
+                  NULL,
+                  (VOID **)&PciRootBridgeIo
+                  );
   if (EFI_ERROR (Status)) {
     PciRootBridgeIo = NULL;
   }
@@ -634,8 +637,8 @@ PatchSystemSlots (
       continue;
     }
 
-    MinLength     = sizeof (*Original.Standard.Type9);
-    StringIndex   = 0;
+    MinLength   = sizeof (*Original.Standard.Type9);
+    StringIndex = 0;
 
     if (EFI_ERROR (SmbiosInitialiseStruct (Table, SMBIOS_TYPE_SYSTEM_SLOTS, MinLength, EntryNo))) {
       continue;
@@ -660,46 +663,46 @@ PatchSystemSlots (
       SMBIOS_OVERRIDE_S (Table, Standard.Type9->SlotDesignation, Original, NULL, &StringIndex, NULL);
       SMBIOS_OVERRIDE_V (Table, Standard.Type9->CurrentUsage, Original, NULL, NULL);
     } else {
-      SlotDesignation = NULL;
+      SlotDesignation                                = NULL;
       Table->CurrentPtr.Standard.Type9->CurrentUsage = SlotUsageAvailable;
 
       if (Table->CurrentPtr.Standard.Type9->BusNum != 0) {
         PciAddress = EFI_PCI_ADDRESS (
-          BitFieldRead8 (Table->CurrentPtr.Standard.Type9->DevFuncNum, 3, 7),
-          Table->CurrentPtr.Standard.Type9->BusNum,
-          BitFieldRead8 (Table->CurrentPtr.Standard.Type9->DevFuncNum, 0, 2),
-          0
-          );
+                       BitFieldRead8 (Table->CurrentPtr.Standard.Type9->DevFuncNum, 3, 7),
+                       Table->CurrentPtr.Standard.Type9->BusNum,
+                       BitFieldRead8 (Table->CurrentPtr.Standard.Type9->DevFuncNum, 0, 2),
+                       0
+                       );
       } else {
         PciAddress = EFI_PCI_ADDRESS (
-          Table->CurrentPtr.Standard.Type9->BusNum,
-          BitFieldRead8 (Table->CurrentPtr.Standard.Type9->DevFuncNum, 3, 7),
-          BitFieldRead8 (Table->CurrentPtr.Standard.Type9->DevFuncNum, 0, 2),
-          0
-          );
+                       Table->CurrentPtr.Standard.Type9->BusNum,
+                       BitFieldRead8 (Table->CurrentPtr.Standard.Type9->DevFuncNum, 3, 7),
+                       BitFieldRead8 (Table->CurrentPtr.Standard.Type9->DevFuncNum, 0, 2),
+                       0
+                       );
       }
 
       SecSubBus = MAX_UINT8;
       ClassCode = MAX_UINT16;
-      Status = PciRootBridgeIo->Pci.Read (
-        PciRootBridgeIo,
-        EfiPciWidthUint8,
-        PciAddress + PCI_BRIDGE_SECONDARY_BUS_REGISTER_OFFSET,
-        1,
-        &SecSubBus
-        );
+      Status    = PciRootBridgeIo->Pci.Read (
+                                         PciRootBridgeIo,
+                                         EfiPciWidthUint8,
+                                         PciAddress + PCI_BRIDGE_SECONDARY_BUS_REGISTER_OFFSET,
+                                         1,
+                                         &SecSubBus
+                                         );
 
-      if (!EFI_ERROR (Status) && SecSubBus != MAX_UINT8) {
+      if (!EFI_ERROR (Status) && (SecSubBus != MAX_UINT8)) {
         Status = PciRootBridgeIo->Pci.Read (
-          PciRootBridgeIo,
-          EfiPciWidthUint16,
-          EFI_PCI_ADDRESS (SecSubBus, 0, 0, 0) + 10,
-          1,
-          &ClassCode
-          );
+                                        PciRootBridgeIo,
+                                        EfiPciWidthUint16,
+                                        EFI_PCI_ADDRESS (SecSubBus, 0, 0, 0) + 10,
+                                        1,
+                                        &ClassCode
+                                        );
       }
 
-      if (!EFI_ERROR (Status) && ClassCode != MAX_UINT16) {
+      if (!EFI_ERROR (Status) && (ClassCode != MAX_UINT16)) {
         Table->CurrentPtr.Standard.Type9->CurrentUsage = SlotUsageAvailable;
         if (ClassCode == 0x0280) {
           SlotDesignation = "AirPort";
@@ -730,13 +733,13 @@ PatchMemoryArray (
   IN     OC_SMBIOS_DATA                  *Data,
   IN     APPLE_SMBIOS_STRUCTURE_POINTER  Original,
   IN     UINT16                          Index,
-     OUT SMBIOS_HANDLE                   *Handle
+  OUT SMBIOS_HANDLE                      *Handle
   )
 {
-  UINT8    MinLength;
+  UINT8  MinLength;
 
-  *Handle       = OcSmbiosInvalidHandle;
-  MinLength     = sizeof (*Original.Standard.Type16);
+  *Handle   = OcSmbiosInvalidHandle;
+  MinLength = sizeof (*Original.Standard.Type16);
 
   if (EFI_ERROR (SmbiosInitialiseStruct (Table, SMBIOS_TYPE_PHYSICAL_MEMORY_ARRAY, MinLength, Index))) {
     return;
@@ -769,22 +772,23 @@ PatchMemoryArray (
 STATIC
 VOID
 CreateMemoryArray (
-  IN OUT OC_SMBIOS_TABLE                 *Table,
-  IN     OC_SMBIOS_DATA                  *Data,
-     OUT SMBIOS_HANDLE                   *Handle
+  IN OUT OC_SMBIOS_TABLE  *Table,
+  IN     OC_SMBIOS_DATA   *Data,
+  OUT SMBIOS_HANDLE       *Handle
   )
 {
-  UINT8    MinLength;
+  UINT8  MinLength;
 
-  *Handle       = OcSmbiosInvalidHandle;
-  MinLength     = sizeof (*Table->CurrentPtr.Standard.Type16);
+  *Handle   = OcSmbiosInvalidHandle;
+  MinLength = sizeof (*Table->CurrentPtr.Standard.Type16);
 
   if (EFI_ERROR (SmbiosInitialiseStruct (Table, SMBIOS_TYPE_PHYSICAL_MEMORY_ARRAY, MinLength, 1))) {
     return;
   }
-  Table->CurrentPtr.Standard.Type16->Location               = MemoryArrayLocationSystemBoard;
-  Table->CurrentPtr.Standard.Type16->Use                    = MemoryArrayUseSystemMemory;
-  Table->CurrentPtr.Standard.Type16->MemoryErrorCorrection  = *Data->MemoryErrorCorrection;
+
+  Table->CurrentPtr.Standard.Type16->Location              = MemoryArrayLocationSystemBoard;
+  Table->CurrentPtr.Standard.Type16->Use                   = MemoryArrayUseSystemMemory;
+  Table->CurrentPtr.Standard.Type16->MemoryErrorCorrection = *Data->MemoryErrorCorrection;
   //
   // Do not support memory error information. 0xFFFF indicates no errors previously detected.
   //
@@ -796,11 +800,11 @@ CreateMemoryArray (
   // Maximum Capacity is represented in KB.
   //
   if (*Data->MemoryMaxCapacity < SIZE_2TB) {
-    Table->CurrentPtr.Standard.Type16->MaximumCapacity          = (UINT32)(*Data->MemoryMaxCapacity / SIZE_1KB);
-    Table->CurrentPtr.Standard.Type16->ExtendedMaximumCapacity  = 0;
+    Table->CurrentPtr.Standard.Type16->MaximumCapacity         = (UINT32)(*Data->MemoryMaxCapacity / SIZE_1KB);
+    Table->CurrentPtr.Standard.Type16->ExtendedMaximumCapacity = 0;
   } else {
-    Table->CurrentPtr.Standard.Type16->MaximumCapacity          = SIZE_2TB / SIZE_1KB;
-    Table->CurrentPtr.Standard.Type16->ExtendedMaximumCapacity  = *Data->MemoryMaxCapacity;
+    Table->CurrentPtr.Standard.Type16->MaximumCapacity         = SIZE_2TB / SIZE_1KB;
+    Table->CurrentPtr.Standard.Type16->ExtendedMaximumCapacity = *Data->MemoryMaxCapacity;
   }
 
   //
@@ -824,17 +828,17 @@ PatchMemoryDevice (
   IN     SMBIOS_HANDLE                   MemoryArrayHandle,
   IN     APPLE_SMBIOS_STRUCTURE_POINTER  Original,
   IN     UINT16                          Index,
-     OUT SMBIOS_HANDLE                   *Handle
+  OUT SMBIOS_HANDLE                      *Handle
   )
 {
-  UINT8        MinLength;
-  UINT8        StringIndex;
-  UINT8        FormFactor;
+  UINT8  MinLength;
+  UINT8  StringIndex;
+  UINT8  FormFactor;
 
-  *Handle       = OcSmbiosInvalidHandle;
-  MinLength     = sizeof (*Original.Standard.Type17);
-  StringIndex   = 0;
-  FormFactor    = SmbiosGetFormFactor (Data, Original);
+  *Handle     = OcSmbiosInvalidHandle;
+  MinLength   = sizeof (*Original.Standard.Type17);
+  StringIndex = 0;
+  FormFactor  = SmbiosGetFormFactor (Data, Original);
 
   if (EFI_ERROR (SmbiosInitialiseStruct (Table, SMBIOS_TYPE_MEMORY_DEVICE, MinLength, Index))) {
     return;
@@ -903,20 +907,20 @@ PatchMemoryDevice (
 STATIC
 VOID
 CreateMemoryDevice (
-  IN OUT OC_SMBIOS_TABLE                 *Table,
-  IN     OC_SMBIOS_DATA                  *Data,
-  IN     OC_SMBIOS_MEMORY_DEVICE_DATA    *DeviceData,
-  IN     SMBIOS_HANDLE                   MemoryArrayHandle,
-  IN     UINT16                          Index,
-     OUT SMBIOS_HANDLE                   *Handle
+  IN OUT OC_SMBIOS_TABLE               *Table,
+  IN     OC_SMBIOS_DATA                *Data,
+  IN     OC_SMBIOS_MEMORY_DEVICE_DATA  *DeviceData,
+  IN     SMBIOS_HANDLE                 MemoryArrayHandle,
+  IN     UINT16                        Index,
+  OUT SMBIOS_HANDLE                    *Handle
   )
 {
-  UINT8    MinLength;
-  UINT8    StringIndex;
+  UINT8  MinLength;
+  UINT8  StringIndex;
 
-  *Handle       = OcSmbiosInvalidHandle;
-  MinLength     = sizeof (*Table->CurrentPtr.Standard.Type17);
-  StringIndex   = 0;
+  *Handle     = OcSmbiosInvalidHandle;
+  MinLength   = sizeof (*Table->CurrentPtr.Standard.Type17);
+  StringIndex = 0;
 
   if (EFI_ERROR (SmbiosInitialiseStruct (Table, SMBIOS_TYPE_MEMORY_DEVICE, MinLength, Index))) {
     return;
@@ -933,7 +937,7 @@ CreateMemoryDevice (
   // Sizes over 32GB-1MB need to be represented in the Extended Size field.
   // Both will be represented in MB.
   //
-  if ((UINT64)(* DeviceData->Size) * SIZE_1MB < SIZE_32GB - SIZE_1MB) {
+  if ((UINT64)(*DeviceData->Size) * SIZE_1MB < SIZE_32GB - SIZE_1MB) {
     Table->CurrentPtr.Standard.Type17->Size         = (UINT16)*DeviceData->Size;
     Table->CurrentPtr.Standard.Type17->ExtendedSize = 0;
   } else {
@@ -942,17 +946,17 @@ CreateMemoryDevice (
   }
 
   SmbiosOverrideString (Table, DeviceData->AssetTag, &StringIndex);
-  Table->CurrentPtr.Standard.Type17->AssetTag       = StringIndex;
+  Table->CurrentPtr.Standard.Type17->AssetTag = StringIndex;
   SmbiosOverrideString (Table, DeviceData->BankLocator, &StringIndex);
-  Table->CurrentPtr.Standard.Type17->BankLocator    = StringIndex;
+  Table->CurrentPtr.Standard.Type17->BankLocator = StringIndex;
   SmbiosOverrideString (Table, DeviceData->DeviceLocator, &StringIndex);
-  Table->CurrentPtr.Standard.Type17->DeviceLocator  = StringIndex;
+  Table->CurrentPtr.Standard.Type17->DeviceLocator = StringIndex;
   SmbiosOverrideString (Table, DeviceData->Manufacturer, &StringIndex);
-  Table->CurrentPtr.Standard.Type17->Manufacturer   = StringIndex;
+  Table->CurrentPtr.Standard.Type17->Manufacturer = StringIndex;
   SmbiosOverrideString (Table, DeviceData->PartNumber, &StringIndex);
-  Table->CurrentPtr.Standard.Type17->PartNumber     = StringIndex;
+  Table->CurrentPtr.Standard.Type17->PartNumber = StringIndex;
   SmbiosOverrideString (Table, DeviceData->SerialNumber, &StringIndex);
-  Table->CurrentPtr.Standard.Type17->SerialNumber   = StringIndex;
+  Table->CurrentPtr.Standard.Type17->SerialNumber = StringIndex;
 
   //
   // Assign the parent memory array handle.
@@ -986,7 +990,7 @@ PatchMemoryMappedAddress (
   IN OUT UINT16                          *MappingNum
   )
 {
-  UINT8   MinLength;
+  UINT8  MinLength;
 
   MinLength = sizeof (*Original.Standard.Type19);
 
@@ -1032,10 +1036,10 @@ PatchMemoryMappedDevice (
   IN     UINT16                          MappingNum
   )
 {
-  UINT8    MinLength;
-  UINT16   MapIndex;
+  UINT8   MinLength;
+  UINT16  MapIndex;
 
-  MinLength     = sizeof (*Original.Standard.Type20);
+  MinLength = sizeof (*Original.Standard.Type20);
 
   if (EFI_ERROR (SmbiosInitialiseStruct (Table, SMBIOS_TYPE_MEMORY_DEVICE_MAPPED_ADDRESS, MinLength, Index))) {
     return;
@@ -1046,7 +1050,7 @@ PatchMemoryMappedDevice (
   Table->CurrentPtr.Standard.Type20->MemoryDeviceHandle = MemoryDeviceHandle;
 
   Table->CurrentPtr.Standard.Type20->MemoryArrayMappedAddressHandle = 0xFFFF;
-  if (Original.Raw != NULL && SMBIOS_ACCESSIBLE (Original, Standard.Type20->MemoryArrayMappedAddressHandle)) {
+  if ((Original.Raw != NULL) && SMBIOS_ACCESSIBLE (Original, Standard.Type20->MemoryArrayMappedAddressHandle)) {
     for (MapIndex = 0; MapIndex < MappingNum; MapIndex++) {
       if (Mapping[MapIndex].Old == Original.Standard.Type20->MemoryArrayMappedAddressHandle) {
         Table->CurrentPtr.Standard.Type20->MemoryArrayMappedAddressHandle = Mapping[MapIndex].New;
@@ -1129,8 +1133,8 @@ PatchBootInformation (
   APPLE_SMBIOS_STRUCTURE_POINTER  Original;
   UINT8                           MinLength;
 
-  Original    = SmbiosGetOriginalStructure (SMBIOS_TYPE_SYSTEM_BOOT_INFORMATION, 1);
-  MinLength   = sizeof (*Original.Standard.Type32);
+  Original  = SmbiosGetOriginalStructure (SMBIOS_TYPE_SYSTEM_BOOT_INFORMATION, 1);
+  MinLength = sizeof (*Original.Standard.Type32);
 
   if (EFI_ERROR (SmbiosInitialiseStruct (Table, SMBIOS_TYPE_SYSTEM_BOOT_INFORMATION, MinLength, 1))) {
     return;
@@ -1159,31 +1163,31 @@ CreateOrPatchAppleFirmwareVolume (
   APPLE_SMBIOS_STRUCTURE_POINTER  Original;
   UINT8                           MinLength;
 
-  UINT32 FirmwareFeatures;
-  UINT32 FirmwareFeaturesMask;
-  UINT32 ExtendedFirmwareFeatures;
-  UINT32 ExtendedFirmwareFeaturesMask;
+  UINT32  FirmwareFeatures;
+  UINT32  FirmwareFeaturesMask;
+  UINT32  ExtendedFirmwareFeatures;
+  UINT32  ExtendedFirmwareFeaturesMask;
 
   if (HasAppleSMBIOS) {
-    Original      = SmbiosGetOriginalStructure (APPLE_SMBIOS_TYPE_FIRMWARE_INFORMATION, 1);
+    Original = SmbiosGetOriginalStructure (APPLE_SMBIOS_TYPE_FIRMWARE_INFORMATION, 1);
   } else {
-    Original.Raw  = NULL;
+    Original.Raw = NULL;
   }
 
-  MinLength   = sizeof (*Table->CurrentPtr.Type128);
+  MinLength = sizeof (*Table->CurrentPtr.Type128);
 
   if (EFI_ERROR (SmbiosInitialiseStruct (Table, APPLE_SMBIOS_TYPE_FIRMWARE_INFORMATION, MinLength, 1))) {
     return;
   }
 
-  FirmwareFeatures             = (UINT32) BitFieldRead64 (Data->FirmwareFeatures    ,  0, 31);
-  FirmwareFeaturesMask         = (UINT32) BitFieldRead64 (Data->FirmwareFeaturesMask,  0, 31);
-  ExtendedFirmwareFeatures     = (UINT32) BitFieldRead64 (Data->FirmwareFeatures    , 32, 63);
-  ExtendedFirmwareFeaturesMask = (UINT32) BitFieldRead64 (Data->FirmwareFeaturesMask, 32, 63);
+  FirmwareFeatures             = (UINT32)BitFieldRead64 (Data->FirmwareFeatures, 0, 31);
+  FirmwareFeaturesMask         = (UINT32)BitFieldRead64 (Data->FirmwareFeaturesMask, 0, 31);
+  ExtendedFirmwareFeatures     = (UINT32)BitFieldRead64 (Data->FirmwareFeatures, 32, 63);
+  ExtendedFirmwareFeaturesMask = (UINT32)BitFieldRead64 (Data->FirmwareFeaturesMask, 32, 63);
 
-  SMBIOS_OVERRIDE_V (Table, Type128->FirmwareFeatures            , Original, Data->FirmwareFeatures     == 0 ? NULL : &FirmwareFeatures            , NULL);
-  SMBIOS_OVERRIDE_V (Table, Type128->FirmwareFeaturesMask        , Original, Data->FirmwareFeaturesMask == 0 ? NULL : &FirmwareFeaturesMask        , NULL);
-  SMBIOS_OVERRIDE_V (Table, Type128->ExtendedFirmwareFeatures    , Original, Data->FirmwareFeatures     == 0 ? NULL : &ExtendedFirmwareFeatures    , NULL);
+  SMBIOS_OVERRIDE_V (Table, Type128->FirmwareFeatures, Original, Data->FirmwareFeatures     == 0 ? NULL : &FirmwareFeatures, NULL);
+  SMBIOS_OVERRIDE_V (Table, Type128->FirmwareFeaturesMask, Original, Data->FirmwareFeaturesMask == 0 ? NULL : &FirmwareFeaturesMask, NULL);
+  SMBIOS_OVERRIDE_V (Table, Type128->ExtendedFirmwareFeatures, Original, Data->FirmwareFeatures     == 0 ? NULL : &ExtendedFirmwareFeatures, NULL);
   SMBIOS_OVERRIDE_V (Table, Type128->ExtendedFirmwareFeaturesMask, Original, Data->FirmwareFeaturesMask == 0 ? NULL : &ExtendedFirmwareFeaturesMask, NULL);
 
   SmbiosFinaliseStruct (Table);
@@ -1232,17 +1236,17 @@ CreateAppleProcessorSpeed (
   IN     OC_CPU_INFO      *CpuInfo
   )
 {
-#ifndef OC_PROVIDE_APPLE_PROCESSOR_BUS_SPEED
+ #ifndef OC_PROVIDE_APPLE_PROCESSOR_BUS_SPEED
   //
   // This table is not added in all modern Macs.
   //
-  (VOID) Table;
-  (VOID) Data;
-  (VOID) CpuInfo;
-#else
-  UINT8                           MinLength;
+  (VOID)Table;
+  (VOID)Data;
+  (VOID)CpuInfo;
+ #else
+  UINT8  MinLength;
 
-  MinLength   = sizeof (*Table->CurrentPtr.Type132);
+  MinLength = sizeof (*Table->CurrentPtr.Type132);
 
   if (EFI_ERROR (SmbiosInitialiseStruct (Table, APPLE_SMBIOS_TYPE_PROCESSOR_BUS_SPEED, MinLength, 1))) {
     return;
@@ -1251,7 +1255,7 @@ CreateAppleProcessorSpeed (
   Table->CurrentPtr.Type132->ProcessorBusSpeed = CpuInfo->ExternalClock * 4;
 
   SmbiosFinaliseStruct (Table);
-#endif
+ #endif
 }
 
 /** Type 133
@@ -1272,19 +1276,19 @@ CreateOrPatchApplePlatformFeature (
   UINT8                           MinLength;
 
   if (HasAppleSMBIOS) {
-    Original      = SmbiosGetOriginalStructure (APPLE_SMBIOS_TYPE_PLATFORM_FEATURE, 1);
+    Original = SmbiosGetOriginalStructure (APPLE_SMBIOS_TYPE_PLATFORM_FEATURE, 1);
   } else {
-    Original.Raw  = NULL;
+    Original.Raw = NULL;
   }
 
   //
   // Older Macs do not support PlatformFeature table.
   //
-  if (Data->PlatformFeature == NULL && Original.Raw == NULL) {
+  if ((Data->PlatformFeature == NULL) && (Original.Raw == NULL)) {
     return;
   }
 
-  MinLength   = sizeof (*Table->CurrentPtr.Type133);
+  MinLength = sizeof (*Table->CurrentPtr.Type133);
 
   if (EFI_ERROR (SmbiosInitialiseStruct (Table, APPLE_SMBIOS_TYPE_PLATFORM_FEATURE, MinLength, 1))) {
     return;
@@ -1313,19 +1317,19 @@ CreateOrPatchAppleSmcInformation (
   UINT8                           MinLength;
 
   if (HasAppleSMBIOS) {
-    Original      = SmbiosGetOriginalStructure (APPLE_SMBIOS_TYPE_SMC_INFORMATION, 1);
+    Original = SmbiosGetOriginalStructure (APPLE_SMBIOS_TYPE_SMC_INFORMATION, 1);
   } else {
-    Original.Raw  = NULL;
+    Original.Raw = NULL;
   }
 
   //
   // Newer Macs do not support SmcVersion table.
   //
-  if (Data->SmcVersion == NULL && Original.Raw == NULL) {
+  if ((Data->SmcVersion == NULL) && (Original.Raw == NULL)) {
     return;
   }
 
-  MinLength   = sizeof (*Table->CurrentPtr.Type134);
+  MinLength = sizeof (*Table->CurrentPtr.Type134);
 
   if (EFI_ERROR (SmbiosInitialiseStruct (Table, APPLE_SMBIOS_TYPE_SMC_INFORMATION, MinLength, 1))) {
     return;
@@ -1348,9 +1352,9 @@ CreateSmBiosEndOfTable (
   IN     OC_SMBIOS_DATA   *Data
   )
 {
-  UINT8                           MinLength;
+  UINT8  MinLength;
 
-  MinLength   = sizeof (*Table->CurrentPtr.Standard.Type127);
+  MinLength = sizeof (*Table->CurrentPtr.Standard.Type127);
 
   if (EFI_ERROR (SmbiosInitialiseStruct (Table, SMBIOS_TYPE_END_OF_TABLE, MinLength, 1))) {
     return;
@@ -1380,14 +1384,14 @@ SmbiosHandleLegacyRegion (
   }
 
   if (Unlock) {
-    if (((UINTN) mOriginalSmbios) < BASE_1MB) {
+    if (((UINTN)mOriginalSmbios) < BASE_1MB) {
       //
       // Enable write access to DMI anchor
       //
       Status = LegacyRegionUnlock (
-        (UINT32) ((UINTN) mOriginalSmbios & 0xFFFF8000ULL),
-        EFI_PAGE_SIZE
-        );
+                 (UINT32)((UINTN)mOriginalSmbios & 0xFFFF8000ULL),
+                 EFI_PAGE_SIZE
+                 );
 
       if (EFI_ERROR (Status)) {
         DEBUG ((DEBUG_INFO, "OCSMB: LegacyRegionUnlock DMI anchor failure - %r\n", Status));
@@ -1395,14 +1399,14 @@ SmbiosHandleLegacyRegion (
       }
     }
 
-    if (((UINTN) mOriginalSmbios->TableAddress) < BASE_1MB) {
+    if (((UINTN)mOriginalSmbios->TableAddress) < BASE_1MB) {
       //
       // Enable write access to DMI table
       //
       Status = LegacyRegionUnlock (
-        (UINT32) ((UINTN) mOriginalSmbios->TableAddress & 0xFFFF8000ULL),
-        EFI_PAGES_TO_SIZE (EFI_SIZE_TO_PAGES (mOriginalSmbios->TableLength))
-        );
+                 (UINT32)((UINTN)mOriginalSmbios->TableAddress & 0xFFFF8000ULL),
+                 EFI_PAGES_TO_SIZE (EFI_SIZE_TO_PAGES (mOriginalSmbios->TableLength))
+                 );
 
       if (EFI_ERROR (Status)) {
         DEBUG ((DEBUG_INFO, "OCSMB: LegacyRegionUnlock DMI table failure - %r\n", Status));
@@ -1410,14 +1414,14 @@ SmbiosHandleLegacyRegion (
       }
     }
   } else {
-    if ((UINTN) mOriginalSmbios->TableAddress < BASE_1MB) {
+    if ((UINTN)mOriginalSmbios->TableAddress < BASE_1MB) {
       //
       // Lock write access To DMI table
       //
       Status = LegacyRegionLock (
-        (UINT32) ((UINTN) mOriginalSmbios->TableAddress & 0xFFFF8000ULL),
-        EFI_PAGES_TO_SIZE (EFI_SIZE_TO_PAGES (mOriginalSmbios->TableLength))
-        );
+                 (UINT32)((UINTN)mOriginalSmbios->TableAddress & 0xFFFF8000ULL),
+                 EFI_PAGES_TO_SIZE (EFI_SIZE_TO_PAGES (mOriginalSmbios->TableLength))
+                 );
 
       if (EFI_ERROR (Status)) {
         DEBUG ((DEBUG_INFO, "OCSMB: LegacyRegionLock DMI table failure - %r\n", Status));
@@ -1425,14 +1429,14 @@ SmbiosHandleLegacyRegion (
       }
     }
 
-    if ((UINTN) mOriginalSmbios < BASE_1MB) {
+    if ((UINTN)mOriginalSmbios < BASE_1MB) {
       //
       // Lock write access To DMI anchor
       //
       Status = LegacyRegionLock (
-        (UINT32) ((UINTN) mOriginalSmbios & 0xFFFF8000ULL),
-        EFI_PAGE_SIZE
-        );
+                 (UINT32)((UINTN)mOriginalSmbios & 0xFFFF8000ULL),
+                 EFI_PAGE_SIZE
+                 );
 
       if (EFI_ERROR (Status)) {
         DEBUG ((DEBUG_INFO, "OCSMB: LegacyRegionLock DMI anchor failure - %r\n", Status));
@@ -1458,10 +1462,10 @@ OcSmbiosTablePrepare (
   ZeroMem (SmbiosTable, sizeof (*SmbiosTable));
   SmbiosTable->Handle = OcSmbiosAutomaticHandle;
 
-  Status  = EfiGetSystemConfigurationTable (
-              &gEfiSmbiosTableGuid,
-              (VOID **) &mOriginalSmbios
-              );
+  Status = EfiGetSystemConfigurationTable (
+             &gEfiSmbiosTableGuid,
+             (VOID **)&mOriginalSmbios
+             );
 
   //
   // Perform basic sanity checks. We assume EfiGetSystemConfigurationTable returns trusted data
@@ -1469,17 +1473,25 @@ OcSmbiosTablePrepare (
   //
   if (!EFI_ERROR (Status)) {
     if (mOriginalSmbios->EntryPointLength < sizeof (SMBIOS_TABLE_ENTRY_POINT)) {
-      DEBUG ((DEBUG_WARN, "OCSMB: SmbiosLookupHost entry is too small - %u/%u bytes\n",
-        mOriginalSmbios->EntryPointLength, (UINT32) sizeof (SMBIOS_TABLE_ENTRY_POINT)));
+      DEBUG ((
+        DEBUG_WARN,
+        "OCSMB: SmbiosLookupHost entry is too small - %u/%u bytes\n",
+        mOriginalSmbios->EntryPointLength,
+        (UINT32)sizeof (SMBIOS_TABLE_ENTRY_POINT)
+        ));
       mOriginalSmbios = NULL;
-    } else if (mOriginalSmbios->TableAddress == 0 || mOriginalSmbios->TableLength == 0) {
+    } else if ((mOriginalSmbios->TableAddress == 0) || (mOriginalSmbios->TableLength == 0)) {
       STATIC_ASSERT (
         sizeof (mOriginalSmbios->TableLength) == sizeof (UINT16)
-        && SMBIOS_TABLE_MAX_LENGTH == MAX_UINT16,
+                    && SMBIOS_TABLE_MAX_LENGTH == MAX_UINT16,
         "mOriginalTable->TableLength may exceed SMBIOS_TABLE_MAX_LENGTH"
         );
-      DEBUG ((DEBUG_WARN, "OCSMB: SmbiosLookupHost entry has invalid table - %08X of %u bytes\n",
-        mOriginalSmbios->TableAddress, mOriginalSmbios->TableLength));
+      DEBUG ((
+        DEBUG_WARN,
+        "OCSMB: SmbiosLookupHost entry has invalid table - %08X of %u bytes\n",
+        mOriginalSmbios->TableAddress,
+        mOriginalSmbios->TableLength
+        ));
       mOriginalSmbios = NULL;
     }
   } else {
@@ -1489,24 +1501,32 @@ OcSmbiosTablePrepare (
   //
   // Do similar checks on SMBIOSv3.
   //
-  Status  = EfiGetSystemConfigurationTable (
-              &gEfiSmbios3TableGuid,
-              (VOID **) &mOriginalSmbios3
-              );
+  Status = EfiGetSystemConfigurationTable (
+             &gEfiSmbios3TableGuid,
+             (VOID **)&mOriginalSmbios3
+             );
 
   if (!EFI_ERROR (Status)) {
     if (mOriginalSmbios3->EntryPointLength < sizeof (SMBIOS_TABLE_3_0_ENTRY_POINT)) {
-      DEBUG ((DEBUG_INFO, "OCSMB: SmbiosLookupHost v3 entry is too small - %u/%u bytes\n",
-        mOriginalSmbios3->EntryPointLength, (UINT32) sizeof (SMBIOS_TABLE_3_0_ENTRY_POINT)));
+      DEBUG ((
+        DEBUG_INFO,
+        "OCSMB: SmbiosLookupHost v3 entry is too small - %u/%u bytes\n",
+        mOriginalSmbios3->EntryPointLength,
+        (UINT32)sizeof (SMBIOS_TABLE_3_0_ENTRY_POINT)
+        ));
       mOriginalSmbios3 = NULL;
-    } else if (mOriginalSmbios3->TableAddress == 0 || mOriginalSmbios3->TableMaximumSize == 0) {
+    } else if ((mOriginalSmbios3->TableAddress == 0) || (mOriginalSmbios3->TableMaximumSize == 0)) {
       STATIC_ASSERT (
         sizeof (mOriginalSmbios3->TableMaximumSize) == sizeof (UINT32)
-        && SMBIOS_3_0_TABLE_MAX_LENGTH == MAX_UINT32,
+                    && SMBIOS_3_0_TABLE_MAX_LENGTH == MAX_UINT32,
         "mOriginalSmbios3->TableMaximumSize may exceed SMBIOS_3_0_TABLE_MAX_LENGTH"
         );
-      DEBUG ((DEBUG_INFO, "OCSMB: SmbiosLookupHost v3 entry has invalid table - %016LX of %u bytes\n",
-        mOriginalSmbios3->TableAddress, mOriginalSmbios3->TableMaximumSize));
+      DEBUG ((
+        DEBUG_INFO,
+        "OCSMB: SmbiosLookupHost v3 entry has invalid table - %016LX of %u bytes\n",
+        mOriginalSmbios3->TableAddress,
+        mOriginalSmbios3->TableMaximumSize
+        ));
       mOriginalSmbios3 = NULL;
     }
   } else {
@@ -1519,10 +1539,10 @@ OcSmbiosTablePrepare (
 
   if (mOriginalSmbios != NULL) {
     mOriginalTableSize = mOriginalSmbios->TableLength;
-    mOriginalTable.Raw = (UINT8 *)(UINTN) mOriginalSmbios->TableAddress;
+    mOriginalTable.Raw = (UINT8 *)(UINTN)mOriginalSmbios->TableAddress;
   } else if (mOriginalSmbios3 != NULL) {
     mOriginalTableSize = mOriginalSmbios3->TableMaximumSize;
-    mOriginalTable.Raw = (UINT8 *)(UINTN) mOriginalSmbios3->TableAddress;
+    mOriginalTable.Raw = (UINT8 *)(UINTN)mOriginalSmbios3->TableAddress;
   }
 
   if (mOriginalSmbios != NULL) {
@@ -1532,7 +1552,7 @@ OcSmbiosTablePrepare (
       mOriginalSmbios,
       mOriginalSmbios->MajorVersion,
       mOriginalSmbios->MinorVersion,
-      (UINT64) mOriginalSmbios->TableAddress,
+      (UINT64)mOriginalSmbios->TableAddress,
       mOriginalSmbios->TableLength
       ));
   }
@@ -1556,7 +1576,6 @@ OcSmbiosTablePrepare (
 
   return Status;
 }
-
 
 VOID
 OcSmbiosTableFree (
@@ -1584,43 +1603,52 @@ SmbiosTableAllocate (
   EFI_STATUS            Status;
   EFI_PHYSICAL_ADDRESS  TmpAddr;
 
-  TablePages         = EFI_SIZE_TO_PAGES (TableLength);
-  *TableEntryPoint   = NULL;
-  *TableEntryPoint3  = NULL;
-  *TableAddress      = NULL;
-  *TableAddress3     = NULL;
+  TablePages        = EFI_SIZE_TO_PAGES (TableLength);
+  *TableEntryPoint  = NULL;
+  *TableEntryPoint3 = NULL;
+  *TableAddress     = NULL;
+  *TableAddress3    = NULL;
 
   TmpAddr = (BASE_4GB - 1);
-  Status = gBS->AllocatePages (AllocateMaxAddress, EfiReservedMemoryType, TablePages, &TmpAddr);
+  Status  = gBS->AllocatePages (AllocateMaxAddress, EfiReservedMemoryType, TablePages, &TmpAddr);
   if (!EFI_ERROR (Status)) {
     *TableAddress = (VOID *)(UINTN)TmpAddr;
-    TmpAddr = (BASE_4GB - 1);
-    Status = gBS->AllocatePages (AllocateMaxAddress, EfiReservedMemoryType, 1,  &TmpAddr);
+    TmpAddr       = (BASE_4GB - 1);
+    Status        = gBS->AllocatePages (AllocateMaxAddress, EfiReservedMemoryType, 1, &TmpAddr);
     if (!EFI_ERROR (Status)) {
       *TableEntryPoint = (SMBIOS_TABLE_ENTRY_POINT *)(UINTN)TmpAddr;
       if (mOriginalSmbios3 != NULL) {
         TmpAddr = (BASE_4GB - 1);
-        Status = gBS->AllocatePages (AllocateMaxAddress, EfiReservedMemoryType, 1, &TmpAddr);
+        Status  = gBS->AllocatePages (AllocateMaxAddress, EfiReservedMemoryType, 1, &TmpAddr);
         if (!EFI_ERROR (Status)) {
           *TableEntryPoint3 = (SMBIOS_TABLE_3_0_ENTRY_POINT *)(UINTN)TmpAddr;
-          *TableAddress3 = *TableAddress;
+          *TableAddress3    = *TableAddress;
         }
       }
     }
   }
 
   if (EFI_ERROR (Status)) {
-    DEBUG ((DEBUG_WARN, "OCSMB: SmbiosTableAllocate aborts as it cannot allocate SMBIOS pages with %d %d %d - %r\n",
-      *TableEntryPoint != NULL, *TableAddress != NULL, *TableEntryPoint3 != NULL, Status));
+    DEBUG ((
+      DEBUG_WARN,
+      "OCSMB: SmbiosTableAllocate aborts as it cannot allocate SMBIOS pages with %d %d %d - %r\n",
+      *TableEntryPoint != NULL,
+      *TableAddress != NULL,
+      *TableEntryPoint3 != NULL,
+      Status
+      ));
     if (*TableEntryPoint != NULL) {
       FreePages (*TableEntryPoint, 1);
     }
+
     if (*TableEntryPoint3 != NULL) {
       FreePages (*TableEntryPoint3, 1);
     }
+
     if (*TableAddress != NULL) {
       FreePages (*TableAddress, TablePages);
     }
+
     return Status;
   }
 
@@ -1647,31 +1675,32 @@ SmbiosTableApply (
   VOID                          *TableAddress;
   VOID                          *TableAddress3;
 
-  ASSERT (Mode == OcSmbiosUpdateCreate
-    || Mode == OcSmbiosUpdateOverwrite
-    || Mode == OcSmbiosUpdateCustom
-    || Mode == OcSmbiosUpdateTryOverwrite
+  ASSERT (
+    Mode == OcSmbiosUpdateCreate
+         || Mode == OcSmbiosUpdateOverwrite
+         || Mode == OcSmbiosUpdateCustom
+         || Mode == OcSmbiosUpdateTryOverwrite
     );
 
   //
   // We check maximum table size during table extension, so this cast is valid.
   //
-  TableLength = (UINT16) (SmbiosTable->CurrentPtr.Raw - SmbiosTable->Table);
+  TableLength = (UINT16)(SmbiosTable->CurrentPtr.Raw - SmbiosTable->Table);
 
   DEBUG ((
     DEBUG_INFO,
     "OCSMB: Applying %u (%d) prev %p (%u/%u), %p (%u/%u)\n",
-    (UINT32) TableLength,
+    (UINT32)TableLength,
     Mode,
     mOriginalSmbios,
-    (UINT32) (mOriginalSmbios != NULL ? mOriginalSmbios->TableLength : 0),
-    (UINT32) (mOriginalSmbios != NULL ? mOriginalSmbios->EntryPointLength : 0),
+    (UINT32)(mOriginalSmbios != NULL ? mOriginalSmbios->TableLength : 0),
+    (UINT32)(mOriginalSmbios != NULL ? mOriginalSmbios->EntryPointLength : 0),
     mOriginalSmbios3,
-    (UINT32) (mOriginalSmbios3 != NULL ? mOriginalSmbios3->TableMaximumSize : 0),
-    (UINT32) (mOriginalSmbios3 != NULL ? mOriginalSmbios3->EntryPointLength : 0)
+    (UINT32)(mOriginalSmbios3 != NULL ? mOriginalSmbios3->TableMaximumSize : 0),
+    (UINT32)(mOriginalSmbios3 != NULL ? mOriginalSmbios3->EntryPointLength : 0)
     ));
 
-  if (Mode == OcSmbiosUpdateTryOverwrite || Mode == OcSmbiosUpdateOverwrite) {
+  if ((Mode == OcSmbiosUpdateTryOverwrite) || (Mode == OcSmbiosUpdateOverwrite)) {
     Status = SmbiosHandleLegacyRegion (TRUE);
 
     if (EFI_ERROR (Status)) {
@@ -1684,25 +1713,42 @@ SmbiosTableApply (
       // Fallback to create mode.
       //
       Mode = OcSmbiosUpdateCreate;
-    } else if (mOriginalSmbios == NULL || TableLength > mOriginalSmbios->TableLength
-      || mOriginalSmbios->EntryPointLength < sizeof (SMBIOS_TABLE_ENTRY_POINT)) {
-      DEBUG ((DEBUG_WARN, "OCSMB: Apply(%u) cannot update old SMBIOS (%p, %u, %u) with %u\n",
-        Mode, mOriginalSmbios, mOriginalSmbios != NULL ? mOriginalSmbios->TableLength : 0,
-        mOriginalSmbios != NULL ? mOriginalSmbios->EntryPointLength : 0, TableLength));
+    } else if (  (mOriginalSmbios == NULL) || (TableLength > mOriginalSmbios->TableLength)
+              || (mOriginalSmbios->EntryPointLength < sizeof (SMBIOS_TABLE_ENTRY_POINT)))
+    {
+      DEBUG ((
+        DEBUG_WARN,
+        "OCSMB: Apply(%u) cannot update old SMBIOS (%p, %u, %u) with %u\n",
+        Mode,
+        mOriginalSmbios,
+        mOriginalSmbios != NULL ? mOriginalSmbios->TableLength : 0,
+        mOriginalSmbios != NULL ? mOriginalSmbios->EntryPointLength : 0,
+        TableLength
+        ));
       if (Mode == OcSmbiosUpdateOverwrite) {
         return EFI_OUT_OF_RESOURCES;
       }
+
       //
       // Fallback to create mode.
       //
       Mode = OcSmbiosUpdateCreate;
-    } else if (mOriginalSmbios3 != NULL && (TableLength > mOriginalSmbios3->TableMaximumSize
-      || mOriginalSmbios3->EntryPointLength < sizeof (SMBIOS_TABLE_3_0_ENTRY_POINT))) {
-      DEBUG ((DEBUG_INFO, "OCSMB: Apply(%u) cannot fit SMBIOSv3 (%p, %u, %u) with %u\n",
-        Mode, mOriginalSmbios3, mOriginalSmbios3->EntryPointLength, mOriginalSmbios3->TableMaximumSize, TableLength));
+    } else if ((mOriginalSmbios3 != NULL) && (  (TableLength > mOriginalSmbios3->TableMaximumSize)
+                                             || (mOriginalSmbios3->EntryPointLength < sizeof (SMBIOS_TABLE_3_0_ENTRY_POINT))))
+    {
+      DEBUG ((
+        DEBUG_INFO,
+        "OCSMB: Apply(%u) cannot fit SMBIOSv3 (%p, %u, %u) with %u\n",
+        Mode,
+        mOriginalSmbios3,
+        mOriginalSmbios3->EntryPointLength,
+        mOriginalSmbios3->TableMaximumSize,
+        TableLength
+        ));
       if (Mode == OcSmbiosUpdateOverwrite) {
         return EFI_OUT_OF_RESOURCES;
       }
+
       Mode = OcSmbiosUpdateCreate;
     } else {
       Mode = OcSmbiosUpdateOverwrite;
@@ -1713,23 +1759,23 @@ SmbiosTableApply (
 
   if (Mode != OcSmbiosUpdateOverwrite) {
     Status = SmbiosTableAllocate (
-      TableLength,
-      &TableEntryPoint,
-      &TableEntryPoint3,
-      &TableAddress,
-      &TableAddress3
-      );
+               TableLength,
+               &TableEntryPoint,
+               &TableEntryPoint3,
+               &TableAddress,
+               &TableAddress3
+               );
     if (EFI_ERROR (Status)) {
       return Status;
     }
   } else {
-    TableEntryPoint = mOriginalSmbios;
+    TableEntryPoint  = mOriginalSmbios;
     TableEntryPoint3 = mOriginalSmbios3;
-    TableAddress = (VOID *)(UINTN) TableEntryPoint->TableAddress;
+    TableAddress     = (VOID *)(UINTN)TableEntryPoint->TableAddress;
     ZeroMem (TableEntryPoint, sizeof (SMBIOS_TABLE_ENTRY_POINT));
     ZeroMem (TableAddress, TableEntryPoint->TableLength);
     if (TableEntryPoint3 != NULL) {
-      TableAddress3 = (VOID *)(UINTN) TableEntryPoint3->TableAddress;
+      TableAddress3 = (VOID *)(UINTN)TableEntryPoint3->TableAddress;
       ZeroMem (TableEntryPoint3, sizeof (SMBIOS_TABLE_3_0_ENTRY_POINT));
       ZeroMem (TableAddress3, TableEntryPoint3->TableMaximumSize);
     } else {
@@ -1743,7 +1789,7 @@ SmbiosTableApply (
     TableLength
     );
 
-  if (TableAddress3 != NULL && TableAddress3 != TableAddress) {
+  if ((TableAddress3 != NULL) && (TableAddress3 != TableAddress)) {
     CopyMem (
       TableAddress3,
       SmbiosTable->Table,
@@ -1751,48 +1797,48 @@ SmbiosTableApply (
       );
   }
 
-  TableEntryPoint->AnchorString[0]             = (UINT8) '_';
-  TableEntryPoint->AnchorString[1]             = (UINT8) 'S';
-  TableEntryPoint->AnchorString[2]             = (UINT8) 'M';
-  TableEntryPoint->AnchorString[3]             = (UINT8) '_';
+  TableEntryPoint->AnchorString[0]             = (UINT8)'_';
+  TableEntryPoint->AnchorString[1]             = (UINT8)'S';
+  TableEntryPoint->AnchorString[2]             = (UINT8)'M';
+  TableEntryPoint->AnchorString[3]             = (UINT8)'_';
   TableEntryPoint->EntryPointLength            = sizeof (SMBIOS_TABLE_ENTRY_POINT);
   TableEntryPoint->MajorVersion                = 3;
   TableEntryPoint->MinorVersion                = 2;
   TableEntryPoint->MaxStructureSize            = SmbiosTable->MaxStructureSize;
-  TableEntryPoint->IntermediateAnchorString[0] = (UINT8) '_';
-  TableEntryPoint->IntermediateAnchorString[1] = (UINT8) 'D';
-  TableEntryPoint->IntermediateAnchorString[2] = (UINT8) 'M';
-  TableEntryPoint->IntermediateAnchorString[3] = (UINT8) 'I';
-  TableEntryPoint->IntermediateAnchorString[4] = (UINT8) '_';
+  TableEntryPoint->IntermediateAnchorString[0] = (UINT8)'_';
+  TableEntryPoint->IntermediateAnchorString[1] = (UINT8)'D';
+  TableEntryPoint->IntermediateAnchorString[2] = (UINT8)'M';
+  TableEntryPoint->IntermediateAnchorString[3] = (UINT8)'I';
+  TableEntryPoint->IntermediateAnchorString[4] = (UINT8)'_';
   TableEntryPoint->TableLength                 = TableLength;
-  TableEntryPoint->TableAddress                = (UINT32)(UINTN) TableAddress;
+  TableEntryPoint->TableAddress                = (UINT32)(UINTN)TableAddress;
   TableEntryPoint->NumberOfSmbiosStructures    = SmbiosTable->NumberOfStructures;
   TableEntryPoint->SmbiosBcdRevision           = 0x32;
   TableEntryPoint->IntermediateChecksum        = CalculateCheckSum8 (
-    (UINT8 *) TableEntryPoint + OFFSET_OF (SMBIOS_TABLE_ENTRY_POINT, IntermediateAnchorString),
-    TableEntryPoint->EntryPointLength - OFFSET_OF (SMBIOS_TABLE_ENTRY_POINT, IntermediateAnchorString)
-    );
+                                                   (UINT8 *)TableEntryPoint + OFFSET_OF (SMBIOS_TABLE_ENTRY_POINT, IntermediateAnchorString),
+                                                   TableEntryPoint->EntryPointLength - OFFSET_OF (SMBIOS_TABLE_ENTRY_POINT, IntermediateAnchorString)
+                                                   );
   TableEntryPoint->EntryPointStructureChecksum = CalculateCheckSum8 (
-    (UINT8 *) TableEntryPoint,
-    TableEntryPoint->EntryPointLength
-    );
+                                                   (UINT8 *)TableEntryPoint,
+                                                   TableEntryPoint->EntryPointLength
+                                                   );
 
   if (TableEntryPoint3 != NULL) {
-    TableEntryPoint3->AnchorString[0]             = (UINT8) '_';
-    TableEntryPoint3->AnchorString[1]             = (UINT8) 'S';
-    TableEntryPoint3->AnchorString[2]             = (UINT8) 'M';
-    TableEntryPoint3->AnchorString[3]             = (UINT8) '3';
-    TableEntryPoint3->AnchorString[4]             = (UINT8) '_';
+    TableEntryPoint3->AnchorString[0]             = (UINT8)'_';
+    TableEntryPoint3->AnchorString[1]             = (UINT8)'S';
+    TableEntryPoint3->AnchorString[2]             = (UINT8)'M';
+    TableEntryPoint3->AnchorString[3]             = (UINT8)'3';
+    TableEntryPoint3->AnchorString[4]             = (UINT8)'_';
     TableEntryPoint3->EntryPointLength            = sizeof (SMBIOS_TABLE_3_0_ENTRY_POINT);
     TableEntryPoint3->MajorVersion                = 3;
     TableEntryPoint3->MinorVersion                = 2;
     TableEntryPoint3->EntryPointRevision          = 1;
     TableEntryPoint3->TableMaximumSize            = TableLength;
-    TableEntryPoint3->TableAddress                = (UINT64)(UINTN) TableAddress;
+    TableEntryPoint3->TableAddress                = (UINT64)(UINTN)TableAddress;
     TableEntryPoint3->EntryPointStructureChecksum = CalculateCheckSum8 (
-      (UINT8 *) TableEntryPoint3,
-      TableEntryPoint3->EntryPointLength
-      );
+                                                      (UINT8 *)TableEntryPoint3,
+                                                      TableEntryPoint3->EntryPointLength
+                                                      );
   }
 
   DEBUG ((
@@ -1801,7 +1847,7 @@ SmbiosTableApply (
     TableEntryPoint,
     TableEntryPoint->MajorVersion,
     TableEntryPoint->MinorVersion,
-    (UINT64) TableEntryPoint->TableAddress,
+    (UINT64)TableEntryPoint->TableAddress,
     TableEntryPoint->TableLength,
     TableEntryPoint->EntryPointStructureChecksum,
     TableEntryPoint->IntermediateChecksum
@@ -1811,20 +1857,20 @@ SmbiosTableApply (
     SmbiosHandleLegacyRegion (FALSE);
   } else {
     if (TableEntryPoint3 != NULL) {
-      Status  = gBS->InstallConfigurationTable (
-        Mode == OcSmbiosUpdateCustom ? &gOcCustomSmbios3TableGuid : &gEfiSmbios3TableGuid,
-        TableEntryPoint3
-        );
+      Status = gBS->InstallConfigurationTable (
+                      Mode == OcSmbiosUpdateCustom ? &gOcCustomSmbios3TableGuid : &gEfiSmbios3TableGuid,
+                      TableEntryPoint3
+                      );
 
       if (EFI_ERROR (Status)) {
         DEBUG ((DEBUG_WARN, "OCSMB: Failed to install v3 table - %r\n", Status));
       }
     }
 
-    Status  = gBS->InstallConfigurationTable (
-      Mode == OcSmbiosUpdateCustom ? &gOcCustomSmbiosTableGuid : &gEfiSmbiosTableGuid,
-      TableEntryPoint
-      );
+    Status = gBS->InstallConfigurationTable (
+                    Mode == OcSmbiosUpdateCustom ? &gOcCustomSmbiosTableGuid : &gEfiSmbiosTableGuid,
+                    TableEntryPoint
+                    );
 
     if (EFI_ERROR (Status)) {
       DEBUG ((DEBUG_WARN, "OCSMB: Failed to install v1 table - %r\n", Status));
@@ -1841,8 +1887,8 @@ OcSmbiosGetSmcVersion (
   OUT UINT8        *SmcVersion
   )
 {
-  UINT8                 Temp;
-  UINT8                 Index;
+  UINT8  Temp;
+  UINT8  Index;
 
   ZeroMem (SmcVersion, APPLE_SMBIOS_SMC_VERSION_SIZE);
 
@@ -1979,7 +2025,7 @@ OcSmbiosCreate (
   IN     OC_CPU_INFO            *CpuInfo
   )
 {
-  EFI_STATUS                      Status;
+  EFI_STATUS  Status;
 
   APPLE_SMBIOS_STRUCTURE_POINTER  MemoryArray;
   APPLE_SMBIOS_STRUCTURE_POINTER  MemoryArrayAddress;
@@ -2002,7 +2048,7 @@ OcSmbiosCreate (
   OC_SMBIOS_MAPPING               *Mapping;
   UINT16                          MappingNum;
 
-  BOOLEAN                         HasAppleSMBIOS;
+  BOOLEAN  HasAppleSMBIOS;
 
   ASSERT (Data != NULL);
 
@@ -2011,6 +2057,7 @@ OcSmbiosCreate (
     DEBUG ((DEBUG_WARN, "OCSMB: Cannot allocate mapping table\n"));
     return EFI_OUT_OF_RESOURCES;
   }
+
   MappingNum = 0;
 
   HasAppleSMBIOS = PatchBiosInformation (SmbiosTable, Data);
@@ -2032,20 +2079,19 @@ OcSmbiosCreate (
       &MemoryArrayHandle
       );
 
-      //
-      // Generate new memory device tables (type 17) for this memory array.
-      //
-      for (MemoryDeviceNo = 0; MemoryDeviceNo < Data->MemoryDevicesCount; MemoryDeviceNo++) {
-        CreateMemoryDevice (
-          SmbiosTable,
-          Data,
-          &Data->MemoryDevices[MemoryDeviceNo],
-          MemoryArrayHandle,
-          MemoryDeviceNo + 1,
-          &MemoryDeviceHandle
-          );
-      }
-
+    //
+    // Generate new memory device tables (type 17) for this memory array.
+    //
+    for (MemoryDeviceNo = 0; MemoryDeviceNo < Data->MemoryDevicesCount; MemoryDeviceNo++) {
+      CreateMemoryDevice (
+        SmbiosTable,
+        Data,
+        &Data->MemoryDevices[MemoryDeviceNo],
+        MemoryArrayHandle,
+        MemoryDeviceNo + 1,
+        &MemoryDeviceHandle
+        );
+    }
   } else {
     NumMemoryArrays       = SmbiosGetOriginalStructureCount (SMBIOS_TYPE_PHYSICAL_MEMORY_ARRAY);
     NumMemoryArrayMapped  = SmbiosGetOriginalStructureCount (SMBIOS_TYPE_MEMORY_ARRAY_MAPPED_ADDRESS);
@@ -2063,8 +2109,9 @@ OcSmbiosCreate (
       //
       // We want to exclude any non-system memory tables, such as system ROM flash areas.
       //
-      if (MemoryArray.Raw == NULL
-        || MemoryArray.Standard.Type16->Use != MemoryArrayUseSystemMemory) {
+      if (  (MemoryArray.Raw == NULL)
+         || (MemoryArray.Standard.Type16->Use != MemoryArrayUseSystemMemory))
+      {
         continue;
       }
 
@@ -2086,8 +2133,9 @@ OcSmbiosCreate (
       for (MemoryArrayMappedNo = 0; MemoryArrayMappedNo < NumMemoryArrayMapped; MemoryArrayMappedNo++) {
         MemoryArrayAddress = SmbiosGetOriginalStructure (SMBIOS_TYPE_MEMORY_ARRAY_MAPPED_ADDRESS, MemoryArrayMappedNo + 1);
 
-        if (MemoryArrayAddress.Raw == NULL
-          || MemoryArrayAddress.Standard.Type19->MemoryArrayHandle != MemoryArray.Standard.Type16->Hdr.Handle) {
+        if (  (MemoryArrayAddress.Raw == NULL)
+           || (MemoryArrayAddress.Standard.Type19->MemoryArrayHandle != MemoryArray.Standard.Type16->Hdr.Handle))
+        {
           continue;
         }
 
@@ -2109,8 +2157,9 @@ OcSmbiosCreate (
       for (MemoryDeviceNo = 0; MemoryDeviceNo < NumMemoryDevices; MemoryDeviceNo++) {
         MemoryDeviceInfo = SmbiosGetOriginalStructure (SMBIOS_TYPE_MEMORY_DEVICE, MemoryDeviceNo + 1);
 
-        if (MemoryDeviceInfo.Raw == NULL
-          || MemoryDeviceInfo.Standard.Type17->MemoryArrayHandle != MemoryArray.Standard.Type16->Hdr.Handle) {
+        if (  (MemoryDeviceInfo.Raw == NULL)
+           || (MemoryDeviceInfo.Standard.Type17->MemoryArrayHandle != MemoryArray.Standard.Type16->Hdr.Handle))
+        {
           continue;
         }
 
@@ -2130,20 +2179,21 @@ OcSmbiosCreate (
         for (MemoryDeviceMappedNo = 0; MemoryDeviceMappedNo < NumMemoryDeviceMapped; MemoryDeviceMappedNo++) {
           MemoryDeviceAddress = SmbiosGetOriginalStructure (SMBIOS_TYPE_MEMORY_DEVICE_MAPPED_ADDRESS, MemoryDeviceMappedNo + 1);
 
-          if (MemoryDeviceAddress.Raw != NULL
-            && SMBIOS_ACCESSIBLE (MemoryDeviceAddress, Standard.Type20->MemoryDeviceHandle)
-            && MemoryDeviceAddress.Standard.Type20->MemoryDeviceHandle ==
-              MemoryDeviceInfo.Standard.Type17->Hdr.Handle) {
-              PatchMemoryMappedDevice (
-                SmbiosTable,
-                Data,
-                MemoryDeviceAddress,
-                MemoryDeviceMappedNewIndex,
-                MemoryDeviceHandle,
-                Mapping,
-                MappingNum
-                );
-              MemoryDeviceMappedNewIndex++;
+          if (  (MemoryDeviceAddress.Raw != NULL)
+             && SMBIOS_ACCESSIBLE (MemoryDeviceAddress, Standard.Type20->MemoryDeviceHandle)
+             && (MemoryDeviceAddress.Standard.Type20->MemoryDeviceHandle ==
+                 MemoryDeviceInfo.Standard.Type17->Hdr.Handle))
+          {
+            PatchMemoryMappedDevice (
+              SmbiosTable,
+              Data,
+              MemoryDeviceAddress,
+              MemoryDeviceMappedNewIndex,
+              MemoryDeviceHandle,
+              Mapping,
+              MappingNum
+              );
+            MemoryDeviceMappedNewIndex++;
           }
         }
       }
@@ -2168,14 +2218,14 @@ OcSmbiosCreate (
 
 VOID
 OcSmbiosExtractOemInfo (
-  IN  OC_SMBIOS_TABLE   *SmbiosTable,
-  OUT CHAR8             *ProductName        OPTIONAL,
-  OUT CHAR8             *SerialNumber       OPTIONAL,
-  OUT EFI_GUID          *SystemUuid         OPTIONAL,
-  OUT CHAR8             *Mlb                OPTIONAL,
-  OUT UINT8             *Rom                OPTIONAL,
-  IN  BOOLEAN           UuidIsRawEncoded,
-  IN  BOOLEAN           UseVariableStorage
+  IN  OC_SMBIOS_TABLE  *SmbiosTable,
+  OUT CHAR8            *ProductName        OPTIONAL,
+  OUT CHAR8            *SerialNumber       OPTIONAL,
+  OUT EFI_GUID         *SystemUuid         OPTIONAL,
+  OUT CHAR8            *Mlb                OPTIONAL,
+  OUT UINT8            *Rom                OPTIONAL,
+  IN  BOOLEAN          UuidIsRawEncoded,
+  IN  BOOLEAN          UseVariableStorage
   )
 {
   EFI_STATUS                      Status;
@@ -2198,7 +2248,7 @@ OcSmbiosExtractOemInfo (
   if (Original.Raw != NULL) {
     if (SMBIOS_ACCESSIBLE (Original, Standard.Type1->ProductName)) {
       SmProductName = SmbiosGetString (Original, Original.Standard.Type1->ProductName);
-      if (SmProductName != NULL && ProductName != NULL) {
+      if ((SmProductName != NULL) && (ProductName != NULL)) {
         Status = AsciiStrCpyS (ProductName, OC_OEM_NAME_MAX, SmProductName);
         if (EFI_ERROR (Status)) {
           DEBUG ((DEBUG_INFO, "OCSMB: Failed to copy SMBIOS product name %a\n", SmProductName));
@@ -2206,7 +2256,7 @@ OcSmbiosExtractOemInfo (
       }
     }
 
-    if (SerialNumber != NULL && SMBIOS_ACCESSIBLE (Original, Standard.Type1->SerialNumber)) {
+    if ((SerialNumber != NULL) && SMBIOS_ACCESSIBLE (Original, Standard.Type1->SerialNumber)) {
       SmTmp = SmbiosGetString (Original, Original.Standard.Type1->SerialNumber);
       if (SmTmp != NULL) {
         Status = AsciiStrCpyS (SerialNumber, OC_OEM_SERIAL_MAX, SmTmp);
@@ -2216,10 +2266,10 @@ OcSmbiosExtractOemInfo (
       }
     }
 
-    if (SystemUuid != NULL && SMBIOS_ACCESSIBLE (Original, Standard.Type1->Uuid)) {
-      MinCount = 0;
-      MaxCount = 0;
-      UuidWalker = (UINT8 *) &Original.Standard.Type1->Uuid;
+    if ((SystemUuid != NULL) && SMBIOS_ACCESSIBLE (Original, Standard.Type1->Uuid)) {
+      MinCount   = 0;
+      MaxCount   = 0;
+      UuidWalker = (UINT8 *)&Original.Standard.Type1->Uuid;
       for (Index = 0; Index < sizeof (Original.Standard.Type1->Uuid); ++Index) {
         if (UuidWalker[Index] == 0x00) {
           ++MinCount;
@@ -2228,7 +2278,7 @@ OcSmbiosExtractOemInfo (
         }
       }
 
-      if (MinCount < 4 && MaxCount < 4) {
+      if ((MinCount < 4) && (MaxCount < 4)) {
         CopyGuid (SystemUuid, &Original.Standard.Type1->Uuid);
         //
         // Convert LE to RAW (assuming SMBIOS stores in LE format).
@@ -2253,10 +2303,12 @@ OcSmbiosExtractOemInfo (
     if (SMBIOS_ACCESSIBLE (Original, Standard.Type2->Manufacturer)) {
       SmManufacturer = SmbiosGetString (Original, Original.Standard.Type2->Manufacturer);
     }
+
     if (SMBIOS_ACCESSIBLE (Original, Standard.Type2->ProductName)) {
       SmBoard = SmbiosGetString (Original, Original.Standard.Type2->ProductName);
     }
-    if (Mlb != NULL && SMBIOS_ACCESSIBLE (Original, Standard.Type2->SerialNumber)) {
+
+    if ((Mlb != NULL) && SMBIOS_ACCESSIBLE (Original, Standard.Type2->SerialNumber)) {
       SmTmp = SmbiosGetString (Original, Original.Standard.Type2->SerialNumber);
       if (SmTmp != NULL) {
         Status = AsciiStrCpyS (Mlb, OC_OEM_SERIAL_MAX, SmTmp);
@@ -2269,13 +2321,13 @@ OcSmbiosExtractOemInfo (
 
   if (Mlb != NULL) {
     TmpSize = OC_OEM_SERIAL_MAX - 1;
-    Status = gRT->GetVariable (
-      L"MLB",
-      &gAppleVendorVariableGuid,
-      NULL,
-      &TmpSize,
-      Mlb
-      );
+    Status  = gRT->GetVariable (
+                     L"MLB",
+                     &gAppleVendorVariableGuid,
+                     NULL,
+                     &TmpSize,
+                     Mlb
+                     );
     if (!EFI_ERROR (Status)) {
       ZeroMem (Mlb + TmpSize, OC_OEM_SERIAL_MAX - TmpSize);
       DEBUG ((DEBUG_INFO, "OCSMB: MLB from NVRAM took precedence: %a\n", Mlb));
@@ -2284,13 +2336,13 @@ OcSmbiosExtractOemInfo (
 
   if (SerialNumber != NULL) {
     TmpSize = OC_OEM_SERIAL_MAX - 1;
-    Status = gRT->GetVariable (
-      L"SSN",
-      &gAppleVendorVariableGuid,
-      NULL,
-      &TmpSize,
-      SerialNumber
-      );
+    Status  = gRT->GetVariable (
+                     L"SSN",
+                     &gAppleVendorVariableGuid,
+                     NULL,
+                     &TmpSize,
+                     SerialNumber
+                     );
     if (!EFI_ERROR (Status)) {
       ZeroMem (SerialNumber + TmpSize, OC_OEM_SERIAL_MAX - TmpSize);
       DEBUG ((DEBUG_INFO, "OCSMB: SSN from NVRAM took precedence: %a\n", SerialNumber));
@@ -2299,28 +2351,28 @@ OcSmbiosExtractOemInfo (
 
   if (Rom != NULL) {
     TmpSize = OC_OEM_ROM_MAX;
-    Status = gRT->GetVariable (
-      L"ROM",
-      &gAppleVendorVariableGuid,
-      NULL,
-      &TmpSize,
-      Rom
-      );
-    if (!EFI_ERROR (Status) && TmpSize != OC_OEM_ROM_MAX) {
+    Status  = gRT->GetVariable (
+                     L"ROM",
+                     &gAppleVendorVariableGuid,
+                     NULL,
+                     &TmpSize,
+                     Rom
+                     );
+    if (!EFI_ERROR (Status) && (TmpSize != OC_OEM_ROM_MAX)) {
       ZeroMem (Rom, OC_OEM_ROM_MAX);
     }
   }
 
   if (SystemUuid != NULL) {
     TmpSize = sizeof (EFI_GUID);
-    Status = gRT->GetVariable (
-      L"system-id",
-      &gAppleVendorVariableGuid,
-      NULL,
-      &TmpSize,
-      SystemUuid
-      );
-    if (!EFI_ERROR (Status) && TmpSize == sizeof (EFI_GUID)) {
+    Status  = gRT->GetVariable (
+                     L"system-id",
+                     &gAppleVendorVariableGuid,
+                     NULL,
+                     &TmpSize,
+                     SystemUuid
+                     );
+    if (!EFI_ERROR (Status) && (TmpSize == sizeof (EFI_GUID))) {
       DEBUG ((DEBUG_INFO, "OCSMB: UUID from NVRAM took precedence: %g\n", SystemUuid));
     } else if (TmpSize != sizeof (EFI_GUID)) {
       ZeroMem (SystemUuid, sizeof (EFI_GUID));
@@ -2335,7 +2387,7 @@ OcSmbiosExtractOemInfo (
     SmManufacturer
     ));
 
-  if (ProductName != NULL && SmProductName != NULL) {
+  if ((ProductName != NULL) && (SmProductName != NULL)) {
     Status = AsciiStrCpyS (ProductName, OC_OEM_NAME_MAX, SmProductName);
     if (EFI_ERROR (Status)) {
       DEBUG ((DEBUG_INFO, "OCSMB: Failed to copy SMBIOS product name %a\n", SmProductName));
@@ -2345,36 +2397,36 @@ OcSmbiosExtractOemInfo (
   if (UseVariableStorage) {
     if (SmProductName != NULL) {
       Status = OcSetSystemVariable (
-        OC_OEM_PRODUCT_VARIABLE_NAME,
-        EFI_VARIABLE_BOOTSERVICE_ACCESS | EFI_VARIABLE_RUNTIME_ACCESS,
-        AsciiStrLen (SmProductName),
-        (VOID *) SmProductName,
-        NULL
-        );
+                 OC_OEM_PRODUCT_VARIABLE_NAME,
+                 EFI_VARIABLE_BOOTSERVICE_ACCESS | EFI_VARIABLE_RUNTIME_ACCESS,
+                 AsciiStrLen (SmProductName),
+                 (VOID *)SmProductName,
+                 NULL
+                 );
       if (EFI_ERROR (Status)) {
         DEBUG ((DEBUG_INFO, "OCSMB: Cannot write OEM product\n"));
       }
     }
 
-    if (SmManufacturer != NULL && SmBoard != NULL) {
+    if ((SmManufacturer != NULL) && (SmBoard != NULL)) {
       Status = OcSetSystemVariable (
-        OC_OEM_VENDOR_VARIABLE_NAME,
-        EFI_VARIABLE_BOOTSERVICE_ACCESS | EFI_VARIABLE_RUNTIME_ACCESS,
-        AsciiStrLen (SmManufacturer),
-        (VOID *) SmManufacturer,
-        NULL
-        );
+                 OC_OEM_VENDOR_VARIABLE_NAME,
+                 EFI_VARIABLE_BOOTSERVICE_ACCESS | EFI_VARIABLE_RUNTIME_ACCESS,
+                 AsciiStrLen (SmManufacturer),
+                 (VOID *)SmManufacturer,
+                 NULL
+                 );
       if (EFI_ERROR (Status)) {
         DEBUG ((DEBUG_INFO, "OCSMB: Cannot write OEM board manufacturer - %r\n", Status));
       }
 
       Status = OcSetSystemVariable (
-        OC_OEM_BOARD_VARIABLE_NAME,
-        EFI_VARIABLE_BOOTSERVICE_ACCESS | EFI_VARIABLE_RUNTIME_ACCESS,
-        AsciiStrLen (SmBoard),
-        (VOID *) SmBoard,
-        NULL
-        );
+                 OC_OEM_BOARD_VARIABLE_NAME,
+                 EFI_VARIABLE_BOOTSERVICE_ACCESS | EFI_VARIABLE_RUNTIME_ACCESS,
+                 AsciiStrLen (SmBoard),
+                 (VOID *)SmBoard,
+                 NULL
+                 );
       if (EFI_ERROR (Status)) {
         DEBUG ((DEBUG_INFO, "OCSMB: Cannot write OEM board - %r\n", Status));
       }

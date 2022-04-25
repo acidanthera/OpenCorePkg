@@ -20,7 +20,7 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 #include <Library/OcInputLib.h>
 #include <Library/UefiBootServicesTableLib.h>
 
-AIK_SELF gAikSelf;
+AIK_SELF  gAikSelf;
 
 STATIC
 VOID
@@ -33,9 +33,9 @@ AIKProtocolArriveHandler (
   EFI_STATUS  Status;
   AIK_SELF    *Keycode;
 
-  Keycode = (AIK_SELF *) Context;
+  Keycode = (AIK_SELF *)Context;
 
-  if (Keycode == NULL || Keycode->OurJobIsDone) {
+  if ((Keycode == NULL) || Keycode->OurJobIsDone) {
     DEBUG ((DEBUG_INFO, "AIK: ProtocolArriveHandler got null handler or called when done\n"));
     return;
   }
@@ -56,8 +56,8 @@ AIKProtocolArriveInstall (
   AIK_SELF  *Keycode
   )
 {
-  EFI_STATUS    Status;
-  VOID          *Registration;
+  EFI_STATUS  Status;
+  VOID        *Registration;
 
   Status = EFI_SUCCESS;
 
@@ -104,8 +104,8 @@ AIKPollKeyboardHandler (
   AMI_EFI_KEY_DATA  KeyData;
   EFI_STATUS        Status;
 
-  Keycode = (AIK_SELF *) Context;
-  if (Keycode == NULL || Keycode->OurJobIsDone) {
+  Keycode = (AIK_SELF *)Context;
+  if ((Keycode == NULL) || Keycode->OurJobIsDone) {
     DEBUG ((DEBUG_INFO, "AIK: PollKeyboardHandler got null handler or called when done\n"));
     return;
   }
@@ -134,10 +134,10 @@ AIKPollKeyboardHandler (
 
   do {
     Status = AIKSourceGrabEfiKey (
-      &Keycode->Source,
-      &KeyData,
-      Keycode->KeyFiltering
-      );
+               &Keycode->Source,
+               &KeyData,
+               Keycode->KeyFiltering
+               );
     if (!EFI_ERROR (Status)) {
       DEBUG ((
         DEBUG_VERBOSE,
@@ -197,10 +197,12 @@ AIKInstall (
   AIKDataReset (&Keycode->Data);
 
   Status = gBS->CreateEvent (
-    EVT_TIMER | EVT_NOTIFY_SIGNAL, TPL_NOTIFY,
-    AIKPollKeyboardHandler,
-    Keycode, &Keycode->PollKeyboardEvent
-    );
+                  EVT_TIMER | EVT_NOTIFY_SIGNAL,
+                  TPL_NOTIFY,
+                  AIKPollKeyboardHandler,
+                  Keycode,
+                  &Keycode->PollKeyboardEvent
+                  );
 
   if (!EFI_ERROR (Status)) {
     Status = gBS->SetTimer (Keycode->PollKeyboardEvent, TimerPeriodic, AIK_KEY_POLL_INTERVAL);
@@ -248,14 +250,14 @@ OcAppleGenericInputKeycodeInit (
   IN BOOLEAN            KeyFiltering
   )
 {
-  EFI_STATUS                Status;
+  EFI_STATUS  Status;
 
   AIKTranslateConfigure (KeySwap);
 
   gAikSelf.Mode               = Mode;
   gAikSelf.KeyForgotThreshold = KeyForgotThreshold;
   gAikSelf.KeyFiltering       = KeyFiltering;
-  Status = AIKInstall (&gAikSelf);
+  Status                      = AIKInstall (&gAikSelf);
 
   if (EFI_ERROR (Status)) {
     //

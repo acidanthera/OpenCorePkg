@@ -6,8 +6,8 @@
 #ifndef OC_FLEX_ARRAY_LIB_H
 #define OC_FLEX_ARRAY_LIB_H
 
-#if !defined(OC_TRACE_FLEX)
-#define OC_TRACE_FLEX DEBUG_VERBOSE
+#if !defined (OC_TRACE_FLEX)
+#define OC_TRACE_FLEX  DEBUG_VERBOSE
 #endif
 
 #include <Uefi.h>
@@ -26,7 +26,7 @@ typedef struct OC_FLEX_ARRAY_ OC_FLEX_ARRAY;
 **/
 typedef
 VOID
-(* OC_FLEX_ARRAY_FREE_ITEM) (
+(*OC_FLEX_ARRAY_FREE_ITEM) (
   IN  VOID  *Item
   );
 
@@ -56,8 +56,8 @@ OcFlexArrayFreePointerItem (
 **/
 OC_FLEX_ARRAY *
 OcFlexArrayInit (
-  IN     CONST UINTN                         ItemSize,
-  IN     CONST OC_FLEX_ARRAY_FREE_ITEM       FreeItem   OPTIONAL
+  IN     CONST UINTN                    ItemSize,
+  IN     CONST OC_FLEX_ARRAY_FREE_ITEM  FreeItem   OPTIONAL
   );
 
 /**
@@ -71,7 +71,7 @@ OcFlexArrayInit (
 **/
 VOID *
 OcFlexArrayAddItem (
-  IN OUT       OC_FLEX_ARRAY       *FlexArray
+  IN OUT       OC_FLEX_ARRAY  *FlexArray
   );
 
 /**
@@ -86,8 +86,8 @@ OcFlexArrayAddItem (
 **/
 VOID *
 OcFlexArrayInsertItem (
-  IN OUT  OC_FLEX_ARRAY                *FlexArray,
-  IN      CONST UINTN                  InsertIndex
+  IN OUT  OC_FLEX_ARRAY  *FlexArray,
+  IN      CONST UINTN    InsertIndex
   );
 
 /**
@@ -101,8 +101,8 @@ OcFlexArrayInsertItem (
 **/
 VOID *
 OcFlexArrayItemAt (
-  IN     CONST OC_FLEX_ARRAY       *FlexArray,
-  IN     CONST UINTN               Index
+  IN     CONST OC_FLEX_ARRAY  *FlexArray,
+  IN     CONST UINTN          Index
   );
 
 /**
@@ -112,7 +112,7 @@ OcFlexArrayItemAt (
 **/
 VOID
 OcFlexArrayFree (
-  IN OUT       OC_FLEX_ARRAY      **FlexArray
+  IN OUT       OC_FLEX_ARRAY  **FlexArray
   );
 
 /**
@@ -123,8 +123,8 @@ OcFlexArrayFree (
 **/
 VOID
 OcFlexArrayDiscardItem (
-  IN OUT  OC_FLEX_ARRAY       *FlexArray,
-  IN      CONST BOOLEAN       FreeItem
+  IN OUT  OC_FLEX_ARRAY  *FlexArray,
+  IN      CONST BOOLEAN  FreeItem
   );
 
 /**
@@ -137,9 +137,9 @@ OcFlexArrayDiscardItem (
 **/
 VOID
 OcFlexArrayFreeContainer (
-  IN OUT       OC_FLEX_ARRAY      **FlexArray,
-  IN OUT       VOID               **Items,
-  IN OUT       UINTN              *Count
+  IN OUT       OC_FLEX_ARRAY  **FlexArray,
+  IN OUT       VOID           **Items,
+  IN OUT       UINTN          *Count
   );
 
 /*
@@ -149,23 +149,23 @@ struct OC_FLEX_ARRAY_ {
   //
   // Allocated array.
   //
-  VOID                            *Items;
+  VOID                       *Items;
   //
   // Item size.
   //
-  UINTN                           ItemSize;
+  UINTN                      ItemSize;
   //
   // Current used count.
   //
-  UINTN                           Count;
+  UINTN                      Count;
   //
   // Current allocated count.
   //
-  UINTN                           AllocatedCount;
+  UINTN                      AllocatedCount;
   //
   // Optional method to free memory pointed to from item.
   //
-  OC_FLEX_ARRAY_FREE_ITEM      FreeItem;
+  OC_FLEX_ARRAY_FREE_ITEM    FreeItem;
 };
 
 /*
@@ -196,8 +196,8 @@ OcAsciiStringBufferInit (
 **/
 EFI_STATUS
 OcAsciiStringBufferAppend (
-  IN OUT  OC_STRING_BUFFER    *Buffer,
-  IN      CONST CHAR8         *AppendString    OPTIONAL
+  IN OUT  OC_STRING_BUFFER  *Buffer,
+  IN      CONST CHAR8       *AppendString    OPTIONAL
   );
 
 /**
@@ -214,11 +214,10 @@ OcAsciiStringBufferAppend (
 **/
 EFI_STATUS
 OcAsciiStringBufferAppendN (
-  IN OUT  OC_STRING_BUFFER    *Buffer,
-  IN      CONST CHAR8         *AppendString,   OPTIONAL
+  IN OUT  OC_STRING_BUFFER *Buffer,
+  IN      CONST CHAR8 *AppendString, OPTIONAL
   IN      CONST UINTN         Length
   );
-
 
 /**
   Safely print to string buffer.
@@ -234,8 +233,8 @@ OcAsciiStringBufferAppendN (
 EFI_STATUS
 EFIAPI
 OcAsciiStringBufferSPrint (
-  IN OUT  OC_STRING_BUFFER    *Buffer,
-  IN      CONST CHAR8         *FormatString,
+  IN OUT  OC_STRING_BUFFER  *Buffer,
+  IN      CONST CHAR8       *FormatString,
   ...
   );
 
@@ -251,7 +250,7 @@ OcAsciiStringBufferSPrint (
 **/
 CHAR8 *
 OcAsciiStringBufferFreeContainer (
-  IN OUT  OC_STRING_BUFFER    **StringBuffer
+  IN OUT  OC_STRING_BUFFER  **StringBuffer
   );
 
 /**
@@ -264,22 +263,22 @@ OcAsciiStringBufferFreeContainer (
 **/
 VOID
 OcAsciiStringBufferFree (
-  IN OUT  OC_STRING_BUFFER    **StringBuffer
+  IN OUT  OC_STRING_BUFFER  **StringBuffer
   );
 
 /*
   String buffer.
 */
 struct OC_STRING_BUFFER_ {
-  CHAR8                           *String;
-  UINTN                           StringLength;
-  UINTN                           BufferSize;
+  CHAR8    *String;
+  UINTN    StringLength;
+  UINTN    BufferSize;
 };
 
 /**
   Split string by delimiter.
 
-  @param[in]  String     A Null-terminated string. 
+  @param[in]  String     A Null-terminated string.
   @param[in]  Delim      Delimiter to search in String.
   @param[in]  IsUnicode  Are option names and values Unicode or ASCII?
 

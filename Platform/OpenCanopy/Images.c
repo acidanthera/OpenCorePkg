@@ -23,7 +23,7 @@
 //
 STATIC
 CONST UINT8
-gAppleDiskLabelImagePalette[256] = {
+  gAppleDiskLabelImagePalette[256] = {
   [0x00] = 255,
   [0xf6] = 238,
   [0xf7] = 221,
@@ -75,16 +75,16 @@ GuiIcnsToImageIcon (
   }
 
   Record = IcnsImage;
-  if (Record->Type != APPLE_ICNS_MAGIC || SwapBytes32 (Record->Size) != IcnsImageSize) {
+  if ((Record->Type != APPLE_ICNS_MAGIC) || (SwapBytes32 (Record->Size) != IcnsImageSize)) {
     return EFI_SECURITY_VIOLATION;
   }
 
   RecordIT32 = NULL;
   RecordT8MK = NULL;
 
-  Offset  = sizeof (APPLE_ICNS_RECORD);
+  Offset = sizeof (APPLE_ICNS_RECORD);
   while (Offset < IcnsImageSize - sizeof (APPLE_ICNS_RECORD)) {
-    Record       = (APPLE_ICNS_RECORD *) ((UINT8 *) IcnsImage + Offset);
+    Record       = (APPLE_ICNS_RECORD *)((UINT8 *)IcnsImage + Offset);
     RecordLength = SwapBytes32 (Record->Size);
 
     //
@@ -93,35 +93,38 @@ GuiIcnsToImageIcon (
     // 2. Record overflowing UINT32 is invalid.
     // 3. Record larger than file size is invalid.
     //
-    if (RecordLength < sizeof (APPLE_ICNS_RECORD) + sizeof (UINT32)
-      || OcOverflowAddU32 (Offset, RecordLength, &Offset)
-      || Offset > IcnsImageSize) {
+    if (  (RecordLength < sizeof (APPLE_ICNS_RECORD) + sizeof (UINT32))
+       || OcOverflowAddU32 (Offset, RecordLength, &Offset)
+       || (Offset > IcnsImageSize))
+    {
       return EFI_SECURITY_VIOLATION;
     }
 
-    if ((Scale == 1 && Record->Type == APPLE_ICNS_IC07)
-      || (Scale == 2 && Record->Type == APPLE_ICNS_IC13)) {
+    if (  ((Scale == 1) && (Record->Type == APPLE_ICNS_IC07))
+       || ((Scale == 2) && (Record->Type == APPLE_ICNS_IC13)))
+    {
       Status = GuiPngToImage (
-        Image,
-        Record->Data,
-        RecordLength - sizeof (APPLE_ICNS_RECORD),
-        TRUE
-        );
+                 Image,
+                 Record->Data,
+                 RecordLength - sizeof (APPLE_ICNS_RECORD),
+                 TRUE
+                 );
 
-      if (!EFI_ERROR (Status) && MatchWidth > 0 && MatchHeight > 0) {
+      if (!EFI_ERROR (Status) && (MatchWidth > 0) && (MatchHeight > 0)) {
         if (AllowLess
-          ? (Image->Width >  MatchWidth * Scale || Image->Height >  MatchWidth * Scale
-          || Image->Width == 0 || Image->Height == 0)
-          : (Image->Width != MatchWidth * Scale || Image->Height != MatchHeight * Scale)) {
+          ? (  (Image->Width >  MatchWidth * Scale) || (Image->Height >  MatchWidth * Scale)
+            || (Image->Width == 0) || (Image->Height == 0))
+          : ((Image->Width != MatchWidth * Scale) || (Image->Height != MatchHeight * Scale)))
+        {
           FreePool (Image->Buffer);
           DEBUG ((
             DEBUG_INFO,
             "OCUI: Expected %dx%d, actual %dx%d, allow less: %d\n",
-             MatchWidth * Scale,
-             MatchHeight * Scale,
-             Image->Width,
-             Image->Height,
-             AllowLess
+            MatchWidth * Scale,
+            MatchHeight * Scale,
+            Image->Width,
+            Image->Height,
+            AllowLess
             ));
           Status = EFI_UNSUPPORTED;
         }
@@ -137,7 +140,7 @@ GuiIcnsToImageIcon (
         RecordT8MK = Record;
       }
 
-      if (RecordT8MK != NULL && RecordIT32 != NULL) {
+      if ((RecordT8MK != NULL) && (RecordIT32 != NULL)) {
         Image->Width  = MatchWidth;
         Image->Height = MatchHeight;
         ImageSize     = (MatchWidth * MatchHeight) * sizeof (EFI_GRAPHICS_OUTPUT_BLT_PIXEL);
@@ -151,14 +154,14 @@ GuiIcnsToImageIcon (
         // We have to add an additional UINT32 for IT32, since it has a reserved field.
         //
         DecodedBytes = DecompressMaskedRLE24 (
-          (UINT8 *) Image->Buffer,
-          ImageSize,
-          RecordIT32->Data + sizeof (UINT32),
-          SwapBytes32 (RecordIT32->Size) - sizeof (APPLE_ICNS_RECORD) - sizeof (UINT32),
-          RecordT8MK->Data,
-          SwapBytes32 (RecordT8MK->Size) - sizeof (APPLE_ICNS_RECORD),
-          TRUE
-          );
+                         (UINT8 *)Image->Buffer,
+                         ImageSize,
+                         RecordIT32->Data + sizeof (UINT32),
+                         SwapBytes32 (RecordIT32->Size) - sizeof (APPLE_ICNS_RECORD) - sizeof (UINT32),
+                         RecordT8MK->Data,
+                         SwapBytes32 (RecordT8MK->Size) - sizeof (APPLE_ICNS_RECORD),
+                         TRUE
+                         );
 
         if (DecodedBytes != ImageSize) {
           FreePool (Image->Buffer);
@@ -175,11 +178,11 @@ GuiIcnsToImageIcon (
 
 EFI_STATUS
 GuiLabelToImage (
-  OUT GUI_IMAGE *Image,
-  IN  VOID      *RawData,
-  IN  UINT32    DataLength,
-  IN  UINT8     Scale,
-  IN  BOOLEAN   Inverted
+  OUT GUI_IMAGE  *Image,
+  IN  VOID       *RawData,
+  IN  UINT32     DataLength,
+  IN  UINT8      Scale,
+  IN  BOOLEAN    Inverted
   )
 {
   APPLE_DISK_LABEL  *Label;
@@ -192,20 +195,21 @@ GuiLabelToImage (
     return EFI_INVALID_PARAMETER;
   }
 
-  Label = RawData;
+  Label         = RawData;
   Image->Width  = SwapBytes16 (Label->Width);
   Image->Height = SwapBytes16 (Label->Height);
 
-  if (Image->Width > APPLE_DISK_LABEL_MAX_WIDTH * Scale
-    || Image->Height > APPLE_DISK_LABEL_MAX_HEIGHT * Scale
-    || DataLength != sizeof (APPLE_DISK_LABEL) + Image->Width * Image->Height) {
+  if (  (Image->Width > APPLE_DISK_LABEL_MAX_WIDTH * Scale)
+     || (Image->Height > APPLE_DISK_LABEL_MAX_HEIGHT * Scale)
+     || (DataLength != sizeof (APPLE_DISK_LABEL) + Image->Width * Image->Height))
+  {
     DEBUG ((DEBUG_INFO, "OCUI: Invalid label has %dx%d dims at %u size\n", Image->Width, Image->Height, DataLength));
     return EFI_SECURITY_VIOLATION;
   }
 
-  Image->Buffer = (EFI_GRAPHICS_OUTPUT_BLT_PIXEL *) AllocatePool (
-    Image->Width * Image->Height * sizeof (EFI_GRAPHICS_OUTPUT_BLT_PIXEL)
-    );
+  Image->Buffer = (EFI_GRAPHICS_OUTPUT_BLT_PIXEL *)AllocatePool (
+                                                     Image->Width * Image->Height * sizeof (EFI_GRAPHICS_OUTPUT_BLT_PIXEL)
+                                                     );
 
   if (Image->Buffer == NULL) {
     return EFI_OUT_OF_RESOURCES;
@@ -238,19 +242,19 @@ GuiPngToImage (
   IN  BOOLEAN    PremultiplyAlpha
   )
 {
-  EFI_STATUS                       Status;
-  EFI_GRAPHICS_OUTPUT_BLT_PIXEL    *BufferWalker;
-  UINTN                            Index;
-  UINT8                            TmpChannel;
+  EFI_STATUS                     Status;
+  EFI_GRAPHICS_OUTPUT_BLT_PIXEL  *BufferWalker;
+  UINTN                          Index;
+  UINT8                          TmpChannel;
 
   Status = OcDecodePng (
-    ImageData,
-    ImageDataSize,
-    (VOID **) &Image->Buffer,
-    &Image->Width,
-    &Image->Height,
-    NULL
-    );
+             ImageData,
+             ImageDataSize,
+             (VOID **)&Image->Buffer,
+             &Image->Width,
+             &Image->Height,
+             NULL
+             );
 
   if (EFI_ERROR (Status)) {
     DEBUG ((DEBUG_INFO, "OCUI: DecodePNG - %r\n", Status));
@@ -259,11 +263,11 @@ GuiPngToImage (
 
   if (PremultiplyAlpha) {
     BufferWalker = Image->Buffer;
-    for (Index = 0; Index < (UINTN) Image->Width * Image->Height; ++Index) {
-      TmpChannel             = (UINT8) ((BufferWalker->Blue * BufferWalker->Reserved) / 0xFF);
-      BufferWalker->Blue     = (UINT8) ((BufferWalker->Red * BufferWalker->Reserved) / 0xFF);
-      BufferWalker->Green    = (UINT8) ((BufferWalker->Green * BufferWalker->Reserved) / 0xFF);
-      BufferWalker->Red      = TmpChannel;
+    for (Index = 0; Index < (UINTN)Image->Width * Image->Height; ++Index) {
+      TmpChannel          = (UINT8)((BufferWalker->Blue * BufferWalker->Reserved) / 0xFF);
+      BufferWalker->Blue  = (UINT8)((BufferWalker->Red * BufferWalker->Reserved) / 0xFF);
+      BufferWalker->Green = (UINT8)((BufferWalker->Green * BufferWalker->Reserved) / 0xFF);
+      BufferWalker->Red   = TmpChannel;
       ++BufferWalker;
     }
   }
@@ -278,14 +282,14 @@ GuiCreateHighlightedImage (
   IN  CONST EFI_GRAPHICS_OUTPUT_BLT_PIXEL  *HighlightPixel
   )
 {
-  EFI_GRAPHICS_OUTPUT_BLT_PIXEL PremulPixel;
+  EFI_GRAPHICS_OUTPUT_BLT_PIXEL  PremulPixel;
 
-  EFI_GRAPHICS_OUTPUT_BLT_PIXEL *Buffer;
-  UINT32                        ColumnOffset;
-  BOOLEAN                       OneSet;
-  UINT32                        FirstUnsetX;
-  UINT32                        IndexY;
-  UINT32                        RowOffset;
+  EFI_GRAPHICS_OUTPUT_BLT_PIXEL  *Buffer;
+  UINT32                         ColumnOffset;
+  BOOLEAN                        OneSet;
+  UINT32                         FirstUnsetX;
+  UINT32                         IndexY;
+  UINT32                         RowOffset;
 
   ASSERT (SelectedImage != NULL);
   ASSERT (SourceImage != NULL);
@@ -308,10 +312,11 @@ GuiCreateHighlightedImage (
   PremulPixel.Reserved = HighlightPixel->Reserved;
 
   for (
-    IndexY = 0, RowOffset = 0;
-    IndexY < SourceImage->Height;
-    ++IndexY, RowOffset += SourceImage->Width
-    ) {
+       IndexY = 0, RowOffset = 0;
+       IndexY < SourceImage->Height;
+       ++IndexY, RowOffset += SourceImage->Width
+       )
+  {
     FirstUnsetX = 0;
     OneSet      = FALSE;
 
@@ -335,7 +340,7 @@ GuiCreateHighlightedImage (
 
           FirstUnsetX = 0;
         }
-      } else if (FirstUnsetX == 0 && OneSet) {
+      } else if ((FirstUnsetX == 0) && OneSet) {
         FirstUnsetX = ColumnOffset;
       }
     }

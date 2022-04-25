@@ -26,14 +26,14 @@
 #include <Library/PrintLib.h>
 #include <Library/UefiBootServicesTableLib.h>
 
-#define OC_LOG_BUFFER_SIZE (2 * EFI_PAGE_SIZE)
+#define OC_LOG_BUFFER_SIZE  (2 * EFI_PAGE_SIZE)
 
 STATIC EFI_EVENT  mLogProtocolArrivedNotifyEvent;
 STATIC VOID       *mLogProtocolArrivedNotifyRegistration;
 
-STATIC UINT8      *mLogBuffer   = NULL;
-STATIC UINT8      *mLogWalker   = NULL;
-STATIC UINTN      mLogCount     = 0;
+STATIC UINT8  *mLogBuffer = NULL;
+STATIC UINT8  *mLogWalker = NULL;
+STATIC UINTN  mLogCount   = 0;
 
 STATIC
 OC_LOG_PROTOCOL *
@@ -43,16 +43,16 @@ InternalGetOcLog (
 {
   EFI_STATUS  Status;
 
-  STATIC OC_LOG_PROTOCOL *mInternalOcLog = NULL;
+  STATIC OC_LOG_PROTOCOL  *mInternalOcLog = NULL;
 
   if (mInternalOcLog == NULL) {
     Status = gBS->LocateProtocol (
-      &gOcLogProtocolGuid,
-      NULL,
-      (VOID **) &mInternalOcLog
-      );
+                    &gOcLogProtocolGuid,
+                    NULL,
+                    (VOID **)&mInternalOcLog
+                    );
 
-    if (EFI_ERROR (Status) || mInternalOcLog->Revision != OC_LOG_REVISION) {
+    if (EFI_ERROR (Status) || (mInternalOcLog->Revision != OC_LOG_REVISION)) {
       mInternalOcLog = NULL;
     }
   }
@@ -81,16 +81,16 @@ LogProtocolArrivedNotify (
   gBS->CloseEvent (mLogProtocolArrivedNotifyEvent);
 
   Status = gBS->LocateProtocol (
-    &gOcLogProtocolGuid,
-    NULL,
-    (VOID **) &OcLog
-    );
+                  &gOcLogProtocolGuid,
+                  NULL,
+                  (VOID **)&OcLog
+                  );
 
-  if (EFI_ERROR (Status) || OcLog->Revision != OC_LOG_REVISION) {
+  if (EFI_ERROR (Status) || (OcLog->Revision != OC_LOG_REVISION)) {
     return;
   }
 
-  Walker = (CHAR8 *) mLogBuffer;
+  Walker = (CHAR8 *)mLogBuffer;
   for (Index = 0; Index < mLogCount; ++Index) {
     //
     // Set ErrorLevel.
@@ -101,7 +101,7 @@ LogProtocolArrivedNotify (
     //
     // Print debug message without onscreen, as it is done by OutputString.
     //
-    CurrLogOpt = OcLog->Options;
+    CurrLogOpt      = OcLog->Options;
     OcLog->Options &= ~OC_LOG_CONSOLE;
     DebugPrint (ErrorLevel, "%a", Walker);
     //
@@ -115,6 +115,7 @@ LogProtocolArrivedNotify (
     while (*Walker != '\0') {
       ++Walker;
     }
+
     //
     // Matched '\0'. Go to the next message.
     //
@@ -146,19 +147,19 @@ OcBufferEarlyLog (
     // Notify when log protocol arrives.
     //
     Status = gBS->CreateEvent (
-      EVT_NOTIFY_SIGNAL,
-      TPL_NOTIFY,
-      LogProtocolArrivedNotify,
-      NULL,
-      &mLogProtocolArrivedNotifyEvent
-      );
+                    EVT_NOTIFY_SIGNAL,
+                    TPL_NOTIFY,
+                    LogProtocolArrivedNotify,
+                    NULL,
+                    &mLogProtocolArrivedNotifyEvent
+                    );
 
     if (!EFI_ERROR (Status)) {
       Status = gBS->RegisterProtocolNotify (
-        &gOcLogProtocolGuid,
-        mLogProtocolArrivedNotifyEvent,
-        &mLogProtocolArrivedNotifyRegistration
-        );
+                      &gOcLogProtocolGuid,
+                      mLogProtocolArrivedNotifyEvent,
+                      &mLogProtocolArrivedNotifyRegistration
+                      );
 
       if (EFI_ERROR (Status)) {
         gBS->CloseEvent (mLogProtocolArrivedNotifyEvent);
@@ -170,7 +171,7 @@ OcBufferEarlyLog (
   // The size of ErrorLevel and that of Buffer string including null terminator should not overflow.
   // The current position (mLogWalker) has been moved to the right side for the same purpose.
   //
-  if ((sizeof (ErrorLevel) + StrLen (Buffer) + 1) <= (UINTN) (mLogBuffer + OC_LOG_BUFFER_SIZE - mLogWalker)) {
+  if ((sizeof (ErrorLevel) + StrLen (Buffer) + 1) <= (UINTN)(mLogBuffer + OC_LOG_BUFFER_SIZE - mLogWalker)) {
     //
     // Store ErrorLevel into buffer.
     //
@@ -181,8 +182,9 @@ OcBufferEarlyLog (
     // Store logs into buffer.
     //
     while (*Buffer != CHAR_NULL) {
-      *mLogWalker++ = (UINT8) *Buffer++;
+      *mLogWalker++ = (UINT8)*Buffer++;
     }
+
     *mLogWalker++ = CHAR_NULL;
 
     //
@@ -219,9 +221,9 @@ DebugPrint (
 
   ASSERT (Format != NULL);
 
-  OcLog = InternalGetOcLog ();
+  OcLog                   = InternalGetOcLog ();
   IsBufferEarlyLogEnabled = PcdGetBool (PcdDebugLibProtocolBufferEarlyLog);
-  ShouldPrintConsole = (ErrorLevel & GetDebugPrintErrorLevel ()) != 0;
+  ShouldPrintConsole      = (ErrorLevel & GetDebugPrintErrorLevel ()) != 0;
 
   VA_START (Marker, Format);
 
@@ -295,7 +297,6 @@ DebugAssert (
   }
 }
 
-
 /**
   Fills a target buffer with PcdDebugClearMemoryValue, and returns the target buffer.
 
@@ -328,7 +329,6 @@ DebugClearMemory (
   return SetMem (Buffer, Length, PcdGet8 (PcdDebugClearMemoryValue));
 }
 
-
 /**
   Returns TRUE if ASSERT() macros are enabled.
 
@@ -345,9 +345,8 @@ DebugAssertEnabled (
   VOID
   )
 {
-  return (BOOLEAN) ((PcdGet8 (PcdDebugPropertyMask) & DEBUG_PROPERTY_DEBUG_ASSERT_ENABLED) != 0);
+  return (BOOLEAN)((PcdGet8 (PcdDebugPropertyMask) & DEBUG_PROPERTY_DEBUG_ASSERT_ENABLED) != 0);
 }
-
 
 /**
   Returns TRUE if DEBUG() macros are enabled.
@@ -365,9 +364,8 @@ DebugPrintEnabled (
   VOID
   )
 {
-  return (BOOLEAN) ((PcdGet8 (PcdDebugPropertyMask) & DEBUG_PROPERTY_DEBUG_PRINT_ENABLED) != 0);
+  return (BOOLEAN)((PcdGet8 (PcdDebugPropertyMask) & DEBUG_PROPERTY_DEBUG_PRINT_ENABLED) != 0);
 }
-
 
 /**
   Returns TRUE if DEBUG_CODE() macros are enabled.
@@ -385,9 +383,8 @@ DebugCodeEnabled (
   VOID
   )
 {
-  return (BOOLEAN) ((PcdGet8 (PcdDebugPropertyMask) & DEBUG_PROPERTY_DEBUG_CODE_ENABLED) != 0);
+  return (BOOLEAN)((PcdGet8 (PcdDebugPropertyMask) & DEBUG_PROPERTY_DEBUG_CODE_ENABLED) != 0);
 }
-
 
 /**
   Returns TRUE if DEBUG_CLEAR_MEMORY() macro is enabled.
@@ -405,9 +402,8 @@ DebugClearMemoryEnabled (
   VOID
   )
 {
-  return (BOOLEAN) ((PcdGet8 (PcdDebugPropertyMask) & DEBUG_PROPERTY_CLEAR_MEMORY_ENABLED) != 0);
+  return (BOOLEAN)((PcdGet8 (PcdDebugPropertyMask) & DEBUG_PROPERTY_CLEAR_MEMORY_ENABLED) != 0);
 }
-
 
 /**
   Returns TRUE if any one of the bit is set both in ErrorLevel and PcdFixedDebugPrintErrorLevel.
@@ -421,10 +417,10 @@ DebugClearMemoryEnabled (
 BOOLEAN
 EFIAPI
 DebugPrintLevelEnabled (
-  IN  CONST UINTN        ErrorLevel
+  IN  CONST UINTN  ErrorLevel
   )
 {
-  return (BOOLEAN) ((ErrorLevel & PcdGet32 (PcdFixedDebugPrintErrorLevel)) != 0);
+  return (BOOLEAN)((ErrorLevel & PcdGet32 (PcdFixedDebugPrintErrorLevel)) != 0);
 }
 
 /**
@@ -437,12 +433,12 @@ DebugPrintLevelEnabled (
 VOID
 EFIAPI
 OcPrintScreen (
-  IN  CONST CHAR16   *Format,
+  IN  CONST CHAR16  *Format,
   ...
   )
 {
-  CHAR16 Buffer[1024];
-  VA_LIST Marker;
+  CHAR16   Buffer[1024];
+  VA_LIST  Marker;
 
   VA_START (Marker, Format);
   UnicodeVSPrint (Buffer, sizeof (Buffer), Format, Marker);

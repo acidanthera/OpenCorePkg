@@ -12,7 +12,7 @@
 //
 // Minimal CPU delay in microseconds (us, 10^-6) for use with MicroSecondDelay e.g. in polling loops
 //
-#define OC_MINIMAL_CPU_DELAY 10
+#define OC_MINIMAL_CPU_DELAY  10
 
 /**
   Calculate the TSC frequency

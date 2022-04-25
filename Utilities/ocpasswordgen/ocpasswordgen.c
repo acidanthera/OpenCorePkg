@@ -25,11 +25,11 @@ ENTRY_POINT (
 
   for (PasswordLen = 0; PasswordLen < OC_PASSWORD_MAX_LEN; ++PasswordLen) {
     Char = getchar ();
-    if (Char == EOF || Char == '\n') {
+    if ((Char == EOF) || (Char == '\n')) {
       break;
     }
 
-    Password[PasswordLen] = (UINT8) Char;
+    Password[PasswordLen] = (UINT8)Char;
   }
 
   for (Index = 0; Index < ARRAY_SIZE (Salt); ++Index) {
@@ -39,7 +39,7 @@ ENTRY_POINT (
   OcHashPasswordSha512 (
     Password,
     PasswordLen,
-    (UINT8 *) Salt,
+    (UINT8 *)Salt,
     sizeof (Salt),
     PasswordHash
     );
@@ -51,8 +51,9 @@ ENTRY_POINT (
 
   printf (">\nPasswordSalt: <");
   for (Index = 0; Index < sizeof (Salt); ++Index) {
-    DEBUG ((DEBUG_ERROR, "%02x", ((UINT8 *) Salt)[Index]));
+    DEBUG ((DEBUG_ERROR, "%02x", ((UINT8 *)Salt)[Index]));
   }
+
   DEBUG ((DEBUG_ERROR, ">\n"));
 
   SecureZeroMem (Password, sizeof (Password));

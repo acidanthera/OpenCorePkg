@@ -15,18 +15,18 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 #include "ControlMsrE2.h"
 
 typedef struct VAR_STORE_CONTEXT_ {
-  EFI_VARSTORE_ID    Id;
-  EFI_IFR_VARSTORE   *VarStoreHeader;
+  EFI_VARSTORE_ID     Id;
+  EFI_IFR_VARSTORE    *VarStoreHeader;
 } VAR_STORE_CONTEXT;
 
 EFI_HII_PACKAGE_LIST_HEADER *
 HiiExportPackageLists (
-  IN EFI_HII_HANDLE Handle
+  IN EFI_HII_HANDLE  Handle
   )
 {
-  EFI_STATUS                    Status;
-  UINTN                         BufferSize;
-  EFI_HII_PACKAGE_LIST_HEADER   *Buffer;
+  EFI_STATUS                   Status;
+  UINTN                        BufferSize;
+  EFI_HII_PACKAGE_LIST_HEADER  *Buffer;
 
   BufferSize = 0;
 
@@ -35,11 +35,11 @@ HiiExportPackageLists (
   // Should fail with EFI_BUFFER_TOO_SMALL.
   //
   Status = gHiiDatabase->ExportPackageLists (gHiiDatabase, Handle, &BufferSize, NULL);
-  if (Status == EFI_BUFFER_TOO_SMALL && BufferSize > 0) {
+  if ((Status == EFI_BUFFER_TOO_SMALL) && (BufferSize > 0)) {
     //
     // Allocate buffer to hold the HII Database.
     //
-    Buffer = (EFI_HII_PACKAGE_LIST_HEADER *) AllocatePool (BufferSize);
+    Buffer = (EFI_HII_PACKAGE_LIST_HEADER *)AllocatePool (BufferSize);
     if (Buffer != NULL) {
       //
       // Export HII Database into the buffer.
@@ -48,19 +48,21 @@ HiiExportPackageLists (
       if (!EFI_ERROR (Status)) {
         return Buffer;
       }
+
       FreePool (Buffer);
     }
   }
+
   return NULL;
 }
 
 EFI_IFR_OP_HEADER *
 IterateOpCode (
-  IN     EFI_IFR_OP_HEADER   *Header,
-  IN     UINT8               OpCode,
-  IN OUT BOOLEAN             *Stop  OPTIONAL,
-  IN     VOID                *Context,
-  IN     OP_CODE_HANDLER     Handler
+  IN     EFI_IFR_OP_HEADER  *Header,
+  IN     UINT8              OpCode,
+  IN OUT BOOLEAN            *Stop  OPTIONAL,
+  IN     VOID               *Context,
+  IN     OP_CODE_HANDLER    Handler
   )
 {
   while (Stop == NULL || !(*Stop)) {
@@ -70,19 +72,19 @@ IterateOpCode (
 
     if (Header->OpCode == OpCode) {
       Handler (Header, Stop, Context);
-      if (Stop != NULL && *Stop) {
+      if ((Stop != NULL) && *Stop) {
         return Header;
       }
     }
 
     if (Header->Scope) {
       Header = IterateOpCode (
-        PADD (Header, Header->Length),
-        OpCode,
-        Stop,
-        Context,
-        Handler
-        );
+                 PADD (Header, Header->Length),
+                 OpCode,
+                 Stop,
+                 Context,
+                 Handler
+                 );
     }
 
     Header = PADD (Header, Header->Length);
@@ -93,16 +95,16 @@ IterateOpCode (
 
 VOID
 HandleVarStore (
-  IN     EFI_IFR_OP_HEADER   *IfrHeader,
-  IN OUT BOOLEAN             *Stop  OPTIONAL,
-  IN OUT VOID                *Context
+  IN     EFI_IFR_OP_HEADER  *IfrHeader,
+  IN OUT BOOLEAN            *Stop  OPTIONAL,
+  IN OUT VOID               *Context
   )
 {
-  VAR_STORE_CONTEXT   *Ctx;
-  EFI_IFR_VARSTORE    *VarStore;
+  VAR_STORE_CONTEXT  *Ctx;
+  EFI_IFR_VARSTORE   *VarStore;
 
-  Ctx = Context;
-  VarStore = (EFI_IFR_VARSTORE *) IfrHeader;
+  Ctx      = Context;
+  VarStore = (EFI_IFR_VARSTORE *)IfrHeader;
 
   if (VarStore->VarStoreId == Ctx->Id) {
     Ctx->VarStoreHeader = VarStore;
@@ -114,15 +116,15 @@ HandleVarStore (
 
 EFI_IFR_VARSTORE *
 GetVarStore (
-  IN EFI_IFR_OP_HEADER   *Header,
-  IN EFI_VARSTORE_ID     Id
+  IN EFI_IFR_OP_HEADER  *Header,
+  IN EFI_VARSTORE_ID    Id
   )
 {
-  BOOLEAN             Stop;
-  VAR_STORE_CONTEXT   Context;
+  BOOLEAN            Stop;
+  VAR_STORE_CONTEXT  Context;
 
-  Stop = FALSE;
-  Context.Id = Id;
+  Stop                   = FALSE;
+  Context.Id             = Id;
   Context.VarStoreHeader = NULL;
 
   IterateOpCode (Header, EFI_IFR_VARSTORE_OP, &Stop, &Context, HandleVarStore);
@@ -132,26 +134,26 @@ GetVarStore (
 
 VOID
 HandleIfrOption (
-  IN     EFI_IFR_OP_HEADER   *IfrHeader,
-  IN OUT BOOLEAN             *Stop  OPTIONAL,
-  IN OUT VOID                *Context
+  IN     EFI_IFR_OP_HEADER  *IfrHeader,
+  IN OUT BOOLEAN            *Stop  OPTIONAL,
+  IN OUT VOID               *Context
   )
 {
-  ONE_OF_CONTEXT     *Ctx;
-  UINT8              *Data;
-  UINT8              *VarPointer;
-  UINTN              DataSize;
-  UINTN              VarSize;
-  UINT16             OldContextCount;
-  UINT64             VarStoreValue;
-  EFI_STATUS         Status;
-  EFI_IFR_VARSTORE   *IfrVarStore;
-  EFI_IFR_ONE_OF     *IfrOneOf;
-  EFI_STRING         HiiString;
-  EFI_STRING         VarStoreName;
+  ONE_OF_CONTEXT    *Ctx;
+  UINT8             *Data;
+  UINT8             *VarPointer;
+  UINTN             DataSize;
+  UINTN             VarSize;
+  UINT16            OldContextCount;
+  UINT64            VarStoreValue;
+  EFI_STATUS        Status;
+  EFI_IFR_VARSTORE  *IfrVarStore;
+  EFI_IFR_ONE_OF    *IfrOneOf;
+  EFI_STRING        HiiString;
+  EFI_STRING        VarStoreName;
 
-  Ctx = Context;
-  IfrOneOf = (EFI_IFR_ONE_OF *) IfrHeader;
+  Ctx      = Context;
+  IfrOneOf = (EFI_IFR_ONE_OF *)IfrHeader;
 
   HiiString = HiiGetString (Ctx->EfiHandle, IfrOneOf->Question.Header.Prompt, "en-US");
   if (HiiString == NULL) {
@@ -169,25 +171,27 @@ HandleIfrOption (
     OldContextCount = Ctx->Count;
 
     if (Ctx->IfrOneOf == NULL) {
-      Ctx->IfrOneOf = IfrOneOf;
+      Ctx->IfrOneOf    = IfrOneOf;
       Ctx->IfrVarStore = IfrVarStore;
       Ctx->Count++;
-    } else {  ///< Skip identical Options
-      if (Ctx->IfrOneOf->Question.VarStoreId != IfrOneOf->Question.VarStoreId
-       || Ctx->IfrOneOf->Question.VarStoreInfo.VarOffset != IfrOneOf->Question.VarStoreInfo.VarOffset) {
-        Ctx->IfrOneOf = IfrOneOf;
+    } else {
+      ///< Skip identical Options
+      if (  (Ctx->IfrOneOf->Question.VarStoreId != IfrOneOf->Question.VarStoreId)
+         || (Ctx->IfrOneOf->Question.VarStoreInfo.VarOffset != IfrOneOf->Question.VarStoreInfo.VarOffset))
+      {
+        Ctx->IfrOneOf    = IfrOneOf;
         Ctx->IfrVarStore = IfrVarStore;
         Ctx->Count++;
       }
     }
 
-    if (Ctx->Count == Ctx->StopAt && Stop != NULL) {
-      Ctx->IfrOneOf = IfrOneOf;
+    if ((Ctx->Count == Ctx->StopAt) && (Stop != NULL)) {
+      Ctx->IfrOneOf    = IfrOneOf;
       Ctx->IfrVarStore = IfrVarStore;
-      Ctx->Count = 1;
-      *Stop = TRUE;
-    } else if (OldContextCount != Ctx->Count && Ctx->StopAt == DONT_STOP_AT) {
-      VarStoreName = AsciiStrCopyToUnicode ((CHAR8 *) IfrVarStore->Name, 0);
+      Ctx->Count       = 1;
+      *Stop            = TRUE;
+    } else if ((OldContextCount != Ctx->Count) && (Ctx->StopAt == DONT_STOP_AT)) {
+      VarStoreName = AsciiStrCopyToUnicode ((CHAR8 *)IfrVarStore->Name, 0);
 
       Print (
         L"%X. %02X %04X %04X /%s/ VarStore Name: %s",
@@ -200,24 +204,24 @@ HandleIfrOption (
         );
 
       DataSize = 0;
-      Status = gRT->GetVariable (
-        VarStoreName,
-        (VOID *) &IfrVarStore->Guid,
-        NULL,
-        &DataSize,
-        NULL
-        );
+      Status   = gRT->GetVariable (
+                        VarStoreName,
+                        (VOID *)&IfrVarStore->Guid,
+                        NULL,
+                        &DataSize,
+                        NULL
+                        );
 
       if (Status == EFI_BUFFER_TOO_SMALL) {
         Data = AllocatePool (DataSize);
         if (Data != NULL) {
           Status = gRT->GetVariable (
-            VarStoreName,
-            (VOID *) &IfrVarStore->Guid,
-            NULL,
-            &DataSize,
-            Data
-            );
+                          VarStoreName,
+                          (VOID *)&IfrVarStore->Guid,
+                          NULL,
+                          &DataSize,
+                          Data
+                          );
 
           if (!EFI_ERROR (Status)) {
             VarSize = sizeof (EFI_IFR_ONE_OF) - IfrOneOf->Header.Length;
@@ -226,47 +230,50 @@ HandleIfrOption (
             if (DataSize >= IfrOneOf->Question.VarStoreInfo.VarOffset + VarSize) {
               VarPointer = Data + IfrOneOf->Question.VarStoreInfo.VarOffset;
               switch (VarSize) {
-              case 1:
-                VarStoreValue = *VarPointer;
-                break;
-              case 2:
-                VarStoreValue = *(UINT16 *) (VarPointer);
-                break;
-              case 4:
-                VarStoreValue = *(UINT32 *) (VarPointer);
-                break;
-              default:
-                VarStoreValue = *(UINT64 *) (VarPointer);
-                break;
+                case 1:
+                  VarStoreValue = *VarPointer;
+                  break;
+                case 2:
+                  VarStoreValue = *(UINT16 *)(VarPointer);
+                  break;
+                case 4:
+                  VarStoreValue = *(UINT32 *)(VarPointer);
+                  break;
+                default:
+                  VarStoreValue = *(UINT64 *)(VarPointer);
+                  break;
               }
 
               Print (L" Value: value %X", VarStoreValue);
             }
           }
+
           FreePool (Data);
         }  ///< Allocate
       }  ///< GetVariable
+
       FreePool (VarStoreName);
       Print (L"\n");
     }
   }
+
   FreePool (HiiString);
 }
 
 VOID
 HandleIfrVariable (
-  IN OUT ONE_OF_CONTEXT *Context
+  IN OUT ONE_OF_CONTEXT  *Context
   )
 {
-  EFI_STATUS        Status;
-  EFI_STRING        HiiString;
-  UINTN             DataSize;
-  UINT8             *Data;
-  UINT32            Attributes;
-  UINTN             VarSize;
-  UINT8             *VarPointer;
-  UINT64            VarStoreValue;
-  UINT64            NewValue;
+  EFI_STATUS  Status;
+  EFI_STRING  HiiString;
+  UINTN       DataSize;
+  UINT8       *Data;
+  UINT32      Attributes;
+  UINTN       VarSize;
+  UINT8       *VarPointer;
+  UINT64      VarStoreValue;
+  UINT64      NewValue;
 
   HiiString = HiiGetString (Context->EfiHandle, Context->IfrOneOf->Question.Header.Prompt, "en-US");
   if (HiiString != NULL) {
@@ -274,7 +281,7 @@ HandleIfrVariable (
     FreePool (HiiString);
   }
 
-  HiiString = AsciiStrCopyToUnicode ((CHAR8 *) Context->IfrVarStore->Name, 0);
+  HiiString = AsciiStrCopyToUnicode ((CHAR8 *)Context->IfrVarStore->Name, 0);
   if (HiiString == NULL) {
     Print (L"\nCould not allocate memory for HiiString\n");
     return;
@@ -294,41 +301,41 @@ HandleIfrVariable (
   DataSize = 0;
 
   Status = gRT->GetVariable (
-    HiiString,
-    (VOID *) &Context->IfrVarStore->Guid,
-    &Attributes,
-    &DataSize,
-    NULL
-    );
+                  HiiString,
+                  (VOID *)&Context->IfrVarStore->Guid,
+                  &Attributes,
+                  &DataSize,
+                  NULL
+                  );
 
   if (Status == EFI_BUFFER_TOO_SMALL) {
     Data = AllocatePool (DataSize);
     if (Data != NULL) {
       Status = gRT->GetVariable (
-        HiiString,
-        (VOID *) &Context->IfrVarStore->Guid,
-        &Attributes,
-        &DataSize,
-        Data
-        );
+                      HiiString,
+                      (VOID *)&Context->IfrVarStore->Guid,
+                      &Attributes,
+                      &DataSize,
+                      Data
+                      );
 
       if (!EFI_ERROR (Status)) {
         ASSERT (DataSize >= Context->IfrOneOf->Question.VarStoreInfo.VarOffset + VarSize);
         VarPointer = Data + Context->IfrOneOf->Question.VarStoreInfo.VarOffset;
         switch (VarSize) {
-        case 1:
-          VarStoreValue = *VarPointer;
-          break;
-        case 2:
-          VarStoreValue = *(UINT16 *) (VarPointer);
-          break;
-        case 4:
-          VarStoreValue = *(UINT32 *) (VarPointer);
-          break;
-        default:
-          ASSERT (VarSize == 8);
-          VarStoreValue = *(UINT64 *) (VarPointer);
-          break;
+          case 1:
+            VarStoreValue = *VarPointer;
+            break;
+          case 2:
+            VarStoreValue = *(UINT16 *)(VarPointer);
+            break;
+          case 4:
+            VarStoreValue = *(UINT32 *)(VarPointer);
+            break;
+          default:
+            ASSERT (VarSize == 8);
+            VarStoreValue = *(UINT64 *)(VarPointer);
+            break;
         }
 
         Print (L"Value: value %X\n", VarStoreValue);
@@ -358,23 +365,23 @@ HandleIfrVariable (
                 *VarPointer = (UINT8)NewValue;
                 break;
               case 2:
-                *(UINT16 *) (VarPointer) = (UINT16)NewValue;
+                *(UINT16 *)(VarPointer) = (UINT16)NewValue;
                 break;
               case 4:
-                *(UINT32 *) (VarPointer) = (UINT32)NewValue;
+                *(UINT32 *)(VarPointer) = (UINT32)NewValue;
                 break;
               default:
-                *(UINT64 *) (VarPointer) = NewValue;
+                *(UINT64 *)(VarPointer) = NewValue;
                 break;
             }
 
             Status = gRT->SetVariable (
-              HiiString,
-              (VOID *) &Context->IfrVarStore->Guid,
-              Attributes,
-              DataSize,
-              Data
-              );
+                            HiiString,
+                            (VOID *)&Context->IfrVarStore->Guid,
+                            Attributes,
+                            DataSize,
+                            Data
+                            );
 
             if (!EFI_ERROR (Status)) {
               Print (L"\nDone. You will have to reboot for the change to take effect.\n");
@@ -390,6 +397,7 @@ HandleIfrVariable (
       } else {
         Print (L"\nCould not read Data\n");
       }
+
       FreePool (Data);
     } else {
       Print (L"\nCould not allocate memory for Data\n");
@@ -397,5 +405,6 @@ HandleIfrVariable (
   } else {
     Print (L"\nCould not find Variable.\n");
   }
+
   FreePool (HiiString);
 }

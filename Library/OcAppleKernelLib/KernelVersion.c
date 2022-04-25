@@ -25,7 +25,7 @@
 
 UINT32
 OcParseDarwinVersion (
-  IN  CONST CHAR8         *String
+  IN  CONST CHAR8  *String
   )
 {
   UINT32  Version;
@@ -33,7 +33,7 @@ OcParseDarwinVersion (
   UINT32  Index;
   UINT32  Index2;
 
-  if (*String == '\0' || *String < '0' || *String > '9') {
+  if ((*String == '\0') || (*String < '0') || (*String > '9')) {
     return 0;
   }
 
@@ -48,13 +48,13 @@ OcParseDarwinVersion (
       //
       // Handle single digit parts, i.e. parse 1.2.3 as 010203.
       //
-      if (*String != '.' && *String != '\0') {
+      if ((*String != '.') && (*String != '\0')) {
         VersionPart *= 10;
       }
 
-      if (*String >= '0' && *String <= '9') {
+      if ((*String >= '0') && (*String <= '9')) {
         VersionPart += *String++ - '0';
-      } else if (*String != '.' && *String != '\0') {
+      } else if ((*String != '.') && (*String != '\0')) {
         return 0;
       }
     }
@@ -114,25 +114,25 @@ OcMatchDarwinVersion (
 
 UINT32
 OcKernelReadDarwinVersion (
-  IN  CONST UINT8   *Kernel,
-  IN  UINT32        KernelSize
+  IN  CONST UINT8  *Kernel,
+  IN  UINT32       KernelSize
   )
 {
-  BOOLEAN Exists;
-  UINT32  Offset;
-  UINT32  Index;
-  CHAR8   DarwinVersion[32];
-  UINT32  DarwinVersionInteger;
+  BOOLEAN  Exists;
+  UINT32   Offset;
+  UINT32   Index;
+  CHAR8    DarwinVersion[32];
+  UINT32   DarwinVersionInteger;
 
   Offset = 0;
   Exists = FindPattern (
-    (CONST UINT8 *) "Darwin Kernel Version ",
-    NULL,
-    L_STR_LEN ("Darwin Kernel Version "),
-    Kernel,
-    KernelSize,
-    &Offset
-    );
+             (CONST UINT8 *)"Darwin Kernel Version ",
+             NULL,
+             L_STR_LEN ("Darwin Kernel Version "),
+             Kernel,
+             KernelSize,
+             &Offset
+             );
 
   if (!Exists) {
     DEBUG ((DEBUG_WARN, "OCAK: Failed to determine kernel version\n"));
@@ -142,11 +142,13 @@ OcKernelReadDarwinVersion (
   Offset += L_STR_LEN ("Darwin Kernel Version ");
 
   for (Index = 0; Index < ARRAY_SIZE (DarwinVersion) - 1; ++Index, ++Offset) {
-    if (Offset >= KernelSize || Kernel[Offset] == ':') {
+    if ((Offset >= KernelSize) || (Kernel[Offset] == ':')) {
       break;
     }
-    DarwinVersion[Index] = (CHAR8) Kernel[Offset];
+
+    DarwinVersion[Index] = (CHAR8)Kernel[Offset];
   }
+
   DarwinVersion[Index] = '\0';
   DarwinVersionInteger = OcParseDarwinVersion (DarwinVersion);
 

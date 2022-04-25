@@ -58,7 +58,7 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 **/
 typedef
 EFI_STATUS
-(EFIAPI *APPLE_BEEP_GEN_BEEP) (
+(EFIAPI *APPLE_BEEP_GEN_BEEP)(
   IN UINT32  ToneCount,
   IN UINTN   ToneLength,
   IN UINTN   SilenceLength
@@ -68,9 +68,9 @@ EFI_STATUS
   All protocol members are optional and can be NULL.
 **/
 typedef struct {
-  APPLE_BEEP_GEN_BEEP  GenBeep; ///< Can be NULL.
+  APPLE_BEEP_GEN_BEEP    GenBeep; ///< Can be NULL.
 } APPLE_BEEP_GEN_PROTOCOL;
 
-extern EFI_GUID gAppleBeepGenProtocolGuid;
+extern EFI_GUID  gAppleBeepGenProtocolGuid;
 
 #endif // APPLE_BEEP_GEN_H

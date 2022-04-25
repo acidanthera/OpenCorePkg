@@ -30,15 +30,15 @@ OcCpuInfoDump (
   UINTN              EntryCount;
   UINTN              Index;
 
-  CHAR8              *FileBuffer;
-  UINTN              FileBufferSize;
-  CHAR16             TmpFileName[32];
+  CHAR8   *FileBuffer;
+  UINTN   FileBufferSize;
+  CHAR16  TmpFileName[32];
 
   ASSERT (CpuInfo != NULL);
   ASSERT (Root    != NULL);
 
   FileBufferSize = SIZE_1KB;
-  FileBuffer     = (CHAR8 *) AllocateZeroPool (FileBufferSize);
+  FileBuffer     = (CHAR8 *)AllocateZeroPool (FileBufferSize);
   if (FileBuffer == NULL) {
     return EFI_OUT_OF_RESOURCES;
   }
@@ -145,12 +145,14 @@ OcCpuInfoDump (
     if (Reports[Index].CpuHasMsrPlatformInfo) {
       OcAsciiPrintBuffer (&FileBuffer, &FileBufferSize, "MSR_PLATFORM_INFO: 0x%llX\n", Reports[Index].CpuMsrPlatformInfoValue);
     }
+
     //
     // MSR_TURBO_RATIO_LIMIT
     //
     if (Reports[Index].CpuHasMsrTurboRatioLimit) {
       OcAsciiPrintBuffer (&FileBuffer, &FileBufferSize, "MSR_TURBO_RATIO_LIMIT: 0x%llX\n", Reports[Index].CpuMsrTurboRatioLimitValue);
     }
+
     //
     // MSR_PKG_POWER_INFO (TODO: To be confirmed)
     //
@@ -171,18 +173,21 @@ OcCpuInfoDump (
     if (Reports[Index].CpuHasMsrIa32MiscEnable) {
       OcAsciiPrintBuffer (&FileBuffer, &FileBufferSize, "MSR_IA32_MISC_ENABLE: 0x%llX\n", Reports[Index].CpuMsrIa32MiscEnableValue);
     }
+
     //
     // MSR_IA32_EXT_CONFIG
     //
     if (Reports[Index].CpuHasMsrIa32ExtConfig) {
       OcAsciiPrintBuffer (&FileBuffer, &FileBufferSize, "MSR_IA32_EXT_CONFIG: 0x%llX\n", Reports[Index].CpuMsrIa32ExtConfigValue);
     }
+
     //
     // MSR_FSB_FREQ
     //
     if (Reports[Index].CpuHasMsrFsbFreq) {
       OcAsciiPrintBuffer (&FileBuffer, &FileBufferSize, "MSR_FSB_FREQ: 0x%llX\n", Reports[Index].CpuMsrFsbFreqValue);
     }
+
     //
     // MSR_IA32_PERF_STATUS
     //
@@ -198,7 +203,7 @@ OcCpuInfoDump (
   //
   if (FileBuffer != NULL) {
     UnicodeSPrint (TmpFileName, sizeof (TmpFileName), L"CPUInfo.txt");
-    Status = OcSetFileData (Root, TmpFileName, FileBuffer, (UINT32) AsciiStrLen (FileBuffer));
+    Status = OcSetFileData (Root, TmpFileName, FileBuffer, (UINT32)AsciiStrLen (FileBuffer));
     DEBUG ((DEBUG_INFO, "OCDM: Dumped CPU info - %r\n", Status));
 
     FreePool (FileBuffer);

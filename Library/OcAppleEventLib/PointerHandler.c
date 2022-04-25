@@ -47,103 +47,103 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 #define MIN_POINTER_POLL_PERIOD  10
 #define MAX_POINTER_POLL_PERIOD  80
 
-GLOBAL_REMOVE_IF_UNREFERENCED UINT32 mPointerSpeedDiv = 0;
-GLOBAL_REMOVE_IF_UNREFERENCED UINT32 mPointerSpeedMul = 0;
+GLOBAL_REMOVE_IF_UNREFERENCED UINT32  mPointerSpeedDiv = 0;
+GLOBAL_REMOVE_IF_UNREFERENCED UINT32  mPointerSpeedMul = 0;
 
-STATIC UINT16 mMaximumDoubleClickSpeed = 75; // 374 for 2 ms
-STATIC UINT16 mMaximumClickDuration    = 15;  // 74 for 2 ms
+STATIC UINT16  mMaximumDoubleClickSpeed = 75; // 374 for 2 ms
+STATIC UINT16  mMaximumClickDuration    = 15; // 74 for 2 ms
 
 // MINIMAL_MOVEMENT
 #define MINIMAL_MOVEMENT  5
 
 // POINTER_BUTTON_INFORMATION
 typedef struct {
-  APPLE_EVENT_TYPE  EventType;
-  UINTN             ButtonTicksHold;
-  UINTN             ButtonTicksSinceClick;
-  UINTN             PreviousClickEventType;
-  BOOLEAN           PreviousButton;
-  BOOLEAN           CurrentButton;
-  DIMENSION         MouseDownPosition;
-  DIMENSION         ClickPosition;
+  APPLE_EVENT_TYPE    EventType;
+  UINTN               ButtonTicksHold;
+  UINTN               ButtonTicksSinceClick;
+  UINTN               PreviousClickEventType;
+  BOOLEAN             PreviousButton;
+  BOOLEAN             CurrentButton;
+  DIMENSION           MouseDownPosition;
+  DIMENSION           ClickPosition;
 } POINTER_BUTTON_INFORMATION;
 
 // SIMPLE_POINTER_INSTANCE
 typedef struct {
-  EFI_HANDLE                  Handle;      ///<
-  EFI_SIMPLE_POINTER_PROTOCOL *Interface;  ///<
-  BOOLEAN                     Installed;   ///<
+  EFI_HANDLE                     Handle;     ///<
+  EFI_SIMPLE_POINTER_PROTOCOL    *Interface; ///<
+  BOOLEAN                        Installed;  ///<
 } SIMPLE_POINTER_INSTANCE;
 
 // mSimplePointerInstallNotifyEvent
-STATIC EFI_EVENT mSimplePointerInstallNotifyEvent = NULL;
+STATIC EFI_EVENT  mSimplePointerInstallNotifyEvent = NULL;
 
 // mSimplePointerInstallNotifyRegistration
-STATIC VOID *mSimplePointerInstallNotifyRegistration = NULL;
+STATIC VOID  *mSimplePointerInstallNotifyRegistration = NULL;
 
 // mSimplePointerInstances
-STATIC SIMPLE_POINTER_INSTANCE *mPointerProtocols = NULL;
+STATIC SIMPLE_POINTER_INSTANCE  *mPointerProtocols = NULL;
 
 // mNoSimplePointerInstances
-STATIC UINTN mNumberOfPointerProtocols = 0;
+STATIC UINTN  mNumberOfPointerProtocols = 0;
 
 // mSimplePointerPollEvent
-STATIC EFI_EVENT mSimplePointerPollEvent = NULL;
+STATIC EFI_EVENT  mSimplePointerPollEvent = NULL;
 
 // mSimplePointerPollTime
-STATIC UINT64 mSimplePointerPollTime;
-STATIC UINT64 mSimplePointerMinPollTime = MIN_POINTER_POLL_PERIOD * 10000;
-STATIC UINT64 mSimplePointerMaxPollTime = MAX_POINTER_POLL_PERIOD * 10000;
+STATIC UINT64  mSimplePointerPollTime;
+STATIC UINT64  mSimplePointerMinPollTime = MIN_POINTER_POLL_PERIOD * 10000;
+STATIC UINT64  mSimplePointerMaxPollTime = MAX_POINTER_POLL_PERIOD * 10000;
 
-STATIC UINT32 mSimplePointerPollMask = POINTER_POLL_ALL_MASK;
+STATIC UINT32  mSimplePointerPollMask = POINTER_POLL_ALL_MASK;
 
 // mUiScale
-STATIC UINT8 mUiScale = 1;
+STATIC UINT8  mUiScale = 1;
 
 // mLeftButtonInfo
-STATIC POINTER_BUTTON_INFORMATION mLeftButtonInfo = {
+STATIC POINTER_BUTTON_INFORMATION  mLeftButtonInfo = {
   APPLE_EVENT_TYPE_LEFT_BUTTON,
   0,
   0,
   0,
   FALSE,
   FALSE,
-  { 0, 0 },
-  { 0, 0 }
+  { 0,                         0  },
+  { 0,                         0  }
 };
 
 // mRightButtonInfo
-STATIC POINTER_BUTTON_INFORMATION mRightButtonInfo = {
+STATIC POINTER_BUTTON_INFORMATION  mRightButtonInfo = {
   APPLE_EVENT_TYPE_RIGHT_BUTTON,
   0,
   0,
   0,
   FALSE,
   FALSE,
-  { 0, 0 },
-  { 0, 0 }
+  { 0,                          0  },
+  { 0,                          0  }
 };
 
 // mCursorPosition
-STATIC DIMENSION mCursorPosition;
+STATIC DIMENSION  mCursorPosition;
 
 // mMouseMoved
-STATIC BOOLEAN mMouseMoved;
+STATIC BOOLEAN  mMouseMoved;
 
 // mScreenResolution
-STATIC DIMENSION mResolution = { 800, 600 };
+STATIC DIMENSION  mResolution = { 800, 600 };
 
-STATIC UINT64 mMaxPointerResolutionX = 1;
-STATIC UINT64 mMaxPointerResolutionY = 1;
+STATIC UINT64  mMaxPointerResolutionX = 1;
+STATIC UINT64  mMaxPointerResolutionY = 1;
 
-STATIC INT64 mPointerRawX;
-STATIC INT64 mPointerRawY;
+STATIC INT64  mPointerRawX;
+STATIC INT64  mPointerRawY;
 
 VOID
 InternalSetPointerPolling (
-  IN UINT32 PointerPollMin,
-  IN UINT32 PointerPollMax,
-  IN UINT32 PointerPollMask
+  IN UINT32  PointerPollMin,
+  IN UINT32  PointerPollMax,
+  IN UINT32  PointerPollMask
   )
 {
   if (PointerPollMin == POINTER_POLL_DEFAULT) {
@@ -163,8 +163,8 @@ InternalSetPointerPolling (
 
 VOID
 InternalSetPointerSpeed (
-  IN UINT16 PointerSpeedDiv,
-  IN UINT16 PointerSpeedMul
+  IN UINT16  PointerSpeedDiv,
+  IN UINT16  PointerSpeedMul
   )
 {
   if (PointerSpeedDiv != 0) {
@@ -189,8 +189,8 @@ InternalRegisterSimplePointerInterface (
   IN EFI_SIMPLE_POINTER_PROTOCOL  *SimplePointer
   )
 {
-  SIMPLE_POINTER_INSTANCE *Instance;
-  UINTN                   Index;
+  SIMPLE_POINTER_INSTANCE  *Instance;
+  UINTN                    Index;
 
   DEBUG ((DEBUG_VERBOSE, "InternalRegisterSimplePointerInterface\n"));
 
@@ -225,22 +225,22 @@ InternalRegisterSimplePointerInterface (
     mPointerProtocols = Instance;
 
     if (SimplePointer->Mode->ResolutionX > mMaxPointerResolutionX) {
-      mPointerRawX = MultS64x64 (mPointerRawX, (INT64) mMaxPointerResolutionX);
+      mPointerRawX = MultS64x64 (mPointerRawX, (INT64)mMaxPointerResolutionX);
       mPointerRawX = DivS64x64Remainder (
-        mPointerRawX,
-        (INT64) SimplePointer->Mode->ResolutionX,
-        NULL
-        );
+                       mPointerRawX,
+                       (INT64)SimplePointer->Mode->ResolutionX,
+                       NULL
+                       );
       mMaxPointerResolutionX = SimplePointer->Mode->ResolutionX;
     }
 
     if (SimplePointer->Mode->ResolutionY > mMaxPointerResolutionY) {
-      mPointerRawY = MultS64x64 (mPointerRawY, (INT64) mMaxPointerResolutionY);
+      mPointerRawY = MultS64x64 (mPointerRawY, (INT64)mMaxPointerResolutionY);
       mPointerRawY = DivS64x64Remainder (
-        mPointerRawY,
-        (INT64) SimplePointer->Mode->ResolutionY,
-        NULL
-        );
+                       mPointerRawY,
+                       (INT64)SimplePointer->Mode->ResolutionY,
+                       NULL
+                       );
       mMaxPointerResolutionY = SimplePointer->Mode->ResolutionY;
     }
   }
@@ -272,19 +272,19 @@ InternalRemoveUninstalledInstances (
   IN     EFI_GUID                 *Protocol
   )
 {
-  EFI_STATUS              Status;
-  UINTN                   NumberHandles;
-  EFI_HANDLE              *Buffer;
-  SIMPLE_POINTER_INSTANCE *Instance;
-  UINTN                   Index;
-  UINTN                   Index2;
-  SIMPLE_POINTER_INSTANCE *OrgInstances;
-  SIMPLE_POINTER_INSTANCE *NewInstances;
-  UINTN                   NumberOfMatches;
+  EFI_STATUS               Status;
+  UINTN                    NumberHandles;
+  EFI_HANDLE               *Buffer;
+  SIMPLE_POINTER_INSTANCE  *Instance;
+  UINTN                    Index;
+  UINTN                    Index2;
+  SIMPLE_POINTER_INSTANCE  *OrgInstances;
+  SIMPLE_POINTER_INSTANCE  *NewInstances;
+  UINTN                    NumberOfMatches;
 
   DEBUG ((DEBUG_VERBOSE, "InternalRemoveUninstalledInstances\n"));
 
-  OrgInstances    = *InstancesPtr;
+  OrgInstances = *InstancesPtr;
 
   Status = gBS->LocateHandleBuffer (
                   ByProtocol,
@@ -322,8 +322,8 @@ InternalRemoveUninstalledInstances (
         NewInstances = NULL;
         if (NumberOfMatches > 0) {
           NewInstances = AllocateZeroPool (
-                   NumberOfMatches * sizeof (*NewInstances)
-                   );
+                           NumberOfMatches * sizeof (*NewInstances)
+                           );
         }
 
         if (NewInstances != NULL) {
@@ -333,7 +333,8 @@ InternalRemoveUninstalledInstances (
             if (Instance->Installed) {
               CopyMem (
                 (VOID *)&NewInstances[Index2],
-                (VOID *)Instance, sizeof (*Instance)
+                (VOID *)Instance,
+                sizeof (*Instance)
                 );
 
               ++Index2;
@@ -368,11 +369,11 @@ InternalSimplePointerInstallNotifyFunction (
   IN VOID       *Context
   )
 {
-  EFI_STATUS                  Status;
-  UINTN                       NumberHandles;
-  EFI_HANDLE                  *Buffer;
-  UINTN                       Index;
-  EFI_SIMPLE_POINTER_PROTOCOL *SimplePointer;
+  EFI_STATUS                   Status;
+  UINTN                        NumberHandles;
+  EFI_HANDLE                   *Buffer;
+  UINTN                        Index;
+  EFI_SIMPLE_POINTER_PROTOCOL  *SimplePointer;
 
   DEBUG ((DEBUG_VERBOSE, "InternalSimplePointerInstallNotifyFunction\n"));
 
@@ -417,7 +418,7 @@ EventCreateSimplePointerInstallNotifyEvent (
   VOID
   )
 {
-  EFI_STATUS Status;
+  EFI_STATUS  Status;
 
   DEBUG ((DEBUG_VERBOSE, "EventCreateSimplePointerInstallNotifyEvent\n"));
 
@@ -468,14 +469,14 @@ InternalGetScreenResolution (
   VOID
   )
 {
-  EFI_STATUS                           Status;
-  EFI_GRAPHICS_OUTPUT_PROTOCOL         *GraphicsOutput;
-  EFI_UGA_DRAW_PROTOCOL                *UgaDraw;
-  EFI_GRAPHICS_OUTPUT_MODE_INFORMATION *Info;
-  UINT32                               HorizontalResolution;
-  UINT32                               VerticalResolution;
-  UINT32                               ColorDepth;
-  UINT32                               RefreshRate;
+  EFI_STATUS                            Status;
+  EFI_GRAPHICS_OUTPUT_PROTOCOL          *GraphicsOutput;
+  EFI_UGA_DRAW_PROTOCOL                 *UgaDraw;
+  EFI_GRAPHICS_OUTPUT_MODE_INFORMATION  *Info;
+  UINT32                                HorizontalResolution;
+  UINT32                                VerticalResolution;
+  UINT32                                ColorDepth;
+  UINT32                                RefreshRate;
 
   DEBUG ((DEBUG_VERBOSE, "InternalGetScreenResolution\n"));
 
@@ -487,20 +488,20 @@ InternalGetScreenResolution (
   VerticalResolution   = 0;
 
   Status = gBS->HandleProtocol (
-    gST->ConsoleOutHandle,
-    &gEfiGraphicsOutputProtocolGuid,
-    (VOID **)&GraphicsOutput
-    );
+                  gST->ConsoleOutHandle,
+                  &gEfiGraphicsOutputProtocolGuid,
+                  (VOID **)&GraphicsOutput
+                  );
   if (!EFI_ERROR (Status)) {
     Info                 = GraphicsOutput->Mode->Info;
     HorizontalResolution = Info->HorizontalResolution;
     VerticalResolution   = Info->VerticalResolution;
   } else if (Status == EFI_UNSUPPORTED) {
     Status = gBS->HandleProtocol (
-      gST->ConsoleOutHandle,
-      &gEfiUgaDrawProtocolGuid,
-      (VOID **)&UgaDraw
-      );
+                    gST->ConsoleOutHandle,
+                    &gEfiUgaDrawProtocolGuid,
+                    (VOID **)&UgaDraw
+                    );
     DEBUG ((
       DEBUG_INFO,
       "OCAE: Failed to handle GOP, discovering UGA - %r\n",
@@ -509,19 +510,19 @@ InternalGetScreenResolution (
 
     if (!EFI_ERROR (Status)) {
       Status = UgaDraw->GetMode (
-        UgaDraw,
-        &HorizontalResolution,
-        &VerticalResolution,
-        &ColorDepth,
-        &RefreshRate
-        );
+                          UgaDraw,
+                          &HorizontalResolution,
+                          &VerticalResolution,
+                          &ColorDepth,
+                          &RefreshRate
+                          );
     }
   }
 
   if (!EFI_ERROR (Status)) {
-    if (HorizontalResolution > 0 && VerticalResolution > 0) {
-      mResolution.Horizontal = (INT32) HorizontalResolution;
-      mResolution.Vertical   = (INT32) VerticalResolution;
+    if ((HorizontalResolution > 0) && (VerticalResolution > 0)) {
+      mResolution.Horizontal = (INT32)HorizontalResolution;
+      mResolution.Vertical   = (INT32)VerticalResolution;
 
       if (mCursorPosition.Horizontal >= mResolution.Horizontal) {
         mCursorPosition.Horizontal = mResolution.Horizontal - 1;
@@ -557,18 +558,18 @@ InternalGetUiScaleData (
   IN INT64  Movement
   )
 {
-  INT64 AbsoluteValue;
-  INTN  Value;
-  INT64 Factor;
+  INT64  AbsoluteValue;
+  INTN   Value;
+  INT64  Factor;
 
   DEBUG ((DEBUG_VERBOSE, "InternalGetUiScaleData\n"));
 
-  AbsoluteValue = ABS(Movement);
-  Value         = HighBitSet64 ((UINT64) (AbsoluteValue));
+  AbsoluteValue = ABS (Movement);
+  Value         = HighBitSet64 ((UINT64)(AbsoluteValue));
   Factor        = 5;
 
   if (Value <= 3) {
-    Factor = (HighBitSet64 ((UINT64) (AbsoluteValue) + 1));
+    Factor = (HighBitSet64 ((UINT64)(AbsoluteValue) + 1));
   }
 
   return (INT64)(MultS64x64 (
@@ -585,8 +586,8 @@ InternalCreatePointerEventQueueInformation (
   IN APPLE_MODIFIER_MAP  Modifiers
   )
 {
-  UINT32           FinalEventType;
-  APPLE_EVENT_DATA EventData;
+  UINT32            FinalEventType;
+  APPLE_EVENT_DATA  EventData;
 
   DEBUG ((DEBUG_VERBOSE, "InternalCreatePointerEventQueueInformation\n"));
 
@@ -619,10 +620,10 @@ InternalHandleButtonInteraction (
   IN     APPLE_MODIFIER_MAP          Modifiers
   )
 {
-  APPLE_EVENT_INFORMATION *Information;
-  INT32                   HorizontalMovement;
-  INT32                   VerticalMovement;
-  APPLE_EVENT_TYPE        EventType;
+  APPLE_EVENT_INFORMATION  *Information;
+  INT32                    HorizontalMovement;
+  INT32                    VerticalMovement;
+  APPLE_EVENT_TYPE         EventType;
 
   DEBUG ((DEBUG_VERBOSE, "InternalHandleButtonInteraction\n"));
 
@@ -652,22 +653,25 @@ InternalHandleButtonInteraction (
       }
 
       if (Pointer->ButtonTicksHold <= mMaximumClickDuration) {
-        HorizontalMovement = ABS(Pointer->MouseDownPosition.Horizontal - mCursorPosition.Horizontal);
-        VerticalMovement   = ABS(Pointer->MouseDownPosition.Vertical - mCursorPosition.Vertical);
+        HorizontalMovement = ABS (Pointer->MouseDownPosition.Horizontal - mCursorPosition.Horizontal);
+        VerticalMovement   = ABS (Pointer->MouseDownPosition.Vertical - mCursorPosition.Vertical);
         //
         // CHANGE: Apple did not scale by UIScale.
         //
-        if ((HorizontalMovement <= mUiScale * MINIMAL_MOVEMENT)
-         && (VerticalMovement <= mUiScale * MINIMAL_MOVEMENT)) {
+        if (  (HorizontalMovement <= mUiScale * MINIMAL_MOVEMENT)
+           && (VerticalMovement <= mUiScale * MINIMAL_MOVEMENT))
+        {
           EventType = APPLE_EVENT_TYPE_MOUSE_CLICK;
 
-          if ((Pointer->PreviousClickEventType == APPLE_EVENT_TYPE_MOUSE_CLICK)
-           && (Pointer->ButtonTicksSinceClick <= mMaximumDoubleClickSpeed)) {
-            HorizontalMovement = ABS(Pointer->ClickPosition.Horizontal - mCursorPosition.Horizontal);
-            VerticalMovement   = ABS(Pointer->ClickPosition.Vertical - mCursorPosition.Vertical);
+          if (  (Pointer->PreviousClickEventType == APPLE_EVENT_TYPE_MOUSE_CLICK)
+             && (Pointer->ButtonTicksSinceClick <= mMaximumDoubleClickSpeed))
+          {
+            HorizontalMovement = ABS (Pointer->ClickPosition.Horizontal - mCursorPosition.Horizontal);
+            VerticalMovement   = ABS (Pointer->ClickPosition.Vertical - mCursorPosition.Vertical);
 
-            if ((HorizontalMovement <= mUiScale * MINIMAL_MOVEMENT)
-             && (VerticalMovement <= mUiScale * MINIMAL_MOVEMENT)) {
+            if (  (HorizontalMovement <= mUiScale * MINIMAL_MOVEMENT)
+               && (VerticalMovement <= mUiScale * MINIMAL_MOVEMENT))
+            {
               EventType = APPLE_EVENT_TYPE_MOUSE_DOUBLE_CLICK;
             }
           }
@@ -713,26 +717,26 @@ InternalSimplePointerPollNotifyFunction (
   IN VOID       *Context
   )
 {
-  APPLE_MODIFIER_MAP          Modifiers;
-  UINTN                       Index;
-  SIMPLE_POINTER_INSTANCE     *Instance;
-  EFI_SIMPLE_POINTER_PROTOCOL *SimplePointer;
-  EFI_STATUS                  Status;
-  EFI_STATUS                  CommonStatus;
-  EFI_SIMPLE_POINTER_STATE    State;
-  INT64                       UiScaleX;
-  INT64                       UiScaleY;
-  INT64                       ScaledY;
-  INT64                       ScaledX;
-  DIMENSION                   NewPosition;
-  APPLE_EVENT_INFORMATION     *Information;
-  APPLE_EVENT_DATA            EventData;
-  UINT64                      StartTime;
-  UINT64                      EndTime;
-  INT64                       MaxRawPointerX;
-  INT64                       MaxRawPointerY;
-  UINT64                      ClickTemp;
-  UINT64                      DoubleClickTemp;
+  APPLE_MODIFIER_MAP           Modifiers;
+  UINTN                        Index;
+  SIMPLE_POINTER_INSTANCE      *Instance;
+  EFI_SIMPLE_POINTER_PROTOCOL  *SimplePointer;
+  EFI_STATUS                   Status;
+  EFI_STATUS                   CommonStatus;
+  EFI_SIMPLE_POINTER_STATE     State;
+  INT64                        UiScaleX;
+  INT64                        UiScaleY;
+  INT64                        ScaledY;
+  INT64                        ScaledX;
+  DIMENSION                    NewPosition;
+  APPLE_EVENT_INFORMATION      *Information;
+  APPLE_EVENT_DATA             EventData;
+  UINT64                       StartTime;
+  UINT64                       EndTime;
+  INT64                        MaxRawPointerX;
+  INT64                        MaxRawPointerY;
+  UINT64                       ClickTemp;
+  UINT64                       DoubleClickTemp;
 
   StartTime = GetPerformanceCounter ();
 
@@ -752,8 +756,9 @@ InternalSimplePointerPollNotifyFunction (
     CommonStatus = EFI_NOT_READY;
 
     for (Index = 0; Index < mNumberOfPointerProtocols; ++Index) {
-      if (mSimplePointerPollMask != POINTER_POLL_ALL_MASK
-        && (Index >= 32 || ((1U << Index) & mSimplePointerPollMask) == 0)) {
+      if (  (mSimplePointerPollMask != POINTER_POLL_ALL_MASK)
+         && ((Index >= 32) || (((1U << Index) & mSimplePointerPollMask) == 0)))
+      {
         continue;
       }
 
@@ -770,49 +775,50 @@ InternalSimplePointerPollNotifyFunction (
         //
 
         UiScaleX = InternalGetUiScaleData ((INT64)State.RelativeMovementX);
-        UiScaleX = MultS64x64 (UiScaleX, (INT64) mMaxPointerResolutionX);
+        UiScaleX = MultS64x64 (UiScaleX, (INT64)mMaxPointerResolutionX);
         UiScaleX = MultS64x64 (UiScaleX, mPointerSpeedMul);
         UiScaleX = DivS64x64Remainder (UiScaleX, mPointerSpeedDiv, NULL);
 
         UiScaleY = InternalGetUiScaleData ((INT64)State.RelativeMovementY);
-        UiScaleY = MultS64x64 (UiScaleY, (INT64) mMaxPointerResolutionY);
+        UiScaleY = MultS64x64 (UiScaleY, (INT64)mMaxPointerResolutionY);
         UiScaleY = MultS64x64 (UiScaleY, mPointerSpeedMul);
         UiScaleY = DivS64x64Remainder (UiScaleY, mPointerSpeedDiv, NULL);
 
         if (SimplePointer->Mode->ResolutionX > 0) {
           UiScaleX = DivS64x64Remainder (
-            UiScaleX,
-            (INT64) SimplePointer->Mode->ResolutionX,
-            NULL
-            );
+                       UiScaleX,
+                       (INT64)SimplePointer->Mode->ResolutionX,
+                       NULL
+                       );
         }
 
         if (SimplePointer->Mode->ResolutionY > 0) {
           UiScaleY = DivS64x64Remainder (
-            UiScaleY,
-            (INT64) SimplePointer->Mode->ResolutionY,
-            NULL
-            );
+                       UiScaleY,
+                       (INT64)SimplePointer->Mode->ResolutionY,
+                       NULL
+                       );
         }
+
         //
         // CHANGE: Fix maximum coordinates.
         //
-        mPointerRawX += UiScaleX;
+        mPointerRawX  += UiScaleX;
         MaxRawPointerX = MultS64x64 (
-          mResolution.Horizontal - 1,
-          (INT64) mMaxPointerResolutionX
-          );
+                           mResolution.Horizontal - 1,
+                           (INT64)mMaxPointerResolutionX
+                           );
         if (mPointerRawX > MaxRawPointerX) {
           mPointerRawX = MaxRawPointerX;
         } else if (mPointerRawX < 0) {
           mPointerRawX = 0;
         }
 
-        mPointerRawY += UiScaleY;
+        mPointerRawY  += UiScaleY;
         MaxRawPointerY = MultS64x64 (
-          mResolution.Vertical - 1,
-          (INT64) mMaxPointerResolutionY
-          );
+                           mResolution.Vertical - 1,
+                           (INT64)mMaxPointerResolutionY
+                           );
         if (mPointerRawY > MaxRawPointerY) {
           mPointerRawY = MaxRawPointerY;
         } else if (mPointerRawY < 0) {
@@ -820,22 +826,23 @@ InternalSimplePointerPollNotifyFunction (
         }
 
         ScaledX = DivS64x64Remainder (
-          mPointerRawX,
-          (INT64) mMaxPointerResolutionX,
-          NULL
-          );
+                    mPointerRawX,
+                    (INT64)mMaxPointerResolutionX,
+                    NULL
+                    );
 
         ScaledY = DivS64x64Remainder (
-          mPointerRawY,
-          (INT64) mMaxPointerResolutionY,
-          NULL
-          );
+                    mPointerRawY,
+                    (INT64)mMaxPointerResolutionY,
+                    NULL
+                    );
 
-        NewPosition.Horizontal = (INT32) ScaledX;
-        NewPosition.Vertical   = (INT32) ScaledY;
+        NewPosition.Horizontal = (INT32)ScaledX;
+        NewPosition.Vertical   = (INT32)ScaledY;
 
-        if ((mCursorPosition.Horizontal != NewPosition.Horizontal)
-         || (mCursorPosition.Vertical != NewPosition.Vertical)) {
+        if (  (mCursorPosition.Horizontal != NewPosition.Horizontal)
+           || (mCursorPosition.Vertical != NewPosition.Vertical))
+        {
           CopyMem (
             &mCursorPosition,
             &NewPosition,
@@ -886,35 +893,36 @@ InternalSimplePointerPollNotifyFunction (
   // which is still far from enough. The event system on these laptops is pretty broken,
   // and even adding gBS->CheckEvent prior to GetState almost does not reduce the time spent.
   //
-  if (mSimplePointerPollEvent != NULL && mSimplePointerPollTime < mSimplePointerMaxPollTime) {
+  if ((mSimplePointerPollEvent != NULL) && (mSimplePointerPollTime < mSimplePointerMaxPollTime)) {
     EndTime = GetPerformanceCounter ();
     if (StartTime > EndTime) {
       EndTime = StartTime;
     }
+
     EndTime = GetTimeInNanoSecond (EndTime - StartTime);
     // Maximum time allowed in this function is half the interval plus some margin (0.55 * 100ns)
     if (EndTime > mSimplePointerPollTime * 55ULL) {
-      ClickTemp = MultU64x32 (mSimplePointerPollTime, mMaximumClickDuration);
+      ClickTemp       = MultU64x32 (mSimplePointerPollTime, mMaximumClickDuration);
       DoubleClickTemp = MultU64x32 (
-        mSimplePointerPollTime,
-        mMaximumDoubleClickSpeed
-        );
+                          mSimplePointerPollTime,
+                          mMaximumDoubleClickSpeed
+                          );
 
       mSimplePointerPollTime = DivU64x32 (EndTime, 50);
       if (mSimplePointerPollTime > mSimplePointerMaxPollTime) {
         mSimplePointerPollTime = mSimplePointerMaxPollTime;
       }
 
-      mMaximumClickDuration = (UINT16) DivU64x64Remainder (
-        ClickTemp,
-        mSimplePointerPollTime,
-        NULL
-        );
-      mMaximumDoubleClickSpeed = (UINT16) DivU64x64Remainder (
-        DoubleClickTemp,
-        mSimplePointerPollTime,
-        NULL
-        );
+      mMaximumClickDuration = (UINT16)DivU64x64Remainder (
+                                        ClickTemp,
+                                        mSimplePointerPollTime,
+                                        NULL
+                                        );
+      mMaximumDoubleClickSpeed = (UINT16)DivU64x64Remainder (
+                                           DoubleClickTemp,
+                                           mSimplePointerPollTime,
+                                           NULL
+                                           );
 
       gBS->SetTimer (mSimplePointerPollEvent, TimerPeriodic, mSimplePointerPollTime);
     }
@@ -936,14 +944,14 @@ EventCreateSimplePointerPollEvent (
   DataSize = sizeof (mUiScale);
 
   Status = gRT->GetVariable (
-    APPLE_UI_SCALE_VARIABLE_NAME,
-    &gAppleVendorVariableGuid,
-    NULL,
-    &DataSize,
-    (VOID *) &mUiScale
-    );
+                  APPLE_UI_SCALE_VARIABLE_NAME,
+                  &gAppleVendorVariableGuid,
+                  NULL,
+                  &DataSize,
+                  (VOID *)&mUiScale
+                  );
 
-  if (EFI_ERROR (Status) || mUiScale != 2) {
+  if (EFI_ERROR (Status) || (mUiScale != 2)) {
     mUiScale = 1;
   }
 
@@ -955,14 +963,15 @@ EventCreateSimplePointerPollEvent (
 
   for (Index = 0; Index < mNumberOfPointerProtocols; ++Index) {
     mPointerProtocols[Index].Interface->Reset (
-      mPointerProtocols[Index].Interface, FALSE
-      );
+                                          mPointerProtocols[Index].Interface,
+                                          FALSE
+                                          );
   }
 
   InternalGetScreenResolution ();
   ZeroMem (&mCursorPosition, sizeof (mCursorPosition));
 
-  mSimplePointerPollTime = mSimplePointerMinPollTime;
+  mSimplePointerPollTime  = mSimplePointerMinPollTime;
   mSimplePointerPollEvent = EventLibCreateNotifyTimerEvent (
                               InternalSimplePointerPollNotifyFunction,
                               NULL,
@@ -1003,7 +1012,7 @@ EventSetCursorPositionImpl (
   IN DIMENSION  *Position
   )
 {
-  EFI_STATUS Status;
+  EFI_STATUS  Status;
 
   DEBUG ((DEBUG_VERBOSE, "EventSetCursorPositionImpl\n"));
 
@@ -1015,19 +1024,20 @@ EventSetCursorPositionImpl (
   // Apple did not check for negatives here.
   //
 
-  if (Position->Horizontal >= 0 && Position->Vertical >= 0
-    && (Position->Horizontal < mResolution.Horizontal)
-    && (Position->Vertical < mResolution.Vertical)) {
+  if (  (Position->Horizontal >= 0) && (Position->Vertical >= 0)
+     && (Position->Horizontal < mResolution.Horizontal)
+     && (Position->Vertical < mResolution.Vertical))
+  {
     mCursorPosition.Horizontal = Position->Horizontal;
     mCursorPosition.Vertical   = Position->Vertical;
-    mPointerRawX = MultS64x64 (
-      mCursorPosition.Horizontal,
-      (INT64) mMaxPointerResolutionX
-      );
+    mPointerRawX               = MultS64x64 (
+                                   mCursorPosition.Horizontal,
+                                   (INT64)mMaxPointerResolutionX
+                                   );
     mPointerRawY = MultS64x64 (
-      mCursorPosition.Vertical,
-      (INT64) mMaxPointerResolutionY
-      );
+                     mCursorPosition.Vertical,
+                     (INT64)mMaxPointerResolutionY
+                     );
     Status = EFI_SUCCESS;
   }
 

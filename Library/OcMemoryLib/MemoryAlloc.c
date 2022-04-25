@@ -33,24 +33,24 @@ OcAllocatePagesFromTop (
   IN     CHECK_ALLOCATION_RANGE  CheckRange     OPTIONAL
   )
 {
-  EFI_STATUS              Status;
-  UINTN                   MemoryMapSize;
-  EFI_MEMORY_DESCRIPTOR   *MemoryMap;
-  UINTN                   MapKey;
-  UINTN                   DescriptorSize;
-  UINT32                  DescriptorVersion;
-  EFI_MEMORY_DESCRIPTOR   *MemoryMapEnd;
-  EFI_MEMORY_DESCRIPTOR   *Desc;
+  EFI_STATUS             Status;
+  UINTN                  MemoryMapSize;
+  EFI_MEMORY_DESCRIPTOR  *MemoryMap;
+  UINTN                  MapKey;
+  UINTN                  DescriptorSize;
+  UINT32                 DescriptorVersion;
+  EFI_MEMORY_DESCRIPTOR  *MemoryMapEnd;
+  EFI_MEMORY_DESCRIPTOR  *Desc;
 
   Status = OcGetCurrentMemoryMapAlloc (
-    &MemoryMapSize,
-    &MemoryMap,
-    &MapKey,
-    &DescriptorSize,
-    &DescriptorVersion,
-    GetMemoryMap,
-    NULL
-    );
+             &MemoryMapSize,
+             &MemoryMap,
+             &MapKey,
+             &DescriptorSize,
+             &DescriptorVersion,
+             GetMemoryMap,
+             NULL
+             );
 
   if (EFI_ERROR (Status)) {
     return Status;
@@ -59,16 +59,16 @@ OcAllocatePagesFromTop (
   Status = EFI_NOT_FOUND;
 
   MemoryMapEnd = NEXT_MEMORY_DESCRIPTOR (MemoryMap, MemoryMapSize);
-  Desc = PREV_MEMORY_DESCRIPTOR (MemoryMapEnd, DescriptorSize);
+  Desc         = PREV_MEMORY_DESCRIPTOR (MemoryMapEnd, DescriptorSize);
 
   for ( ; Desc >= MemoryMap; Desc = PREV_MEMORY_DESCRIPTOR (Desc, DescriptorSize)) {
     //
     // We are looking for some free memory descriptor that contains enough
     // space below the specified memory.
     //
-    if (Desc->Type == EfiConventionalMemory && Pages <= Desc->NumberOfPages &&
-      Desc->PhysicalStart + EFI_PAGES_TO_SIZE (Pages) <= *Memory) {
-
+    if ((Desc->Type == EfiConventionalMemory) && (Pages <= Desc->NumberOfPages) &&
+        (Desc->PhysicalStart + EFI_PAGES_TO_SIZE (Pages) <= *Memory))
+    {
       //
       // Free block found
       //
@@ -87,16 +87,16 @@ OcAllocatePagesFromTop (
       //
       // Ensure that the found block does not overlap with the restricted area.
       //
-      if (CheckRange != NULL && CheckRange (*Memory, EFI_PAGES_TO_SIZE (Pages))) {
+      if ((CheckRange != NULL) && CheckRange (*Memory, EFI_PAGES_TO_SIZE (Pages))) {
         continue;
       }
 
-      Status = (AllocatePages != NULL ? AllocatePages : gBS->AllocatePages) (
-        AllocateAddress,
-        MemoryType,
-        Pages,
-        Memory
-        );
+      Status = (AllocatePages != NULL ? AllocatePages : gBS->AllocatePages)(
+  AllocateAddress,
+  MemoryType,
+  Pages,
+  Memory
+  );
 
       break;
     }
@@ -127,8 +127,9 @@ OcCountRuntimePages (
   Desc       = MemoryMap;
 
   for (Index = 0; Index < NumEntries; ++Index) {
-    if (Desc->Type != EfiReservedMemoryType
-      && (Desc->Attribute & EFI_MEMORY_RUNTIME) != 0) {
+    if (  (Desc->Type != EfiReservedMemoryType)
+       && ((Desc->Attribute & EFI_MEMORY_RUNTIME) != 0))
+    {
       ++DescNum;
       PageNum += Desc->NumberOfPages;
     }
@@ -145,14 +146,14 @@ OcCountRuntimePages (
 
 UINTN
 OcCountFreePages (
-  OUT UINTN                  *LowerMemory  OPTIONAL
+  OUT UINTN  *LowerMemory  OPTIONAL
   )
 {
-  UINTN                        MemoryMapSize;
-  UINTN                        DescriptorSize;
-  EFI_MEMORY_DESCRIPTOR        *MemoryMap;
-  EFI_MEMORY_DESCRIPTOR        *EntryWalker;
-  UINTN                        FreePages;
+  UINTN                  MemoryMapSize;
+  UINTN                  DescriptorSize;
+  EFI_MEMORY_DESCRIPTOR  *MemoryMap;
+  EFI_MEMORY_DESCRIPTOR  *EntryWalker;
+  UINTN                  FreePages;
 
   FreePages = 0;
   if (LowerMemory != NULL) {
@@ -165,10 +166,10 @@ OcCountFreePages (
   }
 
   for (
-    EntryWalker = MemoryMap;
-    (UINT8 *) EntryWalker < ((UINT8 *) MemoryMap + MemoryMapSize);
-    EntryWalker = NEXT_MEMORY_DESCRIPTOR (EntryWalker, DescriptorSize)) {
-
+       EntryWalker = MemoryMap;
+       (UINT8 *)EntryWalker < ((UINT8 *)MemoryMap + MemoryMapSize);
+       EntryWalker = NEXT_MEMORY_DESCRIPTOR (EntryWalker, DescriptorSize))
+  {
     if (EntryWalker->Type != EfiConventionalMemory) {
       continue;
     }
@@ -179,16 +180,16 @@ OcCountFreePages (
     //
     ASSERT (EntryWalker->NumberOfPages <= MAX_UINTN);
     ASSERT (MAX_UINTN - EntryWalker->NumberOfPages >= FreePages);
-    FreePages += (UINTN) EntryWalker->NumberOfPages;
+    FreePages += (UINTN)EntryWalker->NumberOfPages;
 
-    if (LowerMemory == NULL || EntryWalker->PhysicalStart >= BASE_4GB) {
+    if ((LowerMemory == NULL) || (EntryWalker->PhysicalStart >= BASE_4GB)) {
       continue;
     }
 
     if (EntryWalker->PhysicalStart + EFI_PAGES_TO_SIZE (EntryWalker->NumberOfPages) > BASE_4GB) {
-      *LowerMemory += (UINTN) EFI_SIZE_TO_PAGES (BASE_4GB - EntryWalker->PhysicalStart);
+      *LowerMemory += (UINTN)EFI_SIZE_TO_PAGES (BASE_4GB - EntryWalker->PhysicalStart);
     } else {
-      *LowerMemory += (UINTN) EntryWalker->NumberOfPages;
+      *LowerMemory += (UINTN)EntryWalker->NumberOfPages;
     }
   }
 

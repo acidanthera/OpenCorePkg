@@ -12,29 +12,29 @@
 #define HANDLE_PARSING_H
 
 typedef struct {
-  LIST_ENTRY  Link;
-  EFI_HANDLE  TheHandle;
-  UINTN       TheIndex;
+  LIST_ENTRY    Link;
+  EFI_HANDLE    TheHandle;
+  UINTN         TheIndex;
 } HANDLE_LIST;
 
 typedef struct {
-  HANDLE_LIST   List;
-  UINTN         NextIndex;
+  HANDLE_LIST    List;
+  UINTN          NextIndex;
 } HANDLE_INDEX_LIST;
 
-#define HR_UNKNOWN                     0
-#define HR_IMAGE_HANDLE                BIT1
-#define HR_DRIVER_BINDING_HANDLE       BIT2 // has driver binding
-#define HR_DEVICE_DRIVER               BIT3 // device driver (hybrid?)
-#define HR_BUS_DRIVER                  BIT4 // a bus driver  (hybrid?)
-#define HR_DRIVER_CONFIGURATION_HANDLE BIT5
-#define HR_DRIVER_DIAGNOSTICS_HANDLE   BIT6
-#define HR_COMPONENT_NAME_HANDLE       BIT7
-#define HR_DEVICE_HANDLE               BIT8
-#define HR_PARENT_HANDLE               BIT9
-#define HR_CONTROLLER_HANDLE           BIT10
-#define HR_CHILD_HANDLE                BIT11
-#define HR_VALID_MASK                  (BIT1|BIT2|BIT3|BIT4|BIT5|BIT6|BIT7|BIT8|BIT9|BIT10|BIT11)
+#define HR_UNKNOWN                      0
+#define HR_IMAGE_HANDLE                 BIT1
+#define HR_DRIVER_BINDING_HANDLE        BIT2 // has driver binding
+#define HR_DEVICE_DRIVER                BIT3 // device driver (hybrid?)
+#define HR_BUS_DRIVER                   BIT4 // a bus driver  (hybrid?)
+#define HR_DRIVER_CONFIGURATION_HANDLE  BIT5
+#define HR_DRIVER_DIAGNOSTICS_HANDLE    BIT6
+#define HR_COMPONENT_NAME_HANDLE        BIT7
+#define HR_DEVICE_HANDLE                BIT8
+#define HR_PARENT_HANDLE                BIT9
+#define HR_CONTROLLER_HANDLE            BIT10
+#define HR_CHILD_HANDLE                 BIT11
+#define HR_VALID_MASK                   (BIT1|BIT2|BIT3|BIT4|BIT5|BIT6|BIT7|BIT8|BIT9|BIT10|BIT11)
 
 /**
   Function to retrieve the human-friendly index of a given handle.  If the handle
@@ -49,8 +49,8 @@ typedef struct {
 **/
 UINTN
 EFIAPI
-InternalConvertHandleToHandleIndex(
-  IN CONST EFI_HANDLE TheHandle
+InternalConvertHandleToHandleIndex (
+  IN CONST EFI_HANDLE  TheHandle
   );
 
 /**
@@ -84,11 +84,11 @@ InternalConvertHandleToHandleIndex(
 EFI_STATUS
 EFIAPI
 InternalParseHandleDatabaseByRelationship (
-  IN CONST EFI_HANDLE       DriverBindingHandle OPTIONAL,
-  IN CONST EFI_HANDLE       ControllerHandle OPTIONAL,
-  IN CONST UINTN            Mask,
-  IN UINTN                  *MatchingHandleCount,
-  OUT EFI_HANDLE            **MatchingHandleBuffer OPTIONAL
+  IN CONST EFI_HANDLE  DriverBindingHandle OPTIONAL,
+  IN CONST EFI_HANDLE  ControllerHandle OPTIONAL,
+  IN CONST UINTN       Mask,
+  IN UINTN             *MatchingHandleCount,
+  OUT EFI_HANDLE       **MatchingHandleBuffer OPTIONAL
   );
 
 /**
@@ -104,6 +104,5 @@ InternalParseHandleDatabaseByRelationship (
 **/
 #define PARSE_HANDLE_DATABASE_UEFI_DRIVERS(ControllerHandle, Count, Buffer) \
   InternalParseHandleDatabaseByRelationship(NULL, ControllerHandle, HR_DRIVER_BINDING_HANDLE|HR_DEVICE_DRIVER, Count, Buffer)
-
 
 #endif // HANDLE_PARSING_H

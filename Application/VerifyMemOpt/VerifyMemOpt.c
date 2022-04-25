@@ -46,7 +46,7 @@ UefiMain (
 
   Cr0.UintN   = AsmReadCr0 ();
   Cr4.UintN   = AsmReadCr4 ();
-  Flags.UintN = AsmReadEflags();
+  Flags.UintN = AsmReadEflags ();
 
   //
   // CR0.MP         bit (BIT1)   must be set.
@@ -80,7 +80,7 @@ UefiMain (
   gBS->Stall (SECONDS_TO_MICROSECONDS (1));
   CopyMem (Dst, Src, Size);
 
-  Src  += 6;
+  Src += 6;
   DEBUG ((DEBUG_WARN, "VMOPT: CopyMem unaligned src %p/aligned dst %p/size %u\n", Src, Dst, Size));
   gBS->Stall (SECONDS_TO_MICROSECONDS (1));
   CopyMem (Dst, Src, Size);
@@ -90,7 +90,7 @@ UefiMain (
   gBS->Stall (SECONDS_TO_MICROSECONDS (1));
   CopyMem (Dst, Src, Size);
 
-  Dst  += 6;
+  Dst += 6;
   DEBUG ((DEBUG_WARN, "VMOPT: CopyMem unaligned src %p/unaligned dst %p/size %u\n", Src, Dst, Size));
   gBS->Stall (SECONDS_TO_MICROSECONDS (1));
   CopyMem (Dst, Src, Size);

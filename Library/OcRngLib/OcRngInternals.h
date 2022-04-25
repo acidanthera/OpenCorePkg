@@ -36,17 +36,17 @@ AsmAddRngJitter (
 // Uses the recommended value defined in Section 7.3.17 of "Intel 64 and IA-32
 // Architectures Software Developer's Mannual".
 //
-#define RDRAND_RETRY_LIMIT           10
+#define RDRAND_RETRY_LIMIT  10
 
 //
 // Maximum amount of bytes emitted by PRNG before next reseed.
 //
-#define MAX_BYTES_TO_EMIT            1600000
+#define MAX_BYTES_TO_EMIT  1600000
 
 //
 // Maximum bytes in one buffer.
 //
-#define MAX_BYTES_IN_BUF             (16*64)
+#define MAX_BYTES_IN_BUF  (16*64)
 
 /**
   Random Number Generator context.
@@ -55,27 +55,27 @@ typedef struct OC_RNG_CONTEXT_ {
   //
   // Hardware random number generator available.
   //
-  BOOLEAN         HardwareRngAvailable;
+  BOOLEAN           HardwareRngAvailable;
   //
   // Done initialising pseudo random number generator.
   //
-  BOOLEAN         PrngInitialised;
+  BOOLEAN           PrngInitialised;
   //
   // Amount of bytes to emit before next reseed.
   //
-  UINT32          BytesTillReseed;
+  UINT32            BytesTillReseed;
   //
   // Amount of bytes in the current buffer.
   //
-  UINT32          BytesInBuffer;
+  UINT32            BytesInBuffer;
   //
   // Current CPRNG buffer.
   //
-  UINT8           Buffer[MAX_BYTES_IN_BUF];
+  UINT8             Buffer[MAX_BYTES_IN_BUF];
   //
   // ChaCha context.
   //
-  CHACHA_CONTEXT  ChaCha;
+  CHACHA_CONTEXT    ChaCha;
 } OC_RNG_CONTEXT;
 
 #endif // OC_RNG_INTERNALS_H

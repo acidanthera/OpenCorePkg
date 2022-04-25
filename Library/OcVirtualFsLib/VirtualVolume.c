@@ -37,8 +37,8 @@ STATIC
 EFI_STATUS
 EFIAPI
 VirtualFsOpenVolume (
-  IN EFI_SIMPLE_FILE_SYSTEM_PROTOCOL    *This,
-  OUT EFI_FILE_PROTOCOL                 **Root
+  IN EFI_SIMPLE_FILE_SYSTEM_PROTOCOL  *This,
+  OUT EFI_FILE_PROTOCOL               **Root
   )
 {
   EFI_STATUS               Status;
@@ -48,9 +48,9 @@ VirtualFsOpenVolume (
   Data = VIRTUAL_VOLUME_FROM_FILESYSTEM_PROTOCOL (This);
 
   Status = Data->OriginalFileSystem->OpenVolume (
-    Data->OriginalFileSystem,
-    &NewFile
-    );
+                                       Data->OriginalFileSystem,
+                                       &NewFile
+                                       );
 
   if (!EFI_ERROR (Status)) {
     return CreateRealFile (NewFile, Data->OpenCallback, TRUE, Root);
@@ -62,9 +62,9 @@ VirtualFsOpenVolume (
 STATIC
 CONST
 EFI_SIMPLE_FILE_SYSTEM_PROTOCOL
-mVirtualFileSystemProtocolTemplate = {
-  .Revision    = EFI_SIMPLE_FILE_SYSTEM_PROTOCOL_REVISION,
-  .OpenVolume  = VirtualFsOpenVolume
+  mVirtualFileSystemProtocolTemplate = {
+  .Revision   = EFI_SIMPLE_FILE_SYSTEM_PROTOCOL_REVISION,
+  .OpenVolume = VirtualFsOpenVolume
 };
 
 EFI_STATUS
@@ -93,8 +93,8 @@ CreateVirtualFs (
   //
   if (mVirtualFileSystemsUsed == mVirtualFileSystemsAllocated) {
     NewVirtualFileSystems = AllocatePool (
-      (mVirtualFileSystemsAllocated * 2 + 1) * sizeof (mVirtualFileSystems[0])
-      );
+                              (mVirtualFileSystemsAllocated * 2 + 1) * sizeof (mVirtualFileSystems[0])
+                              );
     if (NewVirtualFileSystems == NULL) {
       return EFI_OUT_OF_RESOURCES;
     }

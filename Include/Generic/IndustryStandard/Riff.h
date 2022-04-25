@@ -47,18 +47,18 @@
 //
 // WAVE chunk IDs.
 //
-#define WAVE_CHUNK_ID               "WAVE"
-#define WAVE_CUE_CHUNK_ID           "cue "
-#define WAVE_DATA_CHUNK_ID          "data"
-#define WAVE_FACT_CHUNK_ID          "fact"
-#define WAVE_FILE_CHUNK_ID          "file"
-#define WAVE_FORMAT_CHUNK_ID        "fmt "
-#define WAVE_LABEL_CHUNK_ID         "labl"
-#define WAVE_NOTE_CHUNK_ID          "note"
-#define WAVE_PLAYLIST_CHUNK_ID      "plst"
-#define WAVE_SILENCE_CHUNK_ID       "slnt"
-#define WAVE_TEXT_DATA_CHUNK_ID     "ltxt"
-#define WAVE_WAVE_LIST_CHUNK_ID     "wavl"
+#define WAVE_CHUNK_ID            "WAVE"
+#define WAVE_CUE_CHUNK_ID        "cue "
+#define WAVE_DATA_CHUNK_ID       "data"
+#define WAVE_FACT_CHUNK_ID       "fact"
+#define WAVE_FILE_CHUNK_ID       "file"
+#define WAVE_FORMAT_CHUNK_ID     "fmt "
+#define WAVE_LABEL_CHUNK_ID      "labl"
+#define WAVE_NOTE_CHUNK_ID       "note"
+#define WAVE_PLAYLIST_CHUNK_ID   "plst"
+#define WAVE_SILENCE_CHUNK_ID    "slnt"
+#define WAVE_TEXT_DATA_CHUNK_ID  "ltxt"
+#define WAVE_WAVE_LIST_CHUNK_ID  "wavl"
 
 //
 // WAVE format types.
@@ -72,32 +72,32 @@
   RIFF chunk.
 **/
 typedef struct {
-  CHAR8             Id[RIFF_CHUNK_ID_SIZE];
-  UINT32            Size;
-  UINT8             Data[];
+  CHAR8     Id[RIFF_CHUNK_ID_SIZE];
+  UINT32    Size;
+  UINT8     Data[];
 } RIFF_CHUNK;
 
 /**
   WAVE format data.
 **/
 typedef struct {
-  UINT16            FormatTag;
-  UINT16            Channels;
-  UINT32            SamplesPerSec;
-  UINT32            AvgBytesPerSec;
-  UINT16            BlockAlign;
-  UINT16            BitsPerSample;
+  UINT16    FormatTag;
+  UINT16    Channels;
+  UINT32    SamplesPerSec;
+  UINT32    AvgBytesPerSec;
+  UINT16    BlockAlign;
+  UINT16    BitsPerSample;
 } WAVE_FORMAT_DATA;
 
 /**
   WAVE format data extended.
 **/
 typedef struct {
-  WAVE_FORMAT_DATA  Header;
-  UINT16            ExtensionSize;
-  UINT16            ValidBitsPerSample;
-  UINT32            ChannelMask;
-  GUID              SubFormat;
+  WAVE_FORMAT_DATA    Header;
+  UINT16              ExtensionSize;
+  UINT16              ValidBitsPerSample;
+  UINT32              ChannelMask;
+  GUID                SubFormat;
 } WAVE_FORMAT_DATA_EX;
 
 #pragma pack()

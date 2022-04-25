@@ -26,6 +26,7 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 typedef struct APPLE_KEY_MAP_DATABASE_PROTOCOL APPLE_KEY_MAP_DATABASE_PROTOCOL;
 
 // KEY_MAP_CREATE_KEY_STROKES_BUFFER
+
 /** Creates a new key stroke buffer with a given number of keys allocated.
     The index within the database is returned.
 
@@ -47,6 +48,7 @@ EFI_STATUS
   );
 
 // KEY_MAP_REMOVE_KEY_STROKES_BUFFER
+
 /** Removes the key stroke buffer specified by its index from the database.
 
   @param[in] This   Protocol instance pointer.
@@ -65,6 +67,7 @@ EFI_STATUS
   );
 
 // KEY_MAP_SET_KEY_STROKES_KEYS
+
 /** Sets the key strokes of the key stroke buffer to the given KeyCodes buffer.
 
   @param[in] This              Protocol instance pointer.
@@ -94,13 +97,13 @@ EFI_STATUS
 
 // APPLE_KEY_MAP_DATABASE_PROTOCOL
 struct APPLE_KEY_MAP_DATABASE_PROTOCOL {
-  UINTN                             Revision;
-  KEY_MAP_CREATE_KEY_STROKES_BUFFER CreateKeyStrokesBuffer;
-  KEY_MAP_REMOVE_KEY_STROKES_BUFFER RemoveKeyStrokesBuffer;
-  KEY_MAP_SET_KEY_STROKES_KEYS      SetKeyStrokeBufferKeys;
+  UINTN                                Revision;
+  KEY_MAP_CREATE_KEY_STROKES_BUFFER    CreateKeyStrokesBuffer;
+  KEY_MAP_REMOVE_KEY_STROKES_BUFFER    RemoveKeyStrokesBuffer;
+  KEY_MAP_SET_KEY_STROKES_KEYS         SetKeyStrokeBufferKeys;
 };
 
 // gAppleKeyMapDatabaseProtocolGuid
-extern EFI_GUID gAppleKeyMapDatabaseProtocolGuid;
+extern EFI_GUID  gAppleKeyMapDatabaseProtocolGuid;
 
 #endif // APPLE_KEY_MAP_DATABASE_H

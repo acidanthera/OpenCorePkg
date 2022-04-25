@@ -56,14 +56,14 @@ VOID
 
 // EFI_OS_INFO_PROTOCOL
 typedef struct {
-  UINTN                   Revision;           ///< Revision.
-  OS_INFO_OS_NAME         OSName;             ///< Present as of Revision 1.
-  OS_INFO_OS_VENDOR       OSVendor;           ///< Present as of Revision 2.
-  OS_INFO_SET_VTD_ENABLED SetBootVTdEnabled;  ///< Present as of Revision 3.
-  OS_INFO_GET_VTD_ENABLED GetBootVTdEnabled;  ///< Present as of Revision 3.
+  UINTN                      Revision;          ///< Revision.
+  OS_INFO_OS_NAME            OSName;            ///< Present as of Revision 1.
+  OS_INFO_OS_VENDOR          OSVendor;          ///< Present as of Revision 2.
+  OS_INFO_SET_VTD_ENABLED    SetBootVTdEnabled; ///< Present as of Revision 3.
+  OS_INFO_GET_VTD_ENABLED    GetBootVTdEnabled; ///< Present as of Revision 3.
 } EFI_OS_INFO_PROTOCOL;
 
 // gEfiOSInfoProtocolGuid
-extern EFI_GUID gEfiOSInfoProtocolGuid;
+extern EFI_GUID  gEfiOSInfoProtocolGuid;
 
 #endif // EFI_OS_INFO_H

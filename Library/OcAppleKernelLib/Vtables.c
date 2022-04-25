@@ -27,24 +27,25 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 
 CONST PRELINKED_VTABLE *
 InternalGetOcVtableByNameWorker (
-  IN PRELINKED_CONTEXT     *Context,
-  IN PRELINKED_KEXT        *Kext,
-  IN CONST CHAR8           *Name
+  IN PRELINKED_CONTEXT  *Context,
+  IN PRELINKED_KEXT     *Kext,
+  IN CONST CHAR8        *Name
   )
 {
-  CONST PRELINKED_VTABLE *Vtable;
+  CONST PRELINKED_VTABLE  *Vtable;
 
-  UINTN                  Index;
-  PRELINKED_KEXT         *Dependency;
-  INTN                   Result;
+  UINTN           Index;
+  PRELINKED_KEXT  *Dependency;
+  INTN            Result;
 
   Kext->Processed = TRUE;
 
   for (
-    Index = 0, Vtable = Kext->LinkedVtables;
-    Index < Kext->NumberOfVtables;
-    ++Index, Vtable = GET_NEXT_PRELINKED_VTABLE (Vtable)
-    ) {
+       Index = 0, Vtable = Kext->LinkedVtables;
+       Index < Kext->NumberOfVtables;
+       ++Index, Vtable = GET_NEXT_PRELINKED_VTABLE (Vtable)
+       )
+  {
     Result = AsciiStrCmp (Vtable->Name, Name);
     if (Result == 0) {
       return Vtable;
@@ -72,12 +73,12 @@ InternalGetOcVtableByNameWorker (
 
 CONST PRELINKED_VTABLE *
 InternalGetOcVtableByName (
-  IN PRELINKED_CONTEXT     *Context,
-  IN PRELINKED_KEXT        *Kext,
-  IN CONST CHAR8           *Name
+  IN PRELINKED_CONTEXT  *Context,
+  IN PRELINKED_KEXT     *Kext,
+  IN CONST CHAR8        *Name
   )
 {
-  CONST PRELINKED_VTABLE *Vtable;
+  CONST PRELINKED_VTABLE  *Vtable;
 
   Vtable = InternalGetOcVtableByNameWorker (Context, Kext, Name);
 
@@ -89,16 +90,16 @@ InternalGetOcVtableByName (
 STATIC
 VOID
 InternalConstructVtablePrelinked (
-  IN     PRELINKED_CONTEXT                      *Context,
-  IN OUT PRELINKED_KEXT                         *Kext,
-  IN     CONST OC_PRELINKED_VTABLE_LOOKUP_ENTRY *VtableLookup,
-  OUT    PRELINKED_VTABLE                       *Vtable
+  IN     PRELINKED_CONTEXT                       *Context,
+  IN OUT PRELINKED_KEXT                          *Kext,
+  IN     CONST OC_PRELINKED_VTABLE_LOOKUP_ENTRY  *VtableLookup,
+  OUT    PRELINKED_VTABLE                        *Vtable
   )
 {
-  CONST VOID                                    *VtableData;
-  UINT64                                        Value;
-  UINT32                                        Index;
-  CONST PRELINKED_KEXT_SYMBOL                   *Symbol;
+  CONST VOID                   *VtableData;
+  UINT64                       Value;
+  UINT32                       Index;
+  CONST PRELINKED_KEXT_SYMBOL  *Symbol;
 
   ASSERT (Kext != NULL);
   ASSERT (VtableLookup != NULL);
@@ -118,11 +119,11 @@ InternalConstructVtablePrelinked (
   // The buffer is allocated to be able to hold all entries.
   //
   for (
-    Index = 0;
-    (Value = VTABLE_ENTRY_X (Context->Is32Bit, VtableData, Index + VTABLE_HEADER_LEN)) != 0;
-    ++Index
-    ) {
-
+       Index = 0;
+       (Value = VTABLE_ENTRY_X (Context->Is32Bit, VtableData, Index + VTABLE_HEADER_LEN)) != 0;
+       ++Index
+       )
+  {
     if (Context->IsKernelCollection) {
       Value = KcFixupValue (Value, Kext->Identifier);
     }
@@ -148,13 +149,13 @@ InternalConstructVtablePrelinked (
 
 BOOLEAN
 InternalGetVtableEntries (
-  IN  BOOLEAN       Is32Bit,
-  IN  CONST VOID    *VtableData,
-  IN  UINT32        MaxSize,
-  OUT UINT32        *NumEntries
+  IN  BOOLEAN     Is32Bit,
+  IN  CONST VOID  *VtableData,
+  IN  UINT32      MaxSize,
+  OUT UINT32      *NumEntries
   )
 {
-  UINT32 Index;
+  UINT32  Index;
 
   ASSERT (VtableData != NULL);
   ASSERT (NumEntries != NULL);
@@ -182,10 +183,10 @@ InternalPrepareCreateVtablesPrelinked (
   OUT OC_PRELINKED_VTABLE_LOOKUP_ENTRY  *Vtables
   )
 {
-  UINT32                      VtableIndex;
+  UINT32  VtableIndex;
 
-  CONST PRELINKED_KEXT_SYMBOL *Symbol;
-  UINT32                      Index;
+  CONST PRELINKED_KEXT_SYMBOL  *Symbol;
+  UINT32                       Index;
 
   ASSERT (Kext != NULL);
 
@@ -193,10 +194,11 @@ InternalPrepareCreateVtablesPrelinked (
 
   MaxSize /= sizeof (*Vtables);
   for (
-    Index = (Kext->NumberOfSymbols - Kext->NumberOfCxxSymbols);
-    Index < Kext->NumberOfSymbols;
-    ++Index
-    ) {
+       Index = (Kext->NumberOfSymbols - Kext->NumberOfCxxSymbols);
+       Index < Kext->NumberOfSymbols;
+       ++Index
+       )
+  {
     Symbol = &Kext->LinkedSymbolTable[Index];
     if (MachoSymbolNameIsVtable (Symbol->Name)) {
       //
@@ -238,17 +240,17 @@ InternalCreateVtablesPrelinked (
   OUT    PRELINKED_VTABLE                        *VtableBuffer
   )
 {
-  UINT32              Index;
+  UINT32  Index;
 
   ASSERT (Kext != NULL);
 
   for (Index = 0; Index < NumVtables; ++Index) {
     InternalConstructVtablePrelinked (
-                Context,
-                Kext,
-                &VtableLookups[Index],
-                VtableBuffer
-                );
+      Context,
+      Kext,
+      &VtableLookups[Index],
+      VtableBuffer
+      );
     VtableBuffer = GET_NEXT_PRELINKED_VTABLE (VtableBuffer);
   }
 }
@@ -265,11 +267,11 @@ InternalPatchVtableSymbol (
   OUT    MACH_NLIST_ANY                *Symbol
   )
 {
-  CONST CHAR8 *Name;
-  INTN        Result;
-  BOOLEAN     Success;
-  CONST CHAR8 *ClassName;
-  CHAR8       FunctionPrefix[SYM_MAX_NAME_LEN];
+  CONST CHAR8  *Name;
+  INTN         Result;
+  BOOLEAN      Success;
+  CONST CHAR8  *ClassName;
+  CHAR8        FunctionPrefix[SYM_MAX_NAME_LEN];
 
   ASSERT (Symbol != NULL);
   ASSERT (ParentEntry != NULL);
@@ -282,6 +284,7 @@ InternalPatchVtableSymbol (
   if (ParentEntry->Name == NULL) {
     return TRUE;
   }
+
   //
   // 1) If the symbol is defined locally, do not patch
   //
@@ -300,6 +303,7 @@ InternalPatchVtableSymbol (
   if (MachoSymbolNameIsPureVirtual (Name)) {
     return TRUE;
   }
+
   //
   // 3) If the symbols are the same, do not patch
   //
@@ -307,6 +311,7 @@ InternalPatchVtableSymbol (
   if (Result == 0) {
     return TRUE;
   }
+
   //
   // 4) If the parent vtable entry is a pad slot, and the child does not
   // match it, then the child was built against a newer version of the
@@ -315,6 +320,7 @@ InternalPatchVtableSymbol (
   if (MachoSymbolNameIsPadslot (ParentEntry->Name)) {
     return FALSE;
   }
+
   //
   // 5) If we are doing strict patching, we prevent kexts from declaring
   // virtual functions and not implementing them.  We can tell if a
@@ -346,6 +352,7 @@ InternalPatchVtableSymbol (
       return FALSE;
     }
   }
+
   //
   // 6) The child symbol is unresolved and different from its parent, so
   // we need to patch it up.  We do this by modifying the relocation
@@ -373,8 +380,9 @@ InternalPatchVtableSymbol (
   // context.
   //
   Name = ParentEntry->Name;
-  if (!MachoSymbolNameIsPureVirtual (Name)
-    && (((MachoContext->Is32Bit ? Symbol->Symbol32.Value : Symbol->Symbol64.Value) & 1U) != 0)) {
+  if (  !MachoSymbolNameIsPureVirtual (Name)
+     && (((MachoContext->Is32Bit ? Symbol->Symbol32.Value : Symbol->Symbol64.Value) & 1U) != 0))
+  {
     DEBUG ((DEBUG_WARN, "OCAK: Prelink: Invalid VTable symbol\n"));
   }
 
@@ -384,25 +392,25 @@ InternalPatchVtableSymbol (
 STATIC
 BOOLEAN
 InternalInitializeVtableByEntriesAndRelocations (
-  IN     PRELINKED_CONTEXT            *Context,
-  IN     PRELINKED_KEXT               *Kext,
-  IN     CONST PRELINKED_VTABLE       *SuperVtable,
-  IN     CONST MACH_NLIST_ANY         *VtableSymbol,
-  IN     CONST VOID                   *VtableData,
-  IN     UINT32                       NumSolveSymbols,
-  IN OUT MACH_NLIST_ANY               **SolveSymbols,
-  OUT    PRELINKED_VTABLE             *Vtable
+  IN     PRELINKED_CONTEXT       *Context,
+  IN     PRELINKED_KEXT          *Kext,
+  IN     CONST PRELINKED_VTABLE  *SuperVtable,
+  IN     CONST MACH_NLIST_ANY    *VtableSymbol,
+  IN     CONST VOID              *VtableData,
+  IN     UINT32                  NumSolveSymbols,
+  IN OUT MACH_NLIST_ANY          **SolveSymbols,
+  OUT    PRELINKED_VTABLE        *Vtable
   )
 {
-  OC_MACHO_CONTEXT           *MachoContext;
-  CONST CHAR8                *VtableName;
-  CONST PRELINKED_KEXT_SYMBOL *OcSymbol;
-  UINT32                     Index;
-  PRELINKED_VTABLE_ENTRY     *VtableEntries;
-  UINT64                     EntryValue;
-  UINT32                     SolveSymbolIndex;
-  BOOLEAN                    Result;
-  MACH_NLIST_ANY             *Symbol;
+  OC_MACHO_CONTEXT             *MachoContext;
+  CONST CHAR8                  *VtableName;
+  CONST PRELINKED_KEXT_SYMBOL  *OcSymbol;
+  UINT32                       Index;
+  PRELINKED_VTABLE_ENTRY       *VtableEntries;
+  UINT64                       EntryValue;
+  UINT32                       SolveSymbolIndex;
+  BOOLEAN                      Result;
+  MACH_NLIST_ANY               *Symbol;
 
   MachoContext  = &Kext->Context.MachContext;
   VtableEntries = Vtable->Entries;
@@ -480,25 +488,25 @@ InternalInitializeVtableByEntriesAndRelocations (
 STATIC
 BOOLEAN
 InternalInitializeVtablePatchData (
-  IN OUT OC_MACHO_CONTEXT     *MachoContext,
-  IN     CONST MACH_NLIST_ANY *VtableSymbol,
-  IN OUT UINT32               *MaxSize,
-  OUT    VOID                 **VtableDataPtr,
-  OUT    UINT32               *NumEntries,
-  OUT    UINT32               *NumSymbols,
-  OUT    MACH_NLIST_ANY       **SolveSymbols
+  IN OUT OC_MACHO_CONTEXT      *MachoContext,
+  IN     CONST MACH_NLIST_ANY  *VtableSymbol,
+  IN OUT UINT32                *MaxSize,
+  OUT    VOID                  **VtableDataPtr,
+  OUT    UINT32                *NumEntries,
+  OUT    UINT32                *NumSymbols,
+  OUT    MACH_NLIST_ANY        **SolveSymbols
   )
 {
-  BOOLEAN               Result;
-  UINT32                VtableOffset;
-  UINT32                VtableMaxSize;
-  CONST MACH_HEADER_ANY *MachHeader;
-  VOID                  *VtableData;
-  UINT32                SymIndex;
-  UINT32                EntryOffset;
-  UINT64                FileOffset;
-  UINT32                MaxSymbols;
-  MACH_NLIST_ANY        *Symbol;
+  BOOLEAN                Result;
+  UINT32                 VtableOffset;
+  UINT32                 VtableMaxSize;
+  CONST MACH_HEADER_ANY  *MachHeader;
+  VOID                   *VtableData;
+  UINT32                 SymIndex;
+  UINT32                 EntryOffset;
+  UINT64                 FileOffset;
+  UINT32                 MaxSymbols;
+  MACH_NLIST_ANY         *Symbol;
 
   Result = MachoSymbolGetFileOffset (
              MachoContext,
@@ -513,10 +521,11 @@ InternalInitializeVtablePatchData (
   MachHeader = MachoGetMachHeader (MachoContext);
   ASSERT (MachHeader != NULL);
 
-  VtableData = (VOID *)((UINTN) MachHeader + VtableOffset);
+  VtableData = (VOID *)((UINTN)MachHeader + VtableOffset);
   if (MachoContext->Is32Bit ? !OC_TYPE_ALIGNED (UINT32, VtableData) : !OC_TYPE_ALIGNED (UINT64, VtableData)) {
     return FALSE;
   }
+
   //
   // Assumption: Not ARM (ARM requires an alignment to the function pointer
   //             retrieved from VtableData.
@@ -527,10 +536,11 @@ InternalInitializeVtablePatchData (
   SymIndex = 0;
 
   for (
-    EntryOffset = VTABLE_HEADER_LEN;
-    EntryOffset < VtableMaxSize;
-    ++EntryOffset
-    ) {
+       EntryOffset = VTABLE_HEADER_LEN;
+       EntryOffset < VtableMaxSize;
+       ++EntryOffset
+       )
+  {
     if (VTABLE_ENTRY_X (MachoContext->Is32Bit, VtableData, EntryOffset) == 0) {
       Result = OcOverflowAddU64 (
                  MachoContext->Is32Bit ? VtableSymbol->Symbol32.Value : VtableSymbol->Symbol64.Value,
@@ -572,13 +582,13 @@ InternalInitializeVtablePatchData (
 
 BOOLEAN
 InternalPatchByVtables (
-  IN     PRELINKED_CONTEXT         *Context,
-  IN OUT PRELINKED_KEXT            *Kext
+  IN     PRELINKED_CONTEXT  *Context,
+  IN OUT PRELINKED_KEXT     *Kext
   )
 {
-  OC_VTABLE_PATCH_ENTRY *Entries;
-  OC_VTABLE_PATCH_ENTRY *EntryWalker;
-  UINT32                MaxSize;
+  OC_VTABLE_PATCH_ENTRY  *Entries;
+  OC_VTABLE_PATCH_ENTRY  *EntryWalker;
+  UINT32                 MaxSize;
 
   OC_MACHO_CONTEXT        *MachoContext;
   CONST MACH_HEADER_ANY   *MachHeader;
@@ -621,16 +631,19 @@ InternalPatchByVtables (
   NumEntries  = 0;
 
   for (
-    Index = 0;
-    (Smcp = MachoGetSymbolByIndex (MachoContext, Index)) != NULL;
-    ++Index
-    ) {
+       Index = 0;
+       (Smcp = MachoGetSymbolByIndex (MachoContext, Index)) != NULL;
+       ++Index
+       )
+  {
     Name = MachoGetSymbolName (MachoContext, Smcp);
-    if ((((Context->Is32Bit ? Smcp->Symbol32.Type : Smcp->Symbol64.Type) & MACH_N_TYPE_STAB) == 0)
-     && MachoSymbolNameIsSmcp (MachoContext, Name)) {
+    if (  (((Context->Is32Bit ? Smcp->Symbol32.Type : Smcp->Symbol64.Type) & MACH_N_TYPE_STAB) == 0)
+       && MachoSymbolNameIsSmcp (MachoContext, Name))
+    {
       if (MaxSize < sizeof (*EntryWalker)) {
         return FALSE;
       }
+
       //
       // We walk over the super metaclass pointer symbols because classes
       // with them are the only ones that need patching.  Then we double the
@@ -685,12 +698,13 @@ InternalPatchByVtables (
       EntryWalker = GET_NEXT_OC_VTABLE_PATCH_ENTRY (EntryWalker);
     }
   }
+
   //
   // One structure contains two VTables, hence (NumTables * 2).
   //
   Kext->LinkedVtables = AllocatePool (
                           ((NumTables * 2) * sizeof (*Kext->LinkedVtables))
-                            + (NumEntries * sizeof (*Kext->LinkedVtables->Entries))
+                          + (NumEntries * sizeof (*Kext->LinkedVtables->Entries))
                           );
   if (Kext->LinkedVtables == NULL) {
     return FALSE;
@@ -700,16 +714,17 @@ InternalPatchByVtables (
   //
   // Patch via the previously retrieved SMCPs.
   //
-  NumPatched   = 0;
+  NumPatched = 0;
 
   while (NumPatched < NumTables) {
     SuccessfulIteration = FALSE;
 
     for (
-      Index = 0, EntryWalker = Entries;
-      Index < NumTables;
-      ++Index, EntryWalker = GET_NEXT_OC_VTABLE_PATCH_ENTRY (EntryWalker)
-      ) {
+         Index = 0, EntryWalker = Entries;
+         Index < NumTables;
+         ++Index, EntryWalker = GET_NEXT_OC_VTABLE_PATCH_ENTRY (EntryWalker)
+         )
+    {
       Smcp = EntryWalker->Smcp;
       if (Smcp == NULL) {
         continue;
@@ -735,6 +750,7 @@ InternalPatchByVtables (
       if (!Result) {
         return FALSE;
       }
+
       //
       // Get the vtable name from the class name
       //
@@ -746,6 +762,7 @@ InternalPatchByVtables (
       if (!Result) {
         return FALSE;
       }
+
       //
       // Find the SMCP's meta class symbol
       //
@@ -756,6 +773,7 @@ InternalPatchByVtables (
       if (MetaClass == NULL) {
         return FALSE;
       }
+
       //
       // Get the super class name from the super metaclass
       //
@@ -770,10 +788,10 @@ InternalPatchByVtables (
       }
 
       Result = MachoGetVtableNameFromClassName (
-        SuperClassName,
-        sizeof (SuperVtableName),
-        SuperVtableName
-        );
+                 SuperClassName,
+                 sizeof (SuperVtableName),
+                 SuperVtableName
+                 );
 
       if (!Result) {
         return FALSE;
@@ -790,6 +808,7 @@ InternalPatchByVtables (
       if (SuperVtable == NULL) {
         continue;
       }
+
       //
       // Get the final symbol's name from the super vtable
       //
@@ -801,6 +820,7 @@ InternalPatchByVtables (
       if (!Result) {
         return FALSE;
       }
+
       //
       // Verify that the final symbol does not exist.  First check
       // all the externally defined symbols, then check locally.
@@ -816,12 +836,13 @@ InternalPatchByVtables (
       }
 
       SymbolDummy = MachoGetLocalDefinedSymbolByName (
-                  MachoContext,
-                  FinalSymbolName
-                  );
+                      MachoContext,
+                      FinalSymbolName
+                      );
       if (SymbolDummy != NULL) {
         return FALSE;
       }
+
       //
       // Patch the class's vtable
       //
@@ -861,6 +882,7 @@ InternalPatchByVtables (
       if (MetaVtable != NULL) {
         return FALSE;
       }
+
       //
       // There is no way to look up a metaclass vtable at runtime, but
       // we know that every class's metaclass inherits directly from
@@ -874,6 +896,7 @@ InternalPatchByVtables (
       if (SuperVtable == NULL) {
         return FALSE;
       }
+
       //
       // meta_vtable_sym will be null when we don't support strict
       // patching and can't find the metaclass vtable. If that's the
@@ -904,6 +927,7 @@ InternalPatchByVtables (
       ++NumPatched;
       SuccessfulIteration = TRUE;
     }
+
     //
     // Exit when there are unpatched VTables left, but there are none patched
     // in a full iteration.

@@ -28,20 +28,20 @@ BigNumWordMul64 (
   //
   // Source: https://stackoverflow.com/a/31662911
   //
-  CONST OC_BN_WORD SubWordShift = OC_BN_WORD_NUM_BITS / 2;
-  CONST OC_BN_WORD SubWordMask  = ((OC_BN_WORD)1U << SubWordShift) - 1;
+  CONST OC_BN_WORD  SubWordShift = OC_BN_WORD_NUM_BITS / 2;
+  CONST OC_BN_WORD  SubWordMask  = ((OC_BN_WORD)1U << SubWordShift) - 1;
 
-  OC_BN_WORD ALo;
-  OC_BN_WORD AHi;
-  OC_BN_WORD BLo;
-  OC_BN_WORD BHi;
+  OC_BN_WORD  ALo;
+  OC_BN_WORD  AHi;
+  OC_BN_WORD  BLo;
+  OC_BN_WORD  BHi;
 
-  OC_BN_WORD P0;
-  OC_BN_WORD P1;
-  OC_BN_WORD P2;
-  OC_BN_WORD P3;
+  OC_BN_WORD  P0;
+  OC_BN_WORD  P1;
+  OC_BN_WORD  P2;
+  OC_BN_WORD  P3;
 
-  OC_BN_WORD Cy;
+  OC_BN_WORD  Cy;
 
   ALo = A & SubWordMask;
   AHi = A >> SubWordShift;

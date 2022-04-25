@@ -26,22 +26,22 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 /**
   Current supported revision.
 **/
-#define APPLE_DEBUG_LOG_PROTOCOL_REVISION     0x10000
+#define APPLE_DEBUG_LOG_PROTOCOL_REVISION  0x10000
 
 /**
   Maximum logfile size.
 **/
-#define APPLE_DEBUG_LOG_PROTOCOL_FILESIZE     BASE_2MB
+#define APPLE_DEBUG_LOG_PROTOCOL_FILESIZE  BASE_2MB
 
 /**
   Logfile name on EFI system partition (indices 1~8).
 **/
-#define APPLE_DEBUG_LOG_PROTOCOL_FILENAME     L"\\EFI\\APPLE\\LOG\\BOOT-%u.LOG"
+#define APPLE_DEBUG_LOG_PROTOCOL_FILENAME  L"\\EFI\\APPLE\\LOG\\BOOT-%u.LOG"
 
 /**
   Legacy boot.efi logfile.
 **/
-#define APPLE_DEBUG_LOG_PROTOCOL_BOOTLOG      L"\\BOOTLOG"
+#define APPLE_DEBUG_LOG_PROTOCOL_BOOTLOG  L"\\BOOTLOG"
 
 /**
   Legacy previous boot.efi logfile.
@@ -62,7 +62,7 @@ typedef struct APPLE_DEBUG_LOG_PROTOCOL_ APPLE_DEBUG_LOG_PROTOCOL;
 **/
 typedef
 EFI_STATUS
-(EFIAPI *APPLE_DEBUG_LOG_PRINT) (
+(EFIAPI *APPLE_DEBUG_LOG_PRINT)(
   IN CONST CHAR8               *Message
   );
 
@@ -86,11 +86,11 @@ EFI_STATUS
 **/
 typedef
 EFI_STATUS
-(EFIAPI *APPLE_DEBUG_LOG_EXTRACT_BUFFER) (
+(EFIAPI *APPLE_DEBUG_LOG_EXTRACT_BUFFER)(
   IN OUT UINT32            *Position,
   IN OUT UINTN             *BufferSize,
-     OUT CHAR8             *Buffer          OPTIONAL,
-     OUT UINT32            *LostCharacters  OPTIONAL
+  OUT CHAR8             *Buffer          OPTIONAL,
+  OUT UINT32            *LostCharacters  OPTIONAL
   );
 
 /**
@@ -110,7 +110,7 @@ EFI_STATUS
 **/
 typedef
 EFI_STATUS
-(EFIAPI *APPLE_DEBUG_LOG_WRITE_FILES) (
+(EFIAPI *APPLE_DEBUG_LOG_WRITE_FILES)(
   VOID
   );
 
@@ -130,7 +130,7 @@ EFI_STATUS
 **/
 typedef
 VOID
-(EFIAPI *APPLE_DEBUG_LOG_SETUP_FILES) (
+(EFIAPI *APPLE_DEBUG_LOG_SETUP_FILES)(
   VOID
   );
 
@@ -138,13 +138,13 @@ VOID
   Apple debug log protocol.
 **/
 struct APPLE_DEBUG_LOG_PROTOCOL_ {
-  UINTN                           Revision;
-  APPLE_DEBUG_LOG_PRINT           Print;
-  APPLE_DEBUG_LOG_EXTRACT_BUFFER  ExtractBuffer;
-  APPLE_DEBUG_LOG_WRITE_FILES     WriteFiles;
-  APPLE_DEBUG_LOG_SETUP_FILES     SetupFiles;
+  UINTN                             Revision;
+  APPLE_DEBUG_LOG_PRINT             Print;
+  APPLE_DEBUG_LOG_EXTRACT_BUFFER    ExtractBuffer;
+  APPLE_DEBUG_LOG_WRITE_FILES       WriteFiles;
+  APPLE_DEBUG_LOG_SETUP_FILES       SetupFiles;
 };
 
-extern EFI_GUID gAppleDebugLogProtocolGuid;
+extern EFI_GUID  gAppleDebugLogProtocolGuid;
 
 #endif // APPLE_DEBUG_LOG_H

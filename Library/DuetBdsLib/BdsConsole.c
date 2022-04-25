@@ -33,10 +33,10 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 **/
 BOOLEAN
 IsNvNeed (
-  IN CHAR16 *ConVarName
+  IN CHAR16  *ConVarName
   )
 {
-  CHAR16 *Ptr;
+  CHAR16  *Ptr;
 
   ASSERT (ConVarName != NULL);
 
@@ -57,6 +57,7 @@ IsNvNeed (
   if ((*(Ptr - 3) == 'D') && (*(Ptr - 2) == 'e') && (*(Ptr - 1) == 'v')) {
     return FALSE;
   }
+
   return TRUE;
 }
 
@@ -79,10 +80,10 @@ IsNvNeed (
 **/
 BOOLEAN
 UpdateSystemTableConsole (
-  IN     CHAR16                          *VarName,
-  IN     EFI_GUID                        *ConsoleGuid,
-  IN OUT EFI_HANDLE                      *ConsoleHandle,
-  IN OUT VOID                            **ProtocolInterface
+  IN     CHAR16      *VarName,
+  IN     EFI_GUID    *ConsoleGuid,
+  IN OUT EFI_HANDLE  *ConsoleHandle,
+  IN OUT VOID        **ProtocolInterface
   )
 {
   EFI_STATUS                Status;
@@ -100,11 +101,11 @@ UpdateSystemTableConsole (
 
   if (*ConsoleHandle != NULL) {
     Status = gBS->HandleProtocol (
-                   *ConsoleHandle,
-                   ConsoleGuid,
-                   &Interface
-                   );
-    if (Status == EFI_SUCCESS && Interface == *ProtocolInterface) {
+                    *ConsoleHandle,
+                    ConsoleGuid,
+                    &Interface
+                    );
+    if ((Status == EFI_SUCCESS) && (Interface == *ProtocolInterface)) {
       //
       // If ConsoleHandle is valid and console protocol on this handle also
       // also matched, just return.
@@ -117,10 +118,10 @@ UpdateSystemTableConsole (
   // Get all possible consoles device path from EFI variable
   //
   VarConsole = BdsLibGetVariableAndSize (
-                VarName,
-                &gEfiGlobalVariableGuid,
-                &DevicePathSize
-                );
+                 VarName,
+                 &gEfiGlobalVariableGuid,
+                 &DevicePathSize
+                 );
   if (VarConsole == NULL) {
     //
     // If there is no any console device, just return.
@@ -134,7 +135,7 @@ UpdateSystemTableConsole (
     //
     // Check every instance of the console variable
     //
-    Instance  = GetNextDevicePathInstance (&VarConsole, &DevicePathSize);
+    Instance = GetNextDevicePathInstance (&VarConsole, &DevicePathSize);
     if (Instance == NULL) {
       FreePool (FullDevicePath);
       return FALSE;
@@ -144,19 +145,19 @@ UpdateSystemTableConsole (
     // Find console device handle by device path instance
     //
     Status = gBS->LocateDevicePath (
-                   ConsoleGuid,
-                   &Instance,
-                   &NewHandle
-                   );
+                    ConsoleGuid,
+                    &Instance,
+                    &NewHandle
+                    );
     if (!EFI_ERROR (Status)) {
       //
       // Get the console protocol on this console device handle
       //
       Status = gBS->HandleProtocol (
-                     NewHandle,
-                     ConsoleGuid,
-                     &Interface
-                     );
+                      NewHandle,
+                      ConsoleGuid,
+                      &Interface
+                      );
       if (!EFI_ERROR (Status)) {
         //
         // Update new console handle in System Table.
@@ -166,7 +167,6 @@ UpdateSystemTableConsole (
         return TRUE;
       }
     }
-
   } while (Instance != NULL);
 
   //
@@ -208,8 +208,8 @@ BdsLibUpdateConsoleVariable (
   EFI_DEVICE_PATH_PROTOCOL  *TempNewDevicePath;
   UINT32                    Attributes;
 
-  VarConsole      = NULL;
-  DevicePathSize  = 0;
+  VarConsole     = NULL;
+  DevicePathSize = 0;
 
   //
   // Notes: check the device path point, here should check
@@ -218,27 +218,29 @@ BdsLibUpdateConsoleVariable (
   if (CustomizedConDevicePath == ExclusiveDevicePath) {
     return EFI_UNSUPPORTED;
   }
+
   //
   // Delete the ExclusiveDevicePath from current default console
   //
   VarConsole = BdsLibGetVariableAndSize (
-                ConVarName,
-                &gEfiGlobalVariableGuid,
-                &DevicePathSize
-                );
+                 ConVarName,
+                 &gEfiGlobalVariableGuid,
+                 &DevicePathSize
+                 );
 
   //
   // Initialize NewDevicePath
   //
-  NewDevicePath  = VarConsole;
+  NewDevicePath = VarConsole;
 
   //
   // If ExclusiveDevicePath is even the part of the instance in VarConsole, delete it.
   // In the end, NewDevicePath is the final device path.
   //
-  if (ExclusiveDevicePath != NULL && VarConsole != NULL) {
+  if ((ExclusiveDevicePath != NULL) && (VarConsole != NULL)) {
     NewDevicePath = BdsLibDelPartMatchInstance (VarConsole, ExclusiveDevicePath);
   }
+
   //
   // Try to append customized device path to NewDevicePath.
   //
@@ -253,9 +255,9 @@ BdsLibUpdateConsoleVariable (
       // just append current customized device path
       //
       TempNewDevicePath = NewDevicePath;
-      NewDevicePath = AppendDevicePathInstance (NewDevicePath, CustomizedConDevicePath);
+      NewDevicePath     = AppendDevicePathInstance (NewDevicePath, CustomizedConDevicePath);
       if (TempNewDevicePath != NULL) {
-        FreePool(TempNewDevicePath);
+        FreePool (TempNewDevicePath);
       }
     }
   }
@@ -279,35 +281,35 @@ BdsLibUpdateConsoleVariable (
   // Finally, Update the variable of the default console by NewDevicePath
   //
   DevicePathSize = GetDevicePathSize (NewDevicePath);
-  Status = gRT->SetVariable (
-                  ConVarName,
-                  &gEfiGlobalVariableGuid,
-                  Attributes,
-                  DevicePathSize,
-                  NewDevicePath
-                  );
+  Status         = gRT->SetVariable (
+                          ConVarName,
+                          &gEfiGlobalVariableGuid,
+                          Attributes,
+                          DevicePathSize,
+                          NewDevicePath
+                          );
   if ((DevicePathSize == 0) && (Status == EFI_NOT_FOUND)) {
     Status = EFI_SUCCESS;
   }
+
   ASSERT_EFI_ERROR (Status);
 
   if (VarConsole == NewDevicePath) {
     if (VarConsole != NULL) {
-      FreePool(VarConsole);
+      FreePool (VarConsole);
     }
   } else {
     if (VarConsole != NULL) {
-      FreePool(VarConsole);
+      FreePool (VarConsole);
     }
+
     if (NewDevicePath != NULL) {
-      FreePool(NewDevicePath);
+      FreePool (NewDevicePath);
     }
   }
 
   return Status;
-
 }
-
 
 /**
   Connect the console device base on the variable ConVarName, if
@@ -330,7 +332,7 @@ BdsLibUpdateConsoleVariable (
 EFI_STATUS
 EFIAPI
 BdsLibConnectConsoleVariable (
-  IN  CHAR16                 *ConVarName
+  IN  CHAR16  *ConVarName
   )
 {
   EFI_STATUS                Status;
@@ -362,13 +364,13 @@ BdsLibConnectConsoleVariable (
     //
     // Check every instance of the console variable
     //
-    Instance  = GetNextDevicePathInstance (&CopyOfDevicePath, &Size);
+    Instance = GetNextDevicePathInstance (&CopyOfDevicePath, &Size);
     if (Instance == NULL) {
       FreePool (StartDevicePath);
       return EFI_UNSUPPORTED;
     }
 
-    Next      = Instance;
+    Next = Instance;
     while (!IsDevicePathEndType (Next)) {
       Next = NextDevicePathNode (Next);
     }
@@ -381,9 +383,10 @@ BdsLibConnectConsoleVariable (
     //  or a USB Class device path
     //
     if ((DevicePathType (Instance) == MESSAGING_DEVICE_PATH) &&
-       ((DevicePathSubType (Instance) == MSG_USB_CLASS_DP)
-       || (DevicePathSubType (Instance) == MSG_USB_WWID_DP)
-       )) {
+        (  (DevicePathSubType (Instance) == MSG_USB_CLASS_DP)
+        || (DevicePathSubType (Instance) == MSG_USB_WWID_DP)
+        ))
+    {
       Status = BdsLibConnectUsbDevByShortFormDP (0xFF, Instance);
       if (!EFI_ERROR (Status)) {
         DeviceExist = TRUE;
@@ -403,7 +406,8 @@ BdsLibConnectConsoleVariable (
         DeviceExist = TRUE;
       }
     }
-    FreePool(Instance);
+
+    FreePool (Instance);
   } while (CopyOfDevicePath != NULL);
 
   FreePool (StartDevicePath);
@@ -440,53 +444,52 @@ BdsLibConnectAllConsoles (
   // Update all the console variables
   //
   gBS->LocateHandleBuffer (
-          ByProtocol,
-          &gEfiSimpleTextInProtocolGuid,
-          NULL,
-          &HandleCount,
-          &HandleBuffer
-          );
+         ByProtocol,
+         &gEfiSimpleTextInProtocolGuid,
+         NULL,
+         &HandleCount,
+         &HandleBuffer
+         );
 
   for (Index = 0; Index < HandleCount; Index++) {
     gBS->HandleProtocol (
-            HandleBuffer[Index],
-            &gEfiDevicePathProtocolGuid,
-            (VOID **) &ConDevicePath
-            );
+           HandleBuffer[Index],
+           &gEfiDevicePathProtocolGuid,
+           (VOID **)&ConDevicePath
+           );
     BdsLibUpdateConsoleVariable (L"ConIn", ConDevicePath, NULL);
   }
 
   if (HandleBuffer != NULL) {
-    FreePool(HandleBuffer);
+    FreePool (HandleBuffer);
     HandleBuffer = NULL;
   }
 
   gBS->LocateHandleBuffer (
-          ByProtocol,
-          &gEfiSimpleTextOutProtocolGuid,
-          NULL,
-          &HandleCount,
-          &HandleBuffer
-          );
+         ByProtocol,
+         &gEfiSimpleTextOutProtocolGuid,
+         NULL,
+         &HandleCount,
+         &HandleBuffer
+         );
   for (Index = 0; Index < HandleCount; Index++) {
     gBS->HandleProtocol (
-            HandleBuffer[Index],
-            &gEfiDevicePathProtocolGuid,
-            (VOID **) &ConDevicePath
-            );
+           HandleBuffer[Index],
+           &gEfiDevicePathProtocolGuid,
+           (VOID **)&ConDevicePath
+           );
     BdsLibUpdateConsoleVariable (L"ConOut", ConDevicePath, NULL);
     BdsLibUpdateConsoleVariable (L"ErrOut", ConDevicePath, NULL);
   }
 
   if (HandleBuffer != NULL) {
-    FreePool(HandleBuffer);
+    FreePool (HandleBuffer);
   }
 
   //
   // Connect all console variables
   //
   BdsLibConnectAllDefaultConsoles ();
-
 }
 
 /**
@@ -504,8 +507,8 @@ BdsLibConnectAllDefaultConsoles (
   VOID
   )
 {
-  EFI_STATUS                Status;
-  BOOLEAN                   SystemTableUpdated;
+  EFI_STATUS  Status;
+  BOOLEAN     SystemTableUpdated;
 
   //
   // Connect all default console variables
@@ -536,13 +539,15 @@ BdsLibConnectAllDefaultConsoles (
   //
   // Fill console handles in System Table if no console device assignd.
   //
-  if (UpdateSystemTableConsole (L"ConIn", &gEfiSimpleTextInProtocolGuid, &gST->ConsoleInHandle, (VOID **) &gST->ConIn)) {
+  if (UpdateSystemTableConsole (L"ConIn", &gEfiSimpleTextInProtocolGuid, &gST->ConsoleInHandle, (VOID **)&gST->ConIn)) {
     SystemTableUpdated = TRUE;
   }
-  if (UpdateSystemTableConsole (L"ConOut", &gEfiSimpleTextOutProtocolGuid, &gST->ConsoleOutHandle, (VOID **) &gST->ConOut)) {
+
+  if (UpdateSystemTableConsole (L"ConOut", &gEfiSimpleTextOutProtocolGuid, &gST->ConsoleOutHandle, (VOID **)&gST->ConOut)) {
     SystemTableUpdated = TRUE;
   }
-  if (UpdateSystemTableConsole (L"ErrOut", &gEfiSimpleTextOutProtocolGuid, &gST->StandardErrorHandle, (VOID **) &gST->StdErr)) {
+
+  if (UpdateSystemTableConsole (L"ErrOut", &gEfiSimpleTextOutProtocolGuid, &gST->StandardErrorHandle, (VOID **)&gST->StdErr)) {
     SystemTableUpdated = TRUE;
   }
 
@@ -552,10 +557,10 @@ BdsLibConnectAllDefaultConsoles (
     //
     gST->Hdr.CRC32 = 0;
     gBS->CalculateCrc32 (
-          (UINT8 *) &gST->Hdr,
-          gST->Hdr.HeaderSize,
-          &gST->Hdr.CRC32
-          );
+           (UINT8 *)&gST->Hdr,
+           gST->Hdr.HeaderSize,
+           &gST->Hdr.CRC32
+           );
   }
 
   return EFI_SUCCESS;

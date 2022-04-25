@@ -27,8 +27,8 @@ OcAsciiStringBufferInit (
 
 EFI_STATUS
 OcAsciiStringBufferAppend (
-  IN OUT  OC_STRING_BUFFER    *Buffer,
-  IN      CONST CHAR8         *AppendString    OPTIONAL
+  IN OUT  OC_STRING_BUFFER  *Buffer,
+  IN      CONST CHAR8       *AppendString    OPTIONAL
   )
 {
   return OcAsciiStringBufferAppendN (Buffer, AppendString, MAX_UINTN);
@@ -48,12 +48,12 @@ OcAsciiStringBufferAppend (
 STATIC
 EFI_STATUS
 InternalAsciiStringBufferExtendBy (
-  IN OUT  OC_STRING_BUFFER    *Buffer,
-  IN      CONST UINTN         AppendLength,
-     OUT  UINTN               *TargetLength
+  IN OUT  OC_STRING_BUFFER  *Buffer,
+  IN      CONST UINTN       AppendLength,
+  OUT  UINTN                *TargetLength
   )
 {
-  UINTN       NewSize;
+  UINTN  NewSize;
 
   ASSERT (AppendLength != 0);
 
@@ -65,8 +65,8 @@ InternalAsciiStringBufferExtendBy (
       return EFI_OUT_OF_RESOURCES;
     }
 
-    Buffer->BufferSize  = AppendLength + 1;
-    *TargetLength       = AppendLength;
+    Buffer->BufferSize = AppendLength + 1;
+    *TargetLength      = AppendLength;
   } else {
     if (Buffer->BufferSize == 0) {
       ASSERT (FALSE);
@@ -75,9 +75,9 @@ InternalAsciiStringBufferExtendBy (
 
     NewSize = Buffer->BufferSize;
     if (OcOverflowAddUN (Buffer->StringLength, AppendLength, TargetLength)) {
-        return EFI_OUT_OF_RESOURCES;
+      return EFI_OUT_OF_RESOURCES;
     }
-    
+
     while (NewSize <= *TargetLength) {
       if (OcOverflowMulUN (NewSize, 2, &NewSize)) {
         return EFI_OUT_OF_RESOURCES;
@@ -89,6 +89,7 @@ InternalAsciiStringBufferExtendBy (
       if (Buffer->String == NULL) {
         return EFI_OUT_OF_RESOURCES;
       }
+
       Buffer->BufferSize = NewSize;
     }
   }
@@ -98,8 +99,8 @@ InternalAsciiStringBufferExtendBy (
 
 EFI_STATUS
 OcAsciiStringBufferAppendN (
-  IN OUT  OC_STRING_BUFFER    *Buffer,
-  IN      CONST CHAR8         *AppendString,   OPTIONAL
+  IN OUT  OC_STRING_BUFFER *Buffer,
+  IN      CONST CHAR8 *AppendString, OPTIONAL
   IN      CONST UINTN         Length
   )
 {
@@ -112,7 +113,7 @@ OcAsciiStringBufferAppendN (
   }
 
   AppendLength = AsciiStrnLenS (AppendString, Length);
-  
+
   //
   // Buffer stays NULL if zero appended.
   //
@@ -130,15 +131,15 @@ OcAsciiStringBufferAppendN (
     return Status;
   }
 
-  Buffer->StringLength  = TargetLength;
+  Buffer->StringLength = TargetLength;
   return EFI_SUCCESS;
 }
 
 EFI_STATUS
 EFIAPI
 OcAsciiStringBufferSPrint (
-  IN OUT  OC_STRING_BUFFER    *Buffer,
-  IN      CONST CHAR8         *FormatString,
+  IN OUT  OC_STRING_BUFFER  *Buffer,
+  IN      CONST CHAR8       *FormatString,
   ...
   )
 {
@@ -167,7 +168,7 @@ OcAsciiStringBufferSPrint (
       AsciiVSPrint (&Buffer->String[Buffer->StringLength], NumberOfPrinted + 1, FormatString, Marker);
       Buffer->StringLength = TargetLength;
     }
-  }  
+  }
 
   VA_END (Marker);
   return Status;
@@ -175,12 +176,12 @@ OcAsciiStringBufferSPrint (
 
 CHAR8 *
 OcAsciiStringBufferFreeContainer (
-  IN OUT  OC_STRING_BUFFER    **StringBuffer
+  IN OUT  OC_STRING_BUFFER  **StringBuffer
   )
 {
-  CHAR8   *String;
+  CHAR8  *String;
 
-  if (StringBuffer == NULL || *StringBuffer == NULL) {
+  if ((StringBuffer == NULL) || (*StringBuffer == NULL)) {
     ASSERT (FALSE);
     return NULL;
   }
@@ -194,10 +195,10 @@ OcAsciiStringBufferFreeContainer (
 
 VOID
 OcAsciiStringBufferFree (
-  IN OUT  OC_STRING_BUFFER    **StringBuffer
+  IN OUT  OC_STRING_BUFFER  **StringBuffer
   )
 {
-  CHAR8 *Result;
+  CHAR8  *Result;
 
   Result = OcAsciiStringBufferFreeContainer (StringBuffer);
   if (Result != NULL) {

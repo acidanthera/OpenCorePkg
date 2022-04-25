@@ -29,7 +29,7 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 /**
   Apple RAM Disk protocol revision.
 **/
-#define APPLE_DMG_BOOT_PROTOCOL_REVISION 3
+#define APPLE_DMG_BOOT_PROTOCOL_REVISION  3
 
 /**
   RAM Disk extent signature, "RAMDXTNT".
@@ -39,12 +39,12 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 /**
   RAM Disk extent version.
 **/
-#define APPLE_RAM_DISK_EXTENT_VERSION    0x10000U
+#define APPLE_RAM_DISK_EXTENT_VERSION  0x10000U
 
 /**
   RAM Disk maximum extent count.
 **/
-#define APPLE_RAM_DISK_MAX_EXTENTS       0xFE
+#define APPLE_RAM_DISK_MAX_EXTENTS  0xFE
 
 #pragma pack(push, 1)
 
@@ -61,11 +61,11 @@ typedef PACKED struct {
   /// Extentent address pointing to a sequence of allocated pages from
   /// EfiACPIMemoryNVS or EfiBootServicesData depending on RamDisk init.
   ///
-  UINT64                Start;
+  UINT64    Start;
   ///
   /// Actual size of the extent. Allocated area size may be >= Length.
   ///
-  UINT64                Length;
+  UINT64    Length;
 } APPLE_RAM_DISK_EXTENT;
 
 /**
@@ -75,27 +75,27 @@ typedef PACKED struct {
   ///
   /// Set to APPLE_RAM_DISK_EXTENT_SIGNATURE.
   ///
-  UINT64                Signature;
+  UINT64                   Signature;
   ///
   /// Set to APPLE_RAM_DISK_EXTENT_VERSION.
   ///
-  UINT32                Version;
+  UINT32                   Version;
   ///
   /// Externally visible amount of extents.
   ///
-  UINT32                ExtentCount;
+  UINT32                   ExtentCount;
   ///
   /// Externally visible extent array.
   ///
-  APPLE_RAM_DISK_EXTENT Extents[APPLE_RAM_DISK_MAX_EXTENTS];
+  APPLE_RAM_DISK_EXTENT    Extents[APPLE_RAM_DISK_MAX_EXTENTS];
   ///
   /// Currently reserved or rather unknown.
   ///
-  UINT64                Reserved;
+  UINT64                   Reserved;
   ///
   /// Set to APPLE_RAM_DISK_EXTENT_SIGNATURE.
   ///
-  UINT64                Signature2;
+  UINT64                   Signature2;
 } APPLE_RAM_DISK_EXTENT_TABLE;
 
 /**
@@ -105,27 +105,27 @@ typedef PACKED struct {
   ///
   /// Internally visible amount of extents.
   ///
-  UINT64                       ExtentCount;
+  UINT64                         ExtentCount;
   ///
   /// Currently reserved or rather unknown. Padding?
   ///
-  UINT64                       Reserved1;
+  UINT64                         Reserved1;
   ///
   /// Total addressible disk size specified at creation.
   ///
-  UINT64                       DiskSize;
+  UINT64                         DiskSize;
   ///
   /// Internally visible extent array.
   ///
-  APPLE_RAM_DISK_EXTENT        Extents[APPLE_RAM_DISK_MAX_EXTENTS];
+  APPLE_RAM_DISK_EXTENT          Extents[APPLE_RAM_DISK_MAX_EXTENTS];
   ///
   /// Currently reserved or rather unknown. Padding?
   ///
-  UINT64                       Reserved2;
+  UINT64                         Reserved2;
   ///
   /// Normal extent table.
   ///
-  APPLE_RAM_DISK_EXTENT_TABLE  ExtentTable;
+  APPLE_RAM_DISK_EXTENT_TABLE    ExtentTable;
   ///
   /// More data may follow, for Apple implementation it will be 0x9FD000 bytes.
   /// (This struct and 1 page for internal header.)
@@ -143,11 +143,11 @@ typedef PACKED struct {
   /// Length  = sizeof (VENDOR_DEVICE_PATH) + sizeof (UINT32).
   /// Guid    = APPLE_RAM_DISK_PROTOCOL_GUID.
   ///
-  VENDOR_DEVICE_PATH        Vendor;
+  VENDOR_DEVICE_PATH    Vendor;
   ///
   /// Globally incremented counter to make every path unique.
   ///
-  UINT32                    Counter;
+  UINT32                Counter;
 } APPLE_RAM_DISK_DP_VENDOR;
 
 /**
@@ -157,11 +157,11 @@ typedef PACKED struct {
   ///
   /// Vendor device path.
   ///
-  APPLE_RAM_DISK_DP_VENDOR  Vendor;
+  APPLE_RAM_DISK_DP_VENDOR    Vendor;
   ///
   /// Memmap device path.
   ///
-  MEMMAP_DEVICE_PATH        MemMap;
+  MEMMAP_DEVICE_PATH          MemMap;
 } APPLE_RAM_DISK_DP_HEADER;
 
 /**
@@ -180,15 +180,15 @@ typedef PACKED struct {
   /// Note: EndingAddress, per UEFI specification and edk2 implementation, is supposed
   /// to be the top usable address, not the top of the buffer. Perhaps there is a mistake here.
   ///
-  APPLE_RAM_DISK_DP_VENDOR  Vendor;
+  APPLE_RAM_DISK_DP_VENDOR    Vendor;
   ///
   /// Memmap device path.
   ///
-  MEMMAP_DEVICE_PATH        MemMap;
+  MEMMAP_DEVICE_PATH          MemMap;
   ///
   /// Device path end.
   ///
-  EFI_DEVICE_PATH_PROTOCOL  End;
+  EFI_DEVICE_PATH_PROTOCOL    End;
 } APPLE_RAM_DISK_DP;
 
 #pragma pack(pop)
@@ -223,7 +223,7 @@ typedef PACKED struct {
 **/
 typedef
 EFI_STATUS
-(EFIAPI *APPLE_RAM_DISK_CREATE) (
+(EFIAPI *APPLE_RAM_DISK_CREATE)(
   IN  UINT64       BlockCount     OPTIONAL,
   IN  UINT32       BlockSize      OPTIONAL,
   IN  BOOLEAN      AllocateMemory,
@@ -246,7 +246,7 @@ EFI_STATUS
 **/
 typedef
 EFI_STATUS
-(EFIAPI *APPLE_RAM_DISK_DESTROY) (
+(EFIAPI *APPLE_RAM_DISK_DESTROY)(
   IN  EFI_HANDLE   Handle
   );
 
@@ -264,7 +264,7 @@ EFI_STATUS
 **/
 typedef
 EFI_STATUS
-(EFIAPI *APPLE_RAM_DISK_GET_CONTEXT) (
+(EFIAPI *APPLE_RAM_DISK_GET_CONTEXT)(
   IN  EFI_HANDLE              Handle,
   OUT APPLE_RAM_DISK_CONTEXT  *Context
   );
@@ -273,10 +273,10 @@ EFI_STATUS
   Apple RAM Disk protocol.
 **/
 typedef struct {
-  UINT64                      Revision;
-  APPLE_RAM_DISK_CREATE       CreateRamDisk;
-  APPLE_RAM_DISK_DESTROY      DestroyRamDisk;
-  APPLE_RAM_DISK_GET_CONTEXT  GetRamDiskContext;
+  UINT64                        Revision;
+  APPLE_RAM_DISK_CREATE         CreateRamDisk;
+  APPLE_RAM_DISK_DESTROY        DestroyRamDisk;
+  APPLE_RAM_DISK_GET_CONTEXT    GetRamDiskContext;
 } APPLE_RAM_DISK_PROTOCOL;
 
 STATIC_ASSERT (sizeof (APPLE_RAM_DISK_DP_VENDOR) == 24, "Invalid APPLE_RAM_DISK_DP_VENDOR size");
@@ -285,7 +285,7 @@ STATIC_ASSERT (sizeof (APPLE_RAM_DISK_EXTENT) == 16, "Invalid APPLE_RAM_DISK_EXT
 STATIC_ASSERT (sizeof (APPLE_RAM_DISK_EXTENT_TABLE) == 4096, "Invalid APPLE_RAM_DISK_EXTENT_TABLE size");
 STATIC_ASSERT (sizeof (APPLE_RAM_DISK_CONTEXT) == 8192, "Invalid APPLE_RAM_DISK_CONTEXT size");
 
-extern EFI_GUID gAppleRamDiskProtocolGuid;
+extern EFI_GUID  gAppleRamDiskProtocolGuid;
 
 /**
   Vit: Below come the implementation specific details, which probably do not belong here.
@@ -302,7 +302,7 @@ extern EFI_GUID gAppleRamDiskProtocolGuid;
   RAM Disk default size.
   This value is used when allocating APPLE_RAM_DISK structure.
 **/
-#define APPLE_RAM_DISK_DEFAULT_SIZE        0xA00000U
+#define APPLE_RAM_DISK_DEFAULT_SIZE  0xA00000U
 
 /**
   RAM Disk outermost structure. Allocated in pages with matching MemoryType.
@@ -311,32 +311,32 @@ typedef struct {
   ///
   /// Amount of allocated extents in the RAM disk.
   ///
-  UINT64                 AllocatedExtents;
+  UINT64                   AllocatedExtents;
   ///
   /// Amount of allocated pages in APPLE_RAM_DISK structure.
   /// Normally EFI_SIZE_TO_PAGES (APPLE_RAM_DISK_DEFAULT_SIZE).
   ///
-  UINT64                 PageCount;
+  UINT64                   PageCount;
   ///
   /// Total disk size allocated from memory map.
   /// It is bigger by sizeof(APPLE_RAM_DISK_CONTEXT) than actual requested size,
   /// when AllocateMemory = TRUE is specified.
   ///
-  UINT64                 TotalSize;
+  UINT64                   TotalSize;
   ///
   /// All allocated and owned extents.
   /// First extent is special, as it points to OwnExtentData, and thus
   /// has APPLE_RAM_DISK_DEFAULT_SIZE - sizeof (APPLE_RAM_DISK) bytes.
   ///
-  APPLE_RAM_DISK_EXTENT  Extents[APPLE_RAM_DISK_MAX_EXTENTS];
+  APPLE_RAM_DISK_EXTENT    Extents[APPLE_RAM_DISK_MAX_EXTENTS];
   ///
   /// Currently reserved or rather unknown. Padding?
   ///
-  UINT64                 Reserved;
+  UINT64                   Reserved;
   ///
   /// Own extent data lasting till PageCount end.
   ///
-  UINT8                  OwnExtentData[];
+  UINT8                    OwnExtentData[];
 } APPLE_RAM_DISK;
 
 /**
@@ -346,40 +346,40 @@ typedef struct {
   ///
   /// Set to APPLE_RAM_DISK_INSTANCE_SIGNATURE.
   ///
-  UINT32                       Magic;
+  UINT32                         Magic;
   ///
   /// Set to RAM disk handle, formerly returned with CreateRamDisk.
   ///
-  EFI_HANDLE                   Handle;
+  EFI_HANDLE                     Handle;
   ///
   /// RAM disk device path.
   ///
-  EFI_DEVICE_PATH_PROTOCOL     *DevicePath;
+  EFI_DEVICE_PATH_PROTOCOL       *DevicePath;
   ///
   /// RAM disk Block I/O protocol.
   ///
-  EFI_BLOCK_IO_PROTOCOL        BlockIo;
+  EFI_BLOCK_IO_PROTOCOL          BlockIo;
   ///
   /// Outer RAM disk structure, which owns all allocated extents.
   /// This field is NULL when AllocateMemory = FALSE.
   ///
-  APPLE_RAM_DISK               *RamDisk;
+  APPLE_RAM_DISK                 *RamDisk;
   ///
   /// RAM disk context allocated within RAM disk structure memory.
   /// Apple implementation puts it to the end of RamDisk structure.
   /// This field is NULL when AllocateMemory = FALSE.
   ///
-  APPLE_RAM_DISK_CONTEXT       *Context;
+  APPLE_RAM_DISK_CONTEXT         *Context;
   ///
   /// Extra pointer to Context->Extents.
   /// This field is NULL when AllocateMemory = FALSE.
   ///
-  APPLE_RAM_DISK_EXTENT_TABLE  *Extents;
+  APPLE_RAM_DISK_EXTENT_TABLE    *Extents;
   ///
   /// Total addressible disk size specified at creation.
   /// This field is -1 when AllocateMemory = FALSE.
   ///
-  INT64                        DiskSize;
+  INT64                          DiskSize;
 } APPLE_RAM_DISK_INSTANCE;
 
 #endif // APPLE_RAM_DISK_PROTOCOL_H

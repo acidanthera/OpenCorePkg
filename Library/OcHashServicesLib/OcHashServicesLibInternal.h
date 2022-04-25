@@ -14,18 +14,16 @@
 #include <Protocol/ServiceBinding.h>
 #include <Protocol/Hash.h>
 
-typedef union _HS_CONTEXT_DATA
-{
-  MD5_CONTEXT     Md5;
-  SHA1_CONTEXT    Sha1;
-  SHA256_CONTEXT  Sha256;
+typedef union _HS_CONTEXT_DATA {
+  MD5_CONTEXT       Md5;
+  SHA1_CONTEXT      Sha1;
+  SHA256_CONTEXT    Sha256;
 } HS_CONTEXT_DATA;
 
-typedef struct _HS_PRIVATE_DATA
-{
-  HS_CONTEXT_DATA   Ctx;
-  UINTN             Signature;
-  EFI_HASH_PROTOCOL Proto;
+typedef struct _HS_PRIVATE_DATA {
+  HS_CONTEXT_DATA      Ctx;
+  UINTN                Signature;
+  EFI_HASH_PROTOCOL    Proto;
 } HS_PRIVATE_DATA;
 
 #define HS_PRIVATE_SIGNATURE  SIGNATURE_32('H','S','r','v')
@@ -37,9 +35,9 @@ STATIC
 EFI_STATUS
 EFIAPI
 HSGetHashSize (
-  IN  CONST EFI_HASH_PROTOCOL *This,
-  IN  CONST EFI_GUID          *HashAlgorithm,
-  OUT UINTN                   *HashSize
+  IN  CONST EFI_HASH_PROTOCOL  *This,
+  IN  CONST EFI_GUID           *HashAlgorithm,
+  OUT UINTN                    *HashSize
   );
 
 STATIC
@@ -66,8 +64,8 @@ STATIC
 EFI_STATUS
 EFIAPI
 HSDestroyChild (
-  IN EFI_SERVICE_BINDING_PROTOCOL *This,
-  IN EFI_HANDLE                   ChildHandle
+  IN EFI_SERVICE_BINDING_PROTOCOL  *This,
+  IN EFI_HANDLE                    ChildHandle
   );
 
 #endif // HASH_SERVICES_H

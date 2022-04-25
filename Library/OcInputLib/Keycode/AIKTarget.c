@@ -32,7 +32,7 @@ AIKTargetInstall (
   Target->KeyForgotThreshold = KeyForgotThreshold;
 
   if (Target->KeyMapDb == NULL) {
-    Status = gBS->LocateProtocol (&gAppleKeyMapDatabaseProtocolGuid, NULL, (VOID **) &Target->KeyMapDb);
+    Status = gBS->LocateProtocol (&gAppleKeyMapDatabaseProtocolGuid, NULL, (VOID **)&Target->KeyMapDb);
 
     if (EFI_ERROR (Status)) {
       DEBUG ((DEBUG_INFO, "AppleKeyMapDatabaseProtocol is unavailable - %r\n", Status));
@@ -40,8 +40,10 @@ AIKTargetInstall (
     }
 
     Status = Target->KeyMapDb->CreateKeyStrokesBuffer (
-      Target->KeyMapDb, AIK_TARGET_BUFFER_SIZE, &Target->KeyMapDbIndex
-      );
+                                 Target->KeyMapDb,
+                                 AIK_TARGET_BUFFER_SIZE,
+                                 &Target->KeyMapDbIndex
+                                 );
 
     if (EFI_ERROR (Status)) {
       DEBUG ((DEBUG_INFO, "CreateKeyStrokesBuffer failed - %r\n", Status));
@@ -62,8 +64,8 @@ AIKTargetUninstall (
     Target->KeyMapDb = NULL;
   }
 
-  Target->NumberOfKeys = 0;
-  Target->Modifiers = 0;
+  Target->NumberOfKeys    = 0;
+  Target->Modifiers       = 0;
   Target->ModifierCounter = 0;
   ZeroMem (Target->Keys, sizeof (Target->Keys));
   ZeroMem (Target->KeyCounters, sizeof (Target->KeyCounters));
@@ -89,12 +91,15 @@ AIKTargetRefresh (
         CopyMem (
           &Target->KeyCounters[Index],
           &Target->KeyCounters[Index+1],
-          sizeof (Target->KeyCounters[0]) * Left);
+          sizeof (Target->KeyCounters[0]) * Left
+          );
         CopyMem (
           &Target->Keys[Index],
           &Target->Keys[Index+1],
-          sizeof (Target->Keys[0]) * Left);
+          sizeof (Target->Keys[0]) * Left
+          );
       }
+
       Target->NumberOfKeys--;
     }
   }
@@ -124,7 +129,7 @@ AIKTargetWriteEntry (
 
   AIKTranslate (KeyData, &Modifiers, &Key);
 
-  Target->Modifiers = Modifiers;
+  Target->Modifiers       = Modifiers;
   Target->ModifierCounter = Target->Counter;
 
   if (Key == UsbHidUndefined) {
@@ -158,13 +163,14 @@ AIKTargetWriteEntry (
         InsertIndex   = Index;
       }
     }
+
     Target->NumberOfKeys--;
   }
 
   //
   // Insert the new key
   //
-  Target->Keys[InsertIndex] = Key;
+  Target->Keys[InsertIndex]        = Key;
   Target->KeyCounters[InsertIndex] = Target->Counter;
   Target->NumberOfKeys++;
 }
@@ -178,12 +184,12 @@ AIKTargetSubmit (
 
   if (Target->KeyMapDb != NULL) {
     Status = Target->KeyMapDb->SetKeyStrokeBufferKeys (
-      Target->KeyMapDb,
-      Target->KeyMapDbIndex,
-      Target->Modifiers,
-      Target->NumberOfKeys,
-      Target->Keys
-      );
+                                 Target->KeyMapDb,
+                                 Target->KeyMapDbIndex,
+                                 Target->Modifiers,
+                                 Target->NumberOfKeys,
+                                 Target->Keys
+                                 );
   } else {
     Status = EFI_NOT_FOUND;
   }

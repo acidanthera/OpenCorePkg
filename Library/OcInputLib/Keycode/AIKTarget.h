@@ -22,7 +22,7 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 //
 // Maximum amount of keys reported to Apple protocols
 //
-#define AIK_TARGET_BUFFER_SIZE 6
+#define AIK_TARGET_BUFFER_SIZE  6
 
 //
 // Known values for key repeat (single key hold):
@@ -104,7 +104,7 @@ AIKTargetWriteEntry (
 
 VOID
 AIKTargetSubmit (
-  IN OUT AIK_TARGET        *Target
+  IN OUT AIK_TARGET  *Target
   );
 
 #endif

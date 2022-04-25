@@ -21,6 +21,6 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
     { 0x83, 0x72, 0x89, 0xBD, 0x52, 0x6D, 0xE9, 0x56 } }
 
 // gAppleOSLoadedNamedEventGuid
-extern EFI_GUID gAppleOSLoadedNamedEventGuid;
+extern EFI_GUID  gAppleOSLoadedNamedEventGuid;
 
 #endif // APPLE_OS_LOADED_H

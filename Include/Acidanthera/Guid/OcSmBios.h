@@ -38,7 +38,7 @@
 ///
 /// Exported GUID identifiers.
 ///
-extern EFI_GUID       gOcCustomSmbiosTableGuid;
-extern EFI_GUID       gOcCustomSmbios3TableGuid;
+extern EFI_GUID  gOcCustomSmbiosTableGuid;
+extern EFI_GUID  gOcCustomSmbios3TableGuid;
 
 #endif // OC_SMBIOS_GUID_H

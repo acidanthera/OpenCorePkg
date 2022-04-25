@@ -322,22 +322,22 @@ EFI_STATUS
   );
 
 struct APPLE_SECURE_BOOT_PROTOCOL_ {
-  UINTN                               Revision;
-  APPLE_SB_SET_AVAILABILITY           SetAvailability;
-  APPLE_SB_VERIFY_IMG4_BY_PATH        VerifyImg4ByPath;
-  APPLE_SB_VERIFY_IMG4                VerifyImg4;
-  APPLE_SB_GET_POLICY                 GetPolicy;
-  APPLE_SB_GET_FAILURE_REASON         GetFailureReason;
-  APPLE_SB_SET_FAILURE_REASON         SetFailureReason;
-  APPLE_SB_GET_KERNEL_FAILURE_REASON  GetKernelFailureReason;
-  APPLE_SB_SET_KERNEL_FAILURE_REASON  SetKernelFailureReason;
-  APPLE_SB_VERIFY_WINDOWS_BY_PATH     VerifyWindowsByPath;
-  APPLE_SB_VERIFY_WINDOWS             VerifyWindows;
-  APPLE_SB_GET_WINDOWS_POLICY         GetWindowsPolicy;
-  APPLE_SB_GET_WINDOWS_FAILURE_REASON GetWindowsFailureReason;
-  APPLE_SB_SET_WINDOWS_FAILURE_REASON SetWindowsFailureReason;
+  UINTN                                  Revision;
+  APPLE_SB_SET_AVAILABILITY              SetAvailability;
+  APPLE_SB_VERIFY_IMG4_BY_PATH           VerifyImg4ByPath;
+  APPLE_SB_VERIFY_IMG4                   VerifyImg4;
+  APPLE_SB_GET_POLICY                    GetPolicy;
+  APPLE_SB_GET_FAILURE_REASON            GetFailureReason;
+  APPLE_SB_SET_FAILURE_REASON            SetFailureReason;
+  APPLE_SB_GET_KERNEL_FAILURE_REASON     GetKernelFailureReason;
+  APPLE_SB_SET_KERNEL_FAILURE_REASON     SetKernelFailureReason;
+  APPLE_SB_VERIFY_WINDOWS_BY_PATH        VerifyWindowsByPath;
+  APPLE_SB_VERIFY_WINDOWS                VerifyWindows;
+  APPLE_SB_GET_WINDOWS_POLICY            GetWindowsPolicy;
+  APPLE_SB_GET_WINDOWS_FAILURE_REASON    GetWindowsFailureReason;
+  APPLE_SB_SET_WINDOWS_FAILURE_REASON    SetWindowsFailureReason;
 };
 
-extern EFI_GUID gAppleSecureBootProtocolGuid;
+extern EFI_GUID  gAppleSecureBootProtocolGuid;
 
 #endif // APPLE_SECURE_BOOT_H

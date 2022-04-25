@@ -8,49 +8,60 @@
 #include <Library/MemoryAllocationLib.h>
 
 #ifdef COVERAGE_TEST
-#if defined(__clang__)
+  #if defined (__clang__)
 void
-__wrap_llvm_gcda_emit_arcs (uint32_t num_counters, uint64_t *counters)
+__wrap_llvm_gcda_emit_arcs (
+  uint32_t  num_counters,
+  uint64_t  *counters
+  )
 {
-  uint32_t i;
-  uint64_t *old_ctrs = NULL;
+  uint32_t  i;
+  uint64_t  *old_ctrs = NULL;
 
   old_ctrs = malloc (num_counters * sizeof (uint64_t));
   if (old_ctrs == NULL) {
     return;
   }
+
   memcpy (old_ctrs, counters, num_counters * sizeof (uint64_t));
 
   __real_llvm_gcda_emit_arcs (num_counters, counters);
 
   for (i = 0; i < num_counters; ++i) {
     if ((old_ctrs[i] == counters[i]) && (counters[i] > 0)) {
-      fprintf(stdout, "CoverageHit\n");
+      fprintf (stdout, "CoverageHit\n");
     }
   }
 
   free (old_ctrs);
 }
-#elif defined (__GNUC__)
+
+  #elif defined (__GNUC__)
 void
-__gcov_merge_add (gcov_type *counters, unsigned n_counters)
+__gcov_merge_add (
+  gcov_type  *counters,
+  unsigned   n_counters
+  )
 {
-  gcov_type prev;
-  for (; n_counters; counters++, n_counters--) {
+  gcov_type  prev;
+
+  for ( ; n_counters; counters++, n_counters--) {
     prev = __gcov_read_counter ();
-    if (prev == 0 && *counters > 0) {
+    if ((prev == 0) && (*counters > 0)) {
       fprintf (stdout, "CoverageHit\n");
     }
+
     *counters += prev;
   }
 }
-#endif
+
+  #endif
 #endif
 
 UINT8 *
 UserReadFile (
-  IN  CONST CHAR8 *FileName,
-  OUT UINT32      *Size
+  IN  CONST CHAR8  *FileName,
+  OUT UINT32       *Size
   )
 {
   FILE   *FilePtr;
@@ -91,30 +102,30 @@ UserReadFile (
     fclose (FilePtr);
     return NULL;
   }
-  
+
   fclose (FilePtr);
 
   Buffer[FileSize] = 0;
-  *Size = FileSize;
+  *Size            = FileSize;
 
   return Buffer;
 }
 
 VOID
 UserWriteFile (
-  IN  CONST CHAR8 *FileName,
-  IN  VOID        *Data,
-  IN  UINT32      Size
+  IN  CONST CHAR8  *FileName,
+  IN  VOID         *Data,
+  IN  UINT32       Size
   )
 {
-  FILE   *FilePtr;
+  FILE  *FilePtr;
 
   FilePtr = fopen (FileName, "wb");
 
   if (FilePtr == NULL) {
     abort ();
   }
-  
+
   if (fwrite (Data, Size, 1, FilePtr) != 1) {
     abort ();
   }

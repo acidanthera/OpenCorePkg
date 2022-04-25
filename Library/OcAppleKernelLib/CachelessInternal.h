@@ -2,7 +2,7 @@
   Cacheless boot (S/L/E) support.
 
   Copyright (c) 2020, Goldfish64. All rights reserved.
-  
+
   This program and the accompanying materials
   are licensed and made available under the terms and conditions of the BSD License
   which accompanies this distribution.  The full text of the license may be found at
@@ -22,10 +22,10 @@
 //
 // Names are of format OcXXXXXXXX.kext, where XXXXXXXX is a 32-bit hexadecimal number.
 //
-#define KEXT_BUNDLE_NAME          L"OcXXXXXXXX.kext"
-#define KEXT_BUNDLE_NAME_SIZE     (L_STR_SIZE (KEXT_BUNDLE_NAME))
-#define KEXT_BUNDLE_NAME_LEN      (L_STR_LEN (KEXT_BUNDLE_NAME))
-#define KEXT_BUNDLE_INFO_SIZE     (SIZE_OF_EFI_FILE_INFO + KEXT_BUNDLE_NAME_SIZE)
+#define KEXT_BUNDLE_NAME       L"OcXXXXXXXX.kext"
+#define KEXT_BUNDLE_NAME_SIZE  (L_STR_SIZE (KEXT_BUNDLE_NAME))
+#define KEXT_BUNDLE_NAME_LEN   (L_STR_LEN (KEXT_BUNDLE_NAME))
+#define KEXT_BUNDLE_INFO_SIZE  (SIZE_OF_EFI_FILE_INFO + KEXT_BUNDLE_NAME_SIZE)
 
 enum {
   KEXT_OSBUNDLE_REQUIRED_NONE = 0,
@@ -40,15 +40,15 @@ typedef struct {
   //
   // Signature.
   //
-  UINT32              Signature;
+  UINT32        Signature;
   //
   // Link for global list.
   //
-  LIST_ENTRY          Link;
+  LIST_ENTRY    Link;
   //
   // Bundle identifier.
   //
-  CHAR8               *Identifier;
+  CHAR8         *Identifier;
 } DEPEND_KEXT;
 
 //
@@ -58,35 +58,35 @@ typedef struct {
   //
   // Signature.
   //
-  UINT32              Signature;
+  UINT32        Signature;
   //
   // Link for global list (CACHELESS_CONTEXT -> InjectedKexts).
   //
-  LIST_ENTRY          Link;
+  LIST_ENTRY    Link;
   //
   // Bundle filename used during S/L/E overlay creation.
   //
-  CHAR16              BundleFileName[KEXT_BUNDLE_NAME_LEN + 1];
+  CHAR16        BundleFileName[KEXT_BUNDLE_NAME_LEN + 1];
   //
   // Plist data.
   //
-  CHAR8               *PlistData;
+  CHAR8         *PlistData;
   //
   // Plist data size.
   //
-  UINT32              PlistDataSize;
+  UINT32        PlistDataSize;
   //
   // Binary data.
   //
-  UINT8               *BinaryData;
+  UINT8         *BinaryData;
   //
   // Binary data size.
   //
-  UINT32              BinaryDataSize;
+  UINT32        BinaryDataSize;
   //
   // Binary file name.
   //
-  CHAR16              *BinaryFileName;
+  CHAR16        *BinaryFileName;
 } CACHELESS_KEXT;
 
 //
@@ -96,23 +96,23 @@ typedef struct {
   //
   // Signature.
   //
-  UINT32                  Signature;
+  UINT32                   Signature;
   //
   // Link for global list (PATCHED_BUILTIN_KEXT -> Patches).
   //
-  LIST_ENTRY              Link;
+  LIST_ENTRY               Link;
   //
   // Generic patch.
   //
-  PATCHER_GENERIC_PATCH   Patch;
+  PATCHER_GENERIC_PATCH    Patch;
   //
   // Apply Quirk instead of Patch.
   //
-  BOOLEAN                 ApplyQuirk;
+  BOOLEAN                  ApplyQuirk;
   //
   // Kernel quirk to apply.
   //
-  KERNEL_QUIRK_NAME       QuirkName;
+  KERNEL_QUIRK_NAME        QuirkName;
 } KEXT_PATCH;
 
 //
@@ -122,23 +122,23 @@ typedef struct {
   //
   // Signature.
   //
-  UINT32              Signature;
+  UINT32        Signature;
   //
   // Link for global list (CACHELESS_CONTEXT -> PatchedKexts).
   //
-  LIST_ENTRY          Link;
+  LIST_ENTRY    Link;
   //
   // Bundle identifier.
   //
-  CHAR8               *Identifier;
+  CHAR8         *Identifier;
   //
   // List of patches to apply.
   //
-  LIST_ENTRY          Patches;
+  LIST_ENTRY    Patches;
   //
   // Block kext.
   //
-  BOOLEAN             Block;
+  BOOLEAN       Block;
 } PATCHED_KEXT;
 
 //
@@ -148,43 +148,43 @@ typedef struct {
   //
   // Signature.
   //
-  UINT32              Signature;
+  UINT32        Signature;
   //
   // Link for global list (CACHELESS_CONTEXT -> BuiltInKexts).
   //
-  LIST_ENTRY          Link;
+  LIST_ENTRY    Link;
   //
   // Plist path.
   //
-  CHAR16              *PlistPath;
+  CHAR16        *PlistPath;
   //
   // Bundle identifier.
   //
-  CHAR8               *Identifier;
+  CHAR8         *Identifier;
   //
   // Binary file name.
   //
-  CHAR16              *BinaryFileName;
+  CHAR16        *BinaryFileName;
   //
   // Binary file path.
   //
-  CHAR16              *BinaryPath;
+  CHAR16        *BinaryPath;
   //
   // Dependencies.
   //
-  LIST_ENTRY          Dependencies;
+  LIST_ENTRY    Dependencies;
   //
   // OSBundleRequired is valid?
   //
-  UINT8               OSBundleRequiredValue;
+  UINT8         OSBundleRequiredValue;
   //
   // Needs OSBundleRequired override for dependency injection?
   //
-  BOOLEAN             PatchValidOSBundleRequired;
+  BOOLEAN       PatchValidOSBundleRequired;
   //
   // Needs patches or blocks?
   //
-  BOOLEAN             PatchKext;
+  BOOLEAN       PatchKext;
 } BUILTIN_KEXT;
 
 //

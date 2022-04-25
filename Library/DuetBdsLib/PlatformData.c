@@ -22,7 +22,7 @@ Abstract:
 
 #include "BdsPlatform.h"
 
-ACPI_HID_DEVICE_PATH       gPnpPs2KeyboardDeviceNode  = gPnpPs2Keyboard;
+ACPI_HID_DEVICE_PATH  gPnpPs2KeyboardDeviceNode = gPnpPs2Keyboard;
 
 //
 // Predefined platform root bridge
@@ -32,19 +32,19 @@ PLATFORM_ROOT_BRIDGE_DEVICE_PATH  gPlatformRootBridge0 = {
   gEndEntire
 };
 
-EFI_DEVICE_PATH_PROTOCOL          *gPlatformRootBridges[] = {
-  (EFI_DEVICE_PATH_PROTOCOL *) &gPlatformRootBridge0,
+EFI_DEVICE_PATH_PROTOCOL  *gPlatformRootBridges[] = {
+  (EFI_DEVICE_PATH_PROTOCOL *)&gPlatformRootBridge0,
   NULL
 };
 
-USB_CLASS_FORMAT_DEVICE_PATH gUsbClassKeyboardDevicePath = {
+USB_CLASS_FORMAT_DEVICE_PATH  gUsbClassKeyboardDevicePath = {
   {
     {
       MESSAGING_DEVICE_PATH,
       MSG_USB_CLASS_DP,
       {
-        (UINT8) (sizeof (USB_CLASS_DEVICE_PATH)),
-        (UINT8) ((sizeof (USB_CLASS_DEVICE_PATH)) >> 8)
+        (UINT8)(sizeof (USB_CLASS_DEVICE_PATH)),
+        (UINT8)((sizeof (USB_CLASS_DEVICE_PATH)) >> 8)
       }
     },
     0xffff,           // VendorId
@@ -64,12 +64,11 @@ USB_CLASS_FORMAT_DEVICE_PATH gUsbClassKeyboardDevicePath = {
   }
 };
 
-
 //
 // Platform specific Dummy ISA keyboard device path
 //
 
-PLATFORM_DUMMY_ISA_KEYBOARD_DEVICE_PATH gDummyIsaKeyboardDevicePath = {
+PLATFORM_DUMMY_ISA_KEYBOARD_DEVICE_PATH  gDummyIsaKeyboardDevicePath = {
   gPciRootBridge,
   gPciIsaBridge,
   gPnpPs2Keyboard,
@@ -79,16 +78,16 @@ PLATFORM_DUMMY_ISA_KEYBOARD_DEVICE_PATH gDummyIsaKeyboardDevicePath = {
 //
 // Predefined platform default console device path
 //
-BDS_CONSOLE_CONNECT_ENTRY         gPlatformConsole[] = {
+BDS_CONSOLE_CONNECT_ENTRY  gPlatformConsole[] = {
   //
   // need update dynamically
   //
   {
-    (EFI_DEVICE_PATH_PROTOCOL *) &gDummyIsaKeyboardDevicePath,
+    (EFI_DEVICE_PATH_PROTOCOL *)&gDummyIsaKeyboardDevicePath,
     (CONSOLE_IN | STD_ERROR)
   },
   {
-    (EFI_DEVICE_PATH_PROTOCOL*) &gUsbClassKeyboardDevicePath,
+    (EFI_DEVICE_PATH_PROTOCOL *)&gUsbClassKeyboardDevicePath,
     CONSOLE_IN
   },
   {
@@ -100,4 +99,4 @@ BDS_CONSOLE_CONNECT_ENTRY         gPlatformConsole[] = {
 //
 // Predefined platform specific driver option
 //
-EFI_DEVICE_PATH_PROTOCOL    *gPlatformDriverOption[] = { NULL };
+EFI_DEVICE_PATH_PROTOCOL  *gPlatformDriverOption[] = { NULL };

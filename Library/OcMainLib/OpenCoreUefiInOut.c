@@ -51,8 +51,8 @@ STATIC
 VOID
 EFIAPI
 OcExitBootServicesInputHandler (
-  IN EFI_EVENT    Event,
-  IN VOID         *Context
+  IN EFI_EVENT  Event,
+  IN VOID       *Context
   )
 {
   EFI_STATUS        Status;
@@ -80,7 +80,8 @@ OcExitBootServicesInputHandler (
   if (Config->Uefi.Input.PointerSupport) {
     Status = OcAppleGenericInputPointerExit ();
     if (EFI_ERROR (Status)) {
-      DEBUG ((DEBUG_INFO,
+      DEBUG ((
+        DEBUG_INFO,
         "OC: OcAppleGenericInputPointerExit status - %r\n",
         Status
         ));
@@ -104,13 +105,13 @@ OcLoadUefiInputSupport (
   IN OC_GLOBAL_CONFIG  *Config
   )
 {
-  BOOLEAN               ExitBs;
-  EFI_STATUS            Status;
-  UINT32                TimerResolution;
-  CONST CHAR8           *PointerSupportStr;
-  OC_INPUT_POINTER_MODE PointerMode;
-  OC_INPUT_KEY_MODE     KeyMode;
-  CONST CHAR8           *KeySupportStr;
+  BOOLEAN                ExitBs;
+  EFI_STATUS             Status;
+  UINT32                 TimerResolution;
+  CONST CHAR8            *PointerSupportStr;
+  OC_INPUT_POINTER_MODE  PointerMode;
+  OC_INPUT_KEY_MODE      KeyMode;
+  CONST CHAR8            *KeySupportStr;
 
   ExitBs = FALSE;
 
@@ -126,7 +127,7 @@ OcLoadUefiInputSupport (
 
   if (Config->Uefi.Input.PointerSupport) {
     PointerSupportStr = OC_BLOB_GET (&Config->Uefi.Input.PointerSupportMode);
-    PointerMode = OcInputPointerModeMax;
+    PointerMode       = OcInputPointerModeMax;
     if (AsciiStrCmp (PointerSupportStr, "ASUS") == 0) {
       PointerMode = OcInputPointerModeAsus;
     } else {
@@ -146,7 +147,7 @@ OcLoadUefiInputSupport (
   if (Config->Uefi.Input.KeySupport) {
     DEBUG ((DEBUG_INFO, "OC: Installing KeySupport...\n"));
     KeySupportStr = OC_BLOB_GET (&Config->Uefi.Input.KeySupportMode);
-    KeyMode = OcInputKeyModeMax;
+    KeyMode       = OcInputKeyModeMax;
     if (AsciiStrCmp (KeySupportStr, "Auto") == 0) {
       KeyMode = OcInputKeyModeAuto;
     } else if (AsciiStrCmp (KeySupportStr, "V1") == 0) {
@@ -236,13 +237,13 @@ OcLoadUefiOutputSupport (
     OC_BLOB_GET (&Config->Uefi.Output.Resolution)
     ));
 
-  if (SetMax || (Width > 0 && Height > 0)) {
+  if (SetMax || ((Width > 0) && (Height > 0))) {
     Status = OcSetConsoleResolution (
-      Width,
-      Height,
-      Bpp,
-      Config->Uefi.Output.ForceResolution
-      );
+               Width,
+               Height,
+               Bpp,
+               Config->Uefi.Output.ForceResolution
+               );
     DEBUG ((
       EFI_ERROR (Status) && Status != EFI_ALREADY_STARTED ? DEBUG_WARN : DEBUG_INFO,
       "OC: Changed resolution to %ux%u@%u (max: %d, force: %d) from %a - %r\n",
@@ -277,16 +278,16 @@ OcLoadUefiOutputSupport (
     }
   }
 
-  if (Config->Uefi.Output.UIScale >= 0 && Config->Uefi.Output.UIScale <= 2) {
+  if ((Config->Uefi.Output.UIScale >= 0) && (Config->Uefi.Output.UIScale <= 2)) {
     if (Config->Uefi.Output.UIScale == 0) {
       Status = gBS->HandleProtocol (
-        gST->ConsoleOutHandle,
-        &gEfiGraphicsOutputProtocolGuid,
-        (VOID **) &Gop
-        );
+                      gST->ConsoleOutHandle,
+                      &gEfiGraphicsOutputProtocolGuid,
+                      (VOID **)&Gop
+                      );
       if (!EFI_ERROR (Status)) {
-        UIScale = (UINT64) Gop->Mode->Info->HorizontalResolution
-          * Gop->Mode->Info->VerticalResolution >= 4000000 ? 2 : 1;
+        UIScale = (UINT64)Gop->Mode->Info->HorizontalResolution
+                  * Gop->Mode->Info->VerticalResolution >= 4000000 ? 2 : 1;
         DEBUG ((
           DEBUG_INFO,
           "OC: Selected UIScale %d based on %ux%u resolution\n",
@@ -298,22 +299,22 @@ OcLoadUefiOutputSupport (
         UIScale = 1;
       }
     } else {
-      UIScale = (UINT8) Config->Uefi.Output.UIScale;
+      UIScale = (UINT8)Config->Uefi.Output.UIScale;
     }
 
     Status = OcSetSystemVariable (
-      APPLE_UI_SCALE_VARIABLE_NAME,
-      EFI_VARIABLE_BOOTSERVICE_ACCESS | EFI_VARIABLE_RUNTIME_ACCESS,
-      sizeof (UIScale),
-      &UIScale,
-      &gAppleVendorVariableGuid
-      );
+               APPLE_UI_SCALE_VARIABLE_NAME,
+               EFI_VARIABLE_BOOTSERVICE_ACCESS | EFI_VARIABLE_RUNTIME_ACCESS,
+               sizeof (UIScale),
+               &UIScale,
+               &gAppleVendorVariableGuid
+               );
     DEBUG ((DEBUG_INFO, "OC: Setting UIScale to %d - %r\n", UIScale, Status));
   }
 
   AsciiRenderer = OC_BLOB_GET (&Config->Uefi.Output.TextRenderer);
 
-  if (AsciiRenderer[0] == '\0' || AsciiStrCmp (AsciiRenderer, "BuiltinGraphics") == 0) {
+  if ((AsciiRenderer[0] == '\0') || (AsciiStrCmp (AsciiRenderer, "BuiltinGraphics") == 0)) {
     Renderer = OcConsoleRendererBuiltinGraphics;
   } else if (AsciiStrCmp (AsciiRenderer, "BuiltinText") == 0) {
     Renderer = OcConsoleRendererBuiltinText;
@@ -352,7 +353,7 @@ OcLoadUefiOutputSupport (
     OC_BLOB_GET (&Config->Uefi.Output.ConsoleMode)
     ));
 
-  if (SetMax || (Width > 0 && Height > 0)) {
+  if (SetMax || ((Width > 0) && (Height > 0))) {
     Status = OcSetConsoleMode (Width, Height);
     DEBUG ((
       EFI_ERROR (Status) ? DEBUG_WARN : DEBUG_INFO,

@@ -30,11 +30,11 @@ InternalFindPlistDictChild (
   OUT XML_NODE  **Value
   )
 {
-  UINT32      ChildCount;
-  XML_NODE    *ChildValue;
-  XML_NODE    *ChildKey;
-  CONST CHAR8 *ChildKeyName;
-  UINT32      Index;
+  UINT32       ChildCount;
+  XML_NODE     *ChildValue;
+  XML_NODE     *ChildKey;
+  CONST CHAR8  *ChildKeyName;
+  UINT32       Index;
 
   ASSERT (Node != NULL);
   ASSERT (KeyName != NULL);
@@ -73,14 +73,14 @@ InternalSwapBlockData (
   IN     UINTN                        DataForkSize
   )
 {
-  UINT32                 ChunksSize;
-  UINTN                  MaxOffset;
-  BOOLEAN                Result;
-  APPLE_DISK_IMAGE_CHUNK *Chunk;
-  UINT32                 Index;
-  UINT64                 BlockSectorTop;
-  UINT64                 ChunkSectorTop;
-  UINT64                 OffsetTop;
+  UINT32                  ChunksSize;
+  UINTN                   MaxOffset;
+  BOOLEAN                 Result;
+  APPLE_DISK_IMAGE_CHUNK  *Chunk;
+  UINT32                  Index;
+  UINT64                  BlockSectorTop;
+  UINT64                  ChunkSectorTop;
+  UINT64                  OffsetTop;
 
   ASSERT (MaxSize >= sizeof (*BlockData));
 
@@ -106,9 +106,10 @@ InternalSwapBlockData (
   BlockData->Checksum.Type    = SwapBytes32 (BlockData->Checksum.Type);
   BlockData->Checksum.Size    = SwapBytes32 (BlockData->Checksum.Size);
 
-  if (BlockData->DataOffset > DataForkOffset
-   || (BlockData->Checksum.Size > (sizeof (BlockData->Checksum.Data) * 8))
-   || (BlockData->DataOffset > MaxOffset)) {
+  if (  (BlockData->DataOffset > DataForkOffset)
+     || (BlockData->Checksum.Size > (sizeof (BlockData->Checksum.Data) * 8))
+     || (BlockData->DataOffset > MaxOffset))
+  {
     return FALSE;
   }
 
@@ -117,7 +118,7 @@ InternalSwapBlockData (
              BlockData->SectorCount,
              &BlockSectorTop
              );
-  if (Result || BlockSectorTop > SectorCount) {
+  if (Result || (BlockSectorTop > SectorCount)) {
     DEBUG ((DEBUG_ERROR, "OCDI: Block sectors exceed DMG sectors %lu %lu\n", BlockSectorTop, SectorCount));
     return FALSE;
   }
@@ -171,26 +172,26 @@ InternalParsePlist (
   OUT APPLE_DISK_IMAGE_BLOCK_DATA  ***Blocks
   )
 {
-  BOOLEAN                     Result;
+  BOOLEAN  Result;
 
-  XML_DOCUMENT                *XmlPlistDoc;
-  XML_NODE                    *NodeRoot;
-  XML_NODE                    *NodeResourceForkKey;
-  XML_NODE                    *NodeResourceForkValue;
-  XML_NODE                    *NodeBlockListKey;
-  XML_NODE                    *NodeBlockListValue;
+  XML_DOCUMENT  *XmlPlistDoc;
+  XML_NODE      *NodeRoot;
+  XML_NODE      *NodeResourceForkKey;
+  XML_NODE      *NodeResourceForkValue;
+  XML_NODE      *NodeBlockListKey;
+  XML_NODE      *NodeBlockListValue;
 
-  XML_NODE                    *NodeBlockDict;
-  XML_NODE                    *BlockDictChildKey;
-  XML_NODE                    *BlockDictChildValue;
-  UINT32                      BlockDictChildDataSize;
+  XML_NODE  *NodeBlockDict;
+  XML_NODE  *BlockDictChildKey;
+  XML_NODE  *BlockDictChildValue;
+  UINT32    BlockDictChildDataSize;
 
-  UINT32                      NumDmgBlocks;
-  UINT32                      DmgBlocksSize;
-  APPLE_DISK_IMAGE_BLOCK_DATA **DmgBlocks;
-  APPLE_DISK_IMAGE_BLOCK_DATA *Block;
+  UINT32                       NumDmgBlocks;
+  UINT32                       DmgBlocksSize;
+  APPLE_DISK_IMAGE_BLOCK_DATA  **DmgBlocks;
+  APPLE_DISK_IMAGE_BLOCK_DATA  *Block;
 
-  UINT32                      Index;
+  UINT32  Index;
 
   ASSERT (Plist != NULL);
   ASSERT (PlistSize > 0);
@@ -240,7 +241,8 @@ InternalParsePlist (
   }
 
   Result = !OcOverflowMulU32 (NumDmgBlocks, sizeof (*DmgBlocks), &DmgBlocksSize);
-  if (!Result) { ///< Result must be FALSE on error, it's checked at DONE_ERROR
+  if (!Result) {
+    ///< Result must be FALSE on error, it's checked at DONE_ERROR
     goto DONE_ERROR;
   }
 
@@ -328,21 +330,23 @@ InternalGetBlockChunk (
   OUT APPLE_DISK_IMAGE_CHUNK       **Chunk
   )
 {
-  UINT32                      BlockIndex;
-  UINT32                      ChunkIndex;
-  APPLE_DISK_IMAGE_BLOCK_DATA *BlockData;
-  APPLE_DISK_IMAGE_CHUNK      *BlockChunk;
+  UINT32                       BlockIndex;
+  UINT32                       ChunkIndex;
+  APPLE_DISK_IMAGE_BLOCK_DATA  *BlockData;
+  APPLE_DISK_IMAGE_CHUNK       *BlockChunk;
 
   for (BlockIndex = 0; BlockIndex < Context->BlockCount; ++BlockIndex) {
     BlockData = Context->Blocks[BlockIndex];
 
-    if ((Lba >= BlockData->SectorNumber)
-     && (Lba < (BlockData->SectorNumber + BlockData->SectorCount))) {
+    if (  (Lba >= BlockData->SectorNumber)
+       && (Lba < (BlockData->SectorNumber + BlockData->SectorCount)))
+    {
       for (ChunkIndex = 0; ChunkIndex < BlockData->ChunkCount; ++ChunkIndex) {
         BlockChunk = &BlockData->Chunks[ChunkIndex];
 
-        if ((Lba >= DMG_SECTOR_START_ABS (BlockData, BlockChunk))
-         && (Lba < (DMG_SECTOR_START_ABS (BlockData, BlockChunk) + BlockChunk->SectorCount))) {
+        if (  (Lba >= DMG_SECTOR_START_ABS (BlockData, BlockChunk))
+           && (Lba < (DMG_SECTOR_START_ABS (BlockData, BlockChunk) + BlockChunk->SectorCount)))
+        {
           *Data  = BlockData;
           *Chunk = BlockChunk;
           return TRUE;

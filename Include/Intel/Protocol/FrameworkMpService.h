@@ -63,52 +63,52 @@ typedef struct _FRAMEWORK_EFI_MP_SERVICES_PROTOCOL FRAMEWORK_EFI_MP_SERVICES_PRO
 ///
 /// Fixed delivery mode that may be used as the DeliveryMode parameter in SendIpi().
 ///
-#define DELIVERY_MODE_FIXED           0x0
+#define DELIVERY_MODE_FIXED  0x0
 
 ///
 /// Lowest priority delivery mode that may be used as the DeliveryMode parameter in SendIpi().
 ///
-#define DELIVERY_MODE_LOWEST_PRIORITY 0x1
+#define DELIVERY_MODE_LOWEST_PRIORITY  0x1
 
 ///
 /// SMI delivery mode that may be used as the DeliveryMode parameter in SendIpi().
 ///
-#define DELIVERY_MODE_SMI             0x2
+#define DELIVERY_MODE_SMI  0x2
 
 ///
 /// Remote read delivery mode that may be used as the DeliveryMode parameter in SendIpi().
 ///
-#define DELIVERY_MODE_REMOTE_READ     0x3
+#define DELIVERY_MODE_REMOTE_READ  0x3
 
 ///
 /// NMI delivery mode that may be used as the DeliveryMode parameter in SendIpi().
 ///
-#define DELIVERY_MODE_NMI             0x4
+#define DELIVERY_MODE_NMI  0x4
 
 ///
 /// INIT delivery mode that may be used as the DeliveryMode parameter in SendIpi().
 ///
-#define DELIVERY_MODE_INIT            0x5
+#define DELIVERY_MODE_INIT  0x5
 
 ///
 /// Startup IPI delivery mode that may be used as the DeliveryMode parameter in SendIpi().
 ///
-#define DELIVERY_MODE_SIPI            0x6
+#define DELIVERY_MODE_SIPI  0x6
 
 ///
 /// The DeliveryMode parameter in SendIpi() must be less than this maximum value.
 ///
-#define DELIVERY_MODE_MAX             0x7
+#define DELIVERY_MODE_MAX  0x7
 
 ///
 /// IPF specific value for the state field of the Self Test State Parameter.
 ///
-#define EFI_MP_HEALTH_FLAGS_STATUS_HEALTHY                  0x0
+#define EFI_MP_HEALTH_FLAGS_STATUS_HEALTHY  0x0
 
 ///
 /// IPF specific value for the state field of the Self Test State Parameter.
 ///
-#define EFI_MP_HEALTH_FLAGS_STATUS_PERFORMANCE_RESTRICTED   0x1
+#define EFI_MP_HEALTH_FLAGS_STATUS_PERFORMANCE_RESTRICTED  0x1
 
 ///
 /// IPF specific value for the state field of the Self Test State Parameter.
@@ -120,19 +120,19 @@ typedef union {
   /// Bitfield structure for the IPF Self Test State Parameter.
   ///
   struct {
-    UINT32  Status:2;
-    UINT32  Tested:1;
-    UINT32  Reserved1:13;
-    UINT32  VirtualMemoryUnavailable:1;
-    UINT32  Ia32ExecutionUnavailable:1;
-    UINT32  FloatingPointUnavailable:1;
-    UINT32  MiscFeaturesUnavailable:1;
-    UINT32  Reserved2:12;
+    UINT32    Status                   : 2;
+    UINT32    Tested                   : 1;
+    UINT32    Reserved1                : 13;
+    UINT32    VirtualMemoryUnavailable : 1;
+    UINT32    Ia32ExecutionUnavailable : 1;
+    UINT32    FloatingPointUnavailable : 1;
+    UINT32    MiscFeaturesUnavailable  : 1;
+    UINT32    Reserved2                : 12;
   } Bits;
   ///
   /// IA32 and X64 BIST data of the processor.
   ///
-  UINT32  Uint32;
+  UINT32    Uint32;
 } EFI_MP_HEALTH_FLAGS;
 
 typedef struct {
@@ -145,7 +145,7 @@ typedef struct {
   ///   state parameter, please refer to Intel(R) Itanium(R) Architecture Software
   ///   Developer's Manual, Volume 2: System Architecture.
   ///
-  EFI_MP_HEALTH_FLAGS  Flags;
+  EFI_MP_HEALTH_FLAGS    Flags;
   ///
   /// @par IA32, X64:
   ///   Not used.
@@ -153,11 +153,11 @@ typedef struct {
   /// @par IPF:
   ///   Higher 32 bits of self test state parameter.
   ///
-  UINT32               TestStatus;
+  UINT32                 TestStatus;
 } EFI_MP_HEALTH;
 
 typedef enum {
-  EfiCpuAP                = 0,  ///< The CPU is an AP (Application Processor).
+  EfiCpuAP = 0,                 ///< The CPU is an AP (Application Processor).
   EfiCpuBSP,                    ///< The CPU is the BSP (Boot-Strap Processor).
   EfiCpuDesignationMaximum
 } EFI_CPU_DESIGNATION;
@@ -171,18 +171,18 @@ typedef struct {
   ///   The lower 16 bits contains id/eid as physical address of local SAPIC
   ///   unit, and higher bits are reserved.
   ///
-  UINT32               ApicID;
+  UINT32                 ApicID;
   ///
   /// This field indicates whether the processor is enabled.  If the value is
   /// TRUE, then the processor is enabled. Otherwise, it is disabled.
   ///
-  BOOLEAN              Enabled;
+  BOOLEAN                Enabled;
   ///
   /// This field indicates whether the processor is playing the role of BSP.
   /// If the value is EfiCpuAP, then the processor is AP. If the value is
   /// EfiCpuBSP, then the processor is BSP.
   ///
-  EFI_CPU_DESIGNATION  Designation;
+  EFI_CPU_DESIGNATION    Designation;
   ///
   /// @par IA32, X64:
   ///   The Flags field of this EFI_MP_HEALTH data structure holds BIST (built-in
@@ -194,24 +194,24 @@ typedef struct {
   ///   parameter, in Intel(R) Itanium(R) Architecture Software Developer's Manual,
   ///   Volume 2: System Architecture.
   ///
-  EFI_MP_HEALTH        Health;
+  EFI_MP_HEALTH    Health;
   ///
   /// Zero-based physical package number that identifies the cartridge of the
   /// processor.
   ///
-  UINTN                PackageNumber;
+  UINTN            PackageNumber;
   ///
   /// Zero-based physical core number within package of the processor.
   ///
-  UINTN                NumberOfCores;
+  UINTN            NumberOfCores;
   ///
   /// Zero-based logical thread number within core of the processor.
   ///
-  UINTN                NumberOfThreads;
+  UINTN            NumberOfThreads;
   ///
   /// This field is reserved.
   ///
-  UINT64               ProcessorPALCompatibilityFlags;
+  UINT64           ProcessorPALCompatibilityFlags;
   ///
   /// @par IA32, X64:
   ///   This field is not used, and the value is always zero.
@@ -220,7 +220,7 @@ typedef struct {
   ///   This field is a mask number that is handed off by the PAL about which
   ///   processor tests are performed and which are masked.
   ///
-  UINT64               ProcessorTestMask;
+  UINT64    ProcessorTestMask;
 } EFI_MP_PROC_CONTEXT;
 
 /**
@@ -445,14 +445,14 @@ EFI_STATUS
                                       Otherwise, the value is EFI_SUCCESS.  If NULL,
                                       this parameter is ignored.
 
-  @retval EFI_SUCCESS	            IA32, X64: All dispatched APs have finished
+  @retval EFI_SUCCESS               IA32, X64: All dispatched APs have finished
                                   before the timeout expires.
-  @retval EFI_SUCCESS	            IA32, X64: Only 1 logical processor exists
+  @retval EFI_SUCCESS               IA32, X64: Only 1 logical processor exists
                                   in system.
-  @retval EFI_INVALID_PARAMETER	    IA32, X64: Procedure is NULL.
-  @retval EFI_TIMEOUT	            IA32, X64: The timeout expires before all
+  @retval EFI_INVALID_PARAMETER     IA32, X64: Procedure is NULL.
+  @retval EFI_TIMEOUT               IA32, X64: The timeout expires before all
                                   dispatched APs have finished.
-  @retval EFI_SUCCESS	            IPF: This function always returns EFI_SUCCESS.
+  @retval EFI_SUCCESS               IPF: This function always returns EFI_SUCCESS.
 
 **/
 typedef
@@ -672,16 +672,16 @@ EFI_STATUS
 /// Framework MP Services Protocol structure.
 ///
 struct _FRAMEWORK_EFI_MP_SERVICES_PROTOCOL {
-  FRAMEWORK_EFI_MP_SERVICES_GET_GENERAL_MP_INFO    GetGeneralMPInfo;
-  FRAMEWORK_EFI_MP_SERVICES_GET_PROCESSOR_CONTEXT  GetProcessorContext;
-  FRAMEWORK_EFI_MP_SERVICES_STARTUP_ALL_APS        StartupAllAPs;
-  FRAMEWORK_EFI_MP_SERVICES_STARTUP_THIS_AP        StartupThisAP;
-  FRAMEWORK_EFI_MP_SERVICES_SWITCH_BSP             SwitchBSP;
-  FRAMEWORK_EFI_MP_SERVICES_SEND_IPI               SendIPI;
-  FRAMEWORK_EFI_MP_SERVICES_ENABLEDISABLEAP        EnableDisableAP;
-  FRAMEWORK_EFI_MP_SERVICES_WHOAMI                 WhoAmI;
+  FRAMEWORK_EFI_MP_SERVICES_GET_GENERAL_MP_INFO      GetGeneralMPInfo;
+  FRAMEWORK_EFI_MP_SERVICES_GET_PROCESSOR_CONTEXT    GetProcessorContext;
+  FRAMEWORK_EFI_MP_SERVICES_STARTUP_ALL_APS          StartupAllAPs;
+  FRAMEWORK_EFI_MP_SERVICES_STARTUP_THIS_AP          StartupThisAP;
+  FRAMEWORK_EFI_MP_SERVICES_SWITCH_BSP               SwitchBSP;
+  FRAMEWORK_EFI_MP_SERVICES_SEND_IPI                 SendIPI;
+  FRAMEWORK_EFI_MP_SERVICES_ENABLEDISABLEAP          EnableDisableAP;
+  FRAMEWORK_EFI_MP_SERVICES_WHOAMI                   WhoAmI;
 };
 
-extern EFI_GUID gFrameworkEfiMpServiceProtocolGuid;
+extern EFI_GUID  gFrameworkEfiMpServiceProtocolGuid;
 
 #endif

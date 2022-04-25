@@ -22,7 +22,7 @@
 
 PAGE_MAP_AND_DIRECTORY_POINTER  *
 OcGetCurrentPageTable (
-  OUT UINTN                           *Flags  OPTIONAL
+  OUT UINTN  *Flags  OPTIONAL
   )
 {
   PAGE_MAP_AND_DIRECTORY_POINTER  *PageTable;
@@ -30,7 +30,7 @@ OcGetCurrentPageTable (
 
   Cr3 = AsmReadCr3 ();
 
-  PageTable = (PAGE_MAP_AND_DIRECTORY_POINTER *)(UINTN) (Cr3 & CR3_ADDR_MASK);
+  PageTable = (PAGE_MAP_AND_DIRECTORY_POINTER *)(UINTN)(Cr3 & CR3_ADDR_MASK);
 
   if (Flags != NULL) {
     *Flags = Cr3 & (CR3_FLAG_PWT | CR3_FLAG_PCD);
@@ -71,9 +71,9 @@ EnablePageTableWriteProtection (
 
 EFI_STATUS
 OcGetPhysicalAddress (
-  IN  PAGE_MAP_AND_DIRECTORY_POINTER   *PageTable  OPTIONAL,
-  IN  EFI_VIRTUAL_ADDRESS              VirtualAddr,
-  OUT EFI_PHYSICAL_ADDRESS             *PhysicalAddr
+  IN  PAGE_MAP_AND_DIRECTORY_POINTER  *PageTable  OPTIONAL,
+  IN  EFI_VIRTUAL_ADDRESS             VirtualAddr,
+  OUT EFI_PHYSICAL_ADDRESS            *PhysicalAddr
   )
 {
   EFI_PHYSICAL_ADDRESS            Start;
@@ -91,17 +91,17 @@ OcGetPhysicalAddress (
     PageTable = OcGetCurrentPageTable (NULL);
   }
 
-  VA.Uint64 = (UINT64) VirtualAddr;
+  VA.Uint64 = (UINT64)VirtualAddr;
 
   //
   // PML4
   //
-  PML4 = PageTable;
-  PML4 += VA.Pg4K.PML4Offset;
-  VAStart.Uint64 = 0;
+  PML4                    = PageTable;
+  PML4                   += VA.Pg4K.PML4Offset;
+  VAStart.Uint64          = 0;
   VAStart.Pg4K.PML4Offset = VA.Pg4K.PML4Offset;
   VA_FIX_SIGN_EXTEND (VAStart);
-  VAEnd.Uint64 = ~(UINT64) 0;
+  VAEnd.Uint64          = ~(UINT64)0;
   VAEnd.Pg4K.PML4Offset = VA.Pg4K.PML4Offset;
   VA_FIX_SIGN_EXTEND (VAEnd);
 
@@ -112,10 +112,10 @@ OcGetPhysicalAddress (
   //
   // PDPE
   //
-  PDPE = (PAGE_MAP_AND_DIRECTORY_POINTER *)(UINTN)(PML4->Uint64 & PAGING_4K_ADDRESS_MASK_64);
-  PDPE += VA.Pg4K.PDPOffset;
+  PDPE                   = (PAGE_MAP_AND_DIRECTORY_POINTER *)(UINTN)(PML4->Uint64 & PAGING_4K_ADDRESS_MASK_64);
+  PDPE                  += VA.Pg4K.PDPOffset;
   VAStart.Pg4K.PDPOffset = VA.Pg4K.PDPOffset;
-  VAEnd.Pg4K.PDPOffset = VA.Pg4K.PDPOffset;
+  VAEnd.Pg4K.PDPOffset   = VA.Pg4K.PDPOffset;
 
   if (!PDPE->Bits.Present) {
     return EFI_NO_MAPPING;
@@ -125,8 +125,8 @@ OcGetPhysicalAddress (
     //
     // 1GB PDPE
     //
-    PTE1G = (PAGE_TABLE_1G_ENTRY *) PDPE;
-    Start = PTE1G->Uint64 & PAGING_1G_ADDRESS_MASK_64;
+    PTE1G         = (PAGE_TABLE_1G_ENTRY *)PDPE;
+    Start         = PTE1G->Uint64 & PAGING_1G_ADDRESS_MASK_64;
     *PhysicalAddr = Start + VA.Pg1G.PhysPgOffset;
     return EFI_SUCCESS;
   }
@@ -134,10 +134,10 @@ OcGetPhysicalAddress (
   //
   // PDE
   //
-  PDE = (PAGE_MAP_AND_DIRECTORY_POINTER *)(UINTN)(PDPE->Uint64 & PAGING_4K_ADDRESS_MASK_64);
-  PDE += VA.Pg4K.PDOffset;
+  PDE                   = (PAGE_MAP_AND_DIRECTORY_POINTER *)(UINTN)(PDPE->Uint64 & PAGING_4K_ADDRESS_MASK_64);
+  PDE                  += VA.Pg4K.PDOffset;
   VAStart.Pg4K.PDOffset = VA.Pg4K.PDOffset;
-  VAEnd.Pg4K.PDOffset = VA.Pg4K.PDOffset;
+  VAEnd.Pg4K.PDOffset   = VA.Pg4K.PDOffset;
 
   if (!PDE->Bits.Present) {
     return EFI_NO_MAPPING;
@@ -147,8 +147,8 @@ OcGetPhysicalAddress (
     //
     // 2MB PDE
     //
-    PTE2M = (PAGE_TABLE_2M_ENTRY *) PDE;
-    Start = PTE2M->Uint64 & PAGING_2M_ADDRESS_MASK_64;
+    PTE2M         = (PAGE_TABLE_2M_ENTRY *)PDE;
+    Start         = PTE2M->Uint64 & PAGING_2M_ADDRESS_MASK_64;
     *PhysicalAddr = Start + VA.Pg2M.PhysPgOffset;
     return EFI_SUCCESS;
   }
@@ -156,16 +156,16 @@ OcGetPhysicalAddress (
   //
   // PTE
   //
-  PTE4K = (PAGE_TABLE_4K_ENTRY *)(UINTN)(PDE->Uint64 & PAGING_4K_ADDRESS_MASK_64);
-  PTE4K += VA.Pg4K.PTOffset;
+  PTE4K                 = (PAGE_TABLE_4K_ENTRY *)(UINTN)(PDE->Uint64 & PAGING_4K_ADDRESS_MASK_64);
+  PTE4K                += VA.Pg4K.PTOffset;
   VAStart.Pg4K.PTOffset = VA.Pg4K.PTOffset;
-  VAEnd.Pg4K.PTOffset = VA.Pg4K.PTOffset;
+  VAEnd.Pg4K.PTOffset   = VA.Pg4K.PTOffset;
 
   if (!PTE4K->Bits.Present) {
     return EFI_NO_MAPPING;
   }
 
-  Start = PTE4K->Uint64 & PAGING_4K_ADDRESS_MASK_64;
+  Start         = PTE4K->Uint64 & PAGING_4K_ADDRESS_MASK_64;
   *PhysicalAddr = Start + VA.Pg4K.PhysPgOffset;
 
   return EFI_SUCCESS;
@@ -178,18 +178,18 @@ VmAllocateMemoryPool (
   IN  EFI_GET_MEMORY_MAP  GetMemoryMap  OPTIONAL
   )
 {
-  EFI_STATUS              Status;
-  EFI_PHYSICAL_ADDRESS    Addr;
+  EFI_STATUS            Status;
+  EFI_PHYSICAL_ADDRESS  Addr;
 
-  Addr = BASE_4GB;
+  Addr   = BASE_4GB;
   Status = OcAllocatePagesFromTop (
-    EfiBootServicesData,
-    NumPages,
-    &Addr,
-    GetMemoryMap,
-    NULL,
-    NULL
-    );
+             EfiBootServicesData,
+             NumPages,
+             &Addr,
+             GetMemoryMap,
+             NULL,
+             NULL
+             );
 
   if (!EFI_ERROR (Status)) {
     Context->MemoryPool = (UINT8 *)(UINTN)Addr;
@@ -205,12 +205,12 @@ VmAllocatePages (
   IN     UINTN            NumPages
   )
 {
-  VOID   *AllocatedPages;
+  VOID  *AllocatedPages;
 
   AllocatedPages = NULL;
 
   if (Context->FreePages >= NumPages) {
-    AllocatedPages = Context->MemoryPool;
+    AllocatedPages       = Context->MemoryPool;
     Context->MemoryPool += EFI_PAGES_TO_SIZE (NumPages);
     Context->FreePages  -= NumPages;
   }
@@ -246,12 +246,12 @@ VmMapVirtualPage (
 
   WriteProtected = DisablePageTableWriteProtection ();
 
-  VA.Uint64 = (UINT64) VirtualAddr;
+  VA.Uint64 = (UINT64)VirtualAddr;
 
   //
   // PML4
   //
-  PML4 = PageTable;
+  PML4  = PageTable;
   PML4 += VA.Pg4K.PML4Offset;
 
   //
@@ -259,25 +259,27 @@ VmMapVirtualPage (
   // since we may mess the mapping of first virtual region (happens in VBox and probably DUET).
   // Check for this on first call and if true, just clear our PML4 - we'll rebuild at a later step.
   //
-  if (PML4 != PageTable && PML4->Bits.Present
-    && PageTable->Bits.PageTableBaseAddress == PML4->Bits.PageTableBaseAddress) {
+  if (  (PML4 != PageTable) && PML4->Bits.Present
+     && (PageTable->Bits.PageTableBaseAddress == PML4->Bits.PageTableBaseAddress))
+  {
     PML4->Uint64 = 0;
   }
 
-  VAStart.Uint64 = 0;
+  VAStart.Uint64          = 0;
   VAStart.Pg4K.PML4Offset = VA.Pg4K.PML4Offset;
   VA_FIX_SIGN_EXTEND (VAStart);
-  VAEnd.Uint64 = ~(UINT64) 0;
+  VAEnd.Uint64          = ~(UINT64)0;
   VAEnd.Pg4K.PML4Offset = VA.Pg4K.PML4Offset;
   VA_FIX_SIGN_EXTEND (VAEnd);
 
   if (!PML4->Bits.Present) {
-    PDPE = (PAGE_MAP_AND_DIRECTORY_POINTER *) VmAllocatePages (Context, 1);
+    PDPE = (PAGE_MAP_AND_DIRECTORY_POINTER *)VmAllocatePages (Context, 1);
 
     if (PDPE == NULL) {
       if (WriteProtected) {
         EnablePageTableWriteProtection ();
       }
+
       return EFI_NO_MAPPING;
     }
 
@@ -287,13 +289,13 @@ VmMapVirtualPage (
     // Init this whole 512 GB region with 512 1GB entry pages to map
     // the first 512 GB physical space.
     //
-    PTE1G = (PAGE_TABLE_1G_ENTRY *) PDPE;
+    PTE1G = (PAGE_TABLE_1G_ENTRY *)PDPE;
     Start = 0;
     for (Index = 0; Index < 512; ++Index) {
-      PTE1G->Uint64 = Start & PAGING_1G_ADDRESS_MASK_64;
+      PTE1G->Uint64         = Start & PAGING_1G_ADDRESS_MASK_64;
       PTE1G->Bits.ReadWrite = 1;
-      PTE1G->Bits.Present = 1;
-      PTE1G->Bits.MustBe1 = 1;
+      PTE1G->Bits.Present   = 1;
+      PTE1G->Bits.MustBe1   = 1;
       PTE1G++;
       Start += BASE_1GB;
     }
@@ -301,26 +303,27 @@ VmMapVirtualPage (
     //
     // Put it to PML4.
     //
-    PML4->Uint64 = ((UINT64)(UINTN) PDPE) & PAGING_4K_ADDRESS_MASK_64;
+    PML4->Uint64         = ((UINT64)(UINTN)PDPE) & PAGING_4K_ADDRESS_MASK_64;
     PML4->Bits.ReadWrite = 1;
-    PML4->Bits.Present = 1;
+    PML4->Bits.Present   = 1;
   }
 
   //
   // PDPE
   //
-  PDPE = (PAGE_MAP_AND_DIRECTORY_POINTER *)(UINTN)(PML4->Uint64 & PAGING_4K_ADDRESS_MASK_64);
-  PDPE += VA.Pg4K.PDPOffset;
+  PDPE                   = (PAGE_MAP_AND_DIRECTORY_POINTER *)(UINTN)(PML4->Uint64 & PAGING_4K_ADDRESS_MASK_64);
+  PDPE                  += VA.Pg4K.PDPOffset;
   VAStart.Pg4K.PDPOffset = VA.Pg4K.PDPOffset;
-  VAEnd.Pg4K.PDPOffset = VA.Pg4K.PDPOffset;
+  VAEnd.Pg4K.PDPOffset   = VA.Pg4K.PDPOffset;
 
   if (!PDPE->Bits.Present || (PDPE->Bits.MustBeZero & 0x1)) {
-    PDE = (PAGE_MAP_AND_DIRECTORY_POINTER *) VmAllocatePages(Context, 1);
+    PDE = (PAGE_MAP_AND_DIRECTORY_POINTER *)VmAllocatePages (Context, 1);
 
     if (PDE == NULL) {
       if (WriteProtected) {
         EnablePageTableWriteProtection ();
       }
+
       return EFI_NO_MAPPING;
     }
 
@@ -331,14 +334,14 @@ VmMapVirtualPage (
       // This is 1 GB page. Init new PDE array to get the same
       // mapping but with 2MB pages.
       //
-      PTE2M = (PAGE_TABLE_2M_ENTRY *) PDE;
+      PTE2M = (PAGE_TABLE_2M_ENTRY *)PDE;
       Start = PDPE->Uint64 & PAGING_1G_ADDRESS_MASK_64;
 
       for (Index = 0; Index < 512; ++Index) {
-        PTE2M->Uint64 = Start & PAGING_2M_ADDRESS_MASK_64;
+        PTE2M->Uint64         = Start & PAGING_2M_ADDRESS_MASK_64;
         PTE2M->Bits.ReadWrite = 1;
-        PTE2M->Bits.Present = 1;
-        PTE2M->Bits.MustBe1 = 1;
+        PTE2M->Bits.Present   = 1;
+        PTE2M->Bits.MustBe1   = 1;
         PTE2M++;
         Start += BASE_2MB;
       }
@@ -347,26 +350,27 @@ VmMapVirtualPage (
     //
     // Put it to PDPE.
     //
-    PDPE->Uint64 = ((UINT64)(UINTN) PDE) & PAGING_4K_ADDRESS_MASK_64;
+    PDPE->Uint64         = ((UINT64)(UINTN)PDE) & PAGING_4K_ADDRESS_MASK_64;
     PDPE->Bits.ReadWrite = 1;
-    PDPE->Bits.Present = 1;
+    PDPE->Bits.Present   = 1;
   }
 
   //
   // PDE
   //
-  PDE = (PAGE_MAP_AND_DIRECTORY_POINTER *)(UINTN)(PDPE->Uint64 & PAGING_4K_ADDRESS_MASK_64);
-  PDE += VA.Pg4K.PDOffset;
+  PDE                   = (PAGE_MAP_AND_DIRECTORY_POINTER *)(UINTN)(PDPE->Uint64 & PAGING_4K_ADDRESS_MASK_64);
+  PDE                  += VA.Pg4K.PDOffset;
   VAStart.Pg4K.PDOffset = VA.Pg4K.PDOffset;
-  VAEnd.Pg4K.PDOffset = VA.Pg4K.PDOffset;
+  VAEnd.Pg4K.PDOffset   = VA.Pg4K.PDOffset;
 
   if (!PDE->Bits.Present || (PDE->Bits.MustBeZero & 0x1)) {
-    PTE4K = (PAGE_TABLE_4K_ENTRY *) VmAllocatePages (Context, 1);
+    PTE4K = (PAGE_TABLE_4K_ENTRY *)VmAllocatePages (Context, 1);
 
     if (PTE4K == NULL) {
       if (WriteProtected) {
         EnablePageTableWriteProtection ();
       }
+
       return EFI_NO_MAPPING;
     }
 
@@ -378,12 +382,12 @@ VmMapVirtualPage (
       // mapping but with 4KB pages.
       //
       PTE4KTmp = (PAGE_TABLE_4K_ENTRY *)PTE4K;
-      Start = PDE->Uint64 & PAGING_2M_ADDRESS_MASK_64;
+      Start    = PDE->Uint64 & PAGING_2M_ADDRESS_MASK_64;
 
       for (Index = 0; Index < 512; ++Index) {
-        PTE4KTmp->Uint64 = Start & PAGING_4K_ADDRESS_MASK_64;
+        PTE4KTmp->Uint64         = Start & PAGING_4K_ADDRESS_MASK_64;
         PTE4KTmp->Bits.ReadWrite = 1;
-        PTE4KTmp->Bits.Present = 1;
+        PTE4KTmp->Bits.Present   = 1;
         PTE4KTmp++;
         Start += BASE_4KB;
       }
@@ -392,25 +396,25 @@ VmMapVirtualPage (
     //
     // Put it to PDE.
     //
-    PDE->Uint64 = ((UINT64)(UINTN) PTE4K) & PAGING_4K_ADDRESS_MASK_64;
+    PDE->Uint64         = ((UINT64)(UINTN)PTE4K) & PAGING_4K_ADDRESS_MASK_64;
     PDE->Bits.ReadWrite = 1;
-    PDE->Bits.Present = 1;
+    PDE->Bits.Present   = 1;
   }
 
   //
   // PTE
   //
-  PTE4K = (PAGE_TABLE_4K_ENTRY *)(UINTN)(PDE->Uint64 & PAGING_4K_ADDRESS_MASK_64);
-  PTE4K += VA.Pg4K.PTOffset;
+  PTE4K                 = (PAGE_TABLE_4K_ENTRY *)(UINTN)(PDE->Uint64 & PAGING_4K_ADDRESS_MASK_64);
+  PTE4K                += VA.Pg4K.PTOffset;
   VAStart.Pg4K.PTOffset = VA.Pg4K.PTOffset;
-  VAEnd.Pg4K.PTOffset = VA.Pg4K.PTOffset;
+  VAEnd.Pg4K.PTOffset   = VA.Pg4K.PTOffset;
 
   //
   // Put it to PTE.
   //
-  PTE4K->Uint64 = ((UINT64) PhysicalAddr) & PAGING_4K_ADDRESS_MASK_64;
+  PTE4K->Uint64         = ((UINT64)PhysicalAddr) & PAGING_4K_ADDRESS_MASK_64;
   PTE4K->Bits.ReadWrite = 1;
-  PTE4K->Bits.Present = 1;
+  PTE4K->Bits.Present   = 1;
 
   if (WriteProtected) {
     EnablePageTableWriteProtection ();
@@ -438,11 +442,11 @@ VmMapVirtualPages (
 
   while (NumPages > 0 && !EFI_ERROR (Status)) {
     Status = VmMapVirtualPage (
-      Context,
-      PageTable,
-      VirtualAddr,
-      PhysicalAddr
-      );
+               Context,
+               PageTable,
+               VirtualAddr,
+               PhysicalAddr
+               );
 
     VirtualAddr  += EFI_PAGE_SIZE;
     PhysicalAddr += EFI_PAGE_SIZE;

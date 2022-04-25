@@ -17,10 +17,10 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
     {0x85, 0xF3, 0x00, 0xA0, 0xC9, 0x3E, 0xC9, 0x3B }}
 
 typedef struct {
-  VENDOR_DEVICE_PATH              DevicePath;
-  UINT8                           LegacyDriveLetter;
+  VENDOR_DEVICE_PATH    DevicePath;
+  UINT8                 LegacyDriveLetter;
 } BLOCKIO_VENDOR_DEVICE_PATH;
 
-extern GUID gBlockIoVendorGuid;
+extern GUID  gBlockIoVendorGuid;
 
 #endif

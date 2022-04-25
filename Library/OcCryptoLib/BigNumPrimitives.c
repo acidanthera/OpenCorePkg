@@ -48,7 +48,7 @@ BigNumSwapWord (
   if (OC_BN_WORD_SIZE == sizeof (UINT32)) {
     return (OC_BN_WORD)SwapBytes32 ((UINT32)Word);
   }
-  
+
   if (OC_BN_WORD_SIZE == sizeof (UINT64)) {
     return (OC_BN_WORD)SwapBytes64 ((UINT64)Word);
   }
@@ -66,7 +66,7 @@ BigNumSwapWord (
   @param[in]     Exponent        The Word shift exponent.
 
 **/
-STATIC 
+STATIC
 VOID
 BigNumLeftShiftWords (
   IN OUT OC_BN_WORD        *Result,
@@ -116,7 +116,7 @@ BigNumLeftShiftWordsAndBits (
   IN     UINT8             NumBits
   )
 {
-  OC_BN_NUM_WORDS Index;
+  OC_BN_NUM_WORDS  Index;
 
   ASSERT (Result != NULL);
   ASSERT (NumWordsResult > 0);
@@ -138,10 +138,11 @@ BigNumLeftShiftWordsAndBits (
   for (Index = (NumWordsA - 1); Index > 0; --Index) {
     Result[Index + NumWords] = (A[Index] << NumBits) | (A[Index - 1] >> (OC_BN_WORD_NUM_BITS - NumBits));
   }
+
   //
   // Handle the edge-cases at the beginning and the end of the value.
   //
-  Result[NumWords] = A[0] << NumBits;
+  Result[NumWords]             = A[0] << NumBits;
   Result[NumWordsA + NumWords] = A[NumWordsA - 1] >> (OC_BN_WORD_NUM_BITS - NumBits);
   //
   // Zero everything outside of the previously set ranges.
@@ -169,8 +170,8 @@ BigNumLeftShift (
   IN     UINTN             Exponent
   )
 {
-  UINTN NumWords;
-  UINT8 NumBits;
+  UINTN  NumWords;
+  UINT8  NumBits;
 
   ASSERT (Result != NULL);
   ASSERT (NumWordsResult > 0);
@@ -204,7 +205,7 @@ BigNumLeftShift (
   @param[in]     Exponent        The Word shift exponent.
 
 **/
-STATIC 
+STATIC
 VOID
 BigNumRightShiftWords (
   IN OUT OC_BN_WORD        *Result,
@@ -241,7 +242,7 @@ BigNumRightShiftBitsSmall (
   IN     UINT8            Exponent
   )
 {
-  UINTN Index;
+  UINTN  Index;
 
   ASSERT (A != NULL);
   ASSERT (NumWords > 0);
@@ -255,6 +256,7 @@ BigNumRightShiftBitsSmall (
   for (Index = 0; Index < (NumWords - 1U); ++Index) {
     A[Index] = (A[Index] >> Exponent) | (A[Index + 1] << (OC_BN_WORD_NUM_BITS - Exponent));
   }
+
   A[Index] >>= Exponent;
 }
 
@@ -280,7 +282,7 @@ BigNumRightShiftWordsAndBits (
   IN     UINT8             NumBits
   )
 {
-  UINTN Index;
+  UINTN  Index;
 
   ASSERT (Result != NULL);
   ASSERT (NumWordsResult > 0);
@@ -302,11 +304,12 @@ BigNumRightShiftWordsAndBits (
   // This is not an algorithmic requirement, but BigNumRightShiftWords shall be
   // called if FALSE.
   //
-  //ASSERT (NumWords > 0);
+  // ASSERT (NumWords > 0);
 
-  for (Index = NumWords; Index < (UINTN) (NumWordsA - 1); ++Index) {
+  for (Index = NumWords; Index < (UINTN)(NumWordsA - 1); ++Index) {
     Result[Index - NumWords] = (A[Index] >> NumBits) | (A[Index + 1] << (OC_BN_WORD_NUM_BITS - NumBits));
   }
+
   //
   // Handle the edge-cases at the beginning and the end of the value.
   //
@@ -337,8 +340,8 @@ BigNumRightShift (
   IN     UINTN             Exponent
   )
 {
-  UINTN NumWords;
-  UINT8 NumBits;
+  UINTN  NumWords;
+  UINT8  NumBits;
 
   ASSERT (Result != NULL);
   ASSERT (NumWordsResult > 0);
@@ -379,7 +382,7 @@ BigNumWordMul (
   IN  OC_BN_WORD  B
   )
 {
-  UINT64 Result64;
+  UINT64  Result64;
 
   ASSERT (Hi != NULL);
 
@@ -391,7 +394,7 @@ BigNumWordMul (
     *Hi = (OC_BN_WORD)(RShiftU64 (Result64, OC_BN_WORD_NUM_BITS));
     return (OC_BN_WORD)Result64;
   }
-  
+
   if (OC_BN_WORD_SIZE == sizeof (UINT64)) {
     return BigNumWordMul64 (Hi, A, B);
   }
@@ -405,11 +408,11 @@ BigNumSub (
   IN     CONST OC_BN_WORD  *B
   )
 {
-  OC_BN_WORD TmpResult;
-  OC_BN_WORD Tmp1;
-  OC_BN_WORD Tmp2;
-  UINTN      Index;
-  UINT8      Borrow;
+  OC_BN_WORD  TmpResult;
+  OC_BN_WORD  Tmp1;
+  OC_BN_WORD  Tmp2;
+  UINTN       Index;
+  UINT8       Borrow;
 
   ASSERT (Result != NULL);
   ASSERT (NumWords > 0);
@@ -428,7 +431,7 @@ BigNumSub (
     // When a subtraction wraps around, the result must be bigger than either
     // operand.
     //
-    Borrow = (Tmp2 < Borrow) | (Tmp1 < TmpResult);
+    Borrow        = (Tmp2 < Borrow) | (Tmp1 < TmpResult);
     Result[Index] = TmpResult;
   }
 }
@@ -447,8 +450,9 @@ BigNumSignificantBitsWord (
   IN OC_BN_WORD  Word
   )
 {
-  UINT8      NumBits;
-  OC_BN_WORD Mask;
+  UINT8       NumBits;
+  OC_BN_WORD  Mask;
+
   //
   // The values we are receiving are very likely large, thus this approach
   // should be reasonably fast.
@@ -479,7 +483,7 @@ BigNumMostSignificantWord (
   IN OC_BN_NUM_WORDS   NumWords
   )
 {
-  OC_BN_NUM_WORDS Index;
+  OC_BN_NUM_WORDS  Index;
 
   ASSERT (A != NULL);
   ASSERT (NumWords > 0);
@@ -501,7 +505,7 @@ BigNumSignificantBits (
   IN OC_BN_NUM_WORDS   NumWords
   )
 {
-  OC_BN_NUM_BITS Index;
+  OC_BN_NUM_BITS  Index;
 
   ASSERT (A != NULL);
   ASSERT (NumWords > 0);
@@ -518,8 +522,8 @@ BigNumOrWord (
   IN     UINTN            Exponent
   )
 {
-  UINTN WordIndex;
-  UINT8 NumBits;
+  UINTN  WordIndex;
+  UINT8  NumBits;
 
   ASSERT (A != NULL);
   ASSERT (NumWords > 0);
@@ -527,7 +531,7 @@ BigNumOrWord (
 
   WordIndex = Exponent / OC_BN_WORD_NUM_BITS;
   if (WordIndex < NumWords) {
-    NumBits = Exponent % OC_BN_WORD_NUM_BITS;
+    NumBits       = Exponent % OC_BN_WORD_NUM_BITS;
     A[WordIndex] |= (Value << NumBits);
   }
 }
@@ -539,7 +543,7 @@ BigNumCmp (
   IN CONST OC_BN_WORD  *B
   )
 {
-  UINTN Index;
+  UINTN  Index;
 
   ASSERT (A != NULL);
   ASSERT (NumWords > 0);
@@ -568,15 +572,15 @@ BigNumMod (
   IN     OC_BN_WORD        *ModTmp
   )
 {
-  INTN            CmpResult;
+  INTN  CmpResult;
 
-  OC_BN_NUM_BITS  SigBitsModTmp;
-  OC_BN_NUM_WORDS SigWordsModTmp;
+  OC_BN_NUM_BITS   SigBitsModTmp;
+  OC_BN_NUM_WORDS  SigWordsModTmp;
 
-  OC_BN_NUM_BITS  BigDivExp;
-  OC_BN_WORD      *BigDiv;
-  OC_BN_NUM_BITS  SigBitsBigDiv;
-  OC_BN_NUM_WORDS SigWordsBigDiv;
+  OC_BN_NUM_BITS   BigDivExp;
+  OC_BN_WORD       *BigDiv;
+  OC_BN_NUM_BITS   SigBitsBigDiv;
+  OC_BN_NUM_WORDS  SigWordsBigDiv;
 
   OC_BN_NUM_BITS  DeltaBits;
 
@@ -659,6 +663,7 @@ BigNumMod (
         ASSERT (BigNumCmp (BigDiv, SigWordsBigDiv, B) == 0);
         break;
       }
+
       //
       // SigBitsModTmp is calculated manually to avoid calculating
       // SigWordsModTmp by modulo.
@@ -677,12 +682,13 @@ BigNumMod (
         //
         break;
       }
+
       //
       // Iteration 1: [2] Please refer to Initialisation.
       //
       BigNumRightShift (BigDiv, SigWordsBigDiv, BigDiv, SigWordsBigDiv, DeltaBits);
 
-      SigWordsBigDiv = (OC_BN_NUM_WORDS) ((SigBitsModTmp + (OC_BN_WORD_NUM_BITS - 1U)) / OC_BN_WORD_NUM_BITS);
+      SigWordsBigDiv = (OC_BN_NUM_WORDS)((SigBitsModTmp + (OC_BN_WORD_NUM_BITS - 1U)) / OC_BN_WORD_NUM_BITS);
       SigBitsBigDiv  = SigBitsModTmp;
 
       BigDivExp -= DeltaBits;
@@ -699,6 +705,7 @@ BigNumMod (
         ASSERT (BigNumCmp (BigDiv, SigWordsBigDiv, B) == 0);
         break;
       }
+
       //
       // Iteration 2: [2] BigDiv > ModTmp means BigDiv is reduced to more
       //                  strictly maintain the invariant BigDiv / 2 > ModTmp.
@@ -717,11 +724,13 @@ BigNumMod (
         --SigWordsBigDiv;
       }
     }
+
     //
     // ASSERT both branches maintain SigBitsBigDiv correctly.
     //
     ASSERT (SigBitsBigDiv == BigNumSignificantBits (BigDiv, SigWordsBigDiv));
   }
+
   //
   // Termination:
   // Because BigDiv = B and, by invariant, BigDiv > ModTmp / 2 are true in the
@@ -747,8 +756,8 @@ BigNumParseBuffer (
   IN     UINTN            BufferSize
   )
 {
-  UINTN      Index;
-  OC_BN_WORD Tmp;
+  UINTN       Index;
+  OC_BN_WORD  Tmp;
 
   ASSERT (Result != NULL);
   ASSERT (NumWords * OC_BN_WORD_SIZE == BufferSize);
@@ -759,20 +768,20 @@ BigNumParseBuffer (
   for (Index = OC_BN_WORD_SIZE; Index <= BufferSize; Index += OC_BN_WORD_SIZE) {
     if (OC_BN_WORD_SIZE == sizeof (UINT32)) {
       Tmp = (OC_BN_WORD)(
-        ((UINT32)Buffer[(BufferSize - Index) + 0] << 24U) |
-        ((UINT32)Buffer[(BufferSize - Index) + 1] << 16U) |
-        ((UINT32)Buffer[(BufferSize - Index) + 2] << 8U) |
-        ((UINT32)Buffer[(BufferSize - Index) + 3] << 0U));
+                         ((UINT32)Buffer[(BufferSize - Index) + 0] << 24U) |
+                         ((UINT32)Buffer[(BufferSize - Index) + 1] << 16U) |
+                         ((UINT32)Buffer[(BufferSize - Index) + 2] << 8U) |
+                         ((UINT32)Buffer[(BufferSize - Index) + 3] << 0U));
     } else if (OC_BN_WORD_SIZE == sizeof (UINT64)) {
       Tmp = (OC_BN_WORD)(
-        ((UINT64)Buffer[(BufferSize - Index) + 0] << 56U) |
-        ((UINT64)Buffer[(BufferSize - Index) + 1] << 48U) |
-        ((UINT64)Buffer[(BufferSize - Index) + 2] << 40U) |
-        ((UINT64)Buffer[(BufferSize - Index) + 3] << 32U) |
-        ((UINT64)Buffer[(BufferSize - Index) + 4] << 24U) |
-        ((UINT64)Buffer[(BufferSize - Index) + 5] << 16U) |
-        ((UINT64)Buffer[(BufferSize - Index) + 6] << 8U) |
-        ((UINT64)Buffer[(BufferSize - Index) + 7] << 0U));
+                         ((UINT64)Buffer[(BufferSize - Index) + 0] << 56U) |
+                         ((UINT64)Buffer[(BufferSize - Index) + 1] << 48U) |
+                         ((UINT64)Buffer[(BufferSize - Index) + 2] << 40U) |
+                         ((UINT64)Buffer[(BufferSize - Index) + 3] << 32U) |
+                         ((UINT64)Buffer[(BufferSize - Index) + 4] << 24U) |
+                         ((UINT64)Buffer[(BufferSize - Index) + 5] << 16U) |
+                         ((UINT64)Buffer[(BufferSize - Index) + 6] << 8U) |
+                         ((UINT64)Buffer[(BufferSize - Index) + 7] << 0U));
     }
 
     Result[(Index / OC_BN_WORD_SIZE) - 1] = Tmp;

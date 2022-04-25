@@ -64,10 +64,10 @@ OcPlayAudioFile (
 
   if (Context->OcAudio == NULL) {
     Status = gBS->LocateProtocol (
-      &gOcAudioProtocolGuid,
-      NULL,
-      (VOID **) &Context->OcAudio
-      );
+                    &gOcAudioProtocolGuid,
+                    NULL,
+                    (VOID **)&Context->OcAudio
+                    );
     if (EFI_ERROR (Status)) {
       Context->OcAudio = NULL;
     }
@@ -81,51 +81,51 @@ OcPlayAudioFile (
     switch (File) {
       case AppleVoiceOverAudioFileBeep:
         Status = OcPlayAudioBeep (
-            Context,
-            OC_VOICE_OVER_SIGNALS_NORMAL,
-            OC_VOICE_OVER_SIGNAL_NORMAL_MS,
-            OC_VOICE_OVER_SILENCE_NORMAL_MS
-            );
+                   Context,
+                   OC_VOICE_OVER_SIGNALS_NORMAL,
+                   OC_VOICE_OVER_SIGNAL_NORMAL_MS,
+                   OC_VOICE_OVER_SILENCE_NORMAL_MS
+                   );
         break;
       case OcVoiceOverAudioFileEnterPassword:
         Status = OcPlayAudioBeep (
-          Context,
-          OC_VOICE_OVER_SIGNALS_PASSWORD,
-          OC_VOICE_OVER_SIGNAL_NORMAL_MS,
-          OC_VOICE_OVER_SILENCE_NORMAL_MS
-          );
+                   Context,
+                   OC_VOICE_OVER_SIGNALS_PASSWORD,
+                   OC_VOICE_OVER_SIGNAL_NORMAL_MS,
+                   OC_VOICE_OVER_SILENCE_NORMAL_MS
+                   );
         break;
       case OcVoiceOverAudioFilePasswordAccepted:
         Status = OcPlayAudioBeep (
-          Context,
-          OC_VOICE_OVER_SIGNALS_PASSWORD_OK,
-          OC_VOICE_OVER_SIGNAL_NORMAL_MS,
-          OC_VOICE_OVER_SILENCE_NORMAL_MS
-          );
+                   Context,
+                   OC_VOICE_OVER_SIGNALS_PASSWORD_OK,
+                   OC_VOICE_OVER_SIGNAL_NORMAL_MS,
+                   OC_VOICE_OVER_SILENCE_NORMAL_MS
+                   );
         break;
       case OcVoiceOverAudioFilePasswordIncorrect:
         Status = OcPlayAudioBeep (
-          Context,
-          OC_VOICE_OVER_SIGNALS_ERROR,
-          OC_VOICE_OVER_SIGNAL_ERROR_MS,
-          OC_VOICE_OVER_SILENCE_ERROR_MS
-          );
+                   Context,
+                   OC_VOICE_OVER_SIGNALS_ERROR,
+                   OC_VOICE_OVER_SIGNAL_ERROR_MS,
+                   OC_VOICE_OVER_SILENCE_ERROR_MS
+                   );
         break;
       case OcVoiceOverAudioFilePasswordRetryLimit:
         Status = OcPlayAudioBeep (
-          Context,
-          OC_VOICE_OVER_SIGNALS_HWERROR,
-          OC_VOICE_OVER_SIGNAL_ERROR_MS,
-          OC_VOICE_OVER_SILENCE_ERROR_MS
-          );
+                   Context,
+                   OC_VOICE_OVER_SIGNALS_HWERROR,
+                   OC_VOICE_OVER_SIGNAL_ERROR_MS,
+                   OC_VOICE_OVER_SILENCE_ERROR_MS
+                   );
         break;
       case OcVoiceOverAudioFileExecutionFailure:
         Status = OcPlayAudioBeep (
-          Context,
-          OC_VOICE_OVER_SIGNALS_ERROR,
-          OC_VOICE_OVER_SIGNAL_ERROR_MS,
-          OC_VOICE_OVER_SIGNAL_NORMAL_MS
-          );
+                   Context,
+                   OC_VOICE_OVER_SIGNALS_ERROR,
+                   OC_VOICE_OVER_SIGNAL_ERROR_MS,
+                   OC_VOICE_OVER_SIGNAL_NORMAL_MS
+                   );
         break;
       default:
         //
@@ -141,10 +141,10 @@ OcPlayAudioFile (
 EFI_STATUS
 EFIAPI
 OcPlayAudioBeep (
-  IN     OC_PICKER_CONTEXT        *Context,
-  IN     UINT32                   ToneCount,
-  IN     UINT32                   ToneLength,
-  IN     UINT32                   SilenceLength
+  IN     OC_PICKER_CONTEXT  *Context,
+  IN     UINT32             ToneCount,
+  IN     UINT32             ToneLength,
+  IN     UINT32             SilenceLength
   )
 {
   EFI_STATUS  Status;
@@ -155,10 +155,10 @@ OcPlayAudioBeep (
 
   if (Context->BeepGen == NULL) {
     Status = gBS->LocateProtocol (
-      &gAppleBeepGenProtocolGuid,
-      NULL,
-      (VOID **) &Context->BeepGen
-      );
+                    &gAppleBeepGenProtocolGuid,
+                    NULL,
+                    (VOID **)&Context->BeepGen
+                    );
     if (EFI_ERROR (Status)) {
       return Status;
     }
@@ -190,7 +190,7 @@ OcPlayAudioEntry (
     OcPlayAudioFile (Context, OcVoiceOverAudioFilemacOS_UpdateFw, FALSE);
   } else if (Entry->Type == OC_BOOT_WINDOWS) {
     OcPlayAudioFile (Context, OcVoiceOverAudioFileWindows, FALSE);
-  }  else if (Entry->Type == OC_BOOT_EXTERNAL_OS) {
+  } else if (Entry->Type == OC_BOOT_EXTERNAL_OS) {
     OcPlayAudioFile (Context, OcVoiceOverAudioFileExternalOS, FALSE);
   } else if (Entry->Type == OC_BOOT_RESET_NVRAM) {
     OcPlayAudioFile (Context, OcVoiceOverAudioFileResetNVRAM, FALSE);

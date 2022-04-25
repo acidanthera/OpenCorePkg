@@ -38,11 +38,11 @@ InternalGetRecoveryInitiator (
   UINTN                     DevicePathSize;
 
   Status = GetVariable2 (
-    APPLE_RECOVERY_BOOT_INITIATOR_VARIABLE_NAME,
-    &gAppleVendorVariableGuid,
-    (VOID **) &DevicePath,
-    &DevicePathSize
-    );
+             APPLE_RECOVERY_BOOT_INITIATOR_VARIABLE_NAME,
+             &gAppleVendorVariableGuid,
+             (VOID **)&DevicePath,
+             &DevicePathSize
+             );
   if (EFI_ERROR (Status)) {
     DEBUG ((DEBUG_INFO, "OCB: No recovery initiator found - %r\n", Status));
     return NULL;
@@ -52,15 +52,15 @@ InternalGetRecoveryInitiator (
   // Also delete recovery initiator just in case.
   //
   gRT->SetVariable (
-    APPLE_RECOVERY_BOOT_INITIATOR_VARIABLE_NAME,
-    &gAppleVendorVariableGuid,
-    EFI_VARIABLE_BOOTSERVICE_ACCESS | EFI_VARIABLE_RUNTIME_ACCESS | EFI_VARIABLE_NON_VOLATILE,
-    0,
-    NULL
-    );
+         APPLE_RECOVERY_BOOT_INITIATOR_VARIABLE_NAME,
+         &gAppleVendorVariableGuid,
+         EFI_VARIABLE_BOOTSERVICE_ACCESS | EFI_VARIABLE_RUNTIME_ACCESS | EFI_VARIABLE_NON_VOLATILE,
+         0,
+         NULL
+         );
 
   if (!IsDevicePathValid (DevicePath, DevicePathSize)) {
-    DEBUG ((DEBUG_INFO, "OCB: Recovery initiator (%u) is invalid\n", (UINT32) DevicePathSize));
+    DEBUG ((DEBUG_INFO, "OCB: Recovery initiator (%u) is invalid\n", (UINT32)DevicePathSize));
     FreePool (DevicePath);
     return NULL;
   }
@@ -74,9 +74,9 @@ OcHandleRecoveryRequest (
   OUT EFI_DEVICE_PATH_PROTOCOL  **Initiator  OPTIONAL
   )
 {
-  EFI_STATUS             Status;
-  CHAR8                  *RecoveryBootMode;
-  UINTN                  RecoveryBootModeSize;
+  EFI_STATUS  Status;
+  CHAR8       *RecoveryBootMode;
+  UINTN       RecoveryBootModeSize;
 
   //
   // Provide basic support for recovery-boot-mode variable, which is meant
@@ -84,13 +84,13 @@ OcHandleRecoveryRequest (
   // are set to the recovery path, but this is not the case for secure-boot.
   //
   RecoveryBootModeSize = 0;
-  Status = gRT->GetVariable (
-    APPLE_RECOVERY_BOOT_MODE_VARIABLE_NAME,
-    &gAppleBootVariableGuid,
-    NULL,
-    &RecoveryBootModeSize,
-    NULL
-    );
+  Status               = gRT->GetVariable (
+                                APPLE_RECOVERY_BOOT_MODE_VARIABLE_NAME,
+                                &gAppleBootVariableGuid,
+                                NULL,
+                                &RecoveryBootModeSize,
+                                NULL
+                                );
 
   //
   // Initialise right away.
@@ -115,16 +115,16 @@ OcHandleRecoveryRequest (
     DEBUG ((
       DEBUG_INFO,
       "OCB: Failed to allocate recovery-boot-mode %u\n",
-      (UINT32) (RecoveryBootModeSize + 1)
+      (UINT32)(RecoveryBootModeSize + 1)
       ));
 
     Status = gRT->GetVariable (
-      APPLE_RECOVERY_BOOT_MODE_VARIABLE_NAME,
-      &gAppleBootVariableGuid,
-      NULL,
-      &RecoveryBootModeSize,
-      RecoveryBootMode
-      );
+                    APPLE_RECOVERY_BOOT_MODE_VARIABLE_NAME,
+                    &gAppleBootVariableGuid,
+                    NULL,
+                    &RecoveryBootModeSize,
+                    RecoveryBootMode
+                    );
     if (!EFI_ERROR (Status)) {
       //
       // Ensure null-termination.
@@ -133,7 +133,7 @@ OcHandleRecoveryRequest (
       DEBUG ((
         DEBUG_INFO,
         "OCB: recovery-boot-mode %u = %a - %r\n",
-        (UINT32) RecoveryBootModeSize,
+        (UINT32)RecoveryBootModeSize,
         RecoveryBootMode,
         Status
         ));
@@ -141,7 +141,7 @@ OcHandleRecoveryRequest (
       DEBUG ((
         DEBUG_INFO,
         "OCB: Failed to obtain recovery-boot-mode %u - %r\n",
-        (UINT32) RecoveryBootModeSize,
+        (UINT32)RecoveryBootModeSize,
         Status
         ));
     }
@@ -151,9 +151,10 @@ OcHandleRecoveryRequest (
     DEBUG ((
       DEBUG_INFO,
       "OCB: Failed to allocate recovery-boot-mode %u\n",
-      (UINT32) (RecoveryBootModeSize + 1)
+      (UINT32)(RecoveryBootModeSize + 1)
       ));
   }
+
   DEBUG_CODE_END ();
 
   if (Initiator != NULL) {
@@ -166,12 +167,12 @@ OcHandleRecoveryRequest (
   // In other cases EfiBoot may try to chainload into recovery, but it is unreliable.
   //
   gRT->SetVariable (
-    APPLE_RECOVERY_BOOT_MODE_VARIABLE_NAME,
-    &gAppleBootVariableGuid,
-    EFI_VARIABLE_BOOTSERVICE_ACCESS | EFI_VARIABLE_RUNTIME_ACCESS | EFI_VARIABLE_NON_VOLATILE,
-    0,
-    NULL
-    );
+         APPLE_RECOVERY_BOOT_MODE_VARIABLE_NAME,
+         &gAppleBootVariableGuid,
+         EFI_VARIABLE_BOOTSERVICE_ACCESS | EFI_VARIABLE_RUNTIME_ACCESS | EFI_VARIABLE_NON_VOLATILE,
+         0,
+         NULL
+         );
 
   return EFI_SUCCESS;
 }

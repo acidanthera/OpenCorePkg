@@ -1,13 +1,13 @@
 /*++
 
 Copyright (c) 2005 - 2006, Intel Corporation. All rights reserved.<BR>
-This program and the accompanying materials                          
-are licensed and made available under the terms and conditions of the BSD License         
-which accompanies this distribution.  The full text of the license may be found at        
-http://opensource.org/licenses/bsd-license.php                                            
-                                                                                          
-THE PROGRAM IS DISTRIBUTED UNDER THE BSD LICENSE ON AN "AS IS" BASIS,                     
-WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.             
+This program and the accompanying materials
+are licensed and made available under the terms and conditions of the BSD License
+which accompanies this distribution.  The full text of the license may be found at
+http://opensource.org/licenses/bsd-license.php
+
+THE PROGRAM IS DISTRIBUTED UNDER THE BSD LICENSE ON AN "AS IS" BASIS,
+WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 
 Module Name:
   PcatPciRootBridge.h
@@ -42,54 +42,54 @@ Abstract:
 #include <IndustryStandard/Acpi.h>
 #include <IndustryStandard/Pci.h>
 
-#define PCI_MAX_SEGMENT   0
+#define PCI_MAX_SEGMENT  0
 //
 // Driver Instance Data Prototypes
 //
 #define PCAT_PCI_ROOT_BRIDGE_SIGNATURE  SIGNATURE_32('p', 'c', 'r', 'b')
 
 typedef struct {
-  UINT32                            Signature;
-  EFI_HANDLE                        Handle;
-                                    
-  EFI_DEVICE_PATH_PROTOCOL          *DevicePath;
-  EFI_PCI_ROOT_BRIDGE_IO_PROTOCOL   Io;
-  EFI_CPU_IO2_PROTOCOL              *CpuIo;
+  UINT32                               Signature;
+  EFI_HANDLE                           Handle;
 
-  UINT32                            RootBridgeNumber;
-  UINT32                            PrimaryBus;
-  UINT32                            SubordinateBus;
-                                     
-  UINT64                            MemBase;     // Offsets host to bus memory addr.
-  UINT64                            MemLimit;    // Max allowable memory access
-                                    
-  UINT64                            IoBase;      // Offsets host to bus io addr.
-  UINT64                            IoLimit;     // Max allowable io access
-                                    
-  UINT64                            PciAddress;
-  UINT64                            PciData;
-                                    
-  UINT64                            PhysicalMemoryBase;
-  UINT64                            PhysicalIoBase;
-                                     
-  EFI_LOCK                          PciLock;
-                                    
-  UINT64                            Attributes;
-                                    
-  UINT64                            Mem32Base;
-  UINT64                            Mem32Limit;
-  UINT64                            Pmem32Base;
-  UINT64                            Pmem32Limit;
-  UINT64                            Mem64Base;
-  UINT64                            Mem64Limit;
-  UINT64                            Pmem64Base;
-  UINT64                            Pmem64Limit;
+  EFI_DEVICE_PATH_PROTOCOL             *DevicePath;
+  EFI_PCI_ROOT_BRIDGE_IO_PROTOCOL      Io;
+  EFI_CPU_IO2_PROTOCOL                 *CpuIo;
 
-  UINT64                            PciExpressBaseAddress;
+  UINT32                               RootBridgeNumber;
+  UINT32                               PrimaryBus;
+  UINT32                               SubordinateBus;
 
-  EFI_ACPI_ADDRESS_SPACE_DESCRIPTOR *Configuration;
+  UINT64                               MemBase;  // Offsets host to bus memory addr.
+  UINT64                               MemLimit; // Max allowable memory access
 
-  LIST_ENTRY                    MapInfo;
+  UINT64                               IoBase;   // Offsets host to bus io addr.
+  UINT64                               IoLimit;  // Max allowable io access
+
+  UINT64                               PciAddress;
+  UINT64                               PciData;
+
+  UINT64                               PhysicalMemoryBase;
+  UINT64                               PhysicalIoBase;
+
+  EFI_LOCK                             PciLock;
+
+  UINT64                               Attributes;
+
+  UINT64                               Mem32Base;
+  UINT64                               Mem32Limit;
+  UINT64                               Pmem32Base;
+  UINT64                               Pmem32Limit;
+  UINT64                               Mem64Base;
+  UINT64                               Mem64Limit;
+  UINT64                               Pmem64Base;
+  UINT64                               Pmem64Limit;
+
+  UINT64                               PciExpressBaseAddress;
+
+  EFI_ACPI_ADDRESS_SPACE_DESCRIPTOR    *Configuration;
+
+  LIST_ENTRY                           MapInfo;
 } PCAT_PCI_ROOT_BRIDGE_INSTANCE;
 
 //
@@ -102,25 +102,25 @@ typedef struct {
 // Private data types
 //
 typedef union {
-  UINT8   volatile  *buf;
-  UINT8   volatile  *ui8;
-  UINT16  volatile  *ui16;
-  UINT32  volatile  *ui32;
-  UINT64  volatile  *ui64;
-  UINTN   volatile  ui;
+  UINT8   volatile    *buf;
+  UINT8   volatile    *ui8;
+  UINT16  volatile    *ui16;
+  UINT32  volatile    *ui32;
+  UINT64  volatile    *ui64;
+  UINTN   volatile    ui;
 } PTR;
 
 typedef struct {
-  EFI_PCI_ROOT_BRIDGE_IO_PROTOCOL_OPERATION  Operation;
-  UINTN                                      NumberOfBytes;
-  UINTN                                      NumberOfPages;
-  EFI_PHYSICAL_ADDRESS                       HostAddress;
-  EFI_PHYSICAL_ADDRESS                       MappedHostAddress;
+  EFI_PCI_ROOT_BRIDGE_IO_PROTOCOL_OPERATION    Operation;
+  UINTN                                        NumberOfBytes;
+  UINTN                                        NumberOfPages;
+  EFI_PHYSICAL_ADDRESS                         HostAddress;
+  EFI_PHYSICAL_ADDRESS                         MappedHostAddress;
 } MAP_INFO;
 
 typedef struct {
-  LIST_ENTRY Link;
-  MAP_INFO * Map;  
+  LIST_ENTRY    Link;
+  MAP_INFO      *Map;
 } MAP_INFO_INSTANCE;
 
 typedef
@@ -140,23 +140,23 @@ VOID
   );
 
 typedef struct {
-  UINT16                    *CommandRegisterBuffer;
-  UINT32                    PpbMemoryWindow;     
+  UINT16    *CommandRegisterBuffer;
+  UINT32    PpbMemoryWindow;
 } PCAT_PCI_ROOT_BRIDGE_SCAN_FOR_ROM_CONTEXT;
 
 typedef struct {
-  UINT8 Register;
-  UINT8 Function;
-  UINT8 Device;
-  UINT8 Bus;
-  UINT8 Reserved[4];
+  UINT8    Register;
+  UINT8    Function;
+  UINT8    Device;
+  UINT8    Bus;
+  UINT8    Reserved[4];
 } DEFIO_PCI_ADDR;
 
 //
 // Driver Protocol Constructor Prototypes
 //
-EFI_STATUS 
-ConstructConfiguration(
+EFI_STATUS
+ConstructConfiguration (
   IN OUT PCAT_PCI_ROOT_BRIDGE_INSTANCE  *PrivateData
   );
 
@@ -200,8 +200,8 @@ PcatRootBridgeIoPciRW (
 
 UINT64
 GetPciExpressBaseAddressForRootBridge (
-  IN UINTN    HostBridgeNumber,
-  IN UINTN    RootBridgeNumber
+  IN UINTN  HostBridgeNumber,
+  IN UINTN  RootBridgeNumber
   );
 
 EFI_STATUS
@@ -230,8 +230,8 @@ PcatRootBridgeIoIoWrite (
 EFI_STATUS
 EFIAPI
 InitializePcatPciRootBridge (
-  IN EFI_HANDLE       ImageHandle,
-  IN EFI_SYSTEM_TABLE *SystemTable
+  IN EFI_HANDLE        ImageHandle,
+  IN EFI_SYSTEM_TABLE  *SystemTable
   );
 
 extern EFI_CPU_IO2_PROTOCOL  *gCpuIo;

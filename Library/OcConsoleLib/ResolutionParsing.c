@@ -29,11 +29,11 @@
 STATIC
 VOID
 ParseResolution (
-  IN  CONST CHAR8         *String,
-  OUT UINT32              *Width,
-  OUT UINT32              *Height,
-  OUT UINT32              *Bpp OPTIONAL,
-  OUT BOOLEAN             *Max
+  IN  CONST CHAR8  *String,
+  OUT UINT32       *Width,
+  OUT UINT32       *Height,
+  OUT UINT32       *Bpp OPTIONAL,
+  OUT BOOLEAN      *Max
   )
 {
   UINT32  TmpWidth;
@@ -44,7 +44,7 @@ ParseResolution (
   *Max    = FALSE;
 
   if (Bpp != NULL) {
-    *Bpp    = 0;
+    *Bpp = 0;
   }
 
   if (AsciiStrCmp (String, "Max") == 0) {
@@ -52,7 +52,7 @@ ParseResolution (
     return;
   }
 
-  if (*String == '\0' || *String < '0' || *String > '9') {
+  if ((*String == '\0') || (*String < '0') || (*String > '9')) {
     return;
   }
 
@@ -64,7 +64,7 @@ ParseResolution (
     }
   }
 
-  if (*String++ != 'x' || *String < '0' || *String > '9') {
+  if ((*String++ != 'x') || (*String < '0') || (*String > '9')) {
     return;
   }
 
@@ -74,7 +74,7 @@ ParseResolution (
     }
   }
 
-  if (*String != '\0' && (*String != '@' || Bpp == NULL)) {
+  if ((*String != '\0') && ((*String != '@') || (Bpp == NULL))) {
     return;
   }
 
@@ -101,11 +101,11 @@ ParseResolution (
 
 VOID
 OcParseScreenResolution (
-  IN  CONST CHAR8         *String,
-  OUT UINT32              *Width,
-  OUT UINT32              *Height,
-  OUT UINT32              *Bpp,
-  OUT BOOLEAN             *Max
+  IN  CONST CHAR8  *String,
+  OUT UINT32       *Width,
+  OUT UINT32       *Height,
+  OUT UINT32       *Bpp,
+  OUT BOOLEAN      *Max
   )
 {
   ASSERT (String != NULL);
@@ -119,10 +119,10 @@ OcParseScreenResolution (
 
 VOID
 OcParseConsoleMode (
-  IN  CONST CHAR8         *String,
-  OUT UINT32              *Width,
-  OUT UINT32              *Height,
-  OUT BOOLEAN             *Max
+  IN  CONST CHAR8  *String,
+  OUT UINT32       *Width,
+  OUT UINT32       *Height,
+  OUT BOOLEAN      *Max
   )
 {
   ASSERT (String != NULL);

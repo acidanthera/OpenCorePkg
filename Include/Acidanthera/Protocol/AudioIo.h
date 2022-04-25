@@ -37,7 +37,7 @@
 
 typedef struct EFI_AUDIO_IO_PROTOCOL_ EFI_AUDIO_IO_PROTOCOL;
 
-#define EFI_AUDIO_IO_PROTOCOL_REVISION 3
+#define EFI_AUDIO_IO_PROTOCOL_REVISION  3
 
 /**
   Port type.
@@ -91,53 +91,53 @@ typedef enum {
   Size in bits of each sample.
 **/
 typedef enum {
-  EfiAudioIoBits8     = BIT0,
-  EfiAudioIoBits16    = BIT1,
-  EfiAudioIoBits20    = BIT2,
-  EfiAudioIoBits24    = BIT3,
-  EfiAudioIoBits32    = BIT4
+  EfiAudioIoBits8  = BIT0,
+  EfiAudioIoBits16 = BIT1,
+  EfiAudioIoBits20 = BIT2,
+  EfiAudioIoBits24 = BIT3,
+  EfiAudioIoBits32 = BIT4
 } EFI_AUDIO_IO_PROTOCOL_BITS;
 
 /**
   Frequency of each sample.
 **/
 typedef enum {
-  EfiAudioIoFreq8kHz      = BIT0,
-  EfiAudioIoFreq11kHz     = BIT1,
-  EfiAudioIoFreq16kHz     = BIT2,
-  EfiAudioIoFreq22kHz     = BIT3,
-  EfiAudioIoFreq32kHz     = BIT4,
-  EfiAudioIoFreq44kHz     = BIT5,
-  EfiAudioIoFreq48kHz     = BIT6,
-  EfiAudioIoFreq88kHz     = BIT7,
-  EfiAudioIoFreq96kHz     = BIT8,
-  EfiAudioIoFreq192kHz    = BIT9
+  EfiAudioIoFreq8kHz   = BIT0,
+  EfiAudioIoFreq11kHz  = BIT1,
+  EfiAudioIoFreq16kHz  = BIT2,
+  EfiAudioIoFreq22kHz  = BIT3,
+  EfiAudioIoFreq32kHz  = BIT4,
+  EfiAudioIoFreq44kHz  = BIT5,
+  EfiAudioIoFreq48kHz  = BIT6,
+  EfiAudioIoFreq88kHz  = BIT7,
+  EfiAudioIoFreq96kHz  = BIT8,
+  EfiAudioIoFreq192kHz = BIT9
 } EFI_AUDIO_IO_PROTOCOL_FREQ;
 
 /**
   Audio input/output structure.
 **/
 typedef struct {
-  EFI_AUDIO_IO_PROTOCOL_TYPE      Type;
-  EFI_AUDIO_IO_PROTOCOL_BITS      SupportedBits;
-  EFI_AUDIO_IO_PROTOCOL_FREQ      SupportedFreqs;
-  EFI_AUDIO_IO_PROTOCOL_DEVICE    Device;
-  EFI_AUDIO_IO_PROTOCOL_LOCATION  Location;
-  EFI_AUDIO_IO_PROTOCOL_SURFACE   Surface;
+  EFI_AUDIO_IO_PROTOCOL_TYPE        Type;
+  EFI_AUDIO_IO_PROTOCOL_BITS        SupportedBits;
+  EFI_AUDIO_IO_PROTOCOL_FREQ        SupportedFreqs;
+  EFI_AUDIO_IO_PROTOCOL_DEVICE      Device;
+  EFI_AUDIO_IO_PROTOCOL_LOCATION    Location;
+  EFI_AUDIO_IO_PROTOCOL_SURFACE     Surface;
 } EFI_AUDIO_IO_PROTOCOL_PORT;
 
 /**
   Maximum number of channels.
 **/
-#define EFI_AUDIO_IO_PROTOCOL_MAX_CHANNELS 16
-#define EFI_AUDIO_IO_PROTOCOL_MAX_VOLUME   100
+#define EFI_AUDIO_IO_PROTOCOL_MAX_CHANNELS  16
+#define EFI_AUDIO_IO_PROTOCOL_MAX_VOLUME    100
 
 /**
   Callback function.
 **/
 typedef
 VOID
-(EFIAPI* EFI_AUDIO_IO_CALLBACK) (
+(EFIAPI *EFI_AUDIO_IO_CALLBACK)(
   IN EFI_AUDIO_IO_PROTOCOL        *AudioIo,
   IN VOID                         *Context
   );
@@ -154,7 +154,7 @@ VOID
 **/
 typedef
 EFI_STATUS
-(EFIAPI *EFI_AUDIO_IO_GET_OUTPUTS) (
+(EFIAPI *EFI_AUDIO_IO_GET_OUTPUTS)(
   IN  EFI_AUDIO_IO_PROTOCOL       *This,
   OUT EFI_AUDIO_IO_PROTOCOL_PORT  **OutputPorts,
   OUT UINTN                       *OutputPortsCount
@@ -177,7 +177,7 @@ EFI_STATUS
 **/
 typedef
 EFI_STATUS
-(EFIAPI *EFI_AUDIO_IO_RAW_GAIN_TO_DECIBELS) (
+(EFIAPI *EFI_AUDIO_IO_RAW_GAIN_TO_DECIBELS)(
   IN  EFI_AUDIO_IO_PROTOCOL       *This,
   IN  UINT64                      OutputIndexMask,
   IN  UINT8                       GainParam,
@@ -186,7 +186,7 @@ EFI_STATUS
 
 /**
   Sets up the device to play audio data. Basic caching is implemented: no actions are taken
-  the second and subsequent times that set up is called again with exactly the same paremeters. 
+  the second and subsequent times that set up is called again with exactly the same paremeters.
 
   @param[in] This               A pointer to the EFI_AUDIO_IO_PROTOCOL instance.
   @param[in] OutputIndexMask    A mask indicating the desired outputs.
@@ -202,7 +202,7 @@ EFI_STATUS
 **/
 typedef
 EFI_STATUS
-(EFIAPI *EFI_AUDIO_IO_SETUP_PLAYBACK) (
+(EFIAPI *EFI_AUDIO_IO_SETUP_PLAYBACK)(
   IN EFI_AUDIO_IO_PROTOCOL        *This,
   IN UINT64                       OutputIndexMask,
   IN INT8                         Gain,
@@ -225,7 +225,7 @@ EFI_STATUS
 **/
 typedef
 EFI_STATUS
-(EFIAPI *EFI_AUDIO_IO_START_PLAYBACK) (
+(EFIAPI *EFI_AUDIO_IO_START_PLAYBACK)(
   IN EFI_AUDIO_IO_PROTOCOL        *This,
   IN VOID                         *Data,
   IN UINTN                        DataLength,
@@ -248,7 +248,7 @@ EFI_STATUS
 **/
 typedef
 EFI_STATUS
-(EFIAPI *EFI_AUDIO_IO_START_PLAYBACK_ASYNC) (
+(EFIAPI *EFI_AUDIO_IO_START_PLAYBACK_ASYNC)(
   IN EFI_AUDIO_IO_PROTOCOL        *This,
   IN VOID                         *Data,
   IN UINTN                        DataLength,
@@ -268,7 +268,7 @@ EFI_STATUS
 **/
 typedef
 EFI_STATUS
-(EFIAPI *EFI_AUDIO_IO_STOP_PLAYBACK) (
+(EFIAPI *EFI_AUDIO_IO_STOP_PLAYBACK)(
   IN EFI_AUDIO_IO_PROTOCOL        *This
   );
 
@@ -276,15 +276,15 @@ EFI_STATUS
   Protocol struct.
 **/
 struct EFI_AUDIO_IO_PROTOCOL_ {
-  UINTN                               Revision;
-  EFI_AUDIO_IO_GET_OUTPUTS            GetOutputs;
-  EFI_AUDIO_IO_RAW_GAIN_TO_DECIBELS   RawGainToDecibels;
-  EFI_AUDIO_IO_SETUP_PLAYBACK         SetupPlayback;
-  EFI_AUDIO_IO_START_PLAYBACK         StartPlayback;
-  EFI_AUDIO_IO_START_PLAYBACK_ASYNC   StartPlaybackAsync;
-  EFI_AUDIO_IO_STOP_PLAYBACK          StopPlayback;
+  UINTN                                Revision;
+  EFI_AUDIO_IO_GET_OUTPUTS             GetOutputs;
+  EFI_AUDIO_IO_RAW_GAIN_TO_DECIBELS    RawGainToDecibels;
+  EFI_AUDIO_IO_SETUP_PLAYBACK          SetupPlayback;
+  EFI_AUDIO_IO_START_PLAYBACK          StartPlayback;
+  EFI_AUDIO_IO_START_PLAYBACK_ASYNC    StartPlaybackAsync;
+  EFI_AUDIO_IO_STOP_PLAYBACK           StopPlayback;
 };
 
-extern EFI_GUID gEfiAudioIoProtocolGuid;
+extern EFI_GUID  gEfiAudioIoProtocolGuid;
 
 #endif // EFI_AUDIO_IO_H

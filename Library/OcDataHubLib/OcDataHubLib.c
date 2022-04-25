@@ -59,11 +59,11 @@ OcDataHubInstallProtocol (
       return NULL;
     }
   } else {
-    Status  = gBS->LocateProtocol (
-      &gEfiDataHubProtocolGuid,
-      NULL,
-      (VOID **) &DataHub
-      );
+    Status = gBS->LocateProtocol (
+                    &gEfiDataHubProtocolGuid,
+                    NULL,
+                    (VOID **)&DataHub
+                    );
 
     if (!EFI_ERROR (Status)) {
       return DataHub;
@@ -87,12 +87,12 @@ DataHubSetAppleMiscAscii (
 
   if (Value != NULL) {
     Status = SetDataHubEntry (
-      DataHub,
-      &gEfiMiscSubClassGuid,
-      Key,
-      Value,
-      (UINT32)AsciiStrSize (Value)
-      );
+               DataHub,
+               &gEfiMiscSubClassGuid,
+               Key,
+               Value,
+               (UINT32)AsciiStrSize (Value)
+               );
   }
 
   return Status;
@@ -119,12 +119,12 @@ DataHubSetAppleMiscUnicode (
     }
 
     Status = SetDataHubEntry (
-      DataHub,
-      &gEfiMiscSubClassGuid,
-      Key,
-      UnicodeValue,
-      (UINT32)StrSize (UnicodeValue)
-      );
+               DataHub,
+               &gEfiMiscSubClassGuid,
+               Key,
+               UnicodeValue,
+               (UINT32)StrSize (UnicodeValue)
+               );
 
     FreePool (UnicodeValue);
   }
@@ -147,12 +147,12 @@ DataHubSetAppleMiscData (
 
   if (Value != NULL) {
     Status = SetDataHubEntry (
-      DataHub,
-      &gEfiMiscSubClassGuid,
-      Key,
-      Value,
-      Size
-      );
+               DataHub,
+               &gEfiMiscSubClassGuid,
+               Key,
+               Value,
+               Size
+               );
   }
 
   return Status;
@@ -173,12 +173,12 @@ DataHubSetAppleProcessorData (
 
   if (Value != NULL) {
     Status = SetDataHubEntry (
-      DataHub,
-      &gEfiProcessorSubClassGuid,
-      Key,
-      Value,
-      Size
-      );
+               DataHub,
+               &gEfiProcessorSubClassGuid,
+               Key,
+               Value,
+               Size
+               );
   }
 
   return Status;
@@ -193,14 +193,14 @@ SetDataHubEntry (
   IN UINT32                 DataSize
   )
 {
-  EFI_STATUS                  Status;
-  
+  EFI_STATUS  Status;
+
   APPLE_PLATFORM_DATA_RECORD  *Entry;
   UINT32                      KeySize;
   UINT32                      TotalSize;
   BOOLEAN                     Result;
 
-  KeySize = (UINT32) StrSize (Key);
+  KeySize = (UINT32)StrSize (Key);
   Result  = OcOverflowTriAddU32 (
               sizeof (*Entry),
               KeySize,
@@ -228,13 +228,13 @@ SetDataHubEntry (
   CopyMem (&Entry->Data[Entry->KeySize], Data, DataSize);
 
   Status = DataHub->LogData (
-    DataHub,
-    DataRecordGuid,
-    &gApplePlatformProducerNameGuid,
-    EFI_DATA_RECORD_CLASS_DATA,
-    Entry,
-    TotalSize
-    );
+                      DataHub,
+                      DataRecordGuid,
+                      &gApplePlatformProducerNameGuid,
+                      EFI_DATA_RECORD_CLASS_DATA,
+                      Entry,
+                      TotalSize
+                      );
 
   DEBUG ((
     EFI_ERROR (Status) ? DEBUG_WARN : DEBUG_INFO,
@@ -263,6 +263,7 @@ UpdateDataHub (
   if (Data->SystemUUID != NULL) {
     DataHubSetAppleMiscData (DataHub, OC_SYSTEM_UUID, Data->SystemUUID, sizeof (*Data->SystemUUID));
   }
+
   DataHubSetAppleMiscAscii (DataHub, OC_BOARD_PRODUCT, Data->BoardProduct);
   DataHubSetAppleMiscData (DataHub, OC_BOARD_REVISION, Data->BoardRevision, sizeof (*Data->BoardRevision));
   DataHubSetAppleMiscData (DataHub, OC_STARTUP_POWER_EVENTS, Data->StartupPowerEvents, sizeof (*Data->StartupPowerEvents));
@@ -270,10 +271,12 @@ UpdateDataHub (
   if (Data->FSBFrequency == NULL) {
     Data->FSBFrequency = &CpuInfo->FSBFrequency;
   }
+
   DataHubSetAppleProcessorData (DataHub, OC_FSB_FREQUENCY, Data->FSBFrequency, sizeof (*Data->FSBFrequency));
-  if (Data->ARTFrequency == NULL && CpuInfo->ARTFrequency > 0 && CpuInfo->ARTFrequency != DEFAULT_ART_CLOCK_SOURCE) {
+  if ((Data->ARTFrequency == NULL) && (CpuInfo->ARTFrequency > 0) && (CpuInfo->ARTFrequency != DEFAULT_ART_CLOCK_SOURCE)) {
     Data->ARTFrequency = &CpuInfo->ARTFrequency;
   }
+
   DataHubSetAppleProcessorData (DataHub, OC_ART_FREQUENCY, Data->ARTFrequency, sizeof (*Data->ARTFrequency));
   DataHubSetAppleMiscData (DataHub, OC_DEVICE_PATHS_SUPPORTED, Data->DevicePathsSupported, sizeof (*Data->DevicePathsSupported));
   DataHubSetAppleMiscData (DataHub, OC_SMC_REVISION, Data->SmcRevision, OC_SMC_REVISION_SIZE);

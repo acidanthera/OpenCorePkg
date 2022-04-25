@@ -70,17 +70,17 @@ NOTE:   String length must be evenly divisible by 16byte (str_len % 16 == 0)
 // The number of rounds in AES Cipher (Nr).
 //
 
-#define Nb 4
+#define Nb  4
 
 #if CONFIG_AES_KEY_SIZE == 32
-#define Nk 8
-#define Nr 14
+#define Nk  8
+#define Nr  14
 #elif CONFIG_AES_KEY_SIZE == 24
-#define Nk 6
-#define Nr 12
+#define Nk  6
+#define Nr  12
 #elif CONFIG_AES_KEY_SIZE == 16
-#define Nk 4
-#define Nr 10
+#define Nk  4
+#define Nr  10
 #endif
 
 //
@@ -93,8 +93,8 @@ typedef UINT8 AES_INTERNAL_STATE[4][4];
 // The numbers below can be computed dynamically trading ROM for RAM -
 // This can be useful in (embedded) bootloader applications, where ROM is often limited.
 //
-STATIC CONST UINT8 Sbox[256] = {
-  //0     1    2      3     4    5     6     7      8    9     A      B    C     D     E     F
+STATIC CONST UINT8  Sbox[256] = {
+  // 0     1    2      3     4    5     6     7      8    9     A      B    C     D     E     F
   0x63, 0x7c, 0x77, 0x7b, 0xf2, 0x6b, 0x6f, 0xc5, 0x30, 0x01, 0x67, 0x2b, 0xfe, 0xd7, 0xab, 0x76,
   0xca, 0x82, 0xc9, 0x7d, 0xfa, 0x59, 0x47, 0xf0, 0xad, 0xd4, 0xa2, 0xaf, 0x9c, 0xa4, 0x72, 0xc0,
   0xb7, 0xfd, 0x93, 0x26, 0x36, 0x3f, 0xf7, 0xcc, 0x34, 0xa5, 0xe5, 0xf1, 0x71, 0xd8, 0x31, 0x15,
@@ -113,7 +113,7 @@ STATIC CONST UINT8 Sbox[256] = {
   0x8c, 0xa1, 0x89, 0x0d, 0xbf, 0xe6, 0x42, 0x68, 0x41, 0x99, 0x2d, 0x0f, 0xb0, 0x54, 0xbb, 0x16
 };
 
-STATIC CONST UINT8 RsBox[256] = {
+STATIC CONST UINT8  RsBox[256] = {
   0x52, 0x09, 0x6a, 0xd5, 0x30, 0x36, 0xa5, 0x38, 0xbf, 0x40, 0xa3, 0x9e, 0x81, 0xf3, 0xd7, 0xfb,
   0x7c, 0xe3, 0x39, 0x82, 0x9b, 0x2f, 0xff, 0x87, 0x34, 0x8e, 0x43, 0x44, 0xc4, 0xde, 0xe9, 0xcb,
   0x54, 0x7b, 0x94, 0x32, 0xa6, 0xc2, 0x23, 0x3d, 0xee, 0x4c, 0x95, 0x0b, 0x42, 0xfa, 0xc3, 0x4e,
@@ -136,7 +136,7 @@ STATIC CONST UINT8 RsBox[256] = {
 // The round CONSTant word array, Rcon[i], contains the values given by
 // x to the power (i-1) being powers of x (x is denoted as {02}) in the field GF(2^8)
 //
-STATIC CONST UINT8 Rcon[11] = {
+STATIC CONST UINT8  Rcon[11] = {
   0x8d, 0x01, 0x02, 0x04, 0x08, 0x10, 0x20, 0x40, 0x80, 0x1b, 0x36
 };
 
@@ -150,12 +150,11 @@ STATIC CONST UINT8 Rcon[11] = {
  *  up to rcon[8] for AES-192, up to rcon[7] for AES-256. rcon[0] is not used in AES algorithm."
  */
 
-
 //
 // Private functions:
 //
-#define GetSboxValue(num) (Sbox[(num)])
-#define GetSBoxInvert(num) (RsBox[(num)])
+#define GetSboxValue(num)   (Sbox[(num)])
+#define GetSBoxInvert(num)  (RsBox[(num)])
 
 //
 // This function produces Nb(Nr+1) round keys. The round keys are used in each
@@ -168,11 +167,11 @@ KeyExpansion (
   IN  CONST UINT8  *Key
   )
 {
-  UINT32 Index, J, K;
+  UINT32  Index, J, K;
   //
   // Used for the column/row operations
   //
-  UINT8 TempA[4];
+  UINT8  TempA[4];
 
   //
   // The first round key is the key itself.
@@ -188,7 +187,7 @@ KeyExpansion (
   // All other round keys are found from the previous round keys.
   //
   for (Index = Nk; Index < Nb * (Nr + 1); ++Index) {
-    K = (Index - 1) * 4;
+    K        = (Index - 1) * 4;
     TempA[0] = RoundKey[K + 0];
     TempA[1] = RoundKey[K + 1];
     TempA[2] = RoundKey[K + 2];
@@ -203,11 +202,11 @@ KeyExpansion (
       //
       // Function RotWord()
       //
-      K = TempA[0];
+      K        = TempA[0];
       TempA[0] = TempA[1];
       TempA[1] = TempA[2];
       TempA[2] = TempA[3];
-      TempA[3] = (UINT8) K;
+      TempA[3] = (UINT8)K;
 
       //
       // SubWord() is a function that takes a four-byte input word and
@@ -225,7 +224,7 @@ KeyExpansion (
       TempA[0] = TempA[0] ^ Rcon[Index / Nk];
     }
 
-#if CONFIG_AES_KEY_SIZE == 32
+ #if CONFIG_AES_KEY_SIZE == 32
     if (Index % Nk == 4) {
       //
       // Function Subword()
@@ -235,9 +234,11 @@ KeyExpansion (
       TempA[2] = GetSboxValue (TempA[2]);
       TempA[3] = GetSboxValue (TempA[3]);
     }
-#endif
 
-    J = Index * 4; K = (Index - Nk) * 4;
+ #endif
+
+    J               = Index * 4;
+    K               = (Index - Nk) * 4;
     RoundKey[J + 0] = RoundKey[K + 0] ^ TempA[0];
     RoundKey[J + 1] = RoundKey[K + 1] ^ TempA[1];
     RoundKey[J + 2] = RoundKey[K + 2] ^ TempA[2];
@@ -290,7 +291,7 @@ AddRoundKey (
 // The SubBytes Function Substitutes the values in the
 // state matrix with values in an S-box.
 //
-STATIC 
+STATIC
 VOID
 SubBytes (
   IN OUT AES_INTERNAL_STATE  *State
@@ -300,7 +301,7 @@ SubBytes (
 
   for (I = 0; I < 4; ++I) {
     for (J = 0; J < 4; ++J) {
-      (*State)[J][I] = GetSboxValue((*State)[J][I]);
+      (*State)[J][I] = GetSboxValue ((*State)[J][I]);
     }
   }
 }
@@ -310,7 +311,7 @@ SubBytes (
 // Each row is shifted with different offset.
 // Offset = Row number. So the first row is not shifted.
 //
-STATIC 
+STATIC
 VOID
 ShiftRows (
   IN OUT AES_INTERNAL_STATE  *State
@@ -348,19 +349,19 @@ ShiftRows (
   (*State)[1][3] = Temp;
 }
 
-STATIC 
+STATIC
 UINT8
 XTime (
-  IN UINT8 X
+  IN UINT8  X
   )
 {
-  return (UINT8) (((UINT32) X << 1u) ^ ((((UINT32) X >> 7u) & 1u) * 0x1bu));
+  return (UINT8)(((UINT32)X << 1u) ^ ((((UINT32)X >> 7u) & 1u) * 0x1bu));
 }
 
 //
 // MixColumns function mixes the columns of the state matrix
 //
-STATIC 
+STATIC
 VOID
 MixColumns (
   IN OUT AES_INTERNAL_STATE  *State
@@ -370,20 +371,20 @@ MixColumns (
 
   for (I = 0; I < 4; ++I) {
     T   = (*State)[I][0];
-    Tmp = (UINT8) ((UINT32) ((*State) [I][0]) ^ (UINT32) ((*State) [I][1])
-          ^ (UINT32) ((*State) [I][2]) ^ (UINT32) ((*State) [I][3]));
-    Tm  = (*State) [I][0] ^ (*State) [I][1];
-    Tm = XTime (Tm);
-    (*State) [I][0] ^= Tm ^ Tmp;
-    Tm  = (*State)[I][1] ^ (*State)[I][2];
-    Tm = XTime (Tm);
-    (*State) [I][1] ^= Tm ^ Tmp;
-    Tm  = (*State) [I][2] ^ (*State) [I][3];
-    Tm = XTime (Tm);
-    (*State) [I][2] ^= Tm ^ Tmp;
-    Tm  = (*State)[I][3] ^ T ;
-    Tm = XTime (Tm);
-    (*State) [I][3] ^= Tm ^ Tmp ;
+    Tmp = (UINT8)((UINT32)((*State)[I][0]) ^ (UINT32)((*State)[I][1])
+                  ^ (UINT32)((*State)[I][2]) ^ (UINT32)((*State)[I][3]));
+    Tm              = (*State)[I][0] ^ (*State)[I][1];
+    Tm              = XTime (Tm);
+    (*State)[I][0] ^= Tm ^ Tmp;
+    Tm              = (*State)[I][1] ^ (*State)[I][2];
+    Tm              = XTime (Tm);
+    (*State)[I][1] ^= Tm ^ Tmp;
+    Tm              = (*State)[I][2] ^ (*State)[I][3];
+    Tm              = XTime (Tm);
+    (*State)[I][2] ^= Tm ^ Tmp;
+    Tm              = (*State)[I][3] ^ T;
+    Tm              = XTime (Tm);
+    (*State)[I][3] ^= Tm ^ Tmp;
   }
 }
 
@@ -405,7 +406,7 @@ MixColumns (
 // The method used to multiply may be difficult to understand for the inexperienced.
 // Please use the references to gain more information.
 //
-STATIC 
+STATIC
 VOID
 InvMixColumns (
   IN OUT AES_INTERNAL_STATE  *State
@@ -414,19 +415,19 @@ InvMixColumns (
   UINT8  I, A, B, C, D;
 
   for (I = 0; I < 4; ++I) {
-    A = (*State) [I][0];
-    B = (*State) [I][1];
-    C = (*State) [I][2];
-    D = (*State) [I][3];
+    A = (*State)[I][0];
+    B = (*State)[I][1];
+    C = (*State)[I][2];
+    D = (*State)[I][3];
 
-    (*State)[I][0] = (UINT8) ((UINT32) Multiply(A, 0x0eu) ^ (UINT32) Multiply(B, 0x0bu)
-                     ^ (UINT32) Multiply(C, 0x0du) ^ (UINT32) Multiply(D, 0x09u));
-    (*State)[I][1] = (UINT8) ((UINT32) Multiply(A, 0x09u) ^ (UINT32) Multiply(B, 0x0eu)
-                     ^ (UINT32) Multiply(C, 0x0bu) ^ (UINT32) Multiply(D, 0x0du));
-    (*State)[I][2] = (UINT8) ((UINT32) Multiply(A, 0x0du) ^ (UINT32) Multiply(B, 0x09u)
-                     ^ (UINT32) Multiply(C, 0x0eu) ^ (UINT32) Multiply(D, 0x0bu));
-    (*State)[I][3] = (UINT8) ((UINT32) Multiply(A, 0x0bu) ^ (UINT32) Multiply(B, 0x0du)
-                     ^ (UINT32) Multiply(C, 0x09u) ^ (UINT32) Multiply(D, 0x0eu));
+    (*State)[I][0] = (UINT8)((UINT32)Multiply (A, 0x0eu) ^ (UINT32)Multiply (B, 0x0bu)
+                             ^ (UINT32)Multiply (C, 0x0du) ^ (UINT32)Multiply (D, 0x09u));
+    (*State)[I][1] = (UINT8)((UINT32)Multiply (A, 0x09u) ^ (UINT32)Multiply (B, 0x0eu)
+                             ^ (UINT32)Multiply (C, 0x0bu) ^ (UINT32)Multiply (D, 0x0du));
+    (*State)[I][2] = (UINT8)((UINT32)Multiply (A, 0x0du) ^ (UINT32)Multiply (B, 0x09u)
+                             ^ (UINT32)Multiply (C, 0x0eu) ^ (UINT32)Multiply (D, 0x0bu));
+    (*State)[I][3] = (UINT8)((UINT32)Multiply (A, 0x0bu) ^ (UINT32)Multiply (B, 0x0du)
+                             ^ (UINT32)Multiply (C, 0x09u) ^ (UINT32)Multiply (D, 0x0eu));
   }
 }
 
@@ -460,7 +461,7 @@ InvShiftRows (
   //
   // Rotate first row 1 columns to right
   //
-  Temp = (*State)[3][1];
+  Temp           = (*State)[3][1];
   (*State)[3][1] = (*State)[2][1];
   (*State)[2][1] = (*State)[1][1];
   (*State)[1][1] = (*State)[0][1];
@@ -469,18 +470,18 @@ InvShiftRows (
   //
   // Rotate second row 2 columns to right
   //
-  Temp = (*State)[0][2];
+  Temp           = (*State)[0][2];
   (*State)[0][2] = (*State)[2][2];
   (*State)[2][2] = Temp;
 
-  Temp = (*State)[1][2];
+  Temp           = (*State)[1][2];
   (*State)[1][2] = (*State)[3][2];
   (*State)[3][2] = Temp;
 
   //
   // Rotate third row 3 columns to right
   //
-  Temp = (*State)[0][3];
+  Temp           = (*State)[0][3];
   (*State)[0][3] = (*State)[1][3];
   (*State)[1][3] = (*State)[2][3];
   (*State)[2][3] = (*State)[3][3];
@@ -502,7 +503,7 @@ Cipher (
   //
   // Add the First round key to the state before starting the rounds.
   //
-  AddRoundKey(0, State, RoundKey);
+  AddRoundKey (0, State, RoundKey);
 
   //
   // There will be Nr rounds.
@@ -563,8 +564,8 @@ InvCipher (
 STATIC
 VOID
 XorWithIv (
-  IN OUT UINT8       *Buf,
-  IN     CONST UINT8 *Iv
+  IN OUT UINT8        *Buf,
+  IN     CONST UINT8  *Iv
   )
 {
   UINT8  I;
@@ -595,8 +596,8 @@ AesCbcEncryptBuffer (
 
   for (I = 0; I < Len; I += AES_BLOCK_SIZE) {
     XorWithIv (Data, Iv);
-    Cipher ((AES_INTERNAL_STATE *) Data, Context->RoundKey);
-    Iv = Data;
+    Cipher ((AES_INTERNAL_STATE *)Data, Context->RoundKey);
+    Iv    = Data;
     Data += AES_BLOCK_SIZE;
   }
 
@@ -618,7 +619,7 @@ AesCbcDecryptBuffer (
 
   for (I = 0; I < Len; I += AES_BLOCK_SIZE) {
     CopyMem (StoreNextIv, Data, AES_BLOCK_SIZE);
-    InvCipher ((AES_INTERNAL_STATE *) Data, Context->RoundKey);
+    InvCipher ((AES_INTERNAL_STATE *)Data, Context->RoundKey);
     XorWithIv (Data, Context->Iv);
     CopyMem (Context->Iv, StoreNextIv, AES_BLOCK_SIZE);
     Data += AES_BLOCK_SIZE;
@@ -636,9 +637,9 @@ AesCtrXcryptBuffer (
   IN     UINT32       Len
   )
 {
-  UINT8  Buffer[AES_BLOCK_SIZE];
-  UINT32 I;
-  INT32  Bi;
+  UINT8   Buffer[AES_BLOCK_SIZE];
+  UINT32  I;
+  INT32   Bi;
 
   for (I = 0, Bi = AES_BLOCK_SIZE; I < Len; ++I, ++Bi) {
     //
@@ -646,7 +647,7 @@ AesCtrXcryptBuffer (
     //
     if (Bi == AES_BLOCK_SIZE) {
       CopyMem (Buffer, Context->Iv, AES_BLOCK_SIZE);
-      Cipher ((AES_INTERNAL_STATE *) Buffer, Context->RoundKey);
+      Cipher ((AES_INTERNAL_STATE *)Buffer, Context->RoundKey);
 
       //
       // Increment Iv and handle overflow

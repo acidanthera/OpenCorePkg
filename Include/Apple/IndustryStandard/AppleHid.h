@@ -16,7 +16,7 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 #include <IndustryStandard/UsbHid.h>
 
 // APPLE_USAGE
-#define APPLE_HID_GENERIC_USAGE(UsageId, PageId) (((PageId) << 12) | (UsageId))
+#define APPLE_HID_GENERIC_USAGE(UsageId, PageId)  (((PageId) << 12) | (UsageId))
 
 #define APPLE_HID_USB_KB_KP_USAGE(UsbHidUsageIdKbKp) \
   APPLE_HID_GENERIC_USAGE ((UsbHidUsageIdKbKp), AppleHidKeyboardKeypadPage)

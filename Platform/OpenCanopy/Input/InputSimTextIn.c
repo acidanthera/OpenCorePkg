@@ -23,6 +23,7 @@ GuiKeyConstruct (
   )
 {
   STATIC GUI_KEY_CONTEXT  mContext;
+
   mContext.Context = PickerContext;
 
   return &mContext;
@@ -38,19 +39,21 @@ GuiKeyGetEvent (
   ASSERT (Event != NULL);
 
   Context->Context->HotKeyContext->GetKeyInfo (
-    Context->Context,
-    Context->KeyFilter,
-    Event
-    );
-  
-  if (Context->KeyFilter == OC_PICKER_KEYS_FOR_PICKER
-   && Context->OcModifiers != Event->OcModifiers) {
+                                     Context->Context,
+                                     Context->KeyFilter,
+                                     Event
+                                     );
+
+  if (  (Context->KeyFilter == OC_PICKER_KEYS_FOR_PICKER)
+     && (Context->OcModifiers != Event->OcModifiers))
+  {
     Context->OcModifiers = Event->OcModifiers;
     return TRUE;
   }
 
-  if (Context->KeyFilter == OC_PICKER_KEYS_FOR_TYPING
-   && Event->UnicodeChar != L'\0') {
+  if (  (Context->KeyFilter == OC_PICKER_KEYS_FOR_TYPING)
+     && (Event->UnicodeChar != L'\0'))
+  {
     return TRUE;
   }
 

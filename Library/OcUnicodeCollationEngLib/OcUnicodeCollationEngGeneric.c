@@ -29,10 +29,10 @@ OcUnicodeCollationEngInstallProtocol (
     }
   } else {
     Status = gBS->LocateProtocol (
-      &gEfiUnicodeCollation2ProtocolGuid,
-      NULL,
-      (VOID **) &Existing
-      );
+                    &gEfiUnicodeCollation2ProtocolGuid,
+                    NULL,
+                    (VOID **)&Existing
+                    );
 
     if (!EFI_ERROR (Status)) {
       //
@@ -43,12 +43,12 @@ OcUnicodeCollationEngInstallProtocol (
   }
 
   NewHandle = NULL;
-  Status = gBS->InstallMultipleProtocolInterfaces (
-    &NewHandle,
-    &gEfiUnicodeCollation2ProtocolGuid,
-    &gInternalUnicode2Eng,
-    NULL
-    );
+  Status    = gBS->InstallMultipleProtocolInterfaces (
+                     &NewHandle,
+                     &gEfiUnicodeCollation2ProtocolGuid,
+                     &gInternalUnicode2Eng,
+                     NULL
+                     );
   if (EFI_ERROR (Status)) {
     return NULL;
   }

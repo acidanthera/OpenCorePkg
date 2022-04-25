@@ -42,33 +42,43 @@ InternalDetectAppleMajorType (
     if (AsciiStrnCmp (BrandInfix, "i7", L_STR_LEN ("i7")) == 0) {
       return AppleProcessorMajorI7;
     }
+
     if (AsciiStrnCmp (BrandInfix, "i5", L_STR_LEN ("i5")) == 0) {
       return AppleProcessorMajorI5;
     }
+
     if (AsciiStrnCmp (BrandInfix, "i3", L_STR_LEN ("i3")) == 0) {
       return AppleProcessorMajorI3;
     }
+
     if (AsciiStrnCmp (BrandInfix, "i9", L_STR_LEN ("i9")) == 0) {
       return AppleProcessorMajorI9;
     }
+
     if (AsciiStrnCmp (BrandInfix, "m3", L_STR_LEN ("m3")) == 0) {
       return AppleProcessorMajorM3;
     }
+
     if (AsciiStrnCmp (BrandInfix, "m5", L_STR_LEN ("m5")) == 0) {
       return AppleProcessorMajorM5;
     }
+
     if (AsciiStrnCmp (BrandInfix, "m7", L_STR_LEN ("m7")) == 0) {
       return AppleProcessorMajorM7;
     }
+
     if (AsciiStrnCmp (BrandInfix, "M", L_STR_LEN ("M")) == 0) {
       return AppleProcessorMajorM;
     }
+
     if (AsciiStrnCmp (BrandInfix, "Duo", L_STR_LEN ("Duo")) == 0) {
       return AppleProcessorMajorCore2;
     }
+
     if (AsciiStrnCmp (BrandInfix, "Quad", L_STR_LEN ("Quad")) == 0) {
       return AppleProcessorMajorXeonPenryn;
     }
+
     return AppleProcessorMajorCore;
   }
 
@@ -85,10 +95,11 @@ InternalDetectAppleMajorType (
     //
     // Support Xeon Scalable chips: Xeon(R) Gold 6136 CPU
     //
-    if (AsciiStrnCmp (BrandInfix, "Bronze", L_STR_LEN ("Bronze")) == 0 ||
-        AsciiStrnCmp (BrandInfix, "Silver", L_STR_LEN ("Silver")) == 0 ||
-        AsciiStrnCmp (BrandInfix, "Gold", L_STR_LEN ("Gold")) == 0 ||
-        AsciiStrnCmp (BrandInfix, "Platinum", L_STR_LEN ("Platinum")) == 0) {
+    if ((AsciiStrnCmp (BrandInfix, "Bronze", L_STR_LEN ("Bronze")) == 0) ||
+        (AsciiStrnCmp (BrandInfix, "Silver", L_STR_LEN ("Silver")) == 0) ||
+        (AsciiStrnCmp (BrandInfix, "Gold", L_STR_LEN ("Gold")) == 0) ||
+        (AsciiStrnCmp (BrandInfix, "Platinum", L_STR_LEN ("Platinum")) == 0))
+    {
       // Treat Xeon Scalable chips as their closest relatives, Xeon W
       return AppleProcessorMajorXeonW;
     }
@@ -106,9 +117,11 @@ InternalDetectAppleMajorType (
     if (AsciiStrnCmp (BrandInfix, "E5-", L_STR_LEN ("E5-")) == 0) {
       return AppleProcessorMajorXeonE5;
     }
+
     if (AsciiStrnCmp (BrandInfix, "W-", L_STR_LEN ("W-")) == 0) {
       return AppleProcessorMajorXeonW;
     }
+
     return AppleProcessorMajorXeonNehalem;
   }
 
@@ -117,11 +130,11 @@ InternalDetectAppleMajorType (
 
 UINT16
 InternalDetectAppleProcessorType (
-  IN UINT8   Model,
-  IN UINT8   Stepping,
-  IN UINT8   AppleMajorType,
-  IN UINT16  CoreCount,
-  IN BOOLEAN Is64Bit
+  IN UINT8    Model,
+  IN UINT8    Stepping,
+  IN UINT8    AppleMajorType,
+  IN UINT16   CoreCount,
+  IN BOOLEAN  Is64Bit
   )
 {
   switch (Model) {
@@ -153,16 +166,16 @@ InternalDetectAppleProcessorType (
     // Prescott-2M: same page.
     // Cedar Mill:  same page.
     // Bonnell:     https://en.wikipedia.org/wiki/Bonnell_(microarchitecture)
-    // Saltwell:    same page.        
+    // Saltwell:    same page.
     //
     // Not used by Apple.
     //
-    case CPU_MODEL_PRESCOTT:    // 0x03
-    case CPU_MODEL_PRESCOTT_2M: // 0x04
-    case CPU_MODEL_CEDAR_MILL:  // 0x06
-    case CPU_MODEL_BONNELL:     // 0x1C
-    case CPU_MODEL_BONNELL_MID: // 0x26
-    case CPU_MODEL_SALTWELL:    // 0x36
+    case CPU_MODEL_PRESCOTT:                                                         // 0x03
+    case CPU_MODEL_PRESCOTT_2M:                                                      // 0x04
+    case CPU_MODEL_CEDAR_MILL:                                                       // 0x06
+    case CPU_MODEL_BONNELL:                                                          // 0x1C
+    case CPU_MODEL_BONNELL_MID:                                                      // 0x26
+    case CPU_MODEL_SALTWELL:                                                         // 0x36
       return Is64Bit ? AppleProcessorTypeCore2DuoType1 : AppleProcessorTypeCoreSolo; // 0x0301 if 64-bit, otherwise 0x0201
 
     //
@@ -186,6 +199,7 @@ InternalDetectAppleProcessorType (
           // ONLY MBA31 (SU9400/SU9600) and MBA32 (SL9400/SL9600)
           return AppleProcessorTypeCore2DuoType2; // 0x0302
         }
+
         // IM51 (T7200), IM61 (T7400), IM71 (T7300), IM81 (E8435), IM101 (E7600),
         // MM21 (unknown), MM31 (P7350),
         // MBP21 (T7600), MBP22 (unknown), MBP31 (T7700), MBP41 (T8300), MBP71 (P8600),
@@ -194,13 +208,16 @@ InternalDetectAppleProcessorType (
         // MB21 (unknown), MB31 (T7500), MB41 (T8300), MB51 (P8600), MB52 (P7450), MB61 (P7550), MB71 (P8600)
         return AppleProcessorTypeCore2DuoType1; // 0x0301
       }
-      if (AppleMajorType == AppleProcessorMajorXeonPenryn
-        || AppleMajorType == AppleProcessorMajorXeonE5
-        || AppleMajorType == AppleProcessorMajorXeonNehalem) {
+
+      if (  (AppleMajorType == AppleProcessorMajorXeonPenryn)
+         || (AppleMajorType == AppleProcessorMajorXeonE5)
+         || (AppleMajorType == AppleProcessorMajorXeonNehalem))
+      {
         // MP21 (2x X5365), MP31 (2x E5462) - 0x0402
         // FIXME: check when 0x0401 will be used.
         return AppleProcessorTypeXeonPenrynType2; // 0x0402
       }
+
       // here stands for models not used by Apple (Merom/Penryn), putting 0x0301 as lowest
       return AppleProcessorTypeCore2DuoType1;   // 0x0301
 
@@ -226,19 +243,23 @@ InternalDetectAppleProcessorType (
         // MP41 & Xserve31 (2x E5520, CPU_MODEL_NEHALEM), MP51 (2x X5670, CPU_MODEL_WESTMERE)
         return AppleProcessorTypeXeon;        // 0x0501
       }
+
       if (AppleMajorType == AppleProcessorMajorI3) {
         // IM112 (i3-540, 0x0901, CPU_MODEL_DALES_32NM)
         return AppleProcessorTypeCorei3Type1; // 0x0901
       }
+
       if (AppleMajorType == AppleProcessorMajorI5) {
         // FIXME: no idea what it is on IM112 (i5-680)
         // MBP61, i5-640M, 0x0602, CPU_MODEL_DALES_32NM
         return AppleProcessorTypeCorei5Type2; // 0x0602
       }
+
       if (AppleMajorType == AppleProcessorMajorI7) {
         // FIXME: used by Apple, no idea what to use, assuming 0x0702 for now (based off 0x0602 on i5)
         return AppleProcessorTypeCorei7Type2; // 0x0702
       }
+
       // here stands for Pentium and Celeron (Nehalem/Westmere), not used by Apple at all.
       // putting 0x0901 (i3) as lowest
       return AppleProcessorTypeCorei3Type1; // 0x0901
@@ -264,6 +285,7 @@ InternalDetectAppleProcessorType (
         // FIXME: used by Apple on iMac12,1 (EDU, i3-2100), not confirmed yet
         return AppleProcessorTypeCorei3Type3;   // 0x0903
       }
+
       if (AppleMajorType == AppleProcessorMajorI5) {
         // NOTE: two values are used here. (0x0602 and 0x0603)
         // TODO: how to classify them. (by changing "if (0)")
@@ -271,33 +293,41 @@ InternalDetectAppleProcessorType (
           // MM51 (i5-2415M), MM52 (i5-2520M), MBA41 (i5-2467M), MBA42 (i5-2557M)
           return AppleProcessorTypeCorei5Type2; // 0x0602
         }
+
         // IM121 (i5-2400S), MBP81 (i5-2415M)
         return AppleProcessorTypeCorei5Type3; // 0x0603
       }
+
       if (AppleMajorType == AppleProcessorMajorI7) {
         // IM122 (i7-2600), MBP82 (i7-2675QM), MBP83 (i7-2820QM)
         //
         // FIXME: will those i7 not used by Apple (see above), be identified as AppleProcessorMajorI7?
         return AppleProcessorTypeCorei7Type3;   // 0x0703
       }
-      if (AppleMajorType == AppleProcessorMajorXeonE5) { // see TODO below
+
+      if (AppleMajorType == AppleProcessorMajorXeonE5) {
+        // see TODO below
         // for Sandy Xeon E5, not used by Apple
         // FIXME: is AppleProcessorMajorXeonE5, which seems to be for IVY-E only, compatible with SNB-E too?
         // TODO: write some decent code to check SNB-E based Xeon E5.
         return AppleProcessorTypeXeonE5;        // 0x0A01
       }
-      if (AppleMajorType == AppleProcessorMajorXeonNehalem) { // see TODO below
+
+      if (AppleMajorType == AppleProcessorMajorXeonNehalem) {
+        // see TODO below
         // for Sandy Xeon E3
         // NOTE: Xeon E3 is not used by Apple at all and should be somehow treated as i7,
         //       but here we'd like to show Xeon in "About This Mac".
         // TODO: CPU major type check for SNB based Xeon E3
         return AppleProcessorTypeXeon;          // 0x0501
       }
+
       if (CoreCount > 4) {
         // This can possibly be some engineering sample of a Xeon CPU.
         // REF: https://github.com/acidanthera/bugtracker/issues/1149
         return AppleProcessorTypeXeonE5;
       }
+
       // here stands for Pentium and Celeron (Sandy), not used by Apple at all.
       // putting 0x0903 (i3) as lowest
       return AppleProcessorTypeCorei3Type3;   // 0x0903
@@ -324,12 +354,14 @@ InternalDetectAppleProcessorType (
         // MP61 (E5-1620 v2)
         return AppleProcessorTypeXeonE5;      // 0x0A01
       }
+
       if (AppleMajorType == AppleProcessorMajorI5) {
         // IM131 (i5-3470S), IM132  (i5-3470S),
         // MBP92 (i5-3210M), MBP102 (i5-3210M)
         // MBA51 (i6-3317U), MBA52  (i5-3427U)
         return AppleProcessorTypeCorei5Type4; // 0x0604
       }
+
       if (AppleMajorType == AppleProcessorMajorI7) {
         // MM62  (i7-3615QM),
         // MBP91 (i7-3615QM), MBP101 (i7-3820QM)
@@ -337,18 +369,22 @@ InternalDetectAppleProcessorType (
         // FIXME: will those i7 not used by Apple (see above), be identified as AppleProcessorMajorI7?
         return AppleProcessorTypeCorei7Type4; // 0x0704
       }
+
       if (AppleMajorType == AppleProcessorMajorI3) {
         // FIXME: used by Apple (if iMac13,3 were existent, i3-3225), not confirmed yet
         // assuming it exists for now
         return AppleProcessorTypeCorei3Type4; // 0x0904
       }
-      if (AppleMajorType == AppleProcessorMajorXeonNehalem) { // see TODO below
+
+      if (AppleMajorType == AppleProcessorMajorXeonNehalem) {
+        // see TODO below
         // for Ivy/Ivy-E E3/E7, not used by Apple
         // NOTE: Xeon E3/E7 is not used by Apple at all and should be somehow treated as i7,
         //       but here we'd like to show Xeon in "About This Mac".
         // TODO: CPU major type check for IVY based Xeon E3/E7
         return AppleProcessorTypeXeon;        // 0x0501
       }
+
       // here stands for Pentium and Celeron (Ivy), not used by Apple at all.
       // putting 0x0904 (i3) as lowest.
       return AppleProcessorTypeCorei3Type4; // 0x0904
@@ -375,29 +411,36 @@ InternalDetectAppleProcessorType (
         // MBA62 (i5-4250U)
         return AppleProcessorTypeCorei5Type5; // 0x0605
       }
+
       if (AppleMajorType == AppleProcessorMajorI7) {
         // MBP112 (i7-4770HQ), MBP113 (i7-4850HQ)
         //
         // FIXME: will those i7 not used by Apple (see above), be identified as AppleProcessorMajorI7?
         return AppleProcessorTypeCorei7Type5; // 0x0705
       }
+
       if (AppleMajorType ==  AppleProcessorMajorI3) {
         // for i3, not used by Apple, just for showing i3 in "About This Mac".
         return AppleProcessorTypeCorei3Type5; // 0x0905
       }
-      if (AppleMajorType == AppleProcessorMajorXeonE5) { // see TODO below
+
+      if (AppleMajorType == AppleProcessorMajorXeonE5) {
+        // see TODO below
         // for Haswell-E Xeon E5, not used by Apple
         // FIXME: is AppleProcessorMajorXeonE5, which seems to be for IVY-E only, compatible with Haswell-E too?
         // TODO: write some decent code to check Haswell-E based Xeon E5.
         return AppleProcessorTypeXeonE5;      // 0x0A01
       }
-      if (AppleMajorType == AppleProcessorMajorXeonNehalem) { // see TODO below
+
+      if (AppleMajorType == AppleProcessorMajorXeonNehalem) {
+        // see TODO below
         // for Haswell/Haswell-E E3/E7, not used by Apple
         // NOTE: Xeon E3/E7 is not used by Apple at all and should be somehow treated as i7,
         //       but here we'd like to show Xeon in "About This Mac".
         // TODO: CPU major type check for Haswell/Haswell-E based Xeon E3/E7
         return AppleProcessorTypeXeon;        // 0x0501
       }
+
       // here stands for Pentium and Celeron (Haswell), not used by Apple at all.
       // putting 0x0905 (i3) as lowest.
       return AppleProcessorTypeCorei3Type5; // 0x0905
@@ -425,35 +468,43 @@ InternalDetectAppleProcessorType (
         // MB81 (M 5Y51)
         return AppleProcessorTypeCoreMType6;   // 0x0B06
       }
+
       if (AppleMajorType == AppleProcessorMajorI5) {
         // IM161  (i5-5250U), IM162 (i5-5675R),
         // MBP121 (i5-5257U),
         // MBA71  (i5-5250U), MBA72 (unknown)
         return AppleProcessorTypeCorei5Type6; // 0x0606
       }
+
       if (AppleMajorType == AppleProcessorMajorI7) {
         // FIXME: 0x0706 is just an ideal value for i7, waiting for confirmation
         // FIXME: will those i7 not used by Apple (see above), be identified as AppleProcessorMajorI7?
         return AppleProcessorTypeCorei7Type6; // 0x0706
       }
+
       if (AppleMajorType == AppleProcessorMajorI3) {
         // for i3, not used by Apple, just for showing i3 in "About This Mac".
         // FIXME: 0x0906 is just an ideal value for i3, waiting for confirmation
         return AppleProcessorTypeCorei3Type6; // 0x0906
       }
-      if (AppleMajorType == AppleProcessorMajorXeonE5) { // see TODO below
+
+      if (AppleMajorType == AppleProcessorMajorXeonE5) {
+        // see TODO below
         // for Broadwell-E Xeon E5, not used by Apple
         // FIXME: is AppleProcessorMajorXeonE5, which seems to be for IVY-E only, compatible with Broadwell-E too?
         // TODO: write some decent code to check Broadwell-E based Xeon E5.
         return AppleProcessorTypeXeonE5;      // 0x0A01
       }
-      if (AppleMajorType == AppleProcessorMajorXeonNehalem) { // see TODO below
+
+      if (AppleMajorType == AppleProcessorMajorXeonNehalem) {
+        // see TODO below
         // for Broadwell E3, not used by Apple
         // NOTE: Xeon E3 is not used by Apple at all and should be somehow treated as i7,
         //       but here we'd like to show Xeon in "About This Mac".
         // TODO: CPU major type check for Broadwell based Xeon E3
         return AppleProcessorTypeXeon;        // 0x0501
       }
+
       // here stands for Pentium and Celeron (Broadwell), not used by Apple at all.
       // putting 0x0906 (i3) as lowest.
       return AppleProcessorTypeCorei3Type5; // 0x0906
@@ -473,36 +524,43 @@ InternalDetectAppleProcessorType (
     case CPU_MODEL_SKYLAKE:     // 0x4E
     case CPU_MODEL_SKYLAKE_DT:  // 0x5E
     case CPU_MODEL_SKYLAKE_W:   // 0x55, also SKL-X and SKL-SP
-      if (AppleMajorType == AppleProcessorMajorXeonNehalem) { // see TODO below
+      if (AppleMajorType == AppleProcessorMajorXeonNehalem) {
+        // see TODO below
         // for Skylake E3 (there's no E5/E7 on Skylake), not used by Apple
         // NOTE: Xeon E3 is not used by Apple at all and should be somehow treated as i7,
         //       but here we'd like to show Xeon in "About This Mac".
         // TODO: CPU major type check for Skylake based Xeon E3
         return AppleProcessorTypeXeon;        // 0x0501
       }
-      if (AppleMajorType == AppleProcessorMajorXeonW || CoreCount > 10) {
+
+      if ((AppleMajorType == AppleProcessorMajorXeonW) || (CoreCount > 10)) {
         // IMP11 (Xeon W 2140B)
         // This will also get applied for i9 CPUs containing too many cores
         // that are otherwise marked as unknown.
         return AppleProcessorTypeXeonW;       // 0x0F01
       }
+
       if (AppleMajorType == AppleProcessorMajorM3) {
         // FIXME: we dont have any m3 (Skylake) dump!
         // using an ideal value (0x0C07), which is used on MB101 (m3-7Y32)
         return AppleProcessorTypeCoreM3Type7; // 0x0C07
       }
+
       if (AppleMajorType == AppleProcessorMajorM5) {
         // MB91 (m5 6Y54)
         return AppleProcessorTypeCoreM5Type7; // 0x0D07
       }
+
       if (AppleMajorType == AppleProcessorMajorM7) {
         // FIXME: we dont have any m7 (Skylake) dump!
         // using an ideal value (0x0E07)
         return AppleProcessorTypeCoreM7Type7; // 0x0E07
       }
+
       if (AppleMajorType == AppleProcessorMajorI5) {
         return AppleProcessorTypeCorei5Type5; // 0x0605
       }
+
       if (AppleMajorType == AppleProcessorMajorI7) {
         // FIXME: used by Apple, but not sure what to use...
         // 0x0707 is used on MBP133 (i7-6700HQ),
@@ -510,10 +568,12 @@ InternalDetectAppleProcessorType (
         // using 0x0705 for now
         return AppleProcessorTypeCorei7Type5; // 0x0705
       }
+
       if (AppleMajorType == AppleProcessorMajorI3) {
         // for i3, not used by Apple, just for showing i3 in "About This Mac".
         return AppleProcessorTypeCorei3Type5; // 0x0905
       }
+
       if (AppleMajorType == AppleProcessorMajorI9) {
         // for i9 (SKL-X), not used by Apple, just for showing i9 in "About This Mac".
         // FIXME: i9 was not introdced in this era but later (MBP151, Coffee Lake),
@@ -521,6 +581,7 @@ InternalDetectAppleProcessorType (
         // NOTE: using a mostly invalid value 0x1005 for now...
         return AppleProcessorTypeCorei9Type5; // 0x1005
       }
+
       // here stands for Pentium and Celeron (Skylake), not used by Apple at all.
       // putting 0x0905 (i3) as lowest.
       return AppleProcessorTypeCorei3Type5; // 0x0905
@@ -554,6 +615,7 @@ InternalDetectAppleProcessorType (
         // MB101 (m3 7Y32)
         return AppleProcessorTypeCoreM3Type7; // 0x0C07
       }
+
       if (AppleMajorType == AppleProcessorMajorI5) {
         // Kaby has 0x9 stepping, and Coffee use 0xA / 0xB stepping.
         if (Stepping == 9) {
@@ -563,10 +625,12 @@ InternalDetectAppleProcessorType (
           // NOTE 1: IM191 is Coffee and thus 0x0609 will be used, TODO.
           return AppleProcessorTypeCorei5Type5; // 0x0605
         }
+
         // MM81 (i5-8500B)
         // MBP152 (i5-8259U)
         return AppleProcessorTypeCorei5Type9; // 0x0609
       }
+
       if (AppleMajorType == AppleProcessorMajorI7) {
         // Kaby has 0x9 stepping, and Coffee use 0xA / 0xB stepping.
         if (Stepping == 9) {
@@ -576,26 +640,32 @@ InternalDetectAppleProcessorType (
           // using 0x0705 for now
           return AppleProcessorTypeCorei7Type5; // 0x0705
         }
+
         // MM81 (i7-8700B)
         return AppleProcessorTypeCorei7Type9; // 0x0709
       }
+
       if (AppleMajorType == AppleProcessorMajorI9) {
         // FIXME: find a dump from MBP151 with i9-8950HK,
         // for now using an ideal value (0x1009), comparing to 0x0709 (used on MBP151, i7-8850H and MM81, i7-8700B)
         return AppleProcessorTypeCorei9Type9; // 0x1009
       }
+
       if (AppleMajorType == AppleProcessorMajorI3) {
         // FIXME: find a dump from MM71 with i3...
         // for now using an idea value (0x0905)
         return AppleProcessorTypeCorei3Type5; // 0x0905
       }
-      if (AppleMajorType == AppleProcessorMajorXeonNehalem) { // see TODO below
+
+      if (AppleMajorType == AppleProcessorMajorXeonNehalem) {
+        // see TODO below
         // for Kaby Lake/Coffee Lake E3 (there's no E5/E7 on either), not used by Apple
         // NOTE: Xeon E3 is not used by Apple at all and should be somehow treated as i7,
         //       but here we'd like to show Xeon in "About This Mac".
         // TODO: CPU major type check for KBL/CFL based Xeon E3
         return AppleProcessorTypeXeon;        // 0x0501
       }
+
       // here stands for Pentium and Celeron (KBL/CFL), not used by Apple at all.
       // putting 0x0905 (i3) as lowest.
       return AppleProcessorTypeCorei3Type5; // 0x0905
@@ -608,10 +678,10 @@ InternalDetectAppleProcessorType (
 
 UINT32
 OcCpuModelToAppleFamily (
-  IN CPUID_VERSION_INFO_EAX   VersionEax
+  IN CPUID_VERSION_INFO_EAX  VersionEax
   )
 {
-  UINT8                   Model;
+  UINT8  Model;
 
   if (VersionEax.Bits.FamilyId != 6) {
     return CPUFAMILY_UNKNOWN;
@@ -621,7 +691,7 @@ OcCpuModelToAppleFamily (
   // This MUST be 1 to 1 with Apple XNU kernel implemenation.
   //
 
-  Model = (UINT8) VersionEax.Bits.Model | (UINT8) (VersionEax.Bits.ExtendedModelId << 4U);
+  Model = (UINT8)VersionEax.Bits.Model | (UINT8)(VersionEax.Bits.ExtendedModelId << 4U);
 
   switch (Model) {
     case CPU_MODEL_PENRYN:
@@ -667,21 +737,21 @@ OcCpuFrequencyToDisplayFrequency (
   IN UINT64  Frequency
   )
 {
-  UINT16                          MhzSpeed;
-  UINT16                          MhzRemainder;
+  UINT16  MhzSpeed;
+  UINT16  MhzRemainder;
 
   //
   // Round to nearest in MHz
   //
-  MhzSpeed = (UINT16) DivU64x32 (Frequency + 500000, 1000000);
+  MhzSpeed     = (UINT16)DivU64x32 (Frequency + 500000, 1000000);
   MhzRemainder = MhzSpeed % 100;
   //
   // Round to two digits when the second digit is above zero or to one otherwise.
   // REF: https://github.com/acidanthera/bugtracker/issues/1521
   //
-  if (MhzRemainder >= 60 && MhzRemainder < 89) {
+  if ((MhzRemainder >= 60) && (MhzRemainder < 89)) {
     MhzSpeed = (MhzSpeed) / 10 * 10;
-  } else if (MhzRemainder >= 12 && MhzRemainder < 89) {
+  } else if ((MhzRemainder >= 12) && (MhzRemainder < 89)) {
     MhzSpeed = (MhzSpeed + 5) / 10 * 10;
   } else {
     MhzSpeed = (MhzSpeed + 50) / 100 * 100;

@@ -25,6 +25,7 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
     { 0xB0, 0xBD, 0xF6, 0xBE, 0x2E, 0x1E, 0x27, 0x2C } }
 
 // BOOT_POLICY_GET_BOOT_FILE
+
 /** Locates the bootable file of the given volume.  Prefered are the values
     blessed, though if unavailable, hard-coded names are being verified and
     used if existing.
@@ -48,7 +49,7 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 **/
 typedef
 EFI_STATUS
-(EFIAPI *BOOT_POLICY_GET_BOOT_FILE) (
+(EFIAPI *BOOT_POLICY_GET_BOOT_FILE)(
   IN     EFI_HANDLE                Device,
   IN OUT EFI_DEVICE_PATH_PROTOCOL  **FilePath
   );
@@ -85,7 +86,7 @@ typedef enum {
 
 typedef
 EFI_STATUS
-(EFIAPI *BOOT_POLICY_GET_BOOT_FILE_EX) (
+(EFIAPI *BOOT_POLICY_GET_BOOT_FILE_EX)(
   IN  EFI_HANDLE                Device,
   IN  BOOT_POLICY_ACTION        Action,
   OUT EFI_DEVICE_PATH_PROTOCOL  **FilePath
@@ -93,7 +94,7 @@ EFI_STATUS
 
 typedef
 EFI_STATUS
-(EFIAPI *BOOT_POLICY_DEVICE_PATH_TO_DIR_PATH) (
+(EFIAPI *BOOT_POLICY_DEVICE_PATH_TO_DIR_PATH)(
   IN  EFI_DEVICE_PATH_PROTOCOL  *DevicePath,
   OUT CHAR16                    **BootPathName,
   OUT EFI_HANDLE                *Device,
@@ -102,7 +103,7 @@ EFI_STATUS
 
 typedef
 EFI_STATUS
-(EFIAPI *BOOT_POLICY_GET_APFS_RECOVERY_FILE_PATH) (
+(EFIAPI *BOOT_POLICY_GET_APFS_RECOVERY_FILE_PATH)(
   IN  EFI_DEVICE_PATH_PROTOCOL  *DevicePath,
   IN  CONST CHAR16              *PathName,
   OUT CHAR16                    **FullPathName,
@@ -113,7 +114,7 @@ EFI_STATUS
 
 typedef
 EFI_STATUS
-(EFIAPI *BOOT_POLICY_GET_ALL_APFS_RECOVERY_FILE_PATH) (
+(EFIAPI *BOOT_POLICY_GET_ALL_APFS_RECOVERY_FILE_PATH)(
   IN  EFI_HANDLE  Handle,
   OUT VOID        **Volumes,
   OUT UINTN       *NumberOfEntries
@@ -123,17 +124,17 @@ EFI_STATUS
 /// The structure exposed by the APPLE_BOOT_POLICY_PROTOCOL.
 ///
 typedef struct {
-  UINTN                                       Revision;                    ///< The revision of the installed protocol.
-  BOOT_POLICY_GET_BOOT_FILE                   GetBootFile;                 ///< Present as of Revision 1.
-  BOOT_POLICY_GET_BOOT_FILE_EX                GetBootFileEx;               ///< Present as of Revision 3.
-  BOOT_POLICY_DEVICE_PATH_TO_DIR_PATH         DevicePathToDirPath;         ///< Present as of Revision 3.
-  BOOT_POLICY_GET_APFS_RECOVERY_FILE_PATH     GetApfsRecoveryFilePath;     ///< Present as of Revision 3.
-  BOOT_POLICY_GET_ALL_APFS_RECOVERY_FILE_PATH GetAllApfsRecoveryFilePath;  ///< Present as of Revision 3.
+  UINTN                                          Revision;                   ///< The revision of the installed protocol.
+  BOOT_POLICY_GET_BOOT_FILE                      GetBootFile;                ///< Present as of Revision 1.
+  BOOT_POLICY_GET_BOOT_FILE_EX                   GetBootFileEx;              ///< Present as of Revision 3.
+  BOOT_POLICY_DEVICE_PATH_TO_DIR_PATH            DevicePathToDirPath;        ///< Present as of Revision 3.
+  BOOT_POLICY_GET_APFS_RECOVERY_FILE_PATH        GetApfsRecoveryFilePath;    ///< Present as of Revision 3.
+  BOOT_POLICY_GET_ALL_APFS_RECOVERY_FILE_PATH    GetAllApfsRecoveryFilePath; ///< Present as of Revision 3.
 } APPLE_BOOT_POLICY_PROTOCOL;
 
 ///
 /// A global variable storing the GUID of the APPLE_BOOT_POLICY_PROTOCOL.
 ///
-extern EFI_GUID gAppleBootPolicyProtocolGuid;
+extern EFI_GUID  gAppleBootPolicyProtocolGuid;
 
 #endif // APPLE_BOOT_POLICY_H

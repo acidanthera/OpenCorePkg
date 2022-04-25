@@ -22,10 +22,10 @@
 //
 // Available on all platforms, requires NMI bit handling.
 //
-#define R_PCH_RTC_INDEX           0x70
-#define R_PCH_RTC_TARGET          0x71
-#define R_PCH_RTC_EXT_INDEX       0x72
-#define R_PCH_RTC_EXT_TARGET      0x73
+#define R_PCH_RTC_INDEX       0x70
+#define R_PCH_RTC_TARGET      0x71
+#define R_PCH_RTC_EXT_INDEX   0x72
+#define R_PCH_RTC_EXT_TARGET  0x73
 
 //
 // Available on Ivy Bridge and newer. Ignores NMI bit.
@@ -38,13 +38,13 @@
 //
 // RTC Memory bank size
 //
-#define RTC_BANK_SIZE             0x80
+#define RTC_BANK_SIZE  0x80
 
 //
 // RTC INDEX bit mask
 //
-#define RTC_DATA_MASK             0x7F
-#define RTC_NMI_MASK              0x80
+#define RTC_DATA_MASK  0x7F
+#define RTC_NMI_MASK   0x80
 
 //
 // Standard register addresses.
@@ -67,6 +67,6 @@
 //
 // Register A update in progress bit.
 //
-#define RTC_UPDATE_IN_PROGRESS        0x80U
+#define RTC_UPDATE_IN_PROGRESS  0x80U
 
 #endif // OC_RTC_LIB_INTERNAL_H

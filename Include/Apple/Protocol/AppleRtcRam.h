@@ -42,7 +42,7 @@ typedef struct APPLE_RTC_RAM_PROTOCOL_ APPLE_RTC_RAM_PROTOCOL;
 **/
 typedef
 UINTN
-(EFIAPI *APPLE_RTC_RAM_GET_AVAILABLE_MEMORY) (
+(EFIAPI *APPLE_RTC_RAM_GET_AVAILABLE_MEMORY)(
   IN  APPLE_RTC_RAM_PROTOCOL  *This
   );
 
@@ -67,7 +67,7 @@ UINTN
 **/
 typedef
 EFI_STATUS
-(EFIAPI *APPLE_RTC_RAM_READ_MEMORY) (
+(EFIAPI *APPLE_RTC_RAM_READ_MEMORY)(
   IN  APPLE_RTC_RAM_PROTOCOL  *This,
   OUT UINT8                   *Buffer,
   IN  UINTN                   BufferSize,
@@ -101,7 +101,7 @@ EFI_STATUS
 **/
 typedef
 EFI_STATUS
-(EFIAPI *APPLE_RTC_RAM_WRITE_MEMORY) (
+(EFIAPI *APPLE_RTC_RAM_WRITE_MEMORY)(
   IN  APPLE_RTC_RAM_PROTOCOL  *This,
   IN  CONST UINT8             *Buffer,
   IN  UINTN                   BufferSize,
@@ -125,7 +125,7 @@ EFI_STATUS
 **/
 typedef
 EFI_STATUS
-(EFIAPI *APPLE_RTC_RAM_RESET_MEMORY) (
+(EFIAPI *APPLE_RTC_RAM_RESET_MEMORY)(
   IN  APPLE_RTC_RAM_PROTOCOL  *This
   );
 
@@ -133,12 +133,12 @@ EFI_STATUS
   Apple RTC protocol structure.
 **/
 struct APPLE_RTC_RAM_PROTOCOL_ {
-  APPLE_RTC_RAM_GET_AVAILABLE_MEMORY  GetAvailableMemory;
-  APPLE_RTC_RAM_READ_MEMORY           ReadMemory;
-  APPLE_RTC_RAM_WRITE_MEMORY          WriteMemory;
-  APPLE_RTC_RAM_RESET_MEMORY          ResetMemory;
+  APPLE_RTC_RAM_GET_AVAILABLE_MEMORY    GetAvailableMemory;
+  APPLE_RTC_RAM_READ_MEMORY             ReadMemory;
+  APPLE_RTC_RAM_WRITE_MEMORY            WriteMemory;
+  APPLE_RTC_RAM_RESET_MEMORY            ResetMemory;
 };
 
-extern EFI_GUID gAppleRtcRamProtocolGuid;
+extern EFI_GUID  gAppleRtcRamProtocolGuid;
 
 #endif // APPLE_RTC_RAM_PROTOCOL_H

@@ -17,7 +17,7 @@
 
 /**
   The internal implementation of *_DECOMPRESS_PROTOCOL.GetInfo().
-  
+
   @param Source           The source buffer containing the compressed data.
   @param SourceSize       The size of source buffer
   @param DestinationSize  The size of destination buffer.
@@ -39,8 +39,8 @@ LzmaUefiDecompressGetInfo (
   Decompresses a Lzma compressed source buffer.
 
   Extracts decompressed data to its original form.
-  If the compressed source data specified by Source is successfully decompressed 
-  into Destination, then RETURN_SUCCESS is returned.  If the compressed source data 
+  If the compressed source data specified by Source is successfully decompressed
+  into Destination, then RETURN_SUCCESS is returned.  If the compressed source data
   specified by Source is not in a valid compressed data format,
   then RETURN_INVALID_PARAMETER is returned.
 
@@ -48,13 +48,13 @@ LzmaUefiDecompressGetInfo (
   @param  SourceSize  The size of source buffer.
   @param  Destination The destination buffer to store the decompressed data
   @param  Scratch     A temporary scratch buffer that is used to perform the decompression.
-                      This is an optional parameter that may be NULL if the 
+                      This is an optional parameter that may be NULL if the
                       required scratch buffer size is 0.
-                     
-  @retval  RETURN_SUCCESS Decompression completed successfully, and 
+
+  @retval  RETURN_SUCCESS Decompression completed successfully, and
                           the uncompressed buffer is returned in Destination.
-  @retval  RETURN_INVALID_PARAMETER 
-                          The source buffer specified by Source is corrupted 
+  @retval  RETURN_INVALID_PARAMETER
+                          The source buffer specified by Source is corrupted
                           (not in a valid compressed format).
 **/
 RETURN_STATUS
@@ -65,6 +65,5 @@ LzmaUefiDecompress (
   IN OUT VOID    *Destination,
   IN OUT VOID    *Scratch
   );
-  
-#endif // __LZMADECOMPRESS_H__
 
+#endif // __LZMADECOMPRESS_H__

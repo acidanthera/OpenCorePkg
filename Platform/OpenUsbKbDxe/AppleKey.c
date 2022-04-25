@@ -31,7 +31,7 @@ UsbKbSetAppleKeyMapDb (
   IN APPLE_KEY_MAP_DATABASE_PROTOCOL  *KeyMapDb
   )
 {
-  EFI_STATUS Status;
+  EFI_STATUS  Status;
 
   ASSERT_USB_KB_DEV_VALID (UsbKeyboardDevice);
   ASSERT (KeyMapDb != NULL);
@@ -61,26 +61,26 @@ UsbKbAppleKeyMapDbInstallNotify (
   IN VOID       *Context
   )
 {
-  EFI_STATUS                      Status;
-  APPLE_KEY_MAP_DATABASE_PROTOCOL *KeyMapDb;
-  USB_KB_DEV                      *UsbKeyboardDevice;
+  EFI_STATUS                       Status;
+  APPLE_KEY_MAP_DATABASE_PROTOCOL  *KeyMapDb;
+  USB_KB_DEV                       *UsbKeyboardDevice;
 
   ASSERT (Event != NULL);
   ASSERT_USB_KB_DEV_VALID ((USB_KB_DEV *)Context);
   ASSERT (((USB_KB_DEV *)Context)->KeyMapInstallNotifyEvent == Event);
 
   UsbKeyboardDevice = (USB_KB_DEV *)Context;
-  Status = gBS->LocateProtocol (
-                  &gAppleKeyMapDatabaseProtocolGuid,
-                  UsbKeyboardDevice->KeyMapInstallRegistration,
-                  (VOID **)&KeyMapDb
-                  );
+  Status            = gBS->LocateProtocol (
+                             &gAppleKeyMapDatabaseProtocolGuid,
+                             UsbKeyboardDevice->KeyMapInstallRegistration,
+                             (VOID **)&KeyMapDb
+                             );
   ASSERT (Status != EFI_NOT_FOUND);
 
   UsbKbSetAppleKeyMapDb (UsbKeyboardDevice, KeyMapDb);
 
   gBS->CloseEvent (UsbKeyboardDevice->KeyMapInstallNotifyEvent);
-  UsbKeyboardDevice->KeyMapInstallNotifyEvent = NULL;
+  UsbKeyboardDevice->KeyMapInstallNotifyEvent  = NULL;
   UsbKeyboardDevice->KeyMapInstallRegistration = NULL;
 }
 
@@ -89,8 +89,8 @@ UsbKbLocateAppleKeyMapDb (
   IN USB_KB_DEV  *UsbKeyboardDevice
   )
 {
-  EFI_STATUS                      Status;
-  APPLE_KEY_MAP_DATABASE_PROTOCOL *KeyMapDb;
+  EFI_STATUS                       Status;
+  APPLE_KEY_MAP_DATABASE_PROTOCOL  *KeyMapDb;
 
   ASSERT_USB_KB_DEV_VALID (UsbKeyboardDevice);
 
@@ -125,7 +125,7 @@ UsbKbFreeAppleKeyMapDb (
   IN USB_KB_DEV  *UsbKeyboardDevice
   )
 {
-  EFI_STATUS Status;
+  EFI_STATUS  Status;
 
   ASSERT_USB_KB_DEV_VALID (UsbKeyboardDevice);
 

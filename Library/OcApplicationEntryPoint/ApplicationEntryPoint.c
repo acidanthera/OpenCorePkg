@@ -37,7 +37,7 @@ _ModuleEntryPointReal (
   IN EFI_SYSTEM_TABLE  *SystemTable
   )
 {
-  EFI_STATUS                 Status;
+  EFI_STATUS  Status;
 
   if (_gUefiDriverRevision != 0) {
     //
@@ -69,7 +69,6 @@ _ModuleEntryPointReal (
   return Status;
 }
 
-
 /**
   Invokes the library destructors for all dependent libraries and terminates
   the UEFI Application.
@@ -91,7 +90,6 @@ Exit (
 
   gBS->Exit (gImageHandle, Status, 0, NULL);
 }
-
 
 /**
   Required by the EBC compiler and identical in functionality to _ModuleEntryPoint().

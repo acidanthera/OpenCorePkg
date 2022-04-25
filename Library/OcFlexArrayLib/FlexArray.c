@@ -12,7 +12,7 @@
 #include <Library/OcFlexArrayLib.h>
 #include <Library/OcGuardLib.h>
 
-#define INITIAL_NUM_ITEMS (8)
+#define INITIAL_NUM_ITEMS  (8)
 
 VOID
 OcFlexArrayFreePointerItem (
@@ -21,19 +21,19 @@ OcFlexArrayFreePointerItem (
 {
   ASSERT (Item != NULL);
 
-  if (*(VOID **) Item != NULL) {
-    FreePool (*(VOID **) Item);
-    *(VOID **) Item = NULL;
+  if (*(VOID **)Item != NULL) {
+    FreePool (*(VOID **)Item);
+    *(VOID **)Item = NULL;
   }
 }
 
 OC_FLEX_ARRAY *
 OcFlexArrayInit (
-  IN     CONST UINTN                        ItemSize,
-  IN     CONST OC_FLEX_ARRAY_FREE_ITEM      FreeItem   OPTIONAL
+  IN     CONST UINTN                    ItemSize,
+  IN     CONST OC_FLEX_ARRAY_FREE_ITEM  FreeItem   OPTIONAL
   )
 {
-  OC_FLEX_ARRAY   *FlexArray;
+  OC_FLEX_ARRAY  *FlexArray;
 
   ASSERT (ItemSize > 0);
 
@@ -59,8 +59,8 @@ OcFlexArrayInit (
 STATIC
 VOID *
 InternalFlexArrayItemAt (
-  IN     CONST OC_FLEX_ARRAY                *FlexArray,
-  IN     CONST UINTN                        Index
+  IN     CONST OC_FLEX_ARRAY  *FlexArray,
+  IN     CONST UINTN          Index
   )
 {
   VOID  *Item;
@@ -69,7 +69,7 @@ InternalFlexArrayItemAt (
   ASSERT (Index < FlexArray->Count);
   ASSERT (FlexArray->Items != NULL);
 
-  Item = ((UINT8 *) FlexArray->Items) + Index * FlexArray->ItemSize;
+  Item = ((UINT8 *)FlexArray->Items) + Index * FlexArray->ItemSize;
 
   return Item;
 }
@@ -84,12 +84,12 @@ InternalFlexArrayItemAt (
 STATIC
 VOID *
 InternalFlexArrayAddItem (
-  IN OUT       OC_FLEX_ARRAY                *FlexArray
+  IN OUT       OC_FLEX_ARRAY  *FlexArray
   )
 {
-  VOID    *TmpBuffer;
-  UINTN   NewSize;
-  VOID    *Item;
+  VOID   *TmpBuffer;
+  UINTN  NewSize;
+  VOID   *Item;
 
   ASSERT (FlexArray != NULL);
 
@@ -98,6 +98,7 @@ InternalFlexArrayAddItem (
     if (OcOverflowMulUN (FlexArray->AllocatedCount, FlexArray->ItemSize, &NewSize)) {
       return NULL;
     }
+
     FlexArray->Count = 1;
     FlexArray->Items = AllocatePool (NewSize);
     if (FlexArray->Items == NULL) {
@@ -111,15 +112,17 @@ InternalFlexArrayAddItem (
       if (OcOverflowMulUN (FlexArray->AllocatedCount * FlexArray->ItemSize, 2, &NewSize)) {
         return NULL;
       }
+
       TmpBuffer = ReallocatePool (
-        FlexArray->AllocatedCount * FlexArray->ItemSize,
-        NewSize,
-        FlexArray->Items
-        );
+                    FlexArray->AllocatedCount * FlexArray->ItemSize,
+                    NewSize,
+                    FlexArray->Items
+                    );
       if (TmpBuffer == NULL) {
         return NULL;
       }
-      FlexArray->Items = TmpBuffer;
+
+      FlexArray->Items          = TmpBuffer;
       FlexArray->AllocatedCount = FlexArray->AllocatedCount * 2;
     }
   }
@@ -131,13 +134,13 @@ InternalFlexArrayAddItem (
 
 VOID *
 OcFlexArrayAddItem (
-  IN OUT       OC_FLEX_ARRAY                *FlexArray
+  IN OUT       OC_FLEX_ARRAY  *FlexArray
   )
 {
-  VOID    *Item;
+  VOID  *Item;
 
   ASSERT (FlexArray != NULL);
-  
+
   Item = InternalFlexArrayAddItem (FlexArray);
 
   if (Item != NULL) {
@@ -151,12 +154,12 @@ OcFlexArrayAddItem (
 
 VOID *
 OcFlexArrayInsertItem (
-  IN OUT  OC_FLEX_ARRAY                *FlexArray,
-  IN      CONST UINTN                  InsertIndex
+  IN OUT  OC_FLEX_ARRAY  *FlexArray,
+  IN      CONST UINTN    InsertIndex
   )
 {
-  VOID    *Item;
-  VOID    *Dest;
+  VOID  *Item;
+  VOID  *Dest;
 
   ASSERT (FlexArray != NULL);
   ASSERT (InsertIndex <= FlexArray->Count);
@@ -184,11 +187,11 @@ OcFlexArrayInsertItem (
 
 VOID *
 OcFlexArrayItemAt (
-  IN     CONST OC_FLEX_ARRAY                *FlexArray,
-  IN     CONST UINTN                        Index
+  IN     CONST OC_FLEX_ARRAY  *FlexArray,
+  IN     CONST UINTN          Index
   )
 {
-  VOID *Item;
+  VOID  *Item;
 
   //
   // Repeat these checks here and in internal ItemAt for easier debugging if they fail.
@@ -204,12 +207,12 @@ OcFlexArrayItemAt (
   return Item;
 }
 
-VOID 
+VOID
 OcFlexArrayFree (
-  IN           OC_FLEX_ARRAY                **FlexArray
+  IN           OC_FLEX_ARRAY  **FlexArray
   )
 {
-  UINTN Index;
+  UINTN  Index;
 
   DEBUG ((OC_TRACE_FLEX, "FLEX: Free %p\n", FlexArray));
 
@@ -222,8 +225,10 @@ OcFlexArrayFree (
           (*FlexArray)->FreeItem (InternalFlexArrayItemAt (*FlexArray, Index));
         }
       }
+
       FreePool ((*FlexArray)->Items);
     }
+
     FreePool (*FlexArray);
     *FlexArray = NULL;
   }
@@ -231,8 +236,8 @@ OcFlexArrayFree (
 
 VOID
 OcFlexArrayDiscardItem (
-  IN OUT  OC_FLEX_ARRAY       *FlexArray,
-  IN      CONST BOOLEAN       FreeItem
+  IN OUT  OC_FLEX_ARRAY  *FlexArray,
+  IN      CONST BOOLEAN  FreeItem
   )
 {
   DEBUG ((OC_TRACE_FLEX, "FLEX: Discard %p %u\n", FlexArray, FreeItem));
@@ -241,33 +246,34 @@ OcFlexArrayDiscardItem (
   ASSERT (FlexArray->Items != NULL);
   ASSERT (FlexArray->Count > 0);
 
-  if (FreeItem && FlexArray->FreeItem != NULL) {
+  if (FreeItem && (FlexArray->FreeItem != NULL)) {
     FlexArray->FreeItem (InternalFlexArrayItemAt (FlexArray, FlexArray->Count - 1));
   }
-  
+
   --FlexArray->Count;
 }
 
 VOID
 OcFlexArrayFreeContainer (
-  IN           OC_FLEX_ARRAY                **FlexArray,
-  IN           VOID                         **Items,
-  IN           UINTN                        *Count
+  IN           OC_FLEX_ARRAY  **FlexArray,
+  IN           VOID           **Items,
+  IN           UINTN          *Count
   )
 {
   DEBUG ((OC_TRACE_FLEX, "FLEX: FreeContainer %p\n", FlexArray));
 
-  if (FlexArray == NULL || *FlexArray == NULL) {
+  if ((FlexArray == NULL) || (*FlexArray == NULL)) {
     ASSERT (FALSE);
     *Items = NULL;
     *Count = 0;
   } else {
     *Items = (*FlexArray)->Items;
     *Count = (*FlexArray)->Count;
-    if (*Count == 0 && *Items != NULL) {
+    if ((*Count == 0) && (*Items != NULL)) {
       FreePool (*Items);
       *Items = NULL;
     }
+
     FreePool (*FlexArray);
     *FlexArray = NULL;
   }

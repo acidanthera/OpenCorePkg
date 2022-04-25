@@ -29,9 +29,9 @@
 // Includes a revision for debugging reasons
 //
 typedef struct {
-  UINTN                   Revision;
+  UINTN    Revision;
 } OC_AFTER_BOOT_COMPAT_PROTOCOL;
 
-extern EFI_GUID gOcAfterBootCompatProtocolGuid;
+extern EFI_GUID  gOcAfterBootCompatProtocolGuid;
 
 #endif // OC_AFTER_BOOT_COMPAT_PROTOCOL_H

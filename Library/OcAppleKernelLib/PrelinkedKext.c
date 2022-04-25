@@ -43,29 +43,29 @@ InternalCreatePrelinkedKext (
   IN BOOLEAN                Is32Bit
   )
 {
-  PRELINKED_KEXT           *NewKext;
-  UINT32                   FieldIndex;
-  UINT32                   FieldCount;
-  CONST CHAR8              *KextPlistKey;
-  XML_NODE                 *KextPlistValue;
-  CONST CHAR8              *KextIdentifier;
-  XML_NODE                 *BundleLibraries;
-  XML_NODE                 *BundleLibraries64;
-  CONST CHAR8              *CompatibleVersion;
-  UINT64                   VirtualBase;
-  UINT64                   VirtualKmod;
-  UINT64                   SourceBase;
-  UINT64                   SourceSize;
-  UINT64                   CalculatedSourceSize;
-  UINT64                   SourceEnd;
-  MACH_SEGMENT_COMMAND_ANY *BaseSegment;
-  UINT64                   KxldState;
-  UINT64                   KxldOffset;
-  UINT32                   KxldStateSize;
-  UINT32                   ContainerOffset;
-  BOOLEAN                  Found;
-  BOOLEAN                  HasExe;
-  BOOLEAN                  IsKpi;
+  PRELINKED_KEXT            *NewKext;
+  UINT32                    FieldIndex;
+  UINT32                    FieldCount;
+  CONST CHAR8               *KextPlistKey;
+  XML_NODE                  *KextPlistValue;
+  CONST CHAR8               *KextIdentifier;
+  XML_NODE                  *BundleLibraries;
+  XML_NODE                  *BundleLibraries64;
+  CONST CHAR8               *CompatibleVersion;
+  UINT64                    VirtualBase;
+  UINT64                    VirtualKmod;
+  UINT64                    SourceBase;
+  UINT64                    SourceSize;
+  UINT64                    CalculatedSourceSize;
+  UINT64                    SourceEnd;
+  MACH_SEGMENT_COMMAND_ANY  *BaseSegment;
+  UINT64                    KxldState;
+  UINT64                    KxldOffset;
+  UINT32                    KxldStateSize;
+  UINT32                    ContainerOffset;
+  BOOLEAN                   Found;
+  BOOLEAN                   HasExe;
+  BOOLEAN                   IsKpi;
 
   KextIdentifier    = NULL;
   BundleLibraries   = NULL;
@@ -78,7 +78,7 @@ InternalCreatePrelinkedKext (
   KxldState         = 0;
   KxldStateSize     = 0;
 
-  Found       = Identifier == NULL;
+  Found = Identifier == NULL;
 
   //
   // Prelinked bitness overrides parameter.
@@ -94,69 +94,74 @@ InternalCreatePrelinkedKext (
       continue;
     }
 
-    if (KextIdentifier == NULL && AsciiStrCmp (KextPlistKey, INFO_BUNDLE_IDENTIFIER_KEY) == 0) {
+    if ((KextIdentifier == NULL) && (AsciiStrCmp (KextPlistKey, INFO_BUNDLE_IDENTIFIER_KEY) == 0)) {
       KextIdentifier = XmlNodeContent (KextPlistValue);
-      if (PlistNodeCast (KextPlistValue, PLIST_NODE_TYPE_STRING) == NULL || KextIdentifier == NULL) {
+      if ((PlistNodeCast (KextPlistValue, PLIST_NODE_TYPE_STRING) == NULL) || (KextIdentifier == NULL)) {
         break;
       }
-      if (!Found && AsciiStrCmp (KextIdentifier, Identifier) == 0) {
+
+      if (!Found && (AsciiStrCmp (KextIdentifier, Identifier) == 0)) {
         Found = TRUE;
       }
-    } else if (BundleLibraries == NULL && AsciiStrCmp (KextPlistKey, INFO_BUNDLE_LIBRARIES_KEY) == 0) {
+    } else if ((BundleLibraries == NULL) && (AsciiStrCmp (KextPlistKey, INFO_BUNDLE_LIBRARIES_KEY) == 0)) {
       if (PlistNodeCast (KextPlistValue, PLIST_NODE_TYPE_DICT) == NULL) {
         break;
       }
+
       BundleLibraries = KextPlistValue;
-    } else if (BundleLibraries64 == NULL && AsciiStrCmp (KextPlistKey, INFO_BUNDLE_LIBRARIES_64_KEY) == 0 && !Is32Bit) {
+    } else if ((BundleLibraries64 == NULL) && (AsciiStrCmp (KextPlistKey, INFO_BUNDLE_LIBRARIES_64_KEY) == 0) && !Is32Bit) {
       if (PlistNodeCast (KextPlistValue, PLIST_NODE_TYPE_DICT) == NULL) {
         break;
       }
+
       BundleLibraries64 = BundleLibraries = KextPlistValue;
-    } else if (CompatibleVersion == NULL && AsciiStrCmp (KextPlistKey, INFO_BUNDLE_COMPATIBLE_VERSION_KEY) == 0) {
+    } else if ((CompatibleVersion == NULL) && (AsciiStrCmp (KextPlistKey, INFO_BUNDLE_COMPATIBLE_VERSION_KEY) == 0)) {
       if (PlistNodeCast (KextPlistValue, PLIST_NODE_TYPE_STRING) == NULL) {
         break;
       }
+
       CompatibleVersion = XmlNodeContent (KextPlistValue);
       if (CompatibleVersion == NULL) {
         break;
       }
-    } else if (Prelinked != NULL && VirtualBase == 0 && AsciiStrCmp (KextPlistKey, PRELINK_INFO_EXECUTABLE_LOAD_ADDR_KEY) == 0) {
+    } else if ((Prelinked != NULL) && (VirtualBase == 0) && (AsciiStrCmp (KextPlistKey, PRELINK_INFO_EXECUTABLE_LOAD_ADDR_KEY) == 0)) {
       if (!PlistIntegerValue (KextPlistValue, &VirtualBase, sizeof (VirtualBase), TRUE)) {
         break;
       }
-    } else if (Prelinked != NULL && VirtualKmod == 0 && AsciiStrCmp (KextPlistKey, PRELINK_INFO_KMOD_INFO_KEY) == 0) {
+    } else if ((Prelinked != NULL) && (VirtualKmod == 0) && (AsciiStrCmp (KextPlistKey, PRELINK_INFO_KMOD_INFO_KEY) == 0)) {
       if (!PlistIntegerValue (KextPlistValue, &VirtualKmod, sizeof (VirtualKmod), TRUE)) {
         break;
       }
-    } else if (Prelinked != NULL && SourceBase == 0 && AsciiStrCmp (KextPlistKey, PRELINK_INFO_EXECUTABLE_SOURCE_ADDR_KEY) == 0) {
+    } else if ((Prelinked != NULL) && (SourceBase == 0) && (AsciiStrCmp (KextPlistKey, PRELINK_INFO_EXECUTABLE_SOURCE_ADDR_KEY) == 0)) {
       if (!PlistIntegerValue (KextPlistValue, &SourceBase, sizeof (SourceBase), TRUE)) {
         break;
       }
-    } else if (Prelinked != NULL && SourceSize == 0 && AsciiStrCmp (KextPlistKey, PRELINK_INFO_EXECUTABLE_SIZE_KEY) == 0) {
+    } else if ((Prelinked != NULL) && (SourceSize == 0) && (AsciiStrCmp (KextPlistKey, PRELINK_INFO_EXECUTABLE_SIZE_KEY) == 0)) {
       if (!PlistIntegerValue (KextPlistValue, &SourceSize, sizeof (SourceSize), TRUE)) {
         break;
       }
-    } else if (Prelinked != NULL && KxldState == 0 && AsciiStrCmp (KextPlistKey, PRELINK_INFO_LINK_STATE_ADDR_KEY) == 0) {
+    } else if ((Prelinked != NULL) && (KxldState == 0) && (AsciiStrCmp (KextPlistKey, PRELINK_INFO_LINK_STATE_ADDR_KEY) == 0)) {
       if (!PlistIntegerValue (KextPlistValue, &KxldState, sizeof (KxldState), TRUE)) {
         break;
       }
-    } else if (Prelinked != NULL && KxldStateSize == 0 && AsciiStrCmp (KextPlistKey, PRELINK_INFO_LINK_STATE_SIZE_KEY) == 0) {
+    } else if ((Prelinked != NULL) && (KxldStateSize == 0) && (AsciiStrCmp (KextPlistKey, PRELINK_INFO_LINK_STATE_SIZE_KEY) == 0)) {
       if (!PlistIntegerValue (KextPlistValue, &KxldStateSize, sizeof (KxldStateSize), TRUE)) {
         break;
       }
     }
 
-    if (KextIdentifier != NULL
-      && ((BundleLibraries64 != NULL && !Is32Bit) || (BundleLibraries != NULL && Is32Bit))
-      && CompatibleVersion != NULL
-      && (Prelinked == NULL
-        || (Prelinked != NULL
-          && VirtualBase != 0
-          && VirtualKmod != 0
-          && SourceBase != 0
-          && SourceSize != 0
-          && KxldState != 0
-          && KxldStateSize != 0))) {
+    if (  (KextIdentifier != NULL)
+       && (((BundleLibraries64 != NULL) && !Is32Bit) || ((BundleLibraries != NULL) && Is32Bit))
+       && (CompatibleVersion != NULL)
+       && (  (Prelinked == NULL)
+          || (  (Prelinked != NULL)
+             && (VirtualBase != 0)
+             && (VirtualKmod != 0)
+             && (SourceBase != 0)
+             && (SourceSize != 0)
+             && (KxldState != 0)
+             && (KxldStateSize != 0))))
+    {
       break;
     }
   }
@@ -164,7 +169,7 @@ InternalCreatePrelinkedKext (
   //
   // BundleLibraries, CompatibleVersion, and KmodInfo are optional and thus not checked.
   //
-  if (!Found || KextIdentifier == NULL || SourceBase < VirtualBase) {
+  if (!Found || (KextIdentifier == NULL) || (SourceBase < VirtualBase)) {
     return NULL;
   }
 
@@ -174,15 +179,15 @@ InternalCreatePrelinkedKext (
   if (Prelinked != NULL) {
     HasExe = VirtualBase != 0 && SourceBase != 0 && SourceSize != 0 && SourceSize <= MAX_UINT32;
     IsKpi  = VirtualBase == 0 && SourceBase == 0 && SourceSize == 0
-      && KxldState != 0 && KxldStateSize != 0 && !Prelinked->IsKernelCollection;
+             && KxldState != 0 && KxldStateSize != 0 && !Prelinked->IsKernelCollection;
     if (!IsKpi && !HasExe) {
       return NULL;
     }
   }
 
-  if (Prelinked != NULL && Prelinked->IsKernelCollection) {
+  if ((Prelinked != NULL) && Prelinked->IsKernelCollection) {
     CalculatedSourceSize = KcGetKextSize (Prelinked, SourceBase);
-    if (CalculatedSourceSize < MAX_UINT32 && CalculatedSourceSize > SourceSize) {
+    if ((CalculatedSourceSize < MAX_UINT32) && (CalculatedSourceSize > SourceSize)) {
       DEBUG ((
         DEBUG_INFO,
         "OCAK: Patching invalid size %Lx with %Lx for %a\n",
@@ -194,23 +199,24 @@ InternalCreatePrelinkedKext (
     }
   }
 
-  if (Prelinked != NULL && HasExe) {
+  if ((Prelinked != NULL) && HasExe) {
     if (Prelinked->IsKernelCollection) {
-      BaseSegment = (MACH_SEGMENT_COMMAND_ANY *) Prelinked->RegionSegment;
+      BaseSegment = (MACH_SEGMENT_COMMAND_ANY *)Prelinked->RegionSegment;
     } else {
       BaseSegment = Prelinked->PrelinkedTextSegment;
     }
 
     SourceBase -= Prelinked->Is32Bit ? BaseSegment->Segment32.VirtualAddress : BaseSegment->Segment64.VirtualAddress;
-    if (OcOverflowAddU64 (SourceBase, Prelinked->Is32Bit ? BaseSegment->Segment32.FileOffset : BaseSegment->Segment64.FileOffset, &SourceBase)
-      || OcOverflowAddU64 (SourceBase, SourceSize, &SourceEnd)
-      || SourceEnd > Prelinked->PrelinkedSize) {
+    if (  OcOverflowAddU64 (SourceBase, Prelinked->Is32Bit ? BaseSegment->Segment32.FileOffset : BaseSegment->Segment64.FileOffset, &SourceBase)
+       || OcOverflowAddU64 (SourceBase, SourceSize, &SourceEnd)
+       || (SourceEnd > Prelinked->PrelinkedSize))
+    {
       return NULL;
     }
 
     ContainerOffset = 0;
     if (Prelinked->IsKernelCollection) {
-      ContainerOffset = (UINT32) SourceBase;
+      ContainerOffset = (UINT32)SourceBase;
     }
   }
 
@@ -222,9 +228,10 @@ InternalCreatePrelinkedKext (
     return NULL;
   }
 
-  if (Prelinked != NULL
-    && HasExe
-    && !MachoInitializeContext (&NewKext->Context.MachContext, &Prelinked->Prelinked[SourceBase], (UINT32)SourceSize, ContainerOffset, Prelinked->Is32Bit)) {
+  if (  (Prelinked != NULL)
+     && HasExe
+     && !MachoInitializeContext (&NewKext->Context.MachContext, &Prelinked->Prelinked[SourceBase], (UINT32)SourceSize, ContainerOffset, Prelinked->Is32Bit))
+  {
     FreePool (NewKext);
     return NULL;
   }
@@ -241,15 +248,16 @@ InternalCreatePrelinkedKext (
   //
   // Provide pointer to 10.6.8 KXLD state.
   //
-  if (Prelinked != NULL
-    && KxldState != 0
-    && KxldStateSize != 0
-    && Prelinked->PrelinkedStateKextsAddress != 0
-    && Prelinked->PrelinkedStateKextsAddress <= KxldState
-    && Prelinked->PrelinkedStateKextsSize >= KxldStateSize) {
+  if (  (Prelinked != NULL)
+     && (KxldState != 0)
+     && (KxldStateSize != 0)
+     && (Prelinked->PrelinkedStateKextsAddress != 0)
+     && (Prelinked->PrelinkedStateKextsAddress <= KxldState)
+     && (Prelinked->PrelinkedStateKextsSize >= KxldStateSize))
+  {
     KxldOffset = KxldState - Prelinked->PrelinkedStateKextsAddress;
     if (KxldOffset <= Prelinked->PrelinkedStateKextsSize - KxldStateSize) {
-      NewKext->Context.KxldState = (UINT8 *)Prelinked->PrelinkedStateKexts + KxldOffset;
+      NewKext->Context.KxldState     = (UINT8 *)Prelinked->PrelinkedStateKexts + KxldOffset;
       NewKext->Context.KxldStateSize = KxldStateSize;
     }
   }
@@ -279,36 +287,37 @@ InternalScanCurrentPrelinkedKextLinkInfo (
     return;
   }
 
-  if (Kext->LinkEditSegment == NULL && Kext->NumberOfSymbols == 0) {
+  if ((Kext->LinkEditSegment == NULL) && (Kext->NumberOfSymbols == 0)) {
     if (AsciiStrCmp (Kext->Identifier, PRELINK_KERNEL_IDENTIFIER) == 0) {
       Kext->LinkEditSegment = Context->LinkEditSegment;
     } else {
       Kext->LinkEditSegment = MachoGetSegmentByName (
-        &Kext->Context.MachContext,
-        "__LINKEDIT"
-        );
-    }    
+                                &Kext->Context.MachContext,
+                                "__LINKEDIT"
+                                );
+    }
+
     DEBUG ((
       DEBUG_VERBOSE,
       "OCAK: Requesting __LINKEDIT for %a - %p at %p\n",
       Kext->Identifier,
       Kext->LinkEditSegment,
-      (UINT8 *) MachoGetMachHeader (&Kext->Context.MachContext) - Context->Prelinked
+      (UINT8 *)MachoGetMachHeader (&Kext->Context.MachContext) - Context->Prelinked
       ));
   }
 
-  if (Kext->SymbolTable == NULL && Kext->NumberOfSymbols == 0) {
+  if ((Kext->SymbolTable == NULL) && (Kext->NumberOfSymbols == 0)) {
     Kext->NumberOfSymbols = MachoGetSymbolTable (
-                   &Kext->Context.MachContext,
-                   &Kext->SymbolTable,
-                   &Kext->StringTable,
-                   NULL,
-                   NULL,
-                   NULL,
-                   NULL,
-                   NULL,
-                   NULL
-                   );
+                              &Kext->Context.MachContext,
+                              &Kext->SymbolTable,
+                              &Kext->StringTable,
+                              NULL,
+                              NULL,
+                              NULL,
+                              NULL,
+                              NULL,
+                              NULL
+                              );
     DEBUG ((
       DEBUG_VERBOSE,
       "OCAK: Requesting SymbolTable for %a - %u\n",
@@ -325,20 +334,20 @@ InternalScanBuildLinkedSymbolTable (
   IN     PRELINKED_CONTEXT  *Context
   )
 {
-  CONST MACH_HEADER_ANY *MachHeader;
-  BOOLEAN               ResolveSymbols;
-  PRELINKED_KEXT_SYMBOL *SymbolTable;
-  PRELINKED_KEXT_SYMBOL *WalkerBottom;
-  PRELINKED_KEXT_SYMBOL *WalkerTop;
-  UINT32                NumCxxSymbols;
-  UINT32                NumDiscardedSyms;
-  UINT32                Index;
-  CONST MACH_NLIST_ANY  *Symbol;
-  UINT8                 SymbolType;
-  MACH_NLIST_ANY        SymbolScratch;
-  CONST PRELINKED_KEXT_SYMBOL *ResolvedSymbol;
-  CONST CHAR8           *Name;
-  BOOLEAN               Result;
+  CONST MACH_HEADER_ANY        *MachHeader;
+  BOOLEAN                      ResolveSymbols;
+  PRELINKED_KEXT_SYMBOL        *SymbolTable;
+  PRELINKED_KEXT_SYMBOL        *WalkerBottom;
+  PRELINKED_KEXT_SYMBOL        *WalkerTop;
+  UINT32                       NumCxxSymbols;
+  UINT32                       NumDiscardedSyms;
+  UINT32                       Index;
+  CONST MACH_NLIST_ANY         *Symbol;
+  UINT8                        SymbolType;
+  MACH_NLIST_ANY               SymbolScratch;
+  CONST PRELINKED_KEXT_SYMBOL  *ResolvedSymbol;
+  CONST CHAR8                  *Name;
+  BOOLEAN                      Result;
 
   if (Kext->LinkedSymbolTable != NULL) {
     return EFI_SUCCESS;
@@ -354,7 +363,7 @@ InternalScanBuildLinkedSymbolTable (
   //
   // KPIs declare undefined and indirect symbols even in prelinkedkernel.
   //
-  ResolveSymbols = (((Context->Is32Bit ? MachHeader->Header32.Flags : MachHeader->Header64.Flags) & MACH_HEADER_FLAG_NO_UNDEFINED_REFERENCES) == 0);
+  ResolveSymbols   = (((Context->Is32Bit ? MachHeader->Header32.Flags : MachHeader->Header64.Flags) & MACH_HEADER_FLAG_NO_UNDEFINED_REFERENCES) == 0);
   NumDiscardedSyms = 0;
 
   WalkerBottom = &SymbolTable[0];
@@ -368,6 +377,7 @@ InternalScanBuildLinkedSymbolTable (
     } else {
       Symbol = (MACH_NLIST_ANY *)&(&Kext->SymbolTable->Symbol64)[Index];
     }
+
     SymbolType = Context->Is32Bit ? Symbol->Symbol32.Type : Symbol->Symbol64.Type;
     if ((SymbolType & MACH_N_TYPE_STAB) != 0) {
       ++NumDiscardedSyms;
@@ -408,31 +418,34 @@ InternalScanBuildLinkedSymbolTable (
           FreePool (SymbolTable);
           return EFI_NOT_FOUND;
         }
+
         if (Context->Is32Bit) {
-          SymbolScratch.Symbol32.Value = (UINT32) ResolvedSymbol->Value;
+          SymbolScratch.Symbol32.Value = (UINT32)ResolvedSymbol->Value;
         } else {
           SymbolScratch.Symbol64.Value = ResolvedSymbol->Value;
         }
+
         Symbol = &SymbolScratch;
       }
     }
 
     if (!Result) {
-      WalkerBottom->Value  = Context->Is32Bit ? Symbol->Symbol32.Value : Symbol->Symbol64.Value;
-      WalkerBottom->Name   = Kext->StringTable + (Context->Is32Bit ?
-        Symbol->Symbol32.UnifiedName.StringIndex : Symbol->Symbol64.UnifiedName.StringIndex);
+      WalkerBottom->Value = Context->Is32Bit ? Symbol->Symbol32.Value : Symbol->Symbol64.Value;
+      WalkerBottom->Name  = Kext->StringTable + (Context->Is32Bit ?
+                                                 Symbol->Symbol32.UnifiedName.StringIndex : Symbol->Symbol64.UnifiedName.StringIndex);
       WalkerBottom->Length = (UINT32)AsciiStrLen (WalkerBottom->Name);
       ++WalkerBottom;
     } else {
-      WalkerTop->Value  = Context->Is32Bit ? Symbol->Symbol32.Value : Symbol->Symbol64.Value;
-      WalkerTop->Name   = Kext->StringTable + (Context->Is32Bit ?
-        Symbol->Symbol32.UnifiedName.StringIndex : Symbol->Symbol64.UnifiedName.StringIndex);
+      WalkerTop->Value = Context->Is32Bit ? Symbol->Symbol32.Value : Symbol->Symbol64.Value;
+      WalkerTop->Name  = Kext->StringTable + (Context->Is32Bit ?
+                                              Symbol->Symbol32.UnifiedName.StringIndex : Symbol->Symbol64.UnifiedName.StringIndex);
       WalkerTop->Length = (UINT32)AsciiStrLen (WalkerTop->Name);
       --WalkerTop;
 
       ++NumCxxSymbols;
     }
   }
+
   //
   // Move the C++ symbols to the actual end of the non-C++ symbols as undefined
   // symbols got discarded.
@@ -459,17 +472,17 @@ InternalScanBuildLinkedVtables (
   IN     PRELINKED_CONTEXT  *Context
   )
 {
-  OC_PRELINKED_VTABLE_LOOKUP_ENTRY *VtableLookups;
-  UINT32                           MaxSize;
-  BOOLEAN                          Result;
-  UINT32                           NumVtables;
-  UINT32                           NumEntries;
-  UINT32                           NumEntriesTemp;
-  UINT32                           Index;
-  UINT32                           VtableMaxSize;
-  UINT32                           ResultingSize;
-  CONST VOID                       *VtableData;
-  PRELINKED_VTABLE                 *LinkedVtables;
+  OC_PRELINKED_VTABLE_LOOKUP_ENTRY  *VtableLookups;
+  UINT32                            MaxSize;
+  BOOLEAN                           Result;
+  UINT32                            NumVtables;
+  UINT32                            NumEntries;
+  UINT32                            NumEntriesTemp;
+  UINT32                            Index;
+  UINT32                            VtableMaxSize;
+  UINT32                            ResultingSize;
+  CONST VOID                        *VtableData;
+  PRELINKED_VTABLE                  *LinkedVtables;
 
   if (Kext->LinkedVtables != NULL) {
     return EFI_SUCCESS;
@@ -497,11 +510,11 @@ InternalScanBuildLinkedVtables (
     //       just locate it by address in the first place.
     //
     VtableData = MachoGetFilePointerByAddress (
-            &Kext->Context.MachContext,
-            VtableLookups[Index].Vtable.Value,
-            &VtableMaxSize
-            );
-    if (VtableData == NULL || (Context->Is32Bit ? !OC_TYPE_ALIGNED (UINT32, VtableData) : !OC_TYPE_ALIGNED (UINT64, VtableData))) {
+                   &Kext->Context.MachContext,
+                   VtableLookups[Index].Vtable.Value,
+                   &VtableMaxSize
+                   );
+    if ((VtableData == NULL) || (Context->Is32Bit ? !OC_TYPE_ALIGNED (UINT32, VtableData) : !OC_TYPE_ALIGNED (UINT64, VtableData))) {
       return EFI_UNSUPPORTED;
     }
 
@@ -522,8 +535,9 @@ InternalScanBuildLinkedVtables (
     }
   }
 
-  if (OcOverflowMulU32 (NumVtables, sizeof (*LinkedVtables), &ResultingSize)
-    || OcOverflowMulAddU32 (NumEntries, sizeof (*LinkedVtables->Entries), ResultingSize, &ResultingSize)) {
+  if (  OcOverflowMulU32 (NumVtables, sizeof (*LinkedVtables), &ResultingSize)
+     || OcOverflowMulAddU32 (NumEntries, sizeof (*LinkedVtables->Entries), ResultingSize, &ResultingSize))
+  {
     return EFI_OUT_OF_RESOURCES;
   }
 
@@ -533,12 +547,12 @@ InternalScanBuildLinkedVtables (
   }
 
   InternalCreateVtablesPrelinked (
-             Context,
-             Kext,
-             NumVtables,
-             VtableLookups,
-             LinkedVtables
-             );
+    Context,
+    Kext,
+    NumVtables,
+    VtableLookups,
+    LinkedVtables
+    );
 
   Kext->NumberOfVtables = NumVtables;
   Kext->LinkedVtables   = LinkedVtables;
@@ -552,16 +566,20 @@ InternalGetLinkBufferSize (
   IN OUT PRELINKED_KEXT  *Kext
   )
 {
-  UINT32 Size;
+  UINT32  Size;
+
   //
   // LinkBuffer must be able to hold all symbols and for KEXTs to be prelinked
   // also the __LINKEDIT segment (however not both simultaneously/separately).
   //
   Size = Kext->NumberOfSymbols * (Kext->Context.Is32Bit ? sizeof (MACH_NLIST) : sizeof (MACH_NLIST_64));
-  
+
   if (Kext->LinkEditSegment != NULL) {
-    Size = MAX ((UINT32) (Kext->Context.Is32Bit ?
-      Kext->LinkEditSegment->Segment32.FileSize : Kext->LinkEditSegment->Segment64.FileSize), Size);
+    Size = MAX (
+             (UINT32)(Kext->Context.Is32Bit ?
+                      Kext->LinkEditSegment->Segment32.FileSize : Kext->LinkEditSegment->Segment64.FileSize),
+             Size
+             );
   }
 
   return Size;
@@ -574,7 +592,7 @@ InternalUpdateLinkBuffer (
   IN OUT PRELINKED_CONTEXT  *Context
   )
 {
-  UINT32 BufferSize;
+  UINT32  BufferSize;
 
   ASSERT (Kext != NULL);
   ASSERT (Context != NULL);
@@ -635,8 +653,8 @@ InternalInsertPrelinkedKextDependency (
 
 PRELINKED_KEXT *
 InternalNewPrelinkedKext (
-  IN OC_MACHO_CONTEXT       *Context,
-  IN XML_NODE               *KextPlist
+  IN OC_MACHO_CONTEXT  *Context,
+  IN XML_NODE          *KextPlist
   )
 {
   PRELINKED_KEXT  *NewKext;
@@ -736,7 +754,7 @@ InternalDropCachedPrelinkedKext (
   Link  = GetFirstNode (&Prelinked->PrelinkedKexts);
   Kext  = NULL;
   while (!IsNull (&Prelinked->PrelinkedKexts, Link)) {
-    Kext  = GET_PRELINKED_KEXT_FROM_LINK (Link);
+    Kext = GET_PRELINKED_KEXT_FROM_LINK (Link);
 
     if (AsciiStrCmp (Identifier, Kext->Identifier) == 0) {
       Found = TRUE;
@@ -774,12 +792,12 @@ InternalCachedPrelinkedKernel (
   PRELINKED_KEXT            *NewKext;
   MACH_SEGMENT_COMMAND_ANY  *Segment;
 
-  UINT64                    VirtualAddress;
-  UINT64                    FileOffset;
-  UINT64                    KernelSize;
-  UINT64                    KextsSize;
-  UINT64                    KernelOffset;
-  UINT64                    KextsOffset;
+  UINT64  VirtualAddress;
+  UINT64  FileOffset;
+  UINT64  KernelSize;
+  UINT64  KextsSize;
+  UINT64  KernelOffset;
+  UINT64  KextsOffset;
 
   //
   // First entry is prelinked kernel.
@@ -804,14 +822,14 @@ InternalCachedPrelinkedKernel (
     );
 
   Segment = MachoGetSegmentByName (
-    &NewKext->Context.MachContext,
-    "__TEXT"
-    );
+              &NewKext->Context.MachContext,
+              "__TEXT"
+              );
   if (Segment == NULL) {
     FreePool (NewKext);
     return NULL;
   }
-  
+
   VirtualAddress = Prelinked->Is32Bit ? Segment->Segment32.VirtualAddress : Segment->Segment64.VirtualAddress;
   FileOffset     = Prelinked->Is32Bit ? Segment->Segment32.FileOffset : Segment->Segment64.FileOffset;
 
@@ -834,54 +852,56 @@ InternalCachedPrelinkedKernel (
     // Find optional __PRELINK_STATE segment, present in 10.6.8
     //
     Prelinked->PrelinkedStateSegment = MachoGetSegmentByName (
-      &Prelinked->PrelinkedMachContext,
-      PRELINK_STATE_SEGMENT
-      );
+                                         &Prelinked->PrelinkedMachContext,
+                                         PRELINK_STATE_SEGMENT
+                                         );
 
     if (Prelinked->PrelinkedStateSegment != NULL) {
       Prelinked->PrelinkedStateSectionKernel = MachoGetSectionByName (
-        &Prelinked->PrelinkedMachContext,
-        Prelinked->PrelinkedStateSegment,
-        PRELINK_STATE_SECTION_KERNEL
-        );
+                                                 &Prelinked->PrelinkedMachContext,
+                                                 Prelinked->PrelinkedStateSegment,
+                                                 PRELINK_STATE_SECTION_KERNEL
+                                                 );
       Prelinked->PrelinkedStateSectionKexts = MachoGetSectionByName (
-        &Prelinked->PrelinkedMachContext,
-        Prelinked->PrelinkedStateSegment,
-        PRELINK_STATE_SECTION_KEXTS
-        );
+                                                &Prelinked->PrelinkedMachContext,
+                                                Prelinked->PrelinkedStateSegment,
+                                                PRELINK_STATE_SECTION_KEXTS
+                                                );
 
-      if (Prelinked->PrelinkedStateSectionKernel != NULL
-        && Prelinked->PrelinkedStateSectionKexts != NULL) {
+      if (  (Prelinked->PrelinkedStateSectionKernel != NULL)
+         && (Prelinked->PrelinkedStateSectionKexts != NULL))
+      {
         KernelSize = Prelinked->Is32Bit ?
-          Prelinked->PrelinkedStateSectionKernel->Section32.Size :
-          Prelinked->PrelinkedStateSectionKernel->Section64.Size;
+                     Prelinked->PrelinkedStateSectionKernel->Section32.Size :
+                     Prelinked->PrelinkedStateSectionKernel->Section64.Size;
         KextsSize = Prelinked->Is32Bit ?
-          Prelinked->PrelinkedStateSectionKexts->Section32.Size :
-          Prelinked->PrelinkedStateSectionKexts->Section64.Size;
+                    Prelinked->PrelinkedStateSectionKexts->Section32.Size :
+                    Prelinked->PrelinkedStateSectionKexts->Section64.Size;
         KernelOffset = Prelinked->Is32Bit ?
-          Prelinked->PrelinkedStateSectionKernel->Section32.Offset :
-          Prelinked->PrelinkedStateSectionKernel->Section64.Offset;
+                       Prelinked->PrelinkedStateSectionKernel->Section32.Offset :
+                       Prelinked->PrelinkedStateSectionKernel->Section64.Offset;
         KextsOffset = Prelinked->Is32Bit ?
-          Prelinked->PrelinkedStateSectionKexts->Section32.Offset :
-          Prelinked->PrelinkedStateSectionKexts->Section64.Offset;
+                      Prelinked->PrelinkedStateSectionKexts->Section32.Offset :
+                      Prelinked->PrelinkedStateSectionKexts->Section64.Offset;
 
-        if (KernelSize > 0 && KextsSize > 0) {
-          Prelinked->PrelinkedStateKernelSize = (UINT32) KernelSize;
-          Prelinked->PrelinkedStateKextsSize = (UINT32) KextsSize;
-          Prelinked->PrelinkedStateKernel = AllocateCopyPool (
-            Prelinked->PrelinkedStateKernelSize,
-            &Prelinked->Prelinked[KernelOffset]
-            );
+        if ((KernelSize > 0) && (KextsSize > 0)) {
+          Prelinked->PrelinkedStateKernelSize = (UINT32)KernelSize;
+          Prelinked->PrelinkedStateKextsSize  = (UINT32)KextsSize;
+          Prelinked->PrelinkedStateKernel     = AllocateCopyPool (
+                                                  Prelinked->PrelinkedStateKernelSize,
+                                                  &Prelinked->Prelinked[KernelOffset]
+                                                  );
           Prelinked->PrelinkedStateKexts = AllocateCopyPool (
-            Prelinked->PrelinkedStateKextsSize,
-            &Prelinked->Prelinked[KextsOffset]
-            );
-          if (Prelinked->PrelinkedStateKernel != NULL
-            && Prelinked->PrelinkedStateKexts != NULL) {
+                                             Prelinked->PrelinkedStateKextsSize,
+                                             &Prelinked->Prelinked[KextsOffset]
+                                             );
+          if (  (Prelinked->PrelinkedStateKernel != NULL)
+             && (Prelinked->PrelinkedStateKexts != NULL))
+          {
             Prelinked->PrelinkedStateKextsAddress = Prelinked->Is32Bit ?
-              Prelinked->PrelinkedStateSectionKexts->Section32.Address :
-              Prelinked->PrelinkedStateSectionKexts->Section64.Address;
-            NewKext->Context.KxldState = Prelinked->PrelinkedStateKernel;
+                                                    Prelinked->PrelinkedStateSectionKexts->Section32.Address :
+                                                    Prelinked->PrelinkedStateSectionKexts->Section64.Address;
+            NewKext->Context.KxldState     = Prelinked->PrelinkedStateKernel;
             NewKext->Context.KxldStateSize = Prelinked->PrelinkedStateKernelSize;
           } else {
             DEBUG ((
@@ -893,12 +913,14 @@ InternalCachedPrelinkedKernel (
             if (Prelinked->PrelinkedStateKernel != NULL) {
               FreePool (Prelinked->PrelinkedStateKernel);
             }
+
             if (Prelinked->PrelinkedStateKexts != NULL) {
               FreePool (Prelinked->PrelinkedStateKexts);
             }
+
             Prelinked->PrelinkedStateSectionKernel = NULL;
-            Prelinked->PrelinkedStateSectionKexts = NULL;
-            Prelinked->PrelinkedStateSegment = NULL;
+            Prelinked->PrelinkedStateSectionKexts  = NULL;
+            Prelinked->PrelinkedStateSegment       = NULL;
           }
         }
       }
@@ -916,7 +938,7 @@ InternalGetQuirkDependencyKext (
   IN OUT PRELINKED_CONTEXT  *Context
   )
 {
-  PRELINKED_KEXT *DependencyKext;
+  PRELINKED_KEXT  *DependencyKext;
 
   ASSERT (DependencyId != NULL);
   ASSERT (Context != NULL);
@@ -955,6 +977,7 @@ InternalScanPrelinkedKext (
   UINT32          DependencyIndex;
   CONST CHAR8     *DependencyId;
   PRELINKED_KEXT  *DependencyKext;
+
   //
   // __LINKEDIT may validly not be present, as seen for 10.7.5's
   // com.apple.kpi.unsupported.
@@ -988,7 +1011,7 @@ InternalScanPrelinkedKext (
 
   if (Kext->BundleLibraries != NULL) {
     DependencyIndex = 1;
-    FieldCount = PlistDictChildren (Kext->BundleLibraries);
+    FieldCount      = PlistDictChildren (Kext->BundleLibraries);
 
     for (FieldIndex = 0; FieldIndex < FieldCount; ++FieldIndex) {
       DependencyId = PlistKeyValue (PlistDictChild (Kext->BundleLibraries, FieldIndex, NULL));
@@ -1003,8 +1026,9 @@ InternalScanPrelinkedKext (
       // _PrelinkExecutableLoadAddr / _PrelinkExecutableSourceAddr values equal to MAX_INT64.
       // Skip them early to improve performance.
       //
-      if (Context->IsKernelCollection
-        && AsciiStrnCmp (DependencyId, "com.apple.kpi.", L_STR_LEN ("com.apple.kpi.")) == 0) {
+      if (  Context->IsKernelCollection
+         && (AsciiStrnCmp (DependencyId, "com.apple.kpi.", L_STR_LEN ("com.apple.kpi.")) == 0))
+      {
         DEBUG ((DEBUG_VERBOSE, "OCAK: Ignoring KPI %a for kext %a in KC/state mode\n", DependencyId, Kext->Identifier));
         continue;
       }
@@ -1051,6 +1075,7 @@ InternalScanPrelinkedKext (
   if (EFI_ERROR (Status)) {
     return Status;
   }
+
   //
   // Collect data to enable linking against this KEXT.
   //
@@ -1060,17 +1085,17 @@ InternalScanPrelinkedKext (
       // Use KXLD state as is for 10.6.8 kernel.
       //
       Status = InternalKxldStateBuildLinkedSymbolTable (
-        Kext,
-        Context
-        );
+                 Kext,
+                 Context
+                 );
       if (EFI_ERROR (Status)) {
         return Status;
       }
 
       Status = InternalKxldStateBuildLinkedVtables (
-        Kext,
-        Context
-        );
+                 Kext,
+                 Context
+                 );
       if (EFI_ERROR (Status)) {
         return Status;
       }
@@ -1095,7 +1120,7 @@ InternalScanPrelinkedKext (
 
 VOID
 InternalUnlockContextKexts (
-  IN PRELINKED_CONTEXT                *Context
+  IN PRELINKED_CONTEXT  *Context
   )
 {
   LIST_ENTRY  *Kext;
@@ -1103,7 +1128,7 @@ InternalUnlockContextKexts (
   Kext = GetFirstNode (&Context->PrelinkedKexts);
   while (!IsNull (&Context->PrelinkedKexts, Kext)) {
     GET_PRELINKED_KEXT_FROM_LINK (Kext)->Processed = FALSE;
-    Kext = GetNextNode (&Context->PrelinkedKexts, Kext);
+    Kext                                           = GetNextNode (&Context->PrelinkedKexts, Kext);
   }
 }
 
@@ -1146,6 +1171,7 @@ InternalLinkPrelinkedKext (
     InternalFreePrelinkedKext (Kext);
     return NULL;
   }
+
   //
   // Also detach bundle compatible version if any.
   //
@@ -1163,6 +1189,7 @@ InternalLinkPrelinkedKext (
       return NULL;
     }
   }
+
   //
   // Set virtual addresses.
   //

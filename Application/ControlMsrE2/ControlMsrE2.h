@@ -46,8 +46,8 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 #include <Protocol/HiiConfigKeyword.h>
 #include <Guid/HiiPlatformSetupFormset.h>
 
-#define CHAR_ESC     0x1B
-#define DONT_STOP_AT 0xFFFF
+#define CHAR_ESC      0x1B
+#define DONT_STOP_AT  0xFFFF
 
 /**
   Parameters to search in a Form for
@@ -68,15 +68,15 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
   @param Count             Running number of suitable BIOS Options
 **/
 typedef struct ONE_OF_CONTEXT_ {
-  EFI_STRING                    SearchText;
-  EFI_HII_HANDLE                EfiHandle;
-  EFI_HII_PACKAGE_LIST_HEADER   *ListHeader;
-  EFI_HII_PACKAGE_HEADER        *PkgHeader;
-  EFI_IFR_OP_HEADER             *FirstIfrHeader;
-  EFI_IFR_VARSTORE              *IfrVarStore;
-  EFI_IFR_ONE_OF                *IfrOneOf;
-  UINT16                        StopAt;
-  UINT16                        Count;
+  EFI_STRING                     SearchText;
+  EFI_HII_HANDLE                 EfiHandle;
+  EFI_HII_PACKAGE_LIST_HEADER    *ListHeader;
+  EFI_HII_PACKAGE_HEADER         *PkgHeader;
+  EFI_IFR_OP_HEADER              *FirstIfrHeader;
+  EFI_IFR_VARSTORE               *IfrVarStore;
+  EFI_IFR_ONE_OF                 *IfrOneOf;
+  UINT16                         StopAt;
+  UINT16                         Count;
 } ONE_OF_CONTEXT;
 
 /**
@@ -91,11 +91,11 @@ typedef struct ONE_OF_CONTEXT_ {
 **/
 typedef
 VOID
-OP_CODE_HANDLER (
-  IN     EFI_IFR_OP_HEADER *IfrHeader,
-  IN OUT BOOLEAN           *Stop  OPTIONAL,
-  IN     VOID              *Context
-  );
+  OP_CODE_HANDLER (
+                   IN     EFI_IFR_OP_HEADER  *IfrHeader,
+                   IN OUT BOOLEAN            *Stop  OPTIONAL,
+                   IN     VOID               *Context
+                   );
 
 /**
   Commandline Arguments
@@ -107,11 +107,11 @@ enum {
   ARG_INTERACTIVE = 8,
 };
 
-#define PADD(x,y) (VOID *)(((CHAR8 *) x) + y)
+#define PADD(x, y)  (VOID *)(((CHAR8 *) x) + y)
 
-#define BUFFER_LENGTH 128
+#define BUFFER_LENGTH  128
 
-extern UINTN mArgumentFlags;
+extern UINTN  mArgumentFlags;
 
 /**
   Check MsrE2 Status - original VerifyMSRE2
@@ -165,7 +165,7 @@ InterpretArguments (
 **/
 VOID
 ModifySearchString (
-  IN OUT EFI_STRING *SearchString
+  IN OUT EFI_STRING  *SearchString
   );
 
 /**
@@ -178,7 +178,7 @@ ModifySearchString (
 **/
 EFI_HII_PACKAGE_LIST_HEADER *
 HiiExportPackageLists (
-  IN     EFI_HII_HANDLE Handle
+  IN     EFI_HII_HANDLE  Handle
   );
 
 /**
@@ -192,9 +192,9 @@ HiiExportPackageLists (
 **/
 VOID
 HandleIfrOption (
-  IN     EFI_IFR_OP_HEADER   *IfrHeader,
-  IN OUT BOOLEAN             *Stop  OPTIONAL,
-  IN OUT VOID                *Context
+  IN     EFI_IFR_OP_HEADER  *IfrHeader,
+  IN OUT BOOLEAN            *Stop  OPTIONAL,
+  IN OUT VOID               *Context
   );
 
 /**
@@ -204,7 +204,7 @@ HandleIfrOption (
 **/
 VOID
 HandleIfrVariable (
-  IN OUT ONE_OF_CONTEXT      *Context
+  IN OUT ONE_OF_CONTEXT  *Context
   );
 
 /**
@@ -221,9 +221,9 @@ HandleIfrVariable (
 **/
 EFI_IFR_OP_HEADER *
 IterateOpCode (
-  IN     EFI_IFR_OP_HEADER   *Header,
-  IN     UINT8               OpCode,
-  IN OUT BOOLEAN             *Stop  OPTIONAL,
-  IN     VOID                *Context,
-  IN     OP_CODE_HANDLER     Handler
+  IN     EFI_IFR_OP_HEADER  *Header,
+  IN     UINT8              OpCode,
+  IN OUT BOOLEAN            *Stop  OPTIONAL,
+  IN     VOID               *Context,
+  IN     OP_CODE_HANDLER    Handler
   );

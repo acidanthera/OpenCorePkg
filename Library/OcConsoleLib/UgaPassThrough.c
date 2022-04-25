@@ -24,11 +24,11 @@ STATIC
 EFI_STATUS
 EFIAPI
 OcUgaDrawGetMode (
-  IN  EFI_UGA_DRAW_PROTOCOL *This,
-  OUT UINT32                *HorizontalResolution,
-  OUT UINT32                *VerticalResolution,
-  OUT UINT32                *ColorDepth,
-  OUT UINT32                *RefreshRate
+  IN  EFI_UGA_DRAW_PROTOCOL  *This,
+  OUT UINT32                 *HorizontalResolution,
+  OUT UINT32                 *VerticalResolution,
+  OUT UINT32                 *ColorDepth,
+  OUT UINT32                 *RefreshRate
   )
 {
   OC_UGA_PROTOCOL                       *OcUgaDraw;
@@ -36,11 +36,12 @@ OcUgaDrawGetMode (
 
   DEBUG ((DEBUG_INFO, "OCC: OcUgaDrawGetMode %p\n", This));
 
-  if (This == NULL
-    || HorizontalResolution == NULL
-    || VerticalResolution == NULL
-    || ColorDepth == NULL
-    || RefreshRate == NULL) {
+  if (  (This == NULL)
+     || (HorizontalResolution == NULL)
+     || (VerticalResolution == NULL)
+     || (ColorDepth == NULL)
+     || (RefreshRate == NULL))
+  {
     return EFI_INVALID_PARAMETER;
   }
 
@@ -55,14 +56,14 @@ OcUgaDrawGetMode (
     Info->PixelFormat
     ));
 
-  if (Info->HorizontalResolution == 0 || Info->VerticalResolution == 0) {
+  if ((Info->HorizontalResolution == 0) || (Info->VerticalResolution == 0)) {
     return EFI_NOT_STARTED;
   }
 
   *HorizontalResolution = Info->HorizontalResolution;
-  *VerticalResolution = Info->VerticalResolution;
-  *ColorDepth  = DEFAULT_COLOUR_DEPTH;
-  *RefreshRate = DEFAULT_REFRESH_RATE;
+  *VerticalResolution   = Info->VerticalResolution;
+  *ColorDepth           = DEFAULT_COLOUR_DEPTH;
+  *RefreshRate          = DEFAULT_REFRESH_RATE;
 
   return EFI_SUCCESS;
 }
@@ -71,15 +72,15 @@ STATIC
 EFI_STATUS
 EFIAPI
 OcUgaDrawSetMode (
-  IN  EFI_UGA_DRAW_PROTOCOL *This,
-  IN  UINT32                HorizontalResolution,
-  IN  UINT32                VerticalResolution,
-  IN  UINT32                ColorDepth,
-  IN  UINT32                RefreshRate
+  IN  EFI_UGA_DRAW_PROTOCOL  *This,
+  IN  UINT32                 HorizontalResolution,
+  IN  UINT32                 VerticalResolution,
+  IN  UINT32                 ColorDepth,
+  IN  UINT32                 RefreshRate
   )
 {
-  EFI_STATUS        Status;
-  OC_UGA_PROTOCOL   *OcUgaDraw;
+  EFI_STATUS       Status;
+  OC_UGA_PROTOCOL  *OcUgaDraw;
 
   DEBUG ((
     DEBUG_INFO,
@@ -94,21 +95,21 @@ OcUgaDrawSetMode (
   OcUgaDraw = BASE_CR (This, OC_UGA_PROTOCOL, Uga);
 
   Status = OcSetConsoleResolutionForProtocol (
-    OcUgaDraw->GraphicsOutput,
-    HorizontalResolution,
-    VerticalResolution,
-    ColorDepth
-    );
+             OcUgaDraw->GraphicsOutput,
+             HorizontalResolution,
+             VerticalResolution,
+             ColorDepth
+             );
 
   DEBUG ((DEBUG_INFO, "OCC: UGA SetConsoleResolutionOnHandle attempt - %r\n", Status));
 
   if (EFI_ERROR (Status)) {
     Status = OcSetConsoleResolutionForProtocol (
-      OcUgaDraw->GraphicsOutput,
-      0,
-      0,
-      0
-      );
+               OcUgaDraw->GraphicsOutput,
+               0,
+               0,
+               0
+               );
     DEBUG ((DEBUG_INFO, "OCC: UGA SetConsoleResolutionOnHandle max attempt - %r\n", Status));
   }
 
@@ -119,34 +120,34 @@ STATIC
 EFI_STATUS
 EFIAPI
 OcUgaDrawBlt (
-  IN  EFI_UGA_DRAW_PROTOCOL                   *This,
-  IN  EFI_UGA_PIXEL                           *BltBuffer OPTIONAL,
-  IN  EFI_UGA_BLT_OPERATION                   BltOperation,
-  IN  UINTN                                   SourceX,
-  IN  UINTN                                   SourceY,
-  IN  UINTN                                   DestinationX,
-  IN  UINTN                                   DestinationY,
-  IN  UINTN                                   Width,
-  IN  UINTN                                   Height,
-  IN  UINTN                                   Delta      OPTIONAL
+  IN  EFI_UGA_DRAW_PROTOCOL  *This,
+  IN  EFI_UGA_PIXEL          *BltBuffer OPTIONAL,
+  IN  EFI_UGA_BLT_OPERATION  BltOperation,
+  IN  UINTN                  SourceX,
+  IN  UINTN                  SourceY,
+  IN  UINTN                  DestinationX,
+  IN  UINTN                  DestinationY,
+  IN  UINTN                  Width,
+  IN  UINTN                  Height,
+  IN  UINTN                  Delta      OPTIONAL
   )
 {
-  OC_UGA_PROTOCOL   *OcUgaDraw;
+  OC_UGA_PROTOCOL  *OcUgaDraw;
 
   OcUgaDraw = BASE_CR (This, OC_UGA_PROTOCOL, Uga);
 
   return OcUgaDraw->GraphicsOutput->Blt (
-    OcUgaDraw->GraphicsOutput,
-    (EFI_GRAPHICS_OUTPUT_BLT_PIXEL *) BltBuffer,
-    (EFI_GRAPHICS_OUTPUT_BLT_OPERATION) BltOperation,
-    SourceX,
-    SourceY,
-    DestinationX,
-    DestinationY,
-    Width,
-    Height,
-    Delta
-    );
+                                      OcUgaDraw->GraphicsOutput,
+                                      (EFI_GRAPHICS_OUTPUT_BLT_PIXEL *)BltBuffer,
+                                      (EFI_GRAPHICS_OUTPUT_BLT_OPERATION)BltOperation,
+                                      SourceX,
+                                      SourceY,
+                                      DestinationX,
+                                      DestinationY,
+                                      Width,
+                                      Height,
+                                      Delta
+                                      );
 }
 
 EFI_STATUS
@@ -154,13 +155,13 @@ OcProvideUgaPassThrough (
   VOID
   )
 {
-  EFI_STATUS                     Status;
-  UINTN                          HandleCount;
-  EFI_HANDLE                     *HandleBuffer;
-  UINTN                          Index;
-  EFI_GRAPHICS_OUTPUT_PROTOCOL   *GraphicsOutput;
-  EFI_UGA_DRAW_PROTOCOL          *UgaDraw;
-  OC_UGA_PROTOCOL                *OcUgaDraw;
+  EFI_STATUS                    Status;
+  UINTN                         HandleCount;
+  EFI_HANDLE                    *HandleBuffer;
+  UINTN                         Index;
+  EFI_GRAPHICS_OUTPUT_PROTOCOL  *GraphicsOutput;
+  EFI_UGA_DRAW_PROTOCOL         *UgaDraw;
+  OC_UGA_PROTOCOL               *OcUgaDraw;
 
   //
   // For now we do not need this but for launching 10.4, but as a side note:
@@ -171,42 +172,42 @@ OcProvideUgaPassThrough (
   // - for unknown handle
   //
   DEBUG_CODE_BEGIN ();
-  DEBUG ((DEBUG_INFO, "OCC: Found %u handles with UGA draw\n", (UINT32) OcCountProtocolInstances (&gEfiUgaDrawProtocolGuid)));
+  DEBUG ((DEBUG_INFO, "OCC: Found %u handles with UGA draw\n", (UINT32)OcCountProtocolInstances (&gEfiUgaDrawProtocolGuid)));
   DEBUG_CODE_END ();
 
   Status = gBS->LocateHandleBuffer (
-    ByProtocol,
-    &gEfiGraphicsOutputProtocolGuid,
-    NULL,
-    &HandleCount,
-    &HandleBuffer
-    );
+                  ByProtocol,
+                  &gEfiGraphicsOutputProtocolGuid,
+                  NULL,
+                  &HandleCount,
+                  &HandleBuffer
+                  );
   if (EFI_ERROR (Status)) {
     DEBUG ((DEBUG_INFO, "OCC: Failed to find handles with GOP - %r\n", Status));
     return Status;
   }
 
-  DEBUG ((DEBUG_INFO, "OCC: Found %u handles with GOP for UGA check\n", (UINT32) HandleCount));
+  DEBUG ((DEBUG_INFO, "OCC: Found %u handles with GOP for UGA check\n", (UINT32)HandleCount));
   for (Index = 0; Index < HandleCount; ++Index) {
-    DEBUG ((DEBUG_INFO, "OCC: Trying handle %u - %p\n", (UINT32) Index, HandleBuffer[Index]));
+    DEBUG ((DEBUG_INFO, "OCC: Trying handle %u - %p\n", (UINT32)Index, HandleBuffer[Index]));
 
     Status = gBS->HandleProtocol (
-      HandleBuffer[Index],
-      &gEfiGraphicsOutputProtocolGuid,
-      (VOID **) &GraphicsOutput
-      );
+                    HandleBuffer[Index],
+                    &gEfiGraphicsOutputProtocolGuid,
+                    (VOID **)&GraphicsOutput
+                    );
     if (EFI_ERROR (Status)) {
       DEBUG ((DEBUG_INFO, "OCC: No GOP protocol - %r\n", Status));
       continue;
     }
 
     Status = gBS->HandleProtocol (
-      HandleBuffer[Index],
-      &gEfiUgaDrawProtocolGuid,
-      (VOID **) &UgaDraw
-      );
+                    HandleBuffer[Index],
+                    &gEfiUgaDrawProtocolGuid,
+                    (VOID **)&UgaDraw
+                    );
     if (!EFI_ERROR (Status)) {
-      DEBUG ((DEBUG_INFO, "OCC: Skipping UGA proxying as it is already present on handle %u - %p\n", (UINT32) Index, HandleBuffer[Index]));
+      DEBUG ((DEBUG_INFO, "OCC: Skipping UGA proxying as it is already present on handle %u - %p\n", (UINT32)Index, HandleBuffer[Index]));
       continue;
     }
 
@@ -217,16 +218,16 @@ OcProvideUgaPassThrough (
     }
 
     OcUgaDraw->GraphicsOutput = GraphicsOutput;
-    OcUgaDraw->Uga.GetMode = OcUgaDrawGetMode;
-    OcUgaDraw->Uga.SetMode = OcUgaDrawSetMode;
-    OcUgaDraw->Uga.Blt = OcUgaDrawBlt;
+    OcUgaDraw->Uga.GetMode    = OcUgaDrawGetMode;
+    OcUgaDraw->Uga.SetMode    = OcUgaDrawSetMode;
+    OcUgaDraw->Uga.Blt        = OcUgaDrawBlt;
 
     Status = gBS->InstallMultipleProtocolInterfaces (
-      &HandleBuffer[Index],
-      &gEfiUgaDrawProtocolGuid,
-      &OcUgaDraw->Uga,
-      NULL
-      );
+                    &HandleBuffer[Index],
+                    &gEfiUgaDrawProtocolGuid,
+                    &OcUgaDraw->Uga,
+                    NULL
+                    );
     if (EFI_ERROR (Status)) {
       FreePool (OcUgaDraw);
     }
@@ -235,7 +236,7 @@ OcProvideUgaPassThrough (
       DEBUG_INFO,
       "OCC: Installed UGA protocol - %r (Handle %u - %p)\n",
       Status,
-      (UINT32) Index,
+      (UINT32)Index,
       HandleBuffer[Index]
       ));
   }

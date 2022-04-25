@@ -43,8 +43,8 @@
 
 UINT32
 OcGetDevicePolicyType (
-  IN  EFI_HANDLE   Handle,
-  OUT BOOLEAN      *External  OPTIONAL
+  IN  EFI_HANDLE  Handle,
+  OUT BOOLEAN     *External  OPTIONAL
   )
 {
   EFI_STATUS                Status;
@@ -58,7 +58,7 @@ OcGetDevicePolicyType (
     *External = FALSE;
   }
 
-  Status = gBS->HandleProtocol (Handle, &gEfiDevicePathProtocolGuid, (VOID **) &DevicePath);
+  Status = gBS->HandleProtocol (Handle, &gEfiDevicePathProtocolGuid, (VOID **)&DevicePath);
   if (EFI_ERROR (Status)) {
     return 0;
   }
@@ -89,12 +89,13 @@ OcGetDevicePolicyType (
           // DVD will have NO_DISK_SIGNATURE at least for our DuetPkg.
           //
           DevicePathWalker = NextDevicePathNode (DevicePathWalker);
-          HardDrive = (HARDDRIVE_DEVICE_PATH *) DevicePathWalker;
-          if (!IsDevicePathEnd (DevicePathWalker)
-            && DevicePathType (DevicePathWalker) == MEDIA_DEVICE_PATH
-            && DevicePathSubType (DevicePathWalker) == MEDIA_HARDDRIVE_DP
-            && (HardDrive->SignatureType == SIGNATURE_TYPE_MBR
-              || HardDrive->SignatureType == SIGNATURE_TYPE_GUID)) {
+          HardDrive        = (HARDDRIVE_DEVICE_PATH *)DevicePathWalker;
+          if (  !IsDevicePathEnd (DevicePathWalker)
+             && (DevicePathType (DevicePathWalker) == MEDIA_DEVICE_PATH)
+             && (DevicePathSubType (DevicePathWalker) == MEDIA_HARDDRIVE_DP)
+             && (  (HardDrive->SignatureType == SIGNATURE_TYPE_MBR)
+                || (HardDrive->SignatureType == SIGNATURE_TYPE_GUID)))
+          {
             return OC_SCAN_ALLOW_DEVICE_ATAPI;
           }
 
@@ -104,22 +105,26 @@ OcGetDevicePolicyType (
           if (External != NULL) {
             *External = TRUE;
           }
+
           return OC_SCAN_ALLOW_DEVICE_ATAPI;
         case MSG_USB_DP:
           if (External != NULL) {
             *External = TRUE;
           }
+
           return OC_SCAN_ALLOW_DEVICE_USB;
         case MSG_1394_DP:
           if (External != NULL) {
             *External = TRUE;
           }
+
           return OC_SCAN_ALLOW_DEVICE_FIREWIRE;
         case MSG_SD_DP:
         case MSG_EMMC_DP:
           if (External != NULL) {
             *External = TRUE;
           }
+
           return OC_SCAN_ALLOW_DEVICE_SDCARD;
       }
 
@@ -146,24 +151,27 @@ OcGetDevicePolicyType (
     }
 
     if (DevicePathType (DevicePathWalker) == ACPI_DEVICE_PATH) {
-      Acpi = (ACPI_HID_DEVICE_PATH *) DevicePathWalker;
-      if ((Acpi->HID & PNP_EISA_ID_MASK) == PNP_EISA_ID_CONST
-        && EISA_ID_TO_NUM (Acpi->HID) == 0x0A03) {
+      Acpi = (ACPI_HID_DEVICE_PATH *)DevicePathWalker;
+      if (  ((Acpi->HID & PNP_EISA_ID_MASK) == PNP_EISA_ID_CONST)
+         && (EISA_ID_TO_NUM (Acpi->HID) == 0x0A03))
+      {
         //
         // Allow PciRoot.
         //
         DevicePathWalker = NextDevicePathNode (DevicePathWalker);
         continue;
       }
-    } else if (DevicePathType (DevicePathWalker) == HARDWARE_DEVICE_PATH
-      && DevicePathSubType (DevicePathWalker) == HW_PCI_DP) {
+    } else if (  (DevicePathType (DevicePathWalker) == HARDWARE_DEVICE_PATH)
+              && (DevicePathSubType (DevicePathWalker) == HW_PCI_DP))
+    {
       //
       // Allow Pci.
       //
       DevicePathWalker = NextDevicePathNode (DevicePathWalker);
       continue;
-    } else if (DevicePathType (DevicePathWalker) == MESSAGING_DEVICE_PATH
-      && DevicePathSubType (DevicePathWalker) == MSG_DEVICE_LOGICAL_UNIT_DP) {
+    } else if (  (DevicePathType (DevicePathWalker) == MESSAGING_DEVICE_PATH)
+              && (DevicePathSubType (DevicePathWalker) == MSG_DEVICE_LOGICAL_UNIT_DP))
+    {
       //
       // Each device may have multiple units.
       // E.g. PciRoot(0x0)/Pci(0x1B,0x4)/Pci(0x0,0x0)/Unit(0x1)/HD(...)
@@ -185,16 +193,16 @@ OcGetDevicePolicyType (
   Microsoft partitions.
   https://docs.microsoft.com/ru-ru/windows/win32/api/vds/ns-vds-create_partition_parameters
 **/
-EFI_GUID mMsftBasicDataPartitionTypeGuid = {
-  0xEBD0A0A2, 0xB9E5, 0x4433, {0x87, 0xC0, 0x68, 0xB6, 0xB7, 0x26, 0x99, 0xC7}
+EFI_GUID  mMsftBasicDataPartitionTypeGuid = {
+  0xEBD0A0A2, 0xB9E5, 0x4433, { 0x87, 0xC0, 0x68, 0xB6, 0xB7, 0x26, 0x99, 0xC7 }
 };
 
-EFI_GUID mMsftReservedPartitionTypeGuid = {
-  0xE3C9E316, 0x0B5C, 0x4DB8, {0x81, 0x7D, 0xF9, 0x2D, 0xF0, 0x02, 0x15, 0xAE}
+EFI_GUID  mMsftReservedPartitionTypeGuid = {
+  0xE3C9E316, 0x0B5C, 0x4DB8, { 0x81, 0x7D, 0xF9, 0x2D, 0xF0, 0x02, 0x15, 0xAE }
 };
 
-EFI_GUID mMsftRecoveryPartitionTypeGuid = {
-  0xDE94BBA4, 0x06D1, 0x4D40, {0xA1, 0x6A, 0xBF, 0xD5, 0x01, 0x79, 0xD6, 0xAC}
+EFI_GUID  mMsftRecoveryPartitionTypeGuid = {
+  0xDE94BBA4, 0x06D1, 0x4D40, { 0xA1, 0x6A, 0xBF, 0xD5, 0x01, 0x79, 0xD6, 0xAC }
 };
 
 /**
@@ -202,15 +210,15 @@ EFI_GUID mMsftRecoveryPartitionTypeGuid = {
   https://en.wikipedia.org/wiki/GUID_Partition_Table#Partition_type_GUIDs
   https://systemd.io/DISCOVERABLE_PARTITIONS/
 **/
-EFI_GUID mLinuxRootX86PartitionTypeGuid = {
-  0x44479540, 0xF297, 0x41B2, {0x9A, 0xF7, 0xD1, 0x31, 0xD5, 0xF0, 0x45, 0x8A}
+EFI_GUID  mLinuxRootX86PartitionTypeGuid = {
+  0x44479540, 0xF297, 0x41B2, { 0x9A, 0xF7, 0xD1, 0x31, 0xD5, 0xF0, 0x45, 0x8A }
 };
 
-EFI_GUID mLinuxRootX8664PartitionTypeGuid = {
-  0x4F68BCE3, 0xE8CD, 0x4DB1, {0x96, 0xE7, 0xFB, 0xCA, 0xF9, 0x84, 0xB7, 0x09}
+EFI_GUID  mLinuxRootX8664PartitionTypeGuid = {
+  0x4F68BCE3, 0xE8CD, 0x4DB1, { 0x96, 0xE7, 0xFB, 0xCA, 0xF9, 0x84, 0xB7, 0x09 }
 };
 
-EFI_GUID mLinuxFileSystemPartitionTypeGuid = {
+EFI_GUID  mLinuxFileSystemPartitionTypeGuid = {
   0x0FC63DAF, 0x8483, 0x4772, { 0x8E, 0x79, 0x3D, 0x69, 0xD8, 0x47, 0x7D, 0xE4 }
 };
 
@@ -218,13 +226,13 @@ EFI_GUID mLinuxFileSystemPartitionTypeGuid = {
   Extended Boot Loader Partition (XBOOTLDR).
   https://systemd.io/BOOT_LOADER_SPECIFICATION/
 **/
-EFI_GUID mXBootLdrPartitionTypeGuid = {
+EFI_GUID  mXBootLdrPartitionTypeGuid = {
   0xBC13C2FF, 0x59E6, 0x4262, { 0xA3, 0x52, 0xB2, 0x75, 0xFD, 0x6F, 0x71, 0x72 }
 };
 
 UINT32
 OcGetFileSystemPolicyType (
-  IN  EFI_HANDLE   Handle
+  IN  EFI_HANDLE  Handle
   )
 {
   CONST EFI_PARTITION_ENTRY  *PartitionEntry;
@@ -251,8 +259,9 @@ OcGetFileSystemPolicyType (
   //
   // Unsure whether these two should be separate, likely not.
   //
-  if (CompareGuid (&PartitionEntry->PartitionTypeGUID, &gAppleHfsPartitionTypeGuid)
-    || CompareGuid (&PartitionEntry->PartitionTypeGUID, &gAppleHfsBootPartitionTypeGuid)) {
+  if (  CompareGuid (&PartitionEntry->PartitionTypeGUID, &gAppleHfsPartitionTypeGuid)
+     || CompareGuid (&PartitionEntry->PartitionTypeGUID, &gAppleHfsBootPartitionTypeGuid))
+  {
     return OC_SCAN_ALLOW_FS_HFS;
   }
 
@@ -260,8 +269,9 @@ OcGetFileSystemPolicyType (
     return OC_SCAN_ALLOW_FS_NTFS;
   }
 
-  if (CompareGuid (&PartitionEntry->PartitionTypeGUID, &mLinuxRootX86PartitionTypeGuid)
-    || CompareGuid (&PartitionEntry->PartitionTypeGUID, &mLinuxRootX8664PartitionTypeGuid)) {
+  if (  CompareGuid (&PartitionEntry->PartitionTypeGUID, &mLinuxRootX86PartitionTypeGuid)
+     || CompareGuid (&PartitionEntry->PartitionTypeGUID, &mLinuxRootX8664PartitionTypeGuid))
+  {
     return OC_SCAN_ALLOW_FS_LINUX_ROOT;
   }
 
@@ -274,19 +284,19 @@ OcGetFileSystemPolicyType (
 
 EFI_STATUS
 InternalCheckScanPolicy (
-  IN  EFI_HANDLE                       Handle,
-  IN  UINT32                           Policy,
-  OUT BOOLEAN                          *External OPTIONAL
+  IN  EFI_HANDLE  Handle,
+  IN  UINT32      Policy,
+  OUT BOOLEAN     *External OPTIONAL
   )
 {
-  UINT32                     DevicePolicy;
-  UINT32                     FileSystemPolicy;
+  UINT32  DevicePolicy;
+  UINT32  FileSystemPolicy;
 
   //
   // Always request policy type due to external checks.
   //
   DevicePolicy = OcGetDevicePolicyType (Handle, External);
-  if ((Policy & OC_SCAN_DEVICE_LOCK) != 0 && (Policy & DevicePolicy) == 0) {
+  if (((Policy & OC_SCAN_DEVICE_LOCK) != 0) && ((Policy & DevicePolicy) == 0)) {
     DEBUG ((DEBUG_INFO, "OCB: Invalid device policy (%x/%x) for %p\n", DevicePolicy, Policy, Handle));
     return EFI_SECURITY_VIOLATION;
   }
@@ -310,10 +320,10 @@ OcGetBootDevicePathType (
   OUT BOOLEAN                   *IsGeneric  OPTIONAL
   )
 {
-  CHAR16                      *Path;
-  UINTN                       PathLen;
-  UINTN                       RestLen;
-  UINTN                       Index;
+  CHAR16  *Path;
+  UINTN   PathLen;
+  UINTN   RestLen;
+  UINTN   Index;
 
   Path = NULL;
 
@@ -335,7 +345,7 @@ OcGetBootDevicePathType (
   //
   // Use the trailing character to determine folder.
   //
-  if (IsFolder != NULL && Path[PathLen - 1] == L'\\') {
+  if ((IsFolder != NULL) && (Path[PathLen - 1] == L'\\')) {
     *IsFolder = TRUE;
   }
 
@@ -356,19 +366,19 @@ OcGetBootDevicePathType (
   // Detect macOS by boot.efi in the bootloader name.
   // Detect macOS Time Machine by tmbootpicker.efi in the bootloader name.
   //
-  STATIC CONST CHAR16 *Bootloaders[] = {
+  STATIC CONST CHAR16  *Bootloaders[] = {
     L"boot.efi",
     L"tmbootpicker.efi",
     L"bootmgfw.efi"
   };
 
-  STATIC CONST UINTN BootloaderLengths[] = {
+  STATIC CONST UINTN  BootloaderLengths[] = {
     L_STR_LEN (L"boot.efi"),
     L_STR_LEN (L"tmbootpicker.efi"),
     L_STR_LEN (L"bootmgfw.efi")
   };
 
-  STATIC CONST OC_BOOT_ENTRY_TYPE BootloaderTypes[] = {
+  STATIC CONST OC_BOOT_ENTRY_TYPE  BootloaderTypes[] = {
     OC_BOOT_APPLE_OS,
     OC_BOOT_APPLE_TIME_MACHINE,
     OC_BOOT_WINDOWS
@@ -380,20 +390,22 @@ OcGetBootDevicePathType (
     }
 
     RestLen = PathLen - BootloaderLengths[Index];
-    if ((RestLen == 0 || Path[RestLen - 1] == L'\\')
-      && OcStrniCmp (&Path[RestLen], Bootloaders[Index], BootloaderLengths[Index]) == 0) {
+    if (  ((RestLen == 0) || (Path[RestLen - 1] == L'\\'))
+       && (OcStrniCmp (&Path[RestLen], Bootloaders[Index], BootloaderLengths[Index]) == 0))
+    {
       FreePool (Path);
       return BootloaderTypes[Index];
     }
   }
 
-  CONST CHAR16 *GenericBootloader      = &EFI_REMOVABLE_MEDIA_FILE_NAME[L_STR_LEN (L"\\EFI\\BOOT\\")];
-  CONST UINTN  GenericBootloaderLength = L_STR_LEN (EFI_REMOVABLE_MEDIA_FILE_NAME) - L_STR_LEN (L"\\EFI\\BOOT\\");
+  CONST CHAR16  *GenericBootloader      = &EFI_REMOVABLE_MEDIA_FILE_NAME[L_STR_LEN (L"\\EFI\\BOOT\\")];
+  CONST UINTN   GenericBootloaderLength = L_STR_LEN (EFI_REMOVABLE_MEDIA_FILE_NAME) - L_STR_LEN (L"\\EFI\\BOOT\\");
 
-  if (IsGeneric != NULL && PathLen >= GenericBootloaderLength) {
+  if ((IsGeneric != NULL) && (PathLen >= GenericBootloaderLength)) {
     RestLen = PathLen - GenericBootloaderLength;
-    if ((RestLen == 0 || Path[RestLen - 1] == L'\\')
-      && OcStrniCmp (&Path[RestLen], GenericBootloader, GenericBootloaderLength) == 0) {
+    if (  ((RestLen == 0) || (Path[RestLen - 1] == L'\\'))
+       && (OcStrniCmp (&Path[RestLen], GenericBootloader, GenericBootloaderLength) == 0))
+    {
       *IsGeneric = TRUE;
     }
   }
@@ -407,18 +419,19 @@ OcGetAppleBootLoadedImage (
   IN EFI_HANDLE  ImageHandle
   )
 {
-  EFI_STATUS                  Status;
-  EFI_LOADED_IMAGE_PROTOCOL   *LoadedImage;
+  EFI_STATUS                 Status;
+  EFI_LOADED_IMAGE_PROTOCOL  *LoadedImage;
 
   Status = gBS->HandleProtocol (
-    ImageHandle,
-    &gEfiLoadedImageProtocolGuid,
-    (VOID **)&LoadedImage
-    );
+                  ImageHandle,
+                  &gEfiLoadedImageProtocolGuid,
+                  (VOID **)&LoadedImage
+                  );
 
-  if (!EFI_ERROR (Status)
-    && LoadedImage->FilePath != NULL
-    && (OcGetBootDevicePathType (LoadedImage->FilePath, NULL, NULL) & OC_BOOT_APPLE_ANY) != 0) {
+  if (  !EFI_ERROR (Status)
+     && (LoadedImage->FilePath != NULL)
+     && ((OcGetBootDevicePathType (LoadedImage->FilePath, NULL, NULL) & OC_BOOT_APPLE_ANY) != 0))
+  {
     return LoadedImage;
   }
 

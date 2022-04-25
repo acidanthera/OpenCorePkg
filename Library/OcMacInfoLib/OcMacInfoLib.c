@@ -23,10 +23,10 @@
 
 #include "MacInfoInternal.h"
 
-STATIC CONST UINT32 mDevicePathsSupported = 1;
+STATIC CONST UINT32  mDevicePathsSupported = 1;
 
 STATIC
-CONST MAC_INFO_64BIT_COMPAT_ENTRY gMac64BitModels[] = {
+CONST MAC_INFO_64BIT_COMPAT_ENTRY  gMac64BitModels[] = {
   {
     "Macmini", 0, 3
   },
@@ -53,7 +53,7 @@ CONST MAC_INFO_64BIT_COMPAT_ENTRY gMac64BitModels[] = {
 STATIC
 CONST MAC_INFO_INTERNAL_ENTRY *
 LookupInternalEntry (
-  CONST CHAR8    *ProductName
+  CONST CHAR8  *ProductName
   )
 {
   UINTN  Start;
@@ -72,7 +72,7 @@ LookupInternalEntry (
 
   while (Start <= End) {
     Curr = (Start + End) / 2;
-    Cmp = AsciiStrCmp (gMacInfoModels[Curr].SystemProductName, ProductName);
+    Cmp  = AsciiStrCmp (gMacInfoModels[Curr].SystemProductName, ProductName);
 
     if (Cmp == 0) {
       return &gMacInfoModels[Curr];
@@ -112,21 +112,23 @@ GetMacInfo (
   //
   // Fill in DataHub values.
   //
-  MacInfo->DataHub.PlatformName          = "platform";
-  MacInfo->DataHub.SystemProductName     = ProductName;
-  MacInfo->DataHub.BoardProduct          = InternalEntry->BoardProduct;
+  MacInfo->DataHub.PlatformName      = "platform";
+  MacInfo->DataHub.SystemProductName = ProductName;
+  MacInfo->DataHub.BoardProduct      = InternalEntry->BoardProduct;
   if (InternalEntry->BoardRevision != MAC_INFO_BOARD_REVISION_MISSING) {
-    MacInfo->DataHub.BoardRevision       = &InternalEntry->BoardRevision;
+    MacInfo->DataHub.BoardRevision = &InternalEntry->BoardRevision;
   }
-  MacInfo->DataHub.DevicePathsSupported  = &mDevicePathsSupported;
+
+  MacInfo->DataHub.DevicePathsSupported = &mDevicePathsSupported;
   //
   // T2-based macs have no SMC branch or revision.
   //
   if (InternalEntry->SmcGeneration < 3) {
-    MacInfo->DataHub.SmcRevision         = InternalEntry->SmcRevision;
-    MacInfo->DataHub.SmcBranch           = InternalEntry->SmcBranch;
+    MacInfo->DataHub.SmcRevision = InternalEntry->SmcRevision;
+    MacInfo->DataHub.SmcBranch   = InternalEntry->SmcBranch;
   }
-  MacInfo->DataHub.SmcPlatform           = InternalEntry->SmcPlatform;
+
+  MacInfo->DataHub.SmcPlatform = InternalEntry->SmcPlatform;
 
   MacInfo->Smbios.BIOSVersion            = InternalEntry->BIOSVersion;
   MacInfo->Smbios.BIOSReleaseDate        = InternalEntry->BIOSReleaseDate;
@@ -147,13 +149,13 @@ GetMacInfo (
   MacInfo->Smbios.FirmwareFeaturesMask   = InternalEntry->FirmwareFeaturesMask;
 
   if (InternalEntry->PlatformFeature != MAC_INFO_PLATFORM_FEATURE_MISSING) {
-    MacInfo->Smbios.PlatformFeature      = &InternalEntry->PlatformFeature;
+    MacInfo->Smbios.PlatformFeature = &InternalEntry->PlatformFeature;
   }
 }
 
 CONST CHAR8 *
 GetSecureBootModel (
-  IN CONST CHAR8   *ProductName
+  IN CONST CHAR8  *ProductName
   )
 {
   CONST MAC_INFO_INTERNAL_ENTRY  *InternalEntry;
@@ -175,10 +177,10 @@ GetSecureBootModel (
 
 CONST CHAR8 *
 GetSecureBootModelFromBoardId (
-  IN CONST CHAR8   *BoardId
+  IN CONST CHAR8  *BoardId
   )
 {
-  UINTN        Index;
+  UINTN  Index;
 
   for (Index = 0; Index < gMacInfoModelCount; ++Index) {
     if (AsciiStrCmp (gMacInfoModels[Index].BoardProduct, BoardId) == 0) {
@@ -199,7 +201,7 @@ GetSecureBootModelFromBoardId (
 
 BOOLEAN
 HasMacInfo (
-  IN CONST CHAR8     *ProductName
+  IN CONST CHAR8  *ProductName
   )
 {
   CONST MAC_INFO_INTERNAL_ENTRY  *InternalEntry;
@@ -211,17 +213,17 @@ HasMacInfo (
 
 BOOLEAN
 IsMacModel64BitCompatible (
-  IN CONST CHAR8    *ProductName,
-  IN UINT32         KernelVersion
+  IN CONST CHAR8  *ProductName,
+  IN UINT32       KernelVersion
   )
 {
-  EFI_STATUS                      Status;
-  UINT32                          Index;
-  UINTN                           CurrentModelLength;
-  UINTN                           SystemModelLength;
-  CONST CHAR8                     *SystemModelSuffix;
-  CHAR8                           *SystemModelSeparator;
-  UINT64                          SystemModelMajor;
+  EFI_STATUS   Status;
+  UINT32       Index;
+  UINTN        CurrentModelLength;
+  UINTN        SystemModelLength;
+  CONST CHAR8  *SystemModelSuffix;
+  CHAR8        *SystemModelSeparator;
+  UINT64       SystemModelMajor;
 
   ASSERT (ProductName != NULL);
 
@@ -252,7 +254,7 @@ IsMacModel64BitCompatible (
       }
 
       SystemModelSeparator = AsciiStrStr (SystemModelSuffix, ",");
-      Status = AsciiStrDecimalToUint64S (SystemModelSuffix, &SystemModelSeparator, &SystemModelMajor);
+      Status               = AsciiStrDecimalToUint64S (SystemModelSuffix, &SystemModelSeparator, &SystemModelMajor);
       if (!EFI_ERROR (Status)) {
         if (OcMatchDarwinVersion (KernelVersion, KERNEL_VERSION_SNOW_LEOPARD_MIN, KERNEL_VERSION_SNOW_LEOPARD_MAX)) {
           return gMac64BitModels[Index].SnowLeoMin64 != 0 && SystemModelMajor >= gMac64BitModels[Index].SnowLeoMin64;

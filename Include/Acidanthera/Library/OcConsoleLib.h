@@ -33,8 +33,8 @@ typedef enum {
 /**
   Special commands sent to Builtin text renderer through TestString.
 **/
-#define OC_CONSOLE_MARK_CONTROLLED       L"MarkControlled"
-#define OC_CONSOLE_MARK_UNCONTROLLED     L"MarkUncontrolled"
+#define OC_CONSOLE_MARK_CONTROLLED    L"MarkControlled"
+#define OC_CONSOLE_MARK_UNCONTROLLED  L"MarkUncontrolled"
 
 /**
   Configure console control protocol with given options.
@@ -47,11 +47,11 @@ typedef enum {
 **/
 VOID
 OcSetupConsole (
-  IN OC_CONSOLE_RENDERER   Renderer,
-  IN BOOLEAN               IgnoreTextOutput,
-  IN BOOLEAN               SanitiseClearScreen,
-  IN BOOLEAN               ClearScreenOnModeSwitch,
-  IN BOOLEAN               ReplaceTabWithSpace
+  IN OC_CONSOLE_RENDERER  Renderer,
+  IN BOOLEAN              IgnoreTextOutput,
+  IN BOOLEAN              SanitiseClearScreen,
+  IN BOOLEAN              ClearScreenOnModeSwitch,
+  IN BOOLEAN              ReplaceTabWithSpace
   );
 
 /**
@@ -77,11 +77,11 @@ OcConsoleControlSetMode (
 **/
 VOID
 OcParseScreenResolution (
-  IN  CONST CHAR8         *String,
-  OUT UINT32              *Width,
-  OUT UINT32              *Height,
-  OUT UINT32              *Bpp,
-  OUT BOOLEAN             *Max
+  IN  CONST CHAR8  *String,
+  OUT UINT32       *Width,
+  OUT UINT32       *Height,
+  OUT UINT32       *Bpp,
+  OUT BOOLEAN      *Max
   );
 
 /**
@@ -94,10 +94,10 @@ OcParseScreenResolution (
 **/
 VOID
 OcParseConsoleMode (
-  IN  CONST CHAR8         *String,
-  OUT UINT32              *Width,
-  OUT UINT32              *Height,
-  OUT BOOLEAN             *Max
+  IN  CONST CHAR8  *String,
+  OUT UINT32       *Width,
+  OUT UINT32       *Height,
+  OUT BOOLEAN      *Max
   );
 
 /**
@@ -113,10 +113,10 @@ OcParseConsoleMode (
 **/
 EFI_STATUS
 OcSetConsoleResolution (
-  IN  UINT32              Width  OPTIONAL,
-  IN  UINT32              Height OPTIONAL,
-  IN  UINT32              Bpp    OPTIONAL,
-  IN  BOOLEAN             Force
+  IN  UINT32   Width  OPTIONAL,
+  IN  UINT32   Height OPTIONAL,
+  IN  UINT32   Bpp    OPTIONAL,
+  IN  BOOLEAN  Force
   );
 
 /**
@@ -129,8 +129,8 @@ OcSetConsoleResolution (
 **/
 EFI_STATUS
 OcSetConsoleMode (
-  IN  UINT32              Width,
-  IN  UINT32              Height
+  IN  UINT32  Width,
+  IN  UINT32  Height
   );
 
 /**
@@ -159,7 +159,7 @@ OcReconnectConsole (
 **/
 EFI_STATUS
 OcUseDirectGop (
-  IN INT32   CacheType
+  IN INT32  CacheType
   );
 
 /**

@@ -24,7 +24,7 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 /**
   Returns whether the Relocation's type indicates a Pair for the Intel 32
   platform.
-  
+
   @param[in] Type  The Relocation's type to verify.
 
 **/
@@ -39,7 +39,7 @@ MachoRelocationIsPairIntel32 (
 /**
   Returns whether the Relocation's type indicates a Pair for the Intel 64
   platform.
-  
+
   @param[in] Type  The Relocation's type to verify.
 
 **/
@@ -54,7 +54,7 @@ MachoRelocationIsPairIntel64 (
 /**
   Returns whether the Relocation's type matches a Pair's for the Intel 64
   platform.
-  
+
   @param[in] Type  The Relocation's type to verify.
 
 **/
@@ -68,7 +68,7 @@ MachoIsRelocationPairTypeIntel64 (
 
 /**
   Returns whether the Relocation shall be preserved for the Intel 64 platform.
-  
+
   @param[in] Type  The Relocation's type to verify.
 
 **/
@@ -96,22 +96,24 @@ InternalLookupRelocationByOffset (
   IN     MACH_RELOCATION_INFO  *Relocs
   )
 {
-  UINT32               Index;
-  MACH_RELOCATION_INFO *Relocation;
+  UINT32                Index;
+  MACH_RELOCATION_INFO  *Relocation;
 
   for (Index = 0; Index < NumRelocs; ++Index) {
     Relocation = &Relocs[Index];
     //
     // A section-based relocation entry can be skipped for absolute symbols.
     //
-    if ((Relocation->Extern == 0)
-     && (Relocation->SymbolNumber == MACH_RELOC_ABSOLUTE)) {
+    if (  (Relocation->Extern == 0)
+       && (Relocation->SymbolNumber == MACH_RELOC_ABSOLUTE))
+    {
       continue;
     }
 
     if ((UINT64)Relocation->Address == Address) {
       return Relocation;
     }
+
     //
     // Relocation Pairs can be skipped.
     // Assumption: Intel X64.  Currently verified by the Context
@@ -121,6 +123,7 @@ InternalLookupRelocationByOffset (
       if (Index == (MAX_UINT32 - 1)) {
         break;
       }
+
       ++Index;
     }
   }
@@ -131,18 +134,18 @@ InternalLookupRelocationByOffset (
 STATIC
 MACH_RELOCATION_INFO *
 InternalLookupSectionRelocationByOffset (
-  IN OUT OC_MACHO_CONTEXT      *Context,
-  IN     UINT64                Address,
-  IN     BOOLEAN               External
+  IN OUT OC_MACHO_CONTEXT  *Context,
+  IN     UINT64            Address,
+  IN     BOOLEAN           External
   )
 {
-  MACH_SECTION_ANY        *Section;
-  UINT32                  SectionIndex;
-  UINT32                  Index;
+  MACH_SECTION_ANY  *Section;
+  UINT32            SectionIndex;
+  UINT32            Index;
 
-  MACH_RELOCATION_INFO    *Relocations;
-  MACH_RELOCATION_INFO    *Relocation;
-  UINT32                  RelocationCount;
+  MACH_RELOCATION_INFO  *Relocations;
+  MACH_RELOCATION_INFO  *Relocation;
+  UINT32                RelocationCount;
 
   SectionIndex = 0;
   while (TRUE) {
@@ -156,36 +159,37 @@ InternalLookupSectionRelocationByOffset (
     //
     RelocationCount = Context->Is32Bit ? Section->Section32.NumRelocations : Section->Section64.NumRelocations;
     if (RelocationCount > 0) {
-      Relocations = (MACH_RELOCATION_INFO*) (((UINTN)(Context->MachHeader))
-        + (Context->Is32Bit ? Section->Section32.RelocationsOffset : Section->Section64.RelocationsOffset));
+      Relocations = (MACH_RELOCATION_INFO *)(((UINTN)(Context->MachHeader))
+                                             + (Context->Is32Bit ? Section->Section32.RelocationsOffset : Section->Section64.RelocationsOffset));
 
       for (Index = 0; Index < RelocationCount; Index++) {
-          Relocation = &Relocations[Index];
-          //
-          // A section-based relocation entry can be skipped for absolute symbols.
-          //
-          if ((Relocation->Extern == 0)
-          && (Relocation->SymbolNumber == MACH_RELOC_ABSOLUTE)) {
-            continue;
-          }
+        Relocation = &Relocations[Index];
+        //
+        // A section-based relocation entry can be skipped for absolute symbols.
+        //
+        if (  (Relocation->Extern == 0)
+           && (Relocation->SymbolNumber == MACH_RELOC_ABSOLUTE))
+        {
+          continue;
+        }
 
-          //
-          // Filter out the other relocation type.
-          //
-          if (Relocation->Extern != (UINT32)(External ? 1 : 0)) {
-            continue;
-          }
+        //
+        // Filter out the other relocation type.
+        //
+        if (Relocation->Extern != (UINT32)(External ? 1 : 0)) {
+          continue;
+        }
 
-          if (Context->Is32Bit) {
-            if (((UINT32)Relocation->Address + Section->Section32.Address) == Address) {
-              return Relocation;
-            }
-          } else {
-            if (((UINT64)Relocation->Address + Section->Section64.Address) == Address) {
-              return Relocation;
-            }
+        if (Context->Is32Bit) {
+          if (((UINT32)Relocation->Address + Section->Section32.Address) == Address) {
+            return Relocation;
+          }
+        } else {
+          if (((UINT64)Relocation->Address + Section->Section64.Address) == Address) {
+            return Relocation;
           }
         }
+      }
     }
 
     SectionIndex++;
@@ -214,10 +218,10 @@ InternalGetExternRelocationByOffset (
   //
   if (Context->DySymtab == NULL) {
     return InternalLookupSectionRelocationByOffset (
-      Context,
-      Address,
-      TRUE
-      );
+             Context,
+             Address,
+             TRUE
+             );
   }
 
   return InternalLookupRelocationByOffset (
@@ -247,10 +251,10 @@ InternalGetLocalRelocationByOffset (
   //
   if (Context->DySymtab == NULL) {
     return InternalLookupSectionRelocationByOffset (
-      Context,
-      Address,
-      FALSE
-      );
+             Context,
+             Address,
+             FALSE
+             );
   }
 
   return InternalLookupRelocationByOffset (

@@ -42,16 +42,16 @@ typedef struct OC_FORCE_RESOLUTION_PROTOCOL_ OC_FORCE_RESOLUTION_PROTOCOL;
 **/
 typedef
 EFI_STATUS
-(EFIAPI* OC_FORCE_RESOLUTION_SET_RESOLUTION) (
+(EFIAPI *OC_FORCE_RESOLUTION_SET_RESOLUTION)(
   IN OUT OC_FORCE_RESOLUTION_PROTOCOL *This,
   IN     UINT32                       Width   OPTIONAL,
   IN     UINT32                       Height  OPTIONAL
   );
 
 struct OC_FORCE_RESOLUTION_PROTOCOL_ {
-  OC_FORCE_RESOLUTION_SET_RESOLUTION  SetResolution;
+  OC_FORCE_RESOLUTION_SET_RESOLUTION    SetResolution;
 };
 
-extern EFI_GUID gOcForceResolutionProtocolGuid;
+extern EFI_GUID  gOcForceResolutionProtocolGuid;
 
 #endif

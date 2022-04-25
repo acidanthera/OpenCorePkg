@@ -40,22 +40,22 @@ UefiMain (
   EFI_MEMORY_DESCRIPTOR         *MemoryMap;
 
   Address = 0;
-  Status = gBS->LocateProtocol (&gOcFirmwareRuntimeProtocolGuid, NULL, (VOID **) &FwRuntime);
-  if (!EFI_ERROR (Status) && FwRuntime->Revision == OC_FIRMWARE_RUNTIME_REVISION) {
+  Status  = gBS->LocateProtocol (&gOcFirmwareRuntimeProtocolGuid, NULL, (VOID **)&FwRuntime);
+  if (!EFI_ERROR (Status) && (FwRuntime->Revision == OC_FIRMWARE_RUNTIME_REVISION)) {
     Status = FwRuntime->GetExecArea (&Address, &Pages);
     DEBUG ((
       DEBUG_WARN,
       "MMDD: OpenRuntime r%u resides at %X - %r\n",
-      (UINT32) FwRuntime->Revision,
-      (UINT32) Address,
+      (UINT32)FwRuntime->Revision,
+      (UINT32)Address,
       Status
       ));
-  } else if (!EFI_ERROR (Status) && FwRuntime->Revision != OC_FIRMWARE_RUNTIME_REVISION) {
+  } else if (!EFI_ERROR (Status) && (FwRuntime->Revision != OC_FIRMWARE_RUNTIME_REVISION)) {
     DEBUG ((
       DEBUG_WARN,
       "MMDD: OpenRuntime has unexpected revision r%u instead of r%u\n",
-      (UINT32) FwRuntime->Revision,
-      (UINT32) OC_FIRMWARE_RUNTIME_REVISION
+      (UINT32)FwRuntime->Revision,
+      (UINT32)OC_FIRMWARE_RUNTIME_REVISION
       ));
   } else {
     DEBUG ((
@@ -71,13 +71,13 @@ UefiMain (
     ));
 
   MemoryMap = OcGetCurrentMemoryMap (
-    &MemoryMapSize,
-    &DescriptorSize,
-    NULL,
-    NULL,
-    &OriginalSize,
-    TRUE
-    );
+                &MemoryMapSize,
+                &DescriptorSize,
+                NULL,
+                NULL,
+                &OriginalSize,
+                TRUE
+                );
 
   if (MemoryMap != NULL) {
     OcPrintMemoryAttributesTable ();
@@ -94,6 +94,7 @@ UefiMain (
     } else {
       DEBUG ((DEBUG_INFO, "MMDD: Cannot patch memory map - %r\n", Status));
     }
+
     DEBUG ((DEBUG_INFO, "MMDD: Dumping shrinked memory map\n"));
     OcShrinkMemoryMap (&MemoryMapSize, MemoryMap, DescriptorSize);
     OcPrintMemoryMap (MemoryMapSize, MemoryMap, DescriptorSize);

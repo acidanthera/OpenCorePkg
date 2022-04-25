@@ -91,22 +91,21 @@
 // The CPUID_EXTFEATURE_XXX values define 64-bit values
 // returned in %ecx:%edx to a CPUID request with %eax of 0x80000001:
 
-#define CPUID_EXTFEATURE_SYSCALL BIT11  ///< SYSCALL/sysret
+#define CPUID_EXTFEATURE_SYSCALL  BIT11 ///< SYSCALL/sysret
 
-#define CPUID_EXTFEATURE_XD      BIT20  ///< eXecute Disable
-#define CPUID_EXTFEATURE_1GBPAGE BIT21  ///< 1GB pages
+#define CPUID_EXTFEATURE_XD       BIT20 ///< eXecute Disable
+#define CPUID_EXTFEATURE_1GBPAGE  BIT21 ///< 1GB pages
 
 #define CPUID_EXTFEATURE_RDTSCP  BIT27  ///< RDTSCP
 
-#define CPUID_EXTFEATURE_EM64T   BIT29  ///< Extended Mem 64 Technology
+#define CPUID_EXTFEATURE_EM64T  BIT29   ///< Extended Mem 64 Technology
 
-#define CPUID_EXTFEATURE_LAHF    BIT32  ///< LAFH/SAHF instructions
-
+#define CPUID_EXTFEATURE_LAHF  BIT32    ///< LAFH/SAHF instructions
 
 // The CPUID_EXTFEATURE_XXX values define 64-bit values
 // returned in %ecx:%edx to a CPUID request with %eax of 0x80000007:
 
-#define CPUID_EXTFEATURE_TSCI    BIT8  ///< TSC Invariant
+#define CPUID_EXTFEATURE_TSCI  BIT8    ///< TSC Invariant
 
 // When the EAX register contains a value of 2, the CPUID instruction loads
 // the EAX, EBX, ECX, and EDX registers with descriptors that indicate the
@@ -114,7 +113,7 @@
 
 // CPUID_CACHE_SIZE
 /// Number of 8-bit descriptor values
-#define CPUID_CACHE_SIZE  16  
+#define CPUID_CACHE_SIZE  16
 
 enum {
   CpuIdCacheNull           = 0x00,  ///< NULL

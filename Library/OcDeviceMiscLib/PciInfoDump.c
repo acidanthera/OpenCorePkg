@@ -34,34 +34,34 @@ OcPciInfoDump (
   IN EFI_FILE_PROTOCOL  *Root
   )
 {
-  EFI_STATUS                     Status;
-  UINTN                          HandleCount;
-  EFI_HANDLE                     *HandleBuffer;
-  UINTN                          Index;
-  EFI_PCI_IO_PROTOCOL            *PciIo;
-  PCI_TYPE00                     PciDevice;
-  EFI_DEVICE_PATH_PROTOCOL       *PciDevicePath;
-  CHAR16                         *TextPciDevicePath;
+  EFI_STATUS                Status;
+  UINTN                     HandleCount;
+  EFI_HANDLE                *HandleBuffer;
+  UINTN                     Index;
+  EFI_PCI_IO_PROTOCOL       *PciIo;
+  PCI_TYPE00                PciDevice;
+  EFI_DEVICE_PATH_PROTOCOL  *PciDevicePath;
+  CHAR16                    *TextPciDevicePath;
 
-  CHAR8                          *FileBuffer;
-  UINTN                          FileBufferSize;
-  CHAR16                         TmpFileName[32];
+  CHAR8   *FileBuffer;
+  UINTN   FileBufferSize;
+  CHAR16  TmpFileName[32];
 
   ASSERT (Root != NULL);
 
   FileBufferSize = SIZE_1KB;
-  FileBuffer     = (CHAR8 *) AllocateZeroPool (FileBufferSize);
+  FileBuffer     = (CHAR8 *)AllocateZeroPool (FileBufferSize);
   if (FileBuffer == NULL) {
     return EFI_OUT_OF_RESOURCES;
   }
 
   Status = gBS->LocateHandleBuffer (
-    ByProtocol,
-    &gEfiPciIoProtocolGuid,
-    NULL,
-    &HandleCount,
-    &HandleBuffer
-    );
+                  ByProtocol,
+                  &gEfiPciIoProtocolGuid,
+                  NULL,
+                  &HandleCount,
+                  &HandleBuffer
+                  );
   if (EFI_ERROR (Status)) {
     DEBUG ((DEBUG_INFO, "OCDM: No PCI devices found for dumping - %r\n", Status));
     return Status;
@@ -69,10 +69,10 @@ OcPciInfoDump (
 
   for (Index = 0; Index < HandleCount; ++Index) {
     Status = gBS->HandleProtocol (
-      HandleBuffer[Index],
-      &gEfiPciIoProtocolGuid,
-      (VOID **) &PciIo
-      );
+                    HandleBuffer[Index],
+                    &gEfiPciIoProtocolGuid,
+                    (VOID **)&PciIo
+                    );
     if (EFI_ERROR (Status)) {
       continue;
     }
@@ -81,12 +81,12 @@ OcPciInfoDump (
     // Read the whole PCI device in 32-bit.
     //
     Status = PciIo->Pci.Read (
-      PciIo,
-      EfiPciIoWidthUint32,
-      0,
-      sizeof (PCI_TYPE00) / sizeof (UINT32),
-      &PciDevice
-      );
+                          PciIo,
+                          EfiPciIoWidthUint32,
+                          0,
+                          sizeof (PCI_TYPE00) / sizeof (UINT32),
+                          &PciDevice
+                          );
     if (EFI_ERROR (Status)) {
       continue;
     }
@@ -118,14 +118,15 @@ OcPciInfoDump (
         PciDevice.Device.SubsystemID
         );
     }
+
     //
     // Also dump device path if possible.
     //
     Status = gBS->HandleProtocol (
-      HandleBuffer[Index],
-      &gEfiDevicePathProtocolGuid,
-      (VOID **) &PciDevicePath
-      );
+                    HandleBuffer[Index],
+                    &gEfiDevicePathProtocolGuid,
+                    (VOID **)&PciDevicePath
+                    );
     if (!EFI_ERROR (Status)) {
       TextPciDevicePath = ConvertDevicePathToText (PciDevicePath, FALSE, FALSE);
       if (TextPciDevicePath != NULL) {
@@ -139,6 +140,7 @@ OcPciInfoDump (
         FreePool (TextPciDevicePath);
       }
     }
+
     //
     // Finally, append a newline.
     //
@@ -150,7 +152,7 @@ OcPciInfoDump (
   //
   if (FileBuffer != NULL) {
     UnicodeSPrint (TmpFileName, sizeof (TmpFileName), L"PCIInfo.txt");
-    Status = OcSetFileData (Root, TmpFileName, FileBuffer, (UINT32) AsciiStrLen (FileBuffer));
+    Status = OcSetFileData (Root, TmpFileName, FileBuffer, (UINT32)AsciiStrLen (FileBuffer));
     DEBUG ((DEBUG_INFO, "OCDM: Dumped PCI info - %r\n", Status));
 
     FreePool (FileBuffer);

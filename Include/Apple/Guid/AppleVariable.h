@@ -139,8 +139,8 @@ typedef enum {
 #define APPLE_SYSTEM_AUDIO_VOLUME_MUTED        BIT7
 #define APPLE_SYSTEM_AUDIO_VOLUME_VOLUME_MASK  0x7FU
 
-#define APPLE_SYSTEM_AUDIO_VOLUME_DB_MIN       (-128)
-#define APPLE_SYSTEM_AUDIO_VOLUME_DB_MAX       (127)
+#define APPLE_SYSTEM_AUDIO_VOLUME_DB_MIN  (-128)
+#define APPLE_SYSTEM_AUDIO_VOLUME_DB_MAX  (127)
 
 ///
 /// System audio volume.
@@ -168,28 +168,28 @@ typedef enum {
 /// CHAR8[] String starting with language code (e.g. ru-RU:252).
 /// gAppleBootVariableGuid
 ///
-#define APPLE_PREV_LANG_KBD_VARIABLE_NAME   L"prev-lang:kbd"
+#define APPLE_PREV_LANG_KBD_VARIABLE_NAME  L"prev-lang:kbd"
 
 ///
 /// Performance record data enable.
 /// UINT8: Any value to enable performance gathering (one time).
 /// gAppleBootVariableGuid
 ///
-#define APPLE_EFI_BOOT_PERF_VARIABLE_NAME           L"efiboot-perf-record"
+#define APPLE_EFI_BOOT_PERF_VARIABLE_NAME  L"efiboot-perf-record"
 
 ///
 /// Performance record data address.
 /// UINT32: Physical address to EfiACPIReclaimMemory containing perf data.
 /// gAppleBootVariableGuid
 ///
-#define APPLE_EFI_BOOT_PERF_ADDRESS_VARIABLE_NAME   L"efiboot-perf-record-data"
+#define APPLE_EFI_BOOT_PERF_ADDRESS_VARIABLE_NAME  L"efiboot-perf-record-data"
 
 ///
 /// Performance record data size.
 /// UINT32: Size of performance record data, usually 4096 bytes.
 /// gAppleBootVariableGuid
 ///
-#define APPLE_EFI_BOOT_PERF_SIZE_VARIABLE_NAME      L"efiboot-perf-record-data-size"
+#define APPLE_EFI_BOOT_PERF_SIZE_VARIABLE_NAME  L"efiboot-perf-record-data-size"
 
 ///
 /// Hibernation wake log (mirror for APPLE_RTC_WAKE_LOG_ADDR).
@@ -210,28 +210,28 @@ typedef enum {
 /// CHAR8: '1'.
 /// gAppleBootVariableGuid
 ///
-#define APPLE_INSTALL_WINDOWS_UEFI_VARIABLE_NAME L"InstallWindowsUEFI"
+#define APPLE_INSTALL_WINDOWS_UEFI_VARIABLE_NAME  L"InstallWindowsUEFI"
 
 ///
 /// 7-bit packed panic information.
 /// Data blob from with indices in the range of [0000, 0400).
 /// gAppleBootVariableGuid
 ///
-#define APPLE_PANIC_INFO_NO_VARIABLE_NAME L"AAPL,PanicInfo%04x"
+#define APPLE_PANIC_INFO_NO_VARIABLE_NAME  L"AAPL,PanicInfo%04x"
 
 ///
 /// Set display rotation angle.
 /// UINT32: 0, 90, 180, 270.
 /// gAppleBootVariableGuid
 ///
-#define APPLE_FORCE_DISPLAY_ROTATION_VARIABLE_NAME L"ForceDisplayRotationInEFI"
+#define APPLE_FORCE_DISPLAY_ROTATION_VARIABLE_NAME  L"ForceDisplayRotationInEFI"
 
 ///
 /// BootCampt device path.
 /// UEFI Device Path.
 /// gAppleBootVariableGuid
 ///
-#define APPLE_BOOT_CAMP_HD_VARIABLE_NAME L"BootCampHD"
+#define APPLE_BOOT_CAMP_HD_VARIABLE_NAME  L"BootCampHD"
 
 ///
 /// Boot recovery once on the next restart in the specified mode in ASCII
@@ -244,21 +244,21 @@ typedef enum {
 /// - secure-boot         --- triggered by EfiBoot to perform recovery after SB failure
 /// gAppleBootVariableGuid
 ///
-#define APPLE_RECOVERY_BOOT_MODE_VARIABLE_NAME L"recovery-boot-mode"
+#define APPLE_RECOVERY_BOOT_MODE_VARIABLE_NAME  L"recovery-boot-mode"
 
 ///
 /// Startup sound configuration variable.
 /// UINT8: 00 (for unmuted, default) or 01 (for muted).
 /// gAppleBootVariableGuid
 ///
-#define APPLE_STARTUP_MUTE_VARIABLE_NAME L"StartupMute"
+#define APPLE_STARTUP_MUTE_VARIABLE_NAME  L"StartupMute"
 
 ///
 /// Recovery initiator device path. In general EfiBoot device path that called
 /// reboot to recovery.
 /// gAppleVendorVariableGuid
 ///
-#define APPLE_RECOVERY_BOOT_INITIATOR_VARIABLE_NAME L"RecoveryBootInitiator"
+#define APPLE_RECOVERY_BOOT_INITIATOR_VARIABLE_NAME  L"RecoveryBootInitiator"
 
 ///
 /// Bridge OS hardware model variable used to propagate to IODT bridge-model
@@ -266,83 +266,83 @@ typedef enum {
 /// Uppercase ASCII string with \0 terminator (e.g. J137AP).
 /// gAppleVendorVariableGuid
 ///
-#define APPLE_BRIDGE_OS_HARDWARE_MODEL_VARIABLE_NAME L"BridgeOSHardwareModel"
+#define APPLE_BRIDGE_OS_HARDWARE_MODEL_VARIABLE_NAME  L"BridgeOSHardwareModel"
 
 ///
 /// A global variable storing the GUID of the APPLE_VENDOR EFI variable scope.
 ///
-extern EFI_GUID gAppleVendorVariableGuid;
+extern EFI_GUID  gAppleVendorVariableGuid;
 
 ///
 /// A global variable storing the GUID of the APPLE_BOOT EFI variable scope.
 /// AKA gAppleEFINVRAMGuid
 ///
-extern EFI_GUID gAppleBootVariableGuid;
+extern EFI_GUID  gAppleBootVariableGuid;
 
 ///
 /// A global variable storing the GUID of the APPLE_CORE_STORAGE EFI variable
 /// scope.
 ///
-extern EFI_GUID gAppleCoreStorageVariableGuid;
+extern EFI_GUID  gAppleCoreStorageVariableGuid;
 
 ///
 /// A global variable storing the GUID of the APPLE_TAMPER_RESISTANT_BOOT EFI
 /// variable scope.
 /// AKA gAppleEFINVRAMTRBStagingCommandGuid.
 ///
-extern EFI_GUID gAppleTamperResistantBootVariableGuid;
+extern EFI_GUID  gAppleTamperResistantBootVariableGuid;
 
 ///
 /// A global variable storing the GUID of the APPLE_WIRELESS_NETWORK EFI
 /// variable scope.
 ///
-extern EFI_GUID gAppleWirelessNetworkVariableGuid;
+extern EFI_GUID  gAppleWirelessNetworkVariableGuid;
 
 ///
 /// A global variable storing the GUID of the APPLE_PERSONALIZATION EFI
 /// variable scope.
 ///
-extern EFI_GUID gApplePersonalizationVariableGuid;
+extern EFI_GUID  gApplePersonalizationVariableGuid;
 
 ///
 /// A global variable storing the GUID of
 /// the APPLE_TAMPER_RESISTANT_BOOT_SECURE_VARIABLE_GUID EFI variable scope.
 /// AKA gAppleEFINVRAMTRBSecureVariableGuid.
 ///
-extern EFI_GUID gAppleTamperResistantBootSecureVariableGuid;
+extern EFI_GUID  gAppleTamperResistantBootSecureVariableGuid;
 
 ///
 /// A global variable storing the GUID of
 /// the APPLE_TAMPER_RESISTANT_BOOT_EFI_USER_VARIABLE_GUID EFI variable scope.
 ///
-extern EFI_GUID gAppleTamperResistantBootEfiUserVariableGuid;
+extern EFI_GUID  gAppleTamperResistantBootEfiUserVariableGuid;
 
 ///
 /// A global variable storing the GUID of the APPLE_NETBOOT EFI variable
 /// scope.
 ///
-extern EFI_GUID gAppleNetbootVariableGuid;
+extern EFI_GUID  gAppleNetbootVariableGuid;
 
 ///
 /// A global variable storing the GUID of the APPLE_SECURITY EFI variable
 /// scope.
 ///
-extern EFI_GUID gAppleSecurityVariableGuid;
+extern EFI_GUID  gAppleSecurityVariableGuid;
 
 ///
 /// A global variable storing the GUID of the APPLE_SECURE_BOOT_VARIABLE_GUID
 /// EFI variable  scope.
 ///
-extern EFI_GUID gAppleSecureBootVariableGuid;
+extern EFI_GUID  gAppleSecureBootVariableGuid;
 
 ///
 /// A global variable storing the GUID of the APPLE_STARTUP_MANAGER variable scope.
 ///
-extern EFI_GUID gAppleStartupManagerVariableGuid;
+extern EFI_GUID  gAppleStartupManagerVariableGuid;
 
 ///
 /// A global variable storing the GUID of the APPLE_BACKUP_BOOT variable scope.
 ///
-extern EFI_GUID gAppleBackupBootVariableGuid;
+extern EFI_GUID  gAppleBackupBootVariableGuid;
 
 #endif // APPLE_VARIABLE_H

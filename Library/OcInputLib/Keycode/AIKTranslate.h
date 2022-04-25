@@ -23,7 +23,7 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 #define AIK_MAX_ASCII_NUM     128
 #define AIK_MAX_SCANCODE_NUM  24
 
-#define AIK_MAX_MODIFIERS_NUM ( \
+#define AIK_MAX_MODIFIERS_NUM  (\
   USB_HID_KB_KP_MODIFIER_RIGHT_SHIFT \
   | USB_HID_KB_KP_MODIFIER_LEFT_SHIFT \
   | USB_HID_KB_KP_MODIFIER_RIGHT_CONTROL \
@@ -34,39 +34,39 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
   | USB_HID_KB_KP_MODIFIER_LEFT_GUI \
   )
 
-#define AIK_APPLEKEY_MIN AppleHidUsbKbUsageKeyA
-#define AIK_APPLEKEY_MAX AppleHidUsbKbUsageKeyUpArrow
-#define AIK_MAX_APPLEKEY_NUM ((AIK_APPLEKEY_MAX) - (AIK_APPLEKEY_MIN) + 1)
+#define AIK_APPLEKEY_MIN      AppleHidUsbKbUsageKeyA
+#define AIK_APPLEKEY_MAX      AppleHidUsbKbUsageKeyUpArrow
+#define AIK_MAX_APPLEKEY_NUM  ((AIK_APPLEKEY_MAX) - (AIK_APPLEKEY_MIN) + 1)
 
 typedef struct {
-  UINT8         UsbCode;
-  CONST CHAR8   *KeyName;
-  CONST CHAR8   *ShiftKeyName;
+  UINT8          UsbCode;
+  CONST CHAR8    *KeyName;
+  CONST CHAR8    *ShiftKeyName;
 } AIK_PS2KEY_TO_USB;
 
 typedef struct {
-  UINT8         UsbCode;
-  UINT32        ShiftState;
-  CONST CHAR8   *KeyName;
+  UINT8          UsbCode;
+  UINT32         ShiftState;
+  CONST CHAR8    *KeyName;
 } AIK_EFIKEY_TO_USB;
 
 typedef struct {
-  UINT8         UsbCode;
-  UINT32        ShiftState;
-  CONST CHAR8   *KeyName;
+  UINT8          UsbCode;
+  UINT32         ShiftState;
+  CONST CHAR8    *KeyName;
 } AIK_ASCII_TO_USB;
 
 typedef struct {
-  UINT8         UsbCode;
-  CONST CHAR8   *KeyName;
+  UINT8          UsbCode;
+  CONST CHAR8    *KeyName;
 } AIK_SCANCODE_TO_USB;
 
 extern AIK_PS2KEY_TO_USB    gAikPs2KeyToUsbMap[AIK_MAX_PS2KEY_NUM];
 extern AIK_EFIKEY_TO_USB    gAikEfiKeyToUsbMap[AIK_MAX_EFIKEY_NUM];
 extern AIK_ASCII_TO_USB     gAikAsciiToUsbMap[AIK_MAX_ASCII_NUM];
 extern AIK_SCANCODE_TO_USB  gAikScanCodeToUsbMap[AIK_MAX_SCANCODE_NUM];
-extern CONST CHAR8 *        gAikModifiersToNameMap[AIK_MAX_MODIFIERS_NUM];
-extern CONST CHAR8 *        gAikAppleKeyToNameMap[AIK_MAX_APPLEKEY_NUM];
+extern CONST CHAR8          *gAikModifiersToNameMap[AIK_MAX_MODIFIERS_NUM];
+extern CONST CHAR8          *gAikAppleKeyToNameMap[AIK_MAX_APPLEKEY_NUM];
 
 #define AIK_PS2KEY_TO_NAME(k, m) \
   (((k) < AIK_MAX_PS2KEY_NUM && gAikPs2KeyToUsbMap[k].KeyName) \

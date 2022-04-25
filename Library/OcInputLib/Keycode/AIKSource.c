@@ -27,20 +27,20 @@ AIKSourceGrabEfiKey (
   BOOLEAN           KeyFiltering
   )
 {
-  EFI_STATUS      Status;
-  EFI_EVENT       Event;
+  EFI_STATUS  Status;
+  EFI_EVENT   Event;
 
   ZeroMem (KeyData, sizeof (*KeyData));
 
-  if (Source->AmiKeycode != NULL && Source->AmiReadEfikey) {
+  if ((Source->AmiKeycode != NULL) && Source->AmiReadEfikey) {
     Status = Source->AmiReadEfikey (Source->AmiKeycode, KeyData);
-    Event = Source->AmiKeycode->WaitForKeyEx;
-  } else if (Source->TextInputEx != NULL && Source->TextReadKeyStrokeEx) {
-    Status = Source->TextReadKeyStrokeEx (Source->TextInputEx, (EFI_KEY_DATA *) KeyData);
-    Event = Source->TextInputEx->WaitForKeyEx;
-  } else if (Source->TextInput != NULL && Source->TextReadKeyStroke) {
+    Event  = Source->AmiKeycode->WaitForKeyEx;
+  } else if ((Source->TextInputEx != NULL) && Source->TextReadKeyStrokeEx) {
+    Status = Source->TextReadKeyStrokeEx (Source->TextInputEx, (EFI_KEY_DATA *)KeyData);
+    Event  = Source->TextInputEx->WaitForKeyEx;
+  } else if ((Source->TextInput != NULL) && Source->TextReadKeyStroke) {
     Status = Source->TextReadKeyStroke (Source->TextInput, &KeyData->Key);
-    Event = Source->TextInput->WaitForKey;
+    Event  = Source->TextInput->WaitForKey;
   } else {
     //
     // Should never happen.
@@ -120,6 +120,7 @@ AIKSourceGrabEfiKey (
   if (Event != NULL) {
     gBS->SignalEvent (Event);
   }
+
   return EFI_SUCCESS;
 }
 
@@ -129,39 +130,48 @@ AIKSourceInstall (
   OC_INPUT_KEY_MODE  Mode
   )
 {
-  EFI_STATUS                 Status;
+  EFI_STATUS  Status;
 
-  if (Source->AmiKeycode != NULL || Source->TextInput != NULL || Source->TextInputEx != NULL) {
+  if ((Source->AmiKeycode != NULL) || (Source->TextInput != NULL) || (Source->TextInputEx != NULL)) {
     return EFI_SUCCESS;
   }
 
   Source->ConSplitHandler = gST->ConsoleInHandle;
 
-  if (Mode == OcInputKeyModeAuto || Mode == OcInputKeyModeAmi) {
-    Status = gBS->HandleProtocol (Source->ConSplitHandler, &gAmiEfiKeycodeProtocolGuid,
-      (VOID * *)& Source->AmiKeycode);
+  if ((Mode == OcInputKeyModeAuto) || (Mode == OcInputKeyModeAmi)) {
+    Status = gBS->HandleProtocol (
+                    Source->ConSplitHandler,
+                    &gAmiEfiKeycodeProtocolGuid,
+                    (VOID **)&Source->AmiKeycode
+                    );
     if (EFI_ERROR (Status)) {
       DEBUG ((DEBUG_INFO, "OCII: AmiEfiKeycodeProtocol is unavailable on gST->ConsoleHandle - %r\n", Status));
     }
   }
 
-  if (Mode == OcInputKeyModeAuto || Mode == OcInputKeyModeV1) {
-    Status = gBS->HandleProtocol (Source->ConSplitHandler, &gEfiSimpleTextInProtocolGuid,
-      (VOID * *)& Source->TextInput);
+  if ((Mode == OcInputKeyModeAuto) || (Mode == OcInputKeyModeV1)) {
+    Status = gBS->HandleProtocol (
+                    Source->ConSplitHandler,
+                    &gEfiSimpleTextInProtocolGuid,
+                    (VOID **)&Source->TextInput
+                    );
     if (EFI_ERROR (Status)) {
       DEBUG ((DEBUG_INFO, "OCII: EfiSimpleTextInProtocol is unavailable on gST->ConsoleHandle - %r\n", Status));
     }
   }
 
-  if (Mode == OcInputKeyModeAuto || Mode == OcInputKeyModeV2) {
-    Status = gBS->HandleProtocol (Source->ConSplitHandler, &gEfiSimpleTextInputExProtocolGuid,
-      (VOID * *)& Source->TextInputEx);
+  if ((Mode == OcInputKeyModeAuto) || (Mode == OcInputKeyModeV2)) {
+    Status = gBS->HandleProtocol (
+                    Source->ConSplitHandler,
+                    &gEfiSimpleTextInputExProtocolGuid,
+                    (VOID **)&Source->TextInputEx
+                    );
     if (EFI_ERROR (Status)) {
       DEBUG ((DEBUG_INFO, "OCII: EfiSimpleTextInputExProtocol is unavailable on gST->ConsoleHandle - %r\n", Status));
     }
   }
 
-  if (Source->AmiKeycode == NULL && Source->TextInput == NULL && Source->TextInputEx == NULL) {
+  if ((Source->AmiKeycode == NULL) && (Source->TextInput == NULL) && (Source->TextInputEx == NULL)) {
     DEBUG ((DEBUG_INFO, "OCII: No ConSplitter input protocol is unavailable\n"));
     return EFI_NOT_FOUND;
   }
@@ -169,47 +179,56 @@ AIKSourceInstall (
   DEBUG ((DEBUG_INFO, "OCII: gST->ConIn %p vs found %p\n", gST->ConIn, Source->TextInput));
 
   if (Source->AmiKeycode) {
-    Source->AmiReadEfikey                 = Source->AmiKeycode->ReadEfikey;
-    Source->AmiWait                       = Source->AmiKeycode->WaitForKeyEx;
-    Source->AmiKeycode->ReadEfikey        = AIKShimAmiKeycodeReadEfikey;
-    Status = gBS->CreateEvent (
-      EVT_NOTIFY_WAIT, TPL_NOTIFY, AIKShimWaitForKeyHandler,
-      NULL, &Source->AmiKeycode->WaitForKeyEx
-      );
+    Source->AmiReadEfikey          = Source->AmiKeycode->ReadEfikey;
+    Source->AmiWait                = Source->AmiKeycode->WaitForKeyEx;
+    Source->AmiKeycode->ReadEfikey = AIKShimAmiKeycodeReadEfikey;
+    Status                         = gBS->CreateEvent (
+                                            EVT_NOTIFY_WAIT,
+                                            TPL_NOTIFY,
+                                            AIKShimWaitForKeyHandler,
+                                            NULL,
+                                            &Source->AmiKeycode->WaitForKeyEx
+                                            );
     if (EFI_ERROR (Status)) {
       DEBUG ((DEBUG_INFO, "OCII: AmiEfiKeycodeProtocol WaitForKey replace failed - %r\n", Status));
       Source->AmiKeycode->WaitForKeyEx = Source->AmiWait;
-      Source->AmiWait = NULL;
+      Source->AmiWait                  = NULL;
     }
   }
 
   if (Source->TextInput) {
-    Source->TextReadKeyStroke             = Source->TextInput->ReadKeyStroke;
-    Source->TextWait                      = Source->TextInput->WaitForKey;
-    Source->TextInput->ReadKeyStroke      = AIKShimTextInputReadKeyStroke;
-    Status = gBS->CreateEvent (
-      EVT_NOTIFY_WAIT, TPL_NOTIFY, AIKShimWaitForKeyHandler,
-      NULL, &Source->TextInput->WaitForKey
-      );
+    Source->TextReadKeyStroke        = Source->TextInput->ReadKeyStroke;
+    Source->TextWait                 = Source->TextInput->WaitForKey;
+    Source->TextInput->ReadKeyStroke = AIKShimTextInputReadKeyStroke;
+    Status                           = gBS->CreateEvent (
+                                              EVT_NOTIFY_WAIT,
+                                              TPL_NOTIFY,
+                                              AIKShimWaitForKeyHandler,
+                                              NULL,
+                                              &Source->TextInput->WaitForKey
+                                              );
     if (EFI_ERROR (Status)) {
       DEBUG ((DEBUG_INFO, "OCII: EfiSimpleTextInProtocol WaitForKey replace failed - %r\n", Status));
       Source->TextInput->WaitForKey = Source->TextWait;
-      Source->TextWait = NULL;
+      Source->TextWait              = NULL;
     }
   }
 
   if (Source->TextInputEx) {
-    Source->TextWaitEx                    = Source->TextInputEx->WaitForKeyEx;
-    Source->TextReadKeyStrokeEx           = Source->TextInputEx->ReadKeyStrokeEx;
-    Source->TextInputEx->ReadKeyStrokeEx  = AIKShimTextInputReadKeyStrokeEx;
-    Status = gBS->CreateEvent (
-      EVT_NOTIFY_WAIT, TPL_NOTIFY, AIKShimWaitForKeyHandler,
-      NULL, &Source->TextInputEx->WaitForKeyEx
-      );
+    Source->TextWaitEx                   = Source->TextInputEx->WaitForKeyEx;
+    Source->TextReadKeyStrokeEx          = Source->TextInputEx->ReadKeyStrokeEx;
+    Source->TextInputEx->ReadKeyStrokeEx = AIKShimTextInputReadKeyStrokeEx;
+    Status                               = gBS->CreateEvent (
+                                                  EVT_NOTIFY_WAIT,
+                                                  TPL_NOTIFY,
+                                                  AIKShimWaitForKeyHandler,
+                                                  NULL,
+                                                  &Source->TextInputEx->WaitForKeyEx
+                                                  );
     if (EFI_ERROR (Status)) {
       DEBUG ((DEBUG_INFO, "OCII: EfiSimpleTextInputExProtocol WaitForKey replace failed - %r\n", Status));
       Source->TextInputEx->WaitForKeyEx = Source->TextWaitEx;
-      Source->TextWaitEx = NULL;
+      Source->TextWaitEx                = NULL;
     }
   }
 
@@ -222,33 +241,36 @@ AIKSourceUninstall (
   )
 {
   if (Source->AmiKeycode) {
-    Source->AmiKeycode->ReadEfikey        = Source->AmiReadEfikey;
-    if (Source->AmiWait != NULL && Source->AmiWait != Source->AmiKeycode->WaitForKeyEx) {
+    Source->AmiKeycode->ReadEfikey = Source->AmiReadEfikey;
+    if ((Source->AmiWait != NULL) && (Source->AmiWait != Source->AmiKeycode->WaitForKeyEx)) {
       gBS->CloseEvent (Source->AmiKeycode->WaitForKeyEx);
       Source->AmiKeycode->WaitForKeyEx = Source->AmiWait;
     }
-    Source->AmiReadEfikey  = NULL;
-    Source->AmiWait        = NULL;
-    Source->AmiKeycode     = NULL;
+
+    Source->AmiReadEfikey = NULL;
+    Source->AmiWait       = NULL;
+    Source->AmiKeycode    = NULL;
   }
 
   if (Source->TextInput) {
-    Source->TextInput->ReadKeyStroke      = Source->TextReadKeyStroke;
-    if (Source->TextWait != NULL && Source->TextWait != Source->TextInput->WaitForKey) {
+    Source->TextInput->ReadKeyStroke = Source->TextReadKeyStroke;
+    if ((Source->TextWait != NULL) && (Source->TextWait != Source->TextInput->WaitForKey)) {
       gBS->CloseEvent (Source->TextInput->WaitForKey);
       Source->TextInput->WaitForKey = Source->TextWait;
     }
+
     Source->TextInput         = NULL;
     Source->TextWait          = NULL;
     Source->TextReadKeyStroke = NULL;
   }
 
   if (Source->TextInputEx) {
-    Source->TextInputEx->ReadKeyStrokeEx  = Source->TextReadKeyStrokeEx;
-    if (Source->TextWaitEx != NULL && Source->TextWaitEx != Source->TextInputEx->WaitForKeyEx) {
+    Source->TextInputEx->ReadKeyStrokeEx = Source->TextReadKeyStrokeEx;
+    if ((Source->TextWaitEx != NULL) && (Source->TextWaitEx != Source->TextInputEx->WaitForKeyEx)) {
       gBS->CloseEvent (Source->TextInputEx->WaitForKeyEx);
       Source->TextInputEx->WaitForKeyEx = Source->TextWaitEx;
     }
+
     Source->TextInputEx         = NULL;
     Source->TextWaitEx          = NULL;
     Source->TextReadKeyStrokeEx = NULL;
@@ -259,4 +281,3 @@ AIKSourceUninstall (
     Source->ConSplitHandler = NULL;
   }
 }
-

@@ -78,12 +78,13 @@ InternalSymbolIsSectionType (
 **/
 STATIC
 MACH_NLIST_X *
-MACH_X (InternalGetSymbolByValue) (
-  IN OUT OC_MACHO_CONTEXT   *Context,
-  IN     MACH_UINT_X        Value
-  )
-{
-  UINT32 Index;
+MACH_X (
+  InternalGetSymbolByValue
+  )(
+    IN OUT OC_MACHO_CONTEXT   *Context,
+    IN     MACH_UINT_X        Value
+    ) {
+  UINT32  Index;
 
   ASSERT (Context->SymbolTable != NULL);
   ASSERT (Context->Symtab != NULL);
@@ -100,19 +101,19 @@ MACH_X (InternalGetSymbolByValue) (
 STATIC
 BOOLEAN
 InternalGetSymbolByExternRelocationOffset (
-  IN OUT OC_MACHO_CONTEXT   *Context,
-  IN     MACH_UINT_X        Address,
-  OUT    MACH_NLIST_X       **Symbol
+  IN OUT OC_MACHO_CONTEXT  *Context,
+  IN     MACH_UINT_X       Address,
+  OUT    MACH_NLIST_X      **Symbol
   )
 {
-  CONST MACH_RELOCATION_INFO *Relocation;
+  CONST MACH_RELOCATION_INFO  *Relocation;
 
   ASSERT (Context != NULL);
   MACH_ASSERT_X (Context);
 
   Relocation = InternalGetExternRelocationByOffset (Context, Address);
   if (Relocation != NULL) {
-    *Symbol = MACH_X (MachoGetSymbolByIndex) (Context, Relocation->SymbolNumber);
+    *Symbol = MACH_X (MachoGetSymbolByIndex)(Context, Relocation->SymbolNumber);
     return TRUE;
   }
 
@@ -146,15 +147,15 @@ InternalGetLocalDefinedSymbolByNameWorker (
   ASSERT (Name != NULL);
 
   for (Index = 0; Index < NumberOfSymbols; ++Index) {
-    if (!MACH_X (InternalSymbolIsSane) (Context, &SymbolTable[Index])) {
+    if (!MACH_X (InternalSymbolIsSane)(Context, &SymbolTable[Index])) {
       break;
     }
 
-    if (!MACH_X (MachoSymbolIsDefined) (&SymbolTable[Index])) {
+    if (!MACH_X (MachoSymbolIsDefined)(&SymbolTable[Index])) {
       continue;
     }
 
-    TmpName = MACH_X (MachoGetSymbolName) (Context, &SymbolTable[Index]);
+    TmpName = MACH_X (MachoGetSymbolName)(Context, &SymbolTable[Index]);
     if (AsciiStrCmp (Name, TmpName) == 0) {
       return &SymbolTable[Index];
     }
@@ -164,11 +165,12 @@ InternalGetLocalDefinedSymbolByNameWorker (
 }
 
 BOOLEAN
-MACH_X (InternalSymbolIsSane) (
-  IN OUT OC_MACHO_CONTEXT     *Context,
-  IN     CONST MACH_NLIST_X   *Symbol
-  )
-{
+MACH_X (
+  InternalSymbolIsSane
+  )(
+          IN OUT OC_MACHO_CONTEXT     *Context,
+          IN     CONST MACH_NLIST_X   *Symbol
+          ) {
   ASSERT (Context != NULL);
   ASSERT (Symbol != NULL);
   MACH_ASSERT_X (Context);
@@ -176,11 +178,13 @@ MACH_X (InternalSymbolIsSane) (
   ASSERT (Context->SymbolTable != NULL);
   ASSERT (Context->Symtab->NumSymbols > 0);
 
-  ASSERT (((Symbol >= &(MACH_X (&Context->SymbolTable->Symbol))[0])
-        && (Symbol < &(MACH_X (&Context->SymbolTable->Symbol))[Context->Symtab->NumSymbols]))
-       || ((Context->DySymtab != NULL)
-        && (Symbol >= &(MACH_X (&Context->IndirectSymbolTable->Symbol))[0])
-        && (Symbol < &(MACH_X (&Context->IndirectSymbolTable->Symbol))[Context->DySymtab->NumIndirectSymbols])));
+  ASSERT (
+    (  (Symbol >= &(MACH_X (&Context->SymbolTable->Symbol))[0])
+    && (Symbol < &(MACH_X (&Context->SymbolTable->Symbol))[Context->Symtab->NumSymbols]))
+         || (  (Context->DySymtab != NULL)
+            && (Symbol >= &(MACH_X (&Context->IndirectSymbolTable->Symbol))[0])
+            && (Symbol < &(MACH_X (&Context->IndirectSymbolTable->Symbol))[Context->DySymtab->NumIndirectSymbols]))
+    );
   //
   // Symbol->Section is implicitly verified by MachoGetSectionByIndex() when
   // passed to it.
@@ -193,29 +197,32 @@ MACH_X (InternalSymbolIsSane) (
 }
 
 BOOLEAN
-MACH_X (InternalMachoSymbolGetDirectFileOffset) (
-  IN OUT OC_MACHO_CONTEXT       *Context,
-  IN     MACH_UINT_X            Address,
-  OUT    UINT32                 *FileOffset,
-  OUT    UINT32                 *MaxSize OPTIONAL
-  )
-{
-  MACH_UINT_X               Offset;
-  MACH_UINT_X               Base;
-  MACH_UINT_X               Size;
-  MACH_SEGMENT_COMMAND_X    *Segment;
+MACH_X (
+  InternalMachoSymbolGetDirectFileOffset
+  )(
+                             IN OUT OC_MACHO_CONTEXT       *Context,
+                             IN     MACH_UINT_X            Address,
+                             OUT    UINT32                 *FileOffset,
+                             OUT    UINT32                 *MaxSize OPTIONAL
+                             ) {
+  MACH_UINT_X             Offset;
+  MACH_UINT_X             Base;
+  MACH_UINT_X             Size;
+  MACH_SEGMENT_COMMAND_X  *Segment;
 
   ASSERT (Context != NULL);
   ASSERT (FileOffset != NULL);
   MACH_ASSERT_X (Context);
 
   for (
-    Segment = MACH_X (MachoGetNextSegment) (Context, NULL);
-    Segment != NULL;
-    Segment = MACH_X (MachoGetNextSegment) (Context, Segment)
-    ) {
-    if ((Address >= Segment->VirtualAddress)
-     && (Address < (Segment->VirtualAddress + Segment->Size))) {
+       Segment = MACH_X (MachoGetNextSegment)(Context, NULL);
+       Segment != NULL;
+       Segment = MACH_X (MachoGetNextSegment)(Context, Segment)
+       )
+  {
+    if (  (Address >= Segment->VirtualAddress)
+       && (Address < (Segment->VirtualAddress + Segment->Size)))
+    {
       break;
     }
   }
@@ -238,25 +245,28 @@ MACH_X (InternalMachoSymbolGetDirectFileOffset) (
 }
 
 BOOLEAN
-MACH_X (MachoIsSymbolValueInRange) (
-  IN OUT OC_MACHO_CONTEXT     *Context,
-  IN     CONST MACH_NLIST_X   *Symbol
-  )
-{
+MACH_X (
+  MachoIsSymbolValueInRange
+  )(
+                 IN OUT OC_MACHO_CONTEXT     *Context,
+                 IN     CONST MACH_NLIST_X   *Symbol
+                 ) {
   CONST MACH_SEGMENT_COMMAND_X  *Segment;
 
   ASSERT (Context != NULL);
   ASSERT (Symbol != NULL);
   MACH_ASSERT_X (Context);
 
-  if (MACH_X (MachoSymbolIsLocalDefined) (Context, Symbol)) {
+  if (MACH_X (MachoSymbolIsLocalDefined)(Context, Symbol)) {
     for (
-      Segment = MACH_X (MachoGetNextSegment) (Context, NULL);
-      Segment != NULL;
-      Segment = MACH_X (MachoGetNextSegment) (Context, Segment)
-      ) {
-      if ((Symbol->Value >= Segment->VirtualAddress)
-       && (Symbol->Value < (Segment->VirtualAddress + Segment->Size))) {
+         Segment = MACH_X (MachoGetNextSegment)(Context, NULL);
+         Segment != NULL;
+         Segment = MACH_X (MachoGetNextSegment)(Context, Segment)
+         )
+    {
+      if (  (Symbol->Value >= Segment->VirtualAddress)
+         && (Symbol->Value < (Segment->VirtualAddress + Segment->Size)))
+      {
         return TRUE;
       }
     }
@@ -268,37 +278,40 @@ MACH_X (MachoIsSymbolValueInRange) (
 }
 
 BOOLEAN
-MACH_X (MachoSymbolIsSection) (
-  IN CONST MACH_NLIST_X   *Symbol
-  )
-{
+MACH_X (
+  MachoSymbolIsSection
+  )(
+                     IN CONST MACH_NLIST_X   *Symbol
+                     ) {
   ASSERT (Symbol != NULL);
   return (InternalSymbolIsSectionType (Symbol) && (Symbol->Section != NO_SECT));
 }
 
 BOOLEAN
-MACH_X (MachoSymbolIsDefined) (
-  IN CONST MACH_NLIST_X   *Symbol
-  )
-{
+MACH_X (
+  MachoSymbolIsDefined
+  )(
+            IN CONST MACH_NLIST_X   *Symbol
+            ) {
   ASSERT (Symbol != NULL);
 
-  return (((Symbol->Type & MACH_N_TYPE_STAB) == 0)
-      && (((Symbol->Type & MACH_N_TYPE_TYPE) == MACH_N_TYPE_ABS)
-       || InternalSymbolIsSectionType (Symbol)));
+  return (  ((Symbol->Type & MACH_N_TYPE_STAB) == 0)
+         && (  ((Symbol->Type & MACH_N_TYPE_TYPE) == MACH_N_TYPE_ABS)
+            || InternalSymbolIsSectionType (Symbol)));
 }
 
 BOOLEAN
-MACH_X (MachoSymbolIsLocalDefined) (
-  IN OUT OC_MACHO_CONTEXT     *Context,
-  IN     CONST MACH_NLIST_X   *Symbol
-  )
-{
-  CONST MACH_DYSYMTAB_COMMAND *DySymtab;
-  CONST MACH_NLIST_X          *UndefinedSymbols;
-  CONST MACH_NLIST_X          *UndefinedSymbolsTop;
-  CONST MACH_NLIST_X          *IndirectSymbols;
-  CONST MACH_NLIST_X          *IndirectSymbolsTop;
+MACH_X (
+  MachoSymbolIsLocalDefined
+  )(
+                 IN OUT OC_MACHO_CONTEXT     *Context,
+                 IN     CONST MACH_NLIST_X   *Symbol
+                 ) {
+  CONST MACH_DYSYMTAB_COMMAND  *DySymtab;
+  CONST MACH_NLIST_X           *UndefinedSymbols;
+  CONST MACH_NLIST_X           *UndefinedSymbolsTop;
+  CONST MACH_NLIST_X           *IndirectSymbols;
+  CONST MACH_NLIST_X           *IndirectSymbolsTop;
 
   ASSERT (Context != NULL);
   ASSERT (Symbol != NULL);
@@ -310,6 +323,7 @@ MACH_X (MachoSymbolIsLocalDefined) (
   if ((DySymtab == NULL) || (DySymtab->NumUndefinedSymbols == 0)) {
     return FALSE; // FIXME: Required under 32-bit during vtable parent resolution, if using MH_OBJECT.
   }
+
   //
   // The symbol must have been declared locally prior to solving.  As there is
   // no information on whether the symbol has been solved explicitely, check
@@ -322,22 +336,23 @@ MACH_X (MachoSymbolIsLocalDefined) (
     return FALSE;
   }
 
-  IndirectSymbols = MACH_X (&Context->IndirectSymbolTable->Symbol);
+  IndirectSymbols    = MACH_X (&Context->IndirectSymbolTable->Symbol);
   IndirectSymbolsTop = &IndirectSymbols[DySymtab->NumIndirectSymbols];
 
   if ((Symbol >= IndirectSymbols) && (Symbol < IndirectSymbolsTop)) {
     return FALSE;
   }
 
-  return MACH_X (MachoSymbolIsDefined) (Symbol);
+  return MACH_X (MachoSymbolIsDefined)(Symbol);
 }
 
 MACH_NLIST_X *
-MACH_X (MachoGetSymbolByIndex) (
-  IN OUT OC_MACHO_CONTEXT  *Context,
-  IN     UINT32            Index
-  )
-{
+MACH_X (
+  MachoGetSymbolByIndex
+  )(
+           IN OUT OC_MACHO_CONTEXT  *Context,
+           IN     UINT32            Index
+           ) {
   MACH_NLIST_X  *Symbol;
 
   ASSERT (Context != NULL);
@@ -351,7 +366,7 @@ MACH_X (MachoGetSymbolByIndex) (
 
   if (Index < Context->Symtab->NumSymbols) {
     Symbol = &(MACH_X (&Context->SymbolTable->Symbol))[Index];
-    if (MACH_X (InternalSymbolIsSane) (Context, Symbol)) {
+    if (MACH_X (InternalSymbolIsSane)(Context, Symbol)) {
       return Symbol;
     }
   }
@@ -360,11 +375,12 @@ MACH_X (MachoGetSymbolByIndex) (
 }
 
 CONST CHAR8 *
-MACH_X (MachoGetSymbolName) (
-  IN OUT OC_MACHO_CONTEXT     *Context,
-  IN     CONST MACH_NLIST_X   *Symbol
-  )
-{
+MACH_X (
+  MachoGetSymbolName
+  )(
+          IN OUT OC_MACHO_CONTEXT     *Context,
+          IN     CONST MACH_NLIST_X   *Symbol
+          ) {
   ASSERT (Context != NULL);
   ASSERT (Symbol != NULL);
   MACH_ASSERT_X (Context);
@@ -376,19 +392,21 @@ MACH_X (MachoGetSymbolName) (
 }
 
 CONST CHAR8 *
-MACH_X (MachoGetIndirectSymbolName) (
-  IN OUT OC_MACHO_CONTEXT     *Context,
-  IN     CONST MACH_NLIST_X   *Symbol
-  )
-{
+MACH_X (
+  MachoGetIndirectSymbolName
+  )(
+    IN OUT OC_MACHO_CONTEXT     *Context,
+    IN     CONST MACH_NLIST_X   *Symbol
+    ) {
   ASSERT (Context != NULL);
   ASSERT (Symbol != NULL);
   MACH_ASSERT_X (Context);
 
   ASSERT (Context->SymbolTable != NULL);
 
-  if ((Symbol->Type & MACH_N_TYPE_STAB) != 0
-    || (Symbol->Type & MACH_N_TYPE_TYPE) != MACH_N_TYPE_INDR) {
+  if (  ((Symbol->Type & MACH_N_TYPE_STAB) != 0)
+     || ((Symbol->Type & MACH_N_TYPE_TYPE) != MACH_N_TYPE_INDR))
+  {
     return NULL;
   }
 
@@ -400,12 +418,13 @@ MACH_X (MachoGetIndirectSymbolName) (
 }
 
 BOOLEAN
-MACH_X (MachoGetSymbolByExternRelocationOffset) (
-  IN OUT OC_MACHO_CONTEXT   *Context,
-  IN     MACH_UINT_X        Address,
-  OUT    MACH_NLIST_X       **Symbol
-  )
-{
+MACH_X (
+  MachoGetSymbolByExternRelocationOffset
+  )(
+    IN OUT OC_MACHO_CONTEXT   *Context,
+    IN     MACH_UINT_X        Address,
+    OUT    MACH_NLIST_X       **Symbol
+    ) {
   if (Address >= MachoGetFileSize (Context)) {
     return FALSE;
   }
@@ -418,12 +437,13 @@ MACH_X (MachoGetSymbolByExternRelocationOffset) (
 }
 
 BOOLEAN
-MACH_X (MachoGetSymbolByRelocationOffset) (
-  IN OUT OC_MACHO_CONTEXT   *Context,
-  IN     MACH_UINT_X        Address,
-  OUT    MACH_NLIST_X       **Symbol
-  )
-{
+MACH_X (
+  MachoGetSymbolByRelocationOffset
+  )(
+           IN OUT OC_MACHO_CONTEXT   *Context,
+           IN     MACH_UINT_X        Address,
+           OUT    MACH_NLIST_X       **Symbol
+           ) {
   BOOLEAN                     Result;
   CONST MACH_RELOCATION_INFO  *Relocation;
   CONST MACH_UINT_X           *Data;
@@ -431,13 +451,13 @@ MACH_X (MachoGetSymbolByRelocationOffset) (
   MACH_UINT_X                 AddressTop;
   UINT32                      MaxSize;
 
-  VOID                        *Tmp;
+  VOID  *Tmp;
 
   ASSERT (Context != NULL);
   MACH_ASSERT_X (Context);
 
-  Result = MACH_X (OcOverflowAddU) (Address, sizeof (MACH_UINT_X), &AddressTop);
-  if (Result || AddressTop > MachoGetFileSize (Context)) {
+  Result = MACH_X (OcOverflowAddU)(Address, sizeof (MACH_UINT_X), &AddressTop);
+  if (Result || (AddressTop > MachoGetFileSize (Context))) {
     return FALSE;
   }
 
@@ -454,8 +474,8 @@ MACH_X (MachoGetSymbolByRelocationOffset) (
   if (Relocation != NULL) {
     Sym = NULL;
 
-    Tmp = (VOID *) MachoGetFilePointerByAddress (Context, Address, &MaxSize);
-    if (Tmp == NULL || MaxSize < sizeof (MACH_UINT_X)) {
+    Tmp = (VOID *)MachoGetFilePointerByAddress (Context, Address, &MaxSize);
+    if ((Tmp == NULL) || (MaxSize < sizeof (MACH_UINT_X))) {
       return FALSE;
     }
 
@@ -463,8 +483,8 @@ MACH_X (MachoGetSymbolByRelocationOffset) (
       Data = (MACH_UINT_X *)Tmp;
 
       // FIXME: Only C++ symbols.
-      Sym = MACH_X (InternalGetSymbolByValue) (Context, *Data);
-      if ((Sym != NULL) && !MACH_X (InternalSymbolIsSane) (Context, Sym)) {
+      Sym = MACH_X (InternalGetSymbolByValue)(Context, *Data);
+      if ((Sym != NULL) && !MACH_X (InternalSymbolIsSane)(Context, Sym)) {
         Sym = NULL;
       }
     }
@@ -477,14 +497,15 @@ MACH_X (MachoGetSymbolByRelocationOffset) (
 }
 
 MACH_NLIST_X *
-MACH_X (MachoGetLocalDefinedSymbolByName) (
-  IN OUT OC_MACHO_CONTEXT   *Context,
-  IN     CONST CHAR8        *Name
-  )
-{
-  MACH_NLIST_X                *SymbolTable;
-  CONST MACH_DYSYMTAB_COMMAND *DySymtab;
-  MACH_NLIST_X                *Symbol;
+MACH_X (
+  MachoGetLocalDefinedSymbolByName
+  )(
+                              IN OUT OC_MACHO_CONTEXT   *Context,
+                              IN     CONST CHAR8        *Name
+                              ) {
+  MACH_NLIST_X                 *SymbolTable;
+  CONST MACH_DYSYMTAB_COMMAND  *DySymtab;
+  MACH_NLIST_X                 *Symbol;
 
   ASSERT (Context != NULL);
   ASSERT (Name != NULL);
@@ -528,12 +549,13 @@ MACH_X (MachoGetLocalDefinedSymbolByName) (
 }
 
 BOOLEAN
-MACH_X (MachoRelocateSymbol) (
-  IN OUT OC_MACHO_CONTEXT   *Context,
-  IN     MACH_UINT_X        LinkAddress,
-  IN OUT MACH_NLIST_X       *Symbol
-  )
-{
+MACH_X (
+  MachoRelocateSymbol
+  )(
+               IN OUT OC_MACHO_CONTEXT   *Context,
+               IN     MACH_UINT_X        LinkAddress,
+               IN OUT MACH_NLIST_X       *Symbol
+               ) {
   CONST MACH_SECTION_X  *Section;
   MACH_UINT_X           Value;
   BOOLEAN               Result;
@@ -545,8 +567,8 @@ MACH_X (MachoRelocateSymbol) (
   //
   // Symbols are relocated when they describe sections.
   //
-  if (MACH_X (MachoSymbolIsSection) (Symbol)) {
-    Section = MACH_X (MachoGetSectionByIndex) (Context, (Symbol->Section - 1));
+  if (MACH_X (MachoSymbolIsSection)(Symbol)) {
+    Section = MACH_X (MachoGetSectionByIndex)(Context, (Symbol->Section - 1));
     if (Section == NULL) {
       return FALSE;
     }
@@ -567,7 +589,7 @@ MACH_X (MachoRelocateSymbol) (
       return FALSE;
     }
 
-    Result = MACH_X (OcOverflowAddU) (Symbol->Value, Value, &Value);
+    Result = MACH_X (OcOverflowAddU)(Symbol->Value, Value, &Value);
     if (Result) {
       return FALSE;
     }
@@ -579,18 +601,19 @@ MACH_X (MachoRelocateSymbol) (
 }
 
 BOOLEAN
-MACH_X (MachoSymbolGetFileOffset) (
-  IN OUT OC_MACHO_CONTEXT       *Context,
-  IN     CONST MACH_NLIST_X     *Symbol,
-  OUT    UINT32                 *FileOffset,
-  OUT    UINT32                 *MaxSize OPTIONAL
-  )
-{
-  MACH_UINT_X               Offset;
-  MACH_UINT_X               Base;
-  MACH_UINT_X               Size;
-  MACH_SEGMENT_COMMAND_X    *Segment;
-  MACH_SECTION_X            *Section;
+MACH_X (
+  MachoSymbolGetFileOffset
+  )(
+               IN OUT OC_MACHO_CONTEXT       *Context,
+               IN     CONST MACH_NLIST_X     *Symbol,
+               OUT    UINT32                 *FileOffset,
+               OUT    UINT32                 *MaxSize OPTIONAL
+               ) {
+  MACH_UINT_X             Offset;
+  MACH_UINT_X             Base;
+  MACH_UINT_X             Size;
+  MACH_SEGMENT_COMMAND_X  *Segment;
+  MACH_SECTION_X          *Section;
 
   ASSERT (Context != NULL);
   ASSERT (Symbol != NULL);
@@ -601,18 +624,20 @@ MACH_X (MachoSymbolGetFileOffset) (
     return FALSE;
   }
 
-  Section = MACH_X (MachoGetSectionByIndex) (
+  Section = MACH_X (MachoGetSectionByIndex)(
               Context,
               (Symbol->Section - 1)
               );
-  if (Section == NULL || Section->Size == 0) {
+  if ((Section == NULL) || (Section->Size == 0)) {
     for (
-      Segment = MACH_X (MachoGetNextSegment) (Context, NULL);
-      Segment != NULL;
-      Segment = MACH_X (MachoGetNextSegment) (Context, Segment)
-      ) {
-      if ((Symbol->Value >= Segment->VirtualAddress)
-       && (Symbol->Value < (Segment->VirtualAddress + Segment->Size))) {
+         Segment = MACH_X (MachoGetNextSegment)(Context, NULL);
+         Segment != NULL;
+         Segment = MACH_X (MachoGetNextSegment)(Context, Segment)
+         )
+    {
+      if (  (Symbol->Value >= Segment->VirtualAddress)
+         && (Symbol->Value < (Segment->VirtualAddress + Segment->Size)))
+      {
         break;
       }
     }

@@ -1,7 +1,7 @@
 /** @file
   Library handling KEXT prelinking.
   Currently limited to Intel 64 architectures.
-  
+
 Copyright (c) 2018, Download-Fritz.  All rights reserved.<BR>
 This program and the accompanying materials are licensed and made available
 under the terms and conditions of the BSD License which accompanies this
@@ -25,17 +25,17 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 //
 // Some sane maximum value.
 //
-#define MAX_KEXT_DEPEDENCIES 16
+#define MAX_KEXT_DEPEDENCIES  16
 
 //
 // Aligned maximum virtual address size with 0x prefix and \0 terminator.
 //
-#define KEXT_OFFSET_STR_LEN    24
+#define KEXT_OFFSET_STR_LEN  24
 
 //
 // Kernel quirks array.
 //
-extern KERNEL_QUIRK gKernelQuirks[];
+extern KERNEL_QUIRK  gKernelQuirks[];
 
 typedef struct PRELINKED_KEXT_ PRELINKED_KEXT;
 
@@ -43,14 +43,14 @@ typedef struct {
   //
   // Value is declared first as it has shown to improve comparison performance.
   //
-  UINT64       Value;  ///< value of this symbol (or stab offset)
-  CONST CHAR8  *Name;  ///< name of this symbol
-  UINT32       Length;
+  UINT64         Value; ///< value of this symbol (or stab offset)
+  CONST CHAR8    *Name; ///< name of this symbol
+  UINT32         Length;
 } PRELINKED_KEXT_SYMBOL;
 
 typedef struct {
-  CONST CHAR8 *Name;    ///< The symbol's name.
-  UINT64      Address;  ///< The symbol's address.
+  CONST CHAR8    *Name;   ///< The symbol's name.
+  UINT64         Address; ///< The symbol's address.
 } PRELINKED_VTABLE_ENTRY;
 
 #define GET_NEXT_PRELINKED_VTABLE(This)                                    \
@@ -59,9 +59,9 @@ typedef struct {
     )
 
 typedef struct {
-  CONST CHAR8            *Name;       ///< The VTable's name.
-  UINT32                 NumEntries;  ///< The number of VTable entries.
-  PRELINKED_VTABLE_ENTRY Entries[];   ///< The VTable entries.
+  CONST CHAR8               *Name;      ///< The VTable's name.
+  UINT32                    NumEntries; ///< The number of VTable entries.
+  PRELINKED_VTABLE_ENTRY    Entries[];  ///< The VTable entries.
 } PRELINKED_VTABLE;
 
 struct PRELINKED_KEXT_ {
@@ -70,74 +70,74 @@ struct PRELINKED_KEXT_ {
   // for each KEXT.  It is declared hear for every dependency will
   // eventually be part of a list and to save separate allocations per KEXT.
   //
-  UINT32                   Signature;
+  UINT32                      Signature;
   //
   // Link for global list (PRELINKED_CONTEXT -> PrelinkedKexts).
   //
-  LIST_ENTRY               Link;
+  LIST_ENTRY                  Link;
   //
   // Link for local list (PRELINKED_CONTEXT -> InjectedKexts).
   //
-  LIST_ENTRY               InjectedLink;
+  LIST_ENTRY                  InjectedLink;
   //
   // Kext CFBundleIdentifier.
   //
-  CONST CHAR8              *Identifier;
+  CONST CHAR8                 *Identifier;
   //
   // Patcher context containing useful data.
   //
-  PATCHER_CONTEXT          Context;
+  PATCHER_CONTEXT             Context;
   //
   // Dependencies dictionary (OSBundleLibraries).
   // May be NULL for KPI kexts or after Dependencies are set.
   //
-  XML_NODE                 *BundleLibraries;
+  XML_NODE                    *BundleLibraries;
   //
   // Compatible version, may be NULL.
   //
-  CONST CHAR8              *CompatibleVersion;
+  CONST CHAR8                 *CompatibleVersion;
   //
   // Scanned dependencies (PRELINKED_KEXT) from BundleLibraries.
   // Not resolved by default. See InternalScanPrelinkedKext for fields below.
   //
-  PRELINKED_KEXT           *Dependencies[MAX_KEXT_DEPEDENCIES];
+  PRELINKED_KEXT              *Dependencies[MAX_KEXT_DEPEDENCIES];
   //
   // Linkedit segment reference.
   //
-  MACH_SEGMENT_COMMAND_ANY *LinkEditSegment;
+  MACH_SEGMENT_COMMAND_ANY    *LinkEditSegment;
   //
   // The String Table associated with this symbol table.
   //
-  CONST CHAR8              *StringTable;
+  CONST CHAR8                 *StringTable;
   //
   // Symbol table.
   //
-  CONST MACH_NLIST_ANY     *SymbolTable;
+  CONST MACH_NLIST_ANY        *SymbolTable;
   //
   // Symbol table size.
   //
-  UINT32                   NumberOfSymbols;
+  UINT32                      NumberOfSymbols;
   //
   // Number of C++ symbols. They are put at the end of LinkedSymbolTable.
   // Calculated at LinkedSymbolTable construction.
   //
-  UINT32                   NumberOfCxxSymbols;
+  UINT32                      NumberOfCxxSymbols;
   //
   // Sorted symbol table used only for dependencies.
   //
-  PRELINKED_KEXT_SYMBOL    *LinkedSymbolTable;
+  PRELINKED_KEXT_SYMBOL       *LinkedSymbolTable;
   //
   // A flag set during dependency walk BFS to avoid going through the same path.
   //
-  BOOLEAN                  Processed;
+  BOOLEAN                     Processed;
   //
   // Number of vtables in this kext.
   //
-  UINT32                   NumberOfVtables;
+  UINT32                      NumberOfVtables;
   //
   // Scanned vtable buffer. Iterated with GET_NEXT_PRELINKED_VTABLE.
   //
-  PRELINKED_VTABLE         *LinkedVtables;
+  PRELINKED_VTABLE            *LinkedVtables;
 };
 
 //
@@ -171,14 +171,13 @@ struct PRELINKED_KEXT_ {
     PRELINKED_KEXT_SIGNATURE                \
     ))
 
-
 /**
   Creates new PRELINKED_KEXT from OC_MACHO_CONTEXT.
 **/
 PRELINKED_KEXT *
 InternalNewPrelinkedKext (
-  IN OC_MACHO_CONTEXT       *Context,
-  IN XML_NODE               *KextPlist
+  IN OC_MACHO_CONTEXT  *Context,
+  IN XML_NODE          *KextPlist
   );
 
 /**
@@ -260,17 +259,17 @@ InternalLinkPrelinkedKext (
 EFI_STATUS
 InternalConnectExternalSymtab (
   IN OUT OC_MACHO_CONTEXT  *Context,
-     OUT OC_MACHO_CONTEXT  *InnerContext,
+  OUT OC_MACHO_CONTEXT     *InnerContext,
   IN     UINT8             *Buffer,
   IN     UINT32            BufferSize,
-     OUT BOOLEAN           *KernelCollection  OPTIONAL
+  OUT BOOLEAN              *KernelCollection  OPTIONAL
   );
 
 #define KXLD_WEAK_TEST_SYMBOL  "_gOSKextUnresolved"
 
-#define KXLD_ANY_NEXT(a,b) ((VOID *) (((UINTN)(b)) + ((a) ? sizeof ((b)->Kxld32) : sizeof ((b)->Kxld64))))
+#define KXLD_ANY_NEXT(a, b)  ((VOID *) (((UINTN)(b)) + ((a) ? sizeof ((b)->Kxld32) : sizeof ((b)->Kxld64))))
 
-#define OS_METACLASS_VTABLE_NAME "__ZTV11OSMetaClass"
+#define OS_METACLASS_VTABLE_NAME  "__ZTV11OSMetaClass"
 
 #define X86_64_RIP_RELATIVE_LIMIT  0x80000000ULL
 
@@ -282,24 +281,24 @@ InternalConnectExternalSymtab (
 #define VTABLE_HEADER_SIZE_32  (VTABLE_HEADER_LEN * VTABLE_ENTRY_SIZE_32)
 #define VTABLE_HEADER_SIZE_64  (VTABLE_HEADER_LEN * VTABLE_ENTRY_SIZE_64)
 
-#define KERNEL_ADDRESS_MASK 0xFFFFFFFF00000000ULL
-#define KERNEL_ADDRESS_KEXT 0xFFFFFF7F00000000ULL
-#define KERNEL_ADDRESS_BASE 0xFFFFFF8000000000ULL
-#define KERNEL_FIXUP_OFFSET BASE_1MB
+#define KERNEL_ADDRESS_MASK  0xFFFFFFFF00000000ULL
+#define KERNEL_ADDRESS_KEXT  0xFFFFFF7F00000000ULL
+#define KERNEL_ADDRESS_BASE  0xFFFFFF8000000000ULL
+#define KERNEL_FIXUP_OFFSET  BASE_1MB
 
-#define VTABLE_ENTRY_X(a,b,c)     ((a) ? ((UINT32 *)(b))[(c)] : ((UINT64 *)(b))[(c)])
-#define VTABLE_ENTRY_SIZE_X(a)    ((a) ? VTABLE_ENTRY_SIZE_32 : VTABLE_ENTRY_SIZE_64)
-#define VTABLE_HEADER_SIZE_X(a)   ((a) ? VTABLE_HEADER_SIZE_32 : VTABLE_HEADER_SIZE_64)
+#define VTABLE_ENTRY_X(a, b, c)  ((a) ? ((UINT32 *)(b))[(c)] : ((UINT64 *)(b))[(c)])
+#define VTABLE_ENTRY_SIZE_X(a)   ((a) ? VTABLE_ENTRY_SIZE_32 : VTABLE_ENTRY_SIZE_64)
+#define VTABLE_HEADER_SIZE_X(a)  ((a) ? VTABLE_HEADER_SIZE_32 : VTABLE_HEADER_SIZE_64)
 
 typedef union {
   struct {
-    UINT32 Major      : 14;
-    UINT32 Minor      : 7;
-    UINT32 Revision   : 7;
-    UINT32 Stage      : 4;
-    UINT32 StageLevel : 8;
+    UINT32    Major      : 14;
+    UINT32    Minor      : 7;
+    UINT32    Revision   : 7;
+    UINT32    Stage      : 4;
+    UINT32    StageLevel : 8;
   }      Bits;
-  UINT64 Value;
+  UINT64    Value;
 } OC_KEXT_VERSION;
 
 typedef enum {
@@ -317,10 +316,10 @@ typedef enum {
     )
 
 typedef struct {
-  CONST CHAR8  *Name;
+  CONST CHAR8    *Name;
   union {
-    UINT64       Value;
-    CONST VOID   *Data;
+    UINT64        Value;
+    CONST VOID    *Data;
   } Vtable;
 } OC_PRELINKED_VTABLE_LOOKUP_ENTRY;
 
@@ -330,14 +329,14 @@ STATIC_ASSERT (
   );
 
 typedef struct {
-  CONST MACH_NLIST_ANY  *Smcp;
-  CONST MACH_NLIST_ANY  *Vtable;
-  VOID                  *VtableData;
-  CONST MACH_NLIST_ANY  *MetaVtable;
-  VOID                  *MetaVtableData;
-  UINT32                NumSolveSymbols;
-  UINT32                MetaSymsIndex;
-  MACH_NLIST_ANY        *SolveSymbols[];
+  CONST MACH_NLIST_ANY    *Smcp;
+  CONST MACH_NLIST_ANY    *Vtable;
+  VOID                    *VtableData;
+  CONST MACH_NLIST_ANY    *MetaVtable;
+  VOID                    *MetaVtableData;
+  UINT32                  NumSolveSymbols;
+  UINT32                  MetaSymsIndex;
+  MACH_NLIST_ANY          *SolveSymbols[];
 } OC_VTABLE_PATCH_ENTRY;
 //
 // This ASSERT is very dirty, but it is unlikely to trigger nevertheless.
@@ -356,16 +355,16 @@ STATIC_ASSERT (
 
 BOOLEAN
 InternalGetVtableEntries (
-  IN  BOOLEAN       Is32Bit,
-  IN  CONST VOID    *VtableData,
-  IN  UINT32        MaxSize,
-  OUT UINT32        *NumEntries
+  IN  BOOLEAN     Is32Bit,
+  IN  CONST VOID  *VtableData,
+  IN  UINT32      MaxSize,
+  OUT UINT32      *NumEntries
   );
 
 BOOLEAN
 InternalPatchByVtables (
-  IN     PRELINKED_CONTEXT         *Context,
-  IN OUT PRELINKED_KEXT            *Kext
+  IN     PRELINKED_CONTEXT  *Context,
+  IN OUT PRELINKED_KEXT     *Kext
   );
 
 BOOLEAN
@@ -387,9 +386,9 @@ InternalCreateVtablesPrelinked (
 
 CONST PRELINKED_VTABLE *
 InternalGetOcVtableByName (
-  IN PRELINKED_CONTEXT     *Context,
-  IN PRELINKED_KEXT        *Kext,
-  IN CONST CHAR8           *Name
+  IN PRELINKED_CONTEXT  *Context,
+  IN PRELINKED_KEXT     *Kext,
+  IN CONST CHAR8        *Name
   );
 
 //
@@ -425,9 +424,9 @@ InternalOcGetSymbolValue (
 
 VOID
 InternalSolveSymbolValue (
-  IN  BOOLEAN             Is32Bit,
-  IN  UINT64              Value,
-  OUT MACH_NLIST_ANY      *Symbol
+  IN  BOOLEAN         Is32Bit,
+  IN  UINT64          Value,
+  OUT MACH_NLIST_ANY  *Symbol
   );
 
 /**
@@ -504,10 +503,10 @@ InternalKxldStateRebuild (
 **/
 UINT64
 InternalKxldSolveSymbol (
-  IN BOOLEAN       Is32Bit,
-  IN CONST VOID    *KxldState,
-  IN UINT32        KxldStateSize,
-  IN CONST CHAR8   *Name
+  IN BOOLEAN      Is32Bit,
+  IN CONST VOID   *KxldState,
+  IN UINT32       KxldStateSize,
+  IN CONST CHAR8  *Name
   );
 
 #endif // PRELINKED_INTERNAL_H

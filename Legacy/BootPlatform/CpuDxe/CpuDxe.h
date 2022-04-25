@@ -15,6 +15,7 @@ Module Name:
 Abstract:
 
 --*/
+
 #ifndef _CPU_DXE_H
 #define _CPU_DXE_H
 
@@ -28,10 +29,10 @@ Abstract:
 #include <Library/PrintLib.h>
 #include <Library/UefiBootServicesTableLib.h>
 
-#define CPU_EXCEPTION_DEBUG_OUTPUT   0
-#define CPU_EXCEPTION_VGA_SWITCH     1
+#define CPU_EXCEPTION_DEBUG_OUTPUT  0
+#define CPU_EXCEPTION_VGA_SWITCH    1
 
-#define INTERRUPT_VECTOR_NUMBER 0x100
+#define INTERRUPT_VECTOR_NUMBER  0x100
 
 //
 // Function declarations
@@ -39,77 +40,77 @@ Abstract:
 EFI_STATUS
 EFIAPI
 InitializeCpu (
-  IN EFI_HANDLE                       ImageHandle,
-  IN EFI_SYSTEM_TABLE                 *SystemTable
+  IN EFI_HANDLE        ImageHandle,
+  IN EFI_SYSTEM_TABLE  *SystemTable
   );
 
 EFI_STATUS
 EFIAPI
 CpuFlushCpuDataCache (
-  IN EFI_CPU_ARCH_PROTOCOL           *This,
-  IN EFI_PHYSICAL_ADDRESS            Start,
-  IN UINT64                          Length,
-  IN EFI_CPU_FLUSH_TYPE              FlushType
+  IN EFI_CPU_ARCH_PROTOCOL  *This,
+  IN EFI_PHYSICAL_ADDRESS   Start,
+  IN UINT64                 Length,
+  IN EFI_CPU_FLUSH_TYPE     FlushType
   );
 
 EFI_STATUS
 EFIAPI
 CpuEnableInterrupt (
-  IN EFI_CPU_ARCH_PROTOCOL           *This
+  IN EFI_CPU_ARCH_PROTOCOL  *This
   );
 
 EFI_STATUS
 EFIAPI
 CpuDisableInterrupt (
-  IN EFI_CPU_ARCH_PROTOCOL           *This
+  IN EFI_CPU_ARCH_PROTOCOL  *This
   );
 
 EFI_STATUS
 EFIAPI
 CpuGetInterruptState (
-  IN  EFI_CPU_ARCH_PROTOCOL         *This,
-  OUT BOOLEAN                       *State
+  IN  EFI_CPU_ARCH_PROTOCOL  *This,
+  OUT BOOLEAN                *State
   );
 
 EFI_STATUS
 EFIAPI
 CpuInit (
-  IN EFI_CPU_ARCH_PROTOCOL          *This,
-  IN EFI_CPU_INIT_TYPE               InitType
+  IN EFI_CPU_ARCH_PROTOCOL  *This,
+  IN EFI_CPU_INIT_TYPE      InitType
   );
 
 EFI_STATUS
 EFIAPI
 CpuRegisterInterruptHandler (
-  IN EFI_CPU_ARCH_PROTOCOL          *This,
-  IN EFI_EXCEPTION_TYPE             InterruptType,
-  IN EFI_CPU_INTERRUPT_HANDLER      InterruptHandler
+  IN EFI_CPU_ARCH_PROTOCOL      *This,
+  IN EFI_EXCEPTION_TYPE         InterruptType,
+  IN EFI_CPU_INTERRUPT_HANDLER  InterruptHandler
   );
 
 EFI_STATUS
 EFIAPI
 CpuGetTimerValue (
-  IN  EFI_CPU_ARCH_PROTOCOL          *This,
-  IN  UINT32                         TimerIndex,
-  OUT UINT64                         *TimerValue,
-  OUT UINT64                         *TimerPeriod   OPTIONAL
+  IN  EFI_CPU_ARCH_PROTOCOL  *This,
+  IN  UINT32                 TimerIndex,
+  OUT UINT64                 *TimerValue,
+  OUT UINT64                 *TimerPeriod   OPTIONAL
   );
 
 EFI_STATUS
 EFIAPI
-CpuSetMemoryAttributes(
-  IN  EFI_CPU_ARCH_PROTOCOL           *This,
-  IN  EFI_PHYSICAL_ADDRESS            BaseAddress,
-  IN  UINT64                          Length,
-  IN  UINT64                          Attributes
+CpuSetMemoryAttributes (
+  IN  EFI_CPU_ARCH_PROTOCOL  *This,
+  IN  EFI_PHYSICAL_ADDRESS   BaseAddress,
+  IN  UINT64                 Length,
+  IN  UINT64                 Attributes
   );
 
 VOID
 EFIAPI
 InstallInterruptHandler (
-  UINTN Vector,
-  VOID  (EFIAPI *Handler)(VOID)
-  );
+                         UINTN Vector,
+                         VOID (EFIAPI *Handler)(VOID)
+                         );
 
 VOID
 EFIAPI
@@ -132,8 +133,8 @@ InitDescriptor (
 BOOLEAN
 EFIAPI
 LegacyBiosInt86 (
-  IN  UINT8                           BiosInt,
-  IN  EFI_IA32_REGISTER_SET           *Regs
+  IN  UINT8                  BiosInt,
+  IN  EFI_IA32_REGISTER_SET  *Regs
   );
 
 #endif

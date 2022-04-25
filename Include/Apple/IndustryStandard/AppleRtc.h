@@ -52,14 +52,14 @@
   When performing hibernate wake OSInfo writes chooses the background colour
   based on reported macOS version (grey for 10.9 and below, black otherwise).
 **/
-#define APPLE_RTC_BG_COLOR_ADDR          0x30
-#define APPLE_RTC_BG_COMPLEMENT_ADDR     0x31
+#define APPLE_RTC_BG_COLOR_ADDR       0x30
+#define APPLE_RTC_BG_COMPLEMENT_ADDR  0x31
 
 /**
   APPLE_RTC_BG_COLOR_ADDR values.
 **/
-#define APPLE_RTC_BG_COLOR_GRAY          0x00
-#define APPLE_RTC_BG_COLOR_BLACK         0x01
+#define APPLE_RTC_BG_COLOR_GRAY   0x00
+#define APPLE_RTC_BG_COLOR_BLACK  0x01
 
 /**
   By default masked out with 0xF8.
@@ -68,12 +68,12 @@
 
   See ThunderboltNhi and PchInitDxe.
 **/
-#define APPLE_RTC_FIRMWARE_STATE_ADDR    0x38
+#define APPLE_RTC_FIRMWARE_STATE_ADDR  0x38
 
 /**
   Used by ApplePlatformInit, 1 byte.
 **/
-#define APPLE_RTC_FIRMWARE_3D_ADDR       0x3D
+#define APPLE_RTC_FIRMWARE_3D_ADDR  0x3D
 
 /**
   Bitmask of started test indices.
@@ -81,7 +81,7 @@
   Note: memory testing statuses are a bit more complicated,
   but we do not need too much detail atm.
 **/
-#define APPLE_RTC_MEM_TEST_ACCEPT_ADDR   0x44
+#define APPLE_RTC_MEM_TEST_ACCEPT_ADDR  0x44
 
 /**
   Bitmask of request test indices.
@@ -93,12 +93,12 @@
   Bitmask of performed test indices.
   Little endian 32-bit number.
 **/
-#define APPLE_RTC_MEM_TEST_RESULT_ADDR   0x4C
+#define APPLE_RTC_MEM_TEST_RESULT_ADDR  0x4C
 
 /**
   Another unknown reserved address.
 **/
-#define APPLE_RTC_FIRMWARE_57_ADDR       0x57
+#define APPLE_RTC_FIRMWARE_57_ADDR  0x57
 
 /**
   Firmware boot progress, mostly maintained by AppleBds.
@@ -108,18 +108,18 @@
          enable video output, check battery state, perform memory test, etc.
   0x05 - Exit Boot Services called. Set in AppleBds event handler.
 **/
-#define APPLE_RTC_FIRMWARE_PROGRESS_ADDR 0x5C
+#define APPLE_RTC_FIRMWARE_PROGRESS_ADDR  0x5C
 
 /**
   Apple RTC reserved memory area for unclear purposes, normally filled with FF.
   Should not be erased during PRAM reset (CMD+OPT+P+R).
 **/
-#define APPLE_RTC_RESERVED_ADDR          0x78
+#define APPLE_RTC_RESERVED_ADDR  0x78
 
 /**
   Apple RTC reserved memory size.
 **/
-#define APPLE_RTC_RESERVED_LENGTH        8
+#define APPLE_RTC_RESERVED_LENGTH  8
 
 /**
   Hibernation image encryption data, a copy of IOHibernateRTCVariables.
@@ -128,12 +128,12 @@
   - Erased hibernation image encryption data starts with "DEAD" magic.
   Normally handled by AppleBds prior to transfering control to the bootloader.
 **/
-#define APPLE_RTC_HIBERNATION_KEY_ADDR   0x80
+#define APPLE_RTC_HIBERNATION_KEY_ADDR  0x80
 
 /**
   Effectively equals to sizeof (AppleRTCHibernateVars).
 **/
-#define APPLE_RTC_HIBERNATION_KEY_LENGTH 0x2C
+#define APPLE_RTC_HIBERNATION_KEY_LENGTH  0x2C
 
 /**
   Firmware upgrade control and status byte.
@@ -155,18 +155,18 @@
   AppleBds zeroes this byte at the same time it reaches normal booting phase (0x4)
   in APPLE_RTC_FIRMWARE_PROGRESS_ADDR. This may be set to non-zero value by ApplePlatformInit.
 **/
-#define APPLE_RTC_FIRMWARE_CHECK_ADDR    0xAF
+#define APPLE_RTC_FIRMWARE_CHECK_ADDR  0xAF
 
 /**
   Data contained in RTC allowing to trace various power management events.
   Called via AppleRTC::rtcRecordTracePoint and also used for EfiBoot wake log.
 **/
-#define APPLE_RTC_TRACE_POINT_ADDR       0xB0
+#define APPLE_RTC_TRACE_POINT_ADDR  0xB0
 
 /**
   Trace point data contains a total of 8 bytes, but they seem to have varying purpose.
 **/
-#define APPLE_RTC_TRACE_POINT_LENGTH     8
+#define APPLE_RTC_TRACE_POINT_LENGTH  8
 
 /**
   Trace data is a 32-bit value, which format depends on the phase
@@ -179,12 +179,12 @@
   For EfiBoot this is named hibernatin wake log. It is also written to
   wake-failure NVRAM variable (and later DeviceTree).
 **/
-#define APPLE_RTC_TRACE_DATA_ADDR        0xB0
+#define APPLE_RTC_TRACE_DATA_ADDR  0xB0
 
 /**
   Trace data length.
 **/
-#define APPLE_RTC_TRACE_DATA_LENGTH      4
+#define APPLE_RTC_TRACE_DATA_LENGTH  4
 
 /**
   Mask of events, which happened during booting.
@@ -194,18 +194,18 @@
   which only get updated in hibernate wake, this value is always written
   when a non-zero event is supplied.
 **/
-#define APPLE_RTC_WL_MASK_ADDR   0xB1
+#define APPLE_RTC_WL_MASK_ADDR  0xB1
 
 /**
   Known event bits.
 **/
-#define APPLE_RTC_WL_MASK_BOOT_STARTED   BIT0 ///< Called early at boot.efi startup.
-#define APPLE_RTC_WL_MASK_BOOT_FAILED    BIT1 ///< gBS->Exit: Boot failed; will sleep for 10 seconds before exiting.
-#define APPLE_RTC_WL_MASK_BOOT_KERNEL    BIT2 ///< Called right before jumping to the kernel code.
-#define APPLE_RTC_WL_MASK_CS_UNLOCKED    BIT3 ///< Set along with APPLE_RTC_WL_CS_VOLUME_UNLOCKED.
-#define APPLE_RTC_WL_MASK_HIB_CLEAR_KEYS BIT4 ///< Removed boot-image-key, EFI_STATUS in EXTRA.
-#define APPLE_RTC_WL_MASK_HIB_CLEAR_IMG  BIT5 ///< Removed boot-image, will reboot now.
-#define APPLE_RTC_WL_MASK_BOOT_RESET     BIT6 ///< gBS->Reset was called.
+#define APPLE_RTC_WL_MASK_BOOT_STARTED    BIT0 ///< Called early at boot.efi startup.
+#define APPLE_RTC_WL_MASK_BOOT_FAILED     BIT1 ///< gBS->Exit: Boot failed; will sleep for 10 seconds before exiting.
+#define APPLE_RTC_WL_MASK_BOOT_KERNEL     BIT2 ///< Called right before jumping to the kernel code.
+#define APPLE_RTC_WL_MASK_CS_UNLOCKED     BIT3 ///< Set along with APPLE_RTC_WL_CS_VOLUME_UNLOCKED.
+#define APPLE_RTC_WL_MASK_HIB_CLEAR_KEYS  BIT4 ///< Removed boot-image-key, EFI_STATUS in EXTRA.
+#define APPLE_RTC_WL_MASK_HIB_CLEAR_IMG   BIT5 ///< Removed boot-image, will reboot now.
+#define APPLE_RTC_WL_MASK_BOOT_RESET      BIT6 ///< gBS->Reset was called.
 
 /**
   Event index that happened last during booting.
@@ -217,15 +217,15 @@
 /**
   Known events.
 **/
-#define APPLE_RTC_WL_EVENT_DEFAULT            0  ///< For everything.
-#define APPLE_RTC_WL_INIT_DEVICE_TREE         2  ///< Before first "Start InitDeviceTree".
-#define APPLE_RTC_WL_KERNEL_ALLOC_CALL_GATE   3  ///< After "End InitDeviceTree".
-#define APPLE_RTC_WL_INIT_MEMORY_CONFIG       4  ///< Before "Start InitMemoryConfig".
-#define APPLE_RTC_WL_HIB_CHECK                5  ///< Before "Start CheckHibernate".
-#define APPLE_RTC_WL_CS_LOAD_CONFIGURATION    6  ///< Before "Start LoadCoreStorageConfiguration".
-#define APPLE_RTC_WL_GET_FDE_KEY              7  ///< Before reading HBKP key.
-#define APPLE_RTC_WL_HIB_WAKE_START           8  ///< Before reading FACP table.
-#define APPLE_RTC_WL_HIB_GET_MMAP             9  ///< Before GetMemoryMap for hibernation.
+#define APPLE_RTC_WL_EVENT_DEFAULT           0   ///< For everything.
+#define APPLE_RTC_WL_INIT_DEVICE_TREE        2   ///< Before first "Start InitDeviceTree".
+#define APPLE_RTC_WL_KERNEL_ALLOC_CALL_GATE  3   ///< After "End InitDeviceTree".
+#define APPLE_RTC_WL_INIT_MEMORY_CONFIG      4   ///< Before "Start InitMemoryConfig".
+#define APPLE_RTC_WL_HIB_CHECK               5   ///< Before "Start CheckHibernate".
+#define APPLE_RTC_WL_CS_LOAD_CONFIGURATION   6   ///< Before "Start LoadCoreStorageConfiguration".
+#define APPLE_RTC_WL_GET_FDE_KEY             7   ///< Before reading HBKP key.
+#define APPLE_RTC_WL_HIB_WAKE_START          8   ///< Before reading FACP table.
+#define APPLE_RTC_WL_HIB_GET_MMAP            9   ///< Before GetMemoryMap for hibernation.
 #define APPLE_RTC_WL_HIB_HWSIG_VALID         10  ///< After confirming FACP signature validity with the image.
 #define APPLE_RTC_WL_HIB_MEM_ALLOC           11  ///< Before restore1CodePhysPage / runtimePages allocation.
 #define APPLE_RTC_WL_HIB_SPLASH              12  ///< Before "Start OpenBootGraphics".
@@ -269,15 +269,15 @@
   CoreDisplay is known to report 0 (very helpful) on screen wake.
   I guess we can abuse them if we want.
 **/
-#define APPLE_RTC_TRACE_LOGIN_WINDOW_ADDR  0xB4
-#define APPLE_RTC_TRACE_CORE_DISPLAY_ADDR  0xB5
-#define APPLE_RTC_TRACE_CORE_GRAPHICS_ADDR 0xB6
+#define APPLE_RTC_TRACE_LOGIN_WINDOW_ADDR   0xB4
+#define APPLE_RTC_TRACE_CORE_DISPLAY_ADDR   0xB5
+#define APPLE_RTC_TRACE_CORE_GRAPHICS_ADDR  0xB6
 
 /**
   Trace point power phase e.g. kIOPMTracePointSystemUp.
   See XNU IOPMPrivate.h for more details.
 **/
-#define APPLE_RTC_TRACE_PHASE_ADDR         0xB7
+#define APPLE_RTC_TRACE_PHASE_ADDR  0xB7
 
 /**
   256-bit full disk encryption (FDE) key used for authenticated restart.
@@ -303,13 +303,13 @@
         to 256 bits and just XOR the value. This will break old VirtualSmc.efi
         module, but we do not care anymore.
 **/
-#define APPLE_RTC_FDE_KEY_ADDR           0xD0
+#define APPLE_RTC_FDE_KEY_ADDR  0xD0
 
 /**
   FDE key maximum and default, as AES-256-XTS has 256-bit key.
   For smaller keys remaining bytes are zeroed.
 **/
-#define APPLE_RTC_FDE_KEY_LENGTH         0x20
+#define APPLE_RTC_FDE_KEY_LENGTH  0x20
 
 /**
   FDE key state. Normally written by ApplePlatformInit.
@@ -320,28 +320,28 @@
          copying succeeds this value is overwritten with 0x00. Normally
          this is done by AppleBds.
 **/
-#define APPLE_RTC_FDE_STATE_ADDR         0xF0
+#define APPLE_RTC_FDE_STATE_ADDR  0xF0
 
 /**
   Known values for APPLE_RTC_FDE_STATE_ADDR.
 **/
-#define APPLE_RTC_FDE_STATE_DEFAULT      0x00
-#define APPLE_RTC_FDE_STATE_NEED_KEY     0x41
+#define APPLE_RTC_FDE_STATE_DEFAULT   0x00
+#define APPLE_RTC_FDE_STATE_NEED_KEY  0x41
 
 /**
   Checksum is calculated starting from this address.
 **/
-#define APPLE_RTC_CHECKSUM_START         0x0E
+#define APPLE_RTC_CHECKSUM_START  0x0E
 
 /**
   First 64 bytes are RTC core and are hashed separately.
 **/
-#define APPLE_RTC_CORE_SIZE              0x40
+#define APPLE_RTC_CORE_SIZE  0x40
 
 /**
   All Apple hardware cares about 256 bytes of RTC memory.
 **/
-#define APPLE_RTC_TOTAL_SIZE             0x100
+#define APPLE_RTC_TOTAL_SIZE  0x100
 
 /**
   Apple checksum custom CRC polynomial.
@@ -354,7 +354,7 @@
   where it was used for password hashing as found by dogbert:
   http://sites.google.com/site/dogber1/blag/pwgen-5dec.py
 **/
-#define APPLE_RTC_CHECKSUM_POLYNOMIAL    0x2001
+#define APPLE_RTC_CHECKSUM_POLYNOMIAL  0x2001
 
 /**
   Apple checksum rounds.
@@ -365,36 +365,36 @@
   in 10.4.x, and since Apple Developer Transition Kit was based on Phoenix
   firmware, this could just be a quick change to get a different checksum.
 **/
-#define APPLE_RTC_CHECKSUM_ROUNDS        7
+#define APPLE_RTC_CHECKSUM_ROUNDS  7
 
 /**
   Checksum for Apple RTC with core part of the memory hashed:
   [APPLE_RTC_CHECKSUM_SART, APPLE_RTC_CORE_SIZE).
 **/
-#define APPLE_RTC_CORE_CHECKSUM_ADDR1    0x3E
-#define APPLE_RTC_CORE_CHECKSUM_ADDR2    0x3F
+#define APPLE_RTC_CORE_CHECKSUM_ADDR1  0x3E
+#define APPLE_RTC_CORE_CHECKSUM_ADDR2  0x3F
 
 /**
   Apple RTC core checksum to byte convertion macros.
   BYTE1 BIT0~BIT7 = CHECKSUM BIT0~BIT7
   BYTE2 BIT1~BIT7 = CHECKSUM BIT8~BIT14
 **/
-#define APPLE_RTC_CORE_CHECKSUM_BYTE1(Checksum) ((UINT8) ((UINT32) (Checksum) & 0xFFU))
-#define APPLE_RTC_CORE_CHECKSUM_BYTE2(Checksum) ((UINT8) (((UINT32) (Checksum) >> 7U) & 0xFEU))
+#define APPLE_RTC_CORE_CHECKSUM_BYTE1(Checksum)  ((UINT8) ((UINT32) (Checksum) & 0xFFU))
+#define APPLE_RTC_CORE_CHECKSUM_BYTE2(Checksum)  ((UINT8) (((UINT32) (Checksum) >> 7U) & 0xFEU))
 
 /**
   Checksum for Apple RTC with all the memory hashed:
   [APPLE_RTC_CHECKSUM_SART, APPLE_RTC_TOTAL_SIZE).
 **/
-#define APPLE_RTC_MAIN_CHECKSUM_ADDR1    0x58
-#define APPLE_RTC_MAIN_CHECKSUM_ADDR2    0x59
+#define APPLE_RTC_MAIN_CHECKSUM_ADDR1  0x58
+#define APPLE_RTC_MAIN_CHECKSUM_ADDR2  0x59
 
 /**
   Apple RTC main checksum to byte convertion macros.
   BYTE1 BIT0~BIT7 = CHECKSUM BIT0~BIT7
   BYTE2 BIT0~BIT7 = CHECKSUM BIT8~BIT15
 **/
-#define APPLE_RTC_MAIN_CHECKSUM_BYTE1(Checksum) ((UINT8) (((UINT32) (Checksum) >> 8U) & 0xFFU))
-#define APPLE_RTC_MAIN_CHECKSUM_BYTE2(Checksum) ((UINT8) ((UINT32) (Checksum) & 0xFFU))
+#define APPLE_RTC_MAIN_CHECKSUM_BYTE1(Checksum)  ((UINT8) (((UINT32) (Checksum) >> 8U) & 0xFFU))
+#define APPLE_RTC_MAIN_CHECKSUM_BYTE2(Checksum)  ((UINT8) ((UINT32) (Checksum) & 0xFFU))
 
 #endif // APPLE_RTC_H

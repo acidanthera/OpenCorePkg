@@ -49,24 +49,24 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
     { 0xAB, 0xD3, 0xA9, 0x4E, 0x09, 0xCA, 0x9D, 0xE6 } }
 
 // gAppleDebugMaskHobGuid
-extern EFI_GUID gAppleDebugMaskHobGuid;
+extern EFI_GUID  gAppleDebugMaskHobGuid;
 
 // gAppleFsbFrequencyPlatformInfoIndexHobGuid
-extern EFI_GUID gAppleFsbFrequencyPlatformInfoIndexHobGuid;
+extern EFI_GUID  gAppleFsbFrequencyPlatformInfoIndexHobGuid;
 
 // gAppleSmcMmioAddressHobGuid
-extern EFI_GUID gAppleSmcMmioAddressHobGuid;
+extern EFI_GUID  gAppleSmcMmioAddressHobGuid;
 
 // gAppleTscFrequencyHobGuid
-extern EFI_GUID gAppleTscFrequencyHobGuid;
+extern EFI_GUID  gAppleTscFrequencyHobGuid;
 
 // gAppleHob1Guid
-extern EFI_GUID gAppleHob1Guid;
+extern EFI_GUID  gAppleHob1Guid;
 
 // gAppleHob1Guid
-extern EFI_GUID gAppleHob2Guid;
+extern EFI_GUID  gAppleHob2Guid;
 
 // gAppleHob1Guid
-extern EFI_GUID gAppleHob3Guid;
+extern EFI_GUID  gAppleHob3Guid;
 
 #endif //ifndef APPLE_HOB_H

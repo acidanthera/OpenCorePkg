@@ -31,17 +31,17 @@ UefiMain (
   IN EFI_SYSTEM_TABLE  *SystemTable
   )
 {
-  EFI_STATUS        Status;
-  UINTN             Argc;
-  CHAR16            **Argv;
-  CHAR16            *Mode;
-  EFI_RESET_TYPE    ResetMode;
-  UINT64            OsIndications;
-  UINT32            Attr;
-  UINTN             DataSize;
+  EFI_STATUS      Status;
+  UINTN           Argc;
+  CHAR16          **Argv;
+  CHAR16          *Mode;
+  EFI_RESET_TYPE  ResetMode;
+  UINT64          OsIndications;
+  UINT32          Attr;
+  UINTN           DataSize;
 
   Status = GetArguments (&Argc, &Argv);
-  if (!EFI_ERROR (Status) && Argc >= 2) {
+  if (!EFI_ERROR (Status) && (Argc >= 2)) {
     Mode = Argv[1];
   } else {
     DEBUG ((DEBUG_INFO, "OCRST: Assuming default to be coldreset - %r\n", Status));
@@ -51,28 +51,29 @@ UefiMain (
   if (OcStriCmp (Mode, L"firmware") == 0) {
     DEBUG ((DEBUG_INFO, "OCRST: Entering firmware...\n"));
     DataSize = sizeof (OsIndications);
-    Status = gRT->GetVariable (
-                    EFI_OS_INDICATIONS_SUPPORT_VARIABLE_NAME,
-                    &gEfiGlobalVariableGuid,
-                    &Attr,
-                    &DataSize,
-                    &OsIndications
-                    );
+    Status   = gRT->GetVariable (
+                      EFI_OS_INDICATIONS_SUPPORT_VARIABLE_NAME,
+                      &gEfiGlobalVariableGuid,
+                      &Attr,
+                      &DataSize,
+                      &OsIndications
+                      );
     if (!EFI_ERROR (Status)) {
       if ((OsIndications & EFI_OS_INDICATIONS_BOOT_TO_FW_UI) != 0) {
         DataSize = sizeof (OsIndications);
-        Status = gRT->GetVariable (
-                        EFI_OS_INDICATIONS_VARIABLE_NAME,
-                        &gEfiGlobalVariableGuid,
-                        &Attr,
-                        &DataSize,
-                        &OsIndications
-                        );
+        Status   = gRT->GetVariable (
+                          EFI_OS_INDICATIONS_VARIABLE_NAME,
+                          &gEfiGlobalVariableGuid,
+                          &Attr,
+                          &DataSize,
+                          &OsIndications
+                          );
         if (!EFI_ERROR (Status)) {
           OsIndications |= EFI_OS_INDICATIONS_BOOT_TO_FW_UI;
         } else {
           OsIndications = EFI_OS_INDICATIONS_BOOT_TO_FW_UI;
         }
+
         Status = gRT->SetVariable (
                         EFI_OS_INDICATIONS_VARIABLE_NAME,
                         &gEfiGlobalVariableGuid,
@@ -92,6 +93,7 @@ UefiMain (
       DEBUG ((DEBUG_WARN, "OCRST: Failed to acquire firmware features - %r\n", Status));
       return EFI_NOT_FOUND;
     }
+
     Mode = L"coldreset";
   }
 
@@ -110,11 +112,11 @@ UefiMain (
   }
 
   gRT->ResetSystem (
-    ResetMode,
-    EFI_SUCCESS,
-    0,
-    NULL
-    );
+         ResetMode,
+         EFI_SUCCESS,
+         0,
+         NULL
+         );
 
   DEBUG ((DEBUG_INFO, "OCRST: Failed to reset, trying direct\n"));
 

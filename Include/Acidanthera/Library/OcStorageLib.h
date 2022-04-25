@@ -23,38 +23,38 @@
 /**
   Storage vault file containing a dictionary with SHA-256 hashes for all files.
 **/
-#define OC_STORAGE_VAULT_PATH L"vault.plist"
+#define OC_STORAGE_VAULT_PATH  L"vault.plist"
 
 /**
   RSA-2048 signature of SHA-256 hash of vault.plist.
 **/
-#define OC_STORAGE_VAULT_SIGNATURE_PATH L"vault.sig"
+#define OC_STORAGE_VAULT_SIGNATURE_PATH  L"vault.sig"
 
 /**
   Storage vault version declaring vault compatibility.
 **/
-#define OC_STORAGE_VAULT_VERSION 1
+#define OC_STORAGE_VAULT_VERSION  1
 
 /**
   Safe maximum file path in the storage.
 **/
-#define OC_STORAGE_SAFE_PATH_MAX 128
+#define OC_STORAGE_SAFE_PATH_MAX  128
 
 /**
   Structure declaration for valult file.
 **/
 #define OC_STORAGE_VAULT_HASH_FIELDS(_, __) \
   _(UINT8      , Hash     , [SHA256_DIGEST_SIZE] , {0}         , () )
-  OC_DECLARE (OC_STORAGE_VAULT_HASH)
+OC_DECLARE (OC_STORAGE_VAULT_HASH)
 
 #define OC_STORAGE_VAULT_FILES_FIELDS(_, __) \
   OC_MAP (OC_STRING, OC_STORAGE_VAULT_HASH, _, __)
-  OC_DECLARE (OC_STORAGE_VAULT_FILES)
+OC_DECLARE (OC_STORAGE_VAULT_FILES)
 
 #define OC_STORAGE_VAULT_FIELDS(_, __) \
   _(UINT32                      , Version  ,     , 0                                         , () ) \
   _(OC_STORAGE_VAULT_FILES      , Files    ,     , OC_CONSTR (OC_STORAGE_VAULT_FILES, _, __) , OC_DESTR (OC_STORAGE_VAULT_FILES))
-  OC_DECLARE (OC_STORAGE_VAULT)
+OC_DECLARE (OC_STORAGE_VAULT)
 
 /**
   Storage abstraction context
@@ -63,43 +63,43 @@ typedef struct {
   ///
   /// Storage file system if any.
   ///
-  EFI_SIMPLE_FILE_SYSTEM_PROTOCOL  *FileSystem;
+  EFI_SIMPLE_FILE_SYSTEM_PROTOCOL    *FileSystem;
   ///
   /// Real storage handle for loading.
   ///
-  EFI_HANDLE                       StorageHandle;
+  EFI_HANDLE                         StorageHandle;
   ///
   /// Real file path for file storage, can be missing.
   ///
-  EFI_DEVICE_PATH_PROTOCOL         *StoragePath;
+  EFI_DEVICE_PATH_PROTOCOL           *StoragePath;
   ///
   /// Path to the root of file storage on StoragePage.
   ///
-  CONST CHAR16                     *StorageRoot;
+  CONST CHAR16                       *StorageRoot;
   ///
   /// Storage file instance owned by context.
   ///
-  EFI_FILE_PROTOCOL                *Storage;
+  EFI_FILE_PROTOCOL                  *Storage;
   ///
   /// Device handle with storage (dummy) device path for loading.
   ///
-  EFI_HANDLE                       DummyStorageHandle;
+  EFI_HANDLE                         DummyStorageHandle;
   ///
   /// Dummy file path for file storage.
   ///
-  EFI_DEVICE_PATH_PROTOCOL         *DummyDevicePath;
+  EFI_DEVICE_PATH_PROTOCOL           *DummyDevicePath;
   ///
   /// Dummy file path relative to storage.
   ///
-  EFI_DEVICE_PATH_PROTOCOL         *DummyFilePath;
+  EFI_DEVICE_PATH_PROTOCOL           *DummyFilePath;
   ///
   /// Vault context.
   ///
-  OC_STORAGE_VAULT                 Vault;
+  OC_STORAGE_VAULT                   Vault;
   ///
   /// Vault status.
   ///
-  BOOLEAN                          HasVault;
+  BOOLEAN                            HasVault;
 } OC_STORAGE_CONTEXT;
 
 /**
@@ -131,7 +131,7 @@ OcStorageInitFromFs (
 **/
 VOID
 OcStorageFree (
-  IN OUT OC_STORAGE_CONTEXT            *Context
+  IN OUT OC_STORAGE_CONTEXT  *Context
   );
 
 /**
@@ -144,8 +144,8 @@ OcStorageFree (
 **/
 BOOLEAN
 OcStorageExistsFileUnicode (
-  IN  OC_STORAGE_CONTEXT               *Context,
-  IN  CONST CHAR16                     *FilePath
+  IN  OC_STORAGE_CONTEXT  *Context,
+  IN  CONST CHAR16        *FilePath
   );
 
 /**
@@ -163,9 +163,9 @@ OcStorageExistsFileUnicode (
 **/
 VOID *
 OcStorageReadFileUnicode (
-  IN  OC_STORAGE_CONTEXT               *Context,
-  IN  CONST CHAR16                     *FilePath,
-  OUT UINT32                           *FileSize OPTIONAL
+  IN  OC_STORAGE_CONTEXT  *Context,
+  IN  CONST CHAR16        *FilePath,
+  OUT UINT32              *FileSize OPTIONAL
   );
 
 /**
@@ -182,12 +182,12 @@ OcStorageReadFileUnicode (
 **/
 EFI_STATUS
 OcStorageGetInfo (
-  IN  OC_STORAGE_CONTEXT               *Context,
-  IN  CONST CHAR16                     *FilePath,
-  OUT EFI_DEVICE_PATH_PROTOCOL         **DevicePath,
-  OUT EFI_HANDLE                       *StorageHandle,
-  OUT EFI_DEVICE_PATH_PROTOCOL         **StoragePath,
-  IN  BOOLEAN                          RealPath
+  IN  OC_STORAGE_CONTEXT        *Context,
+  IN  CONST CHAR16              *FilePath,
+  OUT EFI_DEVICE_PATH_PROTOCOL  **DevicePath,
+  OUT EFI_HANDLE                *StorageHandle,
+  OUT EFI_DEVICE_PATH_PROTOCOL  **StoragePath,
+  IN  BOOLEAN                   RealPath
   );
 
 #endif // OC_STORAGE_LIB_H

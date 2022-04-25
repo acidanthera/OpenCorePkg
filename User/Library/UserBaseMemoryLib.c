@@ -14,11 +14,11 @@
 #include <stdlib.h>
 
 #ifdef WIN32
-#include <malloc.h>
+  #include <malloc.h>
 #endif // WIN32
 
-UINTN   mPoolAllocations;
-UINTN   mPageAllocations;
+UINTN  mPoolAllocations;
+UINTN  mPageAllocations;
 
 UINT64  mPoolAllocationMask = MAX_UINT64;
 UINTN   mPoolAllocationIndex;
@@ -74,7 +74,7 @@ IsZeroBuffer (
   UINTN  Index;
   UINT8  *Walker;
 
-  Walker = (UINT8 *) Buffer;
+  Walker = (UINT8 *)Buffer;
 
   for (Index = 0; Index < Length; ++Index) {
     if (Walker[Index] != 0) {
@@ -110,7 +110,7 @@ ScanMem16 (
   UINT16  *Walker;
   UINTN   Index;
 
-  Walker = (UINT16 *) Buffer;
+  Walker = (UINT16 *)Buffer;
 
   for (Index = 0; Index < Length; ++Index) {
     if (Walker[Index] == Value) {
@@ -127,7 +127,7 @@ AllocatePool (
   IN  UINTN  AllocationSize
   )
 {
-  VOID *Buffer;
+  VOID  *Buffer;
 
   if ((mPoolAllocationMask & (1ULL << mPoolAllocationIndex)) != 0) {
     //
@@ -144,11 +144,11 @@ AllocatePool (
   DEBUG ((
     DEBUG_POOL,
     "UMEM: Allocating pool %u at 0x%p\n",
-    (UINT32) AllocationSize,
+    (UINT32)AllocationSize,
     Buffer
     ));
 
-  ASSERT (((UINTN) Buffer & 7ULL) == 0);
+  ASSERT (((UINTN)Buffer & 7ULL) == 0);
 
   if (Buffer != NULL) {
     ++mPoolAllocations;
@@ -164,7 +164,7 @@ AllocateCopyPool (
   IN  CONST VOID  *Buffer
   )
 {
-  VOID *Memory;
+  VOID  *Memory;
 
   ASSERT (Buffer != NULL);
 
@@ -183,7 +183,7 @@ AllocateZeroPool (
   IN  UINTN  AllocationSize
   )
 {
-  VOID *Memory;
+  VOID  *Memory;
 
   Memory = AllocatePool (AllocationSize);
 
@@ -205,7 +205,7 @@ ReallocatePool (
 
   NewBuffer = AllocateZeroPool (NewSize);
 
-  if (NewBuffer != NULL && OldBuffer != NULL) {
+  if ((NewBuffer != NULL) && (OldBuffer != NULL)) {
     CopyMem (NewBuffer, OldBuffer, MIN (OldSize, NewSize));
     FreePool (OldBuffer);
   }
@@ -222,9 +222,9 @@ AllocatePages (
   VOID  *Memory;
 
   if ((mPageAllocationMask & (1ULL << mPageAllocationIndex)) != 0) {
-#ifdef WIN32
+ #ifdef WIN32
     Memory = _aligned_malloc (Pages * EFI_PAGE_SIZE, EFI_PAGE_SIZE);
-#else // !WIN32
+ #else // !WIN32
     Memory = NULL;
     INTN  RetVal;
 
@@ -233,7 +233,8 @@ AllocatePages (
       DEBUG ((DEBUG_ERROR, "posix_memalign returns error %d\n", RetVal));
       Memory = NULL;
     }
-#endif // WIN32
+
+ #endif // WIN32
   } else {
     Memory = NULL;
   }
@@ -244,7 +245,7 @@ AllocatePages (
   DEBUG ((
     DEBUG_PAGE,
     "UMEM: Allocating %u pages at 0x%p\n",
-    (UINT32) Pages,
+    (UINT32)Pages,
     Memory
     ));
 
@@ -258,7 +259,7 @@ AllocatePages (
 VOID
 EFIAPI
 FreePool (
-  IN VOID   *Buffer
+  IN VOID  *Buffer
   )
 {
   ASSERT (Buffer != NULL);
@@ -286,7 +287,7 @@ FreePages (
   DEBUG ((
     DEBUG_PAGE,
     "UMEM: Deallocating %u pages at 0x%p\n",
-    (UINT32) Pages,
+    (UINT32)Pages,
     Buffer
     ));
 
@@ -329,7 +330,7 @@ ReadUnaligned16 (
   IN CONST UINT16  *Buffer
   )
 {
-  UINT16 Value;
+  UINT16  Value;
 
   CopyMem (&Value, Buffer, sizeof (UINT16));
 
@@ -356,7 +357,7 @@ ReadUnaligned24 (
   IN CONST UINT32  *Buffer
   )
 {
-  UINT32 Value;
+  UINT32  Value;
 
   Value = ReadUnaligned32 (Buffer) & 0xFFFFFFU;
 
@@ -369,7 +370,7 @@ ReadUnaligned32 (
   IN CONST UINT32  *Buffer
   )
 {
-  UINT32 Value;
+  UINT32  Value;
 
   ASSERT (Buffer != NULL);
 
@@ -384,7 +385,7 @@ ReadUnaligned64 (
   IN CONST UINT64  *Buffer
   )
 {
-  UINT64 Value;
+  UINT64  Value;
 
   ASSERT (Buffer != NULL);
 

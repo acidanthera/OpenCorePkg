@@ -64,15 +64,15 @@ InternalKcWriteCommandHeaders (
   IN OUT MACH_HEADER_64     *MachHeader
   )
 {
-  PRELINKED_KEXT           *PrelinkedKext;
-  LIST_ENTRY               *Kext;
-  MACH_LOAD_COMMAND_PTR    Command;
-  MACH_HEADER_64           *KextHeader;
-  UINTN                    StringSize;
+  PRELINKED_KEXT         *PrelinkedKext;
+  LIST_ENTRY             *Kext;
+  MACH_LOAD_COMMAND_PTR  Command;
+  MACH_HEADER_64         *KextHeader;
+  UINTN                  StringSize;
 
-  Command.Address = (UINTN) MachHeader->Commands + MachHeader->CommandsSize;
+  Command.Address = (UINTN)MachHeader->Commands + MachHeader->CommandsSize;
 
-  Kext            = GetFirstNode (&Context->InjectedKexts);
+  Kext = GetFirstNode (&Context->InjectedKexts);
 
   while (!IsNull (&Context->InjectedKexts, Kext)) {
     PrelinkedKext = GET_INJECTED_KEXT_FROM_LINK (Kext);
@@ -82,14 +82,16 @@ InternalKcWriteCommandHeaders (
     //
     // Write 8-byte aligned fileset command.
     //
-    Command.FilesetEntry->CommandType = MACH_LOAD_COMMAND_FILESET_ENTRY;
-    Command.FilesetEntry->CommandSize = (UINT32) ALIGN_VALUE (sizeof (MACH_FILESET_ENTRY_COMMAND) + StringSize, 8);
+    Command.FilesetEntry->CommandType    = MACH_LOAD_COMMAND_FILESET_ENTRY;
+    Command.FilesetEntry->CommandSize    = (UINT32)ALIGN_VALUE (sizeof (MACH_FILESET_ENTRY_COMMAND) + StringSize, 8);
     Command.FilesetEntry->VirtualAddress = PrelinkedKext->Context.VirtualBase;
-    KextHeader = MachoGetMachHeader64(&PrelinkedKext->Context.MachContext);
+    KextHeader                           = MachoGetMachHeader64 (&PrelinkedKext->Context.MachContext);
     ASSERT (KextHeader != NULL);
-    ASSERT ((UINTN) KextHeader > (UINTN) Context->Prelinked
-      && (UINTN) KextHeader < (UINTN) Context->Prelinked + Context->PrelinkedSize);
-    Command.FilesetEntry->FileOffset     = (UINTN) KextHeader - (UINTN) Context->Prelinked;
+    ASSERT (
+      (UINTN)KextHeader > (UINTN)Context->Prelinked
+           && (UINTN)KextHeader < (UINTN)Context->Prelinked + Context->PrelinkedSize
+      );
+    Command.FilesetEntry->FileOffset     = (UINTN)KextHeader - (UINTN)Context->Prelinked;
     Command.FilesetEntry->EntryId.Offset = OFFSET_OF (MACH_FILESET_ENTRY_COMMAND, Payload);
     Command.FilesetEntry->Reserved       = 0;
     CopyMem (Command.FilesetEntry->Payload, PrelinkedKext->Identifier, StringSize);
@@ -115,15 +117,15 @@ InternalKcWriteCommandHeaders (
   //
   // Write a segment covering all the kexts.
   //
-  Command.Segment64->CommandType       = MACH_LOAD_COMMAND_SEGMENT_64;
-  Command.Segment64->CommandSize       = sizeof (MACH_SEGMENT_COMMAND_64);
+  Command.Segment64->CommandType = MACH_LOAD_COMMAND_SEGMENT_64;
+  Command.Segment64->CommandSize = sizeof (MACH_SEGMENT_COMMAND_64);
   CopyMem (Command.Segment64->SegmentName, KC_MOSCOW_SEGMENT, sizeof (KC_MOSCOW_SEGMENT));
   ZeroMem (
     &Command.Segment64->SegmentName[sizeof (KC_MOSCOW_SEGMENT)],
     sizeof (Command.Segment64->SegmentName) - sizeof (KC_MOSCOW_SEGMENT)
     );
-  Command.Segment64->VirtualAddress    = Context->KextsVmAddress;
-  Command.Segment64->FileOffset        = Context->KextsFileOffset;
+  Command.Segment64->VirtualAddress = Context->KextsVmAddress;
+  Command.Segment64->FileOffset     = Context->KextsFileOffset;
   //
   // In KC mode, PrelinkedLastAddress and PrelinkedLastLoadAddress are equal
   // before KEXTs are injected.
@@ -131,11 +133,11 @@ InternalKcWriteCommandHeaders (
   Command.Segment64->Size              = Context->PrelinkedLastAddress - Context->KextsVmAddress;
   Command.Segment64->FileSize          = Context->PrelinkedSize - Context->KextsFileOffset;
   Command.Segment64->MaximumProtection = MACH_SEGMENT_VM_PROT_READ
-    | MACH_SEGMENT_VM_PROT_WRITE | MACH_SEGMENT_VM_PROT_EXECUTE;
+                                         | MACH_SEGMENT_VM_PROT_WRITE | MACH_SEGMENT_VM_PROT_EXECUTE;
   Command.Segment64->InitialProtection = MACH_SEGMENT_VM_PROT_READ
-    | MACH_SEGMENT_VM_PROT_WRITE | MACH_SEGMENT_VM_PROT_EXECUTE;
-  Command.Segment64->NumSections       = 0;
-  Command.Segment64->Flags             = 0;
+                                         | MACH_SEGMENT_VM_PROT_WRITE | MACH_SEGMENT_VM_PROT_EXECUTE;
+  Command.Segment64->NumSections = 0;
+  Command.Segment64->Flags       = 0;
 
   //
   // Refresh Mach-O header constants to include the new segment command.
@@ -158,7 +160,7 @@ InternalKcWriteCommandHeaders (
   // and current __PRELINKED_INFO gets shifted.
   //
   CopyMem (
-    (VOID *) Command.Address,
+    (VOID *)Command.Address,
     &Context->PrelinkedInfoSegment->Segment64,
     Context->PrelinkedInfoSegment->Segment64.CommandSize
     );
@@ -179,8 +181,8 @@ InternalKcWriteCommandHeaders (
   //
   // Update __PRELINKED_INFO pointers to get them updated at a later stage.
   //
-  Context->PrelinkedInfoSegment = (MACH_SEGMENT_COMMAND_ANY *) Command.Address;
-  Context->PrelinkedInfoSection = (MACH_SECTION_ANY *) &Context->PrelinkedInfoSegment->Segment64.Sections[0];
+  Context->PrelinkedInfoSegment = (MACH_SEGMENT_COMMAND_ANY *)Command.Address;
+  Context->PrelinkedInfoSection = (MACH_SECTION_ANY *)&Context->PrelinkedInfoSegment->Segment64.Sections[0];
 }
 
 EFI_STATUS
@@ -195,30 +197,31 @@ KcRebuildMachHeader (
   UINTN                    RequiredSize;
 
   MachHeader = MachoGetMachHeader64 (
-    &Context->PrelinkedMachContext
-    );
+                 &Context->PrelinkedMachContext
+                 );
 
   CurrentSize  = MachHeader->CommandsSize + sizeof (*MachHeader);
   FilesetSize  = InternalKcGetKextFilesetSize (Context);
   RequiredSize = FilesetSize + sizeof (MACH_SEGMENT_COMMAND_64) + Context->PrelinkedInfoSegment->Segment64.CommandSize;
 
   TextSegment = MachoGetSegmentByName64 (
-    &Context->PrelinkedMachContext,
-    KC_TEXT_SEGMENT
-    );
+                  &Context->PrelinkedMachContext,
+                  KC_TEXT_SEGMENT
+                  );
 
   DEBUG ((
     DEBUG_INFO,
     "OCAK: KC TEXT is %u bytes with %u Mach-O headers need %u\n",
-    (UINT32) (TextSegment != NULL ? TextSegment->FileSize : 0),
-    (UINT32) CurrentSize,
-    (UINT32) RequiredSize
+    (UINT32)(TextSegment != NULL ? TextSegment->FileSize : 0),
+    (UINT32)CurrentSize,
+    (UINT32)RequiredSize
     ));
 
-  if (TextSegment == NULL
-    || TextSegment->FileOffset != 0
-    || TextSegment->FileSize != TextSegment->Size
-    || TextSegment->FileSize < CurrentSize) {
+  if (  (TextSegment == NULL)
+     || (TextSegment->FileOffset != 0)
+     || (TextSegment->FileSize != TextSegment->Size)
+     || (TextSegment->FileSize < CurrentSize))
+  {
     return EFI_INVALID_PARAMETER;
   }
 
@@ -250,7 +253,7 @@ KcRebuildMachHeader (
   // This should never happen.
   //
   if (CurrentSize + RequiredSize > TextSegment->FileSize) {
-    DEBUG ((DEBUG_INFO, "OCAK: Used header %u is still too large\n", (UINT32) CurrentSize));
+    DEBUG ((DEBUG_INFO, "OCAK: Used header %u is still too large\n", (UINT32)CurrentSize));
     return EFI_UNSUPPORTED;
   }
 
@@ -268,7 +271,7 @@ KcGetSegmentFixupChainsSize (
   IN UINT32  SegmentSize
   )
 {
-  CONST MACH_DYLD_CHAINED_STARTS_IN_SEGMENT *Dummy;
+  CONST MACH_DYLD_CHAINED_STARTS_IN_SEGMENT  *Dummy;
 
   ASSERT (SegmentSize % MACHO_PAGE_SIZE == 0);
 
@@ -276,8 +279,8 @@ KcGetSegmentFixupChainsSize (
     return 0;
   }
 
-  return (UINT32) (sizeof (*Dummy)
-    + (SegmentSize / MACHO_PAGE_SIZE) * sizeof (Dummy->PageStart[0]));
+  return (UINT32)(sizeof (*Dummy)
+                  + (SegmentSize / MACHO_PAGE_SIZE) * sizeof (Dummy->PageStart[0]));
 }
 
 EFI_STATUS
@@ -287,12 +290,12 @@ KcInitKextFixupChains (
   IN     UINT32             ReservedSize
   )
 {
-  BOOLEAN                                Result;
-  CONST MACH_LINKEDIT_DATA_COMMAND       *DyldChainedFixups;
-  CONST MACHO_DYLD_CHAINED_FIXUPS_HEADER *DyldChainedFixupsHdr;
-  MACH_DYLD_CHAINED_STARTS_IN_IMAGE      *DyldChainedStarts;
-  UINT32                                 DyldChainedStartsSize;
-  UINT32                                 SegIndex;
+  BOOLEAN                                 Result;
+  CONST MACH_LINKEDIT_DATA_COMMAND        *DyldChainedFixups;
+  CONST MACHO_DYLD_CHAINED_FIXUPS_HEADER  *DyldChainedFixupsHdr;
+  MACH_DYLD_CHAINED_STARTS_IN_IMAGE       *DyldChainedStarts;
+  UINT32                                  DyldChainedStartsSize;
+  UINT32                                  SegIndex;
 
   ASSERT (Context != NULL);
   ASSERT (ReservedSize % MACHO_PAGE_SIZE == 0);
@@ -310,12 +313,12 @@ KcInitKextFixupChains (
     OC_ALIGNOF (MACH_LINKEDIT_DATA_COMMAND) <= sizeof (UINT64),
     "Alignment is not guaranteed."
     );
-  
-  DyldChainedFixups = (CONST MACH_LINKEDIT_DATA_COMMAND *) MachoGetNextCommand (
-    &Context->PrelinkedMachContext,
-    MACH_LOAD_COMMAND_DYLD_CHAINED_FIXUPS,
-    NULL
-    );
+
+  DyldChainedFixups = (CONST MACH_LINKEDIT_DATA_COMMAND *)MachoGetNextCommand (
+                                                            &Context->PrelinkedMachContext,
+                                                            MACH_LOAD_COMMAND_DYLD_CHAINED_FIXUPS,
+                                                            NULL
+                                                            );
   //
   // Show that StartsInImage is aligned relative to __LINKEDIT start so we only
   // need to check DataOffset below.
@@ -326,20 +329,21 @@ KcInitKextFixupChains (
     "Alignment is not guaranteed."
     );
 
-  if (DyldChainedFixups == NULL
-   || DyldChainedFixups->CommandSize != sizeof (*DyldChainedFixups)
-   || DyldChainedFixups->DataSize < sizeof (MACHO_DYLD_CHAINED_FIXUPS_HEADER)
-   || DyldChainedFixups->DataOffset < Context->LinkEditSegment->Segment64.FileOffset
-   || (Context->LinkEditSegment->Segment64.FileOffset + Context->LinkEditSegment->Segment64.FileSize)
-        - DyldChainedFixups->DataOffset < DyldChainedFixups->DataSize
-   || !OC_TYPE_ALIGNED (MACHO_DYLD_CHAINED_FIXUPS_HEADER, DyldChainedFixups->DataOffset)) {
+  if (  (DyldChainedFixups == NULL)
+     || (DyldChainedFixups->CommandSize != sizeof (*DyldChainedFixups))
+     || (DyldChainedFixups->DataSize < sizeof (MACHO_DYLD_CHAINED_FIXUPS_HEADER))
+     || (DyldChainedFixups->DataOffset < Context->LinkEditSegment->Segment64.FileOffset)
+     || ((Context->LinkEditSegment->Segment64.FileOffset + Context->LinkEditSegment->Segment64.FileSize)
+         - DyldChainedFixups->DataOffset < DyldChainedFixups->DataSize)
+     || !OC_TYPE_ALIGNED (MACHO_DYLD_CHAINED_FIXUPS_HEADER, DyldChainedFixups->DataOffset))
+  {
     DEBUG ((DEBUG_WARN, "ChainedFixups insane\n"));
     return EFI_UNSUPPORTED;
   }
 
-  DyldChainedFixupsHdr = (CONST MACHO_DYLD_CHAINED_FIXUPS_HEADER *) (VOID *) (
-    Context->Prelinked + DyldChainedFixups->DataOffset
-    );
+  DyldChainedFixupsHdr = (CONST MACHO_DYLD_CHAINED_FIXUPS_HEADER *)(VOID *)(
+                                                                            Context->Prelinked + DyldChainedFixups->DataOffset
+                                                                            );
   if (DyldChainedFixupsHdr->FixupsVersion != 0) {
     DEBUG ((DEBUG_WARN, "Unrecognised version\n"));
   }
@@ -354,24 +358,25 @@ KcInitKextFixupChains (
     "The subtraction below is unsafe."
     );
 
-  if (DyldChainedFixupsHdr->StartsOffset < sizeof (MACHO_DYLD_CHAINED_FIXUPS_HEADER)
-   || DyldChainedFixupsHdr->StartsOffset > DyldChainedFixups->DataSize - sizeof (MACH_DYLD_CHAINED_STARTS_IN_IMAGE)
-   || !OC_TYPE_ALIGNED (MACH_DYLD_CHAINED_STARTS_IN_IMAGE, DyldChainedFixupsHdr->StartsOffset)) {
-     DEBUG ((DEBUG_WARN, "ChainedFixupsHdr insane\n"));
-     return EFI_UNSUPPORTED;
+  if (  (DyldChainedFixupsHdr->StartsOffset < sizeof (MACHO_DYLD_CHAINED_FIXUPS_HEADER))
+     || (DyldChainedFixupsHdr->StartsOffset > DyldChainedFixups->DataSize - sizeof (MACH_DYLD_CHAINED_STARTS_IN_IMAGE))
+     || !OC_TYPE_ALIGNED (MACH_DYLD_CHAINED_STARTS_IN_IMAGE, DyldChainedFixupsHdr->StartsOffset))
+  {
+    DEBUG ((DEBUG_WARN, "ChainedFixupsHdr insane\n"));
+    return EFI_UNSUPPORTED;
   }
 
-  DyldChainedStarts = (MACH_DYLD_CHAINED_STARTS_IN_IMAGE *) (VOID *) (
-    (UINTN) DyldChainedFixupsHdr + DyldChainedFixupsHdr->StartsOffset
-    );
+  DyldChainedStarts = (MACH_DYLD_CHAINED_STARTS_IN_IMAGE *)(VOID *)(
+                                                                    (UINTN)DyldChainedFixupsHdr + DyldChainedFixupsHdr->StartsOffset
+                                                                    );
 
   Result = OcOverflowMulAddU32 (
-    DyldChainedStarts->NumSegments,
-    sizeof (*DyldChainedStarts->SegInfoOffset),
-    sizeof (*DyldChainedStarts),
-    &DyldChainedStartsSize
-    );
-  if (Result || DyldChainedStartsSize > DyldChainedFixups->DataSize - DyldChainedFixupsHdr->StartsOffset) {
+             DyldChainedStarts->NumSegments,
+             sizeof (*DyldChainedStarts->SegInfoOffset),
+             sizeof (*DyldChainedStarts),
+             &DyldChainedStartsSize
+             );
+  if (Result || (DyldChainedStartsSize > DyldChainedFixups->DataSize - DyldChainedFixupsHdr->StartsOffset)) {
     DEBUG ((DEBUG_WARN, "DyldChainedFixups insane\n"));
     return EFI_UNSUPPORTED;
   }
@@ -387,25 +392,25 @@ KcInitKextFixupChains (
     return EFI_UNSUPPORTED;
   }
 
-  ASSERT ((UINTN) Context->KextsFixupChains > (UINTN) DyldChainedStarts);
-  DyldChainedStarts->SegInfoOffset[SegIndex] = (UINT32) (
-    (UINTN) Context->KextsFixupChains - (UINTN) DyldChainedStarts
-    );
+  ASSERT ((UINTN)Context->KextsFixupChains > (UINTN)DyldChainedStarts);
+  DyldChainedStarts->SegInfoOffset[SegIndex] = (UINT32)(
+                                                        (UINTN)Context->KextsFixupChains - (UINTN)DyldChainedStarts
+                                                        );
 
   Context->KextsFixupChains->Size            = SegChainSize;
   Context->KextsFixupChains->PageSize        = MACHO_PAGE_SIZE;
   Context->KextsFixupChains->PointerFormat   = MACH_DYLD_CHAINED_PTR_X86_64_KERNEL_CACHE;
   Context->KextsFixupChains->SegmentOffset   = Context->KextsVmAddress - Context->VirtualBase;
   Context->KextsFixupChains->MaxValidPointer = 0;
-  Context->KextsFixupChains->PageCount       = (UINT16) (ReservedSize / MACHO_PAGE_SIZE);
+  Context->KextsFixupChains->PageCount       = (UINT16)(ReservedSize / MACHO_PAGE_SIZE);
   //
   // Initialise all pages with no associated fixups.
   // Sets all PageStarts to MACH_DYLD_CHAINED_PTR_START_NONE.
   //
   SetMem (
     Context->KextsFixupChains->PageStart,
-    (UINT32) Context->KextsFixupChains->PageCount
-      * sizeof (Context->KextsFixupChains->PageStart[0]),
+    (UINT32)Context->KextsFixupChains->PageCount
+    * sizeof (Context->KextsFixupChains->PageStart[0]),
     0xFF
     );
   return EFI_SUCCESS;
@@ -430,23 +435,23 @@ InternalKcConvertRelocToFixup (
   IN     UINT64                      RelocBase
   )
 {
-  UINT8                                        *SegmentData;
-  UINT8                                        *SegmentPageData;
+  UINT8  *SegmentData;
+  UINT8  *SegmentPageData;
 
-  UINT64                                       RelocAddress;
-  UINT32                                       RelocOffsetInSeg;
-  VOID                                         *RelocDest;
+  UINT64  RelocAddress;
+  UINT32  RelocOffsetInSeg;
+  VOID    *RelocDest;
 
-  UINT16                                       NewFixupPage;
-  UINT16                                       NewFixupPageOffset;
-  MACH_DYLD_CHAINED_PTR_64_KERNEL_CACHE_REBASE NewFixup;
+  UINT16                                        NewFixupPage;
+  UINT16                                        NewFixupPageOffset;
+  MACH_DYLD_CHAINED_PTR_64_KERNEL_CACHE_REBASE  NewFixup;
 
-  UINT16                                       IterFixupPageOffset;
-  VOID                                         *IterFixupData;
-  MACH_DYLD_CHAINED_PTR_64_KERNEL_CACHE_REBASE IterFixup;
-  UINT16                                       NextIterFixupPageOffset;
+  UINT16                                        IterFixupPageOffset;
+  VOID                                          *IterFixupData;
+  MACH_DYLD_CHAINED_PTR_64_KERNEL_CACHE_REBASE  IterFixup;
+  UINT16                                        NextIterFixupPageOffset;
 
-  UINT16                                       FixupDelta;
+  UINT16  FixupDelta;
 
   ASSERT (Context != NULL);
   ASSERT (MachContext != NULL);
@@ -458,8 +463,8 @@ InternalKcConvertRelocToFixup (
   // The entire KEXT and thus its relocations must be in Segment.
   // Mach-O images are limited to 4 GB size by OcMachoLib, so the cast is safe.
   //
-  RelocAddress     = RelocBase + (UINT32) RelocInfo->Address;
-  RelocOffsetInSeg = (UINT32) (RelocAddress - Context->KextsVmAddress);
+  RelocAddress     = RelocBase + (UINT32)RelocInfo->Address;
+  RelocOffsetInSeg = (UINT32)(RelocAddress - Context->KextsVmAddress);
   //
   // For now we assume we prelinked already and the relocations are sane.
   //
@@ -485,8 +490,8 @@ InternalKcConvertRelocToFixup (
   //
   NewFixup.Target = ReadUnaligned64 (RelocDest) - KERNEL_FIXUP_OFFSET;
 
-  NewFixupPage       = (UINT16) (RelocOffsetInSeg / MACHO_PAGE_SIZE);
-  NewFixupPageOffset = (UINT16) (RelocOffsetInSeg % MACHO_PAGE_SIZE);
+  NewFixupPage       = (UINT16)(RelocOffsetInSeg / MACHO_PAGE_SIZE);
+  NewFixupPageOffset = (UINT16)(RelocOffsetInSeg % MACHO_PAGE_SIZE);
 
   IterFixupPageOffset = Context->KextsFixupChains->PageStart[NewFixupPage];
 
@@ -502,7 +507,7 @@ InternalKcConvertRelocToFixup (
     //
     // RelocInfo preceeds the first fixup of the page - prepend the new fixup.
     //
-    NewFixup.Next = IterFixupPageOffset - NewFixupPageOffset;
+    NewFixup.Next                                      = IterFixupPageOffset - NewFixupPageOffset;
     Context->KextsFixupChains->PageStart[NewFixupPage] = NewFixupPageOffset;
   } else {
     SegmentPageData = SegmentData + NewFixupPage * MACHO_PAGE_SIZE;
@@ -517,7 +522,7 @@ InternalKcConvertRelocToFixup (
       IterFixupData       = SegmentPageData + IterFixupPageOffset;
 
       CopyMem (&IterFixup, IterFixupData, sizeof (IterFixup));
-      NextIterFixupPageOffset = (UINT16) (IterFixupPageOffset + IterFixup.Next);
+      NextIterFixupPageOffset = (UINT16)(IterFixupPageOffset + IterFixup.Next);
     } while (NextIterFixupPageOffset < NewFixupPageOffset && IterFixup.Next != 0);
 
     FixupDelta = NewFixupPageOffset - IterFixupPageOffset;
@@ -531,6 +536,7 @@ InternalKcConvertRelocToFixup (
     } else {
       NewFixup.Next = 0;
     }
+
     //
     // The last fixup preceeding RelocInfo must point to our new fixup.
     //
@@ -555,11 +561,11 @@ KcKextIndexFixups (
   IN     OC_MACHO_CONTEXT   *MachContext
   )
 {
-  CONST MACH_DYSYMTAB_COMMAND   *DySymtab;
-  CONST MACH_SEGMENT_COMMAND_64 *FirstSegment;
-  MACH_HEADER_64                *MachHeader;
-  CONST MACH_RELOCATION_INFO    *Relocations;
-  UINT32                        RelocIndex;
+  CONST MACH_DYSYMTAB_COMMAND    *DySymtab;
+  CONST MACH_SEGMENT_COMMAND_64  *FirstSegment;
+  MACH_HEADER_64                 *MachHeader;
+  CONST MACH_RELOCATION_INFO     *Relocations;
+  UINT32                         RelocIndex;
 
   ASSERT (Context != NULL);
   ASSERT (MachContext != NULL);
@@ -578,11 +584,11 @@ KcKextIndexFixups (
   // re-initialisation in mind. We really don't want to sanitise everything
   // again, so avoid the dedicated API for now.
   //
-  DySymtab = (MACH_DYSYMTAB_COMMAND *) MachoGetNextCommand (
-    MachContext,
-    MACH_LOAD_COMMAND_DYSYMTAB,
-    NULL
-    );
+  DySymtab = (MACH_DYSYMTAB_COMMAND *)MachoGetNextCommand (
+                                        MachContext,
+                                        MACH_LOAD_COMMAND_DYSYMTAB,
+                                        NULL
+                                        );
   //
   // If DYSYMTAB does not exist, the KEXT must have already not been flagged for
   // DYLD linkage as otherwise prelinking would have failed.
@@ -610,9 +616,9 @@ KcKextIndexFixups (
   //
   // Convert all relocations to fixups.
   //
-  Relocations = (MACH_RELOCATION_INFO *) (
-    (UINTN) MachHeader + DySymtab->LocalRelocationsOffset
-    );
+  Relocations = (MACH_RELOCATION_INFO *)(
+                                         (UINTN)MachHeader + DySymtab->LocalRelocationsOffset
+                                         );
 
   DEBUG ((
     DEBUG_INFO,
@@ -637,8 +643,8 @@ KcGetKextSize (
   IN UINT64             SourceAddress
   )
 {
-  MACH_HEADER_64          *KcHeader;
-  MACH_SEGMENT_COMMAND_64 *Segment;
+  MACH_HEADER_64           *KcHeader;
+  MACH_SEGMENT_COMMAND_64  *Segment;
 
   ASSERT (Context != NULL);
   ASSERT (Context->IsKernelCollection);
@@ -649,13 +655,14 @@ KcGetKextSize (
   // Find the KC segment that contains the KEXT at SourceAddress.
   //
   for (
-    Segment = MachoGetNextSegment64 (&Context->PrelinkedMachContext, NULL);
-    Segment != NULL;
-    Segment = MachoGetNextSegment64 (&Context->PrelinkedMachContext, Segment)
-    )
+       Segment = MachoGetNextSegment64 (&Context->PrelinkedMachContext, NULL);
+       Segment != NULL;
+       Segment = MachoGetNextSegment64 (&Context->PrelinkedMachContext, Segment)
+       )
   {
-    if (SourceAddress >= Segment->VirtualAddress
-     && SourceAddress - Segment->VirtualAddress < Segment->Size) {
+    if (  (SourceAddress >= Segment->VirtualAddress)
+       && (SourceAddress - Segment->VirtualAddress < Segment->Size))
+    {
       //
       // Ensure SourceAddress lies in file memory.
       //
@@ -666,8 +673,8 @@ KcGetKextSize (
       //
       // All kexts in KC use joint __LINKEDIT with the kernel.
       //
-      return (UINT32) (Context->LinkEditSegment->Segment64.VirtualAddress
-        - SourceAddress + Context->LinkEditSegment->Segment64.Size);
+      return (UINT32)(Context->LinkEditSegment->Segment64.VirtualAddress
+                      - SourceAddress + Context->LinkEditSegment->Segment64.Size);
     }
   }
 
@@ -680,13 +687,13 @@ KcKextApplyFileDelta (
   IN     UINT32            Delta
   )
 {
-  MACH_HEADER_64          *KextHeader;
-  MACH_LOAD_COMMAND       *Command;
-  UINTN                   TopOfCommands;
-  MACH_SEGMENT_COMMAND_64 *Segment;
-  MACH_SYMTAB_COMMAND     *Symtab;
-  MACH_DYSYMTAB_COMMAND   *DySymtab;
-  UINT32                  SectIndex;
+  MACH_HEADER_64           *KextHeader;
+  MACH_LOAD_COMMAND        *Command;
+  UINTN                    TopOfCommands;
+  MACH_SEGMENT_COMMAND_64  *Segment;
+  MACH_SYMTAB_COMMAND      *Symtab;
+  MACH_DYSYMTAB_COMMAND    *DySymtab;
+  UINT32                   SectIndex;
 
   ASSERT (Context != NULL);
   ASSERT (Delta > 0);
@@ -694,22 +701,23 @@ KcKextApplyFileDelta (
   KextHeader = MachoGetMachHeader64 (Context);
   ASSERT (KextHeader != NULL);
 
-  TopOfCommands = ((UINTN) KextHeader->Commands + KextHeader->CommandsSize);
+  TopOfCommands = ((UINTN)KextHeader->Commands + KextHeader->CommandsSize);
   //
   // Iterate over all Load Commands to rebase them based on type.
   //
   for (
-    Command = KextHeader->Commands;
-    (UINTN) Command < TopOfCommands;
-    Command = NEXT_MACH_LOAD_COMMAND (Command)
-    ) {
+       Command = KextHeader->Commands;
+       (UINTN)Command < TopOfCommands;
+       Command = NEXT_MACH_LOAD_COMMAND (Command)
+       )
+  {
     switch (Command->CommandType) {
       case MACH_LOAD_COMMAND_SEGMENT_64:
         if (Command->CommandSize < sizeof (MACH_SEGMENT_COMMAND_64)) {
           return EFI_UNSUPPORTED;
         }
 
-        Segment = (MACH_SEGMENT_COMMAND_64 *) (VOID *) Command;
+        Segment = (MACH_SEGMENT_COMMAND_64 *)(VOID *)Command;
         //
         // Rebase the segment's sections.
         //
@@ -718,10 +726,11 @@ KcKextApplyFileDelta (
             Segment->Sections[SectIndex].Offset += Delta;
           }
         }
+
         //
         // Rebase the segment itself.
         //
-        if (Segment->FileOffset != 0 || Segment->FileSize != 0) {
+        if ((Segment->FileOffset != 0) || (Segment->FileSize != 0)) {
           Segment->FileOffset += Delta;
         }
 
@@ -732,7 +741,7 @@ KcKextApplyFileDelta (
           return EFI_UNSUPPORTED;
         }
 
-        Symtab = (MACH_SYMTAB_COMMAND *) (VOID *) Command;
+        Symtab = (MACH_SYMTAB_COMMAND *)(VOID *)Command;
         //
         // Rebase all SYMTAB offsets.
         //
@@ -751,13 +760,14 @@ KcKextApplyFileDelta (
           return EFI_UNSUPPORTED;
         }
 
-        DySymtab = (MACH_DYSYMTAB_COMMAND *) (VOID *) Command;
+        DySymtab = (MACH_DYSYMTAB_COMMAND *)(VOID *)Command;
         //
         // Rebase DYSYMTAB fields that make sense in a prelinked context.
         //
         if (DySymtab->IndirectSymbolsOffset != 0) {
           DySymtab->IndirectSymbolsOffset += Delta;
         }
+
         //
         // KC KEXTs use chained fixups indexed by the KC header.
         //
@@ -785,8 +795,8 @@ KcKextApplyFileDelta (
 
 UINT64
 KcFixupValue (
-  IN UINT64             Value,
-  IN CONST CHAR8        *Name OPTIONAL
+  IN UINT64       Value,
+  IN CONST CHAR8  *Name OPTIONAL
   )
 {
   MACH_DYLD_CHAINED_PTR_64_KERNEL_CACHE_REBASE  *Rebase;
@@ -797,21 +807,24 @@ KcFixupValue (
   // For now we will just detect them by the kernel address
   // as it is faster than compare Kext->Identifier and Context->IsKernelCollection.
   //
-  if ((Value & KERNEL_ADDRESS_MASK) != KERNEL_ADDRESS_BASE
-    && (Value & KERNEL_ADDRESS_MASK) != KERNEL_ADDRESS_KEXT) {
+  if (  ((Value & KERNEL_ADDRESS_MASK) != KERNEL_ADDRESS_BASE)
+     && ((Value & KERNEL_ADDRESS_MASK) != KERNEL_ADDRESS_KEXT))
+  {
     //
     // FIXME: This needs a bit more love with aliasing and alignment.
     // Some day, when Intel rewrites EDK II.
     //
-    Rebase = (MACH_DYLD_CHAINED_PTR_64_KERNEL_CACHE_REBASE *)(UINTN) &Value;
+    Rebase = (MACH_DYLD_CHAINED_PTR_64_KERNEL_CACHE_REBASE *)(UINTN)&Value;
     DEBUG_CODE_BEGIN ();
-    if (Rebase->CacheLevel != 0
-      || Rebase->Diversity != 0
-      || Rebase->AddrDiv != 0
-      || Rebase->Key != 0
-      || Rebase->IsAuth != 0) {
+    if (  (Rebase->CacheLevel != 0)
+       || (Rebase->Diversity != 0)
+       || (Rebase->AddrDiv != 0)
+       || (Rebase->Key != 0)
+       || (Rebase->IsAuth != 0))
+    {
       DEBUG ((DEBUG_INFO, "OCAK: Invalid fixup %Lx for %a\n", Value, Name != NULL ? Name : "<none>"));
     }
+
     DEBUG_CODE_END ();
 
     Value = Rebase->Target + KERNEL_FIXUP_OFFSET + KERNEL_ADDRESS_BASE;

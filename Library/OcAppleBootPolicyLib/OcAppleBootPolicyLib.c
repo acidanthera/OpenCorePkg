@@ -35,16 +35,16 @@
 #include <Library/UefiBootServicesTableLib.h>
 
 typedef struct {
-  EFI_HANDLE             Handle;
-  GUID                   ContainerGuid;
-  GUID                   VolumeGuid;
-  APPLE_APFS_VOLUME_ROLE VolumeRole;
+  EFI_HANDLE                Handle;
+  GUID                      ContainerGuid;
+  GUID                      VolumeGuid;
+  APPLE_APFS_VOLUME_ROLE    VolumeRole;
 } APFS_VOLUME_INFO;
 
 typedef struct {
-  EFI_HANDLE        Handle;
-  CHAR16            *VolumeDirName;
-  EFI_FILE_PROTOCOL *Root;
+  EFI_HANDLE           Handle;
+  CHAR16               *VolumeDirName;
+  EFI_FILE_PROTOCOL    *Root;
 } APFS_VOLUME_ROOT;
 
 ///
@@ -71,16 +71,16 @@ typedef struct {
 /// Linux and related entries are not present here, because they have fine working
 /// software for boot management and do not use BOOTx64.efi in the first place.
 ///
-GLOBAL_REMOVE_IF_UNREFERENCED CONST CHAR16 *gAppleBootPolicyPredefinedPaths[] = {
+GLOBAL_REMOVE_IF_UNREFERENCED CONST CHAR16  *gAppleBootPolicyPredefinedPaths[] = {
   APPLE_BOOTER_DEFAULT_FILE_NAME,
   MS_BOOTER_DEFAULT_FILE_NAME,
   EFI_REMOVABLE_MEDIA_FILE_NAME
 };
 
-GLOBAL_REMOVE_IF_UNREFERENCED CONST UINTN gAppleBootPolicyNumPredefinedPaths =
+GLOBAL_REMOVE_IF_UNREFERENCED CONST UINTN  gAppleBootPolicyNumPredefinedPaths =
   ARRAY_SIZE (gAppleBootPolicyPredefinedPaths);
 
-GLOBAL_REMOVE_IF_UNREFERENCED CONST UINTN gAppleBootPolicyCoreNumPredefinedPaths = 2;
+GLOBAL_REMOVE_IF_UNREFERENCED CONST UINTN  gAppleBootPolicyCoreNumPredefinedPaths = 2;
 
 EFI_STATUS
 EFIAPI
@@ -128,7 +128,7 @@ BootPolicyGetAllApfsRecoveryFilePath (
 ///
 /// The APPLE_BOOT_POLICY_PROTOCOL instance to get installed.
 ///
-STATIC APPLE_BOOT_POLICY_PROTOCOL mAppleBootPolicyProtocol = {
+STATIC APPLE_BOOT_POLICY_PROTOCOL  mAppleBootPolicyProtocol = {
   APPLE_BOOT_POLICY_PROTOCOL_REVISION,
   BootPolicyGetBootFile,
   BootPolicyGetBootFileEx,
@@ -153,16 +153,16 @@ InternalFileExists (
   IN CONST CHAR16     *FileName
   )
 {
-  EFI_STATUS      Status;
-  EFI_FILE_HANDLE FileHandle;
+  EFI_STATUS       Status;
+  EFI_FILE_HANDLE  FileHandle;
 
   Status = OcSafeFileOpen (
-    Root,
-    &FileHandle,
-    FileName,
-    EFI_FILE_MODE_READ,
-    0
-    );
+             Root,
+             &FileHandle,
+             FileName,
+             EFI_FILE_MODE_READ,
+             0
+             );
 
   if (!EFI_ERROR (Status)) {
     FileHandle->Close (FileHandle);
@@ -180,17 +180,17 @@ InternalGetApfsSpecialFileInfo (
   IN OUT APPLE_APFS_CONTAINER_INFO  **ContainerInfo OPTIONAL
   )
 {
-  if (ContainerInfo == NULL && VolumeInfo == NULL) {
+  if ((ContainerInfo == NULL) && (VolumeInfo == NULL)) {
     return EFI_INVALID_PARAMETER;
   }
 
   if (VolumeInfo != NULL) {
     *VolumeInfo = OcGetFileInfo (
-      Root,
-      &gAppleApfsVolumeInfoGuid,
-      sizeof (**VolumeInfo),
-      NULL
-      );
+                    Root,
+                    &gAppleApfsVolumeInfoGuid,
+                    sizeof (**VolumeInfo),
+                    NULL
+                    );
 
     if (*VolumeInfo == NULL) {
       DEBUG ((DEBUG_VERBOSE, "OCBP: APFS Volume Info is missing\n"));
@@ -209,17 +209,18 @@ InternalGetApfsSpecialFileInfo (
 
   if (ContainerInfo != NULL) {
     *ContainerInfo = OcGetFileInfo (
-      Root,
-      &gAppleApfsContainerInfoGuid,
-      sizeof (**ContainerInfo),
-      NULL
-      );
+                       Root,
+                       &gAppleApfsContainerInfoGuid,
+                       sizeof (**ContainerInfo),
+                       NULL
+                       );
 
     if (*ContainerInfo == NULL) {
       DEBUG ((DEBUG_BULK_INFO, "OCBP: APFS Container Info is missing\n"));
       if (VolumeInfo != NULL) {
         FreePool (*VolumeInfo);
       }
+
       return EFI_NOT_FOUND;
     }
 
@@ -244,19 +245,19 @@ InternalGetBooterFromBlessedSystemFilePath (
 {
   UINTN  FilePathSize;
 
-  *FilePath = (EFI_DEVICE_PATH_PROTOCOL *) OcGetFileInfo (
-                Root,
-                &gAppleBlessedSystemFileInfoGuid,
-                sizeof (EFI_DEVICE_PATH_PROTOCOL),
-                &FilePathSize
-                );
+  *FilePath = (EFI_DEVICE_PATH_PROTOCOL *)OcGetFileInfo (
+                                            Root,
+                                            &gAppleBlessedSystemFileInfoGuid,
+                                            sizeof (EFI_DEVICE_PATH_PROTOCOL),
+                                            &FilePathSize
+                                            );
 
   if (*FilePath == NULL) {
     DEBUG ((DEBUG_BULK_INFO, "OCBP: Blessed file is missing\n"));
     return EFI_NOT_FOUND;
   }
 
-  DebugPrintHexDump (DEBUG_BULK_INFO, "OCBP: BlessedFileHEX", (UINT8 *) *FilePath, FilePathSize);
+  DebugPrintHexDump (DEBUG_BULK_INFO, "OCBP: BlessedFileHEX", (UINT8 *)*FilePath, FilePathSize);
 
   if (!IsDevicePathValid (*FilePath, FilePathSize)) {
     DEBUG ((DEBUG_BULK_INFO, "OCBP: Blessed file is invalid\n"));
@@ -280,7 +281,7 @@ InternalGetBooterFromBlessedSystemFolderPath (
   OUT EFI_DEVICE_PATH_PROTOCOL  **FilePath
   )
 {
-  EFI_STATUS                Status;
+  EFI_STATUS  Status;
 
   EFI_DEVICE_PATH_PROTOCOL  *DevicePath;
   EFI_DEVICE_PATH_PROTOCOL  *DevicePathWalker;
@@ -292,19 +293,19 @@ InternalGetBooterFromBlessedSystemFolderPath (
 
   Status = EFI_NOT_FOUND;
 
-  DevicePath = (EFI_DEVICE_PATH_PROTOCOL *) OcGetFileInfo (
-                  Root,
-                  &gAppleBlessedSystemFolderInfoGuid,
-                  sizeof (EFI_DEVICE_PATH_PROTOCOL),
-                  &DevicePathSize
-                  );
+  DevicePath = (EFI_DEVICE_PATH_PROTOCOL *)OcGetFileInfo (
+                                             Root,
+                                             &gAppleBlessedSystemFolderInfoGuid,
+                                             sizeof (EFI_DEVICE_PATH_PROTOCOL),
+                                             &DevicePathSize
+                                             );
 
   if (DevicePath == NULL) {
     DEBUG ((DEBUG_BULK_INFO, "OCBP: Blessed folder is missing\n"));
     return Status;
   }
 
-  DebugPrintHexDump (DEBUG_BULK_INFO, "OCBP: BlessedFolderHEX", (UINT8 *) DevicePath, DevicePathSize);
+  DebugPrintHexDump (DEBUG_BULK_INFO, "OCBP: BlessedFolderHEX", (UINT8 *)DevicePath, DevicePathSize);
 
   if (!IsDevicePathValid (DevicePath, DevicePathSize)) {
     DEBUG ((DEBUG_BULK_INFO, "OCBP: Blessed folder is invalid\n"));
@@ -317,10 +318,10 @@ InternalGetBooterFromBlessedSystemFolderPath (
   DevicePathWalker = DevicePath;
 
   while (!IsDevicePathEnd (DevicePathWalker)) {
-    if ((DevicePathType (DevicePathWalker) == MEDIA_DEVICE_PATH)
-     && (DevicePathSubType (DevicePathWalker) == MEDIA_FILEPATH_DP)) {
-
-      FolderDevicePath  = (FILEPATH_DEVICE_PATH *) DevicePathWalker;
+    if (  (DevicePathType (DevicePathWalker) == MEDIA_DEVICE_PATH)
+       && (DevicePathSubType (DevicePathWalker) == MEDIA_FILEPATH_DP))
+    {
+      FolderDevicePath  = (FILEPATH_DEVICE_PATH *)DevicePathWalker;
       BooterDirPathSize = OcFileDevicePathNameSize (FolderDevicePath);
       BooterPathSize    = BooterDirPathSize + L_STR_SIZE (APPLE_BOOTER_ROOT_FILE_NAME) - sizeof (CHAR16);
       BooterPath        = AllocateZeroPool (BooterPathSize);
@@ -385,10 +386,11 @@ OcGetBooterFromPredefinedPathList (
     if (Prefix != NULL) {
       ASSERT (PathName[0] == L'\\');
     }
+
     Status = InternalFileExists (
-      Root,
-      Prefix != NULL ? &PathName[1] : &PathName[0]
-      );
+               Root,
+               Prefix != NULL ? &PathName[1] : &PathName[0]
+               );
     if (!EFI_ERROR (Status)) {
       DEBUG ((
         DEBUG_BULK_INFO,
@@ -415,6 +417,7 @@ OcGetBooterFromPredefinedPathList (
           *DevicePath = FileDevicePath (Device, PathName);
         }
       }
+
       ASSERT (DevicePath == NULL || *DevicePath != NULL);
       return EFI_SUCCESS;
     } else {
@@ -440,19 +443,19 @@ InternalGetApfsVolumeInfo (
   OUT APPLE_APFS_VOLUME_ROLE  *VolumeRole
   )
 {
-  EFI_STATUS                      Status;
+  EFI_STATUS  Status;
 
-  EFI_FILE_PROTOCOL               *Root;
-  EFI_SIMPLE_FILE_SYSTEM_PROTOCOL *FileSystem;
-  APPLE_APFS_CONTAINER_INFO       *ApfsContainerInfo;
-  APPLE_APFS_VOLUME_INFO          *ApfsVolumeInfo;
+  EFI_FILE_PROTOCOL                *Root;
+  EFI_SIMPLE_FILE_SYSTEM_PROTOCOL  *FileSystem;
+  APPLE_APFS_CONTAINER_INFO        *ApfsContainerInfo;
+  APPLE_APFS_VOLUME_INFO           *ApfsVolumeInfo;
 
   Root = NULL;
 
   Status = gBS->HandleProtocol (
                   Device,
                   &gEfiSimpleFileSystemProtocolGuid,
-                  (VOID **) &FileSystem
+                  (VOID **)&FileSystem
                   );
   if (EFI_ERROR (Status)) {
     return Status;
@@ -492,25 +495,25 @@ InternalGetApfsVolumeInfo (
 STATIC
 EFI_STATUS
 InternalGetBooterFromApfsVolumePredefinedPathList (
-  IN     EFI_HANDLE                      Device,
-  IN     EFI_FILE_PROTOCOL               *PrebootRoot,
-  IN     CHAR16                          *VolumeDirectoryName,
-  IN     CONST CHAR16                    **PredefinedPaths,
-  IN     UINTN                           NumPredefinedPaths,
-  IN OUT EFI_DEVICE_PATH_PROTOCOL        **DevicePath  OPTIONAL
+  IN     EFI_HANDLE                Device,
+  IN     EFI_FILE_PROTOCOL         *PrebootRoot,
+  IN     CHAR16                    *VolumeDirectoryName,
+  IN     CONST CHAR16              **PredefinedPaths,
+  IN     UINTN                     NumPredefinedPaths,
+  IN OUT EFI_DEVICE_PATH_PROTOCOL  **DevicePath  OPTIONAL
   )
 {
-  EFI_STATUS        Status;
-  EFI_FILE_PROTOCOL *VolumeDirectoryHandle;
-  EFI_FILE_INFO     *VolumeDirectoryInfo;
+  EFI_STATUS         Status;
+  EFI_FILE_PROTOCOL  *VolumeDirectoryHandle;
+  EFI_FILE_INFO      *VolumeDirectoryInfo;
 
   Status = OcSafeFileOpen (
-    PrebootRoot,
-    &VolumeDirectoryHandle,
-    VolumeDirectoryName,
-    EFI_FILE_MODE_READ,
-    0
-    );
+             PrebootRoot,
+             &VolumeDirectoryHandle,
+             VolumeDirectoryName,
+             EFI_FILE_MODE_READ,
+             0
+             );
 
   if (EFI_ERROR (Status)) {
     DEBUG ((DEBUG_BULK_INFO, "OCBP: Missing partition %s on preboot - %r\n", VolumeDirectoryName, Status));
@@ -543,13 +546,13 @@ InternalGetBooterFromApfsVolumePredefinedPathList (
 
   if ((VolumeDirectoryInfo->Attribute & EFI_FILE_DIRECTORY) != 0) {
     Status = OcGetBooterFromPredefinedPathList (
-      Device,
-      VolumeDirectoryHandle,
-      PredefinedPaths,
-      NumPredefinedPaths,
-      DevicePath,
-      VolumeDirectoryName
-      );
+               Device,
+               VolumeDirectoryHandle,
+               PredefinedPaths,
+               NumPredefinedPaths,
+               DevicePath,
+               VolumeDirectoryName
+               );
   }
 
   FreePool (VolumeDirectoryInfo);
@@ -567,43 +570,43 @@ InternalGetBooterFromApfsVolumePredefinedPathList (
 STATIC
 EFI_STATUS
 InternalGetBooterFromApfsPredefinedPathList (
-  IN  EFI_HANDLE                      Device,
-  IN  EFI_FILE_PROTOCOL               *PrebootRoot,
-  IN  CONST GUID                      *ContainerUuid,
-  IN  CONST CHAR16                    *VolumeUuid  OPTIONAL,
-  IN  CONST CHAR16                    **PredefinedPaths,
-  IN  UINTN                           NumPredefinedPaths,
-  OUT EFI_DEVICE_PATH_PROTOCOL        **DevicePath  OPTIONAL,
-  OUT EFI_HANDLE                      *VolumeHandle  OPTIONAL
+  IN  EFI_HANDLE                Device,
+  IN  EFI_FILE_PROTOCOL         *PrebootRoot,
+  IN  CONST GUID                *ContainerUuid,
+  IN  CONST CHAR16              *VolumeUuid  OPTIONAL,
+  IN  CONST CHAR16              **PredefinedPaths,
+  IN  UINTN                     NumPredefinedPaths,
+  OUT EFI_DEVICE_PATH_PROTOCOL  **DevicePath  OPTIONAL,
+  OUT EFI_HANDLE                *VolumeHandle  OPTIONAL
   )
 {
-  EFI_STATUS                      Status;
-  EFI_STATUS                      TmpStatus;
+  EFI_STATUS  Status;
+  EFI_STATUS  TmpStatus;
 
-  UINTN                           NumberOfHandles;
-  EFI_HANDLE                      *HandleBuffer;
-  UINTN                           Index;
-  EFI_SIMPLE_FILE_SYSTEM_PROTOCOL *FileSystem;
-  EFI_FILE_PROTOCOL               *HandleRoot;
-  APPLE_APFS_CONTAINER_INFO       *ContainerInfo;
-  APPLE_APFS_VOLUME_INFO          *VolumeInfo;
-  CHAR16                          VolumeDirectoryName[GUID_STRING_LENGTH+1];
-  EFI_DEVICE_PATH_PROTOCOL        *VolumeDevPath;
-  EFI_DEVICE_PATH_PROTOCOL        *TempDevPath;
-  BOOLEAN                         ContainerMatch;
+  UINTN                            NumberOfHandles;
+  EFI_HANDLE                       *HandleBuffer;
+  UINTN                            Index;
+  EFI_SIMPLE_FILE_SYSTEM_PROTOCOL  *FileSystem;
+  EFI_FILE_PROTOCOL                *HandleRoot;
+  APPLE_APFS_CONTAINER_INFO        *ContainerInfo;
+  APPLE_APFS_VOLUME_INFO           *VolumeInfo;
+  CHAR16                           VolumeDirectoryName[GUID_STRING_LENGTH+1];
+  EFI_DEVICE_PATH_PROTOCOL         *VolumeDevPath;
+  EFI_DEVICE_PATH_PROTOCOL         *TempDevPath;
+  BOOLEAN                          ContainerMatch;
 
   ASSERT (VolumeUuid == NULL || (VolumeUuid != NULL && VolumeHandle != NULL && *VolumeHandle == NULL));
 
   NumberOfHandles = 0;
-  Status =  gBS->LocateHandleBuffer (
-                   ByProtocol,
-                   &gEfiSimpleFileSystemProtocolGuid,
-                   NULL,
-                   &NumberOfHandles,
-                   &HandleBuffer
-                   );
+  Status          =  gBS->LocateHandleBuffer (
+                            ByProtocol,
+                            &gEfiSimpleFileSystemProtocolGuid,
+                            NULL,
+                            &NumberOfHandles,
+                            &HandleBuffer
+                            );
 
-  DEBUG ((DEBUG_BULK_INFO, "OCBP: %u filesystems for APFS - %r\n", (UINT32) NumberOfHandles, Status));
+  DEBUG ((DEBUG_BULK_INFO, "OCBP: %u filesystems for APFS - %r\n", (UINT32)NumberOfHandles, Status));
 
   if (EFI_ERROR (Status)) {
     return Status;
@@ -615,14 +618,14 @@ InternalGetBooterFromApfsPredefinedPathList (
     TmpStatus = gBS->HandleProtocol (
                        HandleBuffer[Index],
                        &gEfiSimpleFileSystemProtocolGuid,
-                       (VOID **) &FileSystem
+                       (VOID **)&FileSystem
                        );
     if (EFI_ERROR (TmpStatus)) {
       DEBUG ((
         DEBUG_BULK_INFO,
         "OCBP: Borked APFS filesystem %u of %u - %r\n",
-        (UINT32) (Index + 1),
-        (UINT32) NumberOfHandles,
+        (UINT32)(Index + 1),
+        (UINT32)NumberOfHandles,
         TmpStatus
         ));
       continue;
@@ -633,8 +636,8 @@ InternalGetBooterFromApfsPredefinedPathList (
       DEBUG ((
         DEBUG_BULK_INFO,
         "OCBP: Borked APFS root volume %u of %u - %r\n",
-        (UINT32) (Index + 1),
-        (UINT32) NumberOfHandles,
+        (UINT32)(Index + 1),
+        (UINT32)NumberOfHandles,
         TmpStatus
         ));
       continue;
@@ -648,8 +651,8 @@ InternalGetBooterFromApfsPredefinedPathList (
       DEBUG ((
         DEBUG_VERBOSE,
         "OCBP: No APFS info %u of %u - %r\n",
-        (UINT32) (Index + 1),
-        (UINT32) NumberOfHandles,
+        (UINT32)(Index + 1),
+        (UINT32)NumberOfHandles,
         TmpStatus
         ));
       continue;
@@ -662,8 +665,8 @@ InternalGetBooterFromApfsPredefinedPathList (
       "OCBP: APFS match container %g vs %g for %u of %u - %d\n",
       &ContainerInfo->Uuid,
       ContainerUuid,
-      (UINT32) (Index + 1),
-      (UINT32) NumberOfHandles,
+      (UINT32)(Index + 1),
+      (UINT32)NumberOfHandles,
       ContainerMatch
       ));
 
@@ -683,25 +686,25 @@ InternalGetBooterFromApfsPredefinedPathList (
     FreePool (ContainerInfo);
     FreePool (VolumeInfo);
 
-    if (VolumeUuid != NULL && StrStr (VolumeUuid, VolumeDirectoryName) != NULL) {
+    if ((VolumeUuid != NULL) && (StrStr (VolumeUuid, VolumeDirectoryName) != NULL)) {
       *VolumeHandle = HandleBuffer[Index];
     }
 
     TmpStatus = InternalGetBooterFromApfsVolumePredefinedPathList (
-      Device,
-      PrebootRoot,
-      VolumeDirectoryName,
-      PredefinedPaths,
-      NumPredefinedPaths,
-      DevicePath != NULL ? &VolumeDevPath : NULL
-      );
+                  Device,
+                  PrebootRoot,
+                  VolumeDirectoryName,
+                  PredefinedPaths,
+                  NumPredefinedPaths,
+                  DevicePath != NULL ? &VolumeDevPath : NULL
+                  );
 
     if (EFI_ERROR (TmpStatus)) {
       DEBUG ((
         DEBUG_BULK_INFO,
         "OCBP: No APFS booter %u of %u for %s - %r\n",
-        (UINT32) (Index + 1),
-        (UINT32) NumberOfHandles,
+        (UINT32)(Index + 1),
+        (UINT32)NumberOfHandles,
         VolumeDirectoryName,
         TmpStatus
         ));
@@ -711,8 +714,8 @@ InternalGetBooterFromApfsPredefinedPathList (
       DEBUG ((
         DEBUG_BULK_INFO,
         "OCBP: Found APFS booter %u of %u for %s (%p)\n",
-        (UINT32) (Index + 1),
-        (UINT32) NumberOfHandles,
+        (UINT32)(Index + 1),
+        (UINT32)NumberOfHandles,
         VolumeDirectoryName,
         DevicePath
         ));
@@ -750,22 +753,23 @@ InternalGetBootPathName (
   OUT CHAR16                    **BootPathName
   )
 {
-  UINTN                           Size;
-  CHAR16                          *PathName;
-  UINTN                           PathNameSize;
-  FILEPATH_DEVICE_PATH            *FilePath;
-  CHAR16                          *Slash;
-  UINTN                           Len;
-  CHAR16                          *FilePathName;
+  UINTN                 Size;
+  CHAR16                *PathName;
+  UINTN                 PathNameSize;
+  FILEPATH_DEVICE_PATH  *FilePath;
+  CHAR16                *Slash;
+  UINTN                 Len;
+  CHAR16                *FilePathName;
 
-  if ((DevicePathType (DevicePath) == MEDIA_DEVICE_PATH)
-   && (DevicePathSubType (DevicePath) == MEDIA_FILEPATH_DP)) {
-    FilePath = (FILEPATH_DEVICE_PATH *) DevicePath;
+  if (  (DevicePathType (DevicePath) == MEDIA_DEVICE_PATH)
+     && (DevicePathSubType (DevicePath) == MEDIA_FILEPATH_DP))
+  {
+    FilePath = (FILEPATH_DEVICE_PATH *)DevicePath;
 
     Size = OcFileDevicePathNameSize (FilePath);
 
     PathNameSize = Size + sizeof (CHAR16);
-    PathName = AllocateZeroPool (PathNameSize);
+    PathName     = AllocateZeroPool (PathNameSize);
 
     if (PathName == NULL) {
       return EFI_OUT_OF_RESOURCES;
@@ -804,14 +808,14 @@ InternalGetBootPathName (
 STATIC
 EFI_STATUS
 InternalGetApfsVolumeHandle (
-  IN  EFI_HANDLE                DeviceHandle,
-  IN  CHAR16                    *PathName,
-  IN  CONST CHAR16              **PredefinedPaths,
-  IN  UINTN                     NumPredefinedPaths,
-  OUT EFI_HANDLE                *ApfsVolumeHandle
+  IN  EFI_HANDLE    DeviceHandle,
+  IN  CHAR16        *PathName,
+  IN  CONST CHAR16  **PredefinedPaths,
+  IN  UINTN         NumPredefinedPaths,
+  OUT EFI_HANDLE    *ApfsVolumeHandle
   )
 {
-  EFI_STATUS                       Status;
+  EFI_STATUS  Status;
 
   EFI_SIMPLE_FILE_SYSTEM_PROTOCOL  *FileSystem;
   EFI_FILE_PROTOCOL                *Root;
@@ -831,7 +835,7 @@ InternalGetApfsVolumeHandle (
   Status = gBS->HandleProtocol (
                   DeviceHandle,
                   &gEfiSimpleFileSystemProtocolGuid,
-                  (VOID **) &FileSystem
+                  (VOID **)&FileSystem
                   );
 
   if (EFI_ERROR (Status)) {
@@ -849,15 +853,15 @@ InternalGetApfsVolumeHandle (
     // FIXME: ApfsVolumeHandle is only returned when a predefined path exists
     //
     Status = InternalGetBooterFromApfsPredefinedPathList (
-      DeviceHandle,
-      Root,
-      &ContainerInfo->Uuid,
-      FilePathName,
-      PredefinedPaths,
-      NumPredefinedPaths,
-      NULL,
-      ApfsVolumeHandle
-      );
+               DeviceHandle,
+               Root,
+               &ContainerInfo->Uuid,
+               FilePathName,
+               PredefinedPaths,
+               NumPredefinedPaths,
+               NULL,
+               ApfsVolumeHandle
+               );
 
     FreePool (ContainerInfo);
   }
@@ -875,21 +879,21 @@ OcBootPolicyGetBootFile (
   IN OUT EFI_DEVICE_PATH_PROTOCOL  **FilePath
   )
 {
-  EFI_STATUS                      Status;
+  EFI_STATUS  Status;
 
-  EFI_SIMPLE_FILE_SYSTEM_PROTOCOL *FileSystem;
-  EFI_FILE_PROTOCOL               *Root;
+  EFI_SIMPLE_FILE_SYSTEM_PROTOCOL  *FileSystem;
+  EFI_FILE_PROTOCOL                *Root;
 
   ASSERT (Device != NULL);
   ASSERT (FilePath != NULL);
 
   *FilePath = NULL;
-  Root = NULL;
+  Root      = NULL;
 
   Status = gBS->HandleProtocol (
                   Device,
                   &gEfiSimpleFileSystemProtocolGuid,
-                  (VOID **) &FileSystem
+                  (VOID **)&FileSystem
                   );
 
   if (EFI_ERROR (Status)) {
@@ -929,44 +933,44 @@ BootPolicyGetBootFile (
   IN OUT EFI_DEVICE_PATH_PROTOCOL  **FilePath
   )
 {
-  if (Device == NULL || FilePath == NULL) {
+  if ((Device == NULL) || (FilePath == NULL)) {
     return EFI_INVALID_PARAMETER;
   }
 
   return OcBootPolicyGetBootFile (
-    Device,
-    gAppleBootPolicyPredefinedPaths,
-    ARRAY_SIZE (gAppleBootPolicyPredefinedPaths),
-    FilePath
-    );
+           Device,
+           gAppleBootPolicyPredefinedPaths,
+           ARRAY_SIZE (gAppleBootPolicyPredefinedPaths),
+           FilePath
+           );
 }
 
 EFI_STATUS
 OcBootPolicyGetBootFileEx (
-  IN  EFI_HANDLE                      Device,
-  IN  CONST CHAR16                    **PredefinedPaths,
-  IN  UINTN                           NumPredefinedPaths,
-  OUT EFI_DEVICE_PATH_PROTOCOL        **FilePath
+  IN  EFI_HANDLE                Device,
+  IN  CONST CHAR16              **PredefinedPaths,
+  IN  UINTN                     NumPredefinedPaths,
+  OUT EFI_DEVICE_PATH_PROTOCOL  **FilePath
   )
 {
-  EFI_STATUS                      Status;
-  EFI_STATUS                      TmpStatus;
+  EFI_STATUS  Status;
+  EFI_STATUS  TmpStatus;
 
-  EFI_SIMPLE_FILE_SYSTEM_PROTOCOL *FileSystem;
-  EFI_FILE_PROTOCOL               *Root;
-  APPLE_APFS_CONTAINER_INFO       *ContainerInfo;
-  APPLE_APFS_VOLUME_INFO          *VolumeInfo;
+  EFI_SIMPLE_FILE_SYSTEM_PROTOCOL  *FileSystem;
+  EFI_FILE_PROTOCOL                *Root;
+  APPLE_APFS_CONTAINER_INFO        *ContainerInfo;
+  APPLE_APFS_VOLUME_INFO           *VolumeInfo;
 
   ASSERT (Device != NULL);
   ASSERT (FilePath != NULL);
 
   *FilePath = NULL;
-  Root = NULL;
+  Root      = NULL;
 
   Status = gBS->HandleProtocol (
                   Device,
                   &gEfiSimpleFileSystemProtocolGuid,
-                  (VOID **) &FileSystem
+                  (VOID **)&FileSystem
                   );
   if (EFI_ERROR (Status)) {
     DEBUG ((DEBUG_BULK_INFO, "OCBP: Missing filesystem - %r\n", Status));
@@ -1033,21 +1037,21 @@ OcBootPolicyGetBootFileEx (
 EFI_STATUS
 EFIAPI
 BootPolicyGetBootFileEx (
-  IN  EFI_HANDLE                      Device,
-  IN  BOOT_POLICY_ACTION              Action,
-  OUT EFI_DEVICE_PATH_PROTOCOL        **FilePath
+  IN  EFI_HANDLE                Device,
+  IN  BOOT_POLICY_ACTION        Action,
+  OUT EFI_DEVICE_PATH_PROTOCOL  **FilePath
   )
 {
-  if (Device == NULL || FilePath == NULL) {
+  if ((Device == NULL) || (FilePath == NULL)) {
     return EFI_INVALID_PARAMETER;
   }
 
   return OcBootPolicyGetBootFileEx (
-    Device,
-    gAppleBootPolicyPredefinedPaths,
-    ARRAY_SIZE (gAppleBootPolicyPredefinedPaths),
-    FilePath
-    );
+           Device,
+           gAppleBootPolicyPredefinedPaths,
+           ARRAY_SIZE (gAppleBootPolicyPredefinedPaths),
+           FilePath
+           );
 }
 
 EFI_STATUS
@@ -1057,14 +1061,14 @@ OcBootPolicyDevicePathToDirPath (
   OUT EFI_HANDLE                *Device
   )
 {
-  EFI_STATUS Status;
+  EFI_STATUS  Status;
 
   ASSERT (DevicePath != NULL);
   ASSERT (BootPathName != NULL);
   ASSERT (Device != NULL);
 
-  *BootPathName     = NULL;
-  *Device           = NULL;
+  *BootPathName = NULL;
+  *Device       = NULL;
 
   Status = gBS->LocateDevicePath (
                   &gEfiSimpleFileSystemProtocolGuid,
@@ -1094,7 +1098,7 @@ OcBootPolicyDevicePathToDirPathAndApfsHandle (
   OUT EFI_HANDLE                *ApfsVolumeHandle
   )
 {
-  EFI_STATUS Status;
+  EFI_STATUS  Status;
 
   ASSERT (DevicePath != NULL);
   ASSERT (BootPathName != NULL);
@@ -1102,10 +1106,10 @@ OcBootPolicyDevicePathToDirPathAndApfsHandle (
   ASSERT (ApfsVolumeHandle != NULL);
 
   Status = OcBootPolicyDevicePathToDirPath (
-    DevicePath,
-    BootPathName,
-    Device
-    );
+             DevicePath,
+             BootPathName,
+             Device
+             );
   if (EFI_ERROR (Status)) {
     return Status;
   }
@@ -1115,13 +1119,13 @@ OcBootPolicyDevicePathToDirPathAndApfsHandle (
   // may not exist.
   //
   *ApfsVolumeHandle = NULL;
-  (VOID) InternalGetApfsVolumeHandle (
-    *Device,
-    *BootPathName,
-    PredefinedPaths,
-    NumPredefinedPaths,
-    ApfsVolumeHandle
-    );
+  (VOID)InternalGetApfsVolumeHandle (
+          *Device,
+          *BootPathName,
+          PredefinedPaths,
+          NumPredefinedPaths,
+          ApfsVolumeHandle
+          );
 
   return EFI_SUCCESS;
 }
@@ -1135,23 +1139,24 @@ BootPolicyDevicePathToDirPath (
   OUT EFI_HANDLE                *ApfsVolumeHandle
   )
 {
-  EFI_STATUS Status;
+  EFI_STATUS  Status;
 
-  if (DevicePath       == NULL
-   || BootPathName     == NULL
-   || Device           == NULL
-   || ApfsVolumeHandle == NULL) {
+  if (  (DevicePath       == NULL)
+     || (BootPathName     == NULL)
+     || (Device           == NULL)
+     || (ApfsVolumeHandle == NULL))
+  {
     return EFI_INVALID_PARAMETER;
   }
 
   Status = OcBootPolicyDevicePathToDirPathAndApfsHandle (
-    DevicePath,
-    gAppleBootPolicyPredefinedPaths,
-    ARRAY_SIZE (gAppleBootPolicyPredefinedPaths),
-    BootPathName,
-    Device,
-    ApfsVolumeHandle
-    );
+             DevicePath,
+             gAppleBootPolicyPredefinedPaths,
+             ARRAY_SIZE (gAppleBootPolicyPredefinedPaths),
+             BootPathName,
+             Device,
+             ApfsVolumeHandle
+             );
   if (EFI_ERROR (Status)) {
     *BootPathName     = NULL;
     *Device           = NULL;
@@ -1173,34 +1178,34 @@ OcBootPolicyGetApfsRecoveryFilePath (
   OUT EFI_HANDLE                *DeviceHandle
   )
 {
-  EFI_STATUS                      Result;
+  EFI_STATUS  Result;
 
-  EFI_STATUS                      Status;
+  EFI_STATUS  Status;
 
-  CHAR16                          *BootPathName;
-  EFI_HANDLE                      Device;
-  EFI_HANDLE                      VolumeHandle;
+  CHAR16      *BootPathName;
+  EFI_HANDLE  Device;
+  EFI_HANDLE  VolumeHandle;
 
-  GUID                            ContainerGuid;
-  GUID                            VolumeGuid;
-  APPLE_APFS_VOLUME_ROLE          VolumeRole;
+  GUID                    ContainerGuid;
+  GUID                    VolumeGuid;
+  APPLE_APFS_VOLUME_ROLE  VolumeRole;
 
-  GUID                            ContainerGuid2;
-  GUID                            VolumeGuid2;
-  APPLE_APFS_VOLUME_ROLE          VolumeRole2;
+  GUID                    ContainerGuid2;
+  GUID                    VolumeGuid2;
+  APPLE_APFS_VOLUME_ROLE  VolumeRole2;
 
-  UINTN                           NoHandles;
-  EFI_HANDLE                      *HandleBuffer;
-  UINTN                           Index;
+  UINTN       NoHandles;
+  EFI_HANDLE  *HandleBuffer;
+  UINTN       Index;
 
-  EFI_SIMPLE_FILE_SYSTEM_PROTOCOL *FileSystem;
+  EFI_SIMPLE_FILE_SYSTEM_PROTOCOL  *FileSystem;
 
-  CHAR16                          *FullPathBuffer;
-  UINTN                           FullPathNameSize;
+  CHAR16  *FullPathBuffer;
+  UINTN   FullPathNameSize;
 
-  EFI_FILE_PROTOCOL               *NewHandle;
+  EFI_FILE_PROTOCOL  *NewHandle;
 
-  EFI_FILE_INFO                   *FileInfo;
+  EFI_FILE_INFO  *FileInfo;
 
   ASSERT (DevicePath != NULL);
   ASSERT (PathName != NULL);
@@ -1247,12 +1252,12 @@ OcBootPolicyGetApfsRecoveryFilePath (
   }
 
   Status = gBS->LocateHandleBuffer (
-            ByProtocol,
-            &gEfiSimpleFileSystemProtocolGuid,
-            NULL,
-            &NoHandles,
-            &HandleBuffer
-            );
+                  ByProtocol,
+                  &gEfiSimpleFileSystemProtocolGuid,
+                  NULL,
+                  &NoHandles,
+                  &HandleBuffer
+                  );
 
   if (EFI_ERROR (Status)) {
     DEBUG ((DEBUG_BULK_INFO, "OCBP: APFS recovery simple fs missing - %r\n", Status));
@@ -1276,25 +1281,26 @@ OcBootPolicyGetApfsRecoveryFilePath (
     DEBUG ((
       DEBUG_BULK_INFO,
       "OCBP: APFS recovery info %u/%u due to %g/%g/%X - %r\n",
-      (UINT32) Index,
-      (UINT32) NoHandles,
+      (UINT32)Index,
+      (UINT32)NoHandles,
       &ContainerGuid2,
       &ContainerGuid,
-      (UINT32) VolumeRole2,
+      (UINT32)VolumeRole2,
       Status
       ));
 
-    if (EFI_ERROR (Status)
-      || VolumeRole2 != APPLE_APFS_VOLUME_ROLE_RECOVERY
-      || !CompareGuid (&ContainerGuid2, &ContainerGuid)) {
+    if (  EFI_ERROR (Status)
+       || (VolumeRole2 != APPLE_APFS_VOLUME_ROLE_RECOVERY)
+       || !CompareGuid (&ContainerGuid2, &ContainerGuid))
+    {
       continue;
     }
 
     Status = gBS->HandleProtocol (
-              HandleBuffer[Index],
-              &gEfiSimpleFileSystemProtocolGuid,
-              (VOID **) &FileSystem
-              );
+                    HandleBuffer[Index],
+                    &gEfiSimpleFileSystemProtocolGuid,
+                    (VOID **)&FileSystem
+                    );
     if (EFI_ERROR (Status)) {
       continue;
     }
@@ -1326,12 +1332,12 @@ OcBootPolicyGetApfsRecoveryFilePath (
       );
 
     Status = OcSafeFileOpen (
-      *Root,
-      &NewHandle,
-      FullPathBuffer,
-      EFI_FILE_MODE_READ,
-      0
-      );
+               *Root,
+               &NewHandle,
+               FullPathBuffer,
+               EFI_FILE_MODE_READ,
+               0
+               );
 
     if (EFI_ERROR (Status)) {
       (*Root)->Close (*Root);
@@ -1350,7 +1356,7 @@ OcBootPolicyGetApfsRecoveryFilePath (
       if ((FileInfo->Attribute & EFI_FILE_DIRECTORY) != 0) {
         *FullPathName = FullPathBuffer;
         *DeviceHandle = HandleBuffer[Index];
-        Result = EFI_SUCCESS;
+        Result        = EFI_SUCCESS;
       }
 
       FreePool (FileInfo);
@@ -1382,26 +1388,27 @@ BootPolicyGetApfsRecoveryFilePath (
   OUT EFI_HANDLE                *DeviceHandle
   )
 {
-  if (DevicePath   == NULL
-   || PathName     == NULL
-   || FullPathName == NULL
-   || Reserved     == NULL
-   || Root         == NULL
-   || DeviceHandle == NULL) {
+  if (  (DevicePath   == NULL)
+     || (PathName     == NULL)
+     || (FullPathName == NULL)
+     || (Reserved     == NULL)
+     || (Root         == NULL)
+     || (DeviceHandle == NULL))
+  {
     return EFI_INVALID_PARAMETER;
   }
 
   *Reserved = NULL;
 
   return OcBootPolicyGetApfsRecoveryFilePath (
-    DevicePath,
-    PathName,
-    gAppleBootPolicyPredefinedPaths,
-    ARRAY_SIZE (gAppleBootPolicyPredefinedPaths),
-    FullPathName,
-    Root,
-    DeviceHandle
-    );
+           DevicePath,
+           PathName,
+           gAppleBootPolicyPredefinedPaths,
+           ARRAY_SIZE (gAppleBootPolicyPredefinedPaths),
+           FullPathName,
+           Root,
+           DeviceHandle
+           );
 }
 
 EFI_STATUS
@@ -1411,25 +1418,25 @@ OcBootPolicyGetAllApfsRecoveryFilePath (
   OUT UINTN       *NumberOfEntries
   )
 {
-  EFI_STATUS                      Status;
+  EFI_STATUS  Status;
 
-  UINTN                           NumberOfHandles;
-  EFI_HANDLE                      *HandleBuffer;
-  APFS_VOLUME_INFO                *VolumeInfo;
-  GUID                            *ContainerGuids;
-  UINTN                           NumberOfContainers;
-  UINTN                           NumberOfVolumeInfos;
-  UINTN                           Index;
-  UINTN                           Index2;
-  UINTN                           Index3;
-  APFS_VOLUME_ROOT                **ApfsVolumes;
-  BOOLEAN                         GuidPresent;
-  EFI_SIMPLE_FILE_SYSTEM_PROTOCOL *FileSystem;
-  EFI_FILE_PROTOCOL               *Root;
-  EFI_FILE_PROTOCOL               *NewHandle;
-  CHAR16                          VolumePathName[GUID_STRING_LENGTH + 1];
-  EFI_FILE_INFO                   *FileInfo;
-  APFS_VOLUME_ROOT                *ApfsRoot;
+  UINTN                            NumberOfHandles;
+  EFI_HANDLE                       *HandleBuffer;
+  APFS_VOLUME_INFO                 *VolumeInfo;
+  GUID                             *ContainerGuids;
+  UINTN                            NumberOfContainers;
+  UINTN                            NumberOfVolumeInfos;
+  UINTN                            Index;
+  UINTN                            Index2;
+  UINTN                            Index3;
+  APFS_VOLUME_ROOT                 **ApfsVolumes;
+  BOOLEAN                          GuidPresent;
+  EFI_SIMPLE_FILE_SYSTEM_PROTOCOL  *FileSystem;
+  EFI_FILE_PROTOCOL                *Root;
+  EFI_FILE_PROTOCOL                *NewHandle;
+  CHAR16                           VolumePathName[GUID_STRING_LENGTH + 1];
+  EFI_FILE_INFO                    *FileInfo;
+  APFS_VOLUME_ROOT                 *ApfsRoot;
 
   ASSERT (Volumes != NULL);
   ASSERT (NumberOfEntries != NULL);
@@ -1446,10 +1453,10 @@ OcBootPolicyGetAllApfsRecoveryFilePath (
     return Status;
   }
 
-  VolumeInfo = AllocateZeroPool (NumberOfHandles * sizeof (*VolumeInfo));
+  VolumeInfo     = AllocateZeroPool (NumberOfHandles * sizeof (*VolumeInfo));
   ContainerGuids = AllocateZeroPool (NumberOfHandles * sizeof (*ContainerGuids));
 
-  if (VolumeInfo == NULL || ContainerGuids == NULL) {
+  if ((VolumeInfo == NULL) || (ContainerGuids == NULL)) {
     Status = EFI_OUT_OF_RESOURCES;
   }
 
@@ -1468,7 +1475,7 @@ OcBootPolicyGetAllApfsRecoveryFilePath (
   }
 
   NumberOfVolumeInfos = 0;
-  NumberOfContainers = 0;
+  NumberOfContainers  = 0;
 
   for (Index = 0; Index < NumberOfHandles; ++Index) {
     Status = InternalGetApfsVolumeInfo (
@@ -1482,7 +1489,7 @@ OcBootPolicyGetAllApfsRecoveryFilePath (
       continue;
     }
 
-    VolumeInfo[NumberOfVolumeInfos].Handle     = HandleBuffer[Index];
+    VolumeInfo[NumberOfVolumeInfos].Handle = HandleBuffer[Index];
 
     GuidPresent = FALSE;
     for (Index2 = 0; Index2 < NumberOfContainers; ++Index2) {
@@ -1498,7 +1505,7 @@ OcBootPolicyGetAllApfsRecoveryFilePath (
         &VolumeInfo[NumberOfVolumeInfos].ContainerGuid
         );
 
-      if (Index2 != 0 && HandleBuffer[Index] == Handle) {
+      if ((Index2 != 0) && (HandleBuffer[Index] == Handle)) {
         CopyMem (
           &ContainerGuids[1],
           &ContainerGuids[0],
@@ -1541,15 +1548,16 @@ OcBootPolicyGetAllApfsRecoveryFilePath (
 
   for (Index = 0; Index < NumberOfContainers; ++Index) {
     for (Index2 = 0; Index2 < NumberOfVolumeInfos; ++Index2) {
-      if ((VolumeInfo[Index2].VolumeRole & APPLE_APFS_VOLUME_ROLE_RECOVERY) == 0
-        || !CompareGuid (&ContainerGuids[Index], &VolumeInfo[Index2].ContainerGuid)) {
+      if (  ((VolumeInfo[Index2].VolumeRole & APPLE_APFS_VOLUME_ROLE_RECOVERY) == 0)
+         || !CompareGuid (&ContainerGuids[Index], &VolumeInfo[Index2].ContainerGuid))
+      {
         continue;
       }
 
       Status = gBS->HandleProtocol (
                       VolumeInfo[Index2].Handle,
                       &gEfiSimpleFileSystemProtocolGuid,
-                      (VOID **) &FileSystem
+                      (VOID **)&FileSystem
                       );
       if (EFI_ERROR (Status)) {
         continue;
@@ -1564,9 +1572,10 @@ OcBootPolicyGetAllApfsRecoveryFilePath (
       // Locate recovery for every volume present.
       //
       for (Index3 = 0; Index3 < NumberOfVolumeInfos; ++Index3) {
-        if ((VolumeInfo[Index2].VolumeRole &
-          (APPLE_APFS_VOLUME_ROLE_RECOVERY|APPLE_APFS_VOLUME_ROLE_PREBOOT)) != 0
-          || !CompareGuid (&ContainerGuids[Index], &VolumeInfo[Index3].ContainerGuid)) {
+        if (  ((VolumeInfo[Index2].VolumeRole &
+                (APPLE_APFS_VOLUME_ROLE_RECOVERY|APPLE_APFS_VOLUME_ROLE_PREBOOT)) != 0)
+           || !CompareGuid (&ContainerGuids[Index], &VolumeInfo[Index3].ContainerGuid))
+        {
           continue;
         }
 
@@ -1578,12 +1587,12 @@ OcBootPolicyGetAllApfsRecoveryFilePath (
           );
 
         Status = OcSafeFileOpen (
-          Root,
-          &NewHandle,
-          VolumePathName,
-          EFI_FILE_MODE_READ,
-          0
-          );
+                   Root,
+                   &NewHandle,
+                   VolumePathName,
+                   EFI_FILE_MODE_READ,
+                   0
+                   );
 
         if (EFI_ERROR (Status)) {
           continue;
@@ -1600,8 +1609,8 @@ OcBootPolicyGetAllApfsRecoveryFilePath (
 
         if (FileInfo != NULL) {
           if ((FileInfo->Attribute & EFI_FILE_DIRECTORY) != 0) {
-            ApfsRoot = ApfsVolumes[*NumberOfEntries];
-            ApfsRoot->Handle = VolumeInfo[Index2].Handle;
+            ApfsRoot                = ApfsVolumes[*NumberOfEntries];
+            ApfsRoot->Handle        = VolumeInfo[Index2].Handle;
             ApfsRoot->VolumeDirName = AllocateCopyPool (
                                         StrSize (VolumePathName),
                                         VolumePathName
@@ -1610,6 +1619,7 @@ OcBootPolicyGetAllApfsRecoveryFilePath (
 
             ++(*NumberOfEntries);
           }
+
           FreePool (FileInfo);
         }
       }
@@ -1620,7 +1630,7 @@ OcBootPolicyGetAllApfsRecoveryFilePath (
   FreePool (ContainerGuids);
   FreePool (HandleBuffer);
 
-  if (!EFI_ERROR (Status) && *NumberOfEntries == 0) {
+  if (!EFI_ERROR (Status) && (*NumberOfEntries == 0)) {
     Status = EFI_NOT_FOUND;
   }
 
@@ -1635,15 +1645,15 @@ BootPolicyGetAllApfsRecoveryFilePath (
   OUT UINTN       *NumberOfEntries
   )
 {
-  if (Volumes == NULL || NumberOfEntries == NULL) {
+  if ((Volumes == NULL) || (NumberOfEntries == NULL)) {
     return EFI_INVALID_PARAMETER;
   }
 
   return OcBootPolicyGetAllApfsRecoveryFilePath (
-    Handle,
-    Volumes,
-    NumberOfEntries
-    );
+           Handle,
+           Volumes,
+           NumberOfEntries
+           );
 }
 
 APPLE_BOOT_POLICY_PROTOCOL *
@@ -1651,7 +1661,7 @@ OcAppleBootPolicyInstallProtocol (
   IN BOOLEAN  Reinstall
   )
 {
-  EFI_STATUS Status;
+  EFI_STATUS  Status;
 
   APPLE_BOOT_POLICY_PROTOCOL  *Protocol;
   EFI_HANDLE                  Handle;
@@ -1664,10 +1674,10 @@ OcAppleBootPolicyInstallProtocol (
     }
   } else {
     Status = gBS->LocateProtocol (
-      &gAppleBootPolicyProtocolGuid,
-      NULL,
-      (VOID *) &Protocol
-      );
+                    &gAppleBootPolicyProtocolGuid,
+                    NULL,
+                    (VOID *)&Protocol
+                    );
 
     if (!EFI_ERROR (Status)) {
       return Protocol;
@@ -1676,11 +1686,11 @@ OcAppleBootPolicyInstallProtocol (
 
   Handle = NULL;
   Status = gBS->InstallMultipleProtocolInterfaces (
-    &Handle,
-    &gAppleBootPolicyProtocolGuid,
-    (VOID **) &mAppleBootPolicyProtocol,
-    NULL
-    );
+                  &Handle,
+                  &gAppleBootPolicyProtocolGuid,
+                  (VOID **)&mAppleBootPolicyProtocol,
+                  NULL
+                  );
 
   if (EFI_ERROR (Status)) {
     return NULL;

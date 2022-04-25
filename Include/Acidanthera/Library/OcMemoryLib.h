@@ -42,7 +42,7 @@
 /**
   Reasonable default virtual memory page pool size (2 MB).
 **/
-#define OC_DEFAULT_VMEM_PAGE_COUNT 0x200
+#define OC_DEFAULT_VMEM_PAGE_COUNT  0x200
 
 /**
   Reasonable default memory map size used when allocations are problematic.
@@ -50,11 +50,11 @@
 **/
 #define OC_DEFAULT_MEMORY_MAP_SIZE  (EFI_PAGE_SIZE*3)
 
-#define OC_MEMORY_TYPE_DESC_COUNT 16
+#define OC_MEMORY_TYPE_DESC_COUNT  16
 
 typedef struct {
-  CHAR8            *Name;
-  EFI_MEMORY_TYPE  Type;
+  CHAR8              *Name;
+  EFI_MEMORY_TYPE    Type;
 } OC_MEMORY_TYPE_DESC;
 
 /**
@@ -99,12 +99,12 @@ LegacyRegionUnlock (
 **/
 EFI_MEMORY_DESCRIPTOR *
 OcGetCurrentMemoryMap (
-  OUT UINTN   *MemoryMapSize,
-  OUT UINTN   *DescriptorSize,
-  OUT UINTN   *MapKey                 OPTIONAL,
-  OUT UINT32  *DescriptorVersion      OPTIONAL,
-  OUT UINTN   *OriginalMemoryMapSize  OPTIONAL,
-  IN  BOOLEAN IncludeSplitSpace
+  OUT UINTN    *MemoryMapSize,
+  OUT UINTN    *DescriptorSize,
+  OUT UINTN    *MapKey                 OPTIONAL,
+  OUT UINT32   *DescriptorVersion      OPTIONAL,
+  OUT UINTN    *OriginalMemoryMapSize  OPTIONAL,
+  IN  BOOLEAN  IncludeSplitSpace
   );
 
 /**
@@ -122,13 +122,13 @@ OcGetCurrentMemoryMap (
 **/
 EFI_STATUS
 OcGetCurrentMemoryMapAlloc (
-     OUT UINTN                  *MemoryMapSize,
-     OUT EFI_MEMORY_DESCRIPTOR  **MemoryMap,
-     OUT UINTN                  *MapKey,
-     OUT UINTN                  *DescriptorSize,
-     OUT UINT32                 *DescriptorVersion,
-  IN     EFI_GET_MEMORY_MAP     GetMemoryMap  OPTIONAL,
-  IN OUT EFI_PHYSICAL_ADDRESS   *TopMemory  OPTIONAL
+  OUT UINTN                    *MemoryMapSize,
+  OUT EFI_MEMORY_DESCRIPTOR    **MemoryMap,
+  OUT UINTN                    *MapKey,
+  OUT UINTN                    *DescriptorSize,
+  OUT UINT32                   *DescriptorVersion,
+  IN     EFI_GET_MEMORY_MAP    GetMemoryMap  OPTIONAL,
+  IN OUT EFI_PHYSICAL_ADDRESS  *TopMemory  OPTIONAL
   );
 
 /**
@@ -207,10 +207,10 @@ BOOLEAN
 typedef
 VOID
 (*OC_MEMORY_FILTER) (
-  IN     VOID                        *Context  OPTIONAL,
-  IN     UINTN                       MemoryMapSize,
-  IN OUT EFI_MEMORY_DESCRIPTOR       *MemoryMap,
-  IN     UINTN                       DescriptorSize
+  IN     VOID                   *Context  OPTIONAL,
+  IN     UINTN                  MemoryMapSize,
+  IN OUT EFI_MEMORY_DESCRIPTOR  *MemoryMap,
+  IN     UINTN                  DescriptorSize
   );
 
 /**
@@ -263,7 +263,7 @@ OcCountRuntimePages (
 **/
 UINTN
 OcCountFreePages (
-  OUT UINTN                  *LowerMemory  OPTIONAL
+  OUT UINTN  *LowerMemory  OPTIONAL
   );
 
 /**
@@ -385,7 +385,7 @@ OcSplitMemoryMapByAttributes (
 **/
 PAGE_MAP_AND_DIRECTORY_POINTER  *
 OcGetCurrentPageTable (
-  OUT UINTN                           *Flags  OPTIONAL
+  OUT UINTN  *Flags  OPTIONAL
   );
 
 /**
@@ -399,9 +399,9 @@ OcGetCurrentPageTable (
 **/
 EFI_STATUS
 OcGetPhysicalAddress (
-  IN  PAGE_MAP_AND_DIRECTORY_POINTER   *PageTable  OPTIONAL,
-  IN  EFI_VIRTUAL_ADDRESS              VirtualAddr,
-  OUT EFI_PHYSICAL_ADDRESS             *PhysicalAddr
+  IN  PAGE_MAP_AND_DIRECTORY_POINTER  *PageTable  OPTIONAL,
+  IN  EFI_VIRTUAL_ADDRESS             VirtualAddr,
+  OUT EFI_PHYSICAL_ADDRESS            *PhysicalAddr
   );
 
 /**
@@ -427,11 +427,11 @@ typedef struct OC_VMEM_CONTEXT_ {
   ///
   /// Memory pool containing memory to be spread across allocations.
   ///
-  UINT8  *MemoryPool;
+  UINT8    *MemoryPool;
   ///
   /// Free pages in the memory pool.
   ///
-  UINTN  FreePages;
+  UINTN    FreePages;
 } OC_VMEM_CONTEXT;
 
 /**

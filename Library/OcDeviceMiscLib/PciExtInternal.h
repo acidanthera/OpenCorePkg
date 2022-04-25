@@ -18,27 +18,27 @@
 /**
   Offset to Root Complex Base Address for a PCI bridge device.
 **/
-#define PCI_BRIDGE_RCBA_OFFSET 0xF0U
+#define PCI_BRIDGE_RCBA_OFFSET  0xF0U
 
 /**
   Address bits of the Root Complex Base Address register.
 **/
-#define PCI_BRIDGE_RCBA_ADDRESS_MASK 0xFFFFC000U
+#define PCI_BRIDGE_RCBA_ADDRESS_MASK  0xFFFFC000U
 
 /**
   Access bit of the Root Complex Base Address register.
 **/
-#define PCI_BRIDGE_RCBA_ACCESS_ENABLE BIT0
+#define PCI_BRIDGE_RCBA_ACCESS_ENABLE  BIT0
 
 /**
   HTPC register in RCBA.
 **/
-#define RCBA_HTPC_REGISTER 0x3404U
+#define RCBA_HTPC_REGISTER  0x3404U
 
 /**
   HPET enable bit in HTPC.
 **/
-#define RCBA_HTPC_HPET_ENABLE BIT7
+#define RCBA_HTPC_HPET_ENABLE  BIT7
 
 /**
   XHCI registers.
@@ -53,27 +53,26 @@
 /**
   EHCI registers.
 **/
-#define EHC_BAR_INDEX             0x0
-#define EHC_HCCPARAMS_OFFSET      0x8
-#define EHC_USBCMD_OFFSET         0x0    ///< USB Command Register Offset
-#define EHC_USBSTS_OFFSET         0x4    ///< USB Status Register Offset
-#define EHC_USBINT_OFFSET         0x8    ///< USB Interrupt Enable Register
-
+#define EHC_BAR_INDEX         0x0
+#define EHC_HCCPARAMS_OFFSET  0x8
+#define EHC_USBCMD_OFFSET     0x0        ///< USB Command Register Offset
+#define EHC_USBSTS_OFFSET     0x4        ///< USB Status Register Offset
+#define EHC_USBINT_OFFSET     0x8        ///< USB Interrupt Enable Register
 
 /**
   HDA audio class missing from Pci22.h.
 **/
-#define PCI_CLASS_MEDIA_HDA 0x03
+#define PCI_CLASS_MEDIA_HDA  0x03
 
 /**
   Offset to TCSEL register for a PCI media device.
 **/
-#define PCI_MEDIA_TCSEL_OFFSET 0x44U
+#define PCI_MEDIA_TCSEL_OFFSET  0x44U
 
 /**
   TCSEL class mask.
 **/
-#define TCSEL_CLASS_MASK 0x7U
+#define TCSEL_CLASS_MASK  0x7U
 
 /**
   When the bit of Capabilities Set, it indicates that the Function supports
@@ -82,16 +81,16 @@
   - Bit 1 is set: supports operating with the BAR sized to 2 MB
   - Bit n is set: supports operating with the BAR sized to (2^n) MB
 **/
-#define PCI_BAR_CAP_1MB     BIT0
-#define PCI_BAR_CAP_2MB     BIT1
-#define PCI_BAR_CAP_4MB     BIT2
-#define PCI_BAR_CAP_8MB     BIT3
-#define PCI_BAR_CAP_16MB    BIT4
-#define PCI_BAR_CAP_32MB    BIT5
-#define PCI_BAR_CAP_64MB    BIT6
-#define PCI_BAR_CAP_128MB   BIT7
-#define PCI_BAR_CAP_256MB   BIT8
-#define PCI_BAR_CAP_512MB   BIT9
+#define PCI_BAR_CAP_1MB    BIT0
+#define PCI_BAR_CAP_2MB    BIT1
+#define PCI_BAR_CAP_4MB    BIT2
+#define PCI_BAR_CAP_8MB    BIT3
+#define PCI_BAR_CAP_16MB   BIT4
+#define PCI_BAR_CAP_32MB   BIT5
+#define PCI_BAR_CAP_64MB   BIT6
+#define PCI_BAR_CAP_128MB  BIT7
+#define PCI_BAR_CAP_256MB  BIT8
+#define PCI_BAR_CAP_512MB  BIT9
 #define PCI_BAR_CAP_1GB    BIT10
 #define PCI_BAR_CAP_2GB    BIT11
 #define PCI_BAR_CAP_4GB    BIT12
@@ -106,6 +105,6 @@
 /**
   Capability limit mask from BarSize (e.g. PciBar1MB).
 **/
-#define PCI_BAR_CAP_LIMIT(BarSize) ((1U << ((BarSize) + 1)) - 1)
+#define PCI_BAR_CAP_LIMIT(BarSize)  ((1U << ((BarSize) + 1)) - 1)
 
 #endif // PCI_EXT_INTERNAL_H

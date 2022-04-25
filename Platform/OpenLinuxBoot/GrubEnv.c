@@ -21,15 +21,15 @@ typedef enum GRUBENV_STATE_ {
 
 EFI_STATUS
 InternalProcessGrubEnv (
-  IN OUT       CHAR8              *Content,
-  IN     CONST UINTN              Length
+  IN OUT       CHAR8  *Content,
+  IN     CONST UINTN  Length
   )
 {
-  EFI_STATUS      Status;
-  UINTN           Pos;
-  UINTN           KeyStart;
-  UINTN           VarStart;
-  GRUBENV_STATE   State;
+  EFI_STATUS     Status;
+  UINTN          Pos;
+  UINTN          KeyStart;
+  UINTN          VarStart;
+  GRUBENV_STATE  State;
 
   State = GRUBENV_NEXT_LINE;
 
@@ -44,33 +44,38 @@ InternalProcessGrubEnv (
           State = GRUBENV_COMMENT;
         } else {
           KeyStart = Pos;
-          State = GRUBENV_KEY;
+          State    = GRUBENV_KEY;
         }
+
         break;
-        
+
       case GRUBENV_COMMENT:
         if (Content[Pos] == '\n') {
           State = GRUBENV_NEXT_LINE;
         }
+
         break;
-        
+
       case GRUBENV_KEY:
         if (Content[Pos] == '=') {
           Content[Pos] = '\0';
-          VarStart = Pos + 1;
-          State = GRUBENV_VAR;
+          VarStart     = Pos + 1;
+          State        = GRUBENV_VAR;
         }
+
         break;
-        
+
       case GRUBENV_VAR:
         if (Content[Pos] == '\n') {
           Content[Pos] = '\0';
-          Status = InternalSetGrubVar (&Content[KeyStart], &Content[VarStart], VAR_ERR_NONE);
+          Status       = InternalSetGrubVar (&Content[KeyStart], &Content[VarStart], VAR_ERR_NONE);
           if (EFI_ERROR (Status)) {
             return Status;
           }
+
           State = GRUBENV_NEXT_LINE;
         }
+
         break;
 
       default:

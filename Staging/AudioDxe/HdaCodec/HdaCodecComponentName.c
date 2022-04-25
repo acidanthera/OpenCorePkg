@@ -25,20 +25,20 @@
 #include "HdaCodecComponentName.h"
 
 GLOBAL_REMOVE_IF_UNREFERENCED
-EFI_UNICODE_STRING_TABLE gHdaCodecDriverNameTable[] = {
+EFI_UNICODE_STRING_TABLE  gHdaCodecDriverNameTable[] = {
   { "eng;en", L"HDA Codec Driver" },
-  { NULL, NULL }
+  { NULL,     NULL                }
 };
 
 GLOBAL_REMOVE_IF_UNREFERENCED
-EFI_COMPONENT_NAME_PROTOCOL gHdaCodecComponentName = {
+EFI_COMPONENT_NAME_PROTOCOL  gHdaCodecComponentName = {
   HdaCodecComponentNameGetDriverName,
   HdaCodecComponentNameGetControllerName,
   "eng"
 };
 
 GLOBAL_REMOVE_IF_UNREFERENCED
-EFI_COMPONENT_NAME2_PROTOCOL gHdaCodecComponentName2 = {
+EFI_COMPONENT_NAME2_PROTOCOL  gHdaCodecComponentName2 = {
   (EFI_COMPONENT_NAME2_GET_DRIVER_NAME)HdaCodecComponentNameGetDriverName,
   (EFI_COMPONENT_NAME2_GET_CONTROLLER_NAME)HdaCodecComponentNameGetControllerName,
   "en"
@@ -46,36 +46,53 @@ EFI_COMPONENT_NAME2_PROTOCOL gHdaCodecComponentName2 = {
 
 EFI_STATUS
 EFIAPI
-HdaCodecComponentNameGetDriverName(
-  IN EFI_COMPONENT_NAME_PROTOCOL *This,
-  IN CHAR8 *Language,
-  OUT CHAR16 **DriverName) {
-  return LookupUnicodeString2(Language, This->SupportedLanguages, gHdaCodecDriverNameTable,
-    DriverName, (BOOLEAN)(This == &gHdaCodecComponentName));
+HdaCodecComponentNameGetDriverName (
+  IN EFI_COMPONENT_NAME_PROTOCOL  *This,
+  IN CHAR8                        *Language,
+  OUT CHAR16                      **DriverName
+  )
+{
+  return LookupUnicodeString2 (
+           Language,
+           This->SupportedLanguages,
+           gHdaCodecDriverNameTable,
+           DriverName,
+           (BOOLEAN)(This == &gHdaCodecComponentName)
+           );
 }
 
 EFI_STATUS
 EFIAPI
-HdaCodecComponentNameGetControllerName(
-  IN EFI_COMPONENT_NAME_PROTOCOL *This,
-  IN EFI_HANDLE ControllerHandle,
-  IN EFI_HANDLE ChildHandle OPTIONAL,
-  IN CHAR8 *Language,
-  OUT CHAR16 **ControllerName) {
+HdaCodecComponentNameGetControllerName (
+  IN EFI_COMPONENT_NAME_PROTOCOL  *This,
+  IN EFI_HANDLE                   ControllerHandle,
+  IN EFI_HANDLE                   ChildHandle OPTIONAL,
+  IN CHAR8                        *Language,
+  OUT CHAR16                      **ControllerName
+  )
+{
   // Create variables.
-  EFI_STATUS Status;
-  EFI_HDA_CODEC_INFO_PROTOCOL *HdaCodecInfo;
+  EFI_STATUS                   Status;
+  EFI_HDA_CODEC_INFO_PROTOCOL  *HdaCodecInfo;
 
   // Ensure there is no child handle.
-  if (ChildHandle != NULL)
+  if (ChildHandle != NULL) {
     return EFI_UNSUPPORTED;
+  }
 
   // Get info protocol.
-  Status = gBS->OpenProtocol(ControllerHandle, &gEfiHdaCodecInfoProtocolGuid, (VOID**)&HdaCodecInfo,
-    gHdaCodecDriverBinding.DriverBindingHandle, ControllerHandle, EFI_OPEN_PROTOCOL_GET_PROTOCOL);
-  if (EFI_ERROR(Status))
+  Status = gBS->OpenProtocol (
+                  ControllerHandle,
+                  &gEfiHdaCodecInfoProtocolGuid,
+                  (VOID **)&HdaCodecInfo,
+                  gHdaCodecDriverBinding.DriverBindingHandle,
+                  ControllerHandle,
+                  EFI_OPEN_PROTOCOL_GET_PROTOCOL
+                  );
+  if (EFI_ERROR (Status)) {
     return Status;
+  }
 
   // Get codec name.
-  return HdaCodecInfo->GetName(HdaCodecInfo, (CONST CHAR16 **) ControllerName);
+  return HdaCodecInfo->GetName (HdaCodecInfo, (CONST CHAR16 **)ControllerName);
 }

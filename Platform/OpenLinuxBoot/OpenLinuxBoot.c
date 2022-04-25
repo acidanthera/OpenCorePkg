@@ -21,18 +21,18 @@
 
 #include <Protocol/OcBootEntry.h>
 
-UINTN gLinuxBootFlags = LINUX_BOOT_ALL & ~(LINUX_BOOT_ADD_DEBUG_INFO | LINUX_BOOT_LOG_VERBOSE | LINUX_BOOT_ADD_RW);
+UINTN  gLinuxBootFlags = LINUX_BOOT_ALL & ~(LINUX_BOOT_ADD_DEBUG_INFO | LINUX_BOOT_LOG_VERBOSE | LINUX_BOOT_ADD_RW);
 
-OC_FLEX_ARRAY     *mParsedLoadOptions;
+OC_FLEX_ARRAY  *mParsedLoadOptions;
 
-OC_PICKER_CONTEXT *gPickerContext;
-OC_FLEX_ARRAY     *gLoaderEntries;
-EFI_GUID          gPartuuid;
-CHAR8             *gFileSystemType;
+OC_PICKER_CONTEXT  *gPickerContext;
+OC_FLEX_ARRAY      *gLoaderEntries;
+EFI_GUID           gPartuuid;
+CHAR8              *gFileSystemType;
 
 VOID
 InternalFreePickerEntry (
-  IN   OC_PICKER_ENTRY          *Entry
+  IN   OC_PICKER_ENTRY  *Entry
   )
 {
   ASSERT (Entry != NULL);
@@ -48,15 +48,19 @@ InternalFreePickerEntry (
   if (Entry->Id != NULL) {
     FreePool ((CHAR8 *)Entry->Id);
   }
+
   if (Entry->Name != NULL) {
     FreePool ((CHAR8 *)Entry->Name);
   }
+
   if (Entry->Path != NULL) {
     FreePool ((CHAR8 *)Entry->Path);
   }
+
   if (Entry->Arguments != NULL) {
     FreePool ((CHAR8 *)Entry->Arguments);
   }
+
   if (Entry->Flavour != NULL) {
     FreePool ((CHAR8 *)Entry->Flavour);
   }
@@ -66,15 +70,15 @@ STATIC
 VOID
 EFIAPI
 OcFreeLinuxBootEntries (
-  IN   OC_PICKER_ENTRY          **Entries,
-  IN   UINTN                    NumEntries
+  IN   OC_PICKER_ENTRY  **Entries,
+  IN   UINTN            NumEntries
   )
 {
-  UINTN Index;
+  UINTN  Index;
 
   ASSERT (Entries   != NULL);
   ASSERT (*Entries  != NULL);
-  if (Entries == NULL || *Entries == NULL) {
+  if ((Entries == NULL) || (*Entries == NULL)) {
     return;
   }
 
@@ -90,25 +94,25 @@ STATIC
 EFI_STATUS
 EFIAPI
 OcGetLinuxBootEntries (
-  IN           OC_PICKER_CONTEXT        *PickerContext,
-  IN     CONST EFI_HANDLE               Device,
-     OUT       OC_PICKER_ENTRY          **Entries,
-     OUT       UINTN                    *NumEntries
+  IN           OC_PICKER_CONTEXT  *PickerContext,
+  IN     CONST EFI_HANDLE         Device,
+  OUT       OC_PICKER_ENTRY       **Entries,
+  OUT       UINTN                 *NumEntries
   )
 {
-  EFI_STATUS                      Status;
-  EFI_SIMPLE_FILE_SYSTEM_PROTOCOL *FileSystem;
-  EFI_FILE_PROTOCOL               *RootDirectory;
-  UINT32                          FileSystemPolicy;
-  CONST EFI_PARTITION_ENTRY       *PartitionEntry;
+  EFI_STATUS                       Status;
+  EFI_SIMPLE_FILE_SYSTEM_PROTOCOL  *FileSystem;
+  EFI_FILE_PROTOCOL                *RootDirectory;
+  UINT32                           FileSystemPolicy;
+  CONST EFI_PARTITION_ENTRY        *PartitionEntry;
 
   ASSERT (PickerContext != NULL);
   ASSERT (Entries     != NULL);
   ASSERT (NumEntries  != NULL);
 
-  gPickerContext  = PickerContext;
-  *Entries        = NULL;
-  *NumEntries     = 0;
+  gPickerContext = PickerContext;
+  *Entries       = NULL;
+  *NumEntries    = 0;
 
   //
   // No custom entries.
@@ -121,10 +125,10 @@ OcGetLinuxBootEntries (
   // Open partition file system.
   //
   Status = gBS->HandleProtocol (
-    Device,
-    &gEfiSimpleFileSystemProtocolGuid,
-    (VOID **) &FileSystem
-    );
+                  Device,
+                  &gEfiSimpleFileSystemProtocolGuid,
+                  (VOID **)&FileSystem
+                  );
   if (EFI_ERROR (Status)) {
     DEBUG ((DEBUG_WARN, "LNX: Missing filesystem - %r\n", Status));
     return Status;
@@ -134,15 +138,15 @@ OcGetLinuxBootEntries (
   // Get handle to partiton root directory.
   //
   Status = FileSystem->OpenVolume (
-    FileSystem,
-    &RootDirectory
-    );
+                         FileSystem,
+                         &RootDirectory
+                         );
   if (EFI_ERROR (Status)) {
     DEBUG ((DEBUG_WARN, "LNX: Invalid root volume - %r\n", Status));
     return Status;
   }
 
-  gFileSystemType   = NULL;
+  gFileSystemType = NULL;
 
   FileSystemPolicy = OcGetFileSystemPolicyType (Device);
 
@@ -186,7 +190,7 @@ OcGetLinuxBootEntries (
     if ((FileSystemPolicy & OC_SCAN_ALLOW_FS_NTFS) != 0) {
       //
       // This is not just NTFS, Msft Basic Data part type GUID is used for non-ESP FAT too.
-      //  
+      //
       gFileSystemType = "NTFS/FAT";
     } else {
       gFileSystemType = "OTHER";
@@ -228,26 +232,27 @@ OcGetLinuxBootEntries (
   // Scan for boot loader spec & blscfg entries (Fedora-like).
   //
   Status = InternalScanLoaderEntries (
-    RootDirectory,
-    Entries,
-    NumEntries
-    );
+             RootDirectory,
+             Entries,
+             NumEntries
+             );
 
   //
   // Note: As currently structured, will fall through to autodetect
   // if no /loader/entries/*.conf files are present, but also if there
   // are only unusable files in there.
   //
-  if (EFI_ERROR (Status)
-    && (gLinuxBootFlags & LINUX_BOOT_ALLOW_AUTODETECT) != 0) {
+  if (  EFI_ERROR (Status)
+     && ((gLinuxBootFlags & LINUX_BOOT_ALLOW_AUTODETECT) != 0))
+  {
     //
     // Auto-detect vmlinuz and initrd files on own root filesystem (Debian-like).
     //
     Status = InternalAutodetectLinux (
-      RootDirectory,
-      Entries,
-      NumEntries
-      );
+               RootDirectory,
+               Entries,
+               NumEntries
+               );
   }
 
   RootDirectory->Close (RootDirectory);
@@ -257,7 +262,7 @@ OcGetLinuxBootEntries (
 
 STATIC
 OC_BOOT_ENTRY_PROTOCOL
-mLinuxBootEntryProtocol = {
+  mLinuxBootEntryProtocol = {
   OC_BOOT_ENTRY_PROTOCOL_REVISION,
   OcGetLinuxBootEntries,
   OcFreeLinuxBootEntries
@@ -270,16 +275,16 @@ UefiMain (
   IN EFI_SYSTEM_TABLE  *SystemTable
   )
 {
-  EFI_STATUS                        Status;
-  EFI_LOADED_IMAGE_PROTOCOL         *LoadedImage;
-  UINTN                             AddBootFlags;
-  UINTN                             RemoveBootFlags;
+  EFI_STATUS                 Status;
+  EFI_LOADED_IMAGE_PROTOCOL  *LoadedImage;
+  UINTN                      AddBootFlags;
+  UINTN                      RemoveBootFlags;
 
   Status = gBS->HandleProtocol (
-    ImageHandle,
-    &gEfiLoadedImageProtocolGuid,
-    (VOID **) &LoadedImage
-    );
+                  ImageHandle,
+                  &gEfiLoadedImageProtocolGuid,
+                  (VOID **)&LoadedImage
+                  );
 
   if (EFI_ERROR (Status)) {
     return Status;
@@ -290,10 +295,10 @@ UefiMain (
   //
   Status = OcParseLoadOptions (LoadedImage, &mParsedLoadOptions);
   if (!EFI_ERROR (Status)) {
-    AddBootFlags = 0;
+    AddBootFlags    = 0;
     RemoveBootFlags = 0;
-    OcParsedVarsGetInt (mParsedLoadOptions, L"flags",  &gLinuxBootFlags, TRUE);
-    OcParsedVarsGetInt (mParsedLoadOptions, L"flags+", &AddBootFlags,    TRUE);
+    OcParsedVarsGetInt (mParsedLoadOptions, L"flags", &gLinuxBootFlags, TRUE);
+    OcParsedVarsGetInt (mParsedLoadOptions, L"flags+", &AddBootFlags, TRUE);
     OcParsedVarsGetInt (mParsedLoadOptions, L"flags-", &RemoveBootFlags, TRUE);
     gLinuxBootFlags |= AddBootFlags;
     gLinuxBootFlags &= ~RemoveBootFlags;
@@ -301,6 +306,7 @@ UefiMain (
     if (Status != EFI_NOT_FOUND) {
       return Status;
     }
+
     ASSERT (mParsedLoadOptions == NULL);
   }
 
@@ -313,11 +319,11 @@ UefiMain (
   }
 
   Status = gBS->InstallMultipleProtocolInterfaces (
-    &ImageHandle,
-    &gOcBootEntryProtocolGuid,
-    &mLinuxBootEntryProtocol,
-    NULL
-    );
+                  &ImageHandle,
+                  &gOcBootEntryProtocolGuid,
+                  &mLinuxBootEntryProtocol,
+                  NULL
+                  );
 
   ASSERT_EFI_ERROR (Status);
   if (EFI_ERROR (Status)) {

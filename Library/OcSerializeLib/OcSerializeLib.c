@@ -20,27 +20,28 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 #include <Library/BaseLib.h>
 #include <Library/DebugLib.h>
 
-#if !defined(MDEPKG_NDEBUG)
+#if !defined (MDEPKG_NDEBUG)
 
 STATIC
 CONST CHAR8 *
-mSchemaTypeNames[] = {
+  mSchemaTypeNames[] = {
   [OC_SCHEMA_VALUE_BOOLEAN] = "boolean",
   [OC_SCHEMA_VALUE_INTEGER] = "integer",
-  [OC_SCHEMA_VALUE_DATA] = "data",
-  [OC_SCHEMA_VALUE_STRING] = "string",
-  [OC_SCHEMA_VALUE_MDATA] = "mdata"
+  [OC_SCHEMA_VALUE_DATA]    = "data",
+  [OC_SCHEMA_VALUE_STRING]  = "string",
+  [OC_SCHEMA_VALUE_MDATA]   = "mdata"
 };
 
 STATIC
 CONST CHAR8 *
 GetSchemaTypeName (
-  IN UINT32 Type
+  IN UINT32  Type
   )
 {
   if (Type < ARRAY_SIZE (mSchemaTypeNames)) {
     return mSchemaTypeNames[Type];
   }
+
   return "custom";
 }
 
@@ -48,9 +49,9 @@ GetSchemaTypeName (
 
 OC_SCHEMA *
 LookupConfigSchema (
-  IN OC_SCHEMA      *SortedList,
-  IN UINT32         Size,
-  IN CONST CHAR8    *Name
+  IN OC_SCHEMA    *SortedList,
+  IN UINT32       Size,
+  IN CONST CHAR8  *Name
   )
 {
   UINT32  Start;
@@ -70,7 +71,7 @@ LookupConfigSchema (
 
   while (Start <= End) {
     Curr = (Start + End) / 2;
-    Cmp = AsciiStrCmp (SortedList[Curr].Name, Name);
+    Cmp  = AsciiStrCmp (SortedList[Curr].Name, Name);
 
     if (Cmp == 0) {
       return &SortedList[Curr];
@@ -91,20 +92,20 @@ LookupConfigSchema (
 
 VOID
 ParseSerializedDict (
-      OUT  VOID            *Serialized,
+  OUT  VOID                *Serialized,
   IN       XML_NODE        *Node,
   IN       OC_SCHEMA_INFO  *Info,
   IN       CONST CHAR8     *Context     OPTIONAL,
   IN  OUT  UINT32          *ErrorCount  OPTIONAL
   )
 {
-  UINT32         DictSize;
-  UINT32         Index;
-  UINT32         Index2;
-  CONST CHAR8    *CurrentKey;
-  XML_NODE       *CurrentValue;
-  XML_NODE       *OldValue;
-  OC_SCHEMA      *NewSchema;
+  UINT32       DictSize;
+  UINT32       Index;
+  UINT32       Index2;
+  CONST CHAR8  *CurrentKey;
+  XML_NODE     *CurrentValue;
+  XML_NODE     *OldValue;
+  OC_SCHEMA    *NewSchema;
 
   DictSize = PlistDictChildren (Node);
 
@@ -116,6 +117,7 @@ ParseSerializedDict (
       if (ErrorCount != NULL) {
         ++*ErrorCount;
       }
+
       continue;
     }
 
@@ -138,10 +140,11 @@ ParseSerializedDict (
       if (ErrorCount != NULL) {
         ++*ErrorCount;
       }
+
       continue;
     }
 
-    OldValue = CurrentValue;
+    OldValue     = CurrentValue;
     CurrentValue = PlistNodeCast (CurrentValue, NewSchema->Type);
     if (CurrentValue == NULL) {
       DEBUG ((
@@ -156,6 +159,7 @@ ParseSerializedDict (
       if (ErrorCount != NULL) {
         ++*ErrorCount;
       }
+
       continue;
     }
 
@@ -199,7 +203,7 @@ ParseSerializedDict (
 
 VOID
 ParseSerializedValue (
-      OUT  VOID            *Serialized,
+  OUT  VOID                *Serialized,
   IN       XML_NODE        *Node,
   IN       OC_SCHEMA_INFO  *Info,
   IN       CONST CHAR8     *Context     OPTIONAL,
@@ -216,7 +220,7 @@ ParseSerializedValue (
 
   switch (Info->Value.Type) {
     case OC_SCHEMA_VALUE_BOOLEAN:
-      Result = PlistBooleanValue (Node, (BOOLEAN *) Field);
+      Result = PlistBooleanValue (Node, (BOOLEAN *)Field);
       break;
     case OC_SCHEMA_VALUE_INTEGER:
       Result = PlistIntegerValue (Node, Field, Size, FALSE);
@@ -249,7 +253,7 @@ ParseSerializedValue (
 
 VOID
 ParseSerializedBlob (
-      OUT  VOID            *Serialized,
+  OUT  VOID                *Serialized,
   IN       XML_NODE        *Node,
   IN       OC_SCHEMA_INFO  *Info,
   IN       CONST CHAR8     *Context     OPTIONAL,
@@ -288,10 +292,11 @@ ParseSerializedBlob (
     if (ErrorCount != NULL) {
       ++*ErrorCount;
     }
+
     return;
   }
 
-  Field  = OC_SCHEMA_FIELD (Serialized, VOID, Info->Blob.Field);
+  Field      = OC_SCHEMA_FIELD (Serialized, VOID, Info->Blob.Field);
   BlobMemory = OcBlobAllocate (Field, Size, &BlobSize);
 
   if (BlobMemory == NULL) {
@@ -306,6 +311,7 @@ ParseSerializedBlob (
     if (ErrorCount != NULL) {
       ++*ErrorCount;
     }
+
     return;
   }
 
@@ -313,13 +319,13 @@ ParseSerializedBlob (
 
   switch (Info->Blob.Type) {
     case OC_SCHEMA_BLOB_DATA:
-      Result = PlistDataValue (Node, (UINT8 *) BlobMemory, BlobSize);
+      Result = PlistDataValue (Node, (UINT8 *)BlobMemory, BlobSize);
       break;
     case OC_SCHEMA_BLOB_STRING:
-      Result = PlistStringValue (Node, (CHAR8 *) BlobMemory, BlobSize);
+      Result = PlistStringValue (Node, (CHAR8 *)BlobMemory, BlobSize);
       break;
     case OC_SCHEMA_BLOB_MDATA:
-      Result = PlistMultiDataValue (Node, (UINT8 *) BlobMemory, BlobSize);
+      Result = PlistMultiDataValue (Node, (UINT8 *)BlobMemory, BlobSize);
       break;
   }
 
@@ -340,7 +346,7 @@ ParseSerializedBlob (
 
 VOID
 ParseSerializedMap (
-      OUT  VOID            *Serialized,
+  OUT  VOID                *Serialized,
   IN       XML_NODE        *Node,
   IN       OC_SCHEMA_INFO  *Info,
   IN       CONST CHAR8     *Context     OPTIONAL,
@@ -360,14 +366,15 @@ ParseSerializedMap (
   DictSize = PlistDictChildren (Node);
 
   for (Index = 0; Index < DictSize; Index++) {
-    CurrentKey = PlistKeyValue (PlistDictChild (Node, Index, &ChildNode));
-    CurrentKeyLen = CurrentKey != NULL ? (UINT32) (AsciiStrLen (CurrentKey) + 1) : 0;
+    CurrentKey    = PlistKeyValue (PlistDictChild (Node, Index, &ChildNode));
+    CurrentKeyLen = CurrentKey != NULL ? (UINT32)(AsciiStrLen (CurrentKey) + 1) : 0;
 
     if (CurrentKeyLen == 0) {
       DEBUG ((DEBUG_INFO, "OCS: No get serialized key at %u index!\n", Index));
       if (ErrorCount != NULL) {
         ++*ErrorCount;
       }
+
       continue;
     }
 
@@ -383,25 +390,27 @@ ParseSerializedMap (
       if (ErrorCount != NULL) {
         ++*ErrorCount;
       }
+
       continue;
     }
 
     Success = OcListEntryAllocate (
-      OC_SCHEMA_FIELD (Serialized, VOID, Info->List.Field),
-      &NewValue,
-      &NewKey
-      );
+                OC_SCHEMA_FIELD (Serialized, VOID, Info->List.Field),
+                &NewValue,
+                &NewKey
+                );
     if (Success == FALSE) {
       DEBUG ((DEBUG_INFO, "OCS: Couldn't insert dict serialized at %u index!\n", Index));
       if (ErrorCount != NULL) {
         ++*ErrorCount;
       }
+
       continue;
     }
 
     NewKeyValue = OcBlobAllocate (NewKey, CurrentKeyLen, NULL);
     if (NewKeyValue != NULL) {
-      AsciiStrnCpyS ((CHAR8 *) NewKeyValue, CurrentKeyLen, CurrentKey, CurrentKeyLen - 1);
+      AsciiStrnCpyS ((CHAR8 *)NewKeyValue, CurrentKeyLen, CurrentKey, CurrentKeyLen - 1);
     } else {
       DEBUG ((DEBUG_INFO, "OCS: Couldn't allocate key name at %u index!\n", Index));
       if (ErrorCount != NULL) {
@@ -415,7 +424,7 @@ ParseSerializedMap (
 
 VOID
 ParseSerializedArray (
-      OUT  VOID            *Serialized,
+  OUT  VOID                *Serialized,
   IN       XML_NODE        *Node,
   IN       OC_SCHEMA_INFO  *Info,
   IN       CONST CHAR8     *Context     OPTIONAL,
@@ -440,19 +449,21 @@ ParseSerializedArray (
       if (ErrorCount != NULL) {
         ++*ErrorCount;
       }
+
       continue;
     }
 
     Success = OcListEntryAllocate (
-      OC_SCHEMA_FIELD (Serialized, VOID, Info->List.Field),
-      &NewValue,
-      NULL
-      );
+                OC_SCHEMA_FIELD (Serialized, VOID, Info->List.Field),
+                &NewValue,
+                NULL
+                );
     if (Success == FALSE) {
       DEBUG ((DEBUG_INFO, "OCS: Couldn't insert array serialized at %u index!\n", Index));
       if (ErrorCount != NULL) {
         ++*ErrorCount;
       }
+
       continue;
     }
 
@@ -462,15 +473,15 @@ ParseSerializedArray (
 
 BOOLEAN
 ParseSerialized (
-      OUT  VOID                *Serialized,
-  IN       OC_SCHEMA_INFO      *RootSchema,
-  IN       VOID                *PlistBuffer,
-  IN       UINT32              PlistSize,
-  IN  OUT  UINT32              *ErrorCount  OPTIONAL
+  OUT  VOID                *Serialized,
+  IN       OC_SCHEMA_INFO  *RootSchema,
+  IN       VOID            *PlistBuffer,
+  IN       UINT32          PlistSize,
+  IN  OUT  UINT32          *ErrorCount  OPTIONAL
   )
 {
-  XML_DOCUMENT        *Document;
-  XML_NODE            *RootDict;
+  XML_DOCUMENT  *Document;
+  XML_NODE      *RootDict;
 
   Document = XmlDocumentParse (PlistBuffer, PlistSize, FALSE);
 
@@ -479,6 +490,7 @@ ParseSerialized (
     if (ErrorCount != NULL) {
       ++*ErrorCount;
     }
+
     return FALSE;
   }
 
@@ -490,6 +502,7 @@ ParseSerialized (
     if (ErrorCount != NULL) {
       ++*ErrorCount;
     }
+
     return FALSE;
   }
 

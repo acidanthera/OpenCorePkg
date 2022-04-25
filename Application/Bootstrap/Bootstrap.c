@@ -38,18 +38,18 @@ LoadOpenCore (
   IN  EFI_DEVICE_PATH_PROTOCOL         *LoaderDevicePath
   )
 {
-  EFI_STATUS                 Status;
-  VOID                       *Buffer;
-  UINTN                      LoaderPathSize;
-  UINTN                      PrefixPathSize;
-  UINTN                      RootPathLength;
-  CHAR16                     *LoaderPath;
-  UINT32                     BufferSize;
-  EFI_DEVICE_PATH_PROTOCOL   *ImagePath;
+  EFI_STATUS                Status;
+  VOID                      *Buffer;
+  UINTN                     LoaderPathSize;
+  UINTN                     PrefixPathSize;
+  UINTN                     RootPathLength;
+  CHAR16                    *LoaderPath;
+  UINT32                    BufferSize;
+  EFI_DEVICE_PATH_PROTOCOL  *ImagePath;
 
   ASSERT (FileSystem != NULL);
 
-  Buffer = NULL;
+  Buffer     = NULL;
   BufferSize = 0;
 
   LoaderPath = OcCopyDevicePathFullName (LoaderDevicePath, NULL);
@@ -61,12 +61,13 @@ LoadOpenCore (
   //
   if (LoaderPath != NULL) {
     LoaderPathSize = StrSize (LoaderPath);
-    if (UnicodeGetParentDirectory (LoaderPath)
-      && UnicodeGetParentDirectory (LoaderPath)) {
+    if (  UnicodeGetParentDirectory (LoaderPath)
+       && UnicodeGetParentDirectory (LoaderPath))
+    {
       DEBUG ((DEBUG_INFO, "BS: Relative path - %s\n", LoaderPath));
       PrefixPathSize = StrSize (LoaderPath);
       if (LoaderPathSize - PrefixPathSize >= L_STR_SIZE (OPEN_CORE_APP_PATH)) {
-        RootPathLength = PrefixPathSize / sizeof (CHAR16) - 1;
+        RootPathLength             = PrefixPathSize / sizeof (CHAR16) - 1;
         LoaderPath[RootPathLength] = '\\';
         CopyMem (&LoaderPath[RootPathLength + 1], OPEN_CORE_APP_PATH, L_STR_SIZE (OPEN_CORE_APP_PATH));
         Buffer = OcReadFile (FileSystem, LoaderPath, &BufferSize, BASE_16MB);
@@ -97,11 +98,11 @@ LoadOpenCore (
       ));
 
     Buffer = OcReadFile (
-      FileSystem,
-      OPEN_CORE_ROOT_PATH L"\\" OPEN_CORE_APP_PATH,
-      &BufferSize,
-      BASE_16MB
-      );
+               FileSystem,
+               OPEN_CORE_ROOT_PATH L"\\" OPEN_CORE_APP_PATH,
+               &BufferSize,
+               BASE_16MB
+               );
     if (Buffer != NULL) {
       //
       // Failure to allocate this one is not too critical, as we will still be able
@@ -117,18 +118,18 @@ LoadOpenCore (
     return EFI_NOT_FOUND;
   }
 
-  DEBUG ((DEBUG_INFO, "BS: Read OpenCore image of %Lu bytes\n", (UINT64) BufferSize));
+  DEBUG ((DEBUG_INFO, "BS: Read OpenCore image of %Lu bytes\n", (UINT64)BufferSize));
 
   //
   // Run OpenCore image
   //
   Status = OcLoadAndRunImage (
-    ImagePath,
-    Buffer,
-    BufferSize,
-    NULL,
-    NULL
-    );
+             ImagePath,
+             Buffer,
+             BufferSize,
+             NULL,
+             NULL
+             );
 
   DEBUG ((DEBUG_ERROR, "BS: Failed to start OpenCore image - %r\n", Status));
   FreePool (Buffer);
@@ -144,9 +145,9 @@ UefiMain (
   IN EFI_SYSTEM_TABLE  *SystemTable
   )
 {
-  EFI_STATUS                        Status;
-  EFI_LOADED_IMAGE_PROTOCOL         *LoadedImage;
-  EFI_SIMPLE_FILE_SYSTEM_PROTOCOL   *FileSystem;
+  EFI_STATUS                       Status;
+  EFI_LOADED_IMAGE_PROTOCOL        *LoadedImage;
+  EFI_SIMPLE_FILE_SYSTEM_PROTOCOL  *FileSystem;
 
   DEBUG ((DEBUG_INFO, "BS: Starting OpenCore application...\n"));
 
@@ -157,11 +158,11 @@ UefiMain (
   //
 
   LoadedImage = NULL;
-  Status = gBS->HandleProtocol (
-    ImageHandle,
-    &gEfiLoadedImageProtocolGuid,
-    (VOID **) &LoadedImage
-    );
+  Status      = gBS->HandleProtocol (
+                       ImageHandle,
+                       &gEfiLoadedImageProtocolGuid,
+                       (VOID **)&LoadedImage
+                       );
 
   if (EFI_ERROR (Status)) {
     DEBUG ((DEBUG_ERROR, "BS: Failed to locate loaded image - %r\n", Status));
@@ -174,9 +175,9 @@ UefiMain (
   // Obtain the file system device path
   //
   FileSystem = OcLocateFileSystem (
-    LoadedImage->DeviceHandle,
-    LoadedImage->FilePath
-    );
+                 LoadedImage->DeviceHandle,
+                 LoadedImage->FilePath
+                 );
 
   if (FileSystem == NULL) {
     DEBUG ((DEBUG_ERROR, "BS: Failed to obtain own file system\n"));

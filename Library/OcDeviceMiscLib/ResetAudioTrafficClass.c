@@ -40,12 +40,12 @@ ResetAudioTrafficClass (
   UINT8                TrafficClass;
 
   Status = gBS->LocateHandleBuffer (
-    ByProtocol,
-    &gEfiPciIoProtocolGuid,
-    NULL,
-    &HandleCount,
-    &HandleBuffer
-    );
+                  ByProtocol,
+                  &gEfiPciIoProtocolGuid,
+                  NULL,
+                  &HandleCount,
+                  &HandleBuffer
+                  );
 
   if (EFI_ERROR (Status)) {
     DEBUG ((DEBUG_INFO, "OCDM: No PCI devices for TCSEL reset - %r\n", Status));
@@ -54,29 +54,30 @@ ResetAudioTrafficClass (
 
   for (Index = 0; Index < HandleCount; ++Index) {
     Status = gBS->HandleProtocol (
-      HandleBuffer[Index],
-      &gEfiPciIoProtocolGuid,
-      (VOID **) &PciIo
-      );
+                    HandleBuffer[Index],
+                    &gEfiPciIoProtocolGuid,
+                    (VOID **)&PciIo
+                    );
 
     if (EFI_ERROR (Status)) {
       continue;
     }
 
     Status = PciIo->Pci.Read (
-      PciIo,
-      EfiPciIoWidthUint8,
-      PCI_CLASSCODE_OFFSET,
-      sizeof (PCI_CLASSCODE) / sizeof (UINT8),
-      &ClassCode
-      );
+                          PciIo,
+                          EfiPciIoWidthUint8,
+                          PCI_CLASSCODE_OFFSET,
+                          sizeof (PCI_CLASSCODE) / sizeof (UINT8),
+                          &ClassCode
+                          );
     if (EFI_ERROR (Status)) {
       continue;
     }
 
-    if (ClassCode.BaseCode == PCI_CLASS_MEDIA &&
-      (ClassCode.SubClassCode == PCI_CLASS_MEDIA_AUDIO ||
-      ClassCode.SubClassCode == PCI_CLASS_MEDIA_HDA)) {
+    if ((ClassCode.BaseCode == PCI_CLASS_MEDIA) &&
+        ((ClassCode.SubClassCode == PCI_CLASS_MEDIA_AUDIO) ||
+         (ClassCode.SubClassCode == PCI_CLASS_MEDIA_HDA)))
+    {
       Status = PciIo->Pci.Read (PciIo, EfiPciIoWidthUint8, PCI_MEDIA_TCSEL_OFFSET, 1, &TrafficClass);
       if (EFI_ERROR (Status)) {
         continue;
@@ -85,8 +86,8 @@ ResetAudioTrafficClass (
       DEBUG ((
         DEBUG_INFO,
         "OCDM: Discovered audio device at %u/%u with TCSEL %X\n",
-        (UINT32) (Index + 1),
-        (UINT32) HandleCount,
+        (UINT32)(Index + 1),
+        (UINT32)HandleCount,
         TrafficClass
         ));
 

@@ -29,15 +29,15 @@
 STATIC
 VOID *
 PanicUnpack (
-  IN  CONST VOID   *Packed,
-  IN  UINTN        PackedSize,
-  OUT UINTN        *UnpackedSize
+  IN  CONST VOID  *Packed,
+  IN  UINTN       PackedSize,
+  OUT UINTN       *UnpackedSize
   )
 {
-  VOID          *Unpacked;
-  CONST UINT8   *PackedWalker;
-  UINT8         *UnpackedWalker;
-  UINT64        Sequence;
+  VOID         *Unpacked;
+  CONST UINT8  *PackedWalker;
+  UINT8        *UnpackedWalker;
+  UINT64       Sequence;
 
   if (OcOverflowMulUN (PackedSize, 8, UnpackedSize)) {
     return NULL;
@@ -45,11 +45,11 @@ PanicUnpack (
 
   //
   // Source buffer is required to be 8-byte aligned by Apple,
-  // so we can freely truncate here. 
+  // so we can freely truncate here.
   //
   *UnpackedSize /= 7;
-  *UnpackedSize = *UnpackedSize - (*UnpackedSize % 8);
-  if (*UnpackedSize == 0 || OcOverflowAddUN (*UnpackedSize, 1, UnpackedSize)) {
+  *UnpackedSize  = *UnpackedSize - (*UnpackedSize % 8);
+  if ((*UnpackedSize == 0) || OcOverflowAddUN (*UnpackedSize, 1, UnpackedSize)) {
     return NULL;
   }
 
@@ -58,22 +58,22 @@ PanicUnpack (
     return NULL;
   }
 
-  Sequence = 0;
-  PackedWalker = Packed;
+  Sequence       = 0;
+  PackedWalker   = Packed;
   UnpackedWalker = Unpacked;
 
   while (PackedSize >= 7) {
     CopyMem (&Sequence, PackedWalker, 7);
-    *UnpackedWalker++ = (UINT8) BitFieldRead64 (Sequence, 7 * 0, 7 * 0 + 6);
-    *UnpackedWalker++ = (UINT8) BitFieldRead64 (Sequence, 7 * 1, 7 * 1 + 6);
-    *UnpackedWalker++ = (UINT8) BitFieldRead64 (Sequence, 7 * 2, 7 * 2 + 6);
-    *UnpackedWalker++ = (UINT8) BitFieldRead64 (Sequence, 7 * 3, 7 * 3 + 6);
-    *UnpackedWalker++ = (UINT8) BitFieldRead64 (Sequence, 7 * 4, 7 * 4 + 6);
-    *UnpackedWalker++ = (UINT8) BitFieldRead64 (Sequence, 7 * 5, 7 * 5 + 6);
-    *UnpackedWalker++ = (UINT8) BitFieldRead64 (Sequence, 7 * 6, 7 * 6 + 6);
-    *UnpackedWalker++ = (UINT8) BitFieldRead64 (Sequence, 7 * 7, 7 * 7 + 6);
-    PackedWalker += 7;
-    PackedSize   -= 7;
+    *UnpackedWalker++ = (UINT8)BitFieldRead64 (Sequence, 7 * 0, 7 * 0 + 6);
+    *UnpackedWalker++ = (UINT8)BitFieldRead64 (Sequence, 7 * 1, 7 * 1 + 6);
+    *UnpackedWalker++ = (UINT8)BitFieldRead64 (Sequence, 7 * 2, 7 * 2 + 6);
+    *UnpackedWalker++ = (UINT8)BitFieldRead64 (Sequence, 7 * 3, 7 * 3 + 6);
+    *UnpackedWalker++ = (UINT8)BitFieldRead64 (Sequence, 7 * 4, 7 * 4 + 6);
+    *UnpackedWalker++ = (UINT8)BitFieldRead64 (Sequence, 7 * 5, 7 * 5 + 6);
+    *UnpackedWalker++ = (UINT8)BitFieldRead64 (Sequence, 7 * 6, 7 * 6 + 6);
+    *UnpackedWalker++ = (UINT8)BitFieldRead64 (Sequence, 7 * 7, 7 * 7 + 6);
+    PackedWalker     += 7;
+    PackedSize       -= 7;
   }
 
   //
@@ -110,6 +110,7 @@ PanicExpandPutBuf (
       if (*Buffer != NULL) {
         FreePool (*Buffer);
       }
+
       return FALSE;
     }
 
@@ -118,10 +119,11 @@ PanicExpandPutBuf (
       if (*Buffer != NULL) {
         FreePool (*Buffer);
       }
+
       return FALSE;
     }
 
-    *Buffer = TmpBuffer;
+    *Buffer        = TmpBuffer;
     *AllocatedSize = NewSize;
   }
 
@@ -150,9 +152,9 @@ PanicExpand (
     return NULL; ///< Not encoded.
   }
 
-  Expanded         = NULL;
-  AllocatedSize    = 0;
-  CurrentSize      = 0;
+  Expanded      = NULL;
+  AllocatedSize = 0;
+  CurrentSize   = 0;
 
   TmpSize = EncodedStart - EncodedStart;
 
@@ -208,9 +210,11 @@ PanicExpand (
               Success = PanicExpandPutBuf (&Expanded, &AllocatedSize, &CurrentSize, Encoded, 2);
               break;
           }
+
           break;
         }
-        /* Fallthrough */
+
+      /* Fallthrough */
       default:
         Success = PanicExpandPutBuf (&Expanded, &AllocatedSize, &CurrentSize, Encoded, 1);
         break;
@@ -236,17 +240,17 @@ PanicExpand (
 
 VOID *
 OcReadApplePanicLog (
-  OUT UINT32       *PanicSize
+  OUT UINT32  *PanicSize
   )
 {
-  EFI_STATUS   Status;
-  UINT32       Index;
-  VOID         *Value;
-  UINTN        ValueSize;
-  CHAR16       VariableName[32];
-  VOID         *TmpData;
-  UINTN        TmpDataSize;
-  VOID         *PanicData;
+  EFI_STATUS  Status;
+  UINT32      Index;
+  VOID        *Value;
+  UINTN       ValueSize;
+  CHAR16      VariableName[32];
+  VOID        *TmpData;
+  UINTN       TmpDataSize;
+  VOID        *PanicData;
 
   TmpData     = NULL;
   TmpDataSize = 0;
@@ -274,12 +278,14 @@ OcReadApplePanicLog (
       if (TmpData != NULL) {
         FreePool (TmpData);
       }
+
       return NULL;
     }
+
     TmpData = PanicData;
 
     CopyMem (
-      (UINT8 *) TmpData + TmpDataSize,
+      (UINT8 *)TmpData + TmpDataSize,
       Value,
       ValueSize
       );
@@ -309,14 +315,14 @@ OcReadApplePanicLog (
     // Truncate trailing zeroes.
     //
     TmpDataSize = AsciiStrLen (PanicData);
-    TmpData = PanicExpand (PanicData, TmpDataSize, &TmpDataSize);
+    TmpData     = PanicExpand (PanicData, TmpDataSize, &TmpDataSize);
     if (TmpData != NULL) {
       FreePool (PanicData);
       PanicData = TmpData;
     }
   }
 
-  *PanicSize = (UINT32) TmpDataSize;
+  *PanicSize = (UINT32)TmpDataSize;
 
   return TmpData;
 }

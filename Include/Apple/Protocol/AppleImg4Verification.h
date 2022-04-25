@@ -64,10 +64,10 @@ EFI_STATUS
   );
 
 struct APPLE_IMG4_VERIFICATION_PROTOCOL_ {
-  UINTN             Revision;
-  APPLE_IMG4_VERIFY Verify;
+  UINTN                Revision;
+  APPLE_IMG4_VERIFY    Verify;
 };
 
-extern EFI_GUID gAppleImg4VerificationProtocolGuid;
+extern EFI_GUID  gAppleImg4VerificationProtocolGuid;
 
 #endif // APPLE_IMG4_VERIFICATION_H

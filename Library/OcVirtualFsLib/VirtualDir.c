@@ -32,17 +32,17 @@ STATIC
 EFI_STATUS
 EFIAPI
 VirtualDirOpen (
-  IN  EFI_FILE_PROTOCOL       *This,
-  OUT EFI_FILE_PROTOCOL       **NewHandle,
-  IN  CHAR16                  *FileName,
-  IN  UINT64                  OpenMode,
-  IN  UINT64                  Attributes
+  IN  EFI_FILE_PROTOCOL  *This,
+  OUT EFI_FILE_PROTOCOL  **NewHandle,
+  IN  CHAR16             *FileName,
+  IN  UINT64             OpenMode,
+  IN  UINT64             Attributes
   )
 {
-  EFI_STATUS         Status;
-  VIRTUAL_DIR_DATA   *Data;
+  EFI_STATUS        Status;
+  VIRTUAL_DIR_DATA  *Data;
 
-  if (This == NULL || NewHandle == NULL || FileName == NULL) {
+  if ((This == NULL) || (NewHandle == NULL) || (FileName == NULL)) {
     return EFI_INVALID_PARAMETER;
   }
 
@@ -50,15 +50,16 @@ VirtualDirOpen (
 
   if (Data->UnderlyingProtocol != NULL) {
     Status = Data->UnderlyingProtocol->Open (
-      Data->UnderlyingProtocol,
-      NewHandle,
-      FileName,
-      OpenMode,
-      Attributes
-      );
+                                         Data->UnderlyingProtocol,
+                                         NewHandle,
+                                         FileName,
+                                         OpenMode,
+                                         Attributes
+                                         );
     if (!EFI_ERROR (Status)) {
       return CreateRealFile (*NewHandle, NULL, TRUE, NewHandle);
     }
+
     return Status;
   }
 
@@ -75,8 +76,8 @@ VirtualDirClose (
   IN EFI_FILE_PROTOCOL  *This
   )
 {
-  EFI_STATUS         Status;
-  VIRTUAL_DIR_DATA   *Data;
+  EFI_STATUS        Status;
+  VIRTUAL_DIR_DATA  *Data;
 
   if (This == NULL) {
     return EFI_INVALID_PARAMETER;
@@ -86,8 +87,8 @@ VirtualDirClose (
 
   if (Data->UnderlyingProtocol != NULL) {
     Status = Data->UnderlyingProtocol->Close (
-      Data->UnderlyingProtocol
-    );
+                                         Data->UnderlyingProtocol
+                                         );
     if (EFI_ERROR (Status)) {
       return Status;
     }
@@ -105,7 +106,7 @@ VirtualDirDelete (
   IN EFI_FILE_PROTOCOL  *This
   )
 {
-  EFI_STATUS         Status;
+  EFI_STATUS  Status;
 
   Status = VirtualDirClose (This);
   if (EFI_ERROR (Status)) {
@@ -122,20 +123,21 @@ STATIC
 EFI_STATUS
 EFIAPI
 VirtualDirRead (
-  IN EFI_FILE_PROTOCOL        *This,
-  IN OUT UINTN                *BufferSize,
-     OUT VOID                 *Buffer
+  IN EFI_FILE_PROTOCOL  *This,
+  IN OUT UINTN          *BufferSize,
+  OUT VOID              *Buffer
   )
 {
-  EFI_STATUS            Status;
-  VIRTUAL_DIR_DATA      *Data;
-  LIST_ENTRY            *DirEntryLink;
-  VIRTUAL_DIR_ENTRY     *DirEntry;
-  UINTN                 ReadSize;
-  UINTN                 FileStrSize;
+  EFI_STATUS         Status;
+  VIRTUAL_DIR_DATA   *Data;
+  LIST_ENTRY         *DirEntryLink;
+  VIRTUAL_DIR_ENTRY  *DirEntry;
+  UINTN              ReadSize;
+  UINTN              FileStrSize;
 
-  if (This == NULL
-    || BufferSize == NULL) {
+  if (  (This == NULL)
+     || (BufferSize == NULL))
+  {
     return EFI_INVALID_PARAMETER;
   }
 
@@ -145,16 +147,16 @@ VirtualDirRead (
   // If our entry position is zero, try to read underlying protocol first.
   //
   ReadSize = *BufferSize;
-  if (Data->CurrentEntry == NULL && Data->UnderlyingProtocol != NULL) {
+  if ((Data->CurrentEntry == NULL) && (Data->UnderlyingProtocol != NULL)) {
     Status = Data->UnderlyingProtocol->Read (
-      Data->UnderlyingProtocol,
-      BufferSize,
-      Buffer
-      );
+                                         Data->UnderlyingProtocol,
+                                         BufferSize,
+                                         Buffer
+                                         );
 
-      if (EFI_ERROR (Status) || *BufferSize != 0) {
-        return Status;
-      }
+    if (EFI_ERROR (Status) || (*BufferSize != 0)) {
+      return Status;
+    }
   }
 
   //
@@ -168,14 +170,14 @@ VirtualDirRead (
   //
   // End of directory.
   //
-  if (Data->CurrentEntry != NULL && IsNodeAtEnd (&Data->Entries, Data->CurrentEntry)) {
+  if ((Data->CurrentEntry != NULL) && IsNodeAtEnd (&Data->Entries, Data->CurrentEntry)) {
     Data->CurrentEntry = NULL;
 
     *BufferSize = 0;
     return EFI_SUCCESS;
   }
 
-  *BufferSize = ReadSize;
+  *BufferSize  = ReadSize;
   DirEntryLink = Data->CurrentEntry != NULL ? GetNextNode (&Data->Entries, Data->CurrentEntry) : GetFirstNode (&Data->Entries);
 
   //
@@ -190,8 +192,8 @@ VirtualDirRead (
   // Ensure entry size matches string length.
   //
   FileStrSize = StrSize (DirEntry->FileInfo->FileName);
-  if (OcOverflowAddUN (SIZE_OF_EFI_FILE_INFO, FileStrSize, &ReadSize) || ReadSize != DirEntry->FileInfo->Size) {
-    return EFI_DEVICE_ERROR; 
+  if (OcOverflowAddUN (SIZE_OF_EFI_FILE_INFO, FileStrSize, &ReadSize) || (ReadSize != DirEntry->FileInfo->Size)) {
+    return EFI_DEVICE_ERROR;
   }
 
   if (*BufferSize < ReadSize) {
@@ -217,9 +219,9 @@ STATIC
 EFI_STATUS
 EFIAPI
 VirtualDirWrite (
-  IN EFI_FILE_PROTOCOL        *This,
-  IN OUT UINTN                *BufferSize,
-  IN VOID                     *Buffer
+  IN EFI_FILE_PROTOCOL  *This,
+  IN OUT UINTN          *BufferSize,
+  IN VOID               *Buffer
   )
 {
   //
@@ -232,17 +234,17 @@ STATIC
 EFI_STATUS
 EFIAPI
 VirtualDirSetPosition (
-  IN EFI_FILE_PROTOCOL        *This,
-  IN UINT64                   Position
+  IN EFI_FILE_PROTOCOL  *This,
+  IN UINT64             Position
   )
 {
-  EFI_STATUS         Status;
-  VIRTUAL_DIR_DATA   *Data;
+  EFI_STATUS        Status;
+  VIRTUAL_DIR_DATA  *Data;
 
   if (This == NULL) {
     return EFI_INVALID_PARAMETER;
   }
-  
+
   Data = VIRTUAL_DIR_FROM_PROTOCOL (This);
 
   //
@@ -255,14 +257,15 @@ VirtualDirSetPosition (
   Status = EFI_SUCCESS;
   if (Data->UnderlyingProtocol != NULL) {
     Status = Data->UnderlyingProtocol->SetPosition (
-      Data->UnderlyingProtocol,
-      0
-      );
+                                         Data->UnderlyingProtocol,
+                                         0
+                                         );
   }
 
   if (!EFI_ERROR (Status)) {
     Data->CurrentEntry = NULL;
   }
+
   return Status;
 }
 
@@ -270,8 +273,8 @@ STATIC
 EFI_STATUS
 EFIAPI
 VirtualDirGetPosition (
-  IN  EFI_FILE_PROTOCOL       *This,
-  OUT UINT64                  *Position
+  IN  EFI_FILE_PROTOCOL  *This,
+  OUT UINT64             *Position
   )
 {
   //
@@ -284,21 +287,22 @@ STATIC
 EFI_STATUS
 EFIAPI
 VirtualDirGetInfo (
-  IN  EFI_FILE_PROTOCOL       *This,
-  IN  EFI_GUID                *InformationType,
-  IN  OUT UINTN               *BufferSize,
-  OUT VOID                    *Buffer
+  IN  EFI_FILE_PROTOCOL  *This,
+  IN  EFI_GUID           *InformationType,
+  IN  OUT UINTN          *BufferSize,
+  OUT VOID               *Buffer
   )
 {
-  VIRTUAL_DIR_DATA   *Data;
-  UINTN              InfoSize;  
-  UINTN              NameSize;
-  EFI_FILE_INFO      *FileInfo;
-  BOOLEAN            Fits;
+  VIRTUAL_DIR_DATA  *Data;
+  UINTN             InfoSize;
+  UINTN             NameSize;
+  EFI_FILE_INFO     *FileInfo;
+  BOOLEAN           Fits;
 
-  if (This == NULL
-    || InformationType == NULL
-    || BufferSize == NULL) {
+  if (  (This == NULL)
+     || (InformationType == NULL)
+     || (BufferSize == NULL))
+  {
     return EFI_INVALID_PARAMETER;
   }
 
@@ -325,7 +329,8 @@ VirtualDirGetInfo (
     if (Buffer == NULL) {
       return EFI_INVALID_PARAMETER;
     }
-    FileInfo = (EFI_FILE_INFO *) Buffer;
+
+    FileInfo = (EFI_FILE_INFO *)Buffer;
 
     ZeroMem (FileInfo, InfoSize - NameSize);
     FileInfo->Size = InfoSize;
@@ -337,7 +342,7 @@ VirtualDirGetInfo (
     //
     // Return zeroes for timestamps.
     //
-    FileInfo->Attribute    = EFI_FILE_READ_ONLY | EFI_FILE_DIRECTORY;
+    FileInfo->Attribute = EFI_FILE_READ_ONLY | EFI_FILE_DIRECTORY;
     CopyMem (&FileInfo->FileName[0], Data->FileName, NameSize);
 
     return EFI_SUCCESS;
@@ -350,10 +355,10 @@ STATIC
 EFI_STATUS
 EFIAPI
 VirtualDirSetInfo (
-  IN EFI_FILE_PROTOCOL        *This,
-  IN EFI_GUID                 *InformationType,
-  IN UINTN                    BufferSize,
-  IN VOID                     *Buffer
+  IN EFI_FILE_PROTOCOL  *This,
+  IN EFI_GUID           *InformationType,
+  IN UINTN              BufferSize,
+  IN VOID               *Buffer
   )
 {
   //
@@ -366,7 +371,7 @@ STATIC
 EFI_STATUS
 EFIAPI
 VirtualDirFlush (
-  IN EFI_FILE_PROTOCOL        *This
+  IN EFI_FILE_PROTOCOL  *This
   )
 {
   //
@@ -379,15 +384,15 @@ STATIC
 EFI_STATUS
 EFIAPI
 VirtualDirOpenEx (
-  IN     EFI_FILE_PROTOCOL    *This,
-  OUT    EFI_FILE_PROTOCOL    **NewHandle,
-  IN     CHAR16               *FileName,
-  IN     UINT64               OpenMode,
-  IN     UINT64               Attributes,
-  IN OUT EFI_FILE_IO_TOKEN    *Token
+  IN     EFI_FILE_PROTOCOL  *This,
+  OUT    EFI_FILE_PROTOCOL  **NewHandle,
+  IN     CHAR16             *FileName,
+  IN     UINT64             OpenMode,
+  IN     UINT64             Attributes,
+  IN OUT EFI_FILE_IO_TOKEN  *Token
   )
 {
-  EFI_STATUS         Status;
+  EFI_STATUS  Status;
 
   //
   // Ignore asynchronous interface for now.
@@ -397,14 +402,14 @@ VirtualDirOpenEx (
   //  We do not care for simplicity.
   //
   Status = VirtualDirOpen (
-    This,
-    NewHandle,
-    FileName,
-    OpenMode,
-    Attributes
-    );
+             This,
+             NewHandle,
+             FileName,
+             OpenMode,
+             Attributes
+             );
 
-  if (!EFI_ERROR (Status) && Token->Event != NULL) {
+  if (!EFI_ERROR (Status) && (Token->Event != NULL)) {
     Token->Status = EFI_SUCCESS;
     gBS->SignalEvent (Token->Event);
   }
@@ -420,16 +425,17 @@ VirtualDirReadEx (
   IN OUT EFI_FILE_IO_TOKEN  *Token
   )
 {
-  EFI_STATUS         Status;
+  EFI_STATUS  Status;
 
-  if (This == NULL
-    || Token == NULL) {
+  if (  (This == NULL)
+     || (Token == NULL))
+  {
     return EFI_INVALID_PARAMETER;
   }
 
   Status = VirtualDirRead (This, Token->Buffer, &Token->BufferSize);
 
-  if (!EFI_ERROR (Status) && Token->Event != NULL) {
+  if (!EFI_ERROR (Status) && (Token->Event != NULL)) {
     Token->Status = EFI_SUCCESS;
     gBS->SignalEvent (Token->Event);
   }
@@ -468,7 +474,7 @@ VirtualDirFlushEx (
 STATIC
 CONST
 EFI_FILE_PROTOCOL
-mVirtualDirProtocolTemplate = {
+  mVirtualDirProtocolTemplate = {
   .Revision    = EFI_FILE_PROTOCOL_REVISION2,
   .Open        = VirtualDirOpen,
   .Close       = VirtualDirClose,
@@ -505,10 +511,10 @@ VirtualDirCreateOverlay (
     return EFI_OUT_OF_RESOURCES;
   }
 
-  Data->Signature           = VIRTUAL_DIR_DATA_SIGNATURE;
-  Data->FileName            = FileName;
-  Data->CurrentEntry        = NULL;
-  Data->UnderlyingProtocol  = UnderlyingFile;
+  Data->Signature          = VIRTUAL_DIR_DATA_SIGNATURE;
+  Data->FileName           = FileName;
+  Data->CurrentEntry       = NULL;
+  Data->UnderlyingProtocol = UnderlyingFile;
   InitializeListHead (&Data->Entries);
   CopyMem (&Data->Protocol, &mVirtualDirProtocolTemplate, sizeof (Data->Protocol));
   if (ModificationTime != NULL) {
@@ -529,8 +535,8 @@ VirtualDirCreateOverlayFileNameCopy (
   OUT EFI_FILE_PROTOCOL  **File
   )
 {
-  EFI_STATUS          Status;
-  CHAR16              *FileNameCopy;
+  EFI_STATUS  Status;
+  CHAR16      *FileNameCopy;
 
   ASSERT (FileName != NULL);
   ASSERT (File != NULL);
@@ -547,17 +553,18 @@ VirtualDirCreateOverlayFileNameCopy (
     FreePool (FileNameCopy);
     return EFI_OUT_OF_RESOURCES;
   }
+
   return Status;
 }
 
 EFI_STATUS
 VirtualDirAddEntry (
-  IN EFI_FILE_PROTOCOL    *This,
-  IN EFI_FILE_INFO        *FileInfo
+  IN EFI_FILE_PROTOCOL  *This,
+  IN EFI_FILE_INFO      *FileInfo
   )
 {
-  VIRTUAL_DIR_DATA  *Data;
-  VIRTUAL_DIR_ENTRY *NewEntry;
+  VIRTUAL_DIR_DATA   *Data;
+  VIRTUAL_DIR_ENTRY  *NewEntry;
 
   ASSERT (This != NULL);
   ASSERT (FileInfo != NULL);
@@ -570,7 +577,7 @@ VirtualDirAddEntry (
   }
 
   NewEntry->Signature = VIRTUAL_DIR_ENTRY_SIGNATURE;
-  NewEntry->FileInfo = FileInfo;
+  NewEntry->FileInfo  = FileInfo;
 
   InsertTailList (&Data->Entries, &NewEntry->Link);
   return EFI_SUCCESS;
@@ -578,12 +585,12 @@ VirtualDirAddEntry (
 
 VOID
 VirtualDirFree (
-  IN EFI_FILE_PROTOCOL    *This
+  IN EFI_FILE_PROTOCOL  *This
   )
 {
-  VIRTUAL_DIR_DATA    *Data;
-  LIST_ENTRY          *DirEntryLink;
-  VIRTUAL_DIR_ENTRY   *DirEntry;
+  VIRTUAL_DIR_DATA   *Data;
+  LIST_ENTRY         *DirEntryLink;
+  VIRTUAL_DIR_ENTRY  *DirEntry;
 
   ASSERT (This != NULL);
 
@@ -591,12 +598,13 @@ VirtualDirFree (
 
   while (!IsListEmpty (&Data->Entries)) {
     DirEntryLink = GetFirstNode (&Data->Entries);
-    DirEntry = GET_VIRTUAL_DIR_ENTRY_FROM_LINK (DirEntryLink);
+    DirEntry     = GET_VIRTUAL_DIR_ENTRY_FROM_LINK (DirEntryLink);
     RemoveEntryList (DirEntryLink);
 
     if (DirEntry->FileInfo != NULL) {
       FreePool (DirEntry->FileInfo);
     }
+
     FreePool (DirEntry);
   }
 

@@ -46,10 +46,10 @@ UefiMain (
   OcSetConsoleResolution (0, 0, 0, FALSE);
 
   Status = gBS->HandleProtocol (
-    gST->ConsoleOutHandle,
-    &gEfiGraphicsOutputProtocolGuid,
-    (VOID **) &Gop
-    );
+                  gST->ConsoleOutHandle,
+                  &gEfiGraphicsOutputProtocolGuid,
+                  (VOID **)&Gop
+                  );
 
   if (EFI_ERROR (Status)) {
     //
@@ -58,6 +58,7 @@ UefiMain (
     for (Index = 0; Index < 10; ++Index) {
       gBS->Stall (SECONDS_TO_MICROSECONDS (1));
     }
+
     return Status;
   }
 
@@ -68,7 +69,7 @@ UefiMain (
     //
     // Red. No BootPicker in firmware or we cannot get it.
     //
-    Pixel.Pixel.Red   = 0xFF;
+    Pixel.Pixel.Red = 0xFF;
   } else if (Status == EFI_UNSUPPORTED) {
     //
     // Yellow. BootPicker does not start.
@@ -89,17 +90,17 @@ UefiMain (
   }
 
   Gop->Blt (
-    Gop,
-    &Pixel.Pixel,
-    EfiBltVideoFill,
-    0,
-    0,
-    0,
-    0,
-    Gop->Mode->Info->HorizontalResolution,
-    Gop->Mode->Info->VerticalResolution,
-    0
-    );
+         Gop,
+         &Pixel.Pixel,
+         EfiBltVideoFill,
+         0,
+         0,
+         0,
+         0,
+         Gop->Mode->Info->HorizontalResolution,
+         Gop->Mode->Info->VerticalResolution,
+         0
+         );
 
   //
   // Note: Ensure that stall value is within UINT32 in nanoseconds.

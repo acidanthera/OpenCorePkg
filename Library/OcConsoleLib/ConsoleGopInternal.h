@@ -22,51 +22,51 @@ typedef struct CONSOLE_GOP_CONTEXT {
   ///
   /// Original EFI_BOOT_SERVICES HandleProtocol to hook and override protocols.
   ///
-  EFI_HANDLE_PROTOCOL OriginalHandleProtocol;
+  EFI_HANDLE_PROTOCOL                        OriginalHandleProtocol;
   ///
   /// Graphics output protocol specific to console.
   ///
-  EFI_GRAPHICS_OUTPUT_PROTOCOL *ConsoleGop;
+  EFI_GRAPHICS_OUTPUT_PROTOCOL               *ConsoleGop;
   ///
   /// Direct framebuffer context.
   ///
-  OC_BLIT_CONFIGURE  *FramebufferContext;
+  OC_BLIT_CONFIGURE                          *FramebufferContext;
   ///
   /// Direct framebuffer context size in pages.
   ///
-  UINTN              FramebufferContextPageCount;
+  UINTN                                      FramebufferContextPageCount;
   ///
   /// Framebuffer memory cache policy.
   ///
-  INT32              CachePolicy;
+  INT32                                      CachePolicy;
   ///
   /// Framebuffer rotation angle.
   ///
-  UINT32             Rotation;
+  UINT32                                     Rotation;
   ///
   /// Original EFI_GRAPHICS_OUTPUT_PROTOCOL SetMode function.
   ///
-  EFI_GRAPHICS_OUTPUT_PROTOCOL_SET_MODE   OriginalGopSetMode;
+  EFI_GRAPHICS_OUTPUT_PROTOCOL_SET_MODE      OriginalGopSetMode;
   ///
   /// Original EFI_GRAPHICS_OUTPUT_PROTOCOL SetMode function.
   ///
-  EFI_GRAPHICS_OUTPUT_PROTOCOL_QUERY_MODE OriginalGopQueryMode;
+  EFI_GRAPHICS_OUTPUT_PROTOCOL_QUERY_MODE    OriginalGopQueryMode;
   ///
   /// Original (not rotated) mode information.
   ///
-  EFI_GRAPHICS_OUTPUT_MODE_INFORMATION    OriginalModeInfo;
+  EFI_GRAPHICS_OUTPUT_MODE_INFORMATION       OriginalModeInfo;
   ///
   /// Original (not rotated) linear frame buffer.
   ///
-  EFI_PHYSICAL_ADDRESS                    OriginalFrameBufferBase;
+  EFI_PHYSICAL_ADDRESS                       OriginalFrameBufferBase;
   ///
   /// Original (not rotated) linear frame buffer size.
   ///
-  UINTN                                   OriginalFrameBufferSize;
+  UINTN                                      OriginalFrameBufferSize;
   ///
   /// Ours (rotated) mode informaation.
   ///
-  EFI_GRAPHICS_OUTPUT_MODE_INFORMATION    CustomModeInfo;
+  EFI_GRAPHICS_OUTPUT_MODE_INFORMATION       CustomModeInfo;
 } CONSOLE_GOP_CONTEXT;
 
 CONST CONSOLE_GOP_CONTEXT *

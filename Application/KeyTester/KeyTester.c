@@ -19,7 +19,6 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 #include <Library/UefiBootServicesTableLib.h>
 #include <Library/UefiApplicationEntryPoint.h>
 
-
 EFI_STATUS
 EFIAPI
 UefiMain (
@@ -41,7 +40,6 @@ UefiMain (
     ZeroMem (&Key, sizeof (Key));
     Status = gST->ConIn->ReadKeyStroke (gST->ConIn, &Key);
     if (EFI_ERROR (Status)) {
-
       if (Status == EFI_NOT_READY) {
         continue;
       }

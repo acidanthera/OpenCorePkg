@@ -10,48 +10,47 @@ typedef struct {
   ///
   /// Currently processed opcode in ACPI table.
   ///
-  UINT8  *CurrentOpcode;
+  UINT8     *CurrentOpcode;
   ///
   /// Pointer to the end of ACPI table.
   ///
-  UINT8  *TableStart;
+  UINT8     *TableStart;
   ///
   /// Pointer to the end of ACPI table.
   ///
-  UINT8  *TableEnd;
+  UINT8     *TableEnd;
   ///
   /// Decoded lookup path allocated from pool.
   /// Contains a sequence of parsed identifiers.
   ///
-  UINT32 *PathStart;
+  UINT32    *PathStart;
   ///
   /// Identifier we need to match next.
   /// Once it reaches PathEnd, matching is successful.
   /// Requested number of matches is required to finish lookup.
   ///
-  UINT32 *CurrentIdentifier;
+  UINT32    *CurrentIdentifier;
   ///
   /// Pointer to the end of lookup path.
   ///
-  UINT32 *PathEnd;
+  UINT32    *PathEnd;
   ///
   /// Nesting level. Once it reaches MAX_NESTING the table is discarded.
   ///
-  UINT32 Nesting;
+  UINT32    Nesting;
   ///
   /// Number of entries to find. Generally 1 for first match success.
   ///
-  UINT32 RequiredEntry;
+  UINT32    RequiredEntry;
   ///
   /// Number of entries already found.
   ///
-  UINT32 EntriesFound;
+  UINT32    EntriesFound;
 } ACPI_PARSER_CONTEXT;
 
-
-#define IDENT_LEN   4
-#define OPCODE_LEN  8
-#define MAX_NESTING 1024
+#define IDENT_LEN    4
+#define OPCODE_LEN   8
+#define MAX_NESTING  1024
 
 /**
   Print new entry name.
@@ -83,7 +82,7 @@ typedef struct {
 /**
   Check that context is valid and has work to do.
 **/
-#define CONTEXT_HAS_WORK(Context) do { \
+#define CONTEXT_HAS_WORK(Context)  do {\
     ASSERT ((Context) != NULL); \
     ASSERT ((Context)->CurrentOpcode != NULL); \
     ASSERT ((Context)->TableEnd != NULL); \
@@ -99,7 +98,7 @@ typedef struct {
 /**
   Enter new nesting level.
 **/
-#define CONTEXT_INCREASE_NESTING(Context) do { \
+#define CONTEXT_INCREASE_NESTING(Context)  do {\
     ++(Context)->Nesting; \
     if ((Context)->Nesting > MAX_NESTING) { \
       return EFI_OUT_OF_RESOURCES; \
@@ -110,7 +109,7 @@ typedef struct {
   Exit nesting level.
   Does not need to be called on error-exit.
 **/
-#define CONTEXT_DECREASE_NESTING(Context) do { \
+#define CONTEXT_DECREASE_NESTING(Context)  do {\
     ASSERT ((Context)->Nesting > 0); \
     --(Context)->Nesting; \
   } while (0)
@@ -118,7 +117,7 @@ typedef struct {
 /**
   Check the specified amount of bytes exists.
 **/
-#define CONTEXT_PEEK_BYTES(Context, Bytes) do { \
+#define CONTEXT_PEEK_BYTES(Context, Bytes)  do {\
     if ((UINT32) ((Context)->TableEnd - (Context)->CurrentOpcode) < (UINT32) (Bytes)) { \
       return EFI_DEVICE_ERROR; \
     } \
@@ -127,7 +126,7 @@ typedef struct {
 /**
   Consume the specified amount of bytes.
 **/
-#define CONTEXT_CONSUME_BYTES(Context, Bytes) do { \
+#define CONTEXT_CONSUME_BYTES(Context, Bytes)  do {\
     if ((UINT32) ((Context)->TableEnd - (Context)->CurrentOpcode) < (UINT32) (Bytes)) { \
       return EFI_DEVICE_ERROR; \
     } \
@@ -139,7 +138,7 @@ typedef struct {
   This one will error as long as there is no new opcode,
   i.e. one byte after the current one.
 **/
-#define CONTEXT_ADVANCE_OPCODE(Context) do { \
+#define CONTEXT_ADVANCE_OPCODE(Context)  do {\
     if ((UINT32) ((Context)->TableEnd - (Context)->CurrentOpcode) <= 1U) { \
       return EFI_DEVICE_ERROR; \
     } \
@@ -160,8 +159,8 @@ typedef struct {
  **/
 EFI_STATUS
 InternalAcpiParseTerm (
-  IN OUT ACPI_PARSER_CONTEXT *Context,
-     OUT UINT8               **Result
+  IN OUT ACPI_PARSER_CONTEXT  *Context,
+  OUT UINT8                   **Result
   );
 
 #endif // ACPI_PARSER_H

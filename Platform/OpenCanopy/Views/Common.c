@@ -16,10 +16,10 @@
 //
 // FIXME: Create BootPickerView struct with background colour/image info.
 //
-GLOBAL_REMOVE_IF_UNREFERENCED INT64 mBackgroundImageOffsetX;
-GLOBAL_REMOVE_IF_UNREFERENCED INT64 mBackgroundImageOffsetY;
+GLOBAL_REMOVE_IF_UNREFERENCED INT64  mBackgroundImageOffsetX;
+GLOBAL_REMOVE_IF_UNREFERENCED INT64  mBackgroundImageOffsetY;
 
-GLOBAL_REMOVE_IF_UNREFERENCED GUI_INTERPOLATION mCommonIntroOpacityInterpol = {
+GLOBAL_REMOVE_IF_UNREFERENCED GUI_INTERPOLATION  mCommonIntroOpacityInterpol = {
   GuiInterpolTypeSmooth,
   0,
   25,
@@ -28,10 +28,10 @@ GLOBAL_REMOVE_IF_UNREFERENCED GUI_INTERPOLATION mCommonIntroOpacityInterpol = {
   0
 };
 
-STATIC UINT8 mCommonFocusState = 0;
+STATIC UINT8  mCommonFocusState = 0;
 
-STATIC GUI_OBJ **mCommonFocusList  = NULL;
-STATIC UINT8   mNumCommonFocusList = 0;
+STATIC GUI_OBJ  **mCommonFocusList  = NULL;
+STATIC UINT8    mNumCommonFocusList = 0;
 
 VOID
 GuiDrawChildImage (
@@ -48,7 +48,7 @@ GuiDrawChildImage (
   IN     UINT32               Height
   )
 {
-  BOOLEAN Result;
+  BOOLEAN  Result;
 
   ASSERT (Image != NULL);
   ASSERT (DrawContext != NULL);
@@ -96,12 +96,13 @@ GuiClickableIsHit (
   ASSERT (Image != NULL);
   ASSERT (Image->Buffer != NULL);
 
-  if (OffsetX < 0 || OffsetX >= Image->Width
-   || OffsetY < 0 || OffsetY >= Image->Height) {
+  if (  (OffsetX < 0) || (OffsetX >= Image->Width)
+     || (OffsetY < 0) || (OffsetY >= Image->Height))
+  {
     return FALSE;
   }
 
-  return Image->Buffer[(UINT32) OffsetY * Image->Width + (UINT32) OffsetX].Reserved > 0;
+  return Image->Buffer[(UINT32)OffsetY * Image->Width + (UINT32)OffsetX].Reserved > 0;
 }
 
 GUI_OBJ *
@@ -111,16 +112,16 @@ InternalFocusKeyHandler (
   IN     CONST GUI_KEY_EVENT      *KeyEvent
   )
 {
-  UINT8   CommonFocusState;
-  GUI_OBJ *FocusChangedObj;
+  UINT8    CommonFocusState;
+  GUI_OBJ  *FocusChangedObj;
 
   if (KeyEvent->OcKeyCode == OC_INPUT_SWITCH_FOCUS) {
     if (mNumCommonFocusList > 1) {
       mCommonFocusList[mCommonFocusState]->Focus (
-        mCommonFocusList[mCommonFocusState],
-        DrawContext,
-        FALSE
-        );
+                                             mCommonFocusList[mCommonFocusState],
+                                             DrawContext,
+                                             FALSE
+                                             );
 
       if ((KeyEvent->OcModifiers & OC_MODIFIERS_REVERSE_SWITCH_FOCUS) == 0) {
         CommonFocusState = mCommonFocusState + 1;
@@ -137,10 +138,10 @@ InternalFocusKeyHandler (
       mCommonFocusState = CommonFocusState;
 
       mCommonFocusList[CommonFocusState]->Focus (
-        mCommonFocusList[CommonFocusState],
-        DrawContext,
-        TRUE
-        );
+                                            mCommonFocusList[CommonFocusState],
+                                            DrawContext,
+                                            TRUE
+                                            );
 
       FocusChangedObj = mCommonFocusList[CommonFocusState];
     } else {
@@ -148,12 +149,12 @@ InternalFocusKeyHandler (
     }
   } else {
     mCommonFocusList[mCommonFocusState]->KeyEvent (
-      mCommonFocusList[mCommonFocusState],
-      DrawContext,
-      Context,
-      KeyEvent
-      );
-    
+                                           mCommonFocusList[mCommonFocusState],
+                                           DrawContext,
+                                           Context,
+                                           KeyEvent
+                                           );
+
     FocusChangedObj = NULL;
   }
 
@@ -170,32 +171,32 @@ InternalResetFocus (
   }
 
   mCommonFocusList[mCommonFocusState]->Focus (
-    mCommonFocusList[mCommonFocusState],
-    DrawContext,
-    FALSE
-    );
+                                         mCommonFocusList[mCommonFocusState],
+                                         DrawContext,
+                                         FALSE
+                                         );
 
   mCommonFocusState = 0;
 
   mCommonFocusList[mCommonFocusState]->Focus (
-    mCommonFocusList[mCommonFocusState],
-    DrawContext,
-    TRUE
-    );
+                                         mCommonFocusList[mCommonFocusState],
+                                         DrawContext,
+                                         TRUE
+                                         );
 }
 
 VOID
 InternalCommonViewDraw (
-  IN OUT GUI_OBJ                 *This,
-  IN OUT GUI_DRAWING_CONTEXT     *DrawContext,
-  IN     BOOT_PICKER_GUI_CONTEXT *Context,
-  IN     INT64                   BaseX,
-  IN     INT64                   BaseY,
-  IN     UINT32                  OffsetX,
-  IN     UINT32                  OffsetY,
-  IN     UINT32                  Width,
-  IN     UINT32                  Height,
-  IN     UINT8                   Opacity
+  IN OUT GUI_OBJ                  *This,
+  IN OUT GUI_DRAWING_CONTEXT      *DrawContext,
+  IN     BOOT_PICKER_GUI_CONTEXT  *Context,
+  IN     INT64                    BaseX,
+  IN     INT64                    BaseY,
+  IN     UINT32                   OffsetX,
+  IN     UINT32                   OffsetY,
+  IN     UINT32                   Width,
+  IN     UINT32                   Height,
+  IN     UINT8                    Opacity
   )
 {
   ASSERT (This != NULL);
@@ -246,12 +247,12 @@ InternalCommonViewDraw (
 
 GUI_OBJ *
 InternalCommonViewPtrEvent (
-  IN OUT GUI_OBJ                 *This,
-  IN OUT GUI_DRAWING_CONTEXT     *DrawContext,
-  IN     BOOT_PICKER_GUI_CONTEXT *Context,
-  IN     INT64                   BaseX,
-  IN     INT64                   BaseY,
-  IN     CONST GUI_PTR_EVENT     *Event
+  IN OUT GUI_OBJ                  *This,
+  IN OUT GUI_DRAWING_CONTEXT      *DrawContext,
+  IN     BOOT_PICKER_GUI_CONTEXT  *Context,
+  IN     INT64                    BaseX,
+  IN     INT64                    BaseY,
+  IN     CONST GUI_PTR_EVENT      *Event
   )
 {
   InternalResetFocus (DrawContext);
@@ -260,20 +261,20 @@ InternalCommonViewPtrEvent (
 
 VOID
 InternalCommonSimpleButtonDraw (
-  IN OUT GUI_OBJ                 *This,
-  IN OUT GUI_DRAWING_CONTEXT     *DrawContext,
-  IN     BOOT_PICKER_GUI_CONTEXT *Context,
-  IN     INT64                   BaseX,
-  IN     INT64                   BaseY,
-  IN     UINT32                  OffsetX,
-  IN     UINT32                  OffsetY,
-  IN     UINT32                  Width,
-  IN     UINT32                  Height,
-  IN     UINT8                   Opacity
+  IN OUT GUI_OBJ                  *This,
+  IN OUT GUI_DRAWING_CONTEXT      *DrawContext,
+  IN     BOOT_PICKER_GUI_CONTEXT  *Context,
+  IN     INT64                    BaseX,
+  IN     INT64                    BaseY,
+  IN     UINT32                   OffsetX,
+  IN     UINT32                   OffsetY,
+  IN     UINT32                   Width,
+  IN     UINT32                   Height,
+  IN     UINT8                    Opacity
   )
 {
-  CONST GUI_OBJ_CLICKABLE       *Clickable;
-  CONST GUI_IMAGE               *ButtonImage;
+  CONST GUI_OBJ_CLICKABLE  *Clickable;
+  CONST GUI_IMAGE          *ButtonImage;
 
   ASSERT (This != NULL);
   ASSERT (DrawContext != NULL);
@@ -306,21 +307,21 @@ InternalCommonSimpleButtonDraw (
 
 UINT8
 InternalCommonSimpleButtonPtrEvent (
-  IN OUT GUI_OBJ                 *This,
-  IN OUT GUI_DRAWING_CONTEXT     *DrawContext,
-  IN     BOOT_PICKER_GUI_CONTEXT *Context,
-  IN     INT64                   BaseX,
-  IN     INT64                   BaseY,
-  IN     CONST GUI_PTR_EVENT     *Event
+  IN OUT GUI_OBJ                  *This,
+  IN OUT GUI_DRAWING_CONTEXT      *DrawContext,
+  IN     BOOT_PICKER_GUI_CONTEXT  *Context,
+  IN     INT64                    BaseX,
+  IN     INT64                    BaseY,
+  IN     CONST GUI_PTR_EVENT      *Event
   )
 {
-  UINT8             Return;
+  UINT8  Return;
 
-  GUI_OBJ_CLICKABLE *Clickable;
-  CONST GUI_IMAGE   *ButtonImage;
-  UINT8             ImageState;
+  GUI_OBJ_CLICKABLE  *Clickable;
+  CONST GUI_IMAGE    *ButtonImage;
+  UINT8              ImageState;
 
-  BOOLEAN           IsHit;
+  BOOLEAN  IsHit;
 
   ASSERT (This != NULL);
   ASSERT (DrawContext != NULL);
@@ -343,16 +344,16 @@ InternalCommonSimpleButtonPtrEvent (
   Return = CommonPtrNotHit;
 
   IsHit = GuiClickableIsHit (
-    ButtonImage,
-    Event->Pos.Pos.X - BaseX,
-    Event->Pos.Pos.Y - BaseY
-    );
+            ButtonImage,
+            Event->Pos.Pos.X - BaseX,
+            Event->Pos.Pos.Y - BaseY
+            );
   if (IsHit) {
     if (Event->Type == GuiPointerPrimaryUp) {
       Return = CommonPtrAction;
     } else {
       ImageState = ICON_TYPE_HELD;
-      Return = CommonPtrHit;
+      Return     = CommonPtrHit;
     }
   }
 
@@ -365,7 +366,7 @@ InternalCommonSimpleButtonPtrEvent (
     ASSERT (BaseY >= 0);
     ASSERT (BaseX + This->Width <= DrawContext->Screen.Width);
     ASSERT (BaseY + This->Height <= DrawContext->Screen.Height);
-    GuiRequestDraw ((UINT32) BaseX, (UINT32) BaseY, This->Width, This->Height);
+    GuiRequestDraw ((UINT32)BaseX, (UINT32)BaseY, This->Width, This->Height);
   }
 
   return Return;
@@ -373,16 +374,16 @@ InternalCommonSimpleButtonPtrEvent (
 
 VOID
 InternalCommonSimpleButtonFocusDraw (
-  IN OUT GUI_OBJ                 *This,
-  IN OUT GUI_DRAWING_CONTEXT     *DrawContext,
-  IN     BOOT_PICKER_GUI_CONTEXT *Context,
-  IN     INT64                   BaseX,
-  IN     INT64                   BaseY,
-  IN     UINT32                  OffsetX,
-  IN     UINT32                  OffsetY,
-  IN     UINT32                  Width,
-  IN     UINT32                  Height,
-  IN     UINT8                   Opacity
+  IN OUT GUI_OBJ                  *This,
+  IN OUT GUI_DRAWING_CONTEXT      *DrawContext,
+  IN     BOOT_PICKER_GUI_CONTEXT  *Context,
+  IN     INT64                    BaseX,
+  IN     INT64                    BaseY,
+  IN     UINT32                   OffsetX,
+  IN     UINT32                   OffsetY,
+  IN     UINT32                   Width,
+  IN     UINT32                   Height,
+  IN     UINT8                    Opacity
   )
 {
   ASSERT (This != NULL);
@@ -395,8 +396,8 @@ InternalCommonSimpleButtonFocusDraw (
     DrawContext,
     BaseX,
     BaseY,
-    ((INT32) This->Width - (INT32) Context->Icons[ICON_BUTTON_FOCUS][ICON_TYPE_BASE].Width) / 2,
-    ((INT32) This->Height - (INT32) Context->Icons[ICON_BUTTON_FOCUS][ICON_TYPE_BASE].Height) / 2,
+    ((INT32)This->Width - (INT32)Context->Icons[ICON_BUTTON_FOCUS][ICON_TYPE_BASE].Width) / 2,
+    ((INT32)This->Height - (INT32)Context->Icons[ICON_BUTTON_FOCUS][ICON_TYPE_BASE].Height) / 2,
     OffsetX,
     OffsetY,
     Width,
@@ -410,20 +411,21 @@ InternalCommonSimpleButtonFocusDraw (
 
 VOID
 InternalCommonShutDownKeyEvent (
-  IN OUT GUI_OBJ                 *This,
-  IN OUT GUI_DRAWING_CONTEXT     *DrawContext,
-  IN     BOOT_PICKER_GUI_CONTEXT *Context,
-  IN     CONST GUI_KEY_EVENT     *KeyEvent
+  IN OUT GUI_OBJ                  *This,
+  IN OUT GUI_DRAWING_CONTEXT      *DrawContext,
+  IN     BOOT_PICKER_GUI_CONTEXT  *Context,
+  IN     CONST GUI_KEY_EVENT      *KeyEvent
   )
 {
-  if (KeyEvent->OcKeyCode == OC_INPUT_CONTINUE
-   || KeyEvent->OcKeyCode == OC_INPUT_TYPING_CONFIRM) {
+  if (  (KeyEvent->OcKeyCode == OC_INPUT_CONTINUE)
+     || (KeyEvent->OcKeyCode == OC_INPUT_TYPING_CONFIRM))
+  {
     if (Context->PickerContext->PickerAudioAssist) {
       Context->PickerContext->PlayAudioFile (
-        Context->PickerContext,
-        AppleVoiceOverAudioFileBeep,
-        TRUE
-        );
+                                Context->PickerContext,
+                                AppleVoiceOverAudioFileBeep,
+                                TRUE
+                                );
     }
 
     ResetShutdown ();
@@ -432,30 +434,30 @@ InternalCommonShutDownKeyEvent (
 
 GUI_OBJ *
 InternalCommonShutDownPtrEvent (
-  IN OUT GUI_OBJ                 *This,
-  IN OUT GUI_DRAWING_CONTEXT     *DrawContext,
-  IN     BOOT_PICKER_GUI_CONTEXT *Context,
-  IN     INT64                   BaseX,
-  IN     INT64                   BaseY,
-  IN     CONST GUI_PTR_EVENT     *Event
+  IN OUT GUI_OBJ                  *This,
+  IN OUT GUI_DRAWING_CONTEXT      *DrawContext,
+  IN     BOOT_PICKER_GUI_CONTEXT  *Context,
+  IN     INT64                    BaseX,
+  IN     INT64                    BaseY,
+  IN     CONST GUI_PTR_EVENT      *Event
   )
 {
-  UINT8 Result;
+  UINT8  Result;
 
   Result = InternalCommonSimpleButtonPtrEvent (
-    This,
-    DrawContext,
-    Context,
-    BaseX,
-    BaseY,
-    Event
-    );
+             This,
+             DrawContext,
+             Context,
+             BaseX,
+             BaseY,
+             Event
+             );
   switch (Result) {
     case CommonPtrNotHit:
     {
       return NULL;
     }
-    
+
     case CommonPtrAction:
     {
       ResetShutdown ();
@@ -475,52 +477,53 @@ InternalCommonShutDownPtrEvent (
 
 VOID
 InternalCommonRestartKeyEvent (
-  IN OUT GUI_OBJ                 *This,
-  IN OUT GUI_DRAWING_CONTEXT     *DrawContext,
-  IN     BOOT_PICKER_GUI_CONTEXT *Context,
-  IN     CONST GUI_KEY_EVENT     *KeyEvent
+  IN OUT GUI_OBJ                  *This,
+  IN OUT GUI_DRAWING_CONTEXT      *DrawContext,
+  IN     BOOT_PICKER_GUI_CONTEXT  *Context,
+  IN     CONST GUI_KEY_EVENT      *KeyEvent
   )
 {
-  if (KeyEvent->OcKeyCode == OC_INPUT_CONTINUE
-   || KeyEvent->OcKeyCode == OC_INPUT_TYPING_CONFIRM) {
+  if (  (KeyEvent->OcKeyCode == OC_INPUT_CONTINUE)
+     || (KeyEvent->OcKeyCode == OC_INPUT_TYPING_CONFIRM))
+  {
     if (Context->PickerContext->PickerAudioAssist) {
       Context->PickerContext->PlayAudioFile (
-        Context->PickerContext,
-        AppleVoiceOverAudioFileBeep,
-        TRUE
-        );
+                                Context->PickerContext,
+                                AppleVoiceOverAudioFileBeep,
+                                TRUE
+                                );
     }
-    
+
     ResetWarm ();
   }
 }
 
 GUI_OBJ *
 InternalCommonRestartPtrEvent (
-  IN OUT GUI_OBJ                 *This,
-  IN OUT GUI_DRAWING_CONTEXT     *DrawContext,
-  IN     BOOT_PICKER_GUI_CONTEXT *Context,
-  IN     INT64                   BaseX,
-  IN     INT64                   BaseY,
-  IN     CONST GUI_PTR_EVENT     *Event
+  IN OUT GUI_OBJ                  *This,
+  IN OUT GUI_DRAWING_CONTEXT      *DrawContext,
+  IN     BOOT_PICKER_GUI_CONTEXT  *Context,
+  IN     INT64                    BaseX,
+  IN     INT64                    BaseY,
+  IN     CONST GUI_PTR_EVENT      *Event
   )
 {
-  UINT8 Result;
+  UINT8  Result;
 
   Result = InternalCommonSimpleButtonPtrEvent (
-    This,
-    DrawContext,
-    Context,
-    BaseX,
-    BaseY,
-    Event
-    );
+             This,
+             DrawContext,
+             Context,
+             BaseX,
+             BaseY,
+             Event
+             );
   switch (Result) {
     case CommonPtrNotHit:
     {
       return NULL;
     }
-    
+
     case CommonPtrAction:
     {
       ResetWarm ();
@@ -538,9 +541,9 @@ InternalCommonRestartPtrEvent (
   return This;
 }
 
-extern GUI_OBJ_CHILD mCommonFocus;
+extern GUI_OBJ_CHILD  mCommonFocus;
 
-STATIC GUI_OBJ_CHILD *mCommonActionButtonsContainerChildren[] = {
+STATIC GUI_OBJ_CHILD  *mCommonActionButtonsContainerChildren[] = {
   &mCommonRestart.Hdr,
   &mCommonShutDown.Hdr,
   &mCommonFocus
@@ -566,8 +569,8 @@ InternalCommonActionButtonFocus (
       mCommonFocus.Obj.Height
       );
 
-    mCommonFocus.Obj.OffsetX = This->OffsetX + ((INT32) This->Width - (INT32) mCommonFocus.Obj.Width) / 2;
-    mCommonFocus.Obj.OffsetY = This->OffsetY + ((INT32) This->Height - (INT32) mCommonFocus.Obj.Height) / 2;
+    mCommonFocus.Obj.OffsetX = This->OffsetX + ((INT32)This->Width - (INT32)mCommonFocus.Obj.Width) / 2;
+    mCommonFocus.Obj.OffsetY = This->OffsetY + ((INT32)This->Height - (INT32)mCommonFocus.Obj.Height) / 2;
 
     DrawContext->GuiContext->AudioPlaybackTimeout = 0;
 
@@ -588,7 +591,7 @@ InternalCommonActionButtonFocus (
     );
 }
 
-GLOBAL_REMOVE_IF_UNREFERENCED GUI_OBJ_CHILD mCommonFocus = {
+GLOBAL_REMOVE_IF_UNREFERENCED GUI_OBJ_CHILD  mCommonFocus = {
   {
     0, 0, 0, 0, 0xFF,
     InternalCommonSimpleButtonFocusDraw,
@@ -601,7 +604,7 @@ GLOBAL_REMOVE_IF_UNREFERENCED GUI_OBJ_CHILD mCommonFocus = {
   &mCommonActionButtonsContainer.Obj
 };
 
-GLOBAL_REMOVE_IF_UNREFERENCED GUI_OBJ_CLICKABLE mCommonRestart = {
+GLOBAL_REMOVE_IF_UNREFERENCED GUI_OBJ_CLICKABLE  mCommonRestart = {
   {
     {
       0, 0, 0, 0, 0xFF,
@@ -618,7 +621,7 @@ GLOBAL_REMOVE_IF_UNREFERENCED GUI_OBJ_CLICKABLE mCommonRestart = {
   0
 };
 
-GLOBAL_REMOVE_IF_UNREFERENCED GUI_OBJ_CLICKABLE mCommonShutDown = {
+GLOBAL_REMOVE_IF_UNREFERENCED GUI_OBJ_CLICKABLE  mCommonShutDown = {
   {
     {
       0, 0, 0, 0, 0xFF,
@@ -635,7 +638,7 @@ GLOBAL_REMOVE_IF_UNREFERENCED GUI_OBJ_CLICKABLE mCommonShutDown = {
   0
 };
 
-GLOBAL_REMOVE_IF_UNREFERENCED GUI_OBJ_CHILD mCommonActionButtonsContainer = {
+GLOBAL_REMOVE_IF_UNREFERENCED GUI_OBJ_CHILD  mCommonActionButtonsContainer = {
   {
     0, 0, 0, 0, 0,
     GuiObjDrawDelegate,
@@ -655,13 +658,13 @@ CommonViewInitialize (
   IN     CONST GUI_VIEW_CONTEXT   *ViewContext
   )
 {
-  CONST GUI_IMAGE *FocusImage;
-  CONST GUI_IMAGE *RestartImage;
-  CONST GUI_IMAGE *ShutDownImage;
-  UINT32          RestartWidth;
-  UINT32          RestartHeight;
-  UINT32          ShutDownWidth;
-  UINT32          ShutDownHeight;
+  CONST GUI_IMAGE  *FocusImage;
+  CONST GUI_IMAGE  *RestartImage;
+  CONST GUI_IMAGE  *ShutDownImage;
+  UINT32           RestartWidth;
+  UINT32           RestartHeight;
+  UINT32           ShutDownWidth;
+  UINT32           ShutDownHeight;
 
   ASSERT (GuiContext != NULL);
 
@@ -672,20 +675,20 @@ CommonViewInitialize (
   GuiViewInitialize (DrawContext, GuiContext, ViewContext);
 
   mBackgroundImageOffsetX = DivS64x64Remainder (
-    (INT64) DrawContext->Screen.Width - GuiContext->Background.Width,
-    2,
-    NULL
-    );
+                              (INT64)DrawContext->Screen.Width - GuiContext->Background.Width,
+                              2,
+                              NULL
+                              );
   mBackgroundImageOffsetY = DivS64x64Remainder (
-    (INT64) DrawContext->Screen.Height - GuiContext->Background.Height,
-    2,
-    NULL
-    );
-  
+                              (INT64)DrawContext->Screen.Height - GuiContext->Background.Height,
+                              2,
+                              NULL
+                              );
+
   FocusImage    = &GuiContext->Icons[ICON_BUTTON_FOCUS][ICON_TYPE_BASE];
   RestartImage  = &GuiContext->Icons[ICON_RESTART][ICON_TYPE_BASE];
   ShutDownImage = &GuiContext->Icons[ICON_SHUT_DOWN][ICON_TYPE_BASE];
-  
+
   mCommonFocus.Obj.OffsetX = 0;
   mCommonFocus.Obj.OffsetY = 0;
   mCommonFocus.Obj.Width   = FocusImage->Width;

@@ -14,7 +14,6 @@
   WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 **/
 
-
 #include <Uefi.h>
 
 #include <Library/BaseLib.h>
@@ -45,7 +44,6 @@ DebugPrint (
   )
 {
 }
-
 
 /**
   Prints an assert message containing a filename, line number, and description.
@@ -80,7 +78,6 @@ DebugAssert (
 {
 }
 
-
 /**
   Fills a target buffer with PcdDebugClearMemoryValue, and returns the target buffer.
 
@@ -105,7 +102,6 @@ DebugClearMemory (
   return Buffer;
 }
 
-
 /**
   Returns TRUE if ASSERT() macros are enabled.
 
@@ -124,7 +120,6 @@ DebugAssertEnabled (
 {
   return FALSE;
 }
-
 
 /**
   Returns TRUE if DEBUG() macros are enabled.
@@ -145,7 +140,6 @@ DebugPrintEnabled (
   return FALSE;
 }
 
-
 /**
   Returns TRUE if DEBUG_CODE() macros are enabled.
 
@@ -164,7 +158,6 @@ DebugCodeEnabled (
 {
   return FALSE;
 }
-
 
 /**
   Returns TRUE if DEBUG_CLEAR_MEMORY() macro is enabled.
@@ -185,7 +178,6 @@ DebugClearMemoryEnabled (
   return FALSE;
 }
 
-
 /**
   Returns TRUE if any one of the bit is set both in ErrorLevel and PcdFixedDebugPrintErrorLevel.
 
@@ -198,7 +190,7 @@ DebugClearMemoryEnabled (
 BOOLEAN
 EFIAPI
 DebugPrintLevelEnabled (
-  IN  CONST UINTN        ErrorLevel
+  IN  CONST UINTN  ErrorLevel
   )
 {
   return FALSE;
@@ -214,20 +206,19 @@ DebugPrintLevelEnabled (
 VOID
 EFIAPI
 OcPrintScreen (
-  IN  CONST CHAR16   *Format,
+  IN  CONST CHAR16  *Format,
   ...
   )
 {
 }
 
 VOID
-#if defined(__GNUC__) || defined(__clang__)
+#if defined (__GNUC__) || defined (__clang__)
 __attribute__ ((noinline))
 #endif
 DebugBreak (
   VOID
-  )
-{
+  ) {
   //
   // This function has no code, debuggers may break on it.
   //
@@ -235,7 +226,7 @@ DebugBreak (
 
 VOID
 WaitForKeyPress (
-  CONST CHAR16 *Message
+  CONST CHAR16  *Message
   )
 {
 }
@@ -251,19 +242,19 @@ DebugPrintDevicePath (
 
 VOID
 DebugPrintDevicePathForHandle (
-  IN UINTN                     ErrorLevel,
-  IN CONST CHAR8               *Message,
-  IN EFI_HANDLE                Handle       OPTIONAL
+  IN UINTN        ErrorLevel,
+  IN CONST CHAR8  *Message,
+  IN EFI_HANDLE   Handle       OPTIONAL
   )
 {
 }
 
 VOID
 DebugPrintHexDump (
-  IN UINTN                     ErrorLevel,
-  IN CONST CHAR8               *Message,
-  IN UINT8                     *Bytes,
-  IN UINTN                     Size
+  IN UINTN        ErrorLevel,
+  IN CONST CHAR8  *Message,
+  IN UINT8        *Bytes,
+  IN UINTN        Size
   )
 {
 }
@@ -285,7 +276,7 @@ OcAppleDebugLogConfigure (
 
 VOID
 OcAppleDebugLogPerfAllocated (
-  IN OUT VOID  *PerfBuffer,
+  IN OUT VOID   *PerfBuffer,
   IN     UINTN  PerfBufferSize
   )
 {

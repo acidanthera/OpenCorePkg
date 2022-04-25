@@ -2,13 +2,13 @@
   Guid is for GUIDED HOB of LDR memory descriptor.
 
 Copyright (c) 2011, Intel Corporation. All rights reserved.<BR>
-This program and the accompanying materials                          
-are licensed and made available under the terms and conditions of the BSD License         
-which accompanies this distribution.  The full text of the license may be found at        
-http://opensource.org/licenses/bsd-license.php                                            
-                                                                                          
-THE PROGRAM IS DISTRIBUTED UNDER THE BSD LICENSE ON AN "AS IS" BASIS,                     
-WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.             
+This program and the accompanying materials
+are licensed and made available under the terms and conditions of the BSD License
+which accompanies this distribution.  The full text of the license may be found at
+http://opensource.org/licenses/bsd-license.php
+
+THE PROGRAM IS DISTRIBUTED UNDER THE BSD LICENSE ON AN "AS IS" BASIS,
+WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 
 **/
 
@@ -21,13 +21,13 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 #pragma pack(1)
 
 typedef struct {
-  EFI_HOB_GUID_TYPE             Hob;
-  UINTN                         MemDescCount;
-  EFI_MEMORY_DESCRIPTOR         *MemDesc;
+  EFI_HOB_GUID_TYPE        Hob;
+  UINTN                    MemDescCount;
+  EFI_MEMORY_DESCRIPTOR    *MemDesc;
 } MEMORY_DESC_HOB;
 
 #pragma pack()
 
-extern EFI_GUID gLdrMemoryDescriptorGuid;
+extern EFI_GUID  gLdrMemoryDescriptorGuid;
 
 #endif

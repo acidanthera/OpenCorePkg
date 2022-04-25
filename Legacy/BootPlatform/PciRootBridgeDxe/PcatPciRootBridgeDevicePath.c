@@ -27,21 +27,21 @@ Revision History
 //
 
 typedef struct {
-  ACPI_HID_DEVICE_PATH              AcpiDevicePath;
-  EFI_DEVICE_PATH_PROTOCOL          EndDevicePath;
+  ACPI_HID_DEVICE_PATH        AcpiDevicePath;
+  EFI_DEVICE_PATH_PROTOCOL    EndDevicePath;
 } EFI_PCI_ROOT_BRIDGE_DEVICE_PATH;
 
-EFI_PCI_ROOT_BRIDGE_DEVICE_PATH mEfiPciRootBridgeDevicePath = {
+EFI_PCI_ROOT_BRIDGE_DEVICE_PATH  mEfiPciRootBridgeDevicePath = {
   {
     {
       ACPI_DEVICE_PATH,
       ACPI_DP,
       {
-        (UINT8) (sizeof(ACPI_HID_DEVICE_PATH)),
-        (UINT8) ((sizeof(ACPI_HID_DEVICE_PATH)) >> 8),
+        (UINT8)(sizeof (ACPI_HID_DEVICE_PATH)),
+        (UINT8)((sizeof (ACPI_HID_DEVICE_PATH)) >> 8),
       }
     },
-    EISA_PNP_ID(0x0A03),
+    EISA_PNP_ID (0x0A03),
     0
   },
   {
@@ -60,6 +60,7 @@ PcatRootBridgeDevicePathConstructor (
   IN UINTN                     RootBridgeNumber,
   IN BOOLEAN                   IsPciExpress
   )
+
 /*++
 
 Routine Description:
@@ -78,7 +79,7 @@ Returns:
 {
   ACPI_HID_DEVICE_PATH  *AcpiDevicePath;
 
-  *Protocol = DuplicateDevicePath((EFI_DEVICE_PATH_PROTOCOL *)(&mEfiPciRootBridgeDevicePath));
+  *Protocol = DuplicateDevicePath ((EFI_DEVICE_PATH_PROTOCOL *)(&mEfiPciRootBridgeDevicePath));
 
   AcpiDevicePath = (ACPI_HID_DEVICE_PATH *)(*Protocol);
 

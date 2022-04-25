@@ -45,11 +45,11 @@ LegacyRegionUnlock (
   IN UINT32  LegacyLength
   )
 {
-  EFI_STATUS                    Status;
+  EFI_STATUS  Status;
 
-  EFI_LEGACY_REGION_PROTOCOL    *LegacyRegionProtocol;
-  EFI_LEGACY_REGION2_PROTOCOL   *LegacyRegion2Protocol;
-  UINT32                        Granularity;
+  EFI_LEGACY_REGION_PROTOCOL   *LegacyRegionProtocol;
+  EFI_LEGACY_REGION2_PROTOCOL  *LegacyRegion2Protocol;
+  UINT32                       Granularity;
 
   //
   // Locate v2 protocol and fallback to v1 if unavailable.
@@ -57,17 +57,17 @@ LegacyRegionUnlock (
   LegacyRegionProtocol  = NULL;
   LegacyRegion2Protocol = NULL;
   Status                = gBS->LocateProtocol (
-                            &gEfiLegacyRegion2ProtocolGuid,
-                            NULL,
-                            (VOID **) &LegacyRegion2Protocol
-                            );
+                                 &gEfiLegacyRegion2ProtocolGuid,
+                                 NULL,
+                                 (VOID **)&LegacyRegion2Protocol
+                                 );
 
   if (Status == EFI_NOT_FOUND) {
     Status = gBS->LocateProtocol (
-      &gEfiLegacyRegionProtocolGuid,
-      NULL,
-      (VOID **) &LegacyRegionProtocol
-      );
+                    &gEfiLegacyRegionProtocolGuid,
+                    NULL,
+                    (VOID **)&LegacyRegionProtocol
+                    );
   }
 
   if (!EFI_ERROR (Status)) {
@@ -77,11 +77,11 @@ LegacyRegionUnlock (
     Granularity = 0;
     if (LegacyRegionProtocol != NULL) {
       Status = LegacyRegionProtocol->UnLock (
-                                        LegacyRegionProtocol,
-                                        LegacyAddress,
-                                        LegacyLength,
-                                        &Granularity
-                                        );
+                                       LegacyRegionProtocol,
+                                       LegacyAddress,
+                                       LegacyLength,
+                                       &Granularity
+                                       );
     } else {
       Status = LegacyRegion2Protocol->UnLock (
                                         LegacyRegion2Protocol,
@@ -102,4 +102,3 @@ LegacyRegionUnlock (
 
   return Status;
 }
-

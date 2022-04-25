@@ -17,29 +17,29 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 //
 // Maximum search contexts and matched options allowed
 //
-#define CONTEXTS_MAX 8
-#define OPTIONS_MAX  9
+#define CONTEXTS_MAX  8
+#define OPTIONS_MAX   9
 
 VOID
 IterateListHeaders (
-  IN EFI_HII_HANDLE                *HiiHandles,
-  IN EFI_HII_PACKAGE_LIST_HEADER   **ListHeaders,
-  IN UINT32                        ListHeaderCount,
-  IN EFI_STRING                    SearchString
+  IN EFI_HII_HANDLE               *HiiHandles,
+  IN EFI_HII_PACKAGE_LIST_HEADER  **ListHeaders,
+  IN UINT32                       ListHeaderCount,
+  IN EFI_STRING                   SearchString
   )
 {
-  UINT16                   OptionsCount;
-  UINT16                   ContextsCount;
-  ONE_OF_CONTEXT           Contexts[CONTEXTS_MAX];
-  UINT32                   ListHeaderIndex;
-  EFI_IFR_OP_HEADER        *IfrHeader;
-  EFI_HII_PACKAGE_HEADER   *PkgHeader;
-  BOOLEAN                  Stop;
-  UINT32                   ContextIndex;
-  UINT16                   Index;
-  CHAR16                   Key;
+  UINT16                  OptionsCount;
+  UINT16                  ContextsCount;
+  ONE_OF_CONTEXT          Contexts[CONTEXTS_MAX];
+  UINT32                  ListHeaderIndex;
+  EFI_IFR_OP_HEADER       *IfrHeader;
+  EFI_HII_PACKAGE_HEADER  *PkgHeader;
+  BOOLEAN                 Stop;
+  UINT32                  ContextIndex;
+  UINT16                  Index;
+  CHAR16                  Key;
 
-  OptionsCount = 0;
+  OptionsCount  = 0;
   ContextsCount = 0;
 
   for (ListHeaderIndex = 0; HiiHandles[ListHeaderIndex] != NULL && ContextsCount < CONTEXTS_MAX; ++ListHeaderIndex) {
@@ -73,7 +73,7 @@ IterateListHeaders (
           DEBUG ((
             DEBUG_INFO,
             "Form: %g\n",
-            &((EFI_IFR_FORM_SET *) IfrHeader)->Guid
+            &((EFI_IFR_FORM_SET *)IfrHeader)->Guid
             ));
 
           if (IfrHeader->Length >= sizeof (GUID) + sizeof (EFI_IFR_FORM_SET)) {
@@ -87,15 +87,15 @@ IterateListHeaders (
             // Checkup for Setup Form
             //
             if (CompareGuid (&gEfiHiiPlatformSetupFormsetGuid, PADD (IfrHeader, sizeof (EFI_IFR_FORM_SET)))) {
-              Contexts[ContextsCount].SearchText = SearchString;
-              Contexts[ContextsCount].EfiHandle = HiiHandles[ListHeaderIndex];
-              Contexts[ContextsCount].ListHeader = ListHeaders[ListHeaderIndex];
-              Contexts[ContextsCount].PkgHeader = PkgHeader;
+              Contexts[ContextsCount].SearchText     = SearchString;
+              Contexts[ContextsCount].EfiHandle      = HiiHandles[ListHeaderIndex];
+              Contexts[ContextsCount].ListHeader     = ListHeaders[ListHeaderIndex];
+              Contexts[ContextsCount].PkgHeader      = PkgHeader;
               Contexts[ContextsCount].FirstIfrHeader = PADD (IfrHeader, IfrHeader->Length);
-              Contexts[ContextsCount].IfrVarStore = NULL;
-              Contexts[ContextsCount].IfrOneOf = NULL;
-              Contexts[ContextsCount].StopAt = DONT_STOP_AT;
-              Contexts[ContextsCount].Count = OptionsCount;
+              Contexts[ContextsCount].IfrVarStore    = NULL;
+              Contexts[ContextsCount].IfrOneOf       = NULL;
+              Contexts[ContextsCount].StopAt         = DONT_STOP_AT;
+              Contexts[ContextsCount].Count          = OptionsCount;
 
               IterateOpCode (
                 Contexts[ContextsCount].FirstIfrHeader,
@@ -113,6 +113,7 @@ IterateListHeaders (
           }
         }
       }
+
       PkgHeader = PADD (PkgHeader, PkgHeader->Length);
     }
 
@@ -121,7 +122,7 @@ IterateListHeaders (
 
   DEBUG ((DEBUG_INFO, "Context Count: %x Options Count %x\n", ContextsCount, OptionsCount));
 
-  if (OptionsCount > OPTIONS_MAX || ContextsCount == CONTEXTS_MAX) {
+  if ((OptionsCount > OPTIONS_MAX) || (ContextsCount == CONTEXTS_MAX)) {
     Print (L"Too many corresponding BIOS Options found. Try a different search string using interactive mode.\n");
   } else if (OptionsCount == 0) {
     Print (L"No corresponding BIOS Options found. Try a different search string using interactive mode.\n");
@@ -142,8 +143,8 @@ IterateListHeaders (
 
       for (ContextIndex = 0; ContextIndex < ContextsCount; ++ContextIndex) {
         if (Contexts[ContextIndex].Count >= Index) {
-          Contexts[ContextIndex].Count = ContextIndex == 0 ? 0 : Contexts[ContextIndex - 1].Count;
-          Contexts[ContextIndex].StopAt = Index;
+          Contexts[ContextIndex].Count    = ContextIndex == 0 ? 0 : Contexts[ContextIndex - 1].Count;
+          Contexts[ContextIndex].StopAt   = Index;
           Contexts[ContextIndex].IfrOneOf = NULL;
 
           IterateOpCode (
@@ -157,6 +158,7 @@ IterateListHeaders (
           if (Contexts[ContextIndex].IfrOneOf != NULL) {
             HandleIfrVariable (&Contexts[ContextIndex]);
           }
+
           break;
         }
       }
@@ -172,12 +174,12 @@ IterateListHeaders (
 
 EFI_STATUS
 SearchForString (
-  IN EFI_STRING SearchString
+  IN EFI_STRING  SearchString
   )
 {
-  EFI_HII_HANDLE                *HiiHandles;
-  EFI_HII_PACKAGE_LIST_HEADER   **ListHeaders;
-  UINT32                        ListHeaderCount;
+  EFI_HII_HANDLE               *HiiHandles;
+  EFI_HII_PACKAGE_LIST_HEADER  **ListHeaders;
+  UINT32                       ListHeaderCount;
 
   Print (L"\nBIOS Options:\n");
 
@@ -188,7 +190,6 @@ SearchForString (
   }
 
   for (ListHeaderCount = 0; HiiHandles[ListHeaderCount] != NULL; ++ListHeaderCount) {
-    ;
   }
 
   //
@@ -217,15 +218,15 @@ UefiMain (
   IN EFI_SYSTEM_TABLE  *SystemTable
   )
 {
-  EFI_STATUS Status;
-  EFI_STRING SearchString;
+  EFI_STATUS  Status;
+  EFI_STRING  SearchString;
 
   Status = InterpretArguments ();
   if (!EFI_ERROR (Status)) {
     Status = VerifyMSRE2 ();
     if (!EFI_ERROR (Status)) {
       if (mArgumentFlags != ARG_VERIFY) {
-        SearchString = AllocateCopyPool (L_STR_SIZE(L"cfg"), L"cfg");
+        SearchString = AllocateCopyPool (L_STR_SIZE (L"cfg"), L"cfg");
         if (SearchString != NULL) {
           if (mArgumentFlags == ARG_INTERACTIVE) {
             ModifySearchString (&SearchString);

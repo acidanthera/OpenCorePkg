@@ -24,10 +24,11 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
     { 0xA4, 0xF1, 0xB8, 0x64, 0xF3, 0xB7, 0xA1, 0x72 } }
 
 typedef
-struct APPLE_KEY_MAP_AGGREGATOR_PROTOCOL
+  struct APPLE_KEY_MAP_AGGREGATOR_PROTOCOL
 APPLE_KEY_MAP_AGGREGATOR_PROTOCOL;
 
 // KEY_MAP_GET_KEY_STROKES
+
 /** Returns all pressed keys and key modifiers into the appropiate buffers.
 
   @param[in]     This              A pointer to the protocol instance.
@@ -51,12 +52,13 @@ typedef
 EFI_STATUS
 (EFIAPI *KEY_MAP_GET_KEY_STROKES)(
   IN     APPLE_KEY_MAP_AGGREGATOR_PROTOCOL  *This,
-     OUT APPLE_MODIFIER_MAP                 *Modifiers,
+  OUT APPLE_MODIFIER_MAP                 *Modifiers,
   IN OUT UINTN                              *NumberOfKeyCodes,
-     OUT APPLE_KEY_CODE                     *KeyCodes OPTIONAL
+  OUT APPLE_KEY_CODE                     *KeyCodes OPTIONAL
   );
 
 // KEY_MAP_CONTAINS_KEY_STROKES
+
 /** Returns whether or not a list of keys and their modifiers are part of the
     database of pressed keys.
 
@@ -83,12 +85,12 @@ EFI_STATUS
 
 // APPLE_KEY_MAP_AGGREGATOR_PROTOCOL
 struct APPLE_KEY_MAP_AGGREGATOR_PROTOCOL {
-  UINT64                       Revision;
-  KEY_MAP_GET_KEY_STROKES      GetKeyStrokes;
-  KEY_MAP_CONTAINS_KEY_STROKES ContainsKeyStrokes;
+  UINT64                          Revision;
+  KEY_MAP_GET_KEY_STROKES         GetKeyStrokes;
+  KEY_MAP_CONTAINS_KEY_STROKES    ContainsKeyStrokes;
 };
 
 // gAppleKeyMapAggregatorProtocolGuid
-extern EFI_GUID gAppleKeyMapAggregatorProtocolGuid;
+extern EFI_GUID  gAppleKeyMapAggregatorProtocolGuid;
 
 #endif // APPLE_KEY_MAP_AGGREGATOR_H

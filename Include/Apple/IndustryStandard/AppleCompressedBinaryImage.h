@@ -22,11 +22,11 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 ///
 /// The common 'lzvn' number used to identify a compressed binary with LZVN.
 ///
-#define MACH_COMPRESSED_BINARY_INVERT_LZVN       0x6E767A6C
+#define MACH_COMPRESSED_BINARY_INVERT_LZVN  0x6E767A6C
 ///
 /// The common 'lzss' number used to identify a compressed binary with LZSS.
 ///
-#define MACH_COMPRESSED_BINARY_INVERT_LZSS       0x73737A6C
+#define MACH_COMPRESSED_BINARY_INVERT_LZSS  0x73737A6C
 
 ///
 /// Definition of the the compressed header structure.
@@ -35,31 +35,31 @@ typedef struct {
   ///
   /// The assumed 'comp' type identification number found in the file.
   ///
-  UINT32  Signature;
+  UINT32    Signature;
   ///
   /// The assumed 'lzvn' or 'lzss' compression identification number found in the file.
   ///
-  UINT32  Compression;
+  UINT32    Compression;
   ///
   /// Adler32 hash of the decompressed data.
   ///
-  UINT32  Hash;
+  UINT32    Hash;
   ///
   /// Decompressed data size.
   ///
-  UINT32  Decompressed;
+  UINT32    Decompressed;
   ///
   /// Compressed data size.
   ///
-  UINT32  Compressed;
+  UINT32    Compressed;
   ///
   /// Compression file version.
   ///
-  UINT32  Version;
+  UINT32    Version;
   ///
   /// All zero padding.
   ///
-  UINT32  Padding[90];
+  UINT32    Padding[90];
 } MACH_COMP_HEADER;
 
 #endif // APPLE_COMPRESSED_BINARY_IMAGE_H

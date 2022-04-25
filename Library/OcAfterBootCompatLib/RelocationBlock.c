@@ -32,7 +32,7 @@
 #include <Library/UefiLib.h>
 #include <Library/UefiRuntimeServicesTableLib.h>
 
-STATIC CONST UINT8 mAsmRelocationCallGate[] = {
+STATIC CONST UINT8  mAsmRelocationCallGate[] = {
   #include "RelocationCallGate.h"
 };
 
@@ -59,16 +59,16 @@ AppleRelocationAllocatePages (
   // this quirk anyway due to AllocatePages in AllocateAddress mode Address pointer
   // no longer being reread after the allocation in EfiBoot.
   //
-  if (*Memory == KERNEL_TEXT_PADDR && BootCompat->KernelState.RelocationBlock == 0) {
+  if ((*Memory == KERNEL_TEXT_PADDR) && (BootCompat->KernelState.RelocationBlock == 0)) {
     BootCompat->KernelState.RelocationBlock = BASE_4GB;
-    Status = OcAllocatePagesFromTop (
-      EfiLoaderData,
-      EFI_SIZE_TO_PAGES (EssentialSize),
-      &BootCompat->KernelState.RelocationBlock, 
-      GetMemoryMap,
-      AllocatePages,
-      NULL
-      );
+    Status                                  = OcAllocatePagesFromTop (
+                                                EfiLoaderData,
+                                                EFI_SIZE_TO_PAGES (EssentialSize),
+                                                &BootCompat->KernelState.RelocationBlock,
+                                                GetMemoryMap,
+                                                AllocatePages,
+                                                NULL
+                                                );
     if (EFI_ERROR (Status)) {
       DEBUG ((
         DEBUG_INFO,
@@ -78,22 +78,24 @@ AppleRelocationAllocatePages (
         ));
       return Status;
     }
+
     BootCompat->KernelState.RelocationBlockUsed = 0;
   }
 
   //
   // Not our allocation.
   //
-  if (BootCompat->KernelState.RelocationBlock == 0
-    || *Memory < KERNEL_BASE_PADDR
-    || *Memory >= KERNEL_BASE_PADDR + EssentialSize) {
+  if (  (BootCompat->KernelState.RelocationBlock == 0)
+     || (*Memory < KERNEL_BASE_PADDR)
+     || (*Memory >= KERNEL_BASE_PADDR + EssentialSize))
+  {
     return EFI_INVALID_PARAMETER;
   }
 
   //
   // Track actually occupied memory.
   //
-  EssentialSize = (UINTN) (*Memory - KERNEL_BASE_PADDR + EFI_PAGES_TO_SIZE (NumberOfPages));
+  EssentialSize = (UINTN)(*Memory - KERNEL_BASE_PADDR + EFI_PAGES_TO_SIZE (NumberOfPages));
   if (EssentialSize > BootCompat->KernelState.RelocationBlockUsed) {
     BootCompat->KernelState.RelocationBlockUsed = EssentialSize;
   }
@@ -108,7 +110,7 @@ AppleRelocationAllocatePages (
 
 EFI_STATUS
 AppleRelocationRelease (
-  IN OUT BOOT_COMPAT_CONTEXT   *BootCompat
+  IN OUT BOOT_COMPAT_CONTEXT  *BootCompat
   )
 {
   EFI_STATUS  Status;
@@ -124,11 +126,11 @@ AppleRelocationRelease (
   }
 
   Status = gBS->FreePages (
-    BootCompat->KernelState.RelocationBlock,
-    EFI_SIZE_TO_PAGES (EssentialSize)
-    );
+                  BootCompat->KernelState.RelocationBlock,
+                  EFI_SIZE_TO_PAGES (EssentialSize)
+                  );
 
-  BootCompat->KernelState.RelocationBlock = 0;
+  BootCompat->KernelState.RelocationBlock     = 0;
   BootCompat->KernelState.RelocationBlockUsed = 0;
 
   return Status;
@@ -140,39 +142,39 @@ AppleRelocationVirtualize (
   IN OUT OC_BOOT_ARGUMENTS    *BA
   )
 {
-  EFI_STATUS               Status;
-  UINTN                    MemoryMapSize;
-  UINTN                    DescriptorSize;
-  UINT32                   DescriptorVersion;
-  EFI_MEMORY_DESCRIPTOR    *MemoryMap;
-  EFI_PHYSICAL_ADDRESS     KernelRTAddress;
-  UINTN                    NumEntries;
-  UINTN                    Index;
-  EFI_MEMORY_DESCRIPTOR    *Desc;
-  UINTN                    BlockSize;
-  UINT8                    *KernelRTBlock;
+  EFI_STATUS             Status;
+  UINTN                  MemoryMapSize;
+  UINTN                  DescriptorSize;
+  UINT32                 DescriptorVersion;
+  EFI_MEMORY_DESCRIPTOR  *MemoryMap;
+  EFI_PHYSICAL_ADDRESS   KernelRTAddress;
+  UINTN                  NumEntries;
+  UINTN                  Index;
+  EFI_MEMORY_DESCRIPTOR  *Desc;
+  UINTN                  BlockSize;
+  UINT8                  *KernelRTBlock;
 
   MemoryMapSize     = *BA->MemoryMapSize;
   DescriptorSize    = *BA->MemoryMapDescriptorSize;
   DescriptorVersion = *BA->MemoryMapDescriptorVersion;
-  MemoryMap         = (EFI_MEMORY_DESCRIPTOR *)(UINTN) *BA->MemoryMap;
+  MemoryMap         = (EFI_MEMORY_DESCRIPTOR *)(UINTN)*BA->MemoryMap;
   KernelRTAddress   = EFI_PAGES_TO_SIZE (*BA->RuntimeServicesPG)
-    - (UINT32) (BootCompat->KernelState.RelocationBlock - KERNEL_BASE_PADDR);
+                      - (UINT32)(BootCompat->KernelState.RelocationBlock - KERNEL_BASE_PADDR);
 
   //
   // (1) Assign virtual addresses to all runtime blocks (but reserved).
   //
-  Desc = MemoryMap;
+  Desc       = MemoryMap;
   NumEntries = MemoryMapSize / DescriptorSize;
 
   for (Index = 0; Index < NumEntries; ++Index) {
-    BlockSize = EFI_PAGES_TO_SIZE ((UINTN) Desc->NumberOfPages);
+    BlockSize = EFI_PAGES_TO_SIZE ((UINTN)Desc->NumberOfPages);
 
     if (Desc->Type == EfiReservedMemoryType) {
       Desc->Attribute &= ~EFI_MEMORY_RUNTIME;
     } else if ((Desc->Attribute & EFI_MEMORY_RUNTIME) != 0) {
       Desc->VirtualStart = KernelRTAddress + KERNEL_STATIC_VADDR;
-      KernelRTAddress += BlockSize;
+      KernelRTAddress   += BlockSize;
     }
 
     Desc = NEXT_MEMORY_DESCRIPTOR (Desc, DescriptorSize);
@@ -182,11 +184,11 @@ AppleRelocationVirtualize (
   // (2) Transition to virtual memory.
   //
   Status = gRT->SetVirtualAddressMap (
-    MemoryMapSize,
-    DescriptorSize,
-    DescriptorVersion,
-    MemoryMap
-    );
+                  MemoryMapSize,
+                  DescriptorSize,
+                  DescriptorVersion,
+                  MemoryMap
+                  );
 
   //
   // (3) Perform quick dirty defragmentation similarly to EfiBoot to make vaddr = paddr
@@ -195,38 +197,39 @@ AppleRelocationVirtualize (
   Desc = MemoryMap;
 
   for (Index = 0; Index < NumEntries; ++Index) {
-    if (Desc->Type == EfiRuntimeServicesCode || Desc->Type == EfiRuntimeServicesData) {
+    if ((Desc->Type == EfiRuntimeServicesCode) || (Desc->Type == EfiRuntimeServicesData)) {
       //
       // Get physical address from statically mapped virtual.
       //
-      KernelRTBlock = (UINT8 *)(UINTN) (Desc->VirtualStart & (BASE_1GB - 1));
-      BlockSize = EFI_PAGES_TO_SIZE ((UINTN)Desc->NumberOfPages);
+      KernelRTBlock = (UINT8 *)(UINTN)(Desc->VirtualStart & (BASE_1GB - 1));
+      BlockSize     = EFI_PAGES_TO_SIZE ((UINTN)Desc->NumberOfPages);
       CopyMem (
         KernelRTBlock + (BootCompat->KernelState.RelocationBlock - KERNEL_BASE_PADDR),
-        (VOID*)(UINTN) Desc->PhysicalStart,
+        (VOID *)(UINTN)Desc->PhysicalStart,
         BlockSize
         );
 
-      ZeroMem ((VOID*)(UINTN) Desc->PhysicalStart, BlockSize);
+      ZeroMem ((VOID *)(UINTN)Desc->PhysicalStart, BlockSize);
 
       //
       // (4) Sync changes to EFI_SYSTEM_TABLE location with boot args.
       //
-      if (Desc->PhysicalStart <= *BA->SystemTableP
-        && *BA->SystemTableP <= LAST_DESCRIPTOR_ADDR (Desc)) {
-        *BA->SystemTableP = (UINT32)((UINTN) KernelRTBlock
-          + (*BA->SystemTableP - Desc->PhysicalStart)
-          + (BootCompat->KernelState.RelocationBlock - KERNEL_BASE_PADDR));
+      if (  (Desc->PhysicalStart <= *BA->SystemTableP)
+         && (*BA->SystemTableP <= LAST_DESCRIPTOR_ADDR (Desc)))
+      {
+        *BA->SystemTableP = (UINT32)((UINTN)KernelRTBlock
+                                     + (*BA->SystemTableP - Desc->PhysicalStart)
+                                     + (BootCompat->KernelState.RelocationBlock - KERNEL_BASE_PADDR));
       }
 
       //
       // Mark old RT block in MemMap as free memory and remove RT attribute.
       //
-      Desc->Type = EfiConventionalMemory;
+      Desc->Type      = EfiConventionalMemory;
       Desc->Attribute = Desc->Attribute & (~EFI_MEMORY_RUNTIME);
     }
 
-    Desc = NEXT_MEMORY_DESCRIPTOR(Desc, DescriptorSize);
+    Desc = NEXT_MEMORY_DESCRIPTOR (Desc, DescriptorSize);
   }
 
   return Status;
@@ -238,19 +241,19 @@ AppleRelocationRebase (
   IN OUT OC_BOOT_ARGUMENTS    *BA
   )
 {
-  EFI_STATUS                 Status;
-  DTEntry                    MemMap;
-  CHAR8                      *PropName;
-  DTMemMapEntry              *PropValue;
-  OpaqueDTPropertyIterator   OPropIter;
-  DTPropertyIterator         PropIter;
-  UINT32                     RelocDiff;
+  EFI_STATUS                Status;
+  DTEntry                   MemMap;
+  CHAR8                     *PropName;
+  DTMemMapEntry             *PropValue;
+  OpaqueDTPropertyIterator  OPropIter;
+  DTPropertyIterator        PropIter;
+  UINT32                    RelocDiff;
 
   PropIter = &OPropIter;
 
-  RelocDiff = (UINT32) (BootCompat->KernelState.RelocationBlock - KERNEL_BASE_PADDR);
+  RelocDiff = (UINT32)(BootCompat->KernelState.RelocationBlock - KERNEL_BASE_PADDR);
 
-  DTInit ((DTEntry)(UINTN) *BA->DeviceTreeP, BA->DeviceTreeLength);
+  DTInit ((DTEntry)(UINTN)*BA->DeviceTreeP, BA->DeviceTreeLength);
   Status = DTLookupEntry (NULL, "/chosen/memory-map", &MemMap);
 
   if (!EFI_ERROR (Status)) {
@@ -272,9 +275,10 @@ AppleRelocationRebase (
         //
         // Filter enteries out of the relocation range.
         //
-        PropValue = (DTMemMapEntry*)((UINT8 *) PropIter->CurrentProperty + sizeof (DTProperty));
-        if (PropValue->Address < BootCompat->KernelState.RelocationBlock
-          || PropValue->Address >= BootCompat->KernelState.RelocationBlock + BootCompat->KernelState.RelocationBlockUsed) {
+        PropValue = (DTMemMapEntry *)((UINT8 *)PropIter->CurrentProperty + sizeof (DTProperty));
+        if (  (PropValue->Address < BootCompat->KernelState.RelocationBlock)
+           || (PropValue->Address >= BootCompat->KernelState.RelocationBlock + BootCompat->KernelState.RelocationBlockUsed))
+        {
           continue;
         }
 
@@ -293,8 +297,8 @@ AppleRelocationRebase (
   //
   // Note, this one does not seem to be used by XNU but we set it anyway.
   //
-  *BA->RuntimeServicesV  = EFI_PAGES_TO_SIZE (*BA->RuntimeServicesPG) + KERNEL_STATIC_VADDR;
-  *BA->DeviceTreeP       -= RelocDiff;
+  *BA->RuntimeServicesV = EFI_PAGES_TO_SIZE (*BA->RuntimeServicesPG) + KERNEL_STATIC_VADDR;
+  *BA->DeviceTreeP     -= RelocDiff;
 }
 
 UINTN
@@ -305,29 +309,29 @@ AppleRelocationCallGate (
   IN     UINTN                EntryPoint
   )
 {
-  UINT8                  *Payload;
-  RELOCATION_CALL_GATE   ReloGate;
+  UINT8                 *Payload;
+  RELOCATION_CALL_GATE  ReloGate;
 
   //
   // Shift kernel arguments back.
   //
-  Args -= (UINTN) (BootCompat->KernelState.RelocationBlock - KERNEL_BASE_PADDR);
+  Args -= (UINTN)(BootCompat->KernelState.RelocationBlock - KERNEL_BASE_PADDR);
 
   //
   // Provide copying payload that will not be overwritten.
   //
-  Payload  = (VOID*)(UINTN) CallGate;
+  Payload  = (VOID *)(UINTN)CallGate;
   Payload += ESTIMATED_CALL_GATE_SIZE;
   CopyMem (Payload, mAsmRelocationCallGate, sizeof (mAsmRelocationCallGate));
 
   //
   // Transition to payload.
   //
-  ReloGate = (RELOCATION_CALL_GATE)(UINTN) Payload;
+  ReloGate = (RELOCATION_CALL_GATE)(UINTN)Payload;
   return ReloGate (
-    BootCompat->KernelState.RelocationBlockUsed / sizeof (UINT64),
-    EntryPoint,
-    BootCompat->KernelState.RelocationBlock,
-    Args
-    );
+           BootCompat->KernelState.RelocationBlockUsed / sizeof (UINT64),
+           EntryPoint,
+           BootCompat->KernelState.RelocationBlock,
+           Args
+           );
 }

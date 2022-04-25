@@ -156,8 +156,8 @@ VirtualDirCreateOverlayFileNameCopy (
 **/
 EFI_STATUS
 VirtualDirAddEntry (
-  IN EFI_FILE_PROTOCOL    *This,
-  IN EFI_FILE_INFO        *FileInfo
+  IN EFI_FILE_PROTOCOL  *This,
+  IN EFI_FILE_INFO      *FileInfo
   );
 
 /**
@@ -168,7 +168,7 @@ VirtualDirAddEntry (
 **/
 VOID
 VirtualDirFree (
-  IN EFI_FILE_PROTOCOL    *This
+  IN EFI_FILE_PROTOCOL  *This
   );
 
 /**
@@ -199,8 +199,8 @@ CreateVirtualFs (
 **/
 EFI_STATUS
 EnableVirtualFs (
-  IN OUT EFI_BOOT_SERVICES       *BootServices,
-  IN     EFI_FILE_OPEN           OpenCallback
+  IN OUT EFI_BOOT_SERVICES  *BootServices,
+  IN     EFI_FILE_OPEN      OpenCallback
   );
 
 /**
@@ -212,7 +212,7 @@ EnableVirtualFs (
 **/
 EFI_STATUS
 DisableVirtualFs (
-  IN OUT EFI_BOOT_SERVICES       *BootServices
+  IN OUT EFI_BOOT_SERVICES  *BootServices
   );
 
 #endif // OC_VIRTUAL_FS_LIB_H

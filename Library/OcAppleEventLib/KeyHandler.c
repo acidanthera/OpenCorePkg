@@ -40,58 +40,58 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 
 // KEY_STROKE_INFORMATION
 typedef struct {
-  APPLE_KEY_CODE AppleKeyCode;     ///<
-  UINTN          NumberOfStrokes;  ///<
-  BOOLEAN        CurrentStroke;    ///<
+  APPLE_KEY_CODE    AppleKeyCode;    ///<
+  UINTN             NumberOfStrokes; ///<
+  BOOLEAN           CurrentStroke;   ///<
 } KEY_STROKE_INFORMATION;
 
 // mCLockOn
-STATIC BOOLEAN mCLockOn = FALSE;
+STATIC BOOLEAN  mCLockOn = FALSE;
 
 // mKeyStrokePollEvent
-STATIC EFI_EVENT mKeyStrokePollEvent = NULL;
+STATIC EFI_EVENT  mKeyStrokePollEvent = NULL;
 
 // mModifiers
-STATIC APPLE_MODIFIER_MAP mModifiers = 0;
+STATIC APPLE_MODIFIER_MAP  mModifiers = 0;
 
 // mPreviousModifiers
-STATIC APPLE_MODIFIER_MAP mPreviousModifiers = 0;
+STATIC APPLE_MODIFIER_MAP  mPreviousModifiers = 0;
 
 // mInitialized
-STATIC BOOLEAN mInitialized = FALSE;
+STATIC BOOLEAN  mInitialized = FALSE;
 
 // mKeyInformation
-STATIC KEY_STROKE_INFORMATION mKeyStrokeInfo[10];
+STATIC KEY_STROKE_INFORMATION  mKeyStrokeInfo[10];
 
 // mCLockChanged
-STATIC BOOLEAN mCLockChanged = FALSE;
+STATIC BOOLEAN  mCLockChanged = FALSE;
 
 // mKeyInitialDelay
 // mKeySubsequentDelay
 // Apple implementation default values
-STATIC UINTN mKeyInitialDelay = 50;
-STATIC UINTN mKeySubsequentDelay = 5;
+STATIC UINTN  mKeyInitialDelay    = 50;
+STATIC UINTN  mKeySubsequentDelay = 5;
 
 // mGraphicsInputMirroring
-STATIC BOOLEAN mGraphicsInputMirroring = FALSE;
+STATIC BOOLEAN  mGraphicsInputMirroring = FALSE;
 
 // mAppleKeyMapAggregator
-STATIC APPLE_KEY_MAP_AGGREGATOR_PROTOCOL *mKeyMapAggregator = NULL;
+STATIC APPLE_KEY_MAP_AGGREGATOR_PROTOCOL  *mKeyMapAggregator = NULL;
 
 // InternalSetKeyBehaviour
 VOID
 InternalSetKeyBehaviour (
-  IN  BOOLEAN         CustomDelays,
-  IN  UINT16          KeyInitialDelay,
-  IN  UINT16          KeySubsequentDelay,
-  IN  BOOLEAN         GraphicsInputMirroring
+  IN  BOOLEAN  CustomDelays,
+  IN  UINT16   KeyInitialDelay,
+  IN  UINT16   KeySubsequentDelay,
+  IN  BOOLEAN  GraphicsInputMirroring
   )
 {
   if (CustomDelays) {
     //
     // Zero is meaningful
     //
-    mKeyInitialDelay    = KeyInitialDelay;
+    mKeyInitialDelay = KeyInitialDelay;
 
     //
     // Zero is meaningless (also div by zero expception): warn and use 1
@@ -100,6 +100,7 @@ InternalSetKeyBehaviour (
       KeySubsequentDelay = 1;
       DEBUG ((DEBUG_WARN, "OCAE: Illegal KeySubsequentDelay value 0, using 1\n"));
     }
+
     mKeySubsequentDelay = KeySubsequentDelay;
 
     DEBUG ((DEBUG_INFO, "OCAE: Using key delays %d (%d0ms) and %d (%d0ms)\n", mKeyInitialDelay, mKeyInitialDelay, mKeySubsequentDelay, mKeySubsequentDelay));
@@ -117,7 +118,7 @@ InternalGetAppleKeyStrokes (
   OUT APPLE_KEY_CODE      **KeyCodes
   )
 {
-  EFI_STATUS Status;
+  EFI_STATUS  Status;
 
   DEBUG ((DEBUG_VERBOSE, "InternalGetAppleKeyStrokes\n"));
 
@@ -126,9 +127,10 @@ InternalGetAppleKeyStrokes (
   if (mKeyMapAggregator != NULL) {
     Status = EFI_INVALID_PARAMETER;
 
-    if ((Modifiers != NULL)
-     && (NumberOfKeyCodes != NULL)
-     && (KeyCodes != NULL)) {
+    if (  (Modifiers != NULL)
+       && (NumberOfKeyCodes != NULL)
+       && (KeyCodes != NULL))
+    {
       *NumberOfKeyCodes = 0;
       *KeyCodes         = NULL;
       Status            = mKeyMapAggregator->GetKeyStrokes (
@@ -138,7 +140,7 @@ InternalGetAppleKeyStrokes (
                                                NULL
                                                );
 
-      if (!EFI_ERROR (Status) || Status == EFI_BUFFER_TOO_SMALL) {
+      if (!EFI_ERROR (Status) || (Status == EFI_BUFFER_TOO_SMALL)) {
         if (*NumberOfKeyCodes == 0) {
           *KeyCodes = NULL;
         } else {
@@ -148,15 +150,15 @@ InternalGetAppleKeyStrokes (
 
           if (*KeyCodes == NULL) {
             *NumberOfKeyCodes = 0;
-            Status        = EFI_OUT_OF_RESOURCES;
+            Status            = EFI_OUT_OF_RESOURCES;
             DEBUG ((DEBUG_VERBOSE, "InternalGetAppleKeyStrokes alloc failure\n"));
           } else {
             Status = mKeyMapAggregator->GetKeyStrokes (
-                                               mKeyMapAggregator,
-                                               Modifiers,
-                                               NumberOfKeyCodes,
-                                               *KeyCodes
-                                               );
+                                          mKeyMapAggregator,
+                                          Modifiers,
+                                          NumberOfKeyCodes,
+                                          *KeyCodes
+                                          );
 
             if (EFI_ERROR (Status)) {
               FreePool ((VOID *)*KeyCodes);
@@ -179,10 +181,10 @@ InternalGetModifierStrokes (
   VOID
   )
 {
-  APPLE_MODIFIER_MAP Modifiers;
-  EFI_STATUS         Status;
-  UINTN              NumberOfKeyCodes;
-  APPLE_KEY_CODE     *KeyCodes;
+  APPLE_MODIFIER_MAP  Modifiers;
+  EFI_STATUS          Status;
+  UINTN               NumberOfKeyCodes;
+  APPLE_KEY_CODE      *KeyCodes;
 
   DEBUG ((DEBUG_VERBOSE, "InternalGetModifierStrokes\n"));
 
@@ -212,8 +214,8 @@ InternalAppleKeyEventDataFromInputKey (
   IN  EFI_INPUT_KEY     *InputKey
   )
 {
-  EFI_STATUS           Status;
-  APPLE_KEY_EVENT_DATA *KeyEventData;
+  EFI_STATUS            Status;
+  APPLE_KEY_EVENT_DATA  *KeyEventData;
 
   DEBUG ((DEBUG_VERBOSE, "InternalAppleKeyEventDataFromInputKey\n"));
 
@@ -225,7 +227,7 @@ InternalAppleKeyEventDataFromInputKey (
 
     if (KeyEventData != NULL) {
       KeyEventData->NumberOfKeyPairs = 1;
-      KeyEventData->InputKey = *InputKey;
+      KeyEventData->InputKey         = *InputKey;
 
       CopyMem (
         (VOID *)&KeyEventData->AppleKeyCode,
@@ -251,11 +253,11 @@ InternalGetAndRemoveReleasedKeys (
   OUT APPLE_KEY_CODE        **ReleasedKeys
   )
 {
-  UINTN          NumberOfReleasedKeys;
-  UINTN          Index;
-  UINTN          Index2;
-  APPLE_KEY_CODE ReleasedKeysBuffer[12];
-  UINTN          ReleasedKeysSize;
+  UINTN           NumberOfReleasedKeys;
+  UINTN           Index;
+  UINTN           Index2;
+  APPLE_KEY_CODE  ReleasedKeysBuffer[12];
+  UINTN           ReleasedKeysSize;
 
   DEBUG ((DEBUG_VERBOSE, "InternalGetAndRemoveReleasedKeys\n"));
 
@@ -328,18 +330,19 @@ InternalIsCLockOn (
   IN CONST APPLE_KEY_CODE  *KeyCodes
   )
 {
-  BOOLEAN                CLockOn;
-  UINTN                  Index;
-  UINTN                  Index2;
-  KEY_STROKE_INFORMATION *KeyInfo;
+  BOOLEAN                 CLockOn;
+  UINTN                   Index;
+  UINTN                   Index2;
+  KEY_STROKE_INFORMATION  *KeyInfo;
 
   DEBUG ((DEBUG_VERBOSE, "InternalIsCLockOn\n"));
 
   //
   // Check against invalid usage
   //
-  if (NumberOfKeyCodes == NULL
-    || (*NumberOfKeyCodes != 0 && KeyCodes == NULL)) {
+  if (  (NumberOfKeyCodes == NULL)
+     || ((*NumberOfKeyCodes != 0) && (KeyCodes == NULL)))
+  {
     return FALSE;
   }
 
@@ -358,10 +361,11 @@ InternalIsCLockOn (
       }
     }
 
-    if (KeyInfo == NULL
-      && KeyCodes[Index] == AppleHidUsbKbUsageKeyCLock
-      && !mCLockChanged) {
-      CLockOn = (BOOLEAN) mCLockOn == FALSE;
+    if (  (KeyInfo == NULL)
+       && (KeyCodes[Index] == AppleHidUsbKbUsageKeyCLock)
+       && !mCLockChanged)
+    {
+      CLockOn = (BOOLEAN)mCLockOn == FALSE;
       break;
     }
   }
@@ -376,8 +380,8 @@ InternalGetCurrentStroke (
   VOID
   )
 {
-  KEY_STROKE_INFORMATION *KeyInfo;
-  UINTN                  Index;
+  KEY_STROKE_INFORMATION  *KeyInfo;
+  UINTN                   Index;
 
   DEBUG ((DEBUG_VERBOSE, "InternalGetCurrentStroke\n"));
 
@@ -403,19 +407,19 @@ InternalGetCurrentKeyStroke (
   IN OUT EFI_INPUT_KEY       *Key
   )
 {
-  EFI_STATUS             Status;
-  KEY_STROKE_INFORMATION *KeyInfo;
-  UINTN                  Index;
-  UINTN                  NumberOfReleasedKeys;
-  APPLE_KEY_CODE         *ReleasedKeys;
-  BOOLEAN                CLockOn;
-  APPLE_MODIFIER_MAP     AppleModifiers;
-  BOOLEAN                ShiftPressed;
-  EFI_INPUT_KEY          InputKey;
-  APPLE_EVENT_DATA       AppleEventData;
-  UINTN                  NewKeyIndex;
-  BOOLEAN                AcceptStroke;
-  BOOLEAN                Shifted;
+  EFI_STATUS              Status;
+  KEY_STROKE_INFORMATION  *KeyInfo;
+  UINTN                   Index;
+  UINTN                   NumberOfReleasedKeys;
+  APPLE_KEY_CODE          *ReleasedKeys;
+  BOOLEAN                 CLockOn;
+  APPLE_MODIFIER_MAP      AppleModifiers;
+  BOOLEAN                 ShiftPressed;
+  EFI_INPUT_KEY           InputKey;
+  APPLE_EVENT_DATA        AppleEventData;
+  UINTN                   NewKeyIndex;
+  BOOLEAN                 AcceptStroke;
+  BOOLEAN                 Shifted;
 
   DEBUG ((DEBUG_VERBOSE, "InternalGetCurrentKeyStroke\n"));
 
@@ -439,7 +443,7 @@ InternalGetCurrentKeyStroke (
     AppleModifiers |= APPLE_MODIFIERS_SHIFT;
   }
 
-  ShiftPressed      = (BOOLEAN)((AppleModifiers & APPLE_MODIFIERS_SHIFT) != 0);
+  ShiftPressed = (BOOLEAN)((AppleModifiers & APPLE_MODIFIERS_SHIFT) != 0);
 
   for (Index = 0; Index < NumberOfReleasedKeys; ++Index) {
     EventInputKeyFromAppleKeyCode (
@@ -471,8 +475,8 @@ InternalGetCurrentKeyStroke (
   }
 
   if (CLockOn != mCLockOn) {
-    mCLockOn           = CLockOn;
-    mCLockChanged      = TRUE;
+    mCLockOn      = CLockOn;
+    mCLockChanged = TRUE;
   }
 
   //
@@ -505,7 +509,7 @@ InternalGetCurrentKeyStroke (
       //
       for (Index = 0; Index < ARRAY_SIZE (mKeyStrokeInfo); ++Index) {
         if (mKeyStrokeInfo[Index].AppleKeyCode == 0) {
-          KeyInfo = &mKeyStrokeInfo[Index];
+          KeyInfo                  = &mKeyStrokeInfo[Index];
           KeyInfo->AppleKeyCode    = KeyCodes[NewKeyIndex];
           KeyInfo->CurrentStroke   = TRUE;
           KeyInfo->NumberOfStrokes = 0;
@@ -531,19 +535,19 @@ InternalGetCurrentKeyStroke (
 
     if (KeyInfo != NULL) {
       AcceptStroke = (BOOLEAN)(
-                       (KeyInfo->NumberOfStrokes < mKeyInitialDelay)
+                               (KeyInfo->NumberOfStrokes < mKeyInitialDelay)
                          ? (KeyInfo->NumberOfStrokes == 0)
                          : (((KeyInfo->NumberOfStrokes - mKeyInitialDelay) % mKeySubsequentDelay) == 0)
-                       );
+                               );
 
       if (AcceptStroke) {
         *NumberOfKeyCodes = 1;
         *KeyCodes         = KeyInfo->AppleKeyCode;
 
         Shifted = (BOOLEAN)(
-                    (IS_APPLE_KEY_LETTER (KeyInfo->AppleKeyCode) && CLockOn)
-                      != ((mModifiers & APPLE_MODIFIERS_SHIFT) != 0)
-                    );
+                            (IS_APPLE_KEY_LETTER (KeyInfo->AppleKeyCode) && CLockOn)
+                            != ((mModifiers & APPLE_MODIFIERS_SHIFT) != 0)
+                            );
 
         EventInputKeyFromAppleKeyCode (
           KeyInfo->AppleKeyCode,
@@ -558,7 +562,7 @@ InternalGetCurrentKeyStroke (
       // Report that no keys were pressed.
       //
       *NumberOfKeyCodes = 0;
-      Status = EFI_SUCCESS;
+      Status            = EFI_SUCCESS;
     }
   }
 
@@ -573,14 +577,14 @@ InternalAppleEventDataFromCurrentKeyStroke (
   IN OUT APPLE_MODIFIER_MAP  *Modifiers
   )
 {
-  EFI_STATUS                      Status;
-  EFI_INPUT_KEY                   InputKey;
-  APPLE_KEY_CODE                  *KeyCodes;
-  APPLE_MODIFIER_MAP              AppleModifiers;
-  UINTN                           NumberOfKeyCodes;
-  EFI_CONSOLE_CONTROL_PROTOCOL    *ConsoleControl;
-  EFI_CONSOLE_CONTROL_SCREEN_MODE Mode;
-  UINTN                           Index;
+  EFI_STATUS                       Status;
+  EFI_INPUT_KEY                    InputKey;
+  APPLE_KEY_CODE                   *KeyCodes;
+  APPLE_MODIFIER_MAP               AppleModifiers;
+  UINTN                            NumberOfKeyCodes;
+  EFI_CONSOLE_CONTROL_PROTOCOL     *ConsoleControl;
+  EFI_CONSOLE_CONTROL_SCREEN_MODE  Mode;
+  UINTN                            Index;
 
   DEBUG ((DEBUG_VERBOSE, "InternalAppleEventDataFromCurrentKeyStroke\n"));
 
@@ -590,9 +594,10 @@ InternalAppleEventDataFromCurrentKeyStroke (
 
   Status = EFI_UNSUPPORTED;
 
-  if ((mKeyMapAggregator != NULL)
-   && (EventData != NULL)
-   && (Modifiers != NULL)) {
+  if (  (mKeyMapAggregator != NULL)
+     && (EventData != NULL)
+     && (Modifiers != NULL))
+  {
     AppleModifiers   = 0;
     NumberOfKeyCodes = 0;
 
@@ -665,10 +670,10 @@ InternalKeyStrokePollNotifyFunction (
   IN VOID       *Context
   )
 {
-  EFI_STATUS         Status;
-  APPLE_EVENT_DATA   EventData;
-  APPLE_MODIFIER_MAP Modifiers;
-  APPLE_MODIFIER_MAP PartialModifers;
+  EFI_STATUS          Status;
+  APPLE_EVENT_DATA    EventData;
+  APPLE_MODIFIER_MAP  Modifiers;
+  APPLE_MODIFIER_MAP  PartialModifers;
 
   DEBUG ((DEBUG_VERBOSE, "InternalKeyStrokePollNotifyFunction\n"));
 
@@ -728,9 +733,9 @@ InternalInitializeKeyHandler (
 
     ZeroMem ((VOID *)&mKeyStrokeInfo[0], sizeof (mKeyStrokeInfo));
 
-    mModifiers         = 0;
-    mCLockOn           = FALSE;
-    mCLockChanged      = FALSE;
+    mModifiers    = 0;
+    mCLockOn      = FALSE;
+    mCLockChanged = FALSE;
   }
 }
 
@@ -740,7 +745,7 @@ EventCreateKeyStrokePollEvent (
   VOID
   )
 {
-  EFI_STATUS Status;
+  EFI_STATUS  Status;
 
   DEBUG ((DEBUG_VERBOSE, "EventCreateKeyStrokePollEvent\n"));
 
@@ -782,6 +787,7 @@ EventCancelKeyStrokePollEvent (
 }
 
 // EventIsCapsLockOnImpl
+
 /** Retrieves the state of the CapsLock key.
 
   @param[in,out]  CLockOn  This parameter indicates the state of the CapsLock
@@ -797,7 +803,7 @@ EventIsCapsLockOnImpl (
   IN OUT BOOLEAN  *CLockOn
   )
 {
-  EFI_STATUS Status;
+  EFI_STATUS  Status;
 
   DEBUG ((DEBUG_VERBOSE, "EventIsCapsLockOnImpl\n"));
 

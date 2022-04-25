@@ -21,15 +21,15 @@
 // Tolerance within which we consider two frequency values to be roughly
 // equivalent.
 //
-#define OC_CPU_FREQUENCY_TOLERANCE 50000000LL // 50 Mhz
+#define OC_CPU_FREQUENCY_TOLERANCE  50000000LL// 50 Mhz
 
 /**
   Internal CPU synchronisation structure.
 **/
 typedef struct {
-  UINT64           Tsc;
-  volatile UINT32  CurrentCount;
-  UINT32           APThreadCount;
+  UINT64             Tsc;
+  volatile UINT32    CurrentCount;
+  UINT32             APThreadCount;
 } OC_CPU_TSC_SYNC;
 
 /**
@@ -85,13 +85,12 @@ InternalDetectAppleMajorType (
 **/
 UINT16
 InternalDetectAppleProcessorType (
-  IN UINT8   Model,
-  IN UINT8   Stepping,
-  IN UINT8   AppleMajorType,
-  IN UINT16  CoreCount,
-  IN BOOLEAN Is64Bit
+  IN UINT8    Model,
+  IN UINT8    Stepping,
+  IN UINT8    AppleMajorType,
+  IN UINT16   CoreCount,
+  IN BOOLEAN  Is64Bit
   );
-
 
 /**
   Obtain Intel CPU generation.
@@ -114,7 +113,7 @@ InternalDetectIntelProcessorGeneration (
 **/
 UINTN
 InternalGetPmTimerAddr (
-  OUT CONST CHAR8 **Type  OPTIONAL
+  OUT CONST CHAR8  **Type  OPTIONAL
   );
 
 /**
@@ -182,7 +181,7 @@ InternalCalculateVMTFrequency (
 **/
 UINT64
 InternalConvertAppleFSBToTSCFrequency (
-  IN  UINT64        FSBFrequency
+  IN  UINT64  FSBFrequency
   );
 
 /**

@@ -31,10 +31,10 @@ VerifyRsa (
   OC_BN_WORD  *Scratch;
 
   ModulusSize = PublicKey->Hdr.NumQwords * sizeof (UINT64);
-  RSqrMod = AllocatePool (ModulusSize);
-  Scratch = AllocatePool (BIG_NUM_MONT_PARAMS_SCRATCH_SIZE (ModulusSize / OC_BN_WORD_SIZE));
+  RSqrMod     = AllocatePool (ModulusSize);
+  Scratch     = AllocatePool (BIG_NUM_MONT_PARAMS_SCRATCH_SIZE (ModulusSize / OC_BN_WORD_SIZE));
 
-  if (RSqrMod == NULL || Scratch == NULL) {
+  if ((RSqrMod == NULL) || (Scratch == NULL)) {
     DEBUG ((DEBUG_ERROR, "memory allocation error!\n"));
     FreePool (RSqrMod);
     FreePool (Scratch);
@@ -43,7 +43,7 @@ VerifyRsa (
   N0Inv = BigNumCalculateMontParams (
             RSqrMod,
             ModulusSize / OC_BN_WORD_SIZE,
-            (CONST OC_BN_WORD *) PublicKey->Data,
+            (CONST OC_BN_WORD *)PublicKey->Data,
             Scratch
             );
 
@@ -57,8 +57,8 @@ VerifyRsa (
       ModulusSize
       ),
     N0Inv != PublicKey->Hdr.N0Inv,
-    (UINT64) N0Inv,
-    (UINT64) PublicKey->Hdr.N0Inv
+    (UINT64)N0Inv,
+    (UINT64)PublicKey->Hdr.N0Inv
     ));
 
   FreePool (Scratch);
@@ -76,7 +76,7 @@ ENTRY_POINT (
   UINT32             PkSize;
 
   for (Index = 1; Index < argc; ++Index) {
-    PublicKey = (OC_RSA_PUBLIC_KEY *) UserReadFile (argv[Index], &PkSize);
+    PublicKey = (OC_RSA_PUBLIC_KEY *)UserReadFile (argv[Index], &PkSize);
     if (PublicKey == NULL) {
       DEBUG ((DEBUG_ERROR, "read error\n"));
       return -1;
@@ -86,7 +86,7 @@ ENTRY_POINT (
     FreePool (PublicKey);
   }
 
-  for (Index = 0; (UINTN) Index < ARRAY_SIZE (PkDataBase); ++Index) {
+  for (Index = 0; (UINTN)Index < ARRAY_SIZE (PkDataBase); ++Index) {
     VerifyRsa (PkDataBase[Index].PublicKey, "inbuilt");
   }
 

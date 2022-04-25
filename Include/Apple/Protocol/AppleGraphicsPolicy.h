@@ -1,18 +1,18 @@
 /*++
- 
+
  Created by HermitCrabs on 26/4/2015.
  Copyright 2010-2014 The HermitCrab Labs. All rights reserved.
- 
+
  Module Name:
- 
+
  AppleGraphicsPolicy.h
- 
+
  Abstract:
- 
+
  Revision History
- 
+
  1.0 Initial Version
- 
+
  --*/
 
 #ifndef APPLE_GRAPHICS_POLICY_H
@@ -28,7 +28,7 @@ typedef
 EFI_STATUS
 (EFIAPI *APPLE_GRAPHICS_POLICY_MEMBER_01)(
   IN APPLE_GRAPHICS_POLICY_PROTOCOL  *This,
-     VOID                            *param2
+  VOID                            *param2
   );
 
 typedef
@@ -82,16 +82,16 @@ EFI_STATUS
   );
 
 struct APPLE_GRAPHICS_POLICY_PROTOCOL {
-  UINTN                            Revision;
-  APPLE_GRAPHICS_POLICY_MEMBER_01	 Unknown_01;
-  APPLE_GRAPHICS_POLICY_MEMBER_02	 Unknown_02;
-  APPLE_GRAPHICS_POLICY_MEMBER_03	 Unknown_03;
-  APPLE_GRAPHICS_POLICY_MEMBER_04	 Unknown_04;
-  APPLE_GRAPHICS_POLICY_MEMBER_05	 Unknown_05;
-  APPLE_GRAPHICS_POLICY_MEMBER_06  Unknown_06;
-  APPLE_GRAPHICS_POLICY_MEMBER_07  Unknown_07;
+  UINTN                              Revision;
+  APPLE_GRAPHICS_POLICY_MEMBER_01    Unknown_01;
+  APPLE_GRAPHICS_POLICY_MEMBER_02    Unknown_02;
+  APPLE_GRAPHICS_POLICY_MEMBER_03    Unknown_03;
+  APPLE_GRAPHICS_POLICY_MEMBER_04    Unknown_04;
+  APPLE_GRAPHICS_POLICY_MEMBER_05    Unknown_05;
+  APPLE_GRAPHICS_POLICY_MEMBER_06    Unknown_06;
+  APPLE_GRAPHICS_POLICY_MEMBER_07    Unknown_07;
 };
 
-extern EFI_GUID gAppleGraphicsPolicyProtocolGuid;
+extern EFI_GUID  gAppleGraphicsPolicyProtocolGuid;
 
 #endif // APPLE_GRAPHICS_POLICY_H

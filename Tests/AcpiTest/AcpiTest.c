@@ -31,7 +31,6 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 #include <Protocol/AppleBootPolicy.h>
 #include <Protocol/DevicePathPropertyDatabase.h>
 
-
 #include <Uefi.h>
 #include <Library/PrintLib.h>
 #include <Library/UefiDriverEntryPoint.h>
@@ -42,7 +41,7 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 #include <Protocol/SimpleFileSystem.h>
 #include <Library/OcAcpiLib.h>
 
-UINT8 PatchedSsdt8[] = {
+UINT8  PatchedSsdt8[] = {
   0x53, 0x53, 0x44, 0x54, 0x25, 0x01, 0x00, 0x00, 0x02, 0x60, 0x41, 0x50, 0x50, 0x4C, 0x45, 0x20,
   0x53, 0x73, 0x64, 0x74, 0x45, 0x43, 0x00, 0x00, 0x00, 0x10, 0x00, 0x00, 0x49, 0x4E, 0x54, 0x4C,
   0x10, 0x12, 0x16, 0x20, 0xA0, 0x1C, 0x00, 0x15, 0x5C, 0x2F, 0x03, 0x5F, 0x53, 0x42, 0x5F, 0x50,
@@ -64,28 +63,28 @@ UINT8 PatchedSsdt8[] = {
   0x47, 0x50, 0x45, 0x0A, 0x17
 };
 
-STATIC UINT8 HpetPatchFind[] = {'H', 'P', 'E', 'T'};
-STATIC UINT8 HpetPatchReplace[] = {'X', 'P', 'E', 'T'};
-STATIC UINT8 HpetPatchMask[] = {0xFF, 0xFF, 0xFF, 0xFF};
+STATIC UINT8  HpetPatchFind[]    = { 'H', 'P', 'E', 'T' };
+STATIC UINT8  HpetPatchReplace[] = { 'X', 'P', 'E', 'T' };
+STATIC UINT8  HpetPatchMask[]    = { 0xFF, 0xFF, 0xFF, 0xFF };
 STATIC
 OC_ACPI_PATCH
-HpetPatch = {
-  .Find    = HpetPatchFind,
-  .Replace = HpetPatchReplace,
-  .Mask    = HpetPatchMask,
+  HpetPatch = {
+  .Find        = HpetPatchFind,
+  .Replace     = HpetPatchReplace,
+  .Mask        = HpetPatchMask,
   .ReplaceMask = NULL,
-  .Size    = sizeof (HpetPatchFind),
+  .Size        = sizeof (HpetPatchFind),
   //
   // Replace only once.
   //
-  .Count   = 1,
-  .Skip    = 0,
+  .Count = 1,
+  .Skip  = 0,
   //
   // Only patch DSDT.
   //
   .TableSignature = EFI_ACPI_6_2_DIFFERENTIATED_SYSTEM_DESCRIPTION_TABLE_SIGNATURE,
-  .TableLength = 0,
-  .OemTableId = 0
+  .TableLength    = 0,
+  .OemTableId     = 0
 };
 
 EFI_STATUS
@@ -95,8 +94,8 @@ TestAcpi (
   IN EFI_SYSTEM_TABLE  *SystemTable
   )
 {
-  EFI_STATUS                                  Status;
-  OC_ACPI_CONTEXT                             Context;
+  EFI_STATUS       Status;
+  OC_ACPI_CONTEXT  Context;
 
   Status = AcpiInitContext (&Context);
 
@@ -137,7 +136,7 @@ UefiMain (
   WaitForKeyPress (L"Press any key...");
 
   for (Index = 0; Index < SystemTable->NumberOfTableEntries; ++Index) {
-    Print (L"Table %u is %g\n", (UINT32) Index, &SystemTable->ConfigurationTable[Index].VendorGuid);
+    Print (L"Table %u is %g\n", (UINT32)Index, &SystemTable->ConfigurationTable[Index].VendorGuid);
   }
 
   Print (L"This is test app...\n");

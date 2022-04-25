@@ -48,13 +48,13 @@ BigNumMontInverse (
   IN CONST OC_BN_WORD  *A
   )
 {
-  OC_BN_WORD Dividend;
-  OC_BN_WORD Divisor;
-  OC_BN_WORD X;
-  OC_BN_WORD Y;
-  OC_BN_WORD Mod;
-  OC_BN_WORD Div;
-  OC_BN_WORD Tmp;
+  OC_BN_WORD  Dividend;
+  OC_BN_WORD  Divisor;
+  OC_BN_WORD  X;
+  OC_BN_WORD  Y;
+  OC_BN_WORD  Mod;
+  OC_BN_WORD  Div;
+  OC_BN_WORD  Tmp;
 
   ASSERT (A != NULL);
   //
@@ -102,7 +102,7 @@ BigNumMontInverse (
   // Mod = Dividend % Divisor;
   //
   Div = 0;
-  do { 
+  do {
     Dividend -= Divisor;
     ++Div;
   } while (Dividend >= Divisor);
@@ -136,6 +136,7 @@ BigNumMontInverse (
     Y   = X;
     X   = Tmp;
   }
+
   //
   // When the loop ends, Dividend contains the Greatest Common Divisor.
   // If it is not 1, we cannot compute the Montgomery Inverse.
@@ -143,6 +144,7 @@ BigNumMontInverse (
   if (Dividend != 1) {
     return 0;
   }
+
   //
   // As per above, Y is 1 / A mod 2^#Bits(Word), so invert the result to yield
   // -1 / A mod 2^#Bits(Word).
@@ -158,11 +160,11 @@ BigNumCalculateMontParams (
   IN     OC_BN_WORD        *Scratch
   )
 {
-  OC_BN_WORD      N0Inv;
-  UINT32          NumBits;
-  OC_BN_NUM_WORDS NumWordsRSqr;
-  OC_BN_NUM_WORDS NumWordsMod;
-  OC_BN_WORD      *RSqr;
+  OC_BN_WORD       N0Inv;
+  UINT32           NumBits;
+  OC_BN_NUM_WORDS  NumWordsRSqr;
+  OC_BN_NUM_WORDS  NumWordsMod;
+  OC_BN_WORD       *RSqr;
 
   ASSERT (RSqrMod != NULL);
   ASSERT (NumWords > 0);
@@ -227,8 +229,8 @@ BigNumWordAddMul (
   IN  OC_BN_WORD  B
   )
 {
-  OC_BN_WORD ResHi;
-  OC_BN_WORD ResLo;
+  OC_BN_WORD  ResHi;
+  OC_BN_WORD  ResLo;
 
   ASSERT (Hi != NULL);
 
@@ -263,17 +265,17 @@ BigNumWordAddMulCarry (
   IN  OC_BN_WORD  Carry
   )
 {
-  OC_BN_WORD MulResHi;
-  OC_BN_WORD MulResLo;
+  OC_BN_WORD  MulResHi;
+  OC_BN_WORD  MulResLo;
 
   ASSERT (Hi != NULL);
 
-  MulResLo = BigNumWordAddMul (&MulResHi, C, A, B);
+  MulResLo  = BigNumWordAddMul (&MulResHi, C, A, B);
   MulResLo += Carry;
   if (MulResLo < Carry) {
     ++MulResHi;
   }
-  
+
   *Hi = MulResHi;
   return MulResLo;
 }
@@ -300,13 +302,13 @@ BigNumMontMulRow (
   IN     OC_BN_WORD        N0Inv
   )
 {
-  UINTN      CompIndex;
+  UINTN  CompIndex;
 
-  OC_BN_WORD CCurMulHi;
-  OC_BN_WORD CCurMulLo;
-  OC_BN_WORD CCurMontHi;
-  OC_BN_WORD CCurMontLo;
-  OC_BN_WORD TFirst;
+  OC_BN_WORD  CCurMulHi;
+  OC_BN_WORD  CCurMulLo;
+  OC_BN_WORD  CCurMontHi;
+  OC_BN_WORD  CCurMontLo;
+  OC_BN_WORD  TFirst;
 
   ASSERT (Result != NULL);
   ASSERT (NumWords > 0);
@@ -368,10 +370,11 @@ BigNumMontMulRow (
     //
     Result[CompIndex - 1] = CCurMontLo;
   }
+
   //
   // Assign the most significant byte the remaining carrys.
   //
-  CCurMulLo = CCurMulHi + CCurMontHi;
+  CCurMulLo             = CCurMulHi + CCurMontHi;
   Result[CompIndex - 1] = CCurMulLo;
   //
   // If the result has wrapped around, C >= N is true and we reduce mod N.
@@ -407,7 +410,7 @@ BigNumMontMul (
   IN     OC_BN_WORD        N0Inv
   )
 {
-  UINTN RowIndex;
+  UINTN  RowIndex;
 
   ASSERT (Result != NULL);
   ASSERT (NumWords > 0);
@@ -425,6 +428,7 @@ BigNumMontMul (
   for (RowIndex = 0; RowIndex < NumWords; ++RowIndex) {
     BigNumMontMulRow (Result, NumWords, A[RowIndex], B, N, N0Inv);
   }
+
   //
   // As this implementation only reduces mod N on overflow and not for every
   // yes-instance of C >= N, any sequence of Montgomery Multiplications must be
@@ -453,11 +457,11 @@ BigNumMontMulRow0 (
   IN     OC_BN_WORD        N0Inv
   )
 {
-  UINTN      CompIndex;
+  UINTN  CompIndex;
 
-  OC_BN_WORD CCurMontHi;
-  OC_BN_WORD CCurMontLo;
-  OC_BN_WORD TFirst;
+  OC_BN_WORD  CCurMontHi;
+  OC_BN_WORD  CCurMontLo;
+  OC_BN_WORD  TFirst;
 
   ASSERT (Result != NULL);
   ASSERT (NumWords > 0);
@@ -496,6 +500,7 @@ BigNumMontMulRow0 (
     //
     Result[CompIndex - 1] = CCurMontLo;
   }
+
   //
   // Assign the most significant byte the remaining carry.
   //
@@ -523,7 +528,7 @@ BigNumMontMul1 (
   IN     OC_BN_WORD        N0Inv
   )
 {
-  UINTN RowIndex;
+  UINTN  RowIndex;
 
   ASSERT (Result != NULL);
   ASSERT (NumWords > 0);
@@ -542,6 +547,7 @@ BigNumMontMul1 (
   for (RowIndex = 1; RowIndex < NumWords; ++RowIndex) {
     BigNumMontMulRow0 (Result, NumWords, N, N0Inv);
   }
+
   //
   // As this implementation only reduces mod N on overflow and not for every
   // yes-instance of C >= N, any sequence of Montgomery Multiplications must be
@@ -561,7 +567,7 @@ BigNumPowMod (
   IN     OC_BN_WORD        *ATmp
   )
 {
-  UINTN      Index;
+  UINTN  Index;
 
   ASSERT (Result != NULL);
   ASSERT (NumWords > 0);
@@ -572,7 +578,7 @@ BigNumPowMod (
   //
   // Currently, only the most frequent exponents are supported.
   //
-  if (B != 0x10001 && B != 3) {
+  if ((B != 0x10001) && (B != 3)) {
     DEBUG ((DEBUG_INFO, "OCCR: Unsupported exponent: %x\n", B));
     return FALSE;
   }
@@ -597,6 +603,7 @@ BigNumPowMod (
       //
       BigNumMontMul (ATmp, NumWords, Result, Result, N, N0Inv);
     }
+
     //
     // Because A is not within the Montgomery Domain, this implies another
     // division by R, which takes the result out of the Montgomery Domain.
@@ -620,6 +627,7 @@ BigNumPowMod (
     //
     BigNumMontMul1 (Result, NumWords, ATmp, N, N0Inv);
   }
+
   //
   // The Montgomery Multiplications above only ensure the result is mod N when
   // it does not fit within #Bits(N). For N != 0, which is an obvious
@@ -627,7 +635,7 @@ BigNumPowMod (
   // result is at most one modulus too large.
   // C = C mod N
   //
-  if (BigNumCmp (Result, NumWords, N) >= 0){
+  if (BigNumCmp (Result, NumWords, N) >= 0) {
     BigNumSub (Result, NumWords, Result, N);
   }
 

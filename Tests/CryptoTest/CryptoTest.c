@@ -37,9 +37,9 @@ TestRsa2048Sha256Verify (
   VOID
   )
 {
-  EFI_STATUS Status;
-  UINT8      DataSha256Hash[SHA256_DIGEST_SIZE];
-  BOOLEAN    SignatureVerified = FALSE;
+  EFI_STATUS  Status;
+  UINT8       DataSha256Hash[SHA256_DIGEST_SIZE];
+  BOOLEAN     SignatureVerified = FALSE;
 
   Sha256 (
     DataSha256Hash,
@@ -47,35 +47,35 @@ TestRsa2048Sha256Verify (
     SIGNED_DATA_LEN
     );
 
-  CONST OC_RSA_PUBLIC_KEY *PubKey =
-    (CONST OC_RSA_PUBLIC_KEY *) Rsa2048Sha256Sample.PublicKey;
+  CONST OC_RSA_PUBLIC_KEY  *PubKey =
+    (CONST OC_RSA_PUBLIC_KEY *)Rsa2048Sha256Sample.PublicKey;
 
-  void *Scratch = AllocatePool (
-      RSA_SCRATCH_BUFFER_SIZE (PubKey->Hdr.NumQwords * sizeof (UINT64))
-    );
+  void  *Scratch = AllocatePool (
+                     RSA_SCRATCH_BUFFER_SIZE (PubKey->Hdr.NumQwords * sizeof (UINT64))
+                     );
 
   if (Scratch == NULL) {
     return EFI_OUT_OF_RESOURCES;
   }
 
   SignatureVerified = RsaVerifySigHashFromKey (
-    PubKey,
-    Rsa2048Sha256Sample.Signature,
-    sizeof (Rsa2048Sha256Sample.Signature),
-    DataSha256Hash,
-    sizeof (DataSha256Hash),
-    OcSigHashTypeSha256,
-    Scratch
-    );
+                        PubKey,
+                        Rsa2048Sha256Sample.Signature,
+                        sizeof (Rsa2048Sha256Sample.Signature),
+                        DataSha256Hash,
+                        sizeof (DataSha256Hash),
+                        OcSigHashTypeSha256,
+                        Scratch
+                        );
 
   FreePool (Scratch);
 
   if (SignatureVerified) {
     Status = EFI_SUCCESS;
-    Print(L"Rsa2048Sha256 signature verifying passed!\n");
+    Print (L"Rsa2048Sha256 signature verifying passed!\n");
   } else {
     Status = EFI_INVALID_PARAMETER;
-    Print(L"Rsa2048Sha256 signature verifying failed!\n");
+    Print (L"Rsa2048Sha256 signature verifying failed!\n");
   }
 
   return Status;
@@ -93,8 +93,8 @@ TestAesCtr (
   UINT8        CipherText[AES_SAMPLE_DATA_LEN];
   BOOLEAN      AesTestPassed = TRUE;
 
-  CopyMem(PlainText, AesCtrSample.PlainText, AES_SAMPLE_DATA_LEN);
-  CopyMem(CipherText, AesCtrSample.CipherText, AES_SAMPLE_DATA_LEN);
+  CopyMem (PlainText, AesCtrSample.PlainText, AES_SAMPLE_DATA_LEN);
+  CopyMem (CipherText, AesCtrSample.CipherText, AES_SAMPLE_DATA_LEN);
 
   //
   // Init AES context
@@ -163,8 +163,8 @@ TestAesCbc (
   UINT8        CipherText[AES_SAMPLE_DATA_LEN];
   BOOLEAN      AesTestPassed = TRUE;
 
-  CopyMem(PlainText, AesCbcSample.PlainText, AES_SAMPLE_DATA_LEN);
-  CopyMem(CipherText, AesCbcSample.CipherText, AES_SAMPLE_DATA_LEN);
+  CopyMem (PlainText, AesCbcSample.PlainText, AES_SAMPLE_DATA_LEN);
+  CopyMem (CipherText, AesCbcSample.CipherText, AES_SAMPLE_DATA_LEN);
 
   //
   // Init AES context
@@ -230,8 +230,8 @@ TestChaCha (
   CHACHA_CONTEXT  Context;
   BOOLEAN         EncryptionOk;
   BOOLEAN         DecryptionOk;
-  UINT8 TmpBuffer1[sizeof (ChaChaCipherText)];
-  UINT8 TmpBuffer2[sizeof (ChaChaCipherText)];
+  UINT8           TmpBuffer1[sizeof (ChaChaCipherText)];
+  UINT8           TmpBuffer2[sizeof (ChaChaCipherText)];
 
   ZeroMem (&Context, sizeof (Context));
 
@@ -290,37 +290,38 @@ TestChaCha (
   return EFI_INVALID_PARAMETER;
 }
 
-
 EFI_STATUS
 EFIAPI
 TestHash (
   VOID
   )
 {
-  EFI_STATUS   Status          = EFI_INVALID_PARAMETER;
-  UINTN        Index           = 0;
-  UINTN        Index2          = 0;
-  BOOLEAN      HashTestPassed  = TRUE;
-  UINT8        Md5Hash[MD5_DIGEST_SIZE];
-  UINT8        Sha1Hash[SHA1_DIGEST_SIZE];
-  UINT8        Sha256Hash[SHA256_DIGEST_SIZE];
-  UINT8        Sha512Hash[SHA512_DIGEST_SIZE];
-  UINT8        Sha384Hash[SHA384_DIGEST_SIZE];
+  EFI_STATUS  Status         = EFI_INVALID_PARAMETER;
+  UINTN       Index          = 0;
+  UINTN       Index2         = 0;
+  BOOLEAN     HashTestPassed = TRUE;
+  UINT8       Md5Hash[MD5_DIGEST_SIZE];
+  UINT8       Sha1Hash[SHA1_DIGEST_SIZE];
+  UINT8       Sha256Hash[SHA256_DIGEST_SIZE];
+  UINT8       Sha512Hash[SHA512_DIGEST_SIZE];
+  UINT8       Sha384Hash[SHA384_DIGEST_SIZE];
 
   //
   // Iterate through hash samples
   //
   for (Index = 0; Index < HASH_SAMPLES_NUM; Index++) {
-    Print(L"#########################\n");
-    Print(L"Running hash test №%lu\n", Index);
-    Print(L"Test data:\n");
+    Print (L"#########################\n");
+    Print (L"Running hash test №%lu\n", Index);
+    Print (L"Test data:\n");
     for (Index2 = 0; Index2 < HashSamples[Index].PlainTextLen; Index2++) {
-      if (Index2 % 8 == 0 && Index2 > 0) {
-        Print(L"\n");
+      if ((Index2 % 8 == 0) && (Index2 > 0)) {
+        Print (L"\n");
       }
-      Print(L"%02x ",HashSamples[Index].PlainText[Index2]);
+
+      Print (L"%02x ", HashSamples[Index].PlainText[Index2]);
     }
-    Print(L"\n-------------------------\n");
+
+    Print (L"\n-------------------------\n");
     Md5 (
       Md5Hash,
       HashSamples[Index].PlainText,
@@ -351,36 +352,35 @@ TestHash (
       HashSamples[Index].PlainTextLen
       );
 
-
-    if (CompareMem ( Md5Hash, HashSamples[Index].Md5Hash, MD5_DIGEST_SIZE) == 0) {
+    if (CompareMem (Md5Hash, HashSamples[Index].Md5Hash, MD5_DIGEST_SIZE) == 0) {
       Print (L"Md5 hash test passed\n");
     } else {
       Print (L"Md5 hash test failed\n");
       HashTestPassed = FALSE;
     }
 
-    if (CompareMem ( Sha1Hash, HashSamples[Index].Sha1Hash, SHA1_DIGEST_SIZE) == 0) {
+    if (CompareMem (Sha1Hash, HashSamples[Index].Sha1Hash, SHA1_DIGEST_SIZE) == 0) {
       Print (L"Sha1 hash test passed\n");
     } else {
       Print (L"Sha1 hash test failed\n");
       HashTestPassed = FALSE;
     }
 
-    if (CompareMem ( Sha256Hash, HashSamples[Index].Sha256Hash, SHA256_DIGEST_SIZE) == 0) {
+    if (CompareMem (Sha256Hash, HashSamples[Index].Sha256Hash, SHA256_DIGEST_SIZE) == 0) {
       Print (L"Sha256 hash test passed\n");
     } else {
       Print (L"Sha256 hash test failed\n");
       HashTestPassed = FALSE;
     }
 
-    if (CompareMem ( Sha512Hash, HashSamples[Index].Sha512Hash, SHA512_DIGEST_SIZE) == 0) {
+    if (CompareMem (Sha512Hash, HashSamples[Index].Sha512Hash, SHA512_DIGEST_SIZE) == 0) {
       Print (L"Sha512 hash test passed\n");
     } else {
       Print (L"Sha512 hash test failed\n");
       HashTestPassed = FALSE;
     }
 
-    if (CompareMem ( Sha384Hash, HashSamples[Index].Sha384Hash, SHA384_DIGEST_SIZE) == 0) {
+    if (CompareMem (Sha384Hash, HashSamples[Index].Sha384Hash, SHA384_DIGEST_SIZE) == 0) {
       Print (L"Sha384 hash test passed\n");
     } else {
       Print (L"Sha384 hash test failed\n");
@@ -419,8 +419,8 @@ UefiDriverMain (
   IN EFI_SYSTEM_TABLE  *SystemTable
   )
 {
-  BOOLEAN    Failure;
-  EFI_STATUS Status;
+  BOOLEAN     Failure;
+  EFI_STATUS  Status;
 
   Failure = FALSE;
 
@@ -491,8 +491,8 @@ UefiAppMain (
   IN EFI_SYSTEM_TABLE  *SystemTable
   )
 {
-  BOOLEAN    Failure;
-  EFI_STATUS Status;
+  BOOLEAN     Failure;
+  EFI_STATUS  Status;
 
   Failure = FALSE;
 
@@ -504,10 +504,10 @@ UefiAppMain (
   //
   Status = TestHash ();
   if (EFI_ERROR (Status)) {
-    Print(L"HashTest failed!\n");
+    Print (L"HashTest failed!\n");
     Failure = TRUE;
   } else {
-    Print(L"All hash tests passed!\n");
+    Print (L"All hash tests passed!\n");
   }
 
   WaitForKeyPress (L"Press any key...");
@@ -517,10 +517,10 @@ UefiAppMain (
   //
   Status = TestAesCbc ();
   if (EFI_ERROR (Status)) {
-    Print(L"AES-128-CBC failed!\n");
+    Print (L"AES-128-CBC failed!\n");
     Failure = TRUE;
   } else {
-    Print(L"AES-128-CBC passed!\n");
+    Print (L"AES-128-CBC passed!\n");
   }
 
   WaitForKeyPress (L"Press any key...");
@@ -530,10 +530,10 @@ UefiAppMain (
   //
   Status = TestAesCtr ();
   if (EFI_ERROR (Status)) {
-    Print(L"AES-128-CTR failed!\n");
+    Print (L"AES-128-CTR failed!\n");
     Failure = TRUE;
   } else {
-    Print(L"AES-128-CTR passed!\n");
+    Print (L"AES-128-CTR passed!\n");
   }
 
   WaitForKeyPress (L"Press any key...");
@@ -556,13 +556,13 @@ UefiAppMain (
   //
   Status = TestRsa2048Sha256Verify ();
   if (EFI_ERROR (Status)) {
-    Print(L"Rsa2048Sha256 failed!\n");
+    Print (L"Rsa2048Sha256 failed!\n");
     Failure = TRUE;
   } else {
-    Print(L"Rsa2048Sha256 passed!\n");
+    Print (L"Rsa2048Sha256 passed!\n");
   }
-  WaitForKeyPress (L"Press any key to exit");
 
+  WaitForKeyPress (L"Press any key to exit");
 
   if (Failure) {
     Print (L"Some tests failed\n");

@@ -24,17 +24,17 @@
 
 #include <UserFile.h>
 
-STATIC BOOLEAN FailedToProcess = FALSE;
-STATIC UINT32  KernelVersion   = 0;
+STATIC BOOLEAN  FailedToProcess = FALSE;
+STATIC UINT32   KernelVersion   = 0;
 
-STATIC EFI_FILE_PROTOCOL NilFileProtocol;
+STATIC EFI_FILE_PROTOCOL  NilFileProtocol;
 
-STATIC UINT8  *mPrelinked    = NULL;
-STATIC UINT32 mPrelinkedSize = 0;
+STATIC UINT8   *mPrelinked    = NULL;
+STATIC UINT32  mPrelinkedSize = 0;
 
 STATIC
 CONST CHAR8
-KextInfoPlistData[] = {
+  KextInfoPlistData[] = {
   0x3C, 0x3F, 0x78, 0x6D, 0x6C, 0x20, 0x76, 0x65,
   0x72, 0x73, 0x69, 0x6F, 0x6E, 0x3D, 0x22, 0x31,
   0x2E, 0x30, 0x22, 0x20, 0x65, 0x6E, 0x63, 0x6F,
@@ -188,32 +188,32 @@ KextInfoPlistData[] = {
 
 STATIC
 CONST UINT8
-DisableIOAHCIPatchReplace[] = {
+  DisableIOAHCIPatchReplace[] = {
   0x31, 0xC0, 0xC3 // xor eax, eax ; ret
 };
 
 STATIC
 PATCHER_GENERIC_PATCH
-DisableIOAHCIPatch = {
-  .Base    = "__ZN10IOAHCIPort5startEP9IOService",
-  .Find    = NULL,
-  .Mask    = NULL,
-  .Replace = DisableIOAHCIPatchReplace,
+  DisableIOAHCIPatch = {
+  .Base        = "__ZN10IOAHCIPort5startEP9IOService",
+  .Find        = NULL,
+  .Mask        = NULL,
+  .Replace     = DisableIOAHCIPatchReplace,
   .ReplaceMask = NULL,
-  .Size    = sizeof (DisableIOAHCIPatchReplace),
-  .Count   = 1,
-  .Skip    = 0
+  .Size        = sizeof (DisableIOAHCIPatchReplace),
+  .Count       = 1,
+  .Skip        = 0
 };
 
 STATIC
 CONST UINT8
-DisableKernelLog[] = {
+  DisableKernelLog[] = {
   0xC3
 };
 
 STATIC
 PATCHER_GENERIC_PATCH
-DisableIoLogPatch = {
+  DisableIoLogPatch = {
   .Base    = "_IOLog",
   .Find    = NULL,
   .Mask    = NULL,
@@ -233,10 +233,10 @@ ApplyKextPatches (
   PATCHER_CONTEXT  Patcher;
 
   Status = PatcherInitContextFromPrelinked (
-    &Patcher,
-    Context,
-    "com.apple.iokit.IOAHCIFamily"
-    );
+             &Patcher,
+             Context,
+             "com.apple.iokit.IOAHCIFamily"
+             );
   if (!EFI_ERROR (Status)) {
     Status = PatcherApplyGenericPatch (&Patcher, &DisableIOAHCIPatch);
     if (EFI_ERROR (Status)) {
@@ -251,10 +251,10 @@ ApplyKextPatches (
   }
 
   Status = PatcherInitContextFromPrelinked (
-    &Patcher,
-    Context,
-    "com.apple.iokit.IOHIDFamily"
-    );
+             &Patcher,
+             Context,
+             "com.apple.iokit.IOHIDFamily"
+             );
   if (!EFI_ERROR (Status)) {
     Status = PatcherBlockKext (&Patcher);
     if (EFI_ERROR (Status)) {
@@ -269,10 +269,10 @@ ApplyKextPatches (
   }
 
   Status = PatcherInitContextFromPrelinked (
-    &Patcher,
-    Context,
-    "com.apple.driver.Intel82574LEthernet"
-    );
+             &Patcher,
+             Context,
+             "com.apple.driver.Intel82574LEthernet"
+             );
   if (!EFI_ERROR (Status)) {
     Status = PatcherExcludePrelinkedKext ("com.apple.driver.Intel82574LEthernet", &Patcher, Context);
     if (EFI_ERROR (Status)) {
@@ -417,11 +417,11 @@ ApplyKernelPatches (
   PATCHER_CONTEXT  Patcher;
 
   Status = PatcherInitContextFromBuffer (
-    &Patcher,
-    Kernel,
-    Size,
-    FALSE
-    );
+             &Patcher,
+             Kernel,
+             Size,
+             FALSE
+             );
   if (EFI_ERROR (Status)) {
     DEBUG ((DEBUG_WARN, "Failed to find kernel - %r\n", Status));
     FailedToProcess = TRUE;
@@ -436,17 +436,18 @@ ApplyKernelPatches (
     DEBUG ((DEBUG_WARN, "[OK] DisableIoLogPatch kernel patch\n"));
   }
 
-  UINT32  VirtualCpuid[4]     = {0, 0, 0, 0};
-  UINT32  VirtualCpuidMask[4] = {0xFFFFFFFF, 0, 0, 0};
-  OC_CPU_INFO CpuInfo;
+  UINT32       VirtualCpuid[4]     = { 0, 0, 0, 0 };
+  UINT32       VirtualCpuidMask[4] = { 0xFFFFFFFF, 0, 0, 0 };
+  OC_CPU_INFO  CpuInfo;
+
   ZeroMem (&CpuInfo, sizeof (CpuInfo));
   Status = PatchKernelCpuId (
-    &Patcher,
-    &CpuInfo,
-    VirtualCpuid,
-    VirtualCpuidMask,
-    KernelVersion
-    );
+             &Patcher,
+             &CpuInfo,
+             VirtualCpuid,
+             VirtualCpuidMask,
+             KernelVersion
+             );
   if (EFI_ERROR (Status)) {
     DEBUG ((DEBUG_WARN, "[FAIL] CPUID kernel patch - %r\n", Status));
     FailedToProcess = TRUE;
@@ -510,8 +511,9 @@ ApplyKernelPatches (
     DEBUG ((DEBUG_WARN, "[OK] KernelQuirkSegmentJettison patch\n"));
   }
 
-  UINTN  RegisterBasePmio = 0x2008;
-  UINT32 RegisterStride   = 4;
+  UINTN   RegisterBasePmio = 0x2008;
+  UINT32  RegisterStride   = 4;
+
   PatchSetPciSerialDevice (RegisterBasePmio, RegisterStride);
   Status = KernelApplyQuirk (KernelQuirkCustomPciSerialDevice, &Patcher, KernelVersion);
   if (EFI_ERROR (Status)) {
@@ -532,7 +534,7 @@ OcGetFileData (
 {
   ASSERT (File == &NilFileProtocol);
 
-  if ((UINT64) Position + Size > mPrelinkedSize) {
+  if ((UINT64)Position + Size > mPrelinkedSize) {
     return EFI_INVALID_PARAMETER;
   }
 
@@ -563,25 +565,26 @@ WrapMain (
   PcdGet32 (PcdFixedDebugPrintErrorLevel) |= DEBUG_INFO | DEBUG_VERBOSE;
   PcdGet32 (PcdDebugPrintErrorLevel)      |= DEBUG_INFO | DEBUG_VERBOSE;
 
-  CONST CHAR8 *FileName;
+  CONST CHAR8  *FileName;
+
   FileName = argc > 1 ? argv[1] : "/System/Library/PrelinkedKernels/prelinkedkernel";
   if ((mPrelinked = UserReadFile (FileName, &mPrelinkedSize)) == NULL) {
     DEBUG ((DEBUG_ERROR, "Read fail %a\n", FileName));
     return -1;
   }
 
-  UINT32 ReservedInfoSize = PRELINK_INFO_RESERVE_SIZE;
-  UINT32 ReservedExeSize  = 0;
+  UINT32  ReservedInfoSize = PRELINK_INFO_RESERVE_SIZE;
+  UINT32  ReservedExeSize  = 0;
 
   for (int argi = 0; argc - argi > 2; argi += 2) {
-    UINT8  *TestData = NULL;
-    UINT32 TestDataSize = 0;
-    CHAR8  *TestPlist = NULL;
-    UINT32 TestPlistSize = 0;
+    UINT8   *TestData     = NULL;
+    UINT32  TestDataSize  = 0;
+    CHAR8   *TestPlist    = NULL;
+    UINT32  TestPlistSize = 0;
 
     if (argc - argi > 2) {
-      if (argv[argi + 2][0] == 'n' && argv[argi + 2][1] == 0) {
-        TestData = NULL;
+      if ((argv[argi + 2][0] == 'n') && (argv[argi + 2][1] == 0)) {
+        TestData     = NULL;
         TestDataSize = 0;
       } else {
         TestData = UserReadFile (argv[argi + 2], &TestDataSize);
@@ -594,7 +597,7 @@ WrapMain (
     }
 
     if (argc - argi > 3) {
-      TestPlist = (CHAR8 *) UserReadFile (argv[argi + 3], &TestPlistSize);
+      TestPlist = (CHAR8 *)UserReadFile (argv[argi + 3], &TestPlistSize);
       if (TestPlist == NULL) {
         DEBUG ((DEBUG_ERROR, "Read plist fail\n"));
         FreePool (TestData);
@@ -605,14 +608,14 @@ WrapMain (
       FreePool (TestPlist);
     }
 
-    EFI_STATUS Status = PrelinkedReserveKextSize (
-      &ReservedInfoSize,
-      &ReservedExeSize,
-      TestPlistSize,
-      TestData,
-      TestDataSize,
-      FALSE
-      );
+    EFI_STATUS  Status = PrelinkedReserveKextSize (
+                           &ReservedInfoSize,
+                           &ReservedExeSize,
+                           TestPlistSize,
+                           TestData,
+                           TestDataSize,
+                           FALSE
+                           );
 
     FreePool (TestData);
 
@@ -626,26 +629,27 @@ WrapMain (
     }
   }
 
-  UINT32 LinkedExpansion = KcGetSegmentFixupChainsSize (ReservedExeSize);
+  UINT32  LinkedExpansion = KcGetSegmentFixupChainsSize (ReservedExeSize);
+
   if (LinkedExpansion == 0) {
     FailedToProcess = TRUE;
     return -1;
   }
 
-  UINT8    *NewPrelinked;
-  UINT32   NewPrelinkedSize;
-  UINT8    Sha384[48];
-  BOOLEAN  Is32Bit;
-  EFI_STATUS Status = ReadAppleKernel (
-    &NilFileProtocol,
-    FALSE,
-    &Is32Bit,
-    &NewPrelinked,
-    &NewPrelinkedSize,
-    &AllocSize,
-    ReservedInfoSize + ReservedExeSize + LinkedExpansion,
-    Sha384
-    );
+  UINT8       *NewPrelinked;
+  UINT32      NewPrelinkedSize;
+  UINT8       Sha384[48];
+  BOOLEAN     Is32Bit;
+  EFI_STATUS  Status = ReadAppleKernel (
+                         &NilFileProtocol,
+                         FALSE,
+                         &Is32Bit,
+                         &NewPrelinked,
+                         &NewPrelinkedSize,
+                         &AllocSize,
+                         ReservedInfoSize + ReservedExeSize + LinkedExpansion,
+                         Sha384
+                         );
 
   if (!EFI_ERROR (Status)) {
     FreePool (mPrelinked);
@@ -669,12 +673,13 @@ WrapMain (
   ApplyKernelPatches (mPrelinked, mPrelinkedSize);
 
   PATCHER_CONTEXT  Patcher;
+
   Status = PatcherInitContextFromBuffer (
-    &Patcher,
-    mPrelinked,
-    mPrelinkedSize,
-    FALSE
-    );
+             &Patcher,
+             mPrelinked,
+             mPrelinkedSize,
+             FALSE
+             );
   if (!EFI_ERROR (Status)) {
     DEBUG ((DEBUG_WARN, "[OK] Patcher init success\n"));
   } else {
@@ -685,7 +690,7 @@ WrapMain (
   Status = PrelinkedContextInit (&Context, mPrelinked, mPrelinkedSize, AllocSize, FALSE);
   if (!EFI_ERROR (Status)) {
     ApplyKextPatches (&Context);
-    
+
     Status = PrelinkedInjectPrepare (&Context, LinkedExpansion, ReservedExeSize);
     if (EFI_ERROR (Status)) {
       DEBUG ((DEBUG_WARN, "[FAIL] Prelink inject prepare error %r\n", Status));
@@ -694,15 +699,15 @@ WrapMain (
     }
 
     Status = PrelinkedInjectKext (
-      &Context,
-      NULL,
-      "/Library/Extensions/PlistKext.kext",
-      KextInfoPlistData,
-      sizeof (KextInfoPlistData),
-      NULL,
-      NULL,
-      0
-      );
+               &Context,
+               NULL,
+               "/Library/Extensions/PlistKext.kext",
+               KextInfoPlistData,
+               sizeof (KextInfoPlistData),
+               NULL,
+               NULL,
+               0
+               );
     if (!EFI_ERROR (Status)) {
       DEBUG ((DEBUG_WARN, "[OK] PlistKext.kext injected - %r\n", Status));
     } else {
@@ -710,49 +715,49 @@ WrapMain (
       FailedToProcess = TRUE;
     }
 
-    int c = 0;
+    int  c = 0;
     while (argc > 2) {
-      UINT8  *TestData = NULL;
-      UINT32 TestDataSize = 0;
-      CHAR8  *TestPlist = NULL;
-      UINT32 TestPlistSize = 0;
+      UINT8   *TestData     = NULL;
+      UINT32  TestDataSize  = 0;
+      CHAR8   *TestPlist    = NULL;
+      UINT32  TestPlistSize = 0;
 
       if (argc > 2) {
-        if (argv[2][0] == 'n' && argv[2][1] == 0) {
-          TestData = NULL;
+        if ((argv[2][0] == 'n') && (argv[2][1] == 0)) {
+          TestData     = NULL;
           TestDataSize = 0;
         } else {
-          TestData = UserReadFile(argv[2], &TestDataSize);
+          TestData = UserReadFile (argv[2], &TestDataSize);
           if (TestData == NULL) {
             DEBUG ((DEBUG_ERROR, "Read data fail %a\n", argv[2]));
-            abort();
+            abort ();
             return -1;
           }
         }
       }
 
       if (argc > 3) {
-        TestPlist = (CHAR8*) UserReadFile(argv[3], &TestPlistSize);
+        TestPlist = (CHAR8 *)UserReadFile (argv[3], &TestPlistSize);
         if (TestPlist == NULL) {
           DEBUG ((DEBUG_ERROR, "Read plist fail\n"));
-          abort();
+          abort ();
           return -1;
         }
       }
 
-      char KextPath[64];
-      snprintf(KextPath, sizeof(KextPath), "/Library/Extensions/Kex%d.kext", c);
+      char  KextPath[64];
+      snprintf (KextPath, sizeof (KextPath), "/Library/Extensions/Kex%d.kext", c);
 
       Status = PrelinkedInjectKext (
-        &Context,
-        NULL,
-        KextPath,
-        TestPlist,
-        TestPlistSize,
-        "Contents/MacOS/Kext",
-        TestData,
-        TestDataSize
-        );
+                 &Context,
+                 NULL,
+                 KextPath,
+                 TestPlist,
+                 TestPlistSize,
+                 "Contents/MacOS/Kext",
+                 TestData,
+                 TestDataSize
+                 );
 
       if (!EFI_ERROR (Status)) {
         DEBUG ((DEBUG_WARN, "[OK] %a injected - %r\n", argv[2], Status));
@@ -761,8 +766,13 @@ WrapMain (
         FailedToProcess = TRUE;
       }
 
-      if (argc > 2) free(TestData);
-      if (argc > 3) free(TestPlist);
+      if (argc > 2) {
+        free (TestData);
+      }
+
+      if (argc > 3) {
+        free (TestPlist);
+      }
 
       argc -= 2;
       argv += 2;
@@ -833,15 +843,15 @@ LLVMFuzzerTestOneInput (
   }
 
   Status = PrelinkedInjectKext (
-    &Context,
-    NULL,
-    "/Library/Extensions/Lilu.kext",
-    KextInfoPlistData, ///< FIXME: has no executable
-    sizeof (KextInfoPlistData),
-    "Contents/MacOS/Lilu",
-    Data,
-    Size
-    );
+             &Context,
+             NULL,
+             "/Library/Extensions/Lilu.kext",
+             KextInfoPlistData, ///< FIXME: has no executable
+             sizeof (KextInfoPlistData),
+             "Contents/MacOS/Lilu",
+             Data,
+             Size
+             );
 
   PrelinkedInjectComplete (&Context);
   PrelinkedContextFree (&Context);
@@ -856,12 +866,12 @@ ENTRY_POINT (
   char  *argv[]
   )
 {
-  int code;
+  int  code;
 
-  code = WrapMain(argc, argv);
+  code = WrapMain (argc, argv);
   if (FailedToProcess) {
     code = -1;
   }
-  
+
   return code;
 }

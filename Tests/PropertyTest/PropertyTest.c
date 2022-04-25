@@ -31,7 +31,6 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 #include <Protocol/AppleBootPolicy.h>
 #include <Protocol/DevicePathPropertyDatabase.h>
 
-
 #include <Uefi.h>
 #include <Library/PrintLib.h>
 #include <Library/UefiDriverEntryPoint.h>
@@ -54,8 +53,8 @@ TestDeviceProperties (
   CHAR16                                      *TextualDevicePath;
   UINTN                                       ReadSize;
 
-  UINT8                                       Data[4] = {0x11, 0x22, 0x33, 0x44};
-  UINT8                                       ReadData[4];
+  UINT8  Data[4] = { 0x11, 0x22, 0x33, 0x44 };
+  UINT8  ReadData[4];
 
   Print (L"TestDeviceProperties\n");
 
@@ -74,12 +73,12 @@ TestDeviceProperties (
   Print (L"Textual is is %s\n", TextualDevicePath ? TextualDevicePath : L"<null>");
 
   Status = PropertyDatabase->SetProperty (
-    PropertyDatabase,
-    DevicePath,
-    L"to-the-sky",
-    Data,
-    sizeof (Data)
-    );
+                               PropertyDatabase,
+                               DevicePath,
+                               L"to-the-sky",
+                               Data,
+                               sizeof (Data)
+                               );
 
   Print (L"Set to-the-sky is %r\n", Status);
 
@@ -87,14 +86,14 @@ TestDeviceProperties (
   ReadSize = sizeof (ReadData);
 
   Status = PropertyDatabase->GetProperty (
-    PropertyDatabase,
-    DevicePath,
-    L"to-the-sky",
-    ReadData,
-    &ReadSize
-    );
-  
-  Print (L"Get to-the-sky is %r %u <%02x %02x %02x %02x>\n", Status, (UINT32) ReadSize, ReadData[0], ReadData[1], ReadData[2], ReadData[3]);
+                               PropertyDatabase,
+                               DevicePath,
+                               L"to-the-sky",
+                               ReadData,
+                               &ReadSize
+                               );
+
+  Print (L"Get to-the-sky is %r %u <%02x %02x %02x %02x>\n", Status, (UINT32)ReadSize, ReadData[0], ReadData[1], ReadData[2], ReadData[3]);
 
   /* {
     static UINT8 Data[4] = {0x01, 0x02, 0x03, 0x04};
@@ -122,7 +121,7 @@ UefiMain (
   WaitForKeyPress (L"Press any key...");
 
   for (Index = 0; Index < SystemTable->NumberOfTableEntries; ++Index) {
-    Print (L"Table %u is %g\n", (UINT32) Index, &SystemTable->ConfigurationTable[Index].VendorGuid);
+    Print (L"Table %u is %g\n", (UINT32)Index, &SystemTable->ConfigurationTable[Index].VendorGuid);
   }
 
   Print (L"This is test app...\n");

@@ -58,7 +58,7 @@ PrelinkedFindLastLoadAddress (
     }
 
     LoadAddress = 0;
-    LoadSize = 0;
+    LoadSize    = 0;
 
     FieldCount = PlistDictChildren (LastKext);
     for (FieldIndex = 0; FieldIndex < FieldCount; ++FieldIndex) {
@@ -67,17 +67,17 @@ PrelinkedFindLastLoadAddress (
         continue;
       }
 
-      if (LoadAddress == 0 && AsciiStrCmp (KextPlistKey, PRELINK_INFO_EXECUTABLE_LOAD_ADDR_KEY) == 0) {
+      if ((LoadAddress == 0) && (AsciiStrCmp (KextPlistKey, PRELINK_INFO_EXECUTABLE_LOAD_ADDR_KEY) == 0)) {
         if (!PlistIntegerValue (KextPlistValue, &LoadAddress, sizeof (LoadAddress), TRUE)) {
           return 0;
         }
-      } else if (LoadSize == 0 && AsciiStrCmp (KextPlistKey, PRELINK_INFO_EXECUTABLE_SIZE_KEY) == 0) {
+      } else if ((LoadSize == 0) && (AsciiStrCmp (KextPlistKey, PRELINK_INFO_EXECUTABLE_SIZE_KEY) == 0)) {
         if (!PlistIntegerValue (KextPlistValue, &LoadSize, sizeof (LoadSize), TRUE)) {
           return 0;
         }
       }
 
-      if (LoadSize != 0 && LoadAddress != 0) {
+      if ((LoadSize != 0) && (LoadAddress != 0)) {
         break;
       }
     }
@@ -97,30 +97,32 @@ PrelinkedFindLastLoadAddress (
 STATIC
 EFI_STATUS
 PrelinkedGetSegmentsFromMacho (
-  IN   OC_MACHO_CONTEXT           *MachoContext,
-  OUT  MACH_SEGMENT_COMMAND_ANY   **PrelinkedInfoSegment,
-  OUT  MACH_SECTION_ANY           **PrelinkedInfoSection
+  IN   OC_MACHO_CONTEXT          *MachoContext,
+  OUT  MACH_SEGMENT_COMMAND_ANY  **PrelinkedInfoSegment,
+  OUT  MACH_SECTION_ANY          **PrelinkedInfoSection
   )
 {
   *PrelinkedInfoSegment = MachoGetSegmentByName (
-    MachoContext,
-    PRELINK_INFO_SEGMENT
-    );
+                            MachoContext,
+                            PRELINK_INFO_SEGMENT
+                            );
   if (*PrelinkedInfoSegment == NULL) {
     return EFI_NOT_FOUND;
   }
+
   if ((MachoContext->Is32Bit ? (*PrelinkedInfoSegment)->Segment32.FileOffset : (*PrelinkedInfoSegment)->Segment64.FileOffset) > MAX_UINT32) {
     return EFI_UNSUPPORTED;
   }
 
   *PrelinkedInfoSection = MachoGetSectionByName (
-    MachoContext,
-    *PrelinkedInfoSegment,
-    PRELINK_INFO_SECTION
-    );
+                            MachoContext,
+                            *PrelinkedInfoSegment,
+                            PRELINK_INFO_SECTION
+                            );
   if (*PrelinkedInfoSection == NULL) {
     return EFI_NOT_FOUND;
   }
+
   if ((MachoContext->Is32Bit ? (*PrelinkedInfoSection)->Section32.Size : (*PrelinkedInfoSection)->Section64.Size) > MAX_UINT32) {
     return EFI_UNSUPPORTED;
   }
@@ -131,10 +133,10 @@ PrelinkedGetSegmentsFromMacho (
 EFI_STATUS
 InternalConnectExternalSymtab (
   IN OUT OC_MACHO_CONTEXT  *Context,
-     OUT OC_MACHO_CONTEXT  *InnerContext,
+  OUT OC_MACHO_CONTEXT     *InnerContext,
   IN     UINT8             *Buffer,
   IN     UINT32            BufferSize,
-     OUT BOOLEAN           *KernelCollection  OPTIONAL
+  OUT BOOLEAN              *KernelCollection  OPTIONAL
   )
 {
   MACH_HEADER_ANY          *Header;
@@ -146,7 +148,7 @@ InternalConnectExternalSymtab (
   //
   Header             = MachoGetMachHeader (Context);
   IsKernelCollection = (Context->Is32Bit ?
-    Header->Header32.FileType : Header->Header64.FileType) == MachHeaderFileTypeFileSet;
+                        Header->Header32.FileType : Header->Header64.FileType) == MachHeaderFileTypeFileSet;
 
   if (KernelCollection != NULL) {
     *KernelCollection = IsKernelCollection;
@@ -157,10 +159,10 @@ InternalConnectExternalSymtab (
   //
   if (IsKernelCollection) {
     Segment = MachoGetSegmentByName64 (
-      Context,
-      "__TEXT_EXEC"
-      );
-    if (Segment == NULL || Segment->VirtualAddress < Segment->FileOffset) {
+                Context,
+                "__TEXT_EXEC"
+                );
+    if ((Segment == NULL) || (Segment->VirtualAddress < Segment->FileOffset)) {
       DEBUG ((
         DEBUG_INFO,
         "OCAK: KC symtab failed locating inner %Lx %Lx (%d)\n",
@@ -172,10 +174,12 @@ InternalConnectExternalSymtab (
     }
 
     if (!MachoInitializeContext64 (
-      InnerContext,
-      &Buffer[Segment->FileOffset],
-      (UINT32) (BufferSize - Segment->FileOffset),
-      (UINT32) Segment->FileOffset)) {
+           InnerContext,
+           &Buffer[Segment->FileOffset],
+           (UINT32)(BufferSize - Segment->FileOffset),
+           (UINT32)Segment->FileOffset
+           ))
+    {
       DEBUG ((
         DEBUG_INFO,
         "OCAK: KC symtab failed initialising inner %Lx %x\n",
@@ -208,14 +212,14 @@ PrelinkedContextInit (
   IN      BOOLEAN            Is32Bit
   )
 {
-  EFI_STATUS               Status;
-  XML_NODE                 *DocumentRoot;
-  XML_NODE                 *PrelinkedInfoRoot;
-  CONST CHAR8              *PrelinkedInfoRootKey;
-  UINT64                   SegmentEndOffset;
-  UINT32                   PrelinkedInfoRootIndex;
-  UINT32                   PrelinkedInfoRootCount;
-  PRELINKED_KEXT           *PrelinkedKext;
+  EFI_STATUS      Status;
+  XML_NODE        *DocumentRoot;
+  XML_NODE        *PrelinkedInfoRoot;
+  CONST CHAR8     *PrelinkedInfoRootKey;
+  UINT64          SegmentEndOffset;
+  UINT32          PrelinkedInfoRootIndex;
+  UINT32          PrelinkedInfoRootCount;
+  PRELINKED_KEXT  *PrelinkedKext;
 
   ASSERT (Context != NULL);
   ASSERT (Prelinked != NULL);
@@ -248,12 +252,12 @@ PrelinkedContextInit (
   }
 
   Status = InternalConnectExternalSymtab (
-    &Context->PrelinkedMachContext,
-    &Context->InnerMachContext,
-    Context->Prelinked,
-    Context->PrelinkedSize,
-    &Context->IsKernelCollection
-    );
+             &Context->PrelinkedMachContext,
+             &Context->InnerMachContext,
+             Context->Prelinked,
+             Context->PrelinkedSize,
+             &Context->IsKernelCollection
+             );
   if (EFI_ERROR (Status)) {
     return Status;
   }
@@ -279,27 +283,27 @@ PrelinkedContextInit (
   // Register normal segment entries.
   //
   Status = PrelinkedGetSegmentsFromMacho (
-    &Context->PrelinkedMachContext,
-    &Context->PrelinkedInfoSegment,
-    &Context->PrelinkedInfoSection
-    );
+             &Context->PrelinkedMachContext,
+             &Context->PrelinkedInfoSegment,
+             &Context->PrelinkedInfoSection
+             );
   if (EFI_ERROR (Status)) {
     return Status;
   }
 
   Context->PrelinkedTextSegment = MachoGetSegmentByName (
-    &Context->PrelinkedMachContext,
-    PRELINK_TEXT_SEGMENT
-    );
+                                    &Context->PrelinkedMachContext,
+                                    PRELINK_TEXT_SEGMENT
+                                    );
   if (Context->PrelinkedTextSegment == NULL) {
     return EFI_NOT_FOUND;
   }
 
   Context->PrelinkedTextSection = MachoGetSectionByName (
-    &Context->PrelinkedMachContext,
-    Context->PrelinkedTextSegment,
-    PRELINK_TEXT_SECTION
-    );
+                                    &Context->PrelinkedMachContext,
+                                    Context->PrelinkedTextSegment,
+                                    PRELINK_TEXT_SECTION
+                                    );
   if (Context->PrelinkedTextSection == NULL) {
     return EFI_NOT_FOUND;
   }
@@ -309,47 +313,51 @@ PrelinkedContextInit (
     // Additionally process special entries for KC.
     //
     Status = PrelinkedGetSegmentsFromMacho (
-      &Context->InnerMachContext,
-      (MACH_SEGMENT_COMMAND_ANY **) &Context->InnerInfoSegment,
-      (MACH_SECTION_ANY **) &Context->InnerInfoSection
-      );
+               &Context->InnerMachContext,
+               (MACH_SEGMENT_COMMAND_ANY **)&Context->InnerInfoSegment,
+               (MACH_SECTION_ANY **)&Context->InnerInfoSection
+               );
     if (EFI_ERROR (Status)) {
       return Status;
     }
 
     Context->RegionSegment = MachoGetSegmentByName64 (
-      &Context->PrelinkedMachContext,
-      KC_REGION0_SEGMENT
-      );
+                               &Context->PrelinkedMachContext,
+                               KC_REGION0_SEGMENT
+                               );
     if (Context->RegionSegment == NULL) {
       return EFI_NOT_FOUND;
     }
 
     Context->LinkEditSegment = MachoGetSegmentByName (
-      &Context->PrelinkedMachContext,
-      KC_LINKEDIT_SEGMENT
-      );
+                                 &Context->PrelinkedMachContext,
+                                 KC_LINKEDIT_SEGMENT
+                                 );
     if (Context->LinkEditSegment == NULL) {
       return EFI_NOT_FOUND;
     }
   }
 
   Context->PrelinkedInfo = Context->Is32Bit ?
-    AllocateCopyPool (Context->PrelinkedInfoSection->Section32.Size,
-      &Context->Prelinked[Context->PrelinkedInfoSection->Section32.Offset]) :
-    AllocateCopyPool ((UINTN) Context->PrelinkedInfoSection->Section64.Size,
-      &Context->Prelinked[Context->PrelinkedInfoSection->Section64.Offset]);  
+                           AllocateCopyPool (
+                             Context->PrelinkedInfoSection->Section32.Size,
+                             &Context->Prelinked[Context->PrelinkedInfoSection->Section32.Offset]
+                             ) :
+                           AllocateCopyPool (
+                             (UINTN)Context->PrelinkedInfoSection->Section64.Size,
+                             &Context->Prelinked[Context->PrelinkedInfoSection->Section64.Offset]
+                             );
   if (Context->PrelinkedInfo == NULL) {
     PrelinkedContextFree (Context);
     return EFI_OUT_OF_RESOURCES;
   }
 
   Context->PrelinkedInfoDocument = XmlDocumentParse (
-    Context->PrelinkedInfo,
-    (UINT32) (Context->Is32Bit ?
-      Context->PrelinkedInfoSection->Section32.Size : Context->PrelinkedInfoSection->Section64.Size),
-    TRUE
-    );
+                                     Context->PrelinkedInfo,
+                                     (UINT32)(Context->Is32Bit ?
+                                              Context->PrelinkedInfoSection->Section32.Size : Context->PrelinkedInfoSection->Section64.Size),
+                                     TRUE
+                                     );
   if (Context->PrelinkedInfoDocument == NULL) {
     PrelinkedContextFree (Context);
     return EFI_INVALID_PARAMETER;
@@ -381,7 +389,7 @@ PrelinkedContextInit (
       PrelinkedContextFree (Context);
       return EFI_INVALID_PARAMETER;
     }
-    
+
     Context->PrelinkedLastLoadAddress = Context->LinkEditSegment->Segment64.VirtualAddress + Context->LinkEditSegment->Segment64.Size;
   }
 
@@ -400,10 +408,12 @@ PrelinkedContextInit (
         if (Context->PrelinkedLastLoadAddress == 0) {
           Context->PrelinkedLastLoadAddress = PrelinkedFindLastLoadAddress (Context->KextList);
         }
+
         if (Context->PrelinkedLastLoadAddress != 0) {
           return EFI_SUCCESS;
         }
       }
+
       break;
     }
   }
@@ -440,6 +450,7 @@ PrelinkedContextFree (
     for (Index = 0; Index < Context->PooledBuffersCount; ++Index) {
       FreePool (Context->PooledBuffers[Index]);
     }
+
     FreePool (Context->PooledBuffers);
     Context->PooledBuffers = NULL;
   }
@@ -481,15 +492,16 @@ PrelinkedDependencyInsert (
   IN      VOID               *Buffer
   )
 {
-  VOID   **NewPooledBuffers;
+  VOID  **NewPooledBuffers;
 
   if (Context->PooledBuffersCount == Context->PooledBuffersAllocCount) {
     NewPooledBuffers = AllocatePool (
-      2 * (Context->PooledBuffersAllocCount + 1) * sizeof (NewPooledBuffers[0])
-      );
+                         2 * (Context->PooledBuffersAllocCount + 1) * sizeof (NewPooledBuffers[0])
+                         );
     if (NewPooledBuffers == NULL) {
       return EFI_OUT_OF_RESOURCES;
     }
+
     if (Context->PooledBuffers != NULL) {
       CopyMem (
         &NewPooledBuffers[0],
@@ -498,6 +510,7 @@ PrelinkedDependencyInsert (
         );
       FreePool (Context->PooledBuffers);
     }
+
     Context->PooledBuffers           = NewPooledBuffers;
     Context->PooledBuffersAllocCount = 2 * (Context->PooledBuffersAllocCount + 1);
   }
@@ -515,17 +528,18 @@ PrelinkedInjectPrepare (
   IN     UINT32             ReservedExeSize
   )
 {
-  EFI_STATUS Status;
-  UINT64     SegmentEndOffset;
-  UINT32     AlignedExpansion;
+  EFI_STATUS  Status;
+  UINT64      SegmentEndOffset;
+  UINT32      AlignedExpansion;
 
   if (Context->IsKernelCollection) {
     //
     // For newer variant (KC mode) __LINKEDIT is last, and we need to expand it to enable
     // dyld fixup generation.
     //
-    if (Context->PrelinkedAllocSize < LinkedExpansion
-      || Context->PrelinkedAllocSize - LinkedExpansion < Context->PrelinkedSize) {
+    if (  (Context->PrelinkedAllocSize < LinkedExpansion)
+       || (Context->PrelinkedAllocSize - LinkedExpansion < Context->PrelinkedSize))
+    {
       return EFI_OUT_OF_RESOURCES;
     }
 
@@ -539,7 +553,7 @@ PrelinkedInjectPrepare (
       "KextsFixupChains may be unaligned"
       );
 
-    Context->KextsFixupChains = (VOID *) (Context->Prelinked + Context->PrelinkedSize);
+    Context->KextsFixupChains = (VOID *)(Context->Prelinked + Context->PrelinkedSize);
 
     AlignedExpansion = MACHO_ALIGN (LinkedExpansion);
     //
@@ -550,11 +564,11 @@ PrelinkedInjectPrepare (
       AlignedExpansion
       );
 
-    Context->PrelinkedSize                        += AlignedExpansion;
-    Context->PrelinkedLastAddress                 += AlignedExpansion;
-    Context->PrelinkedLastLoadAddress             += AlignedExpansion;
-    Context->LinkEditSegment->Segment64.Size      += AlignedExpansion;
-    Context->LinkEditSegment->Segment64.FileSize  += AlignedExpansion;
+    Context->PrelinkedSize                       += AlignedExpansion;
+    Context->PrelinkedLastAddress                += AlignedExpansion;
+    Context->PrelinkedLastLoadAddress            += AlignedExpansion;
+    Context->LinkEditSegment->Segment64.Size     += AlignedExpansion;
+    Context->LinkEditSegment->Segment64.FileSize += AlignedExpansion;
   } else {
     //
     // For older variant of the prelinkedkernel plist info is normally
@@ -596,8 +610,8 @@ PrelinkedInjectPrepare (
     // ffffff8000ec5000 - ffffff80010358a8 (at 0000000000dd7000 - 0000000000f478a8) - __LINKEDIT
     //
     SegmentEndOffset = Context->Is32Bit ?
-      Context->PrelinkedInfoSegment->Segment32.FileOffset + Context->PrelinkedInfoSegment->Segment32.FileSize :
-      Context->PrelinkedInfoSegment->Segment64.FileOffset + Context->PrelinkedInfoSegment->Segment64.FileSize;
+                       Context->PrelinkedInfoSegment->Segment32.FileOffset + Context->PrelinkedInfoSegment->Segment32.FileSize :
+                       Context->PrelinkedInfoSegment->Segment64.FileOffset + Context->PrelinkedInfoSegment->Segment64.FileSize;
 
     if (MACHO_ALIGN (SegmentEndOffset) == Context->PrelinkedSize) {
       DEBUG ((
@@ -605,15 +619,17 @@ PrelinkedInjectPrepare (
         "OCAK: Reducing %a-bit prelink size from %X to %X via plist\n",
         Context->Is32Bit ? "32" : "64",
         Context->PrelinkedSize,
-        (UINT32) MACHO_ALIGN (Context->Is32Bit ?
-          Context->PrelinkedInfoSegment->Segment32.FileOffset : Context->PrelinkedInfoSegment->Segment64.FileOffset
-          )
+        (UINT32)MACHO_ALIGN (
+                  Context->Is32Bit ?
+                  Context->PrelinkedInfoSegment->Segment32.FileOffset : Context->PrelinkedInfoSegment->Segment64.FileOffset
+                  )
         ));
-      Context->PrelinkedSize = (UINT32) MACHO_ALIGN (Context->Is32Bit ?
-        Context->PrelinkedInfoSegment->Segment32.FileOffset : Context->PrelinkedInfoSegment->Segment64.FileOffset
-        );
+      Context->PrelinkedSize = (UINT32)MACHO_ALIGN (
+                                         Context->Is32Bit ?
+                                         Context->PrelinkedInfoSegment->Segment32.FileOffset : Context->PrelinkedInfoSegment->Segment64.FileOffset
+                                         );
     } else {
-       DEBUG ((
+      DEBUG ((
         DEBUG_INFO,
         "OCAK: Leaving unchanged %a-bit prelink size %X due to %LX plist\n",
         Context->Is32Bit ? "32" : "64",
@@ -624,8 +640,8 @@ PrelinkedInjectPrepare (
 
     if (Context->PrelinkedStateSegment != NULL) {
       SegmentEndOffset = Context->Is32Bit ?
-        Context->PrelinkedStateSegment->Segment32.FileOffset + Context->PrelinkedStateSegment->Segment32.FileSize :
-        Context->PrelinkedStateSegment->Segment64.FileOffset + Context->PrelinkedStateSegment->Segment64.FileSize;
+                         Context->PrelinkedStateSegment->Segment32.FileOffset + Context->PrelinkedStateSegment->Segment32.FileSize :
+                         Context->PrelinkedStateSegment->Segment64.FileOffset + Context->PrelinkedStateSegment->Segment64.FileSize;
 
       if (MACHO_ALIGN (SegmentEndOffset) == Context->PrelinkedSize) {
         DEBUG ((
@@ -633,13 +649,15 @@ PrelinkedInjectPrepare (
           "OCAK: Reducing %a-bit prelink size from %X to %X via state\n",
           Context->Is32Bit ? "32" : "64",
           Context->PrelinkedSize,
-          (UINT32) MACHO_ALIGN (Context->Is32Bit ?
-            Context->PrelinkedStateSegment->Segment32.FileOffset : Context->PrelinkedStateSegment->Segment64.FileOffset
-            )
+          (UINT32)MACHO_ALIGN (
+                    Context->Is32Bit ?
+                    Context->PrelinkedStateSegment->Segment32.FileOffset : Context->PrelinkedStateSegment->Segment64.FileOffset
+                    )
           ));
-        Context->PrelinkedSize = (UINT32) MACHO_ALIGN (Context->Is32Bit ?
-          Context->PrelinkedStateSegment->Segment32.FileOffset : Context->PrelinkedStateSegment->Segment64.FileOffset
-          );
+        Context->PrelinkedSize = (UINT32)MACHO_ALIGN (
+                                           Context->Is32Bit ?
+                                           Context->PrelinkedStateSegment->Segment32.FileOffset : Context->PrelinkedStateSegment->Segment64.FileOffset
+                                           );
 
         //
         // Need to NULL this, as they are used in address calculations
@@ -669,7 +687,7 @@ PrelinkedInjectPrepare (
           Context->PrelinkedStateSectionKexts->Section64.Offset    = 0;
         }
       } else {
-         DEBUG ((
+        DEBUG ((
           DEBUG_INFO,
           "OCAK: Leaving unchanged %a-bit prelink size %X due to %LX state\n",
           Context->Is32Bit ? "32" : "64",
@@ -703,11 +721,11 @@ PrelinkedInjectPrepare (
     }
 
     //
-    // Prior to plist there usually is prelinked text. 
+    // Prior to plist there usually is prelinked text.
     //
     SegmentEndOffset = Context->Is32Bit ?
-      Context->PrelinkedTextSegment->Segment32.FileOffset + Context->PrelinkedTextSegment->Segment32.FileSize :
-      Context->PrelinkedTextSegment->Segment64.FileOffset + Context->PrelinkedTextSegment->Segment64.FileSize;
+                       Context->PrelinkedTextSegment->Segment32.FileOffset + Context->PrelinkedTextSegment->Segment32.FileSize :
+                       Context->PrelinkedTextSegment->Segment64.FileOffset + Context->PrelinkedTextSegment->Segment64.FileSize;
 
     if (MACHO_ALIGN (SegmentEndOffset) != Context->PrelinkedSize) {
       //
@@ -717,6 +735,7 @@ PrelinkedInjectPrepare (
       return EFI_UNSUPPORTED;
     }
   }
+
   //
   // Append the injected KEXTs to the current kernel end.
   //
@@ -757,15 +776,16 @@ PrelinkedInjectComplete (
     ASSERT (ChainSize <= Context->KextsFixupChains->Size);
 
     Context->KextsFixupChains->Size      = ChainSize;
-    Context->KextsFixupChains->PageCount = (UINT16) (KextsSize / MACHO_PAGE_SIZE);
+    Context->KextsFixupChains->PageCount = (UINT16)(KextsSize / MACHO_PAGE_SIZE);
 
     Status = KcRebuildMachHeader (Context);
     if (EFI_ERROR (Status)) {
       return Status;
     }
-  } else if (Context->PrelinkedStateSegment != NULL && (Context->Is32Bit ?
-    Context->PrelinkedStateSegment->Segment32.VirtualAddress : Context->PrelinkedStateSegment->Segment64.VirtualAddress)
-    == 0) {
+  } else if ((Context->PrelinkedStateSegment != NULL) && ((Context->Is32Bit ?
+                                                           Context->PrelinkedStateSegment->Segment32.VirtualAddress : Context->PrelinkedStateSegment->Segment64.VirtualAddress)
+                                                          == 0))
+  {
     Status = InternalKxldStateRebuild (Context);
     if (EFI_ERROR (Status)) {
       return Status;
@@ -782,18 +802,19 @@ PrelinkedInjectComplete (
   //
   ExportedInfoSize++;
 
-  if (OcOverflowAddU32 (Context->PrelinkedSize, MACHO_ALIGN (ExportedInfoSize), &NewSize)
-    || NewSize > Context->PrelinkedAllocSize) {
+  if (  OcOverflowAddU32 (Context->PrelinkedSize, MACHO_ALIGN (ExportedInfoSize), &NewSize)
+     || (NewSize > Context->PrelinkedAllocSize))
+  {
     FreePool (ExportedInfo);
     return EFI_BUFFER_TOO_SMALL;
   }
 
-#if 0
+ #if 0
   //
   // This is a potential optimisation for smaller kexts allowing us to use less space.
   // This requires disable __KREMLIN relocation segment addition.
   //
-  if (Context->IsKernelCollection && MACHO_ALIGN (ExportedInfoSize) <= Context->PrelinkedInfoSegment->Size) {
+  if (Context->IsKernelCollection && (MACHO_ALIGN (ExportedInfoSize) <= Context->PrelinkedInfoSegment->Size)) {
     CopyMem (
       &Context->Prelinked[Context->PrelinkedInfoSegment->FileOffset],
       ExportedInfo,
@@ -809,14 +830,15 @@ PrelinkedInjectComplete (
 
     return EFI_SUCCESS;
   }
-#endif
+
+ #endif
 
   if (Context->Is32Bit) {
-    Context->PrelinkedInfoSegment->Segment32.VirtualAddress = (UINT32) Context->PrelinkedLastAddress;
+    Context->PrelinkedInfoSegment->Segment32.VirtualAddress = (UINT32)Context->PrelinkedLastAddress;
     Context->PrelinkedInfoSegment->Segment32.Size           = MACHO_ALIGN (ExportedInfoSize);
     Context->PrelinkedInfoSegment->Segment32.FileOffset     = Context->PrelinkedSize;
     Context->PrelinkedInfoSegment->Segment32.FileSize       = MACHO_ALIGN (ExportedInfoSize);
-    Context->PrelinkedInfoSection->Section32.Address        = (UINT32) Context->PrelinkedLastAddress;
+    Context->PrelinkedInfoSection->Section32.Address        = (UINT32)Context->PrelinkedLastAddress;
     Context->PrelinkedInfoSection->Section32.Size           = MACHO_ALIGN (ExportedInfoSize);
     Context->PrelinkedInfoSection->Section32.Offset         = Context->PrelinkedSize;
   } else {
@@ -866,9 +888,9 @@ PrelinkedInjectComplete (
     // Obtain its address again.
     //
     Context->LinkEditSegment = MachoGetSegmentByName (
-      &Context->PrelinkedMachContext,
-      KC_LINKEDIT_SEGMENT
-      );
+                                 &Context->PrelinkedMachContext,
+                                 KC_LINKEDIT_SEGMENT
+                                 );
   }
 
   FreePool (ExportedInfo);
@@ -878,12 +900,12 @@ PrelinkedInjectComplete (
 
 EFI_STATUS
 PrelinkedReserveKextSize (
-  IN OUT UINT32       *ReservedInfoSize,
-  IN OUT UINT32       *ReservedExeSize,
-  IN     UINT32       InfoPlistSize,
-  IN     UINT8        *Executable OPTIONAL,
-  IN     UINT32       ExecutableSize OPTIONAL,
-  IN     BOOLEAN      Is32Bit
+  IN OUT UINT32   *ReservedInfoSize,
+  IN OUT UINT32   *ReservedExeSize,
+  IN     UINT32   InfoPlistSize,
+  IN     UINT8    *Executable OPTIONAL,
+  IN     UINT32   ExecutableSize OPTIONAL,
+  IN     BOOLEAN  Is32Bit
   )
 {
   OC_MACHO_CONTEXT  Context;
@@ -895,7 +917,7 @@ PrelinkedReserveKextSize (
     return EFI_INVALID_PARAMETER;
   }
 
-  InfoPlistSize  = MACHO_ALIGN (InfoPlistSize);
+  InfoPlistSize = MACHO_ALIGN (InfoPlistSize);
 
   if (Executable != NULL) {
     ASSERT (ExecutableSize > 0);
@@ -909,8 +931,9 @@ PrelinkedReserveKextSize (
     }
   }
 
-  if (OcOverflowAddU32 (*ReservedInfoSize, InfoPlistSize, &InfoPlistSize)
-   || OcOverflowAddU32 (*ReservedExeSize, ExecutableSize, &ExecutableSize)) {
+  if (  OcOverflowAddU32 (*ReservedInfoSize, InfoPlistSize, &InfoPlistSize)
+     || OcOverflowAddU32 (*ReservedExeSize, ExecutableSize, &ExecutableSize))
+  {
     return EFI_INVALID_PARAMETER;
   }
 
@@ -932,8 +955,8 @@ PrelinkedInjectKext (
   IN     UINT32             ExecutableSize OPTIONAL
   )
 {
-  EFI_STATUS        Status;
-  BOOLEAN           Result;
+  EFI_STATUS  Status;
+  BOOLEAN     Result;
 
   XML_DOCUMENT      *InfoPlistDocument;
   XML_NODE          *InfoPlistRoot;
@@ -987,24 +1010,26 @@ PrelinkedInjectKext (
       DEBUG ((DEBUG_INFO, "OCAK: Injected kext %a/%a is not a supported executable\n", BundlePath, ExecutablePath));
       return EFI_INVALID_PARAMETER;
     }
+
     //
     // Append the KEXT to the current prelinked end.
     //
     KextOffset = Context->PrelinkedSize;
 
     ExecutableSize = MachoExpandImage (
-      &ExecutableContext,
-      &Context->Prelinked[KextOffset],
-      Context->PrelinkedAllocSize - KextOffset,
-      TRUE,
-      &FileOffset
-      );
+                       &ExecutableContext,
+                       &Context->Prelinked[KextOffset],
+                       Context->PrelinkedAllocSize - KextOffset,
+                       TRUE,
+                       &FileOffset
+                       );
 
     AlignedExecutableSize = MACHO_ALIGN (ExecutableSize);
 
-    if (OcOverflowAddU32 (KextOffset, AlignedExecutableSize, &NewPrelinkedSize)
-      || NewPrelinkedSize > Context->PrelinkedAllocSize
-      || ExecutableSize == 0) {
+    if (  OcOverflowAddU32 (KextOffset, AlignedExecutableSize, &NewPrelinkedSize)
+       || (NewPrelinkedSize > Context->PrelinkedAllocSize)
+       || (ExecutableSize == 0))
+    {
       return EFI_BUFFER_TOO_SMALL;
     }
 
@@ -1013,8 +1038,9 @@ PrelinkedInjectKext (
       AlignedExecutableSize - ExecutableSize
       );
 
-    if (!MachoInitializeContext (&ExecutableContext, &Context->Prelinked[KextOffset], ExecutableSize, 0, Context->Is32Bit)
-      || OcOverflowAddU64 (Context->PrelinkedLastLoadAddress, FileOffset, &LoadAddressOffset)) {
+    if (  !MachoInitializeContext (&ExecutableContext, &Context->Prelinked[KextOffset], ExecutableSize, 0, Context->Is32Bit)
+       || OcOverflowAddU64 (Context->PrelinkedLastLoadAddress, FileOffset, &LoadAddressOffset))
+    {
       return EFI_INVALID_PARAMETER;
     }
 
@@ -1066,9 +1092,10 @@ PrelinkedInjectKext (
       }
     }
   }
+
   DEBUG_CODE_END ();
 
-  Failed = FALSE;
+  Failed  = FALSE;
   Failed |= XmlNodeAppend (InfoPlistRoot, "key", NULL, PRELINK_INFO_BUNDLE_PATH_KEY) == NULL;
   Failed |= XmlNodeAppend (InfoPlistRoot, "string", NULL, BundlePath) == NULL;
   if (Executable != NULL) {
@@ -1085,7 +1112,7 @@ PrelinkedInjectKext (
     Failed |= XmlNodeAppend (InfoPlistRoot, "integer", PRELINK_INFO_INTEGER_ATTRIBUTES, ExecutableSizeStr) == NULL;
     Failed |= !AsciiUint64ToLowerHex (KmodInfoStr, sizeof (KmodInfoStr), KmodAddress);
     Failed |= XmlNodeAppend (InfoPlistRoot, "key", NULL, PRELINK_INFO_KMOD_INFO_KEY) == NULL;
-    Failed |= XmlNodeAppend (InfoPlistRoot, "integer", PRELINK_INFO_INTEGER_ATTRIBUTES, KmodInfoStr) == NULL;  
+    Failed |= XmlNodeAppend (InfoPlistRoot, "integer", PRELINK_INFO_INTEGER_ATTRIBUTES, KmodInfoStr) == NULL;
   }
 
   if (Failed) {
@@ -1096,13 +1123,13 @@ PrelinkedInjectKext (
 
   if (Executable != NULL) {
     PrelinkedKext = InternalLinkPrelinkedKext (
-      Context,
-      &ExecutableContext,
-      InfoPlistRoot,
-      Context->PrelinkedLastLoadAddress,
-      KmodAddress,
-      FileOffset
-      );
+                      Context,
+                      &ExecutableContext,
+                      InfoPlistRoot,
+                      Context->PrelinkedLastLoadAddress,
+                      KmodAddress,
+                      FileOffset
+                      );
 
     if (PrelinkedKext == NULL) {
       XmlDocumentFree (InfoPlistDocument);
@@ -1114,9 +1141,9 @@ PrelinkedInjectKext (
     // XNU assumes that load size and source size are same, so we should append
     // whatever is bigger to all sizes.
     //
-    Context->PrelinkedSize                  += AlignedExecutableSize;
-    Context->PrelinkedLastAddress           += AlignedExecutableSize;
-    Context->PrelinkedLastLoadAddress       += AlignedExecutableSize;
+    Context->PrelinkedSize            += AlignedExecutableSize;
+    Context->PrelinkedLastAddress     += AlignedExecutableSize;
+    Context->PrelinkedLastLoadAddress += AlignedExecutableSize;
 
     if (Context->IsKernelCollection) {
       //
@@ -1165,6 +1192,7 @@ PrelinkedInjectKext (
     if (PrelinkedKext != NULL) {
       InternalFreePrelinkedKext (PrelinkedKext);
     }
+
     return EFI_OUT_OF_RESOURCES;
   }
 
@@ -1174,6 +1202,7 @@ PrelinkedInjectKext (
     if (PrelinkedKext != NULL) {
       InternalFreePrelinkedKext (PrelinkedKext);
     }
+
     return Status;
   }
 
@@ -1181,6 +1210,7 @@ PrelinkedInjectKext (
     if (PrelinkedKext != NULL) {
       InternalFreePrelinkedKext (PrelinkedKext);
     }
+
     return EFI_OUT_OF_RESOURCES;
   }
 
@@ -1206,8 +1236,8 @@ PrelinkedContextApplyPatch (
   IN     PATCHER_GENERIC_PATCH  *Patch
   )
 {
-  EFI_STATUS            Status;
-  PATCHER_CONTEXT       Patcher;
+  EFI_STATUS       Status;
+  PATCHER_CONTEXT  Patcher;
 
   ASSERT (Context != NULL);
   ASSERT (Identifier != NULL);
@@ -1224,14 +1254,14 @@ PrelinkedContextApplyPatch (
 
 EFI_STATUS
 PrelinkedContextApplyQuirk (
-  IN OUT PRELINKED_CONTEXT    *Context,
-  IN     KERNEL_QUIRK_NAME    Quirk,
-  IN     UINT32               KernelVersion
+  IN OUT PRELINKED_CONTEXT  *Context,
+  IN     KERNEL_QUIRK_NAME  Quirk,
+  IN     UINT32             KernelVersion
   )
 {
-  EFI_STATUS            Status;
-  KERNEL_QUIRK          *KernelQuirk;
-  PATCHER_CONTEXT       Patcher;
+  EFI_STATUS       Status;
+  KERNEL_QUIRK     *KernelQuirk;
+  PATCHER_CONTEXT  Patcher;
 
   ASSERT (Context != NULL);
 
@@ -1252,13 +1282,13 @@ PrelinkedContextApplyQuirk (
 
 EFI_STATUS
 PrelinkedContextBlock (
-  IN OUT PRELINKED_CONTEXT      *Context,
-  IN     CONST CHAR8            *Identifier,
-  IN     BOOLEAN                Exclude
+  IN OUT PRELINKED_CONTEXT  *Context,
+  IN     CONST CHAR8        *Identifier,
+  IN     BOOLEAN            Exclude
   )
 {
-  EFI_STATUS            Status;
-  PATCHER_CONTEXT       Patcher;
+  EFI_STATUS       Status;
+  PATCHER_CONTEXT  Patcher;
 
   ASSERT (Context != NULL);
   ASSERT (Identifier != NULL);

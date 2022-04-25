@@ -69,60 +69,60 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 // Supports CSM module, which allows booting legacy Windows operating systems like Windows 7.
 // See: https://opensource.apple.com/source/bless/bless-166/libbless/EFI/BLSupportsLegacyMode.c.auto.html
 //
-#define FW_FEATURE_SUPPORTS_CSM_LEGACY_MODE           0x00000001U // 0
+#define FW_FEATURE_SUPPORTS_CSM_LEGACY_MODE  0x00000001U          // 0
 //
 // Supports CD/DVD Drive boot via El Torito.
 //
-#define FW_FEATURE_SUPPORTS_CD_DRIVE_BOOT             0x00000002U // 1
+#define FW_FEATURE_SUPPORTS_CD_DRIVE_BOOT  0x00000002U            // 1
 //
 // Supports target disk mode, normally invoked by pressing T key at start.
 // Note, AppleTamperResistantBootProtocol+6 may prohibit this.
 // See: BootPicker.
 //
-#define FW_FEATURE_SUPPORTS_TARGET_DISK_MODE          0x00000004U // 2
-#define FW_FEATURE_UNKNOWN_BIT3                       0x00000008U // 3
+#define FW_FEATURE_SUPPORTS_TARGET_DISK_MODE  0x00000004U         // 2
+#define FW_FEATURE_UNKNOWN_BIT3               0x00000008U         // 3
 //
 // Supports NET boot. Read by StartupDisk.prefPane.
 // FW_FEATURE_SUPPORTS_WIRELESS also implies NET boot support.
 //
-#define FW_FEATURE_SUPPORTS_NET_BOOT                  0x00000010U // 4
+#define FW_FEATURE_SUPPORTS_NET_BOOT  0x00000010U                 // 4
 //
 // Supports SlingShot recovery embedded into the firmware.
 //
-#define FW_FEATURE_SUPPORTS_SLING_SHOT                0x00000020U // 5
-#define FW_FEATURE_UNKNOWN_BIT6                       0x00000040U // 6
-#define FW_FEATURE_UNKNOWN_BIT7                       0x00000080U // 7
+#define FW_FEATURE_SUPPORTS_SLING_SHOT  0x00000020U               // 5
+#define FW_FEATURE_UNKNOWN_BIT6         0x00000040U               // 6
+#define FW_FEATURE_UNKNOWN_BIT7         0x00000080U               // 7
 //
 // Has Wi-Fi module and supports wireless drivers in the firmware.
 // Found in SlingShot.
 //
-#define FW_FEATURE_SUPPORTS_WIRELESS                  0x00000100U // 8
-#define FW_FEATURE_UNKNOWN_BIT9                       0x00000200U // 9
+#define FW_FEATURE_SUPPORTS_WIRELESS  0x00000100U                 // 8
+#define FW_FEATURE_UNKNOWN_BIT9       0x00000200U                 // 9
 //
 // Bit 0 of the ApplePlatformSecurityPolicy.
 // TODO: Explore, related to ApplePlatformInfoDatabaseProtocol.
 // Set by AppleFirmwareFeaturesProtocol.
 //
-#define FW_FEATURE_PLATFORM_SECURITY_POLICY_01        0x00000400U // 10
+#define FW_FEATURE_PLATFORM_SECURITY_POLICY_01  0x00000400U       // 10
 //
 // Bit 1 of the ApplePlatformSecurityPolicy.
 // TODO: Explore, related to AppleTamperResistantBootProtocol.
 // Set by AppleFirmwareFeaturesProtocol.
 //
-#define FW_FEATURE_PLATFORM_SECURITY_POLICY_02        0x00000800U // 11
+#define FW_FEATURE_PLATFORM_SECURITY_POLICY_02  0x00000800U       // 11
 //
 // Supports Apple Tamper Resistant Boot, which helps FindMyMac functionality.
 // Not set on Macs with T2 via detected non APPLE_EFI_FIRMWARE_GEN3_ID_MAGIC.
 // See: /System/Library/PrivateFrameworks/FindMyMac.framework/XPCServices/com.apple.HasTRB.xpc/Contents/MacOS/com.apple.HasTRB.
 //
-#define FW_FEATURE_SUPPORTS_TRB                       0x00001000U // 12
-#define FW_FEATURE_UNKNOWN_BIT13                      0x00002000U // 13
+#define FW_FEATURE_SUPPORTS_TRB   0x00001000U                     // 12
+#define FW_FEATURE_UNKNOWN_BIT13  0x00002000U                     // 13
 //
 // Supports USB 2.0 in the firmware. Found in AppleACPIPlatform.kext.
 //
-#define FW_FEATURE_SUPPORTS_HIGH_SPEED_USB            0x00004000U // 14
-#define FW_FEATURE_UNKNOWN_BIT15                      0x00008000U // 15
-#define FW_FEATURE_UNKNOWN_BIT16                      0x00010000U // 16
+#define FW_FEATURE_SUPPORTS_HIGH_SPEED_USB  0x00004000U           // 14
+#define FW_FEATURE_UNKNOWN_BIT15            0x00008000U           // 15
+#define FW_FEATURE_UNKNOWN_BIT16            0x00010000U           // 16
 //
 // Instructs AppleACPIPlatform.kext not to substitute certain USB ports with other ports.
 // In particular: EHC2-2 -> EHC1-3, EHC2-3 -> EHC1-4.
@@ -133,20 +133,20 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 // Supports APFS filesystem (via JumpStart or built-in driver).
 // Verified by OSInstaller.framework (apfsSupportedByROM). Either bit would do.
 //
-#define FW_FEATURE_SUPPORTS_APFS                      0x00080000U // 19
+#define FW_FEATURE_SUPPORTS_APFS  0x00080000U                     // 19
 //
 // Supports APFS filesystem (unused by by any known Mac Model including Macmini7,1).
 // Verified by OSInstaller.framework (apfsSupportedByROM). Either bit would do.
 // Could be reserved for APFS Fusion Drive support, but unused even on them.
 //
-#define FW_FEATURE_SUPPORTS_APFS_EXTRA                0x00100000U // 20
-#define FW_FEATURE_UNKNOWN_BIT21                      0x00200000U // 21
+#define FW_FEATURE_SUPPORTS_APFS_EXTRA  0x00100000U               // 20
+#define FW_FEATURE_UNKNOWN_BIT21        0x00200000U               // 21
 //
 // Supports Apple Tamper Resistant Boot X. This is supposed to be activation lock.
 // See: /System/Library/CoreServices/Language Chooser.app/Contents/MacOS/Language Chooser
 //
-#define FW_FEATURE_SUPPORTS_TRBX                      0x00400000U // 22
-#define FW_FEATURE_UNKNOWN_BIT23                      0x00800000U // 23
+#define FW_FEATURE_SUPPORTS_TRBX  0x00400000U                     // 22
+#define FW_FEATURE_UNKNOWN_BIT23  0x00800000U                     // 23
 //
 // Supports platform security policy.
 // Exposed in UEFI via gApplePlatformSecurityPolicyProtocolGuid GUID.
@@ -157,30 +157,30 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 // Supports 64-bit ExtendedFirmwareFeatures/ExtendedFirmwareFeaturesMask variables.
 // Lower 32-bits are same as FirmwareFeatures, and higher 32-bits contain new information.
 //
-#define FW_FEATURE_SUPPORTS_EXTENDED_FEATURES         0x02000000U // 25
-#define FW_FEATURE_UNKNOWN_BIT26                      0x04000000U // 26
-#define FW_FEATURE_UNKNOWN_BIT27                      0x08000000U // 27
+#define FW_FEATURE_SUPPORTS_EXTENDED_FEATURES  0x02000000U        // 25
+#define FW_FEATURE_UNKNOWN_BIT26               0x04000000U        // 26
+#define FW_FEATURE_UNKNOWN_BIT27               0x08000000U        // 27
 //
 // Instructs boot.efi not to adjust memory map on MacBookAir4,1 and MacBookAir4,2
 // during hibernate wake.
 //
-#define FW_FEATURE_DISABLE_MBA_S4_WORKAROUND          0x10000000U // 28
+#define FW_FEATURE_DISABLE_MBA_S4_WORKAROUND  0x10000000U         // 28
 //
 // Supports Windows UEFI boot (Windows 8 and newer).
 // Also known as UEFIWindowsBootCapable variable.
 // DMIsPreBootEnvironmentUEFIWindowsBootCapable
 //
-#define FW_FEATURE_SUPPORTS_UEFI_WINDOWS_BOOT         0x20000000U // 29
-#define FW_FEATURE_UNKNOWN_BIT30                      0x40000000U // 30
+#define FW_FEATURE_SUPPORTS_UEFI_WINDOWS_BOOT  0x20000000U        // 29
+#define FW_FEATURE_UNKNOWN_BIT30               0x40000000U        // 30
 //
 // Instructs boot.efi not to adjust memory map based on AcpiGlobalVariable->AcpiBootScriptTable.
 // See: https://github.com/Piker-Alpha/macosxbootloader/blob/1abba11e3b792dd29c2a08c410c122efd1d19e98/src/boot/AcpiUtils.cpp#L152
 //
-#define FW_FEATURE_DISABLE_BOOTSCRIPT_WORKAROUND      0x80000000U // 31
+#define FW_FEATURE_DISABLE_BOOTSCRIPT_WORKAROUND  0x80000000U     // 31
 //
 // Supports large BaseSystem. Checked by patchd. Required by macOS 12.
 //
-#define FW_FEATURE_SUPPORTS_LARGE_BASESYSTEM         0x800000000U // 35
+#define FW_FEATURE_SUPPORTS_LARGE_BASESYSTEM  0x800000000U        // 35
 
 //
 // OEM Platform Feature Information - Platform feature bits
@@ -200,7 +200,7 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 // /System/Library/SystemProfiler/SPMemoryReporter.spreporter/Contents/MacOS/SPMemoryReporter
 //
 
-#define PT_FEATURE_UNKNOWN_BIT0                0x00000001U // 0
+#define PT_FEATURE_UNKNOWN_BIT0  0x00000001U               // 0
 //
 // Has not replaceable system memory (RAM).
 //
@@ -208,42 +208,42 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 //
 // Has headless (connector-less) GPU present.
 //
-#define PT_FEATURE_HAS_HEADLESS_GPU            0x00000004U // 2
+#define PT_FEATURE_HAS_HEADLESS_GPU  0x00000004U           // 2
 //
 // Supports host power management.
 //
-#define PT_FEATURE_SUPPORTS_HOST_PM            0x00000008U // 3
+#define PT_FEATURE_SUPPORTS_HOST_PM  0x00000008U           // 3
 //
 // Supports Power Chime sound at boot.
 //
-#define PT_FEATURE_SUPPORTS_POWER_CHIME        0x00000010U // 4
-#define PT_FEATURE_UNKNOWN_BIT5                0x00000020U // 5
-#define PT_FEATURE_UNKNOWN_BIT6                0x00000040U // 6
-#define PT_FEATURE_UNKNOWN_BIT7                0x00000080U // 7
-#define PT_FEATURE_UNKNOWN_BIT8                0x00000100U // 8
-#define PT_FEATURE_UNKNOWN_BIT9                0x00000200U // 9
-#define PT_FEATURE_UNKNOWN_BIT10               0x00000400U // 10
-#define PT_FEATURE_UNKNOWN_BIT11               0x00000800U // 11
-#define PT_FEATURE_UNKNOWN_BIT12               0x00001000U // 12
-#define PT_FEATURE_UNKNOWN_BIT13               0x00002000U // 13
-#define PT_FEATURE_UNKNOWN_BIT14               0x00004000U // 14
-#define PT_FEATURE_UNKNOWN_BIT15               0x00008000U // 15
-#define PT_FEATURE_UNKNOWN_BIT16               0x00010000U // 16
-#define PT_FEATURE_UNKNOWN_BIT17               0x00020000U // 17
-#define PT_FEATURE_UNKNOWN_BIT18               0x00040000U // 18
-#define PT_FEATURE_UNKNOWN_BIT19               0x00080000U // 19
-#define PT_FEATURE_UNKNOWN_BIT20               0x00100000U // 20
-#define PT_FEATURE_UNKNOWN_BIT21               0x00200000U // 21
-#define PT_FEATURE_UNKNOWN_BIT22               0x00400000U // 22
-#define PT_FEATURE_UNKNOWN_BIT23               0x00800000U // 23
-#define PT_FEATURE_UNKNOWN_BIT24               0x01000000U // 24
-#define PT_FEATURE_UNKNOWN_BIT25               0x02000000U // 25
-#define PT_FEATURE_UNKNOWN_BIT26               0x04000000U // 26
-#define PT_FEATURE_UNKNOWN_BIT27               0x08000000U // 27
-#define PT_FEATURE_UNKNOWN_BIT28               0x10000000U // 28
-#define PT_FEATURE_UNKNOWN_BIT29               0x20000000U // 29
-#define PT_FEATURE_UNKNOWN_BIT30               0x40000000U // 30
-#define PT_FEATURE_UNKNOWN_BIT31               0x80000000U // 31
+#define PT_FEATURE_SUPPORTS_POWER_CHIME  0x00000010U       // 4
+#define PT_FEATURE_UNKNOWN_BIT5          0x00000020U       // 5
+#define PT_FEATURE_UNKNOWN_BIT6          0x00000040U       // 6
+#define PT_FEATURE_UNKNOWN_BIT7          0x00000080U       // 7
+#define PT_FEATURE_UNKNOWN_BIT8          0x00000100U       // 8
+#define PT_FEATURE_UNKNOWN_BIT9          0x00000200U       // 9
+#define PT_FEATURE_UNKNOWN_BIT10         0x00000400U       // 10
+#define PT_FEATURE_UNKNOWN_BIT11         0x00000800U       // 11
+#define PT_FEATURE_UNKNOWN_BIT12         0x00001000U       // 12
+#define PT_FEATURE_UNKNOWN_BIT13         0x00002000U       // 13
+#define PT_FEATURE_UNKNOWN_BIT14         0x00004000U       // 14
+#define PT_FEATURE_UNKNOWN_BIT15         0x00008000U       // 15
+#define PT_FEATURE_UNKNOWN_BIT16         0x00010000U       // 16
+#define PT_FEATURE_UNKNOWN_BIT17         0x00020000U       // 17
+#define PT_FEATURE_UNKNOWN_BIT18         0x00040000U       // 18
+#define PT_FEATURE_UNKNOWN_BIT19         0x00080000U       // 19
+#define PT_FEATURE_UNKNOWN_BIT20         0x00100000U       // 20
+#define PT_FEATURE_UNKNOWN_BIT21         0x00200000U       // 21
+#define PT_FEATURE_UNKNOWN_BIT22         0x00400000U       // 22
+#define PT_FEATURE_UNKNOWN_BIT23         0x00800000U       // 23
+#define PT_FEATURE_UNKNOWN_BIT24         0x01000000U       // 24
+#define PT_FEATURE_UNKNOWN_BIT25         0x02000000U       // 25
+#define PT_FEATURE_UNKNOWN_BIT26         0x04000000U       // 26
+#define PT_FEATURE_UNKNOWN_BIT27         0x08000000U       // 27
+#define PT_FEATURE_UNKNOWN_BIT28         0x10000000U       // 28
+#define PT_FEATURE_UNKNOWN_BIT29         0x20000000U       // 29
+#define PT_FEATURE_UNKNOWN_BIT30         0x40000000U       // 30
+#define PT_FEATURE_UNKNOWN_BIT31         0x80000000U       // 31
 
 //
 // EfiBoot Feature Bits.
@@ -255,67 +255,67 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 // Safe mode, enabled with -x boot argument or Shift hotkey.
 // Disables EB_FEATURE_ASLR.
 //
-#define EB_FEATURE_SAFE_MODE                    0x00000001U
+#define EB_FEATURE_SAFE_MODE  0x00000001U
 //
 // Verbose mode, enabled with -v boot argument or Cmd+V hotkey.
 //
-#define EB_FEATURE_VERBOSE                      0x00000002U
-#define EB_FEATURE_NETBOOT                      0x00000004U
-#define EB_FEATURE_ALT_KERNEL                   0x00000008U
+#define EB_FEATURE_VERBOSE     0x00000002U
+#define EB_FEATURE_NETBOOT     0x00000004U
+#define EB_FEATURE_ALT_KERNEL  0x00000008U
 //
 // Single user mode, enabled with -s boot argument or Cmd+S hotkey.
 // Disallowed when Secure Boot is enabled.
 //
-#define EB_FEATURE_SINGLE_USER                  0x00000010U
+#define EB_FEATURE_SINGLE_USER  0x00000010U
 //
 // Graphics boot (with Apple log).
 // Disabled via missing GOP and -v.
 //
-#define EB_FEATURE_GRAPHICS_MODE                0x00000020U
-#define EB_FEATURE_FIRMWARE_PASSWORD            0x00000040U
-#define EB_FEATURE_DEBUG                        0x00000080U
+#define EB_FEATURE_GRAPHICS_MODE      0x00000020U
+#define EB_FEATURE_FIRMWARE_PASSWORD  0x00000040U
+#define EB_FEATURE_DEBUG              0x00000080U
 //
 // Core Storage boot
 //
-#define EB_FEATURE_BOOT_IS_NOT_ROOT             0x00000100U
+#define EB_FEATURE_BOOT_IS_NOT_ROOT  0x00000100U
 //
 // Boot (or wake) with FileVault 2 enabled.
 //
-#define EB_FEATURE_HAS_FILE_VAULT2_CONFIG       0x00000200U
-#define EB_FEATURE_X                            0x00000400U
+#define EB_FEATURE_HAS_FILE_VAULT2_CONFIG  0x00000200U
+#define EB_FEATURE_X                       0x00000400U
 //
 // Recovery OS boot, triggered via NVRAM recovery-boot-mode as well.
 //
-#define EB_FEATURE_EFI_NVRAM_RECOVERY_BOOT_MODE 0x00000800U
-#define EB_FEATURE_FROM_RECOVER_BOOT_DIRECTORY  0x00001000U
+#define EB_FEATURE_EFI_NVRAM_RECOVERY_BOOT_MODE  0x00000800U
+#define EB_FEATURE_FROM_RECOVER_BOOT_DIRECTORY   0x00001000U
 //
 // Hibernate-wake.
 //
-#define EB_FEATURE_WAKE_FROM_HIBERNATION        0x00002000U
+#define EB_FEATURE_WAKE_FROM_HIBERNATION  0x00002000U
 //
 // Generate random KASLR slide.
 //
-#define EB_FEATURE_KASLR_SLIDE                  0x00004000U
-#define EB_FEATURE_SKIP_BOARD_ID_CHECK          0x00008000U
-#define EB_FEATURE_SKIP_PANIC_DIALOG            0x00010000U
+#define EB_FEATURE_KASLR_SLIDE          0x00004000U
+#define EB_FEATURE_SKIP_BOARD_ID_CHECK  0x00008000U
+#define EB_FEATURE_SKIP_PANIC_DIALOG    0x00010000U
 //
 // #[EB.B.MN|BM:+FD]
 //
-#define EB_FEATURE_FD                           0x00020000U
+#define EB_FEATURE_FD  0x00020000U
 //
 // Well, probably...
 //
-#define EB_FEATURE_APFS_VOLUME_BOOT             0x00080000U
+#define EB_FEATURE_APFS_VOLUME_BOOT  0x00080000U
 //
 // Apple Secure Boot enabled configuration (detected via proto & policy).
 // 24B73556-2197-4702-82A8-3E1337DAFBF2 GUID.
 //
-#define EB_FEATURE_HAS_APPLE_SECURE_BOOT        0x00200000U
+#define EB_FEATURE_HAS_APPLE_SECURE_BOOT  0x00200000U
 //
 // Apple Trusted Boot enabled configuration (detected via proto & policy).
 // Some unfinished(?) variant of Secure Boot found in preview firmware.
 // 24B73556-2197-4702-82A8-3E1337DAFBF3 GUID.
 //
-#define EB_FEATURE_HAS_APPLE_TRUSTED_BOOT       0x01000000U
+#define EB_FEATURE_HAS_APPLE_TRUSTED_BOOT  0x01000000U
 
 #endif // APPLE_FEATURES_H

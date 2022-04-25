@@ -29,9 +29,10 @@ MultThenDivU64x64x32 (
   OUT UINT32  *Remainder  OPTIONAL
   )
 {
-  UINT64                            Uint64;
-  UINT32                            LocalRemainder;
-  UINT32                            Uint32;
+  UINT64  Uint64;
+  UINT32  LocalRemainder;
+  UINT32  Uint32;
+
   if (Multiplicand > DivU64x64Remainder (MAX_UINT64, Multiplier, NULL)) {
     //
     // Make sure Multiplicand is the bigger one.
@@ -41,6 +42,7 @@ MultThenDivU64x64x32 (
       Multiplicand = Multiplier;
       Multiplier   = Uint64;
     }
+
     //
     // Because Multiplicand * Multiplier overflows,
     //   Multiplicand * Multiplier / Divisor
@@ -53,6 +55,7 @@ MultThenDivU64x64x32 (
     if ((Multiplicand & 0x1) == 1) {
       Uint64 += DivU64x32Remainder (Multiplier, Divisor, &Uint32);
     }
+
     return Uint64 + DivU64x32Remainder (Uint32 + LShiftU64 (LocalRemainder, 1), Divisor, Remainder);
   } else {
     return DivU64x32Remainder (MultU64x64 (Multiplicand, Multiplier), Divisor, Remainder);

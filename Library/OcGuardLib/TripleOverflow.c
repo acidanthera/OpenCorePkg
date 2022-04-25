@@ -30,8 +30,8 @@ OcOverflowTriAddU32 (
   BOOLEAN  OcFirst;
   BOOLEAN  OcSecond;
 
-  OcFirst  = OcOverflowAddU32(A, B, &OcTmp);
-  OcSecond = OcOverflowAddU32(OcTmp, C, Result);
+  OcFirst  = OcOverflowAddU32 (A, B, &OcTmp);
+  OcSecond = OcOverflowAddU32 (OcTmp, C, Result);
   return OcFirst | OcSecond;
 }
 
@@ -47,8 +47,8 @@ OcOverflowTriMulU32 (
   BOOLEAN  OcFirst;
   BOOLEAN  OcSecond;
 
-  OcFirst  = OcOverflowMulU32(A, B, &OcTmp);
-  OcSecond = OcOverflowMulU32(OcTmp, C, Result);
+  OcFirst  = OcOverflowMulU32 (A, B, &OcTmp);
+  OcSecond = OcOverflowMulU32 (OcTmp, C, Result);
   return OcFirst | OcSecond;
 }
 
@@ -64,8 +64,8 @@ OcOverflowAddMulU32 (
   BOOLEAN  OcFirst;
   BOOLEAN  OcSecond;
 
-  OcFirst  = OcOverflowAddU32(A, B, &OcTmp);
-  OcSecond = OcOverflowMulU32(OcTmp, C, Result);
+  OcFirst  = OcOverflowAddU32 (A, B, &OcTmp);
+  OcSecond = OcOverflowMulU32 (OcTmp, C, Result);
   return OcFirst | OcSecond;
 }
 
@@ -81,8 +81,8 @@ OcOverflowMulAddU32 (
   BOOLEAN  OcFirst;
   BOOLEAN  OcSecond;
 
-  OcFirst  = OcOverflowMulU32(A, B, &OcTmp);
-  OcSecond = OcOverflowAddU32(OcTmp, C, Result);
+  OcFirst  = OcOverflowMulU32 (A, B, &OcTmp);
+  OcSecond = OcOverflowAddU32 (OcTmp, C, Result);
   return OcFirst | OcSecond;
 }
 
@@ -98,8 +98,8 @@ OcOverflowTriAddS32 (
   BOOLEAN  OcFirst;
   BOOLEAN  OcSecond;
 
-  OcFirst  = OcOverflowAddS32(A, B, &OcTmp);
-  OcSecond = OcOverflowAddS32(OcTmp, C, Result);
+  OcFirst  = OcOverflowAddS32 (A, B, &OcTmp);
+  OcSecond = OcOverflowAddS32 (OcTmp, C, Result);
   return OcFirst | OcSecond;
 }
 
@@ -115,8 +115,8 @@ OcOverflowTriMulS32 (
   BOOLEAN  OcFirst;
   BOOLEAN  OcSecond;
 
-  OcFirst  = OcOverflowMulS32(A, B, &OcTmp);
-  OcSecond = OcOverflowMulS32(OcTmp, C, Result);
+  OcFirst  = OcOverflowMulS32 (A, B, &OcTmp);
+  OcSecond = OcOverflowMulS32 (OcTmp, C, Result);
   return OcFirst | OcSecond;
 }
 
@@ -132,8 +132,8 @@ OcOverflowAddMulS32 (
   BOOLEAN  OcFirst;
   BOOLEAN  OcSecond;
 
-  OcFirst  = OcOverflowAddS32(A, B, &OcTmp);
-  OcSecond = OcOverflowMulS32(OcTmp, C, Result);
+  OcFirst  = OcOverflowAddS32 (A, B, &OcTmp);
+  OcSecond = OcOverflowMulS32 (OcTmp, C, Result);
   return OcFirst | OcSecond;
 }
 
@@ -149,11 +149,10 @@ OcOverflowMulAddS32 (
   BOOLEAN  OcFirst;
   BOOLEAN  OcSecond;
 
-  OcFirst  = OcOverflowMulS32(A, B, &OcTmp);
-  OcSecond = OcOverflowAddS32(OcTmp, C, Result);
+  OcFirst  = OcOverflowMulS32 (A, B, &OcTmp);
+  OcSecond = OcOverflowAddS32 (OcTmp, C, Result);
   return OcFirst | OcSecond;
 }
-
 
 BOOLEAN
 OcOverflowTriAddU64 (
@@ -167,8 +166,8 @@ OcOverflowTriAddU64 (
   BOOLEAN  OcFirst;
   BOOLEAN  OcSecond;
 
-  OcFirst  = OcOverflowAddU64(A, B, &OcTmp);
-  OcSecond = OcOverflowAddU64(OcTmp, C, Result);
+  OcFirst  = OcOverflowAddU64 (A, B, &OcTmp);
+  OcSecond = OcOverflowAddU64 (OcTmp, C, Result);
   return OcFirst | OcSecond;
 }
 
@@ -184,8 +183,8 @@ OcOverflowTriMulU64 (
   BOOLEAN  OcFirst;
   BOOLEAN  OcSecond;
 
-  OcFirst  = OcOverflowMulU64(A, B, &OcTmp);
-  OcSecond = OcOverflowMulU64(OcTmp, C, Result);
+  OcFirst  = OcOverflowMulU64 (A, B, &OcTmp);
+  OcSecond = OcOverflowMulU64 (OcTmp, C, Result);
   return OcFirst | OcSecond;
 }
 
@@ -201,8 +200,8 @@ OcOverflowAddMulU64 (
   BOOLEAN  OcFirst;
   BOOLEAN  OcSecond;
 
-  OcFirst  = OcOverflowAddU64(A, B, &OcTmp);
-  OcSecond = OcOverflowMulU64(OcTmp, C, Result);
+  OcFirst  = OcOverflowAddU64 (A, B, &OcTmp);
+  OcSecond = OcOverflowMulU64 (OcTmp, C, Result);
   return OcFirst | OcSecond;
 }
 
@@ -218,8 +217,8 @@ OcOverflowMulAddU64 (
   BOOLEAN  OcFirst;
   BOOLEAN  OcSecond;
 
-  OcFirst  = OcOverflowMulU64(A, B, &OcTmp);
-  OcSecond = OcOverflowAddU64(OcTmp, C, Result);
+  OcFirst  = OcOverflowMulU64 (A, B, &OcTmp);
+  OcSecond = OcOverflowAddU64 (OcTmp, C, Result);
   return OcFirst | OcSecond;
 }
 
@@ -235,8 +234,8 @@ OcOverflowTriAddS64 (
   BOOLEAN  OcFirst;
   BOOLEAN  OcSecond;
 
-  OcFirst  = OcOverflowAddS64(A, B, &OcTmp);
-  OcSecond = OcOverflowAddS64(OcTmp, C, Result);
+  OcFirst  = OcOverflowAddS64 (A, B, &OcTmp);
+  OcSecond = OcOverflowAddS64 (OcTmp, C, Result);
   return OcFirst | OcSecond;
 }
 
@@ -252,8 +251,8 @@ OcOverflowTriMulS64 (
   BOOLEAN  OcFirst;
   BOOLEAN  OcSecond;
 
-  OcFirst  = OcOverflowMulS64(A, B, &OcTmp);
-  OcSecond = OcOverflowMulS64(OcTmp, C, Result);
+  OcFirst  = OcOverflowMulS64 (A, B, &OcTmp);
+  OcSecond = OcOverflowMulS64 (OcTmp, C, Result);
   return OcFirst | OcSecond;
 }
 
@@ -269,8 +268,8 @@ OcOverflowAddMulS64 (
   BOOLEAN  OcFirst;
   BOOLEAN  OcSecond;
 
-  OcFirst  = OcOverflowAddS64(A, B, &OcTmp);
-  OcSecond = OcOverflowMulS64(OcTmp, C, Result);
+  OcFirst  = OcOverflowAddS64 (A, B, &OcTmp);
+  OcSecond = OcOverflowMulS64 (OcTmp, C, Result);
   return OcFirst | OcSecond;
 }
 
@@ -286,11 +285,10 @@ OcOverflowMulAddS64 (
   BOOLEAN  OcFirst;
   BOOLEAN  OcSecond;
 
-  OcFirst  = OcOverflowMulS64(A, B, &OcTmp);
-  OcSecond = OcOverflowAddS64(OcTmp, C, Result);
+  OcFirst  = OcOverflowMulS64 (A, B, &OcTmp);
+  OcSecond = OcOverflowAddS64 (OcTmp, C, Result);
   return OcFirst | OcSecond;
 }
-
 
 BOOLEAN
 OcOverflowTriAddUN (
@@ -304,8 +302,8 @@ OcOverflowTriAddUN (
   BOOLEAN  OcFirst;
   BOOLEAN  OcSecond;
 
-  OcFirst  = OcOverflowAddUN(A, B, &OcTmp);
-  OcSecond = OcOverflowAddUN(OcTmp, C, Result);
+  OcFirst  = OcOverflowAddUN (A, B, &OcTmp);
+  OcSecond = OcOverflowAddUN (OcTmp, C, Result);
   return OcFirst | OcSecond;
 }
 
@@ -321,8 +319,8 @@ OcOverflowTriMulUN (
   BOOLEAN  OcFirst;
   BOOLEAN  OcSecond;
 
-  OcFirst  = OcOverflowMulUN(A, B, &OcTmp);
-  OcSecond = OcOverflowMulUN(OcTmp, C, Result);
+  OcFirst  = OcOverflowMulUN (A, B, &OcTmp);
+  OcSecond = OcOverflowMulUN (OcTmp, C, Result);
   return OcFirst | OcSecond;
 }
 
@@ -338,8 +336,8 @@ OcOverflowAddMulUN (
   BOOLEAN  OcFirst;
   BOOLEAN  OcSecond;
 
-  OcFirst  = OcOverflowAddUN(A, B, &OcTmp);
-  OcSecond = OcOverflowMulUN(OcTmp, C, Result);
+  OcFirst  = OcOverflowAddUN (A, B, &OcTmp);
+  OcSecond = OcOverflowMulUN (OcTmp, C, Result);
   return OcFirst | OcSecond;
 }
 
@@ -355,8 +353,8 @@ OcOverflowMulAddUN (
   BOOLEAN  OcFirst;
   BOOLEAN  OcSecond;
 
-  OcFirst  = OcOverflowMulUN(A, B, &OcTmp);
-  OcSecond = OcOverflowAddUN(OcTmp, C, Result);
+  OcFirst  = OcOverflowMulUN (A, B, &OcTmp);
+  OcSecond = OcOverflowAddUN (OcTmp, C, Result);
   return OcFirst | OcSecond;
 }
 
@@ -372,8 +370,8 @@ OcOverflowTriAddSN (
   BOOLEAN  OcFirst;
   BOOLEAN  OcSecond;
 
-  OcFirst  = OcOverflowAddSN(A, B, &OcTmp);
-  OcSecond = OcOverflowAddSN(OcTmp, C, Result);
+  OcFirst  = OcOverflowAddSN (A, B, &OcTmp);
+  OcSecond = OcOverflowAddSN (OcTmp, C, Result);
   return OcFirst | OcSecond;
 }
 
@@ -389,8 +387,8 @@ OcOverflowTriMulSN (
   BOOLEAN  OcFirst;
   BOOLEAN  OcSecond;
 
-  OcFirst  = OcOverflowMulSN(A, B, &OcTmp);
-  OcSecond = OcOverflowMulSN(OcTmp, C, Result);
+  OcFirst  = OcOverflowMulSN (A, B, &OcTmp);
+  OcSecond = OcOverflowMulSN (OcTmp, C, Result);
   return OcFirst | OcSecond;
 }
 
@@ -406,8 +404,8 @@ OcOverflowAddMulSN (
   BOOLEAN  OcFirst;
   BOOLEAN  OcSecond;
 
-  OcFirst  = OcOverflowAddSN(A, B, &OcTmp);
-  OcSecond = OcOverflowMulSN(OcTmp, C, Result);
+  OcFirst  = OcOverflowAddSN (A, B, &OcTmp);
+  OcSecond = OcOverflowMulSN (OcTmp, C, Result);
   return OcFirst | OcSecond;
 }
 
@@ -423,7 +421,7 @@ OcOverflowMulAddSN (
   BOOLEAN  OcFirst;
   BOOLEAN  OcSecond;
 
-  OcFirst  = OcOverflowMulSN(A, B, &OcTmp);
-  OcSecond = OcOverflowAddSN(OcTmp, C, Result);
+  OcFirst  = OcOverflowMulSN (A, B, &OcTmp);
+  OcSecond = OcOverflowAddSN (OcTmp, C, Result);
   return OcFirst | OcSecond;
 }

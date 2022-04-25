@@ -35,8 +35,8 @@
 EFI_STATUS
 EFIAPI
 AppleFirmwarePasswordCheck (
-  IN  APPLE_FIRMWARE_PASSWORD_PROTOCOL *This,
-  IN OUT UINTN *Arg1
+  IN  APPLE_FIRMWARE_PASSWORD_PROTOCOL  *This,
+  IN OUT UINTN                          *Arg1
   )
 {
   return EFI_SUCCESS;
@@ -52,32 +52,32 @@ AppleFirmwarePasswordCheck (
 
 EFI_STATUS
 OcFirmwarePasswordInstallProtocol (
-  IN  EFI_HANDLE ImageHandle,
-  IN  EFI_SYSTEM_TABLE *SystemTable
+  IN  EFI_HANDLE        ImageHandle,
+  IN  EFI_SYSTEM_TABLE  *SystemTable
   )
 {
-  EFI_STATUS Status;
+  EFI_STATUS  Status;
 
-  APPLE_FIRMWARE_PASSWORD_PRIVATE_DATA *Private = NULL;
+  APPLE_FIRMWARE_PASSWORD_PRIVATE_DATA  *Private = NULL;
 
-  Private = (APPLE_FIRMWARE_PASSWORD_PRIVATE_DATA *)AllocateZeroPool (sizeof(APPLE_FIRMWARE_PASSWORD_PRIVATE_DATA));
+  Private = (APPLE_FIRMWARE_PASSWORD_PRIVATE_DATA *)AllocateZeroPool (sizeof (APPLE_FIRMWARE_PASSWORD_PRIVATE_DATA));
 
   if (Private == NULL) {
     return EFI_OUT_OF_RESOURCES;
   }
 
-  Private->Signature = APPLE_FIRMWARE_PASSWORD_PRIVATE_DATA_SIGNATURE;
+  Private->Signature                   = APPLE_FIRMWARE_PASSWORD_PRIVATE_DATA_SIGNATURE;
   Private->AppleFirmwarePassword.Check = AppleFirmwarePasswordCheck;
 
   // Install our protocol with dupe check enabled.
 
   Status = gBS->InstallMultipleProtocolInterfaces (
-    &ImageHandle,
-    &gAppleFirmwarePasswordProtocolGuid,
-    &Private->AppleFirmwarePassword,
-    NULL
-    );
-  if (EFI_ERROR(Status)) {
+                  &ImageHandle,
+                  &gAppleFirmwarePasswordProtocolGuid,
+                  &Private->AppleFirmwarePassword,
+                  NULL
+                  );
+  if (EFI_ERROR (Status)) {
     FreePool (Private);
   }
 

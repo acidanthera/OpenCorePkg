@@ -11,6 +11,7 @@ THE PROGRAM IS DISTRIBUTED UNDER THE BSD LICENSE ON AN "AS IS" BASIS,
 WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 
 **/
+
 #ifndef AIK_SELF_H
 #define AIK_SELF_H
 
@@ -25,64 +26,64 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 //
 // Maximum amount of keys polled at once
 //
-#define AIK_KEY_POLL_LIMIT (AIK_TARGET_BUFFER_SIZE)
+#define AIK_KEY_POLL_LIMIT  (AIK_TARGET_BUFFER_SIZE)
 
 //
 // Defines key polling frequency
 //
-#define AIK_KEY_POLL_INTERVAL EFI_TIMER_PERIOD_MILLISECONDS(10)
+#define AIK_KEY_POLL_INTERVAL  EFI_TIMER_PERIOD_MILLISECONDS(10)
 
 typedef struct {
   //
   // Input mode
   //
-  OC_INPUT_KEY_MODE     Mode;
+  OC_INPUT_KEY_MODE    Mode;
 
   //
   // Remove key if it was not submitted after this value.
   //
-  UINT8                 KeyForgotThreshold;
+  UINT8                KeyForgotThreshold;
 
   //
   // Perform ASCII and scan code input key filtering.
   //
-  BOOLEAN               KeyFiltering;
+  BOOLEAN              KeyFiltering;
 
   //
   // Input sources
   //
-  AIK_SOURCE            Source;
+  AIK_SOURCE           Source;
 
   //
   // Output targets
   //
-  AIK_TARGET            Target;
+  AIK_TARGET           Target;
 
   //
   // Key data
   //
-  AIK_DATA              Data;
+  AIK_DATA             Data;
 
   //
   // AppleKeyMapAggregator polling event
   //
-  EFI_EVENT             KeyMapDbArriveEvent;
+  EFI_EVENT            KeyMapDbArriveEvent;
 
   //
   // Keyboard input polling event
   //
-  EFI_EVENT             PollKeyboardEvent;
+  EFI_EVENT            PollKeyboardEvent;
 
   //
   // Indicates keyboard input polling event to avoid reentrancy if any
   //
-  BOOLEAN               InPollKeyboardEvent;
+  BOOLEAN              InPollKeyboardEvent;
 
   //
   // Indicates we are done for any event in case it gets fired.
   // Not really needed. Added in case of bogus firmware.
   //
-  BOOLEAN               OurJobIsDone;
+  BOOLEAN              OurJobIsDone;
 } AIK_SELF;
 
 //

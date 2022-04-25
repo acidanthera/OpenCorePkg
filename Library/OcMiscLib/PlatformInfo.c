@@ -27,7 +27,7 @@ OcReadApplePlatformFirstData (
   IN      APPLE_PLATFORM_INFO_DATABASE_PROTOCOL  *PlatformInfo,
   IN      EFI_GUID                               *DataGuid,
   IN OUT  UINT32                                 *Size,
-     OUT  VOID                                   *Data
+  OUT  VOID                                      *Data
   )
 {
   EFI_STATUS  Status;
@@ -38,10 +38,10 @@ OcReadApplePlatformFirstData (
   ASSERT (DataGuid != NULL);
 
   Status = PlatformInfo->GetFirstDataSize (
-    PlatformInfo,
-    DataGuid,
-    &DataSize
-    );
+                           PlatformInfo,
+                           DataGuid,
+                           &DataSize
+                           );
   if (EFI_ERROR (Status)) {
     DEBUG ((
       DEBUG_INFO,
@@ -52,6 +52,7 @@ OcReadApplePlatformFirstData (
       ));
     return Status;
   }
+
   if (DataSize > *Size) {
     DEBUG ((
       DEBUG_INFO,
@@ -65,11 +66,11 @@ OcReadApplePlatformFirstData (
   }
 
   Status = PlatformInfo->GetFirstData (
-    PlatformInfo,
-    DataGuid,
-    Data,
-    &DataSize
-    );
+                           PlatformInfo,
+                           DataGuid,
+                           Data,
+                           &DataSize
+                           );
   if (EFI_ERROR (Status)) {
     DEBUG ((
       DEBUG_INFO,
@@ -102,10 +103,10 @@ OcReadApplePlatformFirstDataAlloc (
   ASSERT (DataGuid != NULL);
 
   Status = PlatformInfo->GetFirstDataSize (
-    PlatformInfo,
-    DataGuid,
-    &DataSize
-    );
+                           PlatformInfo,
+                           DataGuid,
+                           &DataSize
+                           );
   if (EFI_ERROR (Status)) {
     DEBUG ((
       DEBUG_INFO,
@@ -128,11 +129,11 @@ OcReadApplePlatformFirstDataAlloc (
   }
 
   Status = PlatformInfo->GetFirstData (
-    PlatformInfo,
-    DataGuid,
-    *Data,
-    &DataSize
-    );
+                           PlatformInfo,
+                           DataGuid,
+                           *Data,
+                           &DataSize
+                           );
   if (EFI_ERROR (Status)) {
     DEBUG ((
       DEBUG_INFO,
@@ -156,7 +157,7 @@ OcReadApplePlatformData (
   IN      EFI_GUID                               *DataGuid,
   IN      EFI_GUID                               *HobGuid,
   IN OUT  UINT32                                 *Size,
-     OUT  VOID                                   *Data
+  OUT  VOID                                      *Data
   )
 {
   EFI_STATUS  Status;
@@ -174,11 +175,11 @@ OcReadApplePlatformData (
   }
 
   Status = PlatformInfo->GetDataSize (
-    PlatformInfo,
-    DataGuid,
-    *(UINT8 *) GET_GUID_HOB_DATA (FsbHob),
-    &DataSize
-    );
+                           PlatformInfo,
+                           DataGuid,
+                           *(UINT8 *)GET_GUID_HOB_DATA (FsbHob),
+                           &DataSize
+                           );
   if (EFI_ERROR (Status)) {
     DEBUG ((
       DEBUG_INFO,
@@ -189,6 +190,7 @@ OcReadApplePlatformData (
       ));
     return Status;
   }
+
   if (DataSize > *Size) {
     DEBUG ((
       DEBUG_INFO,
@@ -202,12 +204,12 @@ OcReadApplePlatformData (
   }
 
   Status = PlatformInfo->GetData (
-    PlatformInfo,
-    DataGuid,
-    *(UINT8 *) GET_GUID_HOB_DATA (FsbHob),
-    Data,
-    &DataSize
-    );
+                           PlatformInfo,
+                           DataGuid,
+                           *(UINT8 *)GET_GUID_HOB_DATA (FsbHob),
+                           Data,
+                           &DataSize
+                           );
   if (EFI_ERROR (Status)) {
     DEBUG ((
       DEBUG_INFO,

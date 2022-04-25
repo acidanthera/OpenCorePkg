@@ -25,31 +25,31 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 
 #define PRIV_OC_BLOB_FIELDS(_, __) \
   OC_BLOB (CHAR8, [], {0}, _, __)
-  OC_DECLARE (PRIV_OC_BLOB)
+OC_DECLARE (PRIV_OC_BLOB)
 
 #define PRIV_OC_MAP_FIELDS(_, __) \
   OC_MAP (PRIV_OC_BLOB, PRIV_OC_BLOB, _, __)
-  OC_DECLARE (PRIV_OC_MAP)
+OC_DECLARE (PRIV_OC_MAP)
 
 #define PRIV_OC_ARRAY_FIELDS(_, __) \
   OC_ARRAY (PRIV_OC_BLOB, _, __)
-  OC_DECLARE (PRIV_OC_ARRAY)
+OC_DECLARE (PRIV_OC_ARRAY)
 
 typedef union PRIV_OC_LIST_ {
-  PRIV_OC_MAP    Map;
-  PRIV_OC_ARRAY  Array;
+  PRIV_OC_MAP      Map;
+  PRIV_OC_ARRAY    Array;
 } PRIV_OC_LIST;
 
 //
 // We have to be a bit careful about this hack, so assert that type layouts match at the very least.
 //
-#if defined(__GNUC__) || defined(__clang__)
-STATIC_ASSERT(OFFSET_OF (PRIV_OC_ARRAY, Count)      == OFFSET_OF (PRIV_OC_MAP, Count), "PRIV_OC_ARRAY vs PRIV_OC_MAP");
-STATIC_ASSERT(OFFSET_OF (PRIV_OC_ARRAY, AllocCount) == OFFSET_OF (PRIV_OC_MAP, AllocCount), "PRIV_OC_ARRAY vs PRIV_OC_MAP");
-STATIC_ASSERT(OFFSET_OF (PRIV_OC_ARRAY, Construct)  == OFFSET_OF (PRIV_OC_MAP, Construct), "PRIV_OC_ARRAY vs PRIV_OC_MAP");
-STATIC_ASSERT(OFFSET_OF (PRIV_OC_ARRAY, Destruct)   == OFFSET_OF (PRIV_OC_MAP, Destruct), "PRIV_OC_ARRAY vs PRIV_OC_MAP");
-STATIC_ASSERT(OFFSET_OF (PRIV_OC_ARRAY, Values)     == OFFSET_OF (PRIV_OC_MAP, Values), "PRIV_OC_ARRAY vs PRIV_OC_MAP");
-STATIC_ASSERT(OFFSET_OF (PRIV_OC_ARRAY, ValueSize)  == OFFSET_OF (PRIV_OC_MAP, ValueSize), "PRIV_OC_ARRAY vs PRIV_OC_MAP");
+#if defined (__GNUC__) || defined (__clang__)
+STATIC_ASSERT (OFFSET_OF (PRIV_OC_ARRAY, Count)      == OFFSET_OF (PRIV_OC_MAP, Count), "PRIV_OC_ARRAY vs PRIV_OC_MAP");
+STATIC_ASSERT (OFFSET_OF (PRIV_OC_ARRAY, AllocCount) == OFFSET_OF (PRIV_OC_MAP, AllocCount), "PRIV_OC_ARRAY vs PRIV_OC_MAP");
+STATIC_ASSERT (OFFSET_OF (PRIV_OC_ARRAY, Construct)  == OFFSET_OF (PRIV_OC_MAP, Construct), "PRIV_OC_ARRAY vs PRIV_OC_MAP");
+STATIC_ASSERT (OFFSET_OF (PRIV_OC_ARRAY, Destruct)   == OFFSET_OF (PRIV_OC_MAP, Destruct), "PRIV_OC_ARRAY vs PRIV_OC_MAP");
+STATIC_ASSERT (OFFSET_OF (PRIV_OC_ARRAY, Values)     == OFFSET_OF (PRIV_OC_MAP, Values), "PRIV_OC_ARRAY vs PRIV_OC_MAP");
+STATIC_ASSERT (OFFSET_OF (PRIV_OC_ARRAY, ValueSize)  == OFFSET_OF (PRIV_OC_MAP, ValueSize), "PRIV_OC_ARRAY vs PRIV_OC_MAP");
 #endif
 
 VOID
@@ -58,7 +58,8 @@ OcFreePointer (
   UINT32  Size
   )
 {
-  VOID **Field = (VOID **) Pointer;
+  VOID  **Field = (VOID **)Pointer;
+
   if (*Field) {
     FreePool (*Field);
     *Field = NULL;
@@ -80,8 +81,8 @@ OcDestructEmpty (
   UINT32  Size
   )
 {
-  (VOID) Pointer;
-  (VOID) Size;
+  (VOID)Pointer;
+  (VOID)Size;
 }
 
 STATIC
@@ -91,10 +92,10 @@ OcFreeList (
   BOOLEAN  HasKeys
   )
 {
-  UINT32              Index;
-  PRIV_OC_LIST        *List;
+  UINT32        Index;
+  PRIV_OC_LIST  *List;
 
-  List = (PRIV_OC_LIST *) Pointer;
+  List = (PRIV_OC_LIST *)Pointer;
 
   for (Index = 0; Index < List->Array.Count; Index++) {
     List->Array.Destruct (List->Array.Values[Index], List->Array.ValueSize);
@@ -111,7 +112,7 @@ OcFreeList (
     OcFreePointer (&List->Map.Keys, List->Array.AllocCount * List->Map.KeySize);
   }
 
-  List->Array.Count = 0;
+  List->Array.Count      = 0;
   List->Array.AllocCount = 0;
 }
 
@@ -133,7 +134,6 @@ OcFreeArray (
   OcFreeList (Pointer, FALSE);
 }
 
-
 VOID *
 OcBlobAllocate (
   VOID    *Pointer,
@@ -144,10 +144,17 @@ OcBlobAllocate (
   PRIV_OC_BLOB  *Blob;
   VOID          *DynValue;
 
-  Blob = (PRIV_OC_BLOB *) Pointer;
+  Blob = (PRIV_OC_BLOB *)Pointer;
 
-  DEBUG ((DEBUG_VERBOSE, "OCTPL: Allocating %u bytes in blob %p with size %u/%u curr %p\n",
-     Size, Blob, Blob->Size, Blob->MaxSize, Blob->DynValue));
+  DEBUG ((
+    DEBUG_VERBOSE,
+    "OCTPL: Allocating %u bytes in blob %p with size %u/%u curr %p\n",
+    Size,
+    Blob,
+    Blob->Size,
+    Blob->MaxSize,
+    Blob->DynValue
+    ));
 
   //
   // We fit into static space
@@ -158,6 +165,7 @@ OcBlobAllocate (
     if (OutSize != NULL) {
       *OutSize = &Blob->Size;
     }
+
     return Blob->Value;
   }
 
@@ -171,6 +179,7 @@ OcBlobAllocate (
       DEBUG ((DEBUG_VERBOSE, "OCTPL: Failed to fit %u bytes in OC_BLOB\n", Size));
       return NULL;
     }
+
     //
     // Propagate default value.
     //
@@ -188,18 +197,18 @@ OcBlobAllocate (
 
 BOOLEAN
 OcListEntryAllocate (
-  VOID            *Pointer,
-  VOID            **Value,
-  VOID            **Key
+  VOID  *Pointer,
+  VOID  **Value,
+  VOID  **Key
   )
 {
-  PRIV_OC_LIST       *List;
-  UINT32             Count;
-  UINT32             AllocCount;
-  VOID               **NewValues;
-  VOID               **NewKeys;
+  PRIV_OC_LIST  *List;
+  UINT32        Count;
+  UINT32        AllocCount;
+  VOID          **NewValues;
+  VOID          **NewKeys;
 
-  List = (PRIV_OC_LIST *) Pointer;
+  List = (PRIV_OC_LIST *)Pointer;
 
   //
   // Prepare new pair.
@@ -225,22 +234,23 @@ OcListEntryAllocate (
     List->Map.KeyConstruct (*Key, List->Map.KeySize);
   }
 
-  Count = 0;
+  Count      = 0;
   AllocCount = 1;
 
   //
   // Push new entry if there is enough room.
   //
   if (List->Array.Values != NULL) {
-    Count = List->Array.Count;
+    Count      = List->Array.Count;
     AllocCount = List->Array.AllocCount;
 
     if (AllocCount > Count) {
       List->Array.Count++;
       List->Array.Values[Count] = *Value;
       if (Key != NULL) {
-        List->Map.Keys[Count]   = *Key;
+        List->Map.Keys[Count] = *Key;
       }
+
       return TRUE;
     }
   }
@@ -250,9 +260,9 @@ OcListEntryAllocate (
   //
   AllocCount *= 2;
 
-  NewValues = (VOID **) AllocatePool (
-    sizeof (VOID *) * AllocCount
-    );
+  NewValues = (VOID **)AllocatePool (
+                         sizeof (VOID *) * AllocCount
+                         );
 
   if (NewValues == NULL) {
     List->Array.Destruct (*Value, List->Array.ValueSize);
@@ -261,13 +271,14 @@ OcListEntryAllocate (
       List->Map.KeyDestruct (*Key, List->Map.KeySize);
       FreePool (*Key);
     }
+
     return FALSE;
   }
 
   if (Key != NULL) {
-    NewKeys = (VOID **) AllocatePool (
-      sizeof (VOID *) * AllocCount
-      );
+    NewKeys = (VOID **)AllocatePool (
+                         sizeof (VOID *) * AllocCount
+                         );
 
     if (NewKeys == NULL) {
       List->Array.Destruct (*Value, List->Array.ValueSize);
@@ -294,7 +305,7 @@ OcListEntryAllocate (
     FreePool (List->Array.Values);
   }
 
-  if (Key != NULL && List->Map.Keys != NULL) {
+  if ((Key != NULL) && (List->Map.Keys != NULL)) {
     CopyMem (
       &NewKeys[0],
       &List->Map.Keys[0],
@@ -308,11 +319,11 @@ OcListEntryAllocate (
   List->Array.AllocCount = AllocCount;
 
   NewValues[Count]   = *Value;
-  List->Array.Values = (PRIV_OC_BLOB **) NewValues;
+  List->Array.Values = (PRIV_OC_BLOB **)NewValues;
 
   if (Key != NULL) {
     NewKeys[Count] = *Key;
-    List->Map.Keys = (PRIV_OC_BLOB **) NewKeys;
+    List->Map.Keys = (PRIV_OC_BLOB **)NewKeys;
   }
 
   return TRUE;

@@ -32,17 +32,17 @@ STATIC
 EFI_STATUS
 EFIAPI
 VirtualFileOpen (
-  IN  EFI_FILE_PROTOCOL       *This,
-  OUT EFI_FILE_PROTOCOL       **NewHandle,
-  IN  CHAR16                  *FileName,
-  IN  UINT64                  OpenMode,
-  IN  UINT64                  Attributes
+  IN  EFI_FILE_PROTOCOL  *This,
+  OUT EFI_FILE_PROTOCOL  **NewHandle,
+  IN  CHAR16             *FileName,
+  IN  UINT64             OpenMode,
+  IN  UINT64             Attributes
   )
 {
   EFI_STATUS         Status;
   VIRTUAL_FILE_DATA  *Data;
 
-  if (This == NULL || NewHandle == NULL || FileName == NULL) {
+  if ((This == NULL) || (NewHandle == NULL) || (FileName == NULL)) {
     return EFI_INVALID_PARAMETER;
   }
 
@@ -50,25 +50,26 @@ VirtualFileOpen (
 
   if (Data->OpenCallback != NULL) {
     return Data->OpenCallback (
-      Data->OriginalProtocol,
-      NewHandle,
-      FileName,
-      OpenMode,
-      Attributes
-      );
+                   Data->OriginalProtocol,
+                   NewHandle,
+                   FileName,
+                   OpenMode,
+                   Attributes
+                   );
   }
 
   if (Data->OriginalProtocol != NULL) {
     Status = OcSafeFileOpen (
-      Data->OriginalProtocol,
-      NewHandle,
-      FileName,
-      OpenMode,
-      Attributes
-      );
+               Data->OriginalProtocol,
+               NewHandle,
+               FileName,
+               OpenMode,
+               Attributes
+               );
     if (!EFI_ERROR (Status)) {
       return CreateRealFile (*NewHandle, NULL, TRUE, NewHandle);
     }
+
     return Status;
   }
 
@@ -104,8 +105,8 @@ VirtualFileClose (
   }
 
   Status = Data->OriginalProtocol->Close (
-    Data->OriginalProtocol
-    );
+                                     Data->OriginalProtocol
+                                     );
   FreePool (Data);
 
   return Status;
@@ -138,8 +139,8 @@ VirtualFileDelete (
   }
 
   Status = Data->OriginalProtocol->Close (
-    Data->OriginalProtocol
-    );
+                                     Data->OriginalProtocol
+                                     );
   FreePool (Data);
 
   return Status;
@@ -149,18 +150,19 @@ STATIC
 EFI_STATUS
 EFIAPI
 VirtualFileRead (
-  IN EFI_FILE_PROTOCOL        *This,
-  IN OUT UINTN                *BufferSize,
-     OUT VOID                 *Buffer
+  IN EFI_FILE_PROTOCOL  *This,
+  IN OUT UINTN          *BufferSize,
+  OUT VOID              *Buffer
   )
 {
   VIRTUAL_FILE_DATA  *Data;
   UINT64             ReadSize;
   UINTN              ReadBufferSize;
 
-  if (This == NULL
-    || BufferSize == NULL
-    || Buffer == NULL) {
+  if (  (This == NULL)
+     || (BufferSize == NULL)
+     || (Buffer == NULL))
+  {
     return EFI_INVALID_PARAMETER;
   }
 
@@ -196,19 +198,19 @@ VirtualFileRead (
   //
 
   return Data->OriginalProtocol->Read (
-    Data->OriginalProtocol,
-    BufferSize,
-    Buffer
-    );
+                                   Data->OriginalProtocol,
+                                   BufferSize,
+                                   Buffer
+                                   );
 }
 
 STATIC
 EFI_STATUS
 EFIAPI
 VirtualFileWrite (
-  IN EFI_FILE_PROTOCOL        *This,
-  IN OUT UINTN                *BufferSize,
-  IN VOID                     *Buffer
+  IN EFI_FILE_PROTOCOL  *This,
+  IN OUT UINTN          *BufferSize,
+  IN VOID               *Buffer
   )
 {
   VIRTUAL_FILE_DATA  *Data;
@@ -227,18 +229,18 @@ VirtualFileWrite (
   }
 
   return Data->OriginalProtocol->Write (
-    Data->OriginalProtocol,
-    BufferSize,
-    Buffer
-    );
+                                   Data->OriginalProtocol,
+                                   BufferSize,
+                                   Buffer
+                                   );
 }
 
 STATIC
 EFI_STATUS
 EFIAPI
 VirtualFileSetPosition (
-  IN EFI_FILE_PROTOCOL        *This,
-  IN UINT64                   Position
+  IN EFI_FILE_PROTOCOL  *This,
+  IN UINT64             Position
   )
 {
   VIRTUAL_FILE_DATA  *Data;
@@ -263,23 +265,24 @@ VirtualFileSetPosition (
   }
 
   return Data->OriginalProtocol->SetPosition (
-    Data->OriginalProtocol,
-    Position
-    );
+                                   Data->OriginalProtocol,
+                                   Position
+                                   );
 }
 
 STATIC
 EFI_STATUS
 EFIAPI
 VirtualFileGetPosition (
-  IN  EFI_FILE_PROTOCOL       *This,
-  OUT UINT64                  *Position
+  IN  EFI_FILE_PROTOCOL  *This,
+  OUT UINT64             *Position
   )
 {
   VIRTUAL_FILE_DATA  *Data;
 
-  if (This == NULL
-    || Position == NULL) {
+  if (  (This == NULL)
+     || (Position == NULL))
+  {
     return EFI_INVALID_PARAMETER;
   }
 
@@ -291,19 +294,19 @@ VirtualFileGetPosition (
   }
 
   return Data->OriginalProtocol->GetPosition (
-    Data->OriginalProtocol,
-    Position
-    );
+                                   Data->OriginalProtocol,
+                                   Position
+                                   );
 }
 
 STATIC
 EFI_STATUS
 EFIAPI
 VirtualFileGetInfo (
-  IN  EFI_FILE_PROTOCOL       *This,
-  IN  EFI_GUID                *InformationType,
-  IN  OUT UINTN               *BufferSize,
-  OUT VOID                    *Buffer
+  IN  EFI_FILE_PROTOCOL  *This,
+  IN  EFI_GUID           *InformationType,
+  IN  OUT UINTN          *BufferSize,
+  OUT VOID               *Buffer
   )
 {
   EFI_STATUS         Status;
@@ -313,9 +316,10 @@ VirtualFileGetInfo (
   EFI_FILE_INFO      *FileInfo;
   BOOLEAN            Fits;
 
-  if (This == NULL
-    || InformationType == NULL
-    || BufferSize == NULL) {
+  if (  (This == NULL)
+     || (InformationType == NULL)
+     || (BufferSize == NULL))
+  {
     return EFI_INVALID_PARAMETER;
   }
 
@@ -340,7 +344,8 @@ VirtualFileGetInfo (
       if (Buffer == NULL) {
         return EFI_INVALID_PARAMETER;
       }
-      FileInfo = (EFI_FILE_INFO *) Buffer;
+
+      FileInfo = (EFI_FILE_INFO *)Buffer;
 
       ZeroMem (FileInfo, InfoSize - NameSize);
       FileInfo->Size         = InfoSize;
@@ -354,7 +359,7 @@ VirtualFileGetInfo (
       //
       // Return zeroes for timestamps.
       //
-      FileInfo->Attribute    = EFI_FILE_READ_ONLY;
+      FileInfo->Attribute = EFI_FILE_READ_ONLY;
       CopyMem (&FileInfo->FileName[0], Data->FileName, NameSize);
 
       return EFI_SUCCESS;
@@ -368,17 +373,22 @@ VirtualFileGetInfo (
   }
 
   Status = Data->OriginalProtocol->GetInfo (
-    Data->OriginalProtocol,
-    InformationType,
-    BufferSize,
-    Buffer
-    );
+                                     Data->OriginalProtocol,
+                                     InformationType,
+                                     BufferSize,
+                                     Buffer
+                                     );
 
-  DEBUG ((DEBUG_VERBOSE, "Getting file info %g with now BufferSize %u mode gave - %r\n",
-    InformationType, (UINT32) *BufferSize, Status));
+  DEBUG ((
+    DEBUG_VERBOSE,
+    "Getting file info %g with now BufferSize %u mode gave - %r\n",
+    InformationType,
+    (UINT32)*BufferSize,
+    Status
+    ));
 
   if (!EFI_ERROR (Status) && CompareGuid (InformationType, &gEfiFileInfoGuid)) {
-    DEBUG ((DEBUG_VERBOSE, "Got file size %u\n", (UINT32) ((EFI_FILE_INFO *) Buffer)->FileSize));
+    DEBUG ((DEBUG_VERBOSE, "Got file size %u\n", (UINT32)((EFI_FILE_INFO *)Buffer)->FileSize));
   }
 
   return Status;
@@ -388,10 +398,10 @@ STATIC
 EFI_STATUS
 EFIAPI
 VirtualFileSetInfo (
-  IN EFI_FILE_PROTOCOL        *This,
-  IN EFI_GUID                 *InformationType,
-  IN UINTN                    BufferSize,
-  IN VOID                     *Buffer
+  IN EFI_FILE_PROTOCOL  *This,
+  IN EFI_GUID           *InformationType,
+  IN UINTN              BufferSize,
+  IN VOID               *Buffer
   )
 {
   VIRTUAL_FILE_DATA  *Data;
@@ -410,18 +420,18 @@ VirtualFileSetInfo (
   }
 
   return Data->OriginalProtocol->SetInfo (
-    Data->OriginalProtocol,
-    InformationType,
-    BufferSize,
-    Buffer
-    );
+                                   Data->OriginalProtocol,
+                                   InformationType,
+                                   BufferSize,
+                                   Buffer
+                                   );
 }
 
 STATIC
 EFI_STATUS
 EFIAPI
 VirtualFileFlush (
-  IN EFI_FILE_PROTOCOL        *This
+  IN EFI_FILE_PROTOCOL  *This
   )
 {
   VIRTUAL_FILE_DATA  *Data;
@@ -440,23 +450,23 @@ VirtualFileFlush (
   }
 
   return Data->OriginalProtocol->Flush (
-    Data->OriginalProtocol
-    );
+                                   Data->OriginalProtocol
+                                   );
 }
 
 STATIC
 EFI_STATUS
 EFIAPI
 VirtualFileOpenEx (
-  IN     EFI_FILE_PROTOCOL    *This,
-  OUT    EFI_FILE_PROTOCOL    **NewHandle,
-  IN     CHAR16               *FileName,
-  IN     UINT64               OpenMode,
-  IN     UINT64               Attributes,
-  IN OUT EFI_FILE_IO_TOKEN    *Token
+  IN     EFI_FILE_PROTOCOL  *This,
+  OUT    EFI_FILE_PROTOCOL  **NewHandle,
+  IN     CHAR16             *FileName,
+  IN     UINT64             OpenMode,
+  IN     UINT64             Attributes,
+  IN OUT EFI_FILE_IO_TOKEN  *Token
   )
 {
-  EFI_STATUS         Status;
+  EFI_STATUS  Status;
 
   //
   // Ignore asynchronous interface for now.
@@ -468,14 +478,14 @@ VirtualFileOpenEx (
   //  We do not care for simplicity.
   //
   Status = VirtualFileOpen (
-    This,
-    NewHandle,
-    FileName,
-    OpenMode,
-    Attributes
-    );
+             This,
+             NewHandle,
+             FileName,
+             OpenMode,
+             Attributes
+             );
 
-  if (!EFI_ERROR (Status) && Token->Event != NULL) {
+  if (!EFI_ERROR (Status) && (Token->Event != NULL)) {
     Token->Status = EFI_SUCCESS;
     gBS->SignalEvent (Token->Event);
   }
@@ -494,8 +504,9 @@ VirtualFileReadEx (
   EFI_STATUS         Status;
   VIRTUAL_FILE_DATA  *Data;
 
-  if (This == NULL
-    || Token == NULL) {
+  if (  (This == NULL)
+     || (Token == NULL))
+  {
     return EFI_INVALID_PARAMETER;
   }
 
@@ -504,15 +515,15 @@ VirtualFileReadEx (
   if (Data->OriginalProtocol == NULL) {
     Status = VirtualFileRead (This, Token->Buffer, &Token->BufferSize);
 
-    if (!EFI_ERROR (Status) && Token->Event != NULL) {
+    if (!EFI_ERROR (Status) && (Token->Event != NULL)) {
       Token->Status = EFI_SUCCESS;
       gBS->SignalEvent (Token->Event);
     }
   } else {
     Status = Data->OriginalProtocol->ReadEx (
-      This,
-      Token
-      );
+                                       This,
+                                       Token
+                                       );
   }
 
   return Status;
@@ -540,9 +551,9 @@ VirtualFileWriteEx (
   }
 
   return Data->OriginalProtocol->WriteEx (
-    This,
-    Token
-    );
+                                   This,
+                                   Token
+                                   );
 }
 
 STATIC
@@ -569,15 +580,15 @@ VirtualFileFlushEx (
   }
 
   return Data->OriginalProtocol->FlushEx (
-    This,
-    Token
-    );
+                                   This,
+                                   Token
+                                   );
 }
 
 STATIC
 CONST
 EFI_FILE_PROTOCOL
-mVirtualFileProtocolTemplate = {
+  mVirtualFileProtocolTemplate = {
   .Revision    = EFI_FILE_PROTOCOL_REVISION2,
   .Open        = VirtualFileOpen,
   .Close       = VirtualFileClose,
@@ -644,8 +655,8 @@ CreateVirtualFileFileNameCopy (
   OUT EFI_FILE_PROTOCOL  **File
   )
 {
-  EFI_STATUS          Status;
-  CHAR16              *FileNameCopy;
+  EFI_STATUS  Status;
+  CHAR16      *FileNameCopy;
 
   ASSERT (FileName != NULL);
   ASSERT (File != NULL);
@@ -662,6 +673,7 @@ CreateVirtualFileFileNameCopy (
     FreePool (FileNameCopy);
     return EFI_OUT_OF_RESOURCES;
   }
+
   return Status;
 }
 
@@ -697,6 +709,7 @@ CreateRealFile (
       ASSERT (OriginalFile != NULL);
       OriginalFile->Close (OriginalFile);
     }
+
     return EFI_OUT_OF_RESOURCES;
   }
 

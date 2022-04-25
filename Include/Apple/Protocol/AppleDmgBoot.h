@@ -27,12 +27,12 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 /**
   Failed boot poolicy variable in gAppleStartupManagerVariableGuid.
 **/
-#define APPLE_FAILED_BOOT_POLICY_VARIABLE L"AppleFailedBootPolicy"
+#define APPLE_FAILED_BOOT_POLICY_VARIABLE  L"AppleFailedBootPolicy"
 
 /**
   Failed boot volume variable in gAppleStartupManagerVariableGuid (equal to EFMU).
 **/
-#define APPLE_FAILED_BOOT_VOLUME_UUID_VARIABLE L"AppleFailedBootVolumeUUID"
+#define APPLE_FAILED_BOOT_VOLUME_UUID_VARIABLE  L"AppleFailedBootVolumeUUID"
 
 /**
   Set into EFMU / AppleFailedBootVolumeUUID for cmd-opt-R
@@ -61,7 +61,7 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 /**
   Apple DMG boot protocol revision.
 **/
-#define APPLE_DMG_BOOT_PROTOCOL_REVISION 0x20000
+#define APPLE_DMG_BOOT_PROTOCOL_REVISION  0x20000
 
 /**
   Apple DMG boot protocol forward declaration.
@@ -76,7 +76,7 @@ typedef struct APPLE_DMG_BOOT_PROTOCOL_ APPLE_DMG_BOOT_PROTOCOL;
 **/
 typedef
 VOID
-(EFIAPI *APPLE_DMG_BOOT_DEBUG_PRINT) (
+(EFIAPI *APPLE_DMG_BOOT_DEBUG_PRINT)(
   IN  UINTN        ErrorLevel,
   IN  CONST CHAR8  *Format,
   ...
@@ -89,7 +89,7 @@ VOID
 **/
 typedef
 VOID
-(EFIAPI *APPLE_DMG_BOOT_CALLBACK) (
+(EFIAPI *APPLE_DMG_BOOT_CALLBACK)(
   IN  VOID         *Context
   );
 
@@ -118,7 +118,7 @@ VOID
 **/
 typedef
 EFI_STATUS
-(EFIAPI *APPLE_DMG_BOOT_VERIFIED_BOOT) (
+(EFIAPI *APPLE_DMG_BOOT_VERIFIED_BOOT)(
   IN APPLE_DMG_BOOT_PROTOCOL    *This,
   IN EFI_HANDLE                 ParentImageHandle,
   IN CONST CHAR16               *BaseDmgPath,
@@ -148,7 +148,7 @@ EFI_STATUS
 **/
 typedef
 EFI_STATUS
-(EFIAPI *APPLE_DMG_BOOT_UNVERIFIED_BOOT) (
+(EFIAPI *APPLE_DMG_BOOT_UNVERIFIED_BOOT)(
   IN APPLE_DMG_BOOT_PROTOCOL    *This,
   IN EFI_HANDLE                 ParentImageHandle,
   IN EFI_DEVICE_PATH_PROTOCOL   *DevicePath,
@@ -181,7 +181,7 @@ typedef enum {
 **/
 typedef
 EFI_STATUS
-(EFIAPI *APPLE_DMG_BOOT_SET_MODE) (
+(EFIAPI *APPLE_DMG_BOOT_SET_MODE)(
   IN APPLE_DMG_BOOT_PROTOCOL    *This,
   IN APPLE_DMG_BOOT_MODE        Mode
   );
@@ -190,16 +190,16 @@ EFI_STATUS
   Apple disk imge protocol.
 **/
 struct APPLE_DMG_BOOT_PROTOCOL_ {
-  UINT32                          Revision;
-  APPLE_DMG_BOOT_VERIFIED_BOOT    VerifiedDmgBoot;
-  APPLE_DMG_BOOT_UNVERIFIED_BOOT  UnverifiedDmgBoot;
-  APPLE_DMG_BOOT_SET_MODE         SetDmgBootMode;
+  UINT32                            Revision;
+  APPLE_DMG_BOOT_VERIFIED_BOOT      VerifiedDmgBoot;
+  APPLE_DMG_BOOT_UNVERIFIED_BOOT    UnverifiedDmgBoot;
+  APPLE_DMG_BOOT_SET_MODE           SetDmgBootMode;
 };
 
-extern EFI_GUID gAppleDiskImageProtocolGuid;
+extern EFI_GUID  gAppleDiskImageProtocolGuid;
 
-extern EFI_GUID gAppleRecoveryBootNetworkGuid;
+extern EFI_GUID  gAppleRecoveryBootNetworkGuid;
 
-extern EFI_GUID gAppleRecoveryBootDiskGuid;
+extern EFI_GUID  gAppleRecoveryBootDiskGuid;
 
 #endif // APPLE_DISK_IMAGE_PROTOCOL_H

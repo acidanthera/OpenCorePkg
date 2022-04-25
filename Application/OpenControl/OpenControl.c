@@ -29,19 +29,19 @@ UefiMain (
   IN EFI_SYSTEM_TABLE  *SystemTable
   )
 {
-  EFI_STATUS                            Status;
-  UINTN                                 Argc;
-  CHAR16                                **Argv;
-  OC_FIRMWARE_RUNTIME_PROTOCOL          *FwRuntime;
-  OC_FWRT_CONFIG                        Config;
+  EFI_STATUS                    Status;
+  UINTN                         Argc;
+  CHAR16                        **Argv;
+  OC_FIRMWARE_RUNTIME_PROTOCOL  *FwRuntime;
+  OC_FWRT_CONFIG                Config;
 
   Status = GetArguments (&Argc, &Argv);
-  if (!EFI_ERROR (Status) && Argc == 2) {
+  if (!EFI_ERROR (Status) && (Argc == 2)) {
     Status = gBS->LocateProtocol (
-      &gOcFirmwareRuntimeProtocolGuid,
-      NULL,
-      (VOID **) &FwRuntime
-      );
+                    &gOcFirmwareRuntimeProtocolGuid,
+                    NULL,
+                    (VOID **)&FwRuntime
+                    );
 
     if (EFI_ERROR (Status)) {
       Print (L"FwRuntime protocol is unavilable - %r\n", Status);

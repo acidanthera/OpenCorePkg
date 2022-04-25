@@ -22,12 +22,12 @@ Abstract:
 // Global Variables
 //
 
-UINT32 CONST                         mExceptionCodeSize = 9;
-BOOLEAN                              mInterruptState = FALSE;
-UINTN                                mTimerVector = 0;
-volatile EFI_CPU_INTERRUPT_HANDLER   mTimerHandler = NULL;
-EFI_LEGACY_8259_PROTOCOL             *gLegacy8259 = NULL;
-THUNK_CONTEXT                        mThunkContext;
+UINT32 CONST                        mExceptionCodeSize = 9;
+BOOLEAN                             mInterruptState    = FALSE;
+UINTN                               mTimerVector       = 0;
+volatile EFI_CPU_INTERRUPT_HANDLER  mTimerHandler      = NULL;
+EFI_LEGACY_8259_PROTOCOL            *gLegacy8259       = NULL;
+THUNK_CONTEXT                       mThunkContext;
 
 VOID
 InitializeBiosIntCaller (
@@ -37,8 +37,8 @@ InitializeBiosIntCaller (
 //
 // The Cpu Architectural Protocol that this Driver produces
 //
-EFI_HANDLE              mHandle = NULL;
-EFI_CPU_ARCH_PROTOCOL   mCpu = {
+EFI_HANDLE             mHandle = NULL;
+EFI_CPU_ARCH_PROTOCOL  mCpu    = {
   CpuFlushCpuDataCache,        ///< Used in LightMemoryTest
   CpuEnableInterrupt,          ///< Not-used in LegacyBoot
   CpuDisableInterrupt,
@@ -54,11 +54,12 @@ EFI_CPU_ARCH_PROTOCOL   mCpu = {
 EFI_STATUS
 EFIAPI
 CpuFlushCpuDataCache (
-  IN EFI_CPU_ARCH_PROTOCOL           *This,
-  IN EFI_PHYSICAL_ADDRESS            Start,
-  IN UINT64                          Length,
-  IN EFI_CPU_FLUSH_TYPE              FlushType
+  IN EFI_CPU_ARCH_PROTOCOL  *This,
+  IN EFI_PHYSICAL_ADDRESS   Start,
+  IN UINT64                 Length,
+  IN EFI_CPU_FLUSH_TYPE     FlushType
   )
+
 /*++
 
 Routine Description:
@@ -91,12 +92,12 @@ Returns:
   }
 }
 
-
 EFI_STATUS
 EFIAPI
 CpuEnableInterrupt (
-  IN EFI_CPU_ARCH_PROTOCOL          *This
+  IN EFI_CPU_ARCH_PROTOCOL  *This
   )
+
 /*++
 
 Routine Description:
@@ -113,16 +114,16 @@ Returns:
 {
   EnableInterrupts ();
 
-  mInterruptState  = TRUE;
+  mInterruptState = TRUE;
   return EFI_SUCCESS;
 }
-
 
 EFI_STATUS
 EFIAPI
 CpuDisableInterrupt (
-  IN EFI_CPU_ARCH_PROTOCOL          *This
+  IN EFI_CPU_ARCH_PROTOCOL  *This
   )
+
 /*++
 
 Routine Description:
@@ -143,13 +144,13 @@ Returns:
   return EFI_SUCCESS;
 }
 
-
 EFI_STATUS
 EFIAPI
 CpuGetInterruptState (
-  IN  EFI_CPU_ARCH_PROTOCOL         *This,
-  OUT BOOLEAN                       *State
+  IN  EFI_CPU_ARCH_PROTOCOL  *This,
+  OUT BOOLEAN                *State
   )
+
 /*++
 
 Routine Description:
@@ -173,12 +174,11 @@ Returns:
   return EFI_SUCCESS;
 }
 
-
 EFI_STATUS
 EFIAPI
 CpuInit (
-  IN EFI_CPU_ARCH_PROTOCOL           *This,
-  IN EFI_CPU_INIT_TYPE               InitType
+  IN EFI_CPU_ARCH_PROTOCOL  *This,
+  IN EFI_CPU_INIT_TYPE      InitType
   )
 
 /*++
@@ -201,14 +201,14 @@ Returns:
   return EFI_UNSUPPORTED;
 }
 
-
 EFI_STATUS
 EFIAPI
 CpuRegisterInterruptHandler (
-  IN EFI_CPU_ARCH_PROTOCOL          *This,
-  IN EFI_EXCEPTION_TYPE             InterruptType,
-  IN EFI_CPU_INTERRUPT_HANDLER      InterruptHandler
+  IN EFI_CPU_ARCH_PROTOCOL      *This,
+  IN EFI_EXCEPTION_TYPE         InterruptType,
+  IN EFI_CPU_INTERRUPT_HANDLER  InterruptHandler
   )
+
 /*++
 
 Routine Description:
@@ -237,14 +237,17 @@ Returns:
   if ((InterruptType < 0) || (InterruptType >= INTERRUPT_VECTOR_NUMBER)) {
     return EFI_UNSUPPORTED;
   }
+
   if ((UINTN)(UINT32)InterruptType != mTimerVector) {
     return EFI_UNSUPPORTED;
   }
+
   if ((mTimerHandler == NULL) && (InterruptHandler == NULL)) {
     return EFI_INVALID_PARAMETER;
   } else if ((mTimerHandler != NULL) && (InterruptHandler != NULL)) {
     return EFI_ALREADY_STARTED;
   }
+
   mTimerHandler = InterruptHandler;
   return EFI_SUCCESS;
 }
@@ -252,11 +255,12 @@ Returns:
 EFI_STATUS
 EFIAPI
 CpuGetTimerValue (
-  IN  EFI_CPU_ARCH_PROTOCOL          *This,
-  IN  UINT32                         TimerIndex,
-  OUT UINT64                         *TimerValue,
-  OUT UINT64                         *TimerPeriod   OPTIONAL
+  IN  EFI_CPU_ARCH_PROTOCOL  *This,
+  IN  UINT32                 TimerIndex,
+  OUT UINT64                 *TimerValue,
+  OUT UINT64                 *TimerPeriod   OPTIONAL
   )
+
 /*++
 
 Routine Description:
@@ -290,19 +294,22 @@ Returns:
       //
       *TimerPeriod = 1000000000;
     }
+
     return EFI_SUCCESS;
   }
+
   return EFI_INVALID_PARAMETER;
 }
 
 EFI_STATUS
 EFIAPI
 CpuSetMemoryAttributes (
-  IN EFI_CPU_ARCH_PROTOCOL     *This,
-  IN EFI_PHYSICAL_ADDRESS      BaseAddress,
-  IN UINT64                    Length,
-  IN UINT64                    Attributes
+  IN EFI_CPU_ARCH_PROTOCOL  *This,
+  IN EFI_PHYSICAL_ADDRESS   BaseAddress,
+  IN UINT64                 Length,
+  IN UINT64                 Attributes
   )
+
 /*++
 
 Routine Description:
@@ -327,15 +334,15 @@ Returns:
 #if CPU_EXCEPTION_DEBUG_OUTPUT
 VOID
 DumpExceptionDataDebugOut (
-  IN EFI_EXCEPTION_TYPE   InterruptType,
-  IN EFI_SYSTEM_CONTEXT   SystemContext
+  IN EFI_EXCEPTION_TYPE  InterruptType,
+  IN EFI_SYSTEM_CONTEXT  SystemContext
   )
 {
-  UINT32        ErrorCodeFlag;
+  UINT32  ErrorCodeFlag;
 
   ErrorCodeFlag = 0x00027d00;
 
-#ifdef MDE_CPU_IA32
+ #ifdef MDE_CPU_IA32
   DEBUG ((
     EFI_D_ERROR,
     "!!!! IA32 Exception Type - %08x !!!!\n",
@@ -355,6 +362,7 @@ DumpExceptionDataDebugOut (
       SystemContext.SystemContextIa32->ExceptionData
       ));
   }
+
   DEBUG ((
     EFI_D_ERROR,
     "EAX - %08x, ECX - %08x, EDX - %08x, EBX - %08x\n",
@@ -416,7 +424,7 @@ DumpExceptionDataDebugOut (
     SystemContext.SystemContextIa32->Dr6,
     SystemContext.SystemContextIa32->Dr7
     ));
-#else
+ #else
   DEBUG ((
     EFI_D_ERROR,
     "!!!! X64 Exception Type - %016lx !!!!\n",
@@ -436,6 +444,7 @@ DumpExceptionDataDebugOut (
       SystemContext.SystemContextX64->ExceptionData
       ));
   }
+
   DEBUG ((
     EFI_D_ERROR,
     "RAX - %016lx, RCX - %016lx, RDX - %016lx\n",
@@ -530,80 +539,84 @@ DumpExceptionDataDebugOut (
     SystemContext.SystemContextX64->Dr6,
     SystemContext.SystemContextX64->Dr7
     ));
-#endif
-  return ;
+ #endif
+  return;
 }
+
 #endif
 
 STATIC
-CHAR16*
+CHAR16 *
 DumpMemoryVgaOut (
-  IN CHAR16* VideoBuffer,
-  IN UINTN ColumnMax,
-  IN UINTN MemoryAddress,
-  IN UINTN Count
+  IN CHAR16  *VideoBuffer,
+  IN UINTN   ColumnMax,
+  IN UINTN   MemoryAddress,
+  IN UINTN   Count
   )
 {
-  UINT32        Space;
-  UINT32        InLine;
-  CHAR16        *Line;
-  UINT8 CONST   *Data;
+  UINT32       Space;
+  UINT32       InLine;
+  CHAR16       *Line;
+  UINT8 CONST  *Data;
 
-  Space = 8U;
+  Space  = 8U;
   InLine = 4U;
-  Line = VideoBuffer;
-  Data = (UINT8 CONST*) MemoryAddress;
+  Line   = VideoBuffer;
+  Data   = (UINT8 CONST *)MemoryAddress;
 
   while (Count) {
     UnicodeSPrintAsciiFormat (
       VideoBuffer,
       3U * sizeof (CHAR16),
       "%02x",
-      (UINTN) *Data
+      (UINTN)*Data
       );
     VideoBuffer += 2;
     --Space;
     if (!Space) {
-      *(CHAR8*) VideoBuffer = ' ';
+      *(CHAR8 *)VideoBuffer = ' ';
       ++VideoBuffer;
       Space = 8U;
       --InLine;
       if (!InLine) {
-        Line += ColumnMax;
+        Line       += ColumnMax;
         VideoBuffer = Line;
-        InLine = 4U;
+        InLine      = 4U;
       }
     }
+
     ++Data;
     --Count;
   }
+
   if (VideoBuffer != Line) {
-    Line += ColumnMax;
+    Line       += ColumnMax;
     VideoBuffer = Line;
   }
+
   return VideoBuffer;
 }
 
 VOID
 DumpExceptionDataVgaOut (
-  IN EFI_EXCEPTION_TYPE   InterruptType,
-  IN EFI_SYSTEM_CONTEXT   SystemContext
+  IN EFI_EXCEPTION_TYPE  InterruptType,
+  IN EFI_SYSTEM_CONTEXT  SystemContext
   )
 {
-  UINTN         COLUMN_MAX;
-  UINTN         ROW_MAX;
-  UINT32        ErrorCodeFlag;
-  CHAR16        *VideoBufferBase;
-  CHAR16        *VideoBuffer;
-  UINTN         Index;
+  UINTN   COLUMN_MAX;
+  UINTN   ROW_MAX;
+  UINT32  ErrorCodeFlag;
+  CHAR16  *VideoBufferBase;
+  CHAR16  *VideoBuffer;
+  UINTN   Index;
 
   COLUMN_MAX      = 80;
   ROW_MAX         = 25;
   ErrorCodeFlag   = 0x00027d00;
-  VideoBufferBase = (CHAR16 *) (UINTN) 0xb8000;
-  VideoBuffer     = (CHAR16 *) (UINTN) 0xb8000;
+  VideoBufferBase = (CHAR16 *)(UINTN)0xb8000;
+  VideoBuffer     = (CHAR16 *)(UINTN)0xb8000;
 
-#ifdef MDE_CPU_IA32
+ #ifdef MDE_CPU_IA32
   UnicodeSPrintAsciiFormat (
     VideoBuffer,
     COLUMN_MAX * sizeof (CHAR16),
@@ -626,9 +639,10 @@ DumpExceptionDataVgaOut (
       COLUMN_MAX * sizeof (CHAR16),
       "ExceptionData - %08x",
       SystemContext.SystemContextIa32->ExceptionData
-    );
+      );
     VideoBuffer += COLUMN_MAX;
   }
+
   UnicodeSPrintAsciiFormat (
     VideoBuffer,
     COLUMN_MAX * sizeof (CHAR16),
@@ -713,19 +727,19 @@ DumpExceptionDataVgaOut (
     SystemContext.SystemContextIa32->Dr7
     );
   VideoBuffer += COLUMN_MAX;
+  VideoBuffer  = DumpMemoryVgaOut (
+                   VideoBuffer,
+                   COLUMN_MAX,
+                   (UINTN)SystemContext.SystemContextIa32->Esp,
+                   128U
+                   );
   VideoBuffer = DumpMemoryVgaOut (
-    VideoBuffer,
-    COLUMN_MAX,
-    (UINTN) SystemContext.SystemContextIa32->Esp,
-    128U
-    );
-  VideoBuffer = DumpMemoryVgaOut (
-    VideoBuffer,
-    COLUMN_MAX,
-    (UINTN) SystemContext.SystemContextIa32->Eip - 64U,
-    128U
-    );
-#else
+                  VideoBuffer,
+                  COLUMN_MAX,
+                  (UINTN)SystemContext.SystemContextIa32->Eip - 64U,
+                  128U
+                  );
+ #else
   UnicodeSPrintAsciiFormat (
     VideoBuffer,
     COLUMN_MAX * sizeof (CHAR16),
@@ -889,21 +903,21 @@ DumpExceptionDataVgaOut (
     SystemContext.SystemContextX64->Dr7
     );
   VideoBuffer += COLUMN_MAX;
+  VideoBuffer  = DumpMemoryVgaOut (
+                   VideoBuffer,
+                   COLUMN_MAX,
+                   (UINTN)SystemContext.SystemContextX64->Rsp,
+                   128U
+                   );
   VideoBuffer = DumpMemoryVgaOut (
-    VideoBuffer,
-    COLUMN_MAX,
-    (UINTN) SystemContext.SystemContextX64->Rsp,
-    128U
-    );
-  VideoBuffer = DumpMemoryVgaOut (
-    VideoBuffer,
-    COLUMN_MAX,
-    (UINTN) SystemContext.SystemContextX64->Rip - 64U,
-    128U
-    );
-#endif
+                  VideoBuffer,
+                  COLUMN_MAX,
+                  (UINTN)SystemContext.SystemContextX64->Rip - 64U,
+                  128U
+                  );
+ #endif
 
-  for (Index = 0; Index < COLUMN_MAX * ROW_MAX; Index ++) {
+  for (Index = 0; Index < COLUMN_MAX * ROW_MAX; Index++) {
     if (Index > (UINTN)(VideoBuffer - VideoBufferBase)) {
       VideoBufferBase[Index] = 0x0c20;
     } else {
@@ -911,14 +925,15 @@ DumpExceptionDataVgaOut (
     }
   }
 
-  return ;
+  return;
 }
 
 #if CPU_EXCEPTION_VGA_SWITCH
 UINT16
 SwitchVideoMode (
-  UINT16    NewVideoMode
+  UINT16  NewVideoMode
   )
+
 /*++
 Description
   Switch Video Mode from current mode to new mode, and return the old mode.
@@ -933,9 +948,8 @@ Return
 
 --*/
 {
-  EFI_IA32_REGISTER_SET           Regs;
-  UINT16                          OriginalVideoMode = (UINT16) -1;
-
+  EFI_IA32_REGISTER_SET  Regs;
+  UINT16                 OriginalVideoMode = (UINT16)-1;
 
   //
   // Set new video mode
@@ -955,7 +969,7 @@ Return
     //
     gBS->SetMem (&Regs, sizeof (Regs), 0);
     Regs.H.AH = 0x00;
-    Regs.H.AL = (UINT8) NewVideoMode;
+    Regs.H.AL = (UINT8)NewVideoMode;
     LegacyBiosInt86 (0x10, &Regs);
 
     //
@@ -989,35 +1003,36 @@ Return
       //
       // SORRY: Cannot set to video mode!
       //
-      return (UINT16) -1;
+      return (UINT16)-1;
     }
   }
 
   return OriginalVideoMode;
 }
+
 #endif
 
 VOID
 EFIAPI
 ExceptionHandler (
-  IN EFI_EXCEPTION_TYPE    InterruptType,
-  IN EFI_SYSTEM_CONTEXT    SystemContext
+  IN EFI_EXCEPTION_TYPE  InterruptType,
+  IN EFI_SYSTEM_CONTEXT  SystemContext
   )
 {
-#if CPU_EXCEPTION_VGA_SWITCH
-  UINT16                          VideoMode;
-#endif
+ #if CPU_EXCEPTION_VGA_SWITCH
+  UINT16  VideoMode;
+ #endif
 
-#if CPU_EXCEPTION_DEBUG_OUTPUT
+ #if CPU_EXCEPTION_DEBUG_OUTPUT
   DumpExceptionDataDebugOut (InterruptType, SystemContext);
-#endif
+ #endif
 
-#if CPU_EXCEPTION_VGA_SWITCH
+ #if CPU_EXCEPTION_VGA_SWITCH
   //
   // Switch to text mode for RED-SCREEN output
   //
   VideoMode = SwitchVideoMode (0x83);
-#endif
+ #endif
 
   DumpExceptionDataVgaOut (InterruptType, SystemContext);
 
@@ -1028,23 +1043,24 @@ ExceptionHandler (
   //
   CpuDeadLoop ();
 
-#if CPU_EXCEPTION_VGA_SWITCH
+ #if CPU_EXCEPTION_VGA_SWITCH
   //
   // Switch back to the old video mode
   //
   if (VideoMode != (UINT16)-1) {
     SwitchVideoMode (VideoMode);
   }
-#endif
 
-  return ;
+ #endif
+
+  return;
 }
 
 VOID
 EFIAPI
 TimerHandler (
-  IN EFI_EXCEPTION_TYPE    InterruptType,
-  IN EFI_SYSTEM_CONTEXT    SystemContext
+  IN EFI_EXCEPTION_TYPE  InterruptType,
+  IN EFI_SYSTEM_CONTEXT  SystemContext
   )
 {
   if (mTimerHandler != NULL) {
@@ -1055,9 +1071,10 @@ TimerHandler (
 EFI_STATUS
 EFIAPI
 InitializeCpu (
-  IN EFI_HANDLE         ImageHandle,
-  IN EFI_SYSTEM_TABLE   *SystemTable
+  IN EFI_HANDLE        ImageHandle,
+  IN EFI_SYSTEM_TABLE  *SystemTable
   )
+
 /*++
 
 Routine Description:
@@ -1074,20 +1091,20 @@ Returns:
 
 --*/
 {
-  EFI_STATUS                  Status;
-  EFI_8259_IRQ                Irq;
-  UINT32                      InterruptVector;
+  EFI_STATUS    Status;
+  EFI_8259_IRQ  Irq;
+  UINT32        InterruptVector;
 
   //
   // Find the Legacy8259 protocol.
   //
-  Status = gBS->LocateProtocol (&gEfiLegacy8259ProtocolGuid, NULL, (VOID **) &gLegacy8259);
+  Status = gBS->LocateProtocol (&gEfiLegacy8259ProtocolGuid, NULL, (VOID **)&gLegacy8259);
   ASSERT_EFI_ERROR (Status);
 
   //
   // Get the interrupt vector number corresponding to IRQ0 from the 8259 driver
   //
-  Status = gLegacy8259->GetVector (gLegacy8259, Efi8259Irq0, (UINT8 *) &mTimerVector);
+  Status = gLegacy8259->GetVector (gLegacy8259, Efi8259Irq0, (UINT8 *)&mTimerVector);
   ASSERT_EFI_ERROR (Status);
 
   //
@@ -1101,7 +1118,7 @@ Returns:
   for (InterruptVector = 0; InterruptVector < 0x20; InterruptVector++) {
     InstallInterruptHandler (
       InterruptVector,
-      (VOID (EFIAPI *)(VOID)) (UINTN) ((UINTN) SystemExceptionHandler + mExceptionCodeSize * InterruptVector)
+      (VOID (EFIAPI *)(VOID))(UINTN)((UINTN)SystemExceptionHandler + mExceptionCodeSize * InterruptVector)
       );
   }
 
@@ -1116,23 +1133,23 @@ Returns:
   //
   for (Irq = Efi8259Irq1; Irq <= Efi8259Irq15; Irq++) {
     InterruptVector = 0;
-    Status = gLegacy8259->GetVector (gLegacy8259, Irq, (UINT8 *) &InterruptVector);
+    Status          = gLegacy8259->GetVector (gLegacy8259, Irq, (UINT8 *)&InterruptVector);
     ASSERT_EFI_ERROR (Status);
     InstallInterruptHandler (InterruptVector, SystemTimerHandler);
   }
 
-  InitializeBiosIntCaller();
+  InitializeBiosIntCaller ();
 
   //
   // Install CPU Architectural Protocol and the thunk protocol
   //
   mHandle = NULL;
-  Status = gBS->InstallMultipleProtocolInterfaces (
-                  &mHandle,
-                  &gEfiCpuArchProtocolGuid,
-                  &mCpu,
-                  NULL
-                  );
+  Status  = gBS->InstallMultipleProtocolInterfaces (
+                   &mHandle,
+                   &gEfiCpuArchProtocolGuid,
+                   &mCpu,
+                   NULL
+                   );
   ASSERT_EFI_ERROR (Status);
   return Status;
 }
@@ -1154,39 +1171,39 @@ InitializeBiosIntCaller (
   AsmGetThunk16Properties (&RealModeBufferSize, &ExtraStackSize);
   LegacyRegionSize = (((RealModeBufferSize + ExtraStackSize) / EFI_PAGE_SIZE) + 1) * EFI_PAGE_SIZE;
   LegacyRegionBase = 0x0C0000;
-  Status = gBS->AllocatePages (
-                  AllocateMaxAddress,
-                  EfiACPIMemoryNVS,
-                  EFI_SIZE_TO_PAGES(LegacyRegionSize),
-                  &LegacyRegionBase
-                  );
+  Status           = gBS->AllocatePages (
+                            AllocateMaxAddress,
+                            EfiACPIMemoryNVS,
+                            EFI_SIZE_TO_PAGES (LegacyRegionSize),
+                            &LegacyRegionBase
+                            );
   ASSERT_EFI_ERROR (Status);
 
-  ZeroMem ((VOID*)(UINTN) LegacyRegionBase, LegacyRegionSize);
+  ZeroMem ((VOID *)(UINTN)LegacyRegionBase, LegacyRegionSize);
 
-  mThunkContext.RealModeBuffer     = (VOID*)(UINTN)LegacyRegionBase;
+  mThunkContext.RealModeBuffer     = (VOID *)(UINTN)LegacyRegionBase;
   mThunkContext.RealModeBufferSize = LegacyRegionSize;
   mThunkContext.ThunkAttributes    = 3;
-  AsmPrepareThunk16(&mThunkContext);
-
+  AsmPrepareThunk16 (&mThunkContext);
 }
 
 BOOLEAN
 EFIAPI
 LegacyBiosInt86 (
-  IN  UINT8                           BiosInt,
-  IN  EFI_IA32_REGISTER_SET           *Regs
+  IN  UINT8                  BiosInt,
+  IN  EFI_IA32_REGISTER_SET  *Regs
   )
 {
-  UINTN                 Status;
-  BOOLEAN               InterruptsEnabled;
-  IA32_REGISTER_SET     ThunkRegSet;
-  BOOLEAN               Ret;
-  UINT16                *Stack16;
+  UINTN              Status;
+  BOOLEAN            InterruptsEnabled;
+  IA32_REGISTER_SET  ThunkRegSet;
+  BOOLEAN            Ret;
+  UINT16             *Stack16;
 
   if (!gLegacy8259 || !mThunkContext.RealModeBuffer) {
     return FALSE;
   }
+
   Regs->X.Flags.Reserved1 = 1;
   Regs->X.Flags.Reserved2 = 0;
   Regs->X.Flags.Reserved3 = 0;
@@ -1198,15 +1215,15 @@ LegacyBiosInt86 (
   Regs->X.Flags.CF        = 0;
 
   ZeroMem (&ThunkRegSet, sizeof (ThunkRegSet));
-  ThunkRegSet.E.EDI  = Regs->E.EDI;
-  ThunkRegSet.E.ESI  = Regs->E.ESI;
-  ThunkRegSet.E.EBP  = Regs->E.EBP;
-  ThunkRegSet.E.EBX  = Regs->E.EBX;
-  ThunkRegSet.E.EDX  = Regs->E.EDX;
-  ThunkRegSet.E.ECX  = Regs->E.ECX;
-  ThunkRegSet.E.EAX  = Regs->E.EAX;
-  ThunkRegSet.E.DS   = Regs->E.DS;
-  ThunkRegSet.E.ES   = Regs->E.ES;
+  ThunkRegSet.E.EDI = Regs->E.EDI;
+  ThunkRegSet.E.ESI = Regs->E.ESI;
+  ThunkRegSet.E.EBP = Regs->E.EBP;
+  ThunkRegSet.E.EBX = Regs->E.EBX;
+  ThunkRegSet.E.EDX = Regs->E.EDX;
+  ThunkRegSet.E.ECX = Regs->E.ECX;
+  ThunkRegSet.E.EAX = Regs->E.EAX;
+  ThunkRegSet.E.DS  = Regs->E.DS;
+  ThunkRegSet.E.ES  = Regs->E.ES;
 
   CopyMem (&(ThunkRegSet.E.EFLAGS), &(Regs->E.EFlags), sizeof (UINT32));
 
@@ -1221,14 +1238,14 @@ LegacyBiosInt86 (
   Status = gLegacy8259->SetMode (gLegacy8259, Efi8259LegacyMode, NULL, NULL);
   ASSERT_EFI_ERROR (Status);
 
-  Stack16 = (UINT16 *)((UINT8 *) mThunkContext.RealModeBuffer + mThunkContext.RealModeBufferSize - sizeof (UINT16));
+  Stack16  = (UINT16 *)((UINT8 *)mThunkContext.RealModeBuffer + mThunkContext.RealModeBufferSize - sizeof (UINT16));
   Stack16 -= sizeof (ThunkRegSet.E.EFLAGS) / sizeof (UINT16);
   CopyMem (Stack16, &ThunkRegSet.E.EFLAGS, sizeof (ThunkRegSet.E.EFLAGS));
 
-  ThunkRegSet.E.SS   = (UINT16) (((UINTN) Stack16 >> 16) << 12);
-  ThunkRegSet.E.ESP  = (UINT16) (UINTN) Stack16;
-  ThunkRegSet.E.Eip  = (UINT16)((volatile UINT32 *)NULL)[BiosInt];
-  ThunkRegSet.E.CS   = (UINT16)(((volatile UINT32 *)NULL)[BiosInt] >> 16);
+  ThunkRegSet.E.SS  = (UINT16)(((UINTN)Stack16 >> 16) << 12);
+  ThunkRegSet.E.ESP = (UINT16)(UINTN)Stack16;
+  ThunkRegSet.E.Eip = (UINT16)((volatile UINT32 *)NULL)[BiosInt];
+  ThunkRegSet.E.CS  = (UINT16)(((volatile UINT32 *)NULL)[BiosInt] >> 16);
 
   mThunkContext.RealModeState = &ThunkRegSet;
   AsmThunk16 (&mThunkContext);
@@ -1244,21 +1261,21 @@ LegacyBiosInt86 (
   //
   SetInterruptState (InterruptsEnabled);
 
-  Regs->E.EDI      = ThunkRegSet.E.EDI;
-  Regs->E.ESI      = ThunkRegSet.E.ESI;
-  Regs->E.EBP      = ThunkRegSet.E.EBP;
-  Regs->E.EBX      = ThunkRegSet.E.EBX;
-  Regs->E.EDX      = ThunkRegSet.E.EDX;
-  Regs->E.ECX      = ThunkRegSet.E.ECX;
-  Regs->E.EAX      = ThunkRegSet.E.EAX;
-  Regs->E.SS       = ThunkRegSet.E.SS;
-  Regs->E.CS       = ThunkRegSet.E.CS;
-  Regs->E.DS       = ThunkRegSet.E.DS;
-  Regs->E.ES       = ThunkRegSet.E.ES;
+  Regs->E.EDI = ThunkRegSet.E.EDI;
+  Regs->E.ESI = ThunkRegSet.E.ESI;
+  Regs->E.EBP = ThunkRegSet.E.EBP;
+  Regs->E.EBX = ThunkRegSet.E.EBX;
+  Regs->E.EDX = ThunkRegSet.E.EDX;
+  Regs->E.ECX = ThunkRegSet.E.ECX;
+  Regs->E.EAX = ThunkRegSet.E.EAX;
+  Regs->E.SS  = ThunkRegSet.E.SS;
+  Regs->E.CS  = ThunkRegSet.E.CS;
+  Regs->E.DS  = ThunkRegSet.E.DS;
+  Regs->E.ES  = ThunkRegSet.E.ES;
 
   CopyMem (&(Regs->E.EFlags), &(ThunkRegSet.E.EFLAGS), sizeof (UINT32));
 
-  Ret = (BOOLEAN) (Regs->E.EFlags.CF == 1);
+  Ret = (BOOLEAN)(Regs->E.EFlags.CF == 1);
 
   return Ret;
 }

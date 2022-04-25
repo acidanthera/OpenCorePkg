@@ -32,8 +32,8 @@
 #include <Protocol/SimpleFileSystem.h>
 
 LIST_ENTRY               mApfsPrivateDataList = INITIALIZE_LIST_HEAD_VARIABLE (mApfsPrivateDataList);
-STATIC UINT64            mApfsMinimalVersion = OC_APFS_VERSION_DEFAULT;
-STATIC UINT32            mApfsMinimalDate    = OC_APFS_DATE_DEFAULT;
+STATIC UINT64            mApfsMinimalVersion  = OC_APFS_VERSION_DEFAULT;
+STATIC UINT32            mApfsMinimalDate     = OC_APFS_DATE_DEFAULT;
 STATIC UINT32            mOcScanPolicy;
 STATIC BOOLEAN           mIgnoreVerbose;
 STATIC BOOLEAN           mGlobalConnect;
@@ -44,7 +44,7 @@ STATIC EFI_SYSTEM_TABLE  *mNullSystemTable;
 // There seems to exist a driver with a very large version, which is treated by
 // apfs kernel extension to have 0 version. Follow suit.
 //
-STATIC UINT64 mApfsBlacklistedVersions[] = {
+STATIC UINT64  mApfsBlacklistedVersions[] = {
   4294966999999999999ULL
 };
 
@@ -54,14 +54,15 @@ ApfsCheckOpenCoreScanPolicy (
   IN EFI_HANDLE  Handle
   )
 {
-  UINT32      ScanPolicy;
+  UINT32  ScanPolicy;
 
   //
   // If filesystem limitations are set and APFS is not allowed,
   // report failure.
   //
-  if ((mOcScanPolicy & OC_SCAN_FILE_SYSTEM_LOCK) != 0
-    && (mOcScanPolicy & OC_SCAN_ALLOW_FS_APFS) == 0) {
+  if (  ((mOcScanPolicy & OC_SCAN_FILE_SYSTEM_LOCK) != 0)
+     && ((mOcScanPolicy & OC_SCAN_ALLOW_FS_APFS) == 0))
+  {
     return EFI_UNSUPPORTED;
   }
 
@@ -87,18 +88,18 @@ ApfsVerifyDriverVersion (
   IN UINT32             DriverSize
   )
 {
-  EFI_STATUS            Status;
-  APFS_DRIVER_VERSION   *DriverVersion;
-  UINT64                RealVersion;
-  UINT32                RealDate;
-  UINTN                 Index;
-  BOOLEAN               HasLegitVersion;
+  EFI_STATUS           Status;
+  APFS_DRIVER_VERSION  *DriverVersion;
+  UINT64               RealVersion;
+  UINT32               RealDate;
+  UINTN                Index;
+  BOOLEAN              HasLegitVersion;
 
   Status = PeCoffGetApfsDriverVersion (
-    DriverBuffer,
-    DriverSize,
-    &DriverVersion
-    );
+             DriverBuffer,
+             DriverSize,
+             &DriverVersion
+             );
   if (EFI_ERROR (Status)) {
     DEBUG ((
       DEBUG_WARN,
@@ -117,15 +118,16 @@ ApfsVerifyDriverVersion (
     // Parse YYYY/MM/DD date.
     //
     for (Index = 0; Index < 10; ++Index) {
-      if ((Index == 4 || Index == 7)) {
+      if (((Index == 4) || (Index == 7))) {
         if (DriverVersion->Date[Index] != '/') {
           RealDate = 0;
           break;
         }
+
         continue;
       }
 
-      if (DriverVersion->Date[Index] < '0' || DriverVersion->Date[Index] > '9') {
+      if ((DriverVersion->Date[Index] < '0') || (DriverVersion->Date[Index] > '9')) {
         RealDate = 0;
         break;
       }
@@ -157,7 +159,7 @@ ApfsVerifyDriverVersion (
   }
 
   HasLegitVersion = (mApfsMinimalVersion == 0 || mApfsMinimalVersion <= RealVersion)
-    && (mApfsMinimalDate == 0 || mApfsMinimalDate <= RealDate);
+                    && (mApfsMinimalDate == 0 || mApfsMinimalDate <= RealDate);
 
   DEBUG ((
     DEBUG_INFO,
@@ -186,8 +188,8 @@ ApfsRegisterPartition (
   OUT APFS_PRIVATE_DATA      **PrivateDataPointer
   )
 {
-  EFI_STATUS           Status;
-  APFS_PRIVATE_DATA    *PrivateData;
+  EFI_STATUS         Status;
+  APFS_PRIVATE_DATA  *PrivateData;
 
   PrivateData = AllocateZeroPool (sizeof (*PrivateData));
   if (PrivateData == NULL) {
@@ -197,10 +199,10 @@ ApfsRegisterPartition (
   //
   // File private data fields.
   //
-  PrivateData->Signature = APFS_PRIVATE_DATA_SIGNATURE;
+  PrivateData->Signature                     = APFS_PRIVATE_DATA_SIGNATURE;
   PrivateData->LocationInfo.ControllerHandle = Handle;
   CopyGuid (&PrivateData->LocationInfo.ContainerUuid, &SuperBlock->Uuid);
-  PrivateData->BlockIo = BlockIo;
+  PrivateData->BlockIo       = BlockIo;
   PrivateData->ApfsBlockSize = SuperBlock->BlockSize;
   PrivateData->LbaMultiplier = PrivateData->ApfsBlockSize / PrivateData->BlockIo->Media->BlockSize;
   PrivateData->EfiJumpStart  = SuperBlock->EfiJumpStart;
@@ -211,11 +213,11 @@ ApfsRegisterPartition (
   // This guarantees us that we never register twice.
   //
   Status = gBS->InstallMultipleProtocolInterfaces (
-    &PrivateData->LocationInfo.ControllerHandle,
-    &gApfsEfiBootRecordInfoProtocolGuid,
-    &PrivateData->LocationInfo,
-    NULL
-    );
+                  &PrivateData->LocationInfo.ControllerHandle,
+                  &gApfsEfiBootRecordInfoProtocolGuid,
+                  &PrivateData->LocationInfo,
+                  NULL
+                  );
   if (EFI_ERROR (Status)) {
     FreePool (PrivateData);
     return Status;
@@ -237,18 +239,18 @@ ApfsStartDriver (
   IN UINT32             DriverSize
   )
 {
-  EFI_STATUS                 Status;
-  EFI_DEVICE_PATH_PROTOCOL   *DevicePath;
-  EFI_HANDLE                 ImageHandle;
-  EFI_LOADED_IMAGE_PROTOCOL  *LoadedImage;
-  EFI_IMAGE_LOAD             LoadImage;
-  APPLE_SECURE_BOOT_PROTOCOL *SecureBoot;
-  UINT8                      Policy;
+  EFI_STATUS                  Status;
+  EFI_DEVICE_PATH_PROTOCOL    *DevicePath;
+  EFI_HANDLE                  ImageHandle;
+  EFI_LOADED_IMAGE_PROTOCOL   *LoadedImage;
+  EFI_IMAGE_LOAD              LoadImage;
+  APPLE_SECURE_BOOT_PROTOCOL  *SecureBoot;
+  UINT8                       Policy;
 
   Status = PeCoffVerifyAppleSignature (
-    DriverBuffer,
-    &DriverSize
-    );
+             DriverBuffer,
+             &DriverSize
+             );
   if (EFI_ERROR (Status)) {
     DEBUG ((
       DEBUG_INFO,
@@ -260,19 +262,19 @@ ApfsStartDriver (
   }
 
   Status = ApfsVerifyDriverVersion (
-    PrivateData,
-    DriverBuffer,
-    DriverSize
-    );
+             PrivateData,
+             DriverBuffer,
+             DriverSize
+             );
   if (EFI_ERROR (Status)) {
     return Status;
   }
 
   Status = gBS->HandleProtocol (
-    PrivateData->LocationInfo.ControllerHandle,
-    &gEfiDevicePathProtocolGuid,
-    (VOID **) &DevicePath
-    );
+                  PrivateData->LocationInfo.ControllerHandle,
+                  &gEfiDevicePathProtocolGuid,
+                  (VOID **)&DevicePath
+                  );
   if (EFI_ERROR (Status)) {
     DevicePath = NULL;
   }
@@ -280,30 +282,31 @@ ApfsStartDriver (
   SecureBoot = OcAppleSecureBootGetProtocol ();
   ASSERT (SecureBoot != NULL);
   Status = SecureBoot->GetPolicy (
-    SecureBoot,
-    &Policy
-    );
+                         SecureBoot,
+                         &Policy
+                         );
   //
   // Load directly when we have Apple Secure Boot.
   // - Either normal.
   // - Or during DMG loading.
   //
-  if ((!EFI_ERROR (Status) && Policy != AppleImg4SbModeDisabled)
-    || (OcAppleSecureBootGetDmgLoading (&Policy) && Policy != AppleImg4SbModeDisabled)) {
+  if (  (!EFI_ERROR (Status) && (Policy != AppleImg4SbModeDisabled))
+     || (OcAppleSecureBootGetDmgLoading (&Policy) && (Policy != AppleImg4SbModeDisabled)))
+  {
     LoadImage = OcImageLoaderLoad;
   } else {
     LoadImage = gBS->LoadImage;
   }
 
   ImageHandle = NULL;
-  Status = LoadImage (
-    FALSE,
-    gImageHandle,
-    DevicePath,
-    DriverBuffer,
-    DriverSize,
-    &ImageHandle
-    );
+  Status      = LoadImage (
+                  FALSE,
+                  gImageHandle,
+                  DevicePath,
+                  DriverBuffer,
+                  DriverSize,
+                  &ImageHandle
+                  );
   if (EFI_ERROR (Status)) {
     DEBUG ((
       DEBUG_INFO,
@@ -320,14 +323,15 @@ ApfsStartDriver (
   //
   if (mIgnoreVerbose) {
     Status = gBS->HandleProtocol (
-      ImageHandle,
-      &gEfiLoadedImageProtocolGuid,
-      (VOID *) &LoadedImage
-      );
+                    ImageHandle,
+                    &gEfiLoadedImageProtocolGuid,
+                    (VOID *)&LoadedImage
+                    );
     if (!EFI_ERROR (Status)) {
       if (mNullSystemTable == NULL) {
         mNullSystemTable = AllocateNullTextOutSystemTable (gST);
       }
+
       if (mNullSystemTable != NULL) {
         LoadedImage->SystemTable = mNullSystemTable;
       }
@@ -335,10 +339,10 @@ ApfsStartDriver (
   }
 
   Status = gBS->StartImage (
-    ImageHandle,
-    NULL,
-    NULL
-    );
+                  ImageHandle,
+                  NULL,
+                  NULL
+                  );
 
   if (EFI_ERROR (Status)) {
     DEBUG ((
@@ -397,11 +401,11 @@ ApfsConnectDevice (
   IN EFI_BLOCK_IO_PROTOCOL  *BlockIo
   )
 {
-  EFI_STATUS           Status;
-  APFS_NX_SUPERBLOCK   *SuperBlock;
-  APFS_PRIVATE_DATA    *PrivateData;
-  VOID                 *DriverBuffer;
-  UINT32               DriverSize;
+  EFI_STATUS          Status;
+  APFS_NX_SUPERBLOCK  *SuperBlock;
+  APFS_PRIVATE_DATA   *PrivateData;
+  VOID                *DriverBuffer;
+  UINT32              DriverSize;
 
   //
   // This may still be not APFS but some other file system.
@@ -491,10 +495,10 @@ OcApfsConnectHandle (
   // We have nothing to do if the device is already connected.
   //
   Status = gBS->HandleProtocol (
-    Handle,
-    &gEfiSimpleFileSystemProtocolGuid,
-    &TempProtocol
-    );
+                  Handle,
+                  &gEfiSimpleFileSystemProtocolGuid,
+                  &TempProtocol
+                  );
   if (!EFI_ERROR (Status)) {
     DEBUG ((DEBUG_VERBOSE, "OCJS: FS already connected\n"));
     return EFI_ALREADY_STARTED;
@@ -505,10 +509,10 @@ OcApfsConnectHandle (
   // We do not need to care about 2nd revision, as apfs.efi does not use it.
   //
   Status = gBS->HandleProtocol (
-    Handle,
-    &gEfiBlockIoProtocolGuid,
-    (VOID **) &BlockIo
-    );
+                  Handle,
+                  &gEfiBlockIoProtocolGuid,
+                  (VOID **)&BlockIo
+                  );
   if (EFI_ERROR (Status)) {
     DEBUG ((DEBUG_INFO, "OCJS: Cannot connect, BlockIo error - %r\n", Status));
     return EFI_UNSUPPORTED;
@@ -520,13 +524,15 @@ OcApfsConnectHandle (
   // - Which are not partitions (APFS containers).
   // - Which have non-POT block size.
   //
-  if (BlockIo->Media == NULL
-    || !BlockIo->Media->LogicalPartition) {
+  if (  (BlockIo->Media == NULL)
+     || !BlockIo->Media->LogicalPartition)
+  {
     return EFI_UNSUPPORTED;
   }
 
-  if (BlockIo->Media->BlockSize == 0
-    || (BlockIo->Media->BlockSize & (BlockIo->Media->BlockSize - 1)) != 0) {
+  if (  (BlockIo->Media->BlockSize == 0)
+     || ((BlockIo->Media->BlockSize & (BlockIo->Media->BlockSize - 1)) != 0))
+  {
     DEBUG ((
       DEBUG_INFO,
       "OCJS: Cannot connect, BlockIo malformed: %d %u\n",
@@ -552,10 +558,10 @@ OcApfsConnectHandle (
   // TODO: Install this protocol on failure (not in ApfsJumpStart)?
   //
   Status = gBS->HandleProtocol (
-    Handle,
-    &gApfsUnsupportedBdsProtocolGuid,
-    &TempProtocol
-    );
+                  Handle,
+                  &gApfsUnsupportedBdsProtocolGuid,
+                  &TempProtocol
+                  );
   if (!EFI_ERROR (Status)) {
     DEBUG ((DEBUG_INFO, "OCJS: Cannot connect, unsupported BDS\n"));
     return EFI_UNSUPPORTED;
@@ -566,10 +572,10 @@ OcApfsConnectHandle (
   // handled, though potentially not connected.
   //
   Status = gBS->HandleProtocol (
-    Handle,
-    &gApfsEfiBootRecordInfoProtocolGuid,
-    &TempProtocol
-    );
+                  Handle,
+                  &gApfsEfiBootRecordInfoProtocolGuid,
+                  &TempProtocol
+                  );
   if (!EFI_ERROR (Status)) {
     DEBUG ((DEBUG_INFO, "OCJS: Cannot connect, already handled\n"));
     return EFI_UNSUPPORTED;

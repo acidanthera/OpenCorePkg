@@ -33,18 +33,19 @@ OcLoadAndRunImage (
   EFI_STATUS                 Status;
   EFI_HANDLE                 NewHandle;
   EFI_LOADED_IMAGE_PROTOCOL  *LoadedImage;
+
   //
   // Run OpenCore image
   //
   NewHandle = NULL;
-  Status = gBS->LoadImage (
-    FALSE,
-    gImageHandle,
-    DevicePath,
-    Buffer,
-    BufferSize,
-    &NewHandle
-    );
+  Status    = gBS->LoadImage (
+                     FALSE,
+                     gImageHandle,
+                     DevicePath,
+                     Buffer,
+                     BufferSize,
+                     &NewHandle
+                     );
   if (EFI_ERROR (Status)) {
     DEBUG ((DEBUG_ERROR, "OCM: Failed to load image - %r\n", Status));
     return Status;
@@ -53,10 +54,10 @@ OcLoadAndRunImage (
   DEBUG ((DEBUG_INFO, "OCM: Loaded image at %p handle\n", NewHandle));
 
   Status = gBS->HandleProtocol (
-    NewHandle,
-    &gEfiLoadedImageProtocolGuid,
-    (VOID **) &LoadedImage
-    );
+                  NewHandle,
+                  &gEfiLoadedImageProtocolGuid,
+                  (VOID **)&LoadedImage
+                  );
   if (!EFI_ERROR (Status)) {
     DEBUG ((
       DEBUG_INFO,
@@ -70,12 +71,12 @@ OcLoadAndRunImage (
     // REF: https://github.com/acidanthera/bugtracker/issues/712
     // REF: https://github.com/acidanthera/bugtracker/issues/1502
     //
-    if (DevicePath != NULL && LoadedImage->DeviceHandle == NULL) {
+    if ((DevicePath != NULL) && (LoadedImage->DeviceHandle == NULL)) {
       Status = gBS->LocateDevicePath (
-        &gEfiSimpleFileSystemProtocolGuid,
-        &DevicePath,
-        &LoadedImage->DeviceHandle
-        );
+                      &gEfiSimpleFileSystemProtocolGuid,
+                      &DevicePath,
+                      &LoadedImage->DeviceHandle
+                      );
 
       DEBUG ((
         DEBUG_INFO,
@@ -88,21 +89,22 @@ OcLoadAndRunImage (
         if (LoadedImage->FilePath != NULL) {
           FreePool (LoadedImage->FilePath);
         }
+
         LoadedImage->FilePath = DuplicateDevicePath (DevicePath);
       }
     }
 
     if (OptionalData != NULL) {
-      LoadedImage->LoadOptionsSize = (UINT32) StrSize (OptionalData);
+      LoadedImage->LoadOptionsSize = (UINT32)StrSize (OptionalData);
       LoadedImage->LoadOptions     = AllocateCopyPool (LoadedImage->LoadOptionsSize, OptionalData);
     }
   }
 
   Status = gBS->StartImage (
-    NewHandle,
-    NULL,
-    NULL
-    );
+                  NewHandle,
+                  NULL,
+                  NULL
+                  );
 
   if (EFI_ERROR (Status)) {
     DEBUG ((DEBUG_WARN, "OCM: Failed to start image - %r\n", Status));

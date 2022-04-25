@@ -49,11 +49,11 @@
 STATIC
 VOID
 GetSlideRangeForValue (
-  IN  UINTN                EstimatedKernelArea,
-  IN  BOOLEAN              HasSandyOrIvy,
-  IN  UINT8                Slide,
-  OUT UINTN                *StartAddr,
-  OUT UINTN                *EndAddr
+  IN  UINTN    EstimatedKernelArea,
+  IN  BOOLEAN  HasSandyOrIvy,
+  IN  UINT8    Slide,
+  OUT UINTN    *StartAddr,
+  OUT UINTN    *EndAddr
   )
 {
   *StartAddr = Slide * SLIDE_GRANULARITY + KERNEL_BASE_PADDR;
@@ -61,7 +61,7 @@ GetSlideRangeForValue (
   //
   // Skip ranges used by Intel HD 2000/3000.
   //
-  if (Slide >= SLIDE_ERRATA_NUM && HasSandyOrIvy) {
+  if ((Slide >= SLIDE_ERRATA_NUM) && HasSandyOrIvy) {
     *StartAddr += SLIDE_ERRATA_SKIP_RANGE;
   }
 
@@ -136,10 +136,10 @@ ShouldUseCustomSlideOffsetDecision (
     DEBUG ((
       DEBUG_INFO,
       "OCABC: No slide values are usable! Falling back to %u with 0x%08LX bytes!\n",
-      (UINT32) FallbackSlide,
+      (UINT32)FallbackSlide,
       MaxAvailableSize
       ));
-    SlideSupport->ValidSlides[SlideSupport->ValidSlideCount++] = (UINT8) FallbackSlide;
+    SlideSupport->ValidSlides[SlideSupport->ValidSlideCount++] = (UINT8)FallbackSlide;
     return TRUE;
   }
 
@@ -153,8 +153,8 @@ ShouldUseCustomSlideOffsetDecision (
   DEBUG ((
     DEBUG_INFO,
     "OCABC: Only %u/%u slide values are usable!\n",
-    (UINT32) SlideSupport->ValidSlideCount,
-    (UINT32) TOTAL_SLIDE_NUM
+    (UINT32)SlideSupport->ValidSlideCount,
+    (UINT32)TOTAL_SLIDE_NUM
     ));
 
   SlideList[0] = '\0';
@@ -169,9 +169,9 @@ ShouldUseCustomSlideOffsetDecision (
         SlideSupport->ValidSlides[Index]
         );
       AsciiStrCatS (SlideList, sizeof (SlideList), Temp);
-    } else if (Index == SlideSupport->ValidSlideCount
-      || SlideSupport->ValidSlides[Index - 1] + 1 != SlideSupport->ValidSlides[Index]) {
-
+    } else if (  (Index == SlideSupport->ValidSlideCount)
+              || (SlideSupport->ValidSlides[Index - 1] + 1 != SlideSupport->ValidSlides[Index]))
+    {
       if (NumEntries == 1) {
         AsciiSPrint (
           Temp,
@@ -225,11 +225,11 @@ ShouldUseCustomSlideOffsetDecision (
 STATIC
 BOOLEAN
 ShouldUseCustomSlideOffset (
-  IN OUT SLIDE_SUPPORT_STATE   *SlideSupport,
-  IN     EFI_GET_MEMORY_MAP    GetMemoryMap       OPTIONAL,
-  IN     OC_MEMORY_FILTER      FilterMap          OPTIONAL,
-  IN     VOID                  *FilterMapContext  OPTIONAL,
-  IN     BOOLEAN               HasSandyOrIvy
+  IN OUT SLIDE_SUPPORT_STATE  *SlideSupport,
+  IN     EFI_GET_MEMORY_MAP   GetMemoryMap       OPTIONAL,
+  IN     OC_MEMORY_FILTER     FilterMap          OPTIONAL,
+  IN     VOID                 *FilterMapContext  OPTIONAL,
+  IN     BOOLEAN              HasSandyOrIvy
   )
 {
   EFI_PHYSICAL_ADDRESS   AllocatedMapPages;
@@ -256,19 +256,19 @@ ShouldUseCustomSlideOffset (
 
   if (SlideSupport->HasMemoryMapAnalysis) {
     return SlideSupport->ValidSlideCount > 0
-      && SlideSupport->ValidSlideCount < TOTAL_SLIDE_NUM;
+           && SlideSupport->ValidSlideCount < TOTAL_SLIDE_NUM;
   }
 
   AllocatedMapPages = BASE_4GB;
-  Status = OcGetCurrentMemoryMapAlloc (
-    &MemoryMapSize,
-    &MemoryMap,
-    &MapKey,
-    &DescriptorSize,
-    &DescriptorVersion,
-    GetMemoryMap,
-    &AllocatedMapPages
-    );
+  Status            = OcGetCurrentMemoryMapAlloc (
+                        &MemoryMapSize,
+                        &MemoryMap,
+                        &MapKey,
+                        &DescriptorSize,
+                        &DescriptorVersion,
+                        GetMemoryMap,
+                        &AllocatedMapPages
+                        );
 
   if (EFI_ERROR (Status)) {
     DEBUG ((DEBUG_WARN, "OCABC: Failed to obtain memory map for KASLR - %r\n", Status));
@@ -281,9 +281,9 @@ ShouldUseCustomSlideOffset (
 
   SlideSupport->HasSandyOrIvy = HasSandyOrIvy;
 
-  SlideSupport->EstimatedKernelArea = (UINTN) EFI_PAGES_TO_SIZE (
-    OcCountRuntimePages (MemoryMapSize, MemoryMap, DescriptorSize, NULL)
-    ) + ESTIMATED_KERNEL_SIZE;
+  SlideSupport->EstimatedKernelArea = (UINTN)EFI_PAGES_TO_SIZE (
+                                               OcCountRuntimePages (MemoryMapSize, MemoryMap, DescriptorSize, NULL)
+                                               ) + ESTIMATED_KERNEL_SIZE;
 
   //
   // At this point we have a memory map that we could use to
@@ -303,7 +303,7 @@ ShouldUseCustomSlideOffset (
     GetSlideRangeForValue (
       SlideSupport->EstimatedKernelArea,
       SlideSupport->HasSandyOrIvy,
-      (UINT8) Slide,
+      (UINT8)Slide,
       &StartAddr,
       &EndAddr
       );
@@ -356,14 +356,14 @@ ShouldUseCustomSlideOffset (
 
     if (AvailableSize > MaxAvailableSize) {
       MaxAvailableSize = AvailableSize;
-      FallbackSlide    = (UINT8) Slide;
+      FallbackSlide    = (UINT8)Slide;
     }
 
     //
     // Stop evalutating slides after exceeding ProvideMaxSlide, may break when
     // no slides are available.
     //
-    if (SlideSupport->ProvideMaxSlide > 0 && Slide > SlideSupport->ProvideMaxSlide) {
+    if ((SlideSupport->ProvideMaxSlide > 0) && (Slide > SlideSupport->ProvideMaxSlide)) {
       break;
     }
 
@@ -375,7 +375,7 @@ ShouldUseCustomSlideOffset (
     }
 
     if (Supported) {
-      SlideSupport->ValidSlides[SlideSupport->ValidSlideCount++] = (UINT8) Slide;
+      SlideSupport->ValidSlides[SlideSupport->ValidSlideCount++] = (UINT8)Slide;
     }
   }
 
@@ -386,15 +386,15 @@ ShouldUseCustomSlideOffset (
   SlideSupport->HasMemoryMapAnalysis = TRUE;
 
   gBS->FreePages (
-    (EFI_PHYSICAL_ADDRESS)(UINTN) MemoryMap,
-    (UINTN) AllocatedMapPages
-    );
+         (EFI_PHYSICAL_ADDRESS)(UINTN)MemoryMap,
+         (UINTN)AllocatedMapPages
+         );
 
   return ShouldUseCustomSlideOffsetDecision (
-    SlideSupport,
-    FallbackSlide,
-    MaxAvailableSize
-    );
+           SlideSupport,
+           FallbackSlide,
+           MaxAvailableSize
+           );
 }
 
 /**
@@ -429,12 +429,12 @@ GetVariableCsrActiveConfig (
   //
   // If we were asked for the size, just return it right away.
   //
-  if (Data == NULL || *DataSize < sizeof (UINT32)) {
+  if ((Data == NULL) || (*DataSize < sizeof (UINT32))) {
     *DataSize = sizeof (UINT32);
     return EFI_BUFFER_TOO_SMALL;
   }
 
-  Config = (UINT32 *) Data;
+  Config = (UINT32 *)Data;
 
   //
   // Otherwise call the original function.
@@ -444,7 +444,7 @@ GetVariableCsrActiveConfig (
     DEBUG ((DEBUG_INFO, "OCABC: GetVariable csr-active-config - %r\n", Status));
 
     *Config = 0;
-    Status = EFI_SUCCESS;
+    Status  = EFI_SUCCESS;
     if (Attributes != NULL) {
       *Attributes =
         EFI_VARIABLE_BOOTSERVICE_ACCESS |
@@ -458,7 +458,7 @@ GetVariableCsrActiveConfig (
   //
   SlideSupport->CsrActiveConfig    = *Config;
   SlideSupport->HasCsrActiveConfig = TRUE;
-  *Config |= CSR_ALLOW_UNRESTRICTED_NVRAM;
+  *Config                         |= CSR_ALLOW_UNRESTRICTED_NVRAM;
 
   return Status;
 }
@@ -499,18 +499,18 @@ GetVariableBootArgs (
   SlideArgumentLength = ARRAY_SIZE (SlideArgument) - 1;
 
   if (!SlideSupport->HasBootArgs) {
-    Slide  = GenerateSlideValue (SlideSupport);
+    Slide = GenerateSlideValue (SlideSupport);
 
     //
     // boot-args normally arrives non-null terminated.
     //
     Status = GetVariable (
-      VariableName,
-      VendorGuid,
-      Attributes,
-      &StoredBootArgsSize,
-      SlideSupport->BootArgs
-      );
+               VariableName,
+               VendorGuid,
+               Attributes,
+               &StoredBootArgsSize,
+               SlideSupport->BootArgs
+               );
     if (EFI_ERROR (Status)) {
       SlideSupport->BootArgs[0] = '\0';
     }
@@ -544,7 +544,7 @@ GetVariableBootArgs (
       EFI_VARIABLE_NON_VOLATILE;
   }
 
-  if (*DataSize >= SlideSupport->BootArgsSize && Data != NULL) {
+  if ((*DataSize >= SlideSupport->BootArgsSize) && (Data != NULL)) {
     CopyMem (
       Data,
       SlideSupport->BootArgs,
@@ -570,8 +570,8 @@ GetVariableBootArgs (
 STATIC
 VOID
 HideSlideFromOs (
-  IN OUT SLIDE_SUPPORT_STATE   *SlideSupport,
-  IN OUT OC_BOOT_ARGUMENTS     *BootArgs
+  IN OUT SLIDE_SUPPORT_STATE  *SlideSupport,
+  IN OUT OC_BOOT_ARGUMENTS    *BootArgs
   )
 {
   EFI_STATUS  Status;
@@ -587,11 +587,11 @@ HideSlideFromOs (
   //
   // Second, there is a DT entry.
   //
-  DTInit ((VOID *)(UINTN) (*BootArgs->DeviceTreeP), BootArgs->DeviceTreeLength);
+  DTInit ((VOID *)(UINTN)(*BootArgs->DeviceTreeP), BootArgs->DeviceTreeLength);
   Status = DTLookupEntry (NULL, "/chosen", &Chosen);
   if (!EFI_ERROR (Status)) {
     Status = DTGetProperty (Chosen, "boot-args", (VOID **)&ArgsStr, &ArgsSize);
-    if (!EFI_ERROR (Status) && ArgsSize > 0) {
+    if (!EFI_ERROR (Status) && (ArgsSize > 0)) {
       OcRemoveArgumentFromCmd (ArgsStr, "slide=");
     }
   }
@@ -643,21 +643,21 @@ AppleSlideUnlockForSafeMode (
   //
   // This is a reasonable maximum distance to expect between the instructions.
   //
-  STATIC CONST UINTN MaxDist         = 0x10;
-  STATIC CONST UINT8 SearchSeqNew[]  = {0xF6, 0xC4, 0x40, 0x75};
-  STATIC CONST UINT8 SearchSeqNew2[] = {0x0F, 0xBA, 0xE0, 0x0E, 0x72};
-  STATIC CONST UINT8 SearchSeqSur[]  = {0xF6, 0xC1, 0x01, 0x75};
-  STATIC CONST UINT8 SearchSeqSur2[] = {0xF6, 0xC1, 0x01, 0x74};
-  STATIC CONST UINT8 SearchSeq[]     = {0x01, 0x40, 0x00, 0x00};
+  STATIC CONST UINTN  MaxDist         = 0x10;
+  STATIC CONST UINT8  SearchSeqNew[]  = { 0xF6, 0xC4, 0x40, 0x75 };
+  STATIC CONST UINT8  SearchSeqNew2[] = { 0x0F, 0xBA, 0xE0, 0x0E, 0x72 };
+  STATIC CONST UINT8  SearchSeqSur[]  = { 0xF6, 0xC1, 0x01, 0x75 };
+  STATIC CONST UINT8  SearchSeqSur2[] = { 0xF6, 0xC1, 0x01, 0x74 };
+  STATIC CONST UINT8  SearchSeq[]     = { 0x01, 0x40, 0x00, 0x00 };
 
-  UINT8       *StartOff;
-  UINT8       *EndOff;
-  UINTN       FirstOff;
-  UINTN       SecondOff;
-  UINTN       SearchSeqNewSize;
-  BOOLEAN     NewWay;
-  BOOLEAN     IsSur;
-  UINT32      SurOffset;
+  UINT8    *StartOff;
+  UINT8    *EndOff;
+  UINTN    FirstOff;
+  UINTN    SecondOff;
+  UINTN    SearchSeqNewSize;
+  BOOLEAN  NewWay;
+  BOOLEAN  IsSur;
+  UINT32   SurOffset;
 
   StartOff = ImageBase;
   EndOff   = StartOff + ImageSize - sizeof (SearchSeq) - MaxDist;
@@ -666,25 +666,25 @@ AppleSlideUnlockForSafeMode (
   // Rebranding started with macOS 11. All the ones before had Mac OS X or none.
   //
   SurOffset = 0;
-  IsSur = FindPattern (
-    (CONST UINT8 *) "macOS ",
-    NULL,
-    L_STR_LEN ("macOS "),
-    ImageBase,
-    (UINT32) ImageSize,
-    &SurOffset
-    );
+  IsSur     = FindPattern (
+                (CONST UINT8 *)"macOS ",
+                NULL,
+                L_STR_LEN ("macOS "),
+                ImageBase,
+                (UINT32)ImageSize,
+                &SurOffset
+                );
 
   if (IsSur) {
     for (FirstOff = 0; StartOff + FirstOff <= EndOff; ++FirstOff) {
       if (CompareMem (StartOff + FirstOff, SearchSeqSur, sizeof (SearchSeqSur)) == 0) {
-        DEBUG ((DEBUG_INFO, "OCABC: Patching safe mode sur-1 at off %X\n", (UINT32) FirstOff));
+        DEBUG ((DEBUG_INFO, "OCABC: Patching safe mode sur-1 at off %X\n", (UINT32)FirstOff));
         SetMem (StartOff + FirstOff, sizeof (SearchSeqSur) + 1, 0x90);
         return;
       }
 
       if (CompareMem (StartOff + FirstOff, SearchSeqSur2, sizeof (SearchSeqSur2)) == 0) {
-        DEBUG ((DEBUG_INFO, "OCABC: Patching safe mode sur-2 at off %X\n", (UINT32) FirstOff));
+        DEBUG ((DEBUG_INFO, "OCABC: Patching safe mode sur-2 at off %X\n", (UINT32)FirstOff));
         *(StartOff + FirstOff + 3) = 0xEB;
         return;
       }
@@ -698,19 +698,20 @@ AppleSlideUnlockForSafeMode (
   SecondOff = 0;
 
   do {
-    NewWay    = FALSE;
+    NewWay = FALSE;
 
     while (StartOff + FirstOff <= EndOff) {
-      if (StartOff + FirstOff <= EndOff - 1
-       && CompareMem (StartOff + FirstOff, SearchSeqNew2, sizeof (SearchSeqNew2)) == 0) {
+      if (  (StartOff + FirstOff <= EndOff - 1)
+         && (CompareMem (StartOff + FirstOff, SearchSeqNew2, sizeof (SearchSeqNew2)) == 0))
+      {
         SearchSeqNewSize = sizeof (SearchSeqNew2);
-        NewWay = TRUE;
+        NewWay           = TRUE;
         break;
       }
 
       if (CompareMem (StartOff + FirstOff, SearchSeqNew, sizeof (SearchSeqNew)) == 0) {
         SearchSeqNewSize = sizeof (SearchSeqNew);
-        NewWay = TRUE;
+        NewWay           = TRUE;
         break;
       }
 
@@ -730,18 +731,19 @@ AppleSlideUnlockForSafeMode (
       //
       // Here we just patch the comparison code and the check by straight nopping.
       //
-      DEBUG ((DEBUG_INFO, "OCABC: Patching safe mode new at off %X\n", (UINT32) FirstOff));
+      DEBUG ((DEBUG_INFO, "OCABC: Patching safe mode new at off %X\n", (UINT32)FirstOff));
       SetMem (StartOff + FirstOff, SearchSeqNewSize + 1, 0x90);
       return;
     }
 
-    DEBUG ((DEBUG_INFO, "OCABC: Found safe mode legacy p1 at off %X\n", (UINT32) FirstOff));
+    DEBUG ((DEBUG_INFO, "OCABC: Found safe mode legacy p1 at off %X\n", (UINT32)FirstOff));
 
     SecondOff = FirstOff + sizeof (SearchSeq);
 
     while (
-      StartOff + SecondOff <= EndOff && FirstOff + MaxDist >= SecondOff &&
-      CompareMem (StartOff + SecondOff, SearchSeq, sizeof (SearchSeq))) {
+           StartOff + SecondOff <= EndOff && FirstOff + MaxDist >= SecondOff &&
+           CompareMem (StartOff + SecondOff, SearchSeq, sizeof (SearchSeq)))
+    {
       SecondOff++;
     }
 
@@ -752,7 +754,7 @@ AppleSlideUnlockForSafeMode (
       continue;
     }
 
-    DEBUG ((DEBUG_INFO, "OCABC: Found safe mode legacy p2 at off %X\n", (UINT32) SecondOff));
+    DEBUG ((DEBUG_INFO, "OCABC: Found safe mode legacy p2 at off %X\n", (UINT32)SecondOff));
   } while (SecondOff == 0);
 
   if (SecondOff != 0) {
@@ -769,23 +771,23 @@ AppleSlideUnlockForSafeMode (
 
 EFI_STATUS
 AppleSlideGetVariable (
-  IN OUT BOOT_COMPAT_CONTEXT   *BootCompat,
-  IN     EFI_GET_VARIABLE      GetVariable,
-  IN     EFI_GET_MEMORY_MAP    GetMemoryMap  OPTIONAL,
-  IN     OC_MEMORY_FILTER      FilterMap     OPTIONAL,
-  IN     VOID                  *FilterMapContext  OPTIONAL,
-  IN     CHAR16                *VariableName,
-  IN     EFI_GUID              *VendorGuid,
-     OUT UINT32                *Attributes   OPTIONAL,
-  IN OUT UINTN                 *DataSize,
-     OUT VOID                  *Data
+  IN OUT BOOT_COMPAT_CONTEXT  *BootCompat,
+  IN     EFI_GET_VARIABLE     GetVariable,
+  IN     EFI_GET_MEMORY_MAP   GetMemoryMap  OPTIONAL,
+  IN     OC_MEMORY_FILTER     FilterMap     OPTIONAL,
+  IN     VOID                 *FilterMapContext  OPTIONAL,
+  IN     CHAR16               *VariableName,
+  IN     EFI_GUID             *VendorGuid,
+  OUT UINT32                  *Attributes   OPTIONAL,
+  IN OUT UINTN                *DataSize,
+  OUT VOID                    *Data
   )
 {
   BootCompat->SlideSupport.ProvideMaxSlide =  BootCompat->Settings.ProvideMaxSlide;
 
-  if (VariableName != NULL && VendorGuid != NULL && DataSize != NULL
-    && CompareGuid (VendorGuid, &gAppleBootVariableGuid)) {
-
+  if (  (VariableName != NULL) && (VendorGuid != NULL) && (DataSize != NULL)
+     && CompareGuid (VendorGuid, &gAppleBootVariableGuid))
+  {
     if (StrCmp (VariableName, L"csr-active-config") == 0) {
       //
       // We override csr-active-config with CSR_ALLOW_UNRESTRICTED_NVRAM bit set
@@ -794,24 +796,26 @@ AppleSlideGetVariable (
       // This allows SIP to be fully enabled in the operating system.
       //
       return GetVariableCsrActiveConfig (
-        &BootCompat->SlideSupport,
-        GetVariable,
-        VariableName,
-        VendorGuid,
-        Attributes,
-        DataSize,
-        Data
-        );
-    } else if (StrCmp (VariableName, L"boot-args") == 0
-      && (!BootCompat->ServiceState.AppleCustomSlide || BootCompat->Settings.AllowRelocationBlock)
-      && ShouldUseCustomSlideOffset (
-        &BootCompat->SlideSupport,
-        GetMemoryMap,
-        FilterMap,
-        FilterMapContext,
-        BootCompat->CpuInfo->CpuGeneration == OcCpuGenerationSandyBridge
-          || BootCompat->CpuInfo->CpuGeneration == OcCpuGenerationIvyBridge)
-      && !BootCompat->ServiceState.AppleCustomSlide) {
+               &BootCompat->SlideSupport,
+               GetVariable,
+               VariableName,
+               VendorGuid,
+               Attributes,
+               DataSize,
+               Data
+               );
+    } else if (  (StrCmp (VariableName, L"boot-args") == 0)
+              && (!BootCompat->ServiceState.AppleCustomSlide || BootCompat->Settings.AllowRelocationBlock)
+              && ShouldUseCustomSlideOffset (
+                   &BootCompat->SlideSupport,
+                   GetMemoryMap,
+                   FilterMap,
+                   FilterMapContext,
+                   (BootCompat->CpuInfo->CpuGeneration == OcCpuGenerationSandyBridge)
+                                            || (BootCompat->CpuInfo->CpuGeneration == OcCpuGenerationIvyBridge)
+                   )
+              && !BootCompat->ServiceState.AppleCustomSlide)
+    {
       //
       // When we cannot allow some KASLR values due to used address we generate
       // a random slide value among the valid options, which we we pass via boot-args.
@@ -828,14 +832,14 @@ AppleSlideGetVariable (
       // (even when slide=0 is requested) to understand whether we need it or not at a later stage.
       //
       return GetVariableBootArgs (
-        &BootCompat->SlideSupport,
-        GetVariable,
-        VariableName,
-        VendorGuid,
-        Attributes,
-        DataSize,
-        Data
-        );
+               &BootCompat->SlideSupport,
+               GetVariable,
+               VariableName,
+               VendorGuid,
+               Attributes,
+               DataSize,
+               Data
+               );
     }
   }
 
@@ -844,8 +848,8 @@ AppleSlideGetVariable (
 
 VOID
 AppleSlideRestore (
-  IN OUT BOOT_COMPAT_CONTEXT   *BootCompat,
-  IN OUT OC_BOOT_ARGUMENTS     *BootArgs
+  IN OUT BOOT_COMPAT_CONTEXT  *BootCompat,
+  IN OUT OC_BOOT_ARGUMENTS    *BootArgs
   )
 {
   SLIDE_SUPPORT_STATE  *SlideSupport;
@@ -855,7 +859,7 @@ AppleSlideRestore (
   //
   // Restore csr-active-config to a value it was before our slide=X alteration.
   //
-  if (BootArgs->CsrActiveConfig != NULL && SlideSupport->HasCsrActiveConfig) {
+  if ((BootArgs->CsrActiveConfig != NULL) && SlideSupport->HasCsrActiveConfig) {
     //
     // Never enable more bits than EfiBoot actually allowed.
     // On public builds EfiBoot will clear the CSR_ALLOW_APPLE_INTERNAL
@@ -874,7 +878,7 @@ AppleSlideRestore (
 
 UINTN
 AppleSlideGetRelocationSize (
-  IN OUT BOOT_COMPAT_CONTEXT   *BootCompat
+  IN OUT BOOT_COMPAT_CONTEXT  *BootCompat
   )
 {
   SLIDE_SUPPORT_STATE  *SlideSupport;

@@ -31,9 +31,9 @@ HdaCodecInfoGetAddress (
   OUT UINT8                        *Address
   )
 {
-  HDA_CODEC_INFO_PRIVATE_DATA *HdaPrivateData;
+  HDA_CODEC_INFO_PRIVATE_DATA  *HdaPrivateData;
 
-  if (This == NULL || Address == NULL) {
+  if ((This == NULL) || (Address == NULL)) {
     return EFI_INVALID_PARAMETER;
   }
 
@@ -53,21 +53,24 @@ HdaCodecInfoGetAddress (
 **/
 EFI_STATUS
 EFIAPI
-HdaCodecInfoGetCodecName(
-  IN  EFI_HDA_CODEC_INFO_PROTOCOL *This,
-  OUT CONST CHAR16 **CodecName) {
-  //DEBUG((DEBUG_INFO, "HdaCodecInfoGetCodecName(): start\n"));
+HdaCodecInfoGetCodecName (
+  IN  EFI_HDA_CODEC_INFO_PROTOCOL  *This,
+  OUT CONST CHAR16                 **CodecName
+  )
+{
+  // DEBUG((DEBUG_INFO, "HdaCodecInfoGetCodecName(): start\n"));
 
   // Create variables.
-  HDA_CODEC_INFO_PRIVATE_DATA *HdaPrivateData;
+  HDA_CODEC_INFO_PRIVATE_DATA  *HdaPrivateData;
 
   // If parameters are null, fail.
-  if ((This == NULL) || (CodecName == NULL))
+  if ((This == NULL) || (CodecName == NULL)) {
     return EFI_INVALID_PARAMETER;
+  }
 
   // Get private data and fill codec name parameter.
-  HdaPrivateData = HDA_CODEC_INFO_PRIVATE_DATA_FROM_THIS(This);
-  *CodecName = HdaPrivateData->HdaCodecDev->Name;
+  HdaPrivateData = HDA_CODEC_INFO_PRIVATE_DATA_FROM_THIS (This);
+  *CodecName     = HdaPrivateData->HdaCodecDev->Name;
   return EFI_SUCCESS;
 }
 
@@ -82,21 +85,24 @@ HdaCodecInfoGetCodecName(
 **/
 EFI_STATUS
 EFIAPI
-HdaCodecInfoGetVendorId(
-  IN  EFI_HDA_CODEC_INFO_PROTOCOL *This,
-  OUT UINT32 *VendorId) {
-  //DEBUG((DEBUG_INFO, "HdaCodecInfoGetVendorId(): start\n"));
+HdaCodecInfoGetVendorId (
+  IN  EFI_HDA_CODEC_INFO_PROTOCOL  *This,
+  OUT UINT32                       *VendorId
+  )
+{
+  // DEBUG((DEBUG_INFO, "HdaCodecInfoGetVendorId(): start\n"));
 
   // Create variables.
-  HDA_CODEC_INFO_PRIVATE_DATA *HdaPrivateData;
+  HDA_CODEC_INFO_PRIVATE_DATA  *HdaPrivateData;
 
   // If parameters are null, fail.
-  if ((This == NULL) || (VendorId == NULL))
+  if ((This == NULL) || (VendorId == NULL)) {
     return EFI_INVALID_PARAMETER;
+  }
 
   // Get private data and fill vendor ID parameter.
-  HdaPrivateData = HDA_CODEC_INFO_PRIVATE_DATA_FROM_THIS(This);
-  *VendorId = HdaPrivateData->HdaCodecDev->VendorId;
+  HdaPrivateData = HDA_CODEC_INFO_PRIVATE_DATA_FROM_THIS (This);
+  *VendorId      = HdaPrivateData->HdaCodecDev->VendorId;
   return EFI_SUCCESS;
 }
 
@@ -111,21 +117,24 @@ HdaCodecInfoGetVendorId(
 **/
 EFI_STATUS
 EFIAPI
-HdaCodecInfoGetRevisionId(
-  IN  EFI_HDA_CODEC_INFO_PROTOCOL *This,
-  OUT UINT32 *RevisionId) {
-  //DEBUG((DEBUG_INFO, "HdaCodecInfoGetRevisionId(): start\n"));
+HdaCodecInfoGetRevisionId (
+  IN  EFI_HDA_CODEC_INFO_PROTOCOL  *This,
+  OUT UINT32                       *RevisionId
+  )
+{
+  // DEBUG((DEBUG_INFO, "HdaCodecInfoGetRevisionId(): start\n"));
 
   // Create variables.
-  HDA_CODEC_INFO_PRIVATE_DATA *HdaPrivateData;
+  HDA_CODEC_INFO_PRIVATE_DATA  *HdaPrivateData;
 
   // If parameters are null, fail.
-  if ((This == NULL) || (RevisionId == NULL))
+  if ((This == NULL) || (RevisionId == NULL)) {
     return EFI_INVALID_PARAMETER;
+  }
 
   // Get private data and fill revision ID parameter.
-  HdaPrivateData = HDA_CODEC_INFO_PRIVATE_DATA_FROM_THIS(This);
-  *RevisionId = HdaPrivateData->HdaCodecDev->RevisionId;
+  HdaPrivateData = HDA_CODEC_INFO_PRIVATE_DATA_FROM_THIS (This);
+  *RevisionId    = HdaPrivateData->HdaCodecDev->RevisionId;
   return EFI_SUCCESS;
 }
 
@@ -140,23 +149,26 @@ HdaCodecInfoGetRevisionId(
 **/
 EFI_STATUS
 EFIAPI
-HdaCodecInfoGetAudioFuncId(
-  IN  EFI_HDA_CODEC_INFO_PROTOCOL *This,
-  OUT UINT8 *AudioFuncId,
-  OUT BOOLEAN *UnsolCapable) {
-  //DEBUG((DEBUG_INFO, "HdaCodecInfoGetAudioFuncId(): start\n"));
+HdaCodecInfoGetAudioFuncId (
+  IN  EFI_HDA_CODEC_INFO_PROTOCOL  *This,
+  OUT UINT8                        *AudioFuncId,
+  OUT BOOLEAN                      *UnsolCapable
+  )
+{
+  // DEBUG((DEBUG_INFO, "HdaCodecInfoGetAudioFuncId(): start\n"));
 
   // Create variables.
-  HDA_CODEC_INFO_PRIVATE_DATA *HdaPrivateData;
+  HDA_CODEC_INFO_PRIVATE_DATA  *HdaPrivateData;
 
   // If parameters are null, fail.
-  if ((This == NULL) || (AudioFuncId == NULL) || (UnsolCapable == NULL))
+  if ((This == NULL) || (AudioFuncId == NULL) || (UnsolCapable == NULL)) {
     return EFI_INVALID_PARAMETER;
+  }
 
   // Get private data and fill node ID parameter.
-  HdaPrivateData = HDA_CODEC_INFO_PRIVATE_DATA_FROM_THIS(This);
-  *AudioFuncId = HdaPrivateData->HdaCodecDev->AudioFuncGroup->NodeId;
-  *UnsolCapable = HdaPrivateData->HdaCodecDev->AudioFuncGroup->UnsolCapable;
+  HdaPrivateData = HDA_CODEC_INFO_PRIVATE_DATA_FROM_THIS (This);
+  *AudioFuncId   = HdaPrivateData->HdaCodecDev->AudioFuncGroup->NodeId;
+  *UnsolCapable  = HdaPrivateData->HdaCodecDev->AudioFuncGroup->UnsolCapable;
   return EFI_SUCCESS;
 }
 
@@ -172,23 +184,26 @@ HdaCodecInfoGetAudioFuncId(
 **/
 EFI_STATUS
 EFIAPI
-HdaCodecInfoGetDefaultRatesFormats(
-  IN  EFI_HDA_CODEC_INFO_PROTOCOL *This,
-  OUT UINT32 *Rates,
-  OUT UINT32 *Formats) {
-  //DEBUG((DEBUG_INFO, "HdaCodecInfoGetDefaultRatesFormats(): start\n"));
+HdaCodecInfoGetDefaultRatesFormats (
+  IN  EFI_HDA_CODEC_INFO_PROTOCOL  *This,
+  OUT UINT32                       *Rates,
+  OUT UINT32                       *Formats
+  )
+{
+  // DEBUG((DEBUG_INFO, "HdaCodecInfoGetDefaultRatesFormats(): start\n"));
 
   // Create variables.
-  HDA_CODEC_INFO_PRIVATE_DATA *HdaPrivateData;
+  HDA_CODEC_INFO_PRIVATE_DATA  *HdaPrivateData;
 
   // If parameters are null, fail.
-  if ((This == NULL) || (Rates == NULL) || (Formats == NULL))
+  if ((This == NULL) || (Rates == NULL) || (Formats == NULL)) {
     return EFI_INVALID_PARAMETER;
+  }
 
   // Get private data and fill rates and formats parameters.
-  HdaPrivateData = HDA_CODEC_INFO_PRIVATE_DATA_FROM_THIS(This);
-  *Rates = HdaPrivateData->HdaCodecDev->AudioFuncGroup->SupportedPcmRates;
-  *Formats = HdaPrivateData->HdaCodecDev->AudioFuncGroup->SupportedFormats;
+  HdaPrivateData = HDA_CODEC_INFO_PRIVATE_DATA_FROM_THIS (This);
+  *Rates         = HdaPrivateData->HdaCodecDev->AudioFuncGroup->SupportedPcmRates;
+  *Formats       = HdaPrivateData->HdaCodecDev->AudioFuncGroup->SupportedFormats;
   return EFI_SUCCESS;
 }
 
@@ -204,23 +219,26 @@ HdaCodecInfoGetDefaultRatesFormats(
 **/
 EFI_STATUS
 EFIAPI
-HdaCodecInfoGetDefaultAmpCaps(
-  IN  EFI_HDA_CODEC_INFO_PROTOCOL *This,
-  OUT UINT32 *AmpInCaps,
-  OUT UINT32 *AmpOutCaps) {
-  //DEBUG((DEBUG_INFO, "HdaCodecInfoGetDefaultAmpCaps(): start\n"));
+HdaCodecInfoGetDefaultAmpCaps (
+  IN  EFI_HDA_CODEC_INFO_PROTOCOL  *This,
+  OUT UINT32                       *AmpInCaps,
+  OUT UINT32                       *AmpOutCaps
+  )
+{
+  // DEBUG((DEBUG_INFO, "HdaCodecInfoGetDefaultAmpCaps(): start\n"));
 
   // Create variables.
-  HDA_CODEC_INFO_PRIVATE_DATA *HdaPrivateData;
+  HDA_CODEC_INFO_PRIVATE_DATA  *HdaPrivateData;
 
   // If parameters are null, fail.
-  if ((This == NULL) || (AmpInCaps == NULL) || (AmpOutCaps == NULL))
+  if ((This == NULL) || (AmpInCaps == NULL) || (AmpOutCaps == NULL)) {
     return EFI_INVALID_PARAMETER;
+  }
 
   // Get private data and fill amp caps parameters.
-  HdaPrivateData = HDA_CODEC_INFO_PRIVATE_DATA_FROM_THIS(This);
-  *AmpInCaps = HdaPrivateData->HdaCodecDev->AudioFuncGroup->AmpInCapabilities;
-  *AmpOutCaps = HdaPrivateData->HdaCodecDev->AudioFuncGroup->AmpOutCapabilities;
+  HdaPrivateData = HDA_CODEC_INFO_PRIVATE_DATA_FROM_THIS (This);
+  *AmpInCaps     = HdaPrivateData->HdaCodecDev->AudioFuncGroup->AmpInCapabilities;
+  *AmpOutCaps    = HdaPrivateData->HdaCodecDev->AudioFuncGroup->AmpOutCapabilities;
   return EFI_SUCCESS;
 }
 
@@ -237,29 +255,33 @@ HdaCodecInfoGetDefaultAmpCaps(
 **/
 EFI_STATUS
 EFIAPI
-HdaCodecInfoGetWidgets(
-  IN  EFI_HDA_CODEC_INFO_PROTOCOL *This,
-  OUT HDA_WIDGET **Widgets,
-  OUT UINTN *WidgetCount) {
-  //DEBUG((DEBUG_INFO, "HdaCodecInfoGetWidgets(): start\n"));
+HdaCodecInfoGetWidgets (
+  IN  EFI_HDA_CODEC_INFO_PROTOCOL  *This,
+  OUT HDA_WIDGET                   **Widgets,
+  OUT UINTN                        *WidgetCount
+  )
+{
+  // DEBUG((DEBUG_INFO, "HdaCodecInfoGetWidgets(): start\n"));
 
   // Create variables.
-  HDA_CODEC_INFO_PRIVATE_DATA *HdaPrivateData;
-  HDA_WIDGET_DEV *HdaWidgetDev;
-  UINT32 AmpInCount;
-  HDA_WIDGET *HdaWidgets;
-  UINTN HdaWidgetsCount;
+  HDA_CODEC_INFO_PRIVATE_DATA  *HdaPrivateData;
+  HDA_WIDGET_DEV               *HdaWidgetDev;
+  UINT32                       AmpInCount;
+  HDA_WIDGET                   *HdaWidgets;
+  UINTN                        HdaWidgetsCount;
 
   // If parameters are null, fail.
-  if ((This == NULL) || (Widgets == NULL) || (WidgetCount == NULL))
+  if ((This == NULL) || (Widgets == NULL) || (WidgetCount == NULL)) {
     return EFI_INVALID_PARAMETER;
+  }
 
   // Get private data and allocate widgets array.
-  HdaPrivateData = HDA_CODEC_INFO_PRIVATE_DATA_FROM_THIS(This);
+  HdaPrivateData  = HDA_CODEC_INFO_PRIVATE_DATA_FROM_THIS (This);
   HdaWidgetsCount = HdaPrivateData->HdaCodecDev->AudioFuncGroup->WidgetsCount;
-  HdaWidgets = AllocateZeroPool(sizeof(HDA_WIDGET) * HdaWidgetsCount);
-  if (HdaWidgets == NULL)
+  HdaWidgets      = AllocateZeroPool (sizeof (HDA_WIDGET) * HdaWidgetsCount);
+  if (HdaWidgets == NULL) {
     return EFI_OUT_OF_RESOURCES;
+  }
 
   // Populate widgets array.
   for (UINTN w = 0; w < HdaWidgetsCount; w++) {
@@ -267,73 +289,84 @@ HdaCodecInfoGetWidgets(
     HdaWidgetDev = HdaPrivateData->HdaCodecDev->AudioFuncGroup->Widgets + w;
 
     // Get basic data.
-    HdaWidgets[w].NodeId = HdaWidgetDev->NodeId;
+    HdaWidgets[w].NodeId       = HdaWidgetDev->NodeId;
     HdaWidgets[w].Capabilities = HdaWidgetDev->Capabilities;
     HdaWidgets[w].DefaultUnSol = HdaWidgetDev->DefaultUnSol;
-    HdaWidgets[w].DefaultEapd = HdaWidgetDev->DefaultEapd;
+    HdaWidgets[w].DefaultEapd  = HdaWidgetDev->DefaultEapd;
 
     // Get connections.
     HdaWidgets[w].ConnectionCount = HdaWidgetDev->ConnectionCount;
-    HdaWidgets[w].Connections = AllocateZeroPool(sizeof(UINT16) * HdaWidgetDev->ConnectionCount);
-    if (HdaWidgets[w].Connections == NULL)
+    HdaWidgets[w].Connections     = AllocateZeroPool (sizeof (UINT16) * HdaWidgetDev->ConnectionCount);
+    if (HdaWidgets[w].Connections == NULL) {
       goto FREE_WIDGETS;
-    CopyMem(HdaWidgets[w].Connections, HdaWidgetDev->Connections, sizeof(UINT16) * HdaWidgetDev->ConnectionCount);
+    }
+
+    CopyMem (HdaWidgets[w].Connections, HdaWidgetDev->Connections, sizeof (UINT16) * HdaWidgetDev->ConnectionCount);
 
     // Get power info.
     HdaWidgets[w].SupportedPowerStates = HdaWidgetDev->SupportedPowerStates;
-    HdaWidgets[w].DefaultPowerState = HdaWidgetDev->DefaultPowerState;
+    HdaWidgets[w].DefaultPowerState    = HdaWidgetDev->DefaultPowerState;
 
     // Get input amps.
     HdaWidgets[w].AmpInCapabilities = HdaWidgetDev->AmpInCapabilities;
     if (HdaWidgetDev->Capabilities & HDA_PARAMETER_WIDGET_CAPS_IN_AMP) {
       // Determine number of input amps.
       AmpInCount = HdaWidgetDev->ConnectionCount;
-      if (AmpInCount < 1)
+      if (AmpInCount < 1) {
         AmpInCount = 1;
+      }
 
       // Allocate arrays.
-      HdaWidgets[w].AmpInLeftDefaultGainMute = AllocateZeroPool(sizeof(UINT8) * AmpInCount);
-      HdaWidgets[w].AmpInRightDefaultGainMute = AllocateZeroPool(sizeof(UINT8) * AmpInCount);
+      HdaWidgets[w].AmpInLeftDefaultGainMute  = AllocateZeroPool (sizeof (UINT8) * AmpInCount);
+      HdaWidgets[w].AmpInRightDefaultGainMute = AllocateZeroPool (sizeof (UINT8) * AmpInCount);
       if ((HdaWidgets[w].AmpInLeftDefaultGainMute == NULL) ||
-        (HdaWidgets[w].AmpInRightDefaultGainMute == NULL))
+          (HdaWidgets[w].AmpInRightDefaultGainMute == NULL))
+      {
         goto FREE_WIDGETS;
+      }
 
       // Copy arrays.
-      CopyMem(HdaWidgets[w].AmpInLeftDefaultGainMute, HdaWidgetDev->AmpInLeftDefaultGainMute,
-        sizeof(UINT8) * AmpInCount);
-      CopyMem(HdaWidgets[w].AmpInRightDefaultGainMute, HdaWidgetDev->AmpInRightDefaultGainMute,
-        sizeof(UINT8) * AmpInCount);
+      CopyMem (
+        HdaWidgets[w].AmpInLeftDefaultGainMute,
+        HdaWidgetDev->AmpInLeftDefaultGainMute,
+        sizeof (UINT8) * AmpInCount
+        );
+      CopyMem (
+        HdaWidgets[w].AmpInRightDefaultGainMute,
+        HdaWidgetDev->AmpInRightDefaultGainMute,
+        sizeof (UINT8) * AmpInCount
+        );
     }
 
     // Get output amp.
-    HdaWidgets[w].AmpOutCapabilities = HdaWidgetDev->AmpOutCapabilities;
-    HdaWidgets[w].AmpOutLeftDefaultGainMute = HdaWidgetDev->AmpOutLeftDefaultGainMute;
+    HdaWidgets[w].AmpOutCapabilities         = HdaWidgetDev->AmpOutCapabilities;
+    HdaWidgets[w].AmpOutLeftDefaultGainMute  = HdaWidgetDev->AmpOutLeftDefaultGainMute;
     HdaWidgets[w].AmpOutRightDefaultGainMute = HdaWidgetDev->AmpOutRightDefaultGainMute;
 
     // Get input/output data.
-    HdaWidgets[w].SupportedPcmRates = HdaWidgetDev->SupportedPcmRates;
-    HdaWidgets[w].SupportedFormats = HdaWidgetDev->SupportedFormats;
-    HdaWidgets[w].DefaultConvFormat = HdaWidgetDev->DefaultConvFormat;
+    HdaWidgets[w].SupportedPcmRates        = HdaWidgetDev->SupportedPcmRates;
+    HdaWidgets[w].SupportedFormats         = HdaWidgetDev->SupportedFormats;
+    HdaWidgets[w].DefaultConvFormat        = HdaWidgetDev->DefaultConvFormat;
     HdaWidgets[w].DefaultConvStreamChannel = HdaWidgetDev->DefaultConvStreamChannel;
-    HdaWidgets[w].DefaultConvChannelCount = HdaWidgetDev->DefaultConvChannelCount;
+    HdaWidgets[w].DefaultConvChannelCount  = HdaWidgetDev->DefaultConvChannelCount;
 
     // Get pin complex data.
-    HdaWidgets[w].PinCapabilities = HdaWidgetDev->PinCapabilities;
-    HdaWidgets[w].DefaultPinControl = HdaWidgetDev->DefaultPinControl;
+    HdaWidgets[w].PinCapabilities      = HdaWidgetDev->PinCapabilities;
+    HdaWidgets[w].DefaultPinControl    = HdaWidgetDev->DefaultPinControl;
     HdaWidgets[w].DefaultConfiguration = HdaWidgetDev->DefaultConfiguration;
 
     // Get volume knob data.
     HdaWidgets[w].VolumeCapabilities = HdaWidgetDev->VolumeCapabilities;
-    HdaWidgets[w].DefaultVolume = HdaWidgetDev->DefaultVolume;
+    HdaWidgets[w].DefaultVolume      = HdaWidgetDev->DefaultVolume;
   }
 
   // Fill parameters.
   *WidgetCount = HdaWidgetsCount;
-  *Widgets = HdaWidgets;
+  *Widgets     = HdaWidgets;
   return EFI_SUCCESS;
 
 FREE_WIDGETS:
-  HdaCodecInfoFreeWidgetsBuffer(HdaWidgets, HdaWidgetsCount);
+  HdaCodecInfoFreeWidgetsBuffer (HdaWidgets, HdaWidgetsCount);
   return EFI_OUT_OF_RESOURCES;
 }
 
@@ -348,24 +381,33 @@ FREE_WIDGETS:
 **/
 EFI_STATUS
 EFIAPI
-HdaCodecInfoFreeWidgetsBuffer(
-  IN  HDA_WIDGET *Widgets,
-  IN  UINTN WidgetCount) {
-  //DEBUG((DEBUG_INFO, "HdaCodecInfoFreeWidgetsBuffer(): start\n"));
+HdaCodecInfoFreeWidgetsBuffer (
+  IN  HDA_WIDGET  *Widgets,
+  IN  UINTN       WidgetCount
+  )
+{
+  // DEBUG((DEBUG_INFO, "HdaCodecInfoFreeWidgetsBuffer(): start\n"));
 
   // If parameter is null, fail.
-  if (Widgets == NULL)
+  if (Widgets == NULL) {
     return EFI_INVALID_PARAMETER;
+  }
 
   // Free pool buffers.
   for (UINTN w = 0; w < WidgetCount; w++) {
-    if (Widgets[w].Connections != NULL)
-      FreePool(Widgets[w].Connections);
-    if (Widgets[w].AmpInLeftDefaultGainMute != NULL)
-      FreePool(Widgets[w].AmpInLeftDefaultGainMute);
-    if (Widgets[w].AmpInRightDefaultGainMute != NULL)
-      FreePool(Widgets[w].AmpInRightDefaultGainMute);
+    if (Widgets[w].Connections != NULL) {
+      FreePool (Widgets[w].Connections);
+    }
+
+    if (Widgets[w].AmpInLeftDefaultGainMute != NULL) {
+      FreePool (Widgets[w].AmpInLeftDefaultGainMute);
+    }
+
+    if (Widgets[w].AmpInRightDefaultGainMute != NULL) {
+      FreePool (Widgets[w].AmpInRightDefaultGainMute);
+    }
   }
-  FreePool(Widgets);
+
+  FreePool (Widgets);
   return EFI_SUCCESS;
 }

@@ -17,9 +17,9 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 #define APM_ENTRY_TYPE_FREE  "Apple_Free"
 
 typedef PACKED struct {
-  UINT32 BlockStart;
-  UINT16 NumberOfBlocks;
-  UINT16 SystemType;
+  UINT32    BlockStart;
+  UINT16    NumberOfBlocks;
+  UINT16    SystemType;
 } APM_DRIVER_DESCRIPTOR_MAP_ENTRY;
 
 #define APM_DRIVER_DESCRIPTOR_MAP_SIGNATURE  SIGNATURE_16 ('E', 'R')
@@ -28,15 +28,15 @@ typedef PACKED struct {
 // APM Driver Descriptor Map Header
 //
 typedef PACKED struct {
-  UINT16                          Signature;
-  UINT16                          BlockSize;
-  UINT32                          BlockCount;
-  UINT16                          DeviceType;
-  UINT16                          DeviceId;
-  UINT32                          DriverData;
-  UINT16                          DriverDescriptorCount;
-  APM_DRIVER_DESCRIPTOR_MAP_ENTRY DriverDescriptors[8];
-  UINT8                           Reserved[430];
+  UINT16                             Signature;
+  UINT16                             BlockSize;
+  UINT32                             BlockCount;
+  UINT16                             DeviceType;
+  UINT16                             DeviceId;
+  UINT32                             DriverData;
+  UINT16                             DriverDescriptorCount;
+  APM_DRIVER_DESCRIPTOR_MAP_ENTRY    DriverDescriptors[8];
+  UINT8                              Reserved[430];
 } APM_DRIVER_DESCRIPTOR_MAP;
 
 #define APM_ENTRY_SIGNATURE  SIGNATURE_16 ('P', 'M')
@@ -59,26 +59,26 @@ typedef PACKED struct {
 // APM Entry Header
 //
 typedef PACKED struct {
-  UINT16 Signature;
-  UINT16 Reserved1;
-  UINT32 NumberOfPartitionEntries;
-  UINT32 PartitionStart;
-  UINT32 PartitionSize;
-  CHAR8  PartitionName[32];
-  CHAR8  PartitionType[32];
-  UINT32 LBAStart;
-  UINT32 LBASize;
-  UINT32 PartitionFlags;
-  UINT32 BootStrapCodeLBA;
-  UINT32 BootStrapCodeSize;
-  UINT32 BootStrapCodeLoadAddress;
-  UINT32 BootStrapCodeLoadAddress2;
-  UINT32 BootStrapCodeEntry;
-  UINT32 BootStrapCodeEntry2;
-  UINT32 BootStrapCodeChecksum;
-  UINT8  ProcessorType[16];
-  UINT32 Reserved2[32];
-  UINT32 Reserved3[62];
+  UINT16    Signature;
+  UINT16    Reserved1;
+  UINT32    NumberOfPartitionEntries;
+  UINT32    PartitionStart;
+  UINT32    PartitionSize;
+  CHAR8     PartitionName[32];
+  CHAR8     PartitionType[32];
+  UINT32    LBAStart;
+  UINT32    LBASize;
+  UINT32    PartitionFlags;
+  UINT32    BootStrapCodeLBA;
+  UINT32    BootStrapCodeSize;
+  UINT32    BootStrapCodeLoadAddress;
+  UINT32    BootStrapCodeLoadAddress2;
+  UINT32    BootStrapCodeEntry;
+  UINT32    BootStrapCodeEntry2;
+  UINT32    BootStrapCodeChecksum;
+  UINT8     ProcessorType[16];
+  UINT32    Reserved2[32];
+  UINT32    Reserved3[62];
 } APM_ENTRY;
 
 #pragma pack()

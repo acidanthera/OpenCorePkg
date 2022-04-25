@@ -10,12 +10,12 @@
   I/O port to obtain current DDR frequency on NVIDIA nForce MCP89
   and possibly others. Example value: 1066666664.
 **/
-#define R_NVIDIA_MCP89_DDR_PLL 0x580
+#define R_NVIDIA_MCP89_DDR_PLL  0x580
 
 /**
   MMIO base to NVIDIA nForce MCP79 and MCP89 memory controller.
 **/
-#define B_NVIDIA_MCP_MC_BASE 0xF001B000
+#define B_NVIDIA_MCP_MC_BASE  0xF001B000
 
 /**
   Common PCI identifiers for nForce MCP79 and MCP89 memory controllers.
@@ -27,11 +27,11 @@
 /**
   MCP79 and MCP89 memory controller registers, not much is known.
 **/
-#define R_NVIDIA_MCP_MC_UN44 0x44
-#define R_NVIDIA_MCP_MC_MCPC 0x48
-#define R_NVIDIA_MCP_MC_UN78 0x78
-#define R_NVIDIA_MCP_MC_MPLM 0xC8
-#define R_NVIDIA_MCP_MC_MPLN 0xC9
+#define R_NVIDIA_MCP_MC_UN44  0x44
+#define R_NVIDIA_MCP_MC_MCPC  0x48
+#define R_NVIDIA_MCP_MC_UN78  0x78
+#define R_NVIDIA_MCP_MC_MPLM  0xC8
+#define R_NVIDIA_MCP_MC_MPLN  0xC9
 
 #define NVIDIA_MCP79_GET_FSB_FREQUENCY_DIVIDEND(Un44, Un78) \
   (25000000ULL * (((Un44) >> 9U) & 0xFFU) * (((Un78) >> 8U) & 0xFFU))

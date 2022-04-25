@@ -29,7 +29,7 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 
 VOID
 OcLoadDevPropsSupport (
-  IN OC_GLOBAL_CONFIG    *Config
+  IN OC_GLOBAL_CONFIG  *Config
   )
 {
   EFI_STATUS                                  Status;
@@ -83,10 +83,10 @@ OcLoadDevPropsSupport (
       }
 
       Status = PropertyDatabase->RemoveProperty (
-        PropertyDatabase,
-        DevicePath,
-        UnicodeProperty
-        );
+                                   PropertyDatabase,
+                                   DevicePath,
+                                   UnicodeProperty
+                                   );
 
       DEBUG ((
         EFI_ERROR (Status) && Status != EFI_NOT_FOUND ? DEBUG_WARN : DEBUG_INFO,
@@ -119,7 +119,7 @@ OcLoadDevPropsSupport (
     }
 
     for (PropertyIndex = 0; PropertyIndex < PropertyMap->Count; ++PropertyIndex) {
-      AsciiProperty = OC_BLOB_GET (PropertyMap->Keys[PropertyIndex]);
+      AsciiProperty   = OC_BLOB_GET (PropertyMap->Keys[PropertyIndex]);
       UnicodeProperty = AsciiStrCopyToUnicode (AsciiProperty, 0);
       if (UnicodeProperty == NULL) {
         DEBUG ((DEBUG_WARN, "OC: Failed to convert %a property\n", AsciiProperty));
@@ -127,22 +127,22 @@ OcLoadDevPropsSupport (
       }
 
       OriginalSize = 0;
-      Status = PropertyDatabase->GetProperty (
-        PropertyDatabase,
-        DevicePath,
-        UnicodeProperty,
-        NULL,
-        &OriginalSize
-        );
+      Status       = PropertyDatabase->GetProperty (
+                                         PropertyDatabase,
+                                         DevicePath,
+                                         UnicodeProperty,
+                                         NULL,
+                                         &OriginalSize
+                                         );
 
       if (Status != EFI_BUFFER_TOO_SMALL) {
         Status = PropertyDatabase->SetProperty (
-          PropertyDatabase,
-          DevicePath,
-          UnicodeProperty,
-          OC_BLOB_GET (PropertyMap->Values[PropertyIndex]),
-          PropertyMap->Values[PropertyIndex]->Size
-          );
+                                     PropertyDatabase,
+                                     DevicePath,
+                                     UnicodeProperty,
+                                     OC_BLOB_GET (PropertyMap->Values[PropertyIndex]),
+                                     PropertyMap->Values[PropertyIndex]->Size
+                                     );
 
         DEBUG ((
           EFI_ERROR (Status) ? DEBUG_WARN : DEBUG_INFO,

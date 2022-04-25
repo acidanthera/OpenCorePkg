@@ -18,11 +18,11 @@
 STATIC
 BOOLEAN
 ValidateNvramKeySize8 (
-  IN  CONST VOID   *Value,
-  IN  UINT32       ValueSize
+  IN  CONST VOID  *Value,
+  IN  UINT32      ValueSize
   )
 {
-  (VOID) Value;
+  (VOID)Value;
 
   return ValueSize == sizeof (UINT8);
 }
@@ -30,11 +30,11 @@ ValidateNvramKeySize8 (
 STATIC
 BOOLEAN
 ValidateNvramKeySize32 (
-  IN  CONST VOID   *Value,
-  IN  UINT32       ValueSize
+  IN  CONST VOID  *Value,
+  IN  UINT32      ValueSize
   )
 {
-  (VOID) Value;
+  (VOID)Value;
 
   return ValueSize == sizeof (UINT32);
 }
@@ -42,11 +42,11 @@ ValidateNvramKeySize32 (
 STATIC
 BOOLEAN
 ValidateNvramKeySize64 (
-  IN  CONST VOID   *Value,
-  IN  UINT32       ValueSize
+  IN  CONST VOID  *Value,
+  IN  UINT32      ValueSize
   )
 {
-  (VOID) Value;
+  (VOID)Value;
 
   return ValueSize == sizeof (UINT64);
 }
@@ -54,8 +54,8 @@ ValidateNvramKeySize64 (
 STATIC
 BOOLEAN
 ValidateUIScale (
-  IN  CONST VOID   *Value,
-  IN  UINT32       ValueSize
+  IN  CONST VOID  *Value,
+  IN  UINT32      ValueSize
   )
 {
   UINTN               Index;
@@ -65,7 +65,7 @@ ValidateUIScale (
     0x02   ///< HiDPI
   };
 
-  UIScaleValue = (CONST UINT8 *) Value;
+  UIScaleValue = (CONST UINT8 *)Value;
 
   if (!ValidateNvramKeySize8 (NULL, ValueSize)) {
     return FALSE;
@@ -83,8 +83,8 @@ ValidateUIScale (
 STATIC
 BOOLEAN
 ValidateNvdaDrv (
-  IN  CONST VOID   *Value,
-  IN  UINT32       ValueSize
+  IN  CONST VOID  *Value,
+  IN  UINT32      ValueSize
   )
 {
   UINTN               Index;
@@ -94,7 +94,7 @@ ValidateNvdaDrv (
     0x31   ///< "1" - WebDriver on
   };
 
-  NvdaDrvValue = (CONST UINT8 *) Value;
+  NvdaDrvValue = (CONST UINT8 *)Value;
 
   if (!ValidateNvramKeySize8 (NULL, ValueSize)) {
     return FALSE;
@@ -112,13 +112,13 @@ ValidateNvdaDrv (
 STATIC
 BOOLEAN
 ValidateBootArgs (
-  IN  CONST VOID   *Value,
-  IN  UINT32       ValueSize
+  IN  CONST VOID  *Value,
+  IN  UINT32      ValueSize
   )
 {
-  CONST CHAR8   *BootArgsValue;
+  CONST CHAR8  *BootArgsValue;
 
-  BootArgsValue = (CONST CHAR8 *) Value;
+  BootArgsValue = (CONST CHAR8 *)Value;
 
   return OcAsciiStringNPrintable (BootArgsValue, ValueSize);
 }
@@ -126,8 +126,8 @@ ValidateBootArgs (
 STATIC
 BOOLEAN
 ValidateBooterCfg (
-  IN  CONST VOID   *Value,
-  IN  UINT32       ValueSize
+  IN  CONST VOID  *Value,
+  IN  UINT32      ValueSize
   )
 {
   //
@@ -139,8 +139,8 @@ ValidateBooterCfg (
 STATIC
 BOOLEAN
 ValidateDefaultBackgroundColor (
-  IN  CONST VOID   *Value,
-  IN  UINT32       ValueSize
+  IN  CONST VOID  *Value,
+  IN  UINT32      ValueSize
   )
 {
   //
@@ -148,7 +148,7 @@ ValidateDefaultBackgroundColor (
   //
   CONST UINT8  *DefaultBackgroundColorValue;
 
-  DefaultBackgroundColorValue = (CONST UINT8 *) Value;
+  DefaultBackgroundColorValue = (CONST UINT8 *)Value;
 
   //
   // Even if casted to UINT8 *, DefaultBackgroundColor is still 32-bit.
@@ -181,10 +181,10 @@ STATIC NVRAM_KEY_MAP  mAppleVendorVariableGuidKeyMaps[] = {
   { "DefaultBackgroundColor",       ValidateDefaultBackgroundColor },
 };
 
-NVRAM_GUID_MAP mGUIDMaps[] = {
+NVRAM_GUID_MAP  mGUIDMaps[] = {
   { &gAppleBootVariableGuid,   &mAppleBootVariableGuidKeyMaps[0],   ARRAY_SIZE (mAppleBootVariableGuidKeyMaps)   },
   { &gAppleVendorVariableGuid, &mAppleVendorVariableGuidKeyMaps[0], ARRAY_SIZE (mAppleVendorVariableGuidKeyMaps) },
 };
-UINTN mGUIDMapsCount = ARRAY_SIZE (mGUIDMaps);
+UINTN           mGUIDMapsCount = ARRAY_SIZE (mGUIDMaps);
 
-BOOLEAN mHasNvramUIScale = FALSE;
+BOOLEAN  mHasNvramUIScale = FALSE;

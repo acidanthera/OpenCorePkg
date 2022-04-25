@@ -12,20 +12,21 @@
 
 #include "Sha2Internal.h"
 
-#if defined(OC_CRYPTO_SUPPORTS_SHA384) || defined(OC_CRYPTO_SUPPORTS_SHA512)
+#if defined (OC_CRYPTO_SUPPORTS_SHA384) || defined (OC_CRYPTO_SUPPORTS_SHA512)
 VOID
 EFIAPI
 Sha512TransformAccel (
-  IN OUT UINT64      *State,
-  IN     CONST UINT8 *Data,
-  IN     UINTN       BlockNb
+  IN OUT UINT64       *State,
+  IN     CONST UINT8  *Data,
+  IN     UINTN        BlockNb
   )
 {
-  (VOID) State;
-  (VOID) Data;
-  (VOID) BlockNb;
+  (VOID)State;
+  (VOID)Data;
+  (VOID)BlockNb;
   ASSERT (FALSE);
 }
+
 #endif
 
 BOOLEAN

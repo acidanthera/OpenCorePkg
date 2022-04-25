@@ -16,14 +16,14 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 // This needs to be dumped from some firmware.
 //
 
-UINT8 gDefaultAppleEpidCertificate[] = {
+UINT8  gDefaultAppleEpidCertificate[] = {
   0x00
 };
 
-UINTN gDefaultAppleEpidCertificateSize = sizeof (gDefaultAppleEpidCertificate);
+UINTN  gDefaultAppleEpidCertificateSize = sizeof (gDefaultAppleEpidCertificate);
 
-UINT8 gDefaultAppleGroupPublicKeys[] = {
+UINT8  gDefaultAppleGroupPublicKeys[] = {
   0x00
 };
 
-UINTN gDefaultAppleGroupPublicKeysSize = sizeof (gDefaultAppleGroupPublicKeys);
+UINTN  gDefaultAppleGroupPublicKeysSize = sizeof (gDefaultAppleGroupPublicKeys);

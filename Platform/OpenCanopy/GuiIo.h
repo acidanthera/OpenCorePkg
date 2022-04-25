@@ -12,9 +12,9 @@
 #include <Protocol/GraphicsOutput.h>
 #include "OpenCanopy.h"
 
-typedef struct GUI_OUTPUT_CONTEXT_  GUI_OUTPUT_CONTEXT;
-typedef struct GUI_POINTER_CONTEXT_ GUI_POINTER_CONTEXT;
-typedef struct GUI_KEY_CONTEXT_     GUI_KEY_CONTEXT;
+typedef struct GUI_OUTPUT_CONTEXT_   GUI_OUTPUT_CONTEXT;
+typedef struct GUI_POINTER_CONTEXT_  GUI_POINTER_CONTEXT;
+typedef struct GUI_KEY_CONTEXT_      GUI_KEY_CONTEXT;
 
 GUI_OUTPUT_CONTEXT *
 GuiOutputConstruct (

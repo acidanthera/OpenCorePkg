@@ -7,9 +7,9 @@
 
 #include <Library/BaseLib.h>
 
-GLOBAL_REMOVE_IF_UNREFERENCED BOOLEAN gOcCompilerIntrinsicsLib;
+GLOBAL_REMOVE_IF_UNREFERENCED BOOLEAN  gOcCompilerIntrinsicsLib;
 
-#if defined(MDE_CPU_IA32) && defined(__clang__) && defined(__apple_build_version__) && __apple_build_version__ < 11000000
+#if defined (MDE_CPU_IA32) && defined (__clang__) && defined (__apple_build_version__) && __apple_build_version__ < 11000000
 
 /**
   Divides a 64-bit unsigned integer by a 64-bit unsigned integer and generates
@@ -36,55 +36,57 @@ __udivdi3 (
 
 typedef UINTN size_t;
 
-#if defined(_MSC_EXTENSIONS) && !defined(__clang__) && !defined(__GNUC__)
+#if defined (_MSC_EXTENSIONS) && !defined (__clang__) && !defined (__GNUC__)
 void *
 memset (
-  void   *Buffer,
-  int    Value,
-  size_t Length
+  void    *Buffer,
+  int     Value,
+  size_t  Length
   );
 
-#pragma intrinsic(memset)
-#pragma function(memset)
+  #pragma intrinsic(memset)
+  #pragma function(memset)
 #endif
 void *
 memset (
-  void   *Buffer,
-  int    Value,
-  size_t Length
+  void    *Buffer,
+  int     Value,
+  size_t  Length
   )
 {
-  unsigned char *d = Buffer;
+  unsigned char  *d = Buffer;
 
-  while (Length--)
-    *d++ = (unsigned char) Value;
+  while (Length--) {
+    *d++ = (unsigned char)Value;
+  }
 
   return Buffer;
 }
 
-#if defined(_MSC_EXTENSIONS) && !defined(__clang__) && !defined(__GNUC__)
+#if defined (_MSC_EXTENSIONS) && !defined (__clang__) && !defined (__GNUC__)
 void *
 memcpy (
-  void         *DestinationBuffer,
-  const void   *SourceBuffer,
-  size_t       Length
+  void        *DestinationBuffer,
+  const void  *SourceBuffer,
+  size_t      Length
   );
 
-#pragma intrinsic(memcpy)
-#pragma function(memcpy)
+  #pragma intrinsic(memcpy)
+  #pragma function(memcpy)
 #endif
 void *
 memcpy (
-  void         *DestinationBuffer,
-  const void   *SourceBuffer,
-  size_t       Length
+  void        *DestinationBuffer,
+  const void  *SourceBuffer,
+  size_t      Length
   )
 {
-  unsigned char *d = DestinationBuffer;
-  unsigned char const *s = SourceBuffer;
+  unsigned char        *d = DestinationBuffer;
+  unsigned char const  *s = SourceBuffer;
 
-  while (Length--)
+  while (Length--) {
     *d++ = *s++;
+  }
 
   return DestinationBuffer;
 }

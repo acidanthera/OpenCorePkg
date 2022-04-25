@@ -1,13 +1,13 @@
 /** @file
 
 Copyright (c) 2004 - 2010, Intel Corporation. All rights reserved.<BR>
-This program and the accompanying materials                          
-are licensed and made available under the terms and conditions of the BSD License         
-which accompanies this distribution.  The full text of the license may be found at        
-http://opensource.org/licenses/bsd-license.php                                            
-                                                                                          
-THE PROGRAM IS DISTRIBUTED UNDER THE BSD LICENSE ON AN "AS IS" BASIS,                     
-WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.             
+This program and the accompanying materials
+are licensed and made available under the terms and conditions of the BSD License
+which accompanies this distribution.  The full text of the license may be found at
+http://opensource.org/licenses/bsd-license.php
+
+THE PROGRAM IS DISTRIBUTED UNDER THE BSD LICENSE ON AN "AS IS" BASIS,
+WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 
 Module Name:
 
@@ -16,7 +16,7 @@ Module Name:
 Abstract:
 
   Defines for the EFI Flash Map functionality
-  
+
 **/
 
 #ifndef _EFI_FLASHMAP_H_
@@ -25,15 +25,15 @@ Abstract:
 //
 // Definition for flash map GUIDed HOBs
 //
-typedef UINT32  EFI_FLASH_AREA_ATTRIBUTES;
+typedef UINT32 EFI_FLASH_AREA_ATTRIBUTES;
 
-#define EFI_FLASH_AREA_FV           0x0001
-#define EFI_FLASH_AREA_SUBFV        0x0002
-#define EFI_FLASH_AREA_MEMMAPPED_FV 0x0004
-#define EFI_FLASH_AREA_REQUIRED     0x0008
-#define EFI_FLASH_AREA_CORRUPT      0x0010
+#define EFI_FLASH_AREA_FV            0x0001
+#define EFI_FLASH_AREA_SUBFV         0x0002
+#define EFI_FLASH_AREA_MEMMAPPED_FV  0x0004
+#define EFI_FLASH_AREA_REQUIRED      0x0008
+#define EFI_FLASH_AREA_CORRUPT       0x0010
 
-typedef UINT8   EFI_FLASH_AREA_TYPE;
+typedef UINT8 EFI_FLASH_AREA_TYPE;
 
 #define EFI_FLASH_AREA_RECOVERY_BIOS  0x0   // Recovery code
 #define EFI_FLASH_AREA_MAIN_BIOS      0x1   // Regular BIOS code
@@ -58,6 +58,7 @@ typedef UINT8   EFI_FLASH_AREA_TYPE;
 // An individual sub-area Entry.
 // A single flash area may consist of  more than one sub-area.
 //
+
 /**
 typedef struct {
   EFI_FLASH_AREA_ATTRIBUTES Attributes;
@@ -124,28 +125,28 @@ typedef struct {
 **/
 
 typedef struct {
-  EFI_FLASH_AREA_ATTRIBUTES Attributes;
-  UINT32                    Reserved;
-  EFI_PHYSICAL_ADDRESS      Base;
-  EFI_PHYSICAL_ADDRESS      Length;
-  EFI_GUID                  FileSystem;
+  EFI_FLASH_AREA_ATTRIBUTES    Attributes;
+  UINT32                       Reserved;
+  EFI_PHYSICAL_ADDRESS         Base;
+  EFI_PHYSICAL_ADDRESS         Length;
+  EFI_GUID                     FileSystem;
 } EFI_FLASH_SUBAREA_ENTRY;
 
 typedef struct {
-  UINT8                   Reserved[3];
-  EFI_FLASH_AREA_TYPE     AreaType;
-  EFI_GUID                AreaTypeGuid;
-  UINT32                  NumberOfEntries;
-  EFI_FLASH_SUBAREA_ENTRY Entries[1];
+  UINT8                      Reserved[3];
+  EFI_FLASH_AREA_TYPE        AreaType;
+  EFI_GUID                   AreaTypeGuid;
+  UINT32                     NumberOfEntries;
+  EFI_FLASH_SUBAREA_ENTRY    Entries[1];
   //
   // Extended Hob data.
   //
   // VolumeId and FilePath indicating a unique file.
   //
-  UINT32                  VolumeId;
-  CHAR16                  FilePath[258];
-  UINT32                  ActuralSize;
-  UINT32                  Offset;
+  UINT32                     VolumeId;
+  CHAR16                     FilePath[258];
+  UINT32                     ActuralSize;
+  UINT32                     Offset;
 } EFI_FLASH_MAP_FS_ENTRY_DATA;
 
 #pragma pack()

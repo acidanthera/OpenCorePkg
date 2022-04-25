@@ -28,7 +28,7 @@
 EFI_STATUS
 OcSafeFileOpen (
   IN     CONST EFI_FILE_PROTOCOL  *Protocol,
-     OUT       EFI_FILE_PROTOCOL  **NewHandle,
+  OUT       EFI_FILE_PROTOCOL     **NewHandle,
   IN     CONST CHAR16             *FileName,
   IN     CONST UINT64             OpenMode,
   IN     CONST UINT64             Attributes
@@ -41,19 +41,20 @@ OcSafeFileOpen (
   ASSERT (FileName != NULL);
   ASSERT (NewHandle != NULL);
   Length = StrLen (FileName);
-  if (Length > 0 && FileName[Length - 1] == L'\\') {
+  if ((Length > 0) && (FileName[Length - 1] == L'\\')) {
     DEBUG ((DEBUG_INFO, "OCFS: Filename %s has trailing slash\n", FileName));
   }
+
   DEBUG_CODE_END ();
 
   *NewHandle = NULL;
-  Status = Protocol->Open (
-    (EFI_FILE_PROTOCOL  *) Protocol,
-    NewHandle,
-    (CHAR16 *) FileName,
-    OpenMode,
-    Attributes
-    );
+  Status     = Protocol->Open (
+                           (EFI_FILE_PROTOCOL  *)Protocol,
+                           NewHandle,
+                           (CHAR16 *)FileName,
+                           OpenMode,
+                           Attributes
+                           );
   //
   // Some boards like ASUS ROG RAMPAGE VI EXTREME may have malfunctioning FS
   // drivers that report write protection violation errors for read-only
@@ -61,10 +62,11 @@ OcSafeFileOpen (
   //
   // REF: https://github.com/acidanthera/bugtracker/issues/1242
   //
-  if (Status == EFI_WRITE_PROTECTED
-   && OpenMode == EFI_FILE_MODE_READ
-   && Attributes == 0
-   && *NewHandle != NULL) {
+  if (  (Status == EFI_WRITE_PROTECTED)
+     && (OpenMode == EFI_FILE_MODE_READ)
+     && (Attributes == 0)
+     && (*NewHandle != NULL))
+  {
     DEBUG ((
       DEBUG_VERBOSE,
       "OCFS: Avoid invalid WP error for Filename %s\n",
@@ -86,14 +88,14 @@ OcOpenFileByRemainingDevicePath (
   IN  UINT64                          Attributes
   )
 {
-  EFI_STATUS                      Status;
-  EFI_SIMPLE_FILE_SYSTEM_PROTOCOL *FileSystem;
-  EFI_FILE_PROTOCOL               *LastFile;
-  CONST EFI_DEVICE_PATH_PROTOCOL  *FilePathNode;
-  CHAR16                          *AlignedPathName;
-  CHAR16                          *PathName;
-  UINTN                           PathLength;
-  EFI_FILE_PROTOCOL               *NextFile;
+  EFI_STATUS                       Status;
+  EFI_SIMPLE_FILE_SYSTEM_PROTOCOL  *FileSystem;
+  EFI_FILE_PROTOCOL                *LastFile;
+  CONST EFI_DEVICE_PATH_PROTOCOL   *FilePathNode;
+  CHAR16                           *AlignedPathName;
+  CHAR16                           *PathName;
+  UINTN                            PathLength;
+  EFI_FILE_PROTOCOL                *NextFile;
 
   ASSERT (FileSystemHandle != NULL);
   ASSERT (RemainingDevicePath != NULL);
@@ -125,8 +127,9 @@ OcOpenFileByRemainingDevicePath (
   //
   FilePathNode = RemainingDevicePath;
   while (!IsDevicePathEnd (FilePathNode)) {
-    if (DevicePathType (FilePathNode) != MEDIA_DEVICE_PATH ||
-        DevicePathSubType (FilePathNode) != MEDIA_FILEPATH_DP) {
+    if ((DevicePathType (FilePathNode) != MEDIA_DEVICE_PATH) ||
+        (DevicePathSubType (FilePathNode) != MEDIA_FILEPATH_DP))
+    {
       Status = EFI_INVALID_PARAMETER;
       goto CloseLastFile;
     }
@@ -140,7 +143,7 @@ OcOpenFileByRemainingDevicePath (
     AlignedPathName = AllocateCopyPool (
                         (DevicePathNodeLength (FilePathNode) -
                          SIZE_OF_FILEPATH_DEVICE_PATH),
-                        ((CONST FILEPATH_DEVICE_PATH *) FilePathNode)->PathName
+                        ((CONST FILEPATH_DEVICE_PATH *)FilePathNode)->PathName
                         );
     if (AlignedPathName == NULL) {
       Status = EFI_OUT_OF_RESOURCES;
@@ -153,7 +156,7 @@ OcOpenFileByRemainingDevicePath (
     // More details in a852f85986c1fe23fc3a429605e3c560ea800c54 OpenCorePkg commit.
     //
     PathLength = StrLen (AlignedPathName);
-    if (PathLength > 0 && AlignedPathName[PathLength - 1] == '\\') {
+    if ((PathLength > 0) && (AlignedPathName[PathLength - 1] == '\\')) {
       AlignedPathName[PathLength - 1] = '\0';
     }
 
@@ -163,12 +166,12 @@ OcOpenFileByRemainingDevicePath (
     // Open or create the file corresponding to the next pathname fragment.
     //
     Status = OcSafeFileOpen (
-      LastFile,
-      &NextFile,
-      PathName,
-      OpenMode,
-      Attributes
-      );
+               LastFile,
+               &NextFile,
+               PathName,
+               OpenMode,
+               Attributes
+               );
 
     FreePool (AlignedPathName);
 
@@ -180,7 +183,7 @@ OcOpenFileByRemainingDevicePath (
     // Advance to the next device path node.
     //
     LastFile->Close (LastFile);
-    LastFile = NextFile;
+    LastFile     = NextFile;
     FilePathNode = NextDevicePathNode (FilePathNode);
   }
 
@@ -207,8 +210,8 @@ OcOpenFileByDevicePath (
   IN     UINT64                    Attributes
   )
 {
-  EFI_STATUS Status;
-  EFI_HANDLE FileSystemHandle;
+  EFI_STATUS  Status;
+  EFI_HANDLE  FileSystemHandle;
 
   ASSERT (File != NULL);
   ASSERT (FilePath != NULL);
