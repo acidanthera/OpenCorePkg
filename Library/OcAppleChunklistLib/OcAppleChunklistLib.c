@@ -105,7 +105,7 @@ OcAppleChunklistVerifySignature (
   IN     CONST OC_RSA_PUBLIC_KEY     *PublicKey
   )
 {
-  BOOLEAN Result;
+  BOOLEAN  Result;
 
   ASSERT (Context != NULL);
   ASSERT (Context->Signature != NULL);

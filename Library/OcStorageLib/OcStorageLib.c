@@ -130,7 +130,7 @@ OcStorageInitializeVault (
   IN     UINT32              SignatureSize OPTIONAL
   )
 {
-  if (Signature != NULL && Vault == NULL) {
+  if ((Signature != NULL) && (Vault == NULL)) {
     DEBUG ((DEBUG_ERROR, "OCST: Missing vault with signature\n"));
     return EFI_SECURITY_VIOLATION;
   }

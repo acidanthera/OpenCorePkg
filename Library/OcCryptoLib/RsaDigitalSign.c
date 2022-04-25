@@ -496,13 +496,13 @@ RsaVerifySigDataFromData (
   IN OC_SIG_HASH_TYPE  Algorithm
   )
 {
-  OC_BN_NUM_WORDS ModulusNumWords;
+  OC_BN_NUM_WORDS  ModulusNumWords;
 
-  OC_BN_WORD      *Memory;
-  VOID            *Mont;
-  OC_BN_WORD      *N;
-  OC_BN_WORD      *RSqrMod;
-  VOID            *Scratch;
+  OC_BN_WORD  *Memory;
+  VOID        *Mont;
+  OC_BN_WORD  *N;
+  OC_BN_WORD  *RSqrMod;
+  VOID        *Scratch;
 
   OC_BN_WORD  N0Inv;
   BOOLEAN     Result;
@@ -515,10 +515,12 @@ RsaVerifySigDataFromData (
   ASSERT (Data != NULL);
   ASSERT (DataSize > 0);
 
-  if (ModulusSize > OC_BN_MONT_MAX_SIZE
-   || (ModulusSize % OC_BN_WORD_SIZE) != 0) {
+  if (  (ModulusSize > OC_BN_MONT_MAX_SIZE)
+     || ((ModulusSize % OC_BN_WORD_SIZE) != 0))
+  {
     return FALSE;
   }
+
   STATIC_ASSERT (
     RSA_MOD_MAX_SIZE <= OC_BN_MONT_MAX_SIZE,
     "The usage of BIG_NUM_MONT_PARAMS_SCRATCH_SIZE may be unsafe"
@@ -526,7 +528,7 @@ RsaVerifySigDataFromData (
   //
   // By definition: ModulusNumWords <= OC_BN_MONT_MAX_SIZE <= OC_BN_MAX_SIZE.
   //
-  ModulusNumWords = (OC_BN_NUM_WORDS) (ModulusSize / OC_BN_WORD_SIZE);
+  ModulusNumWords = (OC_BN_NUM_WORDS)(ModulusSize / OC_BN_WORD_SIZE);
 
   STATIC_ASSERT (
     OC_BN_MAX_SIZE <= MAX_UINTN / 2,
@@ -551,6 +553,7 @@ RsaVerifySigDataFromData (
     FreePool (Memory);
     return FALSE;
   }
+
   //
   // This usage of RSA_SCRATCH_BUFFER_SIZE may overflow. However, the caller
   // will error in this case before accessing the buffer.
@@ -609,7 +612,7 @@ RsaVerifySigHashFromKey (
   //
   return RsaVerifySigHashFromProcessed (
            (OC_BN_WORD *)Key->Data,
-           (OC_BN_NUM_WORDS) Key->Hdr.NumQwords * (8 / OC_BN_WORD_SIZE),
+           (OC_BN_NUM_WORDS)Key->Hdr.NumQwords * (8 / OC_BN_WORD_SIZE),
            (OC_BN_WORD)Key->Hdr.N0Inv,
            (OC_BN_WORD *)&Key->Data[Key->Hdr.NumQwords],
            0x10001,
@@ -634,8 +637,8 @@ RsaVerifySigHashFromKeyDynalloc (
   IN OC_SIG_HASH_TYPE         Algorithm
   )
 {
-  BOOLEAN Result;
-  VOID    *Scratch;
+  BOOLEAN  Result;
+  VOID     *Scratch;
 
   ASSERT (Key != NULL);
   //
@@ -643,8 +646,8 @@ RsaVerifySigHashFromKeyDynalloc (
   // will error in this case before accessing the buffer.
   //
   Scratch = AllocatePool (
-    RSA_SCRATCH_BUFFER_SIZE ((OC_BN_SIZE) Key->Hdr.NumQwords * sizeof (UINT64))
-    );
+              RSA_SCRATCH_BUFFER_SIZE ((OC_BN_SIZE)Key->Hdr.NumQwords * sizeof (UINT64))
+              );
   if (Scratch == NULL) {
     return FALSE;
   }
@@ -658,7 +661,7 @@ RsaVerifySigHashFromKeyDynalloc (
              Algorithm,
              Scratch
              );
-  
+
   FreePool (Scratch);
 
   return Result;
@@ -693,7 +696,7 @@ RsaVerifySigDataFromKey (
   //
   return RsaVerifySigDataFromProcessed (
            (OC_BN_WORD *)Key->Data,
-           (OC_BN_NUM_WORDS) Key->Hdr.NumQwords * (8 / OC_BN_WORD_SIZE),
+           (OC_BN_NUM_WORDS)Key->Hdr.NumQwords * (8 / OC_BN_WORD_SIZE),
            (OC_BN_WORD)Key->Hdr.N0Inv,
            (OC_BN_WORD *)&Key->Data[Key->Hdr.NumQwords],
            0x10001,
@@ -718,8 +721,8 @@ RsaVerifySigDataFromKeyDynalloc (
   IN OC_SIG_HASH_TYPE         Algorithm
   )
 {
-  BOOLEAN Result;
-  VOID    *Scratch;
+  BOOLEAN  Result;
+  VOID     *Scratch;
 
   ASSERT (Key != NULL);
   //
@@ -727,8 +730,8 @@ RsaVerifySigDataFromKeyDynalloc (
   // will error in this case before accessing the buffer.
   //
   Scratch = AllocatePool (
-    RSA_SCRATCH_BUFFER_SIZE ((OC_BN_SIZE) Key->Hdr.NumQwords * sizeof (UINT64))
-    );
+              RSA_SCRATCH_BUFFER_SIZE ((OC_BN_SIZE)Key->Hdr.NumQwords * sizeof (UINT64))
+              );
   if (Scratch == NULL) {
     return FALSE;
   }
@@ -742,7 +745,7 @@ RsaVerifySigDataFromKeyDynalloc (
              Algorithm,
              Scratch
              );
-  
+
   FreePool (Scratch);
 
   return Result;

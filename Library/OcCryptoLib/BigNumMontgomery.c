@@ -160,11 +160,11 @@ BigNumCalculateMontParams (
   IN     OC_BN_WORD        *Scratch
   )
 {
-  OC_BN_WORD      N0Inv;
-  OC_BN_NUM_BITS  NumBits;
-  OC_BN_NUM_WORDS NumWordsRSqr;
-  OC_BN_WORD      *RSqr;
-  OC_BN_WORD      *Scratch2;
+  OC_BN_WORD       N0Inv;
+  OC_BN_NUM_BITS   NumBits;
+  OC_BN_NUM_WORDS  NumWordsRSqr;
+  OC_BN_WORD       *RSqr;
+  OC_BN_WORD       *Scratch2;
 
   ASSERT (RSqrMod != NULL);
   ASSERT (NumWords > 0);
@@ -180,6 +180,7 @@ BigNumCalculateMontParams (
   if (N0Inv == 0) {
     return 0;
   }
+
   //
   // This cannot overflow because it holds that NumWords <= OC_BN_MONT_MAX_LEN.
   //

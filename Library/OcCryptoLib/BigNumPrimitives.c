@@ -574,13 +574,13 @@ BigNumMod (
 {
   INTN  CmpResult;
 
-  OC_BN_NUM_BITS  SigBitsModTmp;
-  OC_BN_NUM_WORDS SigWordsModTmp;
-  OC_BN_WORD      *ModTmp;
-  OC_BN_NUM_BITS  BigDivExp;
-  OC_BN_WORD      *BigDiv;
-  OC_BN_NUM_BITS  SigBitsBigDiv;
-  OC_BN_NUM_WORDS SigWordsBigDiv;
+  OC_BN_NUM_BITS   SigBitsModTmp;
+  OC_BN_NUM_WORDS  SigWordsModTmp;
+  OC_BN_WORD       *ModTmp;
+  OC_BN_NUM_BITS   BigDivExp;
+  OC_BN_WORD       *BigDiv;
+  OC_BN_NUM_BITS   SigBitsBigDiv;
+  OC_BN_NUM_WORDS  SigWordsBigDiv;
 
   OC_BN_NUM_BITS  DeltaBits;
 

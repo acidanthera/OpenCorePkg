@@ -51,13 +51,13 @@ TestRsa2048Sha256Verify (
     (CONST OC_RSA_PUBLIC_KEY *)Rsa2048Sha256Sample.PublicKey;
 
   SignatureVerified = RsaVerifySigHashFromKeyDynalloc (
-    PubKey,
-    Rsa2048Sha256Sample.Signature,
-    sizeof (Rsa2048Sha256Sample.Signature),
-    DataSha256Hash,
-    sizeof (DataSha256Hash),
-    OcSigHashTypeSha256
-    );
+                        PubKey,
+                        Rsa2048Sha256Sample.Signature,
+                        sizeof (Rsa2048Sha256Sample.Signature),
+                        DataSha256Hash,
+                        sizeof (DataSha256Hash),
+                        OcSigHashTypeSha256
+                        );
 
   if (SignatureVerified) {
     Status = EFI_SUCCESS;

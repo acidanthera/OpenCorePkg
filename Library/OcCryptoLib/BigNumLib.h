@@ -40,7 +40,7 @@ typedef UINT32 OC_BN_NUM_BITS;
 
 /**
   The size, in Bytes, required to store a BigNum with NumWords words.
- 
+
   @param[in] NumWords  The number of Words. Must be at most OC_BN_MAX_LEN.
 **/
 #define OC_BN_SIZE(NumWords)  \
@@ -53,7 +53,7 @@ STATIC_ASSERT (
 
 /**
   The size, in Bits, required to store a BigNum with NumWords words.
- 
+
   @param[in] NumWords  The number of Words. Must be at most OC_BN_MAX_LEN.
 **/
 #define OC_BN_BITS(NumWords)  \
@@ -108,7 +108,7 @@ BigNumSwapWord (
 
 /**
   The length, in BigNum words, of RSqr.
- 
+
   @param[in] NumWords  The number of Words of N. Must be at most
                        OC_BN_MONT_MAX_LEN.
 **/
@@ -121,7 +121,7 @@ STATIC_ASSERT (
 
 /**
   The size, in Bytes, of RSqr.
- 
+
   @param[in] NumWords  The number of Words of N. Must be at most
                        OC_BN_MONT_MAX_LEN.
 **/
@@ -129,7 +129,7 @@ STATIC_ASSERT (
 
 /**
   1 + 2 * NumWords for RSqr, and then twice more than that for Mod.
- 
+
   @param[in] NumWords  The number of Words of RSqrMod and N. Must be at most
                        OC_BN_MONT_MAX_LEN.
 **/
