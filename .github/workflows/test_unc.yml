@@ -1,5 +1,15 @@
 name: Test Uncrustify
 
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+  release:
+    types: [published]
+
+env:
+  PROJECT_TYPE: UEFI
+
 jobs:
   build-macos:
     name: macOS
