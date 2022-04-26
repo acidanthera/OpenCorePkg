@@ -1,0 +1,79 @@
+name: Test Uncrustify
+
+jobs:
+  build-macos:
+    name: macOS
+    runs-on: macos-latest
+    env:
+      JOB_TYPE: BUILD
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Install Dependencies
+        run: brew install cmake
+        env:
+          HOMEBREW_NO_INSTALL_CLEANUP: 1
+          HOMEBREW_NO_AUTO_UPDATE: 1
+
+      - name: CI Bootstrap
+        run: |
+          src=$(/usr/bin/curl -Lfs https://raw.githubusercontent.com/acidanthera/ocbuild/master/ci-bootstrap.sh) && eval "$src" || exit 1
+
+      - run: ./Utilities/Uncrustify/run_uncrustify.tool
+
+      - name: Upload to Artifacts
+        uses: actions/upload-artifact@v3
+        if: failure()
+        with:
+          name: Uncrustify Artifacts
+          path: ./Utilities/Uncrustify/uncrustify.diff
+
+  build-linux:
+    name: Linux
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Install Dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install cmake
+
+      - name: CI Bootstrap
+        run: |
+          src=$(/usr/bin/curl -Lfs https://raw.githubusercontent.com/acidanthera/ocbuild/master/ci-bootstrap.sh) && eval "$src" || exit 1
+
+      - run: ./Utilities/Uncrustify/run_uncrustify.tool
+
+      - name: Upload to Artifacts
+        uses: actions/upload-artifact@v3
+        if: failure()
+        with:
+          name: Uncrustify Artifacts
+          path: ./Utilities/Uncrustify/uncrustify.diff
+
+  build-windows:
+    name: Windows VS2019
+    runs-on: windows-2019
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Install Dependencies
+        run: |
+          choco install make cmake --no-progress
+
+      - name: CI Bootstrap
+        run: |
+          src=$(curl -Lfs https://raw.githubusercontent.com/acidanthera/ocbuild/master/ci-bootstrap.sh) && eval "$src" || exit 1
+
+      - run: ./Utilities/Uncrustify/run_uncrustify.tool
+
+      - name: Upload to Artifacts
+        uses: actions/upload-artifact@v3
+        if: failure()
+        with:
+          name: Uncrustify Artifacts
+          path: ./Utilities/Uncrustify/uncrustify.diff
