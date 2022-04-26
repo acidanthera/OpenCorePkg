@@ -730,6 +730,7 @@ InitFile (
   Status = ReadMftRecord (File->File, File->FileRecord, RecordNumber);
   if (EFI_ERROR (Status)) {
     FreePool (File->FileRecord);
+    File->FileRecord = NULL;
     return Status;
   }
 
@@ -738,6 +739,7 @@ InitFile (
   if ((Record->Flags & IS_IN_USE) == 0) {
     DEBUG ((DEBUG_INFO, "NTFS: MFT Record 0x%Lx is not in use\n", RecordNumber));
     FreePool (File->FileRecord);
+    File->FileRecord = NULL;
     return EFI_VOLUME_CORRUPTED;
   }
 
@@ -746,6 +748,7 @@ InitFile (
     if (Attr == NULL) {
       DEBUG ((DEBUG_INFO, "NTFS: No $DATA in MFT Record 0x%Lx\n", RecordNumber));
       FreePool (File->FileRecord);
+      File->FileRecord = NULL;
       return EFI_VOLUME_CORRUPTED;
     }
 
@@ -762,6 +765,7 @@ InitFile (
     Status = InitAttr (&File->Attr, File);
     if (EFI_ERROR (Status)) {
       FreePool (File->FileRecord);
+      File->FileRecord = NULL;
       return Status;
     }
   }
