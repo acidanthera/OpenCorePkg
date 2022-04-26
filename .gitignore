@@ -19,6 +19,7 @@ Utilities/macserial/macserial
 Utilities/icnspack/icnspack
 Utilities/ocpasswordgen/ocpasswordgen
 Utilities/ocvalidate/ocvalidate
+Utilities/ocvalidate/*.plist
 Utilities/LogoutHook/nvramdump
 Utilities/RsaTool/RsaTool
 Utilities/TestBmf/Bmf
@@ -36,6 +37,10 @@ Utilities/TestMacho/Macho
 Utilities/TestRsaPreprocess/RsaPreprocess
 Utilities/TestSmbios/Smbios
 Utilities/TestPeCoff/PeCoff
+Utilities/Uncrustify/filelist.txt
+Utilities/Uncrustify/uncrustify
+Utilities/Uncrustify/uncrustify.diff
+Utilities/Uncrustify/Uncrustify-repo/
 *.o
 *.o.tmp
 *.d
@@ -74,4 +79,3 @@ Legacy/BinDrivers/X64
 Legacy/BinDrivers/IA32
 Legacy/BootLoader/bin
 Legacy/BootSector/bin
-Utilities/ocvalidate/*.plist
