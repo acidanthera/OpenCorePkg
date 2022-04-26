@@ -28,11 +28,11 @@ jobs:
 
       - name: Run Uncrustify
         run: |
-          src=$(/usr/bin/curl -Lfs https://raw.githubusercontent.com/acidanthera/ocbuild/master/uncrustify/uncstrap.sh) && eval "$src" || exit 1
+          ./Utilities/Uncrustify/run_uncrustify.tool
 
       - name: Upload to Artifacts
         uses: actions/upload-artifact@v3
         if: failure()
         with:
           name: Uncrustify Artifacts
-          path: ./uncrustify.diff
+          path: ./Utilities/Uncrustify/uncrustify.diff
