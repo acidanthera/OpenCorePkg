@@ -9,19 +9,19 @@
 #include "NTFS.h"
 #include "Helper.h"
 
-#define LANGUAGE_CODE_ENGLISH "eng"
+#define LANGUAGE_CODE_ENGLISH  "eng"
 
-CHAR16  *gNTFSDriverName     = L"NTFS Driver";
+CHAR16  *gNTFSDriverName = L"NTFS Driver";
 
 EFI_COMPONENT_NAME_PROTOCOL
-gNTFSDriverNames = {
+  gNTFSDriverNames = {
   .GetDriverName      = NTFSCtlDriverName,
   .GetControllerName  = NTFSCtlGetControllerName,
   .SupportedLanguages = LANGUAGE_CODE_ENGLISH
 };
 
 EFI_DRIVER_BINDING_PROTOCOL
-gNTFSDriverBinding = {
+  gNTFSDriverBinding = {
   .Supported           = NTFSSupported,
   .Start               = NTFSStart,
   .Stop                = NTFSStop,
@@ -33,37 +33,37 @@ gNTFSDriverBinding = {
 EFI_STATUS
 EFIAPI
 NTFSEntryPoint (
-  IN EFI_HANDLE       ImageHandle,
-  IN EFI_SYSTEM_TABLE *SystemTable
+  IN EFI_HANDLE        ImageHandle,
+  IN EFI_SYSTEM_TABLE  *SystemTable
   )
 {
-  EFI_STATUS                Status;
-  EFI_LOADED_IMAGE_PROTOCOL *LoadedImage;
+  EFI_STATUS                 Status;
+  EFI_LOADED_IMAGE_PROTOCOL  *LoadedImage;
 
   Status = gBS->OpenProtocol (
-      ImageHandle,
-      &gEfiLoadedImageProtocolGuid,
-      (VOID **) &LoadedImage,
-      ImageHandle,
-      NULL,
-      EFI_OPEN_PROTOCOL_GET_PROTOCOL
-      );
+                  ImageHandle,
+                  &gEfiLoadedImageProtocolGuid,
+                  (VOID **)&LoadedImage,
+                  ImageHandle,
+                  NULL,
+                  EFI_OPEN_PROTOCOL_GET_PROTOCOL
+                  );
   if (EFI_ERROR (Status)) {
     DEBUG ((DEBUG_INFO, "NTFS: Could not open loaded image protocol - %r\n", Status));
     return Status;
   }
 
-  gNTFSDriverBinding.ImageHandle = ImageHandle;
+  gNTFSDriverBinding.ImageHandle         = ImageHandle;
   gNTFSDriverBinding.DriverBindingHandle = ImageHandle;
 
   Status = gBS->InstallMultipleProtocolInterfaces (
-      &ImageHandle,
-      &gEfiDriverBindingProtocolGuid,
-      &gNTFSDriverBinding,
-      &gEfiComponentNameProtocolGuid,
-      &gNTFSDriverNames,
-      NULL
-      );
+                  &ImageHandle,
+                  &gEfiDriverBindingProtocolGuid,
+                  &gNTFSDriverBinding,
+                  &gEfiComponentNameProtocolGuid,
+                  &gNTFSDriverNames,
+                  NULL
+                  );
   if (EFI_ERROR (Status)) {
     DEBUG ((DEBUG_INFO, "NTFS: Could not bind driver - %r\n", Status));
     return Status;
@@ -77,21 +77,21 @@ NTFSEntryPoint (
 EFI_STATUS
 EFIAPI
 UnloadNTFSDriver (
-  IN EFI_HANDLE ImageHandle
+  IN EFI_HANDLE  ImageHandle
   )
 {
-  EFI_HANDLE *Buffer;
-  UINTN      NumOfHandles;
-  UINTN      Index;
-  EFI_STATUS Status;
+  EFI_HANDLE  *Buffer;
+  UINTN       NumOfHandles;
+  UINTN       Index;
+  EFI_STATUS  Status;
 
   Status = gBS->LocateHandleBuffer (
-    AllHandles,
-    NULL,
-    NULL,
-    &NumOfHandles,
-    &Buffer
-    );
+                  AllHandles,
+                  NULL,
+                  NULL,
+                  &NumOfHandles,
+                  &Buffer
+                  );
   if (EFI_ERROR (Status)) {
     return Status;
   }
@@ -101,17 +101,17 @@ UnloadNTFSDriver (
   }
 
   if (Buffer != NULL) {
-    FreePool(Buffer);
+    FreePool (Buffer);
   }
 
   Status = gBS->UninstallMultipleProtocolInterfaces (
-    ImageHandle,
-    &gEfiDriverBindingProtocolGuid,
-    &gNTFSDriverBinding,
-    &gEfiComponentNameProtocolGuid,
-    &gNTFSDriverNames,
-    NULL
-    );
+                  ImageHandle,
+                  &gEfiDriverBindingProtocolGuid,
+                  &gNTFSDriverBinding,
+                  &gEfiComponentNameProtocolGuid,
+                  &gNTFSDriverNames,
+                  NULL
+                  );
 
   return Status;
 }
@@ -119,13 +119,13 @@ UnloadNTFSDriver (
 EFI_STATUS
 EFIAPI
 NTFSSupported (
-  IN EFI_DRIVER_BINDING_PROTOCOL *This,
-  IN EFI_HANDLE                  Controller,
-  IN EFI_DEVICE_PATH_PROTOCOL    *RemainingDevicePath
+  IN EFI_DRIVER_BINDING_PROTOCOL  *This,
+  IN EFI_HANDLE                   Controller,
+  IN EFI_DEVICE_PATH_PROTOCOL     *RemainingDevicePath
   )
 {
-  EFI_STATUS   Status;
-  EFI_FS       *Instance;
+  EFI_STATUS  Status;
+  EFI_FS      *Instance;
 
   Instance = AllocateZeroPool (sizeof (EFI_FS));
   if (Instance == NULL) {
@@ -134,26 +134,26 @@ NTFSSupported (
   }
 
   Status = gBS->OpenProtocol (
-    Controller,
-    &gEfiBlockIoProtocolGuid,
-    (VOID **) &Instance->BlockIo,
-    This->DriverBindingHandle,
-    Controller,
-    EFI_OPEN_PROTOCOL_GET_PROTOCOL
-    );
+                  Controller,
+                  &gEfiBlockIoProtocolGuid,
+                  (VOID **)&Instance->BlockIo,
+                  This->DriverBindingHandle,
+                  Controller,
+                  EFI_OPEN_PROTOCOL_GET_PROTOCOL
+                  );
   if (EFI_ERROR (Status)) {
     FreePool (Instance);
     return Status;
   }
 
   Status = gBS->OpenProtocol (
-    Controller,
-    &gEfiDiskIoProtocolGuid,
-    (VOID **) &Instance->DiskIo,
-    This->DriverBindingHandle,
-    Controller,
-    EFI_OPEN_PROTOCOL_BY_DRIVER
-    );
+                  Controller,
+                  &gEfiDiskIoProtocolGuid,
+                  (VOID **)&Instance->DiskIo,
+                  This->DriverBindingHandle,
+                  Controller,
+                  EFI_OPEN_PROTOCOL_BY_DRIVER
+                  );
   if (EFI_ERROR (Status)) {
     FreePool (Instance);
     return Status;
@@ -172,11 +172,11 @@ NTFSSupported (
   }
 
   gBS->CloseProtocol (
-    Controller,
-    &gEfiDiskIoProtocolGuid,
-    This->DriverBindingHandle,
-    Controller
-    );
+         Controller,
+         &gEfiDiskIoProtocolGuid,
+         This->DriverBindingHandle,
+         Controller
+         );
 
   FreePool (Instance);
 
@@ -187,17 +187,17 @@ STATIC
 EFI_STATUS
 EFIAPI
 OpenVolume (
-  IN EFI_SIMPLE_FILE_SYSTEM_PROTOCOL *This,
-  OUT EFI_FILE_PROTOCOL              **Root
+  IN EFI_SIMPLE_FILE_SYSTEM_PROTOCOL  *This,
+  OUT EFI_FILE_PROTOCOL               **Root
   )
 {
-  EFI_FS         *Instance;
+  EFI_FS  *Instance;
 
   ASSERT (This != NULL);
 
-  Instance = (EFI_FS *) This;
+  Instance = (EFI_FS *)This;
 
-  *Root = (EFI_FILE_PROTOCOL *) Instance->RootIndex->File;
+  *Root = (EFI_FILE_PROTOCOL *)Instance->RootIndex->File;
 
   return EFI_SUCCESS;
 }
@@ -208,13 +208,13 @@ OpenVolume (
 EFI_STATUS
 EFIAPI
 NTFSStart (
-  IN EFI_DRIVER_BINDING_PROTOCOL *This,
-  IN EFI_HANDLE                  Controller,
-  IN EFI_DEVICE_PATH_PROTOCOL    *RemainingDevicePath
+  IN EFI_DRIVER_BINDING_PROTOCOL  *This,
+  IN EFI_HANDLE                   Controller,
+  IN EFI_DEVICE_PATH_PROTOCOL     *RemainingDevicePath
   )
 {
-  EFI_STATUS   Status;
-  EFI_FS       *Instance;
+  EFI_STATUS  Status;
+  EFI_FS      *Instance;
 
   Instance = AllocateZeroPool (sizeof (EFI_FS));
   if (Instance == NULL) {
@@ -222,7 +222,7 @@ NTFSStart (
     return EFI_OUT_OF_RESOURCES;
   }
 
-  Instance->FileIoInterface.Revision = EFI_SIMPLE_FILE_SYSTEM_PROTOCOL_REVISION;
+  Instance->FileIoInterface.Revision   = EFI_SIMPLE_FILE_SYSTEM_PROTOCOL_REVISION;
   Instance->FileIoInterface.OpenVolume = OpenVolume;
 
   Instance->DevicePath = DevicePathFromHandle (Controller);
@@ -233,18 +233,19 @@ NTFSStart (
   }
 
   Status = gBS->OpenProtocol (
-    Controller,
-    &gEfiBlockIoProtocolGuid,
-    (VOID **) &Instance->BlockIo,
-    This->DriverBindingHandle,
-    Controller,
-    /*
-     * EFI_OPEN_PROTOCOL_BY_DRIVER would return Access Denied here,
-     * because the disk driver has that protocol already open. So use
-     * EFI_OPEN_PROTOCOL_GET_PROTOCOL (which doesn't require us to close it).
-     */
-    EFI_OPEN_PROTOCOL_GET_PROTOCOL
-    );
+                  Controller,
+                  &gEfiBlockIoProtocolGuid,
+                  (VOID **)&Instance->BlockIo,
+                  This->DriverBindingHandle,
+                  Controller,
+
+                  /*
+                   * EFI_OPEN_PROTOCOL_BY_DRIVER would return Access Denied here,
+                   * because the disk driver has that protocol already open. So use
+                   * EFI_OPEN_PROTOCOL_GET_PROTOCOL (which doesn't require us to close it).
+                   */
+                  EFI_OPEN_PROTOCOL_GET_PROTOCOL
+                  );
   if (EFI_ERROR (Status)) {
     DEBUG ((DEBUG_INFO, "NTFS: Could not access BlockIO protocol - %r\n", Status));
     FreePool (Instance);
@@ -252,13 +253,13 @@ NTFSStart (
   }
 
   Status = gBS->OpenProtocol (
-    Controller,
-    &gEfiDiskIoProtocolGuid,
-    (VOID **) &Instance->DiskIo,
-    This->DriverBindingHandle,
-    Controller,
-    EFI_OPEN_PROTOCOL_BY_DRIVER
-    );
+                  Controller,
+                  &gEfiDiskIoProtocolGuid,
+                  (VOID **)&Instance->DiskIo,
+                  This->DriverBindingHandle,
+                  Controller,
+                  EFI_OPEN_PROTOCOL_BY_DRIVER
+                  );
   if (EFI_ERROR (Status)) {
     DEBUG ((DEBUG_INFO, "NTFS: Could not access DiskIO protocol - %r\n", Status));
     FreePool (Instance);
@@ -285,19 +286,19 @@ NTFSStart (
   }
 
   Status = gBS->InstallMultipleProtocolInterfaces (
-    &Controller,
-    &gEfiSimpleFileSystemProtocolGuid,
-    &Instance->FileIoInterface,
-    NULL
-    );
+                  &Controller,
+                  &gEfiSimpleFileSystemProtocolGuid,
+                  &Instance->FileIoInterface,
+                  NULL
+                  );
   if (EFI_ERROR (Status)) {
     DEBUG ((DEBUG_INFO, "NTFS: Could not install simple file system protocol - %r\n", Status));
     gBS->CloseProtocol (
-      Controller,
-      &gEfiDiskIoProtocolGuid,
-      This->DriverBindingHandle,
-      Controller
-      );
+           Controller,
+           &gEfiDiskIoProtocolGuid,
+           This->DriverBindingHandle,
+           Controller
+           );
 
     FreeAttr (&Instance->RootIndex->Attr);
     FreeAttr (&Instance->MftStart->Attr);
@@ -318,30 +319,30 @@ NTFSStart (
 EFI_STATUS
 EFIAPI
 NTFSStop (
-  IN EFI_DRIVER_BINDING_PROTOCOL *This,
-  IN EFI_HANDLE                  Controller,
-  IN UINTN                       NumberOfChildren,
-  IN EFI_HANDLE                  *ChildHandleBuffer
+  IN EFI_DRIVER_BINDING_PROTOCOL  *This,
+  IN EFI_HANDLE                   Controller,
+  IN UINTN                        NumberOfChildren,
+  IN EFI_HANDLE                   *ChildHandleBuffer
   )
 {
-  EFI_STATUS                      Status;
-  EFI_SIMPLE_FILE_SYSTEM_PROTOCOL *NTFS;
-  EFI_FS                          *Instance;
+  EFI_STATUS                       Status;
+  EFI_SIMPLE_FILE_SYSTEM_PROTOCOL  *NTFS;
+  EFI_FS                           *Instance;
 
   Status = gBS->OpenProtocol (
-    Controller,
-    &gEfiSimpleFileSystemProtocolGuid,
-    (VOID **) &NTFS,
-    This->DriverBindingHandle,
-    Controller,
-    EFI_OPEN_PROTOCOL_GET_PROTOCOL
-    );
+                  Controller,
+                  &gEfiSimpleFileSystemProtocolGuid,
+                  (VOID **)&NTFS,
+                  This->DriverBindingHandle,
+                  Controller,
+                  EFI_OPEN_PROTOCOL_GET_PROTOCOL
+                  );
   if (EFI_ERROR (Status)) {
     DEBUG ((DEBUG_INFO, "NTFS: Could not locate our instance - %r\n", Status));
     return Status;
   }
 
-  Instance = (EFI_FS *) NTFS;
+  Instance = (EFI_FS *)NTFS;
 
   FreeAttr (&Instance->RootIndex->Attr);
   FreeAttr (&Instance->MftStart->Attr);
@@ -350,23 +351,24 @@ NTFSStop (
   FreePool (Instance->RootIndex->File);
 
   Status = gBS->UninstallMultipleProtocolInterfaces (
-    Controller,
-    &gEfiSimpleFileSystemProtocolGuid,
-    &NTFS,
-    NULL
-    );
+                  Controller,
+                  &gEfiSimpleFileSystemProtocolGuid,
+                  &NTFS,
+                  NULL
+                  );
   if (EFI_ERROR (Status)) {
     return Status;
   }
+
   //
   // Close DISK_IO Protocol
   //
   Status = gBS->CloseProtocol (
-    Controller,
-    &gEfiDiskIoProtocolGuid,
-    This->DriverBindingHandle,
-    Controller
-    );
+                  Controller,
+                  &gEfiDiskIoProtocolGuid,
+                  This->DriverBindingHandle,
+                  Controller
+                  );
   if (EFI_ERROR (Status)) {
     return Status;
   }
@@ -377,9 +379,9 @@ NTFSStop (
 EFI_STATUS
 EFIAPI
 NTFSCtlDriverName (
-  IN EFI_COMPONENT_NAME_PROTOCOL *This,
-  IN CHAR8                       *Language,
-  OUT CHAR16                     **DriverName
+  IN EFI_COMPONENT_NAME_PROTOCOL  *This,
+  IN CHAR8                        *Language,
+  OUT CHAR16                      **DriverName
   )
 {
   *DriverName = gNTFSDriverName;
@@ -389,11 +391,11 @@ NTFSCtlDriverName (
 EFI_STATUS
 EFIAPI
 NTFSCtlGetControllerName (
-  IN EFI_COMPONENT_NAME_PROTOCOL *This,
-  IN EFI_HANDLE                  Controller,
-  IN EFI_HANDLE                  ChildHandle      OPTIONAL,
-  IN CHAR8                       *Language,
-  OUT CHAR16                     **ControllerName
+  IN EFI_COMPONENT_NAME_PROTOCOL  *This,
+  IN EFI_HANDLE                   Controller,
+  IN EFI_HANDLE                   ChildHandle      OPTIONAL,
+  IN CHAR8                        *Language,
+  OUT CHAR16                      **ControllerName
   )
 {
   return EFI_UNSUPPORTED;

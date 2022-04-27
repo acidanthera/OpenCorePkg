@@ -224,6 +224,7 @@ enum {
 };
 
 #pragma pack(1)
+
 /**
    Table 4.21. Layout of a File Record
    ____________________________________________________________________
@@ -246,18 +247,18 @@ enum {
    --------------------------------------------------------------------
 **/
 typedef struct {
-  UINT32 Magic;
-  UINT16 UpdateSequenceOffset;
-  UINT16 S_Size;
-  UINT64 LSN;
-  UINT16 SequenceNumber;
-  UINT16 HardLinkCount;
-  UINT16 AttributeOffset;
-  UINT16 Flags;
-  UINT32 RealSize;
-  UINT32 AllocatedSize;
-  UINT64 BaseFileRecord;
-  UINT16 NextAttributeId;
+  UINT32    Magic;
+  UINT16    UpdateSequenceOffset;
+  UINT16    S_Size;
+  UINT64    LSN;
+  UINT16    SequenceNumber;
+  UINT16    HardLinkCount;
+  UINT16    AttributeOffset;
+  UINT16    Flags;
+  UINT32    RealSize;
+  UINT32    AllocatedSize;
+  UINT64    BaseFileRecord;
+  UINT16    NextAttributeId;
 } FILE_RECORD_HEADER;
 
 /**
@@ -281,17 +282,17 @@ typedef struct {
    --------------------------------------------------------------------
 **/
 typedef struct {
-  UINT32 Type;
-  UINT32 Length;
-  UINT8  NonResFlag;
-  UINT8  NameLength;
-  UINT16 NameOffset;
-  UINT16 Flags;
-  UINT16 AttributeId;
-  UINT32 InfoLength;
-  UINT16 InfoOffset;
-  UINT8  IndexedFlag;
-  UINT8  Padding;
+  UINT32    Type;
+  UINT32    Length;
+  UINT8     NonResFlag;
+  UINT8     NameLength;
+  UINT16    NameOffset;
+  UINT16    Flags;
+  UINT16    AttributeId;
+  UINT32    InfoLength;
+  UINT16    InfoOffset;
+  UINT8     IndexedFlag;
+  UINT8     Padding;
 } ATTR_HEADER_RES;
 
 /**
@@ -319,21 +320,21 @@ typedef struct {
    --------------------------------------------------------------------
 **/
 typedef struct {
-  UINT32 Type;
-  UINT32 Length;
-  UINT8  NonResFlag;
-  UINT8  NameLength;
-  UINT16 NameOffset;
-  UINT16 Flags;
-  UINT16 AttributeId;
-  UINT64 StartingVCN;
-  UINT64 LastVCN;
-  UINT16 DataRunsOffset;
-  UINT16 CompressionUnitSize;
-  UINT32 Padding;
-  UINT64 AllocatedSize;
-  UINT64 RealSize;
-  UINT64 InitializedDataSize;
+  UINT32    Type;
+  UINT32    Length;
+  UINT8     NonResFlag;
+  UINT8     NameLength;
+  UINT16    NameOffset;
+  UINT16    Flags;
+  UINT16    AttributeId;
+  UINT64    StartingVCN;
+  UINT64    LastVCN;
+  UINT16    DataRunsOffset;
+  UINT16    CompressionUnitSize;
+  UINT32    Padding;
+  UINT64    AllocatedSize;
+  UINT64    RealSize;
+  UINT64    InitializedDataSize;
 } ATTR_HEADER_NONRES;
 
 /**
@@ -353,13 +354,13 @@ typedef struct {
    --------------------------------------------------------------------
 **/
 typedef struct {
-  UINT32 Type;
-  UINT16 RecordLength;
-  UINT8  NameLength;
-  UINT8  NameOffset;
-  UINT64 StartingVCN;
-  UINT64 BaseFileReference;
-  UINT16 AttributeId;
+  UINT32    Type;
+  UINT16    RecordLength;
+  UINT8     NameLength;
+  UINT8     NameOffset;
+  UINT64    StartingVCN;
+  UINT64    BaseFileReference;
+  UINT16    AttributeId;
 } ATTR_LIST_RECORD;
 
 /**
@@ -391,12 +392,12 @@ typedef struct {
    --------------------------------------------------------------------
 **/
 typedef struct {
-  UINT8  FileRecordNumber[6];
-  UINT16 SequenceNumber;
-  UINT16 IndexEntryLength;
-  UINT16 StreamLength;
-  UINT8  Flags;
-  UINT8  Padding[3];
+  UINT8     FileRecordNumber[6];
+  UINT16    SequenceNumber;
+  UINT16    IndexEntryLength;
+  UINT16    StreamLength;
+  UINT8     Flags;
+  UINT8     Padding[3];
 } INDEX_ENTRY;
 
 /**
@@ -423,20 +424,20 @@ typedef struct {
    (a) These values are relative to 0x18
 **/
 typedef struct {
-  UINT32 Magic;
-  UINT16 UpdateSequenceOffset;
-  UINT16 S_Size;
-  UINT64 LSN;
-  UINT64 IndexRecordVCN;
+  UINT32    Magic;
+  UINT16    UpdateSequenceOffset;
+  UINT16    S_Size;
+  UINT64    LSN;
+  UINT64    IndexRecordVCN;
 } INDEX_HEADER;
 
 typedef struct {
-  INDEX_HEADER Header;
-  UINT32       IndexEntriesOffset;
-  UINT32       IndexEntriesSize;
-  UINT32       IndexEntriesAllocated;
-  UINT8        IsNotLeafNode;
-  UINT8        Padding[3];
+  INDEX_HEADER    Header;
+  UINT32          IndexEntriesOffset;
+  UINT32          IndexEntriesSize;
+  UINT32          IndexEntriesAllocated;
+  UINT8           IsNotLeafNode;
+  UINT8           Padding[3];
 } INDEX_RECORD_HEADER;
 
 /**
@@ -464,20 +465,20 @@ typedef struct {
    --------------------------------------------------------------------
 **/
 typedef struct {
-  UINT32 Type;
-  UINT32 CollationRule;
-  UINT32 IndexAllocationSize;
-  UINT8  IndexRecordClusters;
-  UINT8  Padding[3];
+  UINT32    Type;
+  UINT32    CollationRule;
+  UINT32    IndexAllocationSize;
+  UINT8     IndexRecordClusters;
+  UINT8     Padding[3];
 } INDEX_ROOT;
 
 typedef struct {
-  INDEX_ROOT Root;
-  UINT32     FirstEntryOffset;
-  UINT32     EntriesTotalSize;
-  UINT32     EntriesAllocatedSize;
-  UINT8      Flags;
-  UINT8      Padding[3];
+  INDEX_ROOT    Root;
+  UINT32        FirstEntryOffset;
+  UINT32        EntriesTotalSize;
+  UINT32        EntriesAllocatedSize;
+  UINT8         Flags;
+  UINT8         Padding[3];
 } ATTR_INDEX_ROOT;
 
 /**
@@ -501,17 +502,17 @@ typedef struct {
    --------------------------------------------------------------------
 **/
 typedef struct {
-  UINT64 ParentDir;
-  UINT64 CreationTime;
-  UINT64 AlteredTime;
-  UINT64 ChangedMftTime;
-  UINT64 ReadTime;
-  UINT64 AllocatedSize;
-  UINT64 RealSize;
-  UINT32 Flags;
-  UINT32 Reparse;
-  UINT8  FilenameLen;
-  UINT8  Namespace;
+  UINT64    ParentDir;
+  UINT64    CreationTime;
+  UINT64    AlteredTime;
+  UINT64    ChangedMftTime;
+  UINT64    ReadTime;
+  UINT64    AllocatedSize;
+  UINT64    RealSize;
+  UINT32    Flags;
+  UINT32    Reparse;
+  UINT8     FilenameLen;
+  UINT8     Namespace;
 } ATTR_FILE_NAME;
 
 /**
@@ -541,25 +542,25 @@ typedef struct {
    --------------------------------------------------------------------
 **/
 typedef struct {
-  UINT8  BootLoaderJump[3];
-  UINT32 SystemId[2];
-  UINT16 BytesPerSector;
-  UINT8  SectorsPerCluster;
-  UINT8  Unused1[7];
-  UINT8  MediaDescriptor;
-  UINT16 Unused2;
-  UINT16 SectorsPerTrack;
-  UINT16 HeadsNumber;
-  UINT64 Unused3;
-  UINT32 Usually;
-  UINT64 VolumeSectorsNumber;
-  UINT64 MftLcn;
-  UINT64 MftMirrLcn;
-  INT8   MftRecordClusters;
-  UINT8  Unused4[3];
-  INT8   IndexRecordClusters;
-  UINT8  Unused5[3];
-  UINT64 VolumeSerialNumber;
+  UINT8     BootLoaderJump[3];
+  UINT32    SystemId[2];
+  UINT16    BytesPerSector;
+  UINT8     SectorsPerCluster;
+  UINT8     Unused1[7];
+  UINT8     MediaDescriptor;
+  UINT16    Unused2;
+  UINT16    SectorsPerTrack;
+  UINT16    HeadsNumber;
+  UINT64    Unused3;
+  UINT32    Usually;
+  UINT64    VolumeSectorsNumber;
+  UINT64    MftLcn;
+  UINT64    MftMirrLcn;
+  INT8      MftRecordClusters;
+  UINT8     Unused4[3];
+  INT8      IndexRecordClusters;
+  UINT8     Unused5[3];
+  UINT64    VolumeSerialNumber;
 } BOOT_FILE_DATA;
 
 /**
@@ -586,81 +587,81 @@ typedef struct {
    --------------------------------------------------------------------
 **/
 typedef struct {
-  UINT32 Type;
-  UINT16 DataLength;
-  UINT16 Padding;
-  UINT16 SubstituteOffset;
-  UINT16 SubstituteLength;
-  UINT16 PrintOffset;
-  UINT16 PrintLength;
+  UINT32    Type;
+  UINT16    DataLength;
+  UINT16    Padding;
+  UINT16    SubstituteOffset;
+  UINT16    SubstituteLength;
+  UINT16    PrintOffset;
+  UINT16    PrintLength;
 } SYMLINK;
 #pragma pack()
 
-typedef struct _NTFS_FILE     NTFS_FILE;
-typedef struct _EFI_NTFS_FILE EFI_NTFS_FILE;
-typedef struct _EFI_FS        EFI_FS;
+typedef struct _NTFS_FILE      NTFS_FILE;
+typedef struct _EFI_NTFS_FILE  EFI_NTFS_FILE;
+typedef struct _EFI_FS         EFI_FS;
 
 typedef struct {
-  INT32              Flags;
-  UINT8              *ExtensionMftRecord;
-  UINT8              *NonResAttrList;
-  UINT8              *Current;
-  UINT8              *Next;
-  UINT8              *Last;
-  NTFS_FILE          *BaseMftRecord;
+  INT32        Flags;
+  UINT8        *ExtensionMftRecord;
+  UINT8        *NonResAttrList;
+  UINT8        *Current;
+  UINT8        *Next;
+  UINT8        *Last;
+  NTFS_FILE    *BaseMftRecord;
 } NTFS_ATTR;
 
 typedef struct _NTFS_FILE {
-  UINT8              *FileRecord;
-  UINT64             DataAttributeSize;
-  UINT64             CreationTime;
-  UINT64             AlteredTime;
-  UINT64             ReadTime;
-  UINT64             Inode;
-  BOOLEAN            InodeRead;
-  NTFS_ATTR          Attr;
-  EFI_NTFS_FILE      *File;
+  UINT8            *FileRecord;
+  UINT64           DataAttributeSize;
+  UINT64           CreationTime;
+  UINT64           AlteredTime;
+  UINT64           ReadTime;
+  UINT64           Inode;
+  BOOLEAN          InodeRead;
+  NTFS_ATTR        Attr;
+  EFI_NTFS_FILE    *File;
 } NTFS_FILE;
 
 typedef struct _EFI_NTFS_FILE {
-  EFI_FILE_PROTOCOL  EfiFile;
-  BOOLEAN            IsDir;
-  INT64              DirIndex;
-  CHAR16             *Path;
-  CHAR16             *BaseName;
-  UINT64             Offset;
-  UINT32             RefCount;
-  NTFS_FILE          RootFile;
-  NTFS_FILE          MftFile;
-  EFI_FS             *FileSystem;
+  EFI_FILE_PROTOCOL    EfiFile;
+  BOOLEAN              IsDir;
+  INT64                DirIndex;
+  CHAR16               *Path;
+  CHAR16               *BaseName;
+  UINT64               Offset;
+  UINT32               RefCount;
+  NTFS_FILE            RootFile;
+  NTFS_FILE            MftFile;
+  EFI_FS               *FileSystem;
 } EFI_NTFS_FILE;
 
 typedef struct _EFI_FS {
-  EFI_SIMPLE_FILE_SYSTEM_PROTOCOL FileIoInterface;
-  EFI_FILE_PROTOCOL               EfiFile;
-  EFI_BLOCK_IO_PROTOCOL           *BlockIo;
-  EFI_DISK_IO_PROTOCOL            *DiskIo;
-  EFI_DEVICE_PATH                 *DevicePath;
-  UINT64                          FirstMftRecord;
-  NTFS_FILE                       *RootIndex;
-  NTFS_FILE                       *MftStart;
+  EFI_SIMPLE_FILE_SYSTEM_PROTOCOL    FileIoInterface;
+  EFI_FILE_PROTOCOL                  EfiFile;
+  EFI_BLOCK_IO_PROTOCOL              *BlockIo;
+  EFI_DISK_IO_PROTOCOL               *DiskIo;
+  EFI_DEVICE_PATH                    *DevicePath;
+  UINT64                             FirstMftRecord;
+  NTFS_FILE                          *RootIndex;
+  NTFS_FILE                          *MftStart;
 } EFI_FS;
 
 typedef struct {
-  UINT64        Vcn;
-  UINT64        Lcn;
+  UINT64    Vcn;
+  UINT64    Lcn;
 } UNIT_ELEMENT;
 
 typedef struct {
-  EFI_FS        *FileSystem;
-  UINT8         Head;
-  UINT8         Tail;
-  UNIT_ELEMENT  Elements[16];
-  UINT64        CurrentVcn;
-  UINT8         *Cluster;
-  UINTN         ClusterOffset;
-  UINT64        SavedPosition;
-  UINT8         *ClearTextBlock;
+  EFI_FS          *FileSystem;
+  UINT8           Head;
+  UINT8           Tail;
+  UNIT_ELEMENT    Elements[16];
+  UINT64          CurrentVcn;
+  UINT8           *Cluster;
+  UINTN           ClusterOffset;
+  UINT64          SavedPosition;
+  UINT8           *ClearTextBlock;
 } COMPRESSED;
 
 typedef struct {

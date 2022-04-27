@@ -9,17 +9,17 @@
 #include "NTFS.h"
 #include "Helper.h"
 
-extern UINTN mFileRecordSize;
+extern UINTN  mFileRecordSize;
 
 STATIC
 EFI_STATUS
 GetLabel (
-  IN     EFI_FS   *FileSystem,
-  IN OUT CHAR16   **Label
+  IN     EFI_FS  *FileSystem,
+  IN OUT CHAR16  **Label
   )
 {
   EFI_STATUS       Status;
-  NTFS_FILE        *BaseMftRecord  = NULL;
+  NTFS_FILE        *BaseMftRecord = NULL;
   ATTR_HEADER_RES  *Res;
 
   ASSERT (FileSystem != NULL);
@@ -59,7 +59,7 @@ GetLabel (
     return Status;
   }
 
-  Res = (ATTR_HEADER_RES *) FindAttr (&BaseMftRecord->Attr, AT_VOLUME_NAME);
+  Res = (ATTR_HEADER_RES *)FindAttr (&BaseMftRecord->Attr, AT_VOLUME_NAME);
   if ((Res != NULL) && (Res->NonResFlag == 0) && (Res->InfoLength != 0)) {
     //
     // The Volume Name is not terminated with a Unicode NULL.
@@ -80,7 +80,7 @@ GetLabel (
       return EFI_OUT_OF_RESOURCES;
     }
 
-    CopyMem (*Label, (UINT8 *) Res + Res->InfoOffset, Res->InfoLength);
+    CopyMem (*Label, (UINT8 *)Res + Res->InfoOffset, Res->InfoLength);
   }
 
   FreeFile (BaseMftRecord);
@@ -103,10 +103,10 @@ GetLabel (
 EFI_STATUS
 EFIAPI
 FileGetInfo (
-  IN EFI_FILE_PROTOCOL *This,
-  IN EFI_GUID          *Type,
-  IN OUT UINTN         *Len,
-  OUT VOID             *Data
+  IN EFI_FILE_PROTOCOL  *This,
+  IN EFI_GUID           *Type,
+  IN OUT UINTN          *Len,
+  OUT VOID              *Data
   )
 {
   EFI_STATUS                    Status;
@@ -122,13 +122,13 @@ FileGetInfo (
   ASSERT (Len != NULL);
   ASSERT ((Data != NULL) || ((Data == NULL) && (*Len == 0)));
 
-  File = (EFI_NTFS_FILE *) This;
+  File = (EFI_NTFS_FILE *)This;
 
   if (CompareMem (Type, &gEfiFileInfoGuid, sizeof (*Type)) == 0) {
     //
     // Fill in file information
     //
-    Info = (EFI_FILE_INFO *) Data;
+    Info = (EFI_FILE_INFO *)Data;
 
     if (File->BaseName != NULL) {
       Length = sizeof (EFI_FILE_INFO) + StrSize (File->BaseName);
@@ -145,7 +145,7 @@ FileGetInfo (
 
     ZeroMem (Data, sizeof (EFI_FILE_INFO));
 
-    Info->Size = (UINT64) Length;
+    Info->Size      = (UINT64)Length;
     Info->Attribute = EFI_FILE_READ_ONLY;
     NtfsToEfiTime (&Info->CreateTime, File->RootFile.CreationTime);
     NtfsToEfiTime (&Info->LastAccessTime, File->RootFile.ReadTime);
@@ -154,7 +154,7 @@ FileGetInfo (
     if (File->IsDir) {
       Info->Attribute |= EFI_FILE_DIRECTORY;
     } else {
-      Info->FileSize = File->RootFile.DataAttributeSize;
+      Info->FileSize     = File->RootFile.DataAttributeSize;
       Info->PhysicalSize = File->RootFile.DataAttributeSize;
     }
 
@@ -171,19 +171,20 @@ FileGetInfo (
     //
     // Get file system information
     //
-    FSInfo = (EFI_FILE_SYSTEM_INFO *) Data;
+    FSInfo = (EFI_FILE_SYSTEM_INFO *)Data;
 
     if (*Len < MINIMUM_FS_INFO_LENGTH) {
       *Len = MINIMUM_FS_INFO_LENGTH;
       return EFI_BUFFER_TOO_SMALL;
     }
 
-    FSInfo->ReadOnly = TRUE;
+    FSInfo->ReadOnly  = TRUE;
     FSInfo->BlockSize = File->FileSystem->BlockIo->Media->BlockSize;
     if (FSInfo->BlockSize  == 0) {
       DEBUG ((DEBUG_INFO, "NTFS: Corrected Media BlockSize\n"));
       FSInfo->BlockSize = 512;
     }
+
     FSInfo->VolumeSize = (File->FileSystem->BlockIo->Media->LastBlock + 1) * FSInfo->BlockSize;
     //
     // The device is Read Only
@@ -192,14 +193,14 @@ FileGetInfo (
 
     Length = *Len - sizeof (EFI_FILE_SYSTEM_INFO);
     Status = FileGetInfo (
-      This,
-      &gEfiFileSystemVolumeLabelInfoIdGuid,
-      &Length,
-      FSInfo->VolumeLabel
-      );
+               This,
+               &gEfiFileSystemVolumeLabelInfoIdGuid,
+               &Length,
+               FSInfo->VolumeLabel
+               );
 
-    FSInfo->Size = (UINT64) Length + sizeof (EFI_FILE_SYSTEM_INFO);
-    *Len = (UINTN) FSInfo->Size;
+    FSInfo->Size = (UINT64)Length + sizeof (EFI_FILE_SYSTEM_INFO);
+    *Len         = (UINTN)FSInfo->Size;
 
     return Status;
   } else if (CompareMem (Type, &gEfiFileSystemVolumeLabelInfoIdGuid, sizeof (*Type)) == 0) {
@@ -236,10 +237,10 @@ FileGetInfo (
 EFI_STATUS
 EFIAPI
 FileSetInfo (
-  IN EFI_FILE_PROTOCOL *This,
-  IN EFI_GUID          *InformationType,
-  IN UINTN             BufferSize,
-  IN VOID              *Buffer
+  IN EFI_FILE_PROTOCOL  *This,
+  IN EFI_GUID           *InformationType,
+  IN UINTN              BufferSize,
+  IN VOID               *Buffer
   )
 {
   return EFI_WRITE_PROTECTED;

@@ -9,17 +9,17 @@
 #include "NTFS.h"
 #include "Helper.h"
 
-extern UINTN  mFileRecordSize;
-extern UINTN  mIndexRecordSize;
-STATIC UINT64 mBufferSize;
-STATIC UINT8  mDaysPerMonth[] = { 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31, 0 };
-INT64  mIndexCounter;
+extern UINTN   mFileRecordSize;
+extern UINTN   mIndexRecordSize;
+STATIC UINT64  mBufferSize;
+STATIC UINT8   mDaysPerMonth[] = { 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31, 0 };
+INT64          mIndexCounter;
 
 STATIC
 VOID
 FreeNode (
-  IN OUT NTFS_FILE  *Node    OPTIONAL,
-  IN     FSHELP_CTX *Context
+  IN OUT NTFS_FILE   *Node    OPTIONAL,
+  IN     FSHELP_CTX  *Context
   )
 {
   ASSERT (Context != NULL);
@@ -33,10 +33,10 @@ FreeNode (
 STATIC
 VOID
 PopElement (
-  IN OUT FSHELP_CTX *Context
+  IN OUT FSHELP_CTX  *Context
   )
 {
-  STACK_ELEMENT *Element;
+  STACK_ELEMENT  *Element;
 
   ASSERT (Context != NULL);
 
@@ -51,7 +51,7 @@ PopElement (
 STATIC
 VOID
 FreeStack (
-  IN OUT FSHELP_CTX *Context
+  IN OUT FSHELP_CTX  *Context
   )
 {
   ASSERT (Context != NULL);
@@ -64,7 +64,7 @@ FreeStack (
 STATIC
 VOID
 GoUpALevel (
-  IN OUT FSHELP_CTX *Context
+  IN OUT FSHELP_CTX  *Context
   )
 {
   ASSERT (Context != NULL);
@@ -72,6 +72,7 @@ GoUpALevel (
   if (Context->CurrentNode->Parent == NULL) {
     return;
   }
+
   PopElement (Context);
 }
 
@@ -83,7 +84,7 @@ PushNode (
   IN     FSHELP_FILETYPE  FileType
   )
 {
-  STACK_ELEMENT *Next;
+  STACK_ELEMENT  *Next;
 
   ASSERT (Context != NULL);
   ASSERT (Node != NULL);
@@ -93,9 +94,9 @@ PushNode (
     return EFI_OUT_OF_RESOURCES;
   }
 
-  Next->Node = Node;
-  Next->Type = FileType & ~FSHELP_CASE_INSENSITIVE;
-  Next->Parent = Context->CurrentNode;
+  Next->Node           = Node;
+  Next->Type           = FileType & ~FSHELP_CASE_INSENSITIVE;
+  Next->Parent         = Context->CurrentNode;
   Context->CurrentNode = Next;
 
   return EFI_SUCCESS;
@@ -104,7 +105,7 @@ PushNode (
 STATIC
 EFI_STATUS
 GoToRoot (
-  IN OUT FSHELP_CTX *Context
+  IN OUT FSHELP_CTX  *Context
   )
 {
   ASSERT (Context != NULL);
@@ -122,7 +123,7 @@ FindFileIter (
   IN FSHELP_ITER_CTX  *Context
   )
 {
-  INTN Result;
+  INTN  Result;
 
   ASSERT (Name != NULL);
   ASSERT (Node != NULL);
@@ -165,9 +166,10 @@ NtfsDirHook (
   ASSERT (Node != NULL);
   ASSERT (Info != NULL);
 
-  if ((Name[0] == L'.')
-    && ((Name[1] == 0) || ((Name[1] == L'.')
-    && (Name[2] == 0)))) {
+  if (  (Name[0] == L'.')
+     && ((Name[1] == 0) || (  (Name[1] == L'.')
+                           && (Name[2] == 0))))
+  {
     FreeFile (Node);
     return EFI_NOT_FOUND;
   }
@@ -178,11 +180,11 @@ NtfsDirHook (
   }
 
   Status = StrnCpyS (
-    Info->FileName,
-    MAX_PATH,
-    Name,
-    (UINTN) ((Info->Size - sizeof (*Info)) / sizeof (CHAR16))
-    );
+             Info->FileName,
+             MAX_PATH,
+             Name,
+             (UINTN)((Info->Size - sizeof (*Info)) / sizeof (CHAR16))
+             );
   if (EFI_ERROR (Status)) {
     DEBUG ((DEBUG_INFO, "NTFS: Could not copy string.\n"));
     FreeFile (Node);
@@ -223,7 +225,7 @@ NtfsDirIter (
     return EFI_NOT_FOUND;
   }
 
-  File->IsDir = (BOOLEAN) ((FileType & FSHELP_TYPE_MASK) == FSHELP_DIR);
+  File->IsDir = (BOOLEAN)((FileType & FSHELP_TYPE_MASK) == FSHELP_DIR);
   FreeFile (Node);
 
   return EFI_SUCCESS;
@@ -232,10 +234,10 @@ NtfsDirIter (
 STATIC
 EFI_STATUS
 ListFile (
-  IN  NTFS_FILE     *Dir,
-  IN  UINT8         *Position,
-  OUT VOID          *FileOrCtx,
-  IN  FUNCTION_TYPE FunctionType
+  IN  NTFS_FILE      *Dir,
+  IN  UINT8          *Position,
+  OUT VOID           *FileOrCtx,
+  IN  FUNCTION_TYPE  FunctionType
   )
 {
   EFI_STATUS       Status;
@@ -249,7 +251,7 @@ ListFile (
   ASSERT (Position != NULL);
   ASSERT (FileOrCtx != NULL);
 
-  IndexEntry = (INDEX_ENTRY *) Position;
+  IndexEntry = (INDEX_ENTRY *)Position;
 
   while (TRUE) {
     if (mBufferSize < sizeof (*IndexEntry)) {
@@ -266,7 +268,7 @@ ListFile (
       return EFI_VOLUME_CORRUPTED;
     }
 
-    AttrFileName = (ATTR_FILE_NAME *) ((UINT8 *) IndexEntry + sizeof (*IndexEntry));
+    AttrFileName = (ATTR_FILE_NAME *)((UINT8 *)IndexEntry + sizeof (*IndexEntry));
 
     //
     // Ignore files in DOS namespace, as they will reappear as Win32 names.
@@ -307,7 +309,7 @@ ListFile (
 
       CopyMem (
         Filename,
-        (UINT8 *) AttrFileName + sizeof (*AttrFileName),
+        (UINT8 *)AttrFileName + sizeof (*AttrFileName),
         AttrFileName->FilenameLen * sizeof (CHAR16)
         );
 
@@ -336,14 +338,15 @@ ListFile (
       }
     }
 
-    if ((mBufferSize < IndexEntry->IndexEntryLength)
-      || (IndexEntry->IndexEntryLength == 0)) {
+    if (  (mBufferSize < IndexEntry->IndexEntryLength)
+       || (IndexEntry->IndexEntryLength == 0))
+    {
       DEBUG ((DEBUG_INFO, "NTFS: (ListFile #4) INDEX_ENTRY is corrupted.\n"));
       return EFI_VOLUME_CORRUPTED;
     }
 
     mBufferSize -= IndexEntry->IndexEntryLength;
-    IndexEntry = (INDEX_ENTRY *) ((UINT8 *) IndexEntry + IndexEntry->IndexEntryLength);
+    IndexEntry   = (INDEX_ENTRY *)((UINT8 *)IndexEntry + IndexEntry->IndexEntryLength);
   }
 
   return EFI_NOT_FOUND;
@@ -352,8 +355,8 @@ ListFile (
 STATIC
 EFI_STATUS
 FindFile (
-  IN CHAR16        *CurrentPath,
-  IN FSHELP_CTX    *Context
+  IN CHAR16      *CurrentPath,
+  IN FSHELP_CTX  *Context
   )
 {
   EFI_STATUS       Status;
@@ -370,7 +373,7 @@ FindFile (
 
   for (Name = CurrentPath; ; Name = Next) {
     FoundNode = NULL;
-    FoundType  = FSHELP_UNKNOWN;
+    FoundType = FSHELP_UNKNOWN;
 
     while (*Name == L'/') {
       ++Name;
@@ -404,6 +407,7 @@ FindFile (
     if (PathPart == NULL) {
       return EFI_OUT_OF_RESOURCES;
     }
+
     CopyMem (PathPart, Name, (Next - Name) * sizeof (CHAR16));
 
     IterCtx.Name      = PathPart;
@@ -469,9 +473,9 @@ FsHelpFindFile (
   IN  FSHELP_FILETYPE  Type
   )
 {
-  EFI_STATUS      Status;
-  FSHELP_CTX      Context;
-  FSHELP_FILETYPE FoundType;
+  EFI_STATUS       Status;
+  FSHELP_CTX       Context;
+  FSHELP_FILETYPE  FoundType;
 
   ASSERT (Path != NULL);
   ASSERT (RootNode != NULL);
@@ -492,14 +496,14 @@ FsHelpFindFile (
     return Status;
   }
 
-  Status = FindFile ((CHAR16 *) Path, &Context);
+  Status = FindFile ((CHAR16 *)Path, &Context);
   if (EFI_ERROR (Status)) {
     FreeStack (&Context);
     return Status;
   }
 
   *FoundNode = Context.CurrentNode->Node;
-  FoundType = Context.CurrentNode->Type;
+  FoundType  = Context.CurrentNode->Type;
   //
   // Do not free the node
   //
@@ -526,22 +530,22 @@ FsHelpFindFile (
 
 EFI_STATUS
 IterateDir (
-  IN NTFS_FILE     *Dir,
-  IN VOID          *FileOrCtx,
-  IN FUNCTION_TYPE FunctionType
+  IN NTFS_FILE      *Dir,
+  IN VOID           *FileOrCtx,
+  IN FUNCTION_TYPE  FunctionType
   )
 {
-  EFI_STATUS          Status;
-  NTFS_ATTR           Attr;
-  ATTR_HEADER_RES     *Res;
-  ATTR_HEADER_NONRES  *Non;
-  ATTR_INDEX_ROOT     *Index;
-  INDEX_RECORD_HEADER *IndexRecord;
-  UINT8               *BitIndex;
-  UINT8               *BitMap;
-  UINTN               BitMapLen;
-  UINT8               Bit;
-  UINTN               Number;
+  EFI_STATUS           Status;
+  NTFS_ATTR            Attr;
+  ATTR_HEADER_RES      *Res;
+  ATTR_HEADER_NONRES   *Non;
+  ATTR_INDEX_ROOT      *Index;
+  INDEX_RECORD_HEADER  *IndexRecord;
+  UINT8                *BitIndex;
+  UINT8                *BitMap;
+  UINTN                BitMapLen;
+  UINT8                Bit;
+  UINTN                Number;
 
   ASSERT (Dir != NULL);
   ASSERT (FileOrCtx != NULL);
@@ -554,17 +558,18 @@ IterateDir (
   }
 
   IndexRecord = NULL;
-  BitMap = NULL;
+  BitMap      = NULL;
 
   Status = InitAttr (&Attr, Dir);
   if (EFI_ERROR (Status)) {
     return Status;
   }
+
   //
   // Search in $INDEX_ROOT
   //
   while (TRUE) {
-    Res = (ATTR_HEADER_RES *) FindAttr (&Attr, AT_INDEX_ROOT);
+    Res = (ATTR_HEADER_RES *)FindAttr (&Attr, AT_INDEX_ROOT);
     if (Res == NULL) {
       DEBUG ((DEBUG_INFO, "NTFS: no $INDEX_ROOT\n"));
       FreeAttr (&Attr);
@@ -573,9 +578,10 @@ IterateDir (
 
     mBufferSize = mFileRecordSize - (Attr.Current - Attr.BaseMftRecord->FileRecord);
 
-    if ((mBufferSize < sizeof (*Res))
-      || (mBufferSize < (Res->NameOffset + 8))
-      || (mBufferSize < Res->InfoOffset)) {
+    if (  (mBufferSize < sizeof (*Res))
+       || (mBufferSize < (Res->NameOffset + 8))
+       || (mBufferSize < Res->InfoOffset))
+    {
       DEBUG ((DEBUG_INFO, "NTFS: (IterateDir #1) $INDEX_ROOT is corrupted.\n"));
       FreeAttr (&Attr);
       return EFI_VOLUME_CORRUPTED;
@@ -583,10 +589,11 @@ IterateDir (
 
     mBufferSize -= Res->InfoOffset;
 
-    if ((Res->NonResFlag != 0)
-      || (Res->NameLength != 4)
-      || (Res->NameOffset != sizeof (*Res))
-      || (CompareMem ((UINT8 *) Res + Res->NameOffset, L"$I30", 8) != 0)) {
+    if (  (Res->NonResFlag != 0)
+       || (Res->NameLength != 4)
+       || (Res->NameOffset != sizeof (*Res))
+       || (CompareMem ((UINT8 *)Res + Res->NameOffset, L"$I30", 8) != 0))
+    {
       continue;
     }
 
@@ -596,7 +603,7 @@ IterateDir (
       return EFI_VOLUME_CORRUPTED;
     }
 
-    Index = (ATTR_INDEX_ROOT *) ((UINT8 *) Res + Res->InfoOffset);
+    Index = (ATTR_INDEX_ROOT *)((UINT8 *)Res + Res->InfoOffset);
     if (Index->Root.Type != AT_FILENAME) {
       continue;
     }
@@ -613,19 +620,20 @@ IterateDir (
   mBufferSize -= sizeof (INDEX_ROOT) + Index->FirstEntryOffset;
 
   Status = ListFile (
-    Dir,
-    (UINT8 *) Index + sizeof (INDEX_ROOT) + Index->FirstEntryOffset,
-    FileOrCtx,
-    FunctionType
-    );
+             Dir,
+             (UINT8 *)Index + sizeof (INDEX_ROOT) + Index->FirstEntryOffset,
+             FileOrCtx,
+             FunctionType
+             );
   if (!EFI_ERROR (Status)) {
     FreeAttr (&Attr);
     return EFI_SUCCESS;
   }
+
   //
   // Search in $INDEX_ALLOCATION
   //
-  BitIndex = NULL;
+  BitIndex  = NULL;
   BitMapLen = 0;
   FreeAttr (&Attr);
 
@@ -634,21 +642,23 @@ IterateDir (
     return Status;
   }
 
-  while ((Non = (ATTR_HEADER_NONRES *) FindAttr (&Attr, AT_BITMAP)) != NULL) {
+  while ((Non = (ATTR_HEADER_NONRES *)FindAttr (&Attr, AT_BITMAP)) != NULL) {
     mBufferSize = mFileRecordSize - (Attr.Current - Attr.BaseMftRecord->FileRecord);
 
-    if ((mBufferSize < sizeof (*Non))
-      || (mBufferSize < (Non->NameOffset + 8))) {
+    if (  (mBufferSize < sizeof (*Non))
+       || (mBufferSize < (Non->NameOffset + 8)))
+    {
       DEBUG ((DEBUG_INFO, "NTFS: (IterateDir #3) $INDEX_ROOT is corrupted.\n"));
       FreeAttr (&Attr);
       return EFI_VOLUME_CORRUPTED;
     }
 
-    if ((Non->NameLength == 4)
-      && (CompareMem ((UINT8 *) Non + Non->NameOffset, L"$I30", 8) == 0)) {
+    if (  (Non->NameLength == 4)
+       && (CompareMem ((UINT8 *)Non + Non->NameOffset, L"$I30", 8) == 0))
+    {
       BitMapLen = (Non->NonResFlag == 0) ?
-                  ((ATTR_HEADER_RES *) Non)->InfoLength :
-                  (UINTN) Non->AllocatedSize;
+                  ((ATTR_HEADER_RES *)Non)->InfoLength :
+                  (UINTN)Non->AllocatedSize;
 
       if (BitMapLen > MAX_FILE_SIZE) {
         DEBUG ((DEBUG_INFO, "NTFS: (IterateDir) File is too huge.\n"));
@@ -662,7 +672,7 @@ IterateDir (
       }
 
       if (Non->NonResFlag == 0) {
-        if (mBufferSize < (((ATTR_HEADER_RES *) Non)->InfoOffset + BitMapLen)) {
+        if (mBufferSize < (((ATTR_HEADER_RES *)Non)->InfoOffset + BitMapLen)) {
           DEBUG ((DEBUG_INFO, "NTFS: (IterateDir #4) $INDEX_ROOT is corrupted.\n"));
           FreeAttr (&Attr);
           FreePool (BitMap);
@@ -671,18 +681,19 @@ IterateDir (
 
         CopyMem (
           BitMap,
-          (UINT8 *) Non + ((ATTR_HEADER_RES *) Non)->InfoOffset,
+          (UINT8 *)Non + ((ATTR_HEADER_RES *)Non)->InfoOffset,
           BitMapLen
           );
       } else {
-        Status = ReadData (&Attr, (UINT8 *) Non, BitMap, 0, BitMapLen);
+        Status = ReadData (&Attr, (UINT8 *)Non, BitMap, 0, BitMapLen);
         if (EFI_ERROR (Status)) {
           DEBUG ((DEBUG_INFO, "NTFS: Failed to read non-resident $BITMAP\n"));
           FreeAttr (&Attr);
           FreePool (BitMap);
           return Status;
         }
-        BitMapLen = (UINTN) Non->RealSize;
+
+        BitMapLen = (UINTN)Non->RealSize;
       }
 
       BitIndex = BitMap;
@@ -691,29 +702,32 @@ IterateDir (
   }
 
   FreeAttr (&Attr);
-  Non = (ATTR_HEADER_NONRES *) LocateAttr (&Attr, Dir, AT_INDEX_ALLOCATION);
+  Non = (ATTR_HEADER_NONRES *)LocateAttr (&Attr, Dir, AT_INDEX_ALLOCATION);
 
   while (Non != NULL) {
     mBufferSize = mFileRecordSize - (Attr.Current - Attr.BaseMftRecord->FileRecord);
 
-    if ((mBufferSize < sizeof (*Non))
-      || (mBufferSize < (Non->NameOffset + 8))) {
+    if (  (mBufferSize < sizeof (*Non))
+       || (mBufferSize < (Non->NameOffset + 8)))
+    {
       DEBUG ((DEBUG_INFO, "NTFS: (IterateDir #5) $INDEX_ROOT is corrupted.\n"));
       FreeAttr (&Attr);
       if (BitIndex != NULL) {
         FreePool (BitMap);
       }
+
       return EFI_VOLUME_CORRUPTED;
     }
 
-    if ((Non->NonResFlag == 1)
-      && (Non->NameLength == 4)
-      && (Non->NameOffset == sizeof (*Non))
-      && (CompareMem ((UINT8 *) Non + Non->NameOffset, L"$I30", 8) == 0)) {
+    if (  (Non->NonResFlag == 1)
+       && (Non->NameLength == 4)
+       && (Non->NameOffset == sizeof (*Non))
+       && (CompareMem ((UINT8 *)Non + Non->NameOffset, L"$I30", 8) == 0))
+    {
       break;
     }
 
-    Non = (ATTR_HEADER_NONRES *) FindAttr (&Attr, AT_INDEX_ALLOCATION);
+    Non = (ATTR_HEADER_NONRES *)FindAttr (&Attr, AT_INDEX_ALLOCATION);
   }
 
   if ((Non == NULL) && (BitIndex != NULL)) {
@@ -735,11 +749,11 @@ IterateDir (
     for (Number = 0; Number < (BitMapLen * 8); Number++) {
       if ((*BitIndex & Bit) != 0) {
         Status = ReadAttr (
-          &Attr,
-          (UINT8 *) IndexRecord,
-          Number * mIndexRecordSize,
-          mIndexRecordSize
-          );
+                   &Attr,
+                   (UINT8 *)IndexRecord,
+                   Number * mIndexRecordSize,
+                   mIndexRecordSize
+                   );
         if (EFI_ERROR (Status)) {
           FreeAttr (&Attr);
           FreePool (BitMap);
@@ -748,10 +762,10 @@ IterateDir (
         }
 
         Status = Fixup (
-          (UINT8 *) IndexRecord,
-          mIndexRecordSize,
-          SIGNATURE_32 ('I', 'N', 'D', 'X')
-          );
+                   (UINT8 *)IndexRecord,
+                   mIndexRecordSize,
+                   SIGNATURE_32 ('I', 'N', 'D', 'X')
+                   );
         if (EFI_ERROR (Status)) {
           FreeAttr (&Attr);
           FreePool (BitMap);
@@ -759,8 +773,9 @@ IterateDir (
           return Status;
         }
 
-        if ((mIndexRecordSize < sizeof (*IndexRecord))
-          || (mIndexRecordSize < (sizeof (INDEX_HEADER) + IndexRecord->IndexEntriesOffset))) {
+        if (  (mIndexRecordSize < sizeof (*IndexRecord))
+           || (mIndexRecordSize < (sizeof (INDEX_HEADER) + IndexRecord->IndexEntriesOffset)))
+        {
           DEBUG ((DEBUG_INFO, "NTFS: $INDEX_ALLOCATION is corrupted.\n"));
           FreeAttr (&Attr);
           FreePool (BitMap);
@@ -771,11 +786,11 @@ IterateDir (
         mBufferSize = mIndexRecordSize - (sizeof (INDEX_HEADER) + IndexRecord->IndexEntriesOffset);
 
         Status = ListFile (
-          Dir,
-          (UINT8 *) IndexRecord + sizeof (INDEX_HEADER) + IndexRecord->IndexEntriesOffset,
-          FileOrCtx,
-          FunctionType
-          );
+                   Dir,
+                   (UINT8 *)IndexRecord + sizeof (INDEX_HEADER) + IndexRecord->IndexEntriesOffset,
+                   FileOrCtx,
+                   FunctionType
+                   );
         if (!EFI_ERROR (Status)) {
           FreeAttr (&Attr);
           FreePool (BitMap);
@@ -801,25 +816,25 @@ IterateDir (
 
 EFI_STATUS
 RelativeToAbsolute (
-  OUT CHAR16 *Dest,
-  IN  CHAR16 *Source
+  OUT CHAR16  *Dest,
+  IN  CHAR16  *Source
   )
 {
-  CHAR16 *Buffer;
-  CHAR16 *BPointer;
-  CHAR16 *Start;
-  CHAR16 *End;
-  UINT32 Skip;
+  CHAR16  *Buffer;
+  CHAR16  *BPointer;
+  CHAR16  *Start;
+  CHAR16  *End;
+  UINT32  Skip;
 
   ASSERT (Dest != NULL);
   ASSERT (Source != NULL);
 
   Skip = 0;
 
-  Buffer = AllocateZeroPool (StrSize (Source));
+  Buffer   = AllocateZeroPool (StrSize (Source));
   BPointer = Buffer;
 
-  End = Source + StrLen (Source);
+  End   = Source + StrLen (Source);
   Start = End;
   while (Start > Source) {
     while (*Start != L'/') {
@@ -866,7 +881,7 @@ RelativeToAbsolute (
     return EFI_DEVICE_ERROR;
   }
 
-  End = BPointer - 1;
+  End   = BPointer - 1;
   Start = End - 1;
   while (Start > Buffer) {
     while ((Start >= Buffer) && (*Start != L'/')) {
@@ -903,19 +918,19 @@ RelativeToAbsolute (
 **/
 VOID
 NtfsToEfiTime (
-  EFI_TIME *EfiTime,
-  UINT64   NtfsTime
+  EFI_TIME  *EfiTime,
+  UINT64    NtfsTime
   )
 {
-  UINT64 Remainder64;
-  UINT32 Remainder32;
-  UINT16 Year;
-  UINT8  Month;
-  UINT32 Day;
-  UINT32 LastDay;
-  UINT32 PrevLD;
-  UINT8  Index;
-  UINT64 Temp;
+  UINT64  Remainder64;
+  UINT32  Remainder32;
+  UINT16  Year;
+  UINT8   Month;
+  UINT32  Day;
+  UINT32  LastDay;
+  UINT32  PrevLD;
+  UINT8   Index;
+  UINT64  Temp;
 
   ASSERT (EfiTime != NULL);
 
@@ -935,36 +950,38 @@ NtfsToEfiTime (
       //
       Temp -= DAY_IN_100NS;
     }
+
     ++Year;
   }
+
   //
   // From what's left, get the day, hour, minute, second and nanosecond.
   //
-  Day = (UINT32) DivU64x64Remainder (Temp, DAY_IN_100NS, &Remainder64);
+  Day = (UINT32)DivU64x64Remainder (Temp, DAY_IN_100NS, &Remainder64);
   if (Day == 0) {
     //
     // Special handling for last day of year
     //
     Year -= 1U;
-    Day = LEAP_YEAR ? 366U : 365U;
+    Day   = LEAP_YEAR ? 366U : 365U;
   }
 
-  EfiTime->Year   = Year;
-  EfiTime->Hour   = (UINT8) DivU64x64Remainder (Remainder64, HOUR_IN_100NS, &Remainder64);
-  EfiTime->Minute = (UINT8) DivU64x32Remainder (Remainder64, MINUTE_IN_100NS, &Remainder32);
-  EfiTime->Second = (UINT8) (Remainder32 / SECOND_IN_100NS);
-  Remainder32 %= SECOND_IN_100NS;
+  EfiTime->Year       = Year;
+  EfiTime->Hour       = (UINT8)DivU64x64Remainder (Remainder64, HOUR_IN_100NS, &Remainder64);
+  EfiTime->Minute     = (UINT8)DivU64x32Remainder (Remainder64, MINUTE_IN_100NS, &Remainder32);
+  EfiTime->Second     = (UINT8)(Remainder32 / SECOND_IN_100NS);
+  Remainder32        %= SECOND_IN_100NS;
   EfiTime->Nanosecond = Remainder32 * UNIT_IN_NS;
   //
   // "Day" now contains the ordinal date. We have to convert that to month and day.
   //
-  Month = 1U;
+  Month   = 1U;
   LastDay = 31U;
-  PrevLD = 0;
+  PrevLD  = 0;
   for (Index = 1U; Index < 13U; ++Index) {
     if (Day > LastDay) {
-      Month += 1U;
-      PrevLD = LastDay;
+      Month   += 1U;
+      PrevLD   = LastDay;
       LastDay += mDaysPerMonth[Index];
       if ((Index == 1U) && LEAP_YEAR) {
         ++LastDay;
@@ -973,5 +990,5 @@ NtfsToEfiTime (
   }
 
   EfiTime->Month = Month;
-  EfiTime->Day = (UINT8) (Day - PrevLD);
+  EfiTime->Day   = (UINT8)(Day - PrevLD);
 }

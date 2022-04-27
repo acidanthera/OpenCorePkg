@@ -14,11 +14,11 @@ extern INT64  mIndexCounter;
 EFI_STATUS
 EFIAPI
 FileOpen (
-  IN EFI_FILE_PROTOCOL  *This,
-  OUT EFI_FILE_PROTOCOL **NewHandle,
-  IN CHAR16             *FileName,
-  IN UINT64             OpenMode,
-  IN UINT64             Attributes
+  IN EFI_FILE_PROTOCOL   *This,
+  OUT EFI_FILE_PROTOCOL  **NewHandle,
+  IN CHAR16              *FileName,
+  IN UINT64              OpenMode,
+  IN UINT64              Attributes
   )
 {
   EFI_STATUS     Status;
@@ -36,8 +36,8 @@ FileOpen (
   ASSERT (NewHandle != NULL);
   ASSERT (FileName != NULL);
 
-  File = (EFI_NTFS_FILE *) This;
-  FileSystem = File->FileSystem;
+  File         = (EFI_NTFS_FILE *)This;
+  FileSystem   = File->FileSystem;
   AbsolutePath = (*FileName == L'\\');
 
   if (OpenMode != EFI_FILE_MODE_READ) {
@@ -72,7 +72,7 @@ FileOpen (
     return Status;
   }
 
-  for (Index = StrnLenS (Path, MAX_PATH) - 1 ; Index >= Length; Index--) {
+  for (Index = StrnLenS (Path, MAX_PATH) - 1; Index >= Length; Index--) {
     if (Path[Index] == L'\\') {
       Path[Index] = L'/';
     }
@@ -95,7 +95,7 @@ FileOpen (
   NewFile->Path = AllocateZeroPool (StrnSizeS (CleanPath, MAX_PATH));
   if (NewFile->Path == NULL) {
     DEBUG ((DEBUG_INFO, "NTFS: Could not instantiate path\n"));
-    FreePool(NewFile);
+    FreePool (NewFile);
     return EFI_OUT_OF_RESOURCES;
   }
 
@@ -107,21 +107,22 @@ FileOpen (
       break;
     }
   }
-  DirName = (Index <= 0) ? L"/" : CleanPath;
+
+  DirName           = (Index <= 0) ? L"/" : CleanPath;
   NewFile->BaseName = &NewFile->Path[Index + 1];
 
   Status = NtfsDir (FileSystem, DirName, NewFile, INFO_HOOK);
   if (EFI_ERROR (Status)) {
-    FreePool(NewFile->Path);
-    FreePool(NewFile);
+    FreePool (NewFile->Path);
+    FreePool (NewFile);
     return Status;
   }
 
   if (!NewFile->IsDir) {
-    Status = NtfsOpen(NewFile);
+    Status = NtfsOpen (NewFile);
     if (EFI_ERROR (Status)) {
-      FreePool(NewFile->Path);
-      FreePool(NewFile);
+      FreePool (NewFile->Path);
+      FreePool (NewFile);
       return Status;
     }
   }
@@ -140,17 +141,17 @@ FileReadDir (
   IN OUT UINTN      *Size
   )
 {
-  EFI_STATUS    Status;
-  EFI_FILE_INFO *Info;
-  CHAR16        Path[MAX_PATH];
-  EFI_NTFS_FILE *TmpFile = NULL;
-  INTN          Length;
+  EFI_STATUS     Status;
+  EFI_FILE_INFO  *Info;
+  CHAR16         Path[MAX_PATH];
+  EFI_NTFS_FILE  *TmpFile = NULL;
+  INTN           Length;
 
   ASSERT (File != NULL);
   ASSERT (Size != NULL);
   ASSERT ((Data != NULL) || ((Data == NULL) && (*Size == 0)));
 
-  Info = (EFI_FILE_INFO *) Data;
+  Info = (EFI_FILE_INFO *)Data;
 
   if (*Size < MINIMUM_INFO_LENGTH) {
     *Size = MINIMUM_INFO_LENGTH;
@@ -173,7 +174,7 @@ FileReadDir (
   }
 
   mIndexCounter = File->DirIndex;
-  Status = NtfsDir (File->FileSystem, File->Path, Data, DIR_HOOK);
+  Status        = NtfsDir (File->FileSystem, File->Path, Data, DIR_HOOK);
   if (mIndexCounter >= 0) {
     //
     // No entries left
@@ -187,7 +188,7 @@ FileReadDir (
     return Status;
   }
 
-  Info->FileSize = 0;
+  Info->FileSize     = 0;
   Info->PhysicalSize = 0;
 
   if ((Info->Attribute & EFI_FILE_DIRECTORY) == 0) {
@@ -206,14 +207,14 @@ FileReadDir (
     if (EFI_ERROR (Status)) {
       // DEBUG ((DEBUG_INFO, "NTFS: Unable to obtain the size of '%s'\n", Info->FileName));
     } else {
-      Info->FileSize = TmpFile->RootFile.DataAttributeSize;
+      Info->FileSize     = TmpFile->RootFile.DataAttributeSize;
       Info->PhysicalSize = TmpFile->RootFile.DataAttributeSize;
     }
 
     FreePool (TmpFile);
   }
 
-  *Size = (UINTN) Info->Size;
+  *Size = (UINTN)Info->Size;
   File->DirIndex++;
 
   // DEBUG ((DEBUG_INFO, "NTFS:   Entry[%d]: '%s' %s\n", File->DirIndex-1, Info->FileName,
@@ -225,24 +226,24 @@ FileReadDir (
 STATIC
 EFI_STATUS
 Read (
-  IN  EFI_NTFS_FILE *File,
-  OUT VOID          *Data,
-  IN  UINTN         *Size
+  IN  EFI_NTFS_FILE  *File,
+  OUT VOID           *Data,
+  IN  UINTN          *Size
   )
 {
-  EFI_STATUS Status;
-  UINT64     Remaining;
-  NTFS_FILE  *BaseMftRecord;
+  EFI_STATUS  Status;
+  UINT64      Remaining;
+  NTFS_FILE   *BaseMftRecord;
 
   ASSERT (File != NULL);
   ASSERT (Size != NULL);
   ASSERT ((Data != NULL) || ((Data == NULL) && (*Size == 0)));
 
   Remaining = (File->RootFile.DataAttributeSize > File->Offset) ?
-   File->RootFile.DataAttributeSize - File->Offset : 0;
+              File->RootFile.DataAttributeSize - File->Offset : 0;
 
   if (*Size > Remaining) {
-    *Size = (UINTN) Remaining;
+    *Size = (UINTN)Remaining;
   }
 
   BaseMftRecord = &File->RootFile;
@@ -262,9 +263,9 @@ Read (
 EFI_STATUS
 EFIAPI
 FileRead (
-  IN EFI_FILE_PROTOCOL *This,
-  IN OUT UINTN         *BufferSize,
-  OUT VOID             *Buffer
+  IN EFI_FILE_PROTOCOL  *This,
+  IN OUT UINTN          *BufferSize,
+  OUT VOID              *Buffer
   )
 {
   EFI_NTFS_FILE  *File;
@@ -273,7 +274,7 @@ FileRead (
   ASSERT (BufferSize != NULL);
   ASSERT ((Buffer != NULL) || ((Buffer == NULL) && (*BufferSize == 0)));
 
-  File = (EFI_NTFS_FILE *) This;
+  File = (EFI_NTFS_FILE *)This;
 
   if (File->IsDir) {
     return FileReadDir (File, Buffer, BufferSize);
@@ -285,9 +286,9 @@ FileRead (
 EFI_STATUS
 EFIAPI
 FileWrite (
-  IN EFI_FILE_PROTOCOL *This,
-  IN OUT UINTN         *BufferSize,
-  IN VOID              *Buffer
+  IN EFI_FILE_PROTOCOL  *This,
+  IN OUT UINTN          *BufferSize,
+  IN VOID               *Buffer
   )
 {
   return EFI_WRITE_PROTECTED;
@@ -296,7 +297,7 @@ FileWrite (
 EFI_STATUS
 EFIAPI
 FileDelete (
-  IN EFI_FILE_PROTOCOL *This
+  IN EFI_FILE_PROTOCOL  *This
   )
 {
   FileClose (This);
@@ -307,7 +308,7 @@ FileDelete (
 EFI_STATUS
 EFIAPI
 FileFlush (
-  IN EFI_FILE_PROTOCOL *This
+  IN EFI_FILE_PROTOCOL  *This
   )
 {
   return EFI_ACCESS_DENIED;
@@ -316,21 +317,20 @@ FileFlush (
 EFI_STATUS
 EFIAPI
 FileClose (
-  IN EFI_FILE_PROTOCOL *This
+  IN EFI_FILE_PROTOCOL  *This
   )
 {
   EFI_NTFS_FILE  *File;
 
   ASSERT (This != NULL);
 
-  File = (EFI_NTFS_FILE *) This;
+  File = (EFI_NTFS_FILE *)This;
 
   if (&File->RootFile == File->FileSystem->RootIndex) {
     return EFI_SUCCESS;
   }
 
   if (--File->RefCount == 0) {
-
     FreeFile (&File->RootFile);
     FreeFile (&File->MftFile);
 

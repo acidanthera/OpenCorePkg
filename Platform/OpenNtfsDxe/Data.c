@@ -9,27 +9,27 @@
 #include "NTFS.h"
 #include "Helper.h"
 
-extern UINTN mFileRecordSize;
-extern UINTN mSectorSize;
-extern UINTN mClusterSize;
-UINT64       mUnitSize;
+extern UINTN  mFileRecordSize;
+extern UINTN  mSectorSize;
+extern UINTN  mClusterSize;
+UINT64        mUnitSize;
 
 STATIC
 UINT64
 GetLcn (
-  IN RUNLIST *Runlist,
-  IN UINT64  Vcn
+  IN RUNLIST  *Runlist,
+  IN UINT64   Vcn
   )
 {
-  EFI_STATUS     Status;
-  UINT64         Delta;
+  EFI_STATUS  Status;
+  UINT64      Delta;
 
   ASSERT (Runlist != NULL);
 
   if (Vcn >= Runlist->NextVcn) {
     Status = ReadRunListElement (Runlist);
     if (EFI_ERROR (Status)) {
-      return (UINT64) (-1);
+      return (UINT64)(-1);
     }
 
     return Runlist->CurrentLcn;
@@ -43,36 +43,36 @@ GetLcn (
 STATIC
 EFI_STATUS
 ReadClusters (
-  IN  RUNLIST *Runlist,
-  IN  UINT64  Offset,
-  IN  UINTN   Length,
-  OUT UINT8   *Dest
+  IN  RUNLIST  *Runlist,
+  IN  UINT64   Offset,
+  IN  UINTN    Length,
+  OUT UINT8    *Dest
   )
 {
-  EFI_STATUS Status;
-  UINT64     Index;
-  UINT64     ClustersTotal;
-  UINT64     Cluster;
-  UINT64     OffsetInsideCluster;
-  UINTN      Size;
+  EFI_STATUS  Status;
+  UINT64      Index;
+  UINT64      ClustersTotal;
+  UINT64      Cluster;
+  UINT64      OffsetInsideCluster;
+  UINTN       Size;
 
   ASSERT (Runlist != NULL);
   ASSERT (Dest != NULL);
 
   OffsetInsideCluster = Offset & (mClusterSize - 1);
-  Size = mClusterSize;
-  ClustersTotal = DivU64x64Remainder (Length + Offset + mClusterSize - 1, mClusterSize, NULL);
+  Size                = mClusterSize;
+  ClustersTotal       = DivU64x64Remainder (Length + Offset + mClusterSize - 1, mClusterSize, NULL);
 
   for (Index = Runlist->TargetVcn; Index < ClustersTotal; ++Index) {
     Cluster = GetLcn (Runlist, Index);
-    if (Cluster == (UINT64) (-1)) {
+    if (Cluster == (UINT64)(-1)) {
       return EFI_DEVICE_ERROR;
     }
 
     Cluster *= mClusterSize;
 
     if (Index == (ClustersTotal - 1)) {
-      Size = (UINTN) ((Length + Offset) & (mClusterSize - 1));
+      Size = (UINTN)((Length + Offset) & (mClusterSize - 1));
 
       if (Size == 0) {
         Size = mClusterSize;
@@ -84,21 +84,21 @@ ReadClusters (
     }
 
     if (Index == Runlist->TargetVcn) {
-      Size -= (UINTN) OffsetInsideCluster;
+      Size -= (UINTN)OffsetInsideCluster;
     }
 
     if ((Index != Runlist->TargetVcn) && (Index != (ClustersTotal - 1))) {
-      Size = mClusterSize;
+      Size                = mClusterSize;
       OffsetInsideCluster = 0;
     }
 
     if (Cluster != 0) {
       Status = DiskRead (
-        Runlist->Unit.FileSystem,
-        Cluster + OffsetInsideCluster,
-        Size,
-        Dest
-        );
+                 Runlist->Unit.FileSystem,
+                 Cluster + OffsetInsideCluster,
+                 Size,
+                 Dest
+                 );
       if (EFI_ERROR (Status)) {
         return Status;
       }
@@ -115,14 +115,14 @@ ReadClusters (
 EFI_STATUS
 EFIAPI
 DiskRead (
-  IN EFI_FS   *FileSystem,
-  IN UINT64   Offset,
-  IN UINTN    Size,
-  IN OUT VOID *Buffer
+  IN EFI_FS    *FileSystem,
+  IN UINT64    Offset,
+  IN UINTN     Size,
+  IN OUT VOID  *Buffer
   )
 {
-  EFI_STATUS         Status;
-  EFI_BLOCK_IO_MEDIA *Media;
+  EFI_STATUS          Status;
+  EFI_BLOCK_IO_MEDIA  *Media;
 
   ASSERT (FileSystem != NULL);
   ASSERT (FileSystem->DiskIo != NULL);
@@ -131,12 +131,12 @@ DiskRead (
   Media = FileSystem->BlockIo->Media;
 
   Status = FileSystem->DiskIo->ReadDisk (
-    FileSystem->DiskIo,
-    Media->MediaId,
-    Offset,
-    Size,
-    Buffer
-    );
+                                 FileSystem->DiskIo,
+                                 Media->MediaId,
+                                 Offset,
+                                 Size,
+                                 Buffer
+                                 );
   if (EFI_ERROR (Status)) {
     DEBUG ((DEBUG_INFO, "NTFS: Could not read disk at address %Lx\n", Offset));
   }
@@ -147,22 +147,22 @@ DiskRead (
 EFI_STATUS
 EFIAPI
 ReadMftRecord (
-  IN  EFI_NTFS_FILE *File,
-  OUT UINT8         *Buffer,
-  IN  UINT64        RecordNumber
+  IN  EFI_NTFS_FILE  *File,
+  OUT UINT8          *Buffer,
+  IN  UINT64         RecordNumber
   )
 {
-  EFI_STATUS     Status;
+  EFI_STATUS  Status;
 
   ASSERT (File != NULL);
   ASSERT (Buffer != NULL);
 
   Status = ReadAttr (
-    &File->MftFile.Attr,
-    Buffer,
-    RecordNumber * mFileRecordSize,
-    mFileRecordSize
-    );
+             &File->MftFile.Attr,
+             Buffer,
+             RecordNumber * mFileRecordSize,
+             mFileRecordSize
+             );
   if (EFI_ERROR (Status)) {
     DEBUG ((DEBUG_INFO, "NTFS: Could not read MFT Record 0x%Lx\n", RecordNumber));
     FreeAttr (&File->MftFile.Attr);
@@ -175,24 +175,24 @@ ReadMftRecord (
 EFI_STATUS
 EFIAPI
 ReadAttr (
-  IN  NTFS_ATTR *Attr,
-  OUT UINT8     *Dest,
-  IN  UINT64    Offset,
-  IN  UINTN     Length
+  IN  NTFS_ATTR  *Attr,
+  OUT UINT8      *Dest,
+  IN  UINT64     Offset,
+  IN  UINTN      Length
   )
 {
-  EFI_STATUS       Status;
-  UINT8            *Current;
-  UINT32           Type;
-  UINT8            *AttrStart;
-  UINT64           Vcn;
-  ATTR_LIST_RECORD *Record;
-  ATTR_HEADER_RES  *Res;
+  EFI_STATUS        Status;
+  UINT8             *Current;
+  UINT32            Type;
+  UINT8             *AttrStart;
+  UINT64            Vcn;
+  ATTR_LIST_RECORD  *Record;
+  ATTR_HEADER_RES   *Res;
 
   ASSERT (Attr != NULL);
   ASSERT (Dest != NULL);
 
-  Current = Attr->Current;
+  Current    = Attr->Current;
   Attr->Next = Attr->Current;
 
   if ((Attr->Flags & NTFS_AF_ALST) != 0) {
@@ -201,15 +201,15 @@ ReadAttr (
       return EFI_VOLUME_CORRUPTED;
     }
 
-    Record = (ATTR_LIST_RECORD *) Attr->Next;
-    Type = Record->Type;
+    Record = (ATTR_LIST_RECORD *)Attr->Next;
+    Type   = Record->Type;
 
     Vcn = DivU64x64Remainder (Offset, mClusterSize, NULL);
     if (COMPRESSION_BLOCK >= mClusterSize) {
       Vcn &= ~0xFULL;
     }
 
-    Record = (ATTR_LIST_RECORD *) ((UINT8 *) Record + Record->RecordLength);
+    Record = (ATTR_LIST_RECORD *)((UINT8 *)Record + Record->RecordLength);
     while (((UINT8 *)Record + sizeof (ATTR_LIST_RECORD)) <= Attr->Last) {
       if (Record->Type != Type) {
         break;
@@ -223,11 +223,11 @@ ReadAttr (
         return EFI_VOLUME_CORRUPTED;
       }
 
-      Attr->Next = (UINT8 *) Record;
-      Record = (ATTR_LIST_RECORD *) ((UINT8 *) Record + Record->RecordLength);
+      Attr->Next = (UINT8 *)Record;
+      Record     = (ATTR_LIST_RECORD *)((UINT8 *)Record + Record->RecordLength);
     }
   } else {
-    Res = (ATTR_HEADER_RES *) Attr->Next;
+    Res  = (ATTR_HEADER_RES *)Attr->Next;
     Type = Res->Type;
   }
 
@@ -247,21 +247,21 @@ ReadAttr (
 EFI_STATUS
 EFIAPI
 ReadData (
-  IN  NTFS_ATTR *Attr,
-  IN  UINT8     *AttrStart,
-  OUT UINT8     *Dest,
-  IN  UINT64    Offset,
-  IN  UINTN     Length
+  IN  NTFS_ATTR  *Attr,
+  IN  UINT8      *AttrStart,
+  OUT UINT8      *Dest,
+  IN  UINT64     Offset,
+  IN  UINTN      Length
   )
 {
-  EFI_STATUS         Status;
-  RUNLIST            *Runlist;
-  ATTR_HEADER_NONRES *NonRes;
-  ATTR_HEADER_RES    *Res;
-  UINT64             Sector0;
-  UINT64             Sector1;
-  UINT64             OffsetInsideCluster;
-  UINT64             BufferSize;
+  EFI_STATUS          Status;
+  RUNLIST             *Runlist;
+  ATTR_HEADER_NONRES  *NonRes;
+  ATTR_HEADER_RES     *Res;
+  UINT64              Sector0;
+  UINT64              Sector1;
+  UINT64              OffsetInsideCluster;
+  UINT64              BufferSize;
 
   if (Length == 0) {
     return EFI_SUCCESS;
@@ -276,7 +276,7 @@ ReadData (
     return EFI_VOLUME_CORRUPTED;
   }
 
-  Res = (ATTR_HEADER_RES *) AttrStart;
+  Res = (ATTR_HEADER_RES *)AttrStart;
 
   if (Res->NonResFlag == 0) {
     if ((Offset + Length) > Res->InfoLength) {
@@ -289,10 +289,11 @@ ReadData (
       return EFI_VOLUME_CORRUPTED;
     }
 
-    CopyMem (Dest, (UINT8 *) Res + Res->InfoOffset + Offset, Length);
+    CopyMem (Dest, (UINT8 *)Res + Res->InfoOffset + Offset, Length);
 
     return EFI_SUCCESS;
   }
+
   //
   // Non-Resident Attribute
   //
@@ -301,27 +302,28 @@ ReadData (
     return EFI_VOLUME_CORRUPTED;
   }
 
-  NonRes = (ATTR_HEADER_NONRES *) AttrStart;
+  NonRes = (ATTR_HEADER_NONRES *)AttrStart;
 
-  Runlist = (RUNLIST *) AllocateZeroPool (sizeof (RUNLIST));
+  Runlist = (RUNLIST *)AllocateZeroPool (sizeof (RUNLIST));
   if (Runlist == NULL) {
     return EFI_OUT_OF_RESOURCES;
   }
 
-  Runlist->Attr = Attr;
+  Runlist->Attr            = Attr;
   Runlist->Unit.FileSystem = Attr->BaseMftRecord->File->FileSystem;
 
-  if ((NonRes->DataRunsOffset > BufferSize)
-    || (NonRes->DataRunsOffset > NonRes->RealSize)
-    || (NonRes->RealSize > NonRes->AllocatedSize)) {
+  if (  (NonRes->DataRunsOffset > BufferSize)
+     || (NonRes->DataRunsOffset > NonRes->RealSize)
+     || (NonRes->RealSize > NonRes->AllocatedSize))
+  {
     DEBUG ((DEBUG_INFO, "NTFS: Non-Resident Attribute is corrupted.\n"));
     FreePool (Runlist);
     return EFI_VOLUME_CORRUPTED;
   }
 
-  Runlist->NextDataRun = (UINT8 *) NonRes + NonRes->DataRunsOffset;
-  Runlist->NextVcn = NonRes->StartingVCN;
-  Runlist->CurrentLcn = 0;
+  Runlist->NextDataRun = (UINT8 *)NonRes + NonRes->DataRunsOffset;
+  Runlist->NextVcn     = NonRes->StartingVCN;
+  Runlist->CurrentLcn  = 0;
 
   Runlist->TargetVcn = NonRes->StartingVCN + DivU64x64Remainder (Offset, mClusterSize, NULL);
   if (Runlist->TargetVcn < NonRes->StartingVCN) {
@@ -336,9 +338,10 @@ ReadData (
     return EFI_VOLUME_CORRUPTED;
   }
 
-  if (((NonRes->Flags & FLAG_COMPRESSED) != 0)
-    && ((Attr->Flags & NTFS_AF_GPOS) == 0)
-    && (NonRes->Type == AT_DATA)) {
+  if (  ((NonRes->Flags & FLAG_COMPRESSED) != 0)
+     && ((Attr->Flags & NTFS_AF_GPOS) == 0)
+     && (NonRes->Type == AT_DATA))
+  {
     if (NonRes->CompressionUnitSize != 4) {
       DEBUG ((DEBUG_INFO, "NTFS: Invalid copmression unit size.\n"));
       FreePool (Runlist);
@@ -365,16 +368,18 @@ ReadData (
     OffsetInsideCluster = Offset & (mClusterSize - 1);
 
     Sector0 = DivU64x64Remainder (
-      (Runlist->TargetVcn - Runlist->CurrentVcn + Runlist->CurrentLcn) * mClusterSize + OffsetInsideCluster,
-      mSectorSize,
-      NULL
-      );
+                (Runlist->TargetVcn - Runlist->CurrentVcn + Runlist->CurrentLcn) * mClusterSize + OffsetInsideCluster,
+                mSectorSize,
+                NULL
+                );
 
     Sector1 = Sector0 + 1;
     if (Sector1 == DivU64x64Remainder (
-      (Runlist->NextVcn - Runlist->CurrentVcn + Runlist->CurrentLcn) * mClusterSize,
-      mSectorSize,
-      NULL)) {
+                     (Runlist->NextVcn - Runlist->CurrentVcn + Runlist->CurrentLcn) * mClusterSize,
+                     mSectorSize,
+                     NULL
+                     ))
+    {
       Status = ReadRunListElement (Runlist);
       if (EFI_ERROR (Status)) {
         FreePool (Runlist);
@@ -382,25 +387,25 @@ ReadData (
       }
 
       Sector1 = DivU64x64Remainder (
-        Runlist->CurrentLcn * mClusterSize,
-        mSectorSize,
-        NULL
-        );
+                  Runlist->CurrentLcn * mClusterSize,
+                  mSectorSize,
+                  NULL
+                  );
     }
 
-    WriteUnaligned32 ((UINT32 *) Dest, (UINT32) Sector0);
-    WriteUnaligned32 ((UINT32 *) (Dest + 4), (UINT32) Sector1);
+    WriteUnaligned32 ((UINT32 *)Dest, (UINT32)Sector0);
+    WriteUnaligned32 ((UINT32 *)(Dest + 4), (UINT32)Sector1);
 
     FreePool (Runlist);
     return EFI_SUCCESS;
   }
 
   Status = ReadClusters (
-    Runlist,
-    Offset,
-    Length,
-    Dest
-    );
+             Runlist,
+             Offset,
+             Length,
+             Dest
+             );
 
   FreePool (Runlist);
   return Status;
@@ -409,12 +414,12 @@ ReadData (
 STATIC
 UINT64
 ReadField (
-  IN CONST UINT8 *Run,
-  IN UINT8       FieldSize,
-  IN BOOLEAN     Signed
+  IN CONST UINT8  *Run,
+  IN UINT8        FieldSize,
+  IN BOOLEAN      Signed
   )
 {
-  UINT64 Value;
+  UINT64  Value;
 
   ASSERT (Run != NULL);
 
@@ -424,7 +429,7 @@ ReadField (
   // So we must check the most significant bit.
   //
   if (Signed && (FieldSize != 0) && ((Run[FieldSize - 1] & 0x80U) != 0)) {
-    Value = (UINT64) (-1);
+    Value = (UINT64)(-1);
   }
 
   CopyMem (&Value, Run, FieldSize);
@@ -449,19 +454,19 @@ ReadRunListElement (
   IN OUT RUNLIST  *Runlist
   )
 {
-  UINT8              LengthSize;
-  UINT8              OffsetSize;
-  UINT64             OffsetLcn;
-  UINT8              *Run;
-  ATTR_HEADER_NONRES *Attr;
-  UINT64             BufferSize;
+  UINT8               LengthSize;
+  UINT8               OffsetSize;
+  UINT64              OffsetLcn;
+  UINT8               *Run;
+  ATTR_HEADER_NONRES  *Attr;
+  UINT64              BufferSize;
 
   ASSERT (Runlist != NULL);
 
-  Run = Runlist->NextDataRun;
+  Run        = Runlist->NextDataRun;
   BufferSize = mFileRecordSize - (Run - Runlist->Attr->BaseMftRecord->FileRecord);
 
-  retry:
+retry:
   if (BufferSize == 0) {
     DEBUG ((DEBUG_INFO, "NTFS: (ReadRunListElement #1) Runlist is corrupted.\n"));
     return EFI_VOLUME_CORRUPTED;
@@ -472,33 +477,36 @@ ReadRunListElement (
   ++Run;
   --BufferSize;
 
-  if ((LengthSize > 8)
-    || (OffsetSize > 8)
-    || ((LengthSize == 0) && (OffsetSize != 0))) {
+  if (  (LengthSize > 8)
+     || (OffsetSize > 8)
+     || ((LengthSize == 0) && (OffsetSize != 0)))
+  {
     DEBUG ((DEBUG_INFO, "NTFS: (ReadRunListElement #2) Runlist is corrupted.\n"));
     return EFI_VOLUME_CORRUPTED;
   }
+
   //
   // End of Runlist: LengthSize == 0, OffsetSize == 0
   //
   if ((LengthSize == 0) && (OffsetSize == 0)) {
-    if ((Runlist->Attr != NULL)
-      && ((Runlist->Attr->Flags & NTFS_AF_ALST) != 0)) {
-      Attr = (ATTR_HEADER_NONRES *) Runlist->Attr->Current;
-      Attr = (ATTR_HEADER_NONRES *) FindAttr (Runlist->Attr, Attr->Type);
+    if (  (Runlist->Attr != NULL)
+       && ((Runlist->Attr->Flags & NTFS_AF_ALST) != 0))
+    {
+      Attr = (ATTR_HEADER_NONRES *)Runlist->Attr->Current;
+      Attr = (ATTR_HEADER_NONRES *)FindAttr (Runlist->Attr, Attr->Type);
       if (Attr != NULL) {
-
         if (Attr->NonResFlag == 0) {
           DEBUG ((DEBUG_INFO, "NTFS: $DATA should be non-resident\n"));
           return EFI_VOLUME_CORRUPTED;
         }
 
-        Run = (UINT8 *) Attr + Attr->DataRunsOffset;
+        Run                 = (UINT8 *)Attr + Attr->DataRunsOffset;
         Runlist->CurrentLcn = 0;
-        BufferSize = mFileRecordSize - Attr->DataRunsOffset;
+        BufferSize          = mFileRecordSize - Attr->DataRunsOffset;
         goto retry;
       }
     }
+
     DEBUG ((DEBUG_INFO, "NTFS: Run list overflown\n"));
     return EFI_VOLUME_CORRUPTED;
   }
@@ -516,7 +524,7 @@ ReadRunListElement (
     return EFI_VOLUME_CORRUPTED;
   }
 
-  Run += LengthSize;
+  Run        += LengthSize;
   BufferSize -= LengthSize;
 
   if (BufferSize < OffsetSize) {
@@ -524,11 +532,11 @@ ReadRunListElement (
     return EFI_VOLUME_CORRUPTED;
   }
 
-  OffsetLcn = ReadField (Run, OffsetSize, TRUE);
+  OffsetLcn            = ReadField (Run, OffsetSize, TRUE);
   Runlist->CurrentLcn += OffsetLcn;
 
-  Run += OffsetSize;
-  BufferSize -= OffsetSize;
+  Run                 += OffsetSize;
+  BufferSize          -= OffsetSize;
   Runlist->NextDataRun = Run;
 
   Runlist->IsSparse = (OffsetLcn == 0);
@@ -541,11 +549,11 @@ ReadSymlink (
   IN NTFS_FILE  *File
   )
 {
-  EFI_STATUS       Status;
-  SYMLINK          Symlink;
-  CHAR16           *Substitute;
-  CHAR16           *Letter;
-  UINT64           Offset;
+  EFI_STATUS  Status;
+  SYMLINK     Symlink;
+  CHAR16      *Substitute;
+  CHAR16      *Letter;
+  UINT64      Offset;
 
   ASSERT (File != NULL);
 
@@ -564,7 +572,7 @@ ReadSymlink (
     return NULL;
   }
 
-  Status = ReadAttr (&File->Attr, (UINT8 *) &Symlink, 0, sizeof (Symlink));
+  Status = ReadAttr (&File->Attr, (UINT8 *)&Symlink, 0, sizeof (Symlink));
   if (EFI_ERROR (Status)) {
     FreeAttr (&File->Attr);
     return NULL;
@@ -572,10 +580,10 @@ ReadSymlink (
 
   switch (Symlink.Type) {
     case (IS_ALIAS | IS_MICROSOFT | S_SYMLINK):
-      Offset = sizeof (Symlink) + 4 + (UINT64) Symlink.SubstituteOffset;
+      Offset = sizeof (Symlink) + 4 + (UINT64)Symlink.SubstituteOffset;
       break;
     case (IS_ALIAS | IS_MICROSOFT | S_FILENAME):
-      Offset = sizeof (Symlink) + (UINT64) Symlink.SubstituteOffset;
+      Offset = sizeof (Symlink) + (UINT64)Symlink.SubstituteOffset;
       break;
     default:
       DEBUG ((DEBUG_INFO, "NTFS: Symlink type invalid (%x)\n", Symlink.Type));
@@ -587,7 +595,7 @@ ReadSymlink (
     return NULL;
   }
 
-  Status = ReadAttr (&File->Attr, (UINT8 *) Substitute, Offset, Symlink.SubstituteLength);
+  Status = ReadAttr (&File->Attr, (UINT8 *)Substitute, Offset, Symlink.SubstituteLength);
   if (EFI_ERROR (Status)) {
     FreeAttr (&File->Attr);
     FreePool (Substitute);

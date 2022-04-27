@@ -12,8 +12,8 @@
 EFI_STATUS
 EFIAPI
 FileGetPosition (
-  IN  EFI_FILE_PROTOCOL *This,
-  OUT UINT64            *Position
+  IN  EFI_FILE_PROTOCOL  *This,
+  OUT UINT64             *Position
   )
 {
   EFI_NTFS_FILE  *File;
@@ -21,7 +21,7 @@ FileGetPosition (
   ASSERT (This != NULL);
   ASSERT (Position != NULL);
 
-  File = (EFI_NTFS_FILE *) This;
+  File = (EFI_NTFS_FILE *)This;
 
   *Position = File->IsDir ? File->DirIndex : File->Offset;
 
@@ -31,8 +31,8 @@ FileGetPosition (
 EFI_STATUS
 EFIAPI
 FileSetPosition (
-  IN EFI_FILE_PROTOCOL *This,
-  IN UINT64            Position
+  IN EFI_FILE_PROTOCOL  *This,
+  IN UINT64             Position
   )
 {
   EFI_NTFS_FILE  *File;
@@ -40,7 +40,7 @@ FileSetPosition (
 
   ASSERT (This != NULL);
 
-  File = (EFI_NTFS_FILE *) This;
+  File = (EFI_NTFS_FILE *)This;
 
   if (File->IsDir) {
     if (Position != 0) {

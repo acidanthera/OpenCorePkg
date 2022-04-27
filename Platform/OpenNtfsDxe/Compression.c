@@ -9,23 +9,23 @@
 #include "NTFS.h"
 #include "Helper.h"
 
-#define IS_COMPRESSED_BLOCK 0x8000
-#define BLOCK_LENGTH_BITS   0xFFF
-#define UNIT_MASK           0xF
+#define IS_COMPRESSED_BLOCK  0x8000
+#define BLOCK_LENGTH_BITS    0xFFF
+#define UNIT_MASK            0xF
 
-extern UINTN  mFileRecordSize;
-extern UINTN  mSectorSize;
-extern UINTN  mClusterSize;
-extern UINT64 mUnitSize;
-STATIC UINT64 mBufferSize;
+extern UINTN   mFileRecordSize;
+extern UINTN   mSectorSize;
+extern UINTN   mClusterSize;
+extern UINT64  mUnitSize;
+STATIC UINT64  mBufferSize;
 
 STATIC
 EFI_STATUS
 GetNextCluster (
-  IN OUT COMPRESSED *Clusters
+  IN OUT COMPRESSED  *Clusters
   )
 {
-  EFI_STATUS   Status;
+  EFI_STATUS  Status;
 
   if (Clusters->Head >= Clusters->Tail) {
     DEBUG ((DEBUG_INFO, "NTFS: Compression block overflown\n"));
@@ -33,11 +33,11 @@ GetNextCluster (
   }
 
   Status = DiskRead (
-    Clusters->FileSystem,
-    (Clusters->Elements[Clusters->Head].Lcn - Clusters->Elements[Clusters->Head].Vcn + Clusters->CurrentVcn) * mClusterSize,
-    mClusterSize,
-    Clusters->Cluster
-    );
+             Clusters->FileSystem,
+             (Clusters->Elements[Clusters->Head].Lcn - Clusters->Elements[Clusters->Head].Vcn + Clusters->CurrentVcn) * mClusterSize,
+             mClusterSize,
+             Clusters->Cluster
+             );
   if (EFI_ERROR (Status)) {
     return Status;
   }
@@ -56,11 +56,11 @@ GetNextCluster (
 STATIC
 EFI_STATUS
 GetDataRunByte (
-  IN  COMPRESSED *Clusters,
-  OUT UINT8      *Result
+  IN  COMPRESSED  *Clusters,
+  OUT UINT8       *Result
   )
 {
-  EFI_STATUS   Status;
+  EFI_STATUS  Status;
 
   ASSERT (Clusters != NULL);
   ASSERT (Result   != NULL);
@@ -80,13 +80,13 @@ GetDataRunByte (
 STATIC
 EFI_STATUS
 GetTwoDataRunBytes (
-  IN  COMPRESSED *Clusters,
-  OUT UINT16     *Result
+  IN  COMPRESSED  *Clusters,
+  OUT UINT16      *Result
   )
 {
-  EFI_STATUS   Status;
-  UINT8        ByteLow;
-  UINT8        ByteHigh;
+  EFI_STATUS  Status;
+  UINT8       ByteLow;
+  UINT8       ByteHigh;
 
   ASSERT (Clusters != NULL);
   ASSERT (Result   != NULL);
@@ -101,7 +101,7 @@ GetTwoDataRunBytes (
     return Status;
   }
 
-  *Result = (((UINT16) ByteHigh) << 8U) | ByteLow;
+  *Result = (((UINT16)ByteHigh) << 8U) | ByteLow;
 
   return EFI_SUCCESS;
 }
@@ -160,24 +160,24 @@ GetTwoDataRunBytes (
 STATIC
 EFI_STATUS
 DecompressBlock (
-  IN  COMPRESSED *Clusters,
-  OUT UINT8      *Dest       OPTIONAL
+  IN  COMPRESSED  *Clusters,
+  OUT UINT8       *Dest       OPTIONAL
   )
 {
-  EFI_STATUS   Status;
-  UINT16       BlockParameters;
-  UINTN        BlockLength;
-  UINT8        TagsByte;
-  UINT8        Tokens;
-  UINT16       ClearTextPointer;
-  UINT8        PlainText;
-  UINT16       Index;
-  UINT16       Length;
-  UINT16       Lmask;
-  UINT16       Delta;
-  UINT16       Dshift;
-  UINT16       BackReference;
-  UINTN        SpareBytes;
+  EFI_STATUS  Status;
+  UINT16      BlockParameters;
+  UINTN       BlockLength;
+  UINT8       TagsByte;
+  UINT8       Tokens;
+  UINT16      ClearTextPointer;
+  UINT8       PlainText;
+  UINT16      Index;
+  UINT16      Length;
+  UINT16      Lmask;
+  UINT16      Delta;
+  UINT16      Dshift;
+  UINT16      BackReference;
+  UINTN       SpareBytes;
 
   ASSERT (Clusters != NULL);
 
@@ -228,14 +228,14 @@ DecompressBlock (
             return EFI_VOLUME_CORRUPTED;
           }
 
-          Lmask = BLOCK_LENGTH_BITS;
+          Lmask  = BLOCK_LENGTH_BITS;
           Dshift = 12;
           for (Index = ClearTextPointer - 1; Index >= 0x10; Index >>= 1) {
             Lmask >>= 1U;
             --Dshift;
           }
 
-          Delta = BackReference >> Dshift;
+          Delta  = BackReference >> Dshift;
           Length = (BackReference & Lmask) + 3;
 
           if ((Delta > (ClearTextPointer - 1)) || (Length >= COMPRESSION_BLOCK)) {
@@ -300,11 +300,11 @@ DecompressBlock (
       }
 
       CopyMem (Dest, &Clusters->Cluster[Clusters->ClusterOffset], SpareBytes);
-      Dest += SpareBytes;
+      Dest        += SpareBytes;
       mBufferSize -= SpareBytes;
     }
 
-    BlockLength -= SpareBytes;
+    BlockLength             -= SpareBytes;
     Clusters->ClusterOffset += SpareBytes;
     if (BlockLength != 0) {
       Status = GetNextCluster (Clusters);
@@ -374,17 +374,17 @@ Regroup
 STATIC
 EFI_STATUS
 ReadCompressedBlock (
-  IN  RUNLIST *Runlist,
-  OUT UINT8   *Dest        OPTIONAL,
-  IN  UINTN   BlocksTotal
+  IN  RUNLIST  *Runlist,
+  OUT UINT8    *Dest        OPTIONAL,
+  IN  UINTN    BlocksTotal
   )
 {
-  EFI_STATUS   Status;
-  UINTN        SpareBlocks;
-  UINT64       SpareClusters;
-  UINT64       BlocksPerCluster;
-  UINT64       ClustersPerBlock;
-  UINT64       ClearTextClusters;
+  EFI_STATUS  Status;
+  UINTN       SpareBlocks;
+  UINT64      SpareClusters;
+  UINT64      BlocksPerCluster;
+  UINT64      ClustersPerBlock;
+  UINT64      ClearTextClusters;
 
   ASSERT (Runlist != NULL);
 
@@ -400,14 +400,14 @@ ReadCompressedBlock (
   }
 
   while (BlocksTotal != 0) {
-    if ((Runlist->TargetVcn & UNIT_MASK) == 0)  {
+    if ((Runlist->TargetVcn & UNIT_MASK) == 0) {
       if ((Runlist->Unit.Head != Runlist->Unit.Tail) && (Runlist->IsSparse == FALSE)) {
         DEBUG ((DEBUG_INFO, "NTFS: Invalid compression block\n"));
         return EFI_VOLUME_CORRUPTED;
       }
 
-      Runlist->Unit.Head = Runlist->Unit.Tail = 0;
-      Runlist->Unit.CurrentVcn = Runlist->TargetVcn;
+      Runlist->Unit.Head          = Runlist->Unit.Tail = 0;
+      Runlist->Unit.CurrentVcn    = Runlist->TargetVcn;
       Runlist->Unit.ClusterOffset = mClusterSize;
       if (Runlist->TargetVcn >= Runlist->NextVcn) {
         Status = ReadRunListElement (Runlist);
@@ -433,14 +433,15 @@ ReadCompressedBlock (
     }
 
     if (mClusterSize >= COMPRESSION_BLOCK) {
-      SpareBlocks = (UINTN) ((mUnitSize - (Runlist->TargetVcn & UNIT_MASK)) * BlocksPerCluster);
+      SpareBlocks = (UINTN)((mUnitSize - (Runlist->TargetVcn & UNIT_MASK)) * BlocksPerCluster);
     } else {
-      SpareBlocks = (UINTN) DivU64x64Remainder (mUnitSize - (Runlist->TargetVcn & UNIT_MASK), ClustersPerBlock, NULL);
+      SpareBlocks = (UINTN)DivU64x64Remainder (mUnitSize - (Runlist->TargetVcn & UNIT_MASK), ClustersPerBlock, NULL);
     }
 
     if (SpareBlocks > BlocksTotal) {
       SpareBlocks = BlocksTotal;
     }
+
     BlocksTotal -= SpareBlocks;
 
     if (Runlist->IsSparse) {
@@ -458,7 +459,7 @@ ReadCompressedBlock (
           }
 
           ZeroMem (Dest, SpareBlocks * COMPRESSION_BLOCK);
-          Dest += SpareBlocks * COMPRESSION_BLOCK;
+          Dest        += SpareBlocks * COMPRESSION_BLOCK;
           mBufferSize -= SpareBlocks * COMPRESSION_BLOCK;
         }
       } else {
@@ -496,16 +497,16 @@ ReadCompressedBlock (
           }
 
           Status = DiskRead (
-            Runlist->Unit.FileSystem,
-            Runlist->Unit.Elements[Runlist->Unit.Head].Lcn * mClusterSize,
-            (UINTN) (ClearTextClusters * mClusterSize),
-            Dest
-            );
+                     Runlist->Unit.FileSystem,
+                     Runlist->Unit.Elements[Runlist->Unit.Head].Lcn * mClusterSize,
+                     (UINTN)(ClearTextClusters * mClusterSize),
+                     Dest
+                     );
           if (EFI_ERROR (Status)) {
             return Status;
           }
 
-          Dest += ClearTextClusters * mClusterSize;
+          Dest        += ClearTextClusters * mClusterSize;
           mBufferSize -= ClearTextClusters * mClusterSize;
         }
 
@@ -521,18 +522,19 @@ ReadCompressedBlock (
           }
 
           Status = DiskRead (
-            Runlist->Unit.FileSystem,
-            (Runlist->TargetVcn - Runlist->CurrentVcn + Runlist->CurrentLcn) * mClusterSize,
-            (UINTN) (SpareClusters * mClusterSize),
-            Dest
-            );
+                     Runlist->Unit.FileSystem,
+                     (Runlist->TargetVcn - Runlist->CurrentVcn + Runlist->CurrentLcn) * mClusterSize,
+                     (UINTN)(SpareClusters * mClusterSize),
+                     Dest
+                     );
           if (EFI_ERROR (Status)) {
             return Status;
           }
 
-          Dest += SpareClusters * mClusterSize;
+          Dest        += SpareClusters * mClusterSize;
           mBufferSize -= SpareClusters * mClusterSize;
         }
+
         Runlist->TargetVcn += SpareClusters;
       }
     }
@@ -543,26 +545,26 @@ ReadCompressedBlock (
 
 EFI_STATUS
 Decompress (
-  IN  RUNLIST *Runlist,
-  IN  UINT64  Offset,
-  IN  UINTN   Length,
-  OUT UINT8   *Dest
+  IN  RUNLIST  *Runlist,
+  IN  UINT64   Offset,
+  IN  UINTN    Length,
+  OUT UINT8    *Dest
   )
 {
-  EFI_STATUS   Status;
-  UINT64       Vcn;
-  UINT64       Target;
-  UINTN        SpareBytes;
-  UINTN        Residual;
-  UINT64       BlocksPerCluster;
-  UINT64       ClustersPerBlock;
+  EFI_STATUS  Status;
+  UINT64      Vcn;
+  UINT64      Target;
+  UINTN       SpareBytes;
+  UINTN       Residual;
+  UINT64      BlocksPerCluster;
+  UINT64      ClustersPerBlock;
 
   ASSERT (Runlist != NULL);
   ASSERT (Dest    != NULL);
 
   if (Runlist->Unit.ClearTextBlock != NULL) {
     if ((Offset & (~(COMPRESSION_BLOCK - 1U))) == Runlist->Unit.SavedPosition) {
-      Residual = (UINTN) (COMPRESSION_BLOCK - (Offset - Runlist->Unit.SavedPosition));
+      Residual = (UINTN)(COMPRESSION_BLOCK - (Offset - Runlist->Unit.SavedPosition));
       if (Residual > Length) {
         Residual = Length;
       }
@@ -572,7 +574,7 @@ Decompress (
         return EFI_SUCCESS;
       }
 
-      Dest += Residual;
+      Dest   += Residual;
       Length -= Residual;
       Offset += Residual;
     }
@@ -585,7 +587,7 @@ Decompress (
     Runlist->Unit.SavedPosition = 1;
   }
 
-  Vcn = Runlist->TargetVcn;
+  Vcn                 = Runlist->TargetVcn;
   Runlist->TargetVcn &= ~(mUnitSize - 1);
   while (Runlist->NextVcn <= Runlist->TargetVcn) {
     Status = ReadRunListElement (Runlist);
@@ -595,7 +597,7 @@ Decompress (
     }
   }
 
-  Runlist->Unit.Head = Runlist->Unit.Tail = 0;
+  Runlist->Unit.Head    = Runlist->Unit.Tail = 0;
   Runlist->Unit.Cluster = AllocateZeroPool (mClusterSize);
   if (Runlist->Unit.Cluster == NULL) {
     FreePool (Runlist->Unit.ClearTextBlock);
@@ -605,18 +607,18 @@ Decompress (
   if (Vcn > Runlist->TargetVcn) {
     if (mClusterSize >= COMPRESSION_BLOCK) {
       BlocksPerCluster = DivU64x64Remainder (mClusterSize, COMPRESSION_BLOCK, NULL);
-      Status = ReadCompressedBlock (
-        Runlist,
-        NULL,
-        (UINTN) ((Vcn - Runlist->TargetVcn) * BlocksPerCluster)
-        );
+      Status           = ReadCompressedBlock (
+                           Runlist,
+                           NULL,
+                           (UINTN)((Vcn - Runlist->TargetVcn) * BlocksPerCluster)
+                           );
     } else {
       ClustersPerBlock = DivU64x64Remainder (COMPRESSION_BLOCK, mClusterSize, NULL);
-      Status = ReadCompressedBlock (
-        Runlist,
-        NULL,
-        (UINTN) DivU64x64Remainder (Vcn - Runlist->TargetVcn, ClustersPerBlock, NULL)
-        );
+      Status           = ReadCompressedBlock (
+                           Runlist,
+                           NULL,
+                           (UINTN)DivU64x64Remainder (Vcn - Runlist->TargetVcn, ClustersPerBlock, NULL)
+                           );
     }
 
     if (EFI_ERROR (Status)) {
@@ -638,7 +640,7 @@ Decompress (
 
     Runlist->Unit.SavedPosition = Target;
 
-    Residual = (UINTN) (Offset % COMPRESSION_BLOCK);
+    Residual   = (UINTN)(Offset % COMPRESSION_BLOCK);
     SpareBytes = COMPRESSION_BLOCK - Residual;
     if (SpareBytes > Length) {
       SpareBytes = Length;
@@ -651,7 +653,7 @@ Decompress (
       return EFI_SUCCESS;
     }
 
-    Dest += SpareBytes;
+    Dest   += SpareBytes;
     Length -= SpareBytes;
   }
 
@@ -662,7 +664,7 @@ Decompress (
     return Status;
   }
 
-  Dest += (Length / COMPRESSION_BLOCK) * COMPRESSION_BLOCK;
+  Dest   += (Length / COMPRESSION_BLOCK) * COMPRESSION_BLOCK;
   Length %= COMPRESSION_BLOCK;
   if (Length != 0) {
     Target = Runlist->TargetVcn * mClusterSize;
