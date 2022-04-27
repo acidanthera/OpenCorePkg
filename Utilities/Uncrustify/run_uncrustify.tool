@@ -5,35 +5,6 @@ abort() {
   exit 1
 }
 
-# Avoid conflicts with PATH overrides.
-CAT="/bin/cat"
-CHMOD="/bin/chmod"
-CURL="/usr/bin/curl"
-FIND="/usr/bin/find"
-MKDIR="/bin/mkdir"
-MV="/bin/mv"
-RM="/bin/rm"
-TAR="/usr/bin/tar"
-UNZIP="/usr/bin/unzip"
-
-TOOLS=(
-  "${CAT}"
-  "${CHMOD}"
-  "${CURL}"
-  "${FIND}"
-  "${MKDIR}"
-  "${MV}"
-  "${RM}"
-  "${TAR}"
-  "${UNZIP}"
-)
-
-for tool in "${TOOLS[@]}"; do
-  if [ ! -x "${tool}" ]; then
-    abort "Missing ${tool}"
-  fi
-done
-
 PROJECT_PATH="$(dirname "$0")"
 # shellcheck disable=SC2181
 if [ $? -ne 0 ] || [ ! -d "${PROJECT_PATH}" ]; then
@@ -91,9 +62,9 @@ UNCRUSTIFY_CONFIG_FILE=./uncrustify-OpenCorePkg.cfg
 "${UNC_EXEC}" -c "${UNCRUSTIFY_CONFIG_FILE}" -F "${FILE_LIST}" --replace --no-backup --if-changed || abort "Failed to run Uncrustify"
 
 git diff > uncrustify.diff || abort "Failed to generate uncrustify diff with code $?"
-if [ "$(${CAT} uncrustify.diff)" != "" ]; then
+if [ "$(cat uncrustify.diff)" != "" ]; then
   # show the diff
-  "${CAT}" uncrustify.diff
+  cat uncrustify.diff
   abort "Uncrustify detects codestyle problems! Please fix"
 fi
 
