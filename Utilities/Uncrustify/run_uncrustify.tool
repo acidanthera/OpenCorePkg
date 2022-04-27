@@ -1,5 +1,7 @@
 #!/bin/bash
 
+export PROJECT_NAME=OpenCorePkg
+
 abort() {
   echo "ERROR: $1!"
   exit 1
@@ -59,22 +61,22 @@ find \
   -print \
   > "${FILE_LIST}" || abort "Failed to dump source file list to ${FILE_LIST}"
 
-UNCRUSTIFY_CONFIG_FILE=./uncrustify-OpenCorePkg.cfg
-UNCRUSTIFY_DIFF_FILE=./uncrustify.diff
-rm -f "${UNCRUSTIFY_DIFF_FILE}" || abort "Failed to cleanup legacy ${UNCRUSTIFY_DIFF_FILE}"
-"${UNC_EXEC}" -c "${UNCRUSTIFY_CONFIG_FILE}" -F "${FILE_LIST}" --replace --no-backup --if-changed || abort "Failed to run Uncrustify"
+UNC_DIFF_FILE=./uncrustify.diff
+rm -f "${UNC_DIFF_FILE}" || abort "Failed to cleanup legacy ${UNC_DIFF_FILE}"
+"${UNC_EXEC}" -c "${UNC_CONFIG_FILE}" -F "${FILE_LIST}" --replace --no-backup --if-changed || abort "Failed to run Uncrustify"
 
 # only diff the selected .c/.h files
 while read line; do
-  git diff "${line}" >> "${UNCRUSTIFY_DIFF_FILE}" || abort "Failed to git diff ${line}"
+  git diff "${line}" >> "${UNC_DIFF_FILE}" || abort "Failed to git diff ${line}"
 done < "${FILE_LIST}"
-if [ "$(cat ${UNCRUSTIFY_DIFF_FILE})" != "" ]; then
+if [ "$(cat ${UNC_DIFF_FILE})" != "" ]; then
   # show the diff
-  cat "${UNCRUSTIFY_DIFF_FILE}"
+  cat "${UNC_DIFF_FILE}"
   abort "Uncrustify detects codestyle problems! Please fix"
 fi
 
 rm -f "${FILE_LIST}" || abort "Failed to cleanup ${FILE_LIST}"
 rm -f "${UNC_EXEC}" || abort "Failed to cleanup ${UNC_EXEC}"
+rm -f "${UNC_CONFIG_FILE}" || abort "Failed to cleanup ${UNC_CONFIG_FILE}"
 
 exit 0
