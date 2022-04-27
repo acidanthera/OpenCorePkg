@@ -1,4 +1,4 @@
-"""
+'''
 Allows loading TianoCore symbols into a GDB session attached to EFI
 Firmware.
 
@@ -19,7 +19,7 @@ when starting gdb.
 The -o option should be used if you've debugging EFI, where the PE
 images were converted from MACH-O or ELF binaries.
 
-"""
+'''
 
 import array
 import getopt
@@ -34,17 +34,17 @@ sys.path.append(os.path.dirname(__file__))
 
 from common_uefi import *
 
-__license__ = "BSD"
-__version = "1.0.0"
-__maintainer__ = "Andrei Warkentin"
-__email__ = "andrey.warkentin@gmail.com"
-__status__ = "Works"
+__license__ = 'BSD'
+__version = '1.0.0'
+__maintainer__ = 'Andrei Warkentin'
+__email__ = 'andrey.warkentin@gmail.com'
+__status__ = 'Works'
 
 if sys.version_info > (3,):
     long = int
 
 class ReloadUefi (gdb.Command):
-    """Reload UEFI symbols"""
+    '''Reload UEFI symbols'''
 
     #
     # Various constants.
@@ -70,7 +70,7 @@ class ReloadUefi (gdb.Command):
     offset_by_headers = False
 
     def __init__ (self):
-        super (ReloadUefi, self).__init__ ("reload-uefi", gdb.COMMAND_OBSCURE)
+        super (ReloadUefi, self).__init__ ('reload-uefi', gdb.COMMAND_OBSCURE)
 
     #
     # Returns gdb.Type for a type.
@@ -102,9 +102,7 @@ class ReloadUefi (gdb.Command):
     #
 
     def set_field (self, value, field_name, data):
-        gdb.execute ("set *(%s *) 0x%x = 0x%x" % \
-            (str (value[field_name].type), \
-             long (value[field_name].address), data))
+        gdb.execute (f'set *({str (value[field_name].type)} *) 0x{long (value[field_name].address):x} = 0x{data}')
 
     #
     # Returns data backing a gdb.Value as an array.
@@ -139,7 +137,7 @@ class ReloadUefi (gdb.Command):
                     newcrc = self.crc32 (self.value_data (estp.dereference (), 0))
                     self.set_field (estp, 'Crc32', long(oldcrc))
                     if newcrc == oldcrc:
-                        print('EFI_SYSTEM_TABLE_POINTER @ 0x%x' % address)
+                        print(f'EFI_SYSTEM_TABLE_POINTER @ 0x{address:x}')
                         return estp['EfiSystemTableBase']
             except gdb.MemoryError:
                 pass
@@ -163,7 +161,7 @@ class ReloadUefi (gdb.Command):
                     cfg_entry['Data3'] == guid[2] and \
                     self.value_data (cfg_entry['Data4']).tolist () == guid[3]:
                 return cfg_table[index]['VendorTable']
-            index = index + 1
+            index += 1
         return gdb.Value(self.EINVAL)
 
     #
@@ -216,29 +214,21 @@ class ReloadUefi (gdb.Command):
     #
 
     def pe_is_64 (self, pe_headers):
-        if pe_headers['Pe32']['OptionalHeader']['Magic'] == self.PE32PLUS_MAGIC:
-            return True
-        return False
+        return True if pe_headers['Pe32']['OptionalHeader']['Magic'] == self.PE32PLUS_MAGIC else False
 
     #
     # Returns the PE fileheader.
     #
 
     def pe_file (self, pe):
-        if self.pe_is_64 (pe):
-            return pe['Pe32Plus']['FileHeader']
-        else:
-            return pe['Pe32']['FileHeader']
+        return pe['Pe32Plus']['FileHeader'] if self.pe_is_64 (pe) else pe['Pe32']['FileHeader']
 
     #
     # Returns the PE (not so) optional header.
     #
 
     def pe_optional (self, pe):
-        if self.pe_is_64 (pe):
-            return pe['Pe32Plus']['OptionalHeader']
-        else:
-            return pe['Pe32']['OptionalHeader']
+        return pe['Pe32Plus']['OptionalHeader'] if self.pe_is_64 (pe) else pe['Pe32']['OptionalHeader']
 
     #
     # Returns the symbol file name for a PE image.
@@ -251,13 +241,16 @@ class ReloadUefi (gdb.Command):
         dep = dep.cast (self.ptype ('EFI_IMAGE_DEBUG_DIRECTORY_ENTRY'))
         cvp = dep.dereference ()['RVA'] + opt['ImageBase']
         cvv = cvp.cast(self.ptype ('UINT32')).dereference ()
-        if cvv == self.CV_NB10:
-            return cvp + self.sizeof('EFI_IMAGE_DEBUG_CODEVIEW_NB10_ENTRY')
-        elif cvv == self.CV_RSDS:
-            return cvp + self.sizeof('EFI_IMAGE_DEBUG_CODEVIEW_RSDS_ENTRY')
-        elif cvv == self.CV_MTOC:
-            return cvp + self.sizeof('EFI_IMAGE_DEBUG_CODEVIEW_MTOC_ENTRY')
-        return gdb.Value(self.EINVAL)
+        match cvv:
+
+            case self.CV_NB10:
+                return cvp + self.sizeof('EFI_IMAGE_DEBUG_CODEVIEW_NB10_ENTRY')
+            case self.CV_RSDS:
+                return cvp + self.sizeof('EFI_IMAGE_DEBUG_CODEVIEW_RSDS_ENTRY')
+            case self.CV_MTOC:
+                return cvp + self.sizeof('EFI_IMAGE_DEBUG_CODEVIEW_MTOC_ENTRY')
+            case _:
+                return gdb.Value(self.EINVAL)
 
     #
     # Prepares gdb symbol load command with proper section information.
@@ -266,18 +259,18 @@ class ReloadUefi (gdb.Command):
     # TODO: Proper ELF support.
     #
     def get_sym_cmd (self, file, orgbase, sections, macho, fallack_base):
-        cmd = 'add-symbol-file %s' % file
+        cmd = f'add-symbol-file {file}'
 
         # Fallback case, no sections, just load .text.
         if not sections.get('.text') or not sections.get('.data'):
-            cmd += ' 0x%x' % (fallack_base)
+            cmd += f' 0x{fallack_base:x}'
             return cmd
 
-        cmd += ' 0x%x' % (long(orgbase) + sections['.text'])
+        cmd += f" 0x{long(orgbase):x}{sections['.text']}"
 
         if not macho or not os.path.exists(file):
             # Another fallback, try to load data at least.
-            cmd += ' -s .data 0x%x' % (long(orgbase) + sections['.data'])
+            cmd += f" -s .data 0x{long(orgbase) + sections['.data']:x}"
             return cmd
 
         # 1. Parse Mach-O.
@@ -323,7 +316,7 @@ class ReloadUefi (gdb.Command):
         # 3. Rebase.
         for entry in mapping:
             if machsections.get(entry):
-                cmd += ' -s %s 0x%x' % (mapping[entry], long(orgbase) + machsections[entry])
+                cmd += f' -s {mapping[entry]} 0x{long(orgbase) + machsections[entry]:x}'
 
         return cmd
 
@@ -347,7 +340,7 @@ class ReloadUefi (gdb.Command):
             base = base + opt['SizeOfHeaders']
         if sym_name != self.EINVAL:
             sym_name = sym_name.cast (self.ptype('CHAR8')).string ()
-            sym_name_dbg = re.sub(r"\.dll$", ".debug", sym_name)
+            sym_name_dbg = re.sub(r'\.dll$', '.debug', sym_name)
             macho = False
             if os.path.isdir(sym_name + '.dSYM'):
                 sym_name += '.dSYM/Contents/Resources/DWARF/' + os.path.basename(sym_name)
@@ -366,23 +359,22 @@ class ReloadUefi (gdb.Command):
     def parse_edii (self, edii, count):
         index = 0
         syms = []
-        print ("Found {} images...".format(count))
+        print (f'Found {count} images...')
         while index != count:
             entry = edii[index]
             if entry['ImageInfoType'].dereference () == 1:
                 entry = entry['NormalImage']
                 self.parse_image(entry['LoadedImageProtocolInstance'], syms)
             else:
-                print ("Skipping unknown EFI_DEBUG_IMAGE_INFO (Type 0x%x)" % \
-                        entry['ImageInfoType'].dereference ())
-            index = index + 1
-        gdb.execute ("symbol-file")
-        print ("Loading new symbols...")
+                print (f"Skipping unknown EFI_DEBUG_IMAGE_INFO (Type 0x{entry['ImageInfoType'].dereference ():x})")
+            index += 1
+        gdb.execute ('symbol-file')
+        print ('Loading new symbols...')
         for sym in syms:
             try:
                 gdb.execute (sym)
             except (gdb.error) as err:
-                print ('Failed: %s' % err)
+                print (f'Failed: {err}')
 
     #
     # Parses EFI_DEBUG_IMAGE_INFO_TABLE_HEADER, in order to load
@@ -392,10 +384,9 @@ class ReloadUefi (gdb.Command):
     def parse_dh (self, dh):
         dh_t = self.ptype ('EFI_DEBUG_IMAGE_INFO_TABLE_HEADER')
         dh = dh.cast (dh_t)
-        print ("DebugImageInfoTable @ 0x%x, 0x%x entries" % \
-                (long (dh['EfiDebugImageInfoTable']), dh['TableSize']))
+        print (f"DebugImageInfoTable @ 0x{long (dh['EfiDebugImageInfoTable']):x}, 0x{dh['TableSize']:x} entries")
         if dh['UpdateStatus'] & self.DEBUG_IS_UPDATING:
-            print ("EfiDebugImageInfoTable update in progress, retry later")
+            print ('EfiDebugImageInfoTable update in progress, retry later')
             return
         self.parse_edii (dh['EfiDebugImageInfoTable'], dh['TableSize'])
 
@@ -406,16 +397,13 @@ class ReloadUefi (gdb.Command):
     def parse_est (self, est):
         est_t = self.ptype ('EFI_SYSTEM_TABLE')
         est = est.cast (est_t)
-        print ("Connected to %s (Rev. 0x%x)" % \
-                (UefiMisc.parse_utf16 (est['FirmwareVendor']), \
-                long (est['FirmwareRevision'])))
-        print ("ConfigurationTable @ 0x%x, 0x%x entries" % \
-                (long (est['ConfigurationTable']), est['NumberOfTableEntries']))
+        print (f"Connected to {UefiMisc.parse_utf16 (est['FirmwareVendor'])} (Rev. 0x{long (est['FirmwareRevision']):x})")
+        print (f"ConfigurationTable @ 0x{long (est['ConfigurationTable']):x}, 0x{est['NumberOfTableEntries']:x} entries")
 
         dh = self.search_config(est['ConfigurationTable'],
                 est['NumberOfTableEntries'], self.DEBUG_GUID)
         if dh == self.EINVAL:
-            print ("No EFI_DEBUG_IMAGE_INFO_TABLE_HEADER")
+            print ('No EFI_DEBUG_IMAGE_INFO_TABLE_HEADER')
             return
         self.parse_dh (dh)
 
@@ -424,7 +412,7 @@ class ReloadUefi (gdb.Command):
     #
 
     def usage (self):
-        print ("Usage: reload-uefi [-o] [/path/to/GdbSyms.dll]")
+        print ('Usage: reload-uefi [-o] [/path/to/GdbSyms.dll]')
 
     #
     # Handler for reload-uefi.
@@ -433,34 +421,34 @@ class ReloadUefi (gdb.Command):
     def invoke (self, arg, from_tty):
         args = arg.split(' ')
         try:
-            opts, args = getopt.getopt(args, "o", ["offset-by-headers"])
+            opts, args = getopt.getopt(args, 'o', ['offset-by-headers'])
         except (getopt.GetoptError) as err:
             self.usage ()
             return
         for opt, arg in opts:
-            if opt == "-o":
+            if opt == '-o':
                 self.offset_by_headers = True
 
         if len(args) >= 1 and args[0] != '':
-            gdb.execute ("symbol-file")
-            gdb.execute ("symbol-file %s" % args[0])
+            gdb.execute ('symbol-file')
+            gdb.execute (f'symbol-file {args[0]}')
         else:
             # FIXME: gdb.objfiles () loses files after symbol-file execution,
             # so we have to extract GdbSymbs.dll manually.
-            lines = gdb.execute ("info files", to_string=True).split('\n')
+            lines = gdb.execute ('info files', to_string=True).split('\n')
             for line in lines:
                 m = re.search("`([^']+)'", line)
                 if m:
-                    gdb.execute ("symbol-file")
-                    gdb.execute ("symbol-file %s" % m.group(1))
+                    gdb.execute ('symbol-file')
+                    gdb.execute (f'symbol-file {m.group(1)}')
                     break
 
         est = self.search_est ()
         if est == self.EINVAL:
-            print ("No EFI_SYSTEM_TABLE...")
+            print ('No EFI_SYSTEM_TABLE...')
             return
 
-        print ("EFI_SYSTEM_TABLE @ 0x%x" % est)
+        print (f'EFI_SYSTEM_TABLE @ 0x{est}:x')
         self.parse_est (est)
 
 class UefiStringPrinter:
@@ -468,9 +456,7 @@ class UefiStringPrinter:
         self.val = val
 
     def to_string (self):
-        if not self.val:
-            return "NULL"
-        return 'L"' + UefiMisc.parse_utf16(self.val) + '"'
+        return 'NULL' if not self.val else f"L'{UefiMisc.parse_utf16(self.val)}'"
 
 class UefiEfiStatusPrinter:
     def __init__(self, val):
@@ -494,15 +480,17 @@ class UefiGuidPrinter:
         return UefiMisc.parse_guid(self.val)
 
 def lookup_uefi_type (val):
-    if str(val.type) == 'const CHAR16 *' or str(val.type) == 'CHAR16 *':
-        return UefiStringPrinter(val)
-    elif str(val.type) == 'EFI_STATUS':
-        return UefiEfiStatusPrinter(val)
-    elif str(val.type) == 'RETURN_STATUS':
-        return UefiReturnStatusPrinter(val)
-    elif str(val.type) == 'GUID' or str(val.type) == 'EFI_GUID':
-        return UefiGuidPrinter(val)
-    return None
+    match str(val.type):
+        case ('const CHAR16 *' | 'CHAR16 *'):
+            return UefiStringPrinter(val)
+        case 'EFI_STATUS':
+            return UefiStringPrinter(val)
+        case 'RETURN_STATUS':
+            return UefiReturnStatusPrinter(val)
+        case ('GUID' | 'EFI_GUID'):
+            return UefiGuidPrinter(val)
+        case _:
+            return None
 
 ReloadUefi ()
 gdb.pretty_printers.append (lookup_uefi_type)

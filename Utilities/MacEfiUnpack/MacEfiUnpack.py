@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-"""
+'''
 Quick and dirty unpacker for next generation Mac firmware.
 
 Copyright (c) 2019, vit9696
@@ -14,7 +14,7 @@ http://opensource.org/licenses/bsd-license.php
 
 THE PROGRAM IS DISTRIBUTED UNDER THE BSD LICENSE ON AN "AS IS" BASIS,
 WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
-"""
+'''
 
 import os
 import struct
@@ -37,7 +37,7 @@ def save_macfw(firmware, path):
 
 def get_fwname(filename, outdir, suffix=''):
   outname = os.path.splitext(os.path.basename(filename))[0]
-  return os.path.join(outdir, outname + suffix + '.rom')
+  return os.path.join(outdir, f'{outname}{suffix}.rom')
 
 def unwrap_macefi(filename, outdir, firmware, firmware_len):
   if firmware_len < MAC_EFI_HEADER_SIZE:
@@ -48,13 +48,13 @@ def unwrap_macefi(filename, outdir, firmware, firmware_len):
     raise RuntimeError('Unsupported magic!')
 
   if first >= firmware_len - MAC_EFI_HEADER_SIZE:
-    raise RuntimeError('Invalid first image offset 0x{:02X} for size 0x{:02X}'.format(first, firmware_len))
+    raise RuntimeError(f'Invalid first image offset 0x{first:02X} for size 0x{firmware_len:02X}')
 
   if second >= firmware_len - MAC_EFI_HEADER_SIZE:
-    raise RuntimeError('Invalid second image offset 0x{:02X} for size 0x{:02X}'.format(second, firmware_len))
+    raise RuntimeError(f'Invalid second image offset 0x{second:02X} for size 0x{firmware_len:02X}')
 
   if first >= second:
-    raise RuntimeError('First image offset 0x{:02X} comes after second 0x{:02X}'.format(first, second))
+    raise RuntimeError(f'First image offset 0x{first:02X} comes after second 0x{second:02X}')
 
   save_macfw(firmware[first + MAC_EFI_HEADER_SIZE:second+MAC_EFI_HEADER_SIZE], get_fwname(filename, outdir, '1'))
   save_macfw(firmware[second + MAC_EFI_HEADER_SIZE:], get_fwname(filename, outdir, '2'))
@@ -78,7 +78,7 @@ def unwrap_im4p(filename, outdir, firmware, firmware_len):
 
 def unpack_image(filename, outdir):
   if not os.path.exists(filename):
-    raise RuntimeError('Failed to find filename image {}!'.format(filename))
+    raise RuntimeError(f'Failed to find filename image {filename}!')
 
   with open(filename, 'rb') as fd:
     firmware     = fd.read()
@@ -96,4 +96,4 @@ if __name__ == '__main__':
       outdir = os.path.dirname(sys.argv[1])
     sys.exit(unpack_image(sys.argv[1], outdir))
   except Exception as e:
-    print('ERROR {}'.format(str(e)))
+    print(f'ERROR {e}')

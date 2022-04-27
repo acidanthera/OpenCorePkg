@@ -34,24 +34,24 @@ def readstr(ea, l=256):
 
 base = get_name_ea(0, "_show")
 count = 0
-print 'typedef enum {'
+print('typedef enum {')
 while 1:
     s = readstr(readaddr(base))
     if s == None:
         break
     info = s.split('-', 1)
-    print '  %s, // %s' % (info[0].strip().replace(',', '_'), info[1].strip())
+    print(f"  {info[0].strip().replace(',', '_')}, // {info[1].strip()}")
     base += 8
     count += 1;
 
     name = get_name(base)
     if name != None and name != "" and name != "_show":
         break
-print '} AppleModel;'
-print '#define APPLE_MODEL_MAX %d' % count
+print('} AppleModel;')
+print(f'#define APPLE_MODEL_MAX {count}')
 
 base = get_name_ea(0, "_ApplePlatformData")
-print 'static PLATFORMDATA ApplePlatformData[] = {'
+print('static PLATFORMDATA ApplePlatformData[] = {')
 while 1:
     productName     = readstr(readaddr(base+0))
     firmwareVersion = readstr(readaddr(base+8))  # board version
@@ -69,28 +69,28 @@ while 1:
     if productName == None or firmwareVersion == None or boardID == None or productFamily == None or systemVersion == None or serialNumber == None or chassisAsset == None or smcBranch == None or smcConfig == None:
         break
 
-    print '  { "%s", "%s", "%s",' % (productName, firmwareVersion, boardID)
-    print '    "%s", "%s", "%s", "%s",' % (productFamily, systemVersion, serialNumber, chassisAsset)
-    print '    { 0x%02X, 0x%02X, 0x%02X, 0x%02X, 0x%02X, 0x%02X }, "%s", "%s", 0x%08X },' % (smcRevision[0], smcRevision[1], smcRevision[2], smcRevision[3], smcRevision[4], smcRevision[5], smcBranch, smcPlatform, smcConfig)
+    print(f'  {{ "{productName}", "{firmwareVersion}", "{boardID}",')
+    print(f'    "{productFamily}", "{systemVersion}", "{serialNumber}", "{chassisAsset}",')
+    print(f'    {{ 0x{smcRevision[0]:02X}, 0x{smcRevision[1]:02X}, 0x{smcRevision[2]:02X}, 0x{smcRevision[3]:02X}, 0x{smcRevision[4]:02X}, 0x{smcRevision[5]:02X} }}, "{smcBranch}", "{smcPlatform}", 0x{smcConfig:08X} }},')
 
     base += 0x60
 
     name = get_name(base)
     if name != None and name != "" and name != "_ApplePlatformData":
         break
-print '};'
+print('};')
 
 base = get_name_ea(0, "_ModelCode")
-print 'static const char *AppleModelCode[] = {'
+print('static const char *AppleModelCode[] = {')
 while 1:
     s = readstr(readaddr(base))
     if s == None:
         break
 
-    print '  "%s",' % s
+    print(f'  "{s}",')
     base += 8
 
     name = get_name(base)
-    if name != None and name != "" and name != "_ModelCode":
+    if name not in [None, '', '_ModelCode']:
         break
-print '};'
+print('};')

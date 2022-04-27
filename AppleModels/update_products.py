@@ -65,7 +65,7 @@ def map_legacy_status(status):
     return STATUS_EXCEPT
   if status == 'not found':
     return STATUS_NOT_FOUND
-  raise RuntimeError('Invalid legacy status {}'.format(status))
+  raise RuntimeError(f'Invalid legacy status {status}')
 
 def base34_to_num(str):
     num = 0
@@ -115,7 +115,7 @@ def load_products(path='Products.zjson'):
   except IOError:
     return {}
   except Exception as e:
-    print("Failed to parse file {} - {}".format(path, str(e)))
+    print(f'Failed to parse file {path} - {str(e)}')
     sys.exit(1)
 
 def save_database(database, path):
@@ -138,26 +138,26 @@ def update_product(database, model, database_path, force = False, retention = 90
 
   if prev is not None:
     if force is False and prev[KEY_STATUS] == STATUS_OK:
-      print(u'{} - {} (skip)'.format(model, prev[KEY_NAME]))
+      print(f'{model} - {prev[KEY_NAME]} (skip)')
       return ADD_SKIP
 
     curr   = current_date()
     expire = prev[KEY_DATE] + retention*24*3600
     if expire > curr and prev[KEY_STATUS] == STATUS_NOT_FOUND:
-      print(u'{} - not found (skip {})'.format(model, datetime.date.fromtimestamp(prev[KEY_DATE])))
+      print(f'{model} - not found (skip {datetime.date.fromtimestamp(prev[KEY_DATE])})')
       return ADD_SKIP
 
     expire = prev[KEY_DATE] + retention*24*3600 / 2
     if expire > curr and prev[KEY_STATUS] == STATUS_PENDING:
-      print(u'{} - pending (skip {})'.format(model, datetime.date.fromtimestamp(prev[KEY_DATE])))
+      print(f'{model} - pending (skip {datetime.date.fromtimestamp(prev[KEY_DATE])})')
       return ADD_SKIP
 
   try:
-    url    = 'http://support-sp.apple.com/sp/product?cc={}'.format(model)
+    url    = f'http://support-sp.apple.com/sp/product?cc={model}'
     opener = build_opener()
     mm     = random.choice(range(11, 16))
     ff     = random.choice(range(50, 70))
-    agent  = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.{}; rv:{}) Gecko/20100101 Firefox/{}'.format(mm, ff, ff)
+    agent  = f'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.{mm}; rv:{ff}) Gecko/20100101 Firefox/{ff}'
     opener.addheaders = [
       ('Host', 'support-sp.apple.com'),
       ('User-Agent', agent),
@@ -172,7 +172,7 @@ def update_product(database, model, database_path, force = False, retention = 90
     response = opener.open(url)
     root     = xml.etree.ElementTree.fromstring(response.read())
   except Exception as e:
-    print(u'{} - except ({})'.format(model, str(e)))
+    print(f'{model} - except ({str(e)})')
     store_product(database, model, None, str(e), STATUS_EXCEPT)
     time.sleep(1)
     return ADD_EXCEPT
@@ -180,20 +180,20 @@ def update_product(database, model, database_path, force = False, retention = 90
   if root.find('error') is None and root.find('configCode') is not None:
     name   = root.find('configCode').text
     status = STATUS_OK if name is not None else STATUS_PENDING
-    print(u'{} - {}'.format(model, name))
+    print(f'{model} - {name}')
     store_product(database, model, name, None, status)
     save_database(database, database_path) # Always store valid product
     return ADD_NEW
   else:
-    print(u'{} - not found'.format(model))
+    print(f'{model} - not found')
     store_product(database, model, None, None, STATUS_NOT_FOUND)
     return ADD_DUMMY
 
 def merge_products(database, database_path, filename):
-  print('Merging {}'.format(filename))
+  print(f'Merging {filename}')
 
   if not os.path.exists(filename):
-    print(u'File {} is missing'.format(filename))
+    print(f'File {filename} is missing')
     sys.exit(1)
 
   new_database = load_products(filename)
@@ -210,7 +210,7 @@ def merge_products(database, database_path, filename):
       elif old[KEY_STATUS] != STATUS_OK and new[KEY_DATE] > old[KEY_DATE]:
         store = True # Update new status
       else:
-        print(u'Skipping {} entry for {}'.format(str(old), str(new)))
+        print(f'Skipping {str(old)} entry for {str(new)}')
 
     if store:
       store_product(database, model, new[KEY_NAME],
@@ -255,11 +255,11 @@ def main():
 
   for id in [args.start, args.end]:
     if len(id) < 3 or len(id) > 4:
-      print(u'Invalid length for ID {}'.format(id))
+      print(f'Invalid length for ID {id}')
       sys.exit(1)
 
     if not set(id) < set(apple_base34):
-      print(u'Invalid characters in ID {}'.format(id))
+      print(f'Invalid characters in ID {id}')
       sys.exit(1)
 
   def abort_save_database(sig, frame):

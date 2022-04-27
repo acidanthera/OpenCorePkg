@@ -1,8 +1,8 @@
-"""
+'''
 Port of gdb_uefi.py to LLDB.
 Refer to gdb_uefi.py for more details.
 
-"""
+'''
 
 import array
 import binascii
@@ -11,13 +11,11 @@ import lldb
 import os
 import re
 import shlex
-import subprocess
-import sys
 from collections import OrderedDict
 from common_uefi import *
 
 class ReloadUefi:
-    """Reload UEFI symbols"""
+    '''Reload UEFI symbols'''
 
     #
     # Various constants.
@@ -102,18 +100,19 @@ class ReloadUefi:
             # so we only have size to trust. DWARF mode is ok, but it is best to stay most compatible.
             member_unsigned = member.GetValueAsUnsigned()
             char_type = member.GetType().GetPointeeType()
-            if char_type.GetByteSize() == 1:
-                char_size = 1
-                char_data = array.array('B')
-            elif char_type.GetByteSize() == 2:
-                char_size = 2
-                char_data = array.array('H')
-            else:
-                return member_unsigned
+            match char_type.GetByteSize():
+                case 1:
+                    char_size = 1
+                    char_data = array.array('B')
+                case 2:
+                    char_size = 2
+                    char_data = array.array('H')
+                case _:
+                    return member_unsigned
 
             i = 0
             while i < 0x1000:
-                c = member.CreateValueFromAddress("ptr", member_unsigned + i * char_size, char_type).GetValueAsUnsigned()
+                c = member.CreateValueFromAddress('ptr', member_unsigned + i * char_size, char_type).GetValueAsUnsigned()
                 char_data.append(c)
                 if c == 0:
                     break
@@ -150,7 +149,7 @@ class ReloadUefi:
                 newcrc = self.crc32(self.get_field(estp.Dereference()))
                 self.set_field (estp, 'Crc32', oldcrc)
                 if newcrc == oldcrc:
-                    print('EFI_SYSTEM_TABLE_POINTER @ 0x%x' % address)
+                    print(f'EFI_SYSTEM_TABLE_POINTER @ 0x{address:x}')
                     return estp.GetChildMemberWithName('EfiSystemTableBase')
 
             address += 4 * 2**20
@@ -167,14 +166,14 @@ class ReloadUefi:
         index = 0
         while index != count:
             # GetChildAtIndex accesses inner structure fields, so we have to use the fugly way.
-            cfg_entry = cfg_table.GetValueForExpressionPath('[{}]'.format(index))
+            cfg_entry = cfg_table.GetValueForExpressionPath(f'[{index}]')
             cfg_guid  = cfg_entry.GetChildMemberWithName('VendorGuid')
             if self.get_field(cfg_guid, 'Data1') == guid[0] and \
                 self.get_field(cfg_guid, 'Data2') == guid[1] and \
                 self.get_field(cfg_guid, 'Data3') == guid[2] and \
                 self.get_field(cfg_guid, 'Data4', True).tolist () == guid[3]:
                 return cfg_entry.GetChildMemberWithName('VendorTable')
-            index = index + 1
+            index += 1
         return self.EINVAL
 
     #
@@ -188,7 +187,7 @@ class ReloadUefi:
             f = t.GetFieldAtIndex(index)
             if f.GetName() == field:
                 return f.GetOffsetInBytes()
-        raise RuntimeError("Cannot find {} in {} to get offset".format(field, typename))
+        raise RuntimeError(f'Cannot find {field} in {typename} to get offset')
 
     #
     # Returns sizeof of a type.
@@ -207,9 +206,7 @@ class ReloadUefi:
         head_t = self.ptype ('EFI_IMAGE_OPTIONAL_HEADER_UNION')
         dosh = self.typed_ptr(dosh_t, imagebase)
         h_addr = imagebase
-        if self.get_field(dosh, 'e_magic') == self.DOS_MAGIC:
-            h_addr = h_addr + self.get_field(dosh, 'e_lfanew')
-        return self.typed_ptr(head_t, h_addr)
+        h_addr = h_addr + self.get_field(dosh, 'e_lfanew') if self.get_field(dosh, 'e_magic') == self.DOS_MAGIC else self.typed_ptr(head_t, h_addr)
 
     #
     # Returns a dictionary with PE sections.
@@ -221,7 +218,7 @@ class ReloadUefi:
         sections = self.typed_ptr(sect_t, sections_addr)
         sects = OrderedDict()
         for i in range (self.get_field(file, 'NumberOfSections')):
-            section = sections.GetValueForExpressionPath('[{}]'.format(i))
+            section = sections.GetValueForExpressionPath(f'[{i}]')
             name = self.get_field(section, 'Name', force_bytes=True)
             name = UefiMisc.parse_utf8 (name)
             addr = self.get_field(section, 'VirtualAddress')
@@ -235,19 +232,18 @@ class ReloadUefi:
 
     def pe_is_64 (self, pe_headers):
         magic = pe_headers.GetValueForExpressionPath('.Pe32.OptionalHeader.Magic').GetValueAsUnsigned()
-        if magic == self.PE32PLUS_MAGIC:
-            return True
-        return False
+        return True if magic == self.PE32PLUS_MAGIC else False
 
     #
     # Returns the PE fileheader.
     #
 
     def pe_file (self, pe):
-        if self.pe_is_64 (pe):
-            obj = pe.GetChildMemberWithName('Pe32Plus')
-        else:
-            obj = pe.GetChildMemberWithName('Pe32')
+        match self.pe_is_64 (pe):
+            case True:
+                obj = pe.GetChildMemberWithName('Pe32Plus')
+            case False:
+                obj = pe.GetChildMemberWithName('Pe32')
         return obj.GetChildMemberWithName('FileHeader')
 
     #
@@ -255,10 +251,11 @@ class ReloadUefi:
     #
 
     def pe_optional (self, pe):
-        if self.pe_is_64 (pe):
-            obj = pe.GetChildMemberWithName('Pe32Plus')
-        else:
-            obj = pe.GetChildMemberWithName('Pe32')
+        match self.pe_is_64 (pe):
+            case True:
+                obj = pe.GetChildMemberWithName('Pe32Plus')
+            case False:
+                obj = pe.GetChildMemberWithName('Pe32')
         return obj.GetChildMemberWithName('OptionalHeader')
 
     #
@@ -273,14 +270,15 @@ class ReloadUefi:
         cvp = self.get_field(dep, 'RVA') + self.get_field(opt, 'ImageBase')
         # FIXME: UINT32 should be used here instead of unsigned, but LLDB+PDB type system is broken.
         cvv = self.typed_ptr(self.ptype ('unsigned'), cvp).Dereference().GetValueAsUnsigned()
-        if cvv == self.CV_NB10:
-            return cvp + self.sizeof('EFI_IMAGE_DEBUG_CODEVIEW_NB10_ENTRY')
-        elif cvv == self.CV_RSDS:
-            return cvp + self.sizeof('EFI_IMAGE_DEBUG_CODEVIEW_RSDS_ENTRY')
-        elif cvv == self.CV_MTOC:
-            return cvp + self.sizeof('EFI_IMAGE_DEBUG_CODEVIEW_MTOC_ENTRY')
-        elif cvv == 0:
-            return 0            
+        match cvv:
+            case self.CV_NB10:
+                return cvp + self.sizeof('EFI_IMAGE_DEBUG_CODEVIEW_NB10_ENTRY')
+            case self.CV_RSDS:
+                return cvp + self.sizeof('EFI_IMAGE_DEBUG_CODEVIEW_RSDS_ENTRY')
+            case self.CV_MTOC:
+                return cvp + self.sizeof('EFI_IMAGE_DEBUG_CODEVIEW_MTOC_ENTRY')
+            case 0:
+                return 0            
 
         return self.EINVAL
 
@@ -291,11 +289,11 @@ class ReloadUefi:
     def get_sym_cmd (self, file, orgbase, sections, macho, fallack_base):
         if file.endswith('.pdb'):
             dll_file   = file.replace('.pdb', '.dll')
-            module_cmd = 'target modules add -s {} {}'.format(file, dll_file)
+            module_cmd = f'target modules add -s {file} {dll_file}'
         else:
             dll_file   = file
-            module_cmd = 'target modules add {}'.format(file)
-        map_cmd = 'target modules load -f {} -s 0x{:X}'.format(dll_file, orgbase)
+            module_cmd = f'target modules add {file}'
+        map_cmd = f'target modules load -f {dll_file} -s 0x{orgbase:X}'
         return (module_cmd, map_cmd)
 
     #
@@ -340,7 +338,7 @@ class ReloadUefi:
             if macho:
                 real_sym = sym_name
             else:
-                sym_name_dbg = re.sub(r"\.dll$", ".debug", sym_name)
+                sym_name_dbg = re.sub(r'\.dll$', '.debug', sym_name)
                 if sym_name_dbg != sym_name and os.path.exists(sym_name_dbg):
                     real_sym = sym_name_dbg
                 else:
@@ -351,10 +349,7 @@ class ReloadUefi:
                             real_sym = os.path.join(path, sym_name)
                             break
 
-            if real_sym:
-                syms.append (self.get_sym_cmd (real_sym, orgbase, sections, macho, base))
-            else:
-                print('No symbol file {}'.format(sym_name))
+            syms.append (self.get_sym_cmd (real_sym, orgbase, sections, macho, base)) if real_sym else print(f'No symbol file {sym_name}')
 
     #
     # Parses table EFI_DEBUG_IMAGE_INFO structures, builds
@@ -367,15 +362,15 @@ class ReloadUefi:
         syms = []
         while index != count:
             # GetChildAtIndex accesses inner structure fields, so we have to use the fugly way again.
-            entry = edii.GetValueForExpressionPath('[{}]'.format(index))
+            entry = edii.GetValueForExpressionPath(f'[{index}]')
             image_type = self.get_field(entry, 'ImageInfoType', single_entry=True)
             if image_type == 1:
                 entry = entry.GetChildMemberWithName('NormalImage')
                 self.parse_image(entry.GetChildMemberWithName('LoadedImageProtocolInstance'), syms)
             else:
-                print ("Skipping unknown EFI_DEBUG_IMAGE_INFO (Type 0x%x)" % image_type)
+                print (f'Skipping unknown EFI_DEBUG_IMAGE_INFO (Type 0x{image_type:x})')
             index = index + 1
-        print ("Loading new symbols...")
+        print ('Loading new symbols...')
         for sym in syms:
             print(sym[0])
             self.debugger.HandleCommand(sym[0])
@@ -389,11 +384,9 @@ class ReloadUefi:
     def parse_dh (self, dh):
         dh_t = self.ptype ('EFI_DEBUG_IMAGE_INFO_TABLE_HEADER')
         dh = dh.Cast (dh_t)
-        print ("DebugImageInfoTable @ 0x%x, 0x%x entries" % \
-                (self.get_field(dh, 'EfiDebugImageInfoTable'), \
-                self.get_field(dh, 'TableSize')))
+        print (f"DebugImageInfoTable @ 0x{self.get_field(dh, 'EfiDebugImageInfoTable'):x}, 0x{self.get_field(dh, 'TableSize'):x} entries")
         if self.get_field(dh, 'UpdateStatus') & self.DEBUG_IS_UPDATING:
-            print ("EfiDebugImageInfoTable update in progress, retry later")
+            print ('EfiDebugImageInfoTable update in progress, retry later')
             return
         self.parse_edii (dh.GetChildMemberWithName('EfiDebugImageInfoTable'),
             self.get_field(dh, 'TableSize'))
@@ -405,17 +398,12 @@ class ReloadUefi:
     def parse_est (self, est):
         est_t = self.ptype ('EFI_SYSTEM_TABLE')
         est = est.Cast (est_t)
-        print ("Connected to %s (Rev. 0x%x)" % \
-                (UefiMisc.parse_utf16 (self.get_field(est, 'FirmwareVendor')), \
-                self.get_field(est, 'FirmwareRevision')))
-        print ("ConfigurationTable @ 0x%x, 0x%x entries" % \
-                (self.get_field(est, 'ConfigurationTable'), \
-                    self.get_field(est, 'NumberOfTableEntries')))
-
+        print (f"Connected to {UefiMisc.parse_utf16 (self.get_field(est, 'FirmwareVendor'))} (Rev. 0x{self.get_field(est, 'FirmwareRevision'):x}")
+        print (f"ConfigurationTable @ 0x{self.get_field(est, 'ConfigurationTable'):x}, 0x{self.get_field(est, 'NumberOfTableEntries'):x} entries")
         dh = self.search_config(est.GetChildMemberWithName('ConfigurationTable'),
                 self.get_field(est, 'NumberOfTableEntries'), self.DEBUG_GUID)
         if dh == self.EINVAL:
-            print ("No EFI_DEBUG_IMAGE_INFO_TABLE_HEADER")
+            print ('No EFI_DEBUG_IMAGE_INFO_TABLE_HEADER')
             return
         self.parse_dh (dh)
 
@@ -424,10 +412,10 @@ class ReloadUefi:
     #
 
     def get_short_help(self):
-        return "Usage: reload-uefi [-o] [/path/to/GdbSyms.dll]"
+        return 'Usage: reload-uefi [-o] [/path/to/GdbSyms.dll]'
 
     def get_long_help(self):
-        return "Usage: reload-uefi [-o] [/path/to/GdbSyms.dll]"
+        return 'Usage: reload-uefi [-o] [/path/to/GdbSyms.dll]'
 
     def usage (self):
         print (self.get_short_help())
@@ -442,40 +430,40 @@ class ReloadUefi:
 
         category = debugger.GetDefaultCategory()
         FormatBool = lldb.SBTypeFormat(lldb.eFormatBoolean)
-        category.AddTypeFormat(lldb.SBTypeNameSpecifier("BOOLEAN"), FormatBool)
+        category.AddTypeFormat(lldb.SBTypeNameSpecifier('BOOLEAN'), FormatBool)
 
         FormatHex  = lldb.SBTypeFormat(lldb.eFormatHex)
-        category.AddTypeFormat(lldb.SBTypeNameSpecifier("UINT64"), FormatHex)
-        category.AddTypeFormat(lldb.SBTypeNameSpecifier("INT64"), FormatHex)
-        category.AddTypeFormat(lldb.SBTypeNameSpecifier("UINT32"), FormatHex)
-        category.AddTypeFormat(lldb.SBTypeNameSpecifier("INT32"), FormatHex)
-        category.AddTypeFormat(lldb.SBTypeNameSpecifier("UINT16"), FormatHex)
-        category.AddTypeFormat(lldb.SBTypeNameSpecifier("INT16"), FormatHex)
-        category.AddTypeFormat(lldb.SBTypeNameSpecifier("UINT8"), FormatHex)
-        category.AddTypeFormat(lldb.SBTypeNameSpecifier("INT8"), FormatHex)
-        category.AddTypeFormat(lldb.SBTypeNameSpecifier("UINTN"), FormatHex)
-        category.AddTypeFormat(lldb.SBTypeNameSpecifier("INTN"), FormatHex)
-        category.AddTypeFormat(lldb.SBTypeNameSpecifier("CHAR8"), FormatHex)
-        category.AddTypeFormat(lldb.SBTypeNameSpecifier("CHAR16"), FormatHex)
+        category.AddTypeFormat(lldb.SBTypeNameSpecifier('UINT64'), FormatHex)
+        category.AddTypeFormat(lldb.SBTypeNameSpecifier('INT64'), FormatHex)
+        category.AddTypeFormat(lldb.SBTypeNameSpecifier('UINT32'), FormatHex)
+        category.AddTypeFormat(lldb.SBTypeNameSpecifier('INT32'), FormatHex)
+        category.AddTypeFormat(lldb.SBTypeNameSpecifier('UINT16'), FormatHex)
+        category.AddTypeFormat(lldb.SBTypeNameSpecifier('INT16'), FormatHex)
+        category.AddTypeFormat(lldb.SBTypeNameSpecifier('UINT8'), FormatHex)
+        category.AddTypeFormat(lldb.SBTypeNameSpecifier('INT8'), FormatHex)
+        category.AddTypeFormat(lldb.SBTypeNameSpecifier('UINTN'), FormatHex)
+        category.AddTypeFormat(lldb.SBTypeNameSpecifier('INTN'), FormatHex)
+        category.AddTypeFormat(lldb.SBTypeNameSpecifier('CHAR8'), FormatHex)
+        category.AddTypeFormat(lldb.SBTypeNameSpecifier('CHAR16'), FormatHex)
 
-        category.AddTypeFormat(lldb.SBTypeNameSpecifier("EFI_PHYSICAL_ADDRESS"), FormatHex)
-        category.AddTypeFormat(lldb.SBTypeNameSpecifier("PHYSICAL_ADDRESS"), FormatHex)
-        category.AddTypeFormat(lldb.SBTypeNameSpecifier("EFI_STATUS"), FormatHex)
-        category.AddTypeFormat(lldb.SBTypeNameSpecifier("EFI_TPL"), FormatHex)
-        category.AddTypeFormat(lldb.SBTypeNameSpecifier("EFI_LBA"), FormatHex)
-        category.AddTypeFormat(lldb.SBTypeNameSpecifier("EFI_BOOT_MODE"), FormatHex)
-        category.AddTypeFormat(lldb.SBTypeNameSpecifier("EFI_FV_FILETYPE"), FormatHex)
+        category.AddTypeFormat(lldb.SBTypeNameSpecifier('EFI_PHYSICAL_ADDRESS'), FormatHex)
+        category.AddTypeFormat(lldb.SBTypeNameSpecifier('PHYSICAL_ADDRESS'), FormatHex)
+        category.AddTypeFormat(lldb.SBTypeNameSpecifier('EFI_STATUS'), FormatHex)
+        category.AddTypeFormat(lldb.SBTypeNameSpecifier('EFI_TPL'), FormatHex)
+        category.AddTypeFormat(lldb.SBTypeNameSpecifier('EFI_LBA'), FormatHex)
+        category.AddTypeFormat(lldb.SBTypeNameSpecifier('EFI_BOOT_MODE'), FormatHex)
+        category.AddTypeFormat(lldb.SBTypeNameSpecifier('EFI_FV_FILETYPE'), FormatHex)
 
 
 
         args = shlex.split(command)
         try:
-            opts, args = getopt.getopt(args, "o", ["offset-by-headers"])
+            opts, args = getopt.getopt(args, 'o', ['offset-by-headers'])
         except (getopt.GetoptError) as err:
             self.usage ()
             return
         for opt, arg in opts:
-            if opt == "-o":
+            if opt == '-o':
                 self.offset_by_headers = True
 
         self.typetarget   = None
@@ -484,13 +472,13 @@ class ReloadUefi:
         # FIXME: Use ReadCStringFromMemory.
         # FIXME: Support executing code.
         if len(args) >= 1 and args[0] != '':
-            gdb.execute ("symbol-file")
-            gdb.execute ("symbol-file %s" % args[0])
+            gdb.execute ('symbol-file')
+            gdb.execute (f'symbol-file {args[0]}')
         else:
             for i in range(0, self.debugger.GetNumTargets()):
                 target      = self.debugger.GetTargetAtIndex(i)
                 target_name = str(target)
-                print('Target {} is "{}"'.format(i, target_name))
+                print(f"Target {i} is '{target_name}'")
                 if target_name.find('GdbSyms') >= 0:
                     self.typetarget = target
                 elif target_name.find('No executable module.') >= 0:
@@ -509,9 +497,9 @@ class ReloadUefi:
 
         est = self.search_est ()
         if est == self.EINVAL:
-            print ("No EFI_SYSTEM_TABLE...")
+            print ('No EFI_SYSTEM_TABLE...')
             return
 
 
-        print ("EFI_SYSTEM_TABLE @ 0x%x" % est.GetValueAsUnsigned())
+        print (f'EFI_SYSTEM_TABLE @ 0x{est.GetValueAsUnisgned():x}')
         self.parse_est (est)
