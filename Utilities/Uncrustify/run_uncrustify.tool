@@ -66,7 +66,7 @@ rm -f "${UNC_DIFF_FILE}" || abort "Failed to cleanup legacy ${UNC_DIFF_FILE}"
 "${UNC_EXEC}" -c "${UNC_CONFIG_FILE}" -F "${FILE_LIST}" --replace --no-backup --if-changed || abort "Failed to run Uncrustify"
 
 # only diff the selected .c/.h files
-while read line; do
+while read -r line; do
   git diff "${line}" >> "${UNC_DIFF_FILE}" || abort "Failed to git diff ${line}"
 done < "${FILE_LIST}"
 if [ "$(cat ${UNC_DIFF_FILE})" != "" ]; then
