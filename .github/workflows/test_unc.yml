@@ -73,7 +73,7 @@ jobs:
 
       - name: Install Dependencies
         run: |
-          choco install make cmake --no-progress
+          choco install cmake make zip --no-progress
 
       - name: CI Bootstrap
         run: |
