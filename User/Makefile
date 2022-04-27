@@ -286,10 +286,10 @@ sydr-fuzz: $(PROJECT).sydr$(SUFFIX) $(PROJECT)$(SUFFIX) FORCE
 		args = "-jobs=$(FUZZ_JOBS) -workers=$(FUZZ_JOBS) -rss_limit_mb=$(FUZZ_MEM) $(FUZZ_DIR)"
 		merge = false
 	EOF
-	UBSAN_OPTIONS='halt_on_error=1' sydr-fuzz run -f
+	UBSAN_OPTIONS='halt_on_error=1' sydr-fuzz -l debug run -f
 
 sydr-fuzz-security: $(PROJECT).sydr$(SUFFIX) $(PROJECT)$(SUFFIX) FORCE
-	sydr-fuzz security --jobs $(FUZZ_SECURITY_JOBS)
+	sydr-fuzz -l debug security --jobs $(FUZZ_SECURITY_JOBS)
 
 sydr-fuzz-import: $(PROJECT).sydr$(SUFFIX) $(PROJECT)$(SUFFIX) FORCE
 	@$(MKDIR) sydr-fuzz-out/corpus
