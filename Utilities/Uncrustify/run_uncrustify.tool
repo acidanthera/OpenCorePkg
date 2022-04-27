@@ -19,7 +19,6 @@ UNZIP="/usr/bin/unzip"
 TOOLS=(
   "${CAT}"
   "${CHMOD}"
-  "${CURL}"
   "${FIND}"
   "${MKDIR}"
   "${MV}"
