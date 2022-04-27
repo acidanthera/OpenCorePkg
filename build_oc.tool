@@ -25,6 +25,7 @@ buildutil() {
     "TestKextInject"
     "TestMacho"
     "TestMp3"
+    "TestNtfsDxe"
     "TestPeCoff"
     "TestRsaPreprocess"
     "TestSmbios"
