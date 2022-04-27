@@ -5,49 +5,21 @@ abort() {
   exit 1
 }
 
-# Avoid conflicts with PATH overrides.
-CAT="/bin/cat"
-CHMOD="/bin/chmod"
-CURL="/usr/bin/curl"
-FIND="/usr/bin/find"
-MKDIR="/bin/mkdir"
-MV="/bin/mv"
-RM="/bin/rm"
-TAR="/usr/bin/tar"
-UNZIP="/usr/bin/unzip"
-
-TOOLS=(
-  "${CAT}"
-  "${CHMOD}"
-  "${FIND}"
-  "${MKDIR}"
-  "${MV}"
-  "${RM}"
-  "${TAR}"
-  "${UNZIP}"
-)
-
-for tool in "${TOOLS[@]}"; do
-  if [ ! -x "${tool}" ]; then
-    abort "Missing ${tool}"
-  fi
-done
-
 PROJECT_PATH="$(dirname "$0")"
 # shellcheck disable=SC2181
 if [ $? -ne 0 ] || [ ! -d "${PROJECT_PATH}" ]; then
   abort "Failed to determine working directory"
 fi
 
-cd "${PROJECT_PATH}"
+cd "${PROJECT_PATH}" || abort "Failed to cd to ${PROJECT_PATH}"
 
-rm -rf Uncrustify-repo uncrustify || abort "Failed to cleanup legacy Uncrustify directory"
+rm -rf Uncrustify-repo || abort "Failed to cleanup legacy Uncrustify directory"
 # TODO: switch to master
 src=$(curl -Lfs https://raw.githubusercontent.com/acidanthera/ocbuild/unc-build/uncrustify/uncstrap.sh) && eval "$src" || exit 1
 
 FILE_LIST="filelist.txt"
-"${RM}" -f "${FILE_LIST}" || abort "Failed to cleanup legacy ${FILE_LIST}"
-"${FIND}" \
+rm -f "${FILE_LIST}" || abort "Failed to cleanup legacy ${FILE_LIST}"
+find \
   ../.. \
   \( \
     -path "../../UDK" -o \
@@ -83,17 +55,26 @@ FILE_LIST="filelist.txt"
   \) \
   -prune -o \
   -type f \
-  -name "*.[c\|h]" -print \
+  -name "*.[c\|h]" \
+  -print \
   > "${FILE_LIST}" || abort "Failed to dump source file list to ${FILE_LIST}"
 
 UNCRUSTIFY_CONFIG_FILE=./uncrustify-OpenCorePkg.cfg
+UNCRUSTIFY_DIFF_FILE=./uncrustify.diff
+rm -f "${UNCRUSTIFY_DIFF_FILE}" || abort "Failed to cleanup legacy ${UNCRUSTIFY_DIFF_FILE}"
 "${UNC_EXEC}" -c "${UNCRUSTIFY_CONFIG_FILE}" -F "${FILE_LIST}" --replace --no-backup --if-changed || abort "Failed to run Uncrustify"
 
-git diff > uncrustify.diff || abort "Failed to generate uncrustify diff with code $?"
-if [ "$(${CAT} uncrustify.diff)" != "" ]; then
+# only diff the selected .c/.h files
+while read line; do
+  git diff "${line}" >> "${UNCRUSTIFY_DIFF_FILE}" || abort "Failed to git diff ${line}"
+done < "${FILE_LIST}"
+if [ "$(cat ${UNCRUSTIFY_DIFF_FILE})" != "" ]; then
   # show the diff
-  "${CAT}" uncrustify.diff
+  cat "${UNCRUSTIFY_DIFF_FILE}"
   abort "Uncrustify detects codestyle problems! Please fix"
 fi
+
+rm -f "${FILE_LIST}" || abort "Failed to cleanup ${FILE_LIST}"
+rm -f "${UNC_EXEC}" || abort "Failed to cleanup ${UNC_EXEC}"
 
 exit 0
