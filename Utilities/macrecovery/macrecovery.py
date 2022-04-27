@@ -108,19 +108,18 @@ def verify_chunklist(cnkpath):
 						chunk_size, chunk_sha256 = Chunk.unpack(data)
 						yield chunk_size, chunk_sha256
 				digest = hash_ctx.digest()
-				match signature_method:
-					case 1:
-							data = f.read(256)
-							assert len(data) == 256
-							signature = int_from_unsigned_bytes(data, 'little')
-							plaintext = 0x1ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff003031300d0609608648016503040201050004200000000000000000000000000000000000000000000000000000000000000000 | int_from_unsigned_bytes(digest, 'big')
-							assert pow(signature, 0x10001, Apple_EFI_ROM_public_key_1) == plaintext
-					case 2:
-						data = f.read(32)
-						assert data == digest
-						raise RuntimeError('Chunklist missing digital signature')
-					case _:
-						raise NotImplementedError
+				if signature_method == 1:
+					data = f.read(256)
+					assert len(data) == 256
+					signature = int_from_unsigned_bytes(data, 'little')
+					plaintext = 0x1ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff003031300d0609608648016503040201050004200000000000000000000000000000000000000000000000000000000000000000 | int_from_unsigned_bytes(digest, 'big')
+					assert pow(signature, 0x10001, Apple_EFI_ROM_public_key_1) == plaintext
+				elif signature_method == 2:
+					data = f.read(32)
+					assert data == digest
+					raise RuntimeError('Chunklist missing digital signature')
+				else:
+					raise NotImplementedError
 				assert f.read(1) == b''
 
 def get_session(args):
@@ -483,17 +482,16 @@ def main():
 		print('ERROR: Cannot use MLBs in non 17 character format!')
 		sys.exit(1)
 
-	match args.action:
-		case 'download':
-			return action_download(args)
-		case 'selfcheck':
-			return action_selfcheck(args)
-		case 'verify':
-			return action_verify(args)
-		case 'guess':
-			return action_guess(args)
-		case _:
-			assert(False)
+	if args.action == 'download':
+		return action_download(args)
+	elif args.action == 'selfcheck':
+		return action_selfcheck(args)
+	elif args.action == 'verify':
+		return action_verify(args)
+	elif args.action == 'guess':
+		return action_guess(args)
+	else:
+		assert(False)
 
 if __name__ == '__main__':
 	sys.exit(main())
