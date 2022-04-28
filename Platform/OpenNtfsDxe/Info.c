@@ -185,7 +185,7 @@ FileGetInfo (
       FSInfo->BlockSize = 512;
     }
 
-    FSInfo->VolumeSize = (File->FileSystem->BlockIo->Media->LastBlock + 1) * FSInfo->BlockSize;
+    FSInfo->VolumeSize = (File->FileSystem->BlockIo->Media->LastBlock + 1U) * FSInfo->BlockSize;
     //
     // The device is Read Only
     //

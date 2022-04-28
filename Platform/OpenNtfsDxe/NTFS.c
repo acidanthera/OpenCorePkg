@@ -25,7 +25,7 @@ EFI_DRIVER_BINDING_PROTOCOL
   .Supported           = NTFSSupported,
   .Start               = NTFSStart,
   .Stop                = NTFSStop,
-  .Version             = 0x10,
+  .Version             = 0x10U,
   .ImageHandle         = NULL,
   .DriverBindingHandle = NULL
 };
@@ -96,7 +96,7 @@ UnloadNTFSDriver (
     return Status;
   }
 
-  for (Index = 0; Index < NumOfHandles; Index++) {
+  for (Index = 0; Index < NumOfHandles; ++Index) {
     gBS->DisconnectController (Buffer[Index], ImageHandle, NULL);
   }
 

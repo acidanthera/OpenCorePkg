@@ -289,7 +289,7 @@ ListFile (
       }
 
       DirFile->File = Dir->File;
-      CopyMem (&DirFile->Inode, IndexEntry->FileRecordNumber, 6);
+      CopyMem (&DirFile->Inode, IndexEntry->FileRecordNumber, 6U);
       DirFile->CreationTime = AttrFileName->CreationTime;
       DirFile->AlteredTime  = AttrFileName->AlteredTime;
       DirFile->ReadTime     = AttrFileName->ReadTime;
@@ -300,7 +300,7 @@ ListFile (
         return EFI_VOLUME_CORRUPTED;
       }
 
-      Filename = AllocateZeroPool ((AttrFileName->FilenameLen + 1) * sizeof (CHAR16));
+      Filename = AllocateZeroPool ((AttrFileName->FilenameLen + 1U) * sizeof (CHAR16));
       if (Filename == NULL) {
         DEBUG ((DEBUG_INFO, "NTFS: Failed to allocate buffer for Filename\n"));
         FreePool (DirFile);
@@ -394,16 +394,16 @@ FindFile (
       return EFI_INVALID_PARAMETER;
     }
 
-    if ((Next - Name == 1) && (Name[0] == L'.')) {
+    if ((Next - Name == 1U) && (Name[0] == L'.')) {
       continue;
     }
 
-    if ((Next - Name == 2) && (Name[0] == L'.') && (Name[1] == L'.')) {
+    if ((Next - Name == 2U) && (Name[0] == L'.') && (Name[1] == L'.')) {
       GoUpALevel (Context);
       continue;
     }
 
-    PathPart = AllocateZeroPool ((Next - Name + 1) * sizeof (CHAR16));
+    PathPart = AllocateZeroPool ((Next - Name + 1U) * sizeof (CHAR16));
     if (PathPart == NULL) {
       return EFI_OUT_OF_RESOURCES;
     }
@@ -430,7 +430,7 @@ FindFile (
     }
 
     if (Context->CurrentNode->Type == FSHELP_SYMLINK) {
-      if (++Context->SymlinkDepth == 8) {
+      if (++Context->SymlinkDepth == 8U) {
         DEBUG ((DEBUG_INFO, "NTFS: Too deep nesting of symlinks\n"));
         return EFI_INVALID_PARAMETER;
       }
@@ -579,7 +579,7 @@ IterateDir (
     mBufferSize = mFileRecordSize - (Attr.Current - Attr.BaseMftRecord->FileRecord);
 
     if (  (mBufferSize < sizeof (*Res))
-       || (mBufferSize < (Res->NameOffset + 8))
+       || (mBufferSize < (Res->NameOffset + 8U))
        || (mBufferSize < Res->InfoOffset))
     {
       DEBUG ((DEBUG_INFO, "NTFS: (IterateDir #1) $INDEX_ROOT is corrupted.\n"));
@@ -590,9 +590,9 @@ IterateDir (
     mBufferSize -= Res->InfoOffset;
 
     if (  (Res->NonResFlag != 0)
-       || (Res->NameLength != 4)
+       || (Res->NameLength != 4U)
        || (Res->NameOffset != sizeof (*Res))
-       || (CompareMem ((UINT8 *)Res + Res->NameOffset, L"$I30", 8) != 0))
+       || (CompareMem ((UINT8 *)Res + Res->NameOffset, L"$I30", 8U) != 0))
     {
       continue;
     }
@@ -646,15 +646,15 @@ IterateDir (
     mBufferSize = mFileRecordSize - (Attr.Current - Attr.BaseMftRecord->FileRecord);
 
     if (  (mBufferSize < sizeof (*Non))
-       || (mBufferSize < (Non->NameOffset + 8)))
+       || (mBufferSize < (Non->NameOffset + 8U)))
     {
       DEBUG ((DEBUG_INFO, "NTFS: (IterateDir #3) $INDEX_ROOT is corrupted.\n"));
       FreeAttr (&Attr);
       return EFI_VOLUME_CORRUPTED;
     }
 
-    if (  (Non->NameLength == 4)
-       && (CompareMem ((UINT8 *)Non + Non->NameOffset, L"$I30", 8) == 0))
+    if (  (Non->NameLength == 4U)
+       && (CompareMem ((UINT8 *)Non + Non->NameOffset, L"$I30", 8U) == 0))
     {
       BitMapLen = (Non->NonResFlag == 0) ?
                   ((ATTR_HEADER_RES *)Non)->InfoLength :
@@ -708,7 +708,7 @@ IterateDir (
     mBufferSize = mFileRecordSize - (Attr.Current - Attr.BaseMftRecord->FileRecord);
 
     if (  (mBufferSize < sizeof (*Non))
-       || (mBufferSize < (Non->NameOffset + 8)))
+       || (mBufferSize < (Non->NameOffset + 8U)))
     {
       DEBUG ((DEBUG_INFO, "NTFS: (IterateDir #5) $INDEX_ROOT is corrupted.\n"));
       FreeAttr (&Attr);
@@ -719,10 +719,10 @@ IterateDir (
       return EFI_VOLUME_CORRUPTED;
     }
 
-    if (  (Non->NonResFlag == 1)
-       && (Non->NameLength == 4)
+    if (  (Non->NonResFlag == 1U)
+       && (Non->NameLength == 4U)
        && (Non->NameOffset == sizeof (*Non))
-       && (CompareMem ((UINT8 *)Non + Non->NameOffset, L"$I30", 8) == 0))
+       && (CompareMem ((UINT8 *)Non + Non->NameOffset, L"$I30", 8U) == 0))
     {
       break;
     }
@@ -745,8 +745,8 @@ IterateDir (
       return EFI_OUT_OF_RESOURCES;
     }
 
-    Bit = 1;
-    for (Number = 0; Number < (BitMapLen * 8); Number++) {
+    Bit = 1U;
+    for (Number = 0; Number < (BitMapLen * 8U); Number++) {
       if ((*BitIndex & Bit) != 0) {
         Status = ReadAttr (
                    &Attr,
@@ -799,9 +799,9 @@ IterateDir (
         }
       }
 
-      Bit <<= 1;
+      Bit <<= 1U;
       if (Bit == 0) {
-        Bit = 1;
+        Bit = 1U;
         ++BitIndex;
       }
     }
@@ -863,10 +863,10 @@ RelativeToAbsolute (
 
     CopyMem (
       BPointer,
-      Start + 1,
-      (End - Start - 1) * sizeof (CHAR16)
+      Start + 1U,
+      (End - Start - 1U) * sizeof (CHAR16)
       );
-    BPointer += End - Start - 1;
+    BPointer += End - Start - 1U;
 
     *BPointer = L'/';
     ++BPointer;
@@ -881,8 +881,8 @@ RelativeToAbsolute (
     return EFI_DEVICE_ERROR;
   }
 
-  End   = BPointer - 1;
-  Start = End - 1;
+  End   = BPointer - 1U;
+  Start = End - 1U;
   while (Start > Buffer) {
     while ((Start >= Buffer) && (*Start != L'/')) {
       --Start;
@@ -893,10 +893,10 @@ RelativeToAbsolute (
 
     CopyMem (
       Dest,
-      Start + 1,
-      (End - Start - 1) * sizeof (CHAR16)
+      Start + 1U,
+      (End - Start - 1U) * sizeof (CHAR16)
       );
-    Dest += End - Start - 1;
+    Dest += End - Start - 1U;
 
     End = Start;
     --Start;

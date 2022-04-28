@@ -45,7 +45,7 @@ FileOpen (
     return EFI_WRITE_PROTECTED;
   }
 
-  if ((*FileName == 0) || (CompareMem (FileName, L".", 2) == 0)) {
+  if ((*FileName == 0) || (CompareMem (FileName, L".", 2U) == 0)) {
     File->RefCount++;
     *NewHandle = This;
     return EFI_SUCCESS;
@@ -61,7 +61,7 @@ FileOpen (
     }
 
     Length = StrnLenS (Path, MAX_PATH);
-    if ((Length == 0) || (Path[Length-1] != '/')) {
+    if ((Length == 0) || (Path[Length - 1] != '/')) {
       Path[Length++] = L'/';
     }
   }

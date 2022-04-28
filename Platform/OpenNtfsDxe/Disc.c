@@ -114,9 +114,9 @@ NtfsMount (
 
   if (  (Boot.SystemId[0] != SIGNATURE_32 ('N', 'T', 'F', 'S'))
      || (Boot.SectorsPerCluster == 0)
-     || ((Boot.SectorsPerCluster & (Boot.SectorsPerCluster - 1)) != 0)
+     || ((Boot.SectorsPerCluster & (Boot.SectorsPerCluster - 1U)) != 0)
      || (Boot.BytesPerSector == 0)
-     || ((Boot.BytesPerSector & (Boot.BytesPerSector - 1)) != 0))
+     || ((Boot.BytesPerSector & (Boot.BytesPerSector - 1U)) != 0))
   {
     DEBUG ((DEBUG_INFO, "NTFS: (NtfsMount #1) BIOS Parameter Block is corrupted.\n"));
     return EFI_VOLUME_CORRUPTED;
@@ -173,7 +173,7 @@ NtfsMount (
 
   RootFile->IsDir         = TRUE;
   RootFile->Path          = L"/";
-  RootFile->RefCount      = 1;
+  RootFile->RefCount      = 1U;
   RootFile->FileSystem    = FileSystem;
   RootFile->RootFile.File = RootFile;
   RootFile->MftFile.File  = RootFile;
@@ -272,7 +272,7 @@ Fixup (
     return EFI_VOLUME_CORRUPTED;
   }
 
-  if (((UINT64)Record->S_Size - 1) != DivU64x64Remainder (Length, mSectorSize, NULL)) {
+  if (((UINT64)Record->S_Size - 1U) != DivU64x64Remainder (Length, mSectorSize, NULL)) {
     DEBUG ((DEBUG_INFO, "NTFS: (Fixup #4) Record is corrupted.\n"));
     return EFI_VOLUME_CORRUPTED;
   }
@@ -413,6 +413,8 @@ FindAttr (
 
   ASSERT (Attr != NULL);
 
+  BufferSize = 0;
+
   if ((Attr->Flags & NTFS_AF_ALST) != 0) {
 retry:
     while ((Attr->Next + sizeof (*LRecord)) <= Attr->Last) {
@@ -437,8 +439,8 @@ retry:
         if (Attr->Flags & NTFS_AF_MFT_FILE) {
           Status = DiskRead (
                      Attr->BaseMftRecord->File->FileSystem,
-                     ReadUnaligned32 ((UINT32 *)(Attr->Current + 0x10)),
-                     mFileRecordSize / 2,
+                     ReadUnaligned32 ((UINT32 *)(Attr->Current + 0x10U)),
+                     mFileRecordSize / 2U,
                      Attr->ExtensionMftRecord
                      );
           if (EFI_ERROR (Status)) {
@@ -449,9 +451,9 @@ retry:
 
           Status = DiskRead (
                      Attr->BaseMftRecord->File->FileSystem,
-                     ReadUnaligned32 ((UINT32 *)(Attr->Current + 0x14)),
-                     mFileRecordSize / 2,
-                     Attr->ExtensionMftRecord + mFileRecordSize / 2
+                     ReadUnaligned32 ((UINT32 *)(Attr->Current + 0x14U)),
+                     mFileRecordSize / 2U,
+                     Attr->ExtensionMftRecord + mFileRecordSize / 2U
                      );
           if (EFI_ERROR (Status)) {
             DEBUG ((DEBUG_INFO, "NTFS: Could not read second part of extension record.\n"));
@@ -660,13 +662,13 @@ retry:
       Attr->Current = Attr->Next;
       AttrStart     = Attr->Current;
 
-      if (BufferSize >= 0x18) {
+      if (BufferSize >= 0x18U) {
         WriteUnaligned32 (
-          (UINT32 *)(AttrStart + 0x10),
+          (UINT32 *)(AttrStart + 0x10U),
           (UINT32)DivU64x64Remainder (Attr->BaseMftRecord->File->FileSystem->FirstMftRecord, mSectorSize, NULL)
           );
         WriteUnaligned32 (
-          (UINT32 *)(AttrStart + 0x14),
+          (UINT32 *)(AttrStart + 0x14U),
           (UINT32)DivU64x64Remainder (Attr->BaseMftRecord->File->FileSystem->FirstMftRecord, mSectorSize, NULL) + 1U
           );
       } else {
@@ -675,7 +677,7 @@ retry:
         return NULL;
       }
 
-      AttrStart = Attr->Next + ReadUnaligned16 ((UINT16 *)(AttrStart + 0x04));
+      AttrStart = Attr->Next + ReadUnaligned16 ((UINT16 *)(AttrStart + 0x04U));
       while ((AttrStart + sizeof (UINT32) + sizeof (UINT16)) < Attr->Last) {
         if (ReadUnaligned32 ((UINT32 *)AttrStart) != Type) {
           break;
@@ -683,8 +685,8 @@ retry:
 
         Status = ReadAttr (
                    Attr,
-                   AttrStart + 0x10,
-                   ReadUnaligned32 ((UINT32 *)(AttrStart + 0x10)) * mFileRecordSize,
+                   AttrStart + 0x10U,
+                   ReadUnaligned32 ((UINT32 *)(AttrStart + 0x10U)) * mFileRecordSize,
                    mFileRecordSize
                    );
         if (EFI_ERROR (Status)) {
@@ -692,13 +694,13 @@ retry:
           return NULL;
         }
 
-        if (ReadUnaligned16 ((UINT16 *)(AttrStart + 4)) == 0) {
+        if (ReadUnaligned16 ((UINT16 *)(AttrStart + 4U)) == 0) {
           DEBUG ((DEBUG_INFO, "NTFS: (FindAttr #8) File record is corrupted.\n"));
           FreeAttr (Attr);
           return NULL;
         }
 
-        AttrStart += ReadUnaligned16 ((UINT16 *)(AttrStart + 4));
+        AttrStart += ReadUnaligned16 ((UINT16 *)(AttrStart + 4U));
       }
 
       Attr->Next   = Attr->Current;

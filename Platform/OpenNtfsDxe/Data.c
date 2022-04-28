@@ -59,9 +59,9 @@ ReadClusters (
   ASSERT (Runlist != NULL);
   ASSERT (Dest != NULL);
 
-  OffsetInsideCluster = Offset & (mClusterSize - 1);
+  OffsetInsideCluster = Offset & (mClusterSize - 1U);
   Size                = mClusterSize;
-  ClustersTotal       = DivU64x64Remainder (Length + Offset + mClusterSize - 1, mClusterSize, NULL);
+  ClustersTotal       = DivU64x64Remainder (Length + Offset + mClusterSize - 1U, mClusterSize, NULL);
 
   for (Index = Runlist->TargetVcn; Index < ClustersTotal; ++Index) {
     Cluster = GetLcn (Runlist, Index);
@@ -71,8 +71,8 @@ ReadClusters (
 
     Cluster *= mClusterSize;
 
-    if (Index == (ClustersTotal - 1)) {
-      Size = (UINTN)((Length + Offset) & (mClusterSize - 1));
+    if (Index == (ClustersTotal - 1U)) {
+      Size = (UINTN)((Length + Offset) & (mClusterSize - 1U));
 
       if (Size == 0) {
         Size = mClusterSize;
@@ -87,7 +87,7 @@ ReadClusters (
       Size -= (UINTN)OffsetInsideCluster;
     }
 
-    if ((Index != Runlist->TargetVcn) && (Index != (ClustersTotal - 1))) {
+    if ((Index != Runlist->TargetVcn) && (Index != (ClustersTotal - 1U))) {
       Size                = mClusterSize;
       OffsetInsideCluster = 0;
     }
@@ -342,7 +342,7 @@ ReadData (
      && ((Attr->Flags & NTFS_AF_GPOS) == 0)
      && (NonRes->Type == AT_DATA))
   {
-    if (NonRes->CompressionUnitSize != 4) {
+    if (NonRes->CompressionUnitSize != 4U) {
       DEBUG ((DEBUG_INFO, "NTFS: Invalid copmression unit size.\n"));
       FreePool (Runlist);
       return EFI_VOLUME_CORRUPTED;
@@ -365,7 +365,7 @@ ReadData (
   }
 
   if (Attr->Flags & NTFS_AF_GPOS) {
-    OffsetInsideCluster = Offset & (mClusterSize - 1);
+    OffsetInsideCluster = Offset & (mClusterSize - 1U);
 
     Sector0 = DivU64x64Remainder (
                 (Runlist->TargetVcn - Runlist->CurrentVcn + Runlist->CurrentLcn) * mClusterSize + OffsetInsideCluster,
@@ -373,7 +373,7 @@ ReadData (
                 NULL
                 );
 
-    Sector1 = Sector0 + 1;
+    Sector1 = Sector0 + 1U;
     if (Sector1 == DivU64x64Remainder (
                      (Runlist->NextVcn - Runlist->CurrentVcn + Runlist->CurrentLcn) * mClusterSize,
                      mSectorSize,
@@ -394,7 +394,7 @@ ReadData (
     }
 
     WriteUnaligned32 ((UINT32 *)Dest, (UINT32)Sector0);
-    WriteUnaligned32 ((UINT32 *)(Dest + 4), (UINT32)Sector1);
+    WriteUnaligned32 ((UINT32 *)(Dest + 4U), (UINT32)Sector1);
 
     FreePool (Runlist);
     return EFI_SUCCESS;
@@ -428,7 +428,7 @@ ReadField (
   // Offset to the starting LCN of the previous element is a signed value.
   // So we must check the most significant bit.
   //
-  if (Signed && (FieldSize != 0) && ((Run[FieldSize - 1] & 0x80U) != 0)) {
+  if (Signed && (FieldSize != 0) && ((Run[FieldSize - 1U] & 0x80U) != 0)) {
     Value = (UINT64)(-1);
   }
 
@@ -473,12 +473,12 @@ retry:
   }
 
   LengthSize = *Run & 0xFU;
-  OffsetSize = (*Run >> 4) & 0xFU;
+  OffsetSize = (*Run >> 4U) & 0xFU;
   ++Run;
   --BufferSize;
 
-  if (  (LengthSize > 8)
-     || (OffsetSize > 8)
+  if (  (LengthSize > 8U)
+     || (OffsetSize > 8U)
      || ((LengthSize == 0) && (OffsetSize != 0)))
   {
     DEBUG ((DEBUG_INFO, "NTFS: (ReadRunListElement #2) Runlist is corrupted.\n"));
@@ -580,7 +580,7 @@ ReadSymlink (
 
   switch (Symlink.Type) {
     case (IS_ALIAS | IS_MICROSOFT | S_SYMLINK):
-      Offset = sizeof (Symlink) + 4 + (UINT64)Symlink.SubstituteOffset;
+      Offset = sizeof (Symlink) + 4U + (UINT64)Symlink.SubstituteOffset;
       break;
     case (IS_ALIAS | IS_MICROSOFT | S_FILENAME):
       Offset = sizeof (Symlink) + (UINT64)Symlink.SubstituteOffset;

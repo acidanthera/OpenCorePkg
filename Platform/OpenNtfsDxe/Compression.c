@@ -186,7 +186,7 @@ DecompressBlock (
     return Status;
   }
 
-  BlockLength = (BlockParameters & BLOCK_LENGTH_BITS) + 1;
+  BlockLength = (BlockParameters & BLOCK_LENGTH_BITS) + 1U;
 
   if (Dest != NULL) {
     if ((BlockParameters & IS_COMPRESSED_BLOCK) != 0) {
@@ -205,7 +205,7 @@ DecompressBlock (
             return Status;
           }
 
-          Tokens = 8;
+          Tokens = 8U;
           --BlockLength;
           if (BlockLength == 0) {
             break;
@@ -221,7 +221,7 @@ DecompressBlock (
             return Status;
           }
 
-          BlockLength -= 2;
+          BlockLength -= 2U;
 
           if (ClearTextPointer == 0) {
             DEBUG ((DEBUG_INFO, "NTFS: Nontext window empty\n"));
@@ -229,16 +229,16 @@ DecompressBlock (
           }
 
           Lmask  = BLOCK_LENGTH_BITS;
-          Dshift = 12;
-          for (Index = ClearTextPointer - 1; Index >= 0x10; Index >>= 1) {
+          Dshift = 12U;
+          for (Index = ClearTextPointer - 1U; Index >= 0x10U; Index >>= 1U) {
             Lmask >>= 1U;
             --Dshift;
           }
 
           Delta  = BackReference >> Dshift;
-          Length = (BackReference & Lmask) + 3;
+          Length = (BackReference & Lmask) + 3U;
 
-          if ((Delta > (ClearTextPointer - 1)) || (Length >= COMPRESSION_BLOCK)) {
+          if ((Delta > (ClearTextPointer - 1U)) || (Length >= COMPRESSION_BLOCK)) {
             DEBUG ((DEBUG_INFO, "NTFS: Invalid back-reference.\n"));
             return EFI_VOLUME_CORRUPTED;
           }
@@ -249,7 +249,7 @@ DecompressBlock (
           }
 
           for (Index = 0; Index < Length; ++Index) {
-            Dest[ClearTextPointer] = Dest[ClearTextPointer - Delta - 1];
+            Dest[ClearTextPointer] = Dest[ClearTextPointer - Delta - 1U];
             ++ClearTextPointer;
           }
 
@@ -584,11 +584,11 @@ Decompress (
       return EFI_OUT_OF_RESOURCES;
     }
 
-    Runlist->Unit.SavedPosition = 1;
+    Runlist->Unit.SavedPosition = 1U;
   }
 
   Vcn                 = Runlist->TargetVcn;
-  Runlist->TargetVcn &= ~(mUnitSize - 1);
+  Runlist->TargetVcn &= ~(mUnitSize - 1U);
   while (Runlist->NextVcn <= Runlist->TargetVcn) {
     Status = ReadRunListElement (Runlist);
     if (EFI_ERROR (Status)) {
@@ -631,7 +631,7 @@ Decompress (
   if ((Offset % COMPRESSION_BLOCK) != 0) {
     Target = Runlist->TargetVcn * mClusterSize;
 
-    Status = ReadCompressedBlock (Runlist, Runlist->Unit.ClearTextBlock, 1);
+    Status = ReadCompressedBlock (Runlist, Runlist->Unit.ClearTextBlock, 1U);
     if (EFI_ERROR (Status)) {
       FreePool (Runlist->Unit.ClearTextBlock);
       FreePool (Runlist->Unit.Cluster);
@@ -669,7 +669,7 @@ Decompress (
   if (Length != 0) {
     Target = Runlist->TargetVcn * mClusterSize;
 
-    Status = ReadCompressedBlock (Runlist, Runlist->Unit.ClearTextBlock, 1);
+    Status = ReadCompressedBlock (Runlist, Runlist->Unit.ClearTextBlock, 1U);
     if (EFI_ERROR (Status)) {
       FreePool (Runlist->Unit.Cluster);
       return Status;

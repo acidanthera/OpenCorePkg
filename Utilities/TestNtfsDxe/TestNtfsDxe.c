@@ -98,7 +98,7 @@ LLVMFuzzerTestOneInput (
   EFI_STATUS         Status;
   EFI_FS             *Instance;
   EFI_FILE_PROTOCOL  *This;
-  UINT64             BufferSize;
+  UINTN              BufferSize;
   VOID               *Buffer;
   EFI_FILE_PROTOCOL  *NewHandle;
   CHAR16             *FileName;
