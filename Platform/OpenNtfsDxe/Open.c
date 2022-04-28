@@ -28,8 +28,8 @@ FileOpen (
   CHAR16         Path[MAX_PATH];
   CHAR16         CleanPath[MAX_PATH];
   CHAR16         *DirName;
-  INTN           Index;
-  INTN           Length;
+  UINTN          Index;
+  UINTN          Length;
   BOOLEAN        AbsolutePath;
 
   ASSERT (This != NULL);
@@ -66,7 +66,7 @@ FileOpen (
       return EFI_OUT_OF_RESOURCES;
     }
 
-    if ((Length == 0) || (Path[Length - 1] != '/')) {
+    if ((Length == 0) || (Path[Length - 1U] != '/')) {
       Path[Length++] = L'/';
     }
   }
@@ -77,7 +77,7 @@ FileOpen (
     return Status;
   }
 
-  for (Index = StrnLenS (Path, MAX_PATH) - 1; Index >= Length; Index--) {
+  for (Index = StrnLenS (Path, MAX_PATH) - 1U; Index >= Length; --Index) {
     if (Path[Index] == L'\\') {
       Path[Index] = L'/';
     }
@@ -106,15 +106,17 @@ FileOpen (
 
   CopyMem (NewFile->Path, CleanPath, StrnSizeS (CleanPath, MAX_PATH));
 
-  for (Index = StrnLenS (CleanPath, MAX_PATH) - 1; Index >= 0; Index--) {
+  Index = StrnLenS (CleanPath, MAX_PATH);
+  do {
+    --Index;
     if (CleanPath[Index] == L'/') {
       CleanPath[Index] = 0;
       break;
     }
-  }
+  } while (Index > 0);
 
-  DirName           = (Index <= 0) ? L"/" : CleanPath;
-  NewFile->BaseName = &NewFile->Path[Index + 1];
+  DirName           = (Index == 0) ? L"/" : CleanPath;
+  NewFile->BaseName = &NewFile->Path[Index + 1U];
 
   Status = NtfsDir (FileSystem, DirName, NewFile, INFO_HOOK);
   if (EFI_ERROR (Status)) {
@@ -150,7 +152,7 @@ FileReadDir (
   EFI_FILE_INFO  *Info;
   CHAR16         Path[MAX_PATH];
   EFI_NTFS_FILE  *TmpFile = NULL;
-  INTN           Length;
+  UINTN          Length;
 
   ASSERT (File != NULL);
   ASSERT (Size != NULL);
@@ -178,7 +180,7 @@ FileReadDir (
     return EFI_OUT_OF_RESOURCES;
   }
 
-  if (Path[Length - 1] != L'/') {
+  if (Path[Length - 1U] != L'/') {
     Path[Length] = L'/';
     Length++;
   }
