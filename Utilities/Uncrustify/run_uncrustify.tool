@@ -12,14 +12,24 @@ PROJECT_PATH="$(dirname "$0")"
 if [ $? -ne 0 ] || [ ! -d "${PROJECT_PATH}" ]; then
   abort "Failed to determine working directory"
 fi
-
 cd "${PROJECT_PATH}" || abort "Failed to cd to ${PROJECT_PATH}"
 
-rm -rf Uncrustify-repo || abort "Failed to cleanup legacy Uncrustify directory"
 # TODO: switch to master
-src=$(curl -Lfs https://raw.githubusercontent.com/acidanthera/ocbuild/unc-build/uncrustify/uncstrap.sh) && eval "$src" || exit 1
+src=$(curl -Lfs https://raw.githubusercontent.com/acidanthera/ocbuild/unc-build/uncrustify/uncstrap.sh) && eval "$src" || abort "Failed to bootstrap Uncrustify"
+# after bootstrapping, these vars must be exported
+ENV_VARS=(
+  "${UNC_EXEC}"
+  "${UNC_CONFIG}"
+  "${UNCRUSTIFY_REPO}"
+  "${FILE_LIST}"
+  "${UNC_DIFF}"
+  )
+for e in "${ENV_VARS[@]}"; do
+  if [ "${e}" = "" ]; then
+    abort "Borked env variables setting"
+  fi
+done
 
-FILE_LIST="filelist.txt"
 rm -f "${FILE_LIST}" || abort "Failed to cleanup legacy ${FILE_LIST}"
 find \
   ../.. \
@@ -61,22 +71,21 @@ find \
   -print \
   > "${FILE_LIST}" || abort "Failed to dump source file list to ${FILE_LIST}"
 
-UNC_DIFF_FILE=./uncrustify.diff
-rm -f "${UNC_DIFF_FILE}" || abort "Failed to cleanup legacy ${UNC_DIFF_FILE}"
-"${UNC_EXEC}" -c "${UNC_CONFIG_FILE}" -F "${FILE_LIST}" --replace --no-backup --if-changed || abort "Failed to run Uncrustify"
+rm -f "${UNC_DIFF}" || abort "Failed to cleanup legacy ${UNC_DIFF}"
+"${UNC_EXEC}" -c "${UNC_CONFIG}" -F "${FILE_LIST}" --replace --no-backup --if-changed || abort "Failed to run Uncrustify"
 
 # only diff the selected .c/.h files
 while read -r line; do
-  git diff "${line}" >> "${UNC_DIFF_FILE}" || abort "Failed to git diff ${line}"
+  git diff "${line}" >> "${UNC_DIFF}" || abort "Failed to git diff ${line}"
 done < "${FILE_LIST}"
-if [ "$(cat ${UNC_DIFF_FILE})" != "" ]; then
+if [ "$(cat ${UNC_DIFF})" != "" ]; then
   # show the diff
-  cat "${UNC_DIFF_FILE}"
+  cat "${UNC_DIFF}"
   abort "Uncrustify detects codestyle problems! Please fix"
 fi
 
 rm -f "${FILE_LIST}" || abort "Failed to cleanup ${FILE_LIST}"
 rm -f "${UNC_EXEC}" || abort "Failed to cleanup ${UNC_EXEC}"
-rm -f "${UNC_CONFIG_FILE}" || abort "Failed to cleanup ${UNC_CONFIG_FILE}"
+rm -f "${UNC_CONFIG}" || abort "Failed to cleanup ${UNC_CONFIG}"
 
 exit 0
