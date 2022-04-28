@@ -9,8 +9,6 @@
 #include "NTFS.h"
 #include "Helper.h"
 
-extern UINTN   mFileRecordSize;
-extern UINTN   mIndexRecordSize;
 STATIC UINT64  mBufferSize;
 STATIC UINT8   mDaysPerMonth[] = { 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31, 0 };
 INT64          mIndexCounter;
@@ -546,9 +544,14 @@ IterateDir (
   UINTN                BitMapLen;
   UINT8                Bit;
   UINTN                Number;
+  UINTN                FileRecordSize;
+  UINTN                IndexRecordSize;
 
   ASSERT (Dir != NULL);
   ASSERT (FileOrCtx != NULL);
+
+  FileRecordSize  = Dir->File->FileSystem->FileRecordSize;
+  IndexRecordSize = Dir->File->FileSystem->IndexRecordSize;
 
   if (!Dir->InodeRead) {
     Status = InitFile (Dir, Dir->Inode);
@@ -576,7 +579,7 @@ IterateDir (
       return EFI_VOLUME_CORRUPTED;
     }
 
-    mBufferSize = mFileRecordSize - (Attr.Current - Attr.BaseMftRecord->FileRecord);
+    mBufferSize = FileRecordSize - (Attr.Current - Attr.BaseMftRecord->FileRecord);
 
     if (  (mBufferSize < sizeof (*Res))
        || (mBufferSize < (Res->NameOffset + 8U))
@@ -643,7 +646,7 @@ IterateDir (
   }
 
   while ((Non = (ATTR_HEADER_NONRES *)FindAttr (&Attr, AT_BITMAP)) != NULL) {
-    mBufferSize = mFileRecordSize - (Attr.Current - Attr.BaseMftRecord->FileRecord);
+    mBufferSize = FileRecordSize - (Attr.Current - Attr.BaseMftRecord->FileRecord);
 
     if (  (mBufferSize < sizeof (*Non))
        || (mBufferSize < (Non->NameOffset + 8U)))
@@ -705,7 +708,7 @@ IterateDir (
   Non = (ATTR_HEADER_NONRES *)LocateAttr (&Attr, Dir, AT_INDEX_ALLOCATION);
 
   while (Non != NULL) {
-    mBufferSize = mFileRecordSize - (Attr.Current - Attr.BaseMftRecord->FileRecord);
+    mBufferSize = FileRecordSize - (Attr.Current - Attr.BaseMftRecord->FileRecord);
 
     if (  (mBufferSize < sizeof (*Non))
        || (mBufferSize < (Non->NameOffset + 8U)))
@@ -738,7 +741,7 @@ IterateDir (
   }
 
   if (BitIndex != NULL) {
-    IndexRecord = AllocateZeroPool (mIndexRecordSize);
+    IndexRecord = AllocateZeroPool (IndexRecordSize);
     if (IndexRecord == NULL) {
       FreeAttr (&Attr);
       FreePool (BitMap);
@@ -751,8 +754,8 @@ IterateDir (
         Status = ReadAttr (
                    &Attr,
                    (UINT8 *)IndexRecord,
-                   Number * mIndexRecordSize,
-                   mIndexRecordSize
+                   Number * IndexRecordSize,
+                   IndexRecordSize
                    );
         if (EFI_ERROR (Status)) {
           FreeAttr (&Attr);
@@ -763,8 +766,9 @@ IterateDir (
 
         Status = Fixup (
                    (UINT8 *)IndexRecord,
-                   mIndexRecordSize,
-                   SIGNATURE_32 ('I', 'N', 'D', 'X')
+                   IndexRecordSize,
+                   SIGNATURE_32 ('I', 'N', 'D', 'X'),
+                   Dir->File->FileSystem->SectorSize
                    );
         if (EFI_ERROR (Status)) {
           FreeAttr (&Attr);
@@ -773,8 +777,8 @@ IterateDir (
           return Status;
         }
 
-        if (  (mIndexRecordSize < sizeof (*IndexRecord))
-           || (mIndexRecordSize < (sizeof (INDEX_HEADER) + IndexRecord->IndexEntriesOffset)))
+        if (  (IndexRecordSize < sizeof (*IndexRecord))
+           || (IndexRecordSize < (sizeof (INDEX_HEADER) + IndexRecord->IndexEntriesOffset)))
         {
           DEBUG ((DEBUG_INFO, "NTFS: $INDEX_ALLOCATION is corrupted.\n"));
           FreeAttr (&Attr);
@@ -783,7 +787,7 @@ IterateDir (
           return EFI_VOLUME_CORRUPTED;
         }
 
-        mBufferSize = mIndexRecordSize - (sizeof (INDEX_HEADER) + IndexRecord->IndexEntriesOffset);
+        mBufferSize = IndexRecordSize - (sizeof (INDEX_HEADER) + IndexRecord->IndexEntriesOffset);
 
         Status = ListFile (
                    Dir,

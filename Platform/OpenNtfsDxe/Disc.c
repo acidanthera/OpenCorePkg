@@ -9,11 +9,6 @@
 #include "NTFS.h"
 #include "Helper.h"
 
-UINTN  mFileRecordSize;
-UINTN  mIndexRecordSize;
-UINTN  mSectorSize;
-UINTN  mClusterSize;
-
 EFI_STATUS
 NtfsDir (
   IN  EFI_FS         *FileSystem,
@@ -122,11 +117,11 @@ NtfsMount (
     return EFI_VOLUME_CORRUPTED;
   }
 
-  mSectorSize  = (UINTN)Boot.BytesPerSector;
-  mClusterSize = (UINTN)Boot.SectorsPerCluster * mSectorSize;
+  FileSystem->SectorSize  = (UINTN)Boot.BytesPerSector;
+  FileSystem->ClusterSize = (UINTN)Boot.SectorsPerCluster * FileSystem->SectorSize;
 
   if (Boot.MftRecordClusters > 0) {
-    Size = (UINTN)Boot.MftRecordClusters * mClusterSize;
+    Size = (UINTN)Boot.MftRecordClusters * FileSystem->ClusterSize;
   } else if (-Boot.MftRecordClusters >= 31) {
     DEBUG ((DEBUG_INFO, "NTFS: (NtfsMount #2) BIOS Parameter Block is corrupted.\n"));
     return EFI_VOLUME_CORRUPTED;
@@ -134,14 +129,14 @@ NtfsMount (
     Size = (UINTN)LShiftU64 (1ULL, -Boot.MftRecordClusters);
   }
 
-  mFileRecordSize = Size;
-  if (mFileRecordSize < mSectorSize) {
+  FileSystem->FileRecordSize = Size;
+  if (FileSystem->FileRecordSize < FileSystem->SectorSize) {
     DEBUG ((DEBUG_INFO, "NTFS: File Record is smaller than Sector.\n"));
     return EFI_VOLUME_CORRUPTED;
   }
 
   if (Boot.IndexRecordClusters > 0) {
-    Size = (UINTN)Boot.IndexRecordClusters * mClusterSize;
+    Size = (UINTN)Boot.IndexRecordClusters * FileSystem->ClusterSize;
   } else if (-Boot.IndexRecordClusters >= 31) {
     DEBUG ((DEBUG_INFO, "NTFS: (NtfsMount #3) BIOS Parameter Block is corrupted.\n"));
     return EFI_VOLUME_CORRUPTED;
@@ -149,17 +144,19 @@ NtfsMount (
     Size = (UINTN)LShiftU64 (1ULL, -Boot.IndexRecordClusters);
   }
 
-  mIndexRecordSize = Size;
-  if (mIndexRecordSize < mSectorSize) {
+  FileSystem->IndexRecordSize = Size;
+  if (FileSystem->IndexRecordSize < FileSystem->SectorSize) {
     DEBUG ((DEBUG_INFO, "NTFS: Index Record is smaller than Sector.\n"));
     return EFI_VOLUME_CORRUPTED;
   }
 
-  FileSystem->FirstMftRecord = Boot.MftLcn * mClusterSize;
+  FileSystem->FirstMftRecord = Boot.MftLcn * FileSystem->ClusterSize;
   //
   // Driver limitations
   //
-  if ((mFileRecordSize > NTFS_MAX_MFT) || (mIndexRecordSize > NTFS_MAX_IDX)) {
+  if (  (FileSystem->FileRecordSize > NTFS_MAX_MFT)
+     || (FileSystem->IndexRecordSize > NTFS_MAX_IDX))
+  {
     DEBUG ((DEBUG_INFO, "NTFS: (NtfsMount #4) BIOS Parameter Block is corrupted.\n"));
     return EFI_VOLUME_CORRUPTED;
   }
@@ -178,7 +175,7 @@ NtfsMount (
   RootFile->RootFile.File = RootFile;
   RootFile->MftFile.File  = RootFile;
 
-  RootFile->MftFile.FileRecord = AllocateZeroPool (mFileRecordSize);
+  RootFile->MftFile.FileRecord = AllocateZeroPool (FileSystem->FileRecordSize);
   if (RootFile->MftFile.FileRecord == NULL) {
     FreePool (RootFile);
     return EFI_OUT_OF_RESOURCES;
@@ -187,7 +184,7 @@ NtfsMount (
   Status = DiskRead (
              FileSystem,
              FileSystem->FirstMftRecord,
-             mFileRecordSize,
+             FileSystem->FileRecordSize,
              RootFile->MftFile.FileRecord
              );
   if (EFI_ERROR (Status)) {
@@ -198,8 +195,9 @@ NtfsMount (
 
   Status = Fixup (
              RootFile->MftFile.FileRecord,
-             mFileRecordSize,
-             SIGNATURE_32 ('F', 'I', 'L', 'E')
+             FileSystem->FileRecordSize,
+             SIGNATURE_32 ('F', 'I', 'L', 'E'),
+             FileSystem->SectorSize
              );
   if (EFI_ERROR (Status)) {
     FreePool (RootFile->MftFile.FileRecord);
@@ -244,7 +242,8 @@ EFIAPI
 Fixup (
   IN UINT8   *Buffer,
   IN UINT64  Length,
-  IN UINT32  Magic
+  IN UINT32  Magic,
+  IN UINTN   SectorSize
   )
 {
   FILE_RECORD_HEADER  *Record;
@@ -272,7 +271,7 @@ Fixup (
     return EFI_VOLUME_CORRUPTED;
   }
 
-  if (((UINT64)Record->S_Size - 1U) != DivU64x64Remainder (Length, mSectorSize, NULL)) {
+  if (((UINT64)Record->S_Size - 1U) != DivU64x64Remainder (Length, SectorSize, NULL)) {
     DEBUG ((DEBUG_INFO, "NTFS: (Fixup #4) Record is corrupted.\n"));
     return EFI_VOLUME_CORRUPTED;
   }
@@ -281,13 +280,13 @@ Fixup (
   UpdateSequenceNumber  = ReadUnaligned16 ((UINT16 *)UpdateSequencePointer);
   USCounter             = Record->UpdateSequenceOffset;
 
-  if (Length < (mSectorSize - sizeof (UINT16))) {
+  if (Length < (SectorSize - sizeof (UINT16))) {
     DEBUG ((DEBUG_INFO, "NTFS: (Fixup #5) Record is corrupted.\n"));
     return EFI_VOLUME_CORRUPTED;
   }
 
   BufferEnd = Buffer + Length;
-  Buffer   += mSectorSize - sizeof (UINT16);
+  Buffer   += SectorSize - sizeof (UINT16);
   while ((Buffer + sizeof (UINT16)) <= BufferEnd) {
     UpdateSequencePointer += sizeof (UINT16);
 
@@ -304,7 +303,7 @@ Fixup (
 
     Buffer[0] = UpdateSequencePointer[0];
     Buffer[1] = UpdateSequencePointer[1];
-    Buffer   += mSectorSize;
+    Buffer   += SectorSize;
   }
 
   return EFI_SUCCESS;
@@ -328,7 +327,7 @@ InitAttr (
   Attr->Flags         = (File == &File->File->MftFile) ? NTFS_AF_MFT_FILE : 0;
 
   AttrEnd = Record->AttributeOffset + sizeof (ATTR_HEADER_RES);
-  if (  (AttrEnd > mFileRecordSize)
+  if (  (AttrEnd > File->File->FileSystem->FileRecordSize)
      || (AttrEnd > Record->RealSize)
      || (Record->RealSize > Record->AllocatedSize))
   {
@@ -410,10 +409,14 @@ FindAttr (
   ATTR_LIST_RECORD    *LRecord;
   FILE_RECORD_HEADER  *FRecord;
   UINT64              BufferSize;
+  UINTN               FileRecordSize;
+  UINTN               SectorSize;
 
   ASSERT (Attr != NULL);
 
-  BufferSize = 0;
+  BufferSize     = 0;
+  FileRecordSize = Attr->BaseMftRecord->File->FileSystem->FileRecordSize;
+  SectorSize     = Attr->BaseMftRecord->File->FileSystem->SectorSize;
 
   if ((Attr->Flags & NTFS_AF_ALST) != 0) {
 retry:
@@ -440,7 +443,7 @@ retry:
           Status = DiskRead (
                      Attr->BaseMftRecord->File->FileSystem,
                      ReadUnaligned32 ((UINT32 *)(Attr->Current + 0x10U)),
-                     mFileRecordSize / 2U,
+                     FileRecordSize / 2U,
                      Attr->ExtensionMftRecord
                      );
           if (EFI_ERROR (Status)) {
@@ -452,8 +455,8 @@ retry:
           Status = DiskRead (
                      Attr->BaseMftRecord->File->FileSystem,
                      ReadUnaligned32 ((UINT32 *)(Attr->Current + 0x14U)),
-                     mFileRecordSize / 2U,
-                     Attr->ExtensionMftRecord + mFileRecordSize / 2U
+                     FileRecordSize / 2U,
+                     Attr->ExtensionMftRecord + FileRecordSize / 2U
                      );
           if (EFI_ERROR (Status)) {
             DEBUG ((DEBUG_INFO, "NTFS: Could not read second part of extension record.\n"));
@@ -461,7 +464,12 @@ retry:
             return NULL;
           }
 
-          Status = Fixup (Attr->ExtensionMftRecord, mFileRecordSize, SIGNATURE_32 ('F', 'I', 'L', 'E'));
+          Status = Fixup (
+                     Attr->ExtensionMftRecord,
+                     FileRecordSize,
+                     SIGNATURE_32 ('F', 'I', 'L', 'E'),
+                     Attr->BaseMftRecord->File->FileSystem->SectorSize
+                     );
           if (EFI_ERROR (Status)) {
             DEBUG ((DEBUG_INFO, "NTFS: Fixup failed.\n"));
             FreeAttr (Attr);
@@ -481,7 +489,7 @@ retry:
         }
 
         FRecord    = (FILE_RECORD_HEADER *)Attr->ExtensionMftRecord;
-        BufferSize = mFileRecordSize;
+        BufferSize = FileRecordSize;
         if ((FRecord->AttributeOffset + sizeof (*Res)) <= BufferSize) {
           Res         = (ATTR_HEADER_RES *)((UINT8 *)FRecord + FRecord->AttributeOffset);
           BufferSize -= FRecord->AttributeOffset;
@@ -526,7 +534,7 @@ retry:
 
   Attr->Current = Attr->Next;
   Res           = (ATTR_HEADER_RES *)Attr->Current;
-  BufferSize    = mFileRecordSize - (Attr->Current - Attr->BaseMftRecord->FileRecord);
+  BufferSize    = FileRecordSize - (Attr->Current - Attr->BaseMftRecord->FileRecord);
 
   while ((BufferSize >= sizeof (UINT32)) && (Res->Type != ATTRIBUTES_END_MARKER)) {
     if (BufferSize < sizeof (*Res)) {
@@ -564,7 +572,7 @@ retry:
       FreePool (Attr->ExtensionMftRecord);
     }
 
-    Attr->ExtensionMftRecord = AllocateZeroPool (mFileRecordSize);
+    Attr->ExtensionMftRecord = AllocateZeroPool (FileRecordSize);
     if (Attr->ExtensionMftRecord == NULL) {
       FreeAttr (Attr);
       return NULL;
@@ -572,7 +580,7 @@ retry:
 
     AttrStart  = Attr->Last;
     Res        = (ATTR_HEADER_RES *)Attr->Last;
-    BufferSize = mFileRecordSize - (Attr->Last - Attr->BaseMftRecord->FileRecord);
+    BufferSize = FileRecordSize - (Attr->Last - Attr->BaseMftRecord->FileRecord);
 
     if (BufferSize < sizeof (*Res)) {
       DEBUG ((DEBUG_INFO, "NTFS: (FindAttr #3) File record is corrupted.\n"));
@@ -665,11 +673,11 @@ retry:
       if (BufferSize >= 0x18U) {
         WriteUnaligned32 (
           (UINT32 *)(AttrStart + 0x10U),
-          (UINT32)DivU64x64Remainder (Attr->BaseMftRecord->File->FileSystem->FirstMftRecord, mSectorSize, NULL)
+          (UINT32)DivU64x64Remainder (Attr->BaseMftRecord->File->FileSystem->FirstMftRecord, SectorSize, NULL)
           );
         WriteUnaligned32 (
           (UINT32 *)(AttrStart + 0x14U),
-          (UINT32)DivU64x64Remainder (Attr->BaseMftRecord->File->FileSystem->FirstMftRecord, mSectorSize, NULL) + 1U
+          (UINT32)DivU64x64Remainder (Attr->BaseMftRecord->File->FileSystem->FirstMftRecord, SectorSize, NULL) + 1U
           );
       } else {
         DEBUG ((DEBUG_INFO, "NTFS: (FindAttr #7) File record is corrupted.\n"));
@@ -686,8 +694,8 @@ retry:
         Status = ReadAttr (
                    Attr,
                    AttrStart + 0x10U,
-                   ReadUnaligned32 ((UINT32 *)(AttrStart + 0x10U)) * mFileRecordSize,
-                   mFileRecordSize
+                   ReadUnaligned32 ((UINT32 *)(AttrStart + 0x10U)) * FileRecordSize,
+                   FileRecordSize
                    );
         if (EFI_ERROR (Status)) {
           FreeAttr (Attr);
@@ -729,7 +737,7 @@ InitFile (
 
   File->InodeRead = TRUE;
 
-  File->FileRecord = AllocateZeroPool (mFileRecordSize);
+  File->FileRecord = AllocateZeroPool (File->File->FileSystem->FileRecordSize);
   if (File->FileRecord == NULL) {
     return EFI_OUT_OF_RESOURCES;
   }

@@ -645,6 +645,10 @@ typedef struct _EFI_FS {
   UINT64                             FirstMftRecord;
   NTFS_FILE                          *RootIndex;
   NTFS_FILE                          *MftStart;
+  UINTN                              FileRecordSize;
+  UINTN                              IndexRecordSize;
+  UINTN                              SectorSize;
+  UINTN                              ClusterSize;
 } EFI_FS;
 
 typedef struct {

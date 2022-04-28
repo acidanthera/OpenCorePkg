@@ -13,9 +13,6 @@
 #define BLOCK_LENGTH_BITS    0xFFF
 #define UNIT_MASK            0xF
 
-extern UINTN   mFileRecordSize;
-extern UINTN   mSectorSize;
-extern UINTN   mClusterSize;
 extern UINT64  mUnitSize;
 STATIC UINT64  mBufferSize;
 
@@ -26,6 +23,9 @@ GetNextCluster (
   )
 {
   EFI_STATUS  Status;
+  UINTN       ClusterSize;
+
+  ClusterSize = Clusters->FileSystem->ClusterSize;
 
   if (Clusters->Head >= Clusters->Tail) {
     DEBUG ((DEBUG_INFO, "NTFS: Compression block overflown\n"));
@@ -34,8 +34,8 @@ GetNextCluster (
 
   Status = DiskRead (
              Clusters->FileSystem,
-             (Clusters->Elements[Clusters->Head].Lcn - Clusters->Elements[Clusters->Head].Vcn + Clusters->CurrentVcn) * mClusterSize,
-             mClusterSize,
+             (Clusters->Elements[Clusters->Head].Lcn - Clusters->Elements[Clusters->Head].Vcn + Clusters->CurrentVcn) * ClusterSize,
+             ClusterSize,
              Clusters->Cluster
              );
   if (EFI_ERROR (Status)) {
@@ -65,7 +65,7 @@ GetDataRunByte (
   ASSERT (Clusters != NULL);
   ASSERT (Result   != NULL);
 
-  if (Clusters->ClusterOffset >= mClusterSize) {
+  if (Clusters->ClusterOffset >= Clusters->FileSystem->ClusterSize) {
     Status = GetNextCluster (Clusters);
     if (EFI_ERROR (Status)) {
       return Status;
@@ -288,7 +288,7 @@ DecompressBlock (
   }
 
   while (BlockLength > 0) {
-    SpareBytes = mClusterSize - Clusters->ClusterOffset;
+    SpareBytes = Clusters->FileSystem->ClusterSize - Clusters->ClusterOffset;
     if (SpareBytes > BlockLength) {
       SpareBytes = BlockLength;
     }
@@ -385,18 +385,20 @@ ReadCompressedBlock (
   UINT64      BlocksPerCluster;
   UINT64      ClustersPerBlock;
   UINT64      ClearTextClusters;
+  UINTN       ClusterSize;
 
   ASSERT (Runlist != NULL);
 
   BlocksPerCluster = 0;
   ClustersPerBlock = 0;
+  ClusterSize      = Runlist->Unit.FileSystem->ClusterSize;
 
   mBufferSize = BlocksTotal * COMPRESSION_BLOCK;
 
-  if (mClusterSize >= COMPRESSION_BLOCK) {
-    BlocksPerCluster = DivU64x64Remainder (mClusterSize, COMPRESSION_BLOCK, NULL);
+  if (ClusterSize >= COMPRESSION_BLOCK) {
+    BlocksPerCluster = DivU64x64Remainder (ClusterSize, COMPRESSION_BLOCK, NULL);
   } else {
-    ClustersPerBlock = DivU64x64Remainder (COMPRESSION_BLOCK, mClusterSize, NULL);
+    ClustersPerBlock = DivU64x64Remainder (COMPRESSION_BLOCK, ClusterSize, NULL);
   }
 
   while (BlocksTotal != 0) {
@@ -408,7 +410,7 @@ ReadCompressedBlock (
 
       Runlist->Unit.Head          = Runlist->Unit.Tail = 0;
       Runlist->Unit.CurrentVcn    = Runlist->TargetVcn;
-      Runlist->Unit.ClusterOffset = mClusterSize;
+      Runlist->Unit.ClusterOffset = ClusterSize;
       if (Runlist->TargetVcn >= Runlist->NextVcn) {
         Status = ReadRunListElement (Runlist);
         if (EFI_ERROR (Status)) {
@@ -432,7 +434,7 @@ ReadCompressedBlock (
       }
     }
 
-    if (mClusterSize >= COMPRESSION_BLOCK) {
+    if (ClusterSize >= COMPRESSION_BLOCK) {
       SpareBlocks = (UINTN)((mUnitSize - (Runlist->TargetVcn & UNIT_MASK)) * BlocksPerCluster);
     } else {
       SpareBlocks = (UINTN)DivU64x64Remainder (mUnitSize - (Runlist->TargetVcn & UNIT_MASK), ClustersPerBlock, NULL);
@@ -445,7 +447,7 @@ ReadCompressedBlock (
     BlocksTotal -= SpareBlocks;
 
     if (Runlist->IsSparse) {
-      if (mClusterSize >= COMPRESSION_BLOCK) {
+      if (ClusterSize >= COMPRESSION_BLOCK) {
         Runlist->TargetVcn += DivU64x64Remainder (SpareBlocks, BlocksPerCluster, NULL);
       } else {
         Runlist->TargetVcn += SpareBlocks * ClustersPerBlock;
@@ -477,7 +479,7 @@ ReadCompressedBlock (
         }
       }
     } else {
-      if (mClusterSize >= COMPRESSION_BLOCK) {
+      if (ClusterSize >= COMPRESSION_BLOCK) {
         SpareClusters = DivU64x64Remainder (SpareBlocks, BlocksPerCluster, NULL);
       } else {
         SpareClusters = SpareBlocks * ClustersPerBlock;
@@ -491,23 +493,23 @@ ReadCompressedBlock (
 
         Runlist->TargetVcn += ClearTextClusters;
         if (Dest != NULL) {
-          if (mBufferSize < (ClearTextClusters * mClusterSize)) {
+          if (mBufferSize < (ClearTextClusters * ClusterSize)) {
             DEBUG ((DEBUG_INFO, "NTFS: (ReadCompressedBlock #2) Buffer overflow.\n"));
             return EFI_VOLUME_CORRUPTED;
           }
 
           Status = DiskRead (
                      Runlist->Unit.FileSystem,
-                     Runlist->Unit.Elements[Runlist->Unit.Head].Lcn * mClusterSize,
-                     (UINTN)(ClearTextClusters * mClusterSize),
+                     Runlist->Unit.Elements[Runlist->Unit.Head].Lcn * ClusterSize,
+                     (UINTN)(ClearTextClusters * ClusterSize),
                      Dest
                      );
           if (EFI_ERROR (Status)) {
             return Status;
           }
 
-          Dest        += ClearTextClusters * mClusterSize;
-          mBufferSize -= ClearTextClusters * mClusterSize;
+          Dest        += ClearTextClusters * ClusterSize;
+          mBufferSize -= ClearTextClusters * ClusterSize;
         }
 
         SpareClusters -= ClearTextClusters;
@@ -516,23 +518,23 @@ ReadCompressedBlock (
 
       if (SpareClusters != 0) {
         if (Dest != NULL) {
-          if (mBufferSize < (SpareClusters * mClusterSize)) {
+          if (mBufferSize < (SpareClusters * ClusterSize)) {
             DEBUG ((DEBUG_INFO, "NTFS: (ReadCompressedBlock #3) Buffer overflow.\n"));
             return EFI_VOLUME_CORRUPTED;
           }
 
           Status = DiskRead (
                      Runlist->Unit.FileSystem,
-                     (Runlist->TargetVcn - Runlist->CurrentVcn + Runlist->CurrentLcn) * mClusterSize,
-                     (UINTN)(SpareClusters * mClusterSize),
+                     (Runlist->TargetVcn - Runlist->CurrentVcn + Runlist->CurrentLcn) * ClusterSize,
+                     (UINTN)(SpareClusters * ClusterSize),
                      Dest
                      );
           if (EFI_ERROR (Status)) {
             return Status;
           }
 
-          Dest        += SpareClusters * mClusterSize;
-          mBufferSize -= SpareClusters * mClusterSize;
+          Dest        += SpareClusters * ClusterSize;
+          mBufferSize -= SpareClusters * ClusterSize;
         }
 
         Runlist->TargetVcn += SpareClusters;
@@ -558,9 +560,12 @@ Decompress (
   UINTN       Residual;
   UINT64      BlocksPerCluster;
   UINT64      ClustersPerBlock;
+  UINTN       ClusterSize;
 
   ASSERT (Runlist != NULL);
   ASSERT (Dest    != NULL);
+
+  ClusterSize = Runlist->Unit.FileSystem->ClusterSize;
 
   if (Runlist->Unit.ClearTextBlock != NULL) {
     if ((Offset & (~(COMPRESSION_BLOCK - 1U))) == Runlist->Unit.SavedPosition) {
@@ -598,22 +603,22 @@ Decompress (
   }
 
   Runlist->Unit.Head    = Runlist->Unit.Tail = 0;
-  Runlist->Unit.Cluster = AllocateZeroPool (mClusterSize);
+  Runlist->Unit.Cluster = AllocateZeroPool (ClusterSize);
   if (Runlist->Unit.Cluster == NULL) {
     FreePool (Runlist->Unit.ClearTextBlock);
     return EFI_OUT_OF_RESOURCES;
   }
 
   if (Vcn > Runlist->TargetVcn) {
-    if (mClusterSize >= COMPRESSION_BLOCK) {
-      BlocksPerCluster = DivU64x64Remainder (mClusterSize, COMPRESSION_BLOCK, NULL);
+    if (ClusterSize >= COMPRESSION_BLOCK) {
+      BlocksPerCluster = DivU64x64Remainder (ClusterSize, COMPRESSION_BLOCK, NULL);
       Status           = ReadCompressedBlock (
                            Runlist,
                            NULL,
                            (UINTN)((Vcn - Runlist->TargetVcn) * BlocksPerCluster)
                            );
     } else {
-      ClustersPerBlock = DivU64x64Remainder (COMPRESSION_BLOCK, mClusterSize, NULL);
+      ClustersPerBlock = DivU64x64Remainder (COMPRESSION_BLOCK, ClusterSize, NULL);
       Status           = ReadCompressedBlock (
                            Runlist,
                            NULL,
@@ -629,7 +634,7 @@ Decompress (
   }
 
   if ((Offset % COMPRESSION_BLOCK) != 0) {
-    Target = Runlist->TargetVcn * mClusterSize;
+    Target = Runlist->TargetVcn * ClusterSize;
 
     Status = ReadCompressedBlock (Runlist, Runlist->Unit.ClearTextBlock, 1U);
     if (EFI_ERROR (Status)) {
@@ -667,7 +672,7 @@ Decompress (
   Dest   += (Length / COMPRESSION_BLOCK) * COMPRESSION_BLOCK;
   Length %= COMPRESSION_BLOCK;
   if (Length != 0) {
-    Target = Runlist->TargetVcn * mClusterSize;
+    Target = Runlist->TargetVcn * ClusterSize;
 
     Status = ReadCompressedBlock (Runlist, Runlist->Unit.ClearTextBlock, 1U);
     if (EFI_ERROR (Status)) {

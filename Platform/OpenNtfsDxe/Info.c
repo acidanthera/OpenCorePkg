@@ -9,8 +9,6 @@
 #include "NTFS.h"
 #include "Helper.h"
 
-extern UINTN  mFileRecordSize;
-
 STATIC
 EFI_STATUS
 GetLabel (
@@ -34,7 +32,7 @@ GetLabel (
   }
 
   if (!BaseMftRecord->InodeRead) {
-    BaseMftRecord->FileRecord = AllocateZeroPool (mFileRecordSize);
+    BaseMftRecord->FileRecord = AllocateZeroPool (FileSystem->FileRecordSize);
     if (BaseMftRecord->FileRecord == NULL) {
       DEBUG ((DEBUG_INFO, "NTFS: Failed to allocate buffer for FileRecord.\n"));
       FreeFile (BaseMftRecord);

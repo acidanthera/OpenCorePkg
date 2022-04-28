@@ -9,10 +9,7 @@
 #include "NTFS.h"
 #include "Helper.h"
 
-extern UINTN  mFileRecordSize;
-extern UINTN  mSectorSize;
-extern UINTN  mClusterSize;
-UINT64        mUnitSize;
+UINT64  mUnitSize;
 
 STATIC
 UINT64
@@ -55,13 +52,15 @@ ReadClusters (
   UINT64      Cluster;
   UINT64      OffsetInsideCluster;
   UINTN       Size;
+  UINTN       ClusterSize;
 
   ASSERT (Runlist != NULL);
   ASSERT (Dest != NULL);
 
-  OffsetInsideCluster = Offset & (mClusterSize - 1U);
-  Size                = mClusterSize;
-  ClustersTotal       = DivU64x64Remainder (Length + Offset + mClusterSize - 1U, mClusterSize, NULL);
+  ClusterSize         = Runlist->Unit.FileSystem->ClusterSize;
+  OffsetInsideCluster = Offset & (ClusterSize - 1U);
+  Size                = ClusterSize;
+  ClustersTotal       = DivU64x64Remainder (Length + Offset + ClusterSize - 1U, ClusterSize, NULL);
 
   for (Index = Runlist->TargetVcn; Index < ClustersTotal; ++Index) {
     Cluster = GetLcn (Runlist, Index);
@@ -69,13 +68,13 @@ ReadClusters (
       return EFI_DEVICE_ERROR;
     }
 
-    Cluster *= mClusterSize;
+    Cluster *= ClusterSize;
 
     if (Index == (ClustersTotal - 1U)) {
-      Size = (UINTN)((Length + Offset) & (mClusterSize - 1U));
+      Size = (UINTN)((Length + Offset) & (ClusterSize - 1U));
 
       if (Size == 0) {
-        Size = mClusterSize;
+        Size = ClusterSize;
       }
 
       if (Index != Runlist->TargetVcn) {
@@ -88,7 +87,7 @@ ReadClusters (
     }
 
     if ((Index != Runlist->TargetVcn) && (Index != (ClustersTotal - 1U))) {
-      Size                = mClusterSize;
+      Size                = ClusterSize;
       OffsetInsideCluster = 0;
     }
 
@@ -153,15 +152,18 @@ ReadMftRecord (
   )
 {
   EFI_STATUS  Status;
+  UINTN       FileRecordSize;
 
   ASSERT (File != NULL);
   ASSERT (Buffer != NULL);
 
+  FileRecordSize = File->FileSystem->FileRecordSize;
+
   Status = ReadAttr (
              &File->MftFile.Attr,
              Buffer,
-             RecordNumber * mFileRecordSize,
-             mFileRecordSize
+             RecordNumber * FileRecordSize,
+             FileRecordSize
              );
   if (EFI_ERROR (Status)) {
     DEBUG ((DEBUG_INFO, "NTFS: Could not read MFT Record 0x%Lx\n", RecordNumber));
@@ -169,7 +171,12 @@ ReadMftRecord (
     return Status;
   }
 
-  return Fixup (Buffer, mFileRecordSize, SIGNATURE_32 ('F', 'I', 'L', 'E'));
+  return Fixup (
+           Buffer,
+           FileRecordSize,
+           SIGNATURE_32 ('F', 'I', 'L', 'E'),
+           File->FileSystem->SectorSize
+           );
 }
 
 EFI_STATUS
@@ -188,12 +195,14 @@ ReadAttr (
   UINT64            Vcn;
   ATTR_LIST_RECORD  *Record;
   ATTR_HEADER_RES   *Res;
+  UINTN             ClusterSize;
 
   ASSERT (Attr != NULL);
   ASSERT (Dest != NULL);
 
-  Current    = Attr->Current;
-  Attr->Next = Attr->Current;
+  Current     = Attr->Current;
+  Attr->Next  = Attr->Current;
+  ClusterSize = Attr->BaseMftRecord->File->FileSystem->ClusterSize;
 
   if ((Attr->Flags & NTFS_AF_ALST) != 0) {
     if (Attr->Last < (Attr->Next + sizeof (ATTR_LIST_RECORD))) {
@@ -204,8 +213,8 @@ ReadAttr (
     Record = (ATTR_LIST_RECORD *)Attr->Next;
     Type   = Record->Type;
 
-    Vcn = DivU64x64Remainder (Offset, mClusterSize, NULL);
-    if (COMPRESSION_BLOCK >= mClusterSize) {
+    Vcn = DivU64x64Remainder (Offset, ClusterSize, NULL);
+    if (COMPRESSION_BLOCK >= ClusterSize) {
       Vcn &= ~0xFULL;
     }
 
@@ -262,12 +271,18 @@ ReadData (
   UINT64              Sector1;
   UINT64              OffsetInsideCluster;
   UINT64              BufferSize;
+  UINTN               FileRecordSize;
+  UINTN               SectorSize;
+  UINTN               ClusterSize;
 
   if (Length == 0) {
     return EFI_SUCCESS;
   }
 
-  BufferSize = mFileRecordSize - (Attr->Current - Attr->BaseMftRecord->FileRecord);
+  FileRecordSize = Attr->BaseMftRecord->File->FileSystem->FileRecordSize;
+  SectorSize     = Attr->BaseMftRecord->File->FileSystem->SectorSize;
+  ClusterSize    = Attr->BaseMftRecord->File->FileSystem->ClusterSize;
+  BufferSize     = FileRecordSize - (Attr->Current - Attr->BaseMftRecord->FileRecord);
   //
   // Resident Attribute
   //
@@ -325,7 +340,7 @@ ReadData (
   Runlist->NextVcn     = NonRes->StartingVCN;
   Runlist->CurrentLcn  = 0;
 
-  Runlist->TargetVcn = NonRes->StartingVCN + DivU64x64Remainder (Offset, mClusterSize, NULL);
+  Runlist->TargetVcn = NonRes->StartingVCN + DivU64x64Remainder (Offset, ClusterSize, NULL);
   if (Runlist->TargetVcn < NonRes->StartingVCN) {
     DEBUG ((DEBUG_INFO, "NTFS: Overflow: StartingVCN is too large.\n"));
     FreePool (Runlist);
@@ -365,18 +380,18 @@ ReadData (
   }
 
   if (Attr->Flags & NTFS_AF_GPOS) {
-    OffsetInsideCluster = Offset & (mClusterSize - 1U);
+    OffsetInsideCluster = Offset & (ClusterSize - 1U);
 
     Sector0 = DivU64x64Remainder (
-                (Runlist->TargetVcn - Runlist->CurrentVcn + Runlist->CurrentLcn) * mClusterSize + OffsetInsideCluster,
-                mSectorSize,
+                (Runlist->TargetVcn - Runlist->CurrentVcn + Runlist->CurrentLcn) * ClusterSize + OffsetInsideCluster,
+                SectorSize,
                 NULL
                 );
 
     Sector1 = Sector0 + 1U;
     if (Sector1 == DivU64x64Remainder (
-                     (Runlist->NextVcn - Runlist->CurrentVcn + Runlist->CurrentLcn) * mClusterSize,
-                     mSectorSize,
+                     (Runlist->NextVcn - Runlist->CurrentVcn + Runlist->CurrentLcn) * ClusterSize,
+                     SectorSize,
                      NULL
                      ))
     {
@@ -387,8 +402,8 @@ ReadData (
       }
 
       Sector1 = DivU64x64Remainder (
-                  Runlist->CurrentLcn * mClusterSize,
-                  mSectorSize,
+                  Runlist->CurrentLcn * ClusterSize,
+                  SectorSize,
                   NULL
                   );
     }
@@ -460,11 +475,13 @@ ReadRunListElement (
   UINT8               *Run;
   ATTR_HEADER_NONRES  *Attr;
   UINT64              BufferSize;
+  UINTN               FileRecordSize;
 
   ASSERT (Runlist != NULL);
 
-  Run        = Runlist->NextDataRun;
-  BufferSize = mFileRecordSize - (Run - Runlist->Attr->BaseMftRecord->FileRecord);
+  Run            = Runlist->NextDataRun;
+  FileRecordSize = Runlist->Attr->BaseMftRecord->File->FileSystem->FileRecordSize;
+  BufferSize     = FileRecordSize - (Run - Runlist->Attr->BaseMftRecord->FileRecord);
 
 retry:
   if (BufferSize == 0) {
@@ -502,7 +519,7 @@ retry:
 
         Run                 = (UINT8 *)Attr + Attr->DataRunsOffset;
         Runlist->CurrentLcn = 0;
-        BufferSize          = mFileRecordSize - Attr->DataRunsOffset;
+        BufferSize          = FileRecordSize - Attr->DataRunsOffset;
         goto retry;
       }
     }
@@ -557,7 +574,7 @@ ReadSymlink (
 
   ASSERT (File != NULL);
 
-  File->FileRecord = AllocateZeroPool (mFileRecordSize);
+  File->FileRecord = AllocateZeroPool (File->File->FileSystem->FileRecordSize);
   if (File->FileRecord == NULL) {
     return NULL;
   }
