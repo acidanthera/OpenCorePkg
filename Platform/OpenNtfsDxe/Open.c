@@ -61,6 +61,11 @@ FileOpen (
     }
 
     Length = StrnLenS (Path, MAX_PATH);
+    if (Length == MAX_PATH) {
+      DEBUG ((DEBUG_INFO, "NTFS: Path is too long.\n"));
+      return EFI_OUT_OF_RESOURCES;
+    }
+
     if ((Length == 0) || (Path[Length - 1] != '/')) {
       Path[Length++] = L'/';
     }
@@ -168,6 +173,11 @@ FileReadDir (
   }
 
   Length = StrnLenS (Path, MAX_PATH);
+  if (Length == MAX_PATH) {
+    DEBUG ((DEBUG_INFO, "NTFS: Path is too long.\n"));
+    return EFI_OUT_OF_RESOURCES;
+  }
+
   if (Path[Length - 1] != L'/') {
     Path[Length] = L'/';
     Length++;
@@ -199,6 +209,12 @@ FileReadDir (
 
     TmpFile->FileSystem = File->FileSystem;
     CopyMem (&TmpFile->EfiFile, &File->FileSystem->EfiFile, sizeof (EFI_FILE_PROTOCOL));
+
+    if ((MAX_PATH - Length) < StrSize (Info->FileName)) {
+      DEBUG ((DEBUG_INFO, "NTFS: FileName is too long.\n"));
+      FreePool (TmpFile);
+      return EFI_OUT_OF_RESOURCES;      
+    }
 
     CopyMem (&Path[Length], Info->FileName, StrSize (Info->FileName));
     TmpFile->Path = Path;
