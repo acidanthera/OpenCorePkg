@@ -36,6 +36,7 @@ Utilities/TestMacho/Macho
 Utilities/TestRsaPreprocess/RsaPreprocess
 Utilities/TestSmbios/Smbios
 Utilities/TestPeCoff/PeCoff
+Utilities/TestNtfsDxe/TestNtfsDxe
 *.o
 *.o.tmp
 *.d
