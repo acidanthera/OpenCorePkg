@@ -15,7 +15,8 @@ fi
 cd "${PROJECT_PATH}" || abort "Failed to cd to ${PROJECT_PATH}"
 
 # TODO: switch to master
-src=$(curl -Lfs https://raw.githubusercontent.com/acidanthera/ocbuild/unc-build/uncrustify/uncstrap.sh) && eval "$src" || abort "Failed to bootstrap Uncrustify"
+src=$(curl -Lfs https://raw.githubusercontent.com/acidanthera/ocbuild/unc-build/uncrustify/uncstrap.sh)
+eval "$src" || abort "Failed to bootstrap Uncrustify"
 # after bootstrapping, these vars must be exported
 ENV_VARS=(
   "${UNC_EXEC}"
@@ -78,7 +79,7 @@ rm -f "${UNC_DIFF}" || abort "Failed to cleanup legacy ${UNC_DIFF}"
 while read -r line; do
   git diff "${line}" >> "${UNC_DIFF}" || abort "Failed to git diff ${line}"
 done < "${FILE_LIST}"
-if [ "$(cat ${UNC_DIFF})" != "" ]; then
+if [ "$(cat "${UNC_DIFF}")" != "" ]; then
   # show the diff
   cat "${UNC_DIFF}"
   abort "Uncrustify detects codestyle problems! Please fix"
