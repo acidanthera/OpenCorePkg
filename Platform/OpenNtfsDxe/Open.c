@@ -173,7 +173,7 @@ FileReadDir (
     Length++;
   }
 
-  mIndexCounter = File->DirIndex;
+  mIndexCounter = (INT64)File->DirIndex;
   Status        = NtfsDir (File->FileSystem, File->Path, Data, DIR_HOOK);
   if (mIndexCounter >= 0) {
     //
@@ -215,9 +215,9 @@ FileReadDir (
   }
 
   *Size = (UINTN)Info->Size;
-  File->DirIndex++;
+  ++File->DirIndex;
 
-  // DEBUG ((DEBUG_INFO, "NTFS:   Entry[%d]: '%s' %s\n", File->DirIndex-1, Info->FileName,
+  // DEBUG ((DEBUG_INFO, "NTFS:   Entry[%d]: '%s' %s\n", File->DirIndex - 1U, Info->FileName,
   //    (Info->Attribute & EFI_FILE_DIRECTORY) ? L"<DIR>" : L""));
 
   return EFI_SUCCESS;

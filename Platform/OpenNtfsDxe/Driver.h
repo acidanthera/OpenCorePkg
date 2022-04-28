@@ -626,7 +626,7 @@ typedef struct _NTFS_FILE {
 typedef struct _EFI_NTFS_FILE {
   EFI_FILE_PROTOCOL    EfiFile;
   BOOLEAN              IsDir;
-  INT64                DirIndex;
+  UINT64               DirIndex;
   CHAR16               *Path;
   CHAR16               *BaseName;
   UINT64               Offset;
