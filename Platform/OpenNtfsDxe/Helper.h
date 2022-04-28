@@ -133,7 +133,7 @@ Fixup (
   IN UINT8   *Buffer,
   IN UINT64  Length,
   IN UINT32  Magic,
-  IN UINTN   SectorSize  
+  IN UINTN   SectorSize
   );
 
 EFI_STATUS

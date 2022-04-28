@@ -213,7 +213,7 @@ FileReadDir (
     if ((MAX_PATH - Length) < StrSize (Info->FileName)) {
       DEBUG ((DEBUG_INFO, "NTFS: FileName is too long.\n"));
       FreePool (TmpFile);
-      return EFI_OUT_OF_RESOURCES;      
+      return EFI_OUT_OF_RESOURCES;
     }
 
     CopyMem (&Path[Length], Info->FileName, StrSize (Info->FileName));
