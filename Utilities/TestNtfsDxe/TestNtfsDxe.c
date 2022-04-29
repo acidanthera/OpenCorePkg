@@ -180,7 +180,7 @@ LLVMFuzzerTestOneInput (
     BufferSize = 0;
     Status     = FileRead (NewHandle, &BufferSize, Buffer);
     if (Status == EFI_BUFFER_TOO_SMALL) {
-      Buffer     = AllocateZeroPool (BufferSize);
+      Buffer = AllocateZeroPool (BufferSize);
       if (Buffer == NULL) {
         FreeAll (FileName, Instance);
         return 0;
