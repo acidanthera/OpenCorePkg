@@ -77,7 +77,9 @@ FileOpen (
     return Status;
   }
 
-  for (Index = StrnLenS (Path, MAX_PATH) - 1U; Index >= Length; --Index) {
+  Index = StrnLenS (Path, MAX_PATH);
+  while (Index > Length) {
+    --Index;
     if (Path[Index] == L'\\') {
       Path[Index] = L'/';
     }
@@ -107,13 +109,13 @@ FileOpen (
   CopyMem (NewFile->Path, CleanPath, StrnSizeS (CleanPath, MAX_PATH));
 
   Index = StrnLenS (CleanPath, MAX_PATH);
-  do {
+  while (Index > 0) {
     --Index;
     if (CleanPath[Index] == L'/') {
       CleanPath[Index] = 0;
       break;
     }
-  } while (Index > 0);
+  }
 
   DirName           = (Index == 0) ? L"/" : CleanPath;
   NewFile->BaseName = &NewFile->Path[Index + 1U];
