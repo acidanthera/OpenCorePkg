@@ -8,18 +8,8 @@ PRODUCT = $(PROJECT)$(INFIX)$(SUFFIX)
 OBJS    = $(PROJECT).o
 OBJS    += Compression.o Data.o Disc.o Index.o Info.o NTFS.o Open.o Position.o
 
-ifeq ($(UDK_PATH),)
-	ifneq ($(PACKAGES_PATH),)
-		UDK_PATH := $(PACKAGES_PATH)
-	else
-		UDK_PATH ?= ../../UDK
-	endif
-endif
+include  ../../User/Makefile
 
-OC_USER  = $(UDK_PATH)/OpenCorePkg
+CFLAGS  += -I../../Platform/OpenNtfsDxe
 
-include  $(OC_USER)/User/Makefile
-
-CFLAGS  += -I$(OC_USER)/Platform/OpenNtfsDxe
-
-VPATH   += $(OC_USER)/Platform/OpenNtfsDxe:$
+VPATH   += ../../Platform/OpenNtfsDxe:$
