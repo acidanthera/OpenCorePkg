@@ -29,7 +29,7 @@ jobs:
         run: |
           src=$(/usr/bin/curl -Lfs https://raw.githubusercontent.com/acidanthera/ocbuild/master/ci-bootstrap.sh) && eval "$src" || exit 1
 
-      - run: ./Utilities/Uncrustify/run_uncrustify.tool
+      - run: ./run_uncrustify.tool
 
       - name: Upload to Artifacts
         uses: actions/upload-artifact@v3
@@ -53,7 +53,7 @@ jobs:
         run: |
           src=$(/usr/bin/curl -Lfs https://raw.githubusercontent.com/acidanthera/ocbuild/master/ci-bootstrap.sh) && eval "$src" || exit 1
 
-      - run: ./Utilities/Uncrustify/run_uncrustify.tool
+      - run: ./run_uncrustify.tool
 
       - name: Upload to Artifacts
         uses: actions/upload-artifact@v3
@@ -79,7 +79,7 @@ jobs:
         run: |
           src=$(curl -Lfs https://raw.githubusercontent.com/acidanthera/ocbuild/master/ci-bootstrap.sh) && eval "$src" || exit 1
 
-      - run: ./Utilities/Uncrustify/run_uncrustify.tool
+      - run: ./run_uncrustify.tool
 
       - name: Upload to Artifacts
         uses: actions/upload-artifact@v3

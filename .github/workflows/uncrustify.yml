@@ -28,7 +28,7 @@ jobs:
 
       - name: Run Uncrustify
         run: |
-          ./Utilities/Uncrustify/run_uncrustify.tool
+          ./run_uncrustify.tool
 
       - name: Upload to Artifacts
         uses: actions/upload-artifact@v3
