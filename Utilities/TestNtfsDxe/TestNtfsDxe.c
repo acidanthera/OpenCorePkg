@@ -40,12 +40,10 @@ FuzzReadDisk (
 
 VOID
 FreeAll (
-  IN VOID    *Buffer,
   IN CHAR16  *FileName,
   IN EFI_FS  *Instance
   )
 {
-  FreePool (Buffer);
   FreePool (FileName);
 
   if (Instance != NULL) {
@@ -94,29 +92,21 @@ LLVMFuzzerTestOneInput (
   mFuzzPointer = FuzzData;
   mFuzzSize    = FuzzSize;
 
-  Instance = NULL;
+  Instance   = NULL;
+  BufferSize = 100;
 
   //
   // Construct File Name
   //
-  BufferSize = 100;
-  Buffer     = AllocateZeroPool (BufferSize);
-  if (Buffer == NULL) {
-    return 0;
-  }
-
-  ASAN_CHECK_MEMORY_REGION (Buffer, BufferSize);
-
   FileName = AllocateZeroPool (BufferSize);
   if (FileName == NULL) {
-    FreePool (Buffer);
     return 0;
   }
 
   ASAN_CHECK_MEMORY_REGION (FileName, BufferSize);
 
   if ((mFuzzSize - mFuzzOffset) < BufferSize) {
-    FreeAll (Buffer, FileName, Instance);
+    FreeAll (FileName, Instance);
     return 0;
   }
 
@@ -129,7 +119,7 @@ LLVMFuzzerTestOneInput (
   //
   Instance = AllocateZeroPool (sizeof (EFI_FS));
   if (Instance == NULL) {
-    FreeAll (Buffer, FileName, Instance);
+    FreeAll (FileName, Instance);
     return 0;
   }
 
@@ -137,7 +127,7 @@ LLVMFuzzerTestOneInput (
 
   Instance->DiskIo = AllocateZeroPool (sizeof (EFI_DISK_IO_PROTOCOL));
   if (Instance->DiskIo == NULL) {
-    FreeAll (Buffer, FileName, Instance);
+    FreeAll (FileName, Instance);
     return 0;
   }
 
@@ -147,7 +137,7 @@ LLVMFuzzerTestOneInput (
 
   Instance->BlockIo = AllocateZeroPool (sizeof (EFI_BLOCK_IO_PROTOCOL));
   if (Instance->BlockIo == NULL) {
-    FreeAll (Buffer, FileName, Instance);
+    FreeAll (FileName, Instance);
     return 0;
   }
 
@@ -155,7 +145,7 @@ LLVMFuzzerTestOneInput (
 
   Instance->BlockIo->Media = AllocateZeroPool (sizeof (EFI_BLOCK_IO_MEDIA));
   if (Instance->BlockIo->Media == NULL) {
-    FreeAll (Buffer, FileName, Instance);
+    FreeAll (FileName, Instance);
     return 0;
   }
 
@@ -175,7 +165,7 @@ LLVMFuzzerTestOneInput (
 
   Status = NtfsMount (Instance);
   if (EFI_ERROR (Status)) {
-    FreeAll (Buffer, FileName, Instance);
+    FreeAll (FileName, Instance);
     return 0;
   }
 
@@ -186,7 +176,26 @@ LLVMFuzzerTestOneInput (
   //
   Status = FileOpen (This, &NewHandle, FileName, EFI_FILE_MODE_READ, 0);
   if (Status == EFI_SUCCESS) {
-    FileRead (NewHandle, &BufferSize, Buffer);
+    Buffer     = NULL;
+    BufferSize = 0;
+    Status     = FileRead (NewHandle, &BufferSize, Buffer);
+    if (Status == EFI_BUFFER_TOO_SMALL) {
+      Buffer     = AllocateZeroPool (BufferSize);
+      if (Buffer == NULL) {
+        FreeAll (FileName, Instance);
+        return 0;
+      }
+
+      ASAN_CHECK_MEMORY_REGION (Buffer, BufferSize);
+
+      FileRead (NewHandle, &BufferSize, Buffer);
+
+      FileWrite (NewHandle, &BufferSize, Buffer);
+
+      FileFlush (NewHandle);
+
+      FreePool (Buffer);
+    }
 
     Len    = 0;
     Info   = NULL;
@@ -213,14 +222,17 @@ LLVMFuzzerTestOneInput (
       FreePool (Info);
     }
 
-    FileGetPosition (NewHandle, &Position);
-    Position++;
-    FileSetPosition (NewHandle, Position);
+    FileSetInfo (NewHandle, &gEfiFileSystemVolumeLabelInfoIdGuid, Len, Info);
 
-    FileClose (NewHandle);
+    FileGetPosition (NewHandle, &Position);
+    while (!EFI_ERROR (FileSetPosition (NewHandle, Position))) {
+      ++Position;
+    }
+
+    FileDelete (NewHandle);
   }
 
-  FreeAll (Buffer, FileName, Instance);
+  FreeAll (FileName, Instance);
 
   return 0;
 }
