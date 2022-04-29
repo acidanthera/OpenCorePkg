@@ -1,7 +1,5 @@
 #!/bin/bash
 
-export PROJECT_NAME=OpenCorePkg
-
 abort() {
   echo "ERROR: $1!"
   exit 1
@@ -17,21 +15,7 @@ cd "${PROJECT_PATH}" || abort "Failed to cd to ${PROJECT_PATH}"
 # TODO: switch to master
 src=$(curl -Lfs https://raw.githubusercontent.com/acidanthera/ocbuild/unc-build/uncrustify/uncstrap.sh)
 eval "$src" || abort "Failed to bootstrap Uncrustify"
-# after bootstrapping, these vars must be exported
-ENV_VARS=(
-  "${UNC_EXEC}"
-  "${UNC_CONFIG}"
-  "${UNCRUSTIFY_REPO}"
-  "${FILE_LIST}"
-  "${UNC_DIFF}"
-  )
-for e in "${ENV_VARS[@]}"; do
-  if [ "${e}" = "" ]; then
-    abort "Borked env variables setting"
-  fi
-done
 
-rm -f "${FILE_LIST}" || abort "Failed to cleanup legacy ${FILE_LIST}"
 find \
   ../.. \
   \( \
@@ -72,21 +56,6 @@ find \
   -print \
   > "${FILE_LIST}" || abort "Failed to dump source file list to ${FILE_LIST}"
 
-rm -f "${UNC_DIFF}" || abort "Failed to cleanup legacy ${UNC_DIFF}"
-"${UNC_EXEC}" -c "${UNC_CONFIG}" -F "${FILE_LIST}" --replace --no-backup --if-changed || abort "Failed to run Uncrustify"
-
-# only diff the selected .c/.h files
-while read -r line; do
-  git diff "${line}" >> "${UNC_DIFF}" || abort "Failed to git diff ${line}"
-done < "${FILE_LIST}"
-if [ "$(cat "${UNC_DIFF}")" != "" ]; then
-  # show the diff
-  cat "${UNC_DIFF}"
-  abort "Uncrustify detects codestyle problems! Please fix"
-fi
-
-rm -f "${FILE_LIST}" || abort "Failed to cleanup ${FILE_LIST}"
-rm -f "${UNC_EXEC}" || abort "Failed to cleanup ${UNC_EXEC}"
-rm -f "${UNC_CONFIG}" || abort "Failed to cleanup ${UNC_CONFIG}"
+run_uncrustify || abort "Failed to generate codestyle diff with Uncrustify"
 
 exit 0
