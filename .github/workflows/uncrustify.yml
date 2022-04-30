@@ -20,7 +20,8 @@ jobs:
       - name: Install Dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install curl git unzip
+          sudo apt-get install curl git unzip python3 python3-pip
+          sudo python3 -m pip install gitpython requests pyyaml
 
       - name: CI Bootstrap
         run: |
@@ -28,11 +29,11 @@ jobs:
 
       - name: Run Uncrustify
         run: |
-          ./run_uncrustify.tool
+          python3 <(/usr/bin/curl -Lfs https://raw.githubusercontent.com/acidanthera/ocbuild/unc-build/uncrustify/uncstrap.py) || exit 1
 
       - name: Upload to Artifacts
         uses: actions/upload-artifact@v3
         if: failure()
         with:
           name: Uncrustify Artifacts
-          path: ./Utilities/Uncrustify/uncrustify.diff
+          path: ./uncrustify.diff
