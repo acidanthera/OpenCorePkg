@@ -16,3 +16,4 @@
 - [macOS86.it](https://www.macos86.it/showthread.php?4570-OpenCore-aka-OC-Nuovo-BootLoader) in Italian
 - [KVM-OpenCore](https://github.com/Leoyzen/KVM-Opencore) in English, KVM configuration
 - [Reddit](https://www.reddit.com/r/hackintosh) in English
+- [Facebook](https://www.facebook.com/groups/hackintosch) in English, bare-metal and KVM
