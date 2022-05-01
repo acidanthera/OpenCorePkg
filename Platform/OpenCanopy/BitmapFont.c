@@ -22,7 +22,7 @@ BmfGetChar (
   IN UINT32             Char
   )
 {
-  CONST BMF_CHAR  *Chars;
+  CONST BMF_CHAR *Chars;
   UINTN           Left;
   UINTN           Right;
   UINTN           Median;
