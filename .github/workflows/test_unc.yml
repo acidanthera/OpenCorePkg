@@ -20,7 +20,9 @@ jobs:
       - uses: actions/checkout@v3
 
       - name: Install Dependencies
-        run: brew install cmake
+        run: |
+          brew install cmake python3
+          python3 -m pip install gitpython requests pyyaml
         env:
           HOMEBREW_NO_INSTALL_CLEANUP: 1
           HOMEBREW_NO_AUTO_UPDATE: 1
@@ -29,14 +31,17 @@ jobs:
         run: |
           src=$(/usr/bin/curl -Lfs https://raw.githubusercontent.com/acidanthera/ocbuild/master/ci-bootstrap.sh) && eval "$src" || exit 1
 
-      - run: ./run_uncrustify.tool
+      - name: Run Uncrustify
+        run: |
+          /usr/bin/curl https://raw.githubusercontent.com/acidanthera/ocbuild/unc-build/uncrustify/uncstrap.py -o uncrustify.py
+          python3 ./uncrustify.py ./Uncrustify.yml
 
       - name: Upload to Artifacts
         uses: actions/upload-artifact@v3
         if: failure()
         with:
           name: Uncrustify Artifacts
-          path: ./Utilities/Uncrustify/uncrustify.diff
+          path: ./uncrustify.diff
 
   build-linux:
     name: Linux
@@ -47,20 +52,24 @@ jobs:
       - name: Install Dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install cmake
+          sudo apt-get install cmake curl git unzip python3 python3-pip
+          sudo python3 -m pip install gitpython requests pyyaml
 
       - name: CI Bootstrap
         run: |
           src=$(/usr/bin/curl -Lfs https://raw.githubusercontent.com/acidanthera/ocbuild/master/ci-bootstrap.sh) && eval "$src" || exit 1
 
-      - run: ./run_uncrustify.tool
+      - name: Run Uncrustify
+        run: |
+          /usr/bin/curl https://raw.githubusercontent.com/acidanthera/ocbuild/unc-build/uncrustify/uncstrap.py -o uncrustify.py
+          python3 ./uncrustify.py ./Uncrustify.yml
 
       - name: Upload to Artifacts
         uses: actions/upload-artifact@v3
         if: failure()
         with:
           name: Uncrustify Artifacts
-          path: ./Utilities/Uncrustify/uncrustify.diff
+          path: ./uncrustify.diff
 
   build-windows:
     name: Windows VS2019
@@ -73,17 +82,21 @@ jobs:
 
       - name: Install Dependencies
         run: |
-          choco install cmake make zip --no-progress
+          choco install cmake make zip python3 --no-progress
+          python3 -m pip install gitpython requests pyyaml
 
       - name: CI Bootstrap
         run: |
           src=$(curl -Lfs https://raw.githubusercontent.com/acidanthera/ocbuild/master/ci-bootstrap.sh) && eval "$src" || exit 1
 
-      - run: ./run_uncrustify.tool
+      - name: Run Uncrustify
+        run: |
+          curl https://raw.githubusercontent.com/acidanthera/ocbuild/unc-build/uncrustify/uncstrap.py -o uncrustify.py
+          python3 ./uncrustify.py ./Uncrustify.yml
 
       - name: Upload to Artifacts
         uses: actions/upload-artifact@v3
         if: failure()
         with:
           name: Uncrustify Artifacts
-          path: ./Utilities/Uncrustify/uncrustify.diff
+          path: ./uncrustify.diff
