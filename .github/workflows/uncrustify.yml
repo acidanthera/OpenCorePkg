@@ -29,7 +29,8 @@ jobs:
 
       - name: Run Uncrustify
         run: |
-          python3 <(/usr/bin/curl -Lfs https://raw.githubusercontent.com/acidanthera/ocbuild/unc-build/uncrustify/uncstrap.py) || exit 1
+          /usr/bin/curl https://raw.githubusercontent.com/acidanthera/ocbuild/unc-build/uncrustify/uncstrap.py -o uncrustify.py
+          python3 ./uncrustify.py ./Uncrustify.yml
 
       - name: Upload to Artifacts
         uses: actions/upload-artifact@v3
