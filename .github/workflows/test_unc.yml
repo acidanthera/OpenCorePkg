@@ -21,7 +21,7 @@ jobs:
 
       - name: Install Dependencies
         run: |
-          brew install cmake python3
+          brew install cmake
           python3 -m pip install gitpython requests pyyaml
         env:
           HOMEBREW_NO_INSTALL_CLEANUP: 1
