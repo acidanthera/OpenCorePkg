@@ -21,11 +21,7 @@ jobs:
 
       - name: Install Dependencies
         run: |
-          brew install cmake
           python3 -m pip install gitpython requests pyyaml
-        env:
-          HOMEBREW_NO_INSTALL_CLEANUP: 1
-          HOMEBREW_NO_AUTO_UPDATE: 1
 
       - name: CI Bootstrap
         run: |
