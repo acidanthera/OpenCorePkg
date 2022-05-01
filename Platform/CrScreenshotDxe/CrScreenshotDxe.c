@@ -87,7 +87,7 @@ ShowStatus (
   //
   // Backup current image.
   //
-  GraphicsOutput->Blt(
+  GraphicsOutput->Blt (
                     GraphicsOutput,
                     Backup,
                     EfiBltVideoToBltBuffer,
