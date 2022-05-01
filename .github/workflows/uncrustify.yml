@@ -20,7 +20,7 @@ jobs:
       - name: Install Dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install cmake curl git unzip
+          sudo apt-get install cmake curl git
           sudo python3 -m pip install gitpython requests pyyaml
 
       - name: CI Bootstrap
