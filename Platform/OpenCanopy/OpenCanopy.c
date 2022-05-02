@@ -1162,7 +1162,8 @@ GuiDrawLoop (
           {
             DrawContext->GuiContext->PickerContext->PlayAudioFile (
                                                       DrawContext->GuiContext->PickerContext,
-                                                      OcVoiceOverAudioFileAbortTimeout,
+                                                      OC_VOICE_OVER_AUDIO_FILE_ABORT_TIMEOUT,
+                                                      OC_VOICE_OVER_AUDIO_BASE_TYPE_OPEN_CORE,
                                                       FALSE
                                                       );
           }
@@ -1217,7 +1218,8 @@ GuiDrawLoop (
           {
             DrawContext->GuiContext->PickerContext->PlayAudioFile (
                                                       DrawContext->GuiContext->PickerContext,
-                                                      OcVoiceOverAudioFileAbortTimeout,
+                                                      OC_VOICE_OVER_AUDIO_FILE_ABORT_TIMEOUT,
+                                                      OC_VOICE_OVER_AUDIO_BASE_TYPE_OPEN_CORE,
                                                       FALSE
                                                       );
           }
@@ -1264,7 +1266,8 @@ GuiDrawLoop (
           {
             DrawContext->GuiContext->PickerContext->PlayAudioFile (
                                                       DrawContext->GuiContext->PickerContext,
-                                                      OcVoiceOverAudioFileSelected,
+                                                      OC_VOICE_OVER_AUDIO_FILE_SELECTED,
+                                                      OC_VOICE_OVER_AUDIO_BASE_TYPE_OPEN_CORE,
                                                       FALSE
                                                       );
             DrawContext->GuiContext->PickerContext->PlayAudioEntry (
@@ -1278,7 +1281,8 @@ GuiDrawLoop (
           {
             DrawContext->GuiContext->PickerContext->PlayAudioFile (
                                                       DrawContext->GuiContext->PickerContext,
-                                                      OcVoiceOverAudioFileEnterPassword,
+                                                      OC_VOICE_OVER_AUDIO_FILE_ENTER_PASSWORD,
+                                                      OC_VOICE_OVER_AUDIO_BASE_TYPE_OPEN_CORE,
                                                       TRUE
                                                       );
             break;
@@ -1288,12 +1292,14 @@ GuiDrawLoop (
           {
             DrawContext->GuiContext->PickerContext->PlayAudioFile (
                                                       DrawContext->GuiContext->PickerContext,
-                                                      OcVoiceOverAudioFileSelected,
+                                                      OC_VOICE_OVER_AUDIO_FILE_SELECTED,
+                                                      OC_VOICE_OVER_AUDIO_BASE_TYPE_OPEN_CORE,
                                                       FALSE
                                                       );
             DrawContext->GuiContext->PickerContext->PlayAudioFile (
                                                       DrawContext->GuiContext->PickerContext,
-                                                      OcVoiceOverAudioFileShutDown,
+                                                      OC_VOICE_OVER_AUDIO_FILE_SHUT_DOWN,
+                                                      OC_VOICE_OVER_AUDIO_BASE_TYPE_OPEN_CORE,
                                                       TRUE
                                                       );
             break;
@@ -1303,12 +1309,14 @@ GuiDrawLoop (
           {
             DrawContext->GuiContext->PickerContext->PlayAudioFile (
                                                       DrawContext->GuiContext->PickerContext,
-                                                      OcVoiceOverAudioFileSelected,
+                                                      OC_VOICE_OVER_AUDIO_FILE_SELECTED,
+                                                      OC_VOICE_OVER_AUDIO_BASE_TYPE_OPEN_CORE,
                                                       FALSE
                                                       );
             DrawContext->GuiContext->PickerContext->PlayAudioFile (
                                                       DrawContext->GuiContext->PickerContext,
-                                                      OcVoiceOverAudioFileRestart,
+                                                      OC_VOICE_OVER_AUDIO_FILE_RESTART,
+                                                      OC_VOICE_OVER_AUDIO_BASE_TYPE_OPEN_CORE,
                                                       TRUE
                                                       );
             break;
@@ -1337,7 +1345,8 @@ GuiDrawLoop (
       if (DrawContext->GuiContext->PickerContext->PickerAudioAssist) {
         DrawContext->GuiContext->PickerContext->PlayAudioFile (
                                                   DrawContext->GuiContext->PickerContext,
-                                                  OcVoiceOverAudioFileTimeout,
+                                                  OC_VOICE_OVER_AUDIO_FILE_TIMEOUT,
+                                                  OC_VOICE_OVER_AUDIO_BASE_TYPE_OPEN_CORE,
                                                   FALSE
                                                   );
       }

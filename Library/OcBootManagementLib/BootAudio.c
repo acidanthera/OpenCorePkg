@@ -52,7 +52,8 @@ EFI_STATUS
 EFIAPI
 OcPlayAudioFile (
   IN     OC_PICKER_CONTEXT  *Context,
-  IN     UINT32             File,
+  IN     CONST CHAR8        *BasePath,
+  IN     CONST CHAR8        *BaseType,
   IN     BOOLEAN            Fallback
   )
 {
@@ -74,65 +75,61 @@ OcPlayAudioFile (
   }
 
   if (Context->OcAudio != NULL) {
-    Status = Context->OcAudio->PlayFile (Context->OcAudio, File, 0, FALSE, TRUE);
+    Status = Context->OcAudio->PlayFile (Context->OcAudio, BasePath, BaseType, TRUE, 0, FALSE, TRUE);
   }
 
   if (Fallback && EFI_ERROR (Status)) {
-    switch (File) {
-      case AppleVoiceOverAudioFileBeep:
+    if (AsciiStrCmp (BaseType, OC_VOICE_OVER_AUDIO_BASE_TYPE_APPLE) == 0) {
+      if (AsciiStrCmp (BasePath, APPLE_VOICE_OVER_AUDIO_FILE_BEEP) == 0) {
         Status = OcPlayAudioBeep (
                    Context,
                    OC_VOICE_OVER_SIGNALS_NORMAL,
                    OC_VOICE_OVER_SIGNAL_NORMAL_MS,
                    OC_VOICE_OVER_SILENCE_NORMAL_MS
                    );
-        break;
-      case OcVoiceOverAudioFileEnterPassword:
+      }
+    } else if (AsciiStrCmp (BaseType, OC_VOICE_OVER_AUDIO_BASE_TYPE_OPEN_CORE) == 0) {
+      if (AsciiStrCmp (BasePath, OC_VOICE_OVER_AUDIO_FILE_ENTER_PASSWORD) == 0) {
         Status = OcPlayAudioBeep (
                    Context,
                    OC_VOICE_OVER_SIGNALS_PASSWORD,
                    OC_VOICE_OVER_SIGNAL_NORMAL_MS,
                    OC_VOICE_OVER_SILENCE_NORMAL_MS
                    );
-        break;
-      case OcVoiceOverAudioFilePasswordAccepted:
+      } else if (AsciiStrCmp (BasePath, OC_VOICE_OVER_AUDIO_FILE_PASSWORD_ACCEPTED) == 0) {
         Status = OcPlayAudioBeep (
                    Context,
                    OC_VOICE_OVER_SIGNALS_PASSWORD_OK,
                    OC_VOICE_OVER_SIGNAL_NORMAL_MS,
                    OC_VOICE_OVER_SILENCE_NORMAL_MS
                    );
-        break;
-      case OcVoiceOverAudioFilePasswordIncorrect:
+      } else if (AsciiStrCmp (BasePath, OC_VOICE_OVER_AUDIO_FILE_PASSWORD_INCORRECT) == 0) {
         Status = OcPlayAudioBeep (
                    Context,
                    OC_VOICE_OVER_SIGNALS_ERROR,
                    OC_VOICE_OVER_SIGNAL_ERROR_MS,
                    OC_VOICE_OVER_SILENCE_ERROR_MS
                    );
-        break;
-      case OcVoiceOverAudioFilePasswordRetryLimit:
+      } else if (AsciiStrCmp (BasePath, OC_VOICE_OVER_AUDIO_FILE_PASSWORD_RETRY_LIMIT) == 0) {
         Status = OcPlayAudioBeep (
                    Context,
                    OC_VOICE_OVER_SIGNALS_HWERROR,
                    OC_VOICE_OVER_SIGNAL_ERROR_MS,
                    OC_VOICE_OVER_SILENCE_ERROR_MS
                    );
-        break;
-      case OcVoiceOverAudioFileExecutionFailure:
+      } else if (AsciiStrCmp (BasePath, OC_VOICE_OVER_AUDIO_FILE_EXECUTION_FAILURE) == 0) {
         Status = OcPlayAudioBeep (
                    Context,
                    OC_VOICE_OVER_SIGNALS_ERROR,
                    OC_VOICE_OVER_SIGNAL_ERROR_MS,
                    OC_VOICE_OVER_SIGNAL_NORMAL_MS
                    );
-        break;
-      default:
-        //
-        // Should we introduce some special code?
-        //
-        break;
+      }
     }
+
+    //
+    // Should we introduce some fallback code?
+    //
   }
 
   return Status;
@@ -178,50 +175,61 @@ OcPlayAudioEntry (
   IN     OC_BOOT_ENTRY      *Entry
   )
 {
-  OcPlayAudioFile (Context, OcVoiceOverAudioFileIndexBase + Entry->EntryIndex, FALSE);
+  CHAR8  BasePath[ARRAY_SIZE ("Letter") + 1];
+
+  if ((Entry->EntryIndex > 0) && (Entry->EntryIndex <= 9 + 26)) {
+    OcAsciiSafeSPrint (
+      BasePath,
+      sizeof (BasePath),
+      "%a%c",
+      Entry->EntryIndex > 9 ? "Letter" : "",
+      "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"[Entry->EntryIndex]
+      );
+    OcPlayAudioFile (Context, BasePath, OC_VOICE_OVER_AUDIO_BASE_TYPE_OPEN_CORE, FALSE);
+  }
 
   if (Entry->Type == OC_BOOT_APPLE_OS) {
-    OcPlayAudioFile (Context, OcVoiceOverAudioFilemacOS, FALSE);
+    OcPlayAudioFile (Context, OC_VOICE_OVER_AUDIO_FILE_MAC_OS, OC_VOICE_OVER_AUDIO_BASE_TYPE_OPEN_CORE, FALSE);
   } else if (Entry->Type == OC_BOOT_APPLE_RECOVERY) {
-    OcPlayAudioFile (Context, OcVoiceOverAudioFilemacOS_Recovery, FALSE);
+    OcPlayAudioFile (Context, OC_VOICE_OVER_AUDIO_FILE_MAC_OS_RECOVERY, OC_VOICE_OVER_AUDIO_BASE_TYPE_OPEN_CORE, FALSE);
   } else if (Entry->Type == OC_BOOT_APPLE_TIME_MACHINE) {
-    OcPlayAudioFile (Context, OcVoiceOverAudioFilemacOS_TimeMachine, FALSE);
+    OcPlayAudioFile (Context, OC_VOICE_OVER_AUDIO_FILE_MAC_OS_TIME_MACHINE, OC_VOICE_OVER_AUDIO_BASE_TYPE_OPEN_CORE, FALSE);
   } else if (Entry->Type == OC_BOOT_APPLE_FW_UPDATE) {
-    OcPlayAudioFile (Context, OcVoiceOverAudioFilemacOS_UpdateFw, FALSE);
+    OcPlayAudioFile (Context, OC_VOICE_OVER_AUDIO_FILE_MAC_OS_UPDATE_FW, OC_VOICE_OVER_AUDIO_BASE_TYPE_OPEN_CORE, FALSE);
   } else if (Entry->Type == OC_BOOT_WINDOWS) {
-    OcPlayAudioFile (Context, OcVoiceOverAudioFileWindows, FALSE);
+    OcPlayAudioFile (Context, OC_VOICE_OVER_AUDIO_FILE_WINDOWS, OC_VOICE_OVER_AUDIO_BASE_TYPE_OPEN_CORE, FALSE);
   } else if (Entry->Type == OC_BOOT_EXTERNAL_OS) {
-    OcPlayAudioFile (Context, OcVoiceOverAudioFileExternalOS, FALSE);
+    OcPlayAudioFile (Context, OC_VOICE_OVER_AUDIO_FILE_EXTERNAL_OS, OC_VOICE_OVER_AUDIO_BASE_TYPE_OPEN_CORE, FALSE);
   } else if (Entry->Type == OC_BOOT_RESET_NVRAM) {
-    OcPlayAudioFile (Context, OcVoiceOverAudioFileResetNVRAM, FALSE);
+    OcPlayAudioFile (Context, OC_VOICE_OVER_AUDIO_FILE_RESET_NVRAM, OC_VOICE_OVER_AUDIO_BASE_TYPE_OPEN_CORE, FALSE);
   } else if (Entry->Type == OC_BOOT_TOGGLE_SIP) {
     ASSERT (
       StrCmp (Entry->Name, OC_MENU_SIP_IS_DISABLED) == 0 ||
       StrCmp (Entry->Name, OC_MENU_SIP_IS_ENABLED) == 0
       );
     if (StrCmp (Entry->Name, OC_MENU_SIP_IS_DISABLED) == 0) {
-      OcPlayAudioFile (Context, OcVoiceOverAudioFileSIPIsDisabled, FALSE);
+      OcPlayAudioFile (Context, OC_VOICE_OVER_AUDIO_FILE_SIP_IS_DISABLED, OC_VOICE_OVER_AUDIO_BASE_TYPE_OPEN_CORE, FALSE);
     } else {
-      OcPlayAudioFile (Context, OcVoiceOverAudioFileSIPIsEnabled, FALSE);
+      OcPlayAudioFile (Context, OC_VOICE_OVER_AUDIO_FILE_SIP_IS_ENABLED, OC_VOICE_OVER_AUDIO_BASE_TYPE_OPEN_CORE, FALSE);
     }
   } else if (Entry->Type == OC_BOOT_EXTERNAL_TOOL) {
     if (OcAsciiStriStr (Entry->Flavour, OC_FLAVOUR_ID_RESET_NVRAM) != NULL) {
-      OcPlayAudioFile (Context, OcVoiceOverAudioFileResetNVRAM, FALSE);
+      OcPlayAudioFile (Context, OC_VOICE_OVER_AUDIO_FILE_RESET_NVRAM, OC_VOICE_OVER_AUDIO_BASE_TYPE_OPEN_CORE, FALSE);
     } else if (OcAsciiStriStr (Entry->Flavour, OC_FLAVOUR_ID_UEFI_SHELL) != NULL) {
-      OcPlayAudioFile (Context, OcVoiceOverAudioFileUEFI_Shell, FALSE);
+      OcPlayAudioFile (Context, OC_VOICE_OVER_AUDIO_FILE_UEFI_SHELL, OC_VOICE_OVER_AUDIO_BASE_TYPE_OPEN_CORE, FALSE);
     } else {
-      OcPlayAudioFile (Context, OcVoiceOverAudioFileExternalTool, FALSE);
+      OcPlayAudioFile (Context, OC_VOICE_OVER_AUDIO_FILE_EXTERNAL_TOOL, OC_VOICE_OVER_AUDIO_BASE_TYPE_OPEN_CORE, FALSE);
     }
   } else {
-    OcPlayAudioFile (Context, OcVoiceOverAudioFileOtherOS, FALSE);
+    OcPlayAudioFile (Context, OC_VOICE_OVER_AUDIO_FILE_OTHER_OS, OC_VOICE_OVER_AUDIO_BASE_TYPE_OPEN_CORE, FALSE);
   }
 
   if (Entry->IsExternal) {
-    OcPlayAudioFile (Context, OcVoiceOverAudioFileExternal, FALSE);
+    OcPlayAudioFile (Context, OC_VOICE_OVER_AUDIO_FILE_EXTERNAL, OC_VOICE_OVER_AUDIO_BASE_TYPE_OPEN_CORE, FALSE);
   }
 
   if (Entry->IsFolder) {
-    OcPlayAudioFile (Context, OcVoiceOverAudioFileDiskImage, FALSE);
+    OcPlayAudioFile (Context, OC_VOICE_OVER_AUDIO_FILE_DISK_IMAGE, OC_VOICE_OVER_AUDIO_BASE_TYPE_OPEN_CORE, FALSE);
   }
 
   return EFI_SUCCESS;
@@ -231,15 +239,16 @@ VOID
 EFIAPI
 OcToggleVoiceOver (
   IN  OC_PICKER_CONTEXT  *Context,
-  IN  UINT32             File  OPTIONAL
+  IN  CONST CHAR8        *BasePath     OPTIONAL,
+  IN  CONST CHAR8        *BaseType     OPTIONAL
   )
 {
   if (!Context->PickerAudioAssist) {
     Context->PickerAudioAssist = TRUE;
-    OcPlayAudioFile (Context, OcVoiceOverAudioFileWelcome, FALSE);
+    OcPlayAudioFile (Context, OC_VOICE_OVER_AUDIO_FILE_WELCOME, OC_VOICE_OVER_AUDIO_BASE_TYPE_OPEN_CORE, FALSE);
 
-    if (File != 0) {
-      OcPlayAudioFile (Context, File, TRUE);
+    if ((BasePath != NULL) && (BaseType != NULL)) {
+      OcPlayAudioFile (Context, BasePath, BaseType, TRUE);
     }
   } else {
     OcPlayAudioBeep (

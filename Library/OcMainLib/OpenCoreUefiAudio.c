@@ -52,201 +52,17 @@ typedef struct OC_AUDIO_FILE_ {
   UINT32    Size;
 } OC_AUDIO_FILE;
 
-STATIC OC_AUDIO_FILE  mAppleAudioFiles[AppleVoiceOverAudioFileMax];
-STATIC OC_AUDIO_FILE  mOcAudioFiles[OcVoiceOverAudioFileMax - OcVoiceOverAudioFileBase];
-//
-// Note, currently we are not I/O bound, so enabling this has no effect at all.
-// Reconsider it when we resolve lags with AudioDxe.
-//
-STATIC BOOLEAN                    mEnableAudioCaching   = FALSE;
 STATIC EFI_AUDIO_DECODE_PROTOCOL  *mAudioDecodeProtocol = NULL;
-
-STATIC
-CONST CHAR8 *
-OcAudioGetFilePath (
-  IN  UINT32       File,
-  OUT CHAR8        *TmpPath,
-  OUT UINT32       TmpPathSize,
-  OUT CONST CHAR8  **BaseType,
-  OUT BOOLEAN      *Localised
-  )
-{
-  EFI_STATUS   Status;
-  CONST CHAR8  *BasePath;
-
-  *Localised = TRUE;
-
-  if ((File >= OcVoiceOverAudioFileBase) && (File < OcVoiceOverAudioFileMax)) {
-    *BaseType = "OCEFIAudio";
-    if ((File > OcVoiceOverAudioFileIndexBase) && (File <= OcVoiceOverAudioFileIndexMax)) {
-      Status = OcAsciiSafeSPrint (
-                 TmpPath,
-                 TmpPathSize,
-                 "%a%c",
-                 File >= OcVoiceOverAudioFileIndexAlphabetical ? "Letter" : "",
-                 "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"[File - OcVoiceOverAudioFileIndexBase]
-                 );
-      ASSERT_EFI_ERROR (Status);
-      BasePath = TmpPath;
-    } else {
-      switch (File) {
-        case OcVoiceOverAudioFileAbortTimeout:
-          BasePath = "AbortTimeout";
-          break;
-        case OcVoiceOverAudioFileChooseOS:
-          BasePath = "ChooseOS";
-          break;
-        case OcVoiceOverAudioFileDefault:
-          BasePath = "Default";
-          break;
-        case OcVoiceOverAudioFileEnterPassword:
-          BasePath = "EnterPassword";
-          break;
-        case OcVoiceOverAudioFileExecutionFailure:
-          BasePath = "ExecutionFailure";
-          break;
-        case OcVoiceOverAudioFileExecutionSuccessful:
-          BasePath = "ExecutionSuccessful";
-          break;
-        case OcVoiceOverAudioFileExternal:
-          BasePath = "External";
-          break;
-        case OcVoiceOverAudioFileExternalOS:
-          BasePath = "ExternalOS";
-          break;
-        case OcVoiceOverAudioFileExternalTool:
-          BasePath = "ExternalTool";
-          break;
-        case OcVoiceOverAudioFileLoading:
-          BasePath = "Loading";
-          break;
-        case OcVoiceOverAudioFilemacOS:
-          BasePath = "macOS";
-          break;
-        case OcVoiceOverAudioFilemacOS_Recovery:
-          BasePath = "macOS_Recovery";
-          break;
-        case OcVoiceOverAudioFilemacOS_TimeMachine:
-          BasePath = "macOS_TimeMachine";
-          break;
-        case OcVoiceOverAudioFilemacOS_UpdateFw:
-          BasePath = "macOS_UpdateFw";
-          break;
-        case OcVoiceOverAudioFileOtherOS:
-          BasePath = "OtherOS";
-          break;
-        case OcVoiceOverAudioFilePasswordAccepted:
-          BasePath = "PasswordAccepted";
-          break;
-        case OcVoiceOverAudioFilePasswordIncorrect:
-          BasePath = "PasswordIncorrect";
-          break;
-        case OcVoiceOverAudioFilePasswordRetryLimit:
-          BasePath = "PasswordRetryLimit";
-          break;
-        case OcVoiceOverAudioFileReloading:
-          BasePath = "Reloading";
-          break;
-        case OcVoiceOverAudioFileResetNVRAM:
-          BasePath = "ResetNVRAM";
-          break;
-        case OcVoiceOverAudioFileSelected:
-          BasePath = "Selected";
-          break;
-        case OcVoiceOverAudioFileShowAuxiliary:
-          BasePath = "ShowAuxiliary";
-          break;
-        case OcVoiceOverAudioFileTimeout:
-          BasePath = "Timeout";
-          break;
-        case OcVoiceOverAudioFileUEFI_Shell:
-          BasePath = "UEFI_Shell";
-          break;
-        case OcVoiceOverAudioFileWelcome:
-          BasePath = "Welcome";
-          break;
-        case OcVoiceOverAudioFileWindows:
-          BasePath = "Windows";
-          break;
-        case OcVoiceOverAudioFileShutDown:
-          BasePath = "ShutDown";
-          break;
-        case OcVoiceOverAudioFileRestart:
-          BasePath = "Restart";
-          break;
-        case OcVoiceOverAudioFileDiskImage:
-          BasePath = "DiskImage";
-          break;
-        case OcVoiceOverAudioFileSIPIsDisabled:
-          BasePath = "SIPIsDisabled";
-          break;
-        case OcVoiceOverAudioFileSIPIsEnabled:
-          BasePath = "SIPIsEnabled";
-          break;
-        default:
-          BasePath = NULL;
-          break;
-      }
-    }
-  } else {
-    *BaseType = "AXEFIAudio";
-    switch (File) {
-      case AppleVoiceOverAudioFileVoiceOverOn:
-        BasePath = "VoiceOverOn";
-        break;
-      case AppleVoiceOverAudioFileVoiceOverOff:
-        BasePath = "VoiceOverOff";
-        break;
-      case AppleVoiceOverAudioFileUsername:
-        BasePath = "Username";
-        break;
-      case AppleVoiceOverAudioFilePassword:
-        BasePath = "Password";
-        break;
-      case AppleVoiceOverAudioFileUsernameOrPasswordIncorrect:
-        BasePath = "UsernameOrPasswordIncorrect";
-        break;
-      case AppleVoiceOverAudioFileAccountLockedTryLater:
-        BasePath = "AccountLockedTryLater";
-        break;
-      case AppleVoiceOverAudioFileAccountLocked:
-        BasePath = "AccountLocked";
-        break;
-      case AppleVoiceOverAudioFileVoiceOverBoot:
-        *BaseType  = "OCEFIAudio";
-        BasePath   = "VoiceOver_Boot";
-        *Localised = FALSE;
-        break;
-      case AppleVoiceOverAudioFileVoiceOverBoot2:
-        BasePath   = "VoiceOver_Boot";
-        *Localised = FALSE;
-        break;
-      case AppleVoiceOverAudioFileClick:
-        BasePath   = "Click";
-        *Localised = FALSE;
-        break;
-      case AppleVoiceOverAudioFileBeep:
-        BasePath   = "Beep";
-        *Localised = FALSE;
-        break;
-      default:
-        BasePath = NULL;
-        break;
-    }
-  }
-
-  return BasePath;
-}
 
 STATIC
 VOID *
 OcAudioGetFileContents (
   IN  OC_STORAGE_CONTEXT              *Storage,
-  IN  CONST CHAR8                     *BaseType,
   IN  CONST CHAR8                     *BasePath,
+  IN  CONST CHAR8                     *BaseType,
+  IN  BOOLEAN                         Localised,
   IN  CONST CHAR8                     *Extension,
   IN  APPLE_VOICE_OVER_LANGUAGE_CODE  LanguageCode,
-  IN  BOOLEAN                         Localised,
   OUT UINT32                          *BufferSize
   )
 {
@@ -310,12 +126,18 @@ OcAudioGetFileContents (
   return Buffer;
 }
 
+//
+// Note, currently we are not I/O bound, so implementing caching has no effect at all.
+// Reconsider it when we resolve lags with AudioDxe.
+//
 STATIC
 EFI_STATUS
 EFIAPI
 OcAudioAcquireFile (
   IN  VOID                            *Context,
-  IN  UINT32                          File,
+  IN  CONST CHAR8                     *BasePath,
+  IN  CONST CHAR8                     *BaseType,
+  IN  BOOLEAN                         Localised,
   IN  APPLE_VOICE_OVER_LANGUAGE_CODE  LanguageCode,
   OUT UINT8                           **Buffer,
   OUT UINT32                          *BufferSize,
@@ -325,77 +147,40 @@ OcAudioAcquireFile (
   )
 {
   EFI_STATUS          Status;
-  CHAR8               TmpPath[8];
   OC_STORAGE_CONTEXT  *Storage;
-  CONST CHAR8         *BaseType;
-  CONST CHAR8         *BasePath;
   UINT8               *FileBuffer;
   UINT32              FileBufferSize;
-  BOOLEAN             Localised;
-  OC_AUDIO_FILE       *CacheFile;
 
-  Storage   = (OC_STORAGE_CONTEXT *)Context;
-  CacheFile = NULL;
-
-  if ((File >= OcVoiceOverAudioFileBase) && (File < OcVoiceOverAudioFileMax)) {
-    if (mEnableAudioCaching) {
-      CacheFile = &mOcAudioFiles[File - OcVoiceOverAudioFileBase];
-      if (CacheFile->Buffer != NULL) {
-        *Buffer     = CacheFile->Buffer;
-        *BufferSize = CacheFile->Size;
-        return EFI_SUCCESS;
-      }
-    }
-  } else if (File < AppleVoiceOverAudioFileMax) {
-    if (mEnableAudioCaching) {
-      CacheFile = &mAppleAudioFiles[File];
-      if (CacheFile->Buffer != NULL) {
-        *Buffer     = CacheFile->Buffer;
-        *BufferSize = CacheFile->Size;
-        return EFI_SUCCESS;
-      }
-    }
-  } else {
-    DEBUG ((DEBUG_INFO, "OC: Invalid wave index %d\n", File));
-    return EFI_NOT_FOUND;
+  if ((BasePath == NULL) || (BaseType == NULL) || (Buffer == NULL) || (*Buffer == NULL)) {
+    DEBUG ((DEBUG_ERROR, "OC: Illegal wave parameters\n"));
+    return EFI_INVALID_PARAMETER;
   }
 
-  BasePath = OcAudioGetFilePath (
-               File,
-               TmpPath,
-               sizeof (TmpPath),
-               &BaseType,
-               &Localised
-               );
-
-  if (BasePath == NULL) {
-    DEBUG ((DEBUG_INFO, "OC: Unknown Wave %d\n", File));
-    return EFI_NOT_FOUND;
-  }
+  Storage = (OC_STORAGE_CONTEXT *)Context;
 
   FileBuffer = OcAudioGetFileContents (
                  Storage,
-                 BaseType,
                  BasePath,
+                 BaseType,
+                 Localised,
                  "mp3",
                  LanguageCode,
-                 Localised,
                  &FileBufferSize
                  );
   if (FileBuffer == NULL) {
     FileBuffer = OcAudioGetFileContents (
                    Storage,
-                   BaseType,
                    BasePath,
+                   BaseType,
+                   Localised,
                    "wav",
                    LanguageCode,
-                   Localised,
                    &FileBufferSize
                    );
   }
 
   if (FileBuffer == NULL) {
-    DEBUG ((DEBUG_INFO, "OC: Wave %a cannot be found!\n", BasePath));
+    DEBUG ((DEBUG_INFO, "OC: Wave %a %a cannot be found!\n", BaseType, BasePath));
     return EFI_NOT_FOUND;
   }
 
@@ -415,13 +200,8 @@ OcAudioAcquireFile (
   FreePool (FileBuffer);
 
   if (EFI_ERROR (Status)) {
-    DEBUG ((DEBUG_INFO, "OC: Wave %a cannot be decoded - %r!\n", BasePath, Status));
+    DEBUG ((DEBUG_INFO, "OC: Wave %a %a cannot be decoded - %r!\n", BaseType, BasePath, Status));
     return EFI_UNSUPPORTED;
-  }
-
-  if (CacheFile != NULL) {
-    CacheFile->Buffer = *Buffer;
-    CacheFile->Size   = *BufferSize;
   }
 
   return EFI_SUCCESS;
@@ -435,10 +215,7 @@ OcAudioReleaseFile (
   IN  UINT8  *Buffer
   )
 {
-  if (!mEnableAudioCaching) {
-    FreePool (Buffer);
-  }
-
+  FreePool (Buffer);
   return EFI_SUCCESS;
 }
 
@@ -629,7 +406,9 @@ OcLoadUefiAudioSupport (
     DEBUG ((DEBUG_INFO, "OC: Starting to play chime...\n"));
     Status = OcAudio->PlayFile (
                         OcAudio,
-                        AppleVoiceOverAudioFileVoiceOverBoot,
+                        OC_VOICE_OVER_AUDIO_FILE_VOICE_OVER_BOOT,
+                        OC_VOICE_OVER_AUDIO_BASE_TYPE_OPEN_CORE,
+                        FALSE,
                         DecibelGain,
                         TRUE,
                         FALSE
