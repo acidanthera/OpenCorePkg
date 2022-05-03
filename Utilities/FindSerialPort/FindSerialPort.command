@@ -35,7 +35,9 @@ serial_dev=$(ioreg -p IODeviceTree -lw0 | perl -e '
   }
 ')
 
-if [ "$serial_dev" = "" ]; then
+if [ "$serial_dev" != "" ]; then
+  echo "${serial_dev}"
+else
   echo "No serial device found!"
 fi
 
