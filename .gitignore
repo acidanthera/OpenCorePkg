@@ -10,7 +10,7 @@ project.xcworkspace
 *.linux
 .vscode
 .idea
-filelist.txt
+unc-srclist.txt
 uncrustify
 uncrustify.diff
 Uncrustify-repo
