@@ -1,4 +1,4 @@
-name: Test Uncrustify
+name: Build Uncrustify
 
 on:
   push:
@@ -30,11 +30,11 @@ jobs:
       - name: Run Uncrustify
         run: |
           /usr/bin/curl https://raw.githubusercontent.com/acidanthera/ocbuild/unc-build/uncrustify/uncstrap.py -o uncrustify.py
-          python3 ./uncrustify.py ./Uncrustify.yml
+          python3 ./uncrustify.py -b
 
+      # TODO: Upload bin
       - name: Upload to Artifacts
         uses: actions/upload-artifact@v3
-        if: failure()
         with:
           name: Uncrustify Artifacts
           path: ./uncrustify.diff
@@ -48,7 +48,7 @@ jobs:
       - name: Install Dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install cmake curl git
+          sudo apt-get install cmake curl git unzip
           sudo python3 -m pip install gitpython requests pyyaml
 
       - name: CI Bootstrap
@@ -58,8 +58,9 @@ jobs:
       - name: Run Uncrustify
         run: |
           /usr/bin/curl https://raw.githubusercontent.com/acidanthera/ocbuild/unc-build/uncrustify/uncstrap.py -o uncrustify.py
-          python3 ./uncrustify.py ./Uncrustify.yml
+          python3 ./uncrustify.py -b
 
+      # TODO: Upload bin
       - name: Upload to Artifacts
         uses: actions/upload-artifact@v3
         if: failure()
@@ -78,7 +79,7 @@ jobs:
 
       - name: Install Dependencies
         run: |
-          choco install cmake make --no-progress
+          choco install cmake make zip --no-progress
           python3 -m pip install gitpython requests pyyaml
 
       - name: CI Bootstrap
@@ -88,8 +89,9 @@ jobs:
       - name: Run Uncrustify
         run: |
           curl https://raw.githubusercontent.com/acidanthera/ocbuild/unc-build/uncrustify/uncstrap.py -o uncrustify.py
-          python3 ./uncrustify.py ./Uncrustify.yml
+          python3 ./uncrustify.py -b
 
+      # TODO: Upload bin
       - name: Upload to Artifacts
         uses: actions/upload-artifact@v3
         if: failure()
