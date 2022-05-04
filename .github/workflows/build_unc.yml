@@ -31,13 +31,14 @@ jobs:
         run: |
           /usr/bin/curl https://raw.githubusercontent.com/acidanthera/ocbuild/unc-build/uncrustify/uncstrap.py -o uncrustify.py
           python3 ./uncrustify.py -b
+          echo "UNC_SHA=$(cat unc-sha.txt)" >> $GITHUB_ENV
 
       # TODO: Upload bin
       - name: Upload to Artifacts
         uses: actions/upload-artifact@v3
         with:
-          name: Uncrustify Artifacts
-          path: ./uncrustify.diff
+          name: Uncrustify binary macOS
+          path: ./Uncrustify-Darwin-${{ env.UNC_SHA }}.zip
 
   build-linux:
     name: Linux
