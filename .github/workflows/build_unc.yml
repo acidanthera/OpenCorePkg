@@ -27,7 +27,7 @@ jobs:
         run: |
           src=$(/usr/bin/curl -Lfs https://raw.githubusercontent.com/acidanthera/ocbuild/master/ci-bootstrap.sh) && eval "$src" || exit 1
 
-      - name: Run Uncrustify
+      - name: Build Uncrustify
         run: |
           /usr/bin/curl https://raw.githubusercontent.com/acidanthera/ocbuild/unc-build/uncrustify/uncstrap.py -o uncrustify.py
           python3 ./uncrustify.py -b
@@ -55,7 +55,7 @@ jobs:
         run: |
           src=$(/usr/bin/curl -Lfs https://raw.githubusercontent.com/acidanthera/ocbuild/master/ci-bootstrap.sh) && eval "$src" || exit 1
 
-      - name: Run Uncrustify
+      - name: Build Uncrustify
         run: |
           /usr/bin/curl https://raw.githubusercontent.com/acidanthera/ocbuild/unc-build/uncrustify/uncstrap.py -o uncrustify.py
           python3 ./uncrustify.py -b
@@ -86,7 +86,7 @@ jobs:
         run: |
           src=$(curl -Lfs https://raw.githubusercontent.com/acidanthera/ocbuild/master/ci-bootstrap.sh) && eval "$src" || exit 1
 
-      - name: Run Uncrustify
+      - name: Build Uncrustify
         run: |
           curl https://raw.githubusercontent.com/acidanthera/ocbuild/unc-build/uncrustify/uncstrap.py -o uncrustify.py
           python3 ./uncrustify.py -b
