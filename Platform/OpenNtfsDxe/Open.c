@@ -201,6 +201,7 @@ FileReadDir (
   } else {
     Status = NtfsDir (File->FileSystem, File->Path, Data, DIR_HOOK);
   }
+
   if (mIndexCounter >= 0) {
     //
     // No entries left
