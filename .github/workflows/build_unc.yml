@@ -33,11 +33,10 @@ jobs:
           python3 ./uncrustify.py -b
           echo "UNC_SHA=$(cat unc-sha.txt)" >> $GITHUB_ENV
 
-      # TODO: Upload bin
       - name: Upload to Artifacts
         uses: actions/upload-artifact@v3
         with:
-          name: Uncrustify binary macOS
+          name: Uncrustify-Darwin-${{ env.UNC_SHA }}
           path: ./Uncrustify-Darwin-${{ env.UNC_SHA }}.zip
 
   build-linux:
@@ -60,14 +59,13 @@ jobs:
         run: |
           /usr/bin/curl https://raw.githubusercontent.com/acidanthera/ocbuild/unc-build/uncrustify/uncstrap.py -o uncrustify.py
           python3 ./uncrustify.py -b
+          echo "UNC_SHA=$(cat unc-sha.txt)" >> $GITHUB_ENV
 
-      # TODO: Upload bin
       - name: Upload to Artifacts
         uses: actions/upload-artifact@v3
-        if: failure()
         with:
-          name: Uncrustify Artifacts
-          path: ./uncrustify.diff
+          name: Uncrustify-Linux-${{ env.UNC_SHA }}
+          path: ./Uncrustify-Linux-${{ env.UNC_SHA }}.zip
 
   build-windows:
     name: Windows VS2019
@@ -91,11 +89,10 @@ jobs:
         run: |
           curl https://raw.githubusercontent.com/acidanthera/ocbuild/unc-build/uncrustify/uncstrap.py -o uncrustify.py
           python3 ./uncrustify.py -b
+          echo "UNC_SHA=$(cat unc-sha.txt)" >> $GITHUB_ENV
 
-      # TODO: Upload bin
       - name: Upload to Artifacts
         uses: actions/upload-artifact@v3
-        if: failure()
         with:
-          name: Uncrustify Artifacts
-          path: ./uncrustify.diff
+          name: Uncrustify-Windows-${{ env.UNC_SHA }}
+          path: ./Uncrustify-Windows-${{ env.UNC_SHA }}.zip
