@@ -40,6 +40,8 @@ FileOpen (
   FileSystem   = File->FileSystem;
   AbsolutePath = (*FileName == L'\\');
 
+  ZeroMem (Path, sizeof (Path));
+
   if (OpenMode != EFI_FILE_MODE_READ) {
     DEBUG ((DEBUG_INFO, "NTFS: File '%s' can only be opened in read-only mode\n", FileName));
     return EFI_WRITE_PROTECTED;
@@ -109,6 +111,11 @@ FileOpen (
   CopyMem (NewFile->Path, CleanPath, StrnSizeS (CleanPath, MAX_PATH));
 
   Index = StrnLenS (CleanPath, MAX_PATH);
+  if (Index == MAX_PATH) {
+    DEBUG ((DEBUG_INFO, "NTFS: CleanPath is too long.\n"));
+    return EFI_OUT_OF_RESOURCES;
+  }
+
   while (Index > 0) {
     --Index;
     if (CleanPath[Index] == L'/') {
