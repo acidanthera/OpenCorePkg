@@ -125,7 +125,7 @@ FileOpen (
   }
 
   DirName           = (Index == 0) ? L"/" : CleanPath;
-  NewFile->BaseName = &NewFile->Path[Index + 1U];
+  NewFile->BaseName = (Index == 0) ? L"\0" : &NewFile->Path[Index + 1U];
 
   Status = NtfsDir (FileSystem, DirName, NewFile, INFO_HOOK);
   if (EFI_ERROR (Status)) {
@@ -174,6 +174,7 @@ FileReadDir (
     return EFI_BUFFER_TOO_SMALL;
   }
 
+  ZeroMem (Path, sizeof (Path));
   ZeroMem (Data, *Size);
   Info->Size = *Size;
 
@@ -189,13 +190,17 @@ FileReadDir (
     return EFI_OUT_OF_RESOURCES;
   }
 
-  if (Path[Length - 1U] != L'/') {
+  if ((Length == 0) || (Path[Length - 1U] != L'/')) {
     Path[Length] = L'/';
     Length++;
   }
 
   mIndexCounter = (INT64)File->DirIndex;
-  Status        = NtfsDir (File->FileSystem, File->Path, Data, DIR_HOOK);
+  if (Length == 0) {
+    Status = NtfsDir (File->FileSystem, L"/", Data, DIR_HOOK);
+  } else {
+    Status = NtfsDir (File->FileSystem, File->Path, Data, DIR_HOOK);
+  }
   if (mIndexCounter >= 0) {
     //
     // No entries left
