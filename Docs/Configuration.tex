@@ -8027,7 +8027,9 @@ on most Apple hardware, and possibly some others) may be specified in \texttt{UE
   Apple audio protocols allow OpenCore and the macOS bootloader to play
   sounds and signals for screen reading or audible error reporting.
   Supported protocols are beep generation and VoiceOver. The VoiceOver protocol
-  is specific to Gibraltar machines (T2) and is not supported before
+  is only provided natively by Gibraltar machines (T2), however versions of macOS
+  which support VoiceOver will see and use the implementation provided by OpenCore,
+  on screens such as FileVault 2 unlock. VoiceOver is not supported before
   macOS High Sierra (10.13). Older macOS versions use the AppleHDA protocol
   (which is not currently implemented) instead.
 
