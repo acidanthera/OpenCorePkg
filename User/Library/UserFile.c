@@ -28,7 +28,7 @@ __wrap_llvm_gcda_emit_arcs (
   __real_llvm_gcda_emit_arcs (num_counters, counters);
 
   for (i = 0; i < num_counters; ++i) {
-    if ((old_ctrs[i] == counters[i]) && (counters[i] > 0)) {
+    if ((old_ctrs[i] == 0) && (counters[i] > 0)) {
       fprintf (stdout, "CoverageHit\n");
     }
   }
@@ -43,15 +43,15 @@ __gcov_merge_add (
   unsigned   n_counters
   )
 {
-  gcov_type  prev;
+  gcov_type  next;
 
   for ( ; n_counters; counters++, n_counters--) {
-    prev = __gcov_read_counter ();
-    if ((prev == 0) && (*counters > 0)) {
+    next = __gcov_read_counter ();
+    if ((*counters == 0) && (next > 0)) {
       fprintf (stdout, "CoverageHit\n");
     }
 
-    *counters += prev;
+    *counters += next;
   }
 }
 

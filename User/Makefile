@@ -302,13 +302,13 @@ sydr-import-check: $(PRODUCT) FORCE
 	@for f in sydr-fuzz-out/corpus/*
 	do
 		if [ -n "$$(./$(PRODUCT) $$f | grep CoverageHit)" ]; then \
-				cp $$f $(FUZZ_DIR)/; \
+				cp "$$f" $(FUZZ_DIR)/; \
 		fi
 	done || true
 	@for f in sydr-fuzz-out/security/*
 	do
 		if [ -n "$$(./$(PRODUCT) $$f | grep CoverageHit)" ]; then \
-				cp $$f $(FUZZ_DIR)/; \
+				cp "$$f" $(FUZZ_DIR)/; \
 		fi
 	done || true
 
