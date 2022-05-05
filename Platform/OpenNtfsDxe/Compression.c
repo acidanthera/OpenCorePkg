@@ -676,6 +676,7 @@ Decompress (
 
     Status = ReadCompressedBlock (Runlist, Runlist->Unit.ClearTextBlock, 1U);
     if (EFI_ERROR (Status)) {
+      FreePool (Runlist->Unit.ClearTextBlock);
       FreePool (Runlist->Unit.Cluster);
       return Status;
     }
