@@ -47,8 +47,8 @@ FileOpen (
     return EFI_WRITE_PROTECTED;
   }
 
-  if ((*FileName == 0) || (CompareMem (FileName, L".", 2U) == 0)) {
-    File->RefCount++;
+  if ((*FileName == 0) || (CompareMem (FileName, L".", sizeof (L".")) == 0)) {
+    ++File->RefCount;
     *NewHandle = This;
     return EFI_SUCCESS;
   }
@@ -56,16 +56,16 @@ FileOpen (
   if (AbsolutePath) {
     Length = 0;
   } else {
+    Length = StrnLenS (File->Path, MAX_PATH);
+    if (Length == MAX_PATH) {
+      DEBUG ((DEBUG_INFO, "NTFS: Path is too long.\n"));
+      return EFI_OUT_OF_RESOURCES;
+    }
+
     Status = StrCpyS (Path, MAX_PATH, File->Path);
     if (EFI_ERROR (Status)) {
       DEBUG ((DEBUG_INFO, "NTFS: Could not copy string.\n"));
       return Status;
-    }
-
-    Length = StrnLenS (Path, MAX_PATH);
-    if (Length == MAX_PATH) {
-      DEBUG ((DEBUG_INFO, "NTFS: Path is too long.\n"));
-      return EFI_OUT_OF_RESOURCES;
     }
 
     if ((Length == 0) || (Path[Length - 1U] != '/')) {

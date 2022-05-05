@@ -121,7 +121,7 @@ EFIAPI
 NTFSSupported (
   IN EFI_DRIVER_BINDING_PROTOCOL  *This,
   IN EFI_HANDLE                   Controller,
-  IN EFI_DEVICE_PATH_PROTOCOL     *RemainingDevicePath
+  IN EFI_DEVICE_PATH_PROTOCOL     *RemainingDevicePath OPTIONAL
   )
 {
   EFI_STATUS  Status;
@@ -194,6 +194,7 @@ OpenVolume (
   EFI_FS  *Instance;
 
   ASSERT (This != NULL);
+  ASSERT (Root != NULL);
 
   Instance = (EFI_FS *)This;
 
@@ -210,7 +211,7 @@ EFIAPI
 NTFSStart (
   IN EFI_DRIVER_BINDING_PROTOCOL  *This,
   IN EFI_HANDLE                   Controller,
-  IN EFI_DEVICE_PATH_PROTOCOL     *RemainingDevicePath
+  IN EFI_DEVICE_PATH_PROTOCOL     *RemainingDevicePath OPTIONAL
   )
 {
   EFI_STATUS  Status;
@@ -322,7 +323,7 @@ NTFSStop (
   IN EFI_DRIVER_BINDING_PROTOCOL  *This,
   IN EFI_HANDLE                   Controller,
   IN UINTN                        NumberOfChildren,
-  IN EFI_HANDLE                   *ChildHandleBuffer
+  IN EFI_HANDLE                   *ChildHandleBuffer OPTIONAL
   )
 {
   EFI_STATUS                       Status;

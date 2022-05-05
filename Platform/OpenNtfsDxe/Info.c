@@ -12,18 +12,19 @@
 STATIC
 EFI_STATUS
 GetLabel (
-  IN     EFI_FS  *FileSystem,
-  IN OUT CHAR16  **Label
+  IN CONST EFI_FS  *FileSystem,
+  IN OUT CHAR16    **Label
   )
 {
   EFI_STATUS       Status;
-  NTFS_FILE        *BaseMftRecord = NULL;
+  NTFS_FILE        *BaseMftRecord;
   ATTR_HEADER_RES  *Res;
 
   ASSERT (FileSystem != NULL);
   ASSERT (Label != NULL);
 
-  *Label = NULL;
+  *Label        = NULL;
+  BaseMftRecord = NULL;
 
   Status = FsHelpFindFile (L"/$Volume", FileSystem->RootIndex, &BaseMftRecord, FSHELP_REG);
   if (EFI_ERROR (Status)) {
@@ -113,14 +114,15 @@ FileGetInfo (
   EFI_FILE_SYSTEM_INFO          *FSInfo;
   EFI_FILE_SYSTEM_VOLUME_LABEL  *VLInfo;
   CHAR16                        *Label;
-  UINTN                         Length = 0;
+  UINTN                         Length;
 
   ASSERT (This != NULL);
   ASSERT (Type != NULL);
   ASSERT (Len != NULL);
-  ASSERT ((Data != NULL) || ((Data == NULL) && (*Len == 0)));
+  ASSERT ((Data != NULL) || (*Len == 0));
 
-  File = (EFI_NTFS_FILE *)This;
+  File   = (EFI_NTFS_FILE *)This;
+  Length = 0;
 
   if (CompareMem (Type, &gEfiFileInfoGuid, sizeof (*Type)) == 0) {
     //
@@ -165,7 +167,9 @@ FileGetInfo (
     *Len = Length;
 
     return EFI_SUCCESS;
-  } else if (CompareMem (Type, &gEfiFileSystemInfoGuid, sizeof (*Type)) == 0) {
+  }
+
+  if (CompareMem (Type, &gEfiFileSystemInfoGuid, sizeof (*Type)) == 0) {
     //
     // Get file system information
     //
@@ -201,7 +205,9 @@ FileGetInfo (
     *Len         = (UINTN)FSInfo->Size;
 
     return Status;
-  } else if (CompareMem (Type, &gEfiFileSystemVolumeLabelInfoIdGuid, sizeof (*Type)) == 0) {
+  }
+
+  if (CompareMem (Type, &gEfiFileSystemVolumeLabelInfoIdGuid, sizeof (*Type)) == 0) {
     //
     // Get the volume label
     //
@@ -227,9 +233,9 @@ FileGetInfo (
     }
 
     return EFI_SUCCESS;
-  } else {
-    return EFI_UNSUPPORTED;
   }
+
+  return EFI_UNSUPPORTED;
 }
 
 EFI_STATUS
