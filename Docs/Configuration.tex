@@ -2593,6 +2593,9 @@ blocking.
   the \texttt{class-code} property of the PCI serial port device to \texttt{FFFFFFFF} in \texttt{DeviceProperties} section.
   As an alternative solution, a codeless kext \texttt{PCIeSerialDisable.kext} shown in the spoiler \texttt{PCIeSerialDisable.kext/Contents/Info.plist} at
   \href{https://github.com/acidanthera/bugtracker/issues/1954}{acidanthera/bugtracker\#1954}, may also be used.
+  In addition, for certain Thunderbolt cards the IOKit personality \texttt{IOPCITunnelCompatible} also needs to be set to \texttt{true},
+  which can be done by the \texttt{PCIeSerialThunderboltEnable.kext} attached at \href{https://github.com/acidanthera/bugtracker/issues/2003#issuecomment-1116761087}{acidanthera/bugtracker\#2003}.
+
 
   \emph{Note 3}: For this patch to be correctly applied, \texttt{Override}
   must be enabled with all keys properly set in \texttt{Custom}, under section \texttt{Misc->Serial}.
