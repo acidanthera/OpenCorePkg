@@ -11,6 +11,7 @@ project.xcworkspace
 .vscode
 .idea
 unc-srclist.txt
+unc-UEFI.cfg
 uncrustify
 uncrustify.diff
 Uncrustify-repo
