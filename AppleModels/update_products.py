@@ -53,8 +53,10 @@ apple_base34 = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B',
 							 'C', 'D', 'E', 'F', 'G', 'H', 'J', 'K', 'L', 'M', 'N', 'P',
 							 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z']
 
+
 def current_date():
 	return time.mktime(datetime.datetime.now().date().timetuple())
+
 
 def map_legacy_status(status):
 	if status == 'ok':
@@ -67,6 +69,7 @@ def map_legacy_status(status):
 		return STATUS_NOT_FOUND
 	raise RuntimeError(f'Invalid legacy status {status}')
 
+
 def base34_to_num(str):
 		num = 0
 		for i in str:
@@ -76,6 +79,7 @@ def base34_to_num(str):
 		if len(str) == 4 and str.startswith('0'):
 			num += 34**4
 		return num
+
 
 def num_to_base34(num):
 		# 0XXX is essentially the way to encode 10XXX.
@@ -89,6 +93,7 @@ def num_to_base34(num):
 			num, r = divmod(num, 34)
 			str    = apple_base34[r] + str
 		return str.zfill(fill)
+
 
 def load_products(path='Products.zjson'):
 	try:
@@ -118,12 +123,14 @@ def load_products(path='Products.zjson'):
 		print(f'Failed to parse file {path} - {str(e)}')
 		sys.exit(1)
 
+
 def save_database(database, path):
 	# We are not using yaml for speed reasons.
 	path = path.replace('.yaml', '.zjson')
 	path = path.replace('.json', '.zjson')
 	with open(path, 'w') as fh:
 		fh.write(zlib.compress(json.dumps(database, fh, indent=0, separators=(',', ':'), sort_keys=True), 9))
+
 
 def store_product(database, model, name, exception, status, date = None):
 	database[model] = {
@@ -132,6 +139,7 @@ def store_product(database, model, name, exception, status, date = None):
 		KEY_STATUS: status,
 		KEY_DATE: current_date() if date is None else date
 	}
+
 
 def update_product(database, model, database_path, force = False, retention = 90):
 	prev = database.get(model, None)
@@ -189,6 +197,7 @@ def update_product(database, model, database_path, force = False, retention = 90
 		store_product(database, model, None, None, STATUS_NOT_FOUND)
 		return ADD_DUMMY
 
+
 def merge_products(database, database_path, filename):
 	print(f'Merging {filename}')
 
@@ -218,6 +227,7 @@ def merge_products(database, database_path, filename):
 
 	save_database(database, database_path)
 
+
 def update_products(database, start_from, end_with, database_path, force = False, retention = 45, savenum = 2048):
 	start     = base34_to_num(start_from)
 	end       = base34_to_num(end_with)
@@ -235,6 +245,7 @@ def update_products(database, start_from, end_with, database_path, force = False
 				countdown -= 1
 
 	save_database(database, database_path)
+
 
 def main():
 	parser = argparse.ArgumentParser(description='Update product database')
