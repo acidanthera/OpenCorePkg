@@ -43,6 +43,7 @@ __status__ = 'Works'
 if sys.version_info > (3,):
 	long = int
 
+
 class ReloadUefi (gdb.Command):
 	'''Reload UEFI symbols'''
 
@@ -120,10 +121,8 @@ class ReloadUefi (gdb.Command):
 			data.append (value_array[i])
 		return data
 
-	#
 	# Locates the EFI_SYSTEM_TABLE as per UEFI spec 17.4.
 	# Returns base address or -1.
-	#
 
 	def search_est (self):
 		address = 0
@@ -449,6 +448,7 @@ class ReloadUefi (gdb.Command):
 		self.parse_est (est)
 
 class UefiStringPrinter:
+	
 	def __init__(self, val):
 		self.val = val
 
@@ -456,6 +456,7 @@ class UefiStringPrinter:
 		return 'NULL' if not self.val else f"L'{UefiMisc.parse_utf16(self.val)}'"
 
 class UefiEfiStatusPrinter:
+	
 	def __init__(self, val):
 		self.val = val
 
@@ -463,6 +464,7 @@ class UefiEfiStatusPrinter:
 		return UefiMisc.parse_status(self.val, True)
 
 class UefiReturnStatusPrinter:
+	
 	def __init__(self, val):
 		self.val = val
 
@@ -470,11 +472,13 @@ class UefiReturnStatusPrinter:
 		return UefiMisc.parse_status(self.val, False)
 
 class UefiGuidPrinter:
+	
 	def __init__(self, val):
 		self.val = val
 
 	def to_string (self):
 		return UefiMisc.parse_guid(self.val)
+
 
 def lookup_uefi_type (val):
 	if str(val.type) == 'const CHAR16 *' or str(val.type) == 'CHAR16 *':

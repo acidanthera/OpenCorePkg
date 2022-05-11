@@ -6,9 +6,7 @@ Common UEFI parsing and representation code.
 import array
 
 class UefiMisc():
-	#
 	# Returns string corresponding to type value in specified charset.
-	#
 	@classmethod
 	def parse_string (cls, value, type, charset):
 		index = 0
@@ -42,9 +40,8 @@ class UefiMisc():
 		except AttributeError:
 			return data.tostring ().decode (charset)
 
-	#
 	# Returns a UTF16 string corresponding to a (CHAR16 *) value in EFI.
-	#
+	
 	@classmethod
 	def parse_utf16 (cls, value):
 		return cls.parse_string (value, 'H', 'utf-16')
@@ -166,9 +163,8 @@ class UefiMisc():
 				suffix = 'WARN_FILE_SYSTEM'
 		return ('EFI_' if efi else 'RETURN_') + suffix if suffix != '' else hex(val)
 
-	#
 	# Returns a UTF16 string corresponding to a (CHAR16 *) value in EFI.
-	#
+	
 	@classmethod
 	def parse_guid (cls, value):
 		guid = "<%08X-%04X-%04X-%02X%02X-%02X%02X%02X%02X%02X%02X>" % (

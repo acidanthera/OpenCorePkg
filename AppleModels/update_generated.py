@@ -16,9 +16,11 @@ import unicodedata
 import sys
 import yaml
 
+
 def remove_accents(input_str):
 	nfkd_form = unicodedata.normalize('NFKD', input_str)
 	return u''.join([c for c in nfkd_form if not unicodedata.combining(c)])
+
 
 def load_db(dbpath):
 	'''
@@ -52,6 +54,7 @@ def load_db(dbpath):
 	# Sorting is required for fast lookup.
 	return sorted(db, key=operator.itemgetter('SystemProductName'))
 
+
 def gather_products(db, ptype='AppleModelCode', empty_valid=False, shared_valid=False, fatal=True):
 	'''
 	Obtain all product codes from the database
@@ -77,6 +80,7 @@ def gather_products(db, ptype='AppleModelCode', empty_valid=False, shared_valid=
 				continue
 			products.append(p)
 	return products
+
 
 def validate_products(db, dbpd):
 	usedproducts  = gather_products(db)
@@ -120,6 +124,7 @@ def validate_products(db, dbpd):
 					print(f"New AppleModelCode for {info['SystemProductName']}:")
 					for model in to_add[sysname]:
 						print(f"  - \"{model}\"")
+
 
 def export_db_macinfolib(db, path, year=0):
 	'''
@@ -262,6 +267,7 @@ def export_db_macserial(db, dbpd, path, year=0):
 		fh.write('};\n')
 
 		fh.write('#endif // GENSERIAL_MODELINFO_AUTOGEN_H\n')
+
 
 def export_mlb_boards(db, boards):
 	l = {}

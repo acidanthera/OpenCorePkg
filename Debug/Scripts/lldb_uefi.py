@@ -14,6 +14,7 @@ import shlex
 from collections import OrderedDict
 from common_uefi import *
 
+
 class ReloadUefi:
 	'''Reload UEFI symbols'''
 

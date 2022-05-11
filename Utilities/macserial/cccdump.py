@@ -6,11 +6,13 @@
 import ida_bytes
 import struct
 
+
 def readaddr(ea):
 	a = ida_bytes.get_bytes(ea, 8)
 	if a == BADADDR:
 		return None
 	return struct.unpack("L", a)[0]
+
 
 def readstr(ea, l=256):
 	if ea == BADADDR:

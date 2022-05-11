@@ -26,6 +26,7 @@ MAC_EFI_MAGIC         = b'\x5F\x4D\x45\x46\x49\x42\x49\x4E'
 INTEL_EFI_MAGIC       = b'\x5A\xA5\xF0\x0F'
 IM4P_MAC_EFI_MAGIC    = b'\x49\x4D\x34\x50\x16\x04\x6D\x65\x66\x69'
 
+
 def save_macfw(firmware, path):
 	# Hack for Apple images with an extra zero typo in NVRAM volume size.
 	NVBUG_FIND = b'\x8D\x2B\xF1\xFF\x96\x76\x8B\x4C\xA9\x85\x27\x47\x07\x5B\x4F\x50\x00\x00\x2F\x00'
@@ -35,9 +36,11 @@ def save_macfw(firmware, path):
 		fd1.write(firmware.replace(NVBUG_FIND, NVBUG_REPL))
 	return 0
 
+
 def get_fwname(filename, outdir, suffix=''):
 	outname = os.path.splitext(os.path.basename(filename))[0]
 	return os.path.join(outdir, f'{outname}{suffix}.rom')
+
 
 def unwrap_macefi(filename, outdir, firmware, firmware_len):
 	if firmware_len < MAC_EFI_HEADER_SIZE:
@@ -60,6 +63,7 @@ def unwrap_macefi(filename, outdir, firmware, firmware_len):
 	save_macfw(firmware[second + MAC_EFI_HEADER_SIZE:], get_fwname(filename, outdir, '2'))
 	return 0
 
+
 def unwrap_im4p(filename, outdir, firmware, firmware_len):
 	# FIXME: This is ugly, as IM4P is actually an ASN1 encoded sequence.
 	off = firmware.find(IM4P_MAC_EFI_MAGIC)
@@ -75,6 +79,7 @@ def unwrap_im4p(filename, outdir, firmware, firmware_len):
 		return save_macfw(firmware[off - 16:], get_fwname(filename, outdir))
 
 	raise RuntimeError('Unsupported firmware format')
+
 
 def unpack_image(filename, outdir):
 	if not os.path.exists(filename):

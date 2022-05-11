@@ -44,6 +44,7 @@ INFO_SIGN_SESS  = 'CT'
 INFO_REQURED    = [ INFO_PRODUCT, INFO_IMAGE_LINK, INFO_IMAGE_HASH, INFO_IMAGE_SESS,
 										INFO_SIGN_LINK, INFO_SIGN_HASH, INFO_SIGN_SESS ]
 
+
 def run_query(url, headers, post=None, raw=False):
 	if post is not None:
 		data = '\n'.join([entry + '=' + post[entry] for entry in post])
@@ -60,12 +61,15 @@ def run_query(url, headers, post=None, raw=False):
 		print(f'ERROR: "{e}" when connecting to {url}')
 		sys.exit(1)
 
+
 def generate_id(type, id=None):
 	valid_chars = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F']
 	return ''.join(random.choice(valid_chars) for i in range(type)) if not id else id
 
+
 def product_mlb(mlb):
 	return '00000000000' + mlb[11] + mlb[12] + mlb[13] + mlb[14] + '00'
+
 
 def mlb_from_eeee(eeee):
 	if len(eeee) != 4:
@@ -73,6 +77,7 @@ def mlb_from_eeee(eeee):
 		sys.exit(1)
 
 	return f'00000000000{eeee}00'
+
 
 def int_from_unsigned_bytes(bytes, byteorder):
 	if byteorder == 'little': bytes = bytes[::-1]
@@ -88,39 +93,41 @@ assert ChunkListHeader.size == 0x24
 Chunk = struct.Struct('<I32s')
 assert Chunk.size == 0x24
 
+
 def verify_chunklist(cnkpath):
-		with open(cnkpath, 'rb') as f:
-				hash_ctx = hashlib.sha256()
-				data = f.read(ChunkListHeader.size)
+	with open(cnkpath, 'rb') as f:
+		hash_ctx = hashlib.sha256()
+		data = f.read(ChunkListHeader.size)
+		hash_ctx.update(data)
+		magic, header_size, file_version, chunk_method, signature_method, chunk_count, chunk_offset, signature_offset = ChunkListHeader.unpack(data)
+		assert magic == b'CNKL'
+		assert header_size == ChunkListHeader.size
+		assert file_version == 1
+		assert chunk_method == 1
+		assert signature_method in [1, 2]
+		assert chunk_count > 0
+		assert chunk_offset == 0x24
+		assert signature_offset == chunk_offset + Chunk.size * chunk_count
+		for i in range(chunk_count):
+				data = f.read(Chunk.size)
 				hash_ctx.update(data)
-				magic, header_size, file_version, chunk_method, signature_method, chunk_count, chunk_offset, signature_offset = ChunkListHeader.unpack(data)
-				assert magic == b'CNKL'
-				assert header_size == ChunkListHeader.size
-				assert file_version == 1
-				assert chunk_method == 1
-				assert signature_method in [1, 2]
-				assert chunk_count > 0
-				assert chunk_offset == 0x24
-				assert signature_offset == chunk_offset + Chunk.size * chunk_count
-				for i in range(chunk_count):
-						data = f.read(Chunk.size)
-						hash_ctx.update(data)
-						chunk_size, chunk_sha256 = Chunk.unpack(data)
-						yield chunk_size, chunk_sha256
-				digest = hash_ctx.digest()
-				if signature_method == 1:
-					data = f.read(256)
-					assert len(data) == 256
-					signature = int_from_unsigned_bytes(data, 'little')
-					plaintext = 0x1ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff003031300d0609608648016503040201050004200000000000000000000000000000000000000000000000000000000000000000 | int_from_unsigned_bytes(digest, 'big')
-					assert pow(signature, 0x10001, Apple_EFI_ROM_public_key_1) == plaintext
-				elif signature_method == 2:
-					data = f.read(32)
-					assert data == digest
-					raise RuntimeError('Chunklist missing digital signature')
-				else:
-					raise NotImplementedError
-				assert f.read(1) == b''
+				chunk_size, chunk_sha256 = Chunk.unpack(data)
+				yield chunk_size, chunk_sha256
+		digest = hash_ctx.digest()
+		if signature_method == 1:
+			data = f.read(256)
+			assert len(data) == 256
+			signature = int_from_unsigned_bytes(data, 'little')
+			plaintext = 0x1ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff003031300d0609608648016503040201050004200000000000000000000000000000000000000000000000000000000000000000 | int_from_unsigned_bytes(digest, 'big')
+			assert pow(signature, 0x10001, Apple_EFI_ROM_public_key_1) == plaintext
+		elif signature_method == 2:
+			data = f.read(32)
+			assert data == digest
+			raise RuntimeError('Chunklist missing digital signature')
+		else:
+			raise NotImplementedError
+		assert f.read(1) == b''
+
 
 def get_session(args):
 	headers = {
@@ -143,6 +150,7 @@ def get_session(args):
 					return cookie if cookie.startswith('session=') else ...
 
 	raise RuntimeError('No session in headers ' + str(headers))
+
 
 def get_image_info(session, bid, mlb=MLB_ZERO, diag = False, os_type = 'default', cid=None):
 	headers = {
@@ -185,6 +193,7 @@ def get_image_info(session, bid, mlb=MLB_ZERO, diag = False, os_type = 'default'
 
 	return info
 
+
 def save_image(url, sess, filename='', dir=''):
 	purl = urlparse(url)
 	headers = {
@@ -216,6 +225,7 @@ def save_image(url, sess, filename='', dir=''):
 
 	return os.path.join(dir, os.path.basename(filename))
 
+
 def verify_image(dmgpath, cnkpath):
 	print('Verifying image with chunklist...')
 
@@ -233,6 +243,7 @@ def verify_image(dmgpath, cnkpath):
 		if dmgf.read(1) != b'':
 			raise RuntimeError('Invalid image: larger than chunklist')
 		print('\rImage verification complete!\t\t\t\t\t')
+
 
 def action_download(args):
 	"""
@@ -286,6 +297,7 @@ def action_download(args):
 				err = "Invalid chunklist"
 		print(f'\rImage verification failed. ({err})')
 		return 1
+
 
 def action_selfcheck(args):
 	"""
@@ -355,6 +367,7 @@ def action_selfcheck(args):
 	print('SUCCESS: Found no discrepancies with MLB validation algorithm!')
 	return 0
 
+
 def action_verify(args):
 	"""
 	Try to verify MLB serial number.
@@ -392,6 +405,7 @@ def action_verify(args):
 		return 0
 	print(f'UNKNOWN: {args.mlb} MLB can be valid if very new and using special builds!')
 	return 0
+
 
 def action_guess(args):
 	"""
@@ -449,6 +463,7 @@ def action_guess(args):
 		return 0
 
 	print(f'UNKNOWN: Failed to determine supported models for MLB {mlb}!')
+
 
 def main():
 	parser = argparse.ArgumentParser(description='Gather recovery information for Macs')
