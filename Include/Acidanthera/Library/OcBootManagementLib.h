@@ -693,9 +693,10 @@ VOID
 typedef
 EFI_STATUS
 (EFIAPI *OC_PLAY_AUDIO_FILE)(
-  IN  OC_PICKER_CONTEXT  *Context,
-  IN  UINT32             File,
-  IN  BOOLEAN            Fallback
+  IN  OC_PICKER_CONTEXT                 *Context,
+  IN  CONST CHAR8                       *BasePath,
+  IN  CONST CHAR8                       *BaseType,
+  IN  BOOLEAN                           Fallback
   );
 
 /**
@@ -726,8 +727,9 @@ EFI_STATUS
 typedef
 VOID
 (EFIAPI *OC_TOGGLE_VOICE_OVER)(
-  IN  OC_PICKER_CONTEXT  *Context,
-  IN  UINT32             File  OPTIONAL
+  IN  OC_PICKER_CONTEXT                 *Context,
+  IN  CONST CHAR8                       *BasePath     OPTIONAL,
+  IN  CONST CHAR8                       *BaseType     OPTIONAL
   );
 
 /**
@@ -1629,7 +1631,8 @@ OcRunFirmwareApplication (
   Play audio file for context.
 
   @param[in]  Context   Picker context.
-  @param[in]  File      File to play.
+  @param[in]  BasePath  File base path.
+  @param[in]  BaseType  Audio base type.
   @param[in]  Fallback  Try to fallback to beeps on failure.
 
   @retval EFI_SUCCESS on success or when unnecessary.
@@ -1638,7 +1641,8 @@ EFI_STATUS
 EFIAPI
 OcPlayAudioFile (
   IN  OC_PICKER_CONTEXT  *Context,
-  IN  UINT32             File,
+  IN  CONST CHAR8        *BasePath,
+  IN  CONST CHAR8        *BaseType,
   IN  BOOLEAN            Fallback
   );
 
@@ -1680,13 +1684,15 @@ OcPlayAudioEntry (
   Toggle VoiceOver support.
 
   @param[in]  Context   Picker context.
-  @param[in]  File      File to play after enabling VoiceOver.
+  @param[in]  BasePath  File base path of file to play after enabling VoiceOver.
+  @param[in]  BaseType  Audio base type of file to play after enabling VoiceOver.
 **/
 VOID
 EFIAPI
 OcToggleVoiceOver (
   IN  OC_PICKER_CONTEXT  *Context,
-  IN  UINT32             File  OPTIONAL
+  IN  CONST CHAR8        *BasePath     OPTIONAL,
+  IN  CONST CHAR8        *BaseType     OPTIONAL
   );
 
 /**

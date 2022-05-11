@@ -27,6 +27,65 @@
 
 #include "OcAudioInternal.h"
 
+//
+// Convert from Apple file id to file base name and type.
+//
+STATIC
+CONST
+APPLE_VOICE_OVER_FILE_MAP
+  mAppleVoiceOverLocalisedAudioFiles[AppleVoiceOverAudioFileIndexLocalisedMax - AppleVoiceOverAudioFileIndexLocalisedMin] = {
+  [AppleVoiceOverAudioFileVoiceOverOn - AppleVoiceOverAudioFileIndexLocalisedMin] =                 {
+    APPLE_VOICE_OVER_AUDIO_FILE_VOICE_OVER_ON,
+    OC_VOICE_OVER_AUDIO_BASE_TYPE_APPLE
+  },
+  [AppleVoiceOverAudioFileVoiceOverOff - AppleVoiceOverAudioFileIndexLocalisedMin] =                {
+    APPLE_VOICE_OVER_AUDIO_FILE_VOICE_OVER_OFF,
+    OC_VOICE_OVER_AUDIO_BASE_TYPE_APPLE
+  },
+  [AppleVoiceOverAudioFileUsername - AppleVoiceOverAudioFileIndexLocalisedMin] =                    {
+    APPLE_VOICE_OVER_AUDIO_FILE_USERNAME,
+    OC_VOICE_OVER_AUDIO_BASE_TYPE_APPLE
+  },
+  [AppleVoiceOverAudioFilePassword - AppleVoiceOverAudioFileIndexLocalisedMin] =                    {
+    APPLE_VOICE_OVER_AUDIO_FILE_PASSWORD,
+    OC_VOICE_OVER_AUDIO_BASE_TYPE_APPLE
+  },
+  [AppleVoiceOverAudioFileUsernameOrPasswordIncorrect - AppleVoiceOverAudioFileIndexLocalisedMin] = {
+    APPLE_VOICE_OVER_AUDIO_FILE_USERNAME_OR_PASSWORD_INCORRECT,
+    OC_VOICE_OVER_AUDIO_BASE_TYPE_APPLE
+  },
+  [AppleVoiceOverAudioFileAccountLockedTryLater - AppleVoiceOverAudioFileIndexLocalisedMin] =       {
+    APPLE_VOICE_OVER_AUDIO_FILE_ACCOUNT_LOCKED_TRY_LATER,
+    OC_VOICE_OVER_AUDIO_BASE_TYPE_APPLE
+  },
+  [AppleVoiceOverAudioFileAccountLocked - AppleVoiceOverAudioFileIndexLocalisedMin] =               {
+    APPLE_VOICE_OVER_AUDIO_FILE_ACCOUNT_LOCKED,
+    OC_VOICE_OVER_AUDIO_BASE_TYPE_APPLE
+  }
+};
+
+STATIC
+CONST
+APPLE_VOICE_OVER_FILE_MAP
+  mAppleVoiceOverNonLocalisedAudioFiles[AppleVoiceOverAudioFileIndexNonLocalisedMax - AppleVoiceOverAudioFileIndexNonLocalisedMin] = {
+  [AppleVoiceOverAudioFileVoiceOverBoot - AppleVoiceOverAudioFileIndexNonLocalisedMin] =  {
+    OC_VOICE_OVER_AUDIO_FILE_VOICE_OVER_BOOT,
+    OC_VOICE_OVER_AUDIO_BASE_TYPE_OPEN_CORE
+  },
+  [AppleVoiceOverAudioFileVoiceOverBoot2 - AppleVoiceOverAudioFileIndexNonLocalisedMin] = {
+    APPLE_VOICE_OVER_AUDIO_FILE_VOICE_OVER_BOOT,
+    OC_VOICE_OVER_AUDIO_BASE_TYPE_APPLE
+  },
+  [AppleVoiceOverAudioFileClick - AppleVoiceOverAudioFileIndexNonLocalisedMin] =          {
+    APPLE_VOICE_OVER_AUDIO_FILE_CLICK,
+    OC_VOICE_OVER_AUDIO_BASE_TYPE_APPLE
+  },
+  [AppleVoiceOverAudioFileBeep - AppleVoiceOverAudioFileIndexNonLocalisedMin] =           {
+    APPLE_VOICE_OVER_AUDIO_FILE_BEEP,
+    OC_VOICE_OVER_AUDIO_BASE_TYPE_APPLE
+  }
+};
+
 STATIC CONST CHAR8  *mLanguagePairing[] = {
   NULL,
   "ar",
@@ -128,10 +187,31 @@ InternalOcAudioVoiceOverPlay (
   IN     UINT8                            File
   )
 {
-  OC_AUDIO_PROTOCOL_PRIVATE  *Private;
+  OC_AUDIO_PROTOCOL_PRIVATE        *Private;
+  CONST APPLE_VOICE_OVER_FILE_MAP  *Map;
+  BOOLEAN                          Localised;
+
+  Localised = FALSE;
+  Map       = NULL;
+
+  if (  (File >= AppleVoiceOverAudioFileIndexLocalisedMin)
+     && (File < AppleVoiceOverAudioFileIndexLocalisedMax))
+  {
+    Localised = TRUE;
+    Map       = &mAppleVoiceOverLocalisedAudioFiles[File - AppleVoiceOverAudioFileIndexLocalisedMin];
+  } else if (  (File >= AppleVoiceOverAudioFileIndexNonLocalisedMin)
+            && (File < AppleVoiceOverAudioFileIndexNonLocalisedMax))
+  {
+    Map = &mAppleVoiceOverNonLocalisedAudioFiles[File - AppleVoiceOverAudioFileIndexNonLocalisedMin];
+  }
+
+  if ((Map == NULL) || (Map->BasePath == NULL) || (Map->BaseType == NULL)) {
+    DEBUG ((DEBUG_INFO, "OCAU: Unsupported Apple voice over file index %u\n", File));
+    return EFI_UNSUPPORTED;
+  }
 
   Private = OC_AUDIO_PROTOCOL_PRIVATE_FROM_VOICE_OVER (This);
-  return Private->OcAudio.PlayFile (&Private->OcAudio, File, 0, FALSE, TRUE);
+  return Private->OcAudio.PlayFile (&Private->OcAudio, Map->BasePath, Map->BaseType, Localised, 0, FALSE, TRUE);
 }
 
 EFI_STATUS

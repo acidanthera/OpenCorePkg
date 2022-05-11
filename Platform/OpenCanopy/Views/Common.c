@@ -423,7 +423,8 @@ InternalCommonShutDownKeyEvent (
     if (Context->PickerContext->PickerAudioAssist) {
       Context->PickerContext->PlayAudioFile (
                                 Context->PickerContext,
-                                AppleVoiceOverAudioFileBeep,
+                                APPLE_VOICE_OVER_AUDIO_FILE_BEEP,
+                                OC_VOICE_OVER_AUDIO_BASE_TYPE_APPLE,
                                 TRUE
                                 );
     }
@@ -489,7 +490,8 @@ InternalCommonRestartKeyEvent (
     if (Context->PickerContext->PickerAudioAssist) {
       Context->PickerContext->PlayAudioFile (
                                 Context->PickerContext,
-                                AppleVoiceOverAudioFileBeep,
+                                APPLE_VOICE_OVER_AUDIO_FILE_BEEP,
+                                OC_VOICE_OVER_AUDIO_BASE_TYPE_APPLE,
                                 TRUE
                                 );
     }

@@ -265,7 +265,7 @@ OcRunBootPicker (
         ));
 
       if (!SaidWelcome) {
-        OcPlayAudioFile (Context, OcVoiceOverAudioFileWelcome, FALSE);
+        OcPlayAudioFile (Context, OC_VOICE_OVER_AUDIO_FILE_WELCOME, OC_VOICE_OVER_AUDIO_BASE_TYPE_OPEN_CORE, FALSE);
         SaidWelcome = TRUE;
       }
 
@@ -322,8 +322,8 @@ OcRunBootPicker (
 
         if (Chosen->SetDefault) {
           if (Context->PickerCommand == OcPickerShowPicker) {
-            OcPlayAudioFile (Context, OcVoiceOverAudioFileSelected, FALSE);
-            OcPlayAudioFile (Context, OcVoiceOverAudioFileDefault, FALSE);
+            OcPlayAudioFile (Context, OC_VOICE_OVER_AUDIO_FILE_SELECTED, OC_VOICE_OVER_AUDIO_BASE_TYPE_OPEN_CORE, FALSE);
+            OcPlayAudioFile (Context, OC_VOICE_OVER_AUDIO_FILE_DEFAULT, OC_VOICE_OVER_AUDIO_BASE_TYPE_OPEN_CORE, FALSE);
             OcPlayAudioEntry (Context, Chosen);
           }
 
@@ -343,7 +343,7 @@ OcRunBootPicker (
         //
         // Voice chosen information.
         //
-        OcPlayAudioFile (Context, OcVoiceOverAudioFileLoading, FALSE);
+        OcPlayAudioFile (Context, OC_VOICE_OVER_AUDIO_FILE_LOADING, OC_VOICE_OVER_AUDIO_BASE_TYPE_OPEN_CORE, FALSE);
         Status = OcPlayAudioEntry (Context, Chosen);
         if (EFI_ERROR (Status)) {
           OcPlayAudioBeep (
@@ -365,14 +365,14 @@ OcRunBootPicker (
       // Do not wait on successful return code.
       //
       if (EFI_ERROR (Status)) {
-        OcPlayAudioFile (Context, OcVoiceOverAudioFileExecutionFailure, TRUE);
+        OcPlayAudioFile (Context, OC_VOICE_OVER_AUDIO_FILE_EXECUTION_FAILURE, OC_VOICE_OVER_AUDIO_BASE_TYPE_OPEN_CORE, TRUE);
         gBS->Stall (SECONDS_TO_MICROSECONDS (3));
         //
         // Show picker on first failure.
         //
         Context->PickerCommand = OcPickerShowPicker;
       } else {
-        OcPlayAudioFile (Context, OcVoiceOverAudioFileExecutionSuccessful, FALSE);
+        OcPlayAudioFile (Context, OC_VOICE_OVER_AUDIO_FILE_EXECUTION_SUCCESSFUL, OC_VOICE_OVER_AUDIO_BASE_TYPE_OPEN_CORE, FALSE);
       }
 
       //

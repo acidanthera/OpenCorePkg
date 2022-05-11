@@ -211,7 +211,8 @@ InternalConfirmPassword (
     if (Context->PickerContext->PickerAudioAssist) {
       Context->PickerContext->PlayAudioFile (
                                 Context->PickerContext,
-                                OcVoiceOverAudioFilePasswordAccepted,
+                                OC_VOICE_OVER_AUDIO_FILE_PASSWORD_ACCEPTED,
+                                OC_VOICE_OVER_AUDIO_BASE_TYPE_OPEN_CORE,
                                 TRUE
                                 );
     }
@@ -223,7 +224,8 @@ InternalConfirmPassword (
   if (Context->PickerContext->PickerAudioAssist) {
     Context->PickerContext->PlayAudioFile (
                               Context->PickerContext,
-                              OcVoiceOverAudioFilePasswordIncorrect,
+                              OC_VOICE_OVER_AUDIO_FILE_PASSWORD_INCORRECT,
+                              OC_VOICE_OVER_AUDIO_BASE_TYPE_OPEN_CORE,
                               TRUE
                               );
   }
@@ -233,7 +235,8 @@ InternalConfirmPassword (
     if (Context->PickerContext->PickerAudioAssist) {
       Context->PickerContext->PlayAudioFile (
                                 Context->PickerContext,
-                                OcVoiceOverAudioFilePasswordRetryLimit,
+                                OC_VOICE_OVER_AUDIO_FILE_PASSWORD_RETRY_LIMIT,
+                                OC_VOICE_OVER_AUDIO_BASE_TYPE_OPEN_CORE,
                                 TRUE
                                 );
       DEBUG ((DEBUG_WARN, "OCB: User failed to verify password %d times running\n", OC_PASSWORD_MAX_RETRIES));
@@ -305,7 +308,8 @@ InternalPasswordBoxKeyEvent (
     if (Context->PickerContext->PickerAudioAssist) {
       Context->PickerContext->PlayAudioFile (
                                 Context->PickerContext,
-                                AppleVoiceOverAudioFileBeep,
+                                APPLE_VOICE_OVER_AUDIO_FILE_BEEP,
+                                OC_VOICE_OVER_AUDIO_BASE_TYPE_APPLE,
                                 TRUE
                                 );
     }
@@ -381,7 +385,8 @@ InternalPasswordViewKeyEvent (
   if (KeyEvent->OcKeyCode == OC_INPUT_VOICE_OVER) {
     DrawContext->GuiContext->PickerContext->ToggleVoiceOver (
                                               DrawContext->GuiContext->PickerContext,
-                                              OcVoiceOverAudioFileEnterPassword
+                                              OC_VOICE_OVER_AUDIO_FILE_ENTER_PASSWORD,
+                                              OC_VOICE_OVER_AUDIO_BASE_TYPE_OPEN_CORE
                                               );
     return;
   }
@@ -825,7 +830,8 @@ PasswordViewInitialize (
   if (GuiContext->PickerContext->PickerAudioAssist) {
     GuiContext->PickerContext->PlayAudioFile (
                                  GuiContext->PickerContext,
-                                 OcVoiceOverAudioFileEnterPassword,
+                                 OC_VOICE_OVER_AUDIO_FILE_ENTER_PASSWORD,
+                                 OC_VOICE_OVER_AUDIO_BASE_TYPE_OPEN_CORE,
                                  TRUE
                                  );
   }

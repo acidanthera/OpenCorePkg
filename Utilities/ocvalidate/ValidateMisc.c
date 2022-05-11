@@ -280,9 +280,10 @@ CheckMiscBoot (
   LauncherOption = OC_BLOB_GET (&Config->Misc.Boot.LauncherOption);
   if (  (AsciiStrCmp (LauncherOption, "Disabled") != 0)
      && (AsciiStrCmp (LauncherOption, "Full") != 0)
-     && (AsciiStrCmp (LauncherOption, "Short") != 0))
+     && (AsciiStrCmp (LauncherOption, "Short") != 0)
+     && (AsciiStrCmp (LauncherOption, "System") != 0))
   {
-    DEBUG ((DEBUG_WARN, "Misc->Boot->LauncherOption is borked (Can only be Disabled, Full, or Short)!\n"));
+    DEBUG ((DEBUG_WARN, "Misc->Boot->LauncherOption is borked (Can only be Disabled, Full, Short, or System)!\n"));
     ++ErrorCount;
   }
 
