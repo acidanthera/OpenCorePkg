@@ -2,6 +2,11 @@ OpenCore Changelog
 ==================
 #### v0.8.1
 - Improved `ExtendBTFeatureFlags` quirk on newer macOS versions, thx @lvs1974
+- ocvalidate: always print version compatibility info
+- Source code: codestyle fixes, cleanup and conversions
+- Added notes about DMAR table and `ForceAquantiaEthernet`, thx @kokowski
+- Added System option in `LauncherOption` property
+- Updated note about `CustomPciSerialDevice`, thx @joevt
 
 #### v0.8.0
 - Added support for early log preservation
