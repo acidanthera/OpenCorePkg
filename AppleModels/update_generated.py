@@ -277,7 +277,7 @@ def export_mlb_boards(db, boards):
             models = [info['BoardProduct']] if not isinstance(info['BoardProduct'], list) else info['BoardProduct']
 
             for model in models:
-                l[model] = 'latest' if info['MaximumOSVersion'] is None else info['MaximumOSVersion'] 
+                l[model] = 'latest' if not info['MaximumOSVersion'] else info['MaximumOSVersion'] 
 
     with open(boards, 'w') as fh:
         json.dump(l, fh, indent=1)
