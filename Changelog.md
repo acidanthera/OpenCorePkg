@@ -5,7 +5,7 @@ OpenCore Changelog
 - ocvalidate: always print version compatibility info
 - Source code: codestyle fixes, cleanup and conversions
 - Added notes about DMAR table and `ForceAquantiaEthernet`, thx @kokowski
-- Added System option in `LauncherOption` property
+- Added System option in `LauncherOption` property, thx @stevezhengshiqi
 - Updated note about `CustomPciSerialDevice`, thx @joevt
 
 #### v0.8.0
