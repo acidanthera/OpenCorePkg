@@ -286,10 +286,10 @@ sydr-fuzz: $(PROJECT).sydr$(SUFFIX) $(PROJECT)$(SUFFIX) FORCE
 		args = "-jobs=$(FUZZ_JOBS) -workers=$(FUZZ_JOBS) -rss_limit_mb=$(FUZZ_MEM) $(FUZZ_DIR)"
 		merge = false
 	EOF
-	UBSAN_OPTIONS='halt_on_error=1' sydr-fuzz run -f
+	UBSAN_OPTIONS='halt_on_error=1' sydr-fuzz -l debug run -f
 
 sydr-fuzz-security: $(PROJECT).sydr$(SUFFIX) $(PROJECT)$(SUFFIX) FORCE
-	sydr-fuzz security --jobs $(FUZZ_SECURITY_JOBS)
+	sydr-fuzz -l debug security --jobs $(FUZZ_SECURITY_JOBS)
 
 sydr-fuzz-import: $(PROJECT).sydr$(SUFFIX) $(PROJECT)$(SUFFIX) FORCE
 	@$(MKDIR) sydr-fuzz-out/corpus
@@ -319,9 +319,9 @@ coverage: $(PRODUCT) FORCE
 	$(LCOV) --no-checksum --zerocounters --directory .
 	$(LCOV) --no-checksum --capture --initial --directory . --output-file COVERAGE/trace.lcov_base
 	for f in $(FUZZ_DIR)/*; do  ./$(PRODUCT) $$f > /dev/null ; done || true
-	$(LCOV) --no-checksum --capture --directory . --rc lcov_branch_coverage=1  --rc lcov_excl_br_line='LCOV_EXCL_BR_LINE|ASSERT' --output-file COVERAGE/trace.lcov_info || exit 1
-	$(LCOV) --no-checksum -a COVERAGE/trace.lcov_base -a COVERAGE/trace.lcov_info --rc lcov_branch_coverage=1 --rc lcov_excl_br_line='LCOV_EXCL_BR_LINE|ASSERT' --output-file COVERAGE/trace.lcov_tmp || exit 1
-	$(LCOV) --no-checksum -r COVERAGE/trace.lcov_tmp /usr/include/\* --rc lcov_branch_coverage=1  --rc lcov_excl_br_line='LCOV_EXCL_BR_LINE|ASSERT' --output-file COVERAGE/trace.lcov_info_final || exit 1
+	$(LCOV) --no-checksum --capture --directory . --rc lcov_branch_coverage=1  --rc lcov_excl_br_line='LCOV_EXCL_BR_LINE|ASSERT|DEBUG' --output-file COVERAGE/trace.lcov_info || exit 1
+	$(LCOV) --no-checksum -a COVERAGE/trace.lcov_base -a COVERAGE/trace.lcov_info --rc lcov_branch_coverage=1 --rc lcov_excl_br_line='LCOV_EXCL_BR_LINE|ASSERT|DEBUG' --output-file COVERAGE/trace.lcov_tmp || exit 1
+	$(LCOV) --no-checksum -r COVERAGE/trace.lcov_tmp /usr/include/\* --rc lcov_branch_coverage=1  --rc lcov_excl_br_line='LCOV_EXCL_BR_LINE|ASSERT|DEBUG' --output-file COVERAGE/trace.lcov_info_final || exit 1
 	$(GENHTML) --branch-coverage --output-directory COVERAGE COVERAGE/trace.lcov_info_final
 
 clean: FORCE

@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
-%DIF DEL PreviousConfiguration.tex   Fri Apr 22 22:56:12 2022
-%DIF ADD ../Configuration.tex        Mon Apr 25 14:46:15 2022
+%DIF DEL PreviousConfiguration.tex   Sun May  1 02:19:47 2022
+%DIF ADD ../Configuration.tex        Mon May  9 12:41:21 2022
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -2653,6 +2653,10 @@ blocking.
   the \texttt{class-code} property of the PCI serial port device to \texttt{FFFFFFFF} in \texttt{DeviceProperties} section.
   As an alternative solution, a codeless kext \texttt{PCIeSerialDisable.kext} shown in the spoiler \texttt{PCIeSerialDisable.kext/Contents/Info.plist} at
   \href{https://github.com/acidanthera/bugtracker/issues/1954}{acidanthera/bugtracker\#1954}, may also be used.
+  \DIFaddbegin \DIFadd{In addition, for certain Thunderbolt cards the IOKit personality }\texttt{\DIFadd{IOPCITunnelCompatible}} \DIFadd{also needs to be set to }\texttt{\DIFadd{true}}\DIFadd{,
+  which can be done by the }\texttt{\DIFadd{PCIeSerialThunderboltEnable.kext}} \DIFadd{attached at }\href{https://github.com/acidanthera/bugtracker/issues/2003#issuecomment-1116761087}{\DIFadd{acidanthera/bugtracker\#2003}}\DIFadd{.
+}\DIFaddend 
+
 
   \emph{Note 3}: For this patch to be correctly applied, \texttt{Override}
   must be enabled with all keys properly set in \texttt{Custom}, under section \texttt{Misc->Serial}.
@@ -4581,21 +4585,21 @@ rm vault.pub
   \textbf{Description}: Set the clock rate for serial port.
 
   This option will override the value of \texttt{gEfiMdeModulePkgTokenSpaceGuid.PcdSerialClockRate}
-  \DIFaddbegin \DIFadd{defined in }\href{https://github.com/acidanthera/audk/blob/master/MdeModulePkg/MdeModulePkg.dec}{\DIFadd{MdeModulePkg.dec}}\DIFadd{.
-}
+  defined in \href{https://github.com/acidanthera/audk/blob/master/MdeModulePkg/MdeModulePkg.dec}{MdeModulePkg.dec}.
 
 \item
-  \texttt{\DIFadd{DetectCable}}\\
+  \DIFaddbegin \texttt{\DIFadd{DetectCable}}\\
   \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ boolean}}\\
   \textbf{\DIFadd{Failsafe}}\DIFadd{: }\texttt{\DIFadd{false}}\\
   \textbf{\DIFadd{Description}}\DIFadd{: Enable serial port cable detection.
 }
 
   \DIFadd{This option will override the value of }\texttt{\DIFadd{gEfiMdeModulePkgTokenSpaceGuid.PcdSerialDetectCable}}
-  \DIFaddend defined in \href{https://github.com/acidanthera/audk/blob/master/MdeModulePkg/MdeModulePkg.dec}{MdeModulePkg.dec}.
+  \DIFadd{defined in }\href{https://github.com/acidanthera/audk/blob/master/MdeModulePkg/MdeModulePkg.dec}{\DIFadd{MdeModulePkg.dec}}\DIFadd{.
+}
 
 \item
-  \texttt{ExtendedTxFifoSize}\\
+  \DIFaddend \texttt{ExtendedTxFifoSize}\\
   \textbf{Type}: \texttt{plist\ integer}\\
   \textbf{Failsafe}: \texttt{64}\\
   \textbf{Description}: Set the extended transmit FIFO size for serial port.
@@ -8090,7 +8094,9 @@ on most Apple hardware, and possibly some others) may be specified in \texttt{UE
   Apple audio protocols allow OpenCore and the macOS bootloader to play
   sounds and signals for screen reading or audible error reporting.
   Supported protocols are beep generation and VoiceOver. The VoiceOver protocol
-  is specific to Gibraltar machines (T2) and is not supported before
+  is \DIFdelbegin \DIFdel{specific to }\DIFdelend \DIFaddbegin \DIFadd{only provided natively by }\DIFaddend Gibraltar machines (T2)\DIFdelbegin \DIFdel{and }\DIFdelend \DIFaddbegin \DIFadd{, however versions of macOS
+  which support VoiceOver will see and use the implementation provided by OpenCore,
+  on screens such as FileVault 2 unlock. VoiceOver }\DIFaddend is not supported before
   macOS High Sierra (10.13). Older macOS versions use the AppleHDA protocol
   (which is not currently implemented) instead.
 

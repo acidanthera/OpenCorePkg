@@ -94,7 +94,9 @@ EFI_STATUS
 EFIAPI
 InternalOcAudioPlayFile (
   IN OUT OC_AUDIO_PROTOCOL  *This,
-  IN     UINT32             File,
+  IN     CONST CHAR8        *BasePath,
+  IN     CONST CHAR8        *BaseType,
+  IN     BOOLEAN            Localised,
   IN     INT8               Gain  OPTIONAL,
   IN     BOOLEAN            UseGain,
   IN     BOOLEAN            Wait

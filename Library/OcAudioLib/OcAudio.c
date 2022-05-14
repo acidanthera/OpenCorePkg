@@ -353,7 +353,9 @@ EFI_STATUS
 EFIAPI
 InternalOcAudioPlayFile (
   IN OUT OC_AUDIO_PROTOCOL  *This,
-  IN     UINT32             File,
+  IN     CONST CHAR8        *BasePath,
+  IN     CONST CHAR8        *BaseType,
+  IN     BOOLEAN            Localised,
   IN     INT8               Gain  OPTIONAL,
   IN     BOOLEAN            UseGain,
   IN     BOOLEAN            Wait
@@ -377,7 +379,9 @@ InternalOcAudioPlayFile (
 
   Status = Private->ProviderAcquire (
                       Private->ProviderContext,
-                      File,
+                      BasePath,
+                      BaseType,
+                      Localised,
                       Private->Language,
                       &RawBuffer,
                       &RawBufferSize,
@@ -387,14 +391,15 @@ InternalOcAudioPlayFile (
                       );
 
   if (EFI_ERROR (Status)) {
-    DEBUG ((DEBUG_INFO, "OCAU: PlayFile has no file %d for lang %d - %r\n", File, Private->Language, Status));
+    DEBUG ((DEBUG_INFO, "OCAU: PlayFile has no file %a for type %a lang %u - %r\n", BasePath, BaseType, Private->Language, Status));
     return EFI_NOT_FOUND;
   }
 
   DEBUG ((
     DEBUG_INFO,
-    "OCAU: File %d for lang %d is %d %d %d (%u) - %r\n",
-    File,
+    "OCAU: File %a for type %a lang %u is %d %d %d (%u) - %r\n",
+    BasePath,
+    BaseType,
     Private->Language,
     Frequency,
     Bits,
@@ -404,7 +409,7 @@ InternalOcAudioPlayFile (
     ));
 
   if (EFI_ERROR (Status)) {
-    DEBUG ((DEBUG_INFO, "OCAU: PlayFile has invalid file %d for lang %d - %r\n", File, Private->Language, Status));
+    DEBUG ((DEBUG_INFO, "OCAU: PlayFile has invalid file %a for type %a lang %u - %r\n", BasePath, BaseType, Private->Language, Status));
     if (Private->ProviderRelease != NULL) {
       Private->ProviderRelease (Private->ProviderContext, RawBuffer);
     }

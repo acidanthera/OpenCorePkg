@@ -83,4 +83,12 @@ OcAudioDump (
   IN EFI_FILE_PROTOCOL  *Root
   );
 
+//
+// Base path and base type for a given APPLE_VOICE_OVER_AUDIO_FILE index.
+//
+typedef struct {
+  CONST CHAR8    *BasePath;
+  CONST CHAR8    *BaseType;
+} APPLE_VOICE_OVER_FILE_MAP;
+
 #endif // OC_AUDIO_LIB_H

@@ -165,7 +165,8 @@ OcShowMenuByOc (
   if (BootContext->PickerContext->PickerAudioAssist) {
     BootContext->PickerContext->PlayAudioFile (
                                   BootContext->PickerContext,
-                                  OcVoiceOverAudioFileChooseOS,
+                                  OC_VOICE_OVER_AUDIO_FILE_CHOOSE_OS,
+                                  OC_VOICE_OVER_AUDIO_BASE_TYPE_OPEN_CORE,
                                   FALSE
                                   );
     for (Index = 0; Index < BootContext->BootEntryCount; ++Index) {
@@ -176,7 +177,8 @@ OcShowMenuByOc (
       if ((BootContext->PickerContext->TimeoutSeconds > 0) && (BootContext->DefaultEntry->EntryIndex - 1 == Index)) {
         BootContext->PickerContext->PlayAudioFile (
                                       BootContext->PickerContext,
-                                      OcVoiceOverAudioFileDefault,
+                                      OC_VOICE_OVER_AUDIO_FILE_DEFAULT,
+                                      OC_VOICE_OVER_AUDIO_BASE_TYPE_OPEN_CORE,
                                       FALSE
                                       );
       }

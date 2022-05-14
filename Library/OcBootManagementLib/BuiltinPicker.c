@@ -277,7 +277,7 @@ UpdateTabContext (
 
     if (IsEntering) {
       if (ChosenEntry >= 0) {
-        OcPlayAudioFile (BootContext->PickerContext, OcVoiceOverAudioFileSelected, FALSE);
+        OcPlayAudioFile (BootContext->PickerContext, OC_VOICE_OVER_AUDIO_FILE_SELECTED, OC_VOICE_OVER_AUDIO_BASE_TYPE_OPEN_CORE, FALSE);
         OcPlayAudioEntry (BootContext->PickerContext, BootEntries[ChosenEntry]);
       } else {
         //
@@ -305,11 +305,11 @@ UpdateTabContext (
 
     if (IsEntering) {
       if (TabFocus == TAB_SHUTDOWN) {
-        OcPlayAudioFile (BootContext->PickerContext, OcVoiceOverAudioFileSelected, FALSE);
-        OcPlayAudioFile (BootContext->PickerContext, OcVoiceOverAudioFileShutDown, FALSE);
+        OcPlayAudioFile (BootContext->PickerContext, OC_VOICE_OVER_AUDIO_FILE_SELECTED, OC_VOICE_OVER_AUDIO_BASE_TYPE_OPEN_CORE, FALSE);
+        OcPlayAudioFile (BootContext->PickerContext, OC_VOICE_OVER_AUDIO_FILE_SHUT_DOWN, OC_VOICE_OVER_AUDIO_BASE_TYPE_OPEN_CORE, FALSE);
       } else {
-        OcPlayAudioFile (BootContext->PickerContext, OcVoiceOverAudioFileSelected, FALSE);
-        OcPlayAudioFile (BootContext->PickerContext, OcVoiceOverAudioFileRestart, FALSE);
+        OcPlayAudioFile (BootContext->PickerContext, OC_VOICE_OVER_AUDIO_FILE_SELECTED, OC_VOICE_OVER_AUDIO_BASE_TYPE_OPEN_CORE, FALSE);
+        OcPlayAudioFile (BootContext->PickerContext, OC_VOICE_OVER_AUDIO_FILE_RESTART, OC_VOICE_OVER_AUDIO_BASE_TYPE_OPEN_CORE, FALSE);
       }
     }
   }
@@ -588,11 +588,11 @@ OcShowSimpleBootMenu (
     }
 
     if (!PlayedOnce && BootContext->PickerContext->PickerAudioAssist) {
-      OcPlayAudioFile (BootContext->PickerContext, OcVoiceOverAudioFileChooseOS, FALSE);
+      OcPlayAudioFile (BootContext->PickerContext, OC_VOICE_OVER_AUDIO_FILE_CHOOSE_OS, OC_VOICE_OVER_AUDIO_BASE_TYPE_OPEN_CORE, FALSE);
       for (Index = 0; Index < Count; ++Index) {
         OcPlayAudioEntry (BootContext->PickerContext, BootEntries[Index]);
         if ((TimeOutSeconds > 0) && (BootContext->DefaultEntry->EntryIndex - 1 == Index)) {
-          OcPlayAudioFile (BootContext->PickerContext, OcVoiceOverAudioFileDefault, FALSE);
+          OcPlayAudioFile (BootContext->PickerContext, OC_VOICE_OVER_AUDIO_FILE_DEFAULT, OC_VOICE_OVER_AUDIO_BASE_TYPE_OPEN_CORE, FALSE);
         }
       }
 
@@ -691,7 +691,7 @@ OcShowSimpleBootMenu (
         if (PickerKeyInfo.OcKeyCode == OC_INPUT_TYPING_CONFIRM) {
           gST->ConOut->OutputString (gST->ConOut, OC_MENU_RESTART);
           gST->ConOut->OutputString (gST->ConOut, L"\r\n");
-          OcPlayAudioFile (BootContext->PickerContext, AppleVoiceOverAudioFileBeep, FALSE);
+          OcPlayAudioFile (BootContext->PickerContext, APPLE_VOICE_OVER_AUDIO_FILE_BEEP, OC_VOICE_OVER_AUDIO_BASE_TYPE_APPLE, FALSE);
           ResetWarm ();
           return EFI_SUCCESS;
         }
@@ -699,7 +699,7 @@ OcShowSimpleBootMenu (
         if (PickerKeyInfo.OcKeyCode == OC_INPUT_TYPING_CONFIRM) {
           gST->ConOut->OutputString (gST->ConOut, OC_MENU_SHUTDOWN);
           gST->ConOut->OutputString (gST->ConOut, L"\r\n");
-          OcPlayAudioFile (BootContext->PickerContext, AppleVoiceOverAudioFileBeep, FALSE);
+          OcPlayAudioFile (BootContext->PickerContext, APPLE_VOICE_OVER_AUDIO_FILE_BEEP, OC_VOICE_OVER_AUDIO_BASE_TYPE_APPLE, FALSE);
           ResetShutdown ();
           return EFI_SUCCESS;
         }
@@ -734,7 +734,7 @@ OcShowSimpleBootMenu (
  #endif
 
       if (PlayChosen && (PickerKeyInfo.OcKeyCode == OC_INPUT_TIMEOUT)) {
-        OcPlayAudioFile (BootContext->PickerContext, OcVoiceOverAudioFileSelected, FALSE);
+        OcPlayAudioFile (BootContext->PickerContext, OC_VOICE_OVER_AUDIO_FILE_SELECTED, OC_VOICE_OVER_AUDIO_BASE_TYPE_OPEN_CORE, FALSE);
         OcPlayAudioEntry (BootContext->PickerContext, BootEntries[ChosenEntry]);
         PlayChosen = FALSE;
         continue;
@@ -742,7 +742,7 @@ OcShowSimpleBootMenu (
         *ChosenBootEntry = BootEntries[BootContext->DefaultEntry->EntryIndex - 1];
         gST->ConOut->OutputString (gST->ConOut, OC_MENU_TIMEOUT);
         gST->ConOut->OutputString (gST->ConOut, L"\r\n");
-        OcPlayAudioFile (BootContext->PickerContext, OcVoiceOverAudioFileTimeout, FALSE);
+        OcPlayAudioFile (BootContext->PickerContext, OC_VOICE_OVER_AUDIO_FILE_TIMEOUT, OC_VOICE_OVER_AUDIO_BASE_TYPE_OPEN_CORE, FALSE);
         return EFI_SUCCESS;
       } else if (PickerKeyInfo.OcKeyCode == OC_INPUT_CONTINUE) {
         if (ChosenEntry >= 0) {
@@ -758,12 +758,12 @@ OcShowSimpleBootMenu (
       } else if (PickerKeyInfo.OcKeyCode == OC_INPUT_ABORTED) {
         gST->ConOut->OutputString (gST->ConOut, OC_MENU_RELOADING);
         gST->ConOut->OutputString (gST->ConOut, L"\r\n");
-        OcPlayAudioFile (BootContext->PickerContext, OcVoiceOverAudioFileReloading, FALSE);
+        OcPlayAudioFile (BootContext->PickerContext, OC_VOICE_OVER_AUDIO_FILE_RELOADING, OC_VOICE_OVER_AUDIO_BASE_TYPE_OPEN_CORE, FALSE);
         return EFI_ABORTED;
       } else if ((PickerKeyInfo.OcKeyCode == OC_INPUT_MORE) && BootContext->PickerContext->HideAuxiliary) {
         gST->ConOut->OutputString (gST->ConOut, OC_MENU_SHOW_AUXILIARY);
         gST->ConOut->OutputString (gST->ConOut, L"\r\n");
-        OcPlayAudioFile (BootContext->PickerContext, OcVoiceOverAudioFileShowAuxiliary, FALSE);
+        OcPlayAudioFile (BootContext->PickerContext, OC_VOICE_OVER_AUDIO_FILE_SHOW_AUXILIARY, OC_VOICE_OVER_AUDIO_BASE_TYPE_OPEN_CORE, FALSE);
         BootContext->PickerContext->HideAuxiliary = FALSE;
         return EFI_ABORTED;
       } else if (PickerKeyInfo.OcKeyCode == OC_INPUT_UP) {
@@ -813,7 +813,7 @@ OcShowSimpleBootMenu (
 
         break;
       } else if (PickerKeyInfo.OcKeyCode == OC_INPUT_VOICE_OVER) {
-        OcToggleVoiceOver (BootContext->PickerContext, 0);
+        OcToggleVoiceOver (BootContext->PickerContext, NULL, NULL);
         break;
       } else if ((PickerKeyInfo.OcKeyCode != OC_INPUT_NO_ACTION) && (PickerKeyInfo.OcKeyCode >= 0) && ((UINTN)PickerKeyInfo.OcKeyCode < Count)) {
         *ChosenBootEntry               = BootEntries[PickerKeyInfo.OcKeyCode];
@@ -825,7 +825,7 @@ OcShowSimpleBootMenu (
       }
 
       if ((ModifiersChanged || (PickerKeyInfo.OcKeyCode != OC_INPUT_NO_ACTION)) && (TimeOutSeconds > 0)) {
-        OcPlayAudioFile (BootContext->PickerContext, OcVoiceOverAudioFileAbortTimeout, FALSE);
+        OcPlayAudioFile (BootContext->PickerContext, OC_VOICE_OVER_AUDIO_FILE_ABORT_TIMEOUT, OC_VOICE_OVER_AUDIO_BASE_TYPE_OPEN_CORE, FALSE);
         TimeOutSeconds = 0;
         break;
       }
@@ -866,7 +866,7 @@ OcShowSimplePasswordRequest (
     Context->HotKeyContext->FlushTypingBuffer (Context);
 
     gST->ConOut->OutputString (gST->ConOut, OC_MENU_PASSWORD_REQUEST);
-    OcPlayAudioFile (Context, OcVoiceOverAudioFileEnterPassword, TRUE);
+    OcPlayAudioFile (Context, OC_VOICE_OVER_AUDIO_FILE_ENTER_PASSWORD, OC_VOICE_OVER_AUDIO_BASE_TYPE_OPEN_CORE, TRUE);
 
     while (TRUE) {
       Context->HotKeyContext->WaitForKeyInfo (
@@ -877,7 +877,7 @@ OcShowSimplePasswordRequest (
                                 );
 
       if (PickerKeyInfo.OcKeyCode == OC_INPUT_VOICE_OVER) {
-        OcToggleVoiceOver (Context, OcVoiceOverAudioFileEnterPassword);
+        OcToggleVoiceOver (Context, OC_VOICE_OVER_AUDIO_FILE_ENTER_PASSWORD, OC_VOICE_OVER_AUDIO_BASE_TYPE_OPEN_CORE);
         continue;
       }
 
@@ -911,7 +911,7 @@ OcShowSimplePasswordRequest (
                          );
         }
 
-        OcPlayAudioFile (Context, AppleVoiceOverAudioFileBeep, TRUE);
+        OcPlayAudioFile (Context, APPLE_VOICE_OVER_AUDIO_FILE_BEEP, OC_VOICE_OVER_AUDIO_BASE_TYPE_APPLE, TRUE);
         continue;
       }
 
@@ -921,7 +921,7 @@ OcShowSimplePasswordRequest (
       {
         gST->ConOut->OutputString (gST->ConOut, L"*");
         Password[PwIndex] = (UINT8)PickerKeyInfo.UnicodeChar;
-        OcPlayAudioFile (Context, AppleVoiceOverAudioFileBeep, TRUE);
+        OcPlayAudioFile (Context, APPLE_VOICE_OVER_AUDIO_FILE_BEEP, OC_VOICE_OVER_AUDIO_BASE_TYPE_APPLE, TRUE);
         ++PwIndex;
         continue;
       }
@@ -984,15 +984,15 @@ OcShowSimplePasswordRequest (
                    );
 
     if (Result) {
-      OcPlayAudioFile (Context, OcVoiceOverAudioFilePasswordAccepted, TRUE);
+      OcPlayAudioFile (Context, OC_VOICE_OVER_AUDIO_FILE_PASSWORD_ACCEPTED, OC_VOICE_OVER_AUDIO_BASE_TYPE_OPEN_CORE, TRUE);
       return EFI_SUCCESS;
     }
 
-    OcPlayAudioFile (Context, OcVoiceOverAudioFilePasswordIncorrect, TRUE);
+    OcPlayAudioFile (Context, OC_VOICE_OVER_AUDIO_FILE_PASSWORD_INCORRECT, OC_VOICE_OVER_AUDIO_BASE_TYPE_OPEN_CORE, TRUE);
   }
 
   gST->ConOut->OutputString (gST->ConOut, OC_MENU_PASSWORD_RETRY_LIMIT L"\r\n");
-  OcPlayAudioFile (Context, OcVoiceOverAudioFilePasswordRetryLimit, TRUE);
+  OcPlayAudioFile (Context, OC_VOICE_OVER_AUDIO_FILE_PASSWORD_RETRY_LIMIT, OC_VOICE_OVER_AUDIO_BASE_TYPE_OPEN_CORE, TRUE);
   DEBUG ((DEBUG_WARN, "OCB: User failed to verify password %d times running\n", OC_PASSWORD_MAX_RETRIES));
 
   gBS->Stall (SECONDS_TO_MICROSECONDS (5));
