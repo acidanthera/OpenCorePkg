@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
-%DIF DEL PreviousConfiguration.tex   Sun May  1 02:19:47 2022
-%DIF ADD ../Configuration.tex        Mon May  9 12:41:21 2022
+%DIF DEL PreviousConfiguration.tex   Mon Apr 25 17:45:27 2022
+%DIF ADD ../Configuration.tex        Sun May 15 00:57:34 2022
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -118,7 +118,7 @@
 %DIF HYPERREF PREAMBLE %DIF PREAMBLE
 \providecommand{\DIFadd}[1]{\texorpdfstring{\DIFaddtex{#1}}{#1}} %DIF PREAMBLE
 \providecommand{\DIFdel}[1]{\texorpdfstring{\DIFdeltex{#1}}{}} %DIF PREAMBLE
-%DIF COLORLISTINGS PREAMBLE %DIF PREAMBLE
+%DIF LISTINGS PREAMBLE %DIF PREAMBLE
 \RequirePackage{listings} %DIF PREAMBLE
 \RequirePackage{color} %DIF PREAMBLE
 \lstdefinelanguage{DIFcode}{ %DIF PREAMBLE
@@ -6442,7 +6442,10 @@ even cause permanent firmware damage. Some of the known drivers are listed below
 & \hyperref[uefilinux]{OpenCore plugin} implementing \texttt{OC\_BOOT\_ENTRY\_PROTOCOL}
   to allow direct detection and booting of Linux distributiuons from OpenCore, without
   chainloading via GRUB. \\
-\href{https://github.com/acidanthera/OpenCorePkg}{\texttt{OpenUsbKbDxe}}\textbf{*}
+\DIFaddbegin \href{https://github.com/acidanthera/OpenCorePkg}{\texttt{\DIFadd{OpenNtfsDxe}}}\textbf{\DIFadd{*}}
+& \DIFadd{New Technologies File System (NTFS) read-only driver.
+  NTFS is the primary file system for Microsoft Windows versions that are based on Windows NT. }\\
+\DIFaddend \href{https://github.com/acidanthera/OpenCorePkg}{\texttt{OpenUsbKbDxe}}\textbf{*}
 & USB keyboard driver adding support for \texttt{AppleKeyMapAggregator} protocols
   on top of a custom USB keyboard driver implementation. This is an alternative to
   builtin \texttt{KeySupport}, which may work better or worse depending on the firmware. \\
