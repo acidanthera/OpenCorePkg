@@ -62,6 +62,7 @@ Utilities/macserial/macserial
 Utilities/icnspack/icnspack
 Utilities/ocpasswordgen/ocpasswordgen
 Utilities/ocvalidate/ocvalidate
+Utilities/ocvalidate/*.plist
 Utilities/LogoutHook/nvramdump
 Utilities/RsaTool/RsaTool
 Utilities/TestBmf/Bmf
