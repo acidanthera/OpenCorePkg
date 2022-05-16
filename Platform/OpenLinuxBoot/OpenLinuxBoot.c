@@ -94,10 +94,10 @@ STATIC
 EFI_STATUS
 EFIAPI
 OcGetLinuxBootEntries (
-  IN           OC_PICKER_CONTEXT  *PickerContext,
-  IN     CONST EFI_HANDLE         Device,
-  OUT       OC_PICKER_ENTRY       **Entries,
-  OUT       UINTN                 *NumEntries
+  IN OUT         OC_PICKER_CONTEXT  *PickerContext,
+  IN     CONST EFI_HANDLE           Device OPTIONAL,
+  OUT       OC_PICKER_ENTRY         **Entries,
+  OUT       UINTN                   *NumEntries
   )
 {
   EFI_STATUS                       Status;
@@ -265,7 +265,8 @@ OC_BOOT_ENTRY_PROTOCOL
   mLinuxBootEntryProtocol = {
   OC_BOOT_ENTRY_PROTOCOL_REVISION,
   OcGetLinuxBootEntries,
-  OcFreeLinuxBootEntries
+  OcFreeLinuxBootEntries,
+  NULL
 };
 
 EFI_STATUS

@@ -171,6 +171,8 @@ package() {
       "OpenUsbKbDxe.efi"
       "Ps2KeyboardDxe.efi"
       "Ps2MouseDxe.efi"
+      "ResetNvramEntry.efi"
+      "ToggleSipEntry.efi"
       "UsbMouseDxe.efi"
       "XhciDxe.efi"
       )

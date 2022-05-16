@@ -1,0 +1,37 @@
+## @file
+#  Boot entry protocol implementation of Reset NVRAM boot picker entry.
+#
+#  Copyright (C) 2022, Mike Beaton. All rights reserved.<BR>
+#  SPDX-License-Identifier: BSD-3-Clause
+##
+
+
+[Defines]
+  INF_VERSION    = 0x00010005
+  BASE_NAME      = ResetNvramEntry
+  ENTRY_POINT    = UefiMain
+  FILE_GUID      = 88401E59-1FD2-44C1-9092-539866D48676
+  MODULE_TYPE    = UEFI_DRIVER
+  VERSION_STRING = 1.0
+
+[Packages]
+  OpenCorePkg/OpenCorePkg.dec
+  MdePkg/MdePkg.dec
+  MdeModulePkg/MdeModulePkg.dec
+  UefiCpuPkg/UefiCpuPkg.dec
+
+[LibraryClasses]
+  DebugLib
+  OcBootManagementLib
+  OcDeviceMiscLib
+  OcFlexArrayLib
+  UefiBootServicesTableLib
+  UefiRuntimeServicesTableLib
+  UefiDriverEntryPoint
+  UefiLib
+
+[Protocols]
+  gOcBootEntryProtocolGuid            # PRODUCES
+ 
+[Sources]
+  ResetNvramEntry.c

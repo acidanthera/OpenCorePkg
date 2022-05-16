@@ -3593,7 +3593,11 @@ the default boot entry choice will remain changed until the next manual reconfig
   Introducing a delay may give extra time to hold the right \texttt{action hotkey}
   sequence to, for instance, boot into recovery mode. On some platforms, setting this
   option to a minimum of \texttt{5000-10000} microseconds may be required to access
-  \texttt{action hotkeys} due to the nature of the keyboard driver.
+  \texttt{action hotkeys} due to the nature of the keyboard driver. If the boot chime
+  is configured (see audio configuration options) then, at the expense of slightly slower
+  startup, an even longer delay up to more or less the length of the boot chime sound
+  causes behaviour similar to a real Mac, where the chime itself acts as a reliable signal
+  for when hotkeys can be pressed.
 
 \item
   \texttt{Timeout}\\
@@ -3642,17 +3646,13 @@ the default boot entry choice will remain changed until the next manual reconfig
   \item \texttt{ShowPicker} --- this option forces the OpenCore picker to be displayed. This can
   typically be achieved by holding the \texttt{OPT} key during boot. Setting \texttt{ShowPicker} to
   \texttt{true} will make \texttt{ShowPicker} the default option.
-  \item \texttt{ResetNvram} --- this option erases certain UEFI variables and is
-  normally executed by holding down the \texttt{CMD+OPT+P+R} key combination during boot.
-  Another way to erase UEFI variables is to choose \texttt{Reset NVRAM} in the OpenCore picker.
-  This option requires \texttt{AllowNvramReset} to be set to \texttt{true}.
   \item \texttt{BootApple} --- this options performs booting to the first Apple
   operating system found unless the chosen default operating system is one from Apple.
   Hold the \texttt{X} key down to choose this option.
   \item \texttt{BootAppleRecovery} --- this option performs booting into the Apple operating
   system recovery partition. This is either that related to the default chosen operating system,
   or first one found when the chosen default operating system is not from Apple or does not have
-  a recovery partition. Hold the \texttt{CMD+R} key combination down to choose this option.
+  a recovery partition. Hold the \texttt{CMD+R} hotkey combination down to choose this option.
   \end{itemize}
 
   \emph{Note 1}: On non-Apple firmware \texttt{KeySupport}, \texttt{OpenUsbKbDxe}, or similar drivers are
@@ -3960,22 +3960,6 @@ nvram 4D1FDA02-38C7-4A6A-9CC6-4BCCA8B30102:boot-log |
 \begin{enumerate}
 
 \item
-  \texttt{AllowNvramReset}\\
-  \textbf{Type}: \texttt{plist\ boolean}\\
-  \textbf{Failsafe}: \texttt{false}\\
-  \textbf{Description}: Allow \texttt{CMD+OPT+P+R} handling and enable
-  showing \texttt{NVRAM Reset} entry in OpenCore picker.
-
-  \emph{Note 1}: It is known that some Lenovo laptops have a firmware
-  bug, which makes them unbootable after performing NVRAM reset. Refer to
-  \href{https://github.com/acidanthera/bugtracker/issues/995}{acidanthera/bugtracker\#995}
-  for details.
-
-  \emph{Note 2}: Resetting NVRAM will also erase any boot options not backed up using
-  the bless command. For example, Linux installations to custom locations not specified
-  in BlessOverride
-
-\item
   \texttt{AllowSetDefault}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
@@ -3989,36 +3973,6 @@ nvram 4D1FDA02-38C7-4A6A-9CC6-4BCCA8B30102:boot-log |
   \emph{Note 2}: In order to support systems with unresponsive modifiers during preboot
   (which includes \texttt{V1} and \texttt{V2} \texttt{KeySupport} mode on some firmware)
   OpenCore also allows holding the \texttt{=/+} key in order to trigger `set default' mode.
-
-\item
-  \texttt{AllowToggleSip}\\
-  \textbf{Type}: \texttt{plist\ boolean}\\
-  \textbf{Failsafe}: \texttt{false}\\
-  \textbf{Description}: Enable
-  entry for disabling and enabling System Integrity Protection in OpenCore picker.
-
-  This will toggle Apple NVRAM variable \texttt{csr-active-config} between \texttt{0} for
-  SIP Enabled and a practical default value for SIP Disabled.
-
-  \emph{Note 1}: It is strongly recommended not to make a habit of running macOS with
-  SIP disabled. Use of this boot option may make it easier to quickly disable SIP
-  protection when genuinely needed - it should be re-enabled again afterwards.
-
-  \emph{Note 2}: OpenCore uses \texttt{0x27F} while \texttt{csrutil disable} on macOS Big Sur
-  and Monterey sets \texttt{0x7F}.
-  \begin{itemize}
-  \tightlist
-  \item \texttt{CSR\_ALLOW\_UNAPPROVED\_KEXTS} (\texttt{0x200}) is generally useful, in the case
-  where you do need to have SIP disabled anyway, as it allows installing unsigned kexts without
-  manual approval in System Preferences.
-  \item \texttt{CSR\_ALLOW\_UNAUTHENTICATED\_ROOT} (\texttt{0x800}) is not included, as it is
-  very easy when using it to inadvertently break OS seal and prevent incremental OTA updates.
-  \end{itemize}
-
-  \emph{Note3}: For any other value which you may need to use, it is possible to
-  configure \texttt{CsrUtil.efi} as a \texttt{TextMode} \texttt{Tools} entry to configure a
-  different value, e.g. use \texttt{toggle\ 0x77} in \texttt{Arguments} to toggle the
-  SIP disabled value set by default in macOS Catalina.
 
 \item
   \texttt{ApECID}\\
@@ -6403,6 +6357,12 @@ even cause permanent firmware damage. Some of the known drivers are listed below
   a closed source \texttt{HfsPlus} driver commonly found in Apple firmware. While
   it is feature complete, it is approximately 3~times slower and is yet to undergo
   a security audit. \\
+\href{https://github.com/acidanthera/OpenCorePkg}{\texttt{ResetNvramEntry}}\textbf{*}
+& \hyperref[uefiresetnvram]{OpenCore plugin} implementing \texttt{OC\_BOOT\_ENTRY\_PROTOCOL}
+  to add a configurable \texttt{Reset NVRAM} entry to the boot picker menu. \\
+\href{https://github.com/acidanthera/OpenCorePkg}{\texttt{ToggleSipEntry}}\textbf{*}
+& \hyperref[uefitogglesip]{OpenCore plugin} implementing \texttt{OC\_BOOT\_ENTRY\_PROTOCOL}
+  to add a configurable \texttt{Toggle SIP} entry to the boot picker menu. \\
 \href{https://github.com/acidanthera/audk}{\texttt{UsbMouseDxe}}\textbf{*}
 & USB mouse driver from \texttt{MdeModulePkg}. Some virtual machine firmware
   such as OVMF may not include this driver but it is necessary for the mouse to work
@@ -6830,6 +6790,93 @@ does not support the systemd-boot--specific \href{https://systemd.io/BOOT\_LOADE
 therefore \texttt{efibootmgr} rather than \texttt{bootctl} must be used for any low-level Linux command line interaction
 with the boot menu.
 
+\subsection{Other Boot Entry Protocol drivers}
+
+In addition to the \hyperref[uefilinux]{OpenLinuxBoot} plugin, the following \texttt{OC\_BOOT\_ENTRY\_PROTOCOL}
+plugins are made available to add optional, configurable boot entries to the OpenCore boot picker.
+
+\subsubsection{ResetNvramEntry}\label{uefiresetnvram}
+
+Adds a menu entry which resets NVRAM and immediately restarts. Additionally adds support for hotkey
+\texttt{CMD+OPT+P+R} to perform the same action. Note that on some combinations of firmware and
+drivers, the \texttt{TakeoffDelay} option must be configured in order for this
+and other builtin hotkeys to be reliably detected.
+
+\emph{Note 1}: It is known that some Lenovo laptops have a firmware
+bug, which makes them unbootable after performing NVRAM reset. Refer to
+\href{https://github.com/acidanthera/bugtracker/issues/995}{acidanthera/bugtracker\#995}
+for details.
+
+\emph{Note 2}: If \texttt{LauncherOption} is set to \texttt{Full} or \texttt{Short} then the
+OpenCore boot entry is protected. Resetting NVRAM will normally erase any other boot options
+not specified via \texttt{BlessOverride}, for example Linux installations to custom locations
+and not using the \texttt{OpenLinuxBoot} driver, or user-specified UEFI boot menu entries.
+To obtain reset NVRAM functionality which does not remove other boot options, it is possible
+to use the \texttt{-{}-preserve-boot} option (though see the warning specified).
+
+The following configuration options may be specified in the \texttt{Arguments} section for this driver:
+
+\begin{itemize}
+  \item \texttt{-{}-preserve-boot} - Boolean flag, enabled if present. \medskip
+
+  If enabled, BIOS boot entries are not cleared during NVRAM reset. This option should
+  be used with caution, as some boot problems can be fixed by clearing these entries. \medskip
+
+  \item \texttt{-{}-apple} - Boolean flag, enabled if present. \medskip
+
+  On Apple firmware only, this performs a system NVRAM reset. This can result in
+  additional, desirable operations such as NVRAM garbage collection. This is achieved by
+  setting the \texttt{ResetNVRam} NVRAM variable.
+  Where available, this has the same effect as pressing \texttt{CMD+OPT+P+R} during native boot,
+  although note that if accessed from the menu entry only one boot chime will be heard. \medskip
+
+  \emph{Note 1}: Due to using system NVRAM reset, this option is not compatible with the \texttt{-{}-preserve-boot}
+  option and will override it, therefore all BIOS boot entries will be removed. \medskip
+
+  \emph{Note 2}: Due to using system NVRAM reset, the OpenCore boot option
+  cannot be preserved and OpenCore will have to either be reselected in the native boot picker or
+  re-blessed. \medskip
+
+  \emph{Note 3}: On non-Apple hardware, this option will still set this variable but the
+  variable will not be recognised by the firmware and no NVRAM reset will happen. \medskip
+\end{itemize}
+
+\subsubsection{ToggleSipEntry}\label{uefitogglesip}
+
+Provides a boot entry for enabling and disabling System Integrity Protection (SIP) in OpenCore picker.
+
+While macOS is running, SIP involves multiple configured software protection systems, however
+all the information about which of these protections to enable is stored in the single Apple NVRAM variable
+\texttt{csr-active-config}. As long as this variable is set before macOS startup,
+SIP will be fully configured, so setting the variable using this boot option
+(or in any other way, before macOS starts) has exactly the same end result as configuring SIP using the
+\texttt{csrutil} command in macOS Recovery.
+
+\texttt{csr-active-config}  will be toggled between \texttt{0} for enabled, and a user-specified or
+default value for disabled. The default value is \texttt{0x27F} (see below).
+Any other required value can be specified as a single number in the \texttt{Arguments} for this driver.
+This can be specified as hexadecimal, beginning with \texttt{0x}, or as decimal.
+
+\emph{Note 1}: It is recommended not to run macOS with
+SIP disabled. Use of this boot option may make it easier to quickly disable SIP
+protection when genuinely needed - it should be re-enabled again afterwards.
+
+\emph{Note 2}: The default value for disabling SIP with this boot entry is \texttt{0x27F}.
+For comparison, \texttt{csrutil disable} with no other arguments on macOS Big Sur and Monterey
+sets \texttt{0x7F}, and on Catalina it sets \texttt{0x77}. The OpenCore default value of \texttt{0x27F}
+is a variant of the Big Sur and Monterey value, chosen as follows:
+\begin{itemize}
+\tightlist
+\item \texttt{CSR\_ALLOW\_UNAPPROVED\_KEXTS} (\texttt{0x200}) is included in the default value,
+since it is generally useful, in the case where you need to have SIP disabled anyway, to be
+able to install unsigned kexts without manual approval in System Preferences.
+\item \texttt{CSR\_ALLOW\_UNAUTHENTICATED\_ROOT} (\texttt{0x800}) is not included in the default
+value, as it is very easy when using it to inadvertently break OS seal and prevent incremental OTA updates.
+\item If unsupported bits from a later OS are specified in \texttt{csr-active-config}
+(e.g. specifying \texttt{0x7F} on Catalina) then \texttt{csrutil status}
+will report that SIP has a non-standard value, however protection will be functionally the same.
+\end{itemize}
+
 \subsection{AudioDxe}\label{uefiaudio}
 
 High Definition Audio support driver in UEFI firmware for most Intel and some other analog audio controllers.
@@ -6889,7 +6936,7 @@ on most Apple hardware, and possibly some others) may be specified in \texttt{UE
   \texttt{HDA: GPIO setup on pins 0x0F - Success} \medskip
 
   Values for driver parameters can be specified in hexadecimal beginning with \texttt{0x} or
-  in decimal, e.g. \texttt{-{}-gpio-pins=0x12} or \texttt{-{}-gpio-pins=18}.
+  in decimal, e.g. \texttt{-{}-gpio-pins=0x12} or \texttt{-{}-gpio-pins=18}. \medskip
 
 	\item \texttt{-{}-restore-nosnoop} - Boolean flag, enabled if present. \medskip
 

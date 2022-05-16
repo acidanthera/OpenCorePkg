@@ -183,14 +183,6 @@ OcRunBootPicker (
 
   OcImageLoaderActivate ();
 
-  //
-  // Reset NVRAM right away if requested by a key combination.
-  // This function should not return under normal conditions.
-  //
-  if (Context->PickerCommand == OcPickerResetNvram) {
-    return InternalSystemActionResetNvram ();
-  }
-
   KeyMap = OcAppleKeyMapInstallProtocols (FALSE);
   if (KeyMap == NULL) {
     DEBUG ((DEBUG_ERROR, "OCB: AppleKeyMap locate failure\n"));
@@ -229,7 +221,7 @@ OcRunBootPicker (
     //
     // Turbo-boost scanning when bypassing picker.
     //
-    if (Context->PickerCommand == OcPickerDefault) {
+    if ((Context->PickerCommand == OcPickerDefault) || (Context->PickerCommand == OcPickerProtocolHotKey)) {
       BootContext = OcScanForDefaultBootEntry (Context);
     } else {
       ASSERT (
@@ -246,8 +238,12 @@ OcRunBootPicker (
     // Fallback to showing menu in the latter case.
     //
     if (BootContext == NULL) {
-      if (Context->HideAuxiliary) {
-        DEBUG ((DEBUG_INFO, "OCB: System has no boot entries, retrying with auxiliary\n"));
+      //
+      // TODO: Failed protocol hotkey can access OcPickerShowPicker mode even if
+      // this is denied by InternalRunRequestPrivilege above, is this OK?
+      //
+      if (Context->HideAuxiliary || (Context->PickerCommand == OcPickerProtocolHotKey)) {
+        DEBUG ((DEBUG_INFO, "OCB: System has no boot entries, showing picker with auxiliary\n"));
         Context->PickerCommand = OcPickerShowPicker;
         Context->HideAuxiliary = FALSE;
         continue;

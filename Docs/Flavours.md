@@ -152,11 +152,14 @@ It is recommended to either i) only provide `NVRAMTool.icns`, as this will be ap
 If providing `NVRAMTool.icns`, it should be themed so that it could be applied to any generic NVRAM tool.
 
  - **NVRAMTool** - Any NVRAM-related tool (`NVRAMTool.icns`)
- - **ResetNVRAM:NVRAMTool** - A reset NVRAM tool specifically  (`ResetNVRAM.icns`)
-   - This is the recommended flavour, it is automatically used for the entry created by config setting `AllowNvramReset`, or to use for the `CleanNvram.efi` tool.
+ - **ResetNVRAM:NVRAMTool** - Reset NVRAM tool  (`ResetNVRAM.icns`)
+   - This is the recommended flavour, used for the entry created by the `ResetNvramEntry.efi` driver.
    - As another example of how flavours work: **ResetNVRAM:NVRAMTool** will look for `ResetNVRAM.icns`, then `NVRAMTool.icns` (and then, by OC default behaviour, `Tool.icns` then `HardDrive.icns`)
-   - _**NB**: Including **ResetNVRAM** anywhere in the flavour triggers picker audio-assist for "Reset NVRAM"_
- - **ToggleSIP:NVRAMTool** - Icon themed for Toggle SIP tool specifically  (`ToggleSIP.icns`)
+   - **NB**: Including **ResetNVRAM** anywhere in a user flavour triggers picker audio-assist and builtin label support for "Reset NVRAM"
+ - **ToggleSIP:NVRAMTool** - Icon themed for Toggle SIP tool  (`ToggleSIP.icns`)
+ - **ToggleSIP_Enabled:ToggleSIP:NVRAMTool** - Icon themed for Toggle SIP tool when SIP is enabled (system is protected)
+ - **ToggleSIP_Disabled:ToggleSIP:NVRAMTool** - Icon themed for Toggle SIP tool when SIP is disabled (system is unprotected)
+   - **NB**: Including **ToggleSIP_Enabled** or **ToggleSIP_Disabled** anywhere in a user flavour triggers picker audio-assist and builtin label support for the two states of the Toggle SIP menu entry
 
 ### Other Tools
 

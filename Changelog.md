@@ -6,6 +6,11 @@ OpenCore Changelog
 - Added System option in `LauncherOption` property, thx @stevezhengshiqi
 - Updated note about `CustomPciSerialDevice`, thx @joevt
 - Added read-only driver for NTFS
+- Switched `Reset NVRAM` and `Toggle SIP` to configurable boot entry protocol drivers
+- Supported optional Apple firmware-native NVRAM reset, thx @Syncretic
+- Supported NVRAM reset optionally retaining BIOS boot entries
+- Supported user specified `csr-active-config` value for Toggle SIP
+- Added optional `Enabled` and `Disabled` flavours for `Toggle SIP` (allows theme designers to provide distinct icons)
 
 #### v0.8.0
 - Added support for early log preservation

@@ -272,6 +272,8 @@
   OpenCorePkg/Platform/OpenPartitionDxe/PartitionDxe.inf
   OpenCorePkg/Platform/OpenRuntime/OpenRuntime.inf
   OpenCorePkg/Platform/OpenUsbKbDxe/UsbKbDxe.inf
+  OpenCorePkg/Platform/ResetNvramEntry/ResetNvramEntry.inf
+  OpenCorePkg/Platform/ToggleSipEntry/ToggleSipEntry.inf
   OpenCorePkg/Staging/AudioDxe/AudioDxe.inf
   OpenCorePkg/Staging/OpenHfsPlus/OpenHfsPlus.inf
   OpenCorePkg/Tests/AcpiTest/AcpiTest.inf
