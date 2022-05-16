@@ -14,8 +14,8 @@ UINT64  mUnitSize;
 STATIC
 UINT64
 GetLcn (
-  IN RUNLIST  *Runlist,
-  IN UINT64   Vcn
+  IN OUT RUNLIST  *Runlist,
+  IN     UINT64   Vcn
   )
 {
   EFI_STATUS  Status;
