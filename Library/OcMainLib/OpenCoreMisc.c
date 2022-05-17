@@ -572,7 +572,7 @@ BuildLauncherPath (
   // For custom paths no deduplication happens.
   //
   if (AsciiStrCmp (LauncherPath, "Default") == 0) {
-    BootstrapSize = StrSize (RootPath) + StrSize (OPEN_CORE_APP_PATH);
+    BootstrapSize = StrSize (RootPath) + L_STR_SIZE (OPEN_CORE_APP_PATH);
     BootstrapPath = AllocatePool (BootstrapSize);
     if (BootstrapPath == NULL) {
       return NULL;

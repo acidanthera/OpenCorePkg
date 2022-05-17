@@ -94,9 +94,9 @@ IsDeletableVariable (
     //
     if (  (StrCmp (Name, L"BootNext") == 0)
        || (  !PreserveBoot
-          && (StrnCmp (Name, L"Boot", StrLen (L"Boot")) == 0)
+          && (StrnCmp (Name, L"Boot", L_STR_LEN (L"Boot")) == 0)
           && (StrCmp (Name, L"BootOptionSupport") != 0))
-       || (StrnCmp (Name, L"Driver", StrLen (L"Driver")) == 0))
+       || (StrnCmp (Name, L"Driver", L_STR_LEN (L"Driver")) == 0))
     {
       return TRUE;
     }
