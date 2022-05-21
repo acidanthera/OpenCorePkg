@@ -19,7 +19,7 @@ with open(sys.argv[1], 'r', encoding='utf-8') as f:
             print('Checking schema {}'.format(re.match(r'^\w+', content[index + 1]).group(0)))
             prev = ''
             continue
-        x = re.search(r'"([^"]+)"', l)
+        x = re.search(r'"([^"]+)"', line)
         if x:
             if x.group(1) < prev:
                 print('ERROR: {} precedes {}'.format(prev, x.group(1)))
