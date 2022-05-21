@@ -12,9 +12,8 @@ import operator
 import os
 import sys
 import unicodedata
-
-import update_products
 import yaml
+import update_products
 
 
 def remove_accents(input_str):
@@ -146,7 +145,8 @@ def export_db_macinfolib(db, path, year=0):
             sb_model = info.get('AppleModelId')
             sb_model = f"'{sb_model.lower()}'" if sb_model else 'NULL'
 
-            print(' {\n'
+            print(
+                ' {\n'
                 '  .SystemProductName = "%s",\n'
                 '  .BoardProduct = "%s",\n'
                 '  .BoardRevision = %s,\n'
@@ -272,21 +272,21 @@ def export_db_macserial(db, dbpd, path, year=0):
 
 
 def export_mlb_boards(db, boards):
-    
+
     mlb = {}
     for info in db:
         if len(info['SystemSerialNumber']) == 12:
             models = [info['BoardProduct']] if not isinstance(info['BoardProduct'], list) else info['BoardProduct']
 
             for model in models:
-                mlb[model] = 'latest' if not info['MaximumOSVersion'] else info['MaximumOSVersion'] 
+                mlb[model] = 'latest' if not info['MaximumOSVersion'] else info['MaximumOSVersion']
 
     with open(boards, 'w', encoding='utf-8') as fh:
         json.dump(mlb, fh, indent=1)
 
 
 if __name__ == '__main__':
-    
+
     db = load_db('DataBase')
     dbpd = update_products.load_products()
     # Run test phase to validate the library
