@@ -97,7 +97,7 @@ def num_to_base34(num):
 
 def load_products(path='Products.zjson'):
     try:
-        with open(path, 'rb', encoding='utf-8') as fh:
+        with open(path, 'rb') as fh:
             if path.endswith('.zjson'):
                 db = json.loads(zlib.decompress(fh.read()))
             elif path.endswith('.json'):
@@ -110,10 +110,10 @@ def load_products(path='Products.zjson'):
                 newdb = {}
                 for entry in db:
                     newdb[entry] = {
-                        KEY_NAME:   db[entry]['name'] if db[entry]['name'] is not None else 0,
+                        KEY_NAME: db[entry]['name'] if db[entry]['name'] is not None else 0,
                         KEY_EXCEPT: db[entry]['except'] if db[entry]['except'] is not None else 0,
                         KEY_STATUS: map_legacy_status(db[entry]['status']),
-                        KEY_DATE:   db[entry]['date'],
+                        KEY_DATE: db[entry]['date'],
                     }
                 return newdb
             return db
@@ -128,8 +128,10 @@ def save_database(database, path):
     # We are not using yaml for speed reasons.
     path = path.replace('.yaml', '.zjson')
     path = path.replace('.json', '.zjson')
-    with open(path, 'w', encoding='utf-8') as fh:
-        fh.write(zlib.compress(json.dumps(database, fh, indent=0, separators=(',', ':'), sort_keys=True), 9))
+    with open(path, 'wb') as fh:
+        json_dump = json.dumps(database, indent=0, separators=(',', ':'), sort_keys=True)
+        json_dump = bytes(json_dump, 'utf-8')
+        fh.write(zlib.compress(json_dump, 9))
 
 
 def store_product(database, model, name, exception, status, date=None):
