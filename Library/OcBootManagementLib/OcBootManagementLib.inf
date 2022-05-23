@@ -40,7 +40,6 @@
   BootEntryManagement.c
   BootManagementInternal.h
   BootEntryProtocol.c
-  BootEntryProtocolInternal.h
   BuiltinPicker.c
   DefaultEntryChoice.c
   DmgBootSupport.c

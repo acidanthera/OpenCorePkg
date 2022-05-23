@@ -43,7 +43,6 @@ typedef struct OC_HOTKEY_CONTEXT_ OC_HOTKEY_CONTEXT;
   Default strings for use in the interfaces.
 **/
 #define OC_MENU_BOOT_MENU             L"OpenCore Boot Menu"
-#define OC_MENU_RESET_NVRAM_ENTRY     L"Reset NVRAM"
 #define OC_MENU_UEFI_SHELL_ENTRY      L"UEFI Shell"
 #define OC_MENU_PASSWORD_REQUEST      L"Password: "
 #define OC_MENU_PASSWORD_PROCESSING   L"Verifying password..."
@@ -57,26 +56,28 @@ typedef struct OC_HOTKEY_CONTEXT_ OC_HOTKEY_CONTEXT;
 #define OC_MENU_DISK_IMAGE            L" (dmg)"
 #define OC_MENU_SHUTDOWN              L"Shutting Down"
 #define OC_MENU_RESTART               L"Restarting"
-#define OC_MENU_SIP_IS_DISABLED       L"Toggle SIP (Disabled)"
-#define OC_MENU_SIP_IS_ENABLED        L"Toggle SIP (Enabled)"
 
 /**
   Predefined flavours.
 **/
-#define OC_FLAVOUR_AUTO                "Auto"
-#define OC_FLAVOUR_RESET_NVRAM         "ResetNVRAM:NVRAMTool"
-#define OC_FLAVOUR_TOGGLE_SIP          "ToggleSIP:NVRAMTool"
-#define OC_FLAVOUR_APPLE_OS            "Apple"
-#define OC_FLAVOUR_APPLE_RECOVERY      "AppleRecv:Apple"
-#define OC_FLAVOUR_APPLE_FW            "AppleRecv:Apple"
-#define OC_FLAVOUR_APPLE_TIME_MACHINE  "AppleTM:Apple"
-#define OC_FLAVOUR_WINDOWS             "Windows"
+#define OC_FLAVOUR_AUTO                 "Auto"
+#define OC_FLAVOUR_RESET_NVRAM          "ResetNVRAM:NVRAMTool"
+#define OC_FLAVOUR_TOGGLE_SIP           "ToggleSIP:NVRAMTool"
+#define OC_FLAVOUR_TOGGLE_SIP_ENABLED   "ToggleSIP_Enabled:ToggleSIP:NVRAMTool"
+#define OC_FLAVOUR_TOGGLE_SIP_DISABLED  "ToggleSIP_Disabled:ToggleSIP:NVRAMTool"
+#define OC_FLAVOUR_APPLE_OS             "Apple"
+#define OC_FLAVOUR_APPLE_RECOVERY       "AppleRecv:Apple"
+#define OC_FLAVOUR_APPLE_FW             "AppleRecv:Apple"
+#define OC_FLAVOUR_APPLE_TIME_MACHINE   "AppleTM:Apple"
+#define OC_FLAVOUR_WINDOWS              "Windows"
 
 /**
   Predefined flavour ids.
 **/
-#define OC_FLAVOUR_ID_RESET_NVRAM  "ResetNVRAM"
-#define OC_FLAVOUR_ID_UEFI_SHELL   "UEFIShell"
+#define OC_FLAVOUR_ID_RESET_NVRAM          "ResetNVRAM"
+#define OC_FLAVOUR_ID_UEFI_SHELL           "UEFIShell"
+#define OC_FLAVOUR_ID_TOGGLE_SIP_ENABLED   "ToggleSIP_Enabled"
+#define OC_FLAVOUR_ID_TOGGLE_SIP_DISABLED  "ToggleSIP_Disabled"
 
 /**
   Paths allowed to be accessible by the interfaces.
@@ -138,9 +139,7 @@ typedef UINT32 OC_BOOT_ENTRY_TYPE;
 #define OC_BOOT_WINDOWS             BIT5
 #define OC_BOOT_EXTERNAL_OS         BIT6
 #define OC_BOOT_EXTERNAL_TOOL       BIT7
-#define OC_BOOT_RESET_NVRAM         BIT8
-#define OC_BOOT_TOGGLE_SIP          BIT9
-#define OC_BOOT_SYSTEM              (OC_BOOT_RESET_NVRAM | OC_BOOT_TOGGLE_SIP)
+#define OC_BOOT_SYSTEM              BIT8
 
 /**
   Picker mode.
@@ -179,7 +178,7 @@ typedef enum OC_PICKER_MODE_ {
 typedef
 EFI_STATUS
 (*OC_BOOT_SYSTEM_ACTION) (
-  VOID
+  IN OUT          OC_PICKER_CONTEXT  *PickerContext
   );
 
 /**
@@ -260,7 +259,7 @@ typedef struct OC_BOOT_ENTRY_ {
   BOOLEAN                     ExposeDevicePath;
   //
   // Partition UUID of entry device.
-  // Set for boot entry protocol boot entries only.
+  // Set for non-system action boot entry protocol boot entries only.
   //
   EFI_GUID                    UniquePartitionGUID;
   //
@@ -271,6 +270,14 @@ typedef struct OC_BOOT_ENTRY_ {
   // Load option data (usually "boot args").
   //
   VOID                        *LoadOptions;
+  //
+  // Audio base path for system action. Boot Entry Protocol only.
+  //
+  CHAR8                       *AudioBasePath;
+  //
+  // Audio base type for system action. Boot Entry Protocol only.
+  //
+  CHAR8                       *AudioBaseType;
 } OC_BOOT_ENTRY;
 
 /**
@@ -521,7 +528,7 @@ EFI_STATUS
 
 /**
   Custom picker entry.
-  Note that OpenLinuxBoot OC_BOOT_ENTRY_PROTOCOL_REVISION needs incrementing
+  Note that OC_BOOT_ENTRY_PROTOCOL_REVISION needs incrementing
   when this structure is updated.
 **/
 typedef struct {
@@ -530,40 +537,52 @@ typedef struct {
   // Multiple entries may share an id - allows e.g. newest version
   // of Linux install to automatically become selected default.
   //
-  CONST CHAR8    *Id;
+  CONST CHAR8              *Id;
   //
   // Entry name.
   //
-  CONST CHAR8    *Name;
+  CONST CHAR8              *Name;
   //
   // Absolute device path to file for user custom entries,
   // file path relative to device root for boot entry protocol.
   //
-  CONST CHAR8    *Path;
+  CONST CHAR8              *Path;
   //
   // Entry boot arguments.
   //
-  CONST CHAR8    *Arguments;
+  CONST CHAR8              *Arguments;
   //
   // Content flavour.
   //
-  CONST CHAR8    *Flavour;
+  CONST CHAR8              *Flavour;
   //
   // Whether this entry is auxiliary.
   //
-  BOOLEAN        Auxiliary;
+  BOOLEAN                  Auxiliary;
   //
   // Whether this entry is a tool.
   //
-  BOOLEAN        Tool;
+  BOOLEAN                  Tool;
   //
   // Whether it should be started in text mode.
   //
-  BOOLEAN        TextMode;
+  BOOLEAN                  TextMode;
   //
   // Whether we should pass the actual device path (if possible).
   //
-  BOOLEAN        RealPath;
+  BOOLEAN                  RealPath;
+  //
+  // System action. Boot Entry Protocol only. Optional.
+  //
+  OC_BOOT_SYSTEM_ACTION    SystemAction;
+  //
+  // Audio base path for system action. Boot Entry Protocol only. Optional.
+  //
+  CHAR8                    *AudioBasePath;
+  //
+  // Audio base type for system action. Boot Entry Protocol only. Optional.
+  //
+  CHAR8                    *AudioBaseType;
 } OC_PICKER_ENTRY;
 
 /**
@@ -738,9 +757,9 @@ VOID
 typedef enum {
   OcPickerDefault           = 0,
   OcPickerShowPicker        = 1,
-  OcPickerResetNvram        = 2,
+  OcPickerProtocolHotKey    = 2,
   OcPickerBootApple         = 3,
-  OcPickerBootAppleRecovery = 4,
+  OcPickerBootAppleRecovery = 4
 } OC_PICKER_CMD;
 
 /**
@@ -820,6 +839,14 @@ struct OC_PICKER_CONTEXT_ {
   //
   OC_PICKER_CMD               PickerCommand;
   //
+  // Non-NULL if PickerCommand is OcPickerProtocolHotKey.
+  //
+  EFI_HANDLE                  HotKeyProtocolHandle;
+  //
+  // Non-NULL if PickerCommand is OcPickerProtocolHotKey.
+  //
+  CHAR8                       *HotKeyEntryId;
+  //
   // Use custom (gOcVendorVariableGuid) for Boot#### variables.
   //
   BOOLEAN                     CustomBootGuid;
@@ -897,14 +924,6 @@ struct OC_PICKER_CONTEXT_ {
   // Enable polling boot arguments.
   //
   BOOLEAN                     PollAppleHotKeys;
-  //
-  // Append the "Reset NVRAM" option to the boot entry list.
-  //
-  BOOLEAN                     ShowNvramReset;
-  //
-  // Append toggle SIP option to the boot entry list.
-  //
-  BOOLEAN                     ShowToggleSip;
   //
   // Allow setting default boot option from boot menu.
   //
@@ -1437,17 +1456,40 @@ typedef struct OC_BOOT_ARGUMENTS_ {
   EFI_SYSTEM_TABLE    *SystemTable;
 } OC_BOOT_ARGUMENTS;
 
-///
-/// Boot services does not zero LoadOptions and LoadOptionsSize of a
-/// loaded image by default. Applying a limit to accepted LoadOptionsSize
-/// is intended to spot this and make it less likely to cause a segmentation
-/// fault if a newer driver (using LoadOptions) is called by an older version
-/// of OC (or anything else) which leaves these uninitialised.
-/// However the 'uninitialised' (?) value in LoadOptionsSize seems to be small
-/// but not zero, therefore unfortunately this approach - while not harmful - is
-/// not helping to detect this situation.
-///
+//
+// Sanity check max. size for LoadOptions.
+//
 #define MAX_LOAD_OPTIONS_SIZE  SIZE_4KB
+
+/**
+  Are load options apparently valid (Unicode string or cleanly non-present)?
+
+  @param[in]   LoadOptionsSize   Load options size.
+  @param[in]   LoadOptions       Load options.
+
+  @retval TRUE if valid.
+**/
+BOOLEAN
+EFIAPI
+OcValidLoadOptions (
+  IN        UINT32  LoadOptionsSize,
+  IN CONST  VOID    *LoadOptions
+  );
+
+/**
+  Are load options present as a Unicode string?
+
+  @param[in]   LoadOptionsSize   Load options size.
+  @param[in]   LoadOptions       Load options.
+
+  @retval TRUE if valid.
+**/
+BOOLEAN
+EFIAPI
+OcHasLoadOptions (
+  IN        UINT32  LoadOptionsSize,
+  IN CONST  VOID    *LoadOptions
+  );
 
 /**
   Parse macOS kernel into unified boot arguments structure.
@@ -1548,6 +1590,18 @@ OcAppendArgumentsToLoadedImage (
   );
 
 /**
+  Resets selected NVRAM variables and reboots the system.
+
+  @param[in]     PreserveBoot       Should reset preserve Boot### entries.
+
+  @retval EFI_SUCCESS, or error returned by called code.
+**/
+EFI_STATUS
+OcResetNvram (
+  IN     BOOLEAN  PreserveBoot
+  );
+
+/**
   Get current SIP setting.
 
   @param[out]     CsrActiveConfig    Returned csr-active-config variable; uninitialised if variable
@@ -1610,7 +1664,7 @@ OcToggleSip (
 **/
 VOID
 OcDeleteVariables (
-  VOID
+  IN BOOLEAN  PreserveBoot
   );
 
 /**
@@ -1625,6 +1679,21 @@ EFI_STATUS
 OcRunFirmwareApplication (
   IN EFI_GUID  *ApplicationGuid,
   IN BOOLEAN   SetReason
+  );
+
+/**
+  Pre-locate audio protocol for picker context, so that boot
+  entry protocol methods can treat this as the definitive
+  audio protocol instance.
+
+  @param[in]  Context   Picker context.
+
+  @retval EFI_SUCCESS on success or when unnecessary.
+**/
+EFI_STATUS
+EFIAPI
+OcPreLocateAudioProtocol (
+  IN     OC_PICKER_CONTEXT  *Context
   );
 
 /**
@@ -2004,6 +2073,53 @@ OcParsedVarsGetGuid (
   IN     CONST VOID           *Name,
   OUT       EFI_GUID          *Value,
   IN     CONST BOOLEAN        IsUnicode
+  );
+
+/**
+  Locate boot entry protocol handles.
+
+  @param[in,out]     EntryProtocolHandles       Boot entry protocol handles, or NULL if none.
+  @param[in,out]     EntryProtocolHandleCount   Count of boot entry protocol handles.
+**/
+VOID
+OcLocateBootEntryProtocolHandles (
+  IN OUT EFI_HANDLE  **EntryProtocolHandles,
+  IN OUT UINTN       *EntryProtocolHandleCount
+  );
+
+/**
+  Free boot entry protocol handles.
+
+  @param[in,out]     EntryProtocolHandles       Boot entry protocol handles, or NULL if none.
+**/
+VOID
+OcFreeBootEntryProtocolHandles (
+  EFI_HANDLE  **EntryProtocolHandles
+  );
+
+/**
+  Request bootable entries from installed boot entry protocol drivers.
+
+  @param[in,out] BootContext                Context of filesystems.
+  @param[in,out] FileSystem                 Filesystem to scan for entries.
+  @param[in]     EntryProtocolHandles       Boot entry protocol handles, or NULL if none.
+  @param[in]     EntryProtocolHandleCount   Count of boot entry protocol handles.
+  @param[in]     DefaultEntryId             Id of saved default entry on this file system.
+  @param[in]     CreateDefault              Create default entry if TRUE, create all others otherwise.
+  @param[in]     CreateForHotKey            If TRUE default entry is being created for protocol hotkey,
+                                            otherwise for NVRAM boot entry.
+
+  @retval EFI_SUCCESS                       At least one entry was created.
+**/
+EFI_STATUS
+OcAddEntriesFromBootEntryProtocol (
+  IN OUT OC_BOOT_CONTEXT *BootContext,
+  IN OUT OC_BOOT_FILESYSTEM *FileSystem,
+  IN     EFI_HANDLE *EntryProtocolHandles,
+  IN     UINTN EntryProtocolHandleCount,
+  IN     CONST VOID *DefaultEntryId, OPTIONAL
+  IN     BOOLEAN        CreateDefault,
+  IN     BOOLEAN        CreateForHotKey
   );
 
 #endif // OC_BOOT_MANAGEMENT_LIB_H

@@ -572,7 +572,7 @@ BuildLauncherPath (
   // For custom paths no deduplication happens.
   //
   if (AsciiStrCmp (LauncherPath, "Default") == 0) {
-    BootstrapSize = StrSize (RootPath) + StrSize (OPEN_CORE_APP_PATH);
+    BootstrapSize = StrSize (RootPath) + L_STR_SIZE (OPEN_CORE_APP_PATH);
     BootstrapPath = AllocatePool (BootstrapSize);
     if (BootstrapPath == NULL) {
       return NULL;
@@ -763,7 +763,6 @@ OcMiscBoot (
 {
   EFI_STATUS              Status;
   OC_PICKER_CONTEXT       *Context;
-  OC_PICKER_CMD           PickerCommand;
   OC_PICKER_MODE          PickerMode;
   OC_DMG_LOADING_SUPPORT  DmgLoading;
   UINTN                   ContextSize;
@@ -928,11 +927,11 @@ OcMiscBoot (
              &Context->RecoveryInitiator
              );
   if (!EFI_ERROR (Status)) {
-    PickerCommand = Context->PickerCommand = OcPickerBootAppleRecovery;
+    Context->PickerCommand = OcPickerBootAppleRecovery;
   } else if (Config->Misc.Boot.ShowPicker) {
-    PickerCommand = Context->PickerCommand = OcPickerShowPicker;
+    Context->PickerCommand = OcPickerShowPicker;
   } else {
-    PickerCommand = Context->PickerCommand = OcPickerDefault;
+    Context->PickerCommand = OcPickerDefault;
   }
 
   for (Index = 0, EntryIndex = 0; Index < Config->Misc.Entries.Count; ++Index) {
@@ -973,16 +972,13 @@ OcMiscBoot (
   Context->HideAuxiliary       = Config->Misc.Boot.HideAuxiliary;
   Context->PickerAudioAssist   = Config->Misc.Boot.PickerAudioAssist;
 
+  OcPreLocateAudioProtocol (Context);
+
   DEBUG ((DEBUG_INFO, "OC: Ready for takeoff in %u us\n", (UINT32)Context->TakeoffDelay));
 
   OcLoadPickerHotKeys (Context);
 
-  Context->ShowToggleSip   = Config->Misc.Security.AllowToggleSip;
-  Context->ShowNvramReset  = Config->Misc.Security.AllowNvramReset;
   Context->AllowSetDefault = Config->Misc.Security.AllowSetDefault;
-  if (!Config->Misc.Security.AllowNvramReset && (Context->PickerCommand == OcPickerResetNvram)) {
-    Context->PickerCommand = PickerCommand;
-  }
 
   if (Interface != NULL) {
     Status = Interface->PopulateContext (Interface, Storage, Context);

@@ -1011,7 +1011,7 @@ GetSystemFont (
   //
   // The standard font always has the name "sysdefault".
   //
-  NameSize = StrSize (L"sysdefault");
+  NameSize = L_STR_SIZE (L"sysdefault");
   InfoSize = sizeof (EFI_FONT_DISPLAY_INFO) - sizeof (CHAR16) + NameSize;
   Info     = (EFI_FONT_DISPLAY_INFO *)AllocateZeroPool (InfoSize);
   if (Info == NULL) {

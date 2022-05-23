@@ -1433,28 +1433,24 @@ BootPickerEntriesSet (
       case OC_BOOT_EXTERNAL_OS:
         Status = CopyLabel (&VolumeEntry->Label, &GuiContext->Labels[LABEL_OTHER]);
         break;
-      case OC_BOOT_RESET_NVRAM:
-        Status = CopyLabel (&VolumeEntry->Label, &GuiContext->Labels[LABEL_RESET_NVRAM]);
-        break;
-      case OC_BOOT_TOGGLE_SIP:
-        ASSERT (
-          StrCmp (Entry->Name, OC_MENU_SIP_IS_DISABLED) == 0 ||
-          StrCmp (Entry->Name, OC_MENU_SIP_IS_ENABLED) == 0
-          );
-        if (StrCmp (Entry->Name, OC_MENU_SIP_IS_DISABLED) == 0) {
-          Status = CopyLabel (&VolumeEntry->Label, &GuiContext->Labels[LABEL_SIP_IS_DISABLED]);
-        } else {
-          Status = CopyLabel (&VolumeEntry->Label, &GuiContext->Labels[LABEL_SIP_IS_ENABLED]);
-        }
-
-        break;
+      //
+      // Use flavour-based labels for system entries (e.g. from boot entry protocol).
+      //
+      case OC_BOOT_SYSTEM:
       case OC_BOOT_EXTERNAL_TOOL:
         if (OcAsciiStriStr (Entry->Flavour, OC_FLAVOUR_ID_RESET_NVRAM) != NULL) {
           Status = CopyLabel (&VolumeEntry->Label, &GuiContext->Labels[LABEL_RESET_NVRAM]);
+        } else if (OcAsciiStriStr (Entry->Flavour, OC_FLAVOUR_ID_TOGGLE_SIP_ENABLED) != NULL) {
+          Status = CopyLabel (&VolumeEntry->Label, &GuiContext->Labels[LABEL_SIP_IS_ENABLED]);
+        } else if (OcAsciiStriStr (Entry->Flavour, OC_FLAVOUR_ID_TOGGLE_SIP_DISABLED) != NULL) {
+          Status = CopyLabel (&VolumeEntry->Label, &GuiContext->Labels[LABEL_SIP_IS_DISABLED]);
         } else if (OcAsciiStriStr (Entry->Flavour, OC_FLAVOUR_ID_UEFI_SHELL) != NULL) {
           Status = CopyLabel (&VolumeEntry->Label, &GuiContext->Labels[LABEL_SHELL]);
-        } else {
+        } else if (Entry->Type == OC_BOOT_EXTERNAL_TOOL) {
           Status = CopyLabel (&VolumeEntry->Label, &GuiContext->Labels[LABEL_TOOL]);
+        } else {
+          DEBUG ((DEBUG_WARN, "OCUI: System entry flavour %a unsupported for label\n", Entry->Flavour));
+          Status = EFI_UNSUPPORTED;
         }
 
         break;
@@ -1463,7 +1459,7 @@ BootPickerEntriesSet (
         break;
       default:
         DEBUG ((DEBUG_WARN, "OCUI: Entry kind %d unsupported for label\n", Entry->Type));
-        return EFI_UNSUPPORTED;
+        Status = EFI_UNSUPPORTED;
     }
   }
 
@@ -1566,7 +1562,7 @@ BootPickerEntriesSet (
 
       if (Entry->Type == OC_BOOT_EXTERNAL_OS) {
         SuggestedIcon = &GuiContext->Icons[ICON_OTHER][IconTypeIndex];
-      } else if ((Entry->Type == OC_BOOT_EXTERNAL_TOOL) || ((Entry->Type & OC_BOOT_SYSTEM) != 0)) {
+      } else if ((Entry->Type & (OC_BOOT_EXTERNAL_TOOL | OC_BOOT_SYSTEM)) != 0) {
         SuggestedIcon = &GuiContext->Icons[ICON_TOOL][IconTypeIndex];
       }
 

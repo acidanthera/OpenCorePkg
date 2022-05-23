@@ -28,7 +28,7 @@ UefiMain (
 {
   Print (L"NVRAM cleanup...\n");
 
-  OcDeleteVariables ();
+  OcDeleteVariables (FALSE);
 
   Print (L"NVRAM cleanup completed, please reboot!\n");
 
