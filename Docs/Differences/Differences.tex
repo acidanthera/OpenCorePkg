@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
 %DIF DEL PreviousConfiguration.tex   Mon May  2 10:50:22 2022
-%DIF ADD ../Configuration.tex        Mon May 16 22:12:21 2022
+%DIF ADD ../Configuration.tex        Mon May 23 10:06:49 2022
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -3653,16 +3653,23 @@ the default boot entry choice will remain changed until the next manual reconfig
   the OpenCore picker startup and \texttt{action hotkeys}.
 
   Introducing a delay may give extra time to hold the right \texttt{action hotkey}
-  sequence to, for instance, boot into recovery mode. On some platforms, setting this
-  option to a minimum of \texttt{5000-10000} microseconds may be required to access
-  \texttt{action hotkeys} due to the nature of the keyboard driver. \DIFaddbegin \DIFadd{If the boot chime
-  is configured (see audio configuration options) then, at the expense of slightly slower
-  startup, an even longer delay up to more or less the length of the boot chime sound
-  causes behaviour similar to a real Mac, where the chime itself acts as a reliable signal
-  for when hotkeys can be pressed.
-}\DIFaddend 
+  sequence to, for instance, boot into recovery mode. On \DIFaddbegin \DIFadd{most systems, the appearance
+  of the initial boot logo is a good indication of the time from which hotkeys can be
+  held down. Earlier than this, the key press may not be registered. On }\DIFaddend some platforms,
+  setting this option to a minimum of \texttt{5000-10000} microseconds \DIFdelbegin \DIFdel{may be }\DIFdelend \DIFaddbegin \DIFadd{is also }\DIFaddend required
+  to access \texttt{action hotkeys} due to the nature of the keyboard driver.
 
-\item
+  \DIFaddbegin \DIFadd{If the boot chime is configured (see audio configuration options) then at the expense
+  of slower startup, an even longer delay of half to one second (}\texttt{\DIFadd{500000-1000000}}\DIFadd{)
+  may be used to create behaviour similar to a real Mac, where the chime itself can be used
+  as a signal for when hotkeys can be pressed. The boot chime is inevitable later in the boot
+  sequence in OpenCore than on Apple hardware, due to the fact that non-native drivers
+  have to be loaded and connected first. This longer additional delay can also be useful
+  in systems where fast boot time and/or slow monitor signal synchronisation may cause the
+  boot logo not to be shown at all on some boots or reboots.
+}
+
+\DIFaddend \item
   \texttt{Timeout}\\
   \textbf{Type}: \texttt{plist\ integer}, 32 bit\\
   \textbf{Failsafe}: \texttt{0}\\
