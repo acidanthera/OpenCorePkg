@@ -28,7 +28,33 @@ SystemActionSetSip (
   IN OUT          OC_PICKER_CONTEXT  *Context
   )
 {
-  return OcSetSip (&mCsrNextConfig, mAttributes);
+  EFI_STATUS  Status;
+  BOOLEAN     IsEnabled;
+  UINT32      CsrActiveConfig;
+
+  Status = OcSetSip (&mCsrNextConfig, mAttributes);
+  if (EFI_ERROR (Status)) {
+    DEBUG ((DEBUG_WARN, "BEP: OcSetSip (0x%X, 0x%X) failed! - %r\n", mCsrNextConfig, mAttributes, Status));
+    return Status;
+  }
+
+  Status = OcGetSip (&CsrActiveConfig, &mAttributes);
+  if (EFI_ERROR (Status)) {
+    DEBUG ((DEBUG_WARN, "BEP: OcGetSip (0x%X, 0x%X) failed! - %r\n", mCsrNextConfig, mAttributes, Status));
+    return Status;
+  }
+
+  IsEnabled = OcIsSipEnabled (Status, CsrActiveConfig);
+
+  DEBUG ((
+    DEBUG_INFO,
+    "BEP: SystemActionSetSip csr-active-config=0x%X (SIP %a) - %r\n",
+    CsrActiveConfig,
+    (IsEnabled ? "enabled" : "disabled"),
+    Status
+    ));
+
+  return Status;
 }
 
 STATIC OC_PICKER_ENTRY  mToggleSipBootEntries[1] = {
@@ -75,6 +101,25 @@ ToggleSipGetBootEntries (
   Status = OcGetSip (&CsrActiveConfig, &mAttributes);
   if (!EFI_ERROR (Status) || (Status == EFI_NOT_FOUND)) {
     IsEnabled = OcIsSipEnabled (Status, CsrActiveConfig);
+
+    //
+    // Same logic as in CsrUtil.efi to determine attributes to use
+    // (specifically keep same V or NV setting as existing value, if any).
+    //
+    if (Status == EFI_NOT_FOUND) {
+      //
+      // TODO: We may want to upgrade Boot Entry Protocol again, so that
+      // this line is able to access and respect OC WriteFlash setting?
+      //
+      mAttributes     = CSR_APPLE_SIP_NVRAM_NV_ATTR;
+      CsrActiveConfig = 0;
+    } else {
+      //
+      // We are finding other bits set on Apl, specifically 0x80000000,
+      // so only consider relevant bits.
+      //
+      mAttributes &= CSR_APPLE_SIP_NVRAM_NV_ATTR;
+    }
   } else {
     DEBUG ((DEBUG_WARN, "BEP: ToggleSip failed to read csr-active-config, aborting! - %r\n", Status));
     return Status;
@@ -92,7 +137,14 @@ ToggleSipGetBootEntries (
     mCsrNextConfig                         = 0;
   }
 
-  DEBUG ((DEBUG_INFO, "BEP: Adding Toggle SIP entry, currently enabled %d, will change 0x%X->0x%X\n", IsEnabled, CsrActiveConfig, mCsrNextConfig));
+  DEBUG ((
+    DEBUG_INFO,
+    "BEP: Toggle SIP entry, currently %a, will change 0x%X->0x%X%a\n",
+    (IsEnabled ? "enabled" : "disabled"),
+    CsrActiveConfig,
+    mCsrNextConfig,
+    ((mAttributes & EFI_VARIABLE_NON_VOLATILE) == 0 ? " (volatile)" : "")
+    ));
 
   *Entries    = mToggleSipBootEntries;
   *NumEntries = ARRAY_SIZE (mToggleSipBootEntries);

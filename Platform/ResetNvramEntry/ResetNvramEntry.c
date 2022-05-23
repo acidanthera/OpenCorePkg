@@ -99,7 +99,7 @@ ResetNvramGetBootEntries (
     return EFI_NOT_FOUND;
   }
 
-  DEBUG ((DEBUG_INFO, "BEP: Adding Reset NVRAM entry, preserve boot %u, apple %u\n", mPreserveBoot, mUseApple));
+  DEBUG ((DEBUG_INFO, "BEP: Reset NVRAM entry, preserve boot %u, apple %u\n", mPreserveBoot, mUseApple));
 
   *Entries    = mResetNvramBootEntries;
   *NumEntries = ARRAY_SIZE (mResetNvramBootEntries);
