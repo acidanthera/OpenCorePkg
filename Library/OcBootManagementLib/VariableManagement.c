@@ -39,18 +39,12 @@
 STATIC
 EFI_GUID
   mOzmosisProprietary1Guid = {
-  0x4D1FDA02, 0x38C7, 0x4A6A, { 0x9C, 0xC6, 0x4B, 0xCC, 0xA8, 0xB3, 0x01, 0x02 }
-};
-
-STATIC
-EFI_GUID
-  mOzmosisProprietary2Guid = {
   0x1F8E0C02, 0x58A9, 0x4E34, { 0xAE, 0x22, 0x2B, 0x63, 0x74, 0x5F, 0xA1, 0x01 }
 };
 
 STATIC
 EFI_GUID
-  mOzmosisProprietary3Guid = {
+  mOzmosisProprietary2Guid = {
   0x9480E8A1, 0x1793, 0x46C9, { 0x91, 0xD8, 0x11, 0x08, 0xDB, 0xA4, 0x73, 0x1C }
 };
 
@@ -121,8 +115,7 @@ IsDeletableVariable (
     // Ozmozis extensions if present
     //
   } else if (  CompareGuid (Guid, &mOzmosisProprietary1Guid)
-            || CompareGuid (Guid, &mOzmosisProprietary2Guid)
-            || CompareGuid (Guid, &mOzmosisProprietary3Guid))
+            || CompareGuid (Guid, &mOzmosisProprietary2Guid))
   {
     return TRUE;
     //
