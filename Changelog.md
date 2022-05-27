@@ -11,6 +11,7 @@ OpenCore Changelog
 - Supported NVRAM reset optionally retaining BIOS boot entries
 - Supported user specified `csr-active-config` value for Toggle SIP
 - Added optional `Enabled` and `Disabled` flavours for `Toggle SIP` (allows theme designers to provide distinct icons)
+- Added PIIX4 ACPI PM timer detection for TSC calculations on Hyper-V Gen1 VMs
 
 #### v0.8.0
 - Added support for early log preservation
