@@ -55,7 +55,7 @@ EfiLoader (
 
  #if 0
   SerialPortInitialize ();
-  SerialPortWrite ((UINT8 *)"EfiLdr\r\n", AsciiStrLen ("EfiLdr\r\n"));
+  SerialPortWrite ((UINT8 *)"EfiLdr\r\n", L_STR_LEN ("EfiLdr\r\n"));
  #endif
 
   //

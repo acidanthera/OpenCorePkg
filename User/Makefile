@@ -64,6 +64,10 @@ ifeq ($(shell echo 'int a;' | "${CC}" -Wno-address -x c -c - -o /dev/null 2>&1),
 	CFLAGS += -Wno-address
 endif
 
+ifeq ($(shell echo 'int a;' | "${CC}" -Wno-stringop-overflow -x c -c - -o /dev/null 2>&1),)
+	CFLAGS += -Wno-stringop-overflow
+endif
+
 ifeq ($(DIST),Darwin)
 	ifneq ($(FUZZ),1)
 		CFLAGS  += -mmacosx-version-min=10.6 --target=x86_64-apple-darwin

@@ -62,8 +62,8 @@ ExtractDevicePath (
   //
   // Find the 'PATH=' of <PathHdr>.
   //
-  if (StrnCmp (String, L"PATH=", StrLen (L"PATH=")) != 0) {
-    if (StrnCmp (String, L"KEYWORD=", StrLen (L"KEYWORD=")) != 0) {
+  if (StrnCmp (String, L"PATH=", L_STR_LEN (L"PATH=")) != 0) {
+    if (StrnCmp (String, L"KEYWORD=", L_STR_LEN (L"KEYWORD=")) != 0) {
       return EFI_INVALID_PARAMETER;
     } else {
       //
@@ -78,7 +78,7 @@ ExtractDevicePath (
   //
   // Check whether path data does exist.
   //
-  String += StrLen (L"PATH=");
+  String += L_STR_LEN (L"PATH=");
   if (*String == 0) {
     return EFI_INVALID_PARAMETER;
   }
@@ -199,11 +199,11 @@ ExtractNameSpace (
     String++;
   }
 
-  if (StrnCmp (String, L"NAMESPACE=", StrLen (L"NAMESPACE=")) != 0) {
+  if (StrnCmp (String, L"NAMESPACE=", L_STR_LEN (L"NAMESPACE=")) != 0) {
     return EFI_INVALID_PARAMETER;
   }
 
-  String += StrLen (L"NAMESPACE=");
+  String += L_STR_LEN (L"NAMESPACE=");
 
   TmpPtr = StrStr (String, L"&");
   if (TmpPtr != NULL) {
@@ -275,11 +275,11 @@ ExtractKeyword (
     String++;
   }
 
-  if (StrnCmp (String, L"KEYWORD=", StrLen (L"KEYWORD=")) != 0) {
+  if (StrnCmp (String, L"KEYWORD=", L_STR_LEN (L"KEYWORD=")) != 0) {
     return EFI_INVALID_PARAMETER;
   }
 
-  String += StrLen (L"KEYWORD=");
+  String += L_STR_LEN (L"KEYWORD=");
 
   TmpPtr = StrStr (String, L"&");
   if (TmpPtr != NULL) {
@@ -331,11 +331,11 @@ ExtractValue (
     String++;
   }
 
-  if (StrnCmp (String, L"VALUE=", StrLen (L"VALUE=")) != 0) {
+  if (StrnCmp (String, L"VALUE=", L_STR_LEN (L"VALUE=")) != 0) {
     return EFI_INVALID_PARAMETER;
   }
 
-  String += StrLen (L"VALUE=");
+  String += L_STR_LEN (L"VALUE=");
 
   TmpPtr = StrStr (String, L"&");
   if (TmpPtr != NULL) {
@@ -400,29 +400,29 @@ ExtractFilter (
     String++;
   }
 
-  if (StrnCmp (String, L"ReadOnly", StrLen (L"ReadOnly")) == 0) {
+  if (StrnCmp (String, L"ReadOnly", L_STR_LEN (L"ReadOnly")) == 0) {
     //
     // Find ReadOnly filter.
     //
     *FilterFlags |= EFI_KEYWORD_FILTER_READONY;
-    String       += StrLen (L"ReadOnly");
-  } else if (StrnCmp (String, L"ReadWrite", StrLen (L"ReadWrite")) == 0) {
+    String       += L_STR_LEN (L"ReadOnly");
+  } else if (StrnCmp (String, L"ReadWrite", L_STR_LEN (L"ReadWrite")) == 0) {
     //
     // Find ReadWrite filter.
     //
     *FilterFlags |= EFI_KEYWORD_FILTER_REAWRITE;
-    String       += StrLen (L"ReadWrite");
-  } else if (StrnCmp (String, L"Buffer", StrLen (L"Buffer")) == 0) {
+    String       += L_STR_LEN (L"ReadWrite");
+  } else if (StrnCmp (String, L"Buffer", L_STR_LEN (L"Buffer")) == 0) {
     //
     // Find Buffer Filter.
     //
     *FilterFlags |= EFI_KEYWORD_FILTER_BUFFER;
-    String       += StrLen (L"Buffer");
-  } else if (StrnCmp (String, L"Numeric", StrLen (L"Numeric")) == 0) {
+    String       += L_STR_LEN (L"Buffer");
+  } else if (StrnCmp (String, L"Numeric", L_STR_LEN (L"Numeric")) == 0) {
     //
     // Find Numeric Filter
     //
-    String += StrLen (L"Numeric");
+    String += L_STR_LEN (L"Numeric");
     if (*String != L':') {
       *FilterFlags |= EFI_KEYWORD_FILTER_NUMERIC;
     } else {
@@ -451,8 +451,8 @@ ExtractFilter (
     //
     // Check whether other filter item defined by Platform.
     //
-    if ((StrnCmp (String, L"&PATH", StrLen (L"&PATH")) == 0) ||
-        (StrnCmp (String, L"&KEYWORD", StrLen (L"&KEYWORD")) == 0))
+    if ((StrnCmp (String, L"&PATH", L_STR_LEN (L"&PATH")) == 0) ||
+        (StrnCmp (String, L"&KEYWORD", L_STR_LEN (L"&KEYWORD")) == 0))
     {
       //
       // New KeywordRequest start, no platform defined filter.
@@ -1987,7 +1987,7 @@ GetNameFromId (
                    NULL
                    );
   if (BestLanguage == NULL) {
-    BestLanguage = AllocateCopyPool (AsciiStrLen ("en-US"), "en-US");
+    BestLanguage = AllocateCopyPool (L_STR_LEN ("en-US"), "en-US");
     ASSERT (BestLanguage != NULL);
   }
 
@@ -2224,7 +2224,7 @@ ExtractConfigResp (
       ConfigHdr = ConstructConfigHdr (Storage, DatabaseRecord->DriverHandle);
       ASSERT (ConfigHdr != NULL);
 
-      MaxLen      = StrLen (ConfigHdr) + 1 + StrLen (RequestElement) + 1 + StrLen (L"VALUE=") + StrLen (ValueElement) + 1;
+      MaxLen      = StrLen (ConfigHdr) + 1 + StrLen (RequestElement) + 1 + L_STR_LEN (L"VALUE=") + StrLen (ValueElement) + 1;
       *ConfigResp = AllocatePool (MaxLen * sizeof (CHAR16));
       if (*ConfigResp == NULL) {
         FreePool (ConfigHdr);
@@ -2949,7 +2949,7 @@ EfiConfigKeywordHandlerSetData (
     //
     // 1.1 Check whether the input namespace is valid.
     //
-    if (AsciiStrnCmp (NameSpace, UEFI_CONFIG_LANG, AsciiStrLen (UEFI_CONFIG_LANG)) != 0) {
+    if (AsciiStrnCmp (NameSpace, UEFI_CONFIG_LANG, L_STR_LEN (UEFI_CONFIG_LANG)) != 0) {
       *ProgressErr = KEYWORD_HANDLER_MALFORMED_STRING;
       Status       = EFI_INVALID_PARAMETER;
       goto Done;
@@ -3002,9 +3002,9 @@ EfiConfigKeywordHandlerSetData (
     //
     // 5. Find READONLY tag.
     //
-    if ((StringPtr != NULL) && (StrnCmp (StringPtr, L"&READONLY", StrLen (L"&READONLY")) == 0)) {
+    if ((StringPtr != NULL) && (StrnCmp (StringPtr, L"&READONLY", L_STR_LEN (L"&READONLY")) == 0)) {
       ReadOnly   = TRUE;
-      StringPtr += StrLen (L"&READONLY");
+      StringPtr += L_STR_LEN (L"&READONLY");
     } else {
       ReadOnly = FALSE;
     }
@@ -3262,7 +3262,7 @@ EfiConfigKeywordHandlerGetData (
   // 1.1 Check whether the input namespace is valid.
   //
   if (NameSpace != NULL) {
-    if (AsciiStrnCmp (NameSpace, UEFI_CONFIG_LANG, AsciiStrLen (UEFI_CONFIG_LANG)) != 0) {
+    if (AsciiStrnCmp (NameSpace, UEFI_CONFIG_LANG, L_STR_LEN (UEFI_CONFIG_LANG)) != 0) {
       *ProgressErr = KEYWORD_HANDLER_MALFORMED_STRING;
       return EFI_INVALID_PARAMETER;
     }

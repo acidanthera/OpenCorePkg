@@ -50,6 +50,30 @@
 
 EFI_STATUS
 EFIAPI
+OcPreLocateAudioProtocol (
+  IN     OC_PICKER_CONTEXT  *Context
+  )
+{
+  EFI_STATUS  Status;
+
+  if (Context->OcAudio == NULL) {
+    Status = gBS->LocateProtocol (
+                    &gOcAudioProtocolGuid,
+                    NULL,
+                    (VOID **)&Context->OcAudio
+                    );
+    if (EFI_ERROR (Status)) {
+      Context->OcAudio = NULL;
+    }
+  } else {
+    Status = EFI_SUCCESS;
+  }
+
+  return Status;
+}
+
+EFI_STATUS
+EFIAPI
 OcPlayAudioFile (
   IN     OC_PICKER_CONTEXT  *Context,
   IN     CONST CHAR8        *BasePath,
@@ -63,19 +87,10 @@ OcPlayAudioFile (
     return EFI_SUCCESS;
   }
 
-  if (Context->OcAudio == NULL) {
-    Status = gBS->LocateProtocol (
-                    &gOcAudioProtocolGuid,
-                    NULL,
-                    (VOID **)&Context->OcAudio
-                    );
-    if (EFI_ERROR (Status)) {
-      Context->OcAudio = NULL;
-    }
-  }
-
   if (Context->OcAudio != NULL) {
     Status = Context->OcAudio->PlayFile (Context->OcAudio, BasePath, BaseType, TRUE, 0, FALSE, TRUE);
+  } else {
+    Status = EFI_NOT_FOUND;
   }
 
   if (Fallback && EFI_ERROR (Status)) {
@@ -200,21 +215,15 @@ OcPlayAudioEntry (
     OcPlayAudioFile (Context, OC_VOICE_OVER_AUDIO_FILE_WINDOWS, OC_VOICE_OVER_AUDIO_BASE_TYPE_OPEN_CORE, FALSE);
   } else if (Entry->Type == OC_BOOT_EXTERNAL_OS) {
     OcPlayAudioFile (Context, OC_VOICE_OVER_AUDIO_FILE_EXTERNAL_OS, OC_VOICE_OVER_AUDIO_BASE_TYPE_OPEN_CORE, FALSE);
-  } else if (Entry->Type == OC_BOOT_RESET_NVRAM) {
-    OcPlayAudioFile (Context, OC_VOICE_OVER_AUDIO_FILE_RESET_NVRAM, OC_VOICE_OVER_AUDIO_BASE_TYPE_OPEN_CORE, FALSE);
-  } else if (Entry->Type == OC_BOOT_TOGGLE_SIP) {
-    ASSERT (
-      StrCmp (Entry->Name, OC_MENU_SIP_IS_DISABLED) == 0 ||
-      StrCmp (Entry->Name, OC_MENU_SIP_IS_ENABLED) == 0
-      );
-    if (StrCmp (Entry->Name, OC_MENU_SIP_IS_DISABLED) == 0) {
-      OcPlayAudioFile (Context, OC_VOICE_OVER_AUDIO_FILE_SIP_IS_DISABLED, OC_VOICE_OVER_AUDIO_BASE_TYPE_OPEN_CORE, FALSE);
-    } else {
-      OcPlayAudioFile (Context, OC_VOICE_OVER_AUDIO_FILE_SIP_IS_ENABLED, OC_VOICE_OVER_AUDIO_BASE_TYPE_OPEN_CORE, FALSE);
-    }
+  } else if (Entry->Type == OC_BOOT_SYSTEM) {
+    OcPlayAudioFile (Context, Entry->AudioBasePath, Entry->AudioBaseType, FALSE);
   } else if (Entry->Type == OC_BOOT_EXTERNAL_TOOL) {
     if (OcAsciiStriStr (Entry->Flavour, OC_FLAVOUR_ID_RESET_NVRAM) != NULL) {
       OcPlayAudioFile (Context, OC_VOICE_OVER_AUDIO_FILE_RESET_NVRAM, OC_VOICE_OVER_AUDIO_BASE_TYPE_OPEN_CORE, FALSE);
+    } else if (OcAsciiStriStr (Entry->Flavour, OC_FLAVOUR_ID_TOGGLE_SIP_ENABLED) != NULL) {
+      OcPlayAudioFile (Context, OC_VOICE_OVER_AUDIO_FILE_SIP_IS_ENABLED, OC_VOICE_OVER_AUDIO_BASE_TYPE_OPEN_CORE, FALSE);
+    } else if (OcAsciiStriStr (Entry->Flavour, OC_FLAVOUR_ID_TOGGLE_SIP_DISABLED) != NULL) {
+      OcPlayAudioFile (Context, OC_VOICE_OVER_AUDIO_FILE_SIP_IS_DISABLED, OC_VOICE_OVER_AUDIO_BASE_TYPE_OPEN_CORE, FALSE);
     } else if (OcAsciiStriStr (Entry->Flavour, OC_FLAVOUR_ID_UEFI_SHELL) != NULL) {
       OcPlayAudioFile (Context, OC_VOICE_OVER_AUDIO_FILE_UEFI_SHELL, OC_VOICE_OVER_AUDIO_BASE_TYPE_OPEN_CORE, FALSE);
     } else {

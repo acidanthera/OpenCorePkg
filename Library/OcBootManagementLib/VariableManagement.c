@@ -39,18 +39,12 @@
 STATIC
 EFI_GUID
   mOzmosisProprietary1Guid = {
-  0x4D1FDA02, 0x38C7, 0x4A6A, { 0x9C, 0xC6, 0x4B, 0xCC, 0xA8, 0xB3, 0x01, 0x02 }
-};
-
-STATIC
-EFI_GUID
-  mOzmosisProprietary2Guid = {
   0x1F8E0C02, 0x58A9, 0x4E34, { 0xAE, 0x22, 0x2B, 0x63, 0x74, 0x5F, 0xA1, 0x01 }
 };
 
 STATIC
 EFI_GUID
-  mOzmosisProprietary3Guid = {
+  mOzmosisProprietary2Guid = {
   0x9480E8A1, 0x1793, 0x46C9, { 0x91, 0xD8, 0x11, 0x08, 0xDB, 0xA4, 0x73, 0x1C }
 };
 
@@ -64,7 +58,8 @@ STATIC
 BOOLEAN
 IsDeletableVariable (
   IN CHAR16    *Name,
-  IN EFI_GUID  *Guid
+  IN EFI_GUID  *Guid,
+  IN BOOLEAN   PreserveBoot
   )
 {
   //
@@ -89,10 +84,13 @@ IsDeletableVariable (
     //
     // Only erase boot and driver entries for BDS
     // I.e. BootOrder, Boot####, DriverOrder, Driver####
+    // Preserve Boot#### entries except BootNext when PreserveBoot is TRUE.
     //
-    if (  (  (StrnCmp (Name, L"Boot", StrLen (L"Boot")) == 0)
+    if (  (StrCmp (Name, L"BootNext") == 0)
+       || (  !PreserveBoot
+          && (StrnCmp (Name, L"Boot", L_STR_LEN (L"Boot")) == 0)
           && (StrCmp (Name, L"BootOptionSupport") != 0))
-       || (StrnCmp (Name, L"Driver", StrLen (L"Driver")) == 0))
+       || (StrnCmp (Name, L"Driver", L_STR_LEN (L"Driver")) == 0))
     {
       return TRUE;
     }
@@ -117,8 +115,7 @@ IsDeletableVariable (
     // Ozmozis extensions if present
     //
   } else if (  CompareGuid (Guid, &mOzmosisProprietary1Guid)
-            || CompareGuid (Guid, &mOzmosisProprietary2Guid)
-            || CompareGuid (Guid, &mOzmosisProprietary3Guid))
+            || CompareGuid (Guid, &mOzmosisProprietary2Guid))
   {
     return TRUE;
     //
@@ -144,7 +141,7 @@ IsDeletableVariable (
 STATIC
 VOID
 DeleteVariables (
-  VOID
+  IN BOOLEAN  PreserveBoot
   )
 {
   EFI_GUID    CurrentGuid;
@@ -213,7 +210,7 @@ DeleteVariables (
     Status        = gRT->GetNextVariableName (&RequestedSize, Buffer, &CurrentGuid);
 
     if (!EFI_ERROR (Status)) {
-      if (IsDeletableVariable (Buffer, &CurrentGuid)) {
+      if (IsDeletableVariable (Buffer, &CurrentGuid, PreserveBoot)) {
         Status = gRT->SetVariable (Buffer, &CurrentGuid, 0, 0, NULL);
         if (!EFI_ERROR (Status)) {
           DEBUG ((
@@ -428,17 +425,9 @@ OcToggleSip (
   return Status;
 }
 
-EFI_STATUS
-InternalSystemActionToggleSip (
-  VOID
-  )
-{
-  return OcToggleSip (OC_CSR_DISABLE_FLAGS);
-}
-
 VOID
 OcDeleteVariables (
-  VOID
+  IN BOOLEAN  PreserveBoot
   )
 {
   EFI_STATUS                    Status;
@@ -450,21 +439,28 @@ OcDeleteVariables (
   UINTN                         BootOptionSize;
   UINT16                        BootOptionIndex;
 
-  DEBUG ((DEBUG_INFO, "OCB: NVRAM cleanup...\n"));
+  DEBUG ((DEBUG_INFO, "OCB: NVRAM cleanup %d...\n", PreserveBoot));
 
   //
   // Obtain boot protection marker.
   //
-  BootProtectSize = sizeof (BootProtect);
-  Status          = gRT->GetVariable (
-                           OC_BOOT_PROTECT_VARIABLE_NAME,
-                           &gOcVendorVariableGuid,
-                           NULL,
-                           &BootProtectSize,
-                           &BootProtect
-                           );
-  if (EFI_ERROR (Status)) {
+  if (PreserveBoot) {
+    //
+    // We do not need or want to re-create entry and overwrite boot order, in this case.
+    //
     BootProtect = 0;
+  } else {
+    BootProtectSize = sizeof (BootProtect);
+    Status          = gRT->GetVariable (
+                             OC_BOOT_PROTECT_VARIABLE_NAME,
+                             &gOcVendorVariableGuid,
+                             NULL,
+                             &BootProtectSize,
+                             &BootProtect
+                             );
+    if (EFI_ERROR (Status) || (BootProtectSize != sizeof (BootProtect))) {
+      BootProtect = 0;
+    }
   }
 
   Status = gBS->LocateProtocol (
@@ -497,7 +493,7 @@ OcDeleteVariables (
     }
   }
 
-  DeleteVariables ();
+  DeleteVariables (PreserveBoot);
 
   if ((BootProtect & OC_BOOT_PROTECT_VARIABLE_BOOTSTRAP) != 0) {
     BootOptionIndex = 1;
@@ -529,11 +525,11 @@ OcDeleteVariables (
 }
 
 EFI_STATUS
-InternalSystemActionResetNvram (
-  VOID
+OcResetNvram (
+  IN     BOOLEAN  PreserveBoot
   )
 {
-  OcDeleteVariables ();
+  OcDeleteVariables (PreserveBoot);
   DirectResetCold ();
   return EFI_DEVICE_ERROR;
 }

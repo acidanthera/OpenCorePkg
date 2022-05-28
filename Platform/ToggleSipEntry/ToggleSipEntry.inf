@@ -1,0 +1,33 @@
+## @file
+#  Boot entry protocol implementation of Toggle SIP boot picker entry.
+#
+#  Copyright (C) 2022, Mike Beaton. All rights reserved.<BR>
+#  SPDX-License-Identifier: BSD-3-Clause
+##
+
+
+[Defines]
+  INF_VERSION    = 0x00010005
+  BASE_NAME      = ToggleSipEntry
+  ENTRY_POINT    = UefiMain
+  FILE_GUID      = C6215026-239A-44B7-B140-41348A32913C
+  MODULE_TYPE    = UEFI_DRIVER
+  VERSION_STRING = 1.0
+
+[Packages]
+  OpenCorePkg/OpenCorePkg.dec
+  MdePkg/MdePkg.dec
+  MdeModulePkg/MdeModulePkg.dec
+
+[LibraryClasses]
+  DebugLib
+  OcBootManagementLib
+  UefiBootServicesTableLib
+  UefiDriverEntryPoint
+  UefiLib
+
+[Protocols]
+  gOcBootEntryProtocolGuid            # PRODUCES
+ 
+[Sources]
+  ToggleSipEntry.c

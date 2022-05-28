@@ -32,7 +32,7 @@ CalculateConfigStringLen (
   // "GUID=" should be the first element of incoming string.
   //
   ASSERT (String != NULL);
-  ASSERT (StrnCmp (String, L"GUID=", StrLen (L"GUID=")) == 0);
+  ASSERT (StrnCmp (String, L"GUID=", L_STR_LEN (L"GUID=")) == 0);
 
   //
   // The beginning of next <ConfigRequest>/<ConfigResp> should be "&GUID=".
@@ -83,7 +83,7 @@ GetDevicePath (
   //
   // Find the 'PATH=' of <PathHdr> and skip it.
   //
-  for ( ; (*String != 0 && StrnCmp (String, L"PATH=", StrLen (L"PATH=")) != 0); String++) {
+  for ( ; (*String != 0 && StrnCmp (String, L"PATH=", L_STR_LEN (L"PATH=")) != 0); String++) {
   }
 
   if (*String == 0) {
@@ -93,7 +93,7 @@ GetDevicePath (
   //
   // Check whether path data does exist.
   //
-  String += StrLen (L"PATH=");
+  String += L_STR_LEN (L"PATH=");
   if (*String == 0) {
     return EFI_INVALID_PARAMETER;
   }
@@ -356,7 +356,7 @@ OutputConfigBody (
   //
   // The setting information should start OFFSET, not ALTCFG.
   //
-  if (StrnCmp (String, L"&ALTCFG=", StrLen (L"&ALTCFG=")) == 0) {
+  if (StrnCmp (String, L"&ALTCFG=", L_STR_LEN (L"&ALTCFG=")) == 0) {
     return EFI_INVALID_PARAMETER;
   }
 
@@ -644,7 +644,7 @@ CompareBlockElementDefault (
     // Find the "&OFFSET=<Number>" block and get the value of the Number with AltConfigHdr in DefaultAltCfgResp.
     //
     BlockPtrStart = BlockPtr;
-    BlockPtr     += StrLen (L"&OFFSET=");
+    BlockPtr     += L_STR_LEN (L"&OFFSET=");
     Status        = GetValueOfNumber (BlockPtr, &TempBuffer, &OffsetLength);
     if (EFI_ERROR (Status)) {
       Status = EFI_OUT_OF_RESOURCES;
@@ -1075,15 +1075,15 @@ MergeDefaultString (
   //
   // Find <ConfigHdr> GUID=...&NAME=...&PATH=...
   //
-  if (StrnCmp (StringPtr, L"GUID=", StrLen (L"GUID=")) != 0) {
+  if (StrnCmp (StringPtr, L"GUID=", L_STR_LEN (L"GUID=")) != 0) {
     return EFI_INVALID_PARAMETER;
   }
 
-  while (*StringPtr != L'\0' && StrnCmp (StringPtr, L"&NAME=", StrLen (L"&NAME=")) != 0) {
+  while (*StringPtr != L'\0' && StrnCmp (StringPtr, L"&NAME=", L_STR_LEN (L"&NAME=")) != 0) {
     StringPtr++;
   }
 
-  while (*StringPtr != L'\0' && StrnCmp (StringPtr, L"&PATH=", StrLen (L"&PATH=")) != 0) {
+  while (*StringPtr != L'\0' && StrnCmp (StringPtr, L"&PATH=", L_STR_LEN (L"&PATH=")) != 0) {
     StringPtr++;
   }
 
@@ -1091,7 +1091,7 @@ MergeDefaultString (
     return EFI_INVALID_PARAMETER;
   }
 
-  StringPtr += StrLen (L"&PATH=");
+  StringPtr += L_STR_LEN (L"&PATH=");
   while (*StringPtr != L'\0' && *StringPtr != L'&') {
     StringPtr++;
   }
@@ -3248,12 +3248,12 @@ GetBlockElement (
   // <BlockName> ::= &'OFFSET='<Number>&'WIDTH='<Number>
   //
   StringPtr = ConfigRequest;
-  while (*StringPtr != 0 && StrnCmp (StringPtr, L"&OFFSET=", StrLen (L"&OFFSET=")) == 0) {
+  while (*StringPtr != 0 && StrnCmp (StringPtr, L"&OFFSET=", L_STR_LEN (L"&OFFSET=")) == 0) {
     //
     // Skip the OFFSET string
     //
     *Progress  = StringPtr;
-    StringPtr += StrLen (L"&OFFSET=");
+    StringPtr += L_STR_LEN (L"&OFFSET=");
     //
     // Get Offset
     //
@@ -3271,11 +3271,11 @@ GetBlockElement (
     FreePool (TmpBuffer);
 
     StringPtr += Length;
-    if (StrnCmp (StringPtr, L"&WIDTH=", StrLen (L"&WIDTH=")) != 0) {
+    if (StrnCmp (StringPtr, L"&WIDTH=", L_STR_LEN (L"&WIDTH=")) != 0) {
       goto Done;
     }
 
-    StringPtr += StrLen (L"&WIDTH=");
+    StringPtr += L_STR_LEN (L"&WIDTH=");
 
     //
     // Get Width
@@ -3313,8 +3313,8 @@ GetBlockElement (
     //
     // Skip &VALUE string if &VALUE does exists.
     //
-    if (StrnCmp (StringPtr, L"&VALUE=", StrLen (L"&VALUE=")) == 0) {
-      StringPtr += StrLen (L"&VALUE=");
+    if (StrnCmp (StringPtr, L"&VALUE=", L_STR_LEN (L"&VALUE=")) == 0) {
+      StringPtr += L_STR_LEN (L"&VALUE=");
 
       //
       // Get Value
@@ -4216,13 +4216,13 @@ GetFullStringFromHiiFormPackages (
     //
     // Jump <ConfigHdr>
     //
-    if (StrnCmp (StringPtr, L"GUID=", StrLen (L"GUID=")) != 0) {
+    if (StrnCmp (StringPtr, L"GUID=", L_STR_LEN (L"GUID=")) != 0) {
       Status = EFI_INVALID_PARAMETER;
       goto Done;
     }
 
-    StringPtr += StrLen (L"GUID=");
-    while (*StringPtr != L'\0' && StrnCmp (StringPtr, L"&NAME=", StrLen (L"&NAME=")) != 0) {
+    StringPtr += L_STR_LEN (L"GUID=");
+    while (*StringPtr != L'\0' && StrnCmp (StringPtr, L"&NAME=", L_STR_LEN (L"&NAME=")) != 0) {
       StringPtr++;
     }
 
@@ -4231,8 +4231,8 @@ GetFullStringFromHiiFormPackages (
       goto Done;
     }
 
-    StringPtr += StrLen (L"&NAME=");
-    while (*StringPtr != L'\0' && StrnCmp (StringPtr, L"&PATH=", StrLen (L"&PATH=")) != 0) {
+    StringPtr += L_STR_LEN (L"&NAME=");
+    while (*StringPtr != L'\0' && StrnCmp (StringPtr, L"&PATH=", L_STR_LEN (L"&PATH=")) != 0) {
       StringPtr++;
     }
 
@@ -4241,7 +4241,7 @@ GetFullStringFromHiiFormPackages (
       goto Done;
     }
 
-    StringPtr += StrLen (L"&PATH=");
+    StringPtr += L_STR_LEN (L"&PATH=");
     while (*StringPtr != L'\0' && *StringPtr != L'&') {
       StringPtr++;
     }
@@ -4635,11 +4635,11 @@ OffsetWidthValidate (
 
   while (1) {
     RetVal = StringPtr;
-    if (StrnCmp (StringPtr, L"&OFFSET=", StrLen (L"&OFFSET=")) != 0) {
+    if (StrnCmp (StringPtr, L"&OFFSET=", L_STR_LEN (L"&OFFSET=")) != 0) {
       return RetVal;
     }
 
-    while (*StringPtr != L'\0' && StrnCmp (StringPtr, L"&WIDTH=", StrLen (L"&WIDTH=")) != 0) {
+    while (*StringPtr != L'\0' && StrnCmp (StringPtr, L"&WIDTH=", L_STR_LEN (L"&WIDTH=")) != 0) {
       StringPtr++;
     }
 
@@ -4647,8 +4647,8 @@ OffsetWidthValidate (
       return RetVal;
     }
 
-    StringPtr += StrLen (L"&WIDTH=");
-    while (*StringPtr != L'\0' && StrnCmp (StringPtr, L"&OFFSET=", StrLen (L"&OFFSET=")) != 0) {
+    StringPtr += L_STR_LEN (L"&WIDTH=");
+    while (*StringPtr != L'\0' && StrnCmp (StringPtr, L"&OFFSET=", L_STR_LEN (L"&OFFSET=")) != 0) {
       StringPtr++;
     }
 
@@ -4717,12 +4717,12 @@ ConfigRequestValidate (
   //
   // Check <ConfigHdr>
   //
-  if (StrnCmp (StringPtr, L"GUID=", StrLen (L"GUID=")) != 0) {
+  if (StrnCmp (StringPtr, L"GUID=", L_STR_LEN (L"GUID=")) != 0) {
     return ConfigRequest;
   }
 
-  StringPtr += StrLen (L"GUID=");
-  while (*StringPtr != L'\0' && StrnCmp (StringPtr, L"&NAME=", StrLen (L"&NAME=")) != 0) {
+  StringPtr += L_STR_LEN (L"GUID=");
+  while (*StringPtr != L'\0' && StrnCmp (StringPtr, L"&NAME=", L_STR_LEN (L"&NAME=")) != 0) {
     StringPtr++;
   }
 
@@ -4730,12 +4730,12 @@ ConfigRequestValidate (
     return ConfigRequest;
   }
 
-  StringPtr += StrLen (L"&NAME=");
+  StringPtr += L_STR_LEN (L"&NAME=");
   if (*StringPtr == L'&') {
     HasNameField = FALSE;
   }
 
-  while (*StringPtr != L'\0' && StrnCmp (StringPtr, L"&PATH=", StrLen (L"&PATH=")) != 0) {
+  while (*StringPtr != L'\0' && StrnCmp (StringPtr, L"&PATH=", L_STR_LEN (L"&PATH=")) != 0) {
     StringPtr++;
   }
 
@@ -4743,7 +4743,7 @@ ConfigRequestValidate (
     return ConfigRequest;
   }
 
-  StringPtr += StrLen (L"&PATH=");
+  StringPtr += L_STR_LEN (L"&PATH=");
   while (*StringPtr != L'\0' && *StringPtr != L'&') {
     StringPtr++;
   }
@@ -4872,7 +4872,7 @@ HiiConfigRoutingExtractConfig (
   // The first element of <MultiConfigRequest> should be
   // <GuidHdr>, which is in 'GUID='<Guid> syntax.
   //
-  if (StrnCmp (StringPtr, L"GUID=", StrLen (L"GUID=")) != 0) {
+  if (StrnCmp (StringPtr, L"GUID=", L_STR_LEN (L"GUID=")) != 0) {
     return EFI_INVALID_PARAMETER;
   }
 
@@ -4887,7 +4887,7 @@ HiiConfigRoutingExtractConfig (
     return EFI_OUT_OF_RESOURCES;
   }
 
-  while (*StringPtr != 0 && StrnCmp (StringPtr, L"GUID=", StrLen (L"GUID=")) == 0) {
+  while (*StringPtr != 0 && StrnCmp (StringPtr, L"GUID=", L_STR_LEN (L"GUID=")) == 0) {
     //
     // If parsing error, set Progress to the beginning of the <MultiConfigRequest>
     // or most recent & before the error.
@@ -5456,11 +5456,11 @@ HiiConfigRoutingRouteConfig (
   // The first element of <MultiConfigResp> should be
   // <GuidHdr>, which is in 'GUID='<Guid> syntax.
   //
-  if (StrnCmp (StringPtr, L"GUID=", StrLen (L"GUID=")) != 0) {
+  if (StrnCmp (StringPtr, L"GUID=", L_STR_LEN (L"GUID=")) != 0) {
     return EFI_INVALID_PARAMETER;
   }
 
-  while (*StringPtr != 0 && StrnCmp (StringPtr, L"GUID=", StrLen (L"GUID=")) == 0) {
+  while (*StringPtr != 0 && StrnCmp (StringPtr, L"GUID=", L_STR_LEN (L"GUID=")) == 0) {
     //
     // If parsing error, set Progress to the beginning of the <MultiConfigResp>
     // or most recent & before the error.
@@ -5698,13 +5698,13 @@ HiiBlockToConfig (
   //
   // Jump <ConfigHdr>
   //
-  if (StrnCmp (StringPtr, L"GUID=", StrLen (L"GUID=")) != 0) {
+  if (StrnCmp (StringPtr, L"GUID=", L_STR_LEN (L"GUID=")) != 0) {
     *Progress = StringPtr;
     Status    = EFI_INVALID_PARAMETER;
     goto Exit;
   }
 
-  while (*StringPtr != 0 && StrnCmp (StringPtr, L"PATH=", StrLen (L"PATH=")) != 0) {
+  while (*StringPtr != 0 && StrnCmp (StringPtr, L"PATH=", L_STR_LEN (L"PATH=")) != 0) {
     StringPtr++;
   }
 
@@ -5745,13 +5745,13 @@ HiiBlockToConfig (
   // Only <BlockName> format is supported by this help function.
   // <BlockName> ::= 'OFFSET='<Number>&'WIDTH='<Number>
   //
-  while (*StringPtr != 0 && StrnCmp (StringPtr, L"OFFSET=", StrLen (L"OFFSET=")) == 0) {
+  while (*StringPtr != 0 && StrnCmp (StringPtr, L"OFFSET=", L_STR_LEN (L"OFFSET=")) == 0) {
     //
     // Back up the header of one <BlockName>
     //
     TmpPtr = StringPtr;
 
-    StringPtr += StrLen (L"OFFSET=");
+    StringPtr += L_STR_LEN (L"OFFSET=");
     //
     // Get Offset
     //
@@ -5770,13 +5770,13 @@ HiiBlockToConfig (
     FreePool (TmpBuffer);
 
     StringPtr += Length;
-    if (StrnCmp (StringPtr, L"&WIDTH=", StrLen (L"&WIDTH=")) != 0) {
+    if (StrnCmp (StringPtr, L"&WIDTH=", L_STR_LEN (L"&WIDTH=")) != 0) {
       *Progress = TmpPtr - 1;
       Status    = EFI_INVALID_PARAMETER;
       goto Exit;
     }
 
-    StringPtr += StrLen (L"&WIDTH=");
+    StringPtr += L_STR_LEN (L"&WIDTH=");
 
     //
     // Get Width
@@ -5847,7 +5847,7 @@ HiiBlockToConfig (
     //
     // Build a ConfigElement
     //
-    Length       += StringPtr - TmpPtr + 1 + StrLen (L"VALUE=");
+    Length       += StringPtr - TmpPtr + 1 + L_STR_LEN (L"VALUE=");
     ConfigElement = (EFI_STRING)AllocateZeroPool (Length * sizeof (CHAR16));
     if (ConfigElement == NULL) {
       Status = EFI_OUT_OF_RESOURCES;
@@ -6003,13 +6003,13 @@ HiiConfigToBlock (
   //
   // Jump <ConfigHdr>
   //
-  if (StrnCmp (StringPtr, L"GUID=", StrLen (L"GUID=")) != 0) {
+  if (StrnCmp (StringPtr, L"GUID=", L_STR_LEN (L"GUID=")) != 0) {
     *Progress = StringPtr;
     Status    = EFI_INVALID_PARAMETER;
     goto Exit;
   }
 
-  while (*StringPtr != 0 && StrnCmp (StringPtr, L"PATH=", StrLen (L"PATH=")) != 0) {
+  while (*StringPtr != 0 && StrnCmp (StringPtr, L"PATH=", L_STR_LEN (L"PATH=")) != 0) {
     StringPtr++;
   }
 
@@ -6034,9 +6034,9 @@ HiiConfigToBlock (
   // Only '&'<BlockConfig> format is supported by this help function.
   // <BlockConfig> ::= 'OFFSET='<Number>&'WIDTH='<Number>&'VALUE='<Number>
   //
-  while (*StringPtr != 0 && StrnCmp (StringPtr, L"&OFFSET=", StrLen (L"&OFFSET=")) == 0) {
+  while (*StringPtr != 0 && StrnCmp (StringPtr, L"&OFFSET=", L_STR_LEN (L"&OFFSET=")) == 0) {
     TmpPtr     = StringPtr;
-    StringPtr += StrLen (L"&OFFSET=");
+    StringPtr += L_STR_LEN (L"&OFFSET=");
     //
     // Get Offset
     //
@@ -6055,13 +6055,13 @@ HiiConfigToBlock (
     FreePool (TmpBuffer);
 
     StringPtr += Length;
-    if (StrnCmp (StringPtr, L"&WIDTH=", StrLen (L"&WIDTH=")) != 0) {
+    if (StrnCmp (StringPtr, L"&WIDTH=", L_STR_LEN (L"&WIDTH=")) != 0) {
       *Progress = TmpPtr;
       Status    = EFI_INVALID_PARAMETER;
       goto Exit;
     }
 
-    StringPtr += StrLen (L"&WIDTH=");
+    StringPtr += L_STR_LEN (L"&WIDTH=");
 
     //
     // Get Width
@@ -6081,13 +6081,13 @@ HiiConfigToBlock (
     FreePool (TmpBuffer);
 
     StringPtr += Length;
-    if (StrnCmp (StringPtr, L"&VALUE=", StrLen (L"&VALUE=")) != 0) {
+    if (StrnCmp (StringPtr, L"&VALUE=", L_STR_LEN (L"&VALUE=")) != 0) {
       *Progress = TmpPtr;
       Status    = EFI_INVALID_PARAMETER;
       goto Exit;
     }
 
-    StringPtr += StrLen (L"&VALUE=");
+    StringPtr += L_STR_LEN (L"&VALUE=");
 
     //
     // Get Value
@@ -6245,7 +6245,7 @@ HiiGetAltCfg (
   }
 
   StringPtr = Configuration;
-  if (StrnCmp (StringPtr, L"GUID=", StrLen (L"GUID=")) != 0) {
+  if (StrnCmp (StringPtr, L"GUID=", L_STR_LEN (L"GUID=")) != 0) {
     return EFI_INVALID_PARAMETER;
   }
 

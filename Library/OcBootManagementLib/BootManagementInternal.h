@@ -258,22 +258,6 @@ InternalFileSystemForHandle (
   );
 
 /**
-  Resets selected NVRAM variables and reboots the system.
-**/
-EFI_STATUS
-InternalSystemActionResetNvram (
-  VOID
-  );
-
-/**
-  Toggles SIP.
-**/
-EFI_STATUS
-InternalSystemActionToggleSip (
-  VOID
-  );
-
-/**
   Determines whether DevicePath is an OpenCore custom boot entry.
 
   @returns  The OpenCore custom boot entry, or NULL.

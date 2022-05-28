@@ -410,7 +410,7 @@ OcGetBootEntryLabelImage (
   *ImageData  = NULL;
   *DataLength = 0;
 
-  if ((BootEntry->Type == OC_BOOT_EXTERNAL_TOOL) || ((BootEntry->Type & OC_BOOT_SYSTEM) != 0)) {
+  if ((BootEntry->Type & (OC_BOOT_EXTERNAL_TOOL | OC_BOOT_SYSTEM)) != 0) {
     return EFI_NOT_FOUND;
   }
 
@@ -469,7 +469,7 @@ OcGetBootEntryIcon (
   *ImageData  = NULL;
   *DataLength = 0;
 
-  if ((BootEntry->Type == OC_BOOT_EXTERNAL_TOOL) || ((BootEntry->Type & OC_BOOT_SYSTEM) != 0)) {
+  if ((BootEntry->Type & (OC_BOOT_EXTERNAL_TOOL | OC_BOOT_SYSTEM)) != 0) {
     return EFI_NOT_FOUND;
   }
 

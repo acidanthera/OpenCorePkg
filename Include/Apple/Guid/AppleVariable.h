@@ -248,10 +248,18 @@ typedef enum {
 
 ///
 /// Startup sound configuration variable.
-/// UINT8: 00 (for unmuted, default) or 01 (for muted).
+/// UINT8: 00 or not present (unmuted, default), any non-zero value (muted).
 /// gAppleBootVariableGuid
 ///
 #define APPLE_STARTUP_MUTE_VARIABLE_NAME  L"StartupMute"
+
+///
+/// Resets NVRAM and potentially perform garbage collection etc. on next boot, on
+/// supported macOS firmware.
+/// Any size, any value: Not present (no action, default), or present (reset NVRAM).
+/// gAppleBootVariableGuid
+///
+#define APPLE_RESET_NVRAM_VARIABLE_NAME  L"ResetNVRam"
 
 ///
 /// Recovery initiator device path. In general EfiBoot device path that called

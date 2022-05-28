@@ -40,6 +40,7 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 #include <Library/PcdLib.h>
 #include <Library/UefiRuntimeServicesTableLib.h>
 #include <Library/PrintLib.h>
+#include <Library/OcStringLib.h>
 
 #define MAX_STRING_LENGTH      1024
 #define MAX_FONT_NAME_LEN      256

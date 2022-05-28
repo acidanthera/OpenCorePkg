@@ -22,9 +22,9 @@
   Current supported interface protocol revision.
   It is changed every time the contract changes.
 
-  WARNING: This protocol currently undergoes design process.
+  WARNING: This protocol is currently undergoing active design.
 **/
-#define OC_INTERFACE_REVISION  6
+#define OC_INTERFACE_REVISION  7
 
 /**
   The GUID of the OC_INTERFACE_PROTOCOL.
