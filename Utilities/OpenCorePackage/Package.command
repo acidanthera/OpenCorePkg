@@ -13,7 +13,7 @@ sript_uefi="./Script/UEFI"
 script_duet="./Script/Legacy"
 temp_dir="/Private/tmp/Package-DIR"
 root_dir="./OpenCore-Package"
-package_name="./OpenCorePackage.pkg"
+package_name="OpenCorePackage.pkg"
 duet_name="./OC-EFI/usr/standalone/i386/boot0"
 duetfile_name="Duet"
 
@@ -53,7 +53,7 @@ echo "
 Create the final Packages with pkgutil "
 Sleep 1
 # Flatten the Packages with pkgutil
-pkgutil --flatten $temp_dir ./OpenCorePackage.pkg
+pkgutil --flatten $temp_dir ./$package_name
 rm -rf $root_dir
 rm -rf $temp_dir
 echo "Done "
