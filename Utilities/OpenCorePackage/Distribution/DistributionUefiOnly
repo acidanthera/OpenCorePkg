@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<installer-script minSpecVersion="1.000000" authoringTool="com.apple.pkgbuild" authoringToolVersion="1.0" authoringToolBuild="1">
+    <title>OpenCore Package</title>
+    <options customize="allow" allow-external-scripts="true"/>
+    <domains enable_anywhere="true"/>
+    <background file="background" alignment="center" scaling="tofit"/>
+    <background-darkAqua file="background" alignment="center" scaling="tofit"/>
+    <welcome file="Welcome.rtf"/>
+    <readme file="Readme.rtfd"/>
+    <license file="License.txt"/>
+    <choices-outline>
+         <line choice="choice1"/>
+    </choices-outline>
+    <choice id="choice1" title="OpenCore UEFI" description="Install OpenCore UEFI in the ESP (EFI System Partition)" start_selected="true">
+        <pkg-ref id="com.opencoreUefi.pkg"/>
+    </choice>
+    <pkg-ref id="com.opencoreUefi.pkg" installKBytes="4" version="1.0" auth="Root">#Uefi.pkg</pkg-ref>
+</installer-script>
