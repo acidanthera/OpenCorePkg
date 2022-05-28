@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<installer-script minSpecVersion="1.000000" authoringTool="com.apple.pkgbuild" authoringToolVersion="1.0" authoringToolBuild="1">
+    <title>OpenCore Package</title>
+    <options customize="allow" allow-external-scripts="true"/>
+    <domains enable_anywhere="true"/>
+    <background file="background" alignment="center" scaling="tofit"/>
+    <background-darkAqua file="background" alignment="center" scaling="tofit"/>
+    <welcome file="Welcome.rtf"/>
+    <readme file="Readme.rtfd"/>
+    <license file="License.txt"/>
+    <choices-outline>
+         <line choice="choice1"/>
+         <line choice="choice2"/>
+    </choices-outline>
+    <choice id="choice1" title="OpenCore UEFI" description="Install OpenCore UEFI in the ESP (EFI System Partition)" start_selected="false" selected="!choices['choice2'].selected">
+        <pkg-ref id="com.opencoreUefi.pkg"/>
+    </choice>
+    <choice id="choice2" title="OpenCore Legacy" description="Install OpenCore Legacy in the ESP (EFI System Partition)" start_selected="false" selected="!choices['choice1'].selected">
+        <pkg-ref id="com.opencoreLegacy.pkg"/>
+    </choice>
+    <pkg-ref id="com.opencoreUefi.pkg" installKBytes="4" version="1.0" auth="Root">#Uefi.pkg</pkg-ref>
+    <pkg-ref id="com.opencoreLegacy.pkg" installKBytes="4" version="1.0" auth="Root">#Legacy.pkg</pkg-ref>
+</installer-script>
