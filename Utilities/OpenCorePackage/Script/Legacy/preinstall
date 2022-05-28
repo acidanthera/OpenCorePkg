@@ -1,0 +1,64 @@
+#!/bin/bash
+# script Legacy OpenCore
+# chris1111 
+
+echo "==============================================="
+echo "EFIFolder Pre-Install Script"
+echo "==============================================="
+
+#echo "DEBUG: $ 1 = Full path to the installation package the installer app is processing: " $1
+#echo "DEBUG: $ 2 = Full path to the installation destination: " $2
+#echo "DEBUG: $ 3 = Installation volume (mountpoint) to receive the payload: " $3
+#echo "DEBUG: $ 4 = Root directory for the system: " $4
+
+echo "preinstall: Path to installer....... $1"
+echo "preinstall: Path to destination..... $2"
+echo "preinstall: Path to dest volume..... $3"
+echo "preinstall: Root of system folder... $4"
+
+# Check target exists
+if [ ! -e "$3" ]; then
+    echo "$3 volume does not exist!"
+    exit 1
+fi
+
+# If target volume root of current system then replace
+# / with volume name.
+if [ "$3" == "/" ]; then
+    DEST_VOL="/Volumes/"$( ls -1F /Volumes | sed -n 's:@$::p' )
+else
+    DEST_VOL="$3"
+fi
+
+DEST_VOL="${3}"
+EFI_ROOT_DIR="${DEST_VOL}"/Private/tmp/EFIROOTDIR
+install_log="${DEST_VOL}/Private/tmp/OpenCore_Install_Log.txt"
+
+mkdir -p "${DEST_VOL}"/Private/tmp
+Sleep 1
+
+
+# ---------------------------------------------
+# Creating log file
+# ---------------------------------------------
+echo "" > "$install_log"
+echo "Legacy OpenCore Bootloader installer log - $( date )" >> "$install_log"
+echo "Installer OpenCore Legacy" >> "$install_log"
+echo "======================================================================" >> "$install_log"
+diskutil list >> "$install_log"
+
+
+# ---------------------------------------------
+# Mount ESP partition
+# ---------------------------------------------
+
+./MountESP "$DEST_VOL" "$EFI_ROOT_DIR"
+
+# Remove files first
+rm -rf /"$3"/Private/tmp/EFIROOTDIR/boot
+rm -rf /"$3"/Private/tmp/EFIROOTDIR/EFI/OC
+rm -rf /"$3"/Private/tmp/EFIROOTDIR/EFI/BOOT
+rm -rf /"$3"/Private/tmp/EFIROOTDIR/EFI/CLOVER
+rm -rf /"$3"/Private/tmp/EFIROOTDIR/EFI/Clover_Install_Log.txt
+rm -rf /"$3"/Private/tmp/EFIROOTDIR/EFI/OpenCore_Install_Log.txt
+

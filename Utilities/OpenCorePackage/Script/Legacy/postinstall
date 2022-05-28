@@ -1,0 +1,320 @@
+#!/bin/bash
+# script Legacy OpenCore
+# chris1111 
+
+echo "==============================================="
+echo "Post Post-Install Script"
+echo "==============================================="
+
+#echo "DEBUG: $ 1 = Full path to the installation package the installer app is processing: " $1
+#echo "DEBUG: $ 2 = Full path to the installation destination: " $2
+#echo "DEBUG: $ 3 = Installation volume (mountpoint) to receive the payload: " $3
+#echo "DEBUG: $ 4 = Root directory for the system: " $4
+
+echo "preinstall: Path to installer....... $1"
+echo "preinstall: Path to destination..... $2"
+echo "preinstall: Path to dest volume..... $3"
+echo "preinstall: Root of system folder... $4"
+
+
+#############################################################################
+
+
+diskloader="boot0"
+
+DEST_VOL="${3}"
+EFI_ROOT_DIR=$(cd "${DEST_VOL}"/Private/tmp/EFIROOTDIR; pwd -P)
+install_log="${DEST_VOL}/Private/tmp/OpenCore_Install_Log.txt"
+plistbuddy='/usr/libexec/PlistBuddy'
+installer_choice="org.opencore-legacy.bootloader.boot0af"
+installer_altboot_refid='org.opencore-legacy.bootloader.altboot'
+#fdisk440="${DEST_VOL}"/Private/tmp/usr/local/bin/fdisk440
+boot1install="${DEST_VOL}"/Private/tmp/usr/local/bin/boot1-install
+partutil="${DEST_VOL}"/Private/tmp/usr/local/bin/partutil
+
+
+function finish {
+    local exit_code=$?
+    if [[ $exit_code -ne 0 ]]; then
+        if [[ -e "$install_log" && -d "${EFI_ROOT_DIR}/EFI" ]]; then
+            mv -f "$install_log" "${EFI_ROOT_DIR}/EFI/OpenCore_Install_Log.txt"
+        fi
+    fi
+    echo $exit_code
+}
+trap finish EXIT
+
+bootvolume="$EFI_ROOT_DIR"
+echo "Boot Volume is $bootvolume"
+
+if [ -z "${bootvolume}" ]; then
+    echo
+    echo "Cannot find the volume. Exiting."
+    echo
+    exit
+fi
+
+bootdev=$(LC_ALL=C diskutil info "$bootvolume" 2>/dev/null | \
+ sed -n 's/.*Device Node: *//p')
+bootrdev=${bootdev/disk/rdisk}
+
+if [ "${bootdev}" = "${bootdev#*disk*s}" ]; then
+    echo
+    echo "ERROR Volume does not use slices."
+    echo
+    exit
+fi
+
+bootdisk=${bootdev%s*}
+bootrdisk=${bootdisk/disk/rdisk}
+bootslice=${bootdev#*disk*s}
+
+
+# Get the options for alternative booting
+altBoot=$($plistbuddy -c "Print $installer_altboot_refid" \
+ "$OPENCORE_INSTALLER_PLIST_NEW" 2>/dev/null)
+
+
+
+if [[ "$altBoot" == true ]]; then
+    partitionloaderhfs="boot1h2"
+    partitionloaderfat="boot1f32alt"
+    partitionloaderexfat="boot1xalt"
+else
+    partitionloaderhfs="boot1h"
+    partitionloaderfat="boot1f32"
+    partitionloaderexfat="boot1x"
+fi
+
+echo "==============================================="
+echo "Installer Variables:"
+echo "********************"
+echo "bootvolume: Volume is ${bootvolume}"
+echo "bootdev: Volume device is ${bootdev}"
+echo "bootrdev: Volume raw device is ${bootrdev}"
+echo "bootslice: Volume slice is ${bootslice}"
+echo "bootdisk: Disk device is ${bootdisk}"
+echo "bootrdisk: Disk raw device is ${bootrdisk}"
+echo "diskloader: Disk loader is ${diskloader}"
+echo "partitionloaderhfs: Partition loader is ${partitionloaderhfs}"
+echo "partitionloaderfat: Partition loader is ${partitionloaderfat}"
+echo "partitionloaderexfat: Partition loader is ${partitionloaderexfat}"
+echo "-----------------------------------------------"
+echo ""
+echo ""
+
+echo "==============================================="
+echo "Check partition scheme of $bootdisk"
+echo "==============================================="
+bootdisk_partition_scheme=$("$partutil" --show-partitionscheme "$bootdisk")
+
+case "$bootdisk_partition_scheme" in
+    FDisk_partition_scheme)
+        echo "${bootdisk} use MBR partition scheme"
+        bootdisk_partition_scheme="mbr"
+        ;;
+    GUID_partition_scheme)
+        echo "${bootdisk} use GPT/Hybrid GPT partition scheme"
+        bootdisk_partition_scheme="gpt"
+        ;;
+     *) echo "ERROR: $bootdev use an unsupported partition scheme: $bootdisk_partition_scheme" | tee -a "$install_log"
+        exit 1
+        ;;
+esac
+echo ""
+
+echo "==============================================="
+echo "Checking the format of the $bootdev partition"
+echo "==============================================="
+
+boot_volume_format=$("$partutil" --show-fstype $bootdev)
+case "$boot_volume_format" in
+      hfs) echo "${bootdev} is currently formatted as HFS"   ;;
+    msdos) echo "${bootdev} is currently formatted as msdos" ;;
+    exfat) echo "${bootdev} is currently formatted as ExFAT" ;;
+esac
+echo ""
+
+if [[ -z "$boot_volume_format" ]]; then
+    # Try to find why we can't find fstype
+    echo "Can't detect filesystem type for $bootdev !" | tee -a "$install_log"
+    echo "$partutil --dump $bootdev:" | tee -a "$install_log"
+    "$partutil" --dump $bootdev 2>&1  | tee -a "$install_log"
+    echo "Installation abort !" | tee -a "$install_log"
+    exit 33
+else
+    echo "${bootdev} is currently formatted as $boot_volume_format"
+fi
+
+partitionactive=$( fdisk -d ${bootrdisk} | grep -n "*" | awk -F: '{print $1}')
+if [[ -n "$partitionactive" ]]; then
+    echo "Current Active Partition: ${partitionactive}" >> "$install_log"
+else
+    echo "No Active Partition" >> "$install_log"
+fi
+echo "" >> "$install_log"
+
+### Stage 0 ###
+echo "Stage 0 - Writing ${diskloader} to ${bootrdisk}" >> "$install_log"
+echo dd if=${bootrdisk} count=1 bs=512 of=/tmp/origMBR >> "$install_log"
+dd if=${bootrdisk} count=1 bs=512 of=/tmp/origMBR
+echo cp /tmp/origMBR /tmp/newMBR >> "$install_log"
+cp /tmp/origMBR /tmp/newMBR
+echo dd if="${DEST_VOL}/Private/tmp/usr/standalone/i386/${diskloader}" of=/tmp/newMBR bs=440 count=1 conv=notrunc >> "$install_log"
+dd if="${DEST_VOL}/Private/tmp/usr/standalone/i386/${diskloader}" of=/tmp/newMBR bs=440 count=1 conv=notrunc
+echo fdisk -f /tmp/newMBR -u -y ${bootrdisk} >> "$install_log"
+fdisk -f /tmp/newMBR -u -y ${bootrdisk}
+echo "" >> "$install_log"
+
+### Stage 1 ###
+
+# Use temporary files because the partition will be unmount
+tmp_log=/tmp/install.log
+partitionloaderfat_copy="/tmp/$partitionloaderfat"
+partitionloaderexfat_copy="/tmp/$partitionloaderexfat"
+partitionloaderhfs_copy="/tmp/$partitionloaderhfs"
+cp -p "${DEST_VOL}/Private/tmp/usr/standalone/i386/${partitionloaderfat}" "$partitionloaderfat_copy"
+#cp -p "${DEST_VOL}/Private/tmp/usr/standalone/i386/${partitionloaderexfat}" "$partitionloaderexfat_copy"
+#cp -p "${DEST_VOL}/Private/tmp/usr/standalone/i386/${partitionloaderhfs}" "$partitionloaderhfs_copy"
+
+# Try to unmount the partition first
+mnt_pt=$(LC_ALL=C mount | egrep "^$bootdev on" | sed 's/^.* on *//;s/ ([^(]*//')
+if [[ -n "$mnt_pt" ]]; then
+    # Try to umount the partition with umount
+    umount $bootdev 2>/dev/null
+    if [[ $? -ne 0 ]]; then
+        # If it doesn't work try with diskutil
+        diskutil unmount $bootdev 2>/dev/null
+        [[ $? -ne 0 ]] && mnt_pt=''
+    fi
+fi
+
+if [[ ${boot_volume_format} = "hfs" ]]; then
+    echo "Stage 1 - Writing ${partitionloaderhfs} to ${bootrdev}" >> "$tmp_log"
+    echo "File system is HFS." >> "$tmp_log"
+    echo "dd if=${partitionloaderhfs_copy} of=${bootrdev}" >> "$tmp_log"
+    dd if="${partitionloaderhfs_copy}" of=${bootrdev}
+
+elif [[ ${boot_volume_format} = "msdos" ]]; then
+    echo "Stage 1 - Writing ${partitionloaderfat} to ${bootrdev}" >> "$tmp_log"
+
+    # copy partition boot sector to origbs
+    echo "dd if=${bootrdev} count=1 of=/tmp/origbs" >> "$tmp_log"
+    dd if=${bootrdev} count=1 of=/tmp/origbs
+
+    if [[ -n $(cat /tmp/origbs | grep FAT16) ]]; then
+      echo "boot volume format is FAT16" >> "$tmp_log"
+      echo "No Stage1 was written" >> "$tmp_log"
+    else
+      echo "boot volume format is FAT32" >> "$tmp_log"
+      # copy boot1f32 to newbs
+      echo "cp ${partitionloaderfat_copy} /tmp/newbs" >> "$tmp_log"
+      cp -f "${partitionloaderfat_copy}" /tmp/newbs
+
+      # "merge" origbs into newbs
+      echo "dd if=/tmp/origbs of=/tmp/newbs skip=3 seek=3 bs=1 count=87 conv=notrunc" >> "$tmp_log"
+      dd if=/tmp/origbs of=/tmp/newbs skip=3 seek=3 bs=1 count=87 conv=notrunc
+      dd if=/dev/random of=/tmp/newbs skip=496 seek=496 bs=1 count=14 conv=notrunc
+
+      # write newbs to the partition boot sector
+      echo "dd if=/tmp/newbs of=${bootrdev}" >> "$tmp_log"
+      dd if=/tmp/newbs count=1 of=${bootrdev}
+    fi
+elif [[ ${boot_volume_format} = "exfat" ]]; then
+    echo "Stage 1 - Writing ${partitionloaderexfat} to ${bootrdev}" >> "$tmp_log"
+    echo "File system is ExFat." >> "$tmp_log"
+    echo "$boot1install -y -f ${partitionloaderexfat_copy} ${bootrdev}" >> "$tmp_log"
+    "$boot1install" -y -f "${partitionloaderexfat_copy}" ${bootrdev}
+else
+    echo "Unknown boot volume format: $boot_volume_format" >> "$tmp_log"
+    echo "No Stage1 was written" >> "$tmp_log"
+fi
+
+# Now try to remount the partition
+if [[ -n "$mnt_pt" ]]; then
+    [[ ! -d "$mnt_pt" ]] && mkdir -p "$mnt_pt"
+    # First try to mount with the mount command
+    mount -t "$boot_volume_format" "$bootdev" "$mnt_pt"
+    # If failed try with diskutil
+    [[ $? -ne 0 ]] && diskutil mount -mountPoint "$mnt_pt" "$bootdev"
+fi
+
+# Copy temporary log to install_log
+cat "$tmp_log" >> "$install_log"
+# Remove tempory files
+rm -f "$tmp_log"
+rm -f "$partitionloaderfat_copy"
+rm -f "$partitionloaderexfat_copy"
+rm -f "$partitionloaderhfs_copy"
+
+echo "" >> "$install_log"
+
+if [[ "$bootdisk_partition_scheme" == mbr && "$diskloader" == boot0 ]]; then
+    echo "Setup Active Partition to be: ${bootslice}" >> "$install_log"
+    fdisk -e ${bootrdisk} <<-MAKEACTIVE
+print
+flag ${bootslice}
+write
+p
+f 1
+w
+y
+q
+quit
+MAKEACTIVE
+
+    partitionactive=$( fdisk -d ${bootrdisk} | grep -n "*" | awk -F: '{print $1}')
+    echo "New Active Partition: ${partitionactive}" >> "$install_log"
+    echo "" >> "$install_log"
+fi
+
+
+
+boottype='x64'
+opencoreEFIFile='bootX64'
+
+echo "$boottype" > "${DEST_VOL}/Private/tmp/boottype"
+
+if [[ -f "${DEST_VOL}/Private/tmp/usr/standalone/i386/$boottype/$opencoreEFIFile" ]]; then
+    cp -v "${DEST_VOL}/Private/tmp/usr/standalone/i386/$boottype/$opencoreEFIFile" "${EFI_ROOT_DIR}/boot"
+    echo "Stage 2 - Written $opencoreEFIFile to ${EFI_ROOT_DIR}/boot" >> "$install_log"
+fi
+
+
+
+
+echo "======================================================================" >> "${install_log}"
+echo "=========== Legacy OpenCore Bootloader Installation Finish ===========" >> "${install_log}"
+echo "======================================================================" >> "${install_log}"
+
+# ---------------------------------------------
+# Cleanup
+# ---------------------------------------------
+
+if [[ -e "$install_log" && -d "${EFI_ROOT_DIR}/EFI" ]]; then
+    mv -f "$install_log" "${EFI_ROOT_DIR}/EFI/OpenCore_Install_Log.txt"
+fi
+
+
+# Clean up
+rm -f "${DEST_VOL}/Private/tmp/boottype"
+
+# Remove link to the partition that contain the EFI folder
+rm -rf "${DEST_VOL}"/Private/tmp/EFIROOTDIR
+
+# Remove OC files
+rm -rf "${DEST_VOL}"/Private/tmp/usr
+rm -rf /Private/tmp/origbs
+rm -rf /Private/tmp/newbs
+rm -rf /Private/tmp/origMBR
+rm -rf /Private/tmp/newMBR
+
+
+# Clean Up make sur
+rm -rf /tmp/origbs /tmp/newbs /tmp/newMBR /tmp/origMBR
+
+
+
+
+
+		
