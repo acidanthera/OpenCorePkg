@@ -19,8 +19,8 @@ Run Package.command
 
 
 
-#### Readme [UEFI/Duet Installer Package](https://github.com/chris1111/OpenCorePkg/blob/master/Utilities/OpenCorePackage/Docs/ReadMe%20UEFI:Duet.pdf)
+#### Readme [UEFI/Duet Installer Package](https://github.com/acidanthera/OpenCorePkg/master/Utilities/OpenCorePackage/Docs/ReadMe%20UEFI:Duet.pdf)
 
-#### Readme [UEFI Only Installer Package](https://github.com/chris1111/OpenCorePkg/blob/master/Utilities/OpenCorePackage/Docs/ReadMe%20UEFI%20Only.pdf)
+#### Readme [UEFI Only Installer Package](https://github.com/acidanthera/OpenCorePkg/master/Utilities/OpenCorePackage/Docs/ReadMe%20UEFI%20Only.pdf)
 
 #### References [Apple Installer Package](https://developer.apple.com/library/archive/documentation/DeveloperTools/Reference/DistributionDefinitionRef/Chapters/Introduction.html#//apple_ref/doc/uid/TP40005370-CH1-SW1)
