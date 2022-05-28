@@ -203,6 +203,7 @@ package() {
 
   utilScpts=(
     "LegacyBoot"
+    "OpenCorePackage"
     "CreateVault"
     "FindSerialPort"
     "macrecovery"
@@ -214,6 +215,10 @@ package() {
   done
 
   buildutil || exit 1
+
+  # Copying Main EFI to OpenCorePackage
+  echo "Copying Main EFI to OpenCorePackage"
+    cp -Rp "${dstdir}/X64/EFI" "${dstdir}/Utilities/OpenCorePackage/OC-EFI/EFIROOTDIR" || exit 
 
   # Copy LogoutHook.
   mkdir -p "${dstdir}/Utilities/LogoutHook" || exit 1
@@ -236,6 +241,9 @@ package() {
     if [ -f "${booter}" ]; then
       echo "Copying OpenDuetPkg boot file from ${booter}..."
       cp "${booter}" "${dstdir}/Utilities/LegacyBoot/boot${arch}" || exit 1
+      cp "${booter}" "${dstdir}/Utilities/OpenCorePackage/OC-EFI/usr/standalone/i386/x64/boot${arch}" || exit 1
+      cp "${dstdir}/Utilities/LegacyBoot/boot0" "${dstdir}/Utilities/OpenCorePackage/OC-EFI/usr/standalone/i386" || exit 1
+      cp "${dstdir}/Utilities/LegacyBoot/boot1f32" "${dstdir}/Utilities/OpenCorePackage/OC-EFI/usr/standalone/i386" || exit 1
     else
       echo "Failed to find OpenDuetPkg at ${booter}!"
     fi
