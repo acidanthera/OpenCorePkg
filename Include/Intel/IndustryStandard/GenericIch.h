@@ -34,15 +34,15 @@
 #define PCI_FUNCTION_NUMBER_ICH_LPC  0       ///< LPC is Function 0.
 #define PCI_FUNCTION_NUMBER_ICH_PMC  2       ///< PMC is Function 2.
 
-#define V_ICH_PCI_VENDOR_ID          0x8086  ///< Intel vendor-id
-#define V_PIIX4_PMC_PCI_DEVICE_ID    0x7113  ///< Intel PIIX4 PMC device-id
+#define V_ICH_PCI_VENDOR_ID        0x8086    ///< Intel vendor-id
+#define V_PIIX4_PMC_PCI_DEVICE_ID  0x7113    ///< Intel PIIX4 PMC device-id
 
 // IchAcpiCntr   Control for the ICH's ACPI Counter.
 
-#define R_PIIX4_PM_BASE            0x40
-#define B_PIIX4_PM_BASE_BAR        0x0000FFC0
-#define R_PIIX4_PMREGMISC          0x80   ///< See PMIOSE
-#define B_PIIX4_PMREGMISC_PMIOSE   0x1
+#define R_PIIX4_PM_BASE           0x40
+#define B_PIIX4_PM_BASE_BAR       0x0000FFC0
+#define R_PIIX4_PMREGMISC         0x80    ///< See PMIOSE
+#define B_PIIX4_PMREGMISC_PMIOSE  0x1
 
 // IchAcpiCntr   Control for the ICH's ACPI Counter.
 
