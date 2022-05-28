@@ -9,10 +9,15 @@ This tool installs OpenCore UEFI and legacy on GPT-formatted disk
 ##### Credit: [Acidanthera OpenCore](https://github.com/acidanthera/OpenCorePkg),  [JrCs, partutil](https://github.com/JrCs), [MountESP Team Clover](https://github.com/CloverHackyColor/CloverBootloader), [chris1111 Package](https://github.com/chris1111)
 
 
-
+#### Build
+```bash
+Run Package.command
+```
 
 - Build a config.plist base on Docs/SampleCustom.plist to ➤ /OC-EFI/EFIROOTDIR/EFI/OC/config.plist
 - Build a Resources/Themes to ➤ /OC-EFI/EFIROOTDIR/EFI/OC/Resources/Image
+
+
 
 #### Readme [UEFI/Duet Installer Package](https://github.com/chris1111/OpenCorePkg/blob/master/Utilities/OpenCorePackage/Docs/ReadMe%20UEFI:Duet.pdf)
 
