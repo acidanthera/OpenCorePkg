@@ -39,7 +39,7 @@
 import os
 import sys
 
-# pylint: disable=wildcard-import
+# pylint: disable=undefined-variable,wildcard-import
 from lldb import *
 
 # Compiler and DWARF register numbers
@@ -180,7 +180,6 @@ name_to_gdb_regnum = {
 }
 
 name_to_generic_regnum = {
-    # pylint: disable=undefined-variable
     'rip': LLDB_REGNUM_GENERIC_PC,
     'rsp': LLDB_REGNUM_GENERIC_SP,
     'rbp': LLDB_REGNUM_GENERIC_FP,
@@ -194,14 +193,12 @@ name_to_generic_regnum = {
 
 
 def get_reg_num(reg_num_dict, reg_name):
-    # pylint: disable=undefined-variable
     if reg_name in reg_num_dict:
         return reg_num_dict[reg_name]
     return LLDB_INVALID_REGNUM
 
 
 x86_64_register_infos = [
-    # pylint: disable=undefined-variable
     {'name': 'rax',
      'set': 0,
      'bitsize': 64,
@@ -733,7 +730,6 @@ x86_64_register_infos = [
 
 
 def get_target_definition(triple):
-    # pylint: disable=undefined-variable
     g_target_definition = {}
     offset = 0
     for reg_info in x86_64_register_infos:

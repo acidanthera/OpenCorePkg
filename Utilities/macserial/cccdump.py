@@ -1,3 +1,4 @@
+# pylint: disable=undefined-variable
 #
 # Extract platform data from CCC
 # Copyright (c) 2018 vit9696
@@ -8,7 +9,6 @@ import ida_bytes
 
 
 def readaddr(ea):
-    # pylint: disable=undefined-variable
     a = ida_bytes.get_bytes(ea, 8)
     if a == BADADDR:
         return None
@@ -16,7 +16,6 @@ def readaddr(ea):
 
 
 def readstr(ea, length=256):
-    # pylint: disable=undefined-variable
     if ea == BADADDR:
         return None
 
@@ -36,7 +35,6 @@ def readstr(ea, length=256):
             return str
 
 
-# pylint: disable=undefined-variable
 base = get_name_ea(0, "_show")
 count = 0
 print('typedef enum {')
