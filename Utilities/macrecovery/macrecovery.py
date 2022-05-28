@@ -293,7 +293,7 @@ def action_download(args):
                 while tb.tb_next:
                     tb = tb.tb_next
                 err = linecache.getline(tb.tb_frame.f_code.co_filename, tb.tb_lineno, tb.tb_frame.f_globals).strip()
-            except _:
+            except Exception:
                 err = "Invalid chunklist"
         print(f'\rImage verification failed. ({err})')
         return 1

@@ -22,6 +22,6 @@ with open(sys.argv[1], 'r', encoding='utf-8') as f:
         x = re.search(r'"([^"]+)"', line)
         if x:
             if x.group(1) < prev:
-                print('ERROR: {} precedes {}'.format(prev, x.group(1)))
+                print(f'ERROR: {prev} precedes {x.group(1)}')
                 sys.exit(1)
             prev = x.group(1)

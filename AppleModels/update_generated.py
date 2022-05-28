@@ -147,54 +147,30 @@ def export_db_macinfolib(db, path, year=0):
 
             print(
                 ' {\n'
-                '  .SystemProductName = "%s",\n'
-                '  .BoardProduct = "%s",\n'
-                '  .BoardRevision = %s,\n'
-                '  .SmcRevision = {%s},\n'
-                '  .SmcBranch = {%s},\n'
-                '  .SmcPlatform = {%s},\n'
-                '  .BIOSVersion = "%s",\n'
-                '  .BIOSReleaseDate = "%s",\n'
-                '  .SystemVersion = "%s",\n'
-                '  .SystemSKUNumber = "%s",\n'
-                '  .SystemFamily = "%s",\n'
-                '  .BoardVersion = "%s",\n'
-                '  .BoardAssetTag = "%s",\n'
-                '  .BoardLocationInChassis = "%s",\n'
-                '  .SmcGeneration = 0x%X,\n'
-                '  .BoardType = 0x%X,\n'
-                '  .ChassisType = 0x%X,\n'
-                '  .MemoryFormFactor = 0x%X,\n'
-                '  .PlatformFeature = %s,\n'
-                '  .ChassisAssetTag = "%s",\n'
-                '  .FirmwareFeatures = 0x%XULL,\n'
-                '  .FirmwareFeaturesMask = 0x%XULL,\n'
-                '  .SecureBootModel = %s,\n'
-                ' },' % (
-                    info['SystemProductName'],
-                    info['BoardProduct'][0] if isinstance(info['BoardProduct'], list) else info['BoardProduct'],
-                    f"0x{info['BoardRevision']:X}" if 'BoardRevision' in info else 'MAC_INFO_BOARD_REVISION_MISSING',
-                    ', '.join(map(str, info.get('SmcRevision', [0x00]))),
-                    ', '.join(map(str, info.get('SmcBranch', [0x00]))),
-                    ', '.join(map(str, info.get('SmcPlatform', [0x00]))),
-                    info['BIOSVersion'],
-                    info['BIOSReleaseDate'],
-                    info['SystemVersion'],
-                    info['SystemSKUNumber'],
-                    info['SystemFamily'],
-                    info['BoardVersion'],
-                    info['BoardAssetTag'],
-                    info['BoardLocationInChassis'],
-                    info['SmcGeneration'],
-                    info['BoardType'],
-                    info['ChassisType'],
-                    info['MemoryFormFactor'],
-                    f"0x{info['PlatformFeature']:X}" if 'PlatformFeature' in info else 'MAC_INFO_PLATFORM_FEATURE_MISSING',
-                    info['ChassisAssetTag'],
-                    info.get('ExtendedFirmwareFeatures', info.get('FirmwareFeatures', 0)),
-                    info.get('ExtendedFirmwareFeaturesMask', info.get('FirmwareFeaturesMask', 0)),
-                    sb_model
-                ), file=fh)
+                f'''  .SystemProductName = "{info['SystemProductName']}",\n'''
+                f'''  .BoardProduct = "{info['BoardProduct'][0] if isinstance(info['BoardProduct'], list) else info['BoardProduct']}",\n'''
+                f'''  .BoardRevision = {f"0x{info['BoardRevision']:X}" if 'BoardRevision' in info else 'MAC_INFO_BOARD_REVISION_MISSING'},\n'''
+                f'''  .SmcRevision = {{{', '.join(map(str, info.get('SmcRevision', [0x00])))}}},\n'''
+                f'''  .SmcBranch = {{{', '.join(map(str, info.get('SmcBranch', [0x00])))}}},\n'''
+                f'''  .SmcPlatform = {{{', '.join(map(str, info.get('SmcPlatform', [0x00])))}}},\n'''
+                f'''  .BIOSVersion = "{info['BIOSVersion']}",\n'''
+                f'''  .BIOSReleaseDate = "{info['BIOSReleaseDate']}",\n'''
+                f'''  .SystemVersion = "{info['SystemVersion']}",\n'''
+                f'''  .SystemSKUNumber = "{info['SystemSKUNumber']}",\n'''
+                f'''  .SystemFamily = "{info['SystemFamily']}",\n'''
+                f'''  .BoardVersion = "{info['BoardVersion']}",\n'''
+                f'''  .BoardAssetTag = "{info['BoardAssetTag']}",\n'''
+                f'''  .BoardLocationInChassis = "{info['BoardLocationInChassis']}",\n'''
+                f'''  .SmcGeneration = 0x{info['SmcGeneration']:X},\n'''
+                f'''  .BoardType = 0x{info['BoardType']:X},\n'''
+                f'''  .ChassisType = 0x{info['ChassisType']:X},\n'''
+                f'''  .MemoryFormFactor = 0x{info['MemoryFormFactor']:X},\n'''
+                f'''  .PlatformFeature = {f"0x{info['PlatformFeature']:X}" if 'PlatformFeature' in info else 'MAC_INFO_PLATFORM_FEATURE_MISSING'},\n'''
+                f'''  .ChassisAssetTag = "{info['ChassisAssetTag']}",\n'''
+                f'''  .FirmwareFeatures = 0x{info.get('ExtendedFirmwareFeatures', info.get('FirmwareFeatures', 0)):X}ULL,\n'''
+                f'''  .FirmwareFeaturesMask = 0x{info.get('ExtendedFirmwareFeaturesMask', info.get('FirmwareFeaturesMask', 0)):X}ULL,\n'''
+                f'  .SecureBootModel = {sb_model},\n'
+                f' }},', file=fh)
 
         print('};', file=fh)
 

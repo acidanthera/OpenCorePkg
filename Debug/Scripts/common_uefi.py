@@ -166,16 +166,5 @@ class UefiMisc():
     # Returns a UTF16 string corresponding to a (CHAR16 *) value in EFI.
     @classmethod
     def parse_guid(cls, value):
-        guid = "<%08X-%04X-%04X-%02X%02X-%02X%02X%02X%02X%02X%02X>" % (
-            value['Data1'],
-            value['Data2'],
-            value['Data3'],
-            value['Data4'][0],
-            value['Data4'][1],
-            value['Data4'][2],
-            value['Data4'][3],
-            value['Data4'][4],
-            value['Data4'][5],
-            value['Data4'][6],
-            value['Data4'][7])
+        guid = f"<{value['Data1']:08X}-{value['Data2']:04X}-{value['Data3']:04X}-{value['Data4'][0]:02X}{value['Data4'][1]:02X}-{value['Data4'][2]:02X}{value['Data4'][3]:02X}{value['Data4'][4]:02X}{value['Data4'][5]:02X}{value['Data4'][6]:02X}{value['Data4'][7]:02X}>"
         return guid

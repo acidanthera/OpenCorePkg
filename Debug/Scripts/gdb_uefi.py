@@ -29,7 +29,7 @@ import re
 import sys
 import os
 import subprocess
-from common_uefi import *
+from common_uefi import UefiMisc
 
 sys.path.append(os.path.dirname(__file__))
 
@@ -42,6 +42,8 @@ __status__ = 'Works'
 
 
 class ReloadUefi(gdb.Command):
+    # pylint: disable=undefined-variable
+
     '''Reload UEFI symbols'''
 
     #
@@ -75,6 +77,7 @@ class ReloadUefi(gdb.Command):
     #
 
     def lookup_type(self, typename):
+        # pylint: disable=no-self-use
         return gdb.lookup_type(typename)
 
     #
@@ -82,6 +85,7 @@ class ReloadUefi(gdb.Command):
     #
 
     def ptype(self, typename):
+        # pylint: disable=no-self-use
         return gdb.lookup_type(typename).pointer()
 
     #
@@ -89,6 +93,7 @@ class ReloadUefi(gdb.Command):
     #
 
     def crc32(self, data):
+        # pylint: disable=no-self-use
         return binascii.crc32(data) & 0xFFFFFFFF
 
     #
@@ -100,6 +105,7 @@ class ReloadUefi(gdb.Command):
     #
 
     def set_field(self, value, field_name, data):
+        # pylint: disable=no-self-use
         gdb.execute(f'set *({str(value[field_name].type)} *) 0x{int(value[field_name].address):x} = 0x{data}')
 
     #
@@ -210,7 +216,7 @@ class ReloadUefi(gdb.Command):
     #
 
     def pe_is_64(self, pe_headers):
-        return True if pe_headers['Pe32']['OptionalHeader']['Magic'] == self.PE32PLUS_MAGIC else False
+        return pe_headers['Pe32']['OptionalHeader']['Magic'] == self.PE32PLUS_MAGIC
 
     #
     # Returns the PE fileheader.
@@ -252,6 +258,7 @@ class ReloadUefi(gdb.Command):
     # TODO: Proper ELF support.
     #
     def get_sym_cmd(self, file, orgbase, sections, macho, fallack_base):
+        # pylint: disable=no-self-use
         cmd = f'add-symbol-file {file}'
 
         # Fallback case, no sections, just load .text.
@@ -404,6 +411,7 @@ class ReloadUefi(gdb.Command):
     #
 
     def usage(self):
+        # pylint: disable=no-self-use
         print('Usage: reload-uefi [-o] [/path/to/GdbSyms.dll]')
 
     #
@@ -489,4 +497,5 @@ def lookup_uefi_type(val):
 
 
 ReloadUefi()
+# pylint: disable=undefined-variable
 gdb.pretty_printers.append(lookup_uefi_type)

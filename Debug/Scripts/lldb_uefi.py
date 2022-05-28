@@ -11,6 +11,7 @@ import os
 import re
 import shlex
 
+# pylint: disable=wildcard-import
 from collections import OrderedDict
 from common_uefi import *
 import lldb
@@ -75,6 +76,7 @@ class ReloadUefi:
     #
 
     def crc32(self, data):
+        # pylint: disable=no-self-use
         return binascii.crc32(data) & 0xFFFFFFFF
 
     #
@@ -131,6 +133,7 @@ class ReloadUefi:
     #
 
     def set_field(self, value, field_name, data):
+        # pylint: disable=no-self-use
         member = value.GetChildMemberWithName(field_name)
         data = lldb.SBData.CreateDataFromInt(data, size=member.GetByteSize())
         error = lldb.SBError()
@@ -237,7 +240,7 @@ class ReloadUefi:
 
     def pe_is_64(self, pe_headers):
         magic = pe_headers.GetValueForExpressionPath('.Pe32.OptionalHeader.Magic').GetValueAsUnsigned()
-        return True if magic == self.PE32PLUS_MAGIC else False
+        return magic == self.PE32PLUS_MAGIC
 
     #
     # Returns the PE fileheader.
@@ -289,6 +292,7 @@ class ReloadUefi:
     # Currently supports Mach-O and single-section files.
     #
     def get_sym_cmd(self, filename, orgbase, *_):
+        # pylint: disable=no-self-use
         if filename.endswith('.pdb'):
             dll_file = filename.replace('.pdb', '.dll')
             module_cmd = f'target modules add -s {filename} {dll_file}'
@@ -351,7 +355,10 @@ class ReloadUefi:
                             real_sym = os.path.join(path, sym_name)
                             break
 
-            syms.append(self.get_sym_cmd(real_sym, orgbase, sections, macho, base)) if real_sym else print(f'No symbol file {sym_name}')
+            if real_sym:
+                syms.append(self.get_sym_cmd(real_sym, orgbase, sections, macho, base))
+            else:
+                print(f'No symbol file {sym_name}')
 
     #
     # Parses table EFI_DEBUG_IMAGE_INFO structures, builds
@@ -412,9 +419,11 @@ class ReloadUefi:
     #
 
     def get_short_help(self):
+        # pylint: disable=no-self-use
         return 'Usage: reload-uefi [-o] [/path/to/GdbSyms.dll]'
 
     def get_long_help(self):
+        # pylint: disable=no-self-use
         return 'Usage: reload-uefi [-o] [/path/to/GdbSyms.dll]'
 
     def usage(self):
@@ -469,6 +478,7 @@ class ReloadUefi:
         # FIXME: Use ReadCStringFromMemory.
         # FIXME: Support executing code.
         if len(args) >= 1 and args[0] != '':
+            # pylint: disable=undefined-variable
             gdb.execute('symbol-file')
             gdb.execute(f'symbol-file {args[0]}')
         else:
