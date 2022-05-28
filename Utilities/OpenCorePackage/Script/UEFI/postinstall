@@ -1,0 +1,53 @@
+#!/bin/bash
+# script UEFI OpenCore
+# chris1111 
+
+echo "==============================================="
+echo "Post Post-Install Script"
+echo "==============================================="
+
+#echo "DEBUG: $ 1 = Full path to the installation package the installer app is processing: " $1
+#echo "DEBUG: $ 2 = Full path to the installation destination: " $2
+#echo "DEBUG: $ 3 = Installation volume (mountpoint) to receive the payload: " $3
+#echo "DEBUG: $ 4 = Root directory for the system: " $4
+
+echo "preinstall: Path to installer....... $1"
+echo "preinstall: Path to destination..... $2"
+echo "preinstall: Path to dest volume..... $3"
+echo "preinstall: Root of system folder... $4"
+
+
+#############################################################################
+
+DEST_VOL="${3}"
+EFI_ROOT_DIR=$(cd "${DEST_VOL}"/Private/tmp/EFIROOTDIR; pwd -P)
+install_log="${DEST_VOL}/Private/tmp/OpenCore_Install_Log.txt"
+plistbuddy='/usr/libexec/PlistBuddy'
+
+
+
+echo "======================================================================" >> "${install_log}"
+echo "=========== OpenCore Bootloader Installation Finish ===========" >> "${install_log}"
+echo "======================================================================" >> "${install_log}"
+
+# ---------------------------------------------
+# Cleanup
+# ---------------------------------------------
+
+if [[ -e "$install_log" && -d "${EFI_ROOT_DIR}/EFI" ]]; then
+    mv -f "$install_log" "${EFI_ROOT_DIR}/EFI/OpenCore_Install_Log.txt"
+fi
+
+
+# Remove link to the partition that contain the EFI folder
+rm -rf "${DEST_VOL}"/Private/tmp/EFIROOTDIR
+
+# Remove OC files
+rm -rf "${DEST_VOL}"/Private/tmp/usr
+
+
+
+
+
+
+		
