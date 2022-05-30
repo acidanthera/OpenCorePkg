@@ -1,5 +1,5 @@
 /** @file
-  Copyright (c) 2020, Marvin Häuser. All rights reserved.
+  Copyright (c) 2020, Marvin Haeuser. All rights reserved.
   SPDX-License-Identifier: BSD-3-Clause
 **/
 
