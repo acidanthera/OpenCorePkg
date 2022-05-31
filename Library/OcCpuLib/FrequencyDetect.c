@@ -98,10 +98,11 @@ InternalGetPmTimerAddr (
       //
       *Type = "Unknown INTEL";
     }
-  //
-  // PIIX4 uses a different PCI device and function for PM registers.
-  //
-  } else if (PciRead16 (PCI_PIIX4_PMC_ADDRESS (0)) == V_ICH_PCI_VENDOR_ID && PciRead16 (PCI_PIIX4_PMC_ADDRESS (2)) == V_PIIX4_PMC_PCI_DEVICE_ID) {
+
+    //
+    // PIIX4 uses a different PCI device and function for PM registers.
+    //
+  } else if ((PciRead16 (PCI_PIIX4_PMC_ADDRESS (0)) == V_ICH_PCI_VENDOR_ID) && (PciRead16 (PCI_PIIX4_PMC_ADDRESS (2)) == V_PIIX4_PMC_PCI_DEVICE_ID)) {
     if ((PciRead8 (PCI_PIIX4_PMC_ADDRESS (R_PIIX4_PMREGMISC)) & B_PIIX4_PMREGMISC_PMIOSE) != 0) {
       TimerAddr = (PciRead16 (PCI_PIIX4_PMC_ADDRESS (R_PIIX4_PM_BASE)) & B_PIIX4_PM_BASE_BAR) + R_ACPI_PM1_TMR;
       if (Type != NULL) {

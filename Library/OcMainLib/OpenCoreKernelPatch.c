@@ -289,7 +289,6 @@ OcKernelApplyPatches (
           DEBUG_INFO,
           "OC: %a patcher skips DummyPowerManagement patch due to version %u <= %u <= %u\n",
           PRINT_KERNEL_CACHE_TYPE (CacheType),
-          Target,
           MinKernel,
           DarwinVersion,
           MaxKernel

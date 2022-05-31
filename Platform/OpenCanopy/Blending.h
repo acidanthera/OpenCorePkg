@@ -1,7 +1,7 @@
 /** @file
   This file is part of OpenCanopy, OpenCore GUI.
 
-  Copyright (c) 2021, Marvin Häuser. All rights reserved.<BR>
+  Copyright (c) 2021, Marvin Haeuser. All rights reserved.<BR>
   SPDX-License-Identifier: BSD-3-Clause
 **/
 
