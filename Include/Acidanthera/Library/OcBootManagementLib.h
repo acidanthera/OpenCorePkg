@@ -470,7 +470,7 @@ typedef struct OC_BOOT_CONTEXT_ {
   OC_SCAN_ALLOW_DEVICE_PCI)
 
 /**
-  All file system bits used by OC_SCAN_DEVICE_LOCK.
+  All file system bits used by OC_SCAN_FILE_SYSTEM_LOCK.
 **/
 #define OC_SCAN_FILE_SYSTEM_BITS  (\
   OC_SCAN_ALLOW_FS_APFS       | OC_SCAN_ALLOW_FS_HFS        | OC_SCAN_ALLOW_FS_ESP | \
