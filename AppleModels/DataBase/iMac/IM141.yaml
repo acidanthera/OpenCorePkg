@@ -1,7 +1,7 @@
 BIOSVendor: "Apple Inc."
-BIOSVersion: "432.60.3.0.0"
-BIOSLegacyVersion: "IM141.88Z.F000.B00.2110271751"
-BIOSReleaseDate: "10/27/2021"
+BIOSVersion: "433.120.6.0.0"
+BIOSLegacyVersion: "IM141.88Z.F000.B00.2203161445"
+BIOSReleaseDate: "03/16/2022"
 SystemManufacturer: "Apple Inc."
 SystemProductName: "iMac14,1"
 SystemVersion: "1.0"
@@ -69,13 +69,13 @@ SmcEPCI: 0x79007
 OEMStrings: |-
   Apple ROM Version
     Model:        IM141
-    EFI Version:  432.60.3.0.0
-    Built by:     root@bb-g9-pdb36
-    Date:         Wed Oct 27 17:51:08 PDT 2021
-    Revision:     432.60.3 (B&I)
+    EFI Version:  433.120.6.0.0
+    Built by:     root@q9n5v
+    Date:         Wed Mar 16 14:45:20 PDT 2022
+    Revision:     433.120.6 (B&I)
     ROM Version:  F000_B00
     Build Type:   Official Build, Release
-    Compiler:     clang-1300.0.29.10
+    Compiler:     clang-1316.0.21.1
 Specifications:
   CPUCodename:
     - "Crystal Well"

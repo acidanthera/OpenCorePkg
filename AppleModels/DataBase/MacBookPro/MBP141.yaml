@@ -1,7 +1,7 @@
 BIOSVendor: "Apple Inc."
-BIOSVersion: "447.80.3.0.0"
-BIOSLegacyVersion: "MBP141.88Z.F000.B00.2112121733"
-BIOSReleaseDate: "12/12/2021"
+BIOSVersion: "451.120.7.0.0"
+BIOSLegacyVersion: "MBP141.88Z.F000.B00.2203161718"
+BIOSReleaseDate: "03/16/2022"
 SystemManufacturer: "Apple Inc."
 SystemProductName: "MacBookPro14,1"
 SystemVersion: "1.0"
@@ -67,17 +67,17 @@ SmcPlatform:
 SmcEPCI: 0xF0B009
 OEMStrings: |-
   Apple ROM Version
-    BIOS ID:      MBP141.88Z.F000.B00.2112121733
+    BIOS ID:      MBP141.88Z.F000.B00.2203161718
     Model:        MBP141
-    EFI Version:  447.80.3.0.0
-    Built by:     root@bb-g8-pdb106
-    Date:         Sun Dec 12 17:33:03 2021
-    Revision:     447.80.3 (B&I)
+    EFI Version:  451.120.7.0.0
+    Built by:     root@7kxzq
+    Date:         Wed Mar 16 17:18:41 2022
+    Revision:     451.120.7 (B&I)
     ROM Version:  F000_B00
     Build Type:   Official Build, RELEASE
-    Compiler:     clang-1300.0.29.10
-    UUID:         01B84F5C-489D-38B1-9F76-CDF83947988F
-    UUID:         7944EF27-4449-305F-B35A-7CD450B53BC7
+    Compiler:     clang-1316.0.21.1
+    UUID:         DA51E597-5216-3EB8-9E1C-50C4C16F0327
+    UUID:         8661A85E-60F9-3DCD-8C87-0C0C88FC57AD
 Specifications:
   CPUCodename:
     - "Kaby Lake"

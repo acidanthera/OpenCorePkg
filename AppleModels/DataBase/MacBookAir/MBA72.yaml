@@ -1,7 +1,7 @@
 BIOSVendor: "Apple Inc."
-BIOSVersion: "428.60.3.0.0"
-BIOSLegacyVersion: "MBA71.88Z.F000.B00.2110271752"
-BIOSReleaseDate: "10/27/2021"
+BIOSVersion: "430.120.6.0.0"
+BIOSLegacyVersion: "MBA71.88Z.F000.B00.2203161445"
+BIOSReleaseDate: "03/16/2022"
 SystemManufacturer: "Apple Inc."
 SystemProductName: "MacBookAir7,2"
 SystemVersion: "1.0"
@@ -62,13 +62,13 @@ SmcEPCI: 0x7B007
 OEMStrings: |-
   Apple ROM Version
     Model:        MBA71
-    EFI Version:  428.60.3.0.0
-    Built by:     root@bb-g8-pdb6
-    Date:         Wed Oct 27 17:52:07 PDT 2021
-    Revision:     428.60.3 (B&I)
+    EFI Version:  430.120.6.0.0
+    Built by:     root@48hx7
+    Date:         Wed Mar 16 14:45:51 PDT 2022
+    Revision:     430.120.6 (B&I)
     ROM Version:  F000_B00
     Build Type:   Official Build, Release
-    Compiler:     clang-1300.0.29.10
+    Compiler:     clang-1316.0.21.1
 Specifications:
   CPUCodename:
     - "Broadwell"

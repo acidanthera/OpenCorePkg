@@ -1649,11 +1649,11 @@
 		<key>SMBIOS</key>
 		<dict>
 			<key>BIOSReleaseDate</key>
-			<string>01/20/2022</string>
+			<string>03/31/2022</string>
 			<key>BIOSVendor</key>
 			<string>Acidanthera</string>
 			<key>BIOSVersion</key>
-			<string>1731.100.125.0.0</string>
+			<string>1731.120.8.0.0</string>
 			<key>BoardAssetTag</key>
 			<string></string>
 			<key>BoardLocationInChassis</key>
