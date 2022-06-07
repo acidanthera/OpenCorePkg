@@ -1071,7 +1071,7 @@ PatchIncreasePciBarSize (
 
   Status = PatcherApplyGenericPatch (Patcher, &mIncreasePciBarSizePatch);
   if (EFI_ERROR (Status)) {
-    DEBUG ((DEBUG_INFO, "OCAK: Failed to apply patch com.apple.iokit.IOPCIFamily IncreasePciBarSize - %r\n", Status));
+    DEBUG ((DEBUG_INFO, "OCAK: Failed to apply patch com.apple.iokit.IOPCIFamily IncreasePciBarSize - %r, trying legacy patch\n", Status));
     Status = PatcherApplyGenericPatch (Patcher, &mIncreasePciBarSizeLegacyPatch);
     if (EFI_ERROR (Status)) {
       DEBUG ((DEBUG_INFO, "OCAK: Failed to apply legacy patch com.apple.iokit.IOPCIFamily IncreasePciBarSize - %r\n", Status));
