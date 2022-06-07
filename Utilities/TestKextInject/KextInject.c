@@ -489,6 +489,7 @@ ApplyKernelPatches (
 
   UINTN   RegisterBasePmio = 0x2008;
   UINT32  RegisterStride   = 4;
+
   PatchSetPciSerialDevice (RegisterBasePmio, RegisterStride);
   Status = KernelApplyQuirk (KernelQuirkCustomPciSerialDevice, &Patcher, KernelVersion);
   if (EFI_ERROR (Status)) {
