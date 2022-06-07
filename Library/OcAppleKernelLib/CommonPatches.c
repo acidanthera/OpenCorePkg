@@ -60,6 +60,11 @@ PatchAppleCpuPmCfgLock (
   UINT8  *WalkerEnd;
   UINT8  *WalkerTmp;
 
+  if (OcMatchDarwinVersion (KernelVersion, KERNEL_VERSION_VENTURA_MIN, 0)) {
+    DEBUG ((DEBUG_INFO, "OCAK: Skipping AppleCpuPmCfgLock patch on %u\n", KernelVersion));
+    return EFI_SUCCESS;
+  }
+
   ASSERT (Patcher != NULL);
 
   Count     = 0;
@@ -976,6 +981,11 @@ PatchDummyPowerManagement (
   )
 {
   EFI_STATUS  Status;
+
+  if (OcMatchDarwinVersion (KernelVersion, KERNEL_VERSION_VENTURA_MIN, 0)) {
+    DEBUG ((DEBUG_INFO, "OCAK: Skipping dummy AppleIntelCPUPowerManagement patch on %u\n", KernelVersion));
+    return EFI_SUCCESS;
+  }
 
   ASSERT (Patcher != NULL);
 
