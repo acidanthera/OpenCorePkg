@@ -25,7 +25,7 @@ is available at [mesu.apple.com](https://mesu.apple.com/assets/bridgeos/com_appl
 To use them do as follows:
 
 1. Visit suitable update catalogue by filling the OS versions (e.g. [this](https://swscan.apple.com/content/catalogs/others/index-13seed-13-12-10.16-10.15-10.14-10.13-10.12-10.11-10.10-10.9-mountainlion-lion-snowleopard-leopard.merged-1.sucatalog.gz) one for macOS 13 beta).  
-Note: This catalogue does not include `FirmwareUpdate.pkg` for macOS 11+. You can extract  firmware images for generic models from `Install macOS Big Sur.app` (or newer).
+Note: This catalogue does not include `FirmwareUpdate.pkg` for macOS 11+. You can extract firmware images for generic models from `Install macOS Big Sur.app` (or newer).
 2. Download most recent `FirmwareUpdate.pkg` and `BridgeOSUpdateCustomer.pkg`.
 3. Extract `scap` files from `FirmwareUpdate.pkg` files and use them as is.
 4. Extract `/usr/standalone/firmware/bridgeOSCustomer.bundle/Contents/Resources/UpdateBundle.zip`
