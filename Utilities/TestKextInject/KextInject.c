@@ -294,20 +294,20 @@ ApplyKextPatches (
     DEBUG ((DEBUG_WARN, "[OK] Success KernelQuirkAppleCpuPmCfgLock\n"));
   }
 
-  Status = PrelinkedContextApplyQuirk (Context, KernelQuirkExternalDiskIcons, KernelVersion);
+  Status = PrelinkedContextApplyQuirk (Context, KernelQuirkCustomSmbiosGuid1, KernelVersion);
   if (EFI_ERROR (Status)) {
-    DEBUG ((DEBUG_WARN, "[FAIL] Failed to apply KernelQuirkExternalDiskIcons - %r\n", Status));
+    DEBUG ((DEBUG_WARN, "[FAIL] Failed to apply KernelQuirkCustomSmbiosGuid1 - %r\n", Status));
     FailedToProcess = TRUE;
   } else {
-    DEBUG ((DEBUG_WARN, "[OK] Success KernelQuirkExternalDiskIcons\n"));
+    DEBUG ((DEBUG_WARN, "[OK] Success KernelQuirkCustomSmbiosGuid1\n"));
   }
 
-  Status = PrelinkedContextApplyQuirk (Context, KernelQuirkThirdPartyDrives, KernelVersion);
+  Status = PrelinkedContextApplyQuirk (Context, KernelQuirkCustomSmbiosGuid2, KernelVersion);
   if (EFI_ERROR (Status)) {
-    DEBUG ((DEBUG_WARN, "[FAIL] Failed to apply KernelQuirkThirdPartyDrives - %r\n", Status));
+    DEBUG ((DEBUG_WARN, "[FAIL] Failed to apply KernelQuirkCustomSmbiosGuid2 - %r\n", Status));
     FailedToProcess = TRUE;
   } else {
-    DEBUG ((DEBUG_WARN, "[OK] Success KernelQuirkThirdPartyDrives\n"));
+    DEBUG ((DEBUG_WARN, "[OK] Success KernelQuirkCustomSmbiosGuid2\n"));
   }
 
   Status = PrelinkedContextApplyQuirk (Context, KernelQuirkDisableIoMapper, KernelVersion);
@@ -326,6 +326,46 @@ ApplyKextPatches (
     DEBUG ((DEBUG_WARN, "[OK] Success KernelQuirkDisableRtcChecksum\n"));
   }
 
+  Status = PrelinkedContextApplyQuirk (Context, KernelQuirkDummyPowerManagement, KernelVersion);
+  if (EFI_ERROR (Status)) {
+    DEBUG ((DEBUG_WARN, "[FAIL] Failed to apply KernelQuirkDummyPowerManagement - %r\n", Status));
+    FailedToProcess = TRUE;
+  } else {
+    DEBUG ((DEBUG_WARN, "[OK] Success KernelQuirkDummyPowerManagement\n"));
+  }
+
+  Status = PrelinkedContextApplyQuirk (Context, KernelQuirkExtendBTFeatureFlags, KernelVersion);
+  if (EFI_ERROR (Status)) {
+    DEBUG ((DEBUG_WARN, "[FAIL] Failed to apply KernelQuirkExtendBTFeatureFlags - %r\n", Status));
+    FailedToProcess = TRUE;
+  } else {
+    DEBUG ((DEBUG_WARN, "[OK] Success KernelQuirkExtendBTFeatureFlags\n"));
+  }
+
+  Status = PrelinkedContextApplyQuirk (Context, KernelQuirkExternalDiskIcons, KernelVersion);
+  if (EFI_ERROR (Status)) {
+    DEBUG ((DEBUG_WARN, "[FAIL] Failed to apply KernelQuirkExternalDiskIcons - %r\n", Status));
+    FailedToProcess = TRUE;
+  } else {
+    DEBUG ((DEBUG_WARN, "[OK] Success KernelQuirkExternalDiskIcons\n"));
+  }
+
+  Status = PrelinkedContextApplyQuirk (Context, KernelQuirkForceAquantiaEthernet, KernelVersion);
+  if (EFI_ERROR (Status)) {
+    DEBUG ((DEBUG_WARN, "[FAIL] Failed to apply KernelQuirkForceAquantiaEthernet - %r\n", Status));
+    FailedToProcess = TRUE;
+  } else {
+    DEBUG ((DEBUG_WARN, "[OK] Success KernelQuirkForceAquantiaEthernet\n"));
+  }
+
+  Status = PrelinkedContextApplyQuirk (Context, KernelQuirkForceSecureBootScheme, KernelVersion);
+  if (EFI_ERROR (Status)) {
+    DEBUG ((DEBUG_WARN, "[FAIL] Failed to apply KernelQuirkForceSecureBootScheme - %r\n", Status));
+    FailedToProcess = TRUE;
+  } else {
+    DEBUG ((DEBUG_WARN, "[OK] Success KernelQuirkForceSecureBootScheme\n"));
+  }
+
   Status = PrelinkedContextApplyQuirk (Context, KernelQuirkIncreasePciBarSize, KernelVersion);
   if (EFI_ERROR (Status)) {
     DEBUG ((DEBUG_WARN, "[FAIL] Failed to apply KernelQuirkIncreasePciBarSize - %r\n", Status));
@@ -334,12 +374,20 @@ ApplyKextPatches (
     DEBUG ((DEBUG_WARN, "[OK] Success KernelQuirkIncreasePciBarSize\n"));
   }
 
-  Status = PrelinkedContextApplyQuirk (Context, KernelQuirkDummyPowerManagement, KernelVersion);
+  Status = PrelinkedContextApplyQuirk (Context, KernelQuirkSetApfsTrimTimeout, KernelVersion);
   if (EFI_ERROR (Status)) {
-    DEBUG ((DEBUG_WARN, "[FAIL] Failed to apply KernelQuirkDummyPowerManagement - %r\n", Status));
+    DEBUG ((DEBUG_WARN, "[FAIL] Failed to apply KernelQuirkSetApfsTrimTimeout - %r\n", Status));
     FailedToProcess = TRUE;
   } else {
-    DEBUG ((DEBUG_WARN, "[OK] Success KernelQuirkDummyPowerManagement\n"));
+    DEBUG ((DEBUG_WARN, "[OK] Success KernelQuirkSetApfsTrimTimeout\n"));
+  }
+
+  Status = PrelinkedContextApplyQuirk (Context, KernelQuirkThirdPartyDrives, KernelVersion);
+  if (EFI_ERROR (Status)) {
+    DEBUG ((DEBUG_WARN, "[FAIL] Failed to apply KernelQuirkThirdPartyDrives - %r\n", Status));
+    FailedToProcess = TRUE;
+  } else {
+    DEBUG ((DEBUG_WARN, "[OK] Success KernelQuirkThirdPartyDrives\n"));
   }
 
   Status = PrelinkedContextApplyQuirk (Context, KernelQuirkXhciPortLimit1, KernelVersion);
@@ -364,46 +412,6 @@ ApplyKextPatches (
     FailedToProcess = TRUE;
   } else {
     DEBUG ((DEBUG_WARN, "[OK] Success KernelQuirkXhciPortLimit3\n"));
-  }
-
-  Status = PrelinkedContextApplyQuirk (Context, KernelQuirkCustomSmbiosGuid1, KernelVersion);
-  if (EFI_ERROR (Status)) {
-    DEBUG ((DEBUG_WARN, "[FAIL] Failed to apply KernelQuirkCustomSmbiosGuid1 - %r\n", Status));
-    FailedToProcess = TRUE;
-  } else {
-    DEBUG ((DEBUG_WARN, "[OK] Success KernelQuirkCustomSmbiosGuid1\n"));
-  }
-
-  Status = PrelinkedContextApplyQuirk (Context, KernelQuirkCustomSmbiosGuid2, KernelVersion);
-  if (EFI_ERROR (Status)) {
-    DEBUG ((DEBUG_WARN, "[FAIL] Failed to apply KernelQuirkCustomSmbiosGuid2 - %r\n", Status));
-    FailedToProcess = TRUE;
-  } else {
-    DEBUG ((DEBUG_WARN, "[OK] Success KernelQuirkCustomSmbiosGuid2\n"));
-  }
-
-  Status = PrelinkedContextApplyQuirk (Context, KernelQuirkExtendBTFeatureFlags, KernelVersion);
-  if (EFI_ERROR (Status)) {
-    DEBUG ((DEBUG_WARN, "[FAIL] Failed to apply KernelQuirkExtendBTFeatureFlags - %r\n", Status));
-    FailedToProcess = TRUE;
-  } else {
-    DEBUG ((DEBUG_WARN, "[OK] Success KernelQuirkExtendBTFeatureFlags\n"));
-  }
-
-  Status = PrelinkedContextApplyQuirk (Context, KernelQuirkForceSecureBootScheme, KernelVersion);
-  if (EFI_ERROR (Status)) {
-    DEBUG ((DEBUG_WARN, "[FAIL] Failed to apply KernelQuirkForceSecureBootScheme - %r\n", Status));
-    FailedToProcess = TRUE;
-  } else {
-    DEBUG ((DEBUG_WARN, "[OK] Success KernelQuirkForceSecureBootScheme\n"));
-  }
-
-  Status = PrelinkedContextApplyQuirk (Context, KernelQuirkSetApfsTrimTimeout, KernelVersion);
-  if (EFI_ERROR (Status)) {
-    DEBUG ((DEBUG_WARN, "[FAIL] Failed to apply KernelQuirkSetApfsTrimTimeout - %r\n", Status));
-    FailedToProcess = TRUE;
-  } else {
-    DEBUG ((DEBUG_WARN, "[OK] Success KernelQuirkSetApfsTrimTimeout\n"));
   }
 }
 
@@ -479,28 +487,15 @@ ApplyKernelPatches (
     DEBUG ((DEBUG_WARN, "[OK] KernelQuirkAppleXcpmForceBoost patch\n"));
   }
 
-  Status = KernelApplyQuirk (KernelQuirkPanicNoKextDump, &Patcher, KernelVersion);
+  UINTN   RegisterBasePmio = 0x2008;
+  UINT32  RegisterStride   = 4;
+  PatchSetPciSerialDevice (RegisterBasePmio, RegisterStride);
+  Status = KernelApplyQuirk (KernelQuirkCustomPciSerialDevice, &Patcher, KernelVersion);
   if (EFI_ERROR (Status)) {
-    DEBUG ((DEBUG_WARN, "[FAIL] KernelQuirkPanicNoKextDump - %r\n", Status));
+    DEBUG ((DEBUG_WARN, "[FAIL] CustomPciSerialDevice - %r\n", Status));
     FailedToProcess = TRUE;
   } else {
-    DEBUG ((DEBUG_WARN, "[OK] KernelQuirkPanicNoKextDump patch\n"));
-  }
-
-  Status = KernelApplyQuirk (KernelQuirkLapicKernelPanic, &Patcher, KernelVersion);
-  if (EFI_ERROR (Status)) {
-    DEBUG ((DEBUG_WARN, "[FAIL] KernelQuirkLapicKernelPanic - %r\n", Status));
-    FailedToProcess = TRUE;
-  } else {
-    DEBUG ((DEBUG_WARN, "[OK] KernelQuirkLapicKernelPanic patch\n"));
-  }
-
-  Status = KernelApplyQuirk (KernelQuirkPowerTimeoutKernelPanic, &Patcher, KernelVersion);
-  if (EFI_ERROR (Status)) {
-    DEBUG ((DEBUG_WARN, "[FAIL] KernelQuirkPowerTimeoutKernelPanic - %r\n", Status));
-    FailedToProcess = TRUE;
-  } else {
-    DEBUG ((DEBUG_WARN, "[OK] KernelQuirkPowerTimeoutKernelPanic patch\n"));
+    DEBUG ((DEBUG_WARN, "[OK] CustomPciSerialDevice patch\n"));
   }
 
   Status = KernelApplyQuirk (KernelQuirkSegmentJettison, &Patcher, KernelVersion);
@@ -511,16 +506,40 @@ ApplyKernelPatches (
     DEBUG ((DEBUG_WARN, "[OK] KernelQuirkSegmentJettison patch\n"));
   }
 
-  UINTN   RegisterBasePmio = 0x2008;
-  UINT32  RegisterStride   = 4;
-
-  PatchSetPciSerialDevice (RegisterBasePmio, RegisterStride);
-  Status = KernelApplyQuirk (KernelQuirkCustomPciSerialDevice, &Patcher, KernelVersion);
+  Status = KernelApplyQuirk (KernelQuirkLapicKernelPanic, &Patcher, KernelVersion);
   if (EFI_ERROR (Status)) {
-    DEBUG ((DEBUG_WARN, "[FAIL] CustomPciSerialDevicePmio - %r\n", Status));
+    DEBUG ((DEBUG_WARN, "[FAIL] KernelQuirkLapicKernelPanic - %r\n", Status));
     FailedToProcess = TRUE;
   } else {
-    DEBUG ((DEBUG_WARN, "[OK] CustomPciSerialDevicePmio patch\n"));
+    DEBUG ((DEBUG_WARN, "[OK] KernelQuirkLapicKernelPanic patch\n"));
+  }
+
+  //
+  // This is not for modern systems. Commenting out.
+  //
+  //
+  // Status = KernelApplyQuirk (KernelQuirkLegacyCommpage, &Patcher, KernelVersion);
+  // if (EFI_ERROR (Status)) {
+  //   DEBUG ((DEBUG_WARN, "[FAIL] KernelQuirkLegacyCommpage - %r\n", Status));
+  //   FailedToProcess = TRUE;
+  // } else {
+  //   DEBUG ((DEBUG_WARN, "[OK] KernelQuirkLegacyCommpage patch\n"));
+  // }
+
+  Status = KernelApplyQuirk (KernelQuirkPanicNoKextDump, &Patcher, KernelVersion);
+  if (EFI_ERROR (Status)) {
+    DEBUG ((DEBUG_WARN, "[FAIL] KernelQuirkPanicNoKextDump - %r\n", Status));
+    FailedToProcess = TRUE;
+  } else {
+    DEBUG ((DEBUG_WARN, "[OK] KernelQuirkPanicNoKextDump patch\n"));
+  }
+
+  Status = KernelApplyQuirk (KernelQuirkPowerTimeoutKernelPanic, &Patcher, KernelVersion);
+  if (EFI_ERROR (Status)) {
+    DEBUG ((DEBUG_WARN, "[FAIL] KernelQuirkPowerTimeoutKernelPanic - %r\n", Status));
+    FailedToProcess = TRUE;
+  } else {
+    DEBUG ((DEBUG_WARN, "[OK] KernelQuirkPowerTimeoutKernelPanic patch\n"));
   }
 }
 
