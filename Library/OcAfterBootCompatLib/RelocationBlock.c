@@ -301,12 +301,13 @@ AppleRelocationRebase (
   *BA->DeviceTreeP     -= RelocDiff;
 }
 
-UINTN
+VOID
 AppleRelocationCallGate (
-  IN OUT BOOT_COMPAT_CONTEXT  *BootCompat,
+  IN OUT UINTN                *Args,
+  IN     BOOT_COMPAT_CONTEXT  *BootCompat,
   IN     KERNEL_CALL_GATE     CallGate,
-  IN     UINTN                Args,
-  IN     UINTN                EntryPoint
+  IN     UINTN                *KcgArg1,
+  IN     UINTN                KcgArg2
   )
 {
   UINT8                 *Payload;
@@ -315,7 +316,7 @@ AppleRelocationCallGate (
   //
   // Shift kernel arguments back.
   //
-  Args -= (UINTN)(BootCompat->KernelState.RelocationBlock - KERNEL_BASE_PADDR);
+  *Args -= (UINTN)(BootCompat->KernelState.RelocationBlock - KERNEL_BASE_PADDR);
 
   //
   // Provide copying payload that will not be overwritten.
@@ -328,10 +329,10 @@ AppleRelocationCallGate (
   // Transition to payload.
   //
   ReloGate = (RELOCATION_CALL_GATE)(UINTN)Payload;
-  return ReloGate (
-           BootCompat->KernelState.RelocationBlockUsed / sizeof (UINT64),
-           EntryPoint,
-           BootCompat->KernelState.RelocationBlock,
-           Args
-           );
+  ReloGate (
+    BootCompat->KernelState.RelocationBlockUsed / sizeof (UINT64),
+    KcgArg2,
+    BootCompat->KernelState.RelocationBlock,
+    *KcgArg1
+    );
 }

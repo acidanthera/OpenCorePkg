@@ -18,6 +18,7 @@
 #include <Uefi.h>
 
 #include <IndustryStandard/AppleBootArgs.h>
+#include <IndustryStandard/AppleEfiBootRtInfo.h>
 
 #include <Library/OcAfterBootCompatLib.h>
 #include <Library/OcBootManagementLib.h>
@@ -118,16 +119,27 @@
 **/
 #define CALL_GATE_JUMP_SIZE  (sizeof (CALL_GATE_JUMP))
 
+/*
+  Minimum size of the patched call gate.
+*/
+#define CALL_GATE_MIN_SIZE  (ESTIMATED_CALL_GATE_SIZE + CALL_GATE_JUMP_SIZE)
+
 /**
   Command used to perform an absolute 64-bit jump from Call Gate to our code.
 **/
 #pragma pack(push,1)
 typedef struct CALL_GATE_JUMP_ {
-  UINT16    Command;
-  UINT32    Argument;
-  UINT64    Address;
+  struct {
+    UINT8     Command[3];
+    UINT32    Argument;
+  } LeaRip;
+  struct {
+    UINT16    Command;
+    UINT32    Argument;
+    UINT64    Address;
+  } Jmp;
 } CALL_GATE_JUMP;
-STATIC_ASSERT (sizeof (CALL_GATE_JUMP) == 14, "Invalid CALL_GATE_JUMP size");
+STATIC_ASSERT (sizeof (CALL_GATE_JUMP) == 7 + 14, "Invalid CALL_GATE_JUMP size");
 #pragma pack(pop)
 
 /**
@@ -136,8 +148,8 @@ STATIC_ASSERT (sizeof (CALL_GATE_JUMP) == 14, "Invalid CALL_GATE_JUMP size");
 typedef
 UINTN
 (EFIAPI *KERNEL_CALL_GATE)(
-  IN UINTN    Args,
-  IN UINTN    EntryPoint
+  IN UINTN    Arg1,
+  IN UINTN    Arg2
   );
 
 /**
@@ -219,7 +231,12 @@ typedef struct UEFI_SERVICES_POINTERS_ {
   ///
   EFI_EXIT_BOOT_SERVICES    ExitBootServices;
   ///
-  /// Image starting routine. We override to catch boot.efi
+  /// Image loading routine. We override it to catch bootrt.efi
+  /// loading and enable the kernel call gate hook.
+  ///
+  EFI_IMAGE_LOAD            LoadImage;
+  ///
+  /// Image starting routine. We override it to catch boot.efi
   /// loading and enable the rest of functions.
   ///
   EFI_IMAGE_START           StartImage;
@@ -252,31 +269,38 @@ typedef struct SERVICES_OVERRIDE_STATE_ {
   /// to update kernel entry point with the relocation block offset and that can
   /// only be done in the call gate as it will otherwise jump to lower memory.
   ///
-  EFI_PHYSICAL_ADDRESS    KernelCallGate;
+  /// This stores only the old-style kernel call gate before macOS 13 Developer
+  /// Beta 1. The new-style call gate is handled separately.
+  ///
+  EFI_PHYSICAL_ADDRESS         OldKernelCallGate;
   ///
   /// Last descriptor size obtained from GetMemoryMap.
   ///
-  UINTN                   MemoryMapDescriptorSize;
+  UINTN                        MemoryMapDescriptorSize;
   ///
   /// Amount of nested boot.efi detected.
   ///
-  UINTN                   AppleBootNestedCount;
+  UINTN                        AppleBootNestedCount;
+  ///
+  /// The loaded image structure of the last started Apple booter.
+  ///
+  EFI_LOADED_IMAGE_PROTOCOL    *LastAppleBootImage;
   ///
   /// TRUE if we are doing boot.efi hibernate wake.
   ///
-  BOOLEAN                 AppleHibernateWake;
+  BOOLEAN                      AppleHibernateWake;
   ///
   /// TRUE if we are using custom KASLR slide (via boot arg).
   ///
-  BOOLEAN                 AppleCustomSlide;
+  BOOLEAN                      AppleCustomSlide;
   ///
   /// TRUE if we are done reporting MMIO cleanup.
   ///
-  BOOLEAN                 ReportedMmio;
+  BOOLEAN                      ReportedMmio;
   ///
   /// TRUE if we are waiting for performance memory allocation.
   ///
-  BOOLEAN                 AwaitingPerfAlloc;
+  BOOLEAN                      AwaitingPerfAlloc;
 } SERVICES_OVERRIDE_STATE;
 
 /**
@@ -469,11 +493,14 @@ AppleMapPrepareBooterState (
 
   @param[in,out]  BootCompat          Boot compatibility context.
   @param[in]      CallGate            Kernel call gate address.
+  @param[in]      HookAddress         The function address to jump to when
+                                      entering the kernel call gate.
 **/
 VOID
 AppleMapPrepareKernelJump (
   IN OUT BOOT_COMPAT_CONTEXT   *BootCompat,
-  IN     EFI_PHYSICAL_ADDRESS  CallGate
+  IN     EFI_PHYSICAL_ADDRESS  CallGate,
+  IN     UINTN                 HookAddress
   );
 
 /**
@@ -500,16 +527,44 @@ AppleMapPrepareMemState (
   Should transfer control to kernel call gate + CALL_GATE_JUMP_SIZE
   with the same arguments.
 
+  This uses the new (as of macOS 13 Developer Beta 1) prototype. This is due to
+  EfiBootRt wrapping the actual kernel call gate.
+
+  @param[in]      SystemTable   A pointer to the EFI System Table.
+  @param[in,out]  KcgArguments  Arguments to the kernel call gate.
+  @param[in]      CallGate      The kernel call gate.
+
+  @retval EFI_ABORTED  The kernel could not be started.
+  @retval other        On success, this function does not return.
+**/
+EFI_STATUS
+EFIAPI
+AppleMapPrepareKernelStateNew (
+  IN     UINTN                       SystemTable,
+  IN OUT APPLE_EFI_BOOT_RT_KCG_ARGS  *KcgArguments,
+  IN     KERNEL_CALL_GATE            CallGate
+  );
+
+/**
+  Prepare environment for Apple kernel bootloader in boot or wake cases.
+  This callback arrives when boot.efi jumps to kernel call gate.
+  Should transfer control to kernel call gate + CALL_GATE_JUMP_SIZE
+  with the same arguments.
+
+  This uses the old (prior to macOS 13 Developer Beta 1) prototype.
+
   @param[in]  Args         Case-specific kernel argument handle.
   @param[in]  EntryPoint   Case-specific kernel entry point.
+  @param[in]  CallGate     The kernel call gate.
 
   @returns Case-specific value if any.
 **/
 UINTN
 EFIAPI
-AppleMapPrepareKernelState (
-  IN UINTN  Args,
-  IN UINTN  EntryPoint
+AppleMapPrepareKernelStateOld (
+  IN UINTN             Args,
+  IN UINTN             EntryPoint,
+  IN KERNEL_CALL_GATE  CallGate
   );
 
 /**
@@ -647,19 +702,20 @@ AppleRelocationRebase (
 /**
   Boot Apple Kernel through relocation block.
 
-  @param[in,out] BootCompat   Boot compatibility context.
-  @param[in]     Args         Case-specific kernel argument handle.
-  @param[in]     CallGate     Kernel call gate address.
-  @param[in]     EntryPoint   Case-specific kernel entry point.
-
-  @returns Case-specific value if any.
+  @param[in,out] Args        On input, the un-relocated kernel argument handle.
+                             On output, the relocated kernel argument handle.
+  @param[in]     BootCompat  Boot compatibility context.
+  @param[in]     CallGate    Kernel call gate address.
+  @param[in]     KcgArg1     Pointer to the first kernel call gate argument.
+  @param[in]     KcgArg2     Second kernel call gate argument.
 **/
-UINTN
+VOID
 AppleRelocationCallGate (
-  IN OUT BOOT_COMPAT_CONTEXT  *BootCompat,
+  IN OUT UINTN                *Args,
+  IN     BOOT_COMPAT_CONTEXT  *BootCompat,
   IN     KERNEL_CALL_GATE     CallGate,
-  IN     UINTN                Args,
-  IN     UINTN                EntryPoint
+  IN     UINTN                *KcgArg1,
+  IN     UINTN                KcgArg2
   );
 
 #endif // BOOT_COMPAT_INTERNAL_H
