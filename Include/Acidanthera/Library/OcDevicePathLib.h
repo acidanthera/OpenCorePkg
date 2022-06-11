@@ -40,6 +40,18 @@ AppendFileNameDevicePath (
   );
 
 /**
+  Locate the terminating node inside the device path.
+
+  @param[in] DevicePath  The device path used in the search.
+
+  @return  Returned is the last Device Path Node.
+**/
+EFI_DEVICE_PATH_PROTOCOL *
+FindDevicePathEndNode (
+  IN EFI_DEVICE_PATH_PROTOCOL  *DevicePath
+  );
+
+/**
   Locate the node inside the device path specified by Type an SubType values.
 
   @param[in] DevicePath  The device path used in the search.

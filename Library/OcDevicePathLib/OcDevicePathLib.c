@@ -71,6 +71,18 @@ AppendFileNameDevicePath (
 }
 
 EFI_DEVICE_PATH_PROTOCOL *
+FindDevicePathEndNode (
+  IN EFI_DEVICE_PATH_PROTOCOL  *DevicePath
+  )
+{
+  while (!IsDevicePathEnd (DevicePath)) {
+    DevicePath = NextDevicePathNode (DevicePath);
+  }
+
+  return DevicePath;
+}
+
+EFI_DEVICE_PATH_PROTOCOL *
 FindDevicePathNodeWithType (
   IN EFI_DEVICE_PATH_PROTOCOL  *DevicePath,
   IN UINT8                     Type,
