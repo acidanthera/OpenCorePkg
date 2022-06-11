@@ -1079,7 +1079,7 @@ OcGetVariable (
   BootCompat = GetBootCompatContext ();
   IsApple    = BootCompat->ServiceState.AppleBootNestedCount > 0;
 
-  if (IsApple && BootCompat->Settings.ProvideCustomSlide) {
+  if (IsApple && (BootCompat->Settings.ProvideCustomSlide || BootCompat->Settings.AllowRelocationBlock)) {
     Status = AppleSlideGetVariable (
                BootCompat,
                BootCompat->ServicePtrs.GetVariable,
