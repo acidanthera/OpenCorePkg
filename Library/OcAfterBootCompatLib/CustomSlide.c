@@ -813,8 +813,7 @@ AppleSlideGetVariable (
                    FilterMapContext,
                    (BootCompat->CpuInfo->CpuGeneration == OcCpuGenerationSandyBridge)
                                             || (BootCompat->CpuInfo->CpuGeneration == OcCpuGenerationIvyBridge)
-                   )
-              && !BootCompat->ServiceState.AppleCustomSlide)
+                   ))
     {
       //
       // When we cannot allow some KASLR values due to used address we generate
