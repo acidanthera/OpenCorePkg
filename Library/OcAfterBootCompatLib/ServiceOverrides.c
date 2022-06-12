@@ -25,7 +25,6 @@
 #include <Library/BaseMemoryLib.h>
 #include <Library/MemoryAllocationLib.h>
 #include <Library/DevicePathLib.h>
-#include <Library/OcAppleSecureBootLib.h>
 #include <Library/OcBootManagementLib.h>
 #include <Library/OcLogAggregatorLib.h>
 #include <Library/OcDebugLogLib.h>
@@ -39,7 +38,6 @@
 #include <Library/UefiLib.h>
 #include <Library/UefiRuntimeServicesTableLib.h>
 
-#include <Protocol/AppleSecureBoot.h>
 #include <Protocol/OcFirmwareRuntime.h>
 #include <Protocol/VMwareMac.h>
 
@@ -882,19 +880,14 @@ InternalEfiBootRtGetKcgOffset (
   IN  UINTN                     SourceSize
   )
 {
-  EFI_STATUS                  Status;
-  BOOLEAN                     Overflow;
-  APPLE_SECURE_BOOT_PROTOCOL  *SecureBoot;
-  UINT8                       Policy;
-  EFI_HANDLE                  EfiBootRtCopyHandle;
-  APPLE_EFI_BOOT_RT_INFO      EfiBootRtLoadOptions;
-  UINTN                       KcgOffset;
-  EFI_LOADED_IMAGE_PROTOCOL   *LoadedImage;
-  UINTN                       ImageBase;
+  EFI_STATUS                 Status;
+  BOOLEAN                    Overflow;
+  EFI_HANDLE                 EfiBootRtCopyHandle;
+  APPLE_EFI_BOOT_RT_INFO     EfiBootRtLoadOptions;
+  UINTN                      KcgOffset;
+  EFI_LOADED_IMAGE_PROTOCOL  *LoadedImage;
+  UINTN                      ImageBase;
 
-  SecureBoot = OcAppleSecureBootGetProtocol ();
-  ASSERT (SecureBoot != NULL);
-  SecureBoot->GetPolicy (SecureBoot, &Policy);
   //
   // Load a copy of EfiBootRt to retrieve its information structure. EfiBootRt
   // must be loaded with the OpenCore image loader as it is not signed. This is
@@ -1561,9 +1554,6 @@ InstallServiceOverrides (
 
   gBS->Hdr.CRC32 = 0;
   gBS->Hdr.CRC32 = CalculateCrc32 (gBS, gBS->Hdr.HeaderSize);
-
-  gRT->Hdr.CRC32 = 0;
-  gRT->Hdr.CRC32 = CalculateCrc32 (gRT, gRT->Hdr.HeaderSize);
 
   gBS->RestoreTPL (OriginalTpl);
 
