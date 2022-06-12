@@ -886,7 +886,6 @@ InternalEfiBootRtGetKcgOffset (
   BOOLEAN                     Overflow;
   APPLE_SECURE_BOOT_PROTOCOL  *SecureBoot;
   UINT8                       Policy;
-  EFI_IMAGE_LOAD              LoadImage;
   EFI_HANDLE                  EfiBootRtCopyHandle;
   APPLE_EFI_BOOT_RT_INFO      EfiBootRtLoadOptions;
   UINTN                       KcgOffset;
@@ -897,19 +896,11 @@ InternalEfiBootRtGetKcgOffset (
   ASSERT (SecureBoot != NULL);
   SecureBoot->GetPolicy (SecureBoot, &Policy);
   //
-  // Load directly when we have Apple Secure Boot. EfiBootRt is implicitly
-  // verified via EfiBoot.
+  // Load a copy of EfiBootRt to retrieve its information structure. EfiBootRt
+  // must be loaded with the OpenCore image loader as it is not signed. This is
+  // not a security issue as it is implicitly signed via EfiBoot.
   //
-  if (Policy != AppleImg4SbModeDisabled) {
-    LoadImage = OcImageLoaderLoad;
-  } else {
-    LoadImage = BootCompat->ServicePtrs.LoadImage;
-  }
-
-  //
-  // Load a copy of EfiBootRt to retrieve its information structure.
-  //
-  Status = LoadImage (
+  Status = OcImageLoaderLoad (
              FALSE,
              gImageHandle,
              DevicePath,
@@ -940,7 +931,11 @@ InternalEfiBootRtGetKcgOffset (
   ZeroMem (&EfiBootRtLoadOptions, sizeof (EfiBootRtLoadOptions));
   LoadedImage->LoadOptions     = &EfiBootRtLoadOptions;
   LoadedImage->LoadOptionsSize = sizeof (EfiBootRtLoadOptions);
-
+  //
+  // The calls to these services are correct despite calling OcImageLoaderLoad()
+  // directly, as they will be overridden versions that support OpenCore loaded
+  // images.
+  //
   Status = BootCompat->ServicePtrs.StartImage (EfiBootRtCopyHandle, NULL, NULL);
 
   gBS->UnloadImage (EfiBootRtCopyHandle);
@@ -994,39 +989,47 @@ OcLoadImage (
   UINTN                      KcgSize;
 
   BootCompat = GetBootCompatContext ();
-
-  LoadImageStatus = BootCompat->ServicePtrs.LoadImage (
-                                              BootPolicy,
-                                              ParentImageHandle,
-                                              DevicePath,
-                                              SourceBuffer,
-                                              SourceSize,
-                                              ImageHandle
-                                              );
-
-  if (  (BootCompat->ServiceState.AppleBootNestedCount == 0)
-     || EFI_ERROR (LoadImageStatus))
-  {
-    return LoadImageStatus;
-  }
-
   //
-  // Verify whether it's EfiBootRt that's being launched. If it is, patch its
+  // Verify whether it's EfiBootRt that's being loaded. If it is, patch its
   // kernel call gate. This is relevant as of macOS 13 Developer Beta 1, as
   // Apple moved the kernel call gate from a direct to an indirect EfiBoot embed
   // in form of a separate driver, EfiBootRt.
   //
-  if (BootPolicy) {
-    return LoadImageStatus;
+  IsEfiBootRt = FALSE;
+  if (!BootPolicy && (BootCompat->ServiceState.AppleBootNestedCount > 0)) {
+    IsEfiBootRt = InternalIsEfiBootRt (
+                    DevicePath,
+                    SourceBuffer,
+                    SourceSize,
+                    BootCompat->ServiceState.LastAppleBootImage
+                    );
   }
 
-  IsEfiBootRt = InternalIsEfiBootRt (
-                  DevicePath,
-                  SourceBuffer,
-                  SourceSize,
-                  BootCompat->ServiceState.LastAppleBootImage
-                  );
+  //
+  // Anything but EfiBootRt can be loaded transparently. EfiBootRt must be
+  // loaded with the OpenCore image loader as it is not signed. This is not a
+  // security issue as it is implicitly signed via EfiBoot.
+  //
   if (!IsEfiBootRt) {
+    return BootCompat->ServicePtrs.LoadImage (
+                                     BootPolicy,
+                                     ParentImageHandle,
+                                     DevicePath,
+                                     SourceBuffer,
+                                     SourceSize,
+                                     ImageHandle
+                                     );
+  }
+
+  LoadImageStatus = OcImageLoaderLoad (
+                      BootPolicy,
+                      ParentImageHandle,
+                      DevicePath,
+                      SourceBuffer,
+                      SourceSize,
+                      ImageHandle
+                      );
+  if (EFI_ERROR (LoadImageStatus)) {
     return LoadImageStatus;
   }
 
