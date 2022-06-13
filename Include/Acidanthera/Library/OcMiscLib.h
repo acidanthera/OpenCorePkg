@@ -43,7 +43,7 @@ FindPattern (
   IN CONST UINT32  PatternSize,
   IN CONST UINT8   *Data,
   IN UINT32        DataSize,
-  IN UINT32        *DataOff
+  IN OUT UINT32    *DataOff
   );
 
 UINT32
