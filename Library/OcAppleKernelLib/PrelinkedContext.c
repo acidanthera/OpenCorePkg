@@ -989,6 +989,13 @@ PrelinkedInjectKext (
   ASSERT (InfoPlist != NULL);
   ASSERT (InfoPlistSize > 0);
 
+  //
+  // Assume no bundle version from the beginning.
+  //
+  if (BundleVersion != NULL) {
+    *BundleVersion = NULL;
+  }
+
   KmodAddress           = 0;
   AlignedExecutableSize = 0;
   KextOffset            = 0;
@@ -1084,7 +1091,6 @@ PrelinkedInjectKext (
       //
       // Match CFBundleVersion.
       //
-      *BundleVersion = NULL;
       if (AsciiStrCmp (TmpKeyValue, INFO_BUNDLE_VERSION_KEY) == 0) {
         if (PlistNodeCast (KextPlistValue, PLIST_NODE_TYPE_STRING) == NULL) {
           break;
