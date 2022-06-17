@@ -952,7 +952,8 @@ PrelinkedInjectKext (
   IN     UINT32             InfoPlistSize,
   IN     CONST CHAR8        *ExecutablePath OPTIONAL,
   IN     CONST UINT8        *Executable OPTIONAL,
-  IN     UINT32             ExecutableSize OPTIONAL
+  IN     UINT32             ExecutableSize OPTIONAL,
+     OUT CONST CHAR8        **BundleVersion OPTIONAL
   )
 {
   EFI_STATUS  Status;
@@ -960,6 +961,7 @@ PrelinkedInjectKext (
 
   XML_DOCUMENT      *InfoPlistDocument;
   XML_NODE          *InfoPlistRoot;
+  XML_NODE          *KextPlistValue;
   CHAR8             *TmpInfoPlist;
   CHAR8             *NewInfoPlist;
   OC_MACHO_CONTEXT  ExecutableContext;
@@ -1071,6 +1073,29 @@ PrelinkedInjectKext (
     return EFI_INVALID_PARAMETER;
   }
 
+  FieldCount = PlistDictChildren (InfoPlistRoot);
+  if (BundleVersion != NULL) {
+    for (FieldIndex = 0; FieldIndex < FieldCount; ++FieldIndex) {
+      TmpKeyValue = PlistKeyValue (PlistDictChild (InfoPlistRoot, FieldIndex, &KextPlistValue));
+      if (TmpKeyValue == NULL) {
+        continue;
+      }
+
+      //
+      // Match CFBundleVersion.
+      //
+      *BundleVersion = NULL;
+      if (AsciiStrCmp (TmpKeyValue, INFO_BUNDLE_VERSION_KEY) == 0) {
+        if (PlistNodeCast (KextPlistValue, PLIST_NODE_TYPE_STRING) == NULL) {
+          break;
+        }
+
+        *BundleVersion = XmlNodeContent (KextPlistValue);
+        break;
+      }
+    }
+  }
+
   //
   // We are not supposed to check for this, it is XNU responsibility, which reliably panics.
   // However, to avoid certain users making this kind of mistake, we still provide some
@@ -1078,7 +1103,6 @@ PrelinkedInjectKext (
   //
   DEBUG_CODE_BEGIN ();
   if (Executable == NULL) {
-    FieldCount = PlistDictChildren (InfoPlistRoot);
     for (FieldIndex = 0; FieldIndex < FieldCount; ++FieldIndex) {
       TmpKeyValue = PlistKeyValue (PlistDictChild (InfoPlistRoot, FieldIndex, NULL));
       if (TmpKeyValue == NULL) {

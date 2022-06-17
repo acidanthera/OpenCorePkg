@@ -1196,7 +1196,8 @@ MkextInjectKext (
   IN     CONST CHAR8    *InfoPlist,
   IN     UINT32         InfoPlistSize,
   IN     UINT8          *Executable OPTIONAL,
-  IN     UINT32         ExecutableSize OPTIONAL
+  IN     UINT32         ExecutableSize OPTIONAL,
+     OUT CONST CHAR8    **BundleVersion OPTIONAL
   )
 {
   UINT32  MkextNewSize;
@@ -1210,6 +1211,7 @@ MkextInjectKext (
   UINT32        PlistExportedSize;
   XML_DOCUMENT  *PlistXml;
   XML_NODE      *PlistRoot;
+  XML_NODE      *KextPlistValue;
   BOOLEAN       PlistFailed;
   UINT32        PlistBundleIndex;
   UINT32        PlistBundleCount;
@@ -1258,6 +1260,29 @@ MkextInjectKext (
     return EFI_INVALID_PARAMETER;
   }
 
+  FieldCount = PlistDictChildren (PlistRoot);
+  if (BundleVersion != NULL) {
+    for (FieldIndex = 0; FieldIndex < FieldCount; ++FieldIndex) {
+      TmpKeyValue = PlistKeyValue (PlistDictChild (PlistRoot, FieldIndex, &KextPlistValue));
+      if (TmpKeyValue == NULL) {
+        continue;
+      }
+
+      //
+      // Match CFBundleVersion.
+      //
+      *BundleVersion = NULL;
+      if (AsciiStrCmp (TmpKeyValue, INFO_BUNDLE_VERSION_KEY) == 0) {
+        if (PlistNodeCast (KextPlistValue, PLIST_NODE_TYPE_STRING) == NULL) {
+          break;
+        }
+
+        *BundleVersion = XmlNodeContent (KextPlistValue);
+        break;
+      }
+    }
+  }
+
   //
   // We are not supposed to check for this, it is XNU responsibility, which reliably panics.
   // However, to avoid certain users making this kind of mistake, we still provide some
@@ -1265,7 +1290,6 @@ MkextInjectKext (
   //
   DEBUG_CODE_BEGIN ();
   if (Executable == NULL) {
-    FieldCount = PlistDictChildren (PlistRoot);
     for (FieldIndex = 0; FieldIndex < FieldCount; ++FieldIndex) {
       TmpKeyValue = PlistKeyValue (PlistDictChild (PlistRoot, FieldIndex, NULL));
       if (TmpKeyValue == NULL) {
