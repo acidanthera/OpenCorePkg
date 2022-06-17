@@ -1197,7 +1197,7 @@ MkextInjectKext (
   IN     UINT32         InfoPlistSize,
   IN     UINT8          *Executable OPTIONAL,
   IN     UINT32         ExecutableSize OPTIONAL,
-     OUT CONST CHAR8    **BundleVersion OPTIONAL
+  OUT CONST CHAR8       **BundleVersion OPTIONAL
   )
 {
   UINT32  MkextNewSize;

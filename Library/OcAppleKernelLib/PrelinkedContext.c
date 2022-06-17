@@ -953,7 +953,7 @@ PrelinkedInjectKext (
   IN     CONST CHAR8        *ExecutablePath OPTIONAL,
   IN     CONST UINT8        *Executable OPTIONAL,
   IN     UINT32             ExecutableSize OPTIONAL,
-     OUT CONST CHAR8        **BundleVersion OPTIONAL
+  OUT CONST CHAR8           **BundleVersion OPTIONAL
   )
 {
   EFI_STATUS  Status;
