@@ -584,6 +584,7 @@ WrapMain (
 
   PcdGet32 (PcdFixedDebugPrintErrorLevel) |= DEBUG_INFO | DEBUG_VERBOSE;
   PcdGet32 (PcdDebugPrintErrorLevel)      |= DEBUG_INFO | DEBUG_VERBOSE;
+  PcdGet8 (PcdDebugPropertyMask)          |= DEBUG_PROPERTY_DEBUG_CODE_ENABLED;
 
   CONST CHAR8  *FileName;
 

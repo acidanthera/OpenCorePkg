@@ -809,7 +809,7 @@ CachelessContextAddKext (
   IN     UINT32             InfoPlistSize,
   IN     CONST UINT8        *Executable OPTIONAL,
   IN     UINT32             ExecutableSize OPTIONAL,
-  OUT CONST CHAR8           **BundleVersion OPTIONAL
+  OUT    CONST CHAR8        **BundleVersion OPTIONAL
   )
 {
   EFI_STATUS      Status;
@@ -954,6 +954,7 @@ CachelessContextAddKext (
           InfoPlistLibraries = InfoPlistLibraries64;
         }
       } else if ((BundleVersion != NULL) && (AsciiStrCmp (TmpKeyValue, INFO_BUNDLE_VERSION_KEY) == 0)) {
+        DEBUG_CODE_BEGIN ();
         if (PlistNodeCast (InfoPlistValue, PLIST_NODE_TYPE_STRING) == NULL) {
           XmlDocumentFree (InfoPlistDocument);
           FreePool (TmpInfoPlist);
@@ -963,6 +964,8 @@ CachelessContextAddKext (
         }
 
         *BundleVersion = XmlNodeContent (InfoPlistValue);
+
+        DEBUG_CODE_END ();
       }
     }
   }

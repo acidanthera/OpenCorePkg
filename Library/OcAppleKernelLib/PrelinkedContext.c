@@ -953,7 +953,7 @@ PrelinkedInjectKext (
   IN     CONST CHAR8        *ExecutablePath OPTIONAL,
   IN     CONST UINT8        *Executable OPTIONAL,
   IN     UINT32             ExecutableSize OPTIONAL,
-  OUT CONST CHAR8           **BundleVersion OPTIONAL
+  OUT    CONST CHAR8        **BundleVersion OPTIONAL
   )
 {
   EFI_STATUS  Status;
@@ -1080,7 +1080,14 @@ PrelinkedInjectKext (
     return EFI_INVALID_PARAMETER;
   }
 
+  //
+  // We are not supposed to check for this, it is XNU responsibility, which reliably panics.
+  // However, to avoid certain users making this kind of mistake, we still provide some
+  // code in debug mode to diagnose it.
+  //
+  DEBUG_CODE_BEGIN ();
   FieldCount = PlistDictChildren (InfoPlistRoot);
+
   if (BundleVersion != NULL) {
     for (FieldIndex = 0; FieldIndex < FieldCount; ++FieldIndex) {
       TmpKeyValue = PlistKeyValue (PlistDictChild (InfoPlistRoot, FieldIndex, &KextPlistValue));
@@ -1102,12 +1109,6 @@ PrelinkedInjectKext (
     }
   }
 
-  //
-  // We are not supposed to check for this, it is XNU responsibility, which reliably panics.
-  // However, to avoid certain users making this kind of mistake, we still provide some
-  // code in debug mode to diagnose it.
-  //
-  DEBUG_CODE_BEGIN ();
   if (Executable == NULL) {
     for (FieldIndex = 0; FieldIndex < FieldCount; ++FieldIndex) {
       TmpKeyValue = PlistKeyValue (PlistDictChild (InfoPlistRoot, FieldIndex, NULL));

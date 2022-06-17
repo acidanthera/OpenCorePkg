@@ -1197,7 +1197,7 @@ MkextInjectKext (
   IN     UINT32         InfoPlistSize,
   IN     UINT8          *Executable OPTIONAL,
   IN     UINT32         ExecutableSize OPTIONAL,
-  OUT CONST CHAR8       **BundleVersion OPTIONAL
+  OUT    CONST CHAR8    **BundleVersion OPTIONAL
   )
 {
   UINT32  MkextNewSize;
@@ -1267,7 +1267,14 @@ MkextInjectKext (
     return EFI_INVALID_PARAMETER;
   }
 
+  //
+  // We are not supposed to check for this, it is XNU responsibility, which reliably panics.
+  // However, to avoid certain users making this kind of mistake, we still provide some
+  // code in debug mode to diagnose it.
+  //
+  DEBUG_CODE_BEGIN ();
   FieldCount = PlistDictChildren (PlistRoot);
+
   if (BundleVersion != NULL) {
     for (FieldIndex = 0; FieldIndex < FieldCount; ++FieldIndex) {
       TmpKeyValue = PlistKeyValue (PlistDictChild (PlistRoot, FieldIndex, &KextPlistValue));
@@ -1289,12 +1296,6 @@ MkextInjectKext (
     }
   }
 
-  //
-  // We are not supposed to check for this, it is XNU responsibility, which reliably panics.
-  // However, to avoid certain users making this kind of mistake, we still provide some
-  // code in debug mode to diagnose it.
-  //
-  DEBUG_CODE_BEGIN ();
   if (Executable == NULL) {
     for (FieldIndex = 0; FieldIndex < FieldCount; ++FieldIndex) {
       TmpKeyValue = PlistKeyValue (PlistDictChild (PlistRoot, FieldIndex, NULL));

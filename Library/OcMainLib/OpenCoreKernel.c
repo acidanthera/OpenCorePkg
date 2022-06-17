@@ -651,14 +651,28 @@ OcKernelInjectKext (
 
   DEBUG ((
     !IsForced && EFI_ERROR (Status) ? DEBUG_WARN : DEBUG_INFO,
-    "OC: %a%a injection %a (%a) (v%a) - %r\n",
+    "OC: %a%a injection %a (%a) - %r\n",
     PRINT_KERNEL_CACHE_TYPE (CacheType),
     IsForced ? " force" : "",
     BundlePath,
-    BundleVersion == NULL ? "ersion unavailable" : BundleVersion,
     Comment,
     Status
     ));
+
+  //
+  // Report kext bundle version for DEBUG build.
+  //
+  DEBUG_CODE_BEGIN ();
+  DEBUG ((
+    !IsForced && EFI_ERROR (Status) ? DEBUG_WARN : DEBUG_INFO,
+    "OC: %a%a injection %a v%a\n",
+    PRINT_KERNEL_CACHE_TYPE (CacheType),
+    IsForced ? " force" : "",
+    BundlePath,
+    BundleVersion == NULL ? "ersion unavailable" : BundleVersion
+    ));
+
+  DEBUG_CODE_END ();
 }
 
 STATIC
