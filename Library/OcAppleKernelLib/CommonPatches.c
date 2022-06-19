@@ -60,6 +60,11 @@ PatchAppleCpuPmCfgLock (
   UINT8  *WalkerEnd;
   UINT8  *WalkerTmp;
 
+  //
+  // NOTE: As of macOS 13.0 AICPUPM kext is removed.
+  // However, we may remove this check later, if an older version can be injected correctly
+  // such that it will patched.
+  //
   if (OcMatchDarwinVersion (KernelVersion, KERNEL_VERSION_VENTURA_MIN, 0)) {
     DEBUG ((DEBUG_INFO, "OCAK: Skipping AppleCpuPmCfgLock patch on %u\n", KernelVersion));
     return EFI_SUCCESS;
