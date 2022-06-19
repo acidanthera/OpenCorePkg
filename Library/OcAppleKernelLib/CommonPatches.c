@@ -1184,7 +1184,7 @@ PatchCustomPciSerialPmio (
   UINT8  *WalkerTmp;
 
   if (Patcher == NULL) {
-    DEBUG ((DEBUG_INFO, "OCAK: Patcher not found under for %a on %u\n", __func__, KernelVersion));
+    DEBUG ((DEBUG_INFO, "OCAK: Patcher not found under for %a\n", __func__));
     return EFI_NOT_FOUND;
   }
 
