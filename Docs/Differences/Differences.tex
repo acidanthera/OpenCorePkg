@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
-%DIF DEL PreviousConfiguration.tex   Tue Jun  7 04:41:41 2022
-%DIF ADD ../Configuration.tex        Tue Jun  7 04:58:18 2022
+%DIF DEL PreviousConfiguration.tex   Mon Jun 20 21:36:48 2022
+%DIF ADD ../Configuration.tex        Mon Jun 20 21:39:15 2022
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -7008,7 +7008,7 @@ on most Apple hardware, and possibly some others) may be specified in \texttt{UE
 	\item \texttt{-{}-restore-nosnoop} - Boolean flag, enabled if present. \medskip
 
   AudioDxe clears the Intel HDA No Snoop Enable (NSNPEN) bit. On some systems, this change must
-  be reversed on exit in order to avoid breaking sound in Windows. If so, this flag should
+  be reversed on exit in order to avoid breaking sound in Windows \DIFaddbegin \DIFadd{or Linux}\DIFaddend . If so, this flag should
   be added to AudioDxe driver arguments.
   Not enabled by default, since restoring the flag can prevent sound from working in macOS on
   some other systems. \medskip
