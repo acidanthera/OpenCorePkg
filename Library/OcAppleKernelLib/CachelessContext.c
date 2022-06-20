@@ -966,7 +966,7 @@ CachelessContextAddKext (
 
           *BundleVersion = XmlNodeContent (InfoPlistValue);
         }
-        
+
         DEBUG_CODE_END ();
       }
     }
