@@ -248,10 +248,10 @@ PatchAppleXcpmCfgLock (
     return EFI_SUCCESS;
   }
 
-  if (Patcher == NULL) {
-    DEBUG ((DEBUG_INFO, "OCAK: Patcher not found under for %a on %u\n", __func__, KernelVersion));
-    return EFI_NOT_FOUND;
-  }
+  //
+  // This is a kernel patch, so Patcher cannot be NULL.
+  //
+  ASSERT (Patcher != NULL);
 
   Last = (XCPM_MSR_RECORD *)((UINT8 *)MachoGetMachHeader (&Patcher->MachContext)
                              + MachoGetFileSize (&Patcher->MachContext) - sizeof (XCPM_MSR_RECORD));
@@ -375,10 +375,10 @@ PatchAppleXcpmExtraMsrs (
     return EFI_SUCCESS;
   }
 
-  if (Patcher == NULL) {
-    DEBUG ((DEBUG_INFO, "OCAK: Patcher not found under for %a on %u\n", __func__, KernelVersion));
-    return EFI_NOT_FOUND;
-  }
+  //
+  // This is a kernel patch, so Patcher cannot be NULL.
+  //
+  ASSERT (Patcher != NULL);
 
   Last = (XCPM_MSR_RECORD *)((UINT8 *)MachoGetMachHeader (&Patcher->MachContext)
                              + MachoGetFileSize (&Patcher->MachContext) - sizeof (XCPM_MSR_RECORD));
@@ -503,10 +503,10 @@ PatchAppleXcpmForceBoost (
     return EFI_SUCCESS;
   }
 
-  if (Patcher == NULL) {
-    DEBUG ((DEBUG_INFO, "OCAK: Patcher not found under for %a on %u\n", __func__, KernelVersion));
-    return EFI_NOT_FOUND;
-  }
+  //
+  // This is a kernel patch, so Patcher cannot be NULL.
+  //
+  ASSERT (Patcher != NULL);
 
   Start   = (UINT8 *)MachoGetMachHeader (&Patcher->MachContext);
   Last    = Start + MachoGetFileSize (&Patcher->MachContext) - EFI_PAGE_SIZE * 2;
@@ -1262,10 +1262,10 @@ PatchCustomPciSerialDevice (
 {
   EFI_STATUS  Status;
 
-  if (Patcher == NULL) {
-    DEBUG ((DEBUG_INFO, "OCAK: Patcher not found under for %a on %u\n", __func__, KernelVersion));
-    return EFI_NOT_FOUND;
-  }
+  //
+  // This is a kernel patch, so Patcher cannot be NULL.
+  //
+  ASSERT (Patcher != NULL);
 
   Status = EFI_INVALID_PARAMETER;
   if (  ((mPmioRegisterBase != 0) && (mPmioRegisterStride != 0))
@@ -1379,10 +1379,10 @@ PatchPanicKextDump (
     return EFI_SUCCESS;
   }
 
-  if (Patcher == NULL) {
-    DEBUG ((DEBUG_INFO, "OCAK: Patcher not found under for %a on %u\n", __func__, KernelVersion));
-    return EFI_NOT_FOUND;
-  }
+  //
+  // This is a kernel patch, so Patcher cannot be NULL.
+  //
+  ASSERT (Patcher != NULL);
 
   Last = ((UINT8 *)MachoGetMachHeader (&Patcher->MachContext)
           + MachoGetFileSize (&Patcher->MachContext) - EFI_PAGE_SIZE);
@@ -1533,10 +1533,10 @@ PatchLapicKernelPanic (
 {
   EFI_STATUS  Status;
 
-  if (Patcher == NULL) {
-    DEBUG ((DEBUG_INFO, "OCAK: Patcher not found under for %a on %u\n", __func__, KernelVersion));
-    return EFI_NOT_FOUND;
-  }
+  //
+  // This is a kernel patch, so Patcher cannot be NULL.
+  //
+  ASSERT (Patcher != NULL);
 
   //
   // This one is for <= 10.15 release kernels.
@@ -1656,10 +1656,10 @@ PatchPowerStateTimeout (
     return EFI_SUCCESS;
   }
 
-  if (Patcher == NULL) {
-    DEBUG ((DEBUG_INFO, "OCAK: Patcher not found under for %a on %u\n", __func__, KernelVersion));
-    return EFI_NOT_FOUND;
-  }
+  //
+  // This is a kernel patch, so Patcher cannot be NULL.
+  //
+  ASSERT (Patcher != NULL);
 
   Status = PatcherApplyGenericPatch (Patcher, &mPowerStateTimeoutPanicInlinePatch);
   if (!EFI_ERROR (Status)) {
@@ -1805,10 +1805,10 @@ PatchSegmentJettison (
     return EFI_SUCCESS;
   }
 
-  if (Patcher == NULL) {
-    DEBUG ((DEBUG_INFO, "OCAK: Patcher not found under for %a on %u\n", __func__, KernelVersion));
-    return EFI_NOT_FOUND;
-  }
+  //
+  // This is a kernel patch, so Patcher cannot be NULL.
+  //
+  ASSERT (Patcher != NULL);
 
   Last = (UINT8 *)MachoGetMachHeader (&Patcher->MachContext)
          + MachoGetFileSize (&Patcher->MachContext) - sizeof (EFI_PAGE_SIZE) * 2;
@@ -2049,10 +2049,10 @@ PatchLegacyCommpage (
   UINT32                   CommpageAddress;
   UINT32                   CommpageMustHave;
 
-  if (Patcher == NULL) {
-    DEBUG ((DEBUG_INFO, "OCAK: Patcher not found under for %a on %u\n", __func__, KernelVersion));
-    return EFI_NOT_FOUND;
-  }
+  //
+  // This is a kernel patch, so Patcher cannot be NULL.
+  //
+  ASSERT (Patcher != NULL);
 
   Start = ((UINT8 *)MachoGetMachHeader (&Patcher->MachContext));
   Last  = Start + MachoGetFileSize (&Patcher->MachContext) - EFI_PAGE_SIZE * 2 - (Patcher->Is32Bit ? sizeof (COMMPAGE_DESCRIPTOR) : sizeof (COMMPAGE_DESCRIPTOR_64));
