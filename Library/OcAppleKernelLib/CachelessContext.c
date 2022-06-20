@@ -953,18 +953,20 @@ CachelessContextAddKext (
         if (!Context->Is32Bit) {
           InfoPlistLibraries = InfoPlistLibraries64;
         }
-      } else if ((BundleVersion != NULL) && (AsciiStrCmp (TmpKeyValue, INFO_BUNDLE_VERSION_KEY) == 0)) {
+      } else {
         DEBUG_CODE_BEGIN ();
-        if (PlistNodeCast (InfoPlistValue, PLIST_NODE_TYPE_STRING) == NULL) {
-          XmlDocumentFree (InfoPlistDocument);
-          FreePool (TmpInfoPlist);
-          FreePool (NewKext->PlistData);
-          FreePool (NewKext);
-          return EFI_INVALID_PARAMETER;
+        if ((BundleVersion != NULL) && (AsciiStrCmp (TmpKeyValue, INFO_BUNDLE_VERSION_KEY) == 0)) {
+          if (PlistNodeCast (InfoPlistValue, PLIST_NODE_TYPE_STRING) == NULL) {
+            XmlDocumentFree (InfoPlistDocument);
+            FreePool (TmpInfoPlist);
+            FreePool (NewKext->PlistData);
+            FreePool (NewKext);
+            return EFI_INVALID_PARAMETER;
+          }
+
+          *BundleVersion = XmlNodeContent (InfoPlistValue);
         }
-
-        *BundleVersion = XmlNodeContent (InfoPlistValue);
-
+        
         DEBUG_CODE_END ();
       }
     }
