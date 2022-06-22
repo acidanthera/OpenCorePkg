@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
-%DIF DEL PreviousConfiguration.tex   Mon Jun 20 21:36:48 2022
-%DIF ADD ../Configuration.tex        Mon Jun 20 21:39:15 2022
+%DIF DEL PreviousConfiguration.tex   Tue Jun  7 04:41:41 2022
+%DIF ADD ../Configuration.tex        Wed Jun 22 11:28:42 2022
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -2892,7 +2892,7 @@ blocking.
   such that \texttt{apfs.kext} will remain untouched.
 
   \emph{Note 2}: On macOS 12.0 and above, it is no longer possible to specify trim timeout.
-  However, it can be disabled by setting \texttt{0}.
+  However, \DIFdelbegin \DIFdel{it }\DIFdelend \DIFaddbegin \DIFadd{trim }\DIFaddend can be disabled by setting \texttt{0}.
 
   \emph{Note 3}: Trim operations are \emph{only} affected at booting phase when the startup volume is mounted.
   Either specifying timeout, or completely disabling trim with \texttt{0}, will not affect normal macOS running.
