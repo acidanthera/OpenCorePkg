@@ -866,6 +866,7 @@ PrelinkedReserveKextSize (
   @param[in,out] ExecutablePath  Kext executable path (e.g. Contents/MacOS/mykext), optional.
   @param[in,out] Executable      Kext executable, optional.
   @param[in]     ExecutableSize  Kext executable size, optional.
+  @param[out]    BundleVersion   Kext bundle version, optionally set on request.
 
   @return  EFI_SUCCESS on success.
 **/
@@ -878,7 +879,8 @@ PrelinkedInjectKext (
   IN     UINT32             InfoPlistSize,
   IN     CONST CHAR8        *ExecutablePath OPTIONAL,
   IN OUT CONST UINT8        *Executable OPTIONAL,
-  IN     UINT32             ExecutableSize OPTIONAL
+  IN     UINT32             ExecutableSize OPTIONAL,
+  OUT    CONST CHAR8        **BundleVersion OPTIONAL
   );
 
 /**
@@ -1253,6 +1255,7 @@ CachelessContextFree (
   @param[in]     InfoPlistSize   Kext Info.plist size.
   @param[in]     Executable      Kext executable, optional.
   @param[in]     ExecutableSize  Kext executable size, optional.
+  @param[out]    BundleVersion   Kext bundle version, optionally set on request.
 
   @return  EFI_SUCCESS on success.
 **/
@@ -1262,7 +1265,8 @@ CachelessContextAddKext (
   IN     CONST CHAR8        *InfoPlist,
   IN     UINT32             InfoPlistSize,
   IN     CONST UINT8        *Executable OPTIONAL,
-  IN     UINT32             ExecutableSize OPTIONAL
+  IN     UINT32             ExecutableSize OPTIONAL,
+  OUT    CONST CHAR8        **BundleVersion OPTIONAL
   );
 
 /**
@@ -1480,6 +1484,7 @@ MkextReserveKextSize (
   @param[in]     InfoPlistSize    Kext Info.plist size.
   @param[in,out] Executable       Kext executable, optional.
   @param[in]     ExecutableSize   Kext executable size, optional.
+  @param[out]    BundleVersion   Kext bundle version, optionally set on request.
 
   @return  EFI_SUCCESS on success.
 **/
@@ -1491,7 +1496,8 @@ MkextInjectKext (
   IN     CONST CHAR8    *InfoPlist,
   IN     UINT32         InfoPlistSize,
   IN     UINT8          *Executable OPTIONAL,
-  IN     UINT32         ExecutableSize OPTIONAL
+  IN     UINT32         ExecutableSize OPTIONAL,
+  OUT    CONST CHAR8    **BundleVersion OPTIONAL
   );
 
 /**

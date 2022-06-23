@@ -584,6 +584,7 @@ WrapMain (
 
   PcdGet32 (PcdFixedDebugPrintErrorLevel) |= DEBUG_INFO | DEBUG_VERBOSE;
   PcdGet32 (PcdDebugPrintErrorLevel)      |= DEBUG_INFO | DEBUG_VERBOSE;
+  PcdGet8 (PcdDebugPropertyMask)          |= DEBUG_PROPERTY_DEBUG_CODE_ENABLED;
 
   CONST CHAR8  *FileName;
 
@@ -718,6 +719,7 @@ WrapMain (
       return -1;
     }
 
+    CONST CHAR8  *BundleVersion;
     Status = PrelinkedInjectKext (
                &Context,
                NULL,
@@ -726,10 +728,16 @@ WrapMain (
                sizeof (KextInfoPlistData),
                NULL,
                NULL,
-               0
+               0,
+               &BundleVersion
                );
     if (!EFI_ERROR (Status)) {
-      DEBUG ((DEBUG_WARN, "[OK] PlistKext.kext injected - %r\n", Status));
+      DEBUG ((
+        DEBUG_WARN,
+        "[OK] PlistKext.kext injected - %r (v%a)\n",
+        Status,
+        BundleVersion == NULL ? "ersion unavailable" : BundleVersion
+        ));
     } else {
       DEBUG ((DEBUG_WARN, "[FAIL] PlistKext.kext injected - %r\n", Status));
       FailedToProcess = TRUE;
@@ -768,6 +776,7 @@ WrapMain (
       char  KextPath[64];
       snprintf (KextPath, sizeof (KextPath), "/Library/Extensions/Kex%d.kext", c);
 
+      CONST CHAR8  *BundleVersion;
       Status = PrelinkedInjectKext (
                  &Context,
                  NULL,
@@ -776,11 +785,17 @@ WrapMain (
                  TestPlistSize,
                  "Contents/MacOS/Kext",
                  TestData,
-                 TestDataSize
+                 TestDataSize,
+                 &BundleVersion
                  );
 
       if (!EFI_ERROR (Status)) {
-        DEBUG ((DEBUG_WARN, "[OK] %a injected - %r\n", argv[2], Status));
+        DEBUG ((
+          DEBUG_WARN,
+          "[OK] PlistKext.kext injected - %r (v%a)\n",
+          Status,
+          BundleVersion == NULL ? "ersion unavailable" : BundleVersion
+          ));
       } else {
         DEBUG ((DEBUG_WARN, "[FAIL] %a injected - %r\n", argv[2], Status));
         FailedToProcess = TRUE;
@@ -870,7 +885,8 @@ LLVMFuzzerTestOneInput (
              sizeof (KextInfoPlistData),
              "Contents/MacOS/Lilu",
              Data,
-             Size
+             Size,
+             NULL
              );
 
   PrelinkedInjectComplete (&Context);
