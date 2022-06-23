@@ -49,6 +49,8 @@ echo "Hashing files in ${OCPath}..."
 /usr/bin/find . -not -path '*/\.*' -type f \
   \( ! -iname ".*" \) \
   \( ! -iname "vault.*" \) \
+  \( ! -iname "MemTest86.log" \) \
+  \( ! -iname "MemTest86-Report-*.html" \) \
   \( ! -iname "OpenCore.efi" \) | while read -r fname; do
   fname="${fname#"./"}"
   wname="${fname//\//\\\\}"
