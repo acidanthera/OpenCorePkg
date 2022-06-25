@@ -26,7 +26,7 @@ InternalFindPattern (
   IN CONST UINT32  PatternSize,
   IN CONST UINT8   *Data,
   IN UINT32        DataSize,
-  IN UINT32        *DataOff
+  IN OUT UINT32    *DataOff
   )
 {
   UINT32  Index;
@@ -34,6 +34,7 @@ InternalFindPattern (
   UINT32  CurrentOffset;
 
   ASSERT (DataSize >= PatternSize);
+  ASSERT (DataOff != NULL);
 
   if (PatternSize == 0) {
     return FALSE;
@@ -84,7 +85,7 @@ FindPattern (
   IN CONST UINT32  PatternSize,
   IN CONST UINT8   *Data,
   IN UINT32        DataSize,
-  IN UINT32        *DataOff
+  IN OUT UINT32    *DataOff
   )
 {
   if (DataSize < PatternSize) {

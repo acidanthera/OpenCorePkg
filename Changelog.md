@@ -1,5 +1,12 @@
 OpenCore Changelog
 ==================
+#### v0.8.2
+- Fixed `AppleCpuPmCfgLock` on macOS 13
+- Fixed `DummyPowerManagement` on macOS 13
+- Updated builtin firmware versions for SMBIOS and the rest
+- Added macOS 13 support for `AvoidRuntimeDefrag` Booter quirk
+- Added injected kext bundle version printing in DEBUG builds
+
 #### v0.8.1
 - Improved `ExtendBTFeatureFlags` quirk on newer macOS versions, thx @lvs1974
 - Added notes about DMAR table and `ForceAquantiaEthernet`, thx @kokowski

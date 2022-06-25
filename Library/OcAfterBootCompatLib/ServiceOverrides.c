@@ -19,10 +19,12 @@
 #include <Guid/OcVariable.h>
 
 #include <IndustryStandard/AppleHibernate.h>
+#include <IndustryStandard/AppleEfiBootRtInfo.h>
 
 #include <Library/BaseLib.h>
 #include <Library/BaseMemoryLib.h>
 #include <Library/MemoryAllocationLib.h>
+#include <Library/DevicePathLib.h>
 #include <Library/OcBootManagementLib.h>
 #include <Library/OcLogAggregatorLib.h>
 #include <Library/OcDebugLogLib.h>
@@ -527,7 +529,7 @@ OcAllocatePages (
         // Called from boot.efi.
         // Memory allocated for boot.efi to kernel trampoline.
         //
-        BootCompat->ServiceState.KernelCallGate = *Memory;
+        BootCompat->ServiceState.OldKernelCallGate = *Memory;
       } else if (IsPerfAlloc) {
         //
         // Called from boot.efi.
@@ -742,6 +744,402 @@ OcFreePool (
   return Status;
 }
 
+/*
+  Verify whether a device path refers to EfiBootRt of a loaded EfiBoot image.
+
+  @param[in]  EfiBootRtDevicePath  The device path to verify.
+  @param[in]  SourceBuffer         The image buffer of EfiBootRtDevicePath.
+  @param[in]  SourceSize           The size, in Bytes, of SourceBuffer.
+  @param[in]  EfiBootLoadedImage   The loaded EfiBoot image.
+
+  @returns  Whether EfiBootRtDevicePath refers to an EfiBootRt instance.
+*/
+STATIC
+BOOLEAN
+InternalIsEfiBootRt (
+  IN EFI_DEVICE_PATH_PROTOCOL   *EfiBootRtDevicePath OPTIONAL,
+  IN VOID                       *SourceBuffer OPTIONAL,
+  IN UINTN                      SourceSize,
+  IN EFI_LOADED_IMAGE_PROTOCOL  *EfiBootLoadedImage
+  )
+{
+  INTN                      CmpResult;
+  BOOLEAN                   Overflow;
+  EFI_DEVICE_PATH_PROTOCOL  *EfiBootDevicePath;
+  EFI_DEVICE_PATH_PROTOCOL  *DevicePathEnd;
+  UINTN                     EfiBootRtDevicePathRemSize;
+  UINTN                     ComponentSize;
+  EFI_DEVICE_PATH_PROTOCOL  *CurrentRtNode;
+
+  ASSERT (EfiBootLoadedImage != NULL);
+
+  if (  (EfiBootRtDevicePath == NULL)
+     || (SourceBuffer == NULL)
+     || (EfiBootLoadedImage->FilePath == NULL))
+  {
+    DEBUG ((
+      DEBUG_INFO,
+      "OCABC: Cannot be EfiBootRt (DP %d, Buf %d, EfiBoot FP %d)\n",
+      (EfiBootRtDevicePath == NULL),
+      (SourceBuffer == NULL),
+      (EfiBootLoadedImage->FilePath == NULL)
+      ));
+    return FALSE;
+  }
+
+  //
+  // The EfiBootRt device path appends a MemMap device path node with its loaded
+  // image information to the EfiBoot device path. Verify the EfiBoot device
+  // path is its prefix.
+  //
+  EfiBootDevicePath = DevicePathFromHandle (EfiBootLoadedImage->DeviceHandle);
+  if (EfiBootDevicePath == NULL) {
+    DEBUG ((
+      DEBUG_INFO,
+      "OCABC: Failed to get EfiBoot DP from handle 0x%llx\n",
+      (UINT64)(UINTN)EfiBootLoadedImage->DeviceHandle
+      ));
+    return FALSE;
+  }
+
+  DebugPrintDevicePath (
+    DEBUG_INFO,
+    "OCABC: Current EfiBoot",
+    EfiBootDevicePath
+    );
+
+  EfiBootRtDevicePathRemSize = GetDevicePathSize (EfiBootRtDevicePath);
+
+  DevicePathEnd = FindDevicePathEndNode (EfiBootDevicePath);
+  ComponentSize = (UINTN)DevicePathEnd - (UINTN)EfiBootDevicePath;
+
+  Overflow = OcOverflowSubUN (
+               EfiBootRtDevicePathRemSize,
+               ComponentSize,
+               &EfiBootRtDevicePathRemSize
+               );
+  if (Overflow) {
+    DEBUG ((
+      DEBUG_INFO,
+      "OCABC: EfiBootRt DP (0x%llx) is shorter than EfiBoot DP (0x%llx)\n",
+      (UINT64)EfiBootRtDevicePathRemSize,
+      (UINT64)ComponentSize
+      ));
+    return FALSE;
+  }
+
+  //
+  // The EfiBoot device path is constructed from the device path of its device
+  // and its file path node. Check them one by one.
+  //
+  CmpResult = CompareMem (
+                EfiBootRtDevicePath,
+                EfiBootDevicePath,
+                ComponentSize
+                );
+  if (CmpResult != 0) {
+    DEBUG ((DEBUG_INFO, "OCABC: EfiBoot DP is not a prefix of EfiBootRt DP\n"));
+    return FALSE;
+  }
+
+  CurrentRtNode = (EFI_DEVICE_PATH_PROTOCOL *)((UINT8 *)EfiBootRtDevicePath + ComponentSize);
+
+  DevicePathEnd = FindDevicePathEndNode (EfiBootLoadedImage->FilePath);
+  ComponentSize = (UINTN)DevicePathEnd - (UINTN)EfiBootLoadedImage->FilePath;
+
+  if (ComponentSize >= EfiBootRtDevicePathRemSize) {
+    DEBUG ((
+      DEBUG_INFO,
+      "OCABC: EfiBootRt FP (0x%llx) is shorter than EfiBoot FP (0x%llx)\n",
+      (UINT64)EfiBootRtDevicePathRemSize,
+      (UINT64)ComponentSize
+      ));
+    return FALSE;
+  }
+
+  CmpResult = CompareMem (
+                CurrentRtNode,
+                EfiBootLoadedImage->FilePath,
+                ComponentSize
+                );
+  if (CmpResult != 0) {
+    DEBUG ((DEBUG_INFO, "OCABC: EfiBoot FP is not a prefix of EfiBootRt FP\n"));
+    return FALSE;
+  }
+
+  CurrentRtNode = (EFI_DEVICE_PATH_PROTOCOL *)((UINT8 *)CurrentRtNode + ComponentSize);
+  //
+  // Verify the appended node is of MemMap type and matches the loaded image
+  // information.
+  //
+  if (  (DevicePathType (CurrentRtNode) != HARDWARE_DEVICE_PATH)
+     || (DevicePathSubType (CurrentRtNode) != HW_MEMMAP_DP))
+  {
+    DEBUG ((
+      DEBUG_INFO,
+      "OCABC: EfiBootRt FP is not succeeded by a MemMap node\n"
+      ));
+    return FALSE;
+  }
+
+  MEMMAP_DEVICE_PATH  *MemMapNode = (MEMMAP_DEVICE_PATH *)CurrentRtNode;
+
+  if (  (MemMapNode->StartingAddress != (EFI_PHYSICAL_ADDRESS)(UINTN)SourceBuffer)
+     || (MemMapNode->EndingAddress != (EFI_PHYSICAL_ADDRESS)((UINTN)SourceBuffer + SourceSize)))
+  {
+    DEBUG ((
+      DEBUG_INFO,
+      "OCABC: MemMap [0x%llx, 0x%llx) mismatches EfiBootRt [0x%llx, 0x%llx)\n",
+      MemMapNode->StartingAddress,
+      MemMapNode->EndingAddress,
+      (EFI_PHYSICAL_ADDRESS)(UINTN)SourceBuffer,
+      (EFI_PHYSICAL_ADDRESS)((UINTN)SourceBuffer + SourceSize)
+      ));
+    return FALSE;
+  }
+
+  return TRUE;
+}
+
+/*
+  Retrieves the offset of the kernel call gate in EfiBootRt.
+
+  @param[in]  KcgSize       On output, the maximum size, in Bytes, available to
+                            the kernel call gate.
+  @param[in]  BootCompat    The Apple Boot Compatibility context.
+  @param[in]  DevicePath    The device path of EfiBootRt.
+  @param[in]  SourceBuffer  The image buffer of EfiBootRt.
+  @param[in]  SourceSize    The size, in Bytes, of SourceBuffer.
+
+  @retval 0      The function did not complete successfully.
+  @retval other  The offset of the kernel call gate in EfiBootRt.
+*/
+STATIC
+UINTN
+InternalEfiBootRtGetKcgOffset (
+  OUT UINTN                     *KcgSize,
+  IN  BOOT_COMPAT_CONTEXT       *BootCompat,
+  IN  EFI_DEVICE_PATH_PROTOCOL  *DevicePath,
+  IN  VOID                      *SourceBuffer,
+  IN  UINTN                     SourceSize
+  )
+{
+  EFI_STATUS                 Status;
+  BOOLEAN                    Overflow;
+  EFI_HANDLE                 EfiBootRtCopyHandle;
+  APPLE_EFI_BOOT_RT_INFO     EfiBootRtLoadOptions;
+  UINTN                      KcgOffset;
+  EFI_LOADED_IMAGE_PROTOCOL  *LoadedImage;
+  UINTN                      ImageBase;
+
+  //
+  // Load a copy of EfiBootRt to retrieve its information structure. EfiBootRt
+  // must be loaded with the OpenCore image loader as it is not signed. This is
+  // not a security issue as it is implicitly signed via EfiBoot.
+  //
+  Status = OcImageLoaderLoad (
+             FALSE,
+             gImageHandle,
+             DevicePath,
+             SourceBuffer,
+             SourceSize,
+             &EfiBootRtCopyHandle
+             );
+  if (EFI_ERROR (Status)) {
+    DEBUG ((DEBUG_INFO, "OCABC: KCG load - %r\n", Status));
+    return 0;
+  }
+
+  //
+  // EfiBootRt publishes its information via a caller-allocated buffer wired to
+  // its launch options. For this, it must be launched.
+  //
+  Status = gBS->HandleProtocol (
+                  EfiBootRtCopyHandle,
+                  &gEfiLoadedImageProtocolGuid,
+                  (VOID **)&LoadedImage
+                  );
+  if (EFI_ERROR (Status)) {
+    DEBUG ((DEBUG_INFO, "OCABC: Handle KCG LoadedImage - %r\n", Status));
+    gBS->UnloadImage (EfiBootRtCopyHandle);
+    return 0;
+  }
+
+  ImageBase = (UINTN)LoadedImage->ImageBase;
+
+  ZeroMem (&EfiBootRtLoadOptions, sizeof (EfiBootRtLoadOptions));
+  LoadedImage->LoadOptions     = &EfiBootRtLoadOptions;
+  LoadedImage->LoadOptionsSize = sizeof (EfiBootRtLoadOptions);
+  //
+  // The calls to these services are correct despite calling OcImageLoaderLoad()
+  // directly, as they will be overridden versions that support OpenCore loaded
+  // images.
+  //
+  Status = BootCompat->ServicePtrs.StartImage (EfiBootRtCopyHandle, NULL, NULL);
+
+  gBS->UnloadImage (EfiBootRtCopyHandle);
+
+  if (EFI_ERROR (Status)) {
+    DEBUG ((DEBUG_INFO, "OCABC: KCG start - %r\n", Status));
+    return 0;
+  }
+
+  //
+  // Compute the remaining space to the end of the image.
+  //
+  Overflow = OcOverflowSubUN (
+               (UINTN)EfiBootRtLoadOptions.KernelCallGate,
+               ImageBase,
+               &KcgOffset
+               );
+  Overflow |= OcOverflowSubUN (
+                SourceSize,
+                KcgOffset,
+                KcgSize
+                );
+  if (Overflow) {
+    DEBUG ((
+      DEBUG_INFO,
+      "OCABC: KCG OOB (0x%llx, [0x%llx, 0x%llx)\n",
+      (UINT64)(UINTN)EfiBootRtLoadOptions.KernelCallGate,
+      (UINT64)ImageBase,
+      (UINT64)(ImageBase + SourceSize)
+      ));
+    return 0;
+  }
+
+  return KcgOffset;
+}
+
+/**
+  UEFI Boot Services LoadImage override. Called to load an efi image.
+  If this is bootrt.efi, then we patch its kernel call gate.
+**/
+STATIC
+EFI_STATUS
+EFIAPI
+OcLoadImage (
+  IN  BOOLEAN                   BootPolicy,
+  IN  EFI_HANDLE                ParentImageHandle,
+  IN  EFI_DEVICE_PATH_PROTOCOL  *DevicePath,
+  IN  VOID                      *SourceBuffer OPTIONAL,
+  IN  UINTN                     SourceSize,
+  OUT EFI_HANDLE                *ImageHandle
+  )
+{
+  EFI_STATUS                 LoadImageStatus;
+  EFI_STATUS                 Status;
+  BOOLEAN                    IsEfiBootRt;
+  BOOT_COMPAT_CONTEXT        *BootCompat;
+  EFI_LOADED_IMAGE_PROTOCOL  *LoadedImage;
+  UINTN                      KcgOffset;
+  UINTN                      KcgSize;
+
+  BootCompat = GetBootCompatContext ();
+
+  DebugPrintDevicePath (DEBUG_INFO, "OCABC: EfiBootRt candidate", DevicePath);
+
+  //
+  // Verify whether it's EfiBootRt that's being loaded. If it is, patch its
+  // kernel call gate. This is relevant as of macOS 13 Developer Beta 1, as
+  // Apple moved the kernel call gate from a direct to an indirect EfiBoot embed
+  // in form of a separate driver, EfiBootRt.
+  //
+  IsEfiBootRt = FALSE;
+  if (!BootPolicy && (BootCompat->ServiceState.AppleBootNestedCount > 0)) {
+    IsEfiBootRt = InternalIsEfiBootRt (
+                    DevicePath,
+                    SourceBuffer,
+                    SourceSize,
+                    BootCompat->ServiceState.LastAppleBootImage
+                    );
+  }
+
+  DEBUG ((
+    DEBUG_INFO,
+    "OCABC: IsEfiBootRt %d (BP %d, Apple %d)\n",
+    IsEfiBootRt,
+    !BootPolicy,
+    BootCompat->ServiceState.AppleBootNestedCount > 0
+    ));
+
+  //
+  // Anything but EfiBootRt can be loaded transparently. EfiBootRt must be
+  // loaded with the OpenCore image loader as it is not signed. This is not a
+  // security issue as it is implicitly signed via EfiBoot.
+  //
+  if (!IsEfiBootRt) {
+    return BootCompat->ServicePtrs.LoadImage (
+                                     BootPolicy,
+                                     ParentImageHandle,
+                                     DevicePath,
+                                     SourceBuffer,
+                                     SourceSize,
+                                     ImageHandle
+                                     );
+  }
+
+  LoadImageStatus = OcImageLoaderLoad (
+                      BootPolicy,
+                      ParentImageHandle,
+                      DevicePath,
+                      SourceBuffer,
+                      SourceSize,
+                      ImageHandle
+                      );
+  if (EFI_ERROR (LoadImageStatus)) {
+    DEBUG ((DEBUG_INFO, "OCABC: EfiBootRt load - %r\n", LoadImageStatus));
+    return LoadImageStatus;
+  }
+
+  //
+  // Retrieve the EfiBootRt kernel call gate location.
+  //
+  KcgOffset = InternalEfiBootRtGetKcgOffset (
+                &KcgSize,
+                BootCompat,
+                DevicePath,
+                SourceBuffer,
+                SourceSize
+                );
+  if ((KcgOffset == 0) || (KcgSize < CALL_GATE_MIN_SIZE)) {
+    DEBUG ((
+      DEBUG_INFO,
+      "OCABC: Invalid KCG [0x%llx, 0x%llx)\n",
+      (UINT64)KcgOffset,
+      (UINT64)KcgSize
+      ));
+    return LoadImageStatus;
+  }
+
+  Status = gBS->HandleProtocol (
+                  *ImageHandle,
+                  &gEfiLoadedImageProtocolGuid,
+                  (VOID **)&LoadedImage
+                  );
+  if (EFI_ERROR (Status)) {
+    DEBUG ((DEBUG_INFO, "OCABC: Handle EfiBootRt LoadedImage - %r\n", Status));
+    return LoadImageStatus;
+  }
+
+  //
+  // Patch the EfiBootRt kernel call gate.
+  //
+  AppleMapPrepareKernelJump (
+    BootCompat,
+    (UINTN)LoadedImage->ImageBase + KcgOffset,
+    (UINTN)AppleMapPrepareKernelStateNew
+    );
+
+  DEBUG ((
+    DEBUG_INFO,
+    "OCABC: Patched KCG at 0x%llx\n",
+    (UINTN)LoadedImage->ImageBase + KcgOffset
+    ));
+
+  return LoadImageStatus;
+}
+
 /**
   UEFI Boot Services StartImage override. Called to start an efi image.
   If this is boot.efi, then our overrides are enabled.
@@ -757,6 +1155,7 @@ OcStartImage (
 {
   EFI_STATUS                 Status;
   EFI_LOADED_IMAGE_PROTOCOL  *AppleLoadedImage;
+  EFI_LOADED_IMAGE_PROTOCOL  *LastAppleBootImageTmp;
   EFI_OS_INFO_PROTOCOL       *OSInfo;
   BOOT_COMPAT_CONTEXT        *BootCompat;
   OC_FWRT_CONFIG             Config;
@@ -782,13 +1181,18 @@ OcStartImage (
   //
   // Clear monitoring vars
   //
-  BootCompat->ServiceState.KernelCallGate = 0;
+  BootCompat->ServiceState.OldKernelCallGate = 0;
 
   if (AppleLoadedImage != NULL) {
     //
     // Report about macOS being loaded.
     //
     ++BootCompat->ServiceState.AppleBootNestedCount;
+    //
+    // Remember the last started Apple booter to match its EfiBootRt instance.
+    //
+    LastAppleBootImageTmp                       = BootCompat->ServiceState.LastAppleBootImage;
+    BootCompat->ServiceState.LastAppleBootImage = AppleLoadedImage;
 
     //
     // VMware uses OSInfo->SetName call by EfiBoot to ensure that we are allowed
@@ -920,6 +1324,10 @@ OcStartImage (
 
   if (AppleLoadedImage != NULL) {
     //
+    // On exit, restore the previous last started Apple booter.
+    //
+    BootCompat->ServiceState.LastAppleBootImage = LastAppleBootImageTmp;
+    //
     // We failed but other operating systems should be loadable.
     //
     --BootCompat->ServiceState.AppleBootNestedCount;
@@ -1019,7 +1427,8 @@ OcExitBootServices (
 
   AppleMapPrepareKernelJump (
     BootCompat,
-    (UINTN)BootCompat->ServiceState.KernelCallGate
+    (UINTN)BootCompat->ServiceState.OldKernelCallGate,
+    (UINTN)AppleMapPrepareKernelStateOld
     );
 
   return Status;
@@ -1079,7 +1488,7 @@ OcGetVariable (
   BootCompat = GetBootCompatContext ();
   IsApple    = BootCompat->ServiceState.AppleBootNestedCount > 0;
 
-  if (IsApple && BootCompat->Settings.ProvideCustomSlide) {
+  if (IsApple && (BootCompat->Settings.ProvideCustomSlide || BootCompat->Settings.AllowRelocationBlock)) {
     Status = AppleSlideGetVariable (
                BootCompat,
                BootCompat->ServicePtrs.GetVariable,
@@ -1210,6 +1619,7 @@ InstallServiceOverrides (
   ServicePtrs->AllocatePool     = gBS->AllocatePool;
   ServicePtrs->FreePool         = gBS->FreePool;
   ServicePtrs->ExitBootServices = gBS->ExitBootServices;
+  ServicePtrs->LoadImage        = gBS->LoadImage;
   ServicePtrs->StartImage       = gBS->StartImage;
 
   gBS->AllocatePages    = OcAllocatePages;
@@ -1218,13 +1628,11 @@ InstallServiceOverrides (
   gBS->AllocatePool     = OcAllocatePool;
   gBS->FreePool         = OcFreePool;
   gBS->ExitBootServices = OcExitBootServices;
+  gBS->LoadImage        = OcLoadImage;
   gBS->StartImage       = OcStartImage;
 
   gBS->Hdr.CRC32 = 0;
   gBS->Hdr.CRC32 = CalculateCrc32 (gBS, gBS->Hdr.HeaderSize);
-
-  gRT->Hdr.CRC32 = 0;
-  gRT->Hdr.CRC32 = CalculateCrc32 (gRT, gRT->Hdr.HeaderSize);
 
   gBS->RestoreTPL (OriginalTpl);
 

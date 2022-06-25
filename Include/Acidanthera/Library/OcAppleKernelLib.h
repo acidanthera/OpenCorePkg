@@ -123,6 +123,7 @@ typedef enum KERNEL_CACHE_TYPE_ {
 #define KERNEL_VERSION_CATALINA       19
 #define KERNEL_VERSION_BIG_SUR        20
 #define KERNEL_VERSION_MONTEREY       21
+#define KERNEL_VERSION_VENTURA        22
 
 //
 // Minimum kernel versions for each release.
@@ -141,6 +142,7 @@ typedef enum KERNEL_CACHE_TYPE_ {
 #define KERNEL_VERSION_CATALINA_MIN       KERNEL_VERSION (KERNEL_VERSION_CATALINA, 0, 0)
 #define KERNEL_VERSION_BIG_SUR_MIN        KERNEL_VERSION (KERNEL_VERSION_BIG_SUR, 0, 0)
 #define KERNEL_VERSION_MONTEREY_MIN       KERNEL_VERSION (KERNEL_VERSION_MONTEREY, 0, 0)
+#define KERNEL_VERSION_VENTURA_MIN        KERNEL_VERSION (KERNEL_VERSION_VENTURA, 0, 0)
 
 //
 // Maximum kernel versions for each release.
@@ -158,6 +160,7 @@ typedef enum KERNEL_CACHE_TYPE_ {
 #define KERNEL_VERSION_MOJAVE_MAX         (KERNEL_VERSION_CATALINA_MIN - 1)
 #define KERNEL_VERSION_CATALINA_MAX       (KERNEL_VERSION_BIG_SUR_MIN - 1)
 #define KERNEL_VERSION_BIG_SUR_MAX        (KERNEL_VERSION_MONTEREY_MIN - 1)
+#define KERNEL_VERSION_MONTEREY_MAX       (KERNEL_VERSION_VENTURA_MIN - 1)
 
 //
 // Prelinked context used for kernel modification.
@@ -863,6 +866,7 @@ PrelinkedReserveKextSize (
   @param[in,out] ExecutablePath  Kext executable path (e.g. Contents/MacOS/mykext), optional.
   @param[in,out] Executable      Kext executable, optional.
   @param[in]     ExecutableSize  Kext executable size, optional.
+  @param[out]    BundleVersion   Kext bundle version, optionally set on request.
 
   @return  EFI_SUCCESS on success.
 **/
@@ -875,7 +879,8 @@ PrelinkedInjectKext (
   IN     UINT32             InfoPlistSize,
   IN     CONST CHAR8        *ExecutablePath OPTIONAL,
   IN OUT CONST UINT8        *Executable OPTIONAL,
-  IN     UINT32             ExecutableSize OPTIONAL
+  IN     UINT32             ExecutableSize OPTIONAL,
+  OUT    CONST CHAR8        **BundleVersion OPTIONAL
   );
 
 /**
@@ -1250,6 +1255,7 @@ CachelessContextFree (
   @param[in]     InfoPlistSize   Kext Info.plist size.
   @param[in]     Executable      Kext executable, optional.
   @param[in]     ExecutableSize  Kext executable size, optional.
+  @param[out]    BundleVersion   Kext bundle version, optionally set on request.
 
   @return  EFI_SUCCESS on success.
 **/
@@ -1259,7 +1265,8 @@ CachelessContextAddKext (
   IN     CONST CHAR8        *InfoPlist,
   IN     UINT32             InfoPlistSize,
   IN     CONST UINT8        *Executable OPTIONAL,
-  IN     UINT32             ExecutableSize OPTIONAL
+  IN     UINT32             ExecutableSize OPTIONAL,
+  OUT    CONST CHAR8        **BundleVersion OPTIONAL
   );
 
 /**
@@ -1477,6 +1484,7 @@ MkextReserveKextSize (
   @param[in]     InfoPlistSize    Kext Info.plist size.
   @param[in,out] Executable       Kext executable, optional.
   @param[in]     ExecutableSize   Kext executable size, optional.
+  @param[out]    BundleVersion   Kext bundle version, optionally set on request.
 
   @return  EFI_SUCCESS on success.
 **/
@@ -1488,7 +1496,8 @@ MkextInjectKext (
   IN     CONST CHAR8    *InfoPlist,
   IN     UINT32         InfoPlistSize,
   IN     UINT8          *Executable OPTIONAL,
-  IN     UINT32         ExecutableSize OPTIONAL
+  IN     UINT32         ExecutableSize OPTIONAL,
+  OUT    CONST CHAR8    **BundleVersion OPTIONAL
   );
 
 /**

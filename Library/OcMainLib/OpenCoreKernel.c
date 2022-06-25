@@ -565,6 +565,7 @@ OcKernelInjectKext (
   CHAR8        FullPath[OC_STORAGE_SAFE_PATH_MAX];
   UINT32       MaxKernel;
   UINT32       MinKernel;
+  CONST CHAR8  *BundleVersion;
 
   if (!Kext->Enabled || (Kext->PlistData == NULL)) {
     return;
@@ -617,7 +618,8 @@ OcKernelInjectKext (
                  Kext->PlistData,
                  Kext->PlistDataSize,
                  Kext->ImageData,
-                 Kext->ImageDataSize
+                 Kext->ImageDataSize,
+                 &BundleVersion
                  );
     }
   } else if (CacheType == CacheTypeMkext) {
@@ -628,7 +630,8 @@ OcKernelInjectKext (
                Kext->PlistData,
                Kext->PlistDataSize,
                Kext->ImageData,
-               Kext->ImageDataSize
+               Kext->ImageDataSize,
+               &BundleVersion
                );
   } else if (CacheType == CacheTypePrelinked) {
     Status = PrelinkedInjectKext (
@@ -639,7 +642,8 @@ OcKernelInjectKext (
                Kext->PlistDataSize,
                ExecutablePath,
                Kext->ImageData,
-               Kext->ImageDataSize
+               Kext->ImageDataSize,
+               &BundleVersion
                );
   } else {
     Status = EFI_UNSUPPORTED;
@@ -654,6 +658,21 @@ OcKernelInjectKext (
     Comment,
     Status
     ));
+
+  //
+  // Report kext bundle version for DEBUG build.
+  //
+  DEBUG_CODE_BEGIN ();
+  DEBUG ((
+    !IsForced && EFI_ERROR (Status) ? DEBUG_WARN : DEBUG_INFO,
+    "OC: %a%a injection %a v%a\n",
+    PRINT_KERNEL_CACHE_TYPE (CacheType),
+    IsForced ? " force" : "",
+    BundlePath,
+    BundleVersion == NULL ? "ersion unavailable" : BundleVersion
+    ));
+
+  DEBUG_CODE_END ();
 }
 
 STATIC

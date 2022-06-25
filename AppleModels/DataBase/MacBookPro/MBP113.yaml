@@ -1,7 +1,7 @@
 BIOSVendor: "Apple Inc."
-BIOSVersion: "432.60.3.0.0"
-BIOSLegacyVersion: "MBP112.88Z.F000.B00.2110271854"
-BIOSReleaseDate: "10/27/2021"
+BIOSVersion: "433.120.6.0.0"
+BIOSLegacyVersion: "MBP112.88Z.F000.B00.2203161446"
+BIOSReleaseDate: "03/16/2022"
 SystemManufacturer: "Apple Inc."
 SystemProductName: "MacBookPro11,3"
 SystemVersion: "1.0"
@@ -73,13 +73,13 @@ SmcEPCI: 0xF0D007
 OEMStrings: |-
   Apple ROM Version
     Model:        MBP112
-    EFI Version:  432.60.3.0.0
-    Built by:     root@bb-g8-pdb49
-    Date:         Wed Oct 27 18:54:32 PDT 2021
-    Revision:     432.60.3 (B&I)
+    EFI Version:  433.120.6.0.0
+    Built by:     root@shhg7
+    Date:         Wed Mar 16 14:46:02 PDT 2022
+    Revision:     433.120.6 (B&I)
     ROM Version:  F000_B00
     Build Type:   Official Build, Release
-    Compiler:     clang-1300.0.29.10
+    Compiler:     clang-1316.0.21.1
 Specifications:
   CPUCodename:
     - "Crystal Well"
@@ -156,4 +156,4 @@ AppleModelYear:
   - 2014
   - 2015
 MinimumOSVersion: "10.9.4"
-MaximumOSVersion: "11.6.6"
+MaximumOSVersion: "11.6.7"
