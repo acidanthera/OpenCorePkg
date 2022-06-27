@@ -2472,5 +2472,12 @@ KernelApplyQuirk (
   IN     UINT32             KernelVersion
   )
 {
+  //
+  // Patcher cannot be NULL for kernel patches, whose Identifier are NULL.
+  //
+  if (gKernelQuirks[Name].Identifier == NULL) {
+    ASSERT (Patcher != NULL);
+  }
+
   return gKernelQuirks[Name].PatchFunction (Patcher, KernelVersion);
 }
