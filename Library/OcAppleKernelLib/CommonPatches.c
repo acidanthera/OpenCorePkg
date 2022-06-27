@@ -60,6 +60,11 @@ PatchAppleCpuPmCfgLock (
   UINT8  *WalkerEnd;
   UINT8  *WalkerTmp;
 
+  if (Patcher == NULL) {
+    DEBUG ((DEBUG_INFO, "OCAK: Patcher not found under for %a on %u\n", __func__, KernelVersion));
+    return EFI_NOT_FOUND;
+  }
+
   //
   // NOTE: As of macOS 13.0 AICPUPM kext is removed.
   // However, we may remove this check later, if an older version can be injected correctly
@@ -68,11 +73,6 @@ PatchAppleCpuPmCfgLock (
   if (OcMatchDarwinVersion (KernelVersion, KERNEL_VERSION_VENTURA_MIN, 0)) {
     DEBUG ((DEBUG_INFO, "OCAK: Skipping AppleCpuPmCfgLock patch on %u\n", KernelVersion));
     return EFI_SUCCESS;
-  }
-
-  if (Patcher == NULL) {
-    DEBUG ((DEBUG_INFO, "OCAK: Patcher not found under for %a on %u\n", __func__, KernelVersion));
-    return EFI_NOT_FOUND;
   }
 
   Count     = 0;
@@ -241,17 +241,17 @@ PatchAppleXcpmCfgLock (
   UINT32  Replacements;
 
   //
+  // This is a kernel patch, so Patcher cannot be NULL.
+  //
+  ASSERT (Patcher != NULL);
+
+  //
   // XCPM is not available before macOS 10.8.5.
   //
   if (!OcMatchDarwinVersion (KernelVersion, KERNEL_VERSION (KERNEL_VERSION_MOUNTAIN_LION, 5, 0), 0)) {
     DEBUG ((DEBUG_INFO, "OCAK: Skipping XcpmCfgLock on %u\n", KernelVersion));
     return EFI_SUCCESS;
   }
-
-  //
-  // This is a kernel patch, so Patcher cannot be NULL.
-  //
-  ASSERT (Patcher != NULL);
 
   Last = (XCPM_MSR_RECORD *)((UINT8 *)MachoGetMachHeader (&Patcher->MachContext)
                              + MachoGetFileSize (&Patcher->MachContext) - sizeof (XCPM_MSR_RECORD));
@@ -368,17 +368,17 @@ PatchAppleXcpmExtraMsrs (
   UINT32           Replacements;
 
   //
+  // This is a kernel patch, so Patcher cannot be NULL.
+  //
+  ASSERT (Patcher != NULL);
+
+  //
   // XCPM is not available before macOS 10.8.5.
   //
   if (!OcMatchDarwinVersion (KernelVersion, KERNEL_VERSION (KERNEL_VERSION_MOUNTAIN_LION, 5, 0), 0)) {
     DEBUG ((DEBUG_INFO, "OCAK: Skipping XcpmExtraMsrs on %u\n", KernelVersion));
     return EFI_SUCCESS;
   }
-
-  //
-  // This is a kernel patch, so Patcher cannot be NULL.
-  //
-  ASSERT (Patcher != NULL);
 
   Last = (XCPM_MSR_RECORD *)((UINT8 *)MachoGetMachHeader (&Patcher->MachContext)
                              + MachoGetFileSize (&Patcher->MachContext) - sizeof (XCPM_MSR_RECORD));
@@ -496,17 +496,17 @@ PatchAppleXcpmForceBoost (
   UINT8  *Current;
 
   //
+  // This is a kernel patch, so Patcher cannot be NULL.
+  //
+  ASSERT (Patcher != NULL);
+
+  //
   // XCPM is not available before macOS 10.8.5.
   //
   if (!OcMatchDarwinVersion (KernelVersion, KERNEL_VERSION (KERNEL_VERSION_MOUNTAIN_LION, 5, 0), 0)) {
     DEBUG ((DEBUG_INFO, "OCAK: Skipping XcpmForceBoost on %u\n", KernelVersion));
     return EFI_SUCCESS;
   }
-
-  //
-  // This is a kernel patch, so Patcher cannot be NULL.
-  //
-  ASSERT (Patcher != NULL);
 
   Start   = (UINT8 *)MachoGetMachHeader (&Patcher->MachContext);
   Last    = Start + MachoGetFileSize (&Patcher->MachContext) - EFI_PAGE_SIZE * 2;
@@ -656,6 +656,11 @@ PatchUsbXhciPortLimit1 (
 {
   EFI_STATUS  Status;
 
+  if (Patcher == NULL) {
+    DEBUG ((DEBUG_INFO, "OCAK: Patcher not found under for %a on %u\n", __func__, KernelVersion));
+    return EFI_NOT_FOUND;
+  }
+
   //
   // On 10.14.4 and newer IOUSBHostFamily also needs limit removal.
   // Thanks to ydeng discovering this.
@@ -663,11 +668,6 @@ PatchUsbXhciPortLimit1 (
   if (!OcMatchDarwinVersion (KernelVersion, KERNEL_VERSION (KERNEL_VERSION_MOJAVE, 5, 0), 0)) {
     DEBUG ((DEBUG_INFO, "OCAK: Skipping port patch IOUSBHostFamily on %u\n", KernelVersion));
     return EFI_SUCCESS;
-  }
-
-  if (Patcher == NULL) {
-    DEBUG ((DEBUG_INFO, "OCAK: Patcher not found under for %a on %u\n", __func__, KernelVersion));
-    return EFI_NOT_FOUND;
   }
 
   Status = PatcherApplyGenericPatch (Patcher, &mRemoveUsbLimitIoP1Patch);
@@ -689,14 +689,14 @@ PatchUsbXhciPortLimit2 (
 {
   EFI_STATUS  Status;
 
-  if (!OcMatchDarwinVersion (KernelVersion, KERNEL_VERSION_HIGH_SIERRA_MIN, 0)) {
-    DEBUG ((DEBUG_INFO, "OCAK: Skipping modern port patch AppleUSBXHCI on %u\n", KernelVersion));
-    return EFI_SUCCESS;
-  }
-
   if (Patcher == NULL) {
     DEBUG ((DEBUG_INFO, "OCAK: Patcher not found under for %a on %u\n", __func__, KernelVersion));
     return EFI_NOT_FOUND;
+  }
+
+  if (!OcMatchDarwinVersion (KernelVersion, KERNEL_VERSION_HIGH_SIERRA_MIN, 0)) {
+    DEBUG ((DEBUG_INFO, "OCAK: Skipping modern port patch AppleUSBXHCI on %u\n", KernelVersion));
+    return EFI_SUCCESS;
   }
 
   //
@@ -753,14 +753,14 @@ PatchUsbXhciPortLimit3 (
 {
   EFI_STATUS  Status;
 
-  if (!OcMatchDarwinVersion (KernelVersion, KERNEL_VERSION_EL_CAPITAN_MIN, KERNEL_VERSION_HIGH_SIERRA_MAX)) {
-    DEBUG ((DEBUG_INFO, "OCAK: Skipping legacy port patch AppleUSBXHCIPCI on %u\n", KernelVersion));
-    return EFI_SUCCESS;
-  }
-
   if (Patcher == NULL) {
     DEBUG ((DEBUG_INFO, "OCAK: Patcher not found under for %a on %u\n", __func__, KernelVersion));
     return EFI_NOT_FOUND;
+  }
+
+  if (!OcMatchDarwinVersion (KernelVersion, KERNEL_VERSION_EL_CAPITAN_MIN, KERNEL_VERSION_HIGH_SIERRA_MAX)) {
+    DEBUG ((DEBUG_INFO, "OCAK: Skipping legacy port patch AppleUSBXHCIPCI on %u\n", KernelVersion));
+    return EFI_SUCCESS;
   }
 
   //
@@ -969,14 +969,14 @@ PatchAppleIoMapperSupport (
 {
   EFI_STATUS  Status;
 
-  if (!OcMatchDarwinVersion (KernelVersion, KERNEL_VERSION_MOUNTAIN_LION_MIN, 0)) {
-    DEBUG ((DEBUG_INFO, "OCAK: Skipping AppleIoMapper patch on %u\n", KernelVersion));
-    return EFI_SUCCESS;
-  }
-
   if (Patcher == NULL) {
     DEBUG ((DEBUG_INFO, "OCAK: Patcher not found under for %a on %u\n", __func__, KernelVersion));
     return EFI_NOT_FOUND;
+  }
+
+  if (!OcMatchDarwinVersion (KernelVersion, KERNEL_VERSION_MOUNTAIN_LION_MIN, 0)) {
+    DEBUG ((DEBUG_INFO, "OCAK: Skipping AppleIoMapper patch on %u\n", KernelVersion));
+    return EFI_SUCCESS;
   }
 
   Status = PatcherApplyGenericPatch (Patcher, &mAppleIoMapperPatch);
@@ -1019,14 +1019,14 @@ PatchDummyPowerManagement (
 {
   EFI_STATUS  Status;
 
-  if (OcMatchDarwinVersion (KernelVersion, KERNEL_VERSION_VENTURA_MIN, 0)) {
-    DEBUG ((DEBUG_INFO, "OCAK: Skipping dummy AppleIntelCPUPowerManagement patch on %u\n", KernelVersion));
-    return EFI_SUCCESS;
-  }
-
   if (Patcher == NULL) {
     DEBUG ((DEBUG_INFO, "OCAK: Patcher not found under for %a on %u\n", __func__, KernelVersion));
     return EFI_NOT_FOUND;
+  }
+
+  if (OcMatchDarwinVersion (KernelVersion, KERNEL_VERSION_VENTURA_MIN, 0)) {
+    DEBUG ((DEBUG_INFO, "OCAK: Skipping dummy AppleIntelCPUPowerManagement patch on %u\n", KernelVersion));
+    return EFI_SUCCESS;
   }
 
   Status = PatcherApplyGenericPatch (Patcher, &mAppleDummyCpuPmPatch);
@@ -1102,14 +1102,14 @@ PatchIncreasePciBarSize (
 {
   EFI_STATUS  Status;
 
-  if (!OcMatchDarwinVersion (KernelVersion, KERNEL_VERSION_YOSEMITE_MIN, 0)) {
-    DEBUG ((DEBUG_INFO, "OCAK: Skipping com.apple.iokit.IOPCIFamily IncreasePciBarSize on %u\n", KernelVersion));
-    return EFI_SUCCESS;
-  }
-
   if (Patcher == NULL) {
     DEBUG ((DEBUG_INFO, "OCAK: Patcher not found under for %a on %u\n", __func__, KernelVersion));
     return EFI_NOT_FOUND;
+  }
+
+  if (!OcMatchDarwinVersion (KernelVersion, KERNEL_VERSION_YOSEMITE_MIN, 0)) {
+    DEBUG ((DEBUG_INFO, "OCAK: Skipping com.apple.iokit.IOPCIFamily IncreasePciBarSize on %u\n", KernelVersion));
+    return EFI_SUCCESS;
   }
 
   Status = PatcherApplyGenericPatch (Patcher, &mIncreasePciBarSizePatch);
@@ -1374,15 +1374,15 @@ PatchPanicKextDump (
   UINT8       *Record;
   UINT8       *Last;
 
-  if (!OcMatchDarwinVersion (KernelVersion, KERNEL_VERSION_HIGH_SIERRA_MIN, 0)) {
-    DEBUG ((DEBUG_INFO, "OCAK: Skipping PanicKextDump on %u\n", KernelVersion));
-    return EFI_SUCCESS;
-  }
-
   //
   // This is a kernel patch, so Patcher cannot be NULL.
   //
   ASSERT (Patcher != NULL);
+
+  if (!OcMatchDarwinVersion (KernelVersion, KERNEL_VERSION_HIGH_SIERRA_MIN, 0)) {
+    DEBUG ((DEBUG_INFO, "OCAK: Skipping PanicKextDump on %u\n", KernelVersion));
+    return EFI_SUCCESS;
+  }
 
   Last = ((UINT8 *)MachoGetMachHeader (&Patcher->MachContext)
           + MachoGetFileSize (&Patcher->MachContext) - EFI_PAGE_SIZE);
@@ -1651,15 +1651,15 @@ PatchPowerStateTimeout (
 {
   EFI_STATUS  Status;
 
-  if (!OcMatchDarwinVersion (KernelVersion, KERNEL_VERSION_CATALINA_MIN, 0)) {
-    DEBUG ((DEBUG_INFO, "OCAK: Skipping power state patch on %u\n", KernelVersion));
-    return EFI_SUCCESS;
-  }
-
   //
   // This is a kernel patch, so Patcher cannot be NULL.
   //
   ASSERT (Patcher != NULL);
+
+  if (!OcMatchDarwinVersion (KernelVersion, KERNEL_VERSION_CATALINA_MIN, 0)) {
+    DEBUG ((DEBUG_INFO, "OCAK: Skipping power state patch on %u\n", KernelVersion));
+    return EFI_SUCCESS;
+  }
 
   Status = PatcherApplyGenericPatch (Patcher, &mPowerStateTimeoutPanicInlinePatch);
   if (!EFI_ERROR (Status)) {
@@ -1800,15 +1800,15 @@ PatchSegmentJettison (
   UINT32      Diff;
   UINT32      Diff2;
 
-  if (!OcMatchDarwinVersion (KernelVersion, KERNEL_VERSION_BIG_SUR_MIN, 0)) {
-    DEBUG ((DEBUG_INFO, "OCAK: Skipping SegmentJettison on %u\n", KernelVersion));
-    return EFI_SUCCESS;
-  }
-
   //
   // This is a kernel patch, so Patcher cannot be NULL.
   //
   ASSERT (Patcher != NULL);
+
+  if (!OcMatchDarwinVersion (KernelVersion, KERNEL_VERSION_BIG_SUR_MIN, 0)) {
+    DEBUG ((DEBUG_INFO, "OCAK: Skipping SegmentJettison on %u\n", KernelVersion));
+    return EFI_SUCCESS;
+  }
 
   Last = (UINT8 *)MachoGetMachHeader (&Patcher->MachContext)
          + MachoGetFileSize (&Patcher->MachContext) - sizeof (EFI_PAGE_SIZE) * 2;
@@ -1937,14 +1937,14 @@ PatchBTFeatureFlags (
 {
   EFI_STATUS  Status;
 
-  if (!OcMatchDarwinVersion (KernelVersion, KERNEL_VERSION_MOUNTAIN_LION_MIN, 0)) {
-    DEBUG ((DEBUG_INFO, "OCAK: Skipping BTFeatureFlags on %u\n", KernelVersion));
-    return EFI_SUCCESS;
-  }
-
   if (Patcher == NULL) {
     DEBUG ((DEBUG_INFO, "OCAK: Patcher not found under for %a on %u\n", __func__, KernelVersion));
     return EFI_NOT_FOUND;
+  }
+
+  if (!OcMatchDarwinVersion (KernelVersion, KERNEL_VERSION_MOUNTAIN_LION_MIN, 0)) {
+    DEBUG ((DEBUG_INFO, "OCAK: Skipping BTFeatureFlags on %u\n", KernelVersion));
+    return EFI_SUCCESS;
   }
 
   Status = PatcherApplyGenericPatch (Patcher, &mBTFeatureFlagsPatchV1);
@@ -2218,17 +2218,17 @@ PatchAquantiaEthernet (
 {
   EFI_STATUS  Status;
 
+  if (Patcher == NULL) {
+    DEBUG ((DEBUG_INFO, "OCAK: Patcher not found under for %a on %u\n", __func__, KernelVersion));
+    return EFI_NOT_FOUND;
+  }
+
   //
   // This patch is not required before macOS 10.15.4.
   //
   if (!OcMatchDarwinVersion (KernelVersion, KERNEL_VERSION (KERNEL_VERSION_CATALINA, 4, 0), 0)) {
     DEBUG ((DEBUG_INFO, "OCAK: Skipping patching AquantiaEthernet on %u\n", KernelVersion));
     return EFI_SUCCESS;
-  }
-
-  if (Patcher == NULL) {
-    DEBUG ((DEBUG_INFO, "OCAK: Patcher not found under for %a on %u\n", __func__, KernelVersion));
-    return EFI_NOT_FOUND;
   }
 
   //
@@ -2268,14 +2268,14 @@ PatchForceSecureBootScheme (
   UINT8       *HybridAp;
   UINT32      Diff;
 
-  if (!OcMatchDarwinVersion (KernelVersion, KERNEL_VERSION_BIG_SUR_MIN, 0)) {
-    DEBUG ((DEBUG_INFO, "OCAK: Skipping sb scheme on %u\n", KernelVersion));
-    return EFI_SUCCESS;
-  }
-
   if (Patcher == NULL) {
     DEBUG ((DEBUG_INFO, "OCAK: Patcher not found under for %a on %u\n", __func__, KernelVersion));
     return EFI_NOT_FOUND;
+  }
+
+  if (!OcMatchDarwinVersion (KernelVersion, KERNEL_VERSION_BIG_SUR_MIN, 0)) {
+    DEBUG ((DEBUG_INFO, "OCAK: Skipping sb scheme on %u\n", KernelVersion));
+    return EFI_SUCCESS;
   }
 
   //
@@ -2391,14 +2391,14 @@ PatchSetApfsTrimTimeout (
 {
   EFI_STATUS  Status;
 
-  if (!OcMatchDarwinVersion (KernelVersion, KERNEL_VERSION_MOJAVE_MIN, 0)) {
-    DEBUG ((DEBUG_INFO, "OCAK: Skipping apfs timeout on %u\n", KernelVersion));
-    return EFI_SUCCESS;
-  }
-
   if (Patcher == NULL) {
     DEBUG ((DEBUG_INFO, "OCAK: Patcher not found under for %a on %u\n", __func__, KernelVersion));
     return EFI_NOT_FOUND;
+  }
+
+  if (!OcMatchDarwinVersion (KernelVersion, KERNEL_VERSION_MOJAVE_MIN, 0)) {
+    DEBUG ((DEBUG_INFO, "OCAK: Skipping apfs timeout on %u\n", KernelVersion));
+    return EFI_SUCCESS;
   }
 
   //
