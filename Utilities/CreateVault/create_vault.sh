@@ -74,7 +74,7 @@ write_header vault.plist
   \( ! -iname "vault.*" \) \
   \( ! -iname "MemTest86.log" \) \
   \( ! -iname "MemTest86-Report-*.html" \) \
-  \( ! -iname "OpenCore.efi" \) | env LC_COLLATE=POSIX sort | while read -r fname; do
+  \( ! -iname "OpenCore.efi" \) | env LC_COLLATE=POSIX /usr/bin/sort | while read -r fname; do
   fname="${fname#"./"}"
   wname="${fname//\//\\\\}"
   sha=$(/usr/bin/openssl sha256 "${fname}" | /usr/bin/awk '{print $2}') || abort "Failed to hash ${fname}"
