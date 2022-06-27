@@ -30,7 +30,7 @@ abort() {
 
 # plist output functions so we don't need PlistBuddy
 write_header() {
-  cat <<EOF > $1
+  cat <<EOF > "$1"
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
@@ -41,15 +41,17 @@ EOF
 }
 
 write_file_name_and_hash() {
-  echo -e "\t\t<key>${2}</key>" >> $1
-  echo -e "\t\t<data>" >> $1
-  echo -e -n "\t\t" >> $1
-  cat $3 >> $1
-  echo -e "\t\t</data>" >> $1
+  {
+    echo -e "\t\t<key>${2}</key>"
+    echo -e "\t\t<data>"
+    echo -e -n "\t\t"
+    cat "$3"
+    echo -e "\t\t</data>"
+  } >> "$1"
 }
 
 write_footer() {
-  cat <<EOF >> $1
+  cat <<EOF >> "$1"
 	</dict>
 	<key>Version</key>
 	<integer>1</integer>
@@ -83,7 +85,7 @@ write_header vault.plist
   echo "${wname}: ${sha}"
 
   echo "${sha}" | /usr/bin/xxd -r -p | /usr/bin/openssl base64 > /tmp/vault_hash || abort "Hashing failure"
-  write_file_name_and_hash vault.plist ${wname} /tmp/vault_hash
+  write_file_name_and_hash vault.plist "${wname}" /tmp/vault_hash
 done
 
 /bin/rm -rf /tmp/vault_hash
