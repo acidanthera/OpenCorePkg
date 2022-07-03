@@ -10,7 +10,7 @@ cleanup() {
   rm -rf "${KeyPath}"
 }
 
-if [ ! -x /usr/bin/dirname ] || [ ! -x /bin/chmod ] || [ ! -x /bin/mkdir ] || [ ! -x /bin/rm ] || [ ! -x /usr/bin/strings ] || [ ! -x /usr/bin/grep ] || [ ! -x /usr/bin/cut ] || [ ! -x /bin/dd ] || [ ! -x /usr/bin/uuidgen ] ; then
+if [ ! -x /usr/bin/dirname ] || [ ! -x /bin/chmod ] || [ ! -x /bin/mkdir ] || [ ! -x /bin/rm ] || [ ! -x /usr/bin/strings ] || [ ! -x /usr/bin/grep ] || [ ! -x /usr/bin/awk ] || [ ! -x /bin/dd ] || [ ! -x /usr/bin/uuidgen ] ; then
   abort "Unix environment is broken!"
 fi
 
@@ -60,7 +60,7 @@ echo "Signing ${OCBin}..."
 ./RsaTool -sign "${OCPath}/vault.plist" "${OCPath}/vault.sig" "${PubKey}" || abort "Failed to patch ${PubKey}"
 
 echo "Bin-patching ${OCBin}..."
-off=$(($(/usr/bin/strings -a -t d "${OCBin}" | /usr/bin/grep "=BEGIN OC VAULT=" | /usr/bin/cut -f1 -d' ') + 16))
+off=$(($(/usr/bin/strings -a -t d "${OCBin}" | /usr/bin/grep "=BEGIN OC VAULT=" | /usr/bin/awk '{print $1}') + 16))
 if [ "${off}" -le 16 ]; then
   abort "${OCBin} is borked"
 fi
