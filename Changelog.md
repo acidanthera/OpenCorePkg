@@ -6,6 +6,7 @@ OpenCore Changelog
 - Updated builtin firmware versions for SMBIOS and the rest
 - Added macOS 13 support for `AvoidRuntimeDefrag` Booter quirk
 - Added injected kext bundle version printing in DEBUG builds
+- Added Linux compatibility for CreateVault scripts 
 
 #### v0.8.1
 - Improved `ExtendBTFeatureFlags` quirk on newer macOS versions, thx @lvs1974
