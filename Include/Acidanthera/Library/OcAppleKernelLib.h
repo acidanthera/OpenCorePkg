@@ -616,7 +616,7 @@ typedef enum {
 /**
   Kernel quirk patch function.
 
-  @param[in,out]  Patcher        A pointer to the patcher context.
+  @param[in,out]  Patcher        A pointer to the patcher context. Only optional for kext patching.
   @param[in]      KernelVersion  Kernel version to be matched.
 
   @return  EFI_SUCCESS when the patch is successfully applied.
@@ -624,7 +624,7 @@ typedef enum {
 typedef
 EFI_STATUS
 (KERNEL_QUIRK_PATCH_FUNCTION) (
-  IN OUT PATCHER_CONTEXT  *Patcher,
+  IN OUT PATCHER_CONTEXT  *Patcher OPTIONAL,
   IN     UINT32           KernelVersion
   );
 
@@ -646,7 +646,7 @@ typedef struct {
   Applies the specified quirk.
 
   @param[in]     Name           KERNEL_QUIRK_NAME specifying the quirk name.
-  @param[in,out] Patcher        PATCHER_CONTEXT instance.
+  @param[in,out] Patcher        PATCHER_CONTEXT instance. Only optional for kext patching.
   @param[in]     KernelVersion  Current kernel version.
 
   @returns EFI_SUCCESS on success.
@@ -654,7 +654,7 @@ typedef struct {
 EFI_STATUS
 KernelApplyQuirk (
   IN     KERNEL_QUIRK_NAME  Name,
-  IN OUT PATCHER_CONTEXT    *Patcher,
+  IN OUT PATCHER_CONTEXT    *Patcher OPTIONAL,
   IN     UINT32             KernelVersion
   );
 
