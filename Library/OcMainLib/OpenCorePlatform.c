@@ -951,6 +951,7 @@ OcGetLegacySecureBootECID (
   }
 
   CopyMem (ApECID, &Uuid, sizeof (*ApECID));
+  DEBUG ((DEBUG_INFO, "OC: ApECID %Ld from system-id\n", *ApECID));
 }
 
 CONST CHAR8 *
