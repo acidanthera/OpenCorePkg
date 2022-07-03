@@ -53,8 +53,6 @@
 
 #define OPEN_CORE_LOG_PREFIX_PATH  L"opencore"
 
-#define OPEN_CORE_NVRAM_PATH  L"nvram.plist"
-
 #define OPEN_CORE_ACPI_PATH  L"ACPI\\"
 
 #define OPEN_CORE_UEFI_DRIVER_PATH  L"Drivers\\"
@@ -62,12 +60,6 @@
 #define OPEN_CORE_KEXT_PATH  L"Kexts\\"
 
 #define OPEN_CORE_TOOL_PATH  L"Tools\\"
-
-#define OPEN_CORE_NVRAM_ATTR  (EFI_VARIABLE_BOOTSERVICE_ACCESS | EFI_VARIABLE_RUNTIME_ACCESS)
-
-#define OPEN_CORE_NVRAM_NV_ATTR  (EFI_VARIABLE_BOOTSERVICE_ACCESS | EFI_VARIABLE_RUNTIME_ACCESS | EFI_VARIABLE_NON_VOLATILE)
-
-#define OPEN_CORE_INT_NVRAM_ATTR  EFI_VARIABLE_BOOTSERVICE_ACCESS
 
 /**
   Obtain cryptographic key if it was installed.
@@ -101,6 +93,22 @@ OcLoadAcpiSupport (
 VOID
 OcLoadDevPropsSupport (
   IN OC_GLOBAL_CONFIG  *Config
+  );
+
+/**
+  Load drivers.
+
+  @param[in]  Storage             OpenCore storage.
+  @param[in]  Config              OpenCore configuration.
+  @param[in]  DriversToConnect    Drivers which require later connection.
+  @param[in]  LoadEarly           If TRUE load any early phase drivers, otherwise load normal phase.
+**/
+VOID
+OcLoadDrivers (
+  IN  OC_STORAGE_CONTEXT  *Storage,
+  IN  OC_GLOBAL_CONFIG    *Config,
+  OUT EFI_HANDLE          **DriversToConnect  OPTIONAL,
+  IN  BOOLEAN             LoadEarly
   );
 
 /**

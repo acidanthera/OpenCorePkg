@@ -35,6 +35,7 @@
   ReadFile.c
   GptPartitionEntry.c
   FirmwareFile.c
+  FileMisc.c
 
 [Packages]
   OpenCorePkg/OpenCorePkg.dec

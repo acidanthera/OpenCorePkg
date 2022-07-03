@@ -10,7 +10,7 @@
 
 #include <Library/BaseLib.h>
 #include <Library/DebugLib.h>
-#include <Library/OcDeviceMiscLib.h>
+#include <Library/OcDirectResetLib.h>
 #include <Library/ResetSystemLib.h>
 #include <Library/UefiRuntimeServicesTableLib.h>
 

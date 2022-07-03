@@ -27,6 +27,7 @@
 #include <Library/OcDevicePathLib.h>
 #include <Library/OcFileLib.h>
 #include <Library/OcStringLib.h>
+#include <Library/OcVariableLib.h>
 #include <Library/UefiBootServicesTableLib.h>
 #include <Library/UefiLib.h>
 #include <Library/UefiRuntimeServicesTableLib.h>
@@ -136,48 +137,6 @@ InternalGetOcEntryProtocolDevPath (
   return EntryProtocolDevPath;
 }
 
-EFI_LOAD_OPTION *
-InternalGetBootOptionData (
-  OUT UINTN           *OptionSize,
-  IN  UINT16          BootOption,
-  IN  CONST EFI_GUID  *BootGuid
-  )
-{
-  EFI_STATUS       Status;
-  CHAR16           BootVarName[L_STR_LEN (L"Boot####") + 1];
-  UINTN            LoadOptionSize;
-  EFI_LOAD_OPTION  *LoadOption;
-
-  if (CompareGuid (BootGuid, &gOcVendorVariableGuid)) {
-    UnicodeSPrint (
-      BootVarName,
-      sizeof (BootVarName),
-      OC_VENDOR_BOOT_VARIABLE_PREFIX L"%04x",
-      BootOption
-      );
-  } else {
-    UnicodeSPrint (BootVarName, sizeof (BootVarName), L"Boot%04x", BootOption);
-  }
-
-  Status = GetVariable2 (
-             BootVarName,
-             BootGuid,
-             (VOID **)&LoadOption,
-             &LoadOptionSize
-             );
-  if (EFI_ERROR (Status)) {
-    return NULL;
-  }
-
-  if (LoadOptionSize < sizeof (*LoadOption)) {
-    FreePool (LoadOption);
-    return NULL;
-  }
-
-  *OptionSize = LoadOptionSize;
-  return LoadOption;
-}
-
 EFI_DEVICE_PATH_PROTOCOL *
 InternalGetBootOptionPath (
   IN EFI_LOAD_OPTION  *LoadOption,
@@ -276,7 +235,7 @@ InternalDebugBootEnvironment (
 
   for (Predefined = 0; Predefined < 2; ++Predefined) {
     for (Index = 0; Index < BootOrderCount; ++Index) {
-      LoadOption = InternalGetBootOptionData (
+      LoadOption = OcGetBootOptionData (
                      &LoadOptionSize,
                      BootOrder[Index],
                      BootGuid
@@ -567,7 +526,7 @@ InternalHasFirmwareUpdateAsNext (
     return FALSE;
   }
 
-  LoadOption = InternalGetBootOptionData (
+  LoadOption = OcGetBootOptionData (
                  &LoadOptionSize,
                  BootNext,
                  BootVariableGuid
@@ -889,7 +848,7 @@ OcSetDefaultBootEntry (
       continue;
     }
 
-    LoadOption = InternalGetBootOptionData (
+    LoadOption = OcGetBootOptionData (
                    &LoadOptionSize,
                    BootOrder[Index],
                    BootVariableGuid
@@ -1167,6 +1126,8 @@ OcSetDefaultBootEntry (
       ));
   }
 
+  OcSaveLegacyNvram ();
+
   return Status;
 }
 
@@ -1203,7 +1164,7 @@ InternalGetBoostrapOptionData (
   // Check all boot options for trailing "\Bootstrap\Bootstrap.efi".
   //
   for (BootOptionIndex = 0; BootOptionIndex < NumBootOptions; ++BootOptionIndex) {
-    CurrLoadOption = InternalGetBootOptionData (
+    CurrLoadOption = OcGetBootOptionData (
                        LoadOptionSize,
                        BootOptions[BootOptionIndex],
                        &gEfiGlobalVariableGuid
@@ -1532,6 +1493,7 @@ OcRegisterBootstrapBootOption (
              );
 
   if (FwRuntime != NULL) {
+    DEBUG ((DEBUG_INFO, "OCB: Restoring FW NVRAM...\n"));
     FwRuntime->SetOverride (NULL);
   }
 

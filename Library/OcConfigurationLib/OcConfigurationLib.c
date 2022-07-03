@@ -556,7 +556,6 @@ OC_SCHEMA
   mNvramConfigurationSchema[] = {
   OC_SCHEMA_MAP_IN ("Add",                 OC_GLOBAL_CONFIG, Nvram.Add,              &mNvramAddSchema),
   OC_SCHEMA_MAP_IN ("Delete",              OC_GLOBAL_CONFIG, Nvram.Delete,           &mNvramDeleteSchema),
-  OC_SCHEMA_BOOLEAN_IN ("LegacyEnable",    OC_GLOBAL_CONFIG, Nvram.LegacyEnable),
   OC_SCHEMA_BOOLEAN_IN ("LegacyOverwrite", OC_GLOBAL_CONFIG, Nvram.LegacyOverwrite),
   OC_SCHEMA_MAP_IN ("LegacySchema",        OC_GLOBAL_CONFIG, Nvram.Legacy,           &mNvramLegacySchema),
   OC_SCHEMA_BOOLEAN_IN ("WriteFlash",      OC_GLOBAL_CONFIG, Nvram.WriteFlash),
@@ -699,7 +698,7 @@ OC_SCHEMA
   mUefiDriversSchemaEntry[] = {
   OC_SCHEMA_STRING_IN ("Arguments", OC_UEFI_DRIVER_ENTRY, Arguments),
   OC_SCHEMA_STRING_IN ("Comment",   OC_UEFI_DRIVER_ENTRY, Comment),
-  OC_SCHEMA_BOOLEAN_IN ("Enabled",  OC_UEFI_DRIVER_ENTRY, Enabled),
+  OC_SCHEMA_STRING_IN ("Load",      OC_UEFI_DRIVER_ENTRY, Load),
   OC_SCHEMA_STRING_IN ("Path",      OC_UEFI_DRIVER_ENTRY, Path),
 };
 

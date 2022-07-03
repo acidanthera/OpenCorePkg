@@ -16,6 +16,10 @@ OpenCore Changelog
 - Added `--show-csr` option for `Toggle SIP` boot menu entry
 - Added macOS 10.4 and 10.5 support to `AllowRelocationBlock` Booter quirk
 - Added CPU cache info injection for macOS 10.4 to `ProvideCurrentCpuInfo` quirk
+- Added emulated NVRAM driver for use separately from OpenDuet
+- Added support for NVRAM reset and set default boot entry when using emulated NVRAM
+- Upgraded emulated NVRAM logout script to allow unsupervised installation of recent macOS OTA updates
+- Changed `Driver` -> `Enabled` [`true`|`false`] to `Driver` -> `Load` [`Early`|`Enabled`|`Disabled`] (requires config.plist update, see samples)
 
 #### v0.8.2
 - Fixed `AppleCpuPmCfgLock` on macOS 13

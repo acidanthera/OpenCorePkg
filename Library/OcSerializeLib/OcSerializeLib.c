@@ -20,7 +20,13 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 #include <Library/BaseLib.h>
 #include <Library/DebugLib.h>
 
-#if !defined (MDEPKG_NDEBUG)
+#if defined (MDEPKG_NDEBUG)
+
+  #if defined (__GNUC__) || defined (__clang__)
+#define GetSchemaTypeName(expression)  (NULL)
+  #endif
+
+#else
 
 STATIC
 CONST CHAR8 *

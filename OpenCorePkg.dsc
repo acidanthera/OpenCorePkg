@@ -82,6 +82,7 @@
   OcDevicePathLib|OpenCorePkg/Library/OcDevicePathLib/OcDevicePathLib.inf
   OcDevicePropertyLib|OpenCorePkg/Library/OcDevicePropertyLib/OcDevicePropertyLib.inf
   OcDeviceTreeLib|OpenCorePkg/Library/OcDeviceTreeLib/OcDeviceTreeLib.inf
+  OcDirectResetLib|OpenCorePkg/Library/OcDirectResetLib/OcDirectResetLib.inf
   OcDriverConnectionLib|OpenCorePkg/Library/OcDriverConnectionLib/OcDriverConnectionLib.inf
   OcFileLib|OpenCorePkg/Library/OcFileLib/OcFileLib.inf
   OcFirmwarePasswordLib|OpenCorePkg/Library/OcFirmwarePasswordLib/OcFirmwarePasswordLib.inf
@@ -120,6 +121,7 @@
   OcPeCoffExtLib|OpenCorePkg/Library/OcPeCoffExtLib/OcPeCoffExtLib.inf
   OcPeCoffLib|OpenCorePkg/Library/OcPeCoffLib/OcPeCoffLib.inf
   OcVariableLib|OpenCorePkg/Library/OcVariableLib/OcVariableLib.inf
+  OcVariableRuntimeLib|OpenCorePkg/Library/OcVariableRuntimeLib/OcVariableRuntimeLib.inf
   PcdLib|MdePkg/Library/BasePcdLibNull/BasePcdLibNull.inf
   PciCf8Lib|MdePkg/Library/BasePciCf8Lib/BasePciCf8Lib.inf
   PciLib|MdePkg/Library/BasePciLibCf8/BasePciLibCf8.inf
@@ -233,6 +235,7 @@
   OpenCorePkg/Library/OcDevicePathLib/OcDevicePathLib.inf
   OpenCorePkg/Library/OcDevicePropertyLib/OcDevicePropertyLib.inf
   OpenCorePkg/Library/OcDeviceTreeLib/OcDeviceTreeLib.inf
+  OpenCorePkg/Library/OcDirectResetLib/OcDirectResetLib.inf
   OpenCorePkg/Library/OcDriverConnectionLib/OcDriverConnectionLib.inf
   OpenCorePkg/Library/OcFileLib/OcFileLib.inf
   OpenCorePkg/Library/OcFirmwarePasswordLib/OcFirmwarePasswordLib.inf
@@ -275,6 +278,22 @@
   OpenCorePkg/Platform/OpenPartitionDxe/PartitionDxe.inf
   OpenCorePkg/Platform/OpenRuntime/OpenRuntime.inf
   OpenCorePkg/Platform/OpenUsbKbDxe/UsbKbDxe.inf
+  OpenCorePkg/Platform/OpenVariableRuntimeDxe/VariableRuntimeDxe.inf {
+    <PcdsFixedAtBuild>
+      gEfiMdeModulePkgTokenSpaceGuid.PcdEmuVariableNvModeEnable|TRUE
+      gEfiMdeModulePkgTokenSpaceGuid.PcdMaxVariableSize|0x10000
+      gEfiMdeModulePkgTokenSpaceGuid.PcdVariableStoreSize|0x10000
+    <LibraryClasses>
+      UefiRuntimeLib|MdePkg/Library/UefiRuntimeLib/UefiRuntimeLib.inf
+      SafeIntLib|MdePkg/Library/BaseSafeIntLib/BaseSafeIntLib.inf
+      AuthVariableLib|MdeModulePkg/Library/AuthVariableLibNull/AuthVariableLibNull.inf
+      TpmMeasurementLib|MdeModulePkg/Library/TpmMeasurementLibNull/TpmMeasurementLibNull.inf
+      VarCheckLib|MdeModulePkg/Library/VarCheckLib/VarCheckLib.inf
+      VariablePolicyLib|MdeModulePkg/Library/VariablePolicyLib/VariablePolicyLibRuntimeDxe.inf
+      TimerLib|OpenCorePkg/Library/DuetTimerLib/DuetTimerLib.inf
+      DebugLib|OpenCorePkg/Library/OcDebugLibNull/OcDebugLibNull.inf
+      NULL|OpenCorePkg/Library/OcVariableRuntimeLib/OcVariableRuntimeLib.inf
+  }
   OpenCorePkg/Platform/ResetNvramEntry/ResetNvramEntry.inf
   OpenCorePkg/Platform/ToggleSipEntry/ToggleSipEntry.inf
   OpenCorePkg/Staging/AudioDxe/AudioDxe.inf

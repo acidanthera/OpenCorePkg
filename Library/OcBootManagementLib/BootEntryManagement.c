@@ -1,5 +1,5 @@
 /** @file
-  Copyright (C) 2019-2021, vit9696, mikebeaton. All rights reserved.<BR>
+  Copyright (C) 2019-2022, vit9696, mikebeaton. All rights reserved.<BR>
   SPDX-License-Identifier: BSD-3-Clause
 **/
 
@@ -18,18 +18,19 @@
 
 #include <Library/BaseLib.h>
 #include <Library/BaseMemoryLib.h>
-#include <Library/OcDebugLogLib.h>
 #include <Library/DevicePathLib.h>
 #include <Library/MemoryAllocationLib.h>
 #include <Library/OcBootManagementLib.h>
-#include <Library/OcDevicePathLib.h>
 #include <Library/OcConsoleLib.h>
+#include <Library/OcDebugLogLib.h>
+#include <Library/OcDevicePathLib.h>
 #include <Library/OcFileLib.h>
 #include <Library/OcStringLib.h>
+#include <Library/OcVariableLib.h>
+#include <Library/PrintLib.h>
 #include <Library/UefiBootServicesTableLib.h>
 #include <Library/UefiLib.h>
 #include <Library/UefiRuntimeServicesTableLib.h>
-#include <Library/PrintLib.h>
 
 /*
   Expands DevicePath from short-form to full-form.
@@ -1174,7 +1175,7 @@ AddBootEntryFromBootOption (
   // Discard load options for security reasons.
   // Also discard boot name to avoid confusion.
   //
-  LoadOption = InternalGetBootOptionData (
+  LoadOption = OcGetBootOptionData (
                  &LoadOptionSize,
                  BootOption,
                  BootContext->BootVariableGuid
@@ -2385,6 +2386,18 @@ OcLoadBootEntry (
              &DmgLoadContext
              );
   if (!EFI_ERROR (Status)) {
+    //
+    // This does nothing unless emulated NVRAM is present. A hack, basically, to allow us
+    // to switch back to the normal macOS boot entry after booting a macOS Installer once,
+    // because we have nothing available to correctly update the emulated NVRAM file while
+    // the macOS installer is running and rebooting. This strategy is correct, often, and
+    // better then the alternative (continuing to create an installer entry when it no longer
+    // exists) in any event. See OpenVariableRuntimeDxe documentation for more details.
+    //
+    if (BootEntry->IsAppleInstaller) {
+      OcSwitchToFallbackLegacyNvram ();
+    }
+
     Status = Context->StartImage (BootEntry, EntryHandle, NULL, NULL, BootEntry->LaunchInText);
     if (EFI_ERROR (Status)) {
       DEBUG ((DEBUG_WARN, "OCB: StartImage failed - %r\n", Status));

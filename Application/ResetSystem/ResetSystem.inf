@@ -42,7 +42,7 @@
 [LibraryClasses]
   BaseLib
   DebugLib
-  OcDeviceMiscLib
+  OcDirectResetLib
   OcMiscLib
   OcStringLib
   UefiApplicationEntryPoint

@@ -11,6 +11,7 @@
 #include <Uefi.h>
 #include <Library/BaseLib.h>
 #include <Library/MemoryAllocationLib.h>
+#include <Library/OcVariableLib.h>
 #include <Library/UefiBootServicesTableLib.h>
 #include <Library/UefiRuntimeServicesTableLib.h>
 

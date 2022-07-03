@@ -698,13 +698,15 @@ InternalDescribeBootEntry (
     BootEntry->Name = AllocateCopyPool (sizeof (L"Windows"), L"Windows");
   }
 
+  // TODO: Should macOS installer have own OC_BOOT_ENTRY_TYPE (plus own voiceover file?)?
+  BootEntry->IsAppleInstaller = (StrStr (BootDirectoryName, L"com.apple.installer") != NULL);
   if (BootEntry->Name == NULL) {
     //
     // Special case - installer should be clearly identified to end users but does not normally
     // contain text label, only pre-rendered graphical label which is not usable in builtin
     // picker, or in Canopy with disk labels disabled.
     //
-    if (StrStr (BootDirectoryName, L"com.apple.installer") != NULL) {
+    if (BootEntry->IsAppleInstaller) {
       BootEntry->Name = AllocateCopyPool (L_STR_SIZE (L"macOS Installer"), L"macOS Installer");
     } else {
       BootEntry->Name = OcGetVolumeLabel (FileSystem);

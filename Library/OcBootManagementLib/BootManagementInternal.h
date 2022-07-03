@@ -185,13 +185,6 @@ InternalDebugBootEnvironment (
   IN UINTN         BootOrderCount
   );
 
-EFI_LOAD_OPTION *
-InternalGetBootOptionData (
-  OUT UINTN           *OptionSize,
-  IN  UINT16          BootOption,
-  IN  CONST EFI_GUID  *BootGuid
-  );
-
 EFI_DEVICE_PATH_PROTOCOL *
 InternalGetBootOptionPath (
   IN EFI_LOAD_OPTION  *LoadOption,

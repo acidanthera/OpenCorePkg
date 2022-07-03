@@ -1,7 +1,7 @@
 ## @file
 # Component description file for the OpenCore Variable library.
 #
-# Copyright (C) 2021, Marvin Haeuser. All rights reserved.<BR>
+# Copyright (C) 2016-2022, Vitaly Cheptsov, Marvin Haeuser, Mike Beaton. All rights reserved.<BR>
 # SPDX-License-Identifier: BSD-3-Clause
 ##
 
@@ -15,16 +15,40 @@
 
 [Sources]
   OcVariableLib.c
+  LegacyNvramSupport.c
+  LegacyNvramWrapper.c
+  Sip.c
+  VariableManagement.c
 
 [Packages]
   MdePkg/MdePkg.dec
   OpenCorePkg/OpenCorePkg.dec
+  UefiCpuPkg/UefiCpuPkg.dec
 
 [Guids]
-  gOcVendorVariableGuid
+  gAppleBootVariableGuid                        ## SOMETIMES_CONSUMES
+  gAppleCoreStorageVariableGuid                 ## SOMETIMES_CONSUMES
+  gAppleNetbootVariableGuid                     ## SOMETIMES_CONSUMES
+  gApplePersonalizationVariableGuid             ## SOMETIMES_CONSUMES
+  gAppleSecureBootVariableGuid                  ## SOMETIMES_CONSUMES
+  gAppleTamperResistantBootEfiUserVariableGuid  ## SOMETIMES_CONSUMES
+  gAppleTamperResistantBootSecureVariableGuid   ## SOMETIMES_CONSUMES
+  gAppleTamperResistantBootVariableGuid         ## SOMETIMES_CONSUMES
+  gAppleVendorVariableGuid                      ## SOMETIMES_CONSUMES
+  gAppleWirelessNetworkVariableGuid             ## SOMETIMES_CONSUMES
+  gEfiGlobalVariableGuid                        ## SOMETIMES_CONSUMES
+  gMicrosoftVariableGuid                        ## SOMETIMES_CONSUMES
+  gOcReadOnlyVariableGuid                       ## SOMETIMES_CONSUMES
+  gOcVendorVariableGuid                         ## SOMETIMES_CONSUMES
+  gOcWriteOnlyVariableGuid                      ## SOMETIMES_CONSUMES
+
+[Protocols]
+  gOcFirmwareRuntimeProtocolGuid                ## SOMETIMES_CONSUMES
+  gOcVariableRuntimeProtocolGuid                ## CONSUMES
 
 [LibraryClasses]
   BaseMemoryLib
   DebugLib
   MemoryAllocationLib
+  OcDirectResetLib
   UefiRuntimeServicesTableLib

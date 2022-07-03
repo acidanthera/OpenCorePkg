@@ -191,6 +191,8 @@ CheckMiscBoot (
   UINT32                Index;
   OC_UEFI_DRIVER_ENTRY  *DriverEntry;
   CONST CHAR8           *Driver;
+  CONST CHAR8           *Load;
+  BOOLEAN               IsDriverLoaded;
   BOOLEAN               HasOpenCanopyEfiDriver;
   CONST CHAR8           *PickerMode;
   CONST CHAR8           *PickerVariant;
@@ -227,10 +229,12 @@ CheckMiscBoot (
 
   HasOpenCanopyEfiDriver = FALSE;
   for (Index = 0; Index < Config->Uefi.Drivers.Count; ++Index) {
-    DriverEntry = Config->Uefi.Drivers.Values[Index];
-    Driver      = OC_BLOB_GET (&DriverEntry->Path);
+    DriverEntry    = Config->Uefi.Drivers.Values[Index];
+    Driver         = OC_BLOB_GET (&DriverEntry->Path);
+    Load           = OC_BLOB_GET (&DriverEntry->Load);
+    IsDriverLoaded = (AsciiStrCmp (Load, "Early") == 0) || (AsciiStrCmp (Load, "Enabled") == 0);
 
-    if (DriverEntry->Enabled && (AsciiStrCmp (Driver, "OpenCanopy.efi") == 0)) {
+    if (IsDriverLoaded && (AsciiStrCmp (Driver, "OpenCanopy.efi") == 0)) {
       HasOpenCanopyEfiDriver = TRUE;
     }
   }

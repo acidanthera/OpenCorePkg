@@ -83,12 +83,12 @@ OcScheduleExitBootServices (
   ++mOcExitBootServicesIndex;
 }
 
-STATIC
 VOID
 OcLoadDrivers (
   IN  OC_STORAGE_CONTEXT  *Storage,
   IN  OC_GLOBAL_CONFIG    *Config,
-  OUT EFI_HANDLE          **DriversToConnect  OPTIONAL
+  OUT EFI_HANDLE          **DriversToConnect  OPTIONAL,
+  IN  BOOLEAN             LoadEarly
   )
 {
   EFI_STATUS                 Status;
@@ -103,9 +103,12 @@ OcLoadDrivers (
   BOOLEAN                    SkipDriver;
   OC_UEFI_DRIVER_ENTRY       *DriverEntry;
   CONST CHAR8                *DriverComment;
+  CONST CHAR8                *DriverLoad;
   CHAR8                      *DriverFileName;
   CONST CHAR8                *DriverArguments;
   CONST CHAR8                *UnescapedArguments;
+
+  ASSERT (!LoadEarly || DriversToConnect == NULL);
 
   DriversToConnectIterator = NULL;
   if (DriversToConnect != NULL) {
@@ -117,19 +120,35 @@ OcLoadDrivers (
   for (Index = 0; Index < Config->Uefi.Drivers.Count; ++Index) {
     DriverEntry     = Config->Uefi.Drivers.Values[Index];
     DriverComment   = OC_BLOB_GET (&DriverEntry->Comment);
+    DriverLoad      = OC_BLOB_GET (&DriverEntry->Load);
     DriverFileName  = OC_BLOB_GET (&DriverEntry->Path);
     DriverArguments = OC_BLOB_GET (&DriverEntry->Arguments);
 
-    SkipDriver = !DriverEntry->Enabled || DriverFileName == NULL || DriverFileName[0] == '\0';
+    SkipDriver = (
+                    (DriverFileName == NULL)
+                 || (DriverFileName[0] == '\0')
+                 || (
+                     LoadEarly
+                      ? (AsciiStrCmp (DriverLoad, "Early") != 0)
+                      : (AsciiStrCmp (DriverLoad, "Enabled") != 0)
+                     )
+                    );
 
-    DEBUG ((
-      DEBUG_INFO,
-      "OC: Driver %a at %u (%a) is %a\n",
-      DriverFileName,
-      Index,
-      DriverComment,
-      SkipDriver ? "skipped!" : "being loaded..."
-      ));
+    //
+    // Avoid showing skipped lines at early load since this can be several
+    // lines and is basically duplicate info; this also avoids too much
+    // traffic in early log, which can be problematic on some machines.
+    //
+    if (!LoadEarly || !SkipDriver) {
+      DEBUG ((
+        DEBUG_INFO,
+        "OC: Driver %a at %u (%a) is %a\n",
+        DriverFileName,
+        Index,
+        DriverComment,
+        SkipDriver ? "skipped!" : "being loaded..."
+        ));
+    }
 
     //
     // Skip disabled drivers.
@@ -951,7 +970,7 @@ OcLoadUefiSupport (
   OcReserveMemory (Config);
 
   if (Config->Uefi.ConnectDrivers) {
-    OcLoadDrivers (Storage, Config, &DriversToConnect);
+    OcLoadDrivers (Storage, Config, &DriversToConnect, FALSE);
     DEBUG ((DEBUG_INFO, "OC: Connecting drivers...\n"));
     if (DriversToConnect != NULL) {
       OcRegisterDriversToHighestPriority (DriversToConnect);
@@ -969,7 +988,7 @@ OcLoadUefiSupport (
     OcConnectDrivers ();
     DEBUG ((DEBUG_INFO, "OC: Connecting drivers done...\n"));
   } else {
-    OcLoadDrivers (Storage, Config, NULL);
+    OcLoadDrivers (Storage, Config, NULL, FALSE);
   }
 
   DEBUG_CODE_BEGIN ();

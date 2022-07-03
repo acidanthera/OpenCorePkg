@@ -246,6 +246,10 @@ typedef struct OC_BOOT_ENTRY_ {
   //
   BOOLEAN                     IsBootEntryProtocol;
   //
+  // Set when entry is identified as macOS installer.
+  //
+  BOOLEAN                     IsAppleInstaller;
+  //
   // Should make this option default boot option.
   //
   BOOLEAN                     SetDefault;
@@ -1587,84 +1591,6 @@ OcAppendArgumentsToLoadedImage (
   IN     CONST CHAR8                **Arguments,
   IN     UINT32                     ArgumentCount,
   IN     BOOLEAN                    Replace
-  );
-
-/**
-  Resets selected NVRAM variables and reboots the system.
-
-  @param[in]     PreserveBoot       Should reset preserve Boot### entries.
-
-  @retval EFI_SUCCESS, or error returned by called code.
-**/
-EFI_STATUS
-OcResetNvram (
-  IN     BOOLEAN  PreserveBoot
-  );
-
-/**
-  Get current SIP setting.
-
-  @param[out]     CsrActiveConfig    Returned csr-active-config variable; uninitialised if variable
-                                     not found, or other error.
-  @param[out]     Attributes         If not NULL, a pointer to the memory location to return the
-                                     attributes bitmask for the variable; uninitialised if variable
-                                     not found, or other error.
-
-  @retval EFI_SUCCESS, EFI_NOT_FOUND, or other error returned by called code.
-**/
-EFI_STATUS
-OcGetSip (
-  OUT UINT32  *CsrActiveConfig,
-  OUT UINT32  *Attributes          OPTIONAL
-  );
-
-/**
-  Set current SIP setting.
-
-  @param[in]      CsrActiveConfig    csr-active-config value to set, or NULL to clear the variable.
-  @param[in]      Attributes         Attributes to apply.
-
-  @retval EFI_SUCCESS, EFI_NOT_FOUND, or other error returned by called code.
-**/
-EFI_STATUS
-OcSetSip (
-  IN  UINT32  *CsrActiveConfig,
-  IN  UINT32  Attributes
-  );
-
-/**
-  Is SIP enabled?
-
-  @param[in]      GetStatus          Return status from previous OcGetSip or gRT->GetVariable call.
-  @param[in]      CsrActiveConfig    csr-active-config value from previous OcGetSip or gRT->GetVariable call.
-                                     This value is never used unless GetStatus is EFI_SUCCESS.
-
-  @retval TRUE if SIP should be considered enabled based on the passed values.
-**/
-BOOLEAN
-OcIsSipEnabled (
-  IN  EFI_STATUS  GetStatus,
-  IN  UINT32      CsrActiveConfig
-  );
-
-/**
-  Toggle SIP.
-
-  @param[in]      CsrActiveConfig    The csr-active-config value to use to disable SIP, if it was previously enabled.
-
-  @retval TRUE on successful operation.
-**/
-EFI_STATUS
-OcToggleSip (
-  IN  UINT32  CsrActiveConfig
-  );
-
-/**
-  Perform NVRAM UEFI variable deletion.
-**/
-VOID
-OcDeleteVariables (
-  IN BOOLEAN  PreserveBoot
   );
 
 /**
