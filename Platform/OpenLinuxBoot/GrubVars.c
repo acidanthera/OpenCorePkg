@@ -174,15 +174,15 @@ InternalExpandGrubVars (
   IN OUT       CHAR8  **Result
   )
 {
-  EFI_STATUS        Status;
-  UINTN             Pos;
-  UINTN             LastPos;
-  BOOLEAN           InVar;
-  BOOLEAN           Retake;
-  GRUB_VAR          *Var;
-  CHAR8             Ch;
-  UINTN             VarLength;
-  OC_STRING_BUFFER  *StringBuffer;
+  EFI_STATUS              Status;
+  UINTN                   Pos;
+  UINTN                   LastPos;
+  BOOLEAN                 InVar;
+  BOOLEAN                 Retake;
+  GRUB_VAR                *Var;
+  CHAR8                   Ch;
+  UINTN                   VarLength;
+  OC_ASCII_STRING_BUFFER  *StringBuffer;
 
   ASSERT (Value  != NULL);
   ASSERT (Result != NULL);

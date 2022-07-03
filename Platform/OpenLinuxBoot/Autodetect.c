@@ -386,10 +386,10 @@ FreeEtcFiles (
 STATIC
 EFI_STATUS
 InsertOption (
-  IN     CONST UINTN          InsertIndex,
-  IN           OC_FLEX_ARRAY  *Options,
-  IN     CONST VOID           *Value,
-  IN     CONST BOOLEAN        IsUnicode
+  IN     CONST UINTN             InsertIndex,
+  IN           OC_FLEX_ARRAY     *Options,
+  IN     CONST VOID              *Value,
+  IN     CONST OC_STRING_FORMAT  StringFormat
   )
 {
   EFI_STATUS  Status;
@@ -397,7 +397,7 @@ InsertOption (
   UINTN       CopiedLength;
   CHAR8       **Option;
 
-  if (IsUnicode) {
+  if (StringFormat == OcStringFormatUnicode) {
     OptionsLength = StrLen (Value);
   } else {
     OptionsLength = AsciiStrLen (Value);
@@ -409,7 +409,7 @@ InsertOption (
       return EFI_OUT_OF_RESOURCES;
     }
 
-    if (IsUnicode) {
+    if (StringFormat == OcStringFormatUnicode) {
       *Option = AllocatePool ((OptionsLength + 1) * sizeof (CHAR16));
       if (*Option == NULL) {
         return EFI_OUT_OF_RESOURCES;
@@ -432,12 +432,12 @@ InsertOption (
 STATIC
 EFI_STATUS
 AddOption (
-  IN           OC_FLEX_ARRAY  *Options,
-  IN     CONST VOID           *Value,
-  IN     CONST BOOLEAN        IsUnicode
+  IN           OC_FLEX_ARRAY     *Options,
+  IN     CONST VOID              *Value,
+  IN     CONST OC_STRING_FORMAT  StringFormat
   )
 {
-  return InsertOption (Options->Count, Options, Value, IsUnicode);
+  return InsertOption (Options->Count, Options, Value, StringFormat);
 }
 
 EFI_STATUS
