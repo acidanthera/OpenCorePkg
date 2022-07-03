@@ -72,7 +72,7 @@ PatchAppleCpuPmCfgLock (
 
   if (Patcher == NULL) {
     DEBUG ((DEBUG_INFO, "OCAK: Skipping %a on NULL Patcher on %u\n", __func__, KernelVersion));
-    return EFI_SUCCESS;
+    return EFI_NOT_FOUND;
   }
 
   Count     = 0;
@@ -667,7 +667,7 @@ PatchUsbXhciPortLimit1 (
 
   if (Patcher == NULL) {
     DEBUG ((DEBUG_INFO, "OCAK: Skipping %a on NULL Patcher on %u\n", __func__, KernelVersion));
-    return EFI_SUCCESS;
+    return EFI_NOT_FOUND;
   }
 
   Status = PatcherApplyGenericPatch (Patcher, &mRemoveUsbLimitIoP1Patch);
@@ -696,7 +696,7 @@ PatchUsbXhciPortLimit2 (
 
   if (Patcher == NULL) {
     DEBUG ((DEBUG_INFO, "OCAK: Skipping %a on NULL Patcher on %u\n", __func__, KernelVersion));
-    return EFI_SUCCESS;
+    return EFI_NOT_FOUND;
   }
 
   //
@@ -760,7 +760,7 @@ PatchUsbXhciPortLimit3 (
 
   if (Patcher == NULL) {
     DEBUG ((DEBUG_INFO, "OCAK: Skipping %a on NULL Patcher on %u\n", __func__, KernelVersion));
-    return EFI_SUCCESS;
+    return EFI_NOT_FOUND;
   }
 
   //
@@ -849,7 +849,7 @@ PatchThirdPartyDriveSupport (
 
   if (Patcher == NULL) {
     DEBUG ((DEBUG_INFO, "OCAK: Skipping %a on NULL Patcher on %u\n", __func__, KernelVersion));
-    return EFI_SUCCESS;
+    return EFI_NOT_FOUND;
   }
 
   Status = PatcherApplyGenericPatch (Patcher, &mIOAHCIBlockStoragePatchV1);
@@ -921,7 +921,7 @@ PatchForceInternalDiskIcons (
 
   if (Patcher == NULL) {
     DEBUG ((DEBUG_INFO, "OCAK: Skipping %a on NULL Patcher on %u\n", __func__, KernelVersion));
-    return EFI_SUCCESS;
+    return EFI_NOT_FOUND;
   }
 
   Status = PatcherApplyGenericPatch (Patcher, &mIOAHCIPortPatch);
@@ -976,7 +976,7 @@ PatchAppleIoMapperSupport (
 
   if (Patcher == NULL) {
     DEBUG ((DEBUG_INFO, "OCAK: Skipping %a on NULL Patcher on %u\n", __func__, KernelVersion));
-    return EFI_SUCCESS;
+    return EFI_NOT_FOUND;
   }
 
   Status = PatcherApplyGenericPatch (Patcher, &mAppleIoMapperPatch);
@@ -1026,7 +1026,7 @@ PatchDummyPowerManagement (
 
   if (Patcher == NULL) {
     DEBUG ((DEBUG_INFO, "OCAK: Skipping %a on NULL Patcher on %u\n", __func__, KernelVersion));
-    return EFI_SUCCESS;
+    return EFI_NOT_FOUND;
   }
 
   Status = PatcherApplyGenericPatch (Patcher, &mAppleDummyCpuPmPatch);
@@ -1109,7 +1109,7 @@ PatchIncreasePciBarSize (
 
   if (Patcher == NULL) {
     DEBUG ((DEBUG_INFO, "OCAK: Skipping %a on NULL Patcher on %u\n", __func__, KernelVersion));
-    return EFI_SUCCESS;
+    return EFI_NOT_FOUND;
   }
 
   Status = PatcherApplyGenericPatch (Patcher, &mIncreasePciBarSizePatch);
@@ -1324,7 +1324,7 @@ PatchCustomSmbiosGuid (
 
   if (Patcher == NULL) {
     DEBUG ((DEBUG_INFO, "OCAK: Skipping %a on NULL Patcher on %u\n", __func__, KernelVersion));
-    return EFI_SUCCESS;
+    return EFI_NOT_FOUND;
   }
 
   Status = PatcherApplyGenericPatch (Patcher, &mCustomSmbiosGuidPatch);
@@ -1770,7 +1770,7 @@ PatchAppleRtcChecksum (
 
   if (Patcher == NULL) {
     DEBUG ((DEBUG_INFO, "OCAK: Skipping %a on NULL Patcher on %u\n", __func__, KernelVersion));
-    return EFI_SUCCESS;
+    return EFI_NOT_FOUND;
   }
 
   Status = PatcherApplyGenericPatch (Patcher, Patcher->Is32Bit ? &mAppleRtcChecksumPatch32 : &mAppleRtcChecksumPatch64);
@@ -1944,7 +1944,7 @@ PatchBTFeatureFlags (
 
   if (Patcher == NULL) {
     DEBUG ((DEBUG_INFO, "OCAK: Skipping %a on NULL Patcher on %u\n", __func__, KernelVersion));
-    return EFI_SUCCESS;
+    return EFI_NOT_FOUND;
   }
 
   Status = PatcherApplyGenericPatch (Patcher, &mBTFeatureFlagsPatchV1);
@@ -2228,7 +2228,7 @@ PatchAquantiaEthernet (
 
   if (Patcher == NULL) {
     DEBUG ((DEBUG_INFO, "OCAK: Skipping %a on NULL Patcher on %u\n", __func__, KernelVersion));
-    return EFI_SUCCESS;
+    return EFI_NOT_FOUND;
   }
 
   //
@@ -2275,7 +2275,7 @@ PatchForceSecureBootScheme (
 
   if (Patcher == NULL) {
     DEBUG ((DEBUG_INFO, "OCAK: Skipping %a on NULL Patcher on %u\n", __func__, KernelVersion));
-    return EFI_SUCCESS;
+    return EFI_NOT_FOUND;
   }
 
   //
@@ -2398,7 +2398,7 @@ PatchSetApfsTrimTimeout (
 
   if (Patcher == NULL) {
     DEBUG ((DEBUG_INFO, "OCAK: Skipping %a on NULL Patcher on %u\n", __func__, KernelVersion));
-    return EFI_SUCCESS;
+    return EFI_NOT_FOUND;
   }
 
   //
