@@ -146,6 +146,9 @@
 
   !include NetworkPkg/NetworkLibs.dsc.inc
 
+  !include Ext4Pkg/Ext4Defines.dsc.inc
+  !include Ext4Pkg/Ext4Libs.dsc.inc
+
 [Components]
   MdeModulePkg/Bus/Pci/NvmExpressDxe/NvmExpressDxe.inf {
     <LibraryClasses>
@@ -308,6 +311,9 @@
       NULL|ShellPkg/Library/UefiShellNetwork2CommandsLib/UefiShellNetwork2CommandsLib.inf
       NULL|ShellPkg/Library/UefiShellAcpiViewCommandLib/UefiShellAcpiViewCommandLib.inf
   }
+
+  # Ext4 driver
+  Ext4Pkg/Ext4Dxe/Ext4Dxe.inf
 
 [LibraryClasses]
   NULL|OpenCorePkg/Library/OcCompilerIntrinsicsLib/OcCompilerIntrinsicsLib.inf
