@@ -497,16 +497,16 @@ InternalInitializeVtablePatchData (
   OUT    MACH_NLIST_ANY        **SolveSymbols
   )
 {
-  BOOLEAN                Result;
-  UINT32                 VtableOffset;
-  UINT32                 VtableMaxSize;
-  CONST MACH_HEADER_ANY  *MachHeader;
-  VOID                   *VtableData;
-  UINT32                 SymIndex;
-  UINT32                 EntryOffset;
-  UINT64                 FileOffset;
-  UINT32                 MaxSymbols;
-  MACH_NLIST_ANY         *Symbol;
+  BOOLEAN         Result;
+  UINT32          VtableOffset;
+  UINT32          VtableMaxSize;
+  void            *FileData;
+  VOID            *VtableData;
+  UINT32          SymIndex;
+  UINT32          EntryOffset;
+  UINT64          FileOffset;
+  UINT32          MaxSymbols;
+  MACH_NLIST_ANY  *Symbol;
 
   Result = MachoSymbolGetFileOffset (
              MachoContext,
@@ -518,10 +518,10 @@ InternalInitializeVtablePatchData (
     return FALSE;
   }
 
-  MachHeader = MachoGetMachHeader (MachoContext);
-  ASSERT (MachHeader != NULL);
+  FileData = MachoGetFileData (MachoContext);
+  ASSERT (FileData != NULL);
 
-  VtableData = (VOID *)((UINTN)MachHeader + VtableOffset);
+  VtableData = (VOID *)((UINTN)FileData + VtableOffset);
   if (MachoContext->Is32Bit ? !OC_TYPE_ALIGNED (UINT32, VtableData) : !OC_TYPE_ALIGNED (UINT64, VtableData)) {
     return FALSE;
   }
@@ -591,7 +591,6 @@ InternalPatchByVtables (
   UINT32                 MaxSize;
 
   OC_MACHO_CONTEXT        *MachoContext;
-  CONST MACH_HEADER_ANY   *MachHeader;
   UINT32                  Index;
   UINT32                  NumTables;
   UINT32                  NumEntries;
@@ -620,9 +619,6 @@ InternalPatchByVtables (
   MaxSize = Context->LinkBufferSize;
 
   MachoContext = &Kext->Context.MachContext;
-
-  MachHeader = MachoGetMachHeader (MachoContext);
-  ASSERT (MachHeader != NULL);
   //
   // Retrieve all SMCPs.
   //

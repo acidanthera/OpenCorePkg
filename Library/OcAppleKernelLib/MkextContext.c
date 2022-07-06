@@ -1166,7 +1166,7 @@ MkextReserveKextSize (
 
   if (Executable != NULL) {
     ASSERT (ExecutableSize > 0);
-    if (!MachoInitializeContext (&Context, Executable, ExecutableSize, 0, Is32Bit)) {
+    if (!MachoInitializeContext (&Context, Executable, ExecutableSize, 0, ExecutableSize, Is32Bit)) {
       return EFI_INVALID_PARAMETER;
     }
 

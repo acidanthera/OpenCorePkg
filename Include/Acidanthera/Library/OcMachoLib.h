@@ -32,10 +32,11 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 /// only.  Members are not guaranteed to be sane.
 ///
 typedef struct {
-  MACH_HEADER_ANY          *MachHeader;
+  VOID                     *FileData;
   UINT32                   FileSize;
 
-  UINT32                   ContainerOffset;
+  MACH_HEADER_ANY          *MachHeader;
+  UINT32                   InnerSize;
   MACH_SYMTAB_COMMAND      *Symtab;
   MACH_NLIST_ANY           *SymbolTable;
   CHAR8                    *StringTable;
@@ -50,11 +51,12 @@ typedef struct {
 /**
   Initializes a 32-bit Mach-O Context.
 
-  @param[out] Context          Mach-O Context to initialize.
-  @param[in]  FileData         Pointer to the file's expected Mach-O header.
-  @param[in]  FileSize         File size of FileData.
-  @param[in]  ContainerOffset  The amount of Bytes the Mach-O header is offset
-                               from the base (container, e.g. KC) of the file.
+  @param[out] Context       Mach-O Context to initialize.
+  @param[in]  FileData      Pointer to the file's expected Mach-O header.
+  @param[in]  FileSize      File size of FileData.
+  @param[in]  HeaderOffset  The amount of Bytes the Mach-O header is offset from
+                            the base (container, e.g. KC) of the file.
+  @param[in]  InnerSize     The size, in Bytes, of the inner Mach-O file.
 
   @return  Whether Context has been initialized successfully.
 
@@ -64,17 +66,19 @@ MachoInitializeContext32 (
   OUT OC_MACHO_CONTEXT  *Context,
   IN  VOID              *FileData,
   IN  UINT32            FileSize,
-  IN  UINT32            ContainerOffset
+  IN  UINT32            HeaderOffset,
+  IN  UINT32            InnerSize
   );
 
 /**
   Initializes a 64-bit Mach-O Context.
 
-  @param[out] Context          Mach-O Context to initialize.
-  @param[in]  FileData         Pointer to the file's expected Mach-O header.
-  @param[in]  FileSize         File size of FileData.
-  @param[in]  ContainerOffset  The amount of Bytes the Mach-O header is offset
-                               from the base (container, e.g. KC) of the file.
+  @param[out] Context       Mach-O Context to initialize.
+  @param[in]  FileData      Pointer to the file's expected Mach-O header.
+  @param[in]  FileSize      File size of FileData.
+  @param[in]  HeaderOffset  The amount of Bytes the Mach-O header is offset from
+                            the base (container, e.g. KC) of the file.
+  @param[in]  InnerSize     The size, in Bytes, of the inner Mach-O file.
 
   @return  Whether Context has been initialized successfully.
 
@@ -84,18 +88,20 @@ MachoInitializeContext64 (
   OUT OC_MACHO_CONTEXT  *Context,
   IN  VOID              *FileData,
   IN  UINT32            FileSize,
-  IN  UINT32            ContainerOffset
+  IN  UINT32            HeaderOffset,
+  IN  UINT32            InnerSize
   );
 
 /**
   Initializes a Mach-O Context.
 
-  @param[out] Context          Mach-O Context to initialize.
-  @param[in]  FileData         Pointer to the file's expected Mach-O header.
-  @param[in]  FileSize         File size of FileData.
-  @param[in]  ContainerOffset  The amount of Bytes the Mach-O header is offset
-                               from the base (container, e.g. KC) of the file.
-  @param[in]  Is32Bit          TRUE if Mach-O is 32-bit.
+  @param[out] Context       Mach-O Context to initialize.
+  @param[in]  FileData      Pointer to the file's expected Mach-O header.
+  @param[in]  FileSize      File size of FileData.
+  @param[in]  HeaderOffset  The amount of Bytes the Mach-O header is offset from
+                            the base (container, e.g. KC) of the file.
+  @param[in]  InnerSize     The size, in Bytes, of the inner Mach-O file.
+  @param[in]  Is32Bit       TRUE if Mach-O is 32-bit.
 
   @return  Whether Context has been initialized successfully.
 
@@ -105,7 +111,8 @@ MachoInitializeContext (
   OUT OC_MACHO_CONTEXT  *Context,
   IN  VOID              *FileData,
   IN  UINT32            FileSize,
-  IN  UINT32            ContainerOffset,
+  IN  UINT32            HeaderOffset,
+  IN  UINT32            InnerSize,
   IN  BOOLEAN           Is32Bit
   );
 
@@ -117,6 +124,17 @@ MachoInitializeContext (
 **/
 MACH_HEADER_ANY *
 MachoGetMachHeader (
+  IN OUT OC_MACHO_CONTEXT  *Context
+  );
+
+/**
+  Returns the size of the inner Mach-O file (otherwise, the file size).
+
+  @param[in,out] Context  Context of the Mach-O.
+
+**/
+UINT32
+MachoGetInnerSize (
   IN OUT OC_MACHO_CONTEXT  *Context
   );
 
@@ -139,6 +157,17 @@ MachoGetMachHeader32 (
 **/
 MACH_HEADER_64 *
 MachoGetMachHeader64 (
+  IN OUT OC_MACHO_CONTEXT  *Context
+  );
+
+/**
+  Returns the file data of the Mach-O.
+
+  @param[in,out] Context  Context of the Mach-O.
+
+**/
+VOID *
+MachoGetFileData (
   IN OUT OC_MACHO_CONTEXT  *Context
   );
 

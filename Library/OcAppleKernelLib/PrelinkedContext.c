@@ -175,9 +175,10 @@ InternalConnectExternalSymtab (
 
     if (!MachoInitializeContext64 (
            InnerContext,
-           &Buffer[Segment->FileOffset],
-           (UINT32)(BufferSize - Segment->FileOffset),
-           (UINT32)Segment->FileOffset
+           Buffer,
+           BufferSize,
+           (UINT32)Segment->FileOffset,
+           (UINT32)(BufferSize - Segment->FileOffset)
            ))
     {
       DEBUG ((
@@ -247,7 +248,7 @@ PrelinkedContextInit (
   //
   // Initialise primary context.
   //
-  if (!MachoInitializeContext (&Context->PrelinkedMachContext, Prelinked, PrelinkedSize, 0, Context->Is32Bit)) {
+  if (!MachoInitializeContext (&Context->PrelinkedMachContext, Prelinked, PrelinkedSize, 0, PrelinkedSize, Context->Is32Bit)) {
     return EFI_INVALID_PARAMETER;
   }
 
@@ -921,7 +922,7 @@ PrelinkedReserveKextSize (
 
   if (Executable != NULL) {
     ASSERT (ExecutableSize > 0);
-    if (!MachoInitializeContext (&Context, Executable, ExecutableSize, 0, Is32Bit)) {
+    if (!MachoInitializeContext (&Context, Executable, ExecutableSize, 0, ExecutableSize, Is32Bit)) {
       return EFI_INVALID_PARAMETER;
     }
 
@@ -1015,7 +1016,7 @@ PrelinkedInjectKext (
   //
   if (Executable != NULL) {
     ASSERT (ExecutableSize > 0);
-    if (!MachoInitializeContext (&ExecutableContext, (UINT8 *)Executable, ExecutableSize, 0, Context->Is32Bit)) {
+    if (!MachoInitializeContext (&ExecutableContext, (UINT8 *)Executable, ExecutableSize, 0, ExecutableSize, Context->Is32Bit)) {
       DEBUG ((DEBUG_INFO, "OCAK: Injected kext %a/%a is not a supported executable\n", BundlePath, ExecutablePath));
       return EFI_INVALID_PARAMETER;
     }
@@ -1047,7 +1048,7 @@ PrelinkedInjectKext (
       AlignedExecutableSize - ExecutableSize
       );
 
-    if (  !MachoInitializeContext (&ExecutableContext, &Context->Prelinked[KextOffset], ExecutableSize, 0, Context->Is32Bit)
+    if (  !MachoInitializeContext (&ExecutableContext, &Context->Prelinked[KextOffset], ExecutableSize, 0, ExecutableSize, Context->Is32Bit)
        || OcOverflowAddU64 (Context->PrelinkedLastLoadAddress, FileOffset, &LoadAddressOffset))
     {
       return EFI_INVALID_PARAMETER;
@@ -1184,7 +1185,7 @@ PrelinkedInjectKext (
       // ownership was transferred by InternalLinkPrelinkedKext.
       //
       KcKextIndexFixups (Context, &PrelinkedKext->Context.MachContext);
-      Status = KcKextApplyFileDelta (&PrelinkedKext->Context.MachContext, KextOffset);
+      Status = KcKextApplyFileDelta (Context, &PrelinkedKext->Context.MachContext, KextOffset);
       if (EFI_ERROR (Status)) {
         DEBUG ((
           DEBUG_WARN,

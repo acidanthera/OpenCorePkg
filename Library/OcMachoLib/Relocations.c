@@ -159,7 +159,7 @@ InternalLookupSectionRelocationByOffset (
     //
     RelocationCount = Context->Is32Bit ? Section->Section32.NumRelocations : Section->Section64.NumRelocations;
     if (RelocationCount > 0) {
-      Relocations = (MACH_RELOCATION_INFO *)(((UINTN)(Context->MachHeader))
+      Relocations = (MACH_RELOCATION_INFO *)(((UINTN)(Context->FileData))
                                              + (Context->Is32Bit ? Section->Section32.RelocationsOffset : Section->Section64.RelocationsOffset));
 
       for (Index = 0; Index < RelocationCount; Index++) {

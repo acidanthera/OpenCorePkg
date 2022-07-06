@@ -1138,7 +1138,7 @@ InternalRelocateAndCopyRelocations (
       }
 
       if (Section32->NumRelocations > 0) {
-        Relocation = (MACH_RELOCATION_INFO *)((UINTN)MachoGetMachHeader32 (&Kext->Context.MachContext) + Section32->RelocationsOffset);
+        Relocation = (MACH_RELOCATION_INFO *)((UINTN)MachoGetFileData (&Kext->Context.MachContext) + Section32->RelocationsOffset);
         for (Index = 0; Index < Section32->NumRelocations; ++Index) {
           NextRelocation = &Relocation[Index + 1];
           //
@@ -1387,7 +1387,7 @@ InternalProcessSymbolPointers (
   IN UINT64                       LoadAddress
   )
 {
-  CONST MACH_HEADER_ANY   *MachHeader;
+  CONST VOID              *FileData;
   UINT32                  MachSize;
   CONST MACH_SECTION_ANY  *Section;
   UINT32                  NumSymbols;
@@ -1434,8 +1434,8 @@ InternalProcessSymbolPointers (
     return FALSE;
   }
 
-  MachHeader = MachoGetMachHeader (MachoContext);
-  ASSERT (MachHeader != NULL);
+  FileData = MachoGetMachHeader (MachoContext);
+  ASSERT (FileData != NULL);
   //
   // Iterate through the indirect symbol table and fill in the section of
   // symbol pointers.  There are three cases:
@@ -1446,14 +1446,14 @@ InternalProcessSymbolPointers (
   //   3) An INDIRECT_SYMBOL_ABS - prepopulated absolute symbols.  No
   //      action is required.
   //
-  Tmp = (VOID *)((UINTN)MachHeader + DySymtab->IndirectSymbolsOffset);
+  Tmp = (VOID *)((UINTN)FileData + DySymtab->IndirectSymbolsOffset);
   if (!OC_TYPE_ALIGNED (UINT32, Tmp)) {
     return FALSE;
   }
 
   SymIndices = (UINT32 *)Tmp + FirstSym;
 
-  IndirectSymPtr = (VOID *)((UINTN)MachHeader + (MachoContext->Is32Bit ? Section->Section32.Offset : Section->Section64.Offset));
+  IndirectSymPtr = (VOID *)((UINTN)FileData + (MachoContext->Is32Bit ? Section->Section32.Offset : Section->Section64.Offset));
   if (MachoContext->Is32Bit ? !OC_TYPE_ALIGNED (UINT32, IndirectSymPtr) : !OC_TYPE_ALIGNED (UINT64, IndirectSymPtr)) {
     return FALSE;
   }
@@ -1512,6 +1512,7 @@ InternalPrelinkKext (
   UINT64                     LinkEditFileOffset;
   UINT64                     LinkEditFileSize;
 
+  VOID                       *FileData;
   MACH_HEADER_ANY            *MachHeader;
   UINT32                     MachSize;
   BOOLEAN                    IsObject32;
@@ -1579,8 +1580,16 @@ InternalPrelinkKext (
   MachoContext    = &Kext->Context.MachContext;
   LinkEditSegment = Kext->LinkEditSegment;
 
+  //
+  // Kexts cannot be contained.
+  //
+  ASSERT ((VOID *)MachoGetMachHeader (MachoContext) == MachoGetFileData (MachoContext));
+  ASSERT (MachoGetInnerSize (MachoContext) == MachoGetFileSize (MachoContext));
+
   MachHeader = MachoGetMachHeader (MachoContext);
   MachSize   = MachoGetFileSize (MachoContext);
+
+  FileData = (VOID *)MachHeader;
 
   IsObject32 = Context->Is32Bit && MachHeader->Header32.FileType == MachHeaderFileTypeObject;
 
@@ -1801,7 +1810,7 @@ InternalPrelinkKext (
     return EFI_LOAD_ERROR;
   }
 
-  KmodInfo = (KMOD_INFO_ANY *)((UINTN)MachHeader + (UINTN)KmodInfoOffset);
+  KmodInfo = (KMOD_INFO_ANY *)((UINTN)FileData + (UINTN)KmodInfoOffset);
 
   FirstSegment = MachoGetNextSegment (MachoContext, NULL);
   if (FirstSegment == NULL) {
@@ -1934,12 +1943,12 @@ InternalPrelinkKext (
     LinkEditSize = (SymbolTableSize + RelocationsSize + StringTableSize);
 
     CopyMem (
-      (VOID *)((UINTN)MachHeader + (UINTN)LinkEditFileOffset),
+      (VOID *)((UINTN)FileData + (UINTN)LinkEditFileOffset),
       LinkEdit,
       LinkEditSize
       );
     ZeroMem (
-      (VOID *)((UINTN)MachHeader + (UINTN)LinkEditFileOffset + LinkEditSize),
+      (VOID *)((UINTN)FileData + (UINTN)LinkEditFileOffset + LinkEditSize),
       (UINTN)(LinkEditFileSize - LinkEditSize)
       );
 
@@ -2000,11 +2009,11 @@ InternalPrelinkKext (
       // Zero out the existing symbol table, and copy our non-undefined symbols back.
       //
       ZeroMem (
-        (VOID *)((UINTN)MachHeader + Symtab->SymbolsOffset),
+        (VOID *)((UINTN)FileData + Symtab->SymbolsOffset),
         SymtabSize
         );
       CopyMem (
-        (VOID *)((UINTN)MachHeader + Symtab->SymbolsOffset),
+        (VOID *)((UINTN)FileData + Symtab->SymbolsOffset),
         SymtabLinkEdit32,
         SymtabSize2
         );
@@ -2137,7 +2146,7 @@ InternalPrelinkKext (
   // Reinitialize the Mach-O context to account for the changed __LINKEDIT
   // segment and file size.
   //
-  if (!MachoInitializeContext (MachoContext, MachHeader, MachSize, MachoContext->ContainerOffset, Context->Is32Bit)) {
+  if (!MachoInitializeContext (MachoContext, MachoContext->FileData, MachSize, 0, MachSize, Context->Is32Bit)) {
     //
     // This should never failed under normal and abnormal conditions.
     //
