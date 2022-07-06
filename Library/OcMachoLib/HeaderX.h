@@ -70,17 +70,12 @@ InternalSectionIsSane (
   }
 
   if (Section->NumRelocations != 0) {
-    Result = OcOverflowSubU32 (
+    Result = OcOverflowMulAddU32 (
+               Section->NumRelocations,
+               sizeof (MACH_RELOCATION_INFO),
                Section->RelocationsOffset,
-               Context->ContainerOffset,
                &TopOffset32
                );
-    Result |= OcOverflowMulAddU32 (
-                Section->NumRelocations,
-                sizeof (MACH_RELOCATION_INFO),
-                TopOffset32,
-                &TopOffset32
-                );
     if (Result || (TopOffset32 > Context->FileSize)) {
       return FALSE;
     }
@@ -264,8 +259,8 @@ MACH_X (
         *MaxSize = MACH_X_TO_UINT32 (Segment->Size - Offset);
       }
 
-      Offset += Segment->FileOffset - Context->ContainerOffset;
-      return (VOID *)((UINTN)Context->MachHeader + (UINTN)Offset);
+      Offset += Segment->FileOffset;
+      return (VOID *)((UINTN)Context->FileData + (UINTN)Offset);
     }
   }
 
@@ -323,7 +318,14 @@ MACH_X (
   //
   // Header is valid, copy it first.
   //
-  Header     = MACH_X (MachoGetMachHeader)(Context);
+  Header = MACH_X (MachoGetMachHeader)(Context);
+
+  //
+  // Mach-O files with an offset header (e.g., inner kernel files of Kernel
+  // Collections) cannot be reasonably expanded.
+  //
+  ASSERT ((CONST VOID *)Header == Context->FileData);
+
   IsObject   = Header->FileType == MachHeaderFileTypeObject;
   Source     = (UINT8 *)Header;
   HeaderSize = sizeof (*Header) + Header->CommandsSize;
@@ -387,7 +389,7 @@ MACH_X (
     // Do not overwrite header. Header must be in the first segment, but not if we are MH_OBJECT.
     // For objects, the header size will be aligned so we'll need to shift segments to account for this.
     //
-    CopyFileOffset = Segment->FileOffset - Context->ContainerOffset;
+    CopyFileOffset = Segment->FileOffset;
     CopyFileSize   = Segment->FileSize;
     CopyVmSize     = Segment->Size;
 
@@ -465,7 +467,7 @@ MACH_X (
       CurrentDelta
       ));
 
-    if (!IsObject && (DstSegment->VirtualAddress - (SegmentOffset - Context->ContainerOffset) != FirstSegment->VirtualAddress)) {
+    if (!IsObject && (DstSegment->VirtualAddress - SegmentOffset != FirstSegment->VirtualAddress)) {
       return 0;
     }
 
@@ -896,9 +898,11 @@ MACH_X (
     OUT OC_MACHO_CONTEXT  *Context,
     IN  VOID              *FileData,
     IN  UINT32            FileSize,
-    IN  UINT32            ContainerOffset
+    IN  UINT32            HeaderOffset,
+    IN  UINT32            InnerSize
     ) {
   EFI_STATUS               Status;
+  VOID                     *MachData;
   MACH_HEADER_X            *MachHeader;
   UINTN                    TopOfFile;
   UINTN                    TopOfCommands;
@@ -910,27 +914,44 @@ MACH_X (
 
   ASSERT (FileData != NULL);
   ASSERT (FileSize > 0);
+  ASSERT (FileSize >= HeaderOffset);
   ASSERT (Context != NULL);
+
+  if (HeaderOffset == 0) {
+    ASSERT (InnerSize == FileSize);
+  }
+
+  ASSERT (FileSize >= InnerSize && FileSize - InnerSize >= HeaderOffset);
 
   TopOfFile = ((UINTN)FileData + FileSize);
   ASSERT (TopOfFile > (UINTN)FileData);
 
+  MachData = (UINT8 *)FileData + HeaderOffset;
+
+  //
+  // Inner files of Kernel Collections cannot be FAT.
+  //
+  if (HeaderOffset == 0) {
  #ifdef MACHO_LIB_32
-  Status = FatFilterArchitecture32 ((UINT8 **)&FileData, &FileSize);
+    Status = FatFilterArchitecture32 ((UINT8 **)&MachData, &FileSize);
  #else
-  Status = FatFilterArchitecture64 ((UINT8 **)&FileData, &FileSize);
+    Status = FatFilterArchitecture64 ((UINT8 **)&MachData, &FileSize);
  #endif
-  if (EFI_ERROR (Status)) {
-    return FALSE;
+    if (EFI_ERROR (Status)) {
+      return FALSE;
+    }
+
+    FileData  = MachData;
+    InnerSize = FileSize;
   }
 
   if (  (FileSize < sizeof (*MachHeader))
-     || !OC_TYPE_ALIGNED (MACH_HEADER_X, FileData))
+     || !OC_TYPE_ALIGNED (MACH_HEADER_X, MachData))
   {
     return FALSE;
   }
 
-  MachHeader = (MACH_HEADER_X *)FileData;
+  MachHeader = (MACH_HEADER_X *)MachData;
  #ifdef MACHO_LIB_32
   if (MachHeader->Signature != MACH_HEADER_SIGNATURE) {
  #else
@@ -1007,10 +1028,11 @@ MACH_X (
 
   ZeroMem (Context, sizeof (*Context));
 
-  Context->MachHeader      = (MACH_HEADER_ANY *)MachHeader;
-  Context->Is32Bit         = MachHeader->CpuType == MachCpuTypeI386;
-  Context->FileSize        = FileSize;
-  Context->ContainerOffset = ContainerOffset;
+  Context->MachHeader = (MACH_HEADER_ANY *)MachHeader;
+  Context->Is32Bit    = MachHeader->CpuType == MachCpuTypeI386;
+  Context->FileData   = FileData;
+  Context->FileSize   = FileSize;
+  Context->InnerSize  = InnerSize;
 
   return TRUE;
 }
@@ -1214,16 +1236,11 @@ MACH_X (
     return NULL;
   }
 
-  Result = MACH_X (OcOverflowSubU)(
+  Result = MACH_X (OcOverflowAddU)(
              NextSegment->FileOffset,
-             Context->ContainerOffset,
+             NextSegment->FileSize,
              &TopOfSegment
              );
-  Result |= MACH_X (OcOverflowAddU)(
-              TopOfSegment,
-              NextSegment->FileSize,
-              &TopOfSegment
-              );
   if (Result || (TopOfSegment > Context->FileSize)) {
     return NULL;
   }
@@ -1239,10 +1256,10 @@ MACH_SECTION_X *
 MACH_X (
   MachoGetNextSection
   )(
-              IN OUT OC_MACHO_CONTEXT         *Context,
-              IN     MACH_SEGMENT_COMMAND_X   *Segment,
-              IN     MACH_SECTION_X           *Section  OPTIONAL
-              ) {
+             IN OUT OC_MACHO_CONTEXT         *Context,
+             IN     MACH_SEGMENT_COMMAND_X   *Segment,
+             IN     MACH_SECTION_X           *Section  OPTIONAL
+             ) {
   ASSERT (Context != NULL);
   ASSERT (Segment != NULL);
   MACH_ASSERT_X (Context);

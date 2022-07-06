@@ -1004,16 +1004,18 @@ KcGetKextSize (
 /**
   Apply the delta from KC header to the file's offsets.
 
-  @param[in,out] Context  The context of the KEXT to rebase.
-  @param[in]     Delta    The offset from KC header the KEXT starts at.
+  @param[in]     PrelinkedContext  Prelinked context.
+  @param[in,out] Context           The context of the KEXT to rebase.
+  @param[in]     Delta             The offset from KC header the KEXT starts at.
 
   @retval EFI_SUCCESS  The file has beem rebased successfully.
   @retval other        An error has occured.
 **/
 EFI_STATUS
 KcKextApplyFileDelta (
-  IN OUT OC_MACHO_CONTEXT  *Context,
-  IN     UINT32            Delta
+  IN     PRELINKED_CONTEXT  *PrelinkedContext,
+  IN OUT OC_MACHO_CONTEXT   *Context,
+  IN     UINT32             Delta
   );
 
 /**

@@ -815,7 +815,7 @@ PatchKernelCpuId (
     );
 
   Start = ((UINT8 *)MachoGetMachHeader (&Patcher->MachContext));
-  Last  = Start + MachoGetFileSize (&Patcher->MachContext) - EFI_PAGE_SIZE * 2 - sizeof (mKernelCpuIdFindRelNew);
+  Last  = Start + MachoGetInnerSize (&Patcher->MachContext) - EFI_PAGE_SIZE * 2 - sizeof (mKernelCpuIdFindRelNew);
 
   //
   // Do legacy patching for 32-bit 10.7, and 10.6 and older.
