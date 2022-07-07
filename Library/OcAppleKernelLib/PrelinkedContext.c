@@ -292,23 +292,6 @@ PrelinkedContextInit (
     return Status;
   }
 
-  Context->PrelinkedTextSegment = MachoGetSegmentByName (
-                                    &Context->PrelinkedMachContext,
-                                    PRELINK_TEXT_SEGMENT
-                                    );
-  if (Context->PrelinkedTextSegment == NULL) {
-    return EFI_NOT_FOUND;
-  }
-
-  Context->PrelinkedTextSection = MachoGetSectionByName (
-                                    &Context->PrelinkedMachContext,
-                                    Context->PrelinkedTextSegment,
-                                    PRELINK_TEXT_SECTION
-                                    );
-  if (Context->PrelinkedTextSection == NULL) {
-    return EFI_NOT_FOUND;
-  }
-
   if (Context->IsKernelCollection) {
     //
     // Additionally process special entries for KC.
@@ -335,6 +318,23 @@ PrelinkedContextInit (
                                  KC_LINKEDIT_SEGMENT
                                  );
     if (Context->LinkEditSegment == NULL) {
+      return EFI_NOT_FOUND;
+    }
+  } else {
+    Context->PrelinkedTextSegment = MachoGetSegmentByName (
+                                      &Context->PrelinkedMachContext,
+                                      PRELINK_TEXT_SEGMENT
+                                      );
+    if (Context->PrelinkedTextSegment == NULL) {
+      return EFI_NOT_FOUND;
+    }
+
+    Context->PrelinkedTextSection = MachoGetSectionByName (
+                                      &Context->PrelinkedMachContext,
+                                      Context->PrelinkedTextSegment,
+                                      PRELINK_TEXT_SECTION
+                                      );
+    if (Context->PrelinkedTextSection == NULL) {
       return EFI_NOT_FOUND;
     }
   }

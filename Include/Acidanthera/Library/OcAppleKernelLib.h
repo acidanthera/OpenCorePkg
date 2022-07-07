@@ -200,7 +200,9 @@ typedef struct {
   //
   MACH_SECTION_ANY                       *PrelinkedInfoSection;
   //
-  // Pointer to PRELINK_TEXT_SEGMENT.
+  // Pointer to PRELINK_TEXT_SEGMENT (for prelinkedkernel, NULL for KC).
+  // As of macOS 13 Developer Beta 3, this segment may have corrupted
+  // information.
   //
   MACH_SEGMENT_COMMAND_ANY               *PrelinkedTextSegment;
   //
