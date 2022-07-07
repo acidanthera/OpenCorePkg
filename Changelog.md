@@ -2,6 +2,7 @@ OpenCore Changelog
 ==================
 #### v0.8.3
 - Added ext4 file system driver
+- Added support macOS 13 DP3 Kernel Collection
 
 #### v0.8.2
 - Fixed `AppleCpuPmCfgLock` on macOS 13
