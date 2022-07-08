@@ -43,6 +43,7 @@
   MemoryAllocationLib
   OcBootManagementLib
   OcDeviceMiscLib
+  OcDevicePathLib
   OcFlexArrayLib
   OcHdaDevicesLib
   OcMp3Lib

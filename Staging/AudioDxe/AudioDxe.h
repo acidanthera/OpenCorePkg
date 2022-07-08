@@ -85,10 +85,31 @@ extern EFI_AUDIO_DECODE_PROTOCOL    gEfiAudioDecodeProtocol;
 #define GPIO_PIN_MASK_AUTO  0              ///< Auto: use all reported available pins.
 
 //
-// Stored parsed config.
+// Setup stage mask.
 //
-extern UINTN    gGpioSetupStageMask;
-extern UINTN    gGpioPinMask;
-extern BOOLEAN  gRestoreNoSnoop;
+extern
+UINTN
+  gGpioSetupStageMask;
+
+//
+// GPIO pin mask.
+//
+extern
+UINTN
+  gGpioPinMask;
+
+//
+// Whether to restore NOSNOOPEN at exit.
+//
+extern
+BOOLEAN
+  gRestoreNoSnoop;
+
+//
+// Forced device path for HDA controller (ignore advertised class/subclass).
+//
+extern
+EFI_DEVICE_PATH_PROTOCOL *
+  gForcedControllerDevicePath;
 
 #endif // EFI_AUDIODXE_H

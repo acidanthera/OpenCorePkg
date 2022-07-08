@@ -23,7 +23,7 @@
 
 UINTN  gLinuxBootFlags = LINUX_BOOT_ALL & ~(LINUX_BOOT_ADD_DEBUG_INFO | LINUX_BOOT_LOG_VERBOSE | LINUX_BOOT_ADD_RW);
 
-OC_FLEX_ARRAY  *mParsedLoadOptions;
+STATIC OC_FLEX_ARRAY  *mParsedLoadOptions;
 
 OC_PICKER_CONTEXT  *gPickerContext;
 OC_FLEX_ARRAY      *gLoaderEntries;

@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
-%DIF DEL PreviousConfiguration.tex   Tue Jul  5 17:33:51 2022
-%DIF ADD ../Configuration.tex        Fri Jul  8 20:34:17 2022
+%DIF DEL PreviousConfiguration.tex   Thu Jul  7 13:40:40 2022
+%DIF ADD ../Configuration.tex        Sat Jul  9 09:49:03 2022
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -6946,7 +6946,7 @@ will report that SIP has a non-standard value, however protection will be functi
 
 \subsection{AudioDxe}\label{uefiaudio}
 
-High Definition Audio support driver in UEFI firmware for most Intel and some other analog audio controllers.
+High Definition Audio \DIFaddbegin \DIFadd{(HDA) }\DIFaddend support driver in UEFI firmware for most Intel and some other analog audio controllers.
 
 \emph{Note}: AudioDxe is a staging driver, refer to \href{https://github.com/acidanthera/bugtracker/issues/740}{acidanthera/bugtracker\#740}
 for known issues.
@@ -6954,12 +6954,38 @@ for known issues.
 \subsubsection{Configuration}
 
 Most UEFI audio configuration is handled via the \hyperref[uefiaudioprops]{\texttt{UEFI Audio Properties}}
-section, but if required the following additonal configuration options (which are needed to produce sound
-on most Apple hardware, and possibly some others) may be specified in \texttt{UEFI/Drivers/Arguments}:
+section, but \DIFdelbegin \DIFdel{if required the following additonal configuration options (which are needed to produce sound
+on most Apple hardware, and possibly some others)
+  may be specified in }%DIFDELCMD < \texttt{%%%
+\DIFdel{UEFI/Drivers/Arguments}%DIFDELCMD < \MBLOCKRIGHTBRACE%%%
+\DIFdel{:
+}\DIFdelend \DIFaddbegin \DIFadd{in addition some of the following configuration options may be required in order
+to allow AudioDxe to correctly drive certain devices. All options are specified as text strings,
+separated by space if more than one option is required, in the }\texttt{\DIFadd{Arguments}} \DIFadd{property for
+the driver within the }\texttt{\DIFadd{UEFI/Drivers}} \DIFadd{section:
+}\DIFaddend 
 
 \begin{itemize}
   \tightlist
-	\item \texttt{-{}-gpio-setup} - Default value is \texttt{0} (GPIO setup disabled) if argument is not provided,
+	\item \DIFaddbegin \texttt{\DIFadd{-}{}\DIFadd{-force-device}} \DIFadd{- String value, no default. }\medskip
+
+  \DIFadd{When this option is present and has a value (e.g. }\texttt{\DIFadd{-}{}\DIFadd{-force-device=PciRoot(0x0)/Pci(0x1f,0x3)}}\DIFadd{), it
+  forces AudioDxe to connect to the specified PCI device, even if the device does not report itself as
+  an HDA audio controller.
+}
+
+  \DIFadd{During driver connection, AudioDxe automatically provides audio services on all supported codecs of
+  all available HDA controllers. However, if the relevant controller is misreporting its identity
+  (typically, it will be reporting itself as a legacy audio device instead of an HDA controller)
+  then this argument may be required.
+}
+
+  \DIFadd{Applies if the audio device can be made to work in macOS, but shows no sign of being detected by AudioDxe
+  (e.g. when including }\texttt{\DIFadd{DEBUG\_INFO}} \DIFadd{in }\texttt{\DIFadd{DisplayLevel}} \DIFadd{and using a DEBUG build of AudioDxe,
+  no controller and codec layout information is displayed during the }\texttt{\DIFadd{Connecting drivers...}}
+  \DIFadd{phase of OpenCore log). }\medskip
+
+  \item \DIFaddend \texttt{-{}-gpio-setup} - Default value is \texttt{0} (GPIO setup disabled) if argument is not provided,
   or \texttt{7} (all GPIO setup stages stages enabled) if the argument is provided with no value. \medskip
 
 	Available values, which may be combined by adding, are: \medskip

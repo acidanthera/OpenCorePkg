@@ -28,6 +28,7 @@
 #include <Library/OcGuardLib.h>
 #include <Library/OcDeviceMiscLib.h>
 #include <Library/OcDebugLogLib.h>
+#include <Library/OcDevicePathLib.h>
 #include <Library/OcHdaDevicesLib.h>
 #include <Library/OcMiscLib.h>
 #include <Library/OcStringLib.h>
@@ -991,9 +992,10 @@ HdaControllerDriverBindingSupported (
   IN EFI_DEVICE_PATH_PROTOCOL     *RemainingDevicePath OPTIONAL
   )
 {
-  EFI_STATUS           Status;
-  EFI_PCI_IO_PROTOCOL  *PciIo;
-  PCI_CLASSCODE        HdaClassReg;
+  EFI_STATUS                Status;
+  EFI_PCI_IO_PROTOCOL       *PciIo;
+  PCI_CLASSCODE             HdaClassReg;
+  EFI_DEVICE_PATH_PROTOCOL  *DevicePath;
 
   //
   // Open PCI I/O protocol. If this fails, it's not a PCI device.
@@ -1008,6 +1010,23 @@ HdaControllerDriverBindingSupported (
                   );
 
   if (EFI_ERROR (Status)) {
+    return Status;
+  }
+
+  //
+  // For use when the device is misreporting its class or subclass, so ignore these.
+  //
+  if (gForcedControllerDevicePath != NULL) {
+    Status = EFI_UNSUPPORTED;
+
+    DevicePath = DevicePathFromHandle (ControllerHandle);
+
+    if (  (DevicePath != NULL)
+       && IsDevicePathEqual (DevicePath, gForcedControllerDevicePath))
+    {
+      Status = EFI_SUCCESS;
+    }
+
     return Status;
   }
 
