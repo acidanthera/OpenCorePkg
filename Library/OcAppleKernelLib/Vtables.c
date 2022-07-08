@@ -500,7 +500,7 @@ InternalInitializeVtablePatchData (
   BOOLEAN         Result;
   UINT32          VtableOffset;
   UINT32          VtableMaxSize;
-  void            *FileData;
+  VOID            *FileData;
   VOID            *VtableData;
   UINT32          SymIndex;
   UINT32          EntryOffset;
