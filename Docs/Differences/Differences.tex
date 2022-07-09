@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
 %DIF DEL PreviousConfiguration.tex   Thu Jul  7 13:40:40 2022
-%DIF ADD ../Configuration.tex        Sat Jul  9 09:49:03 2022
+%DIF ADD ../Configuration.tex        Sun Jul 10 07:07:33 2022
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -3908,7 +3908,8 @@ cat Kernel.panic | grep macOSProcessedStackshotData |
     \item \texttt{0x10} (bit \texttt{4}) --- Enable UEFI variable logging.
     \item \texttt{0x20} (bit \texttt{5}) --- Enable \texttt{non-volatile} UEFI variable logging.
     \item \texttt{0x40} (bit \texttt{6}) --- Enable logging to file.
-  \end{itemize}
+    \DIFaddbegin \item \texttt{\DIFadd{0x80}} \DIFadd{(bit }\texttt{\DIFadd{7}}\DIFadd{) --- In combination with }\texttt{\DIFadd{0x40}}\DIFadd{, enable faster but unsafe (see Warning 2 below) file logging.
+  }\DIFaddend \end{itemize}
 
   Console logging prints less than the other variants.
   Depending on the build type (\texttt{RELEASE}, \texttt{DEBUG}, or
@@ -3931,7 +3932,7 @@ nvram 4D1FDA02-38C7-4A6A-9CC6-4BCCA8B30102:boot-log |
   awk '{gsub(/%0d%0a%00/,"");gsub(/%0d%0a/,"\n")}1'
 \end{lstlisting}
 
-  \textbf{Warning}: Certain firmware appear to have defective NVRAM garbage collection.
+  \textbf{Warning \DIFaddbegin \DIFadd{1}\DIFaddend }: Certain firmware appear to have defective NVRAM garbage collection.
   As a result, they may not be able to always free space after variable deletion. Do not
   enable \texttt{non-volatile} NVRAM logging on such devices unless specifically required.
 
@@ -3948,7 +3949,15 @@ nvram 4D1FDA02-38C7-4A6A-9CC6-4BCCA8B30102:boot-log |
   avoid frequent use of this option when dealing with flash drives as large I/O
   amounts may speed up memory wear and render the flash drive unusable quicker.
 
-  When interpreting the log, note that the lines are prefixed with a tag describing
+  \DIFaddbegin \textbf{\DIFadd{Warning 2}}\DIFadd{: It is possible to enable fast file logging, which requires a fully compliant
+  firmware FAT32 driver. On drivers with incorrect FAT32 write support (e.g. APTIO IV, but maybe
+  others) this setting can result in corruption up to and including an unusable ESP filesystem,
+  therefore be prepared to recreate the ESP partition and all of its contents if testing this option.
+  This option can increase logging speed significantly on some suitable firmware, but may make little
+  speed difference on some others.
+}
+
+  \DIFaddend When interpreting the log, note that the lines are prefixed with a tag describing
   the relevant location (module) of the log line allowing better attribution of the
   line to the functionality.
 
