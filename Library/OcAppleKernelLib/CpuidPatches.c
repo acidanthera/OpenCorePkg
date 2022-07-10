@@ -1353,7 +1353,7 @@ PatchProvideCurrentCpuInfo (
   Status  = EFI_SUCCESS;
   Status |= PatchProvideCurrentCpuInfoMSR35h (Patcher, CpuInfo, KernelVersion);
 
-  Start = ((UINT8 *)MachoGetMachHeader (&Patcher->MachContext));
+  Start = ((UINT8 *)MachoGetFileData (&Patcher->MachContext));
 
   //
   // 10.6 and below has variables in __DATA/__data instead of __DATA/__common
