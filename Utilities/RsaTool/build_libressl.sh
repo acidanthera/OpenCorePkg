@@ -27,7 +27,7 @@ unamer() {
 }
 
 if [ "$(unamer)" != "Darwin" ]; then
-  abort "This script is only for Darwin!"
+  abort "This script is only for Darwin"
 fi
 
 # Avoid conflicts with PATH overrides.
@@ -56,28 +56,28 @@ ret=0
 
 "${MKDIR}" "tmp" || ret=$?
 if [ $ret -ne 0 ]; then
-  abort "Failed to create temporary directory with code ${ret}!"
+  abort "Failed to create temporary directory with code ${ret}"
 fi
 
 cd "tmp" || ret=$?
 if [ $ret -ne 0 ]; then
-  abort "Failed to cd to temporary directory tmp with code ${ret}!"
+  abort "Failed to cd to temporary directory tmp with code ${ret}"
 fi
 
 echo "Downloading LibreSSL ${LIBRESSL_VERSION}..."
 "${CURL}" -LfsS -o "${LIBRESSL_ARCHIVE}" "${LIBRESSL_URL}" || ret=$?
 if [ ${ret} -ne 0 ]; then
-  abort "Failed to download LibreSSL ${LIBRESSL_VERSION} with code ${ret}!"
+  abort "Failed to download LibreSSL ${LIBRESSL_VERSION} from ${LIBRESSL_URL} with code ${ret}"
 fi
 
 "${TAR}" -xzf "${LIBRESSL_ARCHIVE}" || ret=$?
 if [ ${ret} -ne 0 ]; then
-  abort "Failed to extract LibreSSL with code ${ret}!"
+  abort "Failed to extract LibreSSL with code ${ret}"
 fi
 
 cd "${LIBRESSL_NAME}" || ret=$?
 if [ ${ret} -ne 0 ]; then
-  abort "Failed to cd to ${LIBRESSL_NAME} with code ${ret}!"
+  abort "Failed to cd to ${LIBRESSL_NAME} with code ${ret}"
 fi
 
 if [ "${ARCH}" = "arm64" ]; then
@@ -89,32 +89,32 @@ fi
 
 ./configure --disable-dependency-tracking --disable-tests --disable-shared --prefix="${BUILD_DIR}" "${EXTRA_OPTS[@]}" || ret=$?
 if [ ${ret} -ne 0 ]; then
-  abort "Failed to configure LibreSSL with code ${ret}!"
+  abort "Failed to configure LibreSSL with code ${ret}"
 fi
 
 make -j "$(getconf _NPROCESSORS_ONLN)" || ret=$?
 if [ ${ret} -ne 0 ]; then
-  abort "Failed to build LibreSSL with code ${ret}!"
+  abort "Failed to build LibreSSL with code ${ret}"
 fi
 
 make install || ret=$?
 if [ ${ret} -ne 0 ]; then
-  abort "Failed to copy LibreSSL build files with code ${ret}!"
+  abort "Failed to copy LibreSSL build files with code ${ret}"
 fi
 
 mkdir "${OUTPUT_PATH}" || ret=$?
 if [ ${ret} -ne 0 ]; then
-  abort "Failed to create output directory ${OUTPUT_PATH} with code ${ret}!"
+  abort "Failed to create output directory ${OUTPUT_PATH} with code ${ret}"
 fi
 
 cp -r "${BUILD_DIR}/include" "${BUILD_DIR}/lib" "${OUTPUT_PATH}/" || ret=$?
 if [ ${ret} -ne 0 ]; then
-  abort "Failed to copy LibreSSL libraries to output directory with code ${ret}!"
+  abort "Failed to copy LibreSSL libraries to output directory with code ${ret}"
 fi
 
 cd "$SRC_DIR" || exit 1
 if [ ${ret} -ne 0 ]; then
-  abort "Failed to cd to root with code ${ret}!"
+  abort "Failed to cd to root with code ${ret}"
 fi
 
 ${RM} -rf "tmp"
