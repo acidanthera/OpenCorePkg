@@ -68,6 +68,11 @@
 #define KC_MOSCOW_SEGMENT         "__MOSCOW101"
 
 //
+// Maximum allowed size of kext bundle version (CFBundleVersion) string.
+//
+#define MAX_INFO_BUNDLE_VERSION_KEY_SIZE  32
+
+//
 // Kernel cache types.
 //
 typedef enum KERNEL_CACHE_TYPE_ {
@@ -882,7 +887,7 @@ PrelinkedInjectKext (
   IN     CONST CHAR8        *ExecutablePath OPTIONAL,
   IN OUT CONST UINT8        *Executable OPTIONAL,
   IN     UINT32             ExecutableSize OPTIONAL,
-  OUT    CONST CHAR8        **BundleVersion OPTIONAL
+  OUT    CHAR8              BundleVersion[MAX_INFO_BUNDLE_VERSION_KEY_SIZE] OPTIONAL
   );
 
 /**
@@ -1270,7 +1275,7 @@ CachelessContextAddKext (
   IN     UINT32             InfoPlistSize,
   IN     CONST UINT8        *Executable OPTIONAL,
   IN     UINT32             ExecutableSize OPTIONAL,
-  OUT    CONST CHAR8        **BundleVersion OPTIONAL
+  OUT    CHAR8              BundleVersion[MAX_INFO_BUNDLE_VERSION_KEY_SIZE] OPTIONAL
   );
 
 /**
@@ -1501,7 +1506,7 @@ MkextInjectKext (
   IN     UINT32         InfoPlistSize,
   IN     UINT8          *Executable OPTIONAL,
   IN     UINT32         ExecutableSize OPTIONAL,
-  OUT    CONST CHAR8    **BundleVersion OPTIONAL
+  OUT    CHAR8          BundleVersion[MAX_INFO_BUNDLE_VERSION_KEY_SIZE] OPTIONAL
   );
 
 /**

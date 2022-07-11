@@ -954,7 +954,7 @@ PrelinkedInjectKext (
   IN     CONST CHAR8        *ExecutablePath OPTIONAL,
   IN     CONST UINT8        *Executable OPTIONAL,
   IN     UINT32             ExecutableSize OPTIONAL,
-  OUT    CONST CHAR8        **BundleVersion OPTIONAL
+  OUT    CHAR8              BundleVersion[MAX_INFO_BUNDLE_VERSION_KEY_SIZE] OPTIONAL
   )
 {
   EFI_STATUS  Status;
@@ -982,6 +982,7 @@ PrelinkedInjectKext (
   UINT32            KextOffset;
   UINT64            FileOffset;
   UINT64            LoadAddressOffset;
+  CONST CHAR8       *BundleVerStr;
 
   PrelinkedKext = NULL;
 
@@ -989,13 +990,6 @@ PrelinkedInjectKext (
   ASSERT (BundlePath != NULL);
   ASSERT (InfoPlist != NULL);
   ASSERT (InfoPlistSize > 0);
-
-  //
-  // Assume no bundle version from the beginning.
-  //
-  if (BundleVersion != NULL) {
-    *BundleVersion = NULL;
-  }
 
   KmodAddress           = 0;
   AlignedExecutableSize = 0;
@@ -1104,7 +1098,8 @@ PrelinkedInjectKext (
           break;
         }
 
-        *BundleVersion = XmlNodeContent (KextPlistValue);
+        BundleVerStr = XmlNodeContent (KextPlistValue);
+        AsciiStrnCpyS (BundleVersion, MAX_INFO_BUNDLE_VERSION_KEY_SIZE, BundleVerStr, AsciiStrLen (BundleVerStr));
         break;
       }
     }
