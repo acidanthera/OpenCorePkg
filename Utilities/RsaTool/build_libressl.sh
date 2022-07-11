@@ -38,6 +38,7 @@ ARCH="/usr/bin/arch"
 CURL="/usr/bin/curl"
 MKDIR="/bin/mkdir"
 RM="/bin/rm"
+SED="/usr/bin/sed"
 TAR="/usr/bin/tar"
 
 TOOLS=(
@@ -45,6 +46,7 @@ TOOLS=(
   "${CURL}"
   "${MKDIR}"
   "${RM}"
+  "${SED}"
   "${TAR}"
 )
 for tool in "${TOOLS[@]}"; do
@@ -90,6 +92,12 @@ if [ "$(${ARCH})" = "arm64" ]; then
   LDFLAGS+=" --target=x86_64-apple-darwin"
 else
   EXTRA_OPTS=()
+fi
+
+# Monkeypatch to disable strtonum for <11.0 support
+"${SED}" -i '' 's/.*HAVE_STRTONUM.*//g' m4/check-libc.m4 || ret=$?
+if [ ${ret} -ne 0 ]; then
+  abort "Failed to monkeypatch strtonum in LibreSSL with code ${ret}"
 fi
 
 ./configure --disable-dependency-tracking --disable-tests --disable-shared --prefix="${BUILD_DIR}" "${EXTRA_OPTS[@]}" || ret=$?
