@@ -36,6 +36,7 @@ fi
 # Avoid conflicts with PATH overrides.
 ARCH="/usr/bin/arch"
 CURL="/usr/bin/curl"
+FIND="/usr/bin/find"
 MKDIR="/bin/mkdir"
 RM="/bin/rm"
 SED="/usr/bin/sed"
@@ -44,6 +45,7 @@ TAR="/usr/bin/tar"
 TOOLS=(
   "${ARCH}"
   "${CURL}"
+  "${FIND}"
   "${MKDIR}"
   "${RM}"
   "${SED}"
@@ -94,15 +96,15 @@ else
   EXTRA_OPTS=()
 fi
 
-# Monkeypatch to disable strtonum for <11.0 support
-"${SED}" -i '' 's/strtonum|STRTONUM/disabled/g' configure || ret=$?
-if [ ${ret} -ne 0 ]; then
-  abort "Failed to monkeypatch configure in LibreSSL with code ${ret}"
-fi
-
 ./configure --disable-dependency-tracking --disable-tests --disable-shared --prefix="${BUILD_DIR}" "${EXTRA_OPTS[@]}" || ret=$?
 if [ ${ret} -ne 0 ]; then
   abort "Failed to configure LibreSSL with code ${ret}"
+fi
+
+# Monkeypatch to disable strtonum for <11.0 support
+"${FIND}" . -type f -name Makefile -exec "${SED}" -i '' 's/STRTONUM=1/STRTONUM=0/g' {} \; || ret=$?
+if [ ${ret} -ne 0 ]; then
+  abort "Failed to monkeypatch strtonum in LibreSSL with code ${ret}"
 fi
 
 make -j "$(getconf _NPROCESSORS_ONLN)" || ret=$?
