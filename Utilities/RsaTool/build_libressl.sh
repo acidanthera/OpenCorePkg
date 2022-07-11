@@ -80,7 +80,7 @@ if [ ${ret} -ne 0 ]; then
   abort "Failed to cd to ${LIBRESSL_NAME} with code ${ret}"
 fi
 
-if [ "${ARCH}" = "arm64" ]; then
+if [ "$(${ARCH})" = "arm64" ]; then
   # If we are building on arm64 (Apple Silicon), these extra options are required to ensure x86_64 builds.
   EXTRA_OPTS=(--host=arm-apple-darwin --build=x86_64-apple-darwin CFLAGS="--x86_64-apple-darwin" CPPFLAGS="--x86_64-apple-darwin")
 else
