@@ -11,6 +11,9 @@ cd "$SRC_DIR" || exit 1
 OUTPUT_PATH="$(pwd)/libressl"
 BUILD_DIR="$(pwd)/tmp/${LIBRESSL_NAME}/build"
 
+export CFLAGS="-mmacosx-version-min=10.6"
+export LDFLAGS="-mmacosx-version-min=10.6"
+
 abort() {
   echo "ERROR: $1!"
   exit 1
@@ -82,7 +85,9 @@ fi
 
 if [ "$(${ARCH})" = "arm64" ]; then
   # If we are building on arm64 (Apple Silicon), these extra options are required to ensure x86_64 builds.
-  EXTRA_OPTS=(--host=arm-apple-darwin --build=x86_64-apple-darwin CFLAGS="--target=x86_64-apple-darwin" CPPFLAGS="--target=x86_64-apple-darwin")
+  EXTRA_OPTS=(--host=arm-apple-darwin --build=x86_64-apple-darwin)
+  CFLAGS+=" --target=x86_64-apple-darwin"
+  LDFLAGS+=" --target=x86_64-apple-darwin"
 else
   EXTRA_OPTS=()
 fi
