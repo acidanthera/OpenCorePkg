@@ -102,7 +102,7 @@ if [ ${ret} -ne 0 ]; then
   abort "Failed to copy LibreSSL build files with code ${ret}"
 fi
 
-mkdir "${OUTPUT_PATH}" || ret=$?
+rm -rf "${OUTPUT_PATH}" && mkdir "${OUTPUT_PATH}" || ret=$?
 if [ ${ret} -ne 0 ]; then
   abort "Failed to create output directory ${OUTPUT_PATH} with code ${ret}"
 fi
