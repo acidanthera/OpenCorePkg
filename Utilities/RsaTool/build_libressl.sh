@@ -31,20 +31,16 @@ if [ "$(unamer)" != "Darwin" ]; then
 fi
 
 # Avoid conflicts with PATH overrides.
-ARCH="/bin/arch"
-CHMOD="/bin/chmod"
+ARCH="/usr/bin/arch"
 CURL="/usr/bin/curl"
 MKDIR="/bin/mkdir"
-MV="/bin/mv"
 RM="/bin/rm"
 TAR="/usr/bin/tar"
 
 TOOLS=(
   "${ARCH}"
-  "${CHMOD}"
   "${CURL}"
   "${MKDIR}"
-  "${MV}"
   "${RM}"
   "${TAR}"
 )
