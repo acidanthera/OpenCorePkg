@@ -54,7 +54,7 @@ done
 
 ret=0
 
-"${MKDIR}" "tmp" || ret=$?
+"${RM}" -rf "tmp" && "${MKDIR}" "tmp" || ret=$?
 if [ $ret -ne 0 ]; then
   abort "Failed to create temporary directory with code ${ret}"
 fi
@@ -82,7 +82,7 @@ fi
 
 if [ "$(${ARCH})" = "arm64" ]; then
   # If we are building on arm64 (Apple Silicon), these extra options are required to ensure x86_64 builds.
-  EXTRA_OPTS=(--host=arm-apple-darwin --build=x86_64-apple-darwin CFLAGS="--x86_64-apple-darwin" CPPFLAGS="--x86_64-apple-darwin")
+  EXTRA_OPTS=(--host=arm-apple-darwin --build=x86_64-apple-darwin CFLAGS="--target=x86_64-apple-darwin" CPPFLAGS="--target=x86_64-apple-darwin")
 else
   EXTRA_OPTS=()
 fi
