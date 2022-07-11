@@ -565,7 +565,7 @@ OcKernelInjectKext (
   CHAR8        FullPath[OC_STORAGE_SAFE_PATH_MAX];
   UINT32       MaxKernel;
   UINT32       MinKernel;
-  CONST CHAR8  *BundleVersion;
+  CHAR8        BundleVersion[MAX_INFO_BUNDLE_VERSION_KEY_SIZE];
 
   if (!Kext->Enabled || (Kext->PlistData == NULL)) {
     return;
@@ -576,6 +576,12 @@ OcKernelInjectKext (
   Comment    = OC_BLOB_GET (&Kext->Comment);
   MaxKernel  = OcParseDarwinVersion (OC_BLOB_GET (&Kext->MaxKernel));
   MinKernel  = OcParseDarwinVersion (OC_BLOB_GET (&Kext->MinKernel));
+
+  //
+  // Assume no bundle version from the beginning.
+  // 'v' will be printed in the message, and hence is omitted here.
+  //
+  AsciiStrCpyS (BundleVersion, MAX_INFO_BUNDLE_VERSION_KEY_SIZE, "ersion available");
 
   if (!OcMatchDarwinVersion (DarwinVersion, MinKernel, MaxKernel)) {
     DEBUG ((
@@ -619,7 +625,7 @@ OcKernelInjectKext (
                  Kext->PlistDataSize,
                  Kext->ImageData,
                  Kext->ImageDataSize,
-                 &BundleVersion
+                 BundleVersion
                  );
     }
   } else if (CacheType == CacheTypeMkext) {
@@ -631,7 +637,7 @@ OcKernelInjectKext (
                Kext->PlistDataSize,
                Kext->ImageData,
                Kext->ImageDataSize,
-               &BundleVersion
+               BundleVersion
                );
   } else if (CacheType == CacheTypePrelinked) {
     Status = PrelinkedInjectKext (
@@ -643,7 +649,7 @@ OcKernelInjectKext (
                ExecutablePath,
                Kext->ImageData,
                Kext->ImageDataSize,
-               &BundleVersion
+               BundleVersion
                );
   } else {
     Status = EFI_UNSUPPORTED;
@@ -669,7 +675,7 @@ OcKernelInjectKext (
     PRINT_KERNEL_CACHE_TYPE (CacheType),
     IsForced ? " force" : "",
     BundlePath,
-    BundleVersion == NULL ? "ersion unavailable" : BundleVersion
+    BundleVersion
     ));
 
   DEBUG_CODE_END ();

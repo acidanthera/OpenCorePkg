@@ -74,6 +74,7 @@ Utilities/TestMp3/Mp3
 Utilities/TestMp3/test.bin
 Utilities/TestKernelCollection2/KernelCollection2
 Utilities/TestKextInject/BootKernelExtensions.kc
+Utilities/TestKextInject/*.kext
 Utilities/TestKextInject/KextInject
 Utilities/TestKextInject/Result.xml
 Utilities/TestMacho/Macho

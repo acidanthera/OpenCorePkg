@@ -809,7 +809,7 @@ CachelessContextAddKext (
   IN     UINT32             InfoPlistSize,
   IN     CONST UINT8        *Executable OPTIONAL,
   IN     UINT32             ExecutableSize OPTIONAL,
-  OUT    CONST CHAR8        **BundleVersion OPTIONAL
+  OUT    CHAR8              BundleVersion[MAX_INFO_BUNDLE_VERSION_KEY_SIZE] OPTIONAL
   )
 {
   EFI_STATUS      Status;
@@ -824,6 +824,7 @@ CachelessContextAddKext (
   CONST CHAR8   *TmpKeyValue;
   UINT32        FieldCount;
   UINT32        FieldIndex;
+  CONST CHAR8   *BundleVerStr;
 
   BOOLEAN  Failed;
   BOOLEAN  IsLoadable;
@@ -834,13 +835,6 @@ CachelessContextAddKext (
   ASSERT (Context != NULL);
   ASSERT (InfoPlist != NULL);
   ASSERT (InfoPlistSize > 0);
-
-  //
-  // Assume no bundle version from the beginning.
-  //
-  if (BundleVersion != NULL) {
-    *BundleVersion = NULL;
-  }
 
   IsLoadable      = FALSE;
   PlistHasChanges = FALSE;
@@ -964,7 +958,8 @@ CachelessContextAddKext (
             return EFI_INVALID_PARAMETER;
           }
 
-          *BundleVersion = XmlNodeContent (InfoPlistValue);
+          BundleVerStr = XmlNodeContent (InfoPlistValue);
+          AsciiStrnCpyS (BundleVersion, MAX_INFO_BUNDLE_VERSION_KEY_SIZE, BundleVerStr, AsciiStrLen (BundleVerStr));
         }
 
         DEBUG_CODE_END ();
