@@ -30,7 +30,19 @@ OBJS    = $(PROJECT).o \
 	trees.o \
 	uncompr.o \
 	zlib_uefi.o
-VPATH   = ../../Library/OcAppleKernelLib:$\
+#
+# OcConfigurationLib targets.
+#
+OBJS   += OcConfigurationLib.o
+#
+# OpenCoreKernel targets.
+#
+OBJS   += OpenCoreKernel.o
+OBJS   += OpenCoreKernelPatch.o
+
+VPATH   = ../../Library/OcConfigurationLib:$\
+  ../../Library/OcAppleKernelLib:$\
+	../../Library/OcMainLib:$\
 	../../Library/OcCompressionLib/lzss:$\
 	../../Library/OcCompressionLib/lzvn:$\
 	../../Library/OcCompressionLib/zlib

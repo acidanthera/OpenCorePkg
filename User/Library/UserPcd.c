@@ -37,3 +37,4 @@ BOOLEAN  _gPcd_FixedAtBuild_PcdImageLoaderSupportArmThumb            = FALSE;
 BOOLEAN  _gPcd_FixedAtBuild_PcdImageLoaderForceLoadDebug             = FALSE;
 BOOLEAN  _gPcd_FixedAtBuild_PcdImageLoaderTolerantLoad               = TRUE;
 BOOLEAN  _gPcd_FixedAtBuild_PcdImageLoaderSupportDebug               = FALSE;
+UINT32   _gPcd_BinaryPatch_PcdSerialRegisterStride                   = 0;
