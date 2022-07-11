@@ -59,7 +59,7 @@ if [ $ret -ne 0 ]; then
   abort "Failed to create temporary directory with code ${ret}"
 fi
 
-cd "tmp" || ret=$?
+pushd "tmp" > /dev/null || ret=$?
 if [ $ret -ne 0 ]; then
   abort "Failed to cd to temporary directory tmp with code ${ret}"
 fi
@@ -112,7 +112,7 @@ if [ ${ret} -ne 0 ]; then
   abort "Failed to copy LibreSSL libraries to output directory with code ${ret}"
 fi
 
-cd "$SRC_DIR" || exit 1
+popd > /dev/null || ret=$?
 if [ ${ret} -ne 0 ]; then
   abort "Failed to cd to root with code ${ret}"
 fi
