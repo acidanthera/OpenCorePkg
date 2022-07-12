@@ -558,16 +558,6 @@ OcAppendArgumentsToLoadedImage (
   return FALSE;
 }
 
-VOID
-OcAppleImg4RegisterOverride (
-  IN CONST UINT8  *OriginalDigest,
-  IN CONST UINT8  *Image,
-  IN UINT32       ImageSize
-  )
-{
-  ASSERT (FALSE);
-}
-
 BOOLEAN
 OcCheckArgumentFromEnv (
   IN     EFI_LOADED_IMAGE  *LoadedImage OPTIONAL,
@@ -688,5 +678,54 @@ OcReadFileFromDirectory (
 {
   ASSERT (FALSE);
 
+  return NULL;
+}
+
+EFI_MEMORY_DESCRIPTOR *
+OcGetCurrentMemoryMap (
+  OUT UINTN    *MemoryMapSize,
+  OUT UINTN    *DescriptorSize,
+  OUT UINTN    *MapKey                 OPTIONAL,
+  OUT UINT32   *DescriptorVersion      OPTIONAL,
+  OUT UINTN    *OriginalMemoryMapSize  OPTIONAL,
+  IN  BOOLEAN  IncludeSplitSpace
+  )
+{
+  ASSERT (FALSE);
+  return NULL;
+}
+
+VOID *
+OcGetFileInfo (
+  IN  EFI_FILE_PROTOCOL  *File,
+  IN  EFI_GUID           *InformationType,
+  IN  UINTN              MinFileInfoSize,
+  OUT UINTN              *RealFileInfoSize  OPTIONAL
+  )
+{
+  ASSERT (FALSE);
+
+  return NULL;
+}
+
+CHAR16 *
+OcGetVolumeLabel (
+  IN     EFI_SIMPLE_FILE_SYSTEM_PROTOCOL  *FileSystem
+  )
+{
+  ASSERT (FALSE);
+
+  return NULL;
+}
+
+VOID *
+OcReadFile (
+  IN     CONST EFI_SIMPLE_FILE_SYSTEM_PROTOCOL  *FileSystem,
+  IN     CONST CHAR16                           *FilePath,
+  OUT       UINT32                              *FileSize OPTIONAL,
+  IN     CONST UINT32                           MaxFileSize OPTIONAL
+  )
+{
+  ASSERT (FALSE);
   return NULL;
 }
