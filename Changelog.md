@@ -5,6 +5,7 @@ OpenCore Changelog
 - Added support for macOS 13 DP3 Kernel Collection
 - Added `--force-device` option to AudioDxe, allowing UEFI audio on HDA contollers which misreport themselves as non-HDA audio devices
 - Provided optional unsafe fast file logging (suitable only for firmware with a fully compliant FAT32 driver)
+- Fixed incorrect OSBundleLibraries_x86_64 handling during cacheless injection
 
 #### v0.8.2
 - Fixed `AppleCpuPmCfgLock` on macOS 13
