@@ -6,6 +6,7 @@
 PROJECT = KextInject
 PRODUCT = $(PROJECT)$(INFIX)$(SUFFIX)
 OBJS    = $(PROJECT).o \
+	KextInjectDummy.o \
 	CommonPatches.o \
 	CpuidPatches.o \
 	KextPatcher.o \
