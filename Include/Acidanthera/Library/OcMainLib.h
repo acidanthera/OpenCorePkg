@@ -138,6 +138,20 @@ OcKernelApplyQuirk (
   );
 
 /**
+  Inject kexts.
+**/
+VOID
+OcKernelInjectKexts (
+  IN OC_GLOBAL_CONFIG   *Config,
+  IN KERNEL_CACHE_TYPE  CacheType,
+  IN VOID               *Context,
+  IN UINT32             DarwinVersion,
+  IN BOOLEAN            Is32Bit,
+  IN UINT32             LinkedExpansion,
+  IN UINT32             ReservedExeSize
+  );
+
+/**
   Apply kernel patch.
 **/
 VOID
@@ -162,6 +176,21 @@ OcKernelBlockKexts (
   IN     BOOLEAN            Is32Bit,
   IN     KERNEL_CACHE_TYPE  CacheType,
   IN     VOID               *Context
+  );
+
+/**
+  Process prelinked.
+**/
+EFI_STATUS
+OcKernelProcessPrelinked (
+  IN     OC_GLOBAL_CONFIG  *Config,
+  IN     UINT32            DarwinVersion,
+  IN     BOOLEAN           Is32Bit,
+  IN OUT UINT8             *Kernel,
+  IN     UINT32            *KernelSize,
+  IN     UINT32            AllocatedSize,
+  IN     UINT32            LinkedExpansion,
+  IN     UINT32            ReservedExeSize
   );
 
 /**

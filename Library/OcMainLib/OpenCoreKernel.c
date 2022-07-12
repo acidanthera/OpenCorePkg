@@ -681,7 +681,6 @@ OcKernelInjectKext (
   DEBUG_CODE_END ();
 }
 
-STATIC
 VOID
 OcKernelInjectKexts (
   IN OC_GLOBAL_CONFIG   *Config,
@@ -764,7 +763,6 @@ OcKernelInjectKexts (
   }
 }
 
-STATIC
 EFI_STATUS
 OcKernelProcessPrelinked (
   IN     OC_GLOBAL_CONFIG  *Config,
