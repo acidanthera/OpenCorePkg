@@ -724,7 +724,7 @@ WrapMain (
     // Assume no bundle version from the beginning.
     // 'v' will be printed in the message, and hence is omitted here.
     //
-    AsciiStrCpyS (BundleVersion, MAX_INFO_BUNDLE_VERSION_KEY_SIZE, "ersion available");
+    AsciiStrCpyS (BundleVersion, MAX_INFO_BUNDLE_VERSION_KEY_SIZE, "ersion unavailable");
     Status = PrelinkedInjectKext (
                &Context,
                NULL,
@@ -786,7 +786,7 @@ WrapMain (
       // Assume no bundle version from the beginning.
       // 'v' will be printed in the message, and hence is omitted here.
       //
-      AsciiStrCpyS (BundleVersion, MAX_INFO_BUNDLE_VERSION_KEY_SIZE, "ersion available");
+      AsciiStrCpyS (BundleVersion, MAX_INFO_BUNDLE_VERSION_KEY_SIZE, "ersion unavailable");
       Status = PrelinkedInjectKext (
                  &Context,
                  NULL,
