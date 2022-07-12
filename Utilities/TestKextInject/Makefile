@@ -6,7 +6,6 @@
 PROJECT = KextInject
 PRODUCT = $(PROJECT)$(INFIX)$(SUFFIX)
 OBJS    = $(PROJECT).o \
-	KextInjectDummy.o \
 	CommonPatches.o \
 	CpuidPatches.o \
 	KextPatcher.o \
@@ -31,19 +30,7 @@ OBJS    = $(PROJECT).o \
 	trees.o \
 	uncompr.o \
 	zlib_uefi.o
-#
-# OcConfigurationLib targets.
-#
-OBJS   += OcConfigurationLib.o
-#
-# OpenCoreKernel targets.
-#
-OBJS   += OpenCoreKernel.o
-OBJS   += OpenCoreKernelPatch.o
-
-VPATH   = ../../Library/OcConfigurationLib:$\
-  ../../Library/OcAppleKernelLib:$\
-	../../Library/OcMainLib:$\
+VPATH   = ../../Library/OcAppleKernelLib:$\
 	../../Library/OcCompressionLib/lzss:$\
 	../../Library/OcCompressionLib/lzvn:$\
 	../../Library/OcCompressionLib/zlib
