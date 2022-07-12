@@ -235,7 +235,7 @@ MACH_X (
   Base   = Segment->FileOffset;
   Size   = Segment->Size;
 
-  *FileOffset = MACH_X_TO_UINT32 (Base - Context->ContainerOffset + Offset);
+  *FileOffset = MACH_X_TO_UINT32 (Base + Offset);
 
   if (MaxSize != NULL) {
     *MaxSize = MACH_X_TO_UINT32 (Size - Offset);
@@ -662,7 +662,7 @@ MACH_X (
     }
   }
 
-  *FileOffset = MACH_X_TO_UINT32 (Base - Context->ContainerOffset + Offset);
+  *FileOffset = MACH_X_TO_UINT32 (Base + Offset);
 
   if (MaxSize != NULL) {
     *MaxSize = MACH_X_TO_UINT32 (Size - Offset);

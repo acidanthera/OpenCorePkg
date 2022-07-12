@@ -353,7 +353,6 @@ OcSetFileData (
       DEBUG ((
         DEBUG_VERBOSE,
         "WriteFileData: File->Write truncated %u to %u\n",
-        Status,
         Size,
         (UINT32)WrittenSize
         ));

@@ -719,7 +719,12 @@ WrapMain (
       return -1;
     }
 
-    CONST CHAR8  *BundleVersion;
+    CHAR8  BundleVersion[MAX_INFO_BUNDLE_VERSION_KEY_SIZE];
+    //
+    // Assume no bundle version from the beginning.
+    // 'v' will be printed in the message, and hence is omitted here.
+    //
+    AsciiStrCpyS (BundleVersion, MAX_INFO_BUNDLE_VERSION_KEY_SIZE, "ersion unavailable");
     Status = PrelinkedInjectKext (
                &Context,
                NULL,
@@ -729,14 +734,14 @@ WrapMain (
                NULL,
                NULL,
                0,
-               &BundleVersion
+               BundleVersion
                );
     if (!EFI_ERROR (Status)) {
       DEBUG ((
         DEBUG_WARN,
         "[OK] PlistKext.kext injected - %r (v%a)\n",
         Status,
-        BundleVersion == NULL ? "ersion unavailable" : BundleVersion
+        BundleVersion
         ));
     } else {
       DEBUG ((DEBUG_WARN, "[FAIL] PlistKext.kext injected - %r\n", Status));
@@ -776,7 +781,12 @@ WrapMain (
       char  KextPath[64];
       snprintf (KextPath, sizeof (KextPath), "/Library/Extensions/Kex%d.kext", c);
 
-      CONST CHAR8  *BundleVersion;
+      CHAR8  BundleVersion[MAX_INFO_BUNDLE_VERSION_KEY_SIZE];
+      //
+      // Assume no bundle version from the beginning.
+      // 'v' will be printed in the message, and hence is omitted here.
+      //
+      AsciiStrCpyS (BundleVersion, MAX_INFO_BUNDLE_VERSION_KEY_SIZE, "ersion unavailable");
       Status = PrelinkedInjectKext (
                  &Context,
                  NULL,
@@ -786,15 +796,16 @@ WrapMain (
                  "Contents/MacOS/Kext",
                  TestData,
                  TestDataSize,
-                 &BundleVersion
+                 BundleVersion
                  );
 
       if (!EFI_ERROR (Status)) {
         DEBUG ((
           DEBUG_WARN,
-          "[OK] PlistKext.kext injected - %r (v%a)\n",
+          "[OK] %a injected - %r (v%a)\n",
+          argv[2],
           Status,
-          BundleVersion == NULL ? "ersion unavailable" : BundleVersion
+          BundleVersion
           ));
       } else {
         DEBUG ((DEBUG_WARN, "[FAIL] %a injected - %r\n", argv[2], Status));

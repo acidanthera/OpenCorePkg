@@ -169,9 +169,9 @@ struct OC_FLEX_ARRAY_ {
 };
 
 /*
-  Forward declaration of OC_STRING_BUFFER structure.
+  Forward declaration of OC_ASCII_STRING_BUFFER structure.
 */
-typedef struct OC_STRING_BUFFER_ OC_STRING_BUFFER;
+typedef struct OC_ASCII_STRING_BUFFER_ OC_ASCII_STRING_BUFFER;
 
 /**
   Initialize string buffer.
@@ -179,7 +179,7 @@ typedef struct OC_STRING_BUFFER_ OC_STRING_BUFFER;
   @retval Non-NULL                  Buffer was created.
   @retval NULL                      Out of memory.
 **/
-OC_STRING_BUFFER *
+OC_ASCII_STRING_BUFFER *
 OcAsciiStringBufferInit (
   VOID
   );
@@ -196,8 +196,8 @@ OcAsciiStringBufferInit (
 **/
 EFI_STATUS
 OcAsciiStringBufferAppend (
-  IN OUT  OC_STRING_BUFFER  *Buffer,
-  IN      CONST CHAR8       *AppendString    OPTIONAL
+  IN OUT  OC_ASCII_STRING_BUFFER  *Buffer,
+  IN      CONST CHAR8             *AppendString    OPTIONAL
   );
 
 /**
@@ -214,7 +214,7 @@ OcAsciiStringBufferAppend (
 **/
 EFI_STATUS
 OcAsciiStringBufferAppendN (
-  IN OUT  OC_STRING_BUFFER *Buffer,
+  IN OUT  OC_ASCII_STRING_BUFFER *Buffer,
   IN      CONST CHAR8 *AppendString, OPTIONAL
   IN      CONST UINTN         Length
   );
@@ -233,8 +233,8 @@ OcAsciiStringBufferAppendN (
 EFI_STATUS
 EFIAPI
 OcAsciiStringBufferSPrint (
-  IN OUT  OC_STRING_BUFFER  *Buffer,
-  IN      CONST CHAR8       *FormatString,
+  IN OUT  OC_ASCII_STRING_BUFFER  *Buffer,
+  IN      CONST CHAR8             *FormatString,
   ...
   );
 
@@ -250,7 +250,7 @@ OcAsciiStringBufferSPrint (
 **/
 CHAR8 *
 OcAsciiStringBufferFreeContainer (
-  IN OUT  OC_STRING_BUFFER  **StringBuffer
+  IN OUT  OC_ASCII_STRING_BUFFER  **StringBuffer
   );
 
 /**
@@ -263,13 +263,13 @@ OcAsciiStringBufferFreeContainer (
 **/
 VOID
 OcAsciiStringBufferFree (
-  IN OUT  OC_STRING_BUFFER  **StringBuffer
+  IN OUT  OC_ASCII_STRING_BUFFER  **StringBuffer
   );
 
 /*
   String buffer.
 */
-struct OC_STRING_BUFFER_ {
+struct OC_ASCII_STRING_BUFFER_ {
   CHAR8    *String;
   UINTN    StringLength;
   UINTN    BufferSize;
@@ -278,17 +278,17 @@ struct OC_STRING_BUFFER_ {
 /**
   Split string by delimiter.
 
-  @param[in]  String     A Null-terminated string.
-  @param[in]  Delim      Delimiter to search in String.
-  @param[in]  IsUnicode  Are option names and values Unicode or ASCII?
+  @param[in]  String        A Null-terminated string.
+  @param[in]  Delim         Delimiter to search in String.
+  @param[in]  StringFormat  Are option names and values Unicode or ASCII?
 
   @return  A flex array containing splitted string.
 **/
 OC_FLEX_ARRAY *
 OcStringSplit (
-  IN  CONST VOID     *String,
-  IN  CONST CHAR16   Delim,
-  IN  CONST BOOLEAN  IsUnicode
+  IN  CONST VOID              *String,
+  IN  CONST CHAR16            Delim,
+  IN  CONST OC_STRING_FORMAT  StringFormat
   );
 
 #endif // OC_FLEX_ARRAY_LIB_H

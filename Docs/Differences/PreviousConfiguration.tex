@@ -94,7 +94,7 @@
 
        \vspace{0.2in}
 
-       Reference Manual (0.8.1)
+       Reference Manual (0.8.2)
 
        \vspace{0.2in}
 
@@ -2274,7 +2274,7 @@ blocking.
   \texttt{DummyPowerManagement}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
-  \textbf{Requirement}: 10.4\\
+  \textbf{Requirement}: 10.4-12\\
   \textbf{Description}: Disables \texttt{AppleIntelCpuPowerManagement}.
 
   \emph{Note 1}: This option is a preferred alternative to
@@ -2486,7 +2486,7 @@ blocking.
   \texttt{AppleCpuPmCfgLock}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
-  \textbf{Requirement}: 10.4\\
+  \textbf{Requirement}: 10.4-12\\
   \textbf{Description}: Disables \texttt{PKG\_CST\_CONFIG\_CONTROL} (\texttt{0xE2})
   MSR modification in AppleIntelCPUPowerManagement.kext, commonly causing early
   kernel panic, when it is locked from writing.
@@ -2832,7 +2832,7 @@ blocking.
   such that \texttt{apfs.kext} will remain untouched.
 
   \emph{Note 2}: On macOS 12.0 and above, it is no longer possible to specify trim timeout.
-  However, it can be disabled by setting \texttt{0}.
+  However, trim can be disabled by setting \texttt{0}.
 
   \emph{Note 3}: Trim operations are \emph{only} affected at booting phase when the startup volume is mounted.
   Either specifying timeout, or completely disabling trim with \texttt{0}, will not affect normal macOS running.
@@ -6948,7 +6948,7 @@ on most Apple hardware, and possibly some others) may be specified in \texttt{UE
 	\item \texttt{-{}-restore-nosnoop} - Boolean flag, enabled if present. \medskip
 
   AudioDxe clears the Intel HDA No Snoop Enable (NSNPEN) bit. On some systems, this change must
-  be reversed on exit in order to avoid breaking sound in Windows. If so, this flag should
+  be reversed on exit in order to avoid breaking sound in Windows or Linux. If so, this flag should
   be added to AudioDxe driver arguments.
   Not enabled by default, since restoring the flag can prevent sound from working in macOS on
   some other systems. \medskip

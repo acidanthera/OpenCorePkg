@@ -32,9 +32,17 @@
 #include <Library/OcBootManagementLib.h>
 #include <Library/OcFlexArrayLib.h>
 
-UINTN    gGpioSetupStageMask = GPIO_SETUP_STAGE_NONE;
-UINTN    gGpioPinMask        = GPIO_PIN_MASK_AUTO;
-BOOLEAN  gRestoreNoSnoop     = FALSE;
+UINTN
+  gGpioSetupStageMask = GPIO_SETUP_STAGE_NONE;
+
+UINTN
+  gGpioPinMask = GPIO_PIN_MASK_AUTO;
+
+BOOLEAN
+  gRestoreNoSnoop = FALSE;
+
+EFI_DEVICE_PATH_PROTOCOL *
+  gForcedControllerDevicePath = NULL;
 
 /**
   HdaController Driver Binding.
@@ -71,6 +79,7 @@ AudioDxeInit (
 {
   EFI_STATUS                 Status;
   EFI_LOADED_IMAGE_PROTOCOL  *LoadedImage;
+  CHAR16                     *DevicePathName;
   OC_FLEX_ARRAY              *ParsedLoadOptions;
 
   //
@@ -105,6 +114,13 @@ AudioDxeInit (
         gGpioPinMask,
         gGpioPinMask == 0 ? " (auto)" : ""
         ));
+    }
+
+    DevicePathName = NULL;
+    OcParsedVarsGetUnicodeStr (ParsedLoadOptions, L"--force-device", &DevicePathName);
+    if (DevicePathName != NULL) {
+      DEBUG ((DEBUG_INFO, "HDA: Force binding to %s\n", DevicePathName));
+      gForcedControllerDevicePath = ConvertTextToDevicePath (DevicePathName);
     }
 
     OcFlexArrayFree (&ParsedLoadOptions);

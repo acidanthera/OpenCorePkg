@@ -253,6 +253,9 @@ InternalLogAddEntry (
   UINT32                      KeySize;
   UINT32                      DataSize;
   UINT32                      TotalSize;
+  UINTN                       OldAsciiBufferOffset;
+  UINTN                       WriteSize;
+  UINTN                       WrittenSize;
 
   AsciiVSPrint (
     Private->LineBuffer,
@@ -363,24 +366,51 @@ InternalLogAddEntry (
     // Write to internal buffer.
     //
 
+    OldAsciiBufferOffset = Private->AsciiBufferOffset;
+
     Status = AsciiStrCatS (Private->AsciiBuffer, Private->AsciiBufferSize, Private->TimingTxt);
     if (!EFI_ERROR (Status)) {
-      Status = AsciiStrCatS (Private->AsciiBuffer, Private->AsciiBufferSize, Private->LineBuffer);
+      Private->AsciiBufferOffset += AsciiStrLen (Private->TimingTxt);
+      Status                      = AsciiStrCatS (Private->AsciiBuffer, Private->AsciiBufferSize, Private->LineBuffer);
+      if (!EFI_ERROR (Status)) {
+        Private->AsciiBufferOffset += AsciiStrLen (Private->LineBuffer);
+      }
     }
 
     //
     // Write to a file.
-    // Always overwriting file completely is most reliable.
-    // I know it is slow, but fixed size write is more reliable with broken FAT32 driver.
     //
     if (((OcLog->Options & OC_LOG_FILE) != 0) && (OcLog->FileSystem != NULL)) {
       if (EfiGetCurrentTpl () <= TPL_CALLBACK) {
-        OcSetFileData (
-          OcLog->FileSystem,
-          OcLog->FilePath,
-          Private->AsciiBuffer,
-          (UINT32)Private->AsciiBufferSize
-          );
+        if (OcLog->UnsafeLogFile != NULL) {
+          //
+          // For non-broken FAT32 driver this is fine. For driver with broken write
+          // support (e.g. Aptio IV) this can result in corrupt file or unusable fs.
+          //
+          WriteSize   = Private->AsciiBufferOffset - OldAsciiBufferOffset;
+          WrittenSize = WriteSize;
+          OcLog->UnsafeLogFile->Write (OcLog->UnsafeLogFile, &WrittenSize, &Private->AsciiBuffer[OldAsciiBufferOffset]);
+          OcLog->UnsafeLogFile->Flush (OcLog->UnsafeLogFile);
+          if (WriteSize != WrittenSize) {
+            DEBUG ((
+              DEBUG_VERBOSE,
+              "OCL: Log write truncated %u to %u\n",
+              WriteSize,
+              WrittenSize
+              ));
+          }
+        } else {
+          //
+          // Always overwriting file completely is most reliable.
+          // It is slow, but fixed size write is more reliable with broken FAT32 driver.
+          //
+          OcSetFileData (
+            OcLog->FileSystem,
+            OcLog->FilePath,
+            Private->AsciiBuffer,
+            (UINT32)Private->AsciiBufferSize
+            );
+        }
       }
     }
 
@@ -568,12 +598,14 @@ OcConfigureLogProtocol (
   EFI_HANDLE           Handle;
   EFI_FILE_PROTOCOL    *LogRoot;
   CHAR16               *LogPath;
+  EFI_FILE_PROTOCOL    *UnsafeLogFile;
 
   ASSERT (LogModules != NULL);
 
   if ((Options & (OC_LOG_FILE | OC_LOG_ENABLE)) == (OC_LOG_FILE | OC_LOG_ENABLE)) {
-    LogRoot = NULL;
-    LogPath = GetLogPath (LogPrefixPath);
+    LogRoot       = NULL;
+    LogPath       = GetLogPath (LogPrefixPath);
+    UnsafeLogFile = NULL;
 
     if (LogPath != NULL) {
       if (LogFileSystem != NULL) {
@@ -594,14 +626,31 @@ OcConfigureLogProtocol (
         }
       }
 
+      if ((LogRoot != NULL) && ((Options & OC_LOG_UNSAFE) != 0)) {
+        Status = OcSafeFileOpen (
+                   LogRoot,
+                   &UnsafeLogFile,
+                   LogPath,
+                   EFI_FILE_MODE_CREATE | EFI_FILE_MODE_READ | EFI_FILE_MODE_WRITE,
+                   0
+                   );
+        if (EFI_ERROR (Status)) {
+          DEBUG ((DEBUG_ERROR, "OCL: Failure opening log file - %r\n", Status));
+          UnsafeLogFile = NULL;
+          LogRoot->Close (LogRoot);
+          LogRoot = NULL;
+        }
+      }
+
       if (LogRoot == NULL) {
         FreePool (LogPath);
         LogPath = NULL;
       }
     }
   } else {
-    LogRoot = NULL;
-    LogPath = NULL;
+    LogRoot       = NULL;
+    LogPath       = NULL;
+    UnsafeLogFile = NULL;
   }
 
   //
@@ -619,16 +668,21 @@ OcConfigureLogProtocol (
       OcLog->FileSystem->Close (OcLog->FileSystem);
     }
 
+    if (OcLog->UnsafeLogFile != NULL) {
+      OcLog->UnsafeLogFile->Close (OcLog->UnsafeLogFile);
+    }
+
     if (OcLog->FilePath != NULL) {
       FreePool (OcLog->FilePath);
     }
 
-    OcLog->Options      = Options;
-    OcLog->DisplayDelay = DisplayDelay;
-    OcLog->DisplayLevel = DisplayLevel;
-    OcLog->HaltLevel    = HaltLevel;
-    OcLog->FileSystem   = LogRoot;
-    OcLog->FilePath     = LogPath;
+    OcLog->Options       = Options;
+    OcLog->DisplayDelay  = DisplayDelay;
+    OcLog->DisplayLevel  = DisplayLevel;
+    OcLog->HaltLevel     = HaltLevel;
+    OcLog->FileSystem    = LogRoot;
+    OcLog->FilePath      = LogPath;
+    OcLog->UnsafeLogFile = UnsafeLogFile;
 
     Status = EFI_SUCCESS;
   } else {
@@ -636,20 +690,21 @@ OcConfigureLogProtocol (
     Status  = EFI_OUT_OF_RESOURCES;
 
     if (Private != NULL) {
-      Private->Signature          = OC_LOG_PRIVATE_DATA_SIGNATURE;
-      Private->AsciiBufferSize    = OC_LOG_BUFFER_SIZE;
-      Private->NvramBufferSize    = OC_LOG_NVRAM_BUFFER_SIZE;
-      Private->OcLog.Revision     = OC_LOG_REVISION;
-      Private->OcLog.AddEntry     = OcLogAddEntry;
-      Private->OcLog.GetLog       = OcLogGetLog;
-      Private->OcLog.SaveLog      = OcLogSaveLog;
-      Private->OcLog.ResetTimers  = OcLogResetTimers;
-      Private->OcLog.Options      = Options;
-      Private->OcLog.DisplayDelay = DisplayDelay;
-      Private->OcLog.DisplayLevel = DisplayLevel;
-      Private->OcLog.HaltLevel    = HaltLevel;
-      Private->OcLog.FileSystem   = LogRoot;
-      Private->OcLog.FilePath     = LogPath;
+      Private->Signature           = OC_LOG_PRIVATE_DATA_SIGNATURE;
+      Private->AsciiBufferSize     = OC_LOG_BUFFER_SIZE;
+      Private->NvramBufferSize     = OC_LOG_NVRAM_BUFFER_SIZE;
+      Private->OcLog.Revision      = OC_LOG_REVISION;
+      Private->OcLog.AddEntry      = OcLogAddEntry;
+      Private->OcLog.GetLog        = OcLogGetLog;
+      Private->OcLog.SaveLog       = OcLogSaveLog;
+      Private->OcLog.ResetTimers   = OcLogResetTimers;
+      Private->OcLog.Options       = Options;
+      Private->OcLog.DisplayDelay  = DisplayDelay;
+      Private->OcLog.DisplayLevel  = DisplayLevel;
+      Private->OcLog.HaltLevel     = HaltLevel;
+      Private->OcLog.FileSystem    = LogRoot;
+      Private->OcLog.FilePath      = LogPath;
+      Private->OcLog.UnsafeLogFile = UnsafeLogFile;
 
       //
       // Write filters into Private.
@@ -688,7 +743,10 @@ OcConfigureLogProtocol (
 
   if (LogRoot != NULL) {
     if (!EFI_ERROR (Status)) {
-      if (OC_LOG_PRIVATE_DATA_FROM_OC_LOG_THIS (OcLog)->AsciiBufferSize > 0) {
+      if (  ((Options & OC_LOG_UNSAFE) == 0)
+         && (OC_LOG_PRIVATE_DATA_FROM_OC_LOG_THIS (OcLog)->AsciiBufferSize > 0)
+            )
+      {
         OcSetFileData (
           LogRoot,
           LogPath,
@@ -697,6 +755,10 @@ OcConfigureLogProtocol (
           );
       }
     } else {
+      if (UnsafeLogFile != NULL) {
+        UnsafeLogFile->Close (UnsafeLogFile);
+      }
+
       LogRoot->Close (LogRoot);
       FreePool (LogPath);
     }

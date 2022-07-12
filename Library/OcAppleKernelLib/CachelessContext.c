@@ -809,7 +809,7 @@ CachelessContextAddKext (
   IN     UINT32             InfoPlistSize,
   IN     CONST UINT8        *Executable OPTIONAL,
   IN     UINT32             ExecutableSize OPTIONAL,
-  OUT    CONST CHAR8        **BundleVersion OPTIONAL
+  OUT    CHAR8              BundleVersion[MAX_INFO_BUNDLE_VERSION_KEY_SIZE] OPTIONAL
   )
 {
   EFI_STATUS      Status;
@@ -824,6 +824,7 @@ CachelessContextAddKext (
   CONST CHAR8   *TmpKeyValue;
   UINT32        FieldCount;
   UINT32        FieldIndex;
+  CONST CHAR8   *BundleVerStr;
 
   BOOLEAN  Failed;
   BOOLEAN  IsLoadable;
@@ -834,13 +835,6 @@ CachelessContextAddKext (
   ASSERT (Context != NULL);
   ASSERT (InfoPlist != NULL);
   ASSERT (InfoPlistSize > 0);
-
-  //
-  // Assume no bundle version from the beginning.
-  //
-  if (BundleVersion != NULL) {
-    *BundleVersion = NULL;
-  }
 
   IsLoadable      = FALSE;
   PlistHasChanges = FALSE;
@@ -940,9 +934,24 @@ CachelessContextAddKext (
           FreePool (NewKext);
           return EFI_INVALID_PARAMETER;
         }
-      } else if (AsciiStrCmp (TmpKeyValue, INFO_BUNDLE_LIBRARIES_64_KEY) == 0) {
-        InfoPlistLibraries64 = PlistNodeCast (InfoPlistValue, PLIST_NODE_TYPE_DICT);
-        if (InfoPlistLibraries64 == NULL) {
+      }
+    } else if (AsciiStrCmp (TmpKeyValue, INFO_BUNDLE_LIBRARIES_64_KEY) == 0) {
+      InfoPlistLibraries64 = PlistNodeCast (InfoPlistValue, PLIST_NODE_TYPE_DICT);
+      if (InfoPlistLibraries64 == NULL) {
+        XmlDocumentFree (InfoPlistDocument);
+        FreePool (TmpInfoPlist);
+        FreePool (NewKext->PlistData);
+        FreePool (NewKext);
+        return EFI_INVALID_PARAMETER;
+      }
+
+      if (!Context->Is32Bit) {
+        InfoPlistLibraries = InfoPlistLibraries64;
+      }
+    } else {
+      DEBUG_CODE_BEGIN ();
+      if ((BundleVersion != NULL) && (AsciiStrCmp (TmpKeyValue, INFO_BUNDLE_VERSION_KEY) == 0)) {
+        if (PlistNodeCast (InfoPlistValue, PLIST_NODE_TYPE_STRING) == NULL) {
           XmlDocumentFree (InfoPlistDocument);
           FreePool (TmpInfoPlist);
           FreePool (NewKext->PlistData);
@@ -950,25 +959,11 @@ CachelessContextAddKext (
           return EFI_INVALID_PARAMETER;
         }
 
-        if (!Context->Is32Bit) {
-          InfoPlistLibraries = InfoPlistLibraries64;
-        }
-      } else {
-        DEBUG_CODE_BEGIN ();
-        if ((BundleVersion != NULL) && (AsciiStrCmp (TmpKeyValue, INFO_BUNDLE_VERSION_KEY) == 0)) {
-          if (PlistNodeCast (InfoPlistValue, PLIST_NODE_TYPE_STRING) == NULL) {
-            XmlDocumentFree (InfoPlistDocument);
-            FreePool (TmpInfoPlist);
-            FreePool (NewKext->PlistData);
-            FreePool (NewKext);
-            return EFI_INVALID_PARAMETER;
-          }
-
-          *BundleVersion = XmlNodeContent (InfoPlistValue);
-        }
-
-        DEBUG_CODE_END ();
+        BundleVerStr = XmlNodeContent (InfoPlistValue);
+        AsciiStrCpyS (BundleVersion, MAX_INFO_BUNDLE_VERSION_KEY_SIZE, BundleVerStr);
       }
+
+      DEBUG_CODE_END ();
     }
   }
 

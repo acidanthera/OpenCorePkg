@@ -81,8 +81,8 @@ CONST UINT8
   0x48, 0xB8, 0x88, 0x88, 0x88, 0x88, 0x88, 0x88, 0x88, 0x88, // mov rax, 8888888888888888h
   0x48, 0x89, 0x47, 0x58,                                     // mov [rdi+58h], rax
   0xC7, 0x87, 0xCC, 0x00, 0x00, 0x00, 0x99, 0x99, 0x99, 0x99, // mov dword ptr [rdi+0CCh], 99999999h
-  0xC7, 0x87, 0x88, 0x01, 0x00, 0x00, 0xAA, 0xAA, 0xAA, 0xAA, // mov dword ptr [rdi+188h], 0AAAAAAAAh
-  0xB8, 0xAA, 0xAA, 0xAA, 0xAA,                               // mov eax, 0AAAAAAAAh
+  0xC7, 0x87, 0x88, 0x01, 0x00, 0x00, 0xAA, 0xAA, 0xAA, 0xAA, // mov dword ptr [rdi+188h], AAAAAAAAh
+  0xB8, 0xAA, 0xAA, 0xAA, 0xAA,                               // mov eax, AAAAAAAAh
   0xC3                                                        // retn
 };
 
@@ -815,7 +815,7 @@ PatchKernelCpuId (
     );
 
   Start = ((UINT8 *)MachoGetMachHeader (&Patcher->MachContext));
-  Last  = Start + MachoGetFileSize (&Patcher->MachContext) - EFI_PAGE_SIZE * 2 - sizeof (mKernelCpuIdFindRelNew);
+  Last  = Start + MachoGetInnerSize (&Patcher->MachContext) - EFI_PAGE_SIZE * 2 - sizeof (mKernelCpuIdFindRelNew);
 
   //
   // Do legacy patching for 32-bit 10.7, and 10.6 and older.
@@ -1353,7 +1353,7 @@ PatchProvideCurrentCpuInfo (
   Status  = EFI_SUCCESS;
   Status |= PatchProvideCurrentCpuInfoMSR35h (Patcher, CpuInfo, KernelVersion);
 
-  Start = ((UINT8 *)MachoGetMachHeader (&Patcher->MachContext));
+  Start = ((UINT8 *)MachoGetFileData (&Patcher->MachContext));
 
   //
   // 10.6 and below has variables in __DATA/__data instead of __DATA/__common

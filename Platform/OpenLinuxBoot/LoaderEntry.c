@@ -1059,15 +1059,15 @@ DoConvertLoaderEntriesToBootEntries (
   OUT  UINTN            *NumEntries
   )
 {
-  EFI_STATUS        Status;
-  UINTN             Index;
-  UINTN             OptionsIndex;
-  LOADER_ENTRY      *Entry;
-  OC_FLEX_ARRAY     *PickerEntries;
-  OC_PICKER_ENTRY   *PickerEntry;
-  OC_STRING_BUFFER  *StringBuffer;
-  CHAR8             **Options;
-  UINTN             OptionsLength;
+  EFI_STATUS              Status;
+  UINTN                   Index;
+  UINTN                   OptionsIndex;
+  LOADER_ENTRY            *Entry;
+  OC_FLEX_ARRAY           *PickerEntries;
+  OC_PICKER_ENTRY         *PickerEntry;
+  OC_ASCII_STRING_BUFFER  *StringBuffer;
+  CHAR8                   **Options;
+  UINTN                   OptionsLength;
 
   StringBuffer = NULL;
 
@@ -1228,8 +1228,8 @@ AppendVersion (
   LOADER_ENTRY  *Entry
   )
 {
-  EFI_STATUS        Status;
-  OC_STRING_BUFFER  *StringBuffer;
+  EFI_STATUS              Status;
+  OC_ASCII_STRING_BUFFER  *StringBuffer;
 
   ASSERT (Entry->Title != NULL);
 

@@ -1166,7 +1166,7 @@ MkextReserveKextSize (
 
   if (Executable != NULL) {
     ASSERT (ExecutableSize > 0);
-    if (!MachoInitializeContext (&Context, Executable, ExecutableSize, 0, Is32Bit)) {
+    if (!MachoInitializeContext (&Context, Executable, ExecutableSize, 0, ExecutableSize, Is32Bit)) {
       return EFI_INVALID_PARAMETER;
     }
 
@@ -1197,7 +1197,7 @@ MkextInjectKext (
   IN     UINT32         InfoPlistSize,
   IN     UINT8          *Executable OPTIONAL,
   IN     UINT32         ExecutableSize OPTIONAL,
-  OUT    CONST CHAR8    **BundleVersion OPTIONAL
+  OUT    CHAR8          BundleVersion[MAX_INFO_BUNDLE_VERSION_KEY_SIZE] OPTIONAL
   )
 {
   UINT32  MkextNewSize;
@@ -1217,6 +1217,7 @@ MkextInjectKext (
   UINT32        PlistBundleCount;
   CONST CHAR8   *PlistBundleKey;
   XML_NODE      *PlistBundleKeyValue;
+  CONST CHAR8   *BundleVerStr;
 
   CONST CHAR8  *TmpKeyValue;
   UINT32       FieldCount;
@@ -1229,13 +1230,6 @@ MkextInjectKext (
   ASSERT (BundlePath != NULL);
   ASSERT (InfoPlist != NULL);
   ASSERT (InfoPlistSize > 0);
-
-  //
-  // Assume no bundle version from the beginning.
-  //
-  if (BundleVersion != NULL) {
-    *BundleVersion = NULL;
-  }
 
   BinOffset = 0;
 
@@ -1290,7 +1284,8 @@ MkextInjectKext (
           break;
         }
 
-        *BundleVersion = XmlNodeContent (KextPlistValue);
+        BundleVerStr = XmlNodeContent (KextPlistValue);
+        AsciiStrCpyS (BundleVersion, MAX_INFO_BUNDLE_VERSION_KEY_SIZE, BundleVerStr);
         break;
       }
     }

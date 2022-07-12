@@ -21,7 +21,7 @@
 ///
 /// Current supported log protocol revision.
 ///
-#define OC_LOG_REVISION  0x01000A
+#define OC_LOG_REVISION  0x01000B
 
 ///
 /// The defines for the log flags.
@@ -33,11 +33,12 @@
 #define OC_LOG_VARIABLE     BIT4
 #define OC_LOG_NONVOLATILE  BIT5
 #define OC_LOG_FILE         BIT6
+#define OC_LOG_UNSAFE       BIT7
 #define OC_LOG_ALL_BITS     (\
   OC_LOG_ENABLE   | OC_LOG_CONSOLE     | \
   OC_LOG_DATA_HUB | OC_LOG_SERIAL      | \
   OC_LOG_VARIABLE | OC_LOG_NONVOLATILE | \
-  OC_LOG_FILE)
+  OC_LOG_FILE     | OC_LOG_UNSAFE )
 
 ///
 /// Maximum possible number of characters of log prefix including colon.
@@ -126,18 +127,19 @@ EFI_STATUS
   The structure exposed by the OC_LOG_PROTOCOL.
 **/
 struct OC_LOG_PROTOCOL_ {
-  UINT32                 Revision;      ///< The revision of the installed protocol.
-  UINTN                  Reserved;      ///< Reserved for future extension.
-  OC_LOG_ADD_ENTRY       AddEntry;      ///< A pointer to the AddEntry function.
-  OC_LOG_GET_LOG         GetLog;        ///< A pointer to the GetLog function.
-  OC_LOG_SAVE_LOG        SaveLog;       ///< A pointer to the SaveLog function.
-  OC_LOG_RESET_TIMERS    ResetTimers;   ///< A pointer to the ResetTimers function.
-  OC_LOG_OPTIONS         Options;       ///< The current options of the installed protocol.
-  UINT32                 DisplayDelay;  ///< The delay after visible onscreen message in microseconds.
-  UINTN                  DisplayLevel;  ///< The error level visible onscreen.
-  UINTN                  HaltLevel;     ///< The error level causing CPU dead loop.
-  EFI_FILE_PROTOCOL      *FileSystem;   ///< Log file system root, not owned.
-  CHAR16                 *FilePath;     ///< Log file path.
+  UINT32                 Revision;        ///< The revision of the installed protocol.
+  UINTN                  Reserved;        ///< Reserved for future extension.
+  OC_LOG_ADD_ENTRY       AddEntry;        ///< A pointer to the AddEntry function.
+  OC_LOG_GET_LOG         GetLog;          ///< A pointer to the GetLog function.
+  OC_LOG_SAVE_LOG        SaveLog;         ///< A pointer to the SaveLog function.
+  OC_LOG_RESET_TIMERS    ResetTimers;     ///< A pointer to the ResetTimers function.
+  OC_LOG_OPTIONS         Options;         ///< The current options of the installed protocol.
+  UINT32                 DisplayDelay;    ///< The delay after visible onscreen message in microseconds.
+  UINTN                  DisplayLevel;    ///< The error level visible onscreen.
+  UINTN                  HaltLevel;       ///< The error level causing CPU dead loop.
+  EFI_FILE_PROTOCOL      *FileSystem;     ///< Log file system root, not owned.
+  CHAR16                 *FilePath;       ///< Log file path.
+  EFI_FILE_PROTOCOL      *UnsafeLogFile;  ///< Log file, owned. Unsafe logging only.
 };
 
 /// A global variable storing the GUID of the OC_LOG_PROTOCOL.

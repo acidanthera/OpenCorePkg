@@ -447,9 +447,9 @@ OcParseLoadOptions (
 
 EFI_STATUS
 OcParseVars (
-  IN           VOID        *StrVars,
-  OUT       OC_FLEX_ARRAY  **ParsedVars,
-  IN     CONST BOOLEAN     IsUnicode
+  IN           VOID              *StrVars,
+  OUT       OC_FLEX_ARRAY        **ParsedVars,
+  IN     CONST OC_STRING_FORMAT  StringFormat
   )
 {
   VOID              *Pos;
@@ -461,7 +461,7 @@ OcParseVars (
   VOID              *Value;
   OC_PARSED_VAR     *Option;
 
-  if ((StrVars == NULL) || (IsUnicode ? (((CHAR16 *)StrVars)[0] == CHAR_NULL) : (((CHAR8 *)StrVars)[0] == '\0'))) {
+  if ((StrVars == NULL) || ((StringFormat == OcStringFormatUnicode) ? (((CHAR16 *)StrVars)[0] == CHAR_NULL) : (((CHAR8 *)StrVars)[0] == '\0'))) {
     DEBUG ((OC_TRACE_PARSE_VARS, "OCB: No vars (%p)\n", StrVars));
     return EFI_NOT_FOUND;
   }
@@ -477,7 +477,7 @@ OcParseVars (
   Retake    = FALSE;
 
   do {
-    Ch = IsUnicode ? *((CHAR16 *)Pos) : *((CHAR8 *)Pos);
+    Ch = (StringFormat == OcStringFormatUnicode) ? *((CHAR16 *)Pos) : *((CHAR8 *)Pos);
     switch (State) {
       case PARSE_VARS_WHITE_SPACE:
         if (Ch == '#') {
@@ -498,7 +498,7 @@ OcParseVars (
 
       case PARSE_VARS_NAME:
         if ((Ch == L'=') || OcIsSpace (Ch) || (Ch == CHAR_NULL)) {
-          if (IsUnicode) {
+          if (StringFormat == OcStringFormatUnicode) {
             *((CHAR16 *)Pos) = CHAR_NULL;
           } else {
             *((CHAR8 *)Pos) = '\0';
@@ -516,7 +516,7 @@ OcParseVars (
             return EFI_OUT_OF_RESOURCES;
           }
 
-          if (IsUnicode) {
+          if (StringFormat == OcStringFormatUnicode) {
             Option->Unicode.Name = Name;
             DEBUG ((OC_TRACE_PARSE_VARS, "OCB: Name=\"%s\"\n", Name));
           } else {
@@ -536,7 +536,7 @@ OcParseVars (
       case PARSE_VARS_VALUE_FIRST:
         if (Ch == L'"') {
           State = PARSE_VARS_QUOTED_VALUE;
-          Value = (UINT8 *)Pos + (IsUnicode ? sizeof (CHAR16) : sizeof (CHAR8));
+          Value = (UINT8 *)Pos + ((StringFormat == OcStringFormatUnicode) ? sizeof (CHAR16) : sizeof (CHAR8));
         } else {
           State  = PARSE_VARS_VALUE;
           Value  = Pos;
@@ -559,8 +559,8 @@ OcParseVars (
           PushState = State;
           State     = PARSE_VARS_SHELL_EXPANSION;
         } else if (Ch == L'\\') {
-          SHIFT_TOKEN (Pos, Value, IsUnicode ? sizeof (CHAR16) : sizeof (CHAR8));
-          Ch = IsUnicode ? *((CHAR16 *)Pos) : *((CHAR8 *)Pos);
+          SHIFT_TOKEN (Pos, Value, (StringFormat == OcStringFormatUnicode) ? sizeof (CHAR16) : sizeof (CHAR8));
+          Ch = (StringFormat == OcStringFormatUnicode) ? *((CHAR16 *)Pos) : *((CHAR8 *)Pos);
         } else if (
                    ((State == PARSE_VARS_VALUE) && (OcIsSpace (Ch) || (Ch == CHAR_NULL))) ||
                    ((State == PARSE_VARS_QUOTED_VALUE) && (Ch == '"')))
@@ -576,7 +576,7 @@ OcParseVars (
               DEBUG ((OC_TRACE_PARSE_VARS, "OCB: Found shell expansion, cancelling value\n"));
               PushState = PARSE_VARS_WHITE_SPACE;
             } else {
-              if (IsUnicode) {
+              if (StringFormat == OcStringFormatUnicode) {
                 *((CHAR16 *)Pos)      = CHAR_NULL;
                 Option->Unicode.Value = Value;
                 DEBUG ((OC_TRACE_PARSE_VARS, "OCB: Value=\"%s\"\n", Value));
@@ -603,7 +603,7 @@ OcParseVars (
     if (Retake) {
       Retake = FALSE;
     } else {
-      Pos = (UINT8 *)Pos + (IsUnicode ? sizeof (CHAR16) : sizeof (CHAR8));
+      Pos = (UINT8 *)Pos + ((StringFormat == OcStringFormatUnicode) ? sizeof (CHAR16) : sizeof (CHAR8));
     }
   } while (Ch != CHAR_NULL);
 
@@ -627,10 +627,10 @@ OcParseVars (
 
 BOOLEAN
 OcParsedVarsGetStr (
-  IN     CONST OC_FLEX_ARRAY  *ParsedVars,
-  IN     CONST VOID           *Name,
-  OUT       VOID              **Value,
-  IN     CONST BOOLEAN        IsUnicode
+  IN     CONST OC_FLEX_ARRAY     *ParsedVars,
+  IN     CONST VOID              *Name,
+  OUT       VOID                 **Value,
+  IN     CONST OC_STRING_FORMAT  StringFormat
   )
 {
   UINTN          Index;
@@ -647,7 +647,7 @@ OcParsedVarsGetStr (
 
   for (Index = 0; Index < ParsedVars->Count; ++Index) {
     Option = OcFlexArrayItemAt (ParsedVars, Index);
-    if (IsUnicode) {
+    if (StringFormat == OcStringFormatUnicode) {
       ASSERT (Option->Unicode.Name != NULL);
       if (StrCmp (Option->Unicode.Name, Name) == 0) {
         *Value = Option->Unicode.Value;
@@ -664,7 +664,7 @@ OcParsedVarsGetStr (
     }
   }
 
-  if (IsUnicode) {
+  if (StringFormat == OcStringFormatUnicode) {
     DEBUG ((OC_TRACE_PARSE_VARS, "OCB: No value for \"%s\"\n", Name));
   } else {
     DEBUG ((OC_TRACE_PARSE_VARS, "OCB: No value for \"%a\"\n", Name));
@@ -695,28 +695,28 @@ OcParsedVarsGetAsciiStr (
 
 BOOLEAN
 OcHasParsedVar (
-  IN     CONST OC_FLEX_ARRAY  *ParsedVars,
-  IN     CONST VOID           *Name,
-  IN     CONST BOOLEAN        IsUnicode
+  IN     CONST OC_FLEX_ARRAY     *ParsedVars,
+  IN     CONST VOID              *Name,
+  IN     CONST OC_STRING_FORMAT  StringFormat
   )
 {
   VOID  *Value;
 
-  return OcParsedVarsGetStr (ParsedVars, Name, &Value, IsUnicode);
+  return OcParsedVarsGetStr (ParsedVars, Name, &Value, StringFormat);
 }
 
 EFI_STATUS
 OcParsedVarsGetInt (
-  IN     CONST OC_FLEX_ARRAY  *ParsedVars,
-  IN     CONST VOID           *Name,
-  OUT       UINTN             *Value,
-  IN     CONST BOOLEAN        IsUnicode
+  IN     CONST OC_FLEX_ARRAY     *ParsedVars,
+  IN     CONST VOID              *Name,
+  OUT       UINTN                *Value,
+  IN     CONST OC_STRING_FORMAT  StringFormat
   )
 {
   EFI_STATUS  Status;
   VOID        *StrValue;
 
-  if (!OcParsedVarsGetStr (ParsedVars, Name, &StrValue, IsUnicode)) {
+  if (!OcParsedVarsGetStr (ParsedVars, Name, &StrValue, StringFormat)) {
     return EFI_NOT_FOUND;
   }
 
@@ -724,7 +724,7 @@ OcParsedVarsGetInt (
     return EFI_NOT_FOUND;
   }
 
-  if (IsUnicode) {
+  if (StringFormat == OcStringFormatUnicode) {
     if (OcUnicodeStartsWith (StrValue, L"0x", TRUE)) {
       Status = StrHexToUintnS (StrValue, NULL, Value);
     } else {
@@ -743,16 +743,16 @@ OcParsedVarsGetInt (
 
 EFI_STATUS
 OcParsedVarsGetGuid (
-  IN     CONST OC_FLEX_ARRAY  *ParsedVars,
-  IN     CONST VOID           *Name,
-  OUT       EFI_GUID          *Value,
-  IN     CONST BOOLEAN        IsUnicode
+  IN     CONST OC_FLEX_ARRAY     *ParsedVars,
+  IN     CONST VOID              *Name,
+  OUT       EFI_GUID             *Value,
+  IN     CONST OC_STRING_FORMAT  StringFormat
   )
 {
   EFI_STATUS  Status;
   VOID        *StrValue;
 
-  if (!OcParsedVarsGetStr (ParsedVars, Name, &StrValue, IsUnicode)) {
+  if (!OcParsedVarsGetStr (ParsedVars, Name, &StrValue, StringFormat)) {
     return EFI_NOT_FOUND;
   }
 
@@ -760,7 +760,7 @@ OcParsedVarsGetGuid (
     return EFI_NOT_FOUND;
   }
 
-  if (IsUnicode) {
+  if (StringFormat == OcStringFormatUnicode) {
     Status = StrToGuid (StrValue, Value);
   } else {
     Status = AsciiStrToGuid (StrValue, Value);

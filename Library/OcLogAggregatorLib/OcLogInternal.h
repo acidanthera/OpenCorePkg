@@ -41,6 +41,7 @@ typedef struct {
   CHAR16                   UnicodeLineBuffer[OC_LOG_LINE_BUFFER_SIZE];
   CHAR8                    AsciiBuffer[OC_LOG_BUFFER_SIZE];
   UINTN                    AsciiBufferSize;
+  UINTN                    AsciiBufferOffset;
   CHAR8                    NvramBuffer[OC_LOG_NVRAM_BUFFER_SIZE];
   UINTN                    NvramBufferSize;
   UINT32                   LogCounter;

@@ -56,13 +56,14 @@ InternalCreatePrelinkedKext (
   UINT64                    VirtualKmod;
   UINT64                    SourceBase;
   UINT64                    SourceSize;
+  UINT32                    InnerSize;
   UINT64                    CalculatedSourceSize;
   UINT64                    SourceEnd;
   MACH_SEGMENT_COMMAND_ANY  *BaseSegment;
   UINT64                    KxldState;
   UINT64                    KxldOffset;
   UINT32                    KxldStateSize;
-  UINT32                    ContainerOffset;
+  UINT32                    HeaderOffset;
   BOOLEAN                   Found;
   BOOLEAN                   HasExe;
   BOOLEAN                   IsKpi;
@@ -214,9 +215,18 @@ InternalCreatePrelinkedKext (
       return NULL;
     }
 
-    ContainerOffset = 0;
+    HeaderOffset = 0;
+    InnerSize    = (UINT32)SourceSize;
     if (Prelinked->IsKernelCollection) {
-      ContainerOffset = (UINT32)SourceBase;
+      HeaderOffset = (UINT32)SourceBase;
+
+      //
+      // The Mach-O image is the entire Kernel Collection image. This is because
+      // as of macOS 13 Developer Beta 3, the inner kernel Mach-O references
+      // segments that preceed it.
+      //
+      SourceBase = 0;
+      SourceSize = Prelinked->PrelinkedSize;
     }
   }
 
@@ -230,7 +240,7 @@ InternalCreatePrelinkedKext (
 
   if (  (Prelinked != NULL)
      && HasExe
-     && !MachoInitializeContext (&NewKext->Context.MachContext, &Prelinked->Prelinked[SourceBase], (UINT32)SourceSize, ContainerOffset, Prelinked->Is32Bit))
+     && !MachoInitializeContext (&NewKext->Context.MachContext, &Prelinked->Prelinked[SourceBase], (UINT32)SourceSize, HeaderOffset, InnerSize, Prelinked->Is32Bit))
   {
     FreePool (NewKext);
     return NULL;

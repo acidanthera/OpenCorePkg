@@ -175,9 +175,10 @@ InternalConnectExternalSymtab (
 
     if (!MachoInitializeContext64 (
            InnerContext,
-           &Buffer[Segment->FileOffset],
-           (UINT32)(BufferSize - Segment->FileOffset),
-           (UINT32)Segment->FileOffset
+           Buffer,
+           BufferSize,
+           (UINT32)Segment->FileOffset,
+           (UINT32)(BufferSize - Segment->FileOffset)
            ))
     {
       DEBUG ((
@@ -247,7 +248,7 @@ PrelinkedContextInit (
   //
   // Initialise primary context.
   //
-  if (!MachoInitializeContext (&Context->PrelinkedMachContext, Prelinked, PrelinkedSize, 0, Context->Is32Bit)) {
+  if (!MachoInitializeContext (&Context->PrelinkedMachContext, Prelinked, PrelinkedSize, 0, PrelinkedSize, Context->Is32Bit)) {
     return EFI_INVALID_PARAMETER;
   }
 
@@ -291,23 +292,6 @@ PrelinkedContextInit (
     return Status;
   }
 
-  Context->PrelinkedTextSegment = MachoGetSegmentByName (
-                                    &Context->PrelinkedMachContext,
-                                    PRELINK_TEXT_SEGMENT
-                                    );
-  if (Context->PrelinkedTextSegment == NULL) {
-    return EFI_NOT_FOUND;
-  }
-
-  Context->PrelinkedTextSection = MachoGetSectionByName (
-                                    &Context->PrelinkedMachContext,
-                                    Context->PrelinkedTextSegment,
-                                    PRELINK_TEXT_SECTION
-                                    );
-  if (Context->PrelinkedTextSection == NULL) {
-    return EFI_NOT_FOUND;
-  }
-
   if (Context->IsKernelCollection) {
     //
     // Additionally process special entries for KC.
@@ -334,6 +318,23 @@ PrelinkedContextInit (
                                  KC_LINKEDIT_SEGMENT
                                  );
     if (Context->LinkEditSegment == NULL) {
+      return EFI_NOT_FOUND;
+    }
+  } else {
+    Context->PrelinkedTextSegment = MachoGetSegmentByName (
+                                      &Context->PrelinkedMachContext,
+                                      PRELINK_TEXT_SEGMENT
+                                      );
+    if (Context->PrelinkedTextSegment == NULL) {
+      return EFI_NOT_FOUND;
+    }
+
+    Context->PrelinkedTextSection = MachoGetSectionByName (
+                                      &Context->PrelinkedMachContext,
+                                      Context->PrelinkedTextSegment,
+                                      PRELINK_TEXT_SECTION
+                                      );
+    if (Context->PrelinkedTextSection == NULL) {
       return EFI_NOT_FOUND;
     }
   }
@@ -921,7 +922,7 @@ PrelinkedReserveKextSize (
 
   if (Executable != NULL) {
     ASSERT (ExecutableSize > 0);
-    if (!MachoInitializeContext (&Context, Executable, ExecutableSize, 0, Is32Bit)) {
+    if (!MachoInitializeContext (&Context, Executable, ExecutableSize, 0, ExecutableSize, Is32Bit)) {
       return EFI_INVALID_PARAMETER;
     }
 
@@ -953,7 +954,7 @@ PrelinkedInjectKext (
   IN     CONST CHAR8        *ExecutablePath OPTIONAL,
   IN     CONST UINT8        *Executable OPTIONAL,
   IN     UINT32             ExecutableSize OPTIONAL,
-  OUT    CONST CHAR8        **BundleVersion OPTIONAL
+  OUT    CHAR8              BundleVersion[MAX_INFO_BUNDLE_VERSION_KEY_SIZE] OPTIONAL
   )
 {
   EFI_STATUS  Status;
@@ -981,6 +982,7 @@ PrelinkedInjectKext (
   UINT32            KextOffset;
   UINT64            FileOffset;
   UINT64            LoadAddressOffset;
+  CONST CHAR8       *BundleVerStr;
 
   PrelinkedKext = NULL;
 
@@ -988,13 +990,6 @@ PrelinkedInjectKext (
   ASSERT (BundlePath != NULL);
   ASSERT (InfoPlist != NULL);
   ASSERT (InfoPlistSize > 0);
-
-  //
-  // Assume no bundle version from the beginning.
-  //
-  if (BundleVersion != NULL) {
-    *BundleVersion = NULL;
-  }
 
   KmodAddress           = 0;
   AlignedExecutableSize = 0;
@@ -1015,7 +1010,7 @@ PrelinkedInjectKext (
   //
   if (Executable != NULL) {
     ASSERT (ExecutableSize > 0);
-    if (!MachoInitializeContext (&ExecutableContext, (UINT8 *)Executable, ExecutableSize, 0, Context->Is32Bit)) {
+    if (!MachoInitializeContext (&ExecutableContext, (UINT8 *)Executable, ExecutableSize, 0, ExecutableSize, Context->Is32Bit)) {
       DEBUG ((DEBUG_INFO, "OCAK: Injected kext %a/%a is not a supported executable\n", BundlePath, ExecutablePath));
       return EFI_INVALID_PARAMETER;
     }
@@ -1047,7 +1042,7 @@ PrelinkedInjectKext (
       AlignedExecutableSize - ExecutableSize
       );
 
-    if (  !MachoInitializeContext (&ExecutableContext, &Context->Prelinked[KextOffset], ExecutableSize, 0, Context->Is32Bit)
+    if (  !MachoInitializeContext (&ExecutableContext, &Context->Prelinked[KextOffset], ExecutableSize, 0, ExecutableSize, Context->Is32Bit)
        || OcOverflowAddU64 (Context->PrelinkedLastLoadAddress, FileOffset, &LoadAddressOffset))
     {
       return EFI_INVALID_PARAMETER;
@@ -1103,7 +1098,8 @@ PrelinkedInjectKext (
           break;
         }
 
-        *BundleVersion = XmlNodeContent (KextPlistValue);
+        BundleVerStr = XmlNodeContent (KextPlistValue);
+        AsciiStrCpyS (BundleVersion, MAX_INFO_BUNDLE_VERSION_KEY_SIZE, BundleVerStr);
         break;
       }
     }
@@ -1184,7 +1180,7 @@ PrelinkedInjectKext (
       // ownership was transferred by InternalLinkPrelinkedKext.
       //
       KcKextIndexFixups (Context, &PrelinkedKext->Context.MachContext);
-      Status = KcKextApplyFileDelta (&PrelinkedKext->Context.MachContext, KextOffset);
+      Status = KcKextApplyFileDelta (Context, &PrelinkedKext->Context.MachContext, KextOffset);
       if (EFI_ERROR (Status)) {
         DEBUG ((
           DEBUG_WARN,

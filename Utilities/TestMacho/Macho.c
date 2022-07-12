@@ -37,7 +37,7 @@ FeedMacho (
 {
   OC_MACHO_CONTEXT  Context;
 
-  if (!MachoInitializeContext64 (&Context, File, Size, 0)) {
+  if (!MachoInitializeContext64 (&Context, File, Size, 0, Size)) {
     return -1;
   }
 
