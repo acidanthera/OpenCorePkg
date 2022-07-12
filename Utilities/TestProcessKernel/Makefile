@@ -3,9 +3,10 @@
 # SPDX-License-Identifier: BSD-3-Clause
 ##
 
-PROJECT = KextInject
+PROJECT = ProcessKernel
 PRODUCT = $(PROJECT)$(INFIX)$(SUFFIX)
 OBJS    = $(PROJECT).o \
+	ProcessKernelDummy.o \
 	CommonPatches.o \
 	CpuidPatches.o \
 	KextPatcher.o \
@@ -30,7 +31,19 @@ OBJS    = $(PROJECT).o \
 	trees.o \
 	uncompr.o \
 	zlib_uefi.o
-VPATH   = ../../Library/OcAppleKernelLib:$\
+#
+# OcConfigurationLib targets.
+#
+OBJS   += OcConfigurationLib.o
+#
+# OpenCoreKernel targets.
+#
+OBJS   += OpenCoreKernel.o
+OBJS   += OpenCoreKernelPatch.o
+
+VPATH   = ../../Library/OcConfigurationLib:$\
+  ../../Library/OcAppleKernelLib:$\
+	../../Library/OcMainLib:$\
 	../../Library/OcCompressionLib/lzss:$\
 	../../Library/OcCompressionLib/lzvn:$\
 	../../Library/OcCompressionLib/zlib

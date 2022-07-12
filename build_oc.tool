@@ -28,6 +28,7 @@ buildutil() {
     "TestExt4Dxe"
     "TestNtfsDxe"
     "TestPeCoff"
+    "TestProcessKernel"
     "TestRsaPreprocess"
     "TestSmbios"
   )
