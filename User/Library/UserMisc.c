@@ -695,3 +695,11 @@ OcLocateRootVolume (
 {
   return NULL;
 }
+
+UINTN
+GetSerialRegisterBase (
+  VOID
+  )
+{
+  return 0;
+}

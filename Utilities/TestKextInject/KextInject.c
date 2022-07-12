@@ -22,34 +22,7 @@
 #include <Library/OcConfigurationLib.h>
 #include <Library/OcMainLib.h>
 
-#include <string.h>
-#include <sys/time.h>
-
 #include <UserFile.h>
-
-// FIXME:
-EFI_STATUS
-OcKernelProcessPrelinked (
-  IN     OC_GLOBAL_CONFIG  *Config,
-  IN     UINT32            DarwinVersion,
-  IN     BOOLEAN           Is32Bit,
-  IN OUT UINT8             *Kernel,
-  IN     UINT32            *KernelSize,
-  IN     UINT32            AllocatedSize,
-  IN     UINT32            LinkedExpansion,
-  IN     UINT32            ReservedExeSize
-  )
-{
-  return EFI_UNSUPPORTED;
-}
-
-UINTN
-GetSerialRegisterBase (
-  VOID
-  )
-{
-  return 0;
-}
 
 STATIC CHAR8  mFullPath[256] = { 0 };
 STATIC UINTN  mRootPathLen = 0;
@@ -65,7 +38,8 @@ UserSetRootPath (
   mRootPathLen = strlen (mFullPath);
 }
 
-STATIC UINT8 *
+STATIC
+UINT8 *
 UserReadFileFromRoot (
   IN  CONST CHAR8  *FileName,
   OUT UINT32       *Size
@@ -180,11 +154,10 @@ UserOcKernelLoadAndReserveKext (
 
   AsciiHostSlashes (FullPath);
 
-  Kext->PlistData = (CHAR8 *)UserReadFileFromRoot (
+  Kext->PlistData = (CHAR8 *) UserReadFileFromRoot (
                       FullPath,
                       &Kext->PlistDataSize
                       );
-
   if (Kext->PlistData == NULL) {
     DEBUG ((
       DEBUG_ERROR,
@@ -230,7 +203,6 @@ UserOcKernelLoadAndReserveKext (
                         FullPath,
                         &Kext->ImageDataSize
                         );
-
     if (Kext->ImageData == NULL) {
       DEBUG ((
         DEBUG_ERROR,
@@ -274,6 +246,8 @@ UserOcKernelLoadAndReserveKext (
   }
 
   (*NumReservedKexts)++;
+
+  return EFI_SUCCESS;
 }
 
 EFI_STATUS
@@ -301,6 +275,7 @@ OcGetFileSize (
   )
 {
   ASSERT (File == &NilFileProtocol);
+  
   *Size = mPrelinkedSize;
   return EFI_SUCCESS;
 }
@@ -316,8 +291,9 @@ WrapMain (
   OC_GLOBAL_CONFIG   Config;
   EFI_STATUS         Status;
   UINT32             ErrorCount;
+  UINT32             Index;
   UINT32             AllocSize;
-  PRELINKED_CONTEXT  Context;
+  // PRELINKED_CONTEXT  Context;
   EFI_STATUS         PrelinkedStatus;
 
   CONST CHAR8  *FileName;
@@ -354,7 +330,6 @@ WrapMain (
     DEBUG ((DEBUG_ERROR, "Invalid config\n"));
     return -1;
   }
-
   if (ErrorCount > 0) {
     DEBUG ((DEBUG_ERROR, "Serialisation returns %u %a!\n", ErrorCount, ErrorCount > 1 ? "errors" : "error"));
   }
@@ -372,7 +347,7 @@ WrapMain (
   //
   // Process kexts to be injected.
   //
-  for (UINT32 Index = 0; Index < Config.Kernel.Add.Count; Index++) {
+  for (Index = 0; Index < Config.Kernel.Add.Count; ++Index) {
     OC_KERNEL_ADD_ENTRY  *Kext = Config.Kernel.Add.Values[Index];
 
     Status = UserOcKernelLoadAndReserveKext (
@@ -392,7 +367,6 @@ WrapMain (
   }
 
   UINT32  LinkedExpansion = KcGetSegmentFixupChainsSize (ReservedExeSize);
-
   if (LinkedExpansion == 0) {
     FailedToProcess = TRUE;
     return -1;
@@ -412,7 +386,6 @@ WrapMain (
              ReservedInfoSize + ReservedExeSize + LinkedExpansion,
              Sha384
              );
-
   if (!EFI_ERROR (Status)) {
     FreePool (mPrelinked);
     mPrelinked     = NewPrelinked;
@@ -432,13 +405,18 @@ WrapMain (
     FailedToProcess = TRUE;
   }
 
-  ////
-  ////
-  ////
+  OC_CPU_INFO  DummyCpuInfo;
+  ZeroMem (&DummyCpuInfo, sizeof (DummyCpuInfo));
 
+  //
+  // Disable ProvideCurrentCpuInfo patch, as there is no CpuInfo available on userspace.
+  //
   Config.Kernel.Quirks.ProvideCurrentCpuInfo = FALSE;
+  ASSERT (Config.Kernel.Quirks.ProvideCurrentCpuInfo == FALSE);
+  //
+  // TODO: Correctly set/override Cpuid1Data for testing CPUID patches.
+  //
   ZeroMem (Config.Kernel.Emulate.Cpuid1Data, sizeof (Config.Kernel.Emulate.Cpuid1Data));
-  ASSERT (!Config.Kernel.Quirks.ProvideCurrentCpuInfo);
   ASSERT ((Config.Kernel.Emulate.Cpuid1Data[0] == 0)
        || (Config.Kernel.Emulate.Cpuid1Data[1] == 0)
        || (Config.Kernel.Emulate.Cpuid1Data[2] == 0)
@@ -451,7 +429,7 @@ WrapMain (
   //
   OcKernelApplyPatches (
     &Config,
-    NULL,
+    &DummyCpuInfo,
     KernelVersion,
     FALSE,
     CacheTypeNone,
@@ -478,18 +456,7 @@ WrapMain (
 
   DEBUG ((DEBUG_INFO, "OC: Prelinked status - %r\n", PrelinkedStatus));
 
-  ////
-  ////
-  ////
-
-  //Status = PrelinkedInjectComplete (&Context);
   UserWriteFile ("out.bin", NewPrelinked, NewPrelinkedSize);
-  /*if (!EFI_ERROR (Status)) {
-    DEBUG ((DEBUG_WARN, "[OK] Prelink inject complete success\n"));
-  } else {
-    DEBUG ((DEBUG_WARN, "[FAIL] Prelink inject complete error %r\n", Status));
-    FailedToProcess = TRUE;
-  }*/
 
   FreePool (mPrelinked);
 
