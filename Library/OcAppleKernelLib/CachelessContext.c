@@ -934,9 +934,24 @@ CachelessContextAddKext (
           FreePool (NewKext);
           return EFI_INVALID_PARAMETER;
         }
-      } else if (AsciiStrCmp (TmpKeyValue, INFO_BUNDLE_LIBRARIES_64_KEY) == 0) {
-        InfoPlistLibraries64 = PlistNodeCast (InfoPlistValue, PLIST_NODE_TYPE_DICT);
-        if (InfoPlistLibraries64 == NULL) {
+      }
+    } else if (AsciiStrCmp (TmpKeyValue, INFO_BUNDLE_LIBRARIES_64_KEY) == 0) {
+      InfoPlistLibraries64 = PlistNodeCast (InfoPlistValue, PLIST_NODE_TYPE_DICT);
+      if (InfoPlistLibraries64 == NULL) {
+        XmlDocumentFree (InfoPlistDocument);
+        FreePool (TmpInfoPlist);
+        FreePool (NewKext->PlistData);
+        FreePool (NewKext);
+        return EFI_INVALID_PARAMETER;
+      }
+
+      if (!Context->Is32Bit) {
+        InfoPlistLibraries = InfoPlistLibraries64;
+      }
+    } else {
+      DEBUG_CODE_BEGIN ();
+      if ((BundleVersion != NULL) && (AsciiStrCmp (TmpKeyValue, INFO_BUNDLE_VERSION_KEY) == 0)) {
+        if (PlistNodeCast (InfoPlistValue, PLIST_NODE_TYPE_STRING) == NULL) {
           XmlDocumentFree (InfoPlistDocument);
           FreePool (TmpInfoPlist);
           FreePool (NewKext->PlistData);
@@ -944,26 +959,11 @@ CachelessContextAddKext (
           return EFI_INVALID_PARAMETER;
         }
 
-        if (!Context->Is32Bit) {
-          InfoPlistLibraries = InfoPlistLibraries64;
-        }
-      } else {
-        DEBUG_CODE_BEGIN ();
-        if ((BundleVersion != NULL) && (AsciiStrCmp (TmpKeyValue, INFO_BUNDLE_VERSION_KEY) == 0)) {
-          if (PlistNodeCast (InfoPlistValue, PLIST_NODE_TYPE_STRING) == NULL) {
-            XmlDocumentFree (InfoPlistDocument);
-            FreePool (TmpInfoPlist);
-            FreePool (NewKext->PlistData);
-            FreePool (NewKext);
-            return EFI_INVALID_PARAMETER;
-          }
-
-          BundleVerStr = XmlNodeContent (InfoPlistValue);
-          AsciiStrnCpyS (BundleVersion, MAX_INFO_BUNDLE_VERSION_KEY_SIZE, BundleVerStr, AsciiStrLen (BundleVerStr));
-        }
-
-        DEBUG_CODE_END ();
+        BundleVerStr = XmlNodeContent (InfoPlistValue);
+        AsciiStrnCpyS (BundleVersion, MAX_INFO_BUNDLE_VERSION_KEY_SIZE, BundleVerStr, AsciiStrLen (BundleVerStr));
       }
+
+      DEBUG_CODE_END ();
     }
   }
 
