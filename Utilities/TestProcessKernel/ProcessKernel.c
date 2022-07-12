@@ -25,15 +25,15 @@
 #include <UserFile.h>
 
 STATIC CHAR8  mFullPath[256] = { 0 };
-STATIC UINTN  mRootPathLen = 0;
+STATIC UINTN  mRootPathLen   = 0;
 
 STATIC
 VOID
 UserSetRootPath (
-  IN CONST CHAR8 *RootPath
+  IN CONST CHAR8  *RootPath
   )
 {
-  AsciiStrCpyS (mFullPath, sizeof(mFullPath) - 1, RootPath);
+  AsciiStrCpyS (mFullPath, sizeof (mFullPath) - 1, RootPath);
   DEBUG ((DEBUG_ERROR, "Root Path: %a\n", mFullPath));
   mRootPathLen = strlen (mFullPath);
 }
@@ -45,7 +45,7 @@ UserReadFileFromRoot (
   OUT UINT32       *Size
   )
 {
-  AsciiStrCpyS (&mFullPath[mRootPathLen], sizeof(mFullPath) - mRootPathLen - 1, FileName);
+  AsciiStrCpyS (&mFullPath[mRootPathLen], sizeof (mFullPath) - mRootPathLen - 1, FileName);
   DEBUG ((DEBUG_ERROR, "Full path: %a\n", mFullPath));
   return UserReadFile (mFullPath, Size);
 }
@@ -154,10 +154,10 @@ UserOcKernelLoadAndReserveKext (
 
   AsciiHostSlashes (FullPath);
 
-  Kext->PlistData = (CHAR8 *) UserReadFileFromRoot (
-                      FullPath,
-                      &Kext->PlistDataSize
-                      );
+  Kext->PlistData = (CHAR8 *)UserReadFileFromRoot (
+                               FullPath,
+                               &Kext->PlistDataSize
+                               );
   if (Kext->PlistData == NULL) {
     DEBUG ((
       DEBUG_ERROR,
@@ -219,13 +219,13 @@ UserOcKernelLoadAndReserveKext (
   }
 
   Status = PrelinkedReserveKextSize (
-              ReservedInfoSize,
-              ReservedExeSize,
-              Kext->PlistDataSize,
-              Kext->ImageData,
-              Kext->ImageDataSize,
-              Is32Bit
-              );
+             ReservedInfoSize,
+             ReservedExeSize,
+             Kext->PlistDataSize,
+             Kext->ImageData,
+             Kext->ImageDataSize,
+             Is32Bit
+             );
   if (EFI_ERROR (Status)) {
     DEBUG ((
       DEBUG_INFO,
@@ -275,7 +275,7 @@ OcGetFileSize (
   )
 {
   ASSERT (File == &NilFileProtocol);
-  
+
   *Size = mPrelinkedSize;
   return EFI_SUCCESS;
 }
@@ -286,15 +286,15 @@ WrapMain (
   char  *argv[]
   )
 {
-  UINT8              *ConfigFileBuffer;
-  UINT32             ConfigFileSize;
-  OC_GLOBAL_CONFIG   Config;
-  EFI_STATUS         Status;
-  UINT32             ErrorCount;
-  UINT32             Index;
-  UINT32             AllocSize;
+  UINT8             *ConfigFileBuffer;
+  UINT32            ConfigFileSize;
+  OC_GLOBAL_CONFIG  Config;
+  EFI_STATUS        Status;
+  UINT32            ErrorCount;
+  UINT32            Index;
+  UINT32            AllocSize;
   // PRELINKED_CONTEXT  Context;
-  EFI_STATUS         PrelinkedStatus;
+  EFI_STATUS  PrelinkedStatus;
 
   CONST CHAR8  *FileName;
 
@@ -313,7 +313,8 @@ WrapMain (
   //
   // Read config file (Only one single config is supported).
   //
-  CHAR8 AsciiOcConfig[16];
+  CHAR8  AsciiOcConfig[16];
+
   UnicodeStrToAsciiStrS (OPEN_CORE_CONFIG_PATH, AsciiOcConfig, L_STR_SIZE (OPEN_CORE_CONFIG_PATH));
   ConfigFileBuffer = UserReadFileFromRoot (AsciiOcConfig, &ConfigFileSize);
   if (ConfigFileBuffer == NULL) {
@@ -325,11 +326,12 @@ WrapMain (
   // Initialise config structure to be checked, and exit on error.
   //
   ErrorCount = 0;
-  Status = OcConfigurationInit (&Config, ConfigFileBuffer, ConfigFileSize, &ErrorCount);
+  Status     = OcConfigurationInit (&Config, ConfigFileBuffer, ConfigFileSize, &ErrorCount);
   if (EFI_ERROR (Status)) {
     DEBUG ((DEBUG_ERROR, "Invalid config\n"));
     return -1;
   }
+
   if (ErrorCount > 0) {
     DEBUG ((DEBUG_ERROR, "Serialisation returns %u %a!\n", ErrorCount, ErrorCount > 1 ? "errors" : "error"));
   }
@@ -338,7 +340,7 @@ WrapMain (
   PcdGet32 (PcdDebugPrintErrorLevel)      |= DEBUG_INFO;
   PcdGet8 (PcdDebugPropertyMask)          |= DEBUG_PROPERTY_DEBUG_CODE_ENABLED;
 
-  BOOLEAN mUse32BitKernel = FALSE;
+  BOOLEAN  mUse32BitKernel = FALSE;
 
   UINT32  ReservedInfoSize = PRELINK_INFO_RESERVE_SIZE;
   UINT32  ReservedExeSize  = 0;
@@ -351,14 +353,14 @@ WrapMain (
     OC_KERNEL_ADD_ENTRY  *Kext = Config.Kernel.Add.Values[Index];
 
     Status = UserOcKernelLoadAndReserveKext (
-      Kext,
-      Index,
-      &Config,
-      mUse32BitKernel,
-      &ReservedExeSize,
-      &ReservedInfoSize,
-      &NumReservedKexts
-      );
+               Kext,
+               Index,
+               &Config,
+               mUse32BitKernel,
+               &ReservedExeSize,
+               &ReservedInfoSize,
+               &NumReservedKexts
+               );
     if (EFI_ERROR (Status)) {
       DEBUG ((DEBUG_WARN, "[FAIL] Kernel load and reserve - %r\n", Status));
       FailedToProcess = TRUE;
@@ -367,15 +369,17 @@ WrapMain (
   }
 
   UINT32  LinkedExpansion = KcGetSegmentFixupChainsSize (ReservedExeSize);
+
   if (LinkedExpansion == 0) {
     FailedToProcess = TRUE;
     return -1;
   }
 
-  UINT8       *NewPrelinked;
-  UINT32      NewPrelinkedSize;
-  UINT8       Sha384[48];
-  BOOLEAN     Is32Bit;
+  UINT8    *NewPrelinked;
+  UINT32   NewPrelinkedSize;
+  UINT8    Sha384[48];
+  BOOLEAN  Is32Bit;
+
   Status = ReadAppleKernel (
              &NilFileProtocol,
              FALSE,
@@ -406,6 +410,7 @@ WrapMain (
   }
 
   OC_CPU_INFO  DummyCpuInfo;
+
   ZeroMem (&DummyCpuInfo, sizeof (DummyCpuInfo));
 
   //
@@ -417,11 +422,13 @@ WrapMain (
   // TODO: Correctly set/override Cpuid1Data for testing CPUID patches.
   //
   ZeroMem (Config.Kernel.Emulate.Cpuid1Data, sizeof (Config.Kernel.Emulate.Cpuid1Data));
-  ASSERT ((Config.Kernel.Emulate.Cpuid1Data[0] == 0)
-       || (Config.Kernel.Emulate.Cpuid1Data[1] == 0)
-       || (Config.Kernel.Emulate.Cpuid1Data[2] == 0)
-       || (Config.Kernel.Emulate.Cpuid1Data[3] == 0));
-  
+  ASSERT (
+    (Config.Kernel.Emulate.Cpuid1Data[0] == 0)
+         || (Config.Kernel.Emulate.Cpuid1Data[1] == 0)
+         || (Config.Kernel.Emulate.Cpuid1Data[2] == 0)
+         || (Config.Kernel.Emulate.Cpuid1Data[3] == 0)
+    );
+
   ASSERT (Config.Kernel.Force.Count == 0);
 
   //
