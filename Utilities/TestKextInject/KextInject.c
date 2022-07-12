@@ -51,14 +51,17 @@ GetSerialRegisterBase (
   return 0;
 }
 
-STATIC char mFullPath[256] = { 0 };
-STATIC size_t mRootPathLen = 0;
+STATIC CHAR8  mFullPath[256] = { 0 };
+STATIC UINTN  mRootPathLen = 0;
 
-STATIC VOID
+STATIC
+VOID
 UserSetRootPath (
-  char *RootPath
-  ) {
-  strncpy (mFullPath, RootPath, sizeof(mFullPath) - 1);
+  IN CONST CHAR8 *RootPath
+  )
+{
+  AsciiStrCpyS (mFullPath, sizeof(mFullPath) - 1, RootPath);
+  DEBUG ((DEBUG_ERROR, "Root Path: %a\n", mFullPath));
   mRootPathLen = strlen (mFullPath);
 }
 
@@ -68,8 +71,8 @@ UserReadFileFromRoot (
   OUT UINT32       *Size
   )
 {
-  strncpy (&mFullPath[mRootPathLen], FileName, sizeof(mFullPath) - mRootPathLen - 1);
-  printf("Full path: %s\n", mFullPath);
+  AsciiStrCpyS (&mFullPath[mRootPathLen], sizeof(mFullPath) - mRootPathLen - 1, FileName);
+  DEBUG ((DEBUG_ERROR, "Full path: %a\n", mFullPath));
   return UserReadFile (mFullPath, Size);
 }
 
@@ -333,9 +336,10 @@ WrapMain (
   UserSetRootPath (argv[1]);
   //
   // Read config file (Only one single config is supported).
-  // FIXME: OPEN_CORE_CONFIG_PATH
   //
-  ConfigFileBuffer = UserReadFileFromRoot ("config.plist", &ConfigFileSize);
+  CHAR8 AsciiOcConfig[16];
+  UnicodeStrToAsciiStrS (OPEN_CORE_CONFIG_PATH, AsciiOcConfig, L_STR_SIZE (OPEN_CORE_CONFIG_PATH));
+  ConfigFileBuffer = UserReadFileFromRoot (AsciiOcConfig, &ConfigFileSize);
   if (ConfigFileBuffer == NULL) {
     DEBUG ((DEBUG_ERROR, "Failed to read %s\n", OPEN_CORE_CONFIG_PATH));
     return -1;
