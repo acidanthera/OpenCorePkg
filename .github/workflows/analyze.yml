@@ -36,8 +36,6 @@ jobs:
       - name: Check AppleModels
         working-directory: AppleModels
         run: |
-          pwd
-          ls
           python3 ./update_generated.py  || exit 1
           git status --porcelain
           git diff /Users/runner/work/OpenCorePkg/OpenCorePkg/Utilities/macserial/modelinfo_autogen.h
