@@ -448,6 +448,7 @@ def action_guess(args):
         return 0
 
     print(f'UNKNOWN: Failed to determine supported models for MLB {mlb}!')
+    return None
 
 
 def main():

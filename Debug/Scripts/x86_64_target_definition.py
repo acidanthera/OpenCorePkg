@@ -774,3 +774,4 @@ def get_dynamic_setting(_, setting_name):
             print('Cannot find requested triple!\nHint: set EFI_TRIPLE variable.')
             sys.exit(1)
         return get_target_definition(triple)
+    return None
