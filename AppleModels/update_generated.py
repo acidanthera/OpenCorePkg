@@ -198,7 +198,7 @@ def export_db_macserial(db, dbpd, path, year=0):
         print('} AppleModel;\n', file=fh)
         print(f'#define APPLE_MODEL_MAX {len(db)}\n', file=fh)
 
-        print('''static PLATFORMDATA ApplePlatformData[] = {"''', file=fh)
+        print('static PLATFORMDATA ApplePlatformData[] = {', file=fh)
         for info in db:
             print(f'''  {{ "{info['SystemProductName']}", "{info['SystemSerialNumber']}" }},''', file=fh)
 
