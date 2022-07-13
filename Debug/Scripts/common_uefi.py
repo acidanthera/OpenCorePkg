@@ -1,7 +1,9 @@
+# pylint: disable=too-many-statements,too-many-branches
 """
 Common UEFI parsing and representation code.
 
 """
+
 
 import array
 

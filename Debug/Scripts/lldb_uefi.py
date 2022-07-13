@@ -1,3 +1,4 @@
+# pylint: disable=no-self-use,undefined-variable,wildcard-import,too-many-statements,import-error,too-many-branches
 '''
 Port of gdb_uefi.py to LLDB.
 Refer to gdb_uefi.py for more details.
@@ -11,7 +12,6 @@ import os
 import re
 import shlex
 
-# pylint: disable=no-self-use,undefined-variable,wildcard-import
 from collections import OrderedDict
 from common_uefi import *
 import lldb

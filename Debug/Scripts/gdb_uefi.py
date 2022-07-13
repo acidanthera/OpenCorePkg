@@ -1,5 +1,4 @@
-# load-plugins=pylint.extensions.no_self_use
-# pylint: disable=no-self-use,undefined-variable
+# pylint: disable=no-self-use,undefined-variable,too-few-public-methods
 
 '''
 Allows loading TianoCore symbols into a GDB session attached to EFI

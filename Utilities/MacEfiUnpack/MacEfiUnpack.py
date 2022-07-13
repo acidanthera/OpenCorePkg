@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-
+# pylint: disable=redefined-outer-name
 '''
 Quick and dirty unpacker for next generation Mac firmware.
 

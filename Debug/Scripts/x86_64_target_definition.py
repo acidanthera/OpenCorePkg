@@ -1,4 +1,5 @@
 #!/usr/bin/python
+# pylint: disable=undefined-variable,wildcard-import,import-error
 # ===-- x86_64_target_definition.py -----------------------------*- C++ -*-===//
 #
 # Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
@@ -39,7 +40,6 @@
 import os
 import sys
 
-# pylint: disable=undefined-variable,wildcard-import,unused-wildcard-import
 from lldb import *
 
 # Compiler and DWARF register numbers

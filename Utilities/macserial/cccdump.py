@@ -1,4 +1,4 @@
-# pylint: disable=undefined-variable
+# pylint: disable=undefined-variable,import-error,too-many-boolean-expressions
 #
 # Extract platform data from CCC
 # Copyright (c) 2018 vit9696
