@@ -204,8 +204,8 @@ def export_db_macserial(db, dbpd, path, year=0):
 
         print('};\n', file=fh)
 
-        print(f"#define APPLE_MODEL_CODE_MAX {max(len(info['AppleModelCode']) for info in db)}\n", file=fh)
-        print('static const char *AppleModelCode[][APPLE_MODEL_CODE_MAX] = {\n', file=fh)
+        print(f"#define APPLE_MODEL_CODE_MAX {max(len(info['AppleModelCode']) for info in db)}", file=fh)
+        print('static const char *AppleModelCode[][APPLE_MODEL_CODE_MAX] = {', file=fh)
 
         for info in db:
             print(f"""  /* {info['SystemProductName']:14} */ {{"{'", "'.join(info['AppleModelCode'])}"}},""", file=fh)
