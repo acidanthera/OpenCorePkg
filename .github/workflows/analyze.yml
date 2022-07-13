@@ -75,7 +75,7 @@ jobs:
 
       - name: Run prospector
         run: |
-          /usr/bin/curl -L https://raw.githubusercontent.com/acidanthera/ocbuild/master/prospector/profile.yml -o profile.yml || exit 1
+          /usr/bin/curl -L https://raw.githubusercontent.com/dreamwhite/ocbuild/master/prospector/profile.yml -o profile.yml || exit 1
           python3 -m prospector . -P ./profile.yml > prospector_result.txt || exit 1
 
       - name: Upload prospector result to Artifacts
