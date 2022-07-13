@@ -11,7 +11,7 @@ cd "$SRC_DIR" || exit 1
 OUTPUT_PATH="$(pwd)/libressl"
 BUILD_DIR="$(pwd)/tmp/${LIBRESSL_NAME}/build"
 
-export CFLAGS="-mmacosx-version-min=10.6"
+export CFLAGS="-mmacosx-version-min=10.6 -Wno-unguarded-availability-new"
 export LDFLAGS="-mmacosx-version-min=10.6"
 
 abort() {
@@ -96,15 +96,16 @@ else
   EXTRA_OPTS=()
 fi
 
+# Monkeypatch to disable strtonum for <11.0 support
+"${SED}" -i '' -E 's/strsep strtonum/strsep/g' configure || ret=$?
+# "${FIND}" . -type f -name Makefile -exec "${SED}" -i '' -E 's/HAVE_STRTONUM/HAVE_STRDISABLED/g' {} \; || ret=$?
+if [ ${ret} -ne 0 ]; then
+  abort "Failed to monkeypatch strtonum in LibreSSL with code ${ret}"
+fi
+
 ./configure --disable-dependency-tracking --disable-tests --disable-shared --prefix="${BUILD_DIR}" "${EXTRA_OPTS[@]}" || ret=$?
 if [ ${ret} -ne 0 ]; then
   abort "Failed to configure LibreSSL with code ${ret}"
-fi
-
-# Monkeypatch to disable strtonum for <11.0 support
-"${FIND}" . -type f -name Makefile -exec "${SED}" -i '' 's/STRTONUM=1/STRTONUM=0/g' {} \; || ret=$?
-if [ ${ret} -ne 0 ]; then
-  abort "Failed to monkeypatch strtonum in LibreSSL with code ${ret}"
 fi
 
 make -j "$(getconf _NPROCESSORS_ONLN)" || ret=$?
