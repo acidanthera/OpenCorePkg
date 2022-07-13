@@ -1,3 +1,4 @@
+# load-plugins=pylint.extensions.no_self_use
 # pylint: disable=no-self-use,undefined-variable
 
 '''
