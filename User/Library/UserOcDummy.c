@@ -17,6 +17,8 @@ OcGetNextLoadOptionDevicePath (
   IN  EFI_DEVICE_PATH_PROTOCOL  *FullPath
   )
 {
+  ASSERT (FALSE);
+
   return NULL;
 }
 
@@ -281,7 +283,9 @@ OcPlatformIs64BitSupported (
   IN UINT32  KernelVersion
   )
 {
-  return TRUE;
+  ASSERT (FALSE);
+
+  return FALSE;
 }
 
 EFI_STATUS
@@ -334,6 +338,7 @@ OcGetCurrentMemoryMap (
   )
 {
   ASSERT (FALSE);
+
   return NULL;
 }
 
@@ -369,5 +374,6 @@ OcReadFile (
   )
 {
   ASSERT (FALSE);
+
   return NULL;
 }
