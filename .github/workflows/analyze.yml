@@ -36,8 +36,6 @@ jobs:
       - name: Check AppleModels
         working-directory: AppleModels
         run: |
-          pwd
-          ls
           python3 ./update_generated.py  || exit 1
           if [ "$(git status --porcelain)" != "" ]; then echo "DataBase desync"; exit 1 ; fi
 
