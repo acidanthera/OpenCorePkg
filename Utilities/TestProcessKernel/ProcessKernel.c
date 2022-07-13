@@ -33,9 +33,21 @@ UserSetRootPath (
   IN CONST CHAR8  *RootPath
   )
 {
+  UINTN  RootPathLen = AsciiStrLen (RootPath);
+
   AsciiStrCpyS (mFullPath, sizeof (mFullPath) - 1, RootPath);
+  //
+  // If passed without '/' in the end, append it.
+  //
+  if (mFullPath[RootPathLen - 1] != '/') {
+    mFullPath[RootPathLen] = '/';
+    mFullPath[RootPathLen + 1] = '\0';
+    mRootPathLen = RootPathLen + 1;
+  } else {
+    mRootPathLen = RootPathLen;
+  }
+
   DEBUG ((DEBUG_ERROR, "Root Path: %a\n", mFullPath));
-  mRootPathLen = strlen (mFullPath);
 }
 
 STATIC
