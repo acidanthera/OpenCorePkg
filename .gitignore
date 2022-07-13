@@ -82,3 +82,4 @@ Utilities/TestRsaPreprocess/RsaPreprocess
 Utilities/TestSmbios/Smbios
 Utilities/TestPeCoff/PeCoff
 Utilities/TestNtfsDxe/TestNtfsDxe
+Utilities/TestExt4Dxe/TestExt4Dxe
