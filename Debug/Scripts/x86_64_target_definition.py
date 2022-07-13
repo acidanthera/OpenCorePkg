@@ -39,7 +39,7 @@
 import os
 import sys
 
-# pylint: disable=undefined-variable,wildcard-import
+# pylint: disable=undefined-variable,wildcard-import,unused-wildcard-import
 from lldb import *
 
 # Compiler and DWARF register numbers
