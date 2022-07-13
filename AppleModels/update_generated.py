@@ -240,7 +240,7 @@ def export_db_macserial(db, dbpd, path, year=0):
 
         for model in models:
             if dbpd[model][update_products.KEY_STATUS] == update_products.STATUS_OK:
-                print(f" {{'{model}', '{remove_accents(dbpd[model][update_products.KEY_NAME])}'}},", file=fh)
+                print(f""" {{"{model}", "{remove_accents(dbpd[model][update_products.KEY_NAME])}"}},""", file=fh)
 
         print('};\n', file=fh)
 
