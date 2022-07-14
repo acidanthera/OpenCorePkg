@@ -297,9 +297,11 @@ PatcherGetSymbolAddressValue (
   if (Address != NULL) {
     *Address = (UINT8 *)MachoGetFileData (&Context->MachContext) + Offset;
   }
+
   if (Value != NULL) {
     *Value = Context->Is32Bit ? Symbol->Symbol32.Value : Symbol->Symbol64.Value;
   }
+
   return EFI_SUCCESS;
 }
 

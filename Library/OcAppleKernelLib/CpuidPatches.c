@@ -1004,11 +1004,11 @@ PATCHER_GENERIC_PATCH
 STATIC
 UINT8 *
 PatchMovVar (
-  IN OUT  UINT8             *Location,
-  IN      BOOLEAN           Is32Bit,
-  IN OUT  UINT64            *FuncAddr,
-  IN      UINT64            VarSymAddr,
-  IN      UINT64            Value
+  IN OUT  UINT8    *Location,
+  IN      BOOLEAN  Is32Bit,
+  IN OUT  UINT64   *FuncAddr,
+  IN      UINT64   VarSymAddr,
+  IN      UINT64   Value
   )
 {
   UINT8   *Start;
@@ -1049,7 +1049,6 @@ PatchMovVar (
     Location += sizeof (ValueUpper);
 
     *FuncAddr += (Location - Start);
-
   } else {
     //
     // mov rax, value
@@ -1063,7 +1062,7 @@ PatchMovVar (
     //
     // mov [var], rax
     //
-    Delta       = (INT32)(VarSymAddr - (*FuncAddr + 7));
+    Delta = (INT32)(VarSymAddr - (*FuncAddr + 7));
     DEBUG ((DEBUG_VERBOSE, "OCAK: TSC func delta 0x%X\n", Delta));
     *Location++ = 0x48;
     *Location++ = 0x89;
@@ -1503,7 +1502,6 @@ PatchProvideCurrentCpuInfo (
     *TscLocation++ = 0x58;
     *TscLocation++ = 0x58;
     *TscLocation++ = 0xC9;
-
   } else {
     //
     // mov rdi, FSB freq
@@ -1511,8 +1509,8 @@ PatchProvideCurrentCpuInfo (
     *TscLocation++ = 0x48;
     *TscLocation++ = 0xBF;
     CopyMem (TscLocation, &busFreqValue, sizeof (busFreqValue));
-    TscLocation         += sizeof (busFreqValue);
-    TscInitFuncSymAddr  += sizeof (busFreqValue) + 2;
+    TscLocation        += sizeof (busFreqValue);
+    TscInitFuncSymAddr += sizeof (busFreqValue) + 2;
 
     //
     // mov rsi, TSC freq
@@ -1520,8 +1518,8 @@ PatchProvideCurrentCpuInfo (
     *TscLocation++ = 0x48;
     *TscLocation++ = 0xBE;
     CopyMem (TscLocation, &tscFreqValue, sizeof (tscFreqValue));
-    TscLocation         += sizeof (tscFreqValue);
-    TscInitFuncSymAddr  += sizeof (tscFreqValue) + 2;
+    TscLocation        += sizeof (tscFreqValue);
+    TscInitFuncSymAddr += sizeof (tscFreqValue) + 2;
 
     //
     // call _tmrCvt(busFCvtt2n, tscFCvtn2t)
@@ -1529,8 +1527,8 @@ PatchProvideCurrentCpuInfo (
     Delta          = (INT32)(TmrCvtFunc - (TscLocation + 5));
     *TscLocation++ = 0xE8;
     CopyMem (TscLocation, &Delta, sizeof (Delta));
-    TscLocation         += sizeof (Delta);
-    TscInitFuncSymAddr  += sizeof (Delta) + 1;
+    TscLocation        += sizeof (Delta);
+    TscInitFuncSymAddr += sizeof (Delta) + 1;
 
     //
     // mov [_bus2tsc], rax
