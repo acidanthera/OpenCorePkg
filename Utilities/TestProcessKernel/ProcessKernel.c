@@ -33,7 +33,9 @@ UserSetRootPath (
   IN CONST CHAR8  *RootPath
   )
 {
-  UINTN  RootPathLen = AsciiStrLen (RootPath);
+  UINTN  RootPathLen;
+
+  RootPathLen = AsciiStrLen (RootPath);
 
   AsciiStrCpyS (mFullPath, sizeof (mFullPath) - 1, RootPath);
   //
@@ -70,6 +72,9 @@ STATIC EFI_FILE_PROTOCOL  NilFileProtocol;
 STATIC UINT8   *mPrelinked    = NULL;
 STATIC UINT32  mPrelinkedSize = 0;
 
+//
+// TODO: Windows portability.
+//
 STATIC
 VOID
 AsciiHostSlashes (
@@ -298,17 +303,30 @@ WrapMain (
   char  *argv[]
   )
 {
-  UINT8             *ConfigFileBuffer;
-  UINT32            ConfigFileSize;
-  OC_GLOBAL_CONFIG  Config;
-  EFI_STATUS        Status;
-  UINT32            ErrorCount;
-  UINT32            Index;
-  UINT32            AllocSize;
-  // PRELINKED_CONTEXT  Context;
-  EFI_STATUS  PrelinkedStatus;
+  UINT8                *ConfigFileBuffer;
+  UINT32               ConfigFileSize;
+  OC_GLOBAL_CONFIG     Config;
+  EFI_STATUS           Status;
+  UINT32               ErrorCount;
+  UINT32               Index;
+  UINT32               AllocSize;
+  EFI_STATUS           PrelinkedStatus;
 
-  CONST CHAR8  *FileName;
+  CONST CHAR8          *FileName;
+
+  BOOLEAN              mUse32BitKernel;
+  UINT32               ReservedInfoSize;
+  UINT32               ReservedExeSize;
+  UINT32               NumReservedKexts;
+  UINT32               LinkedExpansion;
+  UINT8                *NewPrelinked;
+  UINT32               NewPrelinkedSize;
+  UINT8                Sha384[48];
+  BOOLEAN              Is32Bit;
+
+  OC_CPU_INFO          DummyCpuInfo;
+
+  OC_KERNEL_ADD_ENTRY  *Kext;
 
   if (argc < 2) {
     DEBUG ((DEBUG_ERROR, "Usage: %a <path/to/OC/folder/> [path/to/kernel]\n\n", argv[0]));
@@ -326,7 +344,6 @@ WrapMain (
   // Read config file (Only one single config is supported).
   //
   CHAR8  AsciiOcConfig[16];
-
   UnicodeStrToAsciiStrS (OPEN_CORE_CONFIG_PATH, AsciiOcConfig, L_STR_SIZE (OPEN_CORE_CONFIG_PATH));
   ConfigFileBuffer = UserReadFileFromRoot (AsciiOcConfig, &ConfigFileSize);
   if (ConfigFileBuffer == NULL) {
@@ -343,7 +360,6 @@ WrapMain (
     DEBUG ((DEBUG_ERROR, "Invalid config\n"));
     return -1;
   }
-
   if (ErrorCount > 0) {
     DEBUG ((DEBUG_ERROR, "Serialisation returns %u %a!\n", ErrorCount, ErrorCount > 1 ? "errors" : "error"));
   }
@@ -352,17 +368,15 @@ WrapMain (
   PcdGet32 (PcdDebugPrintErrorLevel)      |= DEBUG_INFO;
   PcdGet8 (PcdDebugPropertyMask)          |= DEBUG_PROPERTY_DEBUG_CODE_ENABLED;
 
-  BOOLEAN  mUse32BitKernel = FALSE;
-
-  UINT32  ReservedInfoSize = PRELINK_INFO_RESERVE_SIZE;
-  UINT32  ReservedExeSize  = 0;
-  UINT32  NumReservedKexts = 0;
-
+  mUse32BitKernel  = FALSE;
+  ReservedInfoSize = PRELINK_INFO_RESERVE_SIZE;
+  ReservedExeSize  = 0;
+  NumReservedKexts = 0;
   //
   // Process kexts to be injected.
   //
   for (Index = 0; Index < Config.Kernel.Add.Count; ++Index) {
-    OC_KERNEL_ADD_ENTRY  *Kext = Config.Kernel.Add.Values[Index];
+    Kext = Config.Kernel.Add.Values[Index];
 
     Status = UserOcKernelLoadAndReserveKext (
                Kext,
@@ -380,17 +394,11 @@ WrapMain (
     }
   }
 
-  UINT32  LinkedExpansion = KcGetSegmentFixupChainsSize (ReservedExeSize);
-
+  LinkedExpansion = KcGetSegmentFixupChainsSize (ReservedExeSize);
   if (LinkedExpansion == 0) {
     FailedToProcess = TRUE;
     return -1;
   }
-
-  UINT8    *NewPrelinked;
-  UINT32   NewPrelinkedSize;
-  UINT8    Sha384[48];
-  BOOLEAN  Is32Bit;
 
   Status = ReadAppleKernel (
              &NilFileProtocol,
@@ -421,10 +429,7 @@ WrapMain (
     FailedToProcess = TRUE;
   }
 
-  OC_CPU_INFO  DummyCpuInfo;
-
   ZeroMem (&DummyCpuInfo, sizeof (DummyCpuInfo));
-
   //
   // Disable ProvideCurrentCpuInfo patch, as there is no CpuInfo available on userspace.
   //
@@ -456,7 +461,6 @@ WrapMain (
     NewPrelinked,
     NewPrelinkedSize
     );
-
   PrelinkedStatus = OcKernelProcessPrelinked (
                       &Config,
                       KernelVersion,
