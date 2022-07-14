@@ -57,8 +57,6 @@ for tool in "${TOOLS[@]}"; do
   fi
 done
 
-# TODO: should we always rebuild, or only rebuild if files not present/FORCE_INSTALL?
-
 ret=0
 
 "${RM}" -rf "tmp" && "${MKDIR}" "tmp" || ret=$?
