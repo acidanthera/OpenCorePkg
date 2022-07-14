@@ -285,6 +285,7 @@ PatcherGetSymbolAddressValue (
         //
         // Proceed to success.
         //
+        SymbolAddress = Context->Is32Bit ? Symbol->Symbol32.Value : Symbol->Symbol64.Value;
         break;
       }
 
@@ -299,7 +300,7 @@ PatcherGetSymbolAddressValue (
   }
 
   if (Value != NULL) {
-    *Value = Context->Is32Bit ? Symbol->Symbol32.Value : Symbol->Symbol64.Value;
+    *Value = SymbolAddress;
   }
 
   return EFI_SUCCESS;
