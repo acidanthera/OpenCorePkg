@@ -42,9 +42,9 @@ UserSetRootPath (
   // If passed without '/' in the end, append it.
   //
   if (mFullPath[RootPathLen - 1] != '/') {
-    mFullPath[RootPathLen] = '/';
+    mFullPath[RootPathLen]     = '/';
     mFullPath[RootPathLen + 1] = '\0';
-    mRootPathLen = RootPathLen + 1;
+    mRootPathLen               = RootPathLen + 1;
   } else {
     mRootPathLen = RootPathLen;
   }
@@ -303,28 +303,28 @@ WrapMain (
   char  *argv[]
   )
 {
-  UINT8                *ConfigFileBuffer;
-  UINT32               ConfigFileSize;
-  OC_GLOBAL_CONFIG     Config;
-  EFI_STATUS           Status;
-  UINT32               ErrorCount;
-  UINT32               Index;
-  UINT32               AllocSize;
-  EFI_STATUS           PrelinkedStatus;
+  UINT8             *ConfigFileBuffer;
+  UINT32            ConfigFileSize;
+  OC_GLOBAL_CONFIG  Config;
+  EFI_STATUS        Status;
+  UINT32            ErrorCount;
+  UINT32            Index;
+  UINT32            AllocSize;
+  EFI_STATUS        PrelinkedStatus;
 
-  CONST CHAR8          *FileName;
+  CONST CHAR8  *FileName;
 
-  BOOLEAN              mUse32BitKernel;
-  UINT32               ReservedInfoSize;
-  UINT32               ReservedExeSize;
-  UINT32               NumReservedKexts;
-  UINT32               LinkedExpansion;
-  UINT8                *NewPrelinked;
-  UINT32               NewPrelinkedSize;
-  UINT8                Sha384[48];
-  BOOLEAN              Is32Bit;
+  BOOLEAN  mUse32BitKernel;
+  UINT32   ReservedInfoSize;
+  UINT32   ReservedExeSize;
+  UINT32   NumReservedKexts;
+  UINT32   LinkedExpansion;
+  UINT8    *NewPrelinked;
+  UINT32   NewPrelinkedSize;
+  UINT8    Sha384[48];
+  BOOLEAN  Is32Bit;
 
-  OC_CPU_INFO          DummyCpuInfo;
+  OC_CPU_INFO  DummyCpuInfo;
 
   OC_KERNEL_ADD_ENTRY  *Kext;
 
@@ -344,6 +344,7 @@ WrapMain (
   // Read config file (Only one single config is supported).
   //
   CHAR8  AsciiOcConfig[16];
+
   UnicodeStrToAsciiStrS (OPEN_CORE_CONFIG_PATH, AsciiOcConfig, L_STR_SIZE (OPEN_CORE_CONFIG_PATH));
   ConfigFileBuffer = UserReadFileFromRoot (AsciiOcConfig, &ConfigFileSize);
   if (ConfigFileBuffer == NULL) {
@@ -360,6 +361,7 @@ WrapMain (
     DEBUG ((DEBUG_ERROR, "Invalid config\n"));
     return -1;
   }
+
   if (ErrorCount > 0) {
     DEBUG ((DEBUG_ERROR, "Serialisation returns %u %a!\n", ErrorCount, ErrorCount > 1 ? "errors" : "error"));
   }
