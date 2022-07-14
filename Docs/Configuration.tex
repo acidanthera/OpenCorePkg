@@ -1254,6 +1254,13 @@ of \href{https://github.com/acidanthera/AptioFixPkg}{\text{AptioMemoryFix.efi}},
 which is no longer maintained. Refer to the \hyperref[troubleshootingtricks]{Tips and Tricks}
 section for instructions on migration.
 
+Booter changes apply with the following effective order:
+\begin{itemize}
+\tightlist
+\item \texttt{Quirks} are processed.
+\item \texttt{Patch} is processed.
+\end{itemize}
+
 If this is used for the first time on customised firmware, the following requirements
 should be met before starting:
 
