@@ -57,33 +57,16 @@ for tool in "${TOOLS[@]}"; do
   fi
 done
 
-ret=0
+"${RM}" -rf "tmp" && "${MKDIR}" "tmp" || abort "Failed to create temporary directory with code $?"
 
-"${RM}" -rf "tmp" && "${MKDIR}" "tmp" || ret=$?
-if [ $ret -ne 0 ]; then
-  abort "Failed to create temporary directory with code ${ret}"
-fi
-
-pushd "tmp" > /dev/null || ret=$?
-if [ $ret -ne 0 ]; then
-  abort "Failed to cd to temporary directory tmp with code ${ret}"
-fi
+pushd "tmp" > /dev/null || abort "Failed to cd to temporary directory tmp with code $?"
 
 echo "Downloading LibreSSL ${LIBRESSL_VERSION}..."
-"${CURL}" -LfsS -o "${LIBRESSL_ARCHIVE}" "${LIBRESSL_URL}" || ret=$?
-if [ ${ret} -ne 0 ]; then
-  abort "Failed to download LibreSSL ${LIBRESSL_VERSION} from ${LIBRESSL_URL} with code ${ret}"
-fi
+"${CURL}" -LfsS -o "${LIBRESSL_ARCHIVE}" "${LIBRESSL_URL}" || abort "Failed to download LibreSSL ${LIBRESSL_VERSION} from ${LIBRESSL_URL} with code $?"
 
-"${TAR}" -xzf "${LIBRESSL_ARCHIVE}" || ret=$?
-if [ ${ret} -ne 0 ]; then
-  abort "Failed to extract LibreSSL with code ${ret}"
-fi
+"${TAR}" -xzf "${LIBRESSL_ARCHIVE}" || abort "Failed to extract LibreSSL with code $?"
 
-cd "${LIBRESSL_NAME}" || ret=$?
-if [ ${ret} -ne 0 ]; then
-  abort "Failed to cd to ${LIBRESSL_NAME} with code ${ret}"
-fi
+cd "${LIBRESSL_NAME}" || abort "Failed to cd to ${LIBRESSL_NAME} with code $?"
 
 if [ "$(${ARCH})" = "arm64" ]; then
   # If we are building on arm64 (Apple Silicon), these extra options are required to ensure x86_64 builds.
@@ -95,41 +78,19 @@ else
 fi
 
 # Monkeypatch to disable strtonum for <11.0 support
-"${SED}" -i '' -E 's/strsep strtonum/strsep/g' configure || ret=$?
-# "${FIND}" . -type f -name Makefile -exec "${SED}" -i '' -E 's/HAVE_STRTONUM/HAVE_STRDISABLED/g' {} \; || ret=$?
-if [ ${ret} -ne 0 ]; then
-  abort "Failed to monkeypatch strtonum in LibreSSL with code ${ret}"
-fi
+"${SED}" -i '' -E 's/strsep strtonum/strsep/g' configure || abort "Failed to monkeypatch strtonum in LibreSSL with code $?"
 
-./configure --disable-dependency-tracking --disable-tests --disable-shared --prefix="${BUILD_DIR}" "${EXTRA_OPTS[@]}" || ret=$?
-if [ ${ret} -ne 0 ]; then
-  abort "Failed to configure LibreSSL with code ${ret}"
-fi
+./configure --disable-dependency-tracking --disable-tests --disable-shared --prefix="${BUILD_DIR}" "${EXTRA_OPTS[@]}" || abort "Failed to configure LibreSSL with code $?"
 
-make -j "$(getconf _NPROCESSORS_ONLN)" || ret=$?
-if [ ${ret} -ne 0 ]; then
-  abort "Failed to build LibreSSL with code ${ret}"
-fi
+make -j "$(getconf _NPROCESSORS_ONLN)" || abort "Failed to build LibreSSL with code $?"
 
-make install || ret=$?
-if [ ${ret} -ne 0 ]; then
-  abort "Failed to copy LibreSSL build files with code ${ret}"
-fi
+make install || abort "Failed to copy LibreSSL build files with code $?"
 
-rm -rf "${OUTPUT_PATH}" && mkdir "${OUTPUT_PATH}" || ret=$?
-if [ ${ret} -ne 0 ]; then
-  abort "Failed to create output directory ${OUTPUT_PATH} with code ${ret}"
-fi
+rm -rf "${OUTPUT_PATH}" && mkdir "${OUTPUT_PATH}" || abort "Failed to create output directory ${OUTPUT_PATH} with code $?"
 
-cp -r "${BUILD_DIR}/include" "${BUILD_DIR}/lib" "${OUTPUT_PATH}/" || ret=$?
-if [ ${ret} -ne 0 ]; then
-  abort "Failed to copy LibreSSL libraries to output directory with code ${ret}"
-fi
+cp -r "${BUILD_DIR}/include" "${BUILD_DIR}/lib" "${OUTPUT_PATH}/" || abort "Failed to copy LibreSSL libraries to output directory with code $?"
 
-popd > /dev/null || ret=$?
-if [ ${ret} -ne 0 ]; then
-  abort "Failed to cd to root with code ${ret}"
-fi
+popd > /dev/null || abort "Failed to cd to root with code $?"
 
 ${RM} -rf "tmp"
 
