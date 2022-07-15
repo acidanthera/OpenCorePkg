@@ -57,6 +57,7 @@ for tool in "${TOOLS[@]}"; do
   fi
 done
 
+# shellcheck disable=SC2015
 "${RM}" -rf "tmp" && "${MKDIR}" "tmp" || abort "Failed to create temporary directory with code $?"
 
 pushd "tmp" > /dev/null || abort "Failed to cd to temporary directory tmp with code $?"
@@ -86,6 +87,7 @@ make -j "$(getconf _NPROCESSORS_ONLN)" || abort "Failed to build LibreSSL with c
 
 make install || abort "Failed to copy LibreSSL build files with code $?"
 
+# shellcheck disable=SC2015
 rm -rf "${OUTPUT_PATH}" && mkdir "${OUTPUT_PATH}" || abort "Failed to create output directory ${OUTPUT_PATH} with code $?"
 
 cp -r "${BUILD_DIR}/include" "${BUILD_DIR}/lib" "${OUTPUT_PATH}/" || abort "Failed to copy LibreSSL libraries to output directory with code $?"
