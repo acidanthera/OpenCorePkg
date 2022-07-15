@@ -354,9 +354,8 @@ OcKernelApplyPatches (
       } else {
         DEBUG ((
           DEBUG_INFO,
-          "OC: %a patcher skips CPUID patch due to version %u <= %u <= %u\n",
+          "OC: %a patcher skips kernel CPUID patch due to version %u <= %u <= %u\n",
           PRINT_KERNEL_CACHE_TYPE (CacheType),
-          Target,
           MinKernel,
           DarwinVersion,
           MaxKernel

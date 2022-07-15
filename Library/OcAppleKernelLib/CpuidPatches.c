@@ -1004,30 +1004,32 @@ PATCHER_GENERIC_PATCH
 STATIC
 UINT8 *
 PatchMovVar (
-  IN OUT  UINT8             *Location,
-  IN      UINT8             *Start,
-  IN      MACH_SECTION_ANY  *DataSection,
-  IN      MACH_SECTION_ANY  *TextSection,
-  IN      BOOLEAN           Is32Bit,
-  IN      UINT8             *Var,
-  IN      UINT64            Value
+  IN OUT  UINT8    *Location,
+  IN      BOOLEAN  Is32Bit,
+  IN OUT  UINT64   *FuncAddr,
+  IN      UINT64   VarSymAddr,
+  IN      UINT64   Value
   )
 {
+  UINT8   *Start;
   INT32   Delta;
-  UINT64  LocationAddr;
-  UINT64  VarAddr64;
   UINT32  VarAddr32;
   UINT32  ValueLower;
   UINT32  ValueUpper;
+
+  Start = Location;
+  DEBUG ((DEBUG_VERBOSE, "OCAK: Current TSC func address: 0x%llX, variable address: 0x%llX\n", *FuncAddr, VarSymAddr));
 
   if (Is32Bit) {
     ValueLower = (UINT32)Value;
     ValueUpper = (UINT32)(Value >> 32);
 
     //
+    // 32-bit uses absolute addressing
+    //
     // mov [var], value lower
     //
-    VarAddr32   = (UINT32)((Var - Start) + DataSection->Section32.Address - DataSection->Section32.Offset);
+    VarAddr32   = (UINT32)(VarSymAddr);
     *Location++ = 0xC7;
     *Location++ = 0x05;
     CopyMem (Location, &VarAddr32, sizeof (VarAddr32));
@@ -1045,6 +1047,8 @@ PatchMovVar (
     Location += sizeof (VarAddr32);
     CopyMem (Location, &ValueUpper, sizeof (ValueUpper));
     Location += sizeof (ValueUpper);
+
+    *FuncAddr += (Location - Start);
   } else {
     //
     // mov rax, value
@@ -1052,20 +1056,20 @@ PatchMovVar (
     *Location++ = 0x48;
     *Location++ = 0xB8;
     CopyMem (Location, &Value, sizeof (Value));
-    Location += sizeof (Value);
-
-    LocationAddr = (Location - Start) + TextSection->Section64.Address - TextSection->Section64.Offset;
-    VarAddr64    = (Var - Start) + DataSection->Section64.Address - DataSection->Section64.Offset;
+    Location  += sizeof (Value);
+    *FuncAddr += sizeof (Value) + 2;
 
     //
     // mov [var], rax
     //
-    Delta       = (INT32)(VarAddr64 - (LocationAddr + 7));
+    Delta = (INT32)(VarSymAddr - (*FuncAddr + 7));
+    DEBUG ((DEBUG_VERBOSE, "OCAK: TSC func delta 0x%X\n", Delta));
     *Location++ = 0x48;
     *Location++ = 0x89;
     *Location++ = 0x05;
     CopyMem (Location, &Delta, sizeof (Delta));
-    Location += sizeof (Delta);
+    Location  += sizeof (Delta);
+    *FuncAddr += sizeof (Delta) + 3;
   }
 
   return Location;
@@ -1316,25 +1320,23 @@ PatchProvideCurrentCpuInfo (
 {
   EFI_STATUS  Status;
 
-  UINT8             *Start;
-  MACH_SECTION_ANY  *DataSection;
-  MACH_SECTION_ANY  *TextSection;
-
   INT32   Delta;
-  UINT64  LocationAddr;
-  UINT64  VarAddr64;
+  UINT32  VarAddr32;
+  UINT32  ValueLower;
+  UINT32  ValueUpper;
 
   UINT8  *TscInitFunc;
   UINT8  *TmrCvtFunc;
 
-  UINT8  *BusFreq;
-  UINT8  *BusFCvtt2n;
-  UINT8  *BusFCvtn2t;
-  UINT8  *TscFreq;
-  UINT8  *TscFCvtt2n;
-  UINT8  *TscFCvtn2t;
-  UINT8  *TscGranularity;
-  UINT8  *Bus2Tsc;
+  UINT64  TscInitFuncSymAddr;
+  UINT64  BusFreqSymAddr;
+  UINT64  BusFCvtt2nSymAddr;
+  UINT64  BusFCvtn2tSymAddr;
+  UINT64  TscFreqSymAddr;
+  UINT64  TscFCvtt2nSymAddr;
+  UINT64  TscFCvtn2tSymAddr;
+  UINT64  TscGranularitySymAddr;
+  UINT64  Bus2TscSymAddr;
 
   UINT8  *TscLocation;
 
@@ -1353,33 +1355,26 @@ PatchProvideCurrentCpuInfo (
   Status  = EFI_SUCCESS;
   Status |= PatchProvideCurrentCpuInfoMSR35h (Patcher, CpuInfo, KernelVersion);
 
-  Start = ((UINT8 *)MachoGetFileData (&Patcher->MachContext));
-
-  //
-  // 10.6 and below has variables in __DATA/__data instead of __DATA/__common
-  //
-  if (OcMatchDarwinVersion (KernelVersion, KERNEL_VERSION_LION_MIN, 0)) {
-    DataSection = MachoGetSegmentSectionByName (&Patcher->MachContext, "__DATA", "__common");
-  } else {
-    DataSection = MachoGetSegmentSectionByName (&Patcher->MachContext, "__DATA", "__data");
-  }
-
-  TextSection = MachoGetSegmentSectionByName (&Patcher->MachContext, "__TEXT", "__text");
-
   //
   // Pull required symbols.
   //
-  Status |= PatcherGetSymbolAddress (Patcher, "_tsc_init", (UINT8 **)&TscInitFunc);
+  Status |= PatcherGetSymbolAddressValue (Patcher, "_tsc_init", (UINT8 **)&TscInitFunc, &TscInitFuncSymAddr);
   Status |= PatcherGetSymbolAddress (Patcher, "_tmrCvt", (UINT8 **)&TmrCvtFunc);
 
-  Status |= PatcherGetSymbolAddress (Patcher, "_busFreq", (UINT8 **)&BusFreq);
-  Status |= PatcherGetSymbolAddress (Patcher, "_busFCvtt2n", (UINT8 **)&BusFCvtt2n);
-  Status |= PatcherGetSymbolAddress (Patcher, "_busFCvtn2t", (UINT8 **)&BusFCvtn2t);
-  Status |= PatcherGetSymbolAddress (Patcher, "_tscFreq", (UINT8 **)&TscFreq);
-  Status |= PatcherGetSymbolAddress (Patcher, "_tscFCvtt2n", (UINT8 **)&TscFCvtt2n);
-  Status |= PatcherGetSymbolAddress (Patcher, "_tscFCvtn2t", (UINT8 **)&TscFCvtn2t);
-  Status |= PatcherGetSymbolAddress (Patcher, "_tscGranularity", (UINT8 **)&TscGranularity);
-  Status |= PatcherGetSymbolAddress (Patcher, "_bus2tsc", (UINT8 **)&Bus2Tsc);
+  //
+  // _busFreq only exists on 10.5 and higher.
+  //
+  if (OcMatchDarwinVersion (KernelVersion, KERNEL_VERSION_LEOPARD_MIN, 0)) {
+    Status |= PatcherGetSymbolValue (Patcher, "_busFreq", &BusFreqSymAddr);
+  }
+
+  Status |= PatcherGetSymbolValue (Patcher, "_busFCvtt2n", &BusFCvtt2nSymAddr);
+  Status |= PatcherGetSymbolValue (Patcher, "_busFCvtn2t", &BusFCvtn2tSymAddr);
+  Status |= PatcherGetSymbolValue (Patcher, "_tscFreq", &TscFreqSymAddr);
+  Status |= PatcherGetSymbolValue (Patcher, "_tscFCvtt2n", &TscFCvtt2nSymAddr);
+  Status |= PatcherGetSymbolValue (Patcher, "_tscFCvtn2t", &TscFCvtn2tSymAddr);
+  Status |= PatcherGetSymbolValue (Patcher, "_tscGranularity", &TscGranularitySymAddr);
+  Status |= PatcherGetSymbolValue (Patcher, "_bus2tsc", &Bus2TscSymAddr);
 
   if (EFI_ERROR (Status)) {
     DEBUG ((DEBUG_WARN, "OCAK: Failed to locate one or more TSC symbols - %r\n", Status));
@@ -1407,36 +1402,82 @@ PatchProvideCurrentCpuInfo (
   //
   TscLocation = TscInitFunc;
 
-  TscLocation = PatchMovVar (TscLocation, Start, DataSection, TextSection, Patcher->Is32Bit, BusFreq, busFreqValue);
-  TscLocation = PatchMovVar (TscLocation, Start, DataSection, TextSection, Patcher->Is32Bit, BusFCvtt2n, busFCvtt2nValue);
-  TscLocation = PatchMovVar (TscLocation, Start, DataSection, TextSection, Patcher->Is32Bit, BusFCvtn2t, busFCvtn2tValue);
-  TscLocation = PatchMovVar (TscLocation, Start, DataSection, TextSection, Patcher->Is32Bit, TscFreq, tscFreqValue);
-  TscLocation = PatchMovVar (TscLocation, Start, DataSection, TextSection, Patcher->Is32Bit, TscFCvtt2n, tscFCvtt2nValue);
-  TscLocation = PatchMovVar (TscLocation, Start, DataSection, TextSection, Patcher->Is32Bit, TscFCvtn2t, tscFCvtn2tValue);
-  TscLocation = PatchMovVar (TscLocation, Start, DataSection, TextSection, Patcher->Is32Bit, TscGranularity, tscGranularityValue);
-  TscLocation = PatchMovVar (TscLocation, Start, DataSection, TextSection, Patcher->Is32Bit, BusFreq, busFreqValue);
+  if (OcMatchDarwinVersion (KernelVersion, KERNEL_VERSION_LEOPARD_MIN, 0)) {
+    TscLocation = PatchMovVar (TscLocation, Patcher->Is32Bit, &TscInitFuncSymAddr, BusFreqSymAddr, busFreqValue);
+  }
+
+  TscLocation = PatchMovVar (TscLocation, Patcher->Is32Bit, &TscInitFuncSymAddr, BusFCvtt2nSymAddr, busFCvtt2nValue);
+  TscLocation = PatchMovVar (TscLocation, Patcher->Is32Bit, &TscInitFuncSymAddr, BusFCvtn2tSymAddr, busFCvtn2tValue);
+  TscLocation = PatchMovVar (TscLocation, Patcher->Is32Bit, &TscInitFuncSymAddr, TscFreqSymAddr, tscFreqValue);
+  TscLocation = PatchMovVar (TscLocation, Patcher->Is32Bit, &TscInitFuncSymAddr, TscFCvtt2nSymAddr, tscFCvtt2nValue);
+  TscLocation = PatchMovVar (TscLocation, Patcher->Is32Bit, &TscInitFuncSymAddr, TscFCvtn2tSymAddr, tscFCvtn2tValue);
+  TscLocation = PatchMovVar (TscLocation, Patcher->Is32Bit, &TscInitFuncSymAddr, TscGranularitySymAddr, tscGranularityValue);
 
   if (Patcher->Is32Bit) {
-    // TODO
-  } else {
     //
-    // mov rdi, FSB freq
+    // push ebp
+    // move ebp, esp
     //
-    *TscLocation++ = 0x48;
-    *TscLocation++ = 0xBF;
-    CopyMem (TscLocation, &busFreqValue, sizeof (busFreqValue));
-    TscLocation += sizeof (busFreqValue);
+    *TscLocation++ = 0x55;
+    *TscLocation++ = 0x89;
+    *TscLocation++ = 0xE5;
+
+    ValueLower = (UINT32)busFreqValue;
+    ValueUpper = (UINT32)(busFreqValue >> 32);
 
     //
-    // mov rsi, TSC freq
+    // mov eax, FSB freq (lower)
     //
-    *TscLocation++ = 0x48;
-    *TscLocation++ = 0xBE;
-    CopyMem (TscLocation, &tscFreqValue, sizeof (tscFreqValue));
-    TscLocation += sizeof (tscFreqValue);
+    *TscLocation++ = 0xB8;
+    CopyMem (TscLocation, &ValueLower, sizeof (ValueLower));
+    TscLocation += sizeof (ValueLower);
 
     //
-    // call _tmrCvt
+    // push eax
+    //
+    *TscLocation++ = 0x50;
+
+    //
+    // mov eax, FSB freq (higher)
+    //
+    *TscLocation++ = 0xB8;
+    CopyMem (TscLocation, &ValueUpper, sizeof (ValueUpper));
+    TscLocation += sizeof (ValueUpper);
+
+    //
+    // push eax
+    //
+    *TscLocation++ = 0x50;
+
+    ValueLower = (UINT32)tscFreqValue;
+    ValueUpper = (UINT32)(tscFreqValue >> 32);
+
+    //
+    // mov eax, TSC freq (lower)
+    //
+    *TscLocation++ = 0xB8;
+    CopyMem (TscLocation, &ValueLower, sizeof (ValueLower));
+    TscLocation += sizeof (ValueLower);
+
+    //
+    // push eax
+    //
+    *TscLocation++ = 0x50;
+
+    //
+    // mov eax, TSC freq (higher)
+    //
+    *TscLocation++ = 0xB8;
+    CopyMem (TscLocation, &ValueUpper, sizeof (ValueUpper));
+    TscLocation += sizeof (ValueUpper);
+
+    //
+    // push eax
+    //
+    *TscLocation++ = 0x50;
+
+    //
+    // call _tmrCvt(busFCvtt2n, tscFCvtn2t)
     //
     Delta          = (INT32)(TmrCvtFunc - (TscLocation + 5));
     *TscLocation++ = 0xE8;
@@ -1444,11 +1485,63 @@ PatchProvideCurrentCpuInfo (
     TscLocation += sizeof (Delta);
 
     //
+    // mov [_bus2tsc], eax
+    //
+    VarAddr32      = (UINT32)(Bus2TscSymAddr);
+    *TscLocation++ = 0xA3;
+    CopyMem (TscLocation, &VarAddr32, sizeof (VarAddr32));
+    TscLocation += sizeof (VarAddr32);
+
+    //
+    // mov [_bus2tsc+4], edx
+    //
+    VarAddr32     += sizeof (UINT32);
+    *TscLocation++ = 0x89;
+    *TscLocation++ = 0x15;
+    CopyMem (TscLocation, &VarAddr32, sizeof (VarAddr32));
+    TscLocation += sizeof (VarAddr32);
+
+    //
+    // pop eax (x4)
+    // leave
+    //
+    *TscLocation++ = 0x58;
+    *TscLocation++ = 0x58;
+    *TscLocation++ = 0x58;
+    *TscLocation++ = 0x58;
+    *TscLocation++ = 0xC9;
+  } else {
+    //
+    // mov rdi, FSB freq
+    //
+    *TscLocation++ = 0x48;
+    *TscLocation++ = 0xBF;
+    CopyMem (TscLocation, &busFreqValue, sizeof (busFreqValue));
+    TscLocation        += sizeof (busFreqValue);
+    TscInitFuncSymAddr += sizeof (busFreqValue) + 2;
+
+    //
+    // mov rsi, TSC freq
+    //
+    *TscLocation++ = 0x48;
+    *TscLocation++ = 0xBE;
+    CopyMem (TscLocation, &tscFreqValue, sizeof (tscFreqValue));
+    TscLocation        += sizeof (tscFreqValue);
+    TscInitFuncSymAddr += sizeof (tscFreqValue) + 2;
+
+    //
+    // call _tmrCvt(busFCvtt2n, tscFCvtn2t)
+    //
+    Delta          = (INT32)(TmrCvtFunc - (TscLocation + 5));
+    *TscLocation++ = 0xE8;
+    CopyMem (TscLocation, &Delta, sizeof (Delta));
+    TscLocation        += sizeof (Delta);
+    TscInitFuncSymAddr += sizeof (Delta) + 1;
+
+    //
     // mov [_bus2tsc], rax
     //
-    LocationAddr = (TscLocation - Start) + TextSection->Section64.Address - TextSection->Section64.Offset;
-    VarAddr64    = (Bus2Tsc - Start) + DataSection->Section64.Address - DataSection->Section64.Offset;
-    Delta        = (INT32)(VarAddr64 - (LocationAddr + 7));
+    Delta = (INT32)(Bus2TscSymAddr - (TscInitFuncSymAddr + 7));
 
     *TscLocation++ = 0x48;
     *TscLocation++ = 0x89;
