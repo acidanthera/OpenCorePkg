@@ -437,16 +437,11 @@ WrapMain (
   //
   Config.Kernel.Quirks.ProvideCurrentCpuInfo = FALSE;
   ASSERT (Config.Kernel.Quirks.ProvideCurrentCpuInfo == FALSE);
-  //
-  // TODO: Correctly set/override Cpuid1Data for testing CPUID patches.
-  //
+
   ZeroMem (Config.Kernel.Emulate.Cpuid1Data, sizeof (Config.Kernel.Emulate.Cpuid1Data));
-  ASSERT (
-    (Config.Kernel.Emulate.Cpuid1Data[0] == 0)
-         || (Config.Kernel.Emulate.Cpuid1Data[1] == 0)
-         || (Config.Kernel.Emulate.Cpuid1Data[2] == 0)
-         || (Config.Kernel.Emulate.Cpuid1Data[3] == 0)
-    );
+  Config.Kernel.Emulate.Cpuid1Data[0] = 0x000306A9;
+  ZeroMem (Config.Kernel.Emulate.Cpuid1Mask, sizeof (Config.Kernel.Emulate.Cpuid1Mask));
+  Config.Kernel.Emulate.Cpuid1Mask[0] = 0xFFFFFFFF;
 
   ASSERT (Config.Kernel.Force.Count == 0);
 
