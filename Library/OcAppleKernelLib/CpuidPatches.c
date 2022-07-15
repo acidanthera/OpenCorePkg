@@ -1361,7 +1361,13 @@ PatchProvideCurrentCpuInfo (
   Status |= PatcherGetSymbolAddressValue (Patcher, "_tsc_init", (UINT8 **)&TscInitFunc, &TscInitFuncSymAddr);
   Status |= PatcherGetSymbolAddress (Patcher, "_tmrCvt", (UINT8 **)&TmrCvtFunc);
 
-  Status |= PatcherGetSymbolValue (Patcher, "_busFreq", &BusFreqSymAddr);
+  //
+  // _busFreq only exists on 10.5 and higher.
+  //
+  if (OcMatchDarwinVersion (KernelVersion, KERNEL_VERSION_LEOPARD_MIN, 0)) {
+    Status |= PatcherGetSymbolValue (Patcher, "_busFreq", &BusFreqSymAddr);
+  }
+  
   Status |= PatcherGetSymbolValue (Patcher, "_busFCvtt2n", &BusFCvtt2nSymAddr);
   Status |= PatcherGetSymbolValue (Patcher, "_busFCvtn2t", &BusFCvtn2tSymAddr);
   Status |= PatcherGetSymbolValue (Patcher, "_tscFreq", &TscFreqSymAddr);
@@ -1396,14 +1402,16 @@ PatchProvideCurrentCpuInfo (
   //
   TscLocation = TscInitFunc;
 
-  TscLocation = PatchMovVar (TscLocation, Patcher->Is32Bit, &TscInitFuncSymAddr, BusFreqSymAddr, busFreqValue);
+  if (OcMatchDarwinVersion (KernelVersion, KERNEL_VERSION_LEOPARD_MIN, 0)) {
+    TscLocation = PatchMovVar (TscLocation, Patcher->Is32Bit, &TscInitFuncSymAddr, BusFreqSymAddr, busFreqValue);
+  }
+
   TscLocation = PatchMovVar (TscLocation, Patcher->Is32Bit, &TscInitFuncSymAddr, BusFCvtt2nSymAddr, busFCvtt2nValue);
   TscLocation = PatchMovVar (TscLocation, Patcher->Is32Bit, &TscInitFuncSymAddr, BusFCvtn2tSymAddr, busFCvtn2tValue);
   TscLocation = PatchMovVar (TscLocation, Patcher->Is32Bit, &TscInitFuncSymAddr, TscFreqSymAddr, tscFreqValue);
   TscLocation = PatchMovVar (TscLocation, Patcher->Is32Bit, &TscInitFuncSymAddr, TscFCvtt2nSymAddr, tscFCvtt2nValue);
   TscLocation = PatchMovVar (TscLocation, Patcher->Is32Bit, &TscInitFuncSymAddr, TscFCvtn2tSymAddr, tscFCvtn2tValue);
   TscLocation = PatchMovVar (TscLocation, Patcher->Is32Bit, &TscInitFuncSymAddr, TscGranularitySymAddr, tscGranularityValue);
-  TscLocation = PatchMovVar (TscLocation, Patcher->Is32Bit, &TscInitFuncSymAddr, BusFreqSymAddr, busFreqValue);
 
   if (Patcher->Is32Bit) {
     //
