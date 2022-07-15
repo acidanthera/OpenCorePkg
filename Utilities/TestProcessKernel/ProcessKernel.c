@@ -1,5 +1,6 @@
 /** @file
-  Copyright (C) 2018, vit9696. All rights reserved.
+  Copyright (C) 2022, Marvin Haeuser. All rights reserved.
+  Copyright (C) 2022, PMheart. All rights reserved.
 
   All rights reserved.
 
