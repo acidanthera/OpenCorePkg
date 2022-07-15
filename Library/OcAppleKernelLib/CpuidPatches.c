@@ -1367,7 +1367,7 @@ PatchProvideCurrentCpuInfo (
   if (OcMatchDarwinVersion (KernelVersion, KERNEL_VERSION_LEOPARD_MIN, 0)) {
     Status |= PatcherGetSymbolValue (Patcher, "_busFreq", &BusFreqSymAddr);
   }
-  
+
   Status |= PatcherGetSymbolValue (Patcher, "_busFCvtt2n", &BusFCvtt2nSymAddr);
   Status |= PatcherGetSymbolValue (Patcher, "_busFCvtn2t", &BusFCvtn2tSymAddr);
   Status |= PatcherGetSymbolValue (Patcher, "_tscFreq", &TscFreqSymAddr);
