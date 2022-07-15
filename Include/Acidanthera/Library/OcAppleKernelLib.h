@@ -1106,6 +1106,40 @@ PatcherGetSymbolAddress (
   );
 
 /**
+  Get local symbol value.
+
+  @param[in,out] Context         Patcher context.
+  @param[in]     Name            Symbol name.
+  @param[in,out] Value           Returned original symbol value.
+
+  @return  EFI_SUCCESS on success.
+**/
+EFI_STATUS
+PatcherGetSymbolValue (
+  IN OUT PATCHER_CONTEXT  *Context,
+  IN     CONST CHAR8      *Name,
+  IN OUT UINT64           *Value
+  );
+
+/**
+  Get local symbol address and symbol value.
+
+  @param[in,out] Context         Patcher context.
+  @param[in]     Name            Symbol name.
+  @param[in,out] Address         Returned symbol address in file.
+  @param[in,out] Value           Returned original symbol value.
+
+  @return  EFI_SUCCESS on success.
+**/
+EFI_STATUS
+PatcherGetSymbolAddressValue (
+  IN OUT PATCHER_CONTEXT  *Context,
+  IN     CONST CHAR8      *Name,
+  IN OUT UINT8            **Address,
+  IN OUT UINT64           *Value
+  );
+
+/**
   Apply generic patch.
 
   @param[in,out] Context         Patcher context.

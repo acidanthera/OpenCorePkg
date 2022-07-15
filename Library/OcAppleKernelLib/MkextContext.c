@@ -1285,7 +1285,7 @@ MkextInjectKext (
         }
 
         BundleVerStr = XmlNodeContent (KextPlistValue);
-        AsciiStrnCpyS (BundleVersion, MAX_INFO_BUNDLE_VERSION_KEY_SIZE, BundleVerStr, AsciiStrLen (BundleVerStr));
+        AsciiStrCpyS (BundleVersion, MAX_INFO_BUNDLE_VERSION_KEY_SIZE, BundleVerStr);
         break;
       }
     }

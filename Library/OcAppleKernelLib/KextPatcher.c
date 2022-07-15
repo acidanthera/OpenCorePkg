@@ -217,6 +217,27 @@ PatcherGetSymbolAddress (
   IN OUT UINT8            **Address
   )
 {
+  return PatcherGetSymbolAddressValue (Context, Name, Address, NULL);
+}
+
+EFI_STATUS
+PatcherGetSymbolValue (
+  IN OUT PATCHER_CONTEXT  *Context,
+  IN     CONST CHAR8      *Name,
+  IN OUT UINT64           *Value
+  )
+{
+  return PatcherGetSymbolAddressValue (Context, Name, NULL, Value);
+}
+
+EFI_STATUS
+PatcherGetSymbolAddressValue (
+  IN OUT PATCHER_CONTEXT  *Context,
+  IN     CONST CHAR8      *Name,
+  IN OUT UINT8            **Address,
+  IN OUT UINT64           *Value
+  )
+{
   MACH_NLIST_ANY  *Symbol;
   CONST CHAR8     *SymbolName;
   UINT64          SymbolAddress;
@@ -264,6 +285,7 @@ PatcherGetSymbolAddress (
         //
         // Proceed to success.
         //
+        SymbolAddress = Context->Is32Bit ? Symbol->Symbol32.Value : Symbol->Symbol64.Value;
         break;
       }
 
@@ -273,7 +295,14 @@ PatcherGetSymbolAddress (
     Index++;
   }
 
-  *Address = (UINT8 *)MachoGetFileData (&Context->MachContext) + Offset;
+  if (Address != NULL) {
+    *Address = (UINT8 *)MachoGetFileData (&Context->MachContext) + Offset;
+  }
+
+  if (Value != NULL) {
+    *Value = SymbolAddress;
+  }
+
   return EFI_SUCCESS;
 }
 
