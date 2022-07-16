@@ -9,6 +9,13 @@ PRODUCT    = $(PROJECT)$(INFIX)$(SUFFIX)
 OBJS       = $(PROJECT).o
 include ../../User/Makefile
 
-CFLAGS  += -I/usr/local/opt/openssl/include -I/opt/local/include -Wno-deprecated-declarations
-LDFLAGS += -L/usr/local/opt/openssl/lib -L/opt/local/lib
+ifeq ($(DIST),Darwin)
+libressl/lib/libcrypto.a:
+	./build_libressl.sh
+
+$(OUT_DIR)/$(PROJECT).o: libressl/lib/libcrypto.a
+endif
+
+CFLAGS  += -Ilibressl/include -I/usr/local/opt/openssl/include -I/opt/local/include -Wno-deprecated-declarations
+LDFLAGS += -Llibressl/lib -L/usr/local/opt/openssl/lib -L/opt/local/lib
 LDLIBS  += -lcrypto
