@@ -116,118 +116,6 @@ OcKernelApplyPatches (
     }
   }
 
-  for (Index = 0; Index < Config->Kernel.Patch.Count; ++Index) {
-    UserPatch = Config->Kernel.Patch.Values[Index];
-    Target    = OC_BLOB_GET (&UserPatch->Identifier);
-
-    if (!UserPatch->Enabled || ((AsciiStrCmp (Target, "kernel") == 0) != IsKernelPatch)) {
-      continue;
-    }
-
-    Comment   = OC_BLOB_GET (&UserPatch->Comment);
-    Arch      = OC_BLOB_GET (&UserPatch->Arch);
-    MaxKernel = OcParseDarwinVersion (OC_BLOB_GET (&UserPatch->MaxKernel));
-    MinKernel = OcParseDarwinVersion (OC_BLOB_GET (&UserPatch->MinKernel));
-
-    if (AsciiStrCmp (Arch, Is32Bit ? "x86_64" : "i386") == 0) {
-      DEBUG ((
-        DEBUG_INFO,
-        "OC: %a patcher skips %a (%a) patch at %u due to arch %a != %a\n",
-        PRINT_KERNEL_CACHE_TYPE (CacheType),
-        Target,
-        Comment,
-        Index,
-        Arch,
-        Is32Bit ? "i386" : "x86_64"
-        ));
-      continue;
-    }
-
-    if (!OcMatchDarwinVersion (DarwinVersion, MinKernel, MaxKernel)) {
-      DEBUG ((
-        DEBUG_INFO,
-        "OC: %a patcher skips %a (%a) patch at %u due to version %u <= %u <= %u\n",
-        PRINT_KERNEL_CACHE_TYPE (CacheType),
-        Target,
-        Comment,
-        Index,
-        MinKernel,
-        DarwinVersion,
-        MaxKernel
-        ));
-      continue;
-    }
-
-    //
-    // Ignore patch if:
-    // - There is nothing to replace.
-    // - We have neither symbolic base, nor find data.
-    // - Find and replace mismatch in size.
-    // - Mask and ReplaceMask mismatch in size when are available.
-    //
-    if (  (UserPatch->Replace.Size == 0)
-       || ((OC_BLOB_GET (&UserPatch->Base)[0] == '\0') && (UserPatch->Find.Size != UserPatch->Replace.Size))
-       || ((UserPatch->Mask.Size > 0) && (UserPatch->Find.Size != UserPatch->Mask.Size))
-       || ((UserPatch->ReplaceMask.Size > 0) && (UserPatch->Find.Size != UserPatch->ReplaceMask.Size)))
-    {
-      DEBUG ((DEBUG_ERROR, "OC: Kernel patch %u for %a (%a) is borked\n", Index, Target, Comment));
-      continue;
-    }
-
-    ZeroMem (&Patch, sizeof (Patch));
-
-    if (OC_BLOB_GET (&UserPatch->Comment)[0] != '\0') {
-      Patch.Comment = OC_BLOB_GET (&UserPatch->Comment);
-    }
-
-    if (OC_BLOB_GET (&UserPatch->Base)[0] != '\0') {
-      Patch.Base = OC_BLOB_GET (&UserPatch->Base);
-    }
-
-    if (UserPatch->Find.Size > 0) {
-      Patch.Find = OC_BLOB_GET (&UserPatch->Find);
-    }
-
-    Patch.Replace = OC_BLOB_GET (&UserPatch->Replace);
-
-    if (UserPatch->Mask.Size > 0) {
-      Patch.Mask = OC_BLOB_GET (&UserPatch->Mask);
-    }
-
-    if (UserPatch->ReplaceMask.Size > 0) {
-      Patch.ReplaceMask = OC_BLOB_GET (&UserPatch->ReplaceMask);
-    }
-
-    Patch.Size  = UserPatch->Replace.Size;
-    Patch.Count = UserPatch->Count;
-    Patch.Skip  = UserPatch->Skip;
-    Patch.Limit = UserPatch->Limit;
-
-    if (IsKernelPatch) {
-      Status = PatcherApplyGenericPatch (&KernelPatcher, &Patch);
-    } else {
-      if (CacheType == CacheTypeCacheless) {
-        Status = CachelessContextAddPatch (Context, Target, &Patch);
-      } else if (CacheType == CacheTypeMkext) {
-        Status = MkextContextApplyPatch (Context, Target, &Patch);
-      } else if (CacheType == CacheTypePrelinked) {
-        Status = PrelinkedContextApplyPatch (Context, Target, &Patch);
-      } else {
-        Status = EFI_UNSUPPORTED;
-      }
-    }
-
-    DEBUG ((
-      EFI_ERROR (Status) ? DEBUG_WARN : DEBUG_INFO,
-      "OC: %a patcher result %u for %a (%a) - %r\n",
-      PRINT_KERNEL_CACHE_TYPE (CacheType),
-      Index,
-      Target,
-      Comment,
-      Status
-      ));
-  }
-
   //
   // Handle Quirks/Emulate here...
   //
@@ -382,6 +270,118 @@ OcKernelApplyPatches (
     if (Config->Kernel.Quirks.ProvideCurrentCpuInfo) {
       PatchProvideCurrentCpuInfo (&KernelPatcher, CpuInfo, DarwinVersion);
     }
+  }
+
+  for (Index = 0; Index < Config->Kernel.Patch.Count; ++Index) {
+    UserPatch = Config->Kernel.Patch.Values[Index];
+    Target    = OC_BLOB_GET (&UserPatch->Identifier);
+
+    if (!UserPatch->Enabled || ((AsciiStrCmp (Target, "kernel") == 0) != IsKernelPatch)) {
+      continue;
+    }
+
+    Comment   = OC_BLOB_GET (&UserPatch->Comment);
+    Arch      = OC_BLOB_GET (&UserPatch->Arch);
+    MaxKernel = OcParseDarwinVersion (OC_BLOB_GET (&UserPatch->MaxKernel));
+    MinKernel = OcParseDarwinVersion (OC_BLOB_GET (&UserPatch->MinKernel));
+
+    if (AsciiStrCmp (Arch, Is32Bit ? "x86_64" : "i386") == 0) {
+      DEBUG ((
+        DEBUG_INFO,
+        "OC: %a patcher skips %a (%a) patch at %u due to arch %a != %a\n",
+        PRINT_KERNEL_CACHE_TYPE (CacheType),
+        Target,
+        Comment,
+        Index,
+        Arch,
+        Is32Bit ? "i386" : "x86_64"
+        ));
+      continue;
+    }
+
+    if (!OcMatchDarwinVersion (DarwinVersion, MinKernel, MaxKernel)) {
+      DEBUG ((
+        DEBUG_INFO,
+        "OC: %a patcher skips %a (%a) patch at %u due to version %u <= %u <= %u\n",
+        PRINT_KERNEL_CACHE_TYPE (CacheType),
+        Target,
+        Comment,
+        Index,
+        MinKernel,
+        DarwinVersion,
+        MaxKernel
+        ));
+      continue;
+    }
+
+    //
+    // Ignore patch if:
+    // - There is nothing to replace.
+    // - We have neither symbolic base, nor find data.
+    // - Find and replace mismatch in size.
+    // - Mask and ReplaceMask mismatch in size when are available.
+    //
+    if (  (UserPatch->Replace.Size == 0)
+       || ((OC_BLOB_GET (&UserPatch->Base)[0] == '\0') && (UserPatch->Find.Size != UserPatch->Replace.Size))
+       || ((UserPatch->Mask.Size > 0) && (UserPatch->Find.Size != UserPatch->Mask.Size))
+       || ((UserPatch->ReplaceMask.Size > 0) && (UserPatch->Find.Size != UserPatch->ReplaceMask.Size)))
+    {
+      DEBUG ((DEBUG_ERROR, "OC: Kernel patch %u for %a (%a) is borked\n", Index, Target, Comment));
+      continue;
+    }
+
+    ZeroMem (&Patch, sizeof (Patch));
+
+    if (OC_BLOB_GET (&UserPatch->Comment)[0] != '\0') {
+      Patch.Comment = OC_BLOB_GET (&UserPatch->Comment);
+    }
+
+    if (OC_BLOB_GET (&UserPatch->Base)[0] != '\0') {
+      Patch.Base = OC_BLOB_GET (&UserPatch->Base);
+    }
+
+    if (UserPatch->Find.Size > 0) {
+      Patch.Find = OC_BLOB_GET (&UserPatch->Find);
+    }
+
+    Patch.Replace = OC_BLOB_GET (&UserPatch->Replace);
+
+    if (UserPatch->Mask.Size > 0) {
+      Patch.Mask = OC_BLOB_GET (&UserPatch->Mask);
+    }
+
+    if (UserPatch->ReplaceMask.Size > 0) {
+      Patch.ReplaceMask = OC_BLOB_GET (&UserPatch->ReplaceMask);
+    }
+
+    Patch.Size  = UserPatch->Replace.Size;
+    Patch.Count = UserPatch->Count;
+    Patch.Skip  = UserPatch->Skip;
+    Patch.Limit = UserPatch->Limit;
+
+    if (IsKernelPatch) {
+      Status = PatcherApplyGenericPatch (&KernelPatcher, &Patch);
+    } else {
+      if (CacheType == CacheTypeCacheless) {
+        Status = CachelessContextAddPatch (Context, Target, &Patch);
+      } else if (CacheType == CacheTypeMkext) {
+        Status = MkextContextApplyPatch (Context, Target, &Patch);
+      } else if (CacheType == CacheTypePrelinked) {
+        Status = PrelinkedContextApplyPatch (Context, Target, &Patch);
+      } else {
+        Status = EFI_UNSUPPORTED;
+      }
+    }
+
+    DEBUG ((
+      EFI_ERROR (Status) ? DEBUG_WARN : DEBUG_INFO,
+      "OC: %a patcher result %u for %a (%a) - %r\n",
+      PRINT_KERNEL_CACHE_TYPE (CacheType),
+      Index,
+      Target,
+      Comment,
+      Status
+      ));
   }
 }
 
