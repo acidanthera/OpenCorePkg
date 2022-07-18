@@ -37,6 +37,7 @@
 # qRegisterInfo packets are not supported when connecting to a remote
 # GDB server.
 # ----------------------------------------------------------------------
+
 import os
 import sys
 
