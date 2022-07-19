@@ -59,16 +59,17 @@ AppleRelocationAllocatePages (
   // this quirk anyway due to AllocatePages in AllocateAddress mode Address pointer
   // no longer being reread after the allocation in EfiBoot.
   //
-  if ((*Memory == KERNEL_TEXT_PADDR) && (BootCompat->KernelState.RelocationBlock == 0)) {
-    BootCompat->KernelState.RelocationBlock = BASE_4GB;
-    Status                                  = OcAllocatePagesFromTop (
-                                                EfiLoaderData,
-                                                EFI_SIZE_TO_PAGES (EssentialSize),
-                                                &BootCompat->KernelState.RelocationBlock,
-                                                GetMemoryMap,
-                                                AllocatePages,
-                                                NULL
-                                                );
+  if (((*Memory == KERNEL_TEXT_PADDR) || (*Memory == KERNEL_TEXT_PADDR_LEGACY)) && (BootCompat->KernelState.RelocationBlock == 0)) {
+    BootCompat->KernelState.RelocationBlock       = BASE_4GB;
+    BootCompat->KernelState.RelocationBlockLegacy = *Memory == KERNEL_TEXT_PADDR_LEGACY;
+    Status                                        = OcAllocatePagesFromTop (
+                                                      EfiLoaderData,
+                                                      EFI_SIZE_TO_PAGES (EssentialSize),
+                                                      &BootCompat->KernelState.RelocationBlock,
+                                                      GetMemoryMap,
+                                                      AllocatePages,
+                                                      NULL
+                                                      );
     if (EFI_ERROR (Status)) {
       DEBUG ((
         DEBUG_INFO,
@@ -80,6 +81,18 @@ AppleRelocationAllocatePages (
     }
 
     BootCompat->KernelState.RelocationBlockUsed = 0;
+  }
+
+  //
+  // macOS 10.4 and 10.5 do not request original lower addresses when allocating additional kernel structures (boot args, MKEXT, etc).
+  // If such addresses are requested within the range of our allocated relocation block, adjust them.
+  //
+  if (  (BootCompat->KernelState.RelocationBlock != 0)
+     &&  BootCompat->KernelState.RelocationBlockLegacy
+     && (*Memory > BootCompat->KernelState.RelocationBlock)
+     && (*Memory < BootCompat->KernelState.RelocationBlock + EssentialSize))
+  {
+    *Memory -= (BootCompat->KernelState.RelocationBlock - KERNEL_BASE_PADDR);
   }
 
   //
@@ -130,8 +143,9 @@ AppleRelocationRelease (
                   EFI_SIZE_TO_PAGES (EssentialSize)
                   );
 
-  BootCompat->KernelState.RelocationBlock     = 0;
-  BootCompat->KernelState.RelocationBlockUsed = 0;
+  BootCompat->KernelState.RelocationBlock       = 0;
+  BootCompat->KernelState.RelocationBlockUsed   = 0;
+  BootCompat->KernelState.RelocationBlockLegacy = FALSE;
 
   return Status;
 }
@@ -290,9 +304,20 @@ AppleRelocationRebase (
     }
   }
 
+  //
+  // On macOS 10.4 and 10.5, EfiBoot has already set the system table address to the correct virtual one.
+  // The memory map also contains additional trashed entries that must be removed, this seems to occur on Macs as well.
+  //
+  // On macOS 10.6 and newer, we need to adjust it like the others.
+  //
+  if (!BootCompat->KernelState.RelocationBlockLegacy) {
+    *BA->SystemTableP      -= RelocDiff;
+  } else {
+    *BA->MemoryMapSize -= (*BA->MemoryMapDescriptorSize * 4);
+  }
+
   *BA->MemoryMap         -= RelocDiff;
   *BA->KernelAddrP       -= RelocDiff;
-  *BA->SystemTableP      -= RelocDiff;
   *BA->RuntimeServicesPG -= EFI_SIZE_TO_PAGES (RelocDiff);
   //
   // Note, this one does not seem to be used by XNU but we set it anyway.
