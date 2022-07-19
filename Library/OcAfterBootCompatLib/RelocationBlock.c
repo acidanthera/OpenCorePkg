@@ -311,7 +311,7 @@ AppleRelocationRebase (
   // On macOS 10.6 and newer, we need to adjust it like the others.
   //
   if (!BootCompat->KernelState.RelocationBlockLegacy) {
-    *BA->SystemTableP  -= RelocDiff;
+    *BA->SystemTableP -= RelocDiff;
   } else {
     *BA->MemoryMapSize -= (*BA->MemoryMapDescriptorSize * 4);
   }
