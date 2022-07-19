@@ -384,7 +384,7 @@ AppleMapPrepareForBooting (
     }
   }
 
-  if (BootCompat->KernelState.RelocationBlock != 0 && !BootCompat->KernelState.RelocationBlockLegacy) {
+  if ((BootCompat->KernelState.RelocationBlock != 0) && !BootCompat->KernelState.RelocationBlockLegacy) {
     //
     // When using Relocation Block, EfiBoot on macOS 10.6 and newer will not virtualize the addresses
     // since they cannot be mapped 1:1 due to any region from the relocation block being outside
@@ -715,8 +715,8 @@ AppleMapPrepareMemState (
     NumEntries = MemoryMapSize / DescriptorSize;
 
     for (Index = 0; Index < NumEntries; ++Index) {
-      if (  Desc->VirtualStart >= BootCompat->KernelState.RelocationBlock + BootCompat->KernelState.RelocationBlockUsed
-         && Desc->VirtualStart < BootCompat->KernelState.RelocationBlock + ESTIMATED_KERNEL_SIZE)
+      if (  (Desc->VirtualStart >= BootCompat->KernelState.RelocationBlock + BootCompat->KernelState.RelocationBlockUsed)
+         && (Desc->VirtualStart < BootCompat->KernelState.RelocationBlock + ESTIMATED_KERNEL_SIZE))
       {
         Desc->VirtualStart -= BootCompat->KernelState.RelocationBlock - KERNEL_BASE_PADDR;
       }
