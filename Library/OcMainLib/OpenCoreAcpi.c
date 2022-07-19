@@ -211,15 +211,11 @@ OcLoadAcpiSupport (
     return;
   }
 
+  OcAcpiDeleteTables (Config, &Context);
+
   if (Config->Acpi.Quirks.RebaseRegions) {
     AcpiLoadRegions (&Context);
   }
-
-  OcAcpiPatchTables (Config, &Context);
-
-  OcAcpiDeleteTables (Config, &Context);
-
-  OcAcpiAddTables (Config, Storage, &Context);
 
   if (Config->Acpi.Quirks.FadtEnableReset) {
     AcpiFadtEnableReset (&Context);
@@ -245,6 +241,10 @@ OcLoadAcpiSupport (
   if (Config->Acpi.Quirks.SyncTableIds) {
     AcpiSyncTableIds (&Context);
   }
+
+  OcAcpiPatchTables (Config, &Context);
+
+  OcAcpiAddTables (Config, Storage, &Context);
 
   AcpiApplyContext (&Context);
 

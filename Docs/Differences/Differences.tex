@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
 %DIF DEL PreviousConfiguration.tex   Tue Jul  5 17:33:51 2022
-%DIF ADD ../Configuration.tex        Tue Jul 12 10:27:36 2022
+%DIF ADD ../Configuration.tex        Sat Jul 16 19:49:47 2022
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -907,10 +907,10 @@ ACPI changes apply globally (to every operating system) with the following effec
 
 \begin{itemize}
 \tightlist
-\item \texttt{Patch} is processed.
-\item \texttt{Delete} is processed.
-\item \texttt{Add} is processed.
-\item \texttt{Quirks} are processed.
+\item \texttt{\DIFdelbegin \DIFdel{Patch}\DIFdelend \DIFaddbegin \DIFadd{Delete}\DIFaddend } is processed.
+\item \texttt{\DIFdelbegin \DIFdel{Delete}\DIFdelend \DIFaddbegin \DIFadd{Quirks}\DIFaddend } \DIFdelbegin \DIFdel{is }\DIFdelend \DIFaddbegin \DIFadd{are }\DIFaddend processed.
+\item \texttt{\DIFdelbegin \DIFdel{Add}\DIFdelend \DIFaddbegin \DIFadd{Patch}\DIFaddend } is processed.
+\item \texttt{\DIFdelbegin \DIFdel{Quirks}\DIFdelend \DIFaddbegin \DIFadd{Add}\DIFaddend } \DIFdelbegin \DIFdel{are }\DIFdelend \DIFaddbegin \DIFadd{is }\DIFaddend processed.
 \end{itemize}
 
 Applying the changes globally resolves the problems of incorrect operating system
@@ -1314,7 +1314,14 @@ of \href{https://github.com/acidanthera/AptioFixPkg}{\text{AptioMemoryFix.efi}},
 which is no longer maintained. Refer to the \hyperref[troubleshootingtricks]{Tips and Tricks}
 section for instructions on migration.
 
-If this is used for the first time on customised firmware, the following requirements
+\DIFaddbegin \DIFadd{Booter changes apply with the following effective order:
+}\begin{itemize}
+\tightlist
+\item \texttt{\DIFadd{Quirks}} \DIFadd{are processed.
+}\item \texttt{\DIFadd{Patch}} \DIFadd{is processed.
+}\end{itemize}
+
+\DIFaddend If this is used for the first time on customised firmware, the following requirements
 should be met before starting:
 
 \begin{itemize}
@@ -2008,7 +2015,18 @@ Apple Kernel (\href{https://opensource.apple.com/source/xnu}{XNU}). The modifica
 currently provide driver (kext) injection, kernel and driver patching, and driver
 blocking.
 
-\subsection{Properties}\label{kernelprops}
+\DIFaddbegin \DIFadd{Kernel and kext changes apply with the following effective order:
+}
+
+\begin{itemize}
+\tightlist
+\item \texttt{\DIFadd{Block}} \DIFadd{is processed.
+}\item \texttt{\DIFadd{Emulate}} \DIFadd{and }\texttt{\DIFadd{Quirks}} \DIFadd{are processed.
+}\item \texttt{\DIFadd{Patch}} \DIFadd{is processed.
+}\item \texttt{\DIFadd{Add}} \DIFadd{and }\texttt{\DIFadd{Force}} \DIFadd{are processed.
+}\end{itemize}
+
+\DIFaddend \subsection{Properties}\label{kernelprops}
 
 \begin{enumerate}
 \item
@@ -7067,18 +7085,18 @@ the driver within the }\texttt{\DIFadd{UEFI/Drivers}} \DIFadd{section:
   \textbf{Type}: \texttt{plist\ dict}\\
   \textbf{Failsafe}: None\\
   \textbf{Description}: Provide APFS support as configured in the
-  \hyperref[uefiapfsprops]{APFS Properties} \DIFaddbegin \DIFadd{section below.
-}
+  \hyperref[uefiapfsprops]{APFS Properties} section below.
 
 \item
-  \texttt{\DIFadd{AppleInput}}\\
+  \DIFaddbegin \texttt{\DIFadd{AppleInput}}\\
   \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ dict}}\\
   \textbf{\DIFadd{Failsafe}}\DIFadd{: None}\\
   \textbf{\DIFadd{Description}}\DIFadd{: Configure the re-implementation of the Apple Event protocol
-  described in the }\hyperref[uefiappleinputprops]{AppleInput Properties} \DIFaddend section below.
+  described in the }\hyperref[uefiappleinputprops]{AppleInput Properties} \DIFadd{section below.
+}
 
 \item
-  \texttt{Audio}\\
+  \DIFaddend \texttt{Audio}\\
   \textbf{Type}: \texttt{plist\ dict}\\
   \textbf{Failsafe}: None\\
   \textbf{Description}: Configure audio backend support described
@@ -7716,7 +7734,7 @@ the driver within the }\texttt{\DIFadd{UEFI/Drivers}} \DIFadd{section:
   Datasheet (or any other ICH datasheet) for more details about this register.
 
   \emph{Note}: This option is independent from \texttt{AudioSupport}. If AppleALC is used
-  it is preferred to use AppleALC \texttt{alctsel} property instead.
+  it is preferred to use AppleALC \texttt{\DIFdelbegin \DIFdel{alctsel}\DIFdelend \DIFaddbegin \DIFadd{alctcsel}\DIFaddend } property instead.
 
 \item
   \texttt{SetupDelay}\\

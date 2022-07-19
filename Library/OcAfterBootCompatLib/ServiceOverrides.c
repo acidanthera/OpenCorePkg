@@ -1262,16 +1262,6 @@ OcStartImage (
     }
   }
 
-  //
-  // Apply customised booter patches.
-  //
-  ApplyBooterPatches (
-    ImageHandle,
-    AppleLoadedImage != NULL,
-    BootCompat->Settings.BooterPatches,
-    BootCompat->Settings.BooterPatchesSize
-    );
-
   if (BootCompat->ServiceState.FwRuntime != NULL) {
     BootCompat->ServiceState.FwRuntime->GetCurrent (&Config);
 
@@ -1315,6 +1305,16 @@ OcStartImage (
                                           &Config
                                           );
   }
+
+  //
+  // Apply customised booter patches.
+  //
+  ApplyBooterPatches (
+    ImageHandle,
+    AppleLoadedImage != NULL,
+    BootCompat->Settings.BooterPatches,
+    BootCompat->Settings.BooterPatchesSize
+    );
 
   Status = BootCompat->ServicePtrs.StartImage (
                                      ImageHandle,

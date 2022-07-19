@@ -847,10 +847,10 @@ ACPI changes apply globally (to every operating system) with the following effec
 
 \begin{itemize}
 \tightlist
-\item \texttt{Patch} is processed.
 \item \texttt{Delete} is processed.
-\item \texttt{Add} is processed.
 \item \texttt{Quirks} are processed.
+\item \texttt{Patch} is processed.
+\item \texttt{Add} is processed.
 \end{itemize}
 
 Applying the changes globally resolves the problems of incorrect operating system
@@ -1253,6 +1253,13 @@ different firmware types. Some of these features were originally implemented as 
 of \href{https://github.com/acidanthera/AptioFixPkg}{\text{AptioMemoryFix.efi}},
 which is no longer maintained. Refer to the \hyperref[troubleshootingtricks]{Tips and Tricks}
 section for instructions on migration.
+
+Booter changes apply with the following effective order:
+\begin{itemize}
+\tightlist
+\item \texttt{Quirks} are processed.
+\item \texttt{Patch} is processed.
+\end{itemize}
 
 If this is used for the first time on customised firmware, the following requirements
 should be met before starting:
@@ -1947,6 +1954,16 @@ This section allows the application of different kinds of kernelspace modificati
 Apple Kernel (\href{https://opensource.apple.com/source/xnu}{XNU}). The modifications
 currently provide driver (kext) injection, kernel and driver patching, and driver
 blocking.
+
+Kernel and kext changes apply with the following effective order:
+
+\begin{itemize}
+\tightlist
+\item \texttt{Block} is processed.
+\item \texttt{Emulate} and \texttt{Quirks} are processed.
+\item \texttt{Patch} is processed.
+\item \texttt{Add} and \texttt{Force} are processed.
+\end{itemize}
 
 \subsection{Properties}\label{kernelprops}
 
@@ -7633,7 +7650,7 @@ the driver within the \texttt{UEFI/Drivers} section:
   Datasheet (or any other ICH datasheet) for more details about this register.
 
   \emph{Note}: This option is independent from \texttt{AudioSupport}. If AppleALC is used
-  it is preferred to use AppleALC \texttt{alctsel} property instead.
+  it is preferred to use AppleALC \texttt{alctcsel} property instead.
 
 \item
   \texttt{SetupDelay}\\
