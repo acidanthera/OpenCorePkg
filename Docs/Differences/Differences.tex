@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
-%DIF DEL PreviousConfiguration.tex   Tue Jul  5 17:33:51 2022
-%DIF ADD ../Configuration.tex        Sat Jul 16 19:49:47 2022
+%DIF DEL PreviousConfiguration.tex   Thu Jul  7 13:40:40 2022
+%DIF ADD ../Configuration.tex        Wed Jul 20 19:52:29 2022
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -6992,8 +6992,7 @@ for known issues.
 
 Most UEFI audio configuration is handled via the \hyperref[uefiaudioprops]{\texttt{UEFI Audio Properties}}
 section, but \DIFdelbegin \DIFdel{if required the following additonal configuration options (which are needed to produce sound
-on most Apple hardware, and possibly some others)
-  may be specified in }%DIFDELCMD < \texttt{%%%
+onmost Apple hardware, and possibly some others)may be specified in }%DIFDELCMD < \texttt{%%%
 \DIFdel{UEFI/Drivers/Arguments}%DIFDELCMD < \MBLOCKRIGHTBRACE%%%
 \DIFdel{:
 }\DIFdelend \DIFaddbegin \DIFadd{in addition some of the following configuration options may be required in order
@@ -7004,7 +7003,14 @@ the driver within the }\texttt{\DIFadd{UEFI/Drivers}} \DIFadd{section:
 
 \begin{itemize}
   \tightlist
-	\item \DIFaddbegin \texttt{\DIFadd{-}{}\DIFadd{-force-device}} \DIFadd{- String value, no default. }\medskip
+	\item \DIFaddbegin \texttt{\DIFadd{-}{}\DIFadd{-codec-setup-delay}} \DIFadd{- Integer value, default }\texttt{\DIFadd{0}}\DIFadd{. }\medskip
+
+  \DIFadd{Amount of time in milliseconds to wait for all widgets to come fully on, applied per codec
+  during driver connection phase. In most systems this should not be needed and a faster boot
+  will be achieved by using }\texttt{\DIFadd{Audio}} \DIFadd{section }\texttt{\DIFadd{SetupDelay}} \DIFadd{if any audio setup delay
+  is required. Where required, values of up to one second may be needed. }\medskip
+
+	\item \texttt{\DIFadd{-}{}\DIFadd{-force-device}} \DIFadd{- String value, no default. }\medskip
 
   \DIFadd{When this option is present and has a value (e.g. }\texttt{\DIFadd{-}{}\DIFadd{-force-device=PciRoot(0x0)/Pci(0x1f,0x3)}}\DIFadd{), it
   forces AudioDxe to connect to the specified PCI device, even if the device does not report itself as
@@ -7740,7 +7746,7 @@ the driver within the }\texttt{\DIFadd{UEFI/Drivers}} \DIFadd{section:
   \texttt{SetupDelay}\\
   \textbf{Type}: \texttt{plist\ integer}\\
   \textbf{Failsafe}: \texttt{0}\\
-  \textbf{Description}: Audio codec reconfiguration delay in microseconds.
+  \textbf{Description}: Audio codec reconfiguration delay in \DIFdelbegin \DIFdel{microseconds}\DIFdelend \DIFaddbegin \DIFadd{milliseconds}\DIFaddend .
 
   Some codecs require a vendor-specific delay after the reconfiguration
   (e.g. volume setting). This option makes it configurable. A typical

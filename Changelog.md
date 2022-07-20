@@ -8,6 +8,9 @@ OpenCore Changelog
 - Fixed incorrect OSBundleLibraries_x86_64 handling during cacheless injection
 - Changed RsaTool not to link against system ssl on macOS
 - Fixed crash during cacheless injection when kext blocking is enabled
+- Removed default codec connection delay from AudioDxe
+- Added optional `--codec-setup-delay` argument to AudioDxe
+- Changed units of `Audio` -> `SetupDelay` from microseconds to milliseconds (divide previous value by 1000 if using this setting)
 
 #### v0.8.2
 - Fixed `AppleCpuPmCfgLock` on macOS 13

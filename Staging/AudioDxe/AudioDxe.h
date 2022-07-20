@@ -112,4 +112,11 @@ extern
 EFI_DEVICE_PATH_PROTOCOL *
   gForcedControllerDevicePath;
 
+//
+// Time to wait in microseconds per codec for all widgets to fully come on.
+//
+extern
+UINTN
+  gCodecSetupDelay;
+
 #endif // EFI_AUDIODXE_H

@@ -6923,6 +6923,13 @@ the driver within the \texttt{UEFI/Drivers} section:
 
 \begin{itemize}
   \tightlist
+	\item \texttt{-{}-codec-setup-delay} - Integer value, default \texttt{0}. \medskip
+
+  Amount of time in milliseconds to wait for all widgets to come fully on, applied per codec
+  during driver connection phase. In most systems this should not be needed and a faster boot
+  will be achieved by using \texttt{Audio} section \texttt{SetupDelay} if any audio setup delay
+  is required. Where required, values of up to one second may be needed. \medskip
+
 	\item \texttt{-{}-force-device} - String value, no default. \medskip
 
   When this option is present and has a value (e.g. \texttt{-{}-force-device=PciRoot(0x0)/Pci(0x1f,0x3)}), it
@@ -7656,7 +7663,7 @@ the driver within the \texttt{UEFI/Drivers} section:
   \texttt{SetupDelay}\\
   \textbf{Type}: \texttt{plist\ integer}\\
   \textbf{Failsafe}: \texttt{0}\\
-  \textbf{Description}: Audio codec reconfiguration delay in microseconds.
+  \textbf{Description}: Audio codec reconfiguration delay in milliseconds.
 
   Some codecs require a vendor-specific delay after the reconfiguration
   (e.g. volume setting). This option makes it configurable. A typical

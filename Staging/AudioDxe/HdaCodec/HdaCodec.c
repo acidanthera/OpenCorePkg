@@ -1041,8 +1041,10 @@ HdaCodecParsePorts (
     }
   }
 
-  // Wait 1000ms for all widgets to fully come on.
-  gBS->Stall (MS_TO_MICROSECONDS (1000));
+  // Wait for all widgets to fully come on.
+  if (gCodecSetupDelay != 0) {
+    gBS->Stall (MS_TO_MICROSECONDS (gCodecSetupDelay));
+  }
 
   return EFI_SUCCESS;
 }

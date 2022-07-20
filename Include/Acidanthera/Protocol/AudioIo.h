@@ -37,7 +37,7 @@
 
 typedef struct EFI_AUDIO_IO_PROTOCOL_ EFI_AUDIO_IO_PROTOCOL;
 
-#define EFI_AUDIO_IO_PROTOCOL_REVISION  3
+#define EFI_AUDIO_IO_PROTOCOL_REVISION  4
 
 /**
   Port type.
@@ -195,7 +195,7 @@ EFI_STATUS
   @param[in] Bits               The width in bits of the source data.
   @param[in] Freq               The frequency of the source data.
   @param[in] Channels           The number of channels the source data contains.
-  @param[in] PlaybackDelay      The required delay before playback after a change in setup.
+  @param[in] PlaybackDelay      The required delay before playback after a change in setup in milliseconds.
 
   @retval EFI_SUCCESS           The audio data was played successfully.
   @retval EFI_INVALID_PARAMETER One or more parameters are invalid.
