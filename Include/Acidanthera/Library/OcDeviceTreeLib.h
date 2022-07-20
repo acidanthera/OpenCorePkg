@@ -18,8 +18,8 @@
 //
 // Device tree property name prefixes for loaded kexts or mkext.
 //
-#define DT_BOOTER_KEXT_PREFIX    "Driver-"
-#define DT_BOOTER_MKEXT_PREFIX   "DriversPackage-"
+#define DT_BOOTER_KEXT_PREFIX   "Driver-"
+#define DT_BOOTER_MKEXT_PREFIX  "DriversPackage-"
 
 //
 // Struct at the beginning of every loaded kext (10.4 and 10.5).
