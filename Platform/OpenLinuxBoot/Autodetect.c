@@ -269,7 +269,7 @@ LoadOsRelease (
         "LNX: Reading %s\n",
         OS_RELEASE_FILE
         ));
-      Status = OcParseVars (mEtcOsReleaseFileContents, &mEtcOsReleaseOptions, FALSE);
+      Status = OcParseVars (mEtcOsReleaseFileContents, &mEtcOsReleaseOptions, OcStringFormatAscii);
       if (EFI_ERROR (Status)) {
         FreePool (mEtcOsReleaseFileContents);
         mEtcOsReleaseFileContents = NULL;
@@ -320,7 +320,7 @@ LoadDefaultGrub (
       "LNX: Reading %s\n",
       GRUB_DEFAULT_FILE
       ));
-    Status = OcParseVars (mEtcDefaultGrubFileContents, &mEtcDefaultGrubOptions, FALSE);
+    Status = OcParseVars (mEtcDefaultGrubFileContents, &mEtcDefaultGrubOptions, OcStringFormatAscii);
     if (EFI_ERROR (Status)) {
       FreePool (mEtcDefaultGrubFileContents);
       mEtcDefaultGrubFileContents = NULL;
@@ -589,7 +589,7 @@ AutodetectBootOptions (
       "",
       mCurrentPartuuidAutoOpts
       ));
-    Status = AddOption (Options, mCurrentPartuuidAutoOpts, TRUE);
+    Status = AddOption (Options, mCurrentPartuuidAutoOpts, OcStringFormatUnicode);
     return Status;
   }
 
@@ -601,7 +601,7 @@ AutodetectBootOptions (
       "+",
       mCurrentPartuuidAutoOptsPlus
       ));
-    Status = AddOption (Options, mCurrentPartuuidAutoOptsPlus, TRUE);
+    Status = AddOption (Options, mCurrentPartuuidAutoOptsPlus, OcStringFormatUnicode);
     if (EFI_ERROR (Status)) {
       return Status;
     }
@@ -620,7 +620,7 @@ AutodetectBootOptions (
       mGlobalAutoOpts
       ));
 
-    Status = AddOption (Options, mGlobalAutoOpts, TRUE);
+    Status = AddOption (Options, mGlobalAutoOpts, OcStringFormatUnicode);
     return Status;
   } else if (mGlobalAutoOptsPlus) {
     DEBUG ((
@@ -630,7 +630,7 @@ AutodetectBootOptions (
       mGlobalAutoOptsPlus
       ));
 
-    Status = AddOption (Options, mGlobalAutoOptsPlus, TRUE);
+    Status = AddOption (Options, mGlobalAutoOptsPlus, OcStringFormatUnicode);
     if (EFI_ERROR (Status)) {
       return Status;
     }
@@ -682,7 +682,7 @@ AutodetectBootOptions (
           ));
 
         if (AsciiStrValue[0] != '\0') {
-          Status = InsertOption (InsertIndex, Options, AsciiStrValue, FALSE);
+          Status = InsertOption (InsertIndex, Options, AsciiStrValue, OcStringFormatAscii);
           if (EFI_ERROR (Status)) {
             return Status;
           }
@@ -744,7 +744,7 @@ AutodetectBootOptions (
       "LNX: Adding \"%a\"\n",
       AddRxOption
       ));
-    Status = InsertOption (InsertIndex, Options, AddRxOption, FALSE);
+    Status = InsertOption (InsertIndex, Options, AddRxOption, OcStringFormatAscii);
   }
 
   return Status;

@@ -166,8 +166,8 @@ UefiMain (
 
   Status = OcParseLoadOptions (LoadedImage, &ParsedLoadOptions);
   if (!EFI_ERROR (Status)) {
-    mPreserveBoot = OcHasParsedVar (ParsedLoadOptions, L"--preserve-boot", TRUE);
-    mUseApple     = OcHasParsedVar (ParsedLoadOptions, L"--apple", TRUE);
+    mPreserveBoot = OcHasParsedVar (ParsedLoadOptions, L"--preserve-boot", OcStringFormatUnicode);
+    mUseApple     = OcHasParsedVar (ParsedLoadOptions, L"--apple", OcStringFormatUnicode);
 
     OcFlexArrayFree (&ParsedLoadOptions);
   } else {

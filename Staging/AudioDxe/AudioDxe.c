@@ -97,17 +97,17 @@ AudioDxeInit (
 
   Status = OcParseLoadOptions (LoadedImage, &ParsedLoadOptions);
   if (!EFI_ERROR (Status)) {
-    gRestoreNoSnoop = OcHasParsedVar (ParsedLoadOptions, L"--restore-nosnoop", TRUE);
+    gRestoreNoSnoop = OcHasParsedVar (ParsedLoadOptions, L"--restore-nosnoop", OcStringFormatUnicode);
 
-    Status = OcParsedVarsGetInt (ParsedLoadOptions, L"--gpio-setup", &gGpioSetupStageMask, TRUE);
-    if ((Status == EFI_NOT_FOUND) && OcHasParsedVar (ParsedLoadOptions, L"--gpio-setup", TRUE)) {
+    Status = OcParsedVarsGetInt (ParsedLoadOptions, L"--gpio-setup", &gGpioSetupStageMask, OcStringFormatUnicode);
+    if ((Status == EFI_NOT_FOUND) && OcHasParsedVar (ParsedLoadOptions, L"--gpio-setup", OcStringFormatUnicode)) {
       gGpioSetupStageMask = GPIO_SETUP_STAGE_ALL;
     }
 
     DEBUG ((DEBUG_INFO, "HDA: GPIO setup stages 0x%X, restore NSNPEN %d\n", gGpioSetupStageMask, gRestoreNoSnoop));
 
     if (gGpioSetupStageMask != GPIO_SETUP_STAGE_NONE) {
-      OcParsedVarsGetInt (ParsedLoadOptions, L"--gpio-pins", &gGpioPinMask, TRUE);
+      OcParsedVarsGetInt (ParsedLoadOptions, L"--gpio-pins", &gGpioPinMask, OcStringFormatUnicode);
       DEBUG ((
         DEBUG_INFO,
         "HDA: GPIO pin mask 0x%X%a\n",
