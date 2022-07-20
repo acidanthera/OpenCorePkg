@@ -690,6 +690,11 @@ InternalAddBootEntryFromCustomEntry (
                                           )
                                         );
     if (FilePath == NULL) {
+      DEBUG ((
+        DEBUG_WARN,
+        "OCB: Invalid device path, not adding entry %a\n",
+        CustomEntry->Name
+        ));
       FreeBootEntry (BootEntry);
       return EFI_UNSUPPORTED;
     }
@@ -1679,14 +1684,7 @@ AddFileSystemEntryForCustom (
                FALSE
                );
 
-    if (EFI_ERROR (Status)) {
-      DEBUG ((
-        DEBUG_WARN,
-        "OCB: Failed to add custom entry %a - %r\n",
-        BootContext->PickerContext->CustomEntries[Index].Name,
-        Status
-        ));
-    } else {
+    if (!EFI_ERROR (Status)) {
       ReturnStatus = EFI_SUCCESS;
     }
   }
