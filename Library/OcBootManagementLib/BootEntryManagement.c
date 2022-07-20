@@ -1682,7 +1682,7 @@ AddFileSystemEntryForCustom (
     if (EFI_ERROR (Status)) {
       DEBUG ((
         DEBUG_WARN,
-        "OCB: Failed to add custom entry %a - %r",
+        "OCB: Failed to add custom entry %a - %r\n",
         BootContext->PickerContext->CustomEntries[Index].Name,
         Status
         ));
