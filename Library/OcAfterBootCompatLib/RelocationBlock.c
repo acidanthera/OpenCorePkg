@@ -306,12 +306,12 @@ AppleRelocationRebase (
           // 10.6 and newer use a different format from 10.4 and 10.5.
           //
           if (!BootCompat->KernelState.RelocationBlockLegacy) {
-            BooterKextFileInfo = (DTBooterKextFileInfo *)((UINTN)PropValue->Address);
+            BooterKextFileInfo                      = (DTBooterKextFileInfo *)((UINTN)PropValue->Address);
             BooterKextFileInfo->InfoDictPhysAddr   -= RelocDiff;
             BooterKextFileInfo->ExecutablePhysAddr -= RelocDiff;
             BooterKextFileInfo->BundlePathPhysAddr -= RelocDiff;
           } else {
-            BootxDriverInfo = (DTBootxDriverInfo *)((UINTN)PropValue->Address);
+            BootxDriverInfo                 = (DTBootxDriverInfo *)((UINTN)PropValue->Address);
             BootxDriverInfo->PlistPhysAddr -= RelocDiff;
             BootxDriverInfo->ModuleAddress -= RelocDiff;
           }
