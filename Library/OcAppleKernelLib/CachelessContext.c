@@ -1613,9 +1613,8 @@ CachelessContextHookBuiltin (
         Status = PatcherBlockKext (&Patcher);
         DEBUG ((
           EFI_ERROR (Status) ? DEBUG_WARN : DEBUG_INFO,
-          "OCAK: Cacheless blocker result for %a (%a) - %r\n",
+          "OCAK: Cacheless blocker result for %a - %r\n",
           PatchedKext->Identifier,
-          KextPatch->Patch.Comment,
           Status
           ));
       }
