@@ -263,11 +263,11 @@ AppleRelocationRebase (
   DTPropertyIterator        PropIter;
   DTBooterKextFileInfo      *BooterKextFileInfo;
   DTBootxDriverInfo         *BootxDriverInfo;
-  UINTN                     MemoryMapSize;
-  UINTN                     DescriptorSize;
+  UINT32                    MemoryMapSize;
+  UINT32                    DescriptorSize;
   EFI_MEMORY_DESCRIPTOR     *MemoryMap;
-  UINTN                     NumEntries;
-  UINTN                     Index;
+  UINT32                    NumEntries;
+  UINT32                    Index;
   EFI_MEMORY_DESCRIPTOR     *Desc;
   EFI_PHYSICAL_ADDRESS      DescLargestAddress;
   UINT32                    RelocDiff;
