@@ -263,6 +263,13 @@ AppleRelocationRebase (
   DTPropertyIterator        PropIter;
   DTBooterKextFileInfo      *BooterKextFileInfo;
   DTBootxDriverInfo         *BootxDriverInfo;
+  UINTN                     MemoryMapSize;
+  UINTN                     DescriptorSize;
+  EFI_MEMORY_DESCRIPTOR     *MemoryMap;
+  UINTN                     NumEntries;
+  UINTN                     Index;
+  EFI_MEMORY_DESCRIPTOR     *Desc;
+  EFI_PHYSICAL_ADDRESS      DescLargestAddress;
   UINT32                    RelocDiff;
 
   PropIter = &OPropIter;
@@ -334,7 +341,30 @@ AppleRelocationRebase (
   if (!BootCompat->KernelState.RelocationBlockLegacy) {
     *BA->SystemTableP -= RelocDiff;
   } else {
-    *BA->MemoryMapSize -= (*BA->MemoryMapDescriptorSize * 4);
+    MemoryMapSize  = *BA->MemoryMapSize;
+    DescriptorSize = *BA->MemoryMapDescriptorSize;
+    MemoryMap      = (EFI_MEMORY_DESCRIPTOR *)(UINTN)*BA->MemoryMap;
+
+    Desc               = MemoryMap;
+    DescLargestAddress = Desc->PhysicalStart;
+    NumEntries         = MemoryMapSize / DescriptorSize;
+
+    //
+    // Locate end of valid memory map. It is assumed that the entries are in order from
+    // lowest to highest address, performed by RebuildAppleMemoryMap booter quirk.
+    //
+    for (Index = 0; Index < NumEntries; ++Index) {
+      if (Desc->PhysicalStart >= DescLargestAddress) {
+        DescLargestAddress = Desc->PhysicalStart;
+      } else {
+        MemoryMapSize -= (DescriptorSize * (NumEntries - Index));
+        break;
+      }
+
+      Desc = NEXT_MEMORY_DESCRIPTOR (Desc, DescriptorSize);
+    }
+
+    *BA->MemoryMapSize = MemoryMapSize;
   }
 
   *BA->MemoryMap         -= RelocDiff;
