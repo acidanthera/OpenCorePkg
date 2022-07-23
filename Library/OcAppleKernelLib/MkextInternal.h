@@ -68,4 +68,11 @@ InternalCachedMkextKext (
   IN     CONST CHAR8    *BundleId
   );
 
+BOOLEAN
+InternalParseKextBinary (
+  IN OUT UINT8    **Buffer,
+  IN OUT UINT32   *BufferSize,
+  IN     BOOLEAN  Is32Bit
+  );
+
 #endif // MKEXT_INTERNAL_H

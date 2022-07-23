@@ -27,6 +27,7 @@
 #include <Library/OcVirtualFsLib.h>
 
 #include "CachelessInternal.h"
+#include "MkextInternal.h"
 #include "PrelinkedInternal.h"
 
 STATIC
@@ -807,7 +808,7 @@ CachelessContextAddKext (
   IN OUT CACHELESS_CONTEXT  *Context,
   IN     CONST CHAR8        *InfoPlist,
   IN     UINT32             InfoPlistSize,
-  IN     CONST UINT8        *Executable OPTIONAL,
+  IN     UINT8              *Executable OPTIONAL,
   IN     UINT32             ExecutableSize OPTIONAL,
   OUT    CHAR8              BundleVersion[MAX_INFO_BUNDLE_VERSION_KEY_SIZE] OPTIONAL
   )
@@ -1030,6 +1031,17 @@ CachelessContextAddKext (
     // Ensure a binary name was found.
     //
     ASSERT (NewKext->BinaryFileName != NULL);
+
+    //
+    // Use only the binary for the current arch.
+    // Some versions of macOS 10.4 may incorrectly chose the 64-bit slice
+    // despite 32-bit being the only supported Intel architecture.
+    //
+    if (!InternalParseKextBinary (&Executable, &ExecutableSize, Context->Is32Bit)) {
+      FreePool (NewKext->PlistData);
+      FreePool (NewKext);
+      return EFI_INVALID_PARAMETER;
+    }
 
     NewKext->BinaryData = AllocateCopyPool (ExecutableSize, Executable);
     if (NewKext->BinaryData == NULL) {
