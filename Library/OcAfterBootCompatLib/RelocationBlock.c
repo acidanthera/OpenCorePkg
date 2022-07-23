@@ -355,14 +355,13 @@ AppleRelocationRebase (
     //
     for (Index = 0; Index < NumEntries; ++Index) {
       if (Desc->PhysicalStart < PrevDescAddress) {
+        *BA->MemoryMapSize -= (DescriptorSize * (NumEntries - Index));
         break;
       }
 
       PrevDescAddress = Desc->PhysicalStart;
       Desc            = NEXT_MEMORY_DESCRIPTOR (Desc, DescriptorSize);
     }
-
-    *BA->MemoryMapSize -= (DescriptorSize * (NumEntries - Index));
   }
 
   *BA->MemoryMap         -= RelocDiff;
