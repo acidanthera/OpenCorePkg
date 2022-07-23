@@ -71,7 +71,7 @@
 /**
   Kernel __TEXT segment virtual address (macOS 10.4 and 10.5).
 **/
-#define KERNEL_TEXT_VADDR_LEGACY  ((UINT32) (0x111000 & MAX_UINT32))
+#define KERNEL_TEXT_VADDR_LEGACY  0x111000
 
 /**
   Kernel physical base address.

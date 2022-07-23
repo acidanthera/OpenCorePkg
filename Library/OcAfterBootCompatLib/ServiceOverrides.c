@@ -674,6 +674,11 @@ OcGetMemoryMap (
         MemoryMap,
         *DescriptorSize
         );
+    } else if (BootCompat->Settings.AllowRelocationBlock) {
+      //
+      // A sorted memory map is required when using a relocation block.
+      //
+      OcSortMemoryMap (*MemoryMapSize, MemoryMap, *DescriptorSize);
     }
 
     //

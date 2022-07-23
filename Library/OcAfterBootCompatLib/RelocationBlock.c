@@ -269,7 +269,7 @@ AppleRelocationRebase (
   UINT32                    NumEntries;
   UINT32                    Index;
   EFI_MEMORY_DESCRIPTOR     *Desc;
-  EFI_PHYSICAL_ADDRESS      DescLargestAddress;
+  EFI_PHYSICAL_ADDRESS      PrevDescAddress;
   UINT32                    RelocDiff;
 
   PropIter = &OPropIter;
@@ -345,26 +345,24 @@ AppleRelocationRebase (
     DescriptorSize = *BA->MemoryMapDescriptorSize;
     MemoryMap      = (EFI_MEMORY_DESCRIPTOR *)(UINTN)*BA->MemoryMap;
 
-    Desc               = MemoryMap;
-    DescLargestAddress = Desc->PhysicalStart;
-    NumEntries         = MemoryMapSize / DescriptorSize;
+    Desc            = MemoryMap;
+    PrevDescAddress = Desc->PhysicalStart;
+    NumEntries      = MemoryMapSize / DescriptorSize;
 
     //
-    // Locate end of valid memory map. It is assumed that the entries are in order from
-    // lowest to highest address, performed by RebuildAppleMemoryMap booter quirk.
+    // Locate end of valid memory map. It is assumed that the entries are
+    // sorted smallest to largest (performed by AllowRelocationBlock or RebuildAppleMemoryMap).
     //
     for (Index = 0; Index < NumEntries; ++Index) {
-      if (Desc->PhysicalStart >= DescLargestAddress) {
-        DescLargestAddress = Desc->PhysicalStart;
-      } else {
-        MemoryMapSize -= (DescriptorSize * (NumEntries - Index));
+      if (Desc->PhysicalStart < PrevDescAddress) {
         break;
       }
 
+      PrevDescAddress = Desc->PhysicalStart;
       Desc = NEXT_MEMORY_DESCRIPTOR (Desc, DescriptorSize);
     }
 
-    *BA->MemoryMapSize = MemoryMapSize;
+    *BA->MemoryMapSize -= (DescriptorSize * (NumEntries - Index));
   }
 
   *BA->MemoryMap         -= RelocDiff;
