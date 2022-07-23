@@ -359,7 +359,7 @@ AppleRelocationRebase (
       }
 
       PrevDescAddress = Desc->PhysicalStart;
-      Desc = NEXT_MEMORY_DESCRIPTOR (Desc, DescriptorSize);
+      Desc            = NEXT_MEMORY_DESCRIPTOR (Desc, DescriptorSize);
     }
 
     *BA->MemoryMapSize -= (DescriptorSize * (NumEntries - Index));
