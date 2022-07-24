@@ -64,9 +64,14 @@
 #define KERNEL_HIB_VADDR  ((UINTN) (0xFFFFFF8000100000ULL & MAX_UINTN))
 
 /**
-  Kernel __TEXT segment virtual address.
+  Kernel __TEXT segment virtual address (macOS 10.6 and higher).
 **/
 #define KERNEL_TEXT_VADDR  ((UINTN) (0xFFFFFF8000200000ULL & MAX_UINTN))
+
+/**
+  Kernel __TEXT segment virtual address (macOS 10.4 and 10.5).
+**/
+#define KERNEL_TEXT_VADDR_LEGACY  0x111000
 
 /**
   Kernel physical base address.
@@ -74,9 +79,14 @@
 #define KERNEL_BASE_PADDR  ((UINT32) (KERNEL_HIB_VADDR & MAX_UINT32))
 
 /**
-  Kernel physical base address.
+  Kernel __TEXT physical base address (macOS 10.6 and higher).
 **/
 #define KERNEL_TEXT_PADDR  ((UINT32) (KERNEL_TEXT_VADDR & MAX_UINT32))
+
+/**
+  Kernel __TEXT physical base address (macOS 10.4 and 10.5).
+**/
+#define KERNEL_TEXT_PADDR_LEGACY  (KERNEL_TEXT_VADDR_LEGACY)
 
 /**
   Slide offset per slide entry
@@ -355,6 +365,10 @@ typedef struct KERNEL_SUPPORT_STATE_ {
   /// This value should match ksize in XNU BootArgs.
   ///
   UINTN                   RelocationBlockUsed;
+  ///
+  /// Relocation block is being used on macOS 10.4 or 10.5.
+  ///
+  BOOLEAN                 RelocationBlockLegacy;
 } KERNEL_SUPPORT_STATE;
 
 /**
@@ -413,7 +427,7 @@ typedef struct SLIDE_SUPPORT_STATE_ {
 **/
 typedef struct BOOT_COMPAT_CONTEXT_ {
   ///
-  /// Apple Coot Compatibility settings.
+  /// Apple Boot Compatibility settings.
   ///
   OC_ABC_SETTINGS            Settings;
   ///
