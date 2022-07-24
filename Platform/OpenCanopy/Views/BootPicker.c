@@ -1990,6 +1990,9 @@ BootPickerViewInitialize (
   // Conditions for delta function:
   //
 
+  mBootPickerLabelAnimation.Link.BackLink    = &mBootPickerLabelAnimation.Link;
+  mBootPickerLabelAnimation.Link.ForwardLink = &mBootPickerLabelAnimation.Link;
+
   if (!GuiContext->DoneIntroAnimation) {
     InitBpAnimIntro (DrawContext);
     InsertHeadList (&DrawContext->Animations, &mBootPickerIntroAnimation.Link);
