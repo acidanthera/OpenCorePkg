@@ -1678,17 +1678,17 @@ PatchProvideCurrentCpuInfo (
         case 1:
           CacheType = (CpuidCacheEax.Bits.CacheType == 1) ? L1D :
                       (CpuidCacheEax.Bits.CacheType == 2) ? L1I :
-                                                            Lnone;
+                      Lnone;
           break;
 
         case 2:
           CacheType = (CpuidCacheEax.Bits.CacheType == 3) ? L2U :
-                                                            Lnone;
+                      Lnone;
           break;
 
         case 3:
           CacheType = (CpuidCacheEax.Bits.CacheType == 3) ? L3U :
-                                                            Lnone;
+                      Lnone;
           break;
 
         default:
