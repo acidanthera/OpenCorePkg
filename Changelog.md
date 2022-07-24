@@ -12,6 +12,7 @@ OpenCore Changelog
 - Added optional `--codec-setup-delay` argument to AudioDxe
 - Changed units of `Audio` -> `SetupDelay` from microseconds to milliseconds (divide previous value by 1000 if using this setting)
 - Fixed incorrect FAT binary slice being selected under macOS 10.4.11 when performing a cacheless boot
+- Fixed rare assertion caused by label animation initialisation in OpenCanopy
 - Added `--show-csr` option for `Toggle SIP` boot menu entry
 - Added macOS 10.4 and 10.5 support to `AllowRelocationBlock` Booter quirk
 - Added CPU cache info injection for macOS 10.4 to `ProvideCurrentCpuInfo` quirk
