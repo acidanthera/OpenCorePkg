@@ -1891,7 +1891,9 @@ OcImageLoaderLoad (
   );
 
 /**
-  Parse loaded image protocol load options.
+  Parse loaded image protocol load options, resultant options are in the
+  same format as is returned by OcParsedVars and may be examined using the
+  same utility methods.
 
   Assumes CHAR_NULL terminated Unicode string of space separated options,
   each of form {name} or {name}={value}. Double quotes can be used round {value} to
@@ -1947,6 +1949,20 @@ OcParseVars (
   IN           VOID              *StrVars,
   OUT       OC_FLEX_ARRAY        **ParsedVars,
   IN     CONST OC_STRING_FORMAT  StringFormat
+  );
+
+/**
+  Return parsed variable at given index.
+
+  @param[in]   ParsedVars         Parsed variables.
+  @param[in]   Index              Index of option to return.
+
+  @retval                         Parsed option.
+**/
+OC_PARSED_VAR *
+OcParsedVarsItemAt (
+  IN     CONST OC_FLEX_ARRAY  *ParsedVars,
+  IN     CONST UINTN          Index
   );
 
 /**

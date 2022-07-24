@@ -10,17 +10,23 @@
 
 #include <Uefi.h>
 #include <Library/BaseLib.h>
+#include <Library/MemoryAllocationLib.h>
 #include <Library/UefiBootServicesTableLib.h>
 #include <Library/UefiRuntimeServicesTableLib.h>
 
 #include <Protocol/OcBootEntry.h>
 
-#define OC_MENU_SIP_IS_DISABLED  "Toggle SIP (Disabled)"
-#define OC_MENU_SIP_IS_ENABLED   "Toggle SIP (Enabled)"
+#define OC_MENU_TOGGLE_SIP           "Toggle SIP (%a)"
+#define OC_MENU_TOGGLE_SIP_SHOW_CSR  "Toggle SIP (0x%X:%a)"
+#define OC_MENU_TOGGLE_SIP_MAX_SIZE  (\
+    sizeof(OC_MENU_TOGGLE_SIP_SHOW_CSR) \
+  + sizeof(UINT32) * 2 * sizeof (CHAR8) - L_STR_LEN("%X") \
+  + L_STR_LEN("Disabled") - L_STR_LEN("%a"))
 
-STATIC UINT32  mCsrUserConfig;
-STATIC UINT32  mCsrNextConfig;
-STATIC UINT32  mAttributes;
+STATIC UINT32   mCsrUserConfig;
+STATIC UINT32   mCsrNextConfig;
+STATIC UINT32   mAttributes;
+STATIC BOOLEAN  mShowCsr;
 
 STATIC
 EFI_STATUS
@@ -87,6 +93,7 @@ ToggleSipGetBootEntries (
   EFI_STATUS  Status;
   UINT32      CsrActiveConfig;
   BOOLEAN     IsEnabled;
+  CHAR8       *Name;
 
   //
   // Custom entries only.
@@ -125,13 +132,40 @@ ToggleSipGetBootEntries (
     return Status;
   }
 
+  Name = AllocatePool (OC_MENU_TOGGLE_SIP_MAX_SIZE);
+  if (Name == NULL) {
+    return EFI_OUT_OF_RESOURCES;
+  }
+
+  if (mShowCsr) {
+    Status = OcAsciiSafeSPrint (
+               Name,
+               OC_MENU_TOGGLE_SIP_MAX_SIZE,
+               OC_MENU_TOGGLE_SIP_SHOW_CSR,
+               CsrActiveConfig,
+               IsEnabled ? "Enabled" : "Disabled"
+               );
+  } else {
+    Status = OcAsciiSafeSPrint (
+               Name,
+               OC_MENU_TOGGLE_SIP_MAX_SIZE,
+               OC_MENU_TOGGLE_SIP,
+               IsEnabled ? "Enabled" : "Disabled"
+               );
+  }
+
+  if (EFI_ERROR (Status)) {
+    ASSERT (FALSE);
+    FreePool (Name);
+    return EFI_ABORTED;
+  }
+
+  mToggleSipBootEntries[0].Name = Name;
   if (IsEnabled) {
-    mToggleSipBootEntries[0].Name          = OC_MENU_SIP_IS_ENABLED;
     mToggleSipBootEntries[0].Flavour       = OC_FLAVOUR_TOGGLE_SIP_ENABLED;
     mToggleSipBootEntries[0].AudioBasePath = OC_VOICE_OVER_AUDIO_FILE_SIP_IS_ENABLED;
     mCsrNextConfig                         = mCsrUserConfig;
   } else {
-    mToggleSipBootEntries[0].Name          = OC_MENU_SIP_IS_DISABLED;
     mToggleSipBootEntries[0].Flavour       = OC_FLAVOUR_TOGGLE_SIP_DISABLED;
     mToggleSipBootEntries[0].AudioBasePath = OC_VOICE_OVER_AUDIO_FILE_SIP_IS_DISABLED;
     mCsrNextConfig                         = 0;
@@ -153,11 +187,35 @@ ToggleSipGetBootEntries (
 }
 
 STATIC
+VOID
+EFIAPI
+ToggleSipFreeBootEntries (
+  IN           OC_PICKER_ENTRY  **Entries,
+  IN           UINTN            NumEntries
+  )
+{
+  UINTN  Index;
+
+  if (NumEntries == 0) {
+    return;
+  }
+
+  ASSERT (NumEntries == 1);
+  ASSERT (Entries != NULL);
+
+  for (Index = 0; Index < NumEntries; Index++) {
+    if (Entries[Index]->Name != NULL) {
+      FreePool ((VOID *)Entries[Index]->Name);  ///< Discard const
+    }
+  }
+}
+
+STATIC
 OC_BOOT_ENTRY_PROTOCOL
   mToggleSipBootEntryProtocol = {
   OC_BOOT_ENTRY_PROTOCOL_REVISION,
   ToggleSipGetBootEntries,
-  NULL
+  ToggleSipFreeBootEntries
 };
 
 EFI_STATUS
@@ -169,7 +227,11 @@ UefiMain (
 {
   EFI_STATUS                 Status;
   EFI_LOADED_IMAGE_PROTOCOL  *LoadedImage;
+  OC_FLEX_ARRAY              *ParsedLoadOptions;
+  CHAR16                     *Option;
+  UINTN                      Index;
   UINTN                      Data;
+  BOOLEAN                    HasUserCsr;
 
   Status = gBS->HandleProtocol (
                   ImageHandle,
@@ -180,21 +242,41 @@ UefiMain (
     return Status;
   }
 
-  Status = EFI_NOT_FOUND;
+  Status     = OcParseLoadOptions (LoadedImage, &ParsedLoadOptions);
+  HasUserCsr = FALSE;
+  if (!EFI_ERROR (Status)) {
+    for (Index = 0; Index < ParsedLoadOptions->Count; Index++) {
+      Option = OcParsedVarsItemAt (ParsedLoadOptions, Index)->Unicode.Name;
+      if (Option[0] != L'-') {
+        if (OcUnicodeStartsWith (Option, L"0x", TRUE)) {
+          Status = StrHexToUintnS (Option, NULL, &Data);
+        } else {
+          Status = StrDecimalToUintnS (Option, NULL, &Data);
+        }
 
-  if (OcHasLoadOptions (LoadedImage->LoadOptionsSize, LoadedImage->LoadOptions)) {
-    if (OcUnicodeStartsWith (LoadedImage->LoadOptions, L"0x", TRUE)) {
-      Status = StrHexToUintnS (LoadedImage->LoadOptions, NULL, &Data);
-    } else {
-      Status = StrDecimalToUintnS (LoadedImage->LoadOptions, NULL, &Data);
+        if (EFI_ERROR (Status)) {
+          DEBUG ((DEBUG_WARN, "BEP: ToggleSip cannot parse %s - %r\n", Option, Status));
+          HasUserCsr = FALSE;
+        } else {
+          HasUserCsr = TRUE;
+        }
+      }
     }
 
-    if (EFI_ERROR (Status)) {
-      DEBUG ((DEBUG_WARN, "BEP: ToggleSip cannot parse %s - %r\n", LoadedImage->LoadOptions, Status));
+    mShowCsr = OcHasParsedVar (ParsedLoadOptions, L"--show-csr", OcStringFormatUnicode);
+
+    OcFlexArrayFree (&ParsedLoadOptions);
+  } else {
+    ASSERT (ParsedLoadOptions == NULL);
+
+    if (Status != EFI_NOT_FOUND) {
+      return Status;
     }
+
+    mShowCsr = FALSE;
   }
 
-  if (!EFI_ERROR (Status)) {
+  if (HasUserCsr) {
     mCsrUserConfig = (UINT32)Data;
     if (OcIsSipEnabled (EFI_SUCCESS, mCsrUserConfig)) {
       DEBUG ((DEBUG_WARN, "BEP: Specified value 0x%X will not disable SIP!\n", mCsrUserConfig));

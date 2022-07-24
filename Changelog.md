@@ -12,6 +12,7 @@ OpenCore Changelog
 - Added optional `--codec-setup-delay` argument to AudioDxe
 - Changed units of `Audio` -> `SetupDelay` from microseconds to milliseconds (divide previous value by 1000 if using this setting)
 - Fixed incorrect FAT binary slice being selected under macOS 10.4.11 when performing a cacheless boot
+- Added `--show-csr` option for `Toggle SIP` boot menu entry
 
 #### v0.8.2
 - Fixed `AppleCpuPmCfgLock` on macOS 13

@@ -625,6 +625,18 @@ OcParseVars (
   return EFI_SUCCESS;
 }
 
+OC_PARSED_VAR *
+OcParsedVarsItemAt (
+  IN     CONST OC_FLEX_ARRAY  *ParsedVars,
+  IN     CONST UINTN          Index
+  )
+{
+  OC_PARSED_VAR  *Option;
+
+  Option = OcFlexArrayItemAt (ParsedVars, Index);
+  return Option;
+}
+
 BOOLEAN
 OcParsedVarsGetStr (
   IN     CONST OC_FLEX_ARRAY     *ParsedVars,

@@ -6882,9 +6882,24 @@ SIP will be fully configured, so setting the variable using this boot option
 \texttt{csrutil} command in macOS Recovery.
 
 \texttt{csr-active-config}  will be toggled between \texttt{0} for enabled, and a user-specified or
-default value for disabled. The default value is \texttt{0x27F} (see below).
-Any other required value can be specified as a single number in the \texttt{Arguments} for this driver.
-This can be specified as hexadecimal, beginning with \texttt{0x}, or as decimal.
+default value for disabled.
+
+Options for the driver should be specified as plain text values separated by whitespace in the
+\texttt{Arguments} section of \texttt{Driver} entry. Available options are:
+
+\begin{itemize}
+\tightlist
+  \item \texttt{-{}-show-csr} - Boolean flag, enabled if present. \medskip
+
+  If enabled, show the current hexadecimal value of \texttt{csr-active-config} in the boot entry name.
+  This option will not work in OpenCanopy when used in combination with \texttt{OC\_ATTR\_USE\_GENERIC\_LABEL\_IMAGE}
+  in \texttt{PickerAttributes}. \medskip
+
+  \item Numerical value - Default value \texttt{0x27F}. \medskip
+
+  Specify the \texttt{csr-active-config} value to use to disabled SIP. This can be specified as
+  hexadecimal, beginning with \texttt{0x}, or as decimal. For more info see Note 2 below. \medskip
+\end{itemize}
 
 \emph{Note 1}: It is recommended not to run macOS with
 SIP disabled. Use of this boot option may make it easier to quickly disable SIP

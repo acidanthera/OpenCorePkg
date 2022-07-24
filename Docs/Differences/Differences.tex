@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
 %DIF DEL PreviousConfiguration.tex   Thu Jul  7 13:40:40 2022
-%DIF ADD ../Configuration.tex        Wed Jul 20 19:52:29 2022
+%DIF ADD ../Configuration.tex        Sun Jul 24 14:16:13 2022
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -6957,9 +6957,29 @@ SIP will be fully configured, so setting the variable using this boot option
 \texttt{csrutil} command in macOS Recovery.
 
 \texttt{csr-active-config}  will be toggled between \texttt{0} for enabled, and a user-specified or
-default value for disabled. The default value is \texttt{0x27F} (see below).
-Any other required value can be specified as a single number in the \texttt{Arguments} for this driver.
-This can be specified as hexadecimal, beginning with \texttt{0x}, or as decimal.
+default value for disabled.
+\DIFdelbegin \DIFdel{The default value is }\texttt{\DIFdel{0x27F}} %DIFAUXCMD
+\DIFdel{(see below).
+Any other required value can }\DIFdelend \DIFaddbegin 
+
+\DIFadd{Options for the driver should }\DIFaddend be specified as \DIFdelbegin \DIFdel{a single number }\DIFdelend \DIFaddbegin \DIFadd{plain text values separated by whitespace }\DIFaddend in the
+\texttt{Arguments} \DIFdelbegin \DIFdel{for this driver. This }\DIFdelend \DIFaddbegin \DIFadd{section of }\texttt{\DIFadd{Driver}} \DIFadd{entry. Available options are:
+}
+
+\begin{itemize}
+\tightlist
+  \item \texttt{\DIFadd{-}{}\DIFadd{-show-csr}} \DIFadd{- Boolean flag, enabled if present. }\medskip
+
+  \DIFadd{If enabled, show the current hexadecimal value of }\texttt{\DIFadd{csr-active-config}} \DIFadd{in the boot entry name.
+  This option will not work in OpenCanopy when used in combination with }\texttt{\DIFadd{OC\_ATTR\_USE\_GENERIC\_LABEL\_IMAGE}}
+  \DIFadd{in }\texttt{\DIFadd{PickerAttributes}}\DIFadd{. }\medskip
+
+  \item \DIFadd{Numerical value - Default value }\texttt{\DIFadd{0x27F}}\DIFadd{. }\medskip
+
+  \DIFadd{Specify the }\texttt{\DIFadd{csr-active-config}} \DIFadd{value to use to disabled SIP. This }\DIFaddend can be specified as
+  hexadecimal, beginning with \texttt{0x}, or as decimal. \DIFaddbegin \DIFadd{For more info see Note 2 below. }\medskip
+\end{itemize}
+\DIFaddend 
 
 \emph{Note 1}: It is recommended not to run macOS with
 SIP disabled. Use of this boot option may make it easier to quickly disable SIP
