@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
 %DIF DEL PreviousConfiguration.tex   Thu Jul  7 13:40:40 2022
-%DIF ADD ../Configuration.tex        Sun Jul 24 14:16:13 2022
+%DIF ADD ../Configuration.tex        Sun Jul 24 22:03:47 2022
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -2858,7 +2858,7 @@ blocking.
   \texttt{ProvideCurrentCpuInfo}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
-  \textbf{Requirement}: 10.8 (10.14)\\
+  \textbf{Requirement}: \DIFdelbegin \DIFdel{10.8 }\DIFdelend \DIFaddbegin \DIFadd{10.4 }\DIFaddend (10.14)\\
   \textbf{Description}: Provides current CPU info to the kernel.
 
   This quirk works differently depending on the CPU:
@@ -2871,8 +2871,11 @@ blocking.
     values solving kernel panic with \texttt{-cpu host}.
   \item For Intel CPUs it adds support for asymmetrical SMP systems
     (e.g. Intel Alder Lake) by patching core count to thread count along
-    with the supplemental required changes (10.14+).
-  \end{itemize}
+    with the supplemental required changes (10.14+). \DIFaddbegin \DIFadd{Cache size and cache
+    line size are also provided when using 10.4 as Intel Penryn and newer
+    may only have cache information in CPUID leaf 0x4 which is unsupported
+    by 10.4.
+  }\DIFaddend \end{itemize}
 
 \item
   \texttt{SetApfsTrimTimeout}\\
