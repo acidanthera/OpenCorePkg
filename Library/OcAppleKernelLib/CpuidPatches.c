@@ -1722,7 +1722,7 @@ PatchProvideCurrentCpuInfo (
     for (Index = L1I; Index < LCACHE_MAX; Index++) {
       *LocationTigerCache++ = 0xC7;
       *LocationTigerCache++ = 0x40;
-      *LocationTigerCache++ = 0x68 + ((UINT8)(sizeof (UINT32)) * Index);
+      *LocationTigerCache++ = 0x68 + ((UINT8)(sizeof (UINT32) * Index));
       CopyMem (LocationTigerCache, &CacheSizes[Index], sizeof (CacheSizes[Index]));
       LocationTigerCache += sizeof (CacheSizes[Index]);
       DEBUG ((DEBUG_INFO, "OCAK: Cache size (L%u): %u bytes\n", (Index >= 3) ? (Index - 1) : 1, CacheSizes[Index]));
