@@ -25,11 +25,13 @@
 
 #include <UserFile.h>
 
-STATIC CHAR8  mFullPath[256] = { 0 };
+#define  OC_USER_FULL_PATH_MAX_SIZE  256
+
+STATIC CHAR8  mFullPath[OC_USER_FULL_PATH_MAX_SIZE] = { 0 };
 STATIC UINTN  mRootPathLen   = 0;
 
 STATIC
-VOID
+BOOLEAN
 UserSetRootPath (
   IN CONST CHAR8  *RootPath
   )
@@ -37,6 +39,13 @@ UserSetRootPath (
   UINTN  RootPathLen;
 
   RootPathLen = AsciiStrLen (RootPath);
+  //
+  // Preserve 2 bytes for '/' and '\0'.
+  //
+  if (RootPathLen > OC_USER_FULL_PATH_MAX_SIZE - 2) {
+    DEBUG ((DEBUG_ERROR, "RootPath is too long!\n"));
+    return FALSE;
+  }
 
   AsciiStrCpyS (mFullPath, sizeof (mFullPath) - 1, RootPath);
   //
@@ -51,6 +60,7 @@ UserSetRootPath (
   }
 
   DEBUG ((DEBUG_ERROR, "Root Path: %a\n", mFullPath));
+  return TRUE;
 }
 
 STATIC
@@ -340,7 +350,9 @@ WrapMain (
     return -1;
   }
 
-  UserSetRootPath (argv[1]);
+  if (!UserSetRootPath (argv[1])) {
+    return -1;
+  }
   //
   // Read config file (Only one single config is supported).
   //
