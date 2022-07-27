@@ -287,8 +287,8 @@ sydr-fuzz: $(PROJECT).sydr$(SUFFIX) $(PROJECT)$(SUFFIX) FORCE
 
 		[libfuzzer]
 		path = "$(PROJECT)$(SUFFIX)"
-		args = "-jobs=$(FUZZ_JOBS) -workers=$(FUZZ_JOBS) -rss_limit_mb=$(FUZZ_MEM) $(FUZZ_DIR)"
-		merge = false
+		args = "-jobs=1000 -workers=$(FUZZ_JOBS) -rss_limit_mb=$(FUZZ_MEM) $(FUZZ_DIR)"
+		cmin = false
 	EOF
 	UBSAN_OPTIONS='halt_on_error=1' sydr-fuzz -l debug run -f
 
