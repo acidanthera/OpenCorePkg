@@ -373,7 +373,7 @@ saveNvram() {
   # We would like to unmount here, but umount fails with "Resource busy"
   # and diskutil is not available. This should not cause any problem except
   # that the boot drive will be left mounted at the unique path if the
-  # daemon process gets killed (the process would then by restarted by macOS
+  # daemon process gets killed (the process would then be restarted by macOS
   # and NVRAM should still be saved at exit).
 }
 

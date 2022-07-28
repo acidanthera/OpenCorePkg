@@ -6360,7 +6360,8 @@ even cause permanent firmware damage. Some of the known drivers are listed below
   created using the Apple Partitioning Scheme (creating macOS Installers using GPT avoids
   the need for this). OpenDuet already includes this driver. \\
 \href{https://github.com/acidanthera/OpenCorePkg}{\texttt{OpenVariableRuntimeDxe}}\textbf{*}
-& \hyperref[emunvram]{OpenCore plugin} offering emulated NVRAM support. \\
+& \hyperref[emunvram]{OpenCore plugin} offering emulated NVRAM support. OpenDuet already
+includes this driver. \\
 \href{https://github.com/acidanthera/audk}{\texttt{Ps2KeyboardDxe}}\textbf{*}
 & PS/2 keyboard driver from \texttt{MdeModulePkg}. \texttt{OpenDuetPkg} and some types of firmware
   may not include this driver, but it is necessary for PS/2 keyboard to work.
@@ -7027,9 +7028,9 @@ Recommended configuration settings for this driver:
 
 \begin{itemize}
 \tightlist
-  \item \texttt{OpenVariableRuntimeDxe.efi} loaded using \texttt{LoadEarly=true} (not required with OpenDuet).
-  \item \texttt{OpenRuntime.efi} specified after \texttt{OpenVariableRuntimeDxe.efi} in the
-  \texttt{Drivers} list and loaded using \texttt{LoadEarly=true} (not required with OpenDuet).
+  \item \texttt{OpenVariableRuntimeDxe.efi} loaded using \texttt{LoadEarly=true} (driver not required with OpenDuet).
+  \item \texttt{OpenRuntime.efi} specified after \texttt{OpenVariableRuntimeDxe.efi} (when applicable),
+  also loaded using \texttt{LoadEarly=true} for correct operation of \texttt{RequestBootVarRouting}.
   \item \texttt{LegacySchema} populated.
   \item \texttt{ExposeSensitiveData} with at least bit \texttt{0x1} set to make \texttt{boot-path}
   variable containing the OpenCore EFI partition UUID available to the \texttt{Launchd.command} script.
