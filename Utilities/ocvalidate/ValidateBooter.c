@@ -162,8 +162,8 @@ CheckBooterQuirks (
   ResizeAppleGpuBars              = Config->Booter.Quirks.ResizeAppleGpuBars;
 
   for (Index = 0; Index < Config->Uefi.Drivers.Count; ++Index) {
-    DriverEntry    = Config->Uefi.Drivers.Values[Index];
-    Driver         = OC_BLOB_GET (&DriverEntry->Path);
+    DriverEntry = Config->Uefi.Drivers.Values[Index];
+    Driver      = OC_BLOB_GET (&DriverEntry->Path);
 
     //
     // Skip sanitising UEFI->Drivers as it will be performed when checking UEFI section.

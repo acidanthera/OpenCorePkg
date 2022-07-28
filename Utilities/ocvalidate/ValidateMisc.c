@@ -227,8 +227,8 @@ CheckMiscBoot (
 
   HasOpenCanopyEfiDriver = FALSE;
   for (Index = 0; Index < Config->Uefi.Drivers.Count; ++Index) {
-    DriverEntry    = Config->Uefi.Drivers.Values[Index];
-    Driver         = OC_BLOB_GET (&DriverEntry->Path);
+    DriverEntry = Config->Uefi.Drivers.Values[Index];
+    Driver      = OC_BLOB_GET (&DriverEntry->Path);
 
     if (DriverEntry->Enabled && (AsciiStrCmp (Driver, "OpenCanopy.efi") == 0)) {
       HasOpenCanopyEfiDriver = TRUE;

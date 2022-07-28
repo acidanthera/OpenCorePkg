@@ -325,9 +325,9 @@ CheckUefiDrivers (
   HasAudioDxeEfiDriver         = FALSE;
   IndexAudioDxeEfiDriver       = 0;
   for (Index = 0; Index < Config->Uefi.Drivers.Count; ++Index) {
-    DriverEntry    = Config->Uefi.Drivers.Values[Index];
-    Comment        = OC_BLOB_GET (&DriverEntry->Comment);
-    Driver         = OC_BLOB_GET (&DriverEntry->Path);
+    DriverEntry = Config->Uefi.Drivers.Values[Index];
+    Comment     = OC_BLOB_GET (&DriverEntry->Comment);
+    Driver      = OC_BLOB_GET (&DriverEntry->Path);
 
     //
     // Check the length of path relative to OC directory.
