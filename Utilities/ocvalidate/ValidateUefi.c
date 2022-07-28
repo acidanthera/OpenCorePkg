@@ -299,8 +299,6 @@ CheckUefiDrivers (
   OC_UEFI_DRIVER_ENTRY  *DriverEntry;
   CONST CHAR8           *Comment;
   CONST CHAR8           *Driver;
-  CONST CHAR8           *Load;
-  BOOLEAN               IsDriverLoaded;
   UINTN                 DriverSumSize;
   BOOLEAN               HasOpenRuntimeEfiDriver;
   BOOLEAN               HasOpenUsbKbDxeEfiDriver;
@@ -330,8 +328,6 @@ CheckUefiDrivers (
     DriverEntry    = Config->Uefi.Drivers.Values[Index];
     Comment        = OC_BLOB_GET (&DriverEntry->Comment);
     Driver         = OC_BLOB_GET (&DriverEntry->Path);
-    Load           = OC_BLOB_GET (&DriverEntry->Load);
-    IsDriverLoaded = (AsciiStrCmp (Load, "Early") == 0) || (AsciiStrCmp (Load, "Enabled") == 0);
 
     //
     // Check the length of path relative to OC directory.
@@ -361,7 +357,7 @@ CheckUefiDrivers (
       continue;
     }
 
-    if (!IsDriverLoaded) {
+    if (!DriverEntry->Enabled) {
       continue;
     }
 

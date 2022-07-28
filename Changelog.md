@@ -19,7 +19,7 @@ OpenCore Changelog
 - Added emulated NVRAM driver for use separately from OpenDuet
 - Added support for NVRAM reset and set default boot entry when using emulated NVRAM
 - Upgraded emulated NVRAM logout script to allow unsupervised installation of recent macOS OTA updates
-- Changed `Driver` -> `Enabled` [`true`|`false`] to `Driver` -> `Load` [`Early`|`Enabled`|`Disabled`] (requires config.plist update, see samples)
+- Added `Driver` -> `LoadEarly` [`true`|`false`] for drivers loaded before NVRAM init
 
 #### v0.8.2
 - Fixed `AppleCpuPmCfgLock` on macOS 13

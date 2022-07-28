@@ -607,7 +607,8 @@ OC_DECLARE (OC_PLATFORM_CONFIG)
 #define OC_UEFI_DRIVER_ENTRY_FIELDS(_, __) \
   _(OC_STRING                   , Arguments          ,     , OC_STRING_CONSTR ("", _, __)                    , OC_DESTR (OC_STRING) ) \
   _(OC_STRING                   , Comment            ,     , OC_STRING_CONSTR ("", _, __)                    , OC_DESTR (OC_STRING) ) \
-  _(OC_STRING                   , Load               ,     , OC_STRING_CONSTR ("Disabled", _, __)            , OC_DESTR (OC_STRING) ) \
+  _(BOOLEAN                     , Enabled            ,     , FALSE                                           , ()) \
+  _(BOOLEAN                     , LoadEarly          ,     , FALSE                                           , ()) \
   _(OC_STRING                   , Path               ,     , OC_STRING_CONSTR ("", _, __)                    , OC_DESTR (OC_STRING) )
 OC_DECLARE (OC_UEFI_DRIVER_ENTRY)
 

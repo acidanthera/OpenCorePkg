@@ -103,7 +103,6 @@ OcLoadDrivers (
   BOOLEAN                    SkipDriver;
   OC_UEFI_DRIVER_ENTRY       *DriverEntry;
   CONST CHAR8                *DriverComment;
-  CONST CHAR8                *DriverLoad;
   CHAR8                      *DriverFileName;
   CONST CHAR8                *DriverArguments;
   CONST CHAR8                *UnescapedArguments;
@@ -120,18 +119,13 @@ OcLoadDrivers (
   for (Index = 0; Index < Config->Uefi.Drivers.Count; ++Index) {
     DriverEntry     = Config->Uefi.Drivers.Values[Index];
     DriverComment   = OC_BLOB_GET (&DriverEntry->Comment);
-    DriverLoad      = OC_BLOB_GET (&DriverEntry->Load);
     DriverFileName  = OC_BLOB_GET (&DriverEntry->Path);
     DriverArguments = OC_BLOB_GET (&DriverEntry->Arguments);
 
-    SkipDriver = (
-                    (DriverFileName == NULL)
+    SkipDriver = (  !DriverEntry->Enabled
+                 || (DriverFileName == NULL)
                  || (DriverFileName[0] == '\0')
-                 || (
-                     LoadEarly
-                      ? (AsciiStrCmp (DriverLoad, "Early") != 0)
-                      : (AsciiStrCmp (DriverLoad, "Enabled") != 0)
-                     )
+                 || (LoadEarly != DriverEntry->LoadEarly)
                     );
 
     //

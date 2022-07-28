@@ -7027,9 +7027,9 @@ Recommended configuration settings for this driver:
 
 \begin{itemize}
 \tightlist
-  \item \texttt{OpenVariableRuntimeDxe.efi} loaded using \texttt{Load=Early} (not required with OpenDuet).
+  \item \texttt{OpenVariableRuntimeDxe.efi} loaded using \texttt{LoadEarly=true} (not required with OpenDuet).
   \item \texttt{OpenRuntime.efi} specified after \texttt{OpenVariableRuntimeDxe.efi} in the
-  \texttt{Drivers} list and loaded using \texttt{Load=Early} (not required with OpenDuet).
+  \texttt{Drivers} list and loaded using \texttt{LoadEarly=true} (not required with OpenDuet).
   \item \texttt{LegacySchema} populated.
   \item \texttt{ExposeSensitiveData} with at least bit \texttt{0x1} set to make \texttt{boot-path}
   variable containing the OpenCore EFI partition UUID available to the \texttt{Launchd.command} script.
@@ -7800,6 +7800,12 @@ for additional options.
   reference for the entry. Whether this value is used is implementation defined.
 
 \item
+  \texttt{Enabled}\\
+  \textbf{Type}: \texttt{plist\ boolean}\\
+  \textbf{Failsafe}: \texttt{false}\\
+  \textbf{Description}: If \texttt{false} this driver entry will be ignored.
+
+\item
   \texttt{Path}\\
   \textbf{Type}: \texttt{plist\ string}\\
   \textbf{Failsafe}: Empty\\
@@ -7807,19 +7813,12 @@ for additional options.
   from \texttt{OC/Drivers} directory.
 
 \item
-  \texttt{Load}\\
-  \textbf{Type}: \texttt{plist\ string}\\
-  \textbf{Failsafe}: \texttt{Disabled}\\
-  \textbf{Description}: When and whether to load this driver.
+  \texttt{LoadEarly}\\
+  \textbf{Type}: \texttt{plist\ boolean}\\
+  \textbf{Failsafe}: \texttt{false}\\
+  \textbf{Description}: Load the driver early in the OpenCore boot process, before NVRAM setup.
 
-  \begin{itemize}
-  \tightlist
-  \item \texttt{Disabled} --- Do not load this driver.
-  \item \texttt{Enabled} --- Load the driver normally.
-  \item \texttt{Early} --- Load the driver early in the OpenCore boot process, before NVRAM setup.
-  \end{itemize}
-
-  \emph{Note}: Do not use the \texttt{Early} option unless specifically recommended to do so for a
+  \emph{Note}: Do not enable this option unless specifically recommended to do so for a
   given driver and purpose.
 
 \item

@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
-%DIF DEL PreviousConfiguration.tex   Wed Jul 27 21:20:07 2022
-%DIF ADD ../Configuration.tex        Thu Jul 28 00:20:39 2022
+%DIF DEL PreviousConfiguration.tex   Sun Jul 10 20:57:48 2022
+%DIF ADD ../Configuration.tex        Thu Jul 28 23:33:28 2022
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -118,7 +118,7 @@
 %DIF HYPERREF PREAMBLE %DIF PREAMBLE
 \providecommand{\DIFadd}[1]{\texorpdfstring{\DIFaddtex{#1}}{#1}} %DIF PREAMBLE
 \providecommand{\DIFdel}[1]{\texorpdfstring{\DIFdeltex{#1}}{}} %DIF PREAMBLE
-%DIF COLORLISTINGS PREAMBLE %DIF PREAMBLE
+%DIF LISTINGS PREAMBLE %DIF PREAMBLE
 \RequirePackage{listings} %DIF PREAMBLE
 \RequirePackage{color} %DIF PREAMBLE
 \lstdefinelanguage{DIFcode}{ %DIF PREAMBLE
@@ -7288,9 +7288,9 @@ protocol enabling the following:
 
 \begin{itemize}
 \tightlist
-  \item \texttt{\DIFadd{OpenVariableRuntimeDxe.efi}} \DIFadd{loaded using }\texttt{\DIFadd{Load=Early}} \DIFadd{(not required with OpenDuet).
+  \item \texttt{\DIFadd{OpenVariableRuntimeDxe.efi}} \DIFadd{loaded using }\texttt{\DIFadd{LoadEarly=true}} \DIFadd{(not required with OpenDuet).
   }\item \texttt{\DIFadd{OpenRuntime.efi}} \DIFadd{specified after }\texttt{\DIFadd{OpenVariableRuntimeDxe.efi}} \DIFadd{in the
-  }\texttt{\DIFadd{Drivers}} \DIFadd{list and loaded using }\texttt{\DIFadd{Load=Early}} \DIFadd{(not required with OpenDuet).
+  }\texttt{\DIFadd{Drivers}} \DIFadd{list and loaded using }\texttt{\DIFadd{LoadEarly=true}} \DIFadd{(not required with OpenDuet).
   }\item \texttt{\DIFadd{LegacySchema}} \DIFadd{populated.
   }\item \texttt{\DIFadd{ExposeSensitiveData}} \DIFadd{with at least bit }\texttt{\DIFadd{0x1}} \DIFadd{set to make }\texttt{\DIFadd{boot-path}}
   \DIFadd{variable containing the OpenCore EFI partition UUID available to the }\texttt{\DIFadd{Launchd.command}} \DIFadd{script.
@@ -8074,28 +8074,28 @@ for additional options.
   reference for the entry. Whether this value is used is implementation defined.
 
 \item
-  \texttt{Path}\\
+  \DIFaddbegin \texttt{\DIFadd{Enabled}}\\
+  \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ boolean}}\\
+  \textbf{\DIFadd{Failsafe}}\DIFadd{: }\texttt{\DIFadd{false}}\\
+  \textbf{\DIFadd{Description}}\DIFadd{: If }\texttt{\DIFadd{false}} \DIFadd{this driver entry will be ignored.
+}
+
+\item
+  \DIFaddend \texttt{Path}\\
   \textbf{Type}: \texttt{plist\ string}\\
   \textbf{Failsafe}: Empty\\
   \textbf{Description}: Path of file to be loaded as a UEFI driver
   from \texttt{OC/Drivers} directory.
 
 \item
-  \texttt{\DIFdelbegin \DIFdel{Enabled}\DIFdelend \DIFaddbegin \DIFadd{Load}\DIFaddend }\\
-  \textbf{Type}: \texttt{plist\ \DIFdelbegin \DIFdel{boolean}\DIFdelend \DIFaddbegin \DIFadd{string}\DIFaddend }\\
-  \textbf{Failsafe}: \texttt{\DIFdelbegin \DIFdel{false}\DIFdelend \DIFaddbegin \DIFadd{Disabled}\DIFaddend }\\
+  \texttt{\DIFdelbegin \DIFdel{Enabled}\DIFdelend \DIFaddbegin \DIFadd{LoadEarly}\DIFaddend }\\
+  \textbf{Type}: \texttt{plist\ boolean}\\
+  \textbf{Failsafe}: \texttt{false}\\
   \textbf{Description}: \DIFdelbegin \DIFdel{If }\texttt{\DIFdel{false}} %DIFAUXCMD
-\DIFdel{this driverentry will be ignored}\DIFdelend \DIFaddbegin \DIFadd{When and whether to load this driver.
+\DIFdel{this driver entry will be ignored}\DIFdelend \DIFaddbegin \DIFadd{Load the driver early in the OpenCore boot process, before NVRAM setup.
 }
 
-  \begin{itemize}
-  \tightlist
-  \item \texttt{\DIFadd{Disabled}} \DIFadd{--- Do not load this driver.
-  }\item \texttt{\DIFadd{Enabled}} \DIFadd{--- Load the driver normally.
-  }\item \texttt{\DIFadd{Early}} \DIFadd{--- Load the driver early in the OpenCore boot process, before NVRAM setup.
-  }\end{itemize}
-
-  \emph{\DIFadd{Note}}\DIFadd{: Do not use the }\texttt{\DIFadd{Early}} \DIFadd{option unless specifically recommended to do so for a
+  \emph{\DIFadd{Note}}\DIFadd{: Do not enable this option unless specifically recommended to do so for a
   given driver and purpose}\DIFaddend .
 
 \item
