@@ -28,7 +28,7 @@
 #define  OC_USER_FULL_PATH_MAX_SIZE  256
 
 STATIC CHAR8  mFullPath[OC_USER_FULL_PATH_MAX_SIZE] = { 0 };
-STATIC UINTN  mRootPathLen   = 0;
+STATIC UINTN  mRootPathLen                          = 0;
 
 STATIC
 BOOLEAN
@@ -353,6 +353,7 @@ WrapMain (
   if (!UserSetRootPath (argv[1])) {
     return -1;
   }
+
   //
   // Read config file (Only one single config is supported).
   //
