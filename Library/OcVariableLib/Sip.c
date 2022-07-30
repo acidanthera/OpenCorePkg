@@ -1,7 +1,7 @@
 /** @file
   Manage Apple SIP variable csr-active-config.
 
-  Copyright (C) 2022, mikebeaton. All rights reserved.<BR>
+  Copyright (C) 2021-2022, Mike Beaton. All rights reserved.<BR>
   SPDX-License-Identifier: BSD-3-Clause
 **/
 

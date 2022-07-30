@@ -7064,11 +7064,14 @@ as the value for the following three GUID keys in \texttt{LegacySchema}:
  \item 7C436110-AB2A-4BBB-A880-FE41995C9F82
  \item 8BE4DF61-93CA-11D2-AA0D-00E098032B8C
 \end{itemize}
-This enables all variables saved by \texttt{Launchd.command}, and additionally all arbitrary user
-test variables (e.g. as set by \texttt{sudo nvram foo="bar"}), to be saved to \texttt{nvram.plist}.
-However, once set up, only allowing strictly required variables (as shown in OpenCore's sample
-\texttt{.plist} files) is considerably more secure, and please note the following warning about the
-overall security of loading nvram variables from a non-vaulted file.
+This enables all variables saved by \texttt{Launchd.command} to be saved to \texttt{nvram.plist},
+therefore it allows all arbitrary user test variables (e.g. as set by \texttt{sudo nvram foo=bar})
+to be saved. Using this permissive policy is also future-proof against any changes in the variables
+which need to be passed from macOS update setup to the \texttt{macOS Installer} stage, in order for
+it to succeed.
+Nevertheless, once emulated NVRAM is set up, only allowing known strictly required variables
+(as shown in OpenCore's sample \texttt{.plist} files) is considerably more secure. See also the
+following warning about the overall security of loading NVRAM variables from a non-vaulted file.
 
 \textbf{Warning}: The ability to load NVRAM from a file on disk can be dangerous, as it
 passes unprotected data to firmware variable services. Only use when no hardware NVRAM

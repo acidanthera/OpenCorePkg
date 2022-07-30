@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
 %DIF DEL PreviousConfiguration.tex   Wed Jul 27 21:20:07 2022
-%DIF ADD ../Configuration.tex        Thu Jul 28 23:20:08 2022
+%DIF ADD ../Configuration.tex        Sat Jul 30 08:47:48 2022
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -7328,11 +7328,14 @@ root }\texttt{\DIFadd{plist\ dictionary}} \DIFadd{type and contain two fields:
  }\item \DIFadd{7C436110-AB2A-4BBB-A880-FE41995C9F82
  }\item \DIFadd{8BE4DF61-93CA-11D2-AA0D-00E098032B8C
 }\end{itemize}
-\DIFadd{This enables all variables saved by }\texttt{\DIFadd{Launchd.command}}\DIFadd{, and additionally all arbitrary user
-test variables (e.g. as set by }\texttt{\DIFadd{sudo nvram foo="bar"}}\DIFadd{), to be saved to }\texttt{\DIFadd{nvram.plist}}\DIFadd{.
-However, once set up, only allowing strictly required variables (as shown in OpenCore's sample
-}\texttt{\DIFadd{.plist}} \DIFadd{files) is considerably more secure, and please note the following warning about the
-overall security of loading nvram variables from a non-vaulted file.
+\DIFadd{This enables all variables saved by }\texttt{\DIFadd{Launchd.command}} \DIFadd{to be saved to }\texttt{\DIFadd{nvram.plist}}\DIFadd{,
+therefore it allows all arbitrary user test variables (e.g. as set by }\texttt{\DIFadd{sudo nvram foo=bar}}\DIFadd{)
+to be saved. Using this permissive policy is also future-proof against any changes in the variables
+which need to be passed from macOS update setup to the }\texttt{\DIFadd{macOS Installer}} \DIFadd{stage, in order for
+it to succeed.
+Nevertheless, once emulated NVRAM is set up, only allowing known strictly required variables
+(as shown in OpenCore's sample }\texttt{\DIFadd{.plist}} \DIFadd{files) is considerably more secure. See also the
+following warning about the overall security of loading NVRAM variables from a non-vaulted file.
 }
 
 \textbf{\DIFadd{Warning}}\DIFadd{: The ability to load NVRAM from a file on disk can be dangerous, as it

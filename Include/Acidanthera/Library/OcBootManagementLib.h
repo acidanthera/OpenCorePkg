@@ -1,6 +1,5 @@
 /** @file
-  Copyright (C) 2019, vit9696. All rights reserved.<BR>
-  Copyright (C) 2021, Mike Beaton. All rights reserved.<BR>
+  Copyright (C) 2019-2022, vit9696, mikebeaton. All rights reserved.<BR>
   SPDX-License-Identifier: BSD-3-Clause
 **/
 
