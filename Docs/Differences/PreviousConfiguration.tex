@@ -94,7 +94,7 @@
 
        \vspace{0.2in}
 
-       Reference Manual (0.8.2)
+       Reference Manual (0.8.3)
 
        \vspace{0.2in}
 
@@ -494,7 +494,11 @@ should not be relied on.
     child [missing] {}
     child [missing] {}
     child { node [optional] {boot}}
-    child { node [optional] {nvram.plist}}
+    child { node {NVRAM}
+      child { node [optional] {nvram.plist}}
+      child { node [optional] {nvram.fallback}}
+      child { node [optional] {nvram.used}}
+    }
     child { node [optional] {opencore-YYYY-MM-DD-HHMMSS.txt}}
     child { node [optional] {panic-YYYY-MM-DD-HHMMSS.txt}}
     child { node [optional] {SysReport}}
@@ -567,6 +571,12 @@ Available entries include:
 \item
   \texttt{nvram.plist} \\
   OpenCore variable import file.
+\item
+  \texttt{nvram.fallback} \\
+  OpenCore variable import fallback file.
+\item
+  \texttt{nvram.used} \\
+  Renamed previous OpenCore variable import file after switch to fallback file.
 \item
   \texttt{opencore-YYYY-MM-DD-HHMMSS.txt} \\
   OpenCore log file.
@@ -847,10 +857,10 @@ ACPI changes apply globally (to every operating system) with the following effec
 
 \begin{itemize}
 \tightlist
-\item \texttt{Patch} is processed.
 \item \texttt{Delete} is processed.
-\item \texttt{Add} is processed.
 \item \texttt{Quirks} are processed.
+\item \texttt{Patch} is processed.
+\item \texttt{Add} is processed.
 \end{itemize}
 
 Applying the changes globally resolves the problems of incorrect operating system
@@ -1253,6 +1263,13 @@ different firmware types. Some of these features were originally implemented as 
 of \href{https://github.com/acidanthera/AptioFixPkg}{\text{AptioMemoryFix.efi}},
 which is no longer maintained. Refer to the \hyperref[troubleshootingtricks]{Tips and Tricks}
 section for instructions on migration.
+
+Booter changes apply with the following effective order:
+\begin{itemize}
+\tightlist
+\item \texttt{Quirks} are processed.
+\item \texttt{Patch} is processed.
+\end{itemize}
 
 If this is used for the first time on customised firmware, the following requirements
 should be met before starting:
@@ -1948,6 +1965,16 @@ Apple Kernel (\href{https://opensource.apple.com/source/xnu}{XNU}). The modifica
 currently provide driver (kext) injection, kernel and driver patching, and driver
 blocking.
 
+Kernel and kext changes apply with the following effective order:
+
+\begin{itemize}
+\tightlist
+\item \texttt{Block} is processed.
+\item \texttt{Emulate} and \texttt{Quirks} are processed.
+\item \texttt{Patch} is processed.
+\item \texttt{Add} and \texttt{Force} are processed.
+\end{itemize}
+
 \subsection{Properties}\label{kernelprops}
 
 \begin{enumerate}
@@ -2589,10 +2616,7 @@ blocking.
   should be used for XNU to print logs to the serial port.
 
   \emph{Note 2}: In addition to this patch, kext \texttt{Apple16X50PCI0} should be prevented from attaching
-  to have \texttt{kprintf} method working properly. This can be achieved by setting (i.e. \texttt{Delete}, then \texttt{Add})
-  the \texttt{class-code} property of the PCI serial port device to \texttt{FFFFFFFF} in \texttt{DeviceProperties} section.
-  As an alternative solution, a codeless kext \texttt{PCIeSerialDisable.kext} shown in the spoiler \texttt{PCIeSerialDisable.kext/Contents/Info.plist} at
-  \href{https://github.com/acidanthera/bugtracker/issues/1954}{acidanthera/bugtracker\#1954}, may also be used.
+  to have \texttt{kprintf} method working properly. This can be achieved by using \href{https://github.com/joevt/PCIeSerialDisable}{PCIeSerialDisable}.
   In addition, for certain Thunderbolt cards the IOKit personality \texttt{IOPCITunnelCompatible} also needs to be set to \texttt{true},
   which can be done by the \texttt{PCIeSerialThunderboltEnable.kext} attached at \href{https://github.com/acidanthera/bugtracker/issues/2003#issuecomment-1116761087}{acidanthera/bugtracker\#2003}.
 
@@ -2770,7 +2794,7 @@ blocking.
   \texttt{ProvideCurrentCpuInfo}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
-  \textbf{Requirement}: 10.8 (10.14)\\
+  \textbf{Requirement}: 10.4 (10.14)\\
   \textbf{Description}: Provides current CPU info to the kernel.
 
   This quirk works differently depending on the CPU:
@@ -2783,7 +2807,10 @@ blocking.
     values solving kernel panic with \texttt{-cpu host}.
   \item For Intel CPUs it adds support for asymmetrical SMP systems
     (e.g. Intel Alder Lake) by patching core count to thread count along
-    with the supplemental required changes (10.14+).
+    with the supplemental required changes (10.14+). Cache size and cache
+    line size are also provided when using 10.4 as Intel Penryn and newer
+    may only have cache information in CPUID leaf 0x4 which is unsupported
+    by 10.4.
   \end{itemize}
 
 \item
@@ -3848,6 +3875,7 @@ cat Kernel.panic | grep macOSProcessedStackshotData |
     \item \texttt{0x10} (bit \texttt{4}) --- Enable UEFI variable logging.
     \item \texttt{0x20} (bit \texttt{5}) --- Enable \texttt{non-volatile} UEFI variable logging.
     \item \texttt{0x40} (bit \texttt{6}) --- Enable logging to file.
+    \item \texttt{0x80} (bit \texttt{7}) --- In combination with \texttt{0x40}, enable faster but unsafe (see Warning 2 below) file logging.
   \end{itemize}
 
   Console logging prints less than the other variants.
@@ -3871,7 +3899,7 @@ nvram 4D1FDA02-38C7-4A6A-9CC6-4BCCA8B30102:boot-log |
   awk '{gsub(/%0d%0a%00/,"");gsub(/%0d%0a/,"\n")}1'
 \end{lstlisting}
 
-  \textbf{Warning}: Certain firmware appear to have defective NVRAM garbage collection.
+  \textbf{Warning 1}: Certain firmware appear to have defective NVRAM garbage collection.
   As a result, they may not be able to always free space after variable deletion. Do not
   enable \texttt{non-volatile} NVRAM logging on such devices unless specifically required.
 
@@ -3887,6 +3915,13 @@ nvram 4D1FDA02-38C7-4A6A-9CC6-4BCCA8B30102:boot-log |
   \texttt{DisableWatchDog} is set to \texttt{true} when a slow drive is used. Try to
   avoid frequent use of this option when dealing with flash drives as large I/O
   amounts may speed up memory wear and render the flash drive unusable quicker.
+
+  \textbf{Warning 2}: It is possible to enable fast file logging, which requires a fully compliant
+  firmware FAT32 driver. On drivers with incorrect FAT32 write support (e.g. APTIO IV, but maybe
+  others) this setting can result in corruption up to and including an unusable ESP filesystem,
+  therefore be prepared to recreate the ESP partition and all of its contents if testing this option.
+  This option can increase logging speed significantly on some suitable firmware, but may make little
+  speed difference on some others.
 
   When interpreting the log, note that the lines are prefixed with a tag describing
   the relevant location (module) of the log line allowing better attribution of the
@@ -3957,6 +3992,7 @@ nvram 4D1FDA02-38C7-4A6A-9CC6-4BCCA8B30102:boot-log |
   \item \texttt{OCTPL} --- OcTemplateLib
   \item \texttt{OCUC} --- OcUnicodeCollationLib
   \item \texttt{OCUT} --- OcAppleUserInterfaceThemeLib
+  \item \texttt{OCVAR} --- OcVariableLib
   \item \texttt{OCXML} --- OcXmlLib
   \end{itemize}
 
@@ -4752,35 +4788,6 @@ limitations that should be considered for certain use cases.
   \textbf{Description}: Removes NVRAM variables from a map (\texttt{plist\ dict})
   of GUIDs to an array (\texttt{plist\ array}) of variable names in
   \texttt{plist\ string} format.
-
-\item
-  \texttt{LegacyEnable}\\
-  \textbf{Type}: \texttt{plist\ boolean}\\
-  \textbf{Failsafe}: \texttt{false}\\
-  \textbf{Description}: Enables loading a NVRAM variable file named \texttt{nvram.plist}
-  from EFI volume root.
-
-  This file must have a root \texttt{plist\ dictionary} type and contain two fields:
-  \begin{itemize}
-  \tightlist
-  \item \texttt{Version} --- \texttt{plist\ integer}, file version, must be set to 1.
-  \item \texttt{Add} --- \texttt{plist\ dictionary}, equivalent to \texttt{Add} from
-  \texttt{config.plist}.
-  \end{itemize}
-
-  Variable loading happens prior to the \texttt{Delete} (and \texttt{Add}) phases. Unless
-  \texttt{LegacyOverwrite} is enabled, it will not overwrite any existing variable.
-  Variables allowed to be set must be specified in \texttt{LegacySchema}.
-
-  Third-party scripts may be used to create \texttt{nvram.plist}
-  file. An example of such script can be found in
-  \href{https://github.com/acidanthera/OpenCorePkg/tree/master/Utilities/LogoutHook}{\texttt{Utilities/LogoutHook}}.
-  The use of third-party scripts may require \texttt{ExposeSensitiveData} set to \texttt{0x3} to provide
-  \texttt{boot-path} variable with the OpenCore EFI partition UUID.
-
-  \textbf{Warning}: This feature can be dangerous, as it passes unprotected data to
-  firmware variable services. Only use when no hardware NVRAM implementation is
-  provided by the firmware or when the NVRAM implementation is incompatible.
 
 \item
   \texttt{LegacyOverwrite}\\
@@ -6289,7 +6296,7 @@ Depending on the firmware, a different set of drivers may be required.
 Loading an incompatible driver may lead the system to unbootable state or
 even cause permanent firmware damage. Some of the known drivers are listed below:
 
-\begin{longtable}{p{1.3in}p{5.55in}}
+\begin{longtable}{p{1.65in}p{5.25in}}
 \href{https://github.com/acidanthera/OpenCorePkg}{\texttt{AudioDxe}}\textbf{*}
 & \hyperref[uefiaudio]{HDA audio support driver} in UEFI firmware for most Intel and some other analog audio controllers.
   Staging driver, refer to \href{https://github.com/acidanthera/bugtracker/issues/740}{acidanthera/bugtracker\#740}
@@ -6346,10 +6353,15 @@ even cause permanent firmware damage. Some of the known drivers are listed below
 & USB keyboard driver adding support for \texttt{AppleKeyMapAggregator} protocols
   on top of a custom USB keyboard driver implementation. This is an alternative to
   builtin \texttt{KeySupport}, which may work better or worse depending on the firmware. \\
-\href{https://github.com/acidanthera/OcBinaryData}{\texttt{OpenPartitionDxe}}\textbf{*}
+\href{https://github.com/acidanthera/OpenCorePkg}{\texttt{OpenPartitionDxe}}\textbf{*}
 & Partition management driver with Apple Partitioning Scheme support.
-  This driver can be used to support loading older DMG recoveries such as
-  macOS 10.9 using Apple Partitioning Scheme. OpenDuet already includes this driver. \\
+  This driver can be used to support loading older DMG recoveries such as macOS 10.9
+  using Apple Partitioning Scheme, or for loading other macOS Installers where these were
+  created using the Apple Partitioning Scheme (creating macOS Installers using GPT avoids
+  the need for this). OpenDuet already includes this driver. \\
+\href{https://github.com/acidanthera/OpenCorePkg}{\texttt{OpenVariableRuntimeDxe}}\textbf{*}
+& \hyperref[emunvram]{OpenCore plugin} offering emulated NVRAM support. OpenDuet already
+includes this driver. \\
 \href{https://github.com/acidanthera/audk}{\texttt{Ps2KeyboardDxe}}\textbf{*}
 & PS/2 keyboard driver from \texttt{MdeModulePkg}. \texttt{OpenDuetPkg} and some types of firmware
   may not include this driver, but it is necessary for PS/2 keyboard to work.
@@ -6860,9 +6872,24 @@ SIP will be fully configured, so setting the variable using this boot option
 \texttt{csrutil} command in macOS Recovery.
 
 \texttt{csr-active-config}  will be toggled between \texttt{0} for enabled, and a user-specified or
-default value for disabled. The default value is \texttt{0x27F} (see below).
-Any other required value can be specified as a single number in the \texttt{Arguments} for this driver.
-This can be specified as hexadecimal, beginning with \texttt{0x}, or as decimal.
+default value for disabled.
+
+Options for the driver should be specified as plain text values separated by whitespace in the
+\texttt{Arguments} section of \texttt{Driver} entry. Available options are:
+
+\begin{itemize}
+\tightlist
+  \item \texttt{-{}-show-csr} - Boolean flag, enabled if present. \medskip
+
+  If enabled, show the current hexadecimal value of \texttt{csr-active-config} in the boot entry name.
+  This option will not work in OpenCanopy when used in combination with \texttt{OC\_ATTR\_USE\_GENERIC\_LABEL\_IMAGE}
+  in \texttt{PickerAttributes}. \medskip
+
+  \item Numerical value - Default value \texttt{0x27F}. \medskip
+
+  Specify the \texttt{csr-active-config} value to use to disabled SIP. This can be specified as
+  hexadecimal, beginning with \texttt{0x}, or as decimal. For more info see Note 2 below. \medskip
+\end{itemize}
 
 \emph{Note 1}: It is recommended not to run macOS with
 SIP disabled. Use of this boot option may make it easier to quickly disable SIP
@@ -6886,7 +6913,7 @@ will report that SIP has a non-standard value, however protection will be functi
 
 \subsection{AudioDxe}\label{uefiaudio}
 
-High Definition Audio support driver in UEFI firmware for most Intel and some other analog audio controllers.
+High Definition Audio (HDA) support driver in UEFI firmware for most Intel and some other analog audio controllers.
 
 \emph{Note}: AudioDxe is a staging driver, refer to \href{https://github.com/acidanthera/bugtracker/issues/740}{acidanthera/bugtracker\#740}
 for known issues.
@@ -6894,12 +6921,37 @@ for known issues.
 \subsubsection{Configuration}
 
 Most UEFI audio configuration is handled via the \hyperref[uefiaudioprops]{\texttt{UEFI Audio Properties}}
-section, but if required the following additonal configuration options (which are needed to produce sound
-on most Apple hardware, and possibly some others) may be specified in \texttt{UEFI/Drivers/Arguments}:
+section, but in addition some of the following configuration options may be required in order
+to allow AudioDxe to correctly drive certain devices. All options are specified as text strings,
+separated by space if more than one option is required, in the \texttt{Arguments} property for
+the driver within the \texttt{UEFI/Drivers} section:
 
 \begin{itemize}
   \tightlist
-	\item \texttt{-{}-gpio-setup} - Default value is \texttt{0} (GPIO setup disabled) if argument is not provided,
+	\item \texttt{-{}-codec-setup-delay} - Integer value, default \texttt{0}. \medskip
+
+  Amount of time in milliseconds to wait for all widgets to come fully on, applied per codec
+  during driver connection phase. In most systems this should not be needed and a faster boot
+  will be achieved by using \texttt{Audio} section \texttt{SetupDelay} if any audio setup delay
+  is required. Where required, values of up to one second may be needed. \medskip
+
+	\item \texttt{-{}-force-device} - String value, no default. \medskip
+
+  When this option is present and has a value (e.g. \texttt{-{}-force-device=PciRoot(0x0)/Pci(0x1f,0x3)}), it
+  forces AudioDxe to connect to the specified PCI device, even if the device does not report itself as
+  an HDA audio controller.
+
+  During driver connection, AudioDxe automatically provides audio services on all supported codecs of
+  all available HDA controllers. However, if the relevant controller is misreporting its identity
+  (typically, it will be reporting itself as a legacy audio device instead of an HDA controller)
+  then this argument may be required.
+
+  Applies if the audio device can be made to work in macOS, but shows no sign of being detected by AudioDxe
+  (e.g. when including \texttt{DEBUG\_INFO} in \texttt{DisplayLevel} and using a DEBUG build of AudioDxe,
+  no controller and codec layout information is displayed during the \texttt{Connecting drivers...}
+  phase of OpenCore log). \medskip
+
+  \item \texttt{-{}-gpio-setup} - Default value is \texttt{0} (GPIO setup disabled) if argument is not provided,
   or \texttt{7} (all GPIO setup stages stages enabled) if the argument is provided with no value. \medskip
 
 	Available values, which may be combined by adding, are: \medskip
@@ -6954,6 +7006,122 @@ on most Apple hardware, and possibly some others) may be specified in \texttt{UE
   some other systems. \medskip
 \end{itemize}
 
+\subsection{OpenVariableRuntimeDxe}\label{emunvram}
+
+Provides in-memory emulated NVRAM implementation. This can be useful on systems with fragile
+(e.g. MacPro5,1, see discussion linked from this \href{https://forums.macrumors.com/posts/30945127}{forum post})
+or incompatible NVRAM implementations. This driver is included by default in OpenDuet.
+
+In addition to installing emulated NVRAM, this driver additionally installs an OpenCore compatible
+protocol enabling the following:
+
+\begin{itemize}
+\tightlist
+  \item NVRAM values are loaded from \texttt{NVRAM/nvram.plist} (or from \texttt{NVRAM/nvram.fallback}
+  if it is present and \texttt{NVRAM/nvram.plist} is missing) on boot
+  \item The Reset NVRAM option installed by the \texttt{ResetNvramEntry} driver removes the above files instead
+  of affecting underlying NVRAM
+  \item \texttt{CTRL+Enter} in the OpenCore bootpicker updates or creates \texttt{NVRAM/nvram.plist}
+\end{itemize}
+
+Recommended configuration settings for this driver:
+
+\begin{itemize}
+\tightlist
+  \item \texttt{OpenVariableRuntimeDxe.efi} loaded using \texttt{LoadEarly=true} (driver not required with OpenDuet).
+  \item \texttt{OpenRuntime.efi} specified after \texttt{OpenVariableRuntimeDxe.efi} (when applicable),
+  also loaded using \texttt{LoadEarly=true} for correct operation of \texttt{RequestBootVarRouting}.
+  \item \texttt{LegacySchema} populated.
+  \item \texttt{ExposeSensitiveData} with at least bit \texttt{0x1} set to make \texttt{boot-path}
+  variable containing the OpenCore EFI partition UUID available to the \texttt{Launchd.command} script.
+\end{itemize}
+
+Variable loading happens prior to the NVRAM \texttt{Delete} (and \texttt{Add}) phases. Unless
+\texttt{LegacyOverwrite} is enabled, it will not overwrite any existing variable.
+Variables allowed for loading and for saving with \texttt{CTRL+Enter} must be specified in \texttt{LegacySchema}.
+
+In order to allow changes to NVRAM within macOS to be captured and saved,
+an additional script must be installed. An example of such script can be found in
+\href{https://github.com/acidanthera/OpenCorePkg/tree/master/Utilities/LogoutHook/Launchd.command}{\texttt{Utilities/LogoutHook/Launchd.command}}.
+
+\emph{Note 1}: This driver requires working FAT write support in firmware, and sufficient free
+space on the OpenCore EFI partition for up to three saved NVRAM files.
+
+\emph{Note 2}: The \texttt{nvram.plist} (and \texttt{nvram.fallback} if present) files must have a
+root \texttt{plist\ dictionary} type and contain two fields:
+\begin{itemize}
+\tightlist
+ \item \texttt{Version} --- \texttt{plist\ integer}, file version, must be set to 1.
+ \item \texttt{Add} --- \texttt{plist\ dictionary}, equivalent to \texttt{Add} from
+ \texttt{config.plist}.
+\end{itemize}
+
+\emph{Note 3}: When setting up legacy NVRAM, it can be convenient to set \texttt{<string>*</string>}
+as the value for the following three GUID keys in \texttt{LegacySchema}:
+\begin{itemize}
+\tightlist
+ \item 36C28AB5-6566-4C50-9EBD-CBB920F83843
+ \item 7C436110-AB2A-4BBB-A880-FE41995C9F82
+ \item 8BE4DF61-93CA-11D2-AA0D-00E098032B8C
+\end{itemize}
+This enables all variables saved by \texttt{Launchd.command} to be saved to \texttt{nvram.plist},
+therefore it allows all arbitrary user test variables (e.g. as set by \texttt{sudo nvram foo=bar})
+to be saved. Using this permissive policy is also future-proof against any changes in the variables
+which need to be passed from macOS update setup to the \texttt{macOS Installer} stage, in order for
+it to succeed.
+Nevertheless, once emulated NVRAM is set up, only allowing known strictly required variables
+(as shown in OpenCore's sample \texttt{.plist} files) is considerably more secure. See also the
+following warning about the overall security of loading NVRAM variables from a non-vaulted file.
+
+\textbf{Warning}: The ability to load NVRAM from a file on disk can be dangerous, as it
+passes unprotected data to firmware variable services. Only use when no hardware NVRAM
+implementation is provided by the firmware or when the NVRAM implementation available in
+firmware is incompatible or dangerously fragile (e.g. in a state where excessive use
+may cause bricked hardware).
+
+\subsubsection{Managing macOS updates when using emulated NVRAM}
+
+OpenCore combined with \texttt{OpenVariableRuntimeDxe} will only use a given saved \texttt{nvram.plist} file once,
+if it is used to launch a \texttt{macOS Installer} boot entry. After that the used settings are moved to \texttt{nvram.used}
+and fallback settings, if any, from \texttt{nvram.fallback} are used instead. \texttt{Launchd.command} itself
+always copies the previous NVRAM settings to fallback, each time it saves new settings.
+
+This strategy is used to work round the limitation that the \texttt{Launchd.command} script is not running,
+and therefore cannot save NVRAM changes (particularly default boot entry changes), during the second
+and subsequent restarts of the macOS installer.
+
+In brief, this fallback strategy allows full or incremental OTA updates of recent macOS, which are started from within
+an existing macOS (with the \texttt{Launchd.command} script installed), to proceed without manual intervention.
+
+However, for full installs, there can be more than one full restart back to the \texttt{macOS Installer} entry. In this case
+the fallback strategy will lose track of the correct startup item (i.e. \texttt{macOS Installer}) from the second reboot
+onwards. Equally, if installing to a drive other than the current default boot partition, this will not be automatically selected after
+the installer completes, as it would be when using non-emulated NVRAM. (This behaviour remains preferable to not having the fallback strategy,
+in which case a \texttt{macOS Installer} entry would be continually recreated in the picker menu, even once it no longer exists).
+
+In both the above two cases it is recommended to use the following settings, to make it easy to manually control which boot
+entry is selected during the installer process:
+
+\begin{itemize}
+\tightlist
+ \item Set \texttt{ShowPicker=true}.
+ \item Set \texttt{Timeout=0}.
+ \item Set \texttt{DisableWatchdog=true}.
+ \item If possible, start from a situation where there are no other pending \texttt{macOS Installer} entries in the boot menu
+ (to avoid potential confusion as to which is relevant).
+\end{itemize}
+
+The first reboot should correctly select \texttt{macOS Installer}. For second and subsequent reboots, if a \texttt{macOS Installer}
+entry is still present it should be manually selected (using just Enter, not \texttt{CTRL+Enter}). Once a \texttt{macOS Installer}
+entry is no longer present, the entry for the new OS will still be automatically selected if it was the previous boot default.
+If not, it should be manually selected (at this point, \texttt{CTRL+Enter} is a good idea as any final remaining installion restarts
+will be to this entry).
+
+\emph{Note}: When using emulated NVRAM but not installing from within an existing installed macOS (i.e. when installing from
+within macOS Recovery, or from an installation USB), please refer to this
+\href{https://applelife.ru/posts/916248}{forum post} (in Russian)
+for additional options.
+
 \subsection{Properties}\label{uefiprops}
 
 \begin{enumerate}
@@ -6963,6 +7131,13 @@ on most Apple hardware, and possibly some others) may be specified in \texttt{UE
   \textbf{Failsafe}: None\\
   \textbf{Description}: Provide APFS support as configured in the
   \hyperref[uefiapfsprops]{APFS Properties} section below.
+
+\item
+  \texttt{AppleInput}\\
+  \textbf{Type}: \texttt{plist\ dict}\\
+  \textbf{Failsafe}: None\\
+  \textbf{Description}: Configure the re-implementation of the Apple Event protocol
+  described in the \hyperref[uefiappleinputprops]{AppleInput Properties} section below.
 
 \item
   \texttt{Audio}\\
@@ -7603,13 +7778,13 @@ on most Apple hardware, and possibly some others) may be specified in \texttt{UE
   Datasheet (or any other ICH datasheet) for more details about this register.
 
   \emph{Note}: This option is independent from \texttt{AudioSupport}. If AppleALC is used
-  it is preferred to use AppleALC \texttt{alctsel} property instead.
+  it is preferred to use AppleALC \texttt{alctcsel} property instead.
 
 \item
   \texttt{SetupDelay}\\
   \textbf{Type}: \texttt{plist\ integer}\\
   \textbf{Failsafe}: \texttt{0}\\
-  \textbf{Description}: Audio codec reconfiguration delay in microseconds.
+  \textbf{Description}: Audio codec reconfiguration delay in milliseconds.
 
   Some codecs require a vendor-specific delay after the reconfiguration
   (e.g. volume setting). This option makes it configurable. A typical
@@ -7629,6 +7804,12 @@ on most Apple hardware, and possibly some others) may be specified in \texttt{UE
   reference for the entry. Whether this value is used is implementation defined.
 
 \item
+  \texttt{Enabled}\\
+  \textbf{Type}: \texttt{plist\ boolean}\\
+  \textbf{Failsafe}: \texttt{false}\\
+  \textbf{Description}: If \texttt{false} this driver entry will be ignored.
+
+\item
   \texttt{Path}\\
   \textbf{Type}: \texttt{plist\ string}\\
   \textbf{Failsafe}: Empty\\
@@ -7636,10 +7817,13 @@ on most Apple hardware, and possibly some others) may be specified in \texttt{UE
   from \texttt{OC/Drivers} directory.
 
 \item
-  \texttt{Enabled}\\
+  \texttt{LoadEarly}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
-  \textbf{Description}: If \texttt{false} this driver entry will be ignored.
+  \textbf{Description}: Load the driver early in the OpenCore boot process, before NVRAM setup.
+
+  \emph{Note}: Do not enable this option unless specifically recommended to do so for a
+  given driver and purpose.
 
 \item
   \texttt{Arguments}\\
