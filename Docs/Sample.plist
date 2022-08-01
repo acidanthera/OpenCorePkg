@@ -1421,7 +1421,7 @@
 				<key>Enabled</key>
 				<false/>
 				<key>LoadEarly</key>
-				<false/>
+				<true/>
 				<key>Path</key>
 				<string>OpenVariableRuntimeDxe.efi</string>
 			</dict>

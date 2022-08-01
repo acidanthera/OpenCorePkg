@@ -125,6 +125,8 @@ Utility to validate whether a `config.plist` matches requirements and convention
 - `OpenUsbKbDxe.efi` and `Ps2KeyboardDxe.efi` should never co-exist.
 - When HFS+ filesystem driver or `AudioDxe.efi` is in use, `ConnectDrivers` should be enabled altogether.
 - When `OpenCanopy.efi` is in use, `PickerMode` in `Misc->Boot` should be set to `External`.
+- When `OpenVariableRuntimeDxe.efi` is in use, its `LoadEarly` option must be set to `TRUE`.
+- When `OpenVariableRuntimeDxe.efi` is NOT in use, `LoadEarly` for any driver must be set to `FALSE`.
 #### Input
 - KeySupportMode: Only `Auto`, `V1`, `V2`, or `AMI` are accepted.
 - When `PointerSupport` is enabled, the value of `PointerSupportMode` should only be `ASUS`.

@@ -296,6 +296,7 @@ CheckUefiDrivers (
 {
   UINT32                ErrorCount;
   UINT32                Index;
+  UINT32                Index2;
   OC_UEFI_DRIVER_ENTRY  *DriverEntry;
   CONST CHAR8           *Comment;
   CONST CHAR8           *Driver;
@@ -312,18 +313,20 @@ CheckUefiDrivers (
   BOOLEAN               IsRequestBootVarRoutingEnabled;
   BOOLEAN               IsKeySupportEnabled;
   BOOLEAN               IsConnectDriversEnabled;
+  BOOLEAN               HasOpenVariableRuntimeDxeEfiDriver;
 
   ErrorCount = 0;
 
-  HasOpenRuntimeEfiDriver      = FALSE;
-  HasOpenUsbKbDxeEfiDriver     = FALSE;
-  IndexOpenUsbKbDxeEfiDriver   = 0;
-  HasPs2KeyboardDxeEfiDriver   = FALSE;
-  IndexPs2KeyboardDxeEfiDriver = 0;
-  HasHfsEfiDriver              = FALSE;
-  IndexHfsEfiDriver            = 0;
-  HasAudioDxeEfiDriver         = FALSE;
-  IndexAudioDxeEfiDriver       = 0;
+  HasOpenRuntimeEfiDriver            = FALSE;
+  HasOpenUsbKbDxeEfiDriver           = FALSE;
+  IndexOpenUsbKbDxeEfiDriver         = 0;
+  HasPs2KeyboardDxeEfiDriver         = FALSE;
+  IndexPs2KeyboardDxeEfiDriver       = 0;
+  HasHfsEfiDriver                    = FALSE;
+  IndexHfsEfiDriver                  = 0;
+  HasAudioDxeEfiDriver               = FALSE;
+  IndexAudioDxeEfiDriver             = 0;
+  HasOpenVariableRuntimeDxeEfiDriver = FALSE;
   for (Index = 0; Index < Config->Uefi.Drivers.Count; ++Index) {
     DriverEntry = Config->Uefi.Drivers.Values[Index];
     Comment     = OC_BLOB_GET (&DriverEntry->Comment);
@@ -387,6 +390,29 @@ CheckUefiDrivers (
     if (AsciiStrCmp (Driver, "AudioDxe.efi") == 0) {
       HasAudioDxeEfiDriver   = TRUE;
       IndexAudioDxeEfiDriver = Index;
+    }
+
+    if (AsciiStrCmp (Driver, "OpenVariableRuntimeDxe.efi") == 0) {
+      HasOpenVariableRuntimeDxeEfiDriver = TRUE;
+
+      if (!DriverEntry->LoadEarly) {
+        DEBUG ((DEBUG_WARN, "OpenVariableRuntimeDxe at UEFI->Drivers[%u] must have LoadEarly set to TRUE!\n", Index));
+      }
+    }
+  }
+
+  //
+  // LoadEarly should only be TRUE when OpenVariableRuntimeDxe is used.
+  //
+  if (!HasOpenVariableRuntimeDxeEfiDriver) {
+    for (Index2 = 0; Index2 < Config->Uefi.Drivers.Count; ++Index2) {
+      DriverEntry = Config->Uefi.Drivers.Values[Index2];
+      Driver      = OC_BLOB_GET (&DriverEntry->Path);
+
+      if (AsciiStrCmp (Driver, "OpenVariableRuntimeDxe.efi") != 0 && DriverEntry->LoadEarly) {
+        DEBUG ((DEBUG_WARN, "%a at UEFI->Drivers[%u] should have LoadEarly set to FALSE when OpenVariableRuntimeDxe is NOT used!\n", Driver, Index2));
+        ++ErrorCount;
+      }
     }
   }
 
