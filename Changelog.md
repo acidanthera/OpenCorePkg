@@ -1,5 +1,8 @@
 OpenCore Changelog
 ==================
+#### v0.8.4
+- Added checks for `Driver` -> `LoadEarly` in ocvalidate
+
 #### v0.8.3
 - Added ext4 file system driver
 - Added support for macOS 13 DP3 Kernel Collection
