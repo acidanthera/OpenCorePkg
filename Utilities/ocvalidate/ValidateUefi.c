@@ -364,6 +364,21 @@ CheckUefiDrivers (
       continue;
     }
 
+    //
+    // For all drivers but OpenVariableRuntimeDxe.efi, LoadEarly must be FALSE.
+    //
+    if (AsciiStrCmp (Driver, "OpenVariableRuntimeDxe.efi") != 0) {
+      if (DriverEntry->LoadEarly) {
+        DEBUG ((DEBUG_WARN, "%a at UEFI->Drivers[%u] must have LoadEarly set to FALSE", Driver, Index));
+        ++ErrorCount;
+      }
+    } else {
+      if (!DriverEntry->LoadEarly) {
+        DEBUG ((DEBUG_WARN, "OpenVariableRuntimeDxe at UEFI->Drivers[%u] must have LoadEarly set to TRUE!\n", Index));
+        ++ErrorCount;
+      }
+    }
+
     if (AsciiStrCmp (Driver, "OpenRuntime.efi") == 0) {
       HasOpenRuntimeEfiDriver = TRUE;
     }
