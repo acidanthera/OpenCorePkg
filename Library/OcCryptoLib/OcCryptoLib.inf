@@ -36,6 +36,11 @@
   RsaDigitalSign.c
   Sha1.c
   Sha2.c
+  gost3411-2012-const.h
+  gost3411-2012-core.c
+  gost3411-2012-core.h
+  gost3411-2012-precalc.h
+  gost3411-2012-ref.h
   SecureMem.c
   PasswordHash.c
   BigNumLib.h

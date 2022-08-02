@@ -35,6 +35,7 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 #define OC_CRYPTO_SUPPORTS_SHA512  1
 #define OC_CRYPTO_SUPPORTS_SHA1    1
 #define OC_CRYPTO_SUPPORTS_MD5     1
+#define OC_CRYPTO_SUPPORTS_STREEBOG 1
 #endif
 
 //
@@ -392,6 +393,14 @@ Sha384 (
   UINT8        *Hash,
   CONST UINT8  *Data,
   UINTN        Len
+  );
+
+VOID 
+Streebog(
+  CONST UINT8 *data, 
+  UINT32 len, 
+  UINT8 *digest, 
+  UINT32 digest_size
   );
 
 BOOLEAN
