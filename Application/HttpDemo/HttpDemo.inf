@@ -1,0 +1,62 @@
+##
+ # File: HttpDemo.inf
+ #
+ # Copyright (c) 2018 John Davis
+ #
+ # Permission is hereby granted, free of charge, to any person obtaining a copy
+ # of this software and associated documentation files (the "Software"), to deal
+ # in the Software without restriction, including without limitation the rights
+ # to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ # copies of the Software, and to permit persons to whom the Software is
+ # furnished to do so, subject to the following conditions:
+ #
+ # The above copyright notice and this permission notice shall be included in all
+ # copies or substantial portions of the Software.
+ #
+ # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ # IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ # FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ # AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ # SOFTWARE.
+##
+
+[Defines]
+    INF_VERSION    = 0x00010005
+    BASE_NAME      = HttpDemo
+    ENTRY_POINT    = HttpDemoMain
+    FILE_GUID      = 6FC2E080-6C32-414B-95D0-22B96E036407
+    MODULE_TYPE    = UEFI_APPLICATION
+    VERSION_STRING = 1.0
+
+[Packages]
+    MdePkg/MdePkg.dec
+    MdeModulePkg/MdeModulePkg.dec
+    ShellPkg/ShellPkg.dec
+    NetworkPkg/NetworkPkg.dec
+    OpenCorePkg/OpenCorePkg.dec
+
+[LibraryClasses]
+    BaseMemoryLib
+    DebugLib
+    MemoryAllocationLib
+    PcdLib
+    UefiApplicationEntryPoint
+    UefiBootServicesTableLib
+    UefiFileHandleLib
+    UefiLib
+    ShellLib
+    # DmgImageLib
+    OcXmlLib
+
+[Protocols]
+    gEfiHttpProtocolGuid
+    gEfiTcp4ServiceBindingProtocolGuid
+    gEfiHttpServiceBindingProtocolGuid
+    gEfiSimpleFileSystemProtocolGuid # CONSUMES
+    # gEfiDmgRamDiskInterfaceProtocolGuid
+
+[Sources]
+    HttpDemo.h
+    HttpDemo.c
