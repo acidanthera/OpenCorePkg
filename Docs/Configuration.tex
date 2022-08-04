@@ -4647,6 +4647,21 @@ rm vault.pub
   reference for the entry. Whether this value is used is implementation defined.
 
 \item
+  \texttt{DisableFirmwareRuntime}\\
+  \textbf{Type}: \texttt{plist\ boolean}\\
+  \textbf{Failsafe}: \texttt{false}\\
+  \textbf{Description}: Disable firmware runtime during usage of a tool.
+
+  This disables all of the firmware runtime protections provided by
+  \texttt{OpenRuntime.efi} during the time a tool is in use. It should
+  normally be avoided, but may be required for instance if a tool needs
+  to access NVRAM directly without the redirections put in place by
+  \texttt{RequestBootVarRouting}.
+
+  \emph{Note}: This option is only valid for \texttt{Tools} and cannot be
+  specified for \texttt{Entries} (is always \texttt{false}).
+
+\item
   \texttt{Enabled}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
@@ -4694,7 +4709,7 @@ rm vault.pub
   \texttt{memtest86} (for logging and configuration), or \texttt{Shell} (for
   automatic script execution).
 
-  \emph{Note}: This property is only valid for \texttt{Tools} and cannot be
+  \emph{Note}: This option is only valid for \texttt{Tools} and cannot be
   specified for \texttt{Entries} (is always \texttt{true}).
 
 \item

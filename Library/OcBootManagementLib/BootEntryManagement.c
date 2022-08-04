@@ -768,8 +768,9 @@ InternalAddBootEntryFromCustomEntry (
     }
   }
 
-  BootEntry->LaunchInText     = CustomEntry->TextMode;
-  BootEntry->ExposeDevicePath = CustomEntry->RealPath;
+  BootEntry->LaunchInText           = CustomEntry->TextMode;
+  BootEntry->ExposeDevicePath       = CustomEntry->RealPath;
+  BootEntry->DisableFirmwareRuntime = CustomEntry->DisableFirmwareRuntime;
 
   if (BootEntry->SystemAction != NULL) {
     ASSERT (CustomEntry->Arguments == NULL);

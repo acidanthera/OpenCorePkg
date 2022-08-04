@@ -1466,22 +1466,8 @@ OcRegisterBootstrapBootOption (
 {
   EFI_STATUS                    Status;
   OC_FIRMWARE_RUNTIME_PROTOCOL  *FwRuntime;
-  OC_FWRT_CONFIG                Config;
 
-  Status = gBS->LocateProtocol (
-                  &gOcFirmwareRuntimeProtocolGuid,
-                  NULL,
-                  (VOID **)&FwRuntime
-                  );
-
-  if (!EFI_ERROR (Status) && (FwRuntime->Revision == OC_FIRMWARE_RUNTIME_REVISION)) {
-    ZeroMem (&Config, sizeof (Config));
-    FwRuntime->SetOverride (&Config);
-    DEBUG ((DEBUG_INFO, "OCB: Found FW NVRAM, full access %d\n", Config.BootVariableRedirect));
-  } else {
-    FwRuntime = NULL;
-    DEBUG ((DEBUG_INFO, "OCB: Missing FW NVRAM, going on...\n"));
-  }
+  FwRuntime = OcDisableFirmwareRuntime ();
 
   Status = InternalRegisterBootstrapBootOption (
              OptionName,
@@ -1492,10 +1478,7 @@ OcRegisterBootstrapBootOption (
              MatchSuffixLen
              );
 
-  if (FwRuntime != NULL) {
-    DEBUG ((DEBUG_INFO, "OCB: Restoring FW NVRAM...\n"));
-    FwRuntime->SetOverride (NULL);
-  }
+  OcRestoreFirmwareRuntime (FwRuntime);
 
   return Status;
 }

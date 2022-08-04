@@ -24,11 +24,11 @@
 /**
   Currently supported OC_BOOT_ENTRY_PROTOCOL protocol revision.
   Needs to be changed every time the contract changes, including when
-  passed-in structures OC_PICKER_ENTRY and OC_PICKER_ENTRY change.
+  passed-in structures OC_PICKER_CONTEXT and OC_PICKER_ENTRY change.
 
   WARNING: This protocol is currently undergoing active design.
 **/
-#define OC_BOOT_ENTRY_PROTOCOL_REVISION  2
+#define OC_BOOT_ENTRY_PROTOCOL_REVISION  3
 
 /**
   Forward declaration of OC_BOOT_ENTRY_PROTOCOL structure.

@@ -2,6 +2,7 @@ OpenCore Changelog
 ==================
 #### v0.8.4
 - Added checks for `Driver` -> `LoadEarly` in ocvalidate
+- Added `DisableFirmwareRuntime` option for tools which require direct access to NVRAM
 
 #### v0.8.3
 - Added ext4 file system driver

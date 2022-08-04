@@ -261,6 +261,10 @@ typedef struct OC_BOOT_ENTRY_ {
   //
   BOOLEAN                     ExposeDevicePath;
   //
+  // Should disable firmware runtime (when installed) around invocation of tool.
+  //
+  BOOLEAN                     DisableFirmwareRuntime;
+  //
   // Partition UUID of entry device.
   // Set for non-system action boot entry protocol boot entries only.
   //
@@ -574,6 +578,10 @@ typedef struct {
   // Whether we should pass the actual device path (if possible).
   //
   BOOLEAN                  RealPath;
+  //
+  // Whether we should disable firmware runtime (if installed) around call to Tool.
+  //
+  BOOLEAN                  DisableFirmwareRuntime;
   //
   // System action. Boot Entry Protocol only. Optional.
   //

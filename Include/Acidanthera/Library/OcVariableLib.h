@@ -11,6 +11,7 @@
 #include <Uefi.h>
 #include <Library/OcConfigurationLib.h>
 #include <Library/OcStorageLib.h>
+#include <Protocol/OcFirmwareRuntime.h>
 
 #define OPEN_CORE_NVRAM_ROOT_PATH  L"NVRAM"
 
@@ -165,6 +166,33 @@ OcGetBootOptionData (
 EFI_STATUS
 OcResetNvram (
   IN     BOOLEAN  PreserveBoot
+  );
+
+/**
+  When compatible protocol is found, disable firmware runtime then return
+  protocol for subsequent restore, else return NULL.
+  Always call OcRestoreFirmwareRuntime to restore firmware runtime operation
+  (if it was previously present) before booting anything, after disabling with
+  this call.
+
+  @retval     Compatible protocol if found and firmware runtime was disabled,
+              NULL otherwise.
+**/
+OC_FIRMWARE_RUNTIME_PROTOCOL *
+OcDisableFirmwareRuntime (
+  VOID
+  );
+
+/**
+  Restore firmware runtime if it was disabled by a previous call to OcDisableFirmwareRuntime.
+  Noop if FwRuntime is NULL.
+
+  @param[in]     FwRuntime          Firmware runtime protocol or NULL, from previous call to
+                                    OcDisableFirmwareRuntime.
+**/
+VOID
+OcRestoreFirmwareRuntime (
+  IN OC_FIRMWARE_RUNTIME_PROTOCOL  *FwRuntime
   );
 
 /**

@@ -32,7 +32,6 @@
 #include <Library/UefiBootServicesTableLib.h>
 #include <Library/UefiRuntimeServicesTableLib.h>
 #include <Library/UefiLib.h>
-#include <Protocol/OcFirmwareRuntime.h>
 
 STATIC
 EFI_GUID
@@ -416,6 +415,44 @@ GetBootstrapBootData (
   return OptionData;
 }
 
+OC_FIRMWARE_RUNTIME_PROTOCOL *
+OcDisableFirmwareRuntime (
+  VOID
+  )
+{
+  EFI_STATUS                    Status;
+  OC_FIRMWARE_RUNTIME_PROTOCOL  *FwRuntime;
+  OC_FWRT_CONFIG                Config;
+
+  Status = gBS->LocateProtocol (
+                  &gOcFirmwareRuntimeProtocolGuid,
+                  NULL,
+                  (VOID **)&FwRuntime
+                  );
+
+  if (!EFI_ERROR (Status) && (FwRuntime->Revision == OC_FIRMWARE_RUNTIME_REVISION)) {
+    ZeroMem (&Config, sizeof (Config));
+    FwRuntime->SetOverride (&Config);
+    DEBUG ((DEBUG_INFO, "OCVAR: Found FW NVRAM, full access %d\n", Config.BootVariableRedirect));
+  } else {
+    FwRuntime = NULL;
+    DEBUG ((DEBUG_INFO, "OCVAR: Missing compatible FW NVRAM, going on...\n"));
+  }
+
+  return FwRuntime;
+}
+
+VOID
+OcRestoreFirmwareRuntime (
+  IN OC_FIRMWARE_RUNTIME_PROTOCOL  *FwRuntime
+  )
+{
+  if (FwRuntime != NULL) {
+    DEBUG ((DEBUG_INFO, "OCVAR: Restoring FW NVRAM...\n"));
+    FwRuntime->SetOverride (NULL);
+  }
+}
+
 VOID
 OcDeleteVariables (
   IN BOOLEAN  PreserveBoot
@@ -423,7 +460,6 @@ OcDeleteVariables (
 {
   EFI_STATUS                    Status;
   OC_FIRMWARE_RUNTIME_PROTOCOL  *FwRuntime;
-  OC_FWRT_CONFIG                Config;
   UINTN                         BootProtectSize;
   UINT32                        BootProtect;
   VOID                          *BootOption;
@@ -454,20 +490,7 @@ OcDeleteVariables (
     }
   }
 
-  Status = gBS->LocateProtocol (
-                  &gOcFirmwareRuntimeProtocolGuid,
-                  NULL,
-                  (VOID **)&FwRuntime
-                  );
-
-  if (!EFI_ERROR (Status) && (FwRuntime->Revision == OC_FIRMWARE_RUNTIME_REVISION)) {
-    ZeroMem (&Config, sizeof (Config));
-    FwRuntime->SetOverride (&Config);
-    DEBUG ((DEBUG_INFO, "OCVAR: Found FW NVRAM, full access %d\n", Config.BootVariableRedirect));
-  } else {
-    FwRuntime = NULL;
-    DEBUG ((DEBUG_INFO, "OCVAR: Missing compatible FW NVRAM, going on...\n"));
-  }
+  FwRuntime = OcDisableFirmwareRuntime ();
 
   if ((BootProtect & OC_BOOT_PROTECT_VARIABLE_BOOTSTRAP) != 0) {
     BootOption = GetBootstrapBootData (&BootOptionSize, &BootOptionIndex);
@@ -509,10 +532,7 @@ OcDeleteVariables (
     FreePool (BootOption);
   }
 
-  if (FwRuntime != NULL) {
-    DEBUG ((DEBUG_INFO, "OCVAR: Restoring FW NVRAM...\n"));
-    FwRuntime->SetOverride (NULL);
-  }
+  OcRestoreFirmwareRuntime (FwRuntime);
 }
 
 EFI_STATUS

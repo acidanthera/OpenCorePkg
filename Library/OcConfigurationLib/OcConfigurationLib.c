@@ -496,15 +496,16 @@ OC_SCHEMA
 STATIC
 OC_SCHEMA
   mMiscToolsSchemaEntry[] = {
-  OC_SCHEMA_STRING_IN ("Arguments",  OC_MISC_TOOLS_ENTRY, Arguments),
-  OC_SCHEMA_BOOLEAN_IN ("Auxiliary", OC_MISC_TOOLS_ENTRY, Auxiliary),
-  OC_SCHEMA_STRING_IN ("Comment",    OC_MISC_TOOLS_ENTRY, Comment),
-  OC_SCHEMA_BOOLEAN_IN ("Enabled",   OC_MISC_TOOLS_ENTRY, Enabled),
-  OC_SCHEMA_STRING_IN ("Flavour",    OC_MISC_TOOLS_ENTRY, Flavour),
-  OC_SCHEMA_STRING_IN ("Name",       OC_MISC_TOOLS_ENTRY, Name),
-  OC_SCHEMA_STRING_IN ("Path",       OC_MISC_TOOLS_ENTRY, Path),
-  OC_SCHEMA_BOOLEAN_IN ("RealPath",  OC_MISC_TOOLS_ENTRY, RealPath),
-  OC_SCHEMA_BOOLEAN_IN ("TextMode",  OC_MISC_TOOLS_ENTRY, TextMode),
+  OC_SCHEMA_STRING_IN ("Arguments",               OC_MISC_TOOLS_ENTRY, Arguments),
+  OC_SCHEMA_BOOLEAN_IN ("Auxiliary",              OC_MISC_TOOLS_ENTRY, Auxiliary),
+  OC_SCHEMA_STRING_IN ("Comment",                 OC_MISC_TOOLS_ENTRY, Comment),
+  OC_SCHEMA_BOOLEAN_IN ("DisableFirmwareRuntime", OC_MISC_TOOLS_ENTRY, DisableFirmwareRuntime),
+  OC_SCHEMA_BOOLEAN_IN ("Enabled",                OC_MISC_TOOLS_ENTRY, Enabled),
+  OC_SCHEMA_STRING_IN ("Flavour",                 OC_MISC_TOOLS_ENTRY, Flavour),
+  OC_SCHEMA_STRING_IN ("Name",                    OC_MISC_TOOLS_ENTRY, Name),
+  OC_SCHEMA_STRING_IN ("Path",                    OC_MISC_TOOLS_ENTRY, Path),
+  OC_SCHEMA_BOOLEAN_IN ("RealPath",               OC_MISC_TOOLS_ENTRY, RealPath),
+  OC_SCHEMA_BOOLEAN_IN ("TextMode",               OC_MISC_TOOLS_ENTRY, TextMode),
 };
 
 STATIC
