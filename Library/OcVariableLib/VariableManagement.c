@@ -416,7 +416,7 @@ GetBootstrapBootData (
 }
 
 OC_FIRMWARE_RUNTIME_PROTOCOL *
-OcDisableFirmwareRuntime (
+OcDisableNvramProtection (
   VOID
   )
 {
@@ -443,7 +443,7 @@ OcDisableFirmwareRuntime (
 }
 
 VOID
-OcRestoreFirmwareRuntime (
+OcRestoreNvramProtection (
   IN OC_FIRMWARE_RUNTIME_PROTOCOL  *FwRuntime
   )
 {
@@ -490,7 +490,7 @@ OcDeleteVariables (
     }
   }
 
-  FwRuntime = OcDisableFirmwareRuntime ();
+  FwRuntime = OcDisableNvramProtection ();
 
   if ((BootProtect & OC_BOOT_PROTECT_VARIABLE_BOOTSTRAP) != 0) {
     BootOption = GetBootstrapBootData (&BootOptionSize, &BootOptionIndex);
@@ -532,7 +532,7 @@ OcDeleteVariables (
     FreePool (BootOption);
   }
 
-  OcRestoreFirmwareRuntime (FwRuntime);
+  OcRestoreNvramProtection (FwRuntime);
 }
 
 EFI_STATUS

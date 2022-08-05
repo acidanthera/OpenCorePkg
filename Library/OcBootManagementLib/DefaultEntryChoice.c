@@ -1467,7 +1467,7 @@ OcRegisterBootstrapBootOption (
   EFI_STATUS                    Status;
   OC_FIRMWARE_RUNTIME_PROTOCOL  *FwRuntime;
 
-  FwRuntime = OcDisableFirmwareRuntime ();
+  FwRuntime = OcDisableNvramProtection ();
 
   Status = InternalRegisterBootstrapBootOption (
              OptionName,
@@ -1478,7 +1478,7 @@ OcRegisterBootstrapBootOption (
              MatchSuffixLen
              );
 
-  OcRestoreFirmwareRuntime (FwRuntime);
+  OcRestoreNvramProtection (FwRuntime);
 
   return Status;
 }

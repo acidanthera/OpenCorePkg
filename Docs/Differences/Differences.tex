@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
 %DIF DEL PreviousConfiguration.tex   Tue Aug  2 07:37:43 2022
-%DIF ADD ../Configuration.tex        Thu Aug  4 22:26:32 2022
+%DIF ADD ../Configuration.tex        Fri Aug  5 08:46:29 2022
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -4707,25 +4707,7 @@ rm vault.pub
   reference for the entry. Whether this value is used is implementation defined.
 
 \item
-  \DIFaddbegin \texttt{\DIFadd{DisableFirmwareRuntime}}\\
-  \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ boolean}}\\
-  \textbf{\DIFadd{Failsafe}}\DIFadd{: }\texttt{\DIFadd{false}}\\
-  \textbf{\DIFadd{Description}}\DIFadd{: Disable firmware runtime during usage of a tool.
-}
-
-  \DIFadd{This disables all of the firmware runtime protections provided by
-  }\texttt{\DIFadd{OpenRuntime.efi}} \DIFadd{during the time a tool is in use. It should
-  normally be avoided, but may be required for instance if a tool needs
-  to access NVRAM directly without the redirections put in place by
-  }\texttt{\DIFadd{RequestBootVarRouting}}\DIFadd{.
-}
-
-  \emph{\DIFadd{Note}}\DIFadd{: This option is only valid for }\texttt{\DIFadd{Tools}} \DIFadd{and cannot be
-  specified for }\texttt{\DIFadd{Entries}} \DIFadd{(is always }\texttt{\DIFadd{false}}\DIFadd{).
-}
-
-\item
-  \DIFaddend \texttt{Enabled}\\
+  \texttt{Enabled}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
   \textbf{Description}: Set to \texttt{true} activate this entry.
@@ -4737,8 +4719,26 @@ rm vault.pub
   \textbf{Description}: Specify the content flavour for this entry.
   See \hyperref[oc-attr-use-flavour-icon]{\texttt{OC\_ATTR\_USE\_FLAVOUR\_ICON}} flag for documentation.
 
+  \item
+  \DIFaddbegin \texttt{\DIFadd{FullNvramAccess}}\\
+  \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ boolean}}\\
+  \textbf{\DIFadd{Failsafe}}\DIFadd{: }\texttt{\DIFadd{false}}\\
+  \textbf{\DIFadd{Description}}\DIFadd{: Disable }\texttt{\DIFadd{OpenRuntime}} \DIFadd{NVRAM protection during usage of a tool.
+}
+
+  \DIFadd{This disables all of the NVRAM protections provided by
+  }\texttt{\DIFadd{OpenRuntime.efi}}\DIFadd{, during the time a tool is in use. It should
+  normally be avoided, but may be required for instance if a tool needs
+  to access NVRAM directly without the redirections put in place by
+  }\texttt{\DIFadd{RequestBootVarRouting}}\DIFadd{.
+}
+
+  \emph{\DIFadd{Note}}\DIFadd{: This option is only valid for }\texttt{\DIFadd{Tools}} \DIFadd{and cannot be
+  specified for }\texttt{\DIFadd{Entries}} \DIFadd{(is always }\texttt{\DIFadd{false}}\DIFadd{).
+}
+
 \item
-  \texttt{Name}\\
+  \DIFaddend \texttt{Name}\\
   \textbf{Type}: \texttt{plist\ string}\\
   \textbf{Failsafe}: Empty\\
   \textbf{Description}: Human readable entry name displayed in the OpenCore picker.

@@ -353,7 +353,7 @@ OcRunBootPicker (
         }
       }
 
-      FwRuntime = Chosen->DisableFirmwareRuntime ? OcDisableFirmwareRuntime () : NULL;
+      FwRuntime = Chosen->FullNvramAccess ? OcDisableNvramProtection () : NULL;
 
       Status = OcLoadBootEntry (
                  Context,
@@ -361,7 +361,7 @@ OcRunBootPicker (
                  gImageHandle
                  );
 
-      OcRestoreFirmwareRuntime (FwRuntime);
+      OcRestoreNvramProtection (FwRuntime);
 
       //
       // Do not wait on successful return code.
