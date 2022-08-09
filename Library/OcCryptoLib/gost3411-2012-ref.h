@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, Alexey Degtyarev <alexey@renatasystems.org>. 
+ * Copyright (c) 2013, Alexey Degtyarev <alexey@renatasystems.org>.
  * All rights reserved.
  *
  * Portable and simple (thus sometimes slow) implementation of core functions.

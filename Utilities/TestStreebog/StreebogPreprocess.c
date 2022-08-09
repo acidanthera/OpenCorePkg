@@ -39,23 +39,23 @@ CONST UINT8  TestMessage1[] = {
 
 int 
 ENTRY_POINT(
-  int  argc,
-  char *argv[]
+  int   argc,
+  char  *argv[]
   )
 {
-  UINT8 hash[64];
+  UINT8  hash[64];
 
-  Streebog(TestMessage1, 63, hash, 256);
+  Streebog (TestMessage1, 63, hash, 256);
   for (int i = 0; i < 32; ++i) {
-    DEBUG((DEBUG_ERROR, "%X", (int)hash[i]));
+    DEBUG ((DEBUG_ERROR, "%X", (int)hash[i]));
   }
 
-  DEBUG((DEBUG_ERROR, "\n"));
-  Streebog(TestMessage1, 63, hash, 512);
+  DEBUG ((DEBUG_ERROR, "\n"));
+  Streebog (TestMessage1, 63, hash, 512);
   for (int i = 0; i < 64; ++i) {
-    DEBUG((DEBUG_ERROR, "%X", (int)hash[i]));
+    DEBUG ((DEBUG_ERROR, "%X", (int)hash[i]));
   }
-  
-  DEBUG((DEBUG_ERROR, "\n"));
+
+  DEBUG ((DEBUG_ERROR, "\n"));
   return 0;
 }

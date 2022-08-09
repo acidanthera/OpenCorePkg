@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, Alexey Degtyarev <alexey@renatasystems.org>. 
+ * Copyright (c) 2013, Alexey Degtyarev <alexey@renatasystems.org>.
  * All rights reserved.
  *
  * GOST R 34.11-2012 core and API functions.
@@ -120,33 +120,34 @@ Add512 (
 
 static void
 g (
-  union uint512_u *h, 
-  CONST union uint512_u *N, 
-  CONST UINT8 *m
+  union uint512_u        *h, 
+  CONST union uint512_u  *N, 
+  CONST UINT8            *m
   )
 {
-  union uint512_u Ki, data;
-  UINT32 i;
+  union uint512_u  Ki, data;
+  UINT32           i;
 
-  XLPS(h, N, (&data));
+  XLPS (h, N, (&data));
 
   Ki = data;
-  XLPS((&Ki), ((const union uint512_u *) &m[0]), (&data));
+  XLPS ((&Ki), ((const union uint512_u *)&m[0]), (&data));
 
-  for (i = 0; i < 11; i++)
-    ROUND(i, (&Ki), (&data));
+  for (i = 0; i < 11; i++) {
+    ROUND (i, (&Ki), (&data));
+  }
 
   XLPS((&Ki), (&C[11]), (&Ki));
-  X((&Ki), (&data), (&data));
+  X ((&Ki), (&data), (&data));
 
-  X((&data), h, (&data));
-  X((&data), ((const union uint512_u *) &m[0]), h);
+  X ((&data), h, (&data));
+  X ((&data), ((const union uint512_u *)&m[0]), h);
 }
 
 VOID
 MasCpy (
-  UINT8 *to, 
-  CONST UINT8 *from
+  UINT8        *to, 
+  CONST UINT8  *from
   )
 {
   for (INT32 i = 0; i < 64; ++i) {
@@ -156,8 +157,8 @@ MasCpy (
 
 VOID
 Uint512uCpy (
-  union uint512_u *to, 
-  CONST union uint512_u *from
+  union uint512_u        *to, 
+  CONST union uint512_u  *from
   )
 {
   for (INT32 i = 0; i < 8; ++i) {
@@ -167,53 +168,59 @@ Uint512uCpy (
 
 VOID
 Stage2 (
-  GOST34112012Context *CTX, 
-  CONST UINT8 *data
+  GOST34112012Context  *CTX, 
+  CONST UINT8          *data
   )
 {
-  union uint512_u m;
+  union uint512_u  m;
 
-  MasCpy((UINT8 *)&m, data);
-  g(&(CTX->h), &(CTX->N), (CONST UINT8 *)&m);
+  MasCpy ((UINT8 *)&m, data);
+  g (&(CTX->h), &(CTX->N), (CONST UINT8 *)&m);
 
-  Add512(&(CTX->N), &buffer512, &(CTX->N));
-  Add512(&(CTX->Sigma), &m, &(CTX->Sigma));
+  Add512 (&(CTX->N), &buffer512, &(CTX->N));
+  Add512 (&(CTX->Sigma), &m, &(CTX->Sigma));
 }
 
 VOID
 Stage3 (
-  GOST34112012Context *CTX
+  GOST34112012Context  *CTX
   )
 {
-  union uint512_u buf = {{ 0 }};
+  union uint512_u  buf = {
+    { 0 }
+  };
 
-#ifndef __GOST3411_BIG_ENDIAN__
+ #ifndef __GOST3411_BIG_ENDIAN__
   buf.QWORD[0] = CTX->bufsize << 3;
-#else
-  buf.QWORD[0] = BSWAP64(CTX->bufsize << 3);
-#endif
+ #else
+  buf.QWORD[0] = BSWAP64 (CTX->bufsize << 3);
+ #endif
 
-  Pad(CTX);
+  Pad (CTX);
 
-  g(&(CTX->h), &(CTX->N), (const unsigned char *) &(CTX->buffer));
+  g (&(CTX->h), &(CTX->N), (const unsigned char *)&(CTX->buffer));
 
-  Add512(&(CTX->N), &buf, &(CTX->N));
-  Add512(&(CTX->Sigma), (const union uint512_u *) &CTX->buffer[0],
-           &(CTX->Sigma));
+  Add512 (&(CTX->N), &buf, &(CTX->N));
+  Add512 (
+    &(CTX->Sigma), 
+    (const union uint512_u *)&CTX->buffer[0],
+    &(CTX->Sigma)
+    );
 
-  g(&(CTX->h), &buffer0, (const unsigned char *) &(CTX->N));
+  g (&(CTX->h), &buffer0, (const unsigned char *)&(CTX->N));
 
-  g(&(CTX->h), &buffer0, (const unsigned char *) &(CTX->Sigma));
-  Uint512uCpy(&(CTX->hash), &(CTX->h));
+  g (&(CTX->h), &buffer0, (const unsigned char *)&(CTX->Sigma));
+  Uint512uCpy (&(CTX->hash), &(CTX->h));
 }
 
 VOID
 GOST34112012Update (
-  GOST34112012Context *CTX, 
-  CONST UINT8 *data, 
-  UINT32 len)
+  GOST34112012Context  *CTX, 
+  CONST UINT8          *data, 
+  UINT32               len
+  )
 {
-  UINT32 chunksize;
+  UINT32  chunksize;
 
   if (CTX->bufsize) {
     chunksize = 64 - CTX->bufsize;
@@ -226,26 +233,27 @@ GOST34112012Update (
     }
 
     CTX->bufsize += chunksize;
-    len -= chunksize;
-    data += chunksize;
+    len          -= chunksize;
+    data         += chunksize;
         
     if (CTX->bufsize == 64) {
-      Stage2(CTX, CTX->buffer);
+      Stage2 (CTX, CTX->buffer);
 
       CTX->bufsize = 0;
     }
   }
 
   while (len > 63) {
-    Stage2(CTX, data);
+    Stage2 (CTX, data);
 
     data += 64;
     len  -= 64;
   }
 
   if (len) {
-    for (UINT32 i = 0; i < len; ++i)
+    for (UINT32 i = 0; i < len; ++i) {
       ((UINT8 *)(&CTX->buffer))[i] = data[i];
+    }
     
     CTX->bufsize = len;
   }
@@ -253,11 +261,11 @@ GOST34112012Update (
 
 VOID
 GOST34112012Final (
-  GOST34112012Context *CTX, 
-  UINT8 *digest
+  GOST34112012Context  *CTX, 
+  UINT8                *digest
   )
 {
-  Stage3(CTX);
+  Stage3 (CTX);
 
   CTX->bufsize = 0;
 
@@ -273,16 +281,17 @@ GOST34112012Final (
 }
 
 VOID Streebog (
-  CONST UINT8 *data, 
-  UINT32 len, 
-  UINT8 *digest, 
-  UINT32 digest_size
+  CONST UINT8  *data, 
+  UINT32       len, 
+  UINT8        *digest, 
+  UINT32       digest_size
   )
 {
-  GOST34112012Context CTX;
-  GOST34112012Init(&CTX, digest_size);
-  GOST34112012Update(&CTX, data, len);
-  GOST34112012Final(&CTX, digest);
+  GOST34112012Context  CTX;
+
+  GOST34112012Init (&CTX, digest_size);
+  GOST34112012Update (&CTX, data, len);
+  GOST34112012Final (&CTX, digest);
 }
 
 #endif
