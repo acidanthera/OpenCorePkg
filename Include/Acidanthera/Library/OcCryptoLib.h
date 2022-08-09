@@ -395,8 +395,8 @@ Sha384 (
   UINTN        Len
   );
 
-VOID 
-Streebog(
+VOID
+Streebog (
   CONST UINT8  *data,
   UINT32       len,
   UINT8        *digest,
