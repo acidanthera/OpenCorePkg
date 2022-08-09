@@ -427,7 +427,6 @@ should not be relied on.
         child [missing] {}
         child [missing] {}
         child [missing] {}
-        child [missing] {}
         child { node {Drivers}
           child { node [optional] {MyDriver.efi}}
           child { node [optional] {OtherDriver.efi}}
@@ -484,8 +483,7 @@ should not be relied on.
     child [missing] {}
     child [missing] {}
     child [missing] {}
-    child [missing] {}
-    child { node {Kernels}
+    child { node [optional] {Kernels}
       child { node [optional] {kernel}}
       child { node [optional] {kernelcache}}
       child { node [optional] {prelinkedkernel}}
@@ -494,14 +492,14 @@ should not be relied on.
     child [missing] {}
     child [missing] {}
     child { node [optional] {boot}}
-    child { node {NVRAM}
+    child { node [optional] {opencore-YYYY-MM-DD-HHMMSS.txt}}
+    child { node [optional] {panic-YYYY-MM-DD-HHMMSS.txt}}
+    child { node [optional] {SysReport}}
+    child { node [optional] {NVRAM}
       child { node [optional] {nvram.plist}}
       child { node [optional] {nvram.fallback}}
       child { node [optional] {nvram.used}}
     }
-    child { node [optional] {opencore-YYYY-MM-DD-HHMMSS.txt}}
-    child { node [optional] {panic-YYYY-MM-DD-HHMMSS.txt}}
-    child { node [optional] {SysReport}}
   ;
 \end{tikzpicture}
 \break
