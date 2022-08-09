@@ -43,11 +43,11 @@ GOST34112012Cleanup (
 
 VOID
 GOST34112012Init (
-  GOST34112012Context  *CTX, 
+  GOST34112012Context  *CTX,
   CONST UINT32         digest_size
   )
 {
-  UINT32 i;
+  UINT32  i;
 
   GOST34112012Cleanup (CTX);
   CTX->digest_size = digest_size;
@@ -79,8 +79,8 @@ Pad (
 
 static inline void
 Add512 (
-  CONST union uint512_u  *x, 
-  CONST union uint512_u  *y, 
+  CONST union uint512_u  *x,
+  CONST union uint512_u  *y,
   union uint512_u        *r
   )
 {
@@ -100,6 +100,7 @@ Add512 (
 
     r->QWORD[i] = sum;
   }
+
  #else
   CONST UINT8  *xp, *yp;
   UINT8        *rp;
@@ -115,13 +116,14 @@ Add512 (
     buf   = xp[i] + yp[i] + (buf >> 8);
     rp[i] = (UINT8)buf & 0xFF;
   }
+
  #endif
 }
 
 static void
 g (
-  union uint512_u        *h, 
-  CONST union uint512_u  *N, 
+  union uint512_u        *h,
+  CONST union uint512_u  *N,
   CONST UINT8            *m
   )
 {
@@ -137,7 +139,7 @@ g (
     ROUND (i, (&Ki), (&data));
   }
 
-  XLPS((&Ki), (&C[11]), (&Ki));
+  XLPS ((&Ki), (&C[11]), (&Ki));
   X ((&Ki), (&data), (&data));
 
   X ((&data), h, (&data));
@@ -146,7 +148,7 @@ g (
 
 VOID
 MasCpy (
-  UINT8        *to, 
+  UINT8        *to,
   CONST UINT8  *from
   )
 {
@@ -157,7 +159,7 @@ MasCpy (
 
 VOID
 Uint512uCpy (
-  union uint512_u        *to, 
+  union uint512_u        *to,
   CONST union uint512_u  *from
   )
 {
@@ -168,7 +170,7 @@ Uint512uCpy (
 
 VOID
 Stage2 (
-  GOST34112012Context  *CTX, 
+  GOST34112012Context  *CTX,
   CONST UINT8          *data
   )
 {
@@ -202,7 +204,7 @@ Stage3 (
 
   Add512 (&(CTX->N), &buf, &(CTX->N));
   Add512 (
-    &(CTX->Sigma), 
+    &(CTX->Sigma),
     (const union uint512_u *)&CTX->buffer[0],
     &(CTX->Sigma)
     );
@@ -215,8 +217,8 @@ Stage3 (
 
 VOID
 GOST34112012Update (
-  GOST34112012Context  *CTX, 
-  CONST UINT8          *data, 
+  GOST34112012Context  *CTX,
+  CONST UINT8          *data,
   UINT32               len
   )
 {
@@ -235,7 +237,7 @@ GOST34112012Update (
     CTX->bufsize += chunksize;
     len          -= chunksize;
     data         += chunksize;
-        
+
     if (CTX->bufsize == 64) {
       Stage2 (CTX, CTX->buffer);
 
@@ -254,14 +256,14 @@ GOST34112012Update (
     for (UINT32 i = 0; i < len; ++i) {
       ((UINT8 *)(&CTX->buffer))[i] = data[i];
     }
-    
+
     CTX->bufsize = len;
   }
 }
 
 VOID
 GOST34112012Final (
-  GOST34112012Context  *CTX, 
+  GOST34112012Context  *CTX,
   UINT8                *digest
   )
 {
@@ -280,10 +282,11 @@ GOST34112012Final (
   }
 }
 
-VOID Streebog (
-  CONST UINT8  *data, 
-  UINT32       len, 
-  UINT8        *digest, 
+VOID 
+Streebog (
+  CONST UINT8  *data,
+  UINT32       len,
+  UINT8        *digest,
   UINT32       digest_size
   )
 {

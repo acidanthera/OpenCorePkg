@@ -8,7 +8,7 @@
  */
 
 #ifndef __GOST3411_BIG_ENDIAN__
-static const unsigned long long  Ax[8][256] = 
+static const unsigned long long  Ax[8][256] =
 {
   {
     0xd01f715b5c7ef8e6ULL, 0x16fa240980778325ULL, 0xa8a42e857ee049c8ULL,
@@ -716,7 +716,7 @@ static const unsigned long long  Ax[8][256] =
   }
 };
 #else
-static const unsigned long long  Ax[8][256] = 
+static const unsigned long long  Ax[8][256] =
 {
   {
     0xe6f87e5c5b711fd0ULL, 0x258377800924fa16ULL, 0xc849e07e852ea4a8ULL,
@@ -1156,7 +1156,7 @@ static const unsigned long long  Ax[8][256] =
     0x45be423c2f5bb7c1ULL, 0xf71e55fefd88e55dULL, 0x6853032b59f3ee6eULL,
     0x65b3e9c4ff073aaaULL, 0x772ac3399ae5ebecULL, 0x87816e97f842a75bULL,
     0x110e2db2e0484a4bULL, 0x331277cb3dd8deddULL, 0xbd510cac79eb9fa5ULL,
-    0x352179552a91f5c7ULL 
+    0x352179552a91f5c7ULL
   },
   {
     0x8ab0a96846e06a6dULL, 0x43c7e80b4bf0b33aULL, 0x08c9b3546b161ee5ULL,
