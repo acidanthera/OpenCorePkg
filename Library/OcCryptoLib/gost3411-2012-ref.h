@@ -7,15 +7,7 @@
  * $Id$
  */
 
-#ifdef __GOST3411_HAS_SSE2__
-#error "portable implementation disabled in config.h"
-#endif
-
-#ifdef __GOST3411_HAS_MMX__
-#error "portable implementation disabled in config.h"
-#endif
-
-#define X(x, y, z) { \
+#define X(x, y, z)  {\
     z->QWORD[0] = x->QWORD[0] ^ y->QWORD[0]; \
     z->QWORD[1] = x->QWORD[1] ^ y->QWORD[1]; \
     z->QWORD[2] = x->QWORD[2] ^ y->QWORD[2]; \
@@ -27,14 +19,14 @@
 }
 
 #ifndef __GOST3411_BIG_ENDIAN__
-#define __XLPS_FOR for (_i = 0; _i <= 7; _i++)
-#define _datai _i
+#define __XLPS_FOR  for (_i = 0; _i <= 7; _i++)
+#define _datai      _i
 #else
-#define __XLPS_FOR for (_i = 7; _i >= 0; _i--)
-#define _datai 7 - _i
+#define __XLPS_FOR  for (_i = 7; _i >= 0; _i--)
+#define _datai      7 - _i
 #endif
 
-#define XLPS(x, y, data) { \
+#define XLPS(x, y, data)  {\
     register UINT64 r0, r1, r2, r3, r4, r5, r6, r7; \
     int _i; \
     \
@@ -61,7 +53,7 @@
     }\
 }
 
-#define ROUND(i, Ki, data) { \
+#define ROUND(i, Ki, data)  {\
     XLPS(Ki, (&C[i]), Ki); \
     XLPS(Ki, data, data); \
 }

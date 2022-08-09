@@ -30,12 +30,12 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 // Set supported hashes to all by default.
 //
 #ifndef CONFIG_HAS_SUPPORTED_HASHES
-#define OC_CRYPTO_SUPPORTS_SHA256  1
-#define OC_CRYPTO_SUPPORTS_SHA384  1
-#define OC_CRYPTO_SUPPORTS_SHA512  1
-#define OC_CRYPTO_SUPPORTS_SHA1    1
-#define OC_CRYPTO_SUPPORTS_MD5     1
-#define OC_CRYPTO_SUPPORTS_STREEBOG 1
+#define OC_CRYPTO_SUPPORTS_SHA256    1
+#define OC_CRYPTO_SUPPORTS_SHA384    1
+#define OC_CRYPTO_SUPPORTS_SHA512    1
+#define OC_CRYPTO_SUPPORTS_SHA1      1
+#define OC_CRYPTO_SUPPORTS_MD5       1
+#define OC_CRYPTO_SUPPORTS_STREEBOG  1
 #endif
 
 //
@@ -398,9 +398,9 @@ Sha384 (
 VOID 
 Streebog(
   CONST UINT8 *data, 
-  UINT32 len, 
-  UINT8 *digest, 
-  UINT32 digest_size
+  UINT32      len, 
+  UINT8       *digest, 
+  UINT32      digest_size
   );
 
 BOOLEAN
