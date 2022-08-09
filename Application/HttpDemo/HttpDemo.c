@@ -393,6 +393,9 @@ EFIAPI
 HttpDemoMain(
     IN EFI_HANDLE ImageHandle,
     IN EFI_SYSTEM_TABLE *SystemTable) {
+    Print(L"HttpDemo Init\n");
+    gBS->Stall (3000);
+
     Print(L"HttpDemo start\n");
 
     EFI_STATUS Status;

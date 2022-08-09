@@ -48,6 +48,7 @@
     UefiLib
     ShellLib
     # DmgImageLib
+    OcConsoleControlEntryModeGenericLib
     OcXmlLib
 
 [Protocols]
