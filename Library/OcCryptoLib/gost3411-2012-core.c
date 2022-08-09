@@ -22,52 +22,55 @@
      ((x & 0x00000000000000FFULL) << 56))
 
 VOID
-GOST34112012Cleanup(
-  GOST34112012Context *CTX
+GOST34112012Cleanup (
+  GOST34112012Context  *CTX
   )
 {
   for (INT32 i = 0; i < 64; ++i) {
     CTX->buffer[i] = 0;
   }
+
   for (INT32 i = 0; i < 8; ++i) {
-    CTX->hash.QWORD[i] = 0;
-    CTX->h.QWORD[i] = 0;
-    CTX->N.QWORD[i] = 0;
+    CTX->hash.QWORD[i]  = 0;
+    CTX->h.QWORD[i]     = 0;
+    CTX->N.QWORD[i]     = 0;
     CTX->Sigma.QWORD[i] = 0;
   }
-  CTX->bufsize = 0;
+
+  CTX->bufsize     = 0;
   CTX->digest_size = 0;
 }
 
 VOID
-GOST34112012Init(
-  GOST34112012Context *CTX, 
-  CONST UINT32 digest_size
+GOST34112012Init (
+  GOST34112012Context  *CTX, 
+  CONST UINT32         digest_size
   )
 {
   UINT32 i;
 
-  GOST34112012Cleanup(CTX);
+  GOST34112012Cleanup (CTX);
   CTX->digest_size = digest_size;
 
   for (i = 0; i < 8; i++) {
-    if (digest_size == 256)
+    if (digest_size == 256) {
       CTX->h.QWORD[i] = 0x0101010101010101ULL;
-    else
+    } else {
       CTX->h.QWORD[i] = 0x00ULL;
+    }
   }
 }
 
 VOID
-Pad(
-  GOST34112012Context *CTX
+Pad (
+  GOST34112012Context  *CTX
   )
 {
   if (CTX->bufsize > 63) {
     return;
   }
 
-  for (UINT32 i = 0; i < sizeof(CTX->buffer) - CTX->bufsize; ++i) {
+  for (UINT32 i = 0; i < sizeof (CTX->buffer) - CTX->bufsize; ++i) {
     CTX->buffer[CTX->bufsize + i] = 0;
   }
 
@@ -75,46 +78,48 @@ Pad(
 }
 
 static inline void
-Add512(
-  CONST union uint512_u *x, 
-  CONST union uint512_u *y, 
-  union uint512_u *r
+Add512 (
+  CONST union uint512_u  *x, 
+  CONST union uint512_u  *y, 
+  union uint512_u        *r
   )
 {
-#ifndef __GOST3411_BIG_ENDIAN__
-  UINT32 CF;
-  UINT32 i;
+ #ifndef __GOST3411_BIG_ENDIAN__
+  UINT32  CF;
+  UINT32  i;
 
   CF = 0;
   for (i = 0; i < 8; i++) {
-    CONST UINT64 left = x->QWORD[i];
-    UINT64 sum;
+    CONST UINT64  left = x->QWORD[i];
+    UINT64        sum;
 
     sum = left + y->QWORD[i] + CF;
-    if (sum != left)
+    if (sum != left) {
       CF = (sum < left);
+    }
+
     r->QWORD[i] = sum;
   }
-#else
-  CONST UINT8 *xp, *yp;
-  UINT8 *rp;
-  UINT32 i;
-  INT32 buf;
+ #else
+  CONST UINT8  *xp, *yp;
+  UINT8        *rp;
+  UINT32       i;
+  INT32        buf;
 
-  xp = (CONST UINT8 *) &x[0];
-  yp = (CONST UINT8 *) &y[0];
-  rp = (UINT8 *) &r[0];
+  xp = (CONST UINT8 *)&x[0];
+  yp = (CONST UINT8 *)&y[0];
+  rp = (UINT8 *)&r[0];
 
   buf = 0;
   for (i = 0; i < 64; i++) {
-    buf = xp[i] + yp[i] + (buf >> 8);
-    rp[i] = (UINT8) buf & 0xFF;
+    buf   = xp[i] + yp[i] + (buf >> 8);
+    rp[i] = (UINT8)buf & 0xFF;
   }
-#endif
+ #endif
 }
 
 static void
-g(
+g (
   union uint512_u *h, 
   CONST union uint512_u *N, 
   CONST UINT8 *m
@@ -139,7 +144,7 @@ g(
 }
 
 VOID
-MasCpy(
+MasCpy (
   UINT8 *to, 
   CONST UINT8 *from
   )
@@ -150,7 +155,7 @@ MasCpy(
 }
 
 VOID
-Uint512uCpy(
+Uint512uCpy (
   union uint512_u *to, 
   CONST union uint512_u *from
   )
@@ -161,7 +166,7 @@ Uint512uCpy(
 }
 
 VOID
-Stage2(
+Stage2 (
   GOST34112012Context *CTX, 
   CONST UINT8 *data
   )
@@ -176,7 +181,7 @@ Stage2(
 }
 
 VOID
-Stage3(
+Stage3 (
   GOST34112012Context *CTX
   )
 {
@@ -203,7 +208,7 @@ Stage3(
 }
 
 VOID
-GOST34112012Update(
+GOST34112012Update (
   GOST34112012Context *CTX, 
   CONST UINT8 *data, 
   UINT32 len)
@@ -247,7 +252,7 @@ GOST34112012Update(
 }
 
 VOID
-GOST34112012Final(
+GOST34112012Final (
   GOST34112012Context *CTX, 
   UINT8 *digest
   )
@@ -267,7 +272,7 @@ GOST34112012Final(
   }
 }
 
-VOID Streebog(
+VOID Streebog (
   CONST UINT8 *data, 
   UINT32 len, 
   UINT8 *digest, 
