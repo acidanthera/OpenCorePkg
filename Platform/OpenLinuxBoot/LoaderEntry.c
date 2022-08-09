@@ -696,14 +696,14 @@ HasRootOption (
       return TRUE;
     }
 
-    Status = OcParseVars (OptionCopy, &ParsedVars, FALSE);
+    Status = OcParseVars (OptionCopy, &ParsedVars, OcStringFormatAscii);
     if (EFI_ERROR (Status)) {
       DEBUG ((DEBUG_WARN, "LNX: Error parsing Options[%u]=<%a> - %r\n", Index, *Option, Status));
       FreePool (OptionCopy);
       return TRUE;
     }
 
-    HasRoot = OcHasParsedVar (ParsedVars, "root", FALSE);
+    HasRoot = OcHasParsedVar (ParsedVars, "root", OcStringFormatAscii);
 
     FreePool (ParsedVars);
     FreePool (OptionCopy);

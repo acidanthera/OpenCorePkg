@@ -35,6 +35,7 @@
 #include <Library/OcMiscLib.h>
 #include <Library/OcRtcLib.h>
 #include <Library/OcStringLib.h>
+#include <Library/OcVariableLib.h>
 #include <Library/PrintLib.h>
 #include <Library/UefiBootServicesTableLib.h>
 #include <Library/UefiRuntimeServicesTableLib.h>
@@ -178,6 +179,7 @@ OcRunBootPicker (
   OC_BOOT_CONTEXT                    *BootContext;
   OC_BOOT_ENTRY                      *Chosen;
   BOOLEAN                            SaidWelcome;
+  OC_FIRMWARE_RUNTIME_PROTOCOL       *FwRuntime;
 
   SaidWelcome = FALSE;
 
@@ -351,11 +353,15 @@ OcRunBootPicker (
         }
       }
 
+      FwRuntime = Chosen->FullNvramAccess ? OcDisableNvramProtection () : NULL;
+
       Status = OcLoadBootEntry (
                  Context,
                  Chosen,
                  gImageHandle
                  );
+
+      OcRestoreNvramProtection (FwRuntime);
 
       //
       // Do not wait on successful return code.

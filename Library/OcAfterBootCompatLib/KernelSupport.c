@@ -384,10 +384,10 @@ AppleMapPrepareForBooting (
     }
   }
 
-  if (BootCompat->KernelState.RelocationBlock != 0) {
+  if ((BootCompat->KernelState.RelocationBlock != 0) && !BootCompat->KernelState.RelocationBlockLegacy) {
     //
-    // When using Relocation Block EfiBoot will not virtualize the addresses since they
-    // cannot be mapped 1:1 due to any region from the relocation block being outside
+    // When using Relocation Block, EfiBoot on macOS 10.6 and newer will not virtualize the addresses
+    // since they cannot be mapped 1:1 due to any region from the relocation block being outside
     // of static XNU vaddr to paddr mapping. This causes a clean early exit in their
     // SetVirtualAddressMap calling routine avoiding gRT->SetVirtualAddressMap.
     //
@@ -687,7 +687,10 @@ AppleMapPrepareMemState (
   IN     EFI_MEMORY_DESCRIPTOR  *MemoryMap
   )
 {
-  EFI_STATUS  Status;
+  EFI_STATUS             Status;
+  UINTN                  NumEntries;
+  UINTN                  Index;
+  EFI_MEMORY_DESCRIPTOR  *Desc;
 
   //
   // Protect RT areas from relocation by marking then MemMapIO.
@@ -701,6 +704,25 @@ AppleMapPrepareMemState (
       BootCompat->KernelState.SysTableRtArea,
       BootCompat->KernelState.SysTableRtAreaSize
       );
+  }
+
+  //
+  // macOS 10.4 and 10.5 always call SetVirtualAddressMap, even when using a relocation block.
+  // Perform adjustment of virtual addresses here to their final positions.
+  //
+  if (BootCompat->KernelState.RelocationBlockLegacy) {
+    Desc       = MemoryMap;
+    NumEntries = MemoryMapSize / DescriptorSize;
+
+    for (Index = 0; Index < NumEntries; ++Index) {
+      if (  (Desc->VirtualStart >= BootCompat->KernelState.RelocationBlock + BootCompat->KernelState.RelocationBlockUsed)
+         && (Desc->VirtualStart < BootCompat->KernelState.RelocationBlock + ESTIMATED_KERNEL_SIZE))
+      {
+        Desc->VirtualStart -= BootCompat->KernelState.RelocationBlock - KERNEL_BASE_PADDR;
+      }
+
+      Desc = NEXT_MEMORY_DESCRIPTOR (Desc, DescriptorSize);
+    }
   }
 
   //

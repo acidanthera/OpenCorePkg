@@ -130,4 +130,4 @@ AppleModelYear:
   - 2016
   - 2017
 MinimumOSVersion: "10.12"
-MaximumOSVersion: null
+MaximumOSVersion: "12.5"

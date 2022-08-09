@@ -22,9 +22,10 @@
 
 [LibraryClasses]
   DebugLib
+  OcAppleKeyMapLib
   OcBootManagementLib
-  OcDeviceMiscLib
-  OcFlexArrayLib
+  OcDirectResetLib
+  OcVariableLib
   UefiBootServicesTableLib
   UefiRuntimeServicesTableLib
   UefiDriverEntryPoint

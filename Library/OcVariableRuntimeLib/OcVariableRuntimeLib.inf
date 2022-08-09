@@ -1,0 +1,30 @@
+## @file
+#  Save, load and delete emulated NVRAM from file storage.
+#
+#  Copyright (C) 2022, Mike Beaton. All rights reserved.<BR>
+#  SPDX-License-Identifier: BSD-3-Clause
+##
+
+[Defines]
+  INF_VERSION                         = 0x00010005
+  BASE_NAME                           = OcVariableRuntimeLib
+  FILE_GUID                           = 879C591F-F640-4F9F-8B8A-4BDF9CC7603A
+  MODULE_TYPE                         = DXE_RUNTIME_DRIVER
+  VERSION_STRING                      = 1.0
+  CONSTRUCTOR                         = OcVariableRuntimeLibConstructor
+  LIBRARY_CLASS                       = NULL|DXE_RUNTIME_DRIVER
+
+[Sources]
+  OcVariableRuntimeLib.c
+
+[Packages]
+  OpenCorePkg/OpenCorePkg.dec
+  MdePkg/MdePkg.dec
+
+[Protocols]
+  gOcVariableRuntimeProtocolGuid       ## PRODUCES
+
+[LibraryClasses]
+  OcFlexArrayLib
+  OcSerializeLib
+  OcVariableLib

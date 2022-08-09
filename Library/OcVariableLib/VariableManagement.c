@@ -1,5 +1,5 @@
 /** @file
-  Copyright (C) 2016, vit9696. All rights reserved.
+  Copyright (C) 2016-2022, vit9696, mikebeaton. All rights reserved.
 
   All rights reserved.
 
@@ -23,18 +23,15 @@
 #include <Library/DebugLib.h>
 #include <Library/BaseMemoryLib.h>
 #include <Library/MemoryAllocationLib.h>
-#include <Library/OcBootManagementLib.h>
-#include <Library/OcDeviceMiscLib.h>
+#include <Library/OcDirectResetLib.h>
 #include <Library/OcDebugLogLib.h>
 #include <Library/OcMiscLib.h>
 #include <Library/OcStringLib.h>
+#include <Library/OcVariableLib.h>
 #include <Library/PrintLib.h>
 #include <Library/UefiBootServicesTableLib.h>
 #include <Library/UefiRuntimeServicesTableLib.h>
 #include <Library/UefiLib.h>
-#include <Protocol/OcFirmwareRuntime.h>
-
-#include "BootManagementInternal.h"
 
 STATIC
 EFI_GUID
@@ -53,6 +50,48 @@ EFI_GUID
   mBootChimeVendorVariableGuid = {
   0x89D4F995, 0x67E3, 0x4895, { 0x8F, 0x18, 0x45, 0x4B, 0x65, 0x1D, 0x92, 0x15 }
 };
+
+EFI_LOAD_OPTION *
+OcGetBootOptionData (
+  OUT UINTN           *OptionSize,
+  IN  UINT16          BootOption,
+  IN  CONST EFI_GUID  *BootGuid
+  )
+{
+  EFI_STATUS       Status;
+  CHAR16           BootVarName[L_STR_LEN (L"Boot####") + 1];
+  UINTN            LoadOptionSize;
+  EFI_LOAD_OPTION  *LoadOption;
+
+  if (CompareGuid (BootGuid, &gOcVendorVariableGuid)) {
+    UnicodeSPrint (
+      BootVarName,
+      sizeof (BootVarName),
+      OC_VENDOR_BOOT_VARIABLE_PREFIX L"%04x",
+      BootOption
+      );
+  } else {
+    UnicodeSPrint (BootVarName, sizeof (BootVarName), L"Boot%04x", BootOption);
+  }
+
+  Status = GetVariable2 (
+             BootVarName,
+             BootGuid,
+             (VOID **)&LoadOption,
+             &LoadOptionSize
+             );
+  if (EFI_ERROR (Status)) {
+    return NULL;
+  }
+
+  if (LoadOptionSize < sizeof (*LoadOption)) {
+    FreePool (LoadOption);
+    return NULL;
+  }
+
+  *OptionSize = LoadOptionSize;
+  return LoadOption;
+}
 
 STATIC
 BOOLEAN
@@ -138,20 +177,21 @@ IsDeletableVariable (
   return FALSE;
 }
 
-STATIC
 VOID
-DeleteVariables (
-  IN BOOLEAN  PreserveBoot
+OcScanVariables (
+  IN OC_PROCESS_VARIABLE  ProcessVariable,
+  IN VOID                 *Context
   )
 {
-  EFI_GUID    CurrentGuid;
-  EFI_STATUS  Status;
-  CHAR16      *Buffer;
-  CHAR16      *TmpBuffer;
-  UINTN       BufferSize;
-  UINTN       RequestedSize;
-  BOOLEAN     Restart;
-  BOOLEAN     CriticalFailure;
+  EFI_GUID                    CurrentGuid;
+  EFI_STATUS                  Status;
+  CHAR16                      *Buffer;
+  CHAR16                      *TmpBuffer;
+  UINTN                       BufferSize;
+  UINTN                       RequestedSize;
+  BOOLEAN                     Restart;
+  BOOLEAN                     CriticalFailure;
+  OC_PROCESS_VARIABLE_RESULT  ProcessResult;
 
   //
   // Request 1024 byte buffer.
@@ -167,6 +207,11 @@ DeleteVariables (
 
   //
   // Assume we have not failed yet.
+  // TODO: The reasoning behind the logic of CriticalFailure seems not entirely
+  // clear here, if anyone can add a note reminding? (Should be safe, but why 2
+  // failures, not 2 per variable? Or n? Also, was it ever meant to restart the
+  // scan entirely? These possible behaviours could be configured as params to
+  // OcScanVariables.)
   //
   CriticalFailure = FALSE;
 
@@ -187,7 +232,7 @@ DeleteVariables (
       } else {
         DEBUG ((
           DEBUG_INFO,
-          "OCB: Failed to allocate variable name buffer of %u bytes\n",
+          "OCVAR: Failed to allocate variable name buffer of %u bytes\n",
           (UINT32)RequestedSize
           ));
         break;
@@ -210,47 +255,23 @@ DeleteVariables (
     Status        = gRT->GetNextVariableName (&RequestedSize, Buffer, &CurrentGuid);
 
     if (!EFI_ERROR (Status)) {
-      if (IsDeletableVariable (Buffer, &CurrentGuid, PreserveBoot)) {
-        Status = gRT->SetVariable (Buffer, &CurrentGuid, 0, 0, NULL);
-        if (!EFI_ERROR (Status)) {
-          DEBUG ((
-            DEBUG_INFO,
-            "Deleting %g:%s... OK\n",
-            &CurrentGuid,
-            Buffer
-            ));
-          //
-          // Calls to SetVariable() between calls to GetNextVariableName()
-          // may produce unpredictable results, so we restart.
-          //
-          Restart = TRUE;
-        } else if ((Status == EFI_NOT_FOUND) || (Status == EFI_SECURITY_VIOLATION)) {
-          DEBUG ((
-            DEBUG_INFO,
-            "Deleting %g:%s... SKIP - %r\n",
-            &CurrentGuid,
-            Buffer,
-            Status
-            ));
-        } else {
-          DEBUG ((
-            DEBUG_INFO,
-            "Deleting %g:%s... FAIL - %r\n",
-            &CurrentGuid,
-            Buffer,
-            Status
-            ));
-          break;
-        }
-      } else {
-        // Print (L"Skipping %g:%s\n", &CurrentGuid, Buffer);
+      ProcessResult = ProcessVariable (&CurrentGuid, Buffer, Context);
+      if (ProcessResult == OcProcessVariableAbort) {
+        break;
       }
+
+      if (ProcessResult == OcProcessVariableRestart) {
+        Restart = TRUE;
+        continue;
+      }
+
+      ASSERT (ProcessResult == OcProcessVariableContinue);
     } else if ((Status != EFI_BUFFER_TOO_SMALL) && (Status != EFI_NOT_FOUND)) {
       if (!CriticalFailure) {
-        DEBUG ((DEBUG_INFO, "OCB: Unexpected error (%r), trying to rescan\n", Status));
+        DEBUG ((DEBUG_INFO, "OCVAR: Unexpected error (%r), trying to rescan\n", Status));
         CriticalFailure = TRUE;
       } else {
-        DEBUG ((DEBUG_INFO, "OCB: Unexpected error (%r), aborting\n", Status));
+        DEBUG ((DEBUG_INFO, "OCVAR: Unexpected error (%r), aborting\n", Status));
         break;
       }
     }
@@ -261,8 +282,76 @@ DeleteVariables (
   }
 }
 
+STATIC
+OC_PROCESS_VARIABLE_RESULT
+EFIAPI
+DeleteVariable (
+  IN EFI_GUID  *Guid,
+  IN CHAR16    *Name,
+  IN VOID      *Context
+  )
+{
+  EFI_STATUS  Status;
+  BOOLEAN     Restart;
+  BOOLEAN     *PreserveBoot;
+
+  ASSERT (Guid != NULL);
+  ASSERT (Name != NULL);
+  ASSERT (Context != NULL);
+
+  PreserveBoot = Context;
+  Restart      = FALSE;
+
+  if (IsDeletableVariable (Name, Guid, *PreserveBoot)) {
+    Status = gRT->SetVariable (Name, Guid, 0, 0, NULL);
+    if (!EFI_ERROR (Status)) {
+      DEBUG ((
+        DEBUG_INFO,
+        "Deleting %g:%s... OK\n",
+        Guid,
+        Name
+        ));
+      //
+      // Calls to SetVariable() between calls to GetNextVariableName()
+      // may produce unpredictable results, so we restart.
+      //
+      Restart = TRUE;
+    } else if ((Status == EFI_NOT_FOUND) || (Status == EFI_SECURITY_VIOLATION)) {
+      DEBUG ((
+        DEBUG_INFO,
+        "Deleting %g:%s... SKIP - %r\n",
+        Guid,
+        Name,
+        Status
+        ));
+    } else {
+      DEBUG ((
+        DEBUG_INFO,
+        "Deleting %g:%s... FAIL - %r\n",
+        Guid,
+        Name,
+        Status
+        ));
+    }
+  } else {
+    // Print (L"Skipping %g:%s\n", Guid, Name);
+  }
+
+  return Restart ? OcProcessVariableRestart : OcProcessVariableContinue;
+}
+
+STATIC
+VOID
+DeleteVariables (
+  IN BOOLEAN  PreserveBoot
+  )
+{
+  OcScanVariables (DeleteVariable, &PreserveBoot);
+}
+
+STATIC
 VOID *
-InternalGetBootstrapBootData (
+GetBootstrapBootData (
   OUT UINTN   *OptionSize,
   OUT UINT16  *Option
   )
@@ -283,7 +372,7 @@ InternalGetBootstrapBootData (
 
   DEBUG ((
     DEBUG_INFO,
-    "OCB: Have existing order of size %u - %r\n",
+    "OCVAR: Have existing order of size %u - %r\n",
     (UINT32)BootOrderSize,
     Status
     ));
@@ -294,7 +383,7 @@ InternalGetBootstrapBootData (
 
   BootOrder = AllocatePool (BootOrderSize);
   if (BootOrder == NULL) {
-    DEBUG ((DEBUG_INFO, "OCB: Failed to allocate boot order\n"));
+    DEBUG ((DEBUG_INFO, "OCVAR: Failed to allocate boot order\n"));
     return NULL;
   }
 
@@ -306,7 +395,7 @@ InternalGetBootstrapBootData (
                   BootOrder
                   );
   if (EFI_ERROR (Status) || (BootOrderSize == 0) || (BootOrderSize % sizeof (UINT16) != 0)) {
-    DEBUG ((DEBUG_INFO, "OCB: Failed to obtain boot order %u - %r\n", (UINT32)BootOrderSize, Status));
+    DEBUG ((DEBUG_INFO, "OCVAR: Failed to obtain boot order %u - %r\n", (UINT32)BootOrderSize, Status));
     FreePool (BootOrder);
     return NULL;
   }
@@ -314,7 +403,7 @@ InternalGetBootstrapBootData (
   //
   // OpenCore moved Bootstrap to BootOrder[0] on initialisation.
   //
-  OptionData = InternalGetBootOptionData (
+  OptionData = OcGetBootOptionData (
                  OptionSize,
                  BootOrder[0],
                  &gEfiGlobalVariableGuid
@@ -326,103 +415,42 @@ InternalGetBootstrapBootData (
   return OptionData;
 }
 
-EFI_STATUS
-OcGetSip (
-  OUT UINT32  *CsrActiveConfig,
-  OUT UINT32  *Attributes          OPTIONAL
+OC_FIRMWARE_RUNTIME_PROTOCOL *
+OcDisableNvramProtection (
+  VOID
   )
 {
-  EFI_STATUS  Status;
-  UINTN       DataSize;
+  EFI_STATUS                    Status;
+  OC_FIRMWARE_RUNTIME_PROTOCOL  *FwRuntime;
+  OC_FWRT_CONFIG                Config;
 
-  ASSERT (CsrActiveConfig != NULL);
-
-  DataSize = sizeof (*CsrActiveConfig);
-
-  Status = gRT->GetVariable (
-                  L"csr-active-config",
-                  &gAppleBootVariableGuid,
-                  Attributes,
-                  &DataSize,
-                  CsrActiveConfig
+  Status = gBS->LocateProtocol (
+                  &gOcFirmwareRuntimeProtocolGuid,
+                  NULL,
+                  (VOID **)&FwRuntime
                   );
 
-  return Status;
-}
-
-EFI_STATUS
-OcSetSip (
-  IN  UINT32  *CsrActiveConfig,
-  IN  UINT32  Attributes
-  )
-{
-  EFI_STATUS  Status;
-
-  Status = gRT->SetVariable (
-                  L"csr-active-config",
-                  &gAppleBootVariableGuid,
-                  Attributes,
-                  CsrActiveConfig == NULL ? 0 : sizeof (*CsrActiveConfig),
-                  CsrActiveConfig
-                  );
-
-  return Status;
-}
-
-BOOLEAN
-OcIsSipEnabled (
-  IN  EFI_STATUS  GetStatus,
-  IN  UINT32      CsrActiveConfig
-  )
-{
-  ASSERT (GetStatus == EFI_NOT_FOUND || !EFI_ERROR (GetStatus));
-
-  //
-  // CSR_ALLOW_APPLE_INTERNAL with no other bits set reports as SIP enabled
-  // (and is used as the enable value in some Apl setups)
-  //
-  return GetStatus == EFI_NOT_FOUND || (CsrActiveConfig & ~CSR_ALLOW_APPLE_INTERNAL) == 0;
-}
-
-EFI_STATUS
-OcToggleSip (
-  IN  UINT32  CsrActiveConfig
-  )
-{
-  EFI_STATUS  Status;
-  UINT32      Attributes;
-  UINT32      CsrConfig;
-
-  //
-  // Use existing attributes where present (e.g. keep changes made while WriteFlash = false as volatile only)
-  //
-  Status = OcGetSip (&CsrConfig, &Attributes);
-
-  if ((Status != EFI_NOT_FOUND) && EFI_ERROR (Status)) {
-    DEBUG ((DEBUG_ERROR, "OCB: Error getting SIP status - %r\n", Status));
+  if (!EFI_ERROR (Status) && (FwRuntime->Revision == OC_FIRMWARE_RUNTIME_REVISION)) {
+    ZeroMem (&Config, sizeof (Config));
+    FwRuntime->SetOverride (&Config);
+    DEBUG ((DEBUG_INFO, "OCVAR: Found FW NVRAM, full access %d\n", Config.BootVariableRedirect));
   } else {
-    if (Status == EFI_NOT_FOUND) {
-      Attributes = CSR_APPLE_SIP_NVRAM_NV_ATTR;
-    } else {
-      Attributes &= CSR_APPLE_SIP_NVRAM_NV_ATTR;
-    }
-
-    if (OcIsSipEnabled (Status, CsrConfig)) {
-      CsrConfig = CsrActiveConfig;
-      Status    = OcSetSip (&CsrConfig, Attributes);
-      if (EFI_ERROR (Status)) {
-        DEBUG ((DEBUG_ERROR, "OCB: Error disabling SIP - r\n", Status));
-      }
-    } else {
-      CsrConfig = 0;
-      Status    = OcSetSip (&CsrConfig, Attributes);
-      if (EFI_ERROR (Status)) {
-        DEBUG ((DEBUG_ERROR, "OCB: Error enabling SIP - r\n", Status));
-      }
-    }
+    FwRuntime = NULL;
+    DEBUG ((DEBUG_INFO, "OCVAR: Missing compatible FW NVRAM, going on...\n"));
   }
 
-  return Status;
+  return FwRuntime;
+}
+
+VOID
+OcRestoreNvramProtection (
+  IN OC_FIRMWARE_RUNTIME_PROTOCOL  *FwRuntime
+  )
+{
+  if (FwRuntime != NULL) {
+    DEBUG ((DEBUG_INFO, "OCVAR: Restoring FW NVRAM...\n"));
+    FwRuntime->SetOverride (NULL);
+  }
 }
 
 VOID
@@ -432,14 +460,13 @@ OcDeleteVariables (
 {
   EFI_STATUS                    Status;
   OC_FIRMWARE_RUNTIME_PROTOCOL  *FwRuntime;
-  OC_FWRT_CONFIG                Config;
   UINTN                         BootProtectSize;
   UINT32                        BootProtect;
   VOID                          *BootOption;
   UINTN                         BootOptionSize;
   UINT16                        BootOptionIndex;
 
-  DEBUG ((DEBUG_INFO, "OCB: NVRAM cleanup %d...\n", PreserveBoot));
+  DEBUG ((DEBUG_INFO, "OCVAR: NVRAM cleanup %d...\n", PreserveBoot));
 
   //
   // Obtain boot protection marker.
@@ -463,27 +490,14 @@ OcDeleteVariables (
     }
   }
 
-  Status = gBS->LocateProtocol (
-                  &gOcFirmwareRuntimeProtocolGuid,
-                  NULL,
-                  (VOID **)&FwRuntime
-                  );
-
-  if (!EFI_ERROR (Status) && (FwRuntime->Revision == OC_FIRMWARE_RUNTIME_REVISION)) {
-    ZeroMem (&Config, sizeof (Config));
-    FwRuntime->SetOverride (&Config);
-    DEBUG ((DEBUG_INFO, "OCB: Found FW NVRAM, full access %d\n", Config.BootVariableRedirect));
-  } else {
-    FwRuntime = NULL;
-    DEBUG ((DEBUG_INFO, "OCB: Missing compatible FW NVRAM, going on...\n"));
-  }
+  FwRuntime = OcDisableNvramProtection ();
 
   if ((BootProtect & OC_BOOT_PROTECT_VARIABLE_BOOTSTRAP) != 0) {
-    BootOption = InternalGetBootstrapBootData (&BootOptionSize, &BootOptionIndex);
+    BootOption = GetBootstrapBootData (&BootOptionSize, &BootOptionIndex);
     if (BootOption != NULL) {
       DEBUG ((
         DEBUG_INFO,
-        "OCB: Found %g:Boot%04x for preservation of %u bytes\n",
+        "OCVAR: Found %g:Boot%04x for preservation of %u bytes\n",
         &gEfiGlobalVariableGuid,
         BootOptionIndex,
         (UINT32)BootOptionSize
@@ -514,14 +528,11 @@ OcDeleteVariables (
                       );
     }
 
-    DEBUG ((DEBUG_INFO, "OCB: Set bootstrap option to Boot%04x - %r\n", BootOptionIndex, Status));
+    DEBUG ((DEBUG_INFO, "OCVAR: Set bootstrap option to Boot%04x - %r\n", BootOptionIndex, Status));
     FreePool (BootOption);
   }
 
-  if (FwRuntime != NULL) {
-    DEBUG ((DEBUG_INFO, "OCB: Restoring FW NVRAM...\n"));
-    FwRuntime->SetOverride (NULL);
-  }
+  OcRestoreNvramProtection (FwRuntime);
 }
 
 EFI_STATUS

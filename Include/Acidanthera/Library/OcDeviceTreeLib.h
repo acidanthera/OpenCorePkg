@@ -16,7 +16,25 @@
 #define OC_DEVICE_TREE_LIB_H
 
 //
-// Struct at the beginning of every loaded kext.
+// Device tree property name prefixes for loaded kexts or mkext.
+//
+#define DT_BOOTER_KEXT_PREFIX   "Driver-"
+#define DT_BOOTER_MKEXT_PREFIX  "DriversPackage-"
+
+//
+// Struct at the beginning of every loaded kext (10.4 and 10.5).
+// Pointers to every loaded kext (to this struct) are
+// properties Driver-<hex addr of DriverInfo> in DevTree /chosen/memory-map.
+//
+typedef struct DTBootxDriverInfo_ {
+  UINT32    PlistPhysAddr;
+  UINT32    PlistLength;
+  UINT32    ModuleAddress;
+  UINT32    ModuleLength;
+} DTBootxDriverInfo;
+
+//
+// Struct at the beginning of every loaded kext (10.6 and newer).
 // Pointers to every loaded kext (to this struct) are
 // properties Driver-<hex addr of DriverInfo> in DevTree /chosen/memory-map.
 //

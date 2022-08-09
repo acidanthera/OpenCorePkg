@@ -737,7 +737,7 @@ HdaCodecAudioIoSetupPlayback (
   // REF: https://github.com/acidanthera/bugtracker/issues/971
   //
   if (PlaybackDelay > 0) {
-    gBS->Stall (PlaybackDelay);
+    gBS->Stall (MS_TO_MICROSECONDS (PlaybackDelay));
   }
 
   return EFI_SUCCESS;

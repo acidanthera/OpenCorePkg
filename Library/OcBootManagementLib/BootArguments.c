@@ -434,7 +434,7 @@ OcParseLoadOptions (
     return EFI_NOT_FOUND;
   }
 
-  Status = OcParseVars (LoadedImage->LoadOptions, ParsedVars, TRUE);
+  Status = OcParseVars (LoadedImage->LoadOptions, ParsedVars, OcStringFormatUnicode);
 
   if (Status == EFI_INVALID_PARAMETER) {
     DEBUG ((DEBUG_ERROR, "OCB: Failed to parse LoadOptions (%p:%u)\n", LoadedImage->LoadOptions, LoadedImage->LoadOptionsSize));
@@ -625,6 +625,18 @@ OcParseVars (
   return EFI_SUCCESS;
 }
 
+OC_PARSED_VAR *
+OcParsedVarsItemAt (
+  IN     CONST OC_FLEX_ARRAY  *ParsedVars,
+  IN     CONST UINTN          Index
+  )
+{
+  OC_PARSED_VAR  *Option;
+
+  Option = OcFlexArrayItemAt (ParsedVars, Index);
+  return Option;
+}
+
 BOOLEAN
 OcParsedVarsGetStr (
   IN     CONST OC_FLEX_ARRAY     *ParsedVars,
@@ -680,7 +692,7 @@ OcParsedVarsGetUnicodeStr (
   OUT       CHAR16            **Value
   )
 {
-  return OcParsedVarsGetStr (ParsedVars, Name, (VOID **)Value, TRUE);
+  return OcParsedVarsGetStr (ParsedVars, Name, (VOID **)Value, OcStringFormatUnicode);
 }
 
 BOOLEAN
@@ -690,7 +702,7 @@ OcParsedVarsGetAsciiStr (
   OUT       CHAR8             **Value
   )
 {
-  return OcParsedVarsGetStr (ParsedVars, Name, (VOID **)Value, FALSE);
+  return OcParsedVarsGetStr (ParsedVars, Name, (VOID **)Value, OcStringFormatAscii);
 }
 
 BOOLEAN

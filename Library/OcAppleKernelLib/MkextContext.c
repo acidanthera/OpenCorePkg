@@ -32,9 +32,8 @@
 //
 #define MKEXT_ALIGN(a)  (ALIGN_VALUE (a, sizeof (UINT64)))
 
-STATIC
 BOOLEAN
-ParseKextBinary (
+InternalParseKextBinary (
   IN OUT UINT8    **Buffer,
   IN OUT UINT32   *BufferSize,
   IN     BOOLEAN  Is32Bit
@@ -1363,7 +1362,7 @@ MkextInjectKext (
       ASSERT (ExecutableSize > 0);
 
       BinOffset = MkextNewSize;
-      if (!ParseKextBinary (&Executable, &ExecutableSize, Context->Is32Bit)) {
+      if (!InternalParseKextBinary (&Executable, &ExecutableSize, Context->Is32Bit)) {
         return EFI_INVALID_PARAMETER;
       }
 
@@ -1412,7 +1411,7 @@ MkextInjectKext (
       ASSERT (ExecutableSize > 0);
 
       BinOffset = PlistOffset;
-      if (!ParseKextBinary (&Executable, &ExecutableSize, Context->Is32Bit)) {
+      if (!InternalParseKextBinary (&Executable, &ExecutableSize, Context->Is32Bit)) {
         XmlDocumentFree (PlistXml);
         FreePool (PlistBuffer);
         return EFI_INVALID_PARAMETER;

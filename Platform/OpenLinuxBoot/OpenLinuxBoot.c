@@ -298,9 +298,9 @@ UefiMain (
   if (!EFI_ERROR (Status)) {
     AddBootFlags    = 0;
     RemoveBootFlags = 0;
-    OcParsedVarsGetInt (mParsedLoadOptions, L"flags", &gLinuxBootFlags, TRUE);
-    OcParsedVarsGetInt (mParsedLoadOptions, L"flags+", &AddBootFlags, TRUE);
-    OcParsedVarsGetInt (mParsedLoadOptions, L"flags-", &RemoveBootFlags, TRUE);
+    OcParsedVarsGetInt (mParsedLoadOptions, L"flags", &gLinuxBootFlags, OcStringFormatUnicode);
+    OcParsedVarsGetInt (mParsedLoadOptions, L"flags+", &AddBootFlags, OcStringFormatUnicode);
+    OcParsedVarsGetInt (mParsedLoadOptions, L"flags-", &RemoveBootFlags, OcStringFormatUnicode);
     gLinuxBootFlags |= AddBootFlags;
     gLinuxBootFlags &= ~RemoveBootFlags;
   } else {

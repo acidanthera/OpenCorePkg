@@ -1307,7 +1307,7 @@ CachelessContextAddKext (
   IN OUT CACHELESS_CONTEXT  *Context,
   IN     CONST CHAR8        *InfoPlist,
   IN     UINT32             InfoPlistSize,
-  IN     CONST UINT8        *Executable OPTIONAL,
+  IN     UINT8              *Executable OPTIONAL,
   IN     UINT32             ExecutableSize OPTIONAL,
   OUT    CHAR8              BundleVersion[MAX_INFO_BUNDLE_VERSION_KEY_SIZE] OPTIONAL
   );

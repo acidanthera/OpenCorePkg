@@ -47,7 +47,6 @@
   ImageLoader.c
   PolicyManagement.c
   OcBootManagementLib.c
-  VariableManagement.c
 
 [Packages]
   OpenCorePkg/OpenCorePkg.dec
@@ -70,20 +69,9 @@
   gAppleHfsBootPartitionTypeGuid                ## SOMETIMES_CONSUMES
   gAppleLegacyLoadAppFileGuid                   ## SOMETIMES_CONSUMES
   gAppleVendorVariableGuid                      ## SOMETIMES_CONSUMES
-  gAppleCoreStorageVariableGuid                 ## SOMETIMES_CONSUMES
-  gAppleTamperResistantBootVariableGuid         ## SOMETIMES_CONSUMES
-  gAppleWirelessNetworkVariableGuid             ## SOMETIMES_CONSUMES
-  gApplePersonalizationVariableGuid             ## SOMETIMES_CONSUMES
-  gAppleNetbootVariableGuid                     ## SOMETIMES_CONSUMES
-  gAppleSecureBootVariableGuid                  ## SOMETIMES_CONSUMES
-  gAppleTamperResistantBootSecureVariableGuid   ## SOMETIMES_CONSUMES
-  gAppleTamperResistantBootEfiUserVariableGuid  ## SOMETIMES_CONSUMES
   gEfiPartTypeUnusedGuid                        ## SOMETIMES_CONSUMES
   gOcVendorVariableGuid                         ## SOMETIMES_CONSUMES
-  gOcReadOnlyVariableGuid                       ## SOMETIMES_CONSUMES
-  gOcWriteOnlyVariableGuid                      ## SOMETIMES_CONSUMES
   gAppleBootPickerFileGuid                      ## SOMETIMES_CONSUMES
-  gMicrosoftVariableGuid                        ## SOMETIMES_CONSUMES
 
 [Protocols]
   gAppleBootPolicyProtocolGuid       ## PRODUCES
@@ -123,6 +111,7 @@
   OcPeCoffLib
   OcRtcLib
   OcTypingLib
+  OcVariableLib
   OcXmlLib
   TimerLib
   FileHandleLib

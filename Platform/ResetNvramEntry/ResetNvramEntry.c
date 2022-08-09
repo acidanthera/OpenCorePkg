@@ -9,7 +9,8 @@
 
 #include <Uefi.h>
 #include <Library/BaseLib.h>
-#include <Library/OcDeviceMiscLib.h>
+#include <Library/OcDirectResetLib.h>
+#include <Library/OcVariableLib.h>
 #include <Library/UefiBootServicesTableLib.h>
 #include <Library/UefiRuntimeServicesTableLib.h>
 
@@ -44,6 +45,11 @@ SystemActionResetNvram (
   UINT8  ResetNVRam = 1;
 
   WaitForChime (PickerContext);
+
+  //
+  // Does not return if legacy NVRAM protocol is present.
+  //
+  OcResetLegacyNvram ();
 
   if (!mUseApple) {
     return OcResetNvram (mPreserveBoot);
@@ -166,8 +172,8 @@ UefiMain (
 
   Status = OcParseLoadOptions (LoadedImage, &ParsedLoadOptions);
   if (!EFI_ERROR (Status)) {
-    mPreserveBoot = OcHasParsedVar (ParsedLoadOptions, L"--preserve-boot", TRUE);
-    mUseApple     = OcHasParsedVar (ParsedLoadOptions, L"--apple", TRUE);
+    mPreserveBoot = OcHasParsedVar (ParsedLoadOptions, L"--preserve-boot", OcStringFormatUnicode);
+    mUseApple     = OcHasParsedVar (ParsedLoadOptions, L"--apple", OcStringFormatUnicode);
 
     OcFlexArrayFree (&ParsedLoadOptions);
   } else {

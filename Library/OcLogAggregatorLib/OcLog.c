@@ -722,7 +722,7 @@ OcConfigureLogProtocol (
           ++LogModules;
         }
 
-        Private->FlexFilters = OcStringSplit (LogModules, L',', FALSE);
+        Private->FlexFilters = OcStringSplit (LogModules, L',', OcStringFormatAscii);
       }
 
       Handle = NULL;

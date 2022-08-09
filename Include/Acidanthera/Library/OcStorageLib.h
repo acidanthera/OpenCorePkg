@@ -41,7 +41,7 @@
 #define OC_STORAGE_SAFE_PATH_MAX  128
 
 /**
-  Structure declaration for valult file.
+  Structure declaration for vault file.
 **/
 #define OC_STORAGE_VAULT_HASH_FIELDS(_, __) \
   _(UINT8      , Hash     , [SHA256_DIGEST_SIZE] , {0}         , () )

@@ -168,7 +168,6 @@ CheckBooterQuirks (
     //
     // Skip sanitising UEFI->Drivers as it will be performed when checking UEFI section.
     //
-
     if (DriverEntry->Enabled && (AsciiStrCmp (Driver, "OpenRuntime.efi") == 0)) {
       HasOpenRuntimeEfiDriver = TRUE;
     }

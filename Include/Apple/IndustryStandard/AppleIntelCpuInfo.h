@@ -54,6 +54,8 @@ typedef INT32  cpu_subtype_t;
 typedef enum {
   Lnone, L1I, L1D, L2U, L3U, LCACHE_MAX
 } cache_type_t;
+typedef cache_type_t APPLE_INTEL_CPU_CACHE_TYPE;
+
 typedef struct {
   UINT8           value;        /* Descriptor value */
   cache_type_t    type;         /* Cache type */

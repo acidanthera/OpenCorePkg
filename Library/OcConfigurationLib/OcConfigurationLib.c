@@ -496,15 +496,16 @@ OC_SCHEMA
 STATIC
 OC_SCHEMA
   mMiscToolsSchemaEntry[] = {
-  OC_SCHEMA_STRING_IN ("Arguments",  OC_MISC_TOOLS_ENTRY, Arguments),
-  OC_SCHEMA_BOOLEAN_IN ("Auxiliary", OC_MISC_TOOLS_ENTRY, Auxiliary),
-  OC_SCHEMA_STRING_IN ("Comment",    OC_MISC_TOOLS_ENTRY, Comment),
-  OC_SCHEMA_BOOLEAN_IN ("Enabled",   OC_MISC_TOOLS_ENTRY, Enabled),
-  OC_SCHEMA_STRING_IN ("Flavour",    OC_MISC_TOOLS_ENTRY, Flavour),
-  OC_SCHEMA_STRING_IN ("Name",       OC_MISC_TOOLS_ENTRY, Name),
-  OC_SCHEMA_STRING_IN ("Path",       OC_MISC_TOOLS_ENTRY, Path),
-  OC_SCHEMA_BOOLEAN_IN ("RealPath",  OC_MISC_TOOLS_ENTRY, RealPath),
-  OC_SCHEMA_BOOLEAN_IN ("TextMode",  OC_MISC_TOOLS_ENTRY, TextMode),
+  OC_SCHEMA_STRING_IN ("Arguments",        OC_MISC_TOOLS_ENTRY, Arguments),
+  OC_SCHEMA_BOOLEAN_IN ("Auxiliary",       OC_MISC_TOOLS_ENTRY, Auxiliary),
+  OC_SCHEMA_STRING_IN ("Comment",          OC_MISC_TOOLS_ENTRY, Comment),
+  OC_SCHEMA_BOOLEAN_IN ("Enabled",         OC_MISC_TOOLS_ENTRY, Enabled),
+  OC_SCHEMA_STRING_IN ("Flavour",          OC_MISC_TOOLS_ENTRY, Flavour),
+  OC_SCHEMA_BOOLEAN_IN ("FullNvramAccess", OC_MISC_TOOLS_ENTRY, FullNvramAccess),
+  OC_SCHEMA_STRING_IN ("Name",             OC_MISC_TOOLS_ENTRY, Name),
+  OC_SCHEMA_STRING_IN ("Path",             OC_MISC_TOOLS_ENTRY, Path),
+  OC_SCHEMA_BOOLEAN_IN ("RealPath",        OC_MISC_TOOLS_ENTRY, RealPath),
+  OC_SCHEMA_BOOLEAN_IN ("TextMode",        OC_MISC_TOOLS_ENTRY, TextMode),
 };
 
 STATIC
@@ -556,7 +557,6 @@ OC_SCHEMA
   mNvramConfigurationSchema[] = {
   OC_SCHEMA_MAP_IN ("Add",                 OC_GLOBAL_CONFIG, Nvram.Add,              &mNvramAddSchema),
   OC_SCHEMA_MAP_IN ("Delete",              OC_GLOBAL_CONFIG, Nvram.Delete,           &mNvramDeleteSchema),
-  OC_SCHEMA_BOOLEAN_IN ("LegacyEnable",    OC_GLOBAL_CONFIG, Nvram.LegacyEnable),
   OC_SCHEMA_BOOLEAN_IN ("LegacyOverwrite", OC_GLOBAL_CONFIG, Nvram.LegacyOverwrite),
   OC_SCHEMA_MAP_IN ("LegacySchema",        OC_GLOBAL_CONFIG, Nvram.Legacy,           &mNvramLegacySchema),
   OC_SCHEMA_BOOLEAN_IN ("WriteFlash",      OC_GLOBAL_CONFIG, Nvram.WriteFlash),
@@ -697,10 +697,11 @@ OC_SCHEMA
 STATIC
 OC_SCHEMA
   mUefiDriversSchemaEntry[] = {
-  OC_SCHEMA_STRING_IN ("Arguments", OC_UEFI_DRIVER_ENTRY, Arguments),
-  OC_SCHEMA_STRING_IN ("Comment",   OC_UEFI_DRIVER_ENTRY, Comment),
-  OC_SCHEMA_BOOLEAN_IN ("Enabled",  OC_UEFI_DRIVER_ENTRY, Enabled),
-  OC_SCHEMA_STRING_IN ("Path",      OC_UEFI_DRIVER_ENTRY, Path),
+  OC_SCHEMA_STRING_IN ("Arguments",  OC_UEFI_DRIVER_ENTRY, Arguments),
+  OC_SCHEMA_STRING_IN ("Comment",    OC_UEFI_DRIVER_ENTRY, Comment),
+  OC_SCHEMA_BOOLEAN_IN ("Enabled",   OC_UEFI_DRIVER_ENTRY, Enabled),
+  OC_SCHEMA_BOOLEAN_IN ("LoadEarly", OC_UEFI_DRIVER_ENTRY, LoadEarly),
+  OC_SCHEMA_STRING_IN ("Path",       OC_UEFI_DRIVER_ENTRY, Path),
 };
 
 STATIC

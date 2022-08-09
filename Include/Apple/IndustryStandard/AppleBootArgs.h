@@ -111,9 +111,9 @@ typedef struct {
   UINT8           efiMode;              /* 32 = 32-bit, 64 = 64-bit */
   UINT8           __reserved1[3];
   UINT32          __reserved2[1];
-  UINT32          performanceDataStart; /* physical address of log */
+  UINT32          performanceDataStart; /* physical address of log, 10.6 and up */
   UINT32          performanceDataSize;
-  UINT64          efiRuntimeServicesVirtualPageStart; /* virtual address of defragmented runtime pages */
+  UINT64          efiRuntimeServicesVirtualPageStart; /* virtual address of defragmented runtime pages, 10.6 and up */
   UINT32          __reserved3[2];
 } BootArgs1;
 

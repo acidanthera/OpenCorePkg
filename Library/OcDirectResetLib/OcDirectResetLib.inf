@@ -1,0 +1,24 @@
+## @file
+#  OVMF hardware reset implementation.
+#
+#  Copyright (c) 2021-2022, vit9696, mikebeaton. All rights reserved.<BR>
+#  SPDX-License-Identifier: BSD-3-Clause
+##
+
+[Defines]
+  INF_VERSION                         = 0x00010005
+  BASE_NAME                           = OcDirectResetLib
+  FILE_GUID                           = 27CB14A8-C57C-4D7B-B8CA-03DB9486718A
+  MODULE_TYPE                         = DXE_DRIVER
+  VERSION_STRING                      = 1.0
+  LIBRARY_CLASS                       = OcDirectResetLib|PEIM DXE_DRIVER DXE_RUNTIME_DRIVER UEFI_DRIVER UEFI_APPLICATION DXE_SMM_DRIVER
+
+[Sources]
+  DirectReset.c
+
+[Packages]
+  OpenCorePkg/OpenCorePkg.dec
+  MdePkg/MdePkg.dec
+
+[LibraryClasses]
+  UefiLib

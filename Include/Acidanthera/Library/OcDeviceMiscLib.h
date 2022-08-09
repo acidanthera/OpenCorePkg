@@ -29,15 +29,6 @@ ReleaseUsbOwnership (
   );
 
 /**
-  Perform cold reboot directly bypassing UEFI services. Does not return.
-  Supposed to work in any modern physical or virtual environment.
-**/
-VOID
-DirectResetCold (
-  VOID
-  );
-
-/**
   Reset HDA TCSEL to TC0 state.
 **/
 VOID

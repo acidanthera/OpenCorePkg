@@ -1,6 +1,5 @@
 /** @file
-  Copyright (C) 2019, vit9696. All rights reserved.<BR>
-  Copyright (C) 2021, Mike Beaton. All rights reserved.<BR>
+  Copyright (C) 2019-2022, vit9696, mikebeaton. All rights reserved.<BR>
   SPDX-License-Identifier: BSD-3-Clause
 **/
 
@@ -246,6 +245,10 @@ typedef struct OC_BOOT_ENTRY_ {
   //
   BOOLEAN                     IsBootEntryProtocol;
   //
+  // Set when entry is identified as macOS installer.
+  //
+  BOOLEAN                     IsAppleInstaller;
+  //
   // Should make this option default boot option.
   //
   BOOLEAN                     SetDefault;
@@ -257,6 +260,10 @@ typedef struct OC_BOOT_ENTRY_ {
   // Should expose real device path when dealing with custom entries.
   //
   BOOLEAN                     ExposeDevicePath;
+  //
+  // Should disable OpenRuntime NVRAM protection around invocation of tool.
+  //
+  BOOLEAN                     FullNvramAccess;
   //
   // Partition UUID of entry device.
   // Set for non-system action boot entry protocol boot entries only.
@@ -571,6 +578,10 @@ typedef struct {
   // Whether we should pass the actual device path (if possible).
   //
   BOOLEAN                  RealPath;
+  //
+  // Should disable OpenRuntime NVRAM protection around invocation of tool.
+  //
+  BOOLEAN                  FullNvramAccess;
   //
   // System action. Boot Entry Protocol only. Optional.
   //
@@ -1590,84 +1601,6 @@ OcAppendArgumentsToLoadedImage (
   );
 
 /**
-  Resets selected NVRAM variables and reboots the system.
-
-  @param[in]     PreserveBoot       Should reset preserve Boot### entries.
-
-  @retval EFI_SUCCESS, or error returned by called code.
-**/
-EFI_STATUS
-OcResetNvram (
-  IN     BOOLEAN  PreserveBoot
-  );
-
-/**
-  Get current SIP setting.
-
-  @param[out]     CsrActiveConfig    Returned csr-active-config variable; uninitialised if variable
-                                     not found, or other error.
-  @param[out]     Attributes         If not NULL, a pointer to the memory location to return the
-                                     attributes bitmask for the variable; uninitialised if variable
-                                     not found, or other error.
-
-  @retval EFI_SUCCESS, EFI_NOT_FOUND, or other error returned by called code.
-**/
-EFI_STATUS
-OcGetSip (
-  OUT UINT32  *CsrActiveConfig,
-  OUT UINT32  *Attributes          OPTIONAL
-  );
-
-/**
-  Set current SIP setting.
-
-  @param[in]      CsrActiveConfig    csr-active-config value to set, or NULL to clear the variable.
-  @param[in]      Attributes         Attributes to apply.
-
-  @retval EFI_SUCCESS, EFI_NOT_FOUND, or other error returned by called code.
-**/
-EFI_STATUS
-OcSetSip (
-  IN  UINT32  *CsrActiveConfig,
-  IN  UINT32  Attributes
-  );
-
-/**
-  Is SIP enabled?
-
-  @param[in]      GetStatus          Return status from previous OcGetSip or gRT->GetVariable call.
-  @param[in]      CsrActiveConfig    csr-active-config value from previous OcGetSip or gRT->GetVariable call.
-                                     This value is never used unless GetStatus is EFI_SUCCESS.
-
-  @retval TRUE if SIP should be considered enabled based on the passed values.
-**/
-BOOLEAN
-OcIsSipEnabled (
-  IN  EFI_STATUS  GetStatus,
-  IN  UINT32      CsrActiveConfig
-  );
-
-/**
-  Toggle SIP.
-
-  @param[in]      CsrActiveConfig    The csr-active-config value to use to disable SIP, if it was previously enabled.
-
-  @retval TRUE on successful operation.
-**/
-EFI_STATUS
-OcToggleSip (
-  IN  UINT32  CsrActiveConfig
-  );
-
-/**
-  Perform NVRAM UEFI variable deletion.
-**/
-VOID
-OcDeleteVariables (
-  IN BOOLEAN  PreserveBoot
-  );
-
-/**
   Launch firmware application.
 
   @param[in] ApplicationGuid  Application GUID identifier in the firmware.
@@ -1891,7 +1824,9 @@ OcImageLoaderLoad (
   );
 
 /**
-  Parse loaded image protocol load options.
+  Parse loaded image protocol load options, resultant options are in the
+  same format as is returned by OcParsedVars and may be examined using the
+  same utility methods.
 
   Assumes CHAR_NULL terminated Unicode string of space separated options,
   each of form {name} or {name}={value}. Double quotes can be used round {value} to
@@ -1947,6 +1882,20 @@ OcParseVars (
   IN           VOID              *StrVars,
   OUT       OC_FLEX_ARRAY        **ParsedVars,
   IN     CONST OC_STRING_FORMAT  StringFormat
+  );
+
+/**
+  Return parsed variable at given index.
+
+  @param[in]   ParsedVars         Parsed variables.
+  @param[in]   Index              Index of option to return.
+
+  @retval                         Parsed option.
+**/
+OC_PARSED_VAR *
+OcParsedVarsItemAt (
+  IN     CONST OC_FLEX_ARRAY  *ParsedVars,
+  IN     CONST UINTN          Index
   );
 
 /**

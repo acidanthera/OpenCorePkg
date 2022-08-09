@@ -1,9 +1,17 @@
-LogoutHook
-==========
+# LogoutHook
 
-## Installation
-```sudo defaults write com.apple.loginwindow LogoutHook /path/to/LogoutHook.command```
+## Script
 
-or
+### Usage
+```./Launchd.command```
 
-```/path/to/LogoutHook.command install```
+### Installation
+```./Launchd.command install```
+
+### Status
+```./Launchd.command status```
+
+Shows non-empty daemon pid only, if installed with default settings.
+
+### Log
+```/var/log/org.acidanthera.nvramhook.launchd/launchd.log```

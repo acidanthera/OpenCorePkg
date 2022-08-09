@@ -154,9 +154,9 @@ PatchKernelCpuIdLegacy (
   UINT32                StructAddr;
   UINT8                 *Location;
   UINT8                 *LocationEnd;
-  UINT8                 *LocationTsc;
-  UINT8                 *LocationTscEnd;
   UINT8                 *LocationSnow32;
+  UINT8                 *LocationTigerTsc;
+  UINT8                 *LocationTigerTscEnd;
   UINT32                Signature[3];
   BOOLEAN               IsTiger;
   BOOLEAN               IsTigerOld;
@@ -178,9 +178,9 @@ PatchKernelCpuIdLegacy (
   IsLion     = OcMatchDarwinVersion (KernelVersion, KERNEL_VERSION_LION_MIN, KERNEL_VERSION_LION_MAX);
   StructAddr = 0;
 
-  LocationSnow32 = NULL;
-  LocationTsc    = NULL;
-  LocationTscEnd = NULL;
+  LocationSnow32      = NULL;
+  LocationTigerTsc    = NULL;
+  LocationTigerTscEnd = NULL;
 
   //
   // Locate _cpuid_set_info or _cpuid_get_info.
@@ -531,7 +531,7 @@ PatchKernelCpuIdLegacy (
   // This only applies to XNU 8.10.1 and older. Some recovery versions of
   // 10.4.10 have a newer XNU 8.10.3 kernel with code changes to _tsc_init.
   //
-  // It's possible 8.10.2 may require the patch, but there is no sources or kernels
+  // It's possible 8.10.2 may require the patch, but there are no sources or kernels
   // available to verify.
   //
   if (IsTigerOld) {
@@ -552,7 +552,7 @@ PatchKernelCpuIdLegacy (
       0x89, 0xD0                          // mov eax, edx
     };
 
-    for ( ; Index < EFI_PAGE_SIZE; Index++, Record++) {
+    for (Index = 0; Index < EFI_PAGE_SIZE; Index++, Record++) {
       if (  (Record[0] == mKernelCpuidFindTscLocTigerStart[0])
          && (Record[1] == mKernelCpuidFindTscLocTigerStart[1])
          && (Record[2] == mKernelCpuidFindTscLocTigerStart[2])
@@ -569,7 +569,7 @@ PatchKernelCpuIdLegacy (
       return EFI_NOT_FOUND;
     }
 
-    LocationTsc = Record;
+    LocationTigerTsc = Record;
 
     //
     // End of _tsc_init CPUID location.
@@ -587,18 +587,18 @@ PatchKernelCpuIdLegacy (
       return EFI_NOT_FOUND;
     }
 
-    LocationTscEnd = Record + 2;
+    LocationTigerTscEnd = Record + 2;
   }
 
   DEBUG ((
     DEBUG_INFO,
-    "OCAK: Legacy CPUID patch %p:%p, loc %p:%p, tsc loc %p:%p struct @ 0x%X\n",
+    "OCAK: Legacy CPUID patch %p:%p, loc %p:%p, tsc loc %p:%p, struct @ 0x%X\n",
     StartPointer - Start,
     EndPointer - Start,
     Location - Start,
     LocationEnd - Start,
-    IsTigerOld ? LocationTsc - Start : 0,
-    IsTigerOld ? LocationTscEnd - Start : 0,
+    IsTigerOld ? LocationTigerTsc - Start : 0,
+    IsTigerOld ? LocationTigerTscEnd - Start : 0,
     StructAddr
     ));
 
@@ -712,12 +712,12 @@ PatchKernelCpuIdLegacy (
   // the patch area like above in _tsc_init.
   //
   if (IsTigerOld) {
-    Delta          = (INT32)(StartPointer - (LocationTsc + 5));
-    *LocationTsc++ = 0xE8;
-    CopyMem (LocationTsc, &Delta, sizeof (Delta));
-    LocationTsc += sizeof (Delta);
-    while (LocationTsc < LocationTscEnd) {
-      *LocationTsc++ = 0x90;
+    Delta               = (INT32)(StartPointer - (LocationTigerTsc + 5));
+    *LocationTigerTsc++ = 0xE8;
+    CopyMem (LocationTigerTsc, &Delta, sizeof (Delta));
+    LocationTigerTsc += sizeof (Delta);
+    while (LocationTigerTsc < LocationTigerTscEnd) {
+      *LocationTigerTsc++ = 0x90;
     }
   }
 
@@ -1324,6 +1324,10 @@ PatchProvideCurrentCpuInfo (
   UINT32  VarAddr32;
   UINT32  ValueLower;
   UINT32  ValueUpper;
+  UINT8   *Record;
+  UINT8   *Start;
+  UINT8   *Last;
+  UINT32  Index;
 
   UINT8  *TscInitFunc;
   UINT8  *TmrCvtFunc;
@@ -1348,9 +1352,36 @@ PatchProvideCurrentCpuInfo (
   UINT64  tscFCvtn2tValue;
   UINT64  tscGranularityValue;
 
+  BOOLEAN  IsTiger;
+  BOOLEAN  IsTigerCacheUnsupported;
+  UINT8    *LocationTigerCache;
+  UINT8    *LocationTigerCacheEnd;
+
+  APPLE_INTEL_CPU_CACHE_TYPE  CacheType;
+  CPUID_CACHE_PARAMS_EAX      CpuidCacheEax;
+  CPUID_CACHE_PARAMS_EBX      CpuidCacheEbx;
+  UINT32                      CacheSets;
+  UINT32                      CacheSizes[LCACHE_MAX];
+  UINT32                      CacheLineSizes[LCACHE_MAX];
+  UINT32                      CacheLineSize;
+
   UINT32  msrCoreThreadCount;
 
   ASSERT (Patcher != NULL);
+
+  LocationTigerCache    = NULL;
+  LocationTigerCacheEnd = NULL;
+
+  Start = ((UINT8 *)MachoGetMachHeader (&Patcher->MachContext));
+  Last  = Start + MachoGetInnerSize (&Patcher->MachContext) - EFI_PAGE_SIZE * 2;
+
+  IsTiger = OcMatchDarwinVersion (KernelVersion, KERNEL_VERSION_TIGER_MIN, KERNEL_VERSION_TIGER_MAX);
+
+  //
+  // 10.4 does not support pulling CPUID leaf 4 that may contain cache info instead of leaf 2.
+  // On processors that support leaf 4, use that instead.
+  //
+  IsTigerCacheUnsupported = IsTiger && (CpuInfo->MaxId >= CPUID_CACHE_PARAMS);
 
   Status  = EFI_SUCCESS;
   Status |= PatchProvideCurrentCpuInfoMSR35h (Patcher, CpuInfo, KernelVersion);
@@ -1364,7 +1395,7 @@ PatchProvideCurrentCpuInfo (
   //
   // _busFreq only exists on 10.5 and higher.
   //
-  if (OcMatchDarwinVersion (KernelVersion, KERNEL_VERSION_LEOPARD_MIN, 0)) {
+  if (!IsTiger) {
     Status |= PatcherGetSymbolValue (Patcher, "_busFreq", &BusFreqSymAddr);
   }
 
@@ -1554,6 +1585,164 @@ PatchProvideCurrentCpuInfo (
   // ret
   //
   *TscLocation++ = 0xC3;
+
+  //
+  // Find patch region for injecting CPU cache information
+  // into set_intel_cache_info.
+  //
+  if (IsTigerCacheUnsupported) {
+    Status = PatcherGetSymbolAddress (Patcher, "_cpuid_info", (UINT8 **)&Record);
+    if (EFI_ERROR (Status) || (Record >= Last)) {
+      DEBUG ((DEBUG_WARN, "OCAK: Failed to locate _cpuid_info (%p) - %r\n", Record, Status));
+      return EFI_NOT_FOUND;
+    }
+
+    //
+    // Start of patch area.
+    // We'll use this area to populate info_p.
+    //
+    STATIC CONST UINT8  mKernelCpuidFindCacheLocTigerStart[9] = {
+      0x8B, 0x45, 0x08,       // mov eax, dword [ebp+0x8] (*info_p argument)
+      0x8B, 0x50, 0x74,       // mov edx, dword [eax+0x74]
+      0x85, 0xD2,             // test edx, edx
+      0x75                    // jne ...
+    };
+
+    //
+    // End of patch area.
+    //
+    STATIC CONST UINT8  mKernelCpuidFindCacheLocTigerEnd[5] = {
+      0x31, 0xC0,       // xor eax, eax
+      0x0F, 0xA2,       // cpuid
+      0x89              // mov ...
+    };
+
+    for (Index = 0; Index < EFI_PAGE_SIZE; Index++, Record++) {
+      if (  (Record[0] == mKernelCpuidFindCacheLocTigerStart[0])
+         && (Record[1] == mKernelCpuidFindCacheLocTigerStart[1])
+         && (Record[2] == mKernelCpuidFindCacheLocTigerStart[2])
+         && (Record[3] == mKernelCpuidFindCacheLocTigerStart[3])
+         && (Record[4] == mKernelCpuidFindCacheLocTigerStart[4])
+         && (Record[5] == mKernelCpuidFindCacheLocTigerStart[5])
+         && (Record[6] == mKernelCpuidFindCacheLocTigerStart[6])
+         && (Record[7] == mKernelCpuidFindCacheLocTigerStart[7])
+         && (Record[8] == mKernelCpuidFindCacheLocTigerStart[8]))
+      {
+        break;
+      }
+    }
+
+    if (Index >= EFI_PAGE_SIZE) {
+      return EFI_NOT_FOUND;
+    }
+
+    LocationTigerCache = Record + 3;
+
+    for ( ; Index < EFI_PAGE_SIZE; Index++, Record++) {
+      if (  (Record[0] == mKernelCpuidFindCacheLocTigerEnd[0])
+         && (Record[1] == mKernelCpuidFindCacheLocTigerEnd[1])
+         && (Record[2] == mKernelCpuidFindCacheLocTigerEnd[2])
+         && (Record[3] == mKernelCpuidFindCacheLocTigerEnd[3])
+         && (Record[4] == mKernelCpuidFindCacheLocTigerEnd[4]))
+      {
+        break;
+      }
+    }
+
+    if (Index >= EFI_PAGE_SIZE) {
+      return EFI_NOT_FOUND;
+    }
+
+    LocationTigerCacheEnd = Record;
+
+    DEBUG ((
+      DEBUG_INFO,
+      "OCAK: CPU info cache loc %p:%p\n",
+      LocationTigerCache - Start,
+      LocationTigerCacheEnd - Start
+      ));
+
+    ZeroMem (CacheLineSizes, sizeof (CacheLineSizes));
+
+    //
+    // Build CPU info struct
+    //
+    Index = 0;
+    do {
+      AsmCpuidEx (CPUID_CACHE_PARAMS, Index, &CpuidCacheEax.Uint32, &CpuidCacheEbx.Uint32, &CacheSets, NULL);
+      if (CpuidCacheEax.Bits.CacheType == 0) {
+        break;
+      }
+
+      switch (CpuidCacheEax.Bits.CacheLevel) {
+        case 1:
+          CacheType = (CpuidCacheEax.Bits.CacheType == 1) ? L1D :
+                      (CpuidCacheEax.Bits.CacheType == 2) ? L1I :
+                      Lnone;
+          break;
+
+        case 2:
+          CacheType = (CpuidCacheEax.Bits.CacheType == 3) ? L2U :
+                      Lnone;
+          break;
+
+        case 3:
+          CacheType = (CpuidCacheEax.Bits.CacheType == 3) ? L3U :
+                      Lnone;
+          break;
+
+        default:
+          CacheType = Lnone;
+      }
+
+      if (CacheType != Lnone) {
+        CacheSizes[CacheType]     = (CpuidCacheEbx.Bits.LineSize + 1) * (CacheSets + 1) * (CpuidCacheEbx.Bits.Ways + 1);
+        CacheLineSizes[CacheType] = CpuidCacheEbx.Bits.LineSize + 1;
+      }
+
+      Index++;
+    } while (TRUE);
+
+    if (CacheLineSizes[L2U]) {
+      CacheLineSize = CacheLineSizes[L2U];
+    } else if (CacheLineSizes[L1D]) {
+      CacheLineSize = CacheLineSizes[L1D];
+    } else {
+      //
+      // XNU would panic here.
+      //
+      DEBUG ((DEBUG_WARN, "OCAK: Unable to determine CPU cache line size\n"));
+      return EFI_UNSUPPORTED;
+    }
+
+    //
+    // Populate cache sizes.
+    // EAX = address of *info_p struct in stack; 0x68 = offset of cache size array in *info_p struct.
+    //
+    for (Index = L1I; Index < LCACHE_MAX; Index++) {
+      *LocationTigerCache++ = 0xC7;
+      *LocationTigerCache++ = 0x40;
+      *LocationTigerCache++ = 0x68 + ((UINT8)(sizeof (UINT32) * Index));
+      CopyMem (LocationTigerCache, &CacheSizes[Index], sizeof (CacheSizes[Index]));
+      LocationTigerCache += sizeof (CacheSizes[Index]);
+      DEBUG ((DEBUG_INFO, "OCAK: Cache size (L%u): %u bytes\n", (Index >= 3) ? (Index - 1) : 1, CacheSizes[Index]));
+    }
+
+    //
+    // Populate cache line size.
+    // 0x7C = offset of cache line size in *info_p struct.
+    //
+    *LocationTigerCache++ = 0xC7;
+    *LocationTigerCache++ = 0x40;
+    *LocationTigerCache++ = 0x7C;
+    CopyMem (LocationTigerCache, &CacheLineSize, sizeof (CacheLineSize));
+    LocationTigerCache += sizeof (CacheLineSize);
+    DEBUG ((DEBUG_INFO, "OCAK: Cache line size: %u bytes\n", CacheLineSize));
+
+    while (LocationTigerCache < LocationTigerCacheEnd) {
+      *LocationTigerCache++ = 0x90;
+    }
+  }
 
   //
   // Patch MSR 0x35 fallback value on 10.13 and above.

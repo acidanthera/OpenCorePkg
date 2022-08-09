@@ -27,7 +27,7 @@
 
 EFI_STATUS
 OcSafeFileOpen (
-  IN     CONST EFI_FILE_PROTOCOL  *Protocol,
+  IN     CONST EFI_FILE_PROTOCOL  *Directory,
   OUT       EFI_FILE_PROTOCOL     **NewHandle,
   IN     CONST CHAR16             *FileName,
   IN     CONST UINT64             OpenMode,
@@ -48,13 +48,13 @@ OcSafeFileOpen (
   DEBUG_CODE_END ();
 
   *NewHandle = NULL;
-  Status     = Protocol->Open (
-                           (EFI_FILE_PROTOCOL  *)Protocol,
-                           NewHandle,
-                           (CHAR16 *)FileName,
-                           OpenMode,
-                           Attributes
-                           );
+  Status     = Directory->Open (
+                            (EFI_FILE_PROTOCOL  *)Directory,
+                            NewHandle,
+                            (CHAR16 *)FileName,
+                            OpenMode,
+                            Attributes
+                            );
   //
   // Some boards like ASUS ROG RAMPAGE VI EXTREME may have malfunctioning FS
   // drivers that report write protection violation errors for read-only

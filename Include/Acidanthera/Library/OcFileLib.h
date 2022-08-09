@@ -106,21 +106,51 @@ OcGetVolumeLabel (
     slash, however, their driver will modify passed string by removing
     the slash by \0.
 
-  @param  Protocol   File protocol instance.
+  @param  Directory  File protocol instance of parent directory.
   @param  NewHandle  Pointer for returned handle.
-  @param  FileName   Null-terminated file name.
+  @param  FileName   Null-terminated file name or relative path.
   @param  OpenMode   File open mode.
   @param  Attributes Attributes for the newly created file.
 
   @retval EFI_SUCCESS for successfully opened file.
-*/
+**/
 EFI_STATUS
 OcSafeFileOpen (
-  IN     CONST EFI_FILE_PROTOCOL  *Protocol,
+  IN     CONST EFI_FILE_PROTOCOL  *Directory,
   OUT       EFI_FILE_PROTOCOL     **NewHandle,
   IN     CONST CHAR16             *FileName,
   IN     CONST UINT64             OpenMode,
   IN     CONST UINT64             Attributes
+  );
+
+/**
+  Report existence of file relative to source file's location.
+
+  @param  Directory  File protocol instance of parent directory.
+  @param  FileName   Null-terminated file name or relative path.
+
+  @retval TRUE when file exists.
+**/
+BOOLEAN
+OcFileExists (
+  IN    CONST EFI_FILE_PROTOCOL  *Directory,
+  IN    CONST CHAR16             *FileName
+  );
+
+/**
+  Delete child file relative to source file's location.
+
+  @param  Directory  File protocol instance of parent directory.
+  @param  FileName   Null-terminated file name or relative path.
+
+  @retval EFI_SUCCESS     File successfully deleted.
+  @retval EFI_NOT_FOUND   File was not present.
+  @retval other           Other error opening or deleting file.
+**/
+EFI_STATUS
+OcDeleteFile (
+  IN EFI_FILE_PROTOCOL  *Directory,
+  IN CONST CHAR16       *FileName
   );
 
 /**
