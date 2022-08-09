@@ -5,10 +5,8 @@
  * $Id$
  */
 
-
 #include "CryptoInternal.h"
 #include "gost3411-2012-ref.h"
-
 
 union uint512_u {
   UINT64    QWORD[8];
@@ -35,16 +33,16 @@ GOST34112012Init (
 
 VOID
 GOST34112012Update (
-  GOST34112012Context  *CTX, 
+  GOST34112012Context  *CTX,
   CONST UINT8          *data,
   UINT32               len
-  ); 
+  );
 
 VOID
 GOST34112012Final (
-  GOST34112012Context  *CTX, 
+  GOST34112012Context  *CTX,
   UINT8                *digest
-  ); 
+  );
 
 VOID
 GOST34112012Cleanup (
@@ -53,8 +51,8 @@ GOST34112012Cleanup (
   
 VOID
 Streebog (
-  CONST UINT8  *data, 
-  UINT32       len, 
-  UINT8        *digest, 
+  CONST UINT8  *data,
+  UINT32       len,
+  UINT8        *digest,
   UINT32       digest_size
   );

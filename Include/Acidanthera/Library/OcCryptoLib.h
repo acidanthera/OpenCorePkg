@@ -397,9 +397,9 @@ Sha384 (
 
 VOID 
 Streebog(
-  CONST UINT8  *data, 
-  UINT32       len, 
-  UINT8        *digest, 
+  CONST UINT8  *data,
+  UINT32       len,
+  UINT8        *digest,
   UINT32       digest_size
   );
 

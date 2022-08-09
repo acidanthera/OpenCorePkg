@@ -37,8 +37,8 @@ CONST UINT8  TestMessage1[] = {
   0x32
 };
 
-int 
-ENTRY_POINT(
+int
+ENTRY_POINT (
   int   argc,
   char  *argv[]
   )
