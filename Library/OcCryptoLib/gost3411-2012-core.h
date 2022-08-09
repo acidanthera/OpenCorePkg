@@ -48,7 +48,7 @@ VOID
 GOST34112012Cleanup (
   GOST34112012Context  *CTX
   );
-  
+
 VOID
 Streebog (
   CONST UINT8  *data,

@@ -282,7 +282,7 @@ GOST34112012Final (
   }
 }
 
-VOID 
+VOID
 Streebog (
   CONST UINT8  *data,
   UINT32       len,
