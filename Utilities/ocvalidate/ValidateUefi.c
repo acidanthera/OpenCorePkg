@@ -416,14 +416,6 @@ CheckUefiDrivers (
       HasAudioDxeEfiDriver   = TRUE;
       IndexAudioDxeEfiDriver = Index;
     }
-
-    if (AsciiStrCmp (Driver, "OpenVariableRuntimeDxe.efi") == 0) {
-      HasOpenVariableRuntimeDxeEfiDriver = TRUE;
-
-      if (!DriverEntry->LoadEarly) {
-        DEBUG ((DEBUG_WARN, "OpenVariableRuntimeDxe at UEFI->Drivers[%u] must have LoadEarly set to TRUE!\n", Index));
-      }
-    }
   }
 
   //
@@ -436,25 +428,36 @@ CheckUefiDrivers (
                   UefiDriverHasDuplication
                   );
 
-  if (HasOpenVariableRuntimeDxeEfiDriver && HasOpenRuntimeEfiDriver) {
-    if (!IsOpenRuntimeLoadEarly) {
-      DEBUG ((
-        DEBUG_WARN,
-        "OpenRuntime.efi at UEFI->Drivers[%u] should have its LoadEarly set to TRUE when OpenVariableRuntimeDxe.efi at UEFI->Drivers[%u] is in use!\n",
-        IndexOpenRuntimeEfiDriver,
-        IndexOpenVariableRuntimeDxeEfiDriver
-        ));
-      ++ErrorCount;
-    }
+  if (HasOpenRuntimeEfiDriver) {
+    if (HasOpenVariableRuntimeDxeEfiDriver) {
+      if (!IsOpenRuntimeLoadEarly) {
+        DEBUG ((
+          DEBUG_WARN,
+          "OpenRuntime.efi at UEFI->Drivers[%u] should have its LoadEarly set to TRUE when OpenVariableRuntimeDxe.efi at UEFI->Drivers[%u] is in use!\n",
+          IndexOpenRuntimeEfiDriver,
+          IndexOpenVariableRuntimeDxeEfiDriver
+          ));
+        ++ErrorCount;
+      }
 
-    if (IndexOpenVariableRuntimeDxeEfiDriver >= IndexOpenRuntimeEfiDriver) {
-      DEBUG ((
-        DEBUG_WARN,
-        "OpenRuntime.efi (currently at UEFI->Drivers[%u]) should be placed after OpenVariableRuntimeDxe.efi (currently at UEFI->Drivers[%u])!\n",
-        IndexOpenRuntimeEfiDriver,
-        IndexOpenVariableRuntimeDxeEfiDriver
-        ));
-      ++ErrorCount;
+      if (IndexOpenVariableRuntimeDxeEfiDriver >= IndexOpenRuntimeEfiDriver) {
+        DEBUG ((
+          DEBUG_WARN,
+          "OpenRuntime.efi (currently at UEFI->Drivers[%u]) should be placed after OpenVariableRuntimeDxe.efi (currently at UEFI->Drivers[%u])!\n",
+          IndexOpenRuntimeEfiDriver,
+          IndexOpenVariableRuntimeDxeEfiDriver
+          ));
+        ++ErrorCount;
+      }
+    } else {
+      if (IsOpenRuntimeLoadEarly) {
+        DEBUG ((
+          DEBUG_WARN,
+          "OpenRuntime.efi at UEFI->Drivers[%u] should have its LoadEarly set to FALSE unless OpenVariableRuntimeDxe.efi is in use!\n",
+          IndexOpenRuntimeEfiDriver
+          ));
+        ++ErrorCount;
+      }
     }
   }
 
