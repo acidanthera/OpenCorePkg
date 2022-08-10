@@ -263,7 +263,7 @@ typedef struct OC_BOOT_ENTRY_ {
   //
   // Should disable OpenRuntime NVRAM protection around invocation of tool.
   //
-  BOOLEAN                     FullNvramAccess;
+  BOOLEAN                     RawNvramAccess;
   //
   // Partition UUID of entry device.
   // Set for non-system action boot entry protocol boot entries only.
@@ -581,7 +581,7 @@ typedef struct {
   //
   // Should disable OpenRuntime NVRAM protection around invocation of tool.
   //
-  BOOLEAN                  FullNvramAccess;
+  BOOLEAN                  RawNvramAccess;
   //
   // System action. Boot Entry Protocol only. Optional.
   //

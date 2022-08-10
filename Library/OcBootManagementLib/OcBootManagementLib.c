@@ -353,7 +353,7 @@ OcRunBootPicker (
         }
       }
 
-      FwRuntime = Chosen->FullNvramAccess ? OcDisableNvramProtection () : NULL;
+      FwRuntime = Chosen->RawNvramAccess ? OcDisableNvramProtection () : NULL;
 
       Status = OcLoadBootEntry (
                  Context,

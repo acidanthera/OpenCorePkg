@@ -2,7 +2,7 @@ OpenCore Changelog
 ==================
 #### v0.8.4
 - Added checks for `Driver` -> `LoadEarly` in ocvalidate
-- Added `FullNvramAccess` option for tools which require direct access to NVRAM
+- Added `RawNvramAccess` option for tools that require direct access to NVRAM
 
 #### v0.8.3
 - Added ext4 file system driver
@@ -264,7 +264,7 @@ OpenCore Changelog
 - Fixed ACPI table magic corruption during patching
 - Fixed unnatural OpenCanopy and FileVault 2 cursor movement
 - Fixed OpenCanopy interrupt handling causing missed events and lag
-- Improved OpenCanopy double-click detection 
+- Improved OpenCanopy double-click detection
 - Reduced OpenCanopy touch input lag and improved usability
 - Improved keypress responsiveness in OpenCanopy and builtin pickers
 - Improved non-repeating key detection in OpenCanopy and builtin pickers

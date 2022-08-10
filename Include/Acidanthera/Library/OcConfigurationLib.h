@@ -395,7 +395,7 @@ OC_DECLARE (OC_MISC_SECURITY)
   _(OC_STRING                   , Flavour         ,     , OC_STRING_CONSTR ("Auto", _, __), OC_DESTR (OC_STRING) ) \
   _(BOOLEAN                     , Auxiliary       ,     , FALSE                       , ()                   ) \
   _(BOOLEAN                     , Enabled         ,     , FALSE                       , ()                   ) \
-  _(BOOLEAN                     , FullNvramAccess ,     , FALSE                       , ()                   ) \
+  _(BOOLEAN                     , RawNvramAccess  ,     , FALSE                       , ()                   ) \
   _(BOOLEAN                     , RealPath        ,     , FALSE                       , ()                   ) \
   _(BOOLEAN                     , TextMode        ,     , FALSE                       , ()                   ) \
   _(OC_STRING                   , Name            ,     , OC_STRING_CONSTR ("", _, __), OC_DESTR (OC_STRING) ) \

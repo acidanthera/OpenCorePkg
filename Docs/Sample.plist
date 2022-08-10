@@ -1172,12 +1172,12 @@
 				<false/>
 				<key>Flavour</key>
 				<string>OpenShell:UEFIShell:Shell</string>
-				<key>FullNvramAccess</key>
-				<false/>
 				<key>Name</key>
 				<string>UEFI Shell</string>
 				<key>Path</key>
 				<string>OpenShell.efi</string>
+				<key>RawNvramAccess</key>
+				<false/>
 				<key>RealPath</key>
 				<false/>
 				<key>TextMode</key>
@@ -1194,12 +1194,12 @@
 				<false/>
 				<key>Flavour</key>
 				<string>MemTest</string>
-				<key>FullNvramAccess</key>
-				<false/>
 				<key>Name</key>
 				<string>memtest86</string>
 				<key>Path</key>
 				<string>memtest86/BOOTX64.efi</string>
+				<key>RawNvramAccess</key>
+				<false/>
 				<key>RealPath</key>
 				<true/>
 				<key>TextMode</key>
@@ -1216,12 +1216,12 @@
 				<false/>
 				<key>Flavour</key>
 				<string>Auto</string>
-				<key>FullNvramAccess</key>
-				<false/>
 				<key>Name</key>
 				<string>Shutdown</string>
 				<key>Path</key>
 				<string>ResetSystem.efi</string>
+				<key>RawNvramAccess</key>
+				<false/>
 				<key>RealPath</key>
 				<false/>
 				<key>TextMode</key>

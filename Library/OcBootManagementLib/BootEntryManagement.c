@@ -770,7 +770,7 @@ InternalAddBootEntryFromCustomEntry (
 
   BootEntry->LaunchInText     = CustomEntry->TextMode;
   BootEntry->ExposeDevicePath = CustomEntry->RealPath;
-  BootEntry->FullNvramAccess  = CustomEntry->FullNvramAccess;
+  BootEntry->RawNvramAccess   = CustomEntry->RawNvramAccess;
 
   if (BootEntry->SystemAction != NULL) {
     ASSERT (CustomEntry->Arguments == NULL);
