@@ -1,7 +1,7 @@
 /*
  * Hyper-V CPU plugin-type SSDT to enable VMPlatformPlugin on Big Sur and newer.
  *
- * This SSDT must be loaded after SSDT-HV-CPU.dsl
+ * This SSDT must be loaded after SSDT-HV-DEV.dsl
  */
 
 DefinitionBlock ("", "SSDT", 2, "ACDT", "HVPLUG", 0x00000000)

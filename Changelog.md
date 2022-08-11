@@ -3,6 +3,7 @@ OpenCore Changelog
 #### v0.8.4
 - Added checks for `Driver` -> `LoadEarly` in ocvalidate
 - Added `FullNvramAccess` option for tools which require direct access to NVRAM
+- Replaced `SSDT-HV-CPU.dsl` with `SSDT-HV-DEV.dsl` for compatiblity with older macOS versions on Windows 10 and newer
 
 #### v0.8.3
 - Added ext4 file system driver

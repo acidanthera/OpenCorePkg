@@ -5,14 +5,18 @@
  * path generation, and will not work with the default string values Hyper-V provides.
  *
  * Requires the following ACPI patches:
- * (1) Base:     \_SB.VMOD
- *     Find:     _HID
- *     Replace:  XHID
- *     Count:    1
- * (2) Base:     \_SB.VMOD.VMBS
- *     Find:     _HID
- *     Replace:  XHID
- *     Count:    1
+ * (1) Base:            \_SB.VMOD
+ *     Comment:         _HID to XHID rename (Hyper-V VMOD)
+ *     Count:           1
+ *     Find:            _HID
+ *     Replace:         XHID
+ *     TableSignature:  44534454 (DSDT)
+ * (2) Base:            \_SB.VMOD.VMBS
+ *     Comment:         _HID to XHID rename (Hyper-V VMBus)
+ *     Count:           1
+ *     Find:            _HID
+ *     Replace:         XHID
+ *     TableSignature:  44534454 (DSDT)
  */
 
 DefinitionBlock ("", "SSDT", 2, "ACDT", "HVVMBUS", 0x00000000)
