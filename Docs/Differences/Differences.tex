@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
-%DIF DEL PreviousConfiguration.tex   Tue Aug  9 17:20:13 2022
-%DIF ADD ../Configuration.tex        Tue Aug  9 17:18:01 2022
+%DIF DEL PreviousConfiguration.tex   Thu Aug  4 14:04:55 2022
+%DIF ADD ../Configuration.tex        Fri Aug 12 17:57:59 2022
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -118,7 +118,7 @@
 %DIF HYPERREF PREAMBLE %DIF PREAMBLE
 \providecommand{\DIFadd}[1]{\texorpdfstring{\DIFaddtex{#1}}{#1}} %DIF PREAMBLE
 \providecommand{\DIFdel}[1]{\texorpdfstring{\DIFdeltex{#1}}{}} %DIF PREAMBLE
-%DIF LISTINGS PREAMBLE %DIF PREAMBLE
+%DIF COLORLISTINGS PREAMBLE %DIF PREAMBLE
 \RequirePackage{listings} %DIF PREAMBLE
 \RequirePackage{color} %DIF PREAMBLE
 \lstdefinelanguage{DIFcode}{ %DIF PREAMBLE
@@ -7301,22 +7301,28 @@ for additional options.
 \item
   \texttt{APFS}\\
   \textbf{Type}: \texttt{plist\ dict}\\
-  \textbf{Failsafe}: None\\
-  \textbf{Description}: Provide APFS support as configured in the
+  \DIFdelbegin \textbf{\DIFdel{Failsafe}}%DIFAUXCMD
+\DIFdel{: None}%DIFDELCMD < \\
+%DIFDELCMD <   %%%
+\DIFdelend \textbf{Description}: Provide APFS support as configured in the
   \hyperref[uefiapfsprops]{APFS Properties} section below.
 
 \item
   \texttt{AppleInput}\\
   \textbf{Type}: \texttt{plist\ dict}\\
-  \textbf{Failsafe}: None\\
-  \textbf{Description}: Configure the re-implementation of the Apple Event protocol
+  \DIFdelbegin \textbf{\DIFdel{Failsafe}}%DIFAUXCMD
+\DIFdel{: None}%DIFDELCMD < \\
+%DIFDELCMD <   %%%
+\DIFdelend \textbf{Description}: Configure the re-implementation of the Apple Event protocol
   described in the \hyperref[uefiappleinputprops]{AppleInput Properties} section below.
 
 \item
   \texttt{Audio}\\
   \textbf{Type}: \texttt{plist\ dict}\\
-  \textbf{Failsafe}: None\\
-  \textbf{Description}: Configure audio backend support described
+  \DIFdelbegin \textbf{\DIFdel{Failsafe}}%DIFAUXCMD
+\DIFdel{: None}%DIFDELCMD < \\
+%DIFDELCMD <   %%%
+\DIFdelend \textbf{Description}: Configure audio backend support described
   in the \hyperref[uefiaudioprops]{\texttt{Audio Properties}} section below.
 
   Unless documented otherwise (e.g. \texttt{ResetTrafficClass}) settings in this section
@@ -7386,30 +7392,38 @@ for additional options.
 \item
   \texttt{Input}\\
   \textbf{Type}: \texttt{plist\ dict}\\
-  \textbf{Failsafe}: None\\
-  \textbf{Description}: Apply individual settings designed for input (keyboard and mouse) in the
+  \DIFdelbegin \textbf{\DIFdel{Failsafe}}%DIFAUXCMD
+\DIFdel{: None}%DIFDELCMD < \\
+%DIFDELCMD <   %%%
+\DIFdelend \textbf{Description}: Apply individual settings designed for input (keyboard and mouse) in the
   \hyperref[uefiinputprops]{Input Properties} section below.
 
 \item
   \texttt{Output}\\
   \textbf{Type}: \texttt{plist\ dict}\\
-  \textbf{Failsafe}: None\\
-  \textbf{Description}: Apply individual settings designed for output (text and graphics) in the
+  \DIFdelbegin \textbf{\DIFdel{Failsafe}}%DIFAUXCMD
+\DIFdel{: None}%DIFDELCMD < \\
+%DIFDELCMD <   %%%
+\DIFdelend \textbf{Description}: Apply individual settings designed for output (text and graphics) in the
   \hyperref[uefioutputprops]{Output Properties} section below.
 
 \item
   \texttt{ProtocolOverrides}\\
   \textbf{Type}: \texttt{plist\ dict}\\
-  \textbf{Failsafe}: None\\
-  \textbf{Description}: Force builtin versions of certain protocols described
+  \DIFdelbegin \textbf{\DIFdel{Failsafe}}%DIFAUXCMD
+\DIFdel{: None}%DIFDELCMD < \\
+%DIFDELCMD <   %%%
+\DIFdelend \textbf{Description}: Force builtin versions of certain protocols described
   in the \hyperref[uefiprotoprops]{ProtocolOverrides Properties} section below.
 
   \emph{Note}: all protocol instances are installed prior to driver loading.
 
 \item
   \texttt{Quirks}\\
-  \textbf{Type}: \texttt{plist\ dict}\\
-  \textbf{Failsafe}: None\\
+  \textbf{Type}: \texttt{plist\ dict}\DIFdelbegin %DIFDELCMD < \\
+%DIFDELCMD <   %%%
+\textbf{\DIFdel{Failsafe}}%DIFAUXCMD
+\DIFdel{: None}\DIFdelend \\
   \textbf{Description}: Apply individual firmware quirks described in the
   \hyperref[uefiquirkprops]{Quirks Properties} section below.
 
