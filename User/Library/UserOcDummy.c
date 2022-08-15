@@ -5,7 +5,7 @@
 
 #include <Library/OcDevicePathLib.h>
 
-char * const z_errmsg = NULL;
+char *const  z_errmsg = NULL;
 
 EFI_DEVICE_PATH_PROTOCOL *
 OcGetNextLoadOptionDevicePath (
