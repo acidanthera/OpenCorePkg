@@ -236,6 +236,10 @@ extern z_const char * const z_errmsg[10]; /* indexed by 2-zlib_error */
    void ZLIB_INTERNAL zmemzero OF((Bytef* dest, uInt len));
 #endif
 
+#define zmemcpy(Dst, Src, Size) CopyMem ((Dst), (Src), (Size))
+#define zmemcmp(Ptr1, Ptr2, Size) CompareMem ((Ptr1), (Ptr2), (Size))
+#define zmemzero(Dst, Size) ZeroMem ((Dst), (Size))
+
 /* Diagnostic functions */
 #ifdef ZLIB_DEBUG
 #  include <stdio.h>

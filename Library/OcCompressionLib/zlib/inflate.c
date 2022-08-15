@@ -637,8 +637,10 @@ int flush;
     code last;                  /* parent table entry */
     unsigned len;               /* length to copy for repeats, bits to drop */
     int ret;                    /* return code */
+#ifdef OC_INFLATE_VERIFY_DATA
 #ifdef GUNZIP
     unsigned char hbuf[4];      /* buffer for gzip header crc calculation */
+#endif
 #endif
     static const unsigned short order[19] = /* permutation of code lengths */
         {16, 17, 18, 0, 8, 7, 9, 6, 10, 5, 11, 4, 12, 3, 13, 2, 14, 1, 15};
@@ -665,8 +667,10 @@ int flush;
             if ((state->wrap & 2) && hold == 0x8b1f) {  /* gzip header */
                 if (state->wbits == 0)
                     state->wbits = 15;
+#ifdef OC_INFLATE_VERIFY_DATA
                 state->check = crc32(0L, Z_NULL, 0);
                 CRC2(state->check, hold);
+#endif
                 INITBITS();
                 state->mode = FLAGS;
                 break;
@@ -699,7 +703,9 @@ int flush;
             state->dmax = 1U << len;
             state->flags = 0;               /* indicate zlib header */
             Tracev((stderr, "inflate:   zlib header ok\n"));
+#ifdef OC_INFLATE_VERIFY_DATA
             strm->adler = state->check = adler32(0L, Z_NULL, 0);
+#endif
             state->mode = hold & 0x200 ? DICTID : TYPE;
             INITBITS();
             break;
@@ -719,8 +725,10 @@ int flush;
             }
             if (state->head != Z_NULL)
                 state->head->text = (int)((hold >> 8) & 1);
+#ifdef OC_INFLATE_VERIFY_DATA
             if ((state->flags & 0x0200) && (state->wrap & 4))
                 CRC2(state->check, hold);
+#endif
             INITBITS();
             state->mode = TIME;
                 /* fallthrough */
@@ -728,8 +736,10 @@ int flush;
             NEEDBITS(32);
             if (state->head != Z_NULL)
                 state->head->time = hold;
+#ifdef OC_INFLATE_VERIFY_DATA
             if ((state->flags & 0x0200) && (state->wrap & 4))
                 CRC4(state->check, hold);
+#endif
             INITBITS();
             state->mode = OS;
                 /* fallthrough */
@@ -739,8 +749,10 @@ int flush;
                 state->head->xflags = (int)(hold & 0xff);
                 state->head->os = (int)(hold >> 8);
             }
+#ifdef OC_INFLATE_VERIFY_DATA
             if ((state->flags & 0x0200) && (state->wrap & 4))
                 CRC2(state->check, hold);
+#endif
             INITBITS();
             state->mode = EXLEN;
                 /* fallthrough */
@@ -750,8 +762,10 @@ int flush;
                 state->length = (unsigned)(hold);
                 if (state->head != Z_NULL)
                     state->head->extra_len = (unsigned)hold;
+#ifdef OC_INFLATE_VERIFY_DATA
                 if ((state->flags & 0x0200) && (state->wrap & 4))
                     CRC2(state->check, hold);
+#endif
                 INITBITS();
             }
             else if (state->head != Z_NULL)
@@ -770,8 +784,10 @@ int flush;
                                 len + copy > state->head->extra_max ?
                                 state->head->extra_max - len : copy);
                     }
+#ifdef OC_INFLATE_VERIFY_DATA
                     if ((state->flags & 0x0200) && (state->wrap & 4))
                         state->check = crc32(state->check, next, copy);
+#endif
                     have -= copy;
                     next += copy;
                     state->length -= copy;
@@ -792,8 +808,10 @@ int flush;
                             state->length < state->head->name_max)
                         state->head->name[state->length++] = (Bytef)len;
                 } while (len && copy < have);
+#ifdef OC_INFLATE_VERIFY_DATA
                 if ((state->flags & 0x0200) && (state->wrap & 4))
                     state->check = crc32(state->check, next, copy);
+#endif
                 have -= copy;
                 next += copy;
                 if (len) goto inf_leave;
@@ -814,8 +832,10 @@ int flush;
                             state->length < state->head->comm_max)
                         state->head->comment[state->length++] = (Bytef)len;
                 } while (len && copy < have);
+#ifdef OC_INFLATE_VERIFY_DATA
                 if ((state->flags & 0x0200) && (state->wrap & 4))
                     state->check = crc32(state->check, next, copy);
+#endif
                 have -= copy;
                 next += copy;
                 if (len) goto inf_leave;
@@ -827,24 +847,30 @@ int flush;
         case HCRC:
             if (state->flags & 0x0200) {
                 NEEDBITS(16);
+#ifdef OC_INFLATE_VERIFY_DATA
                 if ((state->wrap & 4) && hold != (state->check & 0xffff)) {
                     strm->msg = (char *)"header crc mismatch";
                     state->mode = BAD;
                     break;
                 }
+#endif
                 INITBITS();
             }
             if (state->head != Z_NULL) {
                 state->head->hcrc = (int)((state->flags >> 9) & 1);
                 state->head->done = 1;
             }
+#ifdef OC_INFLATE_VERIFY_DATA
             strm->adler = state->check = crc32(0L, Z_NULL, 0);
+#endif
             state->mode = TYPE;
             break;
 #endif
         case DICTID:
             NEEDBITS(32);
+#ifdef OC_INFLATE_VERIFY_DATA
             strm->adler = state->check = ZSWAP32(hold);
+#endif
             INITBITS();
             state->mode = DICT;
                 /* fallthrough */
@@ -853,7 +879,9 @@ int flush;
                 RESTORE();
                 return Z_NEED_DICT;
             }
+#ifdef OC_INFLATE_VERIFY_DATA
             strm->adler = state->check = adler32(0L, Z_NULL, 0);
+#endif
             state->mode = TYPE;
                 /* fallthrough */
         case TYPE:
@@ -1221,10 +1249,13 @@ int flush;
                 out -= left;
                 strm->total_out += out;
                 state->total += out;
+#ifdef OC_INFLATE_VERIFY_DATA
                 if ((state->wrap & 4) && out)
                     strm->adler = state->check =
                         UPDATE_CHECK(state->check, put - out, out);
+#endif
                 out = left;
+#ifdef OC_INFLATE_VERIFY_DATA
                 if ((state->wrap & 4) && (
 #ifdef GUNZIP
                      state->flags ? hold :
@@ -1234,6 +1265,7 @@ int flush;
                     state->mode = BAD;
                     break;
                 }
+#endif
                 INITBITS();
                 Tracev((stderr, "inflate:   check matches trailer\n"));
             }
@@ -1287,9 +1319,11 @@ int flush;
     strm->total_in += in;
     strm->total_out += out;
     state->total += out;
+#ifdef OC_INFLATE_VERIFY_DATA
     if ((state->wrap & 4) && out)
         strm->adler = state->check =
             UPDATE_CHECK(state->check, strm->next_out - out, out);
+#endif
     strm->data_type = (int)state->bits + (state->last ? 64 : 0) +
                       (state->mode == TYPE ? 128 : 0) +
                       (state->mode == LEN_ || state->mode == COPY_ ? 256 : 0);
@@ -1341,7 +1375,9 @@ const Bytef *dictionary;
 uInt dictLength;
 {
     struct inflate_state FAR *state;
+#ifdef OC_INFLATE_VERIFY_DATA
     unsigned long dictid;
+#endif
     int ret;
 
     /* check state */
@@ -1351,12 +1387,14 @@ uInt dictLength;
         return Z_STREAM_ERROR;
 
     /* check for correct dictionary identifier */
+#ifdef OC_INFLATE_VERIFY_DATA
     if (state->mode == DICT) {
         dictid = adler32(0L, Z_NULL, 0);
         dictid = adler32(dictid, dictionary, dictLength);
         if (dictid != state->check)
             return Z_DATA_ERROR;
     }
+#endif
 
     /* copy dictionary to window using updatewindow(), which will amend the
        existing dictionary if appropriate */
