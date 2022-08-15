@@ -211,10 +211,6 @@ ifneq ($(STANDALONE),1)
 	# OcVariableLib targets.
 	#
 	OBJS    += OcVariableLib.o
-	#
-	# OcCompressionLib/zlib targets.
-	#
-	OBJS    += zutil.o
 
 	#
 	# Add source searchpath for transparent compilation.
@@ -246,8 +242,7 @@ ifneq ($(STANDALONE),1)
 				$(OC_USER)/Library/OcCpuLib/Ia32:$\
 				$(OC_USER)/Library/OcMiscLib:$\
 				$(OC_USER)/Library/OcAppleKernelLib:$\
-				$(OC_USER)/Library/OcVariableLib:$\
-				$(OC_USER)/Library/OcCompressionLib/zlib
+				$(OC_USER)/Library/OcVariableLib
 endif
 
 #

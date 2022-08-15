@@ -29,7 +29,8 @@ OBJS    = $(PROJECT).o \
 	inftrees.o \
 	trees.o \
 	uncompr.o \
-	zlib_uefi.o
+	zlib_uefi.o \
+	zutil.o
 VPATH   = ../../Library/OcAppleKernelLib:$\
 	../../Library/OcCompressionLib/lzss:$\
 	../../Library/OcCompressionLib/lzvn:$\
