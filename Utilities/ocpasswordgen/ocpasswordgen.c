@@ -71,12 +71,9 @@ ENTRY_POINT (
       exit (EXIT_FAILURE);
     }
 
-    if ((Char == EOF) || (Char == CHAR_LINEFEED)) {
+    if ((Char == EOF) || (Char == CHAR_LINEFEED) || (Char == CHAR_CARRIAGE_RETURN)) {
+      Password[PasswordLen] = '\0';
       break;
-    }
-
-    if (Char == CHAR_CARRIAGE_RETURN) {
-      continue;
     }
 
     if ((Char == CHAR_BACKSPACE) || (Char == CHAR_DELETE)) {
