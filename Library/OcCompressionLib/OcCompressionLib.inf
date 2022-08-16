@@ -57,6 +57,7 @@
   zlib/zconf.h
   zlib/zlib.h
   zlib/zlib_uefi.c
+  zlib/zutil.c
   zlib/zutil.h
 
 [Packages]
