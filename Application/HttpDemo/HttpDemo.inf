@@ -32,8 +32,8 @@
 
 [Packages]
     MdePkg/MdePkg.dec
-    MdeModulePkg/MdeModulePkg.dec
-    ShellPkg/ShellPkg.dec
+    ##MdeModulePkg/MdeModulePkg.dec
+    #ShellPkg/ShellPkg.dec
     NetworkPkg/NetworkPkg.dec
     OpenCorePkg/OpenCorePkg.dec
 
@@ -46,8 +46,8 @@
     UefiBootServicesTableLib
     UefiFileHandleLib
     UefiLib
-    ShellLib
-    # DmgImageLib
+    #ShellLib
+    #DmgImageLib
     OcConsoleControlEntryModeGenericLib
     OcXmlLib
 
@@ -56,7 +56,7 @@
     gEfiTcp4ServiceBindingProtocolGuid
     gEfiHttpServiceBindingProtocolGuid
     gEfiSimpleFileSystemProtocolGuid # CONSUMES
-    # gEfiDmgRamDiskInterfaceProtocolGuid
+    #gEfiDmgRamDiskInterfaceProtocolGuid
 
 [Sources]
     HttpDemo.h

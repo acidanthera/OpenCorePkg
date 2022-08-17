@@ -23,7 +23,7 @@
  */
 
 #include "HttpDemo.h"
-#include <Library/ShellLib.h>
+//#include <Library/ShellLib.h>
 
 #include <Protocol/Http.h>
 #include <Protocol/Tcp4.h>
@@ -51,6 +51,8 @@
 #define HTTP_CONTENT_TYPE_VALUE_TEXT    "text/plain"
 #define HTTP_CONTENT_LENGTH_NAME        "Content-Length"
 
+static const int EFIHTTP_POLL_TIMEOUT = 300000;
+
 VOID
 EFIAPI
 HttpCallback(
@@ -74,6 +76,7 @@ GetSessionCookie(
     CHAR8 *SessionStrEnd;
     UINTN SessionLength;
     CHAR8 *SessionValue = NULL;
+    UINTN PollTime = 0;
 
     // GET request to service.
     EFI_HTTP_REQUEST_DATA GetRequestData;
@@ -143,8 +146,17 @@ GetSessionCookie(
     if (EFI_ERROR(Status))
         goto DONE;
 
-    // Wait for request to send.
-    while (!CallbackReached);
+    PollTime = 0;
+    while (!CallbackReached && PollTime < EFIHTTP_POLL_TIMEOUT) {
+        Status = HttpIo->Poll(HttpIo);
+        if (EFI_ERROR(Status)) {
+            break;
+        }
+        if (!CallbackReached) {
+          gBS->Stall(100 * 1000);
+          PollTime += 100;
+        }
+    }
 
     // Get response.
     CallbackReached = FALSE;
@@ -153,7 +165,17 @@ GetSessionCookie(
         goto DONE;
 
     // Wait for response to come in.
-    while (!CallbackReached);
+    PollTime = 0;
+    while (!CallbackReached && PollTime < EFIHTTP_POLL_TIMEOUT) {
+        Status = HttpIo->Poll(HttpIo);
+        if (EFI_ERROR (Status)) {
+            break;
+        }
+        if (!CallbackReached) {
+            gBS->Stall(100 * 1000);
+            PollTime += 100;
+        }
+    }
 
     // Get cookie session value.
     for (UINTN i = 0; i < GetResponseMessage.HeaderCount; i++) {
@@ -182,7 +204,7 @@ GetSessionCookie(
             CopyMem(SessionValue, SessionStr, SessionLength);
             SessionValue[SessionLength] = '\0';
             *SessionCookieValue = SessionValue;
-            
+
             // Success.
             Status = EFI_SUCCESS;
             goto DONE;
@@ -238,6 +260,7 @@ PostMachineData(
     EFI_HTTP_RESPONSE_DATA PostResponseData;
     EFI_HTTP_MESSAGE PostResponseMessage;
     EFI_HTTP_TOKEN PostResponseToken;
+    UINTN PollTime;
 
     // Create callback event.
     Status = gBS->CreateEvent(EVT_NOTIFY_SIGNAL, TPL_CALLBACK, HttpCallback,
@@ -325,7 +348,17 @@ PostMachineData(
         goto DONE;
 
     // Wait for request to send.
-    while (!CallbackReached);
+    PollTime = 0;
+    while (!CallbackReached && PollTime < EFIHTTP_POLL_TIMEOUT) {
+        Status = HttpIo->Poll(HttpIo);
+        if (EFI_ERROR (Status)) {
+            break;
+        }
+        if (!CallbackReached) {
+            gBS->Stall(100 * 1000);
+            PollTime += 100;
+        }
+    }
     Print(L"status %r\n", PostRequestToken.Status);
 
     // Get response.
@@ -335,7 +368,17 @@ PostMachineData(
         goto DONE;
 
     // Wait for response to come in.
-    while (!CallbackReached);
+    PollTime = 0;
+    while (!CallbackReached && PollTime < EFIHTTP_POLL_TIMEOUT) {
+        Status = HttpIo->Poll(HttpIo);
+        if (EFI_ERROR (Status)) {
+            break;
+        }
+        if (!CallbackReached) {
+            gBS->Stall(100 * 1000);
+            PollTime += 100;
+        }
+    }
 
     // Get recovery image data from response.
     for (UINTN i = 0; i < PostResponseMessage.HeaderCount; i++) {
@@ -401,10 +444,10 @@ HttpDemoMain(
     EFI_STATUS Status;
     EFI_HANDLE *handles;
     UINTN handleCount;
-    
+
    Status = gBS->LocateHandleBuffer(ByProtocol, &gEfiTcp4ServiceBindingProtocolGuid, NULL, &handleCount, &handles);
    ASSERT_EFI_ERROR(Status);
-    
+
 
    Print(L"Handles: %u\n", handleCount);
 
@@ -429,17 +472,27 @@ HttpDemoMain(
 
     EFI_HTTPv4_ACCESS_POINT ipv4Access;
     ipv4Access.UseDefaultAddress = TRUE;
-    ipv4Access.LocalPort = 10000;
+
+    //
+    // WARN
+    // Local port number. Set to zero to use the automatically assigned port number.
+    //
+    ipv4Access.LocalPort = 0;
 
     EFI_HTTP_CONFIG_DATA configData;
     configData.HttpVersion = HttpVersion11;
-    configData.TimeOutMillisec = 2000;
+    //
+    // Set it to 0 to use auto timeout value
+    //
+    configData.TimeOutMillisec = 0;
     configData.LocalAddressIsIPv6 = FALSE;
     configData.AccessPoint.IPv4Node = &ipv4Access;
 
-
-    Status = HttpIo->Configure(HttpIo, NULL);
-    ASSERT_EFI_ERROR(Status);
+    //
+    // I think we shouldn't configure it twice
+    //
+    //Status = HttpIo->Configure(HttpIo, NULL);
+    //ASSERT_EFI_ERROR(Status);
     Status = HttpIo->Configure(HttpIo, &configData);
     ASSERT_EFI_ERROR(Status);
 
@@ -450,10 +503,13 @@ HttpDemoMain(
 
     Status = GetSessionCookie(HttpIo, &SessionCookieValue);
     ASSERT_EFI_ERROR(Status);
+    //
+    // We need timeout before next request. Its a workaround, in future we need to use
+    // Timer event
+    //
+    gBS->Stall(EFIHTTP_POLL_TIMEOUT);
     Status = PostMachineData(HttpIo, MachineData, SessionCookieValue, &RecoveryData);
     ASSERT_EFI_ERROR(Status);
-
-    
 
     Print(L"Machine data:\n");
     AsciiPrint(RecoveryData);
@@ -499,7 +555,7 @@ HttpDemoMain(
     /*DMG_FILE *File;
     Status = DmgImageRead(bytes, bytesLength, &File);
     ASSERT_EFI_ERROR(Status);
-    
+
     Print(L"DMG version 0x%X\n", File->Trailer.Version);
     Print(L"Data fork offset: 0x%X, length: 0x%X\n", File->Trailer.DataForkOffset, File->Trailer.DataForkLength);
     Print(L"XML offset: 0x%X, length: 0x%X\n", File->Trailer.XmlOffset, File->Trailer.XmlLength);
