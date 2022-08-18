@@ -1,69 +1,68 @@
+# pylint: disable=too-many-statements,too-many-branches
 """
 Common UEFI parsing and representation code.
 
 """
 
+
 import array
 
+
 class UefiMisc():
-    #
+
     # Returns string corresponding to type value in specified charset.
-    #
     @classmethod
-    def parse_string (cls, value, type, charset):
+    def parse_string(cls, value, type_value, charset):
         index = 0
-        data = array.array (type)
+        data = array.array(type_value)
         try:
             while value[index] != 0:
+
                 # TODO: add more ASCII symbols?
                 v = value[index]
-                if v == 0x0A: # \n
+                if v == 0x0A:  # \n
                     data.append(0x5C)
                     data.append(0x6E)
-                elif v == 0x0D: # \r
+                elif v == 0x0D:  # \r
                     data.append(0x5C)
                     data.append(0x72)
-                elif v == 0x09: # \t
+                elif v == 0x09:  # \t
                     data.append(0x5C)
                     data.append(0x74)
-                elif v == 0x22: # "
+                elif v == 0x22:  # "
                     data.append(0x5C)
                     data.append(0x22)
-                elif v == 0x5C: # \
+                elif v == 0x5C:  # \
                     data.append(0x5C)
                     data.append(0x5C)
                 else:
-                    data.append (v)
-                index = index + 1
+                    data.append(v)
+                index += 1
         except IndexError:
             pass
-        try:
-            return data.tobytes ().decode (charset)
-        except AttributeError:
-            return data.tostring ().decode (charset)
+        return data.tobytes().decode(charset)
 
-    #
     # Returns a UTF16 string corresponding to a (CHAR16 *) value in EFI.
-    #
+
     @classmethod
-    def parse_utf16 (cls, value):
-        return cls.parse_string (value, 'H', 'utf-16')
+    def parse_utf16(cls, value):
+        return cls.parse_string(value, 'H', 'utf-16')
 
     #
     # Returns a UTF8 string corresponding to a (CHAR8 *) value in EFI.
     #
     @classmethod
-    def parse_utf8 (cls, value):
-        return cls.parse_string (value, 'B', 'utf-8')
+    def parse_utf8(cls, value):
+        return cls.parse_string(value, 'B', 'utf-8')
 
     #
     # Returns a printable EFI or RETURN status.
     #
     @classmethod
-    def parse_status (cls, value, efi):
+    def parse_status(cls, value, efi):
         suffix = ''
         err = 0
-        val = long(value)
+        val = int(value)
         if val & 0x80000000:
             err = val & ~0x80000000
         elif val & 0x8000000000000000:
@@ -164,25 +163,10 @@ class UefiMisc():
                 suffix = 'WARN_STALE_DATA'
             elif val == 6:
                 suffix = 'WARN_FILE_SYSTEM'
-        if suffix != '':
-            return ('EFI_' if efi else 'RETURN_') + suffix
-        return hex(val)
+        return('EFI_' if efi else 'RETURN_') + suffix if suffix != '' else hex(val)
 
-    #
     # Returns a UTF16 string corresponding to a (CHAR16 *) value in EFI.
-    #
     @classmethod
-    def parse_guid (cls, value):
-        guid = "<%08X-%04X-%04X-%02X%02X-%02X%02X%02X%02X%02X%02X>" % (
-            value['Data1'],
-            value['Data2'],
-            value['Data3'],
-            value['Data4'][0],
-            value['Data4'][1],
-            value['Data4'][2],
-            value['Data4'][3],
-            value['Data4'][4],
-            value['Data4'][5],
-            value['Data4'][6],
-            value['Data4'][7])
+    def parse_guid(cls, value):
+        guid = f"<{value['Data1']:08X}-{value['Data2']:04X}-{value['Data3']:04X}-{value['Data4'][0]:02X}{value['Data4'][1]:02X}-{value['Data4'][2]:02X}{value['Data4'][3]:02X}{value['Data4'][4]:02X}{value['Data4'][5]:02X}{value['Data4'][6]:02X}{value['Data4'][7]:02X}>"
         return guid

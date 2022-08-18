@@ -11,8 +11,8 @@ env:
   PROJECT_TYPE: UEFI
 
 jobs:
-  analyze-scripts:
-    name: Scripts
+  analyze-shell-scripts:
+    name: Shell Scripts
     runs-on: macos-latest
     env:
       JOB_TYPE: ANALYZE
@@ -58,6 +58,30 @@ jobs:
                 inside        {gsub ("\t", "", $0); printf $0; next}
                               {print}' "${File}" > "${File}.tmp" && mv "${File}.tmp" "${File}"
           if [ "$(git diff ${File})" != '' ]; then echo "Not in Xcode style or not in alphabetical order!!"; exit 1 ; fi
+
+  analyze-python-scripts:
+    name: Python Scripts
+    runs-on: ubuntu-latest
+    env:
+      JOB_TYPE: ANALYZE
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Install Dependencies
+        run: |
+          python3 -m pip install prospector
+
+      - name: Run prospector
+        run: |
+          /usr/bin/curl -L https://raw.githubusercontent.com/acidanthera/ocbuild/master/prospector/profile.yml -o profile.yml || exit 1
+          python3 -m prospector . -P ./profile.yml | tee prospector_result.txt || exit 1
+
+      - name: Upload prospector result to Artifacts
+        uses: actions/upload-artifact@v3
+        if: failure()
+        with:
+          name: Prospector Artifacts
+          path: ./prospector_result.txt
 
   analyze-docs-linux:
     name: Documentation
