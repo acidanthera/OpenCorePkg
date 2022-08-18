@@ -4,6 +4,8 @@ OpenCore Changelog
 - Added checks for `Driver` -> `LoadEarly` in ocvalidate
 - Added `FullNvramAccess` option for tools which require direct access to NVRAM
 - Replaced `SSDT-HV-CPU.dsl` with `SSDT-HV-DEV.dsl` for compatiblity with older macOS versions on Windows 10 and newer
+- Updated builtin zlib library to 1.2.12
+- Changed ocpasswordgen not to print characters on password input
 
 #### v0.8.3
 - Added ext4 file system driver
