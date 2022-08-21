@@ -43,7 +43,7 @@ STATIC CONST CHAR8  *mEfiMemoryTypeDesc[EfiMaxMemoryType] = {
 
 STATIC
 VOID
-OcPrintMemoryDescritptor (
+OcPrintMemoryDescriptor (
   IN EFI_MEMORY_DESCRIPTOR  *Desc
   )
 {
@@ -132,7 +132,7 @@ OcPrintMemoryAttributesTable (
   DEBUG ((DEBUG_INFO, "OCMM:   DescriptorSize       - 0x%08x\n", MemoryAttributesTable->DescriptorSize));
 
   for (Index = 0; Index < MemoryAttributesTable->NumberOfEntries; ++Index) {
-    OcPrintMemoryDescritptor (MemoryAttributesEntry);
+    OcPrintMemoryDescriptor (MemoryAttributesEntry);
     MemoryAttributesEntry = NEXT_MEMORY_DESCRIPTOR (
                               MemoryAttributesEntry,
                               MemoryAttributesTable->DescriptorSize
@@ -158,7 +158,7 @@ OcPrintMemoryMap (
   DEBUG ((DEBUG_INFO, "OCMM:   DescriptorSize       - 0x%08x\n", DescriptorSize));
 
   for (Index = 0; Index < NumberOfEntries; ++Index) {
-    OcPrintMemoryDescritptor (MemoryMap);
+    OcPrintMemoryDescriptor (MemoryMap);
     MemoryMap = NEXT_MEMORY_DESCRIPTOR (
                   MemoryMap,
                   DescriptorSize
