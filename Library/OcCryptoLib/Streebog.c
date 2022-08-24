@@ -7,7 +7,7 @@
 #include "BigNumLib.h"
 #ifdef OC_CRYPTO_SUPPORTS_STREEBOG
 
-#include "Streebog.h"
+  #include "Streebog.h"
 
 #define BSWAP64(x) \
     (((x & 0xFF00000000000000ULL) >> 56) | \
@@ -84,7 +84,7 @@ Add512 (
   union uint512_u        *r
   )
 {
- #if defined(__BYTE_ORDER__) && __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
+ #if defined (__BYTE_ORDER__) && __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
   UINT32  CF;
   UINT32  i;
 
@@ -101,7 +101,7 @@ Add512 (
     r->QWORD[i] = sum;
   }
 
- #elif defined(__BYTE_ORDER__) && __BYTE_ORDER__ == __ORDER_BIG_ENDIAN__
+ #elif defined (__BYTE_ORDER__) && __BYTE_ORDER__ == __ORDER_BIG_ENDIAN__
   CONST UINT8  *xp, *yp;
   UINT8        *rp;
   UINT32       i;
@@ -118,7 +118,7 @@ Add512 (
   }
 
  #else
- #error Byte order is undefined
+   #error Byte order is undefined
  #endif
 }
 
@@ -199,12 +199,12 @@ Stage3 (
     { 0 }
   };
 
- #if defined(__BYTE_ORDER__) && __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
+ #if defined (__BYTE_ORDER__) && __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
   buf.QWORD[0] = CTX->bufsize << 3;
- #elif defined(__BYTE_ORDER__) && __BYTE_ORDER__ == __ORDER_BIG_ENDIAN__
+ #elif defined (__BYTE_ORDER__) && __BYTE_ORDER__ == __ORDER_BIG_ENDIAN__
   buf.QWORD[0] = BSWAP64 (CTX->bufsize << 3);
  #else
- #error Byte order is undefined
+   #error Byte order is undefined
  #endif 
 
   Pad (CTX);

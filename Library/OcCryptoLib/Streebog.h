@@ -99,18 +99,18 @@ static CONST union uint512_u  buffer0 = {
     0x0ULL, 0x0ULL, 0x0ULL, 0x0ULL, 0x0ULL }
 };
 
-#if defined(__BYTE_ORDER__) && __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
+#if defined (__BYTE_ORDER__) && __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
 static CONST union uint512_u  buffer512 = {
   { 0x0000000000000200ULL,
     0x0ULL, 0x0ULL, 0x0ULL, 0x0ULL, 0x0ULL, 0x0ULL, 0x0ULL }
 };
-#elif defined(__BYTE_ORDER__) && __BYTE_ORDER__ == __ORDER_BIG_ENDIAN__
+#elif defined (__BYTE_ORDER__) && __BYTE_ORDER__ == __ORDER_BIG_ENDIAN__
 static CONST union uint512_u  buffer512 = {
   { 0x0002000000000000ULL,
     0x0ULL, 0x0ULL, 0x0ULL, 0x0ULL, 0x0ULL, 0x0ULL, 0x0ULL }
 };
 #else
-#error Byte order is undefined
+  #error Byte order is undefined
 #endif
 
 #define X(x, y, z)  {\
@@ -164,7 +164,7 @@ static CONST union uint512_u  buffer512 = {
   XLPS(Ki, data, data); \
 }
 
-#if defined(__BYTE_ORDER__) && __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
+#if defined (__BYTE_ORDER__) && __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
 static CONST union uint512_u  C[12] = {
   {
     {
@@ -311,7 +311,7 @@ static CONST union uint512_u  C[12] = {
     }
   }
 };
-#elif defined(__BYTE_ORDER__) && __BYTE_ORDER__ == __ORDER_BIG_ENDIAN__
+#elif defined (__BYTE_ORDER__) && __BYTE_ORDER__ == __ORDER_BIG_ENDIAN__
 static CONST union uint512_u  C[12] = {
   {
     {
@@ -459,10 +459,10 @@ static CONST union uint512_u  C[12] = {
   }
 };
 #else
-#error Byte order is undefined
+  #error Byte order is undefined
 #endif
 
-#if defined(__BYTE_ORDER__) && __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
+#if defined (__BYTE_ORDER__) && __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
 static const unsigned long long  Ax[8][256] =
 {
   {
@@ -1170,7 +1170,7 @@ static const unsigned long long  Ax[8][256] =
     0xd6a30f258c153427ULL
   }
 };
-#elif defined(__BYTE_ORDER__) && __BYTE_ORDER__ == __ORDER_BIG_ENDIAN__
+#elif defined (__BYTE_ORDER__) && __BYTE_ORDER__ == __ORDER_BIG_ENDIAN__
 static const unsigned long long  Ax[8][256] =
 {
   {
@@ -1879,6 +1879,6 @@ static const unsigned long long  Ax[8][256] =
   }
 };
 #else
-#error Byte order is undefined
+  #error Byte order is undefined
 #endif
 
