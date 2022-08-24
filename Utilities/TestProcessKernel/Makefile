@@ -30,7 +30,8 @@ OBJS    = $(PROJECT).o \
 	inftrees.o \
 	trees.o \
 	uncompr.o \
-	zlib_uefi.o
+	zlib_uefi.o \
+	zutil.o
 #
 # OcConfigurationLib targets.
 #
