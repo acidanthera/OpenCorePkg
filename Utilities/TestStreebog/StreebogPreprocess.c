@@ -90,8 +90,6 @@ CONST CHAR8  M2TEMP[] = {
   0xe5, 0xd1
 };
 
-
-
 CONST UINT8  H1_256[] = {
   0x9d, 0x15,
   0x1e, 0xef,
