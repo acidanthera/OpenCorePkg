@@ -118,7 +118,7 @@ Add512 (
   }
 
  #else
-   #error Byte order is undefined
+  #error Byte order is undefined
  #endif
 }
 
@@ -204,7 +204,7 @@ Stage3 (
  #elif defined (__BYTE_ORDER__) && __BYTE_ORDER__ == __ORDER_BIG_ENDIAN__
   buf.QWORD[0] = BSWAP64 (CTX->bufsize << 3);
  #else
-   #error Byte order is undefined
+  #error Byte order is undefined
  #endif 
 
   Pad (CTX);
@@ -352,7 +352,7 @@ Streebog256 (
   UINT8        *digest
   )
 {
-  StreebogContext CTX;
+  StreebogContext  CTX;
 
   Streebog256Init (&CTX);
   Streebog256Update (&CTX, data, len);
@@ -366,7 +366,7 @@ Streebog512 (
   UINT8        *digest
   )
 {
-  StreebogContext CTX;
+  StreebogContext  CTX;
 
   Streebog512Init (&CTX);
   Streebog512Update (&CTX, data, len);
