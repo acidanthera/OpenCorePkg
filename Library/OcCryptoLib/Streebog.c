@@ -1,15 +1,13 @@
-/*
- * Copyright (c) 2013, Alexey Degtyarev <alexey@renatasystems.org>.
- * All rights reserved.
- *
- * GOST R 34.11-2012 core and API functions.
- *
- * $Id$
- */
+/** @file
+  Copyright (c) 2013, Alexey Degtyarev <alexey@renatasystems.org>. All rights reserved.<BR>
+  Copyright (c) 2022 Maxim Kuznetsov. All rights reserved.<BR>
+  SPDX-License-Identifier: BSD-2-Clause
+**/
 
+#include "BigNumLib.h"
 #ifdef OC_CRYPTO_SUPPORTS_STREEBOG
 
-#include "gost3411-2012-core.h"
+#include "Streebog.h"
 
 #define BSWAP64(x) \
     (((x & 0xFF00000000000000ULL) >> 56) | \
@@ -23,7 +21,7 @@
 
 VOID
 GOST34112012Cleanup (
-  GOST34112012Context  *CTX
+  StreebogContext  *CTX
   )
 {
   for (INT32 i = 0; i < 64; ++i) {
@@ -43,8 +41,8 @@ GOST34112012Cleanup (
 
 VOID
 GOST34112012Init (
-  GOST34112012Context  *CTX,
-  CONST UINT32         digest_size
+  StreebogContext  *CTX,
+  CONST UINT32     digest_size
   )
 {
   UINT32  i;
@@ -61,9 +59,10 @@ GOST34112012Init (
   }
 }
 
+STATIC
 VOID
 Pad (
-  GOST34112012Context  *CTX
+  StreebogContext  *CTX
   )
 {
   if (CTX->bufsize > 63) {
@@ -77,14 +76,15 @@ Pad (
   CTX->buffer[CTX->bufsize] = 0x01;
 }
 
-static inline void
+STATIC
+VOID
 Add512 (
   CONST union uint512_u  *x,
   CONST union uint512_u  *y,
   union uint512_u        *r
   )
 {
- #ifndef __GOST3411_BIG_ENDIAN__
+ #if defined(__BYTE_ORDER__) && __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
   UINT32  CF;
   UINT32  i;
 
@@ -101,7 +101,7 @@ Add512 (
     r->QWORD[i] = sum;
   }
 
- #else
+ #elif defined(__BYTE_ORDER__) && __BYTE_ORDER__ == __ORDER_BIG_ENDIAN__
   CONST UINT8  *xp, *yp;
   UINT8        *rp;
   UINT32       i;
@@ -117,10 +117,13 @@ Add512 (
     rp[i] = (UINT8)buf & 0xFF;
   }
 
+ #else
+ #error Byte order is undefined
  #endif
 }
 
-static void
+STATIC
+VOID
 g (
   union uint512_u        *h,
   CONST union uint512_u  *N,
@@ -146,6 +149,7 @@ g (
   X ((&data), ((const union uint512_u *)&m[0]), h);
 }
 
+STATIC
 VOID
 MasCpy (
   UINT8        *to,
@@ -157,6 +161,7 @@ MasCpy (
   }
 }
 
+STATIC
 VOID
 Uint512uCpy (
   union uint512_u        *to,
@@ -168,10 +173,11 @@ Uint512uCpy (
   }
 }
 
+STATIC
 VOID
 Stage2 (
-  GOST34112012Context  *CTX,
-  CONST UINT8          *data
+  StreebogContext  *CTX,
+  CONST UINT8      *data
   )
 {
   union uint512_u  m;
@@ -183,20 +189,23 @@ Stage2 (
   Add512 (&(CTX->Sigma), &m, &(CTX->Sigma));
 }
 
+STATIC
 VOID
 Stage3 (
-  GOST34112012Context  *CTX
+  StreebogContext  *CTX
   )
 {
   union uint512_u  buf = {
     { 0 }
   };
 
- #ifndef __GOST3411_BIG_ENDIAN__
+ #if defined(__BYTE_ORDER__) && __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
   buf.QWORD[0] = CTX->bufsize << 3;
- #else
+ #elif defined(__BYTE_ORDER__) && __BYTE_ORDER__ == __ORDER_BIG_ENDIAN__
   buf.QWORD[0] = BSWAP64 (CTX->bufsize << 3);
- #endif
+ #else
+ #error Byte order is undefined
+ #endif 
 
   Pad (CTX);
 
@@ -217,9 +226,9 @@ Stage3 (
 
 VOID
 GOST34112012Update (
-  GOST34112012Context  *CTX,
-  CONST UINT8          *data,
-  UINT32               len
+  StreebogContext  *CTX,
+  CONST UINT8      *data,
+  UINT32           len
   )
 {
   UINT32  chunksize;
@@ -263,8 +272,8 @@ GOST34112012Update (
 
 VOID
 GOST34112012Final (
-  GOST34112012Context  *CTX,
-  UINT8                *digest
+  StreebogContext  *CTX,
+  UINT8            *digest
   )
 {
   Stage3 (CTX);
@@ -283,18 +292,85 @@ GOST34112012Final (
 }
 
 VOID
-Streebog (
-  CONST UINT8  *data,
-  UINT32       len,
-  UINT8        *digest,
-  UINT32       digest_size
+Streebog256Init (
+  StreebogContext  *CTX
   )
 {
-  GOST34112012Context  CTX;
+  GOST34112012Init (CTX, 256);
+}
 
-  GOST34112012Init (&CTX, digest_size);
-  GOST34112012Update (&CTX, data, len);
-  GOST34112012Final (&CTX, digest);
+VOID
+Streebog256Update (
+  StreebogContext  *CTX,
+  CONST UINT8      *data,
+  UINT32           len
+  )
+{
+  GOST34112012Update (CTX, data, len);
+}
+
+VOID
+Streebog256Final (
+  StreebogContext  *CTX,
+  UINT8            *digest
+  )
+{
+  GOST34112012Final (CTX, digest);
+}
+
+VOID
+Streebog512Init (
+  StreebogContext  *CTX
+  )
+{
+  GOST34112012Init (CTX, 512);
+}
+
+VOID
+Streebog512Update (
+  StreebogContext  *CTX,
+  CONST UINT8      *data,
+  UINT32           len
+  )
+{
+  GOST34112012Update (CTX, data, len);
+}
+
+VOID
+Streebog512Final (
+  StreebogContext  *CTX,
+  UINT8            *digest
+  )
+{
+  GOST34112012Final (CTX, digest);
+}
+
+VOID
+Streebog256 (
+  CONST UINT8  *data,
+  UINT32       len,
+  UINT8        *digest
+  )
+{
+  StreebogContext CTX;
+
+  Streebog256Init (&CTX);
+  Streebog256Update (&CTX, data, len);
+  Streebog256Final (&CTX, digest);
+}
+
+VOID
+Streebog512 (
+  CONST UINT8  *data,
+  UINT32       len,
+  UINT8        *digest
+  )
+{
+  StreebogContext CTX;
+
+  Streebog512Init (&CTX);
+  Streebog512Update (&CTX, data, len);
+  Streebog512Final (&CTX, digest);
 }
 
 #endif
