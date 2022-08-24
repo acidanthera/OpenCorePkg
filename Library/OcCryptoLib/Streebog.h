@@ -6,20 +6,6 @@
 
 #include "CryptoInternal.h"
 
-// union uint512_u {
-//   UINT64    QWORD[8];
-// };
-
-// typedef struct StreebogContext {
-//   UINT8              buffer[64];
-//   union uint512_u    hash;
-//   union uint512_u    h;
-//   union uint512_u    N;
-//   union uint512_u    Sigma;
-//   UINT32             bufsize;
-//   UINT32             digest_size;
-// } StreebogContext;
-
 VOID
 GOST34112012Init (
   StreebogContext  *CTX,
@@ -110,7 +96,7 @@ static CONST union uint512_u  buffer512 = {
     0x0ULL, 0x0ULL, 0x0ULL, 0x0ULL, 0x0ULL, 0x0ULL, 0x0ULL }
 };
 #else
-  #error Byte order is undefined
+ #error Byte order is undefined
 #endif
 
 #define X(x, y, z)  {\
@@ -459,7 +445,7 @@ static CONST union uint512_u  C[12] = {
   }
 };
 #else
-  #error Byte order is undefined
+ #error Byte order is undefined
 #endif
 
 #if defined (__BYTE_ORDER__) && __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
@@ -1879,6 +1865,6 @@ static const unsigned long long  Ax[8][256] =
   }
 };
 #else
-  #error Byte order is undefined
+ #error Byte order is undefined
 #endif
 
