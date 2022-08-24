@@ -205,7 +205,7 @@ Stage3 (
   buf.QWORD[0] = BSWAP64 (CTX->bufsize << 3);
  #else
   #error Byte order is undefined
- #endif 
+ #endif
 
   Pad (CTX);
 

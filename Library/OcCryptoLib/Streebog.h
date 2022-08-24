@@ -96,7 +96,7 @@ static CONST union uint512_u  buffer512 = {
     0x0ULL, 0x0ULL, 0x0ULL, 0x0ULL, 0x0ULL, 0x0ULL, 0x0ULL }
 };
 #else
- #error Byte order is undefined
+  #error Byte order is undefined
 #endif
 
 #define X(x, y, z)  {\
@@ -445,7 +445,7 @@ static CONST union uint512_u  C[12] = {
   }
 };
 #else
- #error Byte order is undefined
+  #error Byte order is undefined
 #endif
 
 #if defined (__BYTE_ORDER__) && __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
@@ -1865,6 +1865,6 @@ static const unsigned long long  Ax[8][256] =
   }
 };
 #else
- #error Byte order is undefined
+  #error Byte order is undefined
 #endif
 
