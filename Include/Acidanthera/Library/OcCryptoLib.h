@@ -146,6 +146,20 @@ typedef struct SHA512_CONTEXT_ {
 
 typedef SHA512_CONTEXT SHA384_CONTEXT;
 
+union uint512_u {
+  UINT64    QWORD[8];
+};
+
+typedef struct StreebogContext {
+  UINT8              buffer[64];
+  union uint512_u    hash;
+  union uint512_u    h;
+  union uint512_u    N;
+  union uint512_u    Sigma;
+  UINT32             bufsize;
+  UINT32             digest_size;
+} StreebogContext;
+
 ///
 /// The structure describing the RSA Public Key format.
 /// The exponent is always 65537.
@@ -396,11 +410,53 @@ Sha384 (
   );
 
 VOID
-Streebog (
+Streebog256Init (
+  StreebogContext  *CTX
+  );
+
+VOID
+Streebog256Update (
+  StreebogContext  *CTX,
+  CONST UINT8      *data,
+  UINT32           len
+  );
+
+VOID
+Streebog256Final (
+  StreebogContext  *CTX,
+  UINT8            *digest
+  );
+
+VOID
+Streebog512Init (
+  StreebogContext  *CTX
+  );
+
+VOID
+Streebog512Update (
+  StreebogContext  *CTX,
+  CONST UINT8      *data,
+  UINT32           len
+  );
+
+VOID
+Streebog512Final (
+  StreebogContext  *CTX,
+  UINT8            *digest
+  );
+
+VOID
+Streebog256 (
   CONST UINT8  *data,
   UINT32       len,
-  UINT8        *digest,
-  UINT32       digest_size
+  UINT8        *digest
+  );
+
+VOID
+Streebog512 (
+  CONST UINT8  *data,
+  UINT32       len,
+  UINT8        *digest
   );
 
 BOOLEAN
