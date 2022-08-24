@@ -6,6 +6,7 @@ OpenCore Changelog
 - Replaced `SSDT-HV-CPU.dsl` with `SSDT-HV-DEV.dsl` for compatiblity with older macOS versions on Windows 10 and newer
 - Updated builtin zlib library to 1.2.12
 - Changed ocpasswordgen not to print characters on password input
+- Added ProcessKernel utility for testing kext injection based on configs
 
 #### v0.8.3
 - Added ext4 file system driver
