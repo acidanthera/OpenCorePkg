@@ -47,8 +47,10 @@ prelinkedkernel.unpack
 *.nam
 *.til
 *.aml
+*.kext
 Debug/QemuRun
 Doxy
+BootKernelExtensions.kc
 Legacy/BinDrivers/X64
 Legacy/BinDrivers/IA32
 Legacy/BootLoader/bin
@@ -74,13 +76,14 @@ Utilities/TestImg4/Img4
 Utilities/TestMp3/Mp3
 Utilities/TestMp3/test.bin
 Utilities/TestKernelCollection2/KernelCollection2
-Utilities/TestKextInject/BootKernelExtensions.kc
-Utilities/TestKextInject/*.kext
 Utilities/TestKextInject/KextInject
 Utilities/TestKextInject/Result.xml
 Utilities/TestMacho/Macho
 Utilities/TestRsaPreprocess/RsaPreprocess
 Utilities/TestSmbios/Smbios
 Utilities/TestPeCoff/PeCoff
+Utilities/TestProcessKernel/EFI/*
+Utilities/TestProcessKernel/OC/*
+Utilities/TestProcessKernel/ProcessKernel
 Utilities/TestNtfsDxe/TestNtfsDxe
 Utilities/TestExt4Dxe/TestExt4Dxe

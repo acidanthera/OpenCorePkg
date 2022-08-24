@@ -908,6 +908,8 @@ PatchKernelCpuId (
           sizeof (mKernelCpuidFindMcRel) - sizeof (INTERNAL_MICROCODE_PATCH),
           0x90
           );
+
+        DEBUG ((DEBUG_INFO, "OCAK: Patch success CPUID release\n"));
         return EFI_SUCCESS;
       }
     }
@@ -939,6 +941,7 @@ PatchKernelCpuId (
 
     FnPatch->AppleFamily1 = FnPatch->AppleFamily2 = OcCpuModelToAppleFamily (Eax);
 
+    DEBUG ((DEBUG_INFO, "OCAK: Patch success CPUID debug\n"));
     return EFI_SUCCESS;
   }
 
