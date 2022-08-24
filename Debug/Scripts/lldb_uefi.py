@@ -210,7 +210,6 @@ class ReloadUefi:
         head_t = self.ptype('EFI_IMAGE_OPTIONAL_HEADER_UNION')
         dosh = self.typed_ptr(dosh_t, imagebase)
         h_addr = imagebase
-        h_addr = h_addr + self.get_field(dosh, 'e_lfanew') if self.get_field(dosh, 'e_magic') == self.DOS_MAGIC else self.typed_ptr(head_t, h_addr)
         if self.get_field(dosh, 'e_magic') == self.DOS_MAGIC:
             h_addr = h_addr + self.get_field(dosh, 'e_lfanew')
         return self.typed_ptr(head_t, h_addr)
@@ -501,5 +500,5 @@ class ReloadUefi:
             print('No EFI_SYSTEM_TABLE...')
             return
 
-        print(f'EFI_SYSTEM_TABLE @ 0x{est.GetValueAsUnisgned():x}')
+        print(f'EFI_SYSTEM_TABLE @ 0x{est.GetValueAsUnsigned():x}')
         self.parse_est(est)

@@ -31,10 +31,10 @@ import re
 import sys
 import os
 import subprocess
-from common_uefi import UefiMisc
 
 sys.path.append(os.path.dirname(__file__))
 
+from common_uefi import UefiMisc
 
 __license__ = 'BSD'
 __version__ = '1.0.0'
@@ -77,7 +77,7 @@ class ReloadUefi(gdb.Command):
     # Returns gdb.Type for a type.
     #
 
-    def lookup_type(self, typename):
+    def type(self, typename):
         return gdb.lookup_type(typename)
 
     #
@@ -103,7 +103,7 @@ class ReloadUefi(gdb.Command):
     #
 
     def set_field(self, value, field_name, data):
-        gdb.execute(f'set *({str(value[field_name].type)} *) 0x{int(value[field_name].address):x} = 0x{data}')
+        gdb.execute(f'set *({str(value[field_name].type)} *) 0x{int(value[field_name].address):x} = 0x{data:x}')
 
     #
     # Returns data backing a gdb.Value as an array.
@@ -262,7 +262,7 @@ class ReloadUefi(gdb.Command):
             cmd += f' 0x{fallack_base:x}'
             return cmd
 
-        cmd += f" 0x{int(orgbase):x}{sections['.text']}"
+        cmd += f" 0x{int(orgbase) + sections['.text']:x}"
 
         if not macho or not os.path.exists(file):
             # Another fallback, try to load data at least.
@@ -310,9 +310,9 @@ class ReloadUefi(gdb.Command):
         }
 
         # 3. Rebase.
-        for entry in mapping.items():
-            if machsections.get(entry):
-                cmd += f' -s {mapping[entry]} 0x{int(orgbase) + machsections[entry]:x}'
+        for section, new_section in mapping.items():
+            if machsections.get(section):
+                cmd += f' -s {new_section} 0x{int(orgbase) + machsections[section]:x}'
 
         return cmd
 
@@ -380,7 +380,7 @@ class ReloadUefi(gdb.Command):
     def parse_dh(self, dh):
         dh_t = self.ptype('EFI_DEBUG_IMAGE_INFO_TABLE_HEADER')
         dh = dh.cast(dh_t)
-        print(f"DebugImageInfoTable @ 0x{int(dh['EfiDebugImageInfoTable']):x}, 0x{dh['TableSize']:x} entries")
+        print(f"DebugImageInfoTable @ 0x{int(dh['EfiDebugImageInfoTable']):x}, 0x{int(dh['TableSize']):x} entries")
         if dh['UpdateStatus'] & self.DEBUG_IS_UPDATING:
             print('EfiDebugImageInfoTable update in progress, retry later')
             return
@@ -393,8 +393,8 @@ class ReloadUefi(gdb.Command):
     def parse_est(self, est):
         est_t = self.ptype('EFI_SYSTEM_TABLE')
         est = est.cast(est_t)
-        print(f"Connected to {UefiMisc.parse_utf16(est['FirmwareVendor'])}(Rev. 0x{int(est['FirmwareRevision']):x})")
-        print(f"ConfigurationTable @ 0x{int(est['ConfigurationTable']):x}, 0x{est['NumberOfTableEntries']:x} entries")
+        print(f"Connected to {UefiMisc.parse_utf16(est['FirmwareVendor'])} (Rev. 0x{int(est['FirmwareRevision']):x})")
+        print(f"ConfigurationTable @ 0x{int(est['ConfigurationTable']):x}, 0x{int(est['NumberOfTableEntries']):x} entries")
 
         dh = self.search_config(est['ConfigurationTable'], est['NumberOfTableEntries'], self.DEBUG_GUID)
         if dh == self.EINVAL:
@@ -452,7 +452,7 @@ class UefiStringPrinter:
         self.val = val
 
     def to_string(self):
-        return 'NULL' if not self.val else f"L'{UefiMisc.parse_utf16(self.val)}'"
+        return 'NULL' if not self.val else f'L"{UefiMisc.parse_utf16(self.val)}"'
 
 
 class UefiEfiStatusPrinter:
