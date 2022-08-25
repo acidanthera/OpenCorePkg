@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
-%DIF DEL PreviousConfiguration.tex   Thu Aug  4 14:04:55 2022
-%DIF ADD ../Configuration.tex        Fri Aug 12 17:57:59 2022
+%DIF DEL PreviousConfiguration.tex   Tue Aug  2 07:37:43 2022
+%DIF ADD ../Configuration.tex        Thu Aug 25 01:01:39 2022
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -2695,7 +2695,8 @@ Kernel and kext changes apply with the following effective order:
     \item Find \texttt{CFG Lock, VarStoreInfo (VarOffset/VarName):} in \texttt{Setup.txt} and
       remember the offset right after it (e.g. \texttt{0x123}).
     \item Download and run \href{http://brains.by/posts/bootx64.7z}{Modified GRUB Shell} compiled by
-      \href{https://geektimes.com/post/258090}{brainsucker} or use
+      \DIFdelbegin %DIFDELCMD < \href{https://geektimes.com/post/258090}{%%%
+\DIFdelend \DIFaddbegin \href{https://habr.com/geektimes/post/258090}{\DIFaddend brainsucker} or use
       \href{https://github.com/datasone/grub-mod-setup_var}{a newer version} by
       \href{https://github.com/datasone}{datasone}.
     \item Enter \texttt{setup\_var 0x123 0x00} command, where \texttt{0x123} should be replaced by
