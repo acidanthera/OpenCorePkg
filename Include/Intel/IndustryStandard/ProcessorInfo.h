@@ -56,7 +56,6 @@
 #define MSR_IA32_PERF_CONTROL    0x199
 #define MSR_THERM2_CTL           0x19D
 
-#define MSR_IA32_MISC_ENABLES   0x1A0
 #define TURBO_DISABLE_MASK      ((UINT64)1 << 38)
 #define TURBO_MODE_DISABLE_BIT  38
 

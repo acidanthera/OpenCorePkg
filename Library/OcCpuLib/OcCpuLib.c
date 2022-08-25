@@ -551,7 +551,8 @@ ScanIntelProcessor (
   // If we are under virtualization, then we should get the topology from CPUID the same was as with Penryn.
   //
   if (  (Cpu->MaxId >= CPUID_CACHE_PARAMS)
-     && (  (Cpu->CpuGeneration == OcCpuGenerationPrePenryn)
+     && (  (Cpu->CpuGeneration == OcCpuGenerationPreYonah)
+        || (Cpu->CpuGeneration == OcCpuGenerationYonahMerom)
         || (Cpu->CpuGeneration == OcCpuGenerationPenryn)
         || (Cpu->CpuGeneration == OcCpuGenerationBonnell)
         || (Cpu->CpuGeneration == OcCpuGenerationSilvermont)
@@ -584,7 +585,7 @@ ScanIntelProcessor (
     //
     Cpu->CoreCount   = 0;
     Cpu->ThreadCount = 0;
-  } else if (  (Cpu->CpuGeneration == OcCpuGenerationPrePenryn)
+  } else if (  (Cpu->CpuGeneration == OcCpuGenerationPreYonah)
             && (Cpu->MaxId < CPUID_CACHE_PARAMS))
   {
     //
@@ -1024,24 +1025,26 @@ OcCpuGetMsrReport (
       Report->CpuHasMsrE2   = TRUE;
       Report->CpuMsrE2Value = AsmReadMsr64 (MSR_BROADWELL_PKG_CST_CONFIG_CONTROL);
     }
-  } else if (CpuInfo->CpuGeneration >= OcCpuGenerationPrePenryn) {
+  } else if (CpuInfo->CpuGeneration >= OcCpuGenerationPreYonah) {
+    if (CpuInfo->CpuGeneration >= OcCpuGenerationYonahMerom) {
+      //
+      // MSR_IA32_EXT_CONFIG
+      //
+      Report->CpuHasMsrIa32ExtConfig   = TRUE;
+      Report->CpuMsrIa32ExtConfigValue = AsmReadMsr64 (MSR_IA32_EXT_CONFIG);
+
+      //
+      // MSR_CORE_FSB_FREQ
+      //
+      Report->CpuHasMsrFsbFreq   = TRUE;
+      Report->CpuMsrFsbFreqValue = AsmReadMsr64 (MSR_CORE_FSB_FREQ);
+    }
+
     //
     // MSR_IA32_MISC_ENABLE
     //
     Report->CpuHasMsrIa32MiscEnable   = TRUE;
-    Report->CpuMsrIa32MiscEnableValue = AsmReadMsr64 (MSR_IA32_MISC_ENABLES);
-
-    //
-    // MSR_IA32_EXT_CONFIG
-    //
-    Report->CpuHasMsrIa32ExtConfig   = TRUE;
-    Report->CpuMsrIa32ExtConfigValue = AsmReadMsr64 (MSR_IA32_EXT_CONFIG);
-
-    //
-    // MSR_CORE_FSB_FREQ
-    //
-    Report->CpuHasMsrFsbFreq   = TRUE;
-    Report->CpuMsrFsbFreqValue = AsmReadMsr64 (MSR_CORE_FSB_FREQ);
+    Report->CpuMsrIa32MiscEnableValue = AsmReadMsr64 (MSR_IA32_MISC_ENABLE);
 
     //
     // MSR_IA32_PERF_STATUS
@@ -1331,6 +1334,10 @@ InternalDetectIntelProcessorGeneration (
       case CPU_MODEL_DOTHAN:
         CpuGeneration = OcCpuGenerationBanias;
         break;
+      case CPU_MODEL_YONAH:
+      case CPU_MODEL_MEROM:
+        CpuGeneration = OcCpuGenerationYonahMerom;
+        break;
       case CPU_MODEL_PENRYN:
         CpuGeneration = OcCpuGenerationPenryn;
         break;
@@ -1414,13 +1421,13 @@ InternalDetectIntelProcessorGeneration (
         break;
       default:
         if (CpuInfo->Model < CPU_MODEL_PENRYN) {
-          CpuGeneration = OcCpuGenerationPrePenryn;
+          CpuGeneration = OcCpuGenerationPreYonah;
         } else if (CpuInfo->Model >= CPU_MODEL_SANDYBRIDGE) {
           CpuGeneration = OcCpuGenerationPostSandyBridge;
         }
     }
   } else {
-    CpuGeneration = OcCpuGenerationPrePenryn;
+    CpuGeneration = OcCpuGenerationPreYonah;
   }
 
   DEBUG ((

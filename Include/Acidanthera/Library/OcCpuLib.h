@@ -35,7 +35,8 @@
 typedef enum {
   OcCpuGenerationUnknown,
   OcCpuGenerationBanias,
-  OcCpuGenerationPrePenryn,
+  OcCpuGenerationPreYonah,
+  OcCpuGenerationYonahMerom,
   OcCpuGenerationPenryn,
   OcCpuGenerationNehalem,
   OcCpuGenerationBonnell,

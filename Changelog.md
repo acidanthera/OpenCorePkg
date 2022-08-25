@@ -7,6 +7,7 @@ OpenCore Changelog
 - Updated builtin zlib library to 1.2.12
 - Changed ocpasswordgen not to print characters on password input
 - Added ProcessKernel utility for testing kext injection based on configs
+- Fixed crash while using `SysReport` on Pentium 4 systems
 
 #### v0.8.3
 - Added ext4 file system driver
