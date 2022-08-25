@@ -43,19 +43,25 @@ Additional variables are supported to adjust the compilation process.
 - `WERROR=1` — treat compiler warnings as errors.
 - `SYDR=1` — change `$(SUFFIX)` to store compilation results for Sydr DSE in a directory distinct from the default one.
 
-Example 1. To build for 32-bit Windows (requires MinGW installed) use the following command:
+Example 1. To build 32-bit version of utility on macOS (use High Sierra 10.13 or below):
+
+```sh
+UDK_ARCH=Ia32 make
+```
+
+Example 2. To build for 32-bit Windows (requires MinGW installed) use the following command:
 
 ```sh
 UDK_ARCH=Ia32 CC=i686-w64-mingw32-gcc STRIP=i686-w64-mingw32-strip DIST=Windows make
 ```
 
-Example 2. To build with LLVM sanitizers use the following command:
+Example 3. To build with LLVM sanitizers use the following command:
 
 ```sh
 DEBUG=1 SANITIZE=1 make
 ```
 
-Example 3. Perform fuzzing and generate coverage report:
+Example 4. Perform fuzzing and generate coverage report:
 
 ```sh
 # MacPorts clang is used since Xcode clang has no fuzzing support.
@@ -67,7 +73,7 @@ COVERAGE=1 DEBUG=1 make coverage
 
 Note: fuzzing corpus is saved in `FUZZDICT`.
 
-Example 4. Perform fuzzing with the help of [Sydr](https://www.ispras.ru/en/technologies/crusher/) tool (path to which should be in `$PATH`):
+Example 5. Perform fuzzing with the help of [Sydr](https://www.ispras.ru/en/technologies/crusher/) tool (path to which should be in `$PATH`):
 
 ```sh
 CC=clang DEBUG=1 FUZZ=1 SANITIZE=1 make
