@@ -86,7 +86,7 @@ OcAppleGenericInputTimerQuirkExit (
     Status = mTimerProtocol->SetTimerPeriod (mTimerProtocol, mOriginalTimerPeriod);
     if (!EFI_ERROR (Status)) {
       DEBUG ((
-        DEBUG_INFO,
+        DEBUG_VERBOSE,
         "AmiShimTimerBoostExit changed current period to %Lu\n",
         mOriginalTimerPeriod
         ));
