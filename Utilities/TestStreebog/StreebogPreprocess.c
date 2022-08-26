@@ -179,7 +179,6 @@ ENTRY_POINT (
   )
 {
   UINT8  hash[64];
-  UINT8  TM2[72];
   UINT8  Flag = 1;
 
   Streebog256 (M1, 63, hash);
