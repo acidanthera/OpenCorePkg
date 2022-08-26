@@ -32,7 +32,7 @@ buildutil() {
     "TestPeCoff"
     "TestProcessKernel"
     "TestRsaPreprocess"
-    "TestStreebog"
+    "StreebogPreprocess"
     "TestSmbios"
   )
 
