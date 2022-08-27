@@ -36,8 +36,8 @@
   RsaDigitalSign.c
   Sha1.c
   Sha2.c
-  Streebog.c
   Streebog.h
+  Streebog.c
   SecureMem.c
   PasswordHash.c
   BigNumLib.h
