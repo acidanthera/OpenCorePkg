@@ -150,7 +150,7 @@ union uint512_u {
   UINT64    QWORD[8];
 };
 
-typedef struct StreebogContext {
+typedef struct STREEBOG_CONTEXT {
   UINT8              buffer[64];
   union uint512_u    hash;
   union uint512_u    h;
@@ -158,7 +158,7 @@ typedef struct StreebogContext {
   union uint512_u    Sigma;
   UINT32             bufsize;
   UINT32             digest_size;
-} StreebogContext;
+} STREEBOG_CONTEXT;
 
 ///
 /// The structure describing the RSA Public Key format.
@@ -411,52 +411,52 @@ Sha384 (
 
 VOID
 Streebog256Init (
-  StreebogContext  *CTX
+  STREEBOG_CONTEXT  *Context
   );
 
 VOID
 Streebog256Update (
-  StreebogContext  *CTX,
-  CONST UINT8      *data,
-  UINT32           len
+  STREEBOG_CONTEXT  *Context,
+  CONST UINT8       *Data,
+  UINT32            Length
   );
 
 VOID
 Streebog256Final (
-  StreebogContext  *CTX,
-  UINT8            *digest
+  STREEBOG_CONTEXT  *Context,
+  UINT8             *Digest
   );
 
 VOID
 Streebog512Init (
-  StreebogContext  *CTX
+  STREEBOG_CONTEXT  *Context
   );
 
 VOID
 Streebog512Update (
-  StreebogContext  *CTX,
-  CONST UINT8      *data,
-  UINT32           len
+  STREEBOG_CONTEXT  *Context,
+  CONST UINT8       *Data,
+  UINT32            Length
   );
 
 VOID
 Streebog512Final (
-  StreebogContext  *CTX,
-  UINT8            *digest
+  STREEBOG_CONTEXT  *Context,
+  UINT8             *Digest
   );
 
 VOID
 Streebog256 (
-  CONST UINT8  *data,
-  UINT32       len,
-  UINT8        *digest
+  CONST UINT8  *Data,
+  UINT32       Length,
+  UINT8        *Digest
   );
 
 VOID
 Streebog512 (
-  CONST UINT8  *data,
-  UINT32       len,
-  UINT8        *digest
+  CONST UINT8  *Data,
+  UINT32       Length,
+  UINT8        *Digest
   );
 
 BOOLEAN

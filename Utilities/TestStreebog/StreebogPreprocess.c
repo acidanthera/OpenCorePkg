@@ -8,6 +8,8 @@
 #include <Library/OcCryptoLib.h>
 #include <BigNumLib.h>
 
+#define HASHSIZE 64
+
 CONST UINT8  M1[] = {
   0x30, 0x31,
   0x32, 0x33,
@@ -178,69 +180,58 @@ ENTRY_POINT (
   char  *argv[]
   )
 {
-  UINT8  hash[64];
-  UINT8  Flag = 1;
+  UINT8  hash[HASHSIZE];
+  UINT8  Flag      = 1;
+  UINT8  LocalFlag = 1;
 
   Streebog256 (M1, 63, hash);
 
-  for (int i = 0; i < 32; ++i) {
-    if (hash[i] != H1_256[i]) {
-      Flag = 0;
-      break;
-    }
-  }
+  LocalFlag = !CompareMem(hash, H1_256, HASHSIZE / 2);
 
-  if (Flag) {
+  if (LocalFlag) {
     DEBUG ((DEBUG_ERROR, "M1 256 OK\n"));
   } else {
     DEBUG ((DEBUG_ERROR, "M1 256 ERROR\n"));
+    Flag = 0;
   }
 
-  Flag = 1;
+  LocalFlag = 1;
   Streebog512 (M1, 63, hash);
 
-  for (int i = 0; i < 64; ++i) {
-    if (hash[i] != H1_512[i]) {
-      Flag = 0;
-      break;
-    }
-  }
-
-  if (Flag) {
+  LocalFlag = !CompareMem(hash, H1_512, HASHSIZE);
+  
+  if (LocalFlag) {
     DEBUG ((DEBUG_ERROR, "M1 512 OK\n"));
   } else {
     DEBUG ((DEBUG_ERROR, "M1 512 ERROR\n"));
+    Flag = 0;
   }
 
   Streebog256 (M2, 72, hash);
 
-  for (int i = 0; i < 32; ++i) {
-    if (hash[i] != H2_256[i]) {
-      Flag = 0;
-      break;
-    }
-  }
+  LocalFlag = !CompareMem(hash, H2_256, HASHSIZE / 2);
 
-  if (Flag) {
+  if (LocalFlag) {
     DEBUG ((DEBUG_ERROR, "M2 256 OK\n"));
   } else {
     DEBUG ((DEBUG_ERROR, "M2 256 ERROR\n"));
+    Flag = 0;
   }
 
   Streebog512 (M2, 72, hash);
 
-  for (int i = 0; i < 64; ++i) {
-    if (hash[i] != H2_512[i]) {
-      Flag = 0;
-      break;
-    }
-  }
+  LocalFlag = !CompareMem(hash, H2_512, HASHSIZE);
 
-  if (Flag) {
+  if (LocalFlag) {
     DEBUG ((DEBUG_ERROR, "M2 512 OK\n"));
   } else {
     DEBUG ((DEBUG_ERROR, "M2 512 ERROR\n"));
+    Flag = 0;
   }
-
-  return 0;
+  
+  if (Flag) {
+    return 0;
+  } else {
+    return 1;
+  }
 }

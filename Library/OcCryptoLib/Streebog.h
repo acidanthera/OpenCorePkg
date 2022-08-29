@@ -6,86 +6,12 @@
 
 #include "CryptoInternal.h"
 
-VOID
-GOST34112012Init (
-  StreebogContext  *CTX,
-  CONST UINT32     digest_size
-  );
-
-VOID
-GOST34112012Update (
-  StreebogContext  *CTX,
-  CONST UINT8      *data,
-  UINT32           len
-  );
-
-VOID
-GOST34112012Final (
-  StreebogContext  *CTX,
-  UINT8            *digest
-  );
-
-VOID
-GOST34112012Cleanup (
-  StreebogContext  *CTX
-  );
-
-VOID
-Streebog256Init (
-  StreebogContext  *CTX
-  );
-
-VOID
-Streebog256Update (
-  StreebogContext  *CTX,
-  CONST UINT8      *data,
-  UINT32           len
-  );
-
-VOID
-Streebog256Final (
-  StreebogContext  *CTX,
-  UINT8            *digest
-  );
-
-VOID
-Streebog512Init (
-  StreebogContext  *CTX
-  );
-
-VOID
-Streebog512Update (
-  StreebogContext  *CTX,
-  CONST UINT8      *data,
-  UINT32           len
-  );
-
-VOID
-Streebog512Final (
-  StreebogContext  *CTX,
-  UINT8            *digest
-  );
-
-VOID
-Streebog256 (
-  CONST UINT8  *data,
-  UINT32       len,
-  UINT8        *digest
-  );
-
-VOID
-Streebog512 (
-  CONST UINT8  *data,
-  UINT32       len,
-  UINT8        *digest
-  );
-
 static CONST union uint512_u  buffer0 = {
   { 0x0ULL, 0x0ULL, 0x0ULL,
     0x0ULL, 0x0ULL, 0x0ULL, 0x0ULL, 0x0ULL }
 };
 
-#if defined (__BYTE_ORDER__) && __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
+#if (defined (__BYTE_ORDER__) && __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__) || defined(MDE_CPU_IA32) || defined(MDE_CPU_X64)
 static CONST union uint512_u  buffer512 = {
   { 0x0000000000000200ULL,
     0x0ULL, 0x0ULL, 0x0ULL, 0x0ULL, 0x0ULL, 0x0ULL, 0x0ULL }
@@ -150,7 +76,7 @@ static CONST union uint512_u  buffer512 = {
   XLPS(Ki, data, data); \
 }
 
-#if defined (__BYTE_ORDER__) && __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
+#if (defined (__BYTE_ORDER__) && __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__) || defined(MDE_CPU_IA32) || defined(MDE_CPU_X64)
 static CONST union uint512_u  C[12] = {
   {
     {
@@ -448,7 +374,7 @@ static CONST union uint512_u  C[12] = {
   #error Byte order is undefined
 #endif
 
-#if defined (__BYTE_ORDER__) && __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
+#if (defined (__BYTE_ORDER__) && __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__) || defined(MDE_CPU_IA32) || defined(MDE_CPU_X64)
 static const unsigned long long  Ax[8][256] =
 {
   {
