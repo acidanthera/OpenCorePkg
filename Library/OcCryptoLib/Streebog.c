@@ -4,10 +4,10 @@
   SPDX-License-Identifier: BSD-2-Clause
 **/
 
-#include "BigNumLib.h"
 #ifdef OC_CRYPTO_SUPPORTS_STREEBOG
 
-  #include "Streebog.h"
+#include "CryptoInternal.h"
+#include "Streebog.h"
 
 #define BSWAP64(x) \
     (((x & 0xFF00000000000000ULL) >> 56) | \
@@ -21,40 +21,40 @@
 
 VOID
 GOST34112012Cleanup (
-  StreebogContext  *CTX
+  STREEBOG_CONTEXT  *Context
   )
 {
   for (INT32 i = 0; i < 64; ++i) {
-    CTX->buffer[i] = 0;
+    Context->buffer[i] = 0;
   }
 
   for (INT32 i = 0; i < 8; ++i) {
-    CTX->hash.QWORD[i]  = 0;
-    CTX->h.QWORD[i]     = 0;
-    CTX->N.QWORD[i]     = 0;
-    CTX->Sigma.QWORD[i] = 0;
+    Context->hash.QWORD[i]  = 0;
+    Context->h.QWORD[i]     = 0;
+    Context->N.QWORD[i]     = 0;
+    Context->Sigma.QWORD[i] = 0;
   }
 
-  CTX->bufsize     = 0;
-  CTX->digest_size = 0;
+  Context->bufsize     = 0;
+  Context->digest_size = 0;
 }
 
 VOID
 GOST34112012Init (
-  StreebogContext  *CTX,
-  CONST UINT32     digest_size
+  STREEBOG_CONTEXT  *Context,
+  CONST UINT32      digest_size
   )
 {
   UINT32  i;
 
-  GOST34112012Cleanup (CTX);
-  CTX->digest_size = digest_size;
+  GOST34112012Cleanup (Context);
+  Context->digest_size = digest_size;
 
   for (i = 0; i < 8; i++) {
     if (digest_size == 256) {
-      CTX->h.QWORD[i] = 0x0101010101010101ULL;
+      Context->h.QWORD[i] = 0x0101010101010101ULL;
     } else {
-      CTX->h.QWORD[i] = 0x00ULL;
+      Context->h.QWORD[i] = 0x00ULL;
     }
   }
 }
@@ -62,18 +62,18 @@ GOST34112012Init (
 STATIC
 VOID
 Pad (
-  StreebogContext  *CTX
+  STREEBOG_CONTEXT  *Context
   )
 {
-  if (CTX->bufsize > 63) {
+  if (Context->bufsize > 63) {
     return;
   }
 
-  for (UINT32 i = 0; i < sizeof (CTX->buffer) - CTX->bufsize; ++i) {
-    CTX->buffer[CTX->bufsize + i] = 0;
+  for (UINT32 i = 0; i < sizeof (Context->buffer) - Context->bufsize; ++i) {
+    Context->buffer[Context->bufsize + i] = 0;
   }
 
-  CTX->buffer[CTX->bufsize] = 0x01;
+  Context->buffer[Context->bufsize] = 0x01;
 }
 
 STATIC
@@ -84,7 +84,7 @@ Add512 (
   union uint512_u        *r
   )
 {
- #if defined (__BYTE_ORDER__) && __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
+#if (defined (__BYTE_ORDER__) && __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__) || defined(MDE_CPU_IA32) || defined(MDE_CPU_X64)
   UINT32  CF;
   UINT32  i;
 
@@ -101,7 +101,7 @@ Add512 (
     r->QWORD[i] = sum;
   }
 
- #elif defined (__BYTE_ORDER__) && __BYTE_ORDER__ == __ORDER_BIG_ENDIAN__
+#elif defined (__BYTE_ORDER__) && __BYTE_ORDER__ == __ORDER_BIG_ENDIAN__
   CONST UINT8  *xp, *yp;
   UINT8        *rp;
   UINT32       i;
@@ -117,9 +117,9 @@ Add512 (
     rp[i] = (UINT8)buf & 0xFF;
   }
 
- #else
+#else
   #error Byte order is undefined
- #endif
+#endif
 }
 
 STATIC
@@ -152,12 +152,12 @@ g (
 STATIC
 VOID
 MasCpy (
-  UINT8        *to,
-  CONST UINT8  *from
+  UINT8        *To,
+  CONST UINT8  *From
   )
 {
   for (INT32 i = 0; i < 64; ++i) {
-    to[i] = from[i];
+    To[i] = From[i];
   }
 }
 
@@ -176,201 +176,203 @@ Uint512uCpy (
 STATIC
 VOID
 Stage2 (
-  StreebogContext  *CTX,
-  CONST UINT8      *data
+  STREEBOG_CONTEXT  *Context,
+  CONST UINT8       *Data
   )
 {
   union uint512_u  m;
 
-  MasCpy ((UINT8 *)&m, data);
-  g (&(CTX->h), &(CTX->N), (CONST UINT8 *)&m);
+  MasCpy ((UINT8 *)&m, Data);
+  g (&(Context->h), &(Context->N), (CONST UINT8 *)&m);
 
-  Add512 (&(CTX->N), &buffer512, &(CTX->N));
-  Add512 (&(CTX->Sigma), &m, &(CTX->Sigma));
+  Add512 (&(Context->N), &buffer512, &(Context->N));
+  Add512 (&(Context->Sigma), &m, &(Context->Sigma));
 }
 
 STATIC
 VOID
 Stage3 (
-  StreebogContext  *CTX
+  STREEBOG_CONTEXT  *Context
   )
 {
   union uint512_u  buf = {
     { 0 }
   };
 
- #if defined (__BYTE_ORDER__) && __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
-  buf.QWORD[0] = CTX->bufsize << 3;
- #elif defined (__BYTE_ORDER__) && __BYTE_ORDER__ == __ORDER_BIG_ENDIAN__
-  buf.QWORD[0] = BSWAP64 (CTX->bufsize << 3);
- #else
+#if (defined (__BYTE_ORDER__) && __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__) || defined(MDE_CPU_IA32) || defined(MDE_CPU_X64)
+  buf.QWORD[0] = Context->bufsize << 3;
+#elif defined (__BYTE_ORDER__) && __BYTE_ORDER__ == __ORDER_BIG_ENDIAN__
+  buf.QWORD[0] = BSWAP64 (Context->bufsize << 3);
+#else
   #error Byte order is undefined
- #endif
+#endif
 
-  Pad (CTX);
+  Pad (Context);
 
-  g (&(CTX->h), &(CTX->N), (const unsigned char *)&(CTX->buffer));
+  g (&(Context->h), &(Context->N), (const unsigned char *)&(Context->buffer));
 
-  Add512 (&(CTX->N), &buf, &(CTX->N));
+  Add512 (&(Context->N), &buf, &(Context->N));
   Add512 (
-    &(CTX->Sigma),
-    (const union uint512_u *)&CTX->buffer[0],
-    &(CTX->Sigma)
+    &(Context->Sigma),
+    (const union uint512_u *)&Context->buffer[0],
+    &(Context->Sigma)
     );
 
-  g (&(CTX->h), &buffer0, (const unsigned char *)&(CTX->N));
+  g (&(Context->h), &buffer0, (const unsigned char *)&(Context->N));
 
-  g (&(CTX->h), &buffer0, (const unsigned char *)&(CTX->Sigma));
-  Uint512uCpy (&(CTX->hash), &(CTX->h));
+  g (&(Context->h), &buffer0, (const unsigned char *)&(Context->Sigma));
+  Uint512uCpy (&(Context->hash), &(Context->h));
 }
 
 VOID
 GOST34112012Update (
-  StreebogContext  *CTX,
-  CONST UINT8      *data,
-  UINT32           len
+  STREEBOG_CONTEXT  *Context,
+  CONST UINT8       *Data,
+  UINT32            len
   )
 {
   UINT32  chunksize;
 
-  if (CTX->bufsize) {
-    chunksize = 64 - CTX->bufsize;
+  if (Context->bufsize) {
+    chunksize = 64 - Context->bufsize;
     if (chunksize > len) {
       chunksize = len;
     }
 
     for (UINT32 i = 0; i < chunksize; ++i) {
-      ((UINT8 *)(&(CTX->buffer[CTX->bufsize])))[i] = data[i];
+      ((UINT8 *)(&(Context->buffer[Context->bufsize])))[i] = Data[i];
     }
 
-    CTX->bufsize += chunksize;
+    Context->bufsize += chunksize;
     len          -= chunksize;
-    data         += chunksize;
+    Data         += chunksize;
 
-    if (CTX->bufsize == 64) {
-      Stage2 (CTX, CTX->buffer);
+    if (Context->bufsize == 64) {
+      Stage2 (Context, Context->buffer);
 
-      CTX->bufsize = 0;
+      Context->bufsize = 0;
     }
   }
 
   while (len > 63) {
-    Stage2 (CTX, data);
+    Stage2 (Context, Data);
 
-    data += 64;
+    Data += 64;
     len  -= 64;
   }
 
   if (len) {
     for (UINT32 i = 0; i < len; ++i) {
-      ((UINT8 *)(&CTX->buffer))[i] = data[i];
+      ((UINT8 *)(&Context->buffer))[i] = Data[i];
     }
 
-    CTX->bufsize = len;
+    Context->bufsize = len;
   }
 }
 
 VOID
 GOST34112012Final (
-  StreebogContext  *CTX,
+  STREEBOG_CONTEXT  *Context,
   UINT8            *digest
   )
 {
-  Stage3 (CTX);
+  Stage3 (Context);
 
-  CTX->bufsize = 0;
+  Context->bufsize = 0;
 
-  if (CTX->digest_size == 256) {
+  if (Context->digest_size == 256) {
     for (INT32 i = 0; i < 32; ++i) {
-      digest[i] = ((UINT8 *)&(CTX->hash.QWORD[4]))[i];
+      digest[i] = ((UINT8 *)&(Context->hash.QWORD[4]))[i];
     }
   } else {
     for (INT32 i = 0; i < 64; ++i) {
-      digest[i] = ((UINT8 *)&(CTX->hash.QWORD[0]))[i];
+      digest[i] = ((UINT8 *)&(Context->hash.QWORD[0]))[i];
     }
   }
 }
 
 VOID
 Streebog256Init (
-  StreebogContext  *CTX
+  STREEBOG_CONTEXT  *Context
   )
 {
-  GOST34112012Init (CTX, 256);
+  GOST34112012Init (Context, 256);
 }
 
 VOID
 Streebog256Update (
-  StreebogContext  *CTX,
-  CONST UINT8      *data,
-  UINT32           len
+  STREEBOG_CONTEXT  *Context,
+  CONST UINT8       *Data,
+  UINT32            len
   )
 {
-  GOST34112012Update (CTX, data, len);
+  GOST34112012Update (Context, Data, len);
 }
 
 VOID
 Streebog256Final (
-  StreebogContext  *CTX,
+  STREEBOG_CONTEXT  *Context,
   UINT8            *digest
   )
 {
-  GOST34112012Final (CTX, digest);
+  GOST34112012Final (Context, digest);
 }
 
 VOID
 Streebog512Init (
-  StreebogContext  *CTX
+  STREEBOG_CONTEXT  *Context
   )
 {
-  GOST34112012Init (CTX, 512);
+  GOST34112012Init (Context, 512);
 }
 
 VOID
 Streebog512Update (
-  StreebogContext  *CTX,
-  CONST UINT8      *data,
+  STREEBOG_CONTEXT  *Context,
+  CONST UINT8      *Data,
   UINT32           len
   )
 {
-  GOST34112012Update (CTX, data, len);
+  GOST34112012Update (Context, Data, len);
 }
 
 VOID
 Streebog512Final (
-  StreebogContext  *CTX,
+  STREEBOG_CONTEXT  *Context,
   UINT8            *digest
   )
 {
-  GOST34112012Final (CTX, digest);
+  GOST34112012Final (Context, digest);
 }
 
 VOID
 Streebog256 (
-  CONST UINT8  *data,
+  CONST UINT8  *Data,
   UINT32       len,
   UINT8        *digest
   )
 {
-  StreebogContext  CTX;
+  STREEBOG_CONTEXT  Context;
 
-  Streebog256Init (&CTX);
-  Streebog256Update (&CTX, data, len);
-  Streebog256Final (&CTX, digest);
+  Streebog256Init (&Context);
+  Streebog256Update (&Context, Data, len);
+  Streebog256Final (&Context, digest);
+  SecureZeroMem (&Context, sizeof(Context));
 }
 
 VOID
 Streebog512 (
-  CONST UINT8  *data,
+  CONST UINT8  *Data,
   UINT32       len,
   UINT8        *digest
   )
 {
-  StreebogContext  CTX;
+  STREEBOG_CONTEXT  Context;
 
-  Streebog512Init (&CTX);
-  Streebog512Update (&CTX, data, len);
-  Streebog512Final (&CTX, digest);
+  Streebog512Init (&Context);
+  Streebog512Update (&Context, Data, len);
+  Streebog512Final (&Context, digest);
+  SecureZeroMem (&Context, sizeof(Context));
 }
 
 #endif
