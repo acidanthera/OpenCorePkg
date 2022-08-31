@@ -16,7 +16,7 @@
 [Defines]
 !if ($(ARCH) == X64)
   [FV.DuetEfiMainFvX64]
-!else 
+!else
   [FV.DuetEfiMainFvIA32]
 !endif
 
