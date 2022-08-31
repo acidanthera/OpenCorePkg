@@ -23,6 +23,23 @@
   SKUID_IDENTIFIER        = DEFAULT
   DSC_SPECIFICATION       = 0x00010006
 
+  #
+  # Network definition
+  #
+  DEFINE NETWORK_ENABLE                 = TRUE
+  DEFINE NETWORK_SNP_ENABLE             = TRUE
+  DEFINE NETWORK_IP4_ENABLE             = TRUE
+  DEFINE NETWORK_IP6_ENABLE             = FALSE
+  DEFINE NETWORK_TLS_ENABLE             = FALSE
+  DEFINE NETWORK_HTTP_ENABLE            = TRUE
+  DEFINE NETWORK_HTTP_BOOT_ENABLE       = TRUE
+  DEFINE NETWORK_ALLOW_HTTP_CONNECTIONS = TRUE
+  DEFINE NETWORK_ISCSI_ENABLE           = FALSE
+  DEFINE NETWORK_ISCSI_MD5_ENABLE       = FALSE
+  DEFINE NETWORK_VLAN_ENABLE            = FALSE
+
+!include NetworkPkg/NetworkDefines.dsc.inc
+
 !include MdePkg/MdeLibs.dsc.inc
 
 [LibraryClasses]
@@ -334,6 +351,11 @@
   # Ext4 driver
   Ext4Pkg/Ext4Dxe/Ext4Dxe.inf
 
+  #
+  # Network Support
+  #
+  !include NetworkPkg/NetworkComponents.dsc.inc
+
 [LibraryClasses]
   NULL|OpenCorePkg/Library/OcCompilerIntrinsicsLib/OcCompilerIntrinsicsLib.inf
 
@@ -367,6 +389,10 @@
   gEfiMdeModulePkgTokenSpaceGuid.PcdSerialPciDeviceInfo|{0xFF,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}
   gEfiMdeModulePkgTokenSpaceGuid.PcdSerialExtendedTxFifoSize|64
   gEfiMdeModulePkgTokenSpaceGuid.PcdSerialRegisterStride|1
+  #
+  # Network Pcds
+  #
+  !include NetworkPkg/NetworkPcds.dsc.inc
 
 [BuildOptions]
   # While there are no PCDs as of now, there at least are some custom macros.
@@ -395,3 +421,5 @@
   XCODE:*_*_*_MTOC_FLAGS = -align 0x1000
   CLANGPDB:*_*_*_DLINK_FLAGS = /ALIGN:4096 /FILEALIGN:512
   CLANGGCC:*_*_*_DLINK_FLAGS = -z common-page-size=0x1000
+
+  !include NetworkPkg/NetworkBuildOptions.dsc.inc

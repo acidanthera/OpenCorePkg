@@ -1,4 +1,4 @@
-## @file 
+## @file
 #
 # This Package provides all definitions(including functions, MACROs, structures and library classes)
 # and libraries instances, which are only used by Duet platform.
@@ -33,10 +33,10 @@
 
   ## Include/Duet/Guid/FlashMapHob.h
   gEfiFlashMapHobGuid           = {0xb091e7d2, 0x05a0, 0x4198, {0x94, 0xf0, 0x74, 0xb7, 0xb8, 0xc5, 0x54, 0x59 }}
-  
+
   ## Include/Duet/Guid/PciOptionRomTable.h
   gEfiPciOptionRomTableGuid     = {0x7462660F, 0x1CBD, 0x48DA, {0xAD, 0x11, 0x91, 0x71, 0x79, 0x13, 0x83, 0x1C }}
-  
+
   ## Include/Duet/Guid/DxeCoreFileName.h
   gDxeCoreFileNameGuid          = {0xD6A2CB7F, 0x6A18, 0x4e2f, {0xB4, 0x3B, 0x99, 0x20, 0xA7, 0x33, 0x70, 0x0A }}
 
