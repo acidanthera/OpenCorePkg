@@ -10,6 +10,7 @@ OpenCore Changelog
 - Fixed crash while using `SysReport` on Pentium 4 systems
 - Fixed crash after ExitBootServices() is called while using DEBUG builds and file logging
 - Fixed 32-bit userspace build support on macOS (use High Sierra 10.13 and below)
+- Added basic set of NetworkPkg drivers with HTTP boot support
 
 #### v0.8.3
 - Added ext4 file system driver
