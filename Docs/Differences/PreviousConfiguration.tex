@@ -94,7 +94,7 @@
 
        \vspace{0.2in}
 
-       Reference Manual (0.8.3)
+       Reference Manual (0.8.4)
 
        \vspace{0.2in}
 
@@ -427,7 +427,6 @@ should not be relied on.
         child [missing] {}
         child [missing] {}
         child [missing] {}
-        child [missing] {}
         child { node {Drivers}
           child { node [optional] {MyDriver.efi}}
           child { node [optional] {OtherDriver.efi}}
@@ -484,8 +483,7 @@ should not be relied on.
     child [missing] {}
     child [missing] {}
     child [missing] {}
-    child [missing] {}
-    child { node {Kernels}
+    child { node [optional] {Kernels}
       child { node [optional] {kernel}}
       child { node [optional] {kernelcache}}
       child { node [optional] {prelinkedkernel}}
@@ -494,14 +492,14 @@ should not be relied on.
     child [missing] {}
     child [missing] {}
     child { node [optional] {boot}}
-    child { node {NVRAM}
+    child { node [optional] {opencore-YYYY-MM-DD-HHMMSS.txt}}
+    child { node [optional] {panic-YYYY-MM-DD-HHMMSS.txt}}
+    child { node [optional] {SysReport}}
+    child { node [optional] {NVRAM}
       child { node [optional] {nvram.plist}}
       child { node [optional] {nvram.fallback}}
       child { node [optional] {nvram.used}}
     }
-    child { node [optional] {opencore-YYYY-MM-DD-HHMMSS.txt}}
-    child { node [optional] {panic-YYYY-MM-DD-HHMMSS.txt}}
-    child { node [optional] {SysReport}}
   ;
 \end{tikzpicture}
 \break
@@ -2219,7 +2217,7 @@ Kernel and kext changes apply with the following effective order:
   \emph{Note}: It is risky to \texttt{Exclude} a kext that is a dependency of others.
 
   \emph{Note 2}: At this moment \texttt{Exclude} is only applied to \texttt{prelinkedkernel} and newer mechanisms.
-  
+
   \emph{Note 3}: In most cases strategy \texttt{Exclude} requires the new kext to be injected as a replacement.
 
 \end{enumerate}
@@ -2540,7 +2538,7 @@ Kernel and kext changes apply with the following effective order:
     \item Find \texttt{CFG Lock, VarStoreInfo (VarOffset/VarName):} in \texttt{Setup.txt} and
       remember the offset right after it (e.g. \texttt{0x123}).
     \item Download and run \href{http://brains.by/posts/bootx64.7z}{Modified GRUB Shell} compiled by
-      \href{https://geektimes.com/post/258090}{brainsucker} or use
+      \href{https://habr.com/geektimes/post/258090}{brainsucker} or use
       \href{https://github.com/datasone/grub-mod-setup_var}{a newer version} by
       \href{https://github.com/datasone}{datasone}.
     \item Enter \texttt{setup\_var 0x123 0x00} command, where \texttt{0x123} should be replaced by
@@ -3424,7 +3422,7 @@ the default boot entry choice will remain changed until the next manual reconfig
   It is also possible to use \texttt{efibootmgr} within Linux to remove the offending entry, if you have a working
   version of Linux on the machine. Linux must be started either not via OpenCore, or via OpenCore with \texttt{RequestBootVarRouting} disabled
   for this to work.
-  
+
 \item
   \texttt{LauncherPath}\\
   \textbf{Type}: \texttt{plist\ string}\\
@@ -3623,7 +3621,7 @@ the default boot entry choice will remain changed until the next manual reconfig
   held down. Earlier than this, the key press may not be registered. On some platforms,
   setting this option to a minimum of \texttt{5000-10000} microseconds is also required
   to access \texttt{action hotkeys} due to the nature of the keyboard driver.
-  
+
   If the boot chime is configured (see audio configuration options) then at the expense
   of slower startup, an even longer delay of half to one second (\texttt{500000-1000000})
   may be used to create behaviour similar to a real Mac, where the chime itself can be used
@@ -4193,13 +4191,13 @@ nvram 4D1FDA02-38C7-4A6A-9CC6-4BCCA8B30102:oem-board   # SMBIOS Type2 ProductNam
   \texttt{PasswordHash}\\
   \textbf{Type}: \texttt{plist\ data} 64 bytes\\
   \textbf{Failsafe}: all zero\\
-  \textbf{Description}: Password hash used when \texttt{EnabledPassword} is set.
+  \textbf{Description}: Password hash used when \texttt{EnablePassword} is set.
 
 \item
   \texttt{PasswordSalt}\\
   \textbf{Type}: \texttt{plist\ data}\\
   \textbf{Failsafe}: empty\\
-  \textbf{Description}: Password salt used when \texttt{EnabledPassword} is set.
+  \textbf{Description}: Password salt used when \texttt{EnablePassword} is set.
 
 \item \label{securevaulting}
   \texttt{Vault}\\
@@ -4659,6 +4657,21 @@ rm vault.pub
   \textbf{Description}: Specify the content flavour for this entry.
   See \hyperref[oc-attr-use-flavour-icon]{\texttt{OC\_ATTR\_USE\_FLAVOUR\_ICON}} flag for documentation.
 
+  \item
+  \texttt{FullNvramAccess}\\
+  \textbf{Type}: \texttt{plist\ boolean}\\
+  \textbf{Failsafe}: \texttt{false}\\
+  \textbf{Description}: Disable \texttt{OpenRuntime} NVRAM protection during usage of a tool.
+
+  This disables all of the NVRAM protections provided by
+  \texttt{OpenRuntime.efi}, during the time a tool is in use. It should
+  normally be avoided, but may be required for instance if a tool needs
+  to access NVRAM directly without the redirections put in place by
+  \texttt{RequestBootVarRouting}.
+
+  \emph{Note}: This option is only valid for \texttt{Tools} and cannot be
+  specified for \texttt{Entries} (is always \texttt{false}).
+
 \item
   \texttt{Name}\\
   \textbf{Type}: \texttt{plist\ string}\\
@@ -4694,7 +4707,7 @@ rm vault.pub
   \texttt{memtest86} (for logging and configuration), or \texttt{Shell} (for
   automatic script execution).
 
-  \emph{Note}: This property is only valid for \texttt{Tools} and cannot be
+  \emph{Note}: This option is only valid for \texttt{Tools} and cannot be
   specified for \texttt{Entries} (is always \texttt{true}).
 
 \item
@@ -6756,7 +6769,7 @@ options for the driver may be specified in \texttt{UEFI/Drivers/Arguments}:
   output of \texttt{ls -l /dev/disk/by-partuuid}. \medskip
 
 	\item \texttt{autoopts[+]="\{options\}"} - Default: None specified. \medskip
-  
+
   Allows manually specifying kernel options to use in autodetect mode. The alternative format \texttt{autoopts:\{PARTUUID\}}
   is more suitable where there are multiple distros, but \texttt{autoopts} with no PARTUUID required may be more
   convenient for just one distro.
@@ -7128,21 +7141,18 @@ for additional options.
 \item
   \texttt{APFS}\\
   \textbf{Type}: \texttt{plist\ dict}\\
-  \textbf{Failsafe}: None\\
   \textbf{Description}: Provide APFS support as configured in the
   \hyperref[uefiapfsprops]{APFS Properties} section below.
 
 \item
   \texttt{AppleInput}\\
   \textbf{Type}: \texttt{plist\ dict}\\
-  \textbf{Failsafe}: None\\
   \textbf{Description}: Configure the re-implementation of the Apple Event protocol
   described in the \hyperref[uefiappleinputprops]{AppleInput Properties} section below.
 
 \item
   \texttt{Audio}\\
   \textbf{Type}: \texttt{plist\ dict}\\
-  \textbf{Failsafe}: None\\
   \textbf{Description}: Configure audio backend support described
   in the \hyperref[uefiaudioprops]{\texttt{Audio Properties}} section below.
 
@@ -7213,21 +7223,18 @@ for additional options.
 \item
   \texttt{Input}\\
   \textbf{Type}: \texttt{plist\ dict}\\
-  \textbf{Failsafe}: None\\
   \textbf{Description}: Apply individual settings designed for input (keyboard and mouse) in the
   \hyperref[uefiinputprops]{Input Properties} section below.
 
 \item
   \texttt{Output}\\
   \textbf{Type}: \texttt{plist\ dict}\\
-  \textbf{Failsafe}: None\\
   \textbf{Description}: Apply individual settings designed for output (text and graphics) in the
   \hyperref[uefioutputprops]{Output Properties} section below.
 
 \item
   \texttt{ProtocolOverrides}\\
   \textbf{Type}: \texttt{plist\ dict}\\
-  \textbf{Failsafe}: None\\
   \textbf{Description}: Force builtin versions of certain protocols described
   in the \hyperref[uefiprotoprops]{ProtocolOverrides Properties} section below.
 
@@ -7236,7 +7243,6 @@ for additional options.
 \item
   \texttt{Quirks}\\
   \textbf{Type}: \texttt{plist\ dict}\\
-  \textbf{Failsafe}: None\\
   \textbf{Description}: Apply individual firmware quirks described in the
   \hyperref[uefiquirkprops]{Quirks Properties} section below.
 
@@ -7622,7 +7628,7 @@ for additional options.
   \texttt{HDA: Connecting controller - \textit{\textbf{PciRoot(0x0)/Pci(0x1B,0x0)}}}
 
   Finally, \texttt{gfxutil -f HDEF} command can be used in macOS to obtain the device path.
-  
+
   Specifying an empty device path results in the first available codec and audio controller being used. The value
   of \texttt{AudioCodec} is ignored in this case. This can be a convenient initial option to try to get UEFI
   audio working. Manual settings as above will be required when this default value does not work.
@@ -7653,9 +7659,9 @@ for additional options.
   \texttt{HDA:  | Port widget @ 0x10 is an output (pin defaults 0x4BE030) (\textit{\textbf{bitmask 8}})}
 
   Further information on the available output channels may be found from a Linux codec dump using the command:
-  
+
   \texttt{cat /proc/asound/card\{n\}/codec\#\{m\}}
-  
+
   Using \texttt{AudioOutMask}, it is possible to play sound to more than one channel (e.g. main speaker plus bass speaker;
   headphones plus speakers) as long as all the chosen outputs support the sound file format in use; if any do not then no
   sound will play and a warning will be logged.
@@ -7698,7 +7704,7 @@ for additional options.
   All UEFI audio will use this gain setting when the system amplifier gain read from the \texttt{SystemAudioVolumeDB}
   NVRAM variable is higher than this. This is to avoid over-loud UEFI audio when the system volume is set very high,
   or the \texttt{SystemAudioVolumeDB} NVRAM value has been misconfigured.
-  
+
   \emph{Note 1}: Decibels (dB) specify gain (postive values; increase in volume) or attenuation (negative values; decrease
   in volume) compared to some reference level. When you hear the sound level of a jet plane expressed as 120 decibels, say,
   the reference level is the sound level just audible to an average human. However generally
@@ -7706,7 +7712,7 @@ for additional options.
   decibels to specify volume level. On most Intel HDA hardware the reference level of 0 dB is the
   \emph{loudest} volume of the hardware, and all lower volumes are therefore negative numbers. The quietest volume
   on typical sound hardware is around -55 dB to -60 dB.
-  
+
   \emph{Note 2}: Matching how macOS handles decibel values, this value is converted to a signed byte; therefore values
   outside $-128$ dB to $+127$ dB (which are well beyond physically plausible volume levels) are not allowed.
 
