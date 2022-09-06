@@ -332,7 +332,18 @@ typedef struct {
   // Prelinked is 32-bit.
   //
   BOOLEAN                                Is32Bit;
+  //
+  // Whether this context is member of a PAGEABLE_CONTEXT.
+  //
+  BOOLEAN                                HasPageable;
 } PRELINKED_CONTEXT;
+
+typedef struct {
+  //
+  // Context representing the base kernel collection.
+  //
+  PRELINKED_CONTEXT   PrelinkedContext;
+} PAGEABLE_CONTEXT;
 
 //
 // Kernel and kext patching context.
@@ -1037,6 +1048,32 @@ UINT64
 KcFixupValue (
   IN UINT64       Value,
   IN CONST CHAR8  *Name OPTIONAL
+  );
+
+/**
+  Construct pageable context for later modification.
+  Must be freed with PageableContextFree on success.
+  Note, that BaseAllocSize and PageableAllocSize never change, and are to be estimated.
+
+  @param[in,out] Context               Pageable context.
+  @param[in,out] Base                  Unpacked BootKC buffer (Mach-O image).
+  @param[in]     BaseSize              Unpacked BootKC buffer size.
+  @param[in]     BaseAllocSize         Unpacked BootKC buffer allocated size.
+  @param[in,out] Pageable              Unpacked PageableKC buffer (Mach-O image).
+  @param[in]     PageableSize          Unpacked PageableKC buffer size.
+  @param[in]     PageableAllocSize     Unpacked PageableKC buffer allocated size.
+
+  @return  EFI_SUCCESS on success.
+**/
+EFI_STATUS
+PageableContextInit (
+  IN OUT  PAGEABLE_CONTEXT   *Context,
+  IN OUT  UINT8              *Base,
+  IN      UINT32             BaseSize,
+  IN      UINT32             BaseAllocSize,
+  IN OUT  UINT8              *Pageable,
+  IN      UINT32             PageableSize,
+  IN      UINT32             PageableAllocSize
   );
 
 /**

@@ -34,6 +34,7 @@
   Link.c
   CommonPatches.c
   KernelCollection.c
+  PageableContext.c
   KernelVersion.c
   KxldState.c
   PrelinkedContext.c
