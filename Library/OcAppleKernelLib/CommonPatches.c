@@ -230,7 +230,7 @@ PATCHER_GENERIC_PATCH
 STATIC
 EFI_STATUS
 PatchAppleXcpmCfgLock (
-  IN OUT PATCHER_CONTEXT  *Patcher OPTIONAL,
+  IN OUT PATCHER_CONTEXT  *Patcher,
   IN     UINT32           KernelVersion
   )
 {
@@ -358,7 +358,7 @@ PATCHER_GENERIC_PATCH
 STATIC
 EFI_STATUS
 PatchAppleXcpmExtraMsrs (
-  IN OUT PATCHER_CONTEXT  *Patcher OPTIONAL,
+  IN OUT PATCHER_CONTEXT  *Patcher,
   IN     UINT32           KernelVersion
   )
 {
@@ -487,7 +487,7 @@ CONST UINT8
 STATIC
 EFI_STATUS
 PatchAppleXcpmForceBoost (
-  IN OUT PATCHER_CONTEXT  *Patcher OPTIONAL,
+  IN OUT PATCHER_CONTEXT  *Patcher,
   IN     UINT32           KernelVersion
   )
 {
@@ -1256,7 +1256,7 @@ PatchCustomPciSerialPmio (
 STATIC
 EFI_STATUS
 PatchCustomPciSerialDevice (
-  IN OUT PATCHER_CONTEXT  *Patcher OPTIONAL,
+  IN OUT PATCHER_CONTEXT  *Patcher,
   IN     UINT32           KernelVersion
   )
 {
@@ -1366,7 +1366,7 @@ PATCHER_GENERIC_PATCH
 STATIC
 EFI_STATUS
 PatchPanicKextDump (
-  IN OUT PATCHER_CONTEXT  *Patcher OPTIONAL,
+  IN OUT PATCHER_CONTEXT  *Patcher,
   IN     UINT32           KernelVersion
   )
 {
@@ -1527,7 +1527,7 @@ PATCHER_GENERIC_PATCH
 STATIC
 EFI_STATUS
 PatchLapicKernelPanic (
-  IN OUT PATCHER_CONTEXT  *Patcher OPTIONAL,
+  IN OUT PATCHER_CONTEXT  *Patcher,
   IN     UINT32           KernelVersion
   )
 {
@@ -1645,7 +1645,7 @@ PATCHER_GENERIC_PATCH
 STATIC
 EFI_STATUS
 PatchPowerStateTimeout (
-  IN OUT PATCHER_CONTEXT  *Patcher OPTIONAL,
+  IN OUT PATCHER_CONTEXT  *Patcher,
   IN     UINT32           KernelVersion
   )
 {
@@ -1786,7 +1786,7 @@ PatchAppleRtcChecksum (
 STATIC
 EFI_STATUS
 PatchSegmentJettison (
-  IN OUT PATCHER_CONTEXT  *Patcher OPTIONAL,
+  IN OUT PATCHER_CONTEXT  *Patcher,
   IN     UINT32           KernelVersion
   )
 {
@@ -2032,7 +2032,7 @@ CONST UINT8
 STATIC
 EFI_STATUS
 PatchLegacyCommpage (
-  IN OUT PATCHER_CONTEXT  *Patcher OPTIONAL,
+  IN OUT PATCHER_CONTEXT  *Patcher,
   IN     UINT32           KernelVersion
   )
 {
