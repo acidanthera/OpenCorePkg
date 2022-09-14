@@ -1,7 +1,7 @@
 BIOSVendor: "Apple Inc."
-BIOSVersion: "433.120.6.0.0"
-BIOSLegacyVersion: "MBA61.88Z.F000.B00.2203161446"
-BIOSReleaseDate: "03/16/2022"
+BIOSVersion: "433.140.2.0.0"
+BIOSLegacyVersion: "MBA61.88Z.F000.B00.2204181525"
+BIOSReleaseDate: "04/18/2022"
 SystemManufacturer: "Apple Inc."
 SystemProductName: "MacBookAir6,2"
 SystemVersion: "1.0"
@@ -75,13 +75,13 @@ SmcEPCI: 0x7B007
 OEMStrings: |-
   Apple ROM Version
     Model:        MBA61
-    EFI Version:  433.120.6.0.0
-    Built by:     root@kn7d8
-    Date:         Wed Mar 16 14:46:17 PDT 2022
-    Revision:     433.120.6 (B&I)
+    EFI Version:  433.140.2.0.0
+    Built by:     root@8465w
+    Date:         Mon Apr 18 15:25:04 PDT 2022
+    Revision:     433.140.2 (B&I)
     ROM Version:  F000_B00
     Build Type:   Official Build, Release
-    Compiler:     clang-1316.0.21.1
+    Compiler:     clang-1316.0.21.3
 Specifications:
   CPUCodename:
     - "Haswell"

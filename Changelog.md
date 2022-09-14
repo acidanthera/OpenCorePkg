@@ -1,5 +1,8 @@
 OpenCore Changelog
 ==================
+#### v0.8.5
+- Updated builtin firmware versions for SMBIOS and the rest
+
 #### v0.8.4
 - Added checks for `Driver` -> `LoadEarly` in ocvalidate
 - Added `FullNvramAccess` option for tools which require direct access to NVRAM
