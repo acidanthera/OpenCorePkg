@@ -188,7 +188,7 @@ PatchKernelCpuIdLegacy (
   //
   Status = PatcherGetSymbolAddress (Patcher, IsTiger ? "_cpuid_get_info" : "_cpuid_set_info", (UINT8 **)&Record);
   if (EFI_ERROR (Status) || (Record >= Last)) {
-    DEBUG ((DEBUG_WARN, "OCAK: Failed to locate _cpuid_%a_info (%p) - %r\n", IsTiger ? "get" : "set", Record, Status));
+    DEBUG ((DEBUG_WARN, "OCAK: [FAIL] Failed to locate _cpuid_%a_info (%p) - %r\n", IsTiger ? "get" : "set", Record, Status));
     return EFI_NOT_FOUND;
   }
 
@@ -245,7 +245,7 @@ PatchKernelCpuIdLegacy (
       //
       Status = PatcherGetSymbolAddress (Patcher, IsLion ? "_bzero" : "_blkclr", (UINT8 **)&BlockClearFunc);
       if (EFI_ERROR (Status) || (Record >= Last)) {
-        DEBUG ((DEBUG_WARN, "OCAK: Failed to locate %a (%p) - %r\n", IsLion ? "_bzero" : "_blkclr", Record, Status));
+        DEBUG ((DEBUG_WARN, "OCAK: [FAIL] Failed to locate %a (%p) - %r\n", IsLion ? "_bzero" : "_blkclr", Record, Status));
         return EFI_NOT_FOUND;
       }
 
@@ -537,7 +537,7 @@ PatchKernelCpuIdLegacy (
   if (IsTigerOld) {
     Status = PatcherGetSymbolAddress (Patcher, "_tsc_init", (UINT8 **)&Record);
     if (EFI_ERROR (Status) || (Record >= Last)) {
-      DEBUG ((DEBUG_WARN, "OCAK: Failed to locate _tsc_init (%p) - %r\n", Record, Status));
+      DEBUG ((DEBUG_WARN, "OCAK: [FAIL] Failed to locate _tsc_init (%p) - %r\n", Record, Status));
       return EFI_NOT_FOUND;
     }
 
@@ -771,7 +771,7 @@ PatchKernelCpuIdLegacy (
   //
   *StartPointer++ = 0xC3;
 
-  DEBUG ((DEBUG_INFO, "OCAK: Legacy CPUID patch completed @ %p\n", StartPointer - Start));
+  DEBUG ((DEBUG_INFO, "OCAK: [OK] Legacy CPUID patch completed @ %p\n", StartPointer - Start));
   return EFI_SUCCESS;
 }
 
@@ -825,7 +825,7 @@ PatchKernelCpuId (
   {
     Status = PatchKernelCpuIdLegacy (Patcher, KernelVersion, CpuInfo, Data, DataMask, Start, Last);
     if (EFI_ERROR (Status)) {
-      DEBUG ((DEBUG_WARN, "OCAK: Failed to patch legacy CPUID - %r\n", Status));
+      DEBUG ((DEBUG_WARN, "OCAK: [FAIL] Failed to patch legacy CPUID - %r\n", Status));
     }
 
     return Status;
@@ -833,7 +833,7 @@ PatchKernelCpuId (
 
   Status = PatcherGetSymbolAddress (Patcher, "_cpuid_set_info", (UINT8 **)&CpuidSetInfo);
   if (EFI_ERROR (Status) || (CpuidSetInfo >= Last)) {
-    DEBUG ((DEBUG_WARN, "OCAK: Failed to locate _cpuid_set_info (%p) - %r\n", CpuidSetInfo, Status));
+    DEBUG ((DEBUG_WARN, "OCAK: [FAIL] Failed to locate _cpuid_set_info (%p) - %r\n", CpuidSetInfo, Status));
     return EFI_NOT_FOUND;
   }
 
@@ -909,7 +909,7 @@ PatchKernelCpuId (
           0x90
           );
 
-        DEBUG ((DEBUG_INFO, "OCAK: Patch success CPUID release\n"));
+        DEBUG ((DEBUG_INFO, "OCAK: [OK] Patch success CPUID release\n"));
         return EFI_SUCCESS;
       }
     }
@@ -919,7 +919,7 @@ PatchKernelCpuId (
     //
     Status = PatcherGetSymbolAddress (Patcher, "_cpuid_set_cpufamily", (UINT8 **)&Record);
     if (EFI_ERROR (Status) || (Record >= Last)) {
-      DEBUG ((DEBUG_WARN, "OCAK: Failed to locate _cpuid_set_cpufamily (%p) - %r\n", Record, Status));
+      DEBUG ((DEBUG_WARN, "OCAK: [FAIL] Failed to locate _cpuid_set_cpufamily (%p) - %r\n", Record, Status));
       return EFI_NOT_FOUND;
     }
 
@@ -941,11 +941,11 @@ PatchKernelCpuId (
 
     FnPatch->AppleFamily1 = FnPatch->AppleFamily2 = OcCpuModelToAppleFamily (Eax);
 
-    DEBUG ((DEBUG_INFO, "OCAK: Patch success CPUID debug\n"));
+    DEBUG ((DEBUG_INFO, "OCAK: [OK] Patch success CPUID debug\n"));
     return EFI_SUCCESS;
   }
 
-  DEBUG ((DEBUG_WARN, "OCAK: Failed to find either CPUID patch (%u)\n", FoundSize));
+  DEBUG ((DEBUG_WARN, "OCAK: [FAIL] Failed to find either CPUID patch (%u)\n", FoundSize));
 
   return EFI_UNSUPPORTED;
 }
@@ -1256,7 +1256,7 @@ PatchProvideCurrentCpuInfoMSR35h (
   // Anyone can test/contribute as needed.
   //
   if (KernelVersion < KERNEL_VERSION_MOJAVE_MIN) {
-    DEBUG ((DEBUG_INFO, "OCAK: Ignoring CPU INFO for AMP below macOS 10.14\n"));
+    DEBUG ((DEBUG_INFO, "OCAK: [OK] Ignoring CPU INFO for AMP below macOS 10.14\n"));
     return EFI_SUCCESS;
   }
 
@@ -1411,7 +1411,7 @@ PatchProvideCurrentCpuInfo (
   Status |= PatcherGetSymbolValue (Patcher, "_bus2tsc", &Bus2TscSymAddr);
 
   if (EFI_ERROR (Status)) {
-    DEBUG ((DEBUG_WARN, "OCAK: Failed to locate one or more TSC symbols - %r\n", Status));
+    DEBUG ((DEBUG_WARN, "OCAK: [FAIL] Failed to locate one or more TSC symbols - %r\n", Status));
     return EFI_NOT_FOUND;
   }
 
@@ -1596,7 +1596,7 @@ PatchProvideCurrentCpuInfo (
   if (IsTigerCacheUnsupported) {
     Status = PatcherGetSymbolAddress (Patcher, "_cpuid_info", (UINT8 **)&Record);
     if (EFI_ERROR (Status) || (Record >= Last)) {
-      DEBUG ((DEBUG_WARN, "OCAK: Failed to locate _cpuid_info (%p) - %r\n", Record, Status));
+      DEBUG ((DEBUG_WARN, "OCAK: [FAIL] Failed to locate _cpuid_info (%p) - %r\n", Record, Status));
       return EFI_NOT_FOUND;
     }
 
@@ -1714,7 +1714,7 @@ PatchProvideCurrentCpuInfo (
       //
       // XNU would panic here.
       //
-      DEBUG ((DEBUG_WARN, "OCAK: Unable to determine CPU cache line size\n"));
+      DEBUG ((DEBUG_WARN, "OCAK: [FAIL] Unable to determine CPU cache line size\n"));
       return EFI_UNSUPPORTED;
     }
 
@@ -1773,10 +1773,10 @@ PatchProvideCurrentCpuInfo (
                &mProvideCurrentCpuInfoZeroMsrThreadCoreCountPatch
                );
     if (EFI_ERROR (Status)) {
-      DEBUG ((DEBUG_INFO, "OCAK: Failed to find CPU MSR 0x35 default value patch - %r\n", Status));
+      DEBUG ((DEBUG_INFO, "OCAK: [FAIL] Failed to find CPU MSR 0x35 default value patch - %r\n", Status));
     }
   } else {
-    DEBUG ((DEBUG_INFO, "OCAK: Skipping CPU MSR 0x35 default value patch on %u\n", KernelVersion));
+    DEBUG ((DEBUG_INFO, "OCAK: [OK] Skipping CPU MSR 0x35 default value patch on %u\n", KernelVersion));
   }
 
   //
@@ -1788,10 +1788,10 @@ PatchProvideCurrentCpuInfo (
                &mProvideCurrentCpuInfoTopologyValidationPatch
                );
     if (EFI_ERROR (Status)) {
-      DEBUG ((DEBUG_INFO, "OCAK: Failed to find CPU topology validation patch - %r\n", Status));
+      DEBUG ((DEBUG_INFO, "OCAK: [FAIL] Failed to find CPU topology validation patch - %r\n", Status));
     }
   } else {
-    DEBUG ((DEBUG_INFO, "OCAK: Skipping CPU topology validation patch on %u\n", KernelVersion));
+    DEBUG ((DEBUG_INFO, "OCAK: [OK] Skipping CPU topology validation patch on %u\n", KernelVersion));
   }
 
   return EFI_SUCCESS;
