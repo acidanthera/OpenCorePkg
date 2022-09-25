@@ -867,10 +867,11 @@ BmExpandHyperVDevicePath (
   //
   // Get SCSI device node from file path, if any.
   //
-  FileScsiPath      = NULL;
-  if ( (DevicePathType (FilePath) == MESSAGING_DEVICE_PATH)
-     && (DevicePathSubType (FilePath) == MSG_SCSI_DP)) {
-    FileScsiPath = (SCSI_DEVICE_PATH *) FilePath;
+  FileScsiPath = NULL;
+  if (  (DevicePathType (FilePath) == MESSAGING_DEVICE_PATH)
+     && (DevicePathSubType (FilePath) == MSG_SCSI_DP))
+  {
+    FileScsiPath = (SCSI_DEVICE_PATH *)FilePath;
     FilePath     = NextDevicePathNode (FilePath);
   }
 
@@ -902,12 +903,12 @@ BmExpandHyperVDevicePath (
       //
       // Skip over SCSI paths if the target of the file path matches the LUN of this one.
       //
-      if (   FileScsiPath != NULL
+      if (  (FileScsiPath != NULL)
          && (DevicePathType (Node) == MESSAGING_DEVICE_PATH)
          && (DevicePathSubType (Node) == MSG_SCSI_DP))
       {
-        HvScsiPath = (SCSI_DEVICE_PATH*) Node;
-        if (HvScsiPath->Pun == FileScsiPath->Lun && HvScsiPath->Lun == FileScsiPath->Pun) {
+        HvScsiPath = (SCSI_DEVICE_PATH *)Node;
+        if ((HvScsiPath->Pun == FileScsiPath->Lun) && (HvScsiPath->Lun == FileScsiPath->Pun)) {
           continue;
         } else {
           break;
