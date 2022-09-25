@@ -838,6 +838,9 @@ BmConnectUsbShortFormDevicePath (
     /Scsi(0x0,0x0)
     /HD(2,GPT,63882141-5773-4630-B8FD-2C6E4A491C78,0x64028,0x3A66090)
 
+  Additionally, MacHyperVSupport exposes disks as individual SCSI targets to properly support hotplug
+  where Hyper-V exposes just a single target.
+
   @param[in] FilePath macOS-made device path with ACPI parts trimmed (i.e. Scsi(0x0, 0x0)/.../File).
 
   @return  real Hyper-V device path or NULL.
@@ -856,8 +859,20 @@ BmExpandHyperVDevicePath (
   EFI_DEVICE_PATH_PROTOCOL  *Node;
   EFI_DEVICE_PATH_PROTOCOL  *NewDevicePath;
   UINTN                     HvSuffixSize;
+  SCSI_DEVICE_PATH          *FileScsiPath;
+  SCSI_DEVICE_PATH          *HvScsiPath;
 
   DebugPrintDevicePath (DEBUG_INFO, "OCDP: Expanding Hyper-V DP", FilePath);
+
+  //
+  // Get SCSI device node from file path, if any.
+  //
+  FileScsiPath      = NULL;
+  if ( (DevicePathType (FilePath) == MESSAGING_DEVICE_PATH)
+     && (DevicePathSubType (FilePath) == MSG_SCSI_DP)) {
+    FileScsiPath = (SCSI_DEVICE_PATH *) FilePath;
+    FilePath     = NextDevicePathNode (FilePath);
+  }
 
   Status = gBS->LocateHandleBuffer (
                   ByProtocol,
@@ -884,6 +899,21 @@ BmExpandHyperVDevicePath (
     DebugPrintDevicePath (DEBUG_INFO, "OCDP: Matching Hyper-V DP", HvDevicePath);
 
     for (Node = HvDevicePath; !IsDevicePathEnd (Node); Node = NextDevicePathNode (Node)) {
+      //
+      // Skip over SCSI paths if the target of the file path matches the LUN of this one.
+      //
+      if (   FileScsiPath != NULL
+         && (DevicePathType (Node) == MESSAGING_DEVICE_PATH)
+         && (DevicePathSubType (Node) == MSG_SCSI_DP))
+      {
+        HvScsiPath = (SCSI_DEVICE_PATH*) Node;
+        if (HvScsiPath->Pun == FileScsiPath->Lun && HvScsiPath->Lun == FileScsiPath->Pun) {
+          continue;
+        } else {
+          break;
+        }
+      }
+
       //
       // Skip till we find the matching node in the middle of macOS-made DP.
       //
