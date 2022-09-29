@@ -66,12 +66,12 @@ PatchAppleCpuPmCfgLock (
   // such that it will patched.
   //
   if (OcMatchDarwinVersion (KernelVersion, KERNEL_VERSION_VENTURA_MIN, 0)) {
-    DEBUG ((DEBUG_INFO, "OCAK: Skipping AppleCpuPmCfgLock patch on %u\n", KernelVersion));
+    DEBUG ((DEBUG_INFO, "OCAK: [OK] Skipping AppleCpuPmCfgLock patch on kernel version %u\n", KernelVersion));
     return EFI_SUCCESS;
   }
 
   if (Patcher == NULL) {
-    DEBUG ((DEBUG_INFO, "OCAK: Skipping %a on NULL Patcher on %u\n", __func__, KernelVersion));
+    DEBUG ((DEBUG_INFO, "OCAK: [OK] Skipping %a on NULL Patcher on kernel version %u\n", __func__, KernelVersion));
     return EFI_NOT_FOUND;
   }
 
@@ -148,7 +148,13 @@ PatchAppleCpuPmCfgLock (
   //
   // At least one patch must be successful for this to work.
   //
-  return Count > 0 ? EFI_SUCCESS : EFI_NOT_FOUND;
+  if (Count > 0) {
+    DEBUG ((DEBUG_INFO, "OCAK: [OK] Success AppleCpuPmCfgLock patch\n"));
+    return EFI_SUCCESS;
+  }
+
+  DEBUG ((DEBUG_INFO, "OCAK: [FAIL] Failed to apply AppleCpuPmCfgLock patch\n"));
+  return EFI_NOT_FOUND;
 }
 
 #pragma pack(push, 1)
@@ -249,7 +255,7 @@ PatchAppleXcpmCfgLock (
   // XCPM is not available before macOS 10.8.5.
   //
   if (!OcMatchDarwinVersion (KernelVersion, KERNEL_VERSION (KERNEL_VERSION_MOUNTAIN_LION, 5, 0), 0)) {
-    DEBUG ((DEBUG_INFO, "OCAK: Skipping XcpmCfgLock on %u\n", KernelVersion));
+    DEBUG ((DEBUG_INFO, "OCAK: [OK] Skipping XcpmCfgLock on %u\n", KernelVersion));
     return EFI_SUCCESS;
   }
 
@@ -260,7 +266,7 @@ PatchAppleXcpmCfgLock (
 
   Status = PatcherGetSymbolAddress (Patcher, "_xcpm_core_scope_msrs", (UINT8 **)&Record);
   if (EFI_ERROR (Status)) {
-    DEBUG ((DEBUG_WARN, "OCAK: Failed to locate _xcpm_core_scope_msrs - %r\n", Status));
+    DEBUG ((DEBUG_WARN, "OCAK: [FAIL] Failed to locate _xcpm_core_scope_msrs for XcpmCfgLock patch - %r\n", Status));
     return EFI_NOT_FOUND;
   }
 
@@ -293,7 +299,13 @@ PatchAppleXcpmCfgLock (
     }
   }
 
-  return (Replacements > 0 && !EFI_ERROR (Status)) ? EFI_SUCCESS : EFI_NOT_FOUND;
+  if ((Replacements > 0) && !EFI_ERROR (Status)) {
+    DEBUG ((DEBUG_INFO, "OCAK: [OK] Success XcpmCfgLock patch\n"));
+    return EFI_SUCCESS;
+  }
+
+  DEBUG ((DEBUG_INFO, "OCAK: [FAIL] Failed to apply XcpmCfgLock patch\n"));
+  return EFI_NOT_FOUND;
 }
 
 STATIC
@@ -376,7 +388,7 @@ PatchAppleXcpmExtraMsrs (
   // XCPM is not available before macOS 10.8.5.
   //
   if (!OcMatchDarwinVersion (KernelVersion, KERNEL_VERSION (KERNEL_VERSION_MOUNTAIN_LION, 5, 0), 0)) {
-    DEBUG ((DEBUG_INFO, "OCAK: Skipping XcpmExtraMsrs on %u\n", KernelVersion));
+    DEBUG ((DEBUG_INFO, "OCAK: [OK] Skipping XcpmExtraMsrs on %u\n", KernelVersion));
     return EFI_SUCCESS;
   }
 
@@ -387,7 +399,7 @@ PatchAppleXcpmExtraMsrs (
 
   Status = PatcherGetSymbolAddress (Patcher, "_xcpm_pkg_scope_msrs", (UINT8 **)&Record);
   if (EFI_ERROR (Status)) {
-    DEBUG ((DEBUG_WARN, "OCAK: Failed to locate _xcpm_pkg_scope_msrs - %r\n", Status));
+    DEBUG ((DEBUG_WARN, "OCAK: [FAIL] Failed to locate _xcpm_pkg_scope_msrs for XcpmExtraMsrs patch - %r\n", Status));
     return EFI_NOT_FOUND;
   }
 
@@ -415,7 +427,7 @@ PatchAppleXcpmExtraMsrs (
 
   Status = PatcherGetSymbolAddress (Patcher, "_xcpm_SMT_scope_msrs", (UINT8 **)&Record);
   if (EFI_ERROR (Status)) {
-    DEBUG ((DEBUG_WARN, "OCAK: Failed to locate _xcpm_SMT_scope_msrs - %r\n", Status));
+    DEBUG ((DEBUG_WARN, "OCAK: [FAIL] Failed to locate _xcpm_SMT_scope_msrs for XcpmExtraMsrs patch - %r\n", Status));
     return EFI_NOT_FOUND;
   }
 
@@ -448,7 +460,13 @@ PatchAppleXcpmExtraMsrs (
     }
   }
 
-  return (Replacements > 0 && !EFI_ERROR (Status)) ? EFI_SUCCESS : EFI_NOT_FOUND;
+  if ((Replacements > 0) && !EFI_ERROR (Status)) {
+    DEBUG ((DEBUG_INFO, "OCAK: [OK] Success XcpmExtraMsrs patch\n"));
+    return EFI_SUCCESS;
+  }
+
+  DEBUG ((DEBUG_INFO, "OCAK: [FAIL] Failed to apply XcpmExtraMsrs patch\n"));
+  return EFI_NOT_FOUND;
 }
 
 STATIC
@@ -504,7 +522,7 @@ PatchAppleXcpmForceBoost (
   // XCPM is not available before macOS 10.8.5.
   //
   if (!OcMatchDarwinVersion (KernelVersion, KERNEL_VERSION (KERNEL_VERSION_MOUNTAIN_LION, 5, 0), 0)) {
-    DEBUG ((DEBUG_INFO, "OCAK: Skipping XcpmForceBoost on %u\n", KernelVersion));
+    DEBUG ((DEBUG_INFO, "OCAK: [OK] Skipping XcpmForceBoost on %u\n", KernelVersion));
     return EFI_SUCCESS;
   }
 
@@ -534,7 +552,7 @@ PatchAppleXcpmForceBoost (
   }
 
   if (Current == Last) {
-    DEBUG ((DEBUG_WARN, "OCAK: Failed to locate MSR_IA32_PERF_CONTROL write\n"));
+    DEBUG ((DEBUG_WARN, "OCAK: [FAIL] Failed to locate MSR_IA32_PERF_CONTROL write for XcpmForceBoost patch\n"));
     return EFI_NOT_FOUND;
   }
 
@@ -557,11 +575,11 @@ PatchAppleXcpmForceBoost (
   }
 
   if (Current < Start) {
-    DEBUG ((DEBUG_WARN, "OCAK: Failed to locate MSR_IA32_PERF_CONTROL prologue\n"));
+    DEBUG ((DEBUG_WARN, "OCAK: [FAIL] Failed to locate MSR_IA32_PERF_CONTROL prologue for XcpmForceBoost patch\n"));
     return EFI_NOT_FOUND;
   }
 
-  DEBUG ((DEBUG_INFO, "OCAK: Patch write max to MSR_IA32_PERF_CONTROL\n"));
+  DEBUG ((DEBUG_INFO, "OCAK: [OK] Patch write max to MSR_IA32_PERF_CONTROL for XcpmForceBoost patch\n"));
   CopyMem (Current, mPerfCtrlMax, sizeof (mPerfCtrlMax));
   return EFI_SUCCESS;
 }
@@ -661,20 +679,20 @@ PatchUsbXhciPortLimit1 (
   // Thanks to ydeng discovering this.
   //
   if (!OcMatchDarwinVersion (KernelVersion, KERNEL_VERSION (KERNEL_VERSION_MOJAVE, 5, 0), 0)) {
-    DEBUG ((DEBUG_INFO, "OCAK: Skipping port patch IOUSBHostFamily on %u\n", KernelVersion));
+    DEBUG ((DEBUG_INFO, "OCAK: [OK] Skipping port patch IOUSBHostFamily on %u\n", KernelVersion));
     return EFI_SUCCESS;
   }
 
   if (Patcher == NULL) {
-    DEBUG ((DEBUG_INFO, "OCAK: Skipping %a on NULL Patcher on %u\n", __func__, KernelVersion));
+    DEBUG ((DEBUG_INFO, "OCAK: [OK] Skipping %a on NULL Patcher on %u\n", __func__, KernelVersion));
     return EFI_NOT_FOUND;
   }
 
   Status = PatcherApplyGenericPatch (Patcher, &mRemoveUsbLimitIoP1Patch);
   if (EFI_ERROR (Status)) {
-    DEBUG ((DEBUG_INFO, "OCAK: Failed to apply port patch com.apple.iokit.IOUSBHostFamily - %r\n", Status));
+    DEBUG ((DEBUG_INFO, "OCAK: [FAIL] Failed to apply port patch com.apple.iokit.IOUSBHostFamily - %r\n", Status));
   } else {
-    DEBUG ((DEBUG_INFO, "OCAK: Patch success port com.apple.iokit.IOUSBHostFamily\n"));
+    DEBUG ((DEBUG_INFO, "OCAK: [OK] Patch success port com.apple.iokit.IOUSBHostFamily\n"));
   }
 
   return Status;
@@ -690,12 +708,12 @@ PatchUsbXhciPortLimit2 (
   EFI_STATUS  Status;
 
   if (!OcMatchDarwinVersion (KernelVersion, KERNEL_VERSION_HIGH_SIERRA_MIN, 0)) {
-    DEBUG ((DEBUG_INFO, "OCAK: Skipping modern port patch AppleUSBXHCI on %u\n", KernelVersion));
+    DEBUG ((DEBUG_INFO, "OCAK: [OK] Skipping modern port patch AppleUSBXHCI on %u\n", KernelVersion));
     return EFI_SUCCESS;
   }
 
   if (Patcher == NULL) {
-    DEBUG ((DEBUG_INFO, "OCAK: Skipping %a on NULL Patcher on %u\n", __func__, KernelVersion));
+    DEBUG ((DEBUG_INFO, "OCAK: [OK] Skipping %a on NULL Patcher on %u\n", __func__, KernelVersion));
     return EFI_NOT_FOUND;
   }
 
@@ -726,9 +744,9 @@ PatchUsbXhciPortLimit2 (
     // We do not need to patch com.apple.driver.usb.AppleUSBXHCI if this patch was successful.
     // Only legacy systems require com.apple.driver.usb.AppleUSBXHCI to be patched.
     //
-    DEBUG ((DEBUG_INFO, "OCAK: Patch success com.apple.driver.usb.AppleUSBXHCI\n"));
+    DEBUG ((DEBUG_INFO, "OCAK: [OK] Patch success com.apple.driver.usb.AppleUSBXHCI\n"));
   } else {
-    DEBUG ((DEBUG_INFO, "OCAK: Failed to apply patch com.apple.driver.usb.AppleUSBXHCI - %r\n", Status));
+    DEBUG ((DEBUG_INFO, "OCAK: [FAIL] Failed to apply patch com.apple.driver.usb.AppleUSBXHCI - %r\n", Status));
   }
 
   //
@@ -737,7 +755,7 @@ PatchUsbXhciPortLimit2 (
   if (  EFI_ERROR (Status)
      && OcMatchDarwinVersion (KernelVersion, KERNEL_VERSION_HIGH_SIERRA_MIN, KERNEL_VERSION_HIGH_SIERRA_MAX))
   {
-    DEBUG ((DEBUG_INFO, "OCAK: Assuming success for AppleUSBXHCI on %u\n", KernelVersion));
+    DEBUG ((DEBUG_INFO, "OCAK: [OK] Assuming success for AppleUSBXHCI on %u\n", KernelVersion));
     return EFI_SUCCESS;
   }
 
@@ -754,12 +772,12 @@ PatchUsbXhciPortLimit3 (
   EFI_STATUS  Status;
 
   if (!OcMatchDarwinVersion (KernelVersion, KERNEL_VERSION_EL_CAPITAN_MIN, KERNEL_VERSION_HIGH_SIERRA_MAX)) {
-    DEBUG ((DEBUG_INFO, "OCAK: Skipping legacy port patch AppleUSBXHCIPCI on %u\n", KernelVersion));
+    DEBUG ((DEBUG_INFO, "OCAK: [OK] Skipping legacy port patch AppleUSBXHCIPCI on %u\n", KernelVersion));
     return EFI_SUCCESS;
   }
 
   if (Patcher == NULL) {
-    DEBUG ((DEBUG_INFO, "OCAK: Skipping %a on NULL Patcher on %u\n", __func__, KernelVersion));
+    DEBUG ((DEBUG_INFO, "OCAK: [OK] Skipping %a on NULL Patcher on %u\n", __func__, KernelVersion));
     return EFI_NOT_FOUND;
   }
 
@@ -768,9 +786,9 @@ PatchUsbXhciPortLimit3 (
   //
   Status = PatcherApplyGenericPatch (Patcher, &mRemoveUsbLimitV1Patch);
   if (EFI_ERROR (Status)) {
-    DEBUG ((DEBUG_INFO, "OCAK: Failed to apply legacy port patch AppleUSBXHCIPCI - %r\n", Status));
+    DEBUG ((DEBUG_INFO, "OCAK: [FAIL] Failed to apply legacy port patch AppleUSBXHCIPCI - %r\n", Status));
   } else {
-    DEBUG ((DEBUG_INFO, "OCAK: Patch success apply legacy port AppleUSBXHCIPCI\n"));
+    DEBUG ((DEBUG_INFO, "OCAK: [OK] Patch success apply legacy port AppleUSBXHCIPCI\n"));
   }
 
   //
@@ -779,7 +797,7 @@ PatchUsbXhciPortLimit3 (
   if (  EFI_ERROR (Status)
      && OcMatchDarwinVersion (KernelVersion, KERNEL_VERSION_HIGH_SIERRA_MIN, KERNEL_VERSION_HIGH_SIERRA_MAX))
   {
-    DEBUG ((DEBUG_INFO, "OCAK: Assuming success for legacy port AppleUSBXHCIPCI on %u\n", KernelVersion));
+    DEBUG ((DEBUG_INFO, "OCAK: [OK] Assuming success for legacy port AppleUSBXHCIPCI on %u\n", KernelVersion));
     return EFI_SUCCESS;
   }
 
@@ -848,26 +866,26 @@ PatchThirdPartyDriveSupport (
   EFI_STATUS  Status;
 
   if (Patcher == NULL) {
-    DEBUG ((DEBUG_INFO, "OCAK: Skipping %a on NULL Patcher on %u\n", __func__, KernelVersion));
+    DEBUG ((DEBUG_INFO, "OCAK: [OK] Skipping %a on NULL Patcher on %u\n", __func__, KernelVersion));
     return EFI_NOT_FOUND;
   }
 
   Status = PatcherApplyGenericPatch (Patcher, &mIOAHCIBlockStoragePatchV1);
   if (EFI_ERROR (Status)) {
-    DEBUG ((DEBUG_INFO, "OCAK: Failed to apply patch com.apple.iokit.IOAHCIBlockStorage V1 - %r\n", Status));
+    DEBUG ((DEBUG_INFO, "OCAK: [FAIL] Failed to apply patch com.apple.iokit.IOAHCIBlockStorage V1 - %r\n", Status));
   } else {
-    DEBUG ((DEBUG_INFO, "OCAK: Patch success com.apple.iokit.IOAHCIBlockStorage V1\n"));
+    DEBUG ((DEBUG_INFO, "OCAK: [OK] Patch success com.apple.iokit.IOAHCIBlockStorage V1\n"));
   }
 
   if (OcMatchDarwinVersion (KernelVersion, KERNEL_VERSION_CATALINA_MIN, 0)) {
     Status = PatcherApplyGenericPatch (Patcher, &mIOAHCIBlockStoragePatchV2);
     if (EFI_ERROR (Status)) {
-      DEBUG ((DEBUG_INFO, "OCAK: Failed to apply patch com.apple.iokit.IOAHCIBlockStorage V2 - %r\n", Status));
+      DEBUG ((DEBUG_INFO, "OCAK: [FAIL] Failed to apply patch com.apple.iokit.IOAHCIBlockStorage V2 - %r\n", Status));
     } else {
-      DEBUG ((DEBUG_INFO, "OCAK: Patch success com.apple.iokit.IOAHCIBlockStorage V2\n"));
+      DEBUG ((DEBUG_INFO, "OCAK: [OK] Patch success com.apple.iokit.IOAHCIBlockStorage V2\n"));
     }
   } else {
-    DEBUG ((DEBUG_INFO, "OCAK: Skipping IOAHCIBlockStorage V2 on %u\n", KernelVersion));
+    DEBUG ((DEBUG_INFO, "OCAK: [OK] Skipping IOAHCIBlockStorage V2 on %u\n", KernelVersion));
   }
 
   //
@@ -877,7 +895,7 @@ PatchThirdPartyDriveSupport (
   if (  EFI_ERROR (Status)
      && OcMatchDarwinVersion (KernelVersion, KERNEL_VERSION_SNOW_LEOPARD_MIN, KERNEL_VERSION_SNOW_LEOPARD_MAX))
   {
-    DEBUG ((DEBUG_INFO, "OCAK: Assuming success for IOAHCIBlockStorage on %u\n", KernelVersion));
+    DEBUG ((DEBUG_INFO, "OCAK: [OK] Assuming success for IOAHCIBlockStorage on %u\n", KernelVersion));
     return EFI_SUCCESS;
   }
 
@@ -920,15 +938,15 @@ PatchForceInternalDiskIcons (
   EFI_STATUS  Status;
 
   if (Patcher == NULL) {
-    DEBUG ((DEBUG_INFO, "OCAK: Skipping %a on NULL Patcher on %u\n", __func__, KernelVersion));
+    DEBUG ((DEBUG_INFO, "OCAK: [OK] Skipping %a on NULL Patcher on %u\n", __func__, KernelVersion));
     return EFI_NOT_FOUND;
   }
 
   Status = PatcherApplyGenericPatch (Patcher, &mIOAHCIPortPatch);
   if (EFI_ERROR (Status)) {
-    DEBUG ((DEBUG_INFO, "OCAK: Failed to apply patch com.apple.driver.AppleAHCIPort - %r\n", Status));
+    DEBUG ((DEBUG_INFO, "OCAK: [FAIL] Failed to apply patch com.apple.driver.AppleAHCIPort - %r\n", Status));
   } else {
-    DEBUG ((DEBUG_INFO, "OCAK: Patch success com.apple.driver.AppleAHCIPort\n"));
+    DEBUG ((DEBUG_INFO, "OCAK: [OK] Patch success com.apple.driver.AppleAHCIPort\n"));
   }
 
   return Status;
@@ -970,20 +988,20 @@ PatchAppleIoMapperSupport (
   EFI_STATUS  Status;
 
   if (!OcMatchDarwinVersion (KernelVersion, KERNEL_VERSION_MOUNTAIN_LION_MIN, 0)) {
-    DEBUG ((DEBUG_INFO, "OCAK: Skipping AppleIoMapper patch on %u\n", KernelVersion));
+    DEBUG ((DEBUG_INFO, "OCAK: [OK] Skipping AppleIoMapper patch on %u\n", KernelVersion));
     return EFI_SUCCESS;
   }
 
   if (Patcher == NULL) {
-    DEBUG ((DEBUG_INFO, "OCAK: Skipping %a on NULL Patcher on %u\n", __func__, KernelVersion));
+    DEBUG ((DEBUG_INFO, "OCAK: [OK] Skipping %a on NULL Patcher on %u\n", __func__, KernelVersion));
     return EFI_NOT_FOUND;
   }
 
   Status = PatcherApplyGenericPatch (Patcher, &mAppleIoMapperPatch);
   if (EFI_ERROR (Status)) {
-    DEBUG ((DEBUG_INFO, "OCAK: Failed to apply patch com.apple.iokit.IOPCIFamily AppleIoMapper - %r\n", Status));
+    DEBUG ((DEBUG_INFO, "OCAK: [FAIL] Failed to apply patch com.apple.iokit.IOPCIFamily AppleIoMapper - %r\n", Status));
   } else {
-    DEBUG ((DEBUG_INFO, "OCAK: Patch success com.apple.iokit.IOPCIFamily AppleIoMapper\n"));
+    DEBUG ((DEBUG_INFO, "OCAK: [OK] Patch success com.apple.iokit.IOPCIFamily AppleIoMapper\n"));
   }
 
   return Status;
@@ -1020,20 +1038,20 @@ PatchDummyPowerManagement (
   EFI_STATUS  Status;
 
   if (OcMatchDarwinVersion (KernelVersion, KERNEL_VERSION_VENTURA_MIN, 0)) {
-    DEBUG ((DEBUG_INFO, "OCAK: Skipping dummy AppleIntelCPUPowerManagement patch on %u\n", KernelVersion));
+    DEBUG ((DEBUG_INFO, "OCAK: [OK] Skipping dummy AppleIntelCPUPowerManagement patch on %u\n", KernelVersion));
     return EFI_SUCCESS;
   }
 
   if (Patcher == NULL) {
-    DEBUG ((DEBUG_INFO, "OCAK: Skipping %a on NULL Patcher on %u\n", __func__, KernelVersion));
+    DEBUG ((DEBUG_INFO, "OCAK: [OK] Skipping %a on NULL Patcher on %u\n", __func__, KernelVersion));
     return EFI_NOT_FOUND;
   }
 
   Status = PatcherApplyGenericPatch (Patcher, &mAppleDummyCpuPmPatch);
   if (EFI_ERROR (Status)) {
-    DEBUG ((DEBUG_INFO, "OCAK: Failed to apply patch dummy AppleIntelCPUPowerManagement - %r\n", Status));
+    DEBUG ((DEBUG_INFO, "OCAK: [FAIL] Failed to apply patch dummy AppleIntelCPUPowerManagement - %r\n", Status));
   } else {
-    DEBUG ((DEBUG_INFO, "OCAK: Patch success dummy AppleIntelCPUPowerManagement\n"));
+    DEBUG ((DEBUG_INFO, "OCAK: [OK] Patch success dummy AppleIntelCPUPowerManagement\n"));
   }
 
   return Status;
@@ -1103,26 +1121,26 @@ PatchIncreasePciBarSize (
   EFI_STATUS  Status;
 
   if (!OcMatchDarwinVersion (KernelVersion, KERNEL_VERSION_YOSEMITE_MIN, 0)) {
-    DEBUG ((DEBUG_INFO, "OCAK: Skipping com.apple.iokit.IOPCIFamily IncreasePciBarSize on %u\n", KernelVersion));
+    DEBUG ((DEBUG_INFO, "OCAK: [OK] Skipping com.apple.iokit.IOPCIFamily IncreasePciBarSize on %u\n", KernelVersion));
     return EFI_SUCCESS;
   }
 
   if (Patcher == NULL) {
-    DEBUG ((DEBUG_INFO, "OCAK: Skipping %a on NULL Patcher on %u\n", __func__, KernelVersion));
+    DEBUG ((DEBUG_INFO, "OCAK: [OK] Skipping %a on NULL Patcher on %u\n", __func__, KernelVersion));
     return EFI_NOT_FOUND;
   }
 
   Status = PatcherApplyGenericPatch (Patcher, &mIncreasePciBarSizePatch);
   if (EFI_ERROR (Status)) {
-    DEBUG ((DEBUG_INFO, "OCAK: Failed to apply patch com.apple.iokit.IOPCIFamily IncreasePciBarSize - %r, trying legacy patch\n", Status));
+    DEBUG ((DEBUG_INFO, "OCAK: [FAIL] Failed to apply patch com.apple.iokit.IOPCIFamily IncreasePciBarSize - %r, trying legacy patch\n", Status));
     Status = PatcherApplyGenericPatch (Patcher, &mIncreasePciBarSizeLegacyPatch);
     if (EFI_ERROR (Status)) {
-      DEBUG ((DEBUG_INFO, "OCAK: Failed to apply legacy patch com.apple.iokit.IOPCIFamily IncreasePciBarSize - %r\n", Status));
+      DEBUG ((DEBUG_INFO, "OCAK: [FAIL] Failed to apply legacy patch com.apple.iokit.IOPCIFamily IncreasePciBarSize - %r\n", Status));
     } else {
-      DEBUG ((DEBUG_INFO, "OCAK: Patch success legacy com.apple.iokit.IOPCIFamily IncreasePciBarSize\n"));
+      DEBUG ((DEBUG_INFO, "OCAK: [OK] Patch success legacy com.apple.iokit.IOPCIFamily IncreasePciBarSize\n"));
     }
   } else {
-    DEBUG ((DEBUG_INFO, "OCAK: Patch success com.apple.iokit.IOPCIFamily IncreasePciBarSize\n"));
+    DEBUG ((DEBUG_INFO, "OCAK: [OK] Patch success com.apple.iokit.IOPCIFamily IncreasePciBarSize\n"));
   }
 
   return Status;
@@ -1245,11 +1263,11 @@ PatchCustomPciSerialPmio (
   }
 
   if (Count > 0) {
-    DEBUG ((DEBUG_INFO, "OCAK: Patched CustomPciSerialDevice PMIO port %u times\n", Count));
+    DEBUG ((DEBUG_INFO, "OCAK: [OK] Patched CustomPciSerialDevice PMIO port %u times\n", Count));
     return EFI_SUCCESS;
   }
 
-  DEBUG ((DEBUG_INFO, "OCAK: Failed to patch CustomPciSerialDevice PMIO port!\n"));
+  DEBUG ((DEBUG_INFO, "OCAK: [FAIL] Failed to patch CustomPciSerialDevice PMIO port!\n"));
   return EFI_NOT_FOUND;
 }
 
@@ -1279,9 +1297,9 @@ PatchCustomPciSerialDevice (
   //
 
   if (EFI_ERROR (Status)) {
-    DEBUG ((DEBUG_INFO, "OCAK: Failed to apply patch CustomPciSerialDevice - %r\n"));
+    DEBUG ((DEBUG_INFO, "OCAK: [FAIL] Failed to apply patch CustomPciSerialDevice - %r\n"));
   } else {
-    DEBUG ((DEBUG_INFO, "OCAK: Patch success CustomPciSerialDevice\n"));
+    DEBUG ((DEBUG_INFO, "OCAK: [OK] Patch success CustomPciSerialDevice\n"));
   }
 
   return Status;
@@ -1323,15 +1341,15 @@ PatchCustomSmbiosGuid (
   EFI_STATUS  Status;
 
   if (Patcher == NULL) {
-    DEBUG ((DEBUG_INFO, "OCAK: Skipping %a on NULL Patcher on %u\n", __func__, KernelVersion));
+    DEBUG ((DEBUG_INFO, "OCAK: [OK] Skipping %a on NULL Patcher on %u\n", __func__, KernelVersion));
     return EFI_NOT_FOUND;
   }
 
   Status = PatcherApplyGenericPatch (Patcher, &mCustomSmbiosGuidPatch);
   if (!EFI_ERROR (Status)) {
-    DEBUG ((DEBUG_INFO, "OCAK: SMBIOS Patch success\n"));
+    DEBUG ((DEBUG_INFO, "OCAK: [OK] SMBIOS Patch success\n"));
   } else {
-    DEBUG ((DEBUG_INFO, "OCAK: Failed to apply SMBIOS patch - %r\n", Status));
+    DEBUG ((DEBUG_INFO, "OCAK: [FAIL] Failed to apply SMBIOS patch - %r\n", Status));
   }
 
   return Status;
@@ -1380,7 +1398,7 @@ PatchPanicKextDump (
   ASSERT (Patcher != NULL);
 
   if (!OcMatchDarwinVersion (KernelVersion, KERNEL_VERSION_HIGH_SIERRA_MIN, 0)) {
-    DEBUG ((DEBUG_INFO, "OCAK: Skipping PanicKextDump on %u\n", KernelVersion));
+    DEBUG ((DEBUG_INFO, "OCAK: [OK] Skipping PanicKextDump on %u\n", KernelVersion));
     return EFI_SUCCESS;
   }
 
@@ -1396,7 +1414,7 @@ PatchPanicKextDump (
              (UINT8 **)&Record
              );
   if (EFI_ERROR (Status) || (Record >= Last)) {
-    DEBUG ((DEBUG_WARN, "OCAK: Failed to locate printKextPanicLists (%p) - %r\n", Record, Status));
+    DEBUG ((DEBUG_WARN, "OCAK: [FAIL] Failed to locate printKextPanicLists (%p) - %r\n", Record, Status));
     return EFI_NOT_FOUND;
   }
 
@@ -1408,9 +1426,9 @@ PatchPanicKextDump (
   //
   Status = PatcherApplyGenericPatch (Patcher, &mPanicKextDumpPatch);
   if (EFI_ERROR (Status)) {
-    DEBUG ((DEBUG_INFO, "OCAK: Failed to apply kext dump patch - %r\n", Status));
+    DEBUG ((DEBUG_INFO, "OCAK: [FAIL] Failed to apply kext dump patch - %r\n", Status));
   } else {
-    DEBUG ((DEBUG_INFO, "OCAK: Patch success kext dump\n"));
+    DEBUG ((DEBUG_INFO, "OCAK: [OK] Patch success kext dump\n"));
   }
 
   return Status;
@@ -1544,16 +1562,16 @@ PatchLapicKernelPanic (
   //
   Status = PatcherApplyGenericPatch (Patcher, &mLapicKernelPanicPatch);
   if (EFI_ERROR (Status)) {
-    DEBUG ((DEBUG_INFO, "OCAK: Failed to apply modern lapic patch - %r\n", Status));
+    DEBUG ((DEBUG_INFO, "OCAK: [FAIL] Failed to apply modern lapic patch - %r\n", Status));
 
     Status = PatcherApplyGenericPatch (Patcher, &mLapicKernelPanicLegacyPatch);
     if (!EFI_ERROR (Status)) {
-      DEBUG ((DEBUG_INFO, "OCAK: Patch success legacy lapic\n"));
+      DEBUG ((DEBUG_INFO, "OCAK: [OK] Patch success legacy lapic\n"));
     } else {
-      DEBUG ((DEBUG_INFO, "OCAK: Failed to apply modern lapic patch - %r\n", Status));
+      DEBUG ((DEBUG_INFO, "OCAK: [FAIL] Failed to apply modern lapic patch - %r\n", Status));
     }
   } else {
-    DEBUG ((DEBUG_INFO, "OCAK: Patch success lapic\n"));
+    DEBUG ((DEBUG_INFO, "OCAK: [OK] Patch success lapic\n"));
 
     //
     // Also patch away the master core check to never require lapic_dont_panic=1.
@@ -1561,9 +1579,9 @@ PatchLapicKernelPanic (
     //
     Status = PatcherApplyGenericPatch (Patcher, &mLapicKernelPanicMasterPatch);
     if (EFI_ERROR (Status)) {
-      DEBUG ((DEBUG_INFO, "OCAK: Failed to apply extended lapic patch - %r\n", Status));
+      DEBUG ((DEBUG_INFO, "OCAK: [FAIL] Failed to apply extended lapic patch - %r\n", Status));
     } else {
-      DEBUG ((DEBUG_INFO, "OCAK: Patch success extended lapic\n"));
+      DEBUG ((DEBUG_INFO, "OCAK: [OK] Patch success extended lapic\n"));
     }
 
     Status = EFI_SUCCESS;
@@ -1657,13 +1675,13 @@ PatchPowerStateTimeout (
   ASSERT (Patcher != NULL);
 
   if (!OcMatchDarwinVersion (KernelVersion, KERNEL_VERSION_CATALINA_MIN, 0)) {
-    DEBUG ((DEBUG_INFO, "OCAK: Skipping power state patch on %u\n", KernelVersion));
+    DEBUG ((DEBUG_INFO, "OCAK: [OK] Skipping power state patch on %u\n", KernelVersion));
     return EFI_SUCCESS;
   }
 
   Status = PatcherApplyGenericPatch (Patcher, &mPowerStateTimeoutPanicInlinePatch);
   if (!EFI_ERROR (Status)) {
-    DEBUG ((DEBUG_INFO, "OCAK: Patch success inline power state\n"));
+    DEBUG ((DEBUG_INFO, "OCAK: [OK] Patch success inline power state\n"));
     return Status;
   }
 
@@ -1671,9 +1689,9 @@ PatchPowerStateTimeout (
 
   Status = PatcherApplyGenericPatch (Patcher, &mPowerStateTimeoutPanicMasterPatch);
   if (EFI_ERROR (Status)) {
-    DEBUG ((DEBUG_INFO, "OCAK: Failed to apply power state patch - %r\n", Status));
+    DEBUG ((DEBUG_INFO, "OCAK: [FAIL] Failed to apply power state patch - %r\n", Status));
   } else {
-    DEBUG ((DEBUG_INFO, "OCAK: Patch success power state\n"));
+    DEBUG ((DEBUG_INFO, "OCAK: [OK] Patch success power state\n"));
   }
 
   //
@@ -1769,15 +1787,15 @@ PatchAppleRtcChecksum (
   EFI_STATUS  Status;
 
   if (Patcher == NULL) {
-    DEBUG ((DEBUG_INFO, "OCAK: Skipping %a on NULL Patcher on %u\n", __func__, KernelVersion));
+    DEBUG ((DEBUG_INFO, "OCAK: [OK] Skipping %a on NULL Patcher on %u\n", __func__, KernelVersion));
     return EFI_NOT_FOUND;
   }
 
   Status = PatcherApplyGenericPatch (Patcher, Patcher->Is32Bit ? &mAppleRtcChecksumPatch32 : &mAppleRtcChecksumPatch64);
   if (EFI_ERROR (Status)) {
-    DEBUG ((DEBUG_INFO, "OCAK: Failed to apply patch com.apple.driver.AppleRTC DisableRtcChecksum - %r\n", Status));
+    DEBUG ((DEBUG_INFO, "OCAK: [FAIL] Failed to apply patch com.apple.driver.AppleRTC DisableRtcChecksum - %r\n", Status));
   } else {
-    DEBUG ((DEBUG_INFO, "OCAK: Patch success com.apple.driver.AppleRTC DisableRtcChecksum\n"));
+    DEBUG ((DEBUG_INFO, "OCAK: [OK] Patch success com.apple.driver.AppleRTC DisableRtcChecksum\n"));
   }
 
   return Status;
@@ -1806,7 +1824,7 @@ PatchSegmentJettison (
   ASSERT (Patcher != NULL);
 
   if (!OcMatchDarwinVersion (KernelVersion, KERNEL_VERSION_BIG_SUR_MIN, 0)) {
-    DEBUG ((DEBUG_INFO, "OCAK: Skipping SegmentJettison on %u\n", KernelVersion));
+    DEBUG ((DEBUG_INFO, "OCAK: [OK] Skipping SegmentJettison on %u\n", KernelVersion));
     return EFI_SUCCESS;
   }
 
@@ -1815,18 +1833,18 @@ PatchSegmentJettison (
 
   Status = PatcherGetSymbolAddress (Patcher, "__ZN6OSKext19removeKextBootstrapEv", (UINT8 **)&RemoveBs);
   if (EFI_ERROR (Status) || (RemoveBs > Last)) {
-    DEBUG ((DEBUG_INFO, "OCAK: Missing removeKextBootstrap - %r\n", Status));
+    DEBUG ((DEBUG_INFO, "OCAK: [FAIL] Missing removeKextBootstrap - %r\n", Status));
     return EFI_NOT_FOUND;
   }
 
   Status = PatcherGetSymbolAddress (Patcher, "_ml_static_mfree", (UINT8 **)&StaticMfree);
   if (EFI_ERROR (Status) || (StaticMfree > Last)) {
-    DEBUG ((DEBUG_INFO, "OCAK: Missing ml_static_mfree - %r\n", Status));
+    DEBUG ((DEBUG_INFO, "OCAK: [FAIL] Missing ml_static_mfree - %r\n", Status));
     return EFI_NOT_FOUND;
   }
 
   if (RemoveBs - StaticMfree > MAX_INT32) {
-    DEBUG ((DEBUG_INFO, "OCAK: ml_static_mfree %p removeKextBootstrap %p are too far\n", StaticMfree, RemoveBs));
+    DEBUG ((DEBUG_INFO, "OCAK: [FAIL] ml_static_mfree %p removeKextBootstrap %p are too far\n", StaticMfree, RemoveBs));
     return EFI_UNSUPPORTED;
   }
 
@@ -1864,7 +1882,7 @@ PatchSegmentJettison (
       if (  ((UINT8 *)Jettisoning <= Last)
          && (AsciiStrnCmp (Jettisoning, "Jettisoning fileset", L_STR_LEN ("Jettisoning fileset")) == 0))
       {
-        DEBUG ((DEBUG_INFO, "OCAK: Found jettisoning fileset\n"));
+        DEBUG ((DEBUG_INFO, "OCAK: [OK] Found jettisoning fileset\n"));
         SetMem (CurrFreeCall, 5, 0x90);
         return EFI_SUCCESS;
       }
@@ -1938,26 +1956,32 @@ PatchBTFeatureFlags (
   EFI_STATUS  Status;
 
   if (!OcMatchDarwinVersion (KernelVersion, KERNEL_VERSION_MOUNTAIN_LION_MIN, 0)) {
-    DEBUG ((DEBUG_INFO, "OCAK: Skipping BTFeatureFlags on %u\n", KernelVersion));
+    DEBUG ((DEBUG_INFO, "OCAK: [OK] Skipping BTFeatureFlags on %u\n", KernelVersion));
     return EFI_SUCCESS;
   }
 
   if (Patcher == NULL) {
-    DEBUG ((DEBUG_INFO, "OCAK: Skipping %a on NULL Patcher on %u\n", __func__, KernelVersion));
+    DEBUG ((DEBUG_INFO, "OCAK: [OK] Skipping %a on NULL Patcher on %u\n", __func__, KernelVersion));
     return EFI_NOT_FOUND;
   }
 
   Status = PatcherApplyGenericPatch (Patcher, &mBTFeatureFlagsPatchV1);
   if (EFI_ERROR (Status)) {
-    DEBUG ((DEBUG_INFO, "OCAK: Failed to find BT FeatureFlags symbol v1 - %r, trying v2\n", Status));
+    DEBUG ((DEBUG_INFO, "OCAK: [FAIL] Failed to find BT FeatureFlags symbol v1 - %r, trying v2\n", Status));
     Status = PatcherApplyGenericPatch (Patcher, &mBTFeatureFlagsPatchV2);
     if (EFI_ERROR (Status)) {
-      DEBUG ((DEBUG_INFO, "OCAK: Failed to find BT FeatureFlags symbol v2 - %r, trying v3\n", Status));
+      DEBUG ((DEBUG_INFO, "OCAK: [FAIL] Failed to find BT FeatureFlags symbol v2 - %r, trying v3\n", Status));
       Status = PatcherApplyGenericPatch (Patcher, &mBTFeatureFlagsPatchV3);
       if (EFI_ERROR (Status)) {
-        DEBUG ((DEBUG_INFO, "OCAK: Failed to find BT FeatureFlags symbol v3 - %r\n", Status));
+        DEBUG ((DEBUG_INFO, "OCAK: [FAIL] Failed to find BT FeatureFlags symbol v3 - %r\n", Status));
+      } else {
+        DEBUG ((DEBUG_INFO, "OCAK: [OK] Success BT FeatureFlags patch v3\n"));
       }
+    } else {
+      DEBUG ((DEBUG_INFO, "OCAK: [OK] Success BT FeatureFlags patch v2\n"));
     }
+  } else {
+    DEBUG ((DEBUG_INFO, "OCAK: [OK] Success BT FeatureFlags patch v1\n"));
   }
 
   return Status;
@@ -2062,7 +2086,7 @@ PatchLegacyCommpage (
   //
   Status = PatcherGetSymbolAddress (Patcher, "_commpage_64_routines", (UINT8 **)&CommpageRoutines);
   if (EFI_ERROR (Status) || (CommpageRoutines >= Last)) {
-    DEBUG ((DEBUG_WARN, "OCAK: Failed to locate _commpage_64_routines (%p) - %r\n", CommpageRoutines, Status));
+    DEBUG ((DEBUG_WARN, "OCAK: [FAIL] Failed to locate _commpage_64_routines (%p) - %r\n", CommpageRoutines, Status));
     return EFI_NOT_FOUND;
   }
 
@@ -2123,7 +2147,7 @@ PatchLegacyCommpage (
     Address = Patcher->Is32Bit ? *((UINT32 *)CommpageRoutines) : *((UINT64 *)CommpageRoutines);
   }
 
-  DEBUG ((DEBUG_INFO, "OCAK: Failed to find 64-bit _COMM_PAGE_BCOPY function\n"));
+  DEBUG ((DEBUG_INFO, "OCAK: [FAIL] Failed to find 64-bit _COMM_PAGE_BCOPY function\n"));
 
   return EFI_NOT_FOUND;
 }
@@ -2222,12 +2246,12 @@ PatchAquantiaEthernet (
   // This patch is not required before macOS 10.15.4.
   //
   if (!OcMatchDarwinVersion (KernelVersion, KERNEL_VERSION (KERNEL_VERSION_CATALINA, 4, 0), 0)) {
-    DEBUG ((DEBUG_INFO, "OCAK: Skipping patching AquantiaEthernet on %u\n", KernelVersion));
+    DEBUG ((DEBUG_INFO, "OCAK: [OK] Skipping patching AquantiaEthernet on %u\n", KernelVersion));
     return EFI_SUCCESS;
   }
 
   if (Patcher == NULL) {
-    DEBUG ((DEBUG_INFO, "OCAK: Skipping %a on NULL Patcher on %u\n", __func__, KernelVersion));
+    DEBUG ((DEBUG_INFO, "OCAK: [OK] Skipping %a on NULL Patcher on %u\n", __func__, KernelVersion));
     return EFI_NOT_FOUND;
   }
 
@@ -2237,19 +2261,19 @@ PatchAquantiaEthernet (
   //
   Status = PatcherApplyGenericPatch (Patcher, &mAquantiaEthernetPatchShikumo);
   if (!EFI_ERROR (Status)) {
-    DEBUG ((DEBUG_INFO, "OCAK: Patch success Aquantia Ethernet Shikumo\n"));
+    DEBUG ((DEBUG_INFO, "OCAK: [OK] Patch success Aquantia Ethernet Shikumo\n"));
     return Status;
   }
 
   //
   // In case Shikumo's patch failed, try Mieze's so at least AQC 107 will work.
   //
-  DEBUG ((DEBUG_INFO, "OCAK: Failed to apply Aquantia Ethernet patch Shikumo - %r, trying Mieze\n", Status));
+  DEBUG ((DEBUG_INFO, "OCAK: [FAIL] Failed to apply Aquantia Ethernet patch Shikumo - %r, trying Mieze\n", Status));
   Status = PatcherApplyGenericPatch (Patcher, &mAquantiaEthernetPatchMieze);
   if (EFI_ERROR (Status)) {
-    DEBUG ((DEBUG_INFO, "OCAK: Failed to apply Aquantia Ethernet patch Mieze - %r\n", Status));
+    DEBUG ((DEBUG_INFO, "OCAK: [FAIL] Failed to apply Aquantia Ethernet patch Mieze - %r\n", Status));
   } else {
-    DEBUG ((DEBUG_INFO, "OCAK: Patch success Aquantia Ethernet Mieze\n"));
+    DEBUG ((DEBUG_INFO, "OCAK: [OK] Patch success Aquantia Ethernet Mieze\n"));
   }
 
   return Status;
@@ -2269,12 +2293,12 @@ PatchForceSecureBootScheme (
   UINT32      Diff;
 
   if (!OcMatchDarwinVersion (KernelVersion, KERNEL_VERSION_BIG_SUR_MIN, 0)) {
-    DEBUG ((DEBUG_INFO, "OCAK: Skipping sb scheme on %u\n", KernelVersion));
+    DEBUG ((DEBUG_INFO, "OCAK: [OK] Skipping sb scheme on %u\n", KernelVersion));
     return EFI_SUCCESS;
   }
 
   if (Patcher == NULL) {
-    DEBUG ((DEBUG_INFO, "OCAK: Skipping %a on NULL Patcher on %u\n", __func__, KernelVersion));
+    DEBUG ((DEBUG_INFO, "OCAK: [OK] Skipping %a on NULL Patcher on %u\n", __func__, KernelVersion));
     return EFI_NOT_FOUND;
   }
 
@@ -2298,13 +2322,13 @@ PatchForceSecureBootScheme (
 
   Status = PatcherGetSymbolAddress (Patcher, "_img4_chip_select_effective_ap", &SelectAp);
   if (EFI_ERROR (Status) || (SelectAp > Last)) {
-    DEBUG ((DEBUG_INFO, "OCAK: Missing _img4_chip_select_effective_ap - %r\n", Status));
+    DEBUG ((DEBUG_INFO, "OCAK: [FAIL] Missing _img4_chip_select_effective_ap - %r\n", Status));
     return EFI_NOT_FOUND;
   }
 
   Status = PatcherGetSymbolAddress (Patcher, "__img4_chip_x86", &HybridAp);
   if (EFI_ERROR (Status) || (HybridAp > Last)) {
-    DEBUG ((DEBUG_INFO, "OCAK: Missing __img4_chip_x86 - %r\n", Status));
+    DEBUG ((DEBUG_INFO, "OCAK: [FAIL] Missing __img4_chip_x86 - %r\n", Status));
     return EFI_NOT_FOUND;
   }
 
@@ -2392,12 +2416,12 @@ PatchSetApfsTrimTimeout (
   EFI_STATUS  Status;
 
   if (!OcMatchDarwinVersion (KernelVersion, KERNEL_VERSION_MOJAVE_MIN, 0)) {
-    DEBUG ((DEBUG_INFO, "OCAK: Skipping apfs timeout on %u\n", KernelVersion));
+    DEBUG ((DEBUG_INFO, "OCAK: [OK] Skipping apfs timeout on %u\n", KernelVersion));
     return EFI_SUCCESS;
   }
 
   if (Patcher == NULL) {
-    DEBUG ((DEBUG_INFO, "OCAK: Skipping %a on NULL Patcher on %u\n", __func__, KernelVersion));
+    DEBUG ((DEBUG_INFO, "OCAK: [OK] Skipping %a on NULL Patcher on %u\n", __func__, KernelVersion));
     return EFI_NOT_FOUND;
   }
 
@@ -2407,9 +2431,9 @@ PatchSetApfsTrimTimeout (
   if (IsZeroBuffer (&mApfsTimeoutReplace[2], sizeof (UINT32))) {
     Status = PatcherApplyGenericPatch (Patcher, &mApfsDisableTrimPatch);
     if (EFI_ERROR (Status)) {
-      DEBUG ((DEBUG_INFO, "OCAK: Failed to apply patch ApfsDisableTrim - %r\n", Status));
+      DEBUG ((DEBUG_INFO, "OCAK: [FAIL] Failed to apply patch ApfsDisableTrim - %r\n", Status));
     } else {
-      DEBUG ((DEBUG_INFO, "OCAK: Patch success ApfsDisableTrim\n"));
+      DEBUG ((DEBUG_INFO, "OCAK: [OK] Patch success ApfsDisableTrim\n"));
     }
 
     return Status;
@@ -2422,9 +2446,9 @@ PatchSetApfsTrimTimeout (
   if (KernelVersion < KERNEL_VERSION_MONTEREY_MIN) {
     Status = PatcherApplyGenericPatch (Patcher, &mApfsTimeoutPatch);
     if (EFI_ERROR (Status)) {
-      DEBUG ((DEBUG_INFO, "OCAK: Failed to apply patch SetApfsTrimTimeout - %r\n", Status));
+      DEBUG ((DEBUG_INFO, "OCAK: [FAIL] Failed to apply patch SetApfsTrimTimeout - %r\n", Status));
     } else {
-      DEBUG ((DEBUG_INFO, "OCAK: Patch success SetApfsTrimTimeout\n"));
+      DEBUG ((DEBUG_INFO, "OCAK: [OK] Patch success SetApfsTrimTimeout\n"));
     }
 
     return Status;
