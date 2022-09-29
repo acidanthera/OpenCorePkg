@@ -66,7 +66,6 @@ Kexts
 | [TSCAdjustReset.kext](https://github.com/interferenc/TSCAdjustReset) | — | — | — |
 | [VoodooTSCSync.kext](https://github.com/RehabMan/VoodooTSCSync) | — | — | — |
 | [CpuTscSync.kext](https://github.com/acidanthera/CpuTscSync) | 12.0.0 (10.8) | — | — |
-| [FakeSMC-32.kext](https://github.com/khronokernel/Legacy-Kexts/blob/master/32Bit-only/Zip/FakeSMC-32.kext.zip?raw=true) | 8.0.0 (10.4) | 11.9.9 (10.7) | For VMs with EFI64 |
 | [VirtualSMC.kext](https://github.com/acidanthera/VirtualSMC) | 8.0.0 (10.4) | — | — |
 | [SMCLightSensor.kext](https://github.com/acidanthera/VirtualSMC) | 10.0.0 (10.6) | — | Not tested 10.6 and 10.7 |
 | [SMCSuperIO.kext](https://github.com/acidanthera/VirtualSMC) | 10.0.0 (10.6) | — | Not tested 10.6 and 10.7 |
@@ -98,6 +97,7 @@ Kexts
 | [TOSMotionSensor.kext](https://github.com/jslegendre/TOSMotionSensor) | — | — | — |
 | [FeatureUnlock.kext](https://github.com/acidanthera/FeatureUnlock) | — | — | — |
 | [MacHyperVSupport.kext](https://github.com/acidanthera/MacHyperVSupport) | 8.0.0 (10.4) | — | — |
+| [CryptexFixup.kext](https://github.com/acidanthera/CryptexFixup) | 22.0.0 (13.0) | — | — |
 
 More complete list with legacy kexts is hosted [here](https://docs.google.com/spreadsheets/d/15S-ocrkm_VTUJpKxNII-YUyQFd5VYdjbe0DHlZVCQyM). Full Lilu plugin list with legacy kexts is hosted [here](https://github.com/acidanthera/Lilu/blob/master/KnownPlugins.md). For developers only.   
 Acidanthera members are not affiliated with the authors of any kernel extensions but ones hosted at https://github.com/acidanthera. This list is provided for information purposes without warranty of any kind.  
