@@ -69,7 +69,7 @@ choose_debugger() {
   fi
 
   if [ "${EFI_PORT}" = "" ]; then
-    if [ "${EFI_ARCH}" = "IA32" ]; then
+    if [ "${EFI_ARCH}" = "Ia32" ]; then
       EFI_PORT=8832
     else
       EFI_PORT=8864
@@ -116,7 +116,7 @@ choose_debugger() {
   fi
 
   if [ "${EFI_TRIPLE}" = "" ]; then
-    if [ "${EFI_ARCH}" = "IA32" ]; then
+    if [ "${EFI_ARCH}" = "Ia32" ]; then
       triple_arch=i386
     else
       triple_arch=x86_64
