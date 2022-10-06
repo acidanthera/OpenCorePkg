@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
-%DIF DEL PreviousConfiguration.tex   Wed Oct  5 13:59:43 2022
-%DIF ADD ../Configuration.tex        Wed Oct  5 13:59:44 2022
+%DIF DEL PreviousConfiguration.tex   Wed Oct  5 20:21:08 2022
+%DIF ADD ../Configuration.tex        Thu Oct  6 05:51:14 2022
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -118,7 +118,7 @@
 %DIF HYPERREF PREAMBLE %DIF PREAMBLE
 \providecommand{\DIFadd}[1]{\texorpdfstring{\DIFaddtex{#1}}{#1}} %DIF PREAMBLE
 \providecommand{\DIFdel}[1]{\texorpdfstring{\DIFdeltex{#1}}{}} %DIF PREAMBLE
-%DIF LISTINGS PREAMBLE %DIF PREAMBLE
+%DIF COLORLISTINGS PREAMBLE %DIF PREAMBLE
 \RequirePackage{listings} %DIF PREAMBLE
 \RequirePackage{color} %DIF PREAMBLE
 \lstdefinelanguage{DIFcode}{ %DIF PREAMBLE
@@ -7101,11 +7101,28 @@ Recommended configuration settings for this driver:
 
 \begin{itemize}
 \tightlist
-  \item \texttt{OpenVariableRuntimeDxe.efi} loaded using \texttt{LoadEarly=true} (driver not required with OpenDuet).
+  \item \texttt{OpenVariableRuntimeDxe.efi} loaded using \texttt{LoadEarly=true}\DIFdelbegin \DIFdel{(driver not required with OpenDuet)}\DIFdelend \DIFaddbegin \DIFadd{. OpenDuet users
+  should not load this driver, as it is included in OpenDuet}\DIFaddend .
   \item \texttt{OpenRuntime.efi} specified after \texttt{OpenVariableRuntimeDxe.efi} (when applicable),
   also loaded using \texttt{LoadEarly=true} for correct operation of \texttt{RequestBootVarRouting}.
-  \item \texttt{LegacySchema} populated.
-  \item \texttt{ExposeSensitiveData} with at least bit \texttt{0x1} set to make \texttt{boot-path}
+  \DIFaddbegin \begin{itemize}
+  \tightlist
+    \DIFaddend \item \DIFaddbegin \texttt{\DIFadd{RequestBootVarRouting}} \DIFadd{is never strictly needed while using emulated NVRAM, but
+    it can be convenient to leave it set on a system which needs to switch between real and emulated NVRAM.
+    }\item \texttt{\DIFadd{RequestBootVarRouting}} \DIFadd{is never required on an OpenDuet system, since there are
+    no BIOS-managed boot entries to protect, therefore on OpenDuet recommended settings are
+    }\texttt{\DIFadd{LoadEarly=false}} \DIFadd{for }\texttt{\DIFadd{OpenRuntime.efi}} \DIFadd{and }\texttt{\DIFadd{RequestBootVarRouting=false}}\DIFadd{.
+  }\end{itemize}
+  \item \DIFaddend \texttt{LegacySchema} populated.
+  \DIFaddbegin \begin{itemize}
+  \tightlist
+    \item \DIFadd{For simpler testing (allows arbitrary test variables), and future-proofing against
+    changes in the variables required by macOS updates, use }\texttt{\DIFadd{<string>*</string>}} \DIFadd{settings, as
+    described in notes below.
+    }\item \DIFadd{For increased security, populate sections with known required keys only, as shown in OpenCore's
+    sample }\texttt{\DIFadd{.plist}} \DIFadd{files.
+  }\end{itemize}
+  \DIFaddend \item \texttt{ExposeSensitiveData} with at least bit \texttt{0x1} set to make \texttt{boot-path}
   variable containing the OpenCore EFI partition UUID available to the \texttt{Launchd.command} script.
 \end{itemize}
 

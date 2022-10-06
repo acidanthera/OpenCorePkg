@@ -7041,10 +7041,27 @@ Recommended configuration settings for this driver:
 
 \begin{itemize}
 \tightlist
-  \item \texttt{OpenVariableRuntimeDxe.efi} loaded using \texttt{LoadEarly=true} (driver not required with OpenDuet).
+  \item \texttt{OpenVariableRuntimeDxe.efi} loaded using \texttt{LoadEarly=true}. OpenDuet users
+  should not load this driver, as it is included in OpenDuet.
   \item \texttt{OpenRuntime.efi} specified after \texttt{OpenVariableRuntimeDxe.efi} (when applicable),
   also loaded using \texttt{LoadEarly=true} for correct operation of \texttt{RequestBootVarRouting}.
+  \begin{itemize}
+  \tightlist
+    \item \texttt{RequestBootVarRouting} is never strictly needed while using emulated NVRAM, but
+    it can be convenient to leave it set on a system which needs to switch between real and emulated NVRAM.
+    \item \texttt{RequestBootVarRouting} is never required on an OpenDuet system, since there are
+    no BIOS-managed boot entries to protect, therefore on OpenDuet recommended settings are
+    \texttt{LoadEarly=false} for \texttt{OpenRuntime.efi} and \texttt{RequestBootVarRouting=false}.
+  \end{itemize}
   \item \texttt{LegacySchema} populated.
+  \begin{itemize}
+  \tightlist
+    \item For simpler testing (allows arbitrary test variables), and future-proofing against
+    changes in the variables required by macOS updates, use \texttt{<string>*</string>} settings, as
+    described in notes below.
+    \item For increased security, populate sections with known required keys only, as shown in OpenCore's
+    sample \texttt{.plist} files.
+  \end{itemize}
   \item \texttt{ExposeSensitiveData} with at least bit \texttt{0x1} set to make \texttt{boot-path}
   variable containing the OpenCore EFI partition UUID available to the \texttt{Launchd.command} script.
 \end{itemize}
