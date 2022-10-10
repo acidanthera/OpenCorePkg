@@ -85,6 +85,9 @@ KEXT_INFO  mKextInfo[] = {
   { "BrcmBluetoothInjectorLegacy.kext",                                     "",                                   "Contents/Info.plist" },
   { "BlueToolFixup.kext",                                                   "Contents/MacOS/BlueToolFixup",       "Contents/Info.plist" },
   { "BrcmFirmwareData.kext",                                                "Contents/MacOS/BrcmFirmwareData",    "Contents/Info.plist" },
+  //
+  // NOTE: BrcmFirmwareRepo.kext cannot be injected by the bootloader; when it is present, an error should be prompted.
+  //
   { "BrcmFirmwareRepo.kext",                                                "Contents/MacOS/BrcmFirmwareRepo",    "Contents/Info.plist" },
   { "BrcmNonPatchRAM.kext",                                                 "Contents/MacOS/BrcmNonPatchRAM",     "Contents/Info.plist" },
   { "BrcmNonPatchRAM2.kext",                                                "Contents/MacOS/BrcmNonPatchRAM2",    "Contents/Info.plist" },
