@@ -20,6 +20,17 @@ DefinitionBlock ("", "SSDT", 2, "ACDT", "BRG0", 0x00000000)
         Device (BRG0)
         {
             Name (_ADR, Zero)
+            Method (_STA, 0, NotSerialized)  // _STA: Status
+            {
+                If (_OSI ("Darwin"))
+                {
+                    Return (0x0F)
+                }
+                Else
+                {
+                    Return (Zero)
+                }
+            }
 
             /*
              * This is an actual GPU device present on the bridge.
