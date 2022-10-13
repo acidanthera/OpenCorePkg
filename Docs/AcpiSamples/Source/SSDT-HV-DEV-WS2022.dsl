@@ -13,10 +13,9 @@
  * On Windows Server 2019 and older this SSDT is unnecessary and can be removed.
  *
  * Requires the following ACPI patches:
- *     TableSignature:  44534454 (DSDT)
  * (1) Base:            \P241
  *     Comment:         _STA to XSTA rename (additional Hyper-V processors)
- *     Count:           1808 
+ *     Count:           1808
  *     Find:            _STA
  *     Replace:         XSTA
  *     TableSignature:  44534454 (DSDT)
