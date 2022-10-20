@@ -8,7 +8,7 @@ PROJECT = TestExt4Dxe
 PRODUCT = $(PROJECT)$(INFIX)$(SUFFIX)
 OBJS    = $(PROJECT).o
 OBJS   += BaseUcs2Utf8Lib.o BaseOrderedCollectionRedBlackTreeLib.o
-OBJS   += BlockGroup.o BlockMap.o Collation.o Directory.o DiskUtil.o
+OBJS   += BlockGroup.o BlockMap.o Directory.o DiskUtil.o
 OBJS   += Ext4Dxe.o Extents.o File.o Inode.o Partition.o Superblock.o Symlink.o
 
 include  ../../User/Makefile
