@@ -28,6 +28,7 @@
 #include <Library/DevicePathLib.h>
 #include <Library/PcdLib.h>
 #include <Guid/DebugImageInfoTable.h>
+#include <IndustryStandard/PeImage2.h>
 
 /**
   Main entry point.
