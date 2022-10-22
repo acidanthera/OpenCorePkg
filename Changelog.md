@@ -3,6 +3,7 @@ OpenCore Changelog
 #### v0.8.6
 - Updated emulated NVRAM save script for compatibilty with earlier macOS (Snow Leopard+ tested)
 - Updated emulated NVRAM save script to automatically install as launch daemon (Yosemite+) or logout hook
+- Fixed maximum click duration and double click speed for non-standard poll frequencies
 
 #### v0.8.5
 - Updated builtin firmware versions for SMBIOS and the rest
