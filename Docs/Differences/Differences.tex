@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
-%DIF DEL PreviousConfiguration.tex   Wed Oct  5 20:21:08 2022
-%DIF ADD ../Configuration.tex        Thu Oct  6 05:51:14 2022
+%DIF DEL PreviousConfiguration.tex   Wed Oct 12 15:33:32 2022
+%DIF ADD ../Configuration.tex        Sun Oct 23 18:41:15 2022
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -7116,13 +7116,13 @@ Recommended configuration settings for this driver:
   \item \DIFaddend \texttt{LegacySchema} populated.
   \DIFaddbegin \begin{itemize}
   \tightlist
-    \item \DIFadd{For simpler testing (allows arbitrary test variables), and future-proofing against
+    \DIFaddend \item \DIFaddbegin \DIFadd{For simpler testing (allows arbitrary test variables), and future-proofing against
     changes in the variables required by macOS updates, use }\texttt{\DIFadd{<string>*</string>}} \DIFadd{settings, as
     described in notes below.
     }\item \DIFadd{For increased security, populate sections with known required keys only, as shown in OpenCore's
     sample }\texttt{\DIFadd{.plist}} \DIFadd{files.
   }\end{itemize}
-  \DIFaddend \item \texttt{ExposeSensitiveData} with at least bit \texttt{0x1} set to make \texttt{boot-path}
+  \item \DIFaddend \texttt{ExposeSensitiveData} with at least bit \texttt{0x1} set to make \texttt{boot-path}
   variable containing the OpenCore EFI partition UUID available to the \texttt{Launchd.command} script.
 \end{itemize}
 
@@ -7662,7 +7662,47 @@ for additional options.
 
   \emph{Note}: The recommended value for this option is \texttt{1}. This value may
   optionally be modified in combination with \texttt{PointerSpeedDiv}, according to user
-  preference, to achieve customised mouse movement scaling.
+  preference, to achieve customised mouse movement scaling\DIFaddbegin \DIFadd{.
+}
+
+\item
+  \texttt{\DIFadd{PointerDwellClickTimeout}}\\
+  \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ integer}}\\
+  \textbf{\DIFadd{Failsafe}}\DIFadd{: }\texttt{\DIFadd{0}}\\
+  \textbf{\DIFadd{Description}}\DIFadd{: Configure pointer dwell-clicking single left click timeout in
+  milliseconds in the OpenCore re-implementation of the Apple Event protocol.
+  Has no effect when using the OEM Apple implementation (see }\texttt{\DIFadd{AppleEvent}} \DIFadd{setting).
+}
+
+  \DIFadd{When the timeout expires, a single left click is issued at the current position.
+  }\texttt{\DIFadd{0}} \DIFadd{indicates the timeout is disabled.
+}
+
+\item
+  \texttt{\DIFadd{PointerDwellDoubleClickTimeout}}\\
+  \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ integer}}\\
+  \textbf{\DIFadd{Failsafe}}\DIFadd{: }\texttt{\DIFadd{0}}\\
+  \textbf{\DIFadd{Description}}\DIFadd{: Configure pointer dwell-clicking single left double click timeout in
+  milliseconds in the OpenCore re-implementation of the Apple Event protocol.
+  Has no effect when using the OEM Apple implementation (see }\texttt{\DIFadd{AppleEvent}} \DIFadd{setting).
+}
+
+  \DIFadd{When the timeout expires, a single left double click is issued at the current position.
+  }\texttt{\DIFadd{0}} \DIFadd{indicates the timeout is disabled.
+}
+
+\item
+  \texttt{\DIFadd{PointerDwellRadius}}\\
+  \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ integer}}\\
+  \textbf{\DIFadd{Failsafe}}\DIFadd{: }\texttt{\DIFadd{0}}\\
+  \textbf{\DIFadd{Description}}\DIFadd{: Configure pointer dwell-clicking tolerance radius in pixels in the
+  OpenCore re-implementation of the Apple Event protocol.
+  Has no effect when using the OEM Apple implementation (see }\texttt{\DIFadd{AppleEvent}} \DIFadd{setting).
+}
+
+  \DIFadd{The radius is scaled by }\texttt{\DIFadd{UIScale}}\DIFadd{. When the pointer leaves this radius, the timeouts for }\texttt{\DIFadd{PointerDwellClickTimeout}}
+  \DIFadd{and }\texttt{\DIFadd{PointerDwellDoubleClickTimeout}} \DIFadd{are reset and the new position is the centre
+  for the new dwell-clicking tolerance radius}\DIFaddend .
 
 \end{enumerate}
 
