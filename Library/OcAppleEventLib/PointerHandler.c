@@ -144,6 +144,33 @@ STATIC UINT64  mMaxPointerResolutionY = 1;
 STATIC UINT64  mPointerRawX;
 STATIC UINT64  mPointerRawY;
 
+STATIC UINT32     mDwellClickTimeout;
+STATIC UINT32     mDwellDoubleClickTimeout;
+STATIC UINT32     mDwellClickRadiusSqr;
+STATIC DIMENSION  mDwellPosition;
+STATIC UINT32     mDwellClickTime;
+
+VOID
+InternalInitializePointerUiScale (
+  VOID
+  )
+{
+  EFI_STATUS  Status;
+  UINTN       DataSize;
+
+  DataSize = sizeof (mUiScale);
+  Status   = gRT->GetVariable (
+                    APPLE_UI_SCALE_VARIABLE_NAME,
+                    &gAppleVendorVariableGuid,
+                    NULL,
+                    &DataSize,
+                    (VOID *)&mUiScale
+                    );
+  if (EFI_ERROR (Status) || (mUiScale != 2)) {
+    mUiScale = 1;
+  }
+}
+
 VOID
 InternalSetPointerPolling (
   IN UINT32  PointerPollMin,
@@ -191,6 +218,18 @@ InternalSetPointerSpeed (
   }
 
   mPointerSpeedMul = PointerSpeedMul;
+}
+
+VOID
+InternalSetDwellClicking (
+  IN UINT16  ClickTimeout,
+  IN UINT16  DoubleClickTimeout,
+  IN UINT16  Radius
+  )
+{
+  mDwellClickTimeout       = (UINT32)ClickTimeout * 10000;
+  mDwellDoubleClickTimeout = (UINT32)DoubleClickTimeout * 10000;
+  mDwellClickRadiusSqr     = ((UINT32)Radius * Radius) * (mUiScale * mUiScale);
 }
 
 // InternalRegisterSimplePointerInterface
@@ -720,6 +759,90 @@ InternalHandleButtonInteraction (
   ++Pointer->ButtonTicksSinceClick;
 }
 
+STATIC
+VOID
+InternalResetDwellClicking (
+  VOID
+  )
+{
+  mDwellClickTime = 0;
+  CopyMem (
+    &mDwellPosition,
+    &mCursorPosition,
+    sizeof (mDwellPosition)
+    );
+}
+
+STATIC
+VOID
+InternalQueueDwellClick (
+  IN APPLE_EVENT_TYPE    EventType,
+  IN APPLE_MODIFIER_MAP  Modifiers
+  )
+{
+  APPLE_EVENT_INFORMATION  *Information;
+
+  Information = InternalCreatePointerEventQueueInformation (
+                  APPLE_EVENT_TYPE_LEFT_BUTTON | APPLE_EVENT_TYPE_MOUSE_DOWN,
+                  Modifiers
+                  );
+  if (Information != NULL) {
+    EventAddEventToQueue (Information);
+  }
+
+  Information = InternalCreatePointerEventQueueInformation (
+                  APPLE_EVENT_TYPE_LEFT_BUTTON | APPLE_EVENT_TYPE_MOUSE_UP,
+                  Modifiers
+                  );
+  if (Information != NULL) {
+    EventAddEventToQueue (Information);
+  }
+
+  Information = InternalCreatePointerEventQueueInformation (
+                  APPLE_EVENT_TYPE_LEFT_BUTTON | EventType,
+                  Modifiers
+                  );
+  if (Information != NULL) {
+    EventAddEventToQueue (Information);
+  }
+}
+
+STATIC
+VOID
+InternalHandleDwellClicking (
+  IN APPLE_MODIFIER_MAP  Modifiers
+  )
+{
+  BOOLEAN  ClickDisabled;
+  BOOLEAN  DoubleClickDisabled;
+  INT32    DistX;
+  INT32    DistY;
+
+  ClickDisabled       = mDwellClickTimeout == 0;
+  DoubleClickDisabled = mDwellDoubleClickTimeout == 0;
+  if (ClickDisabled && DoubleClickDisabled) {
+    return;
+  }
+
+  DistX = mCursorPosition.Horizontal - mDwellPosition.Horizontal;
+  DistY = mCursorPosition.Vertical - mDwellPosition.Vertical;
+  if ((UINT32)(DistX * DistX + DistY * DistY) <= mDwellClickRadiusSqr) {
+    mDwellClickTime += mSimplePointerPollTime;
+
+    if (!DoubleClickDisabled && (mDwellClickTime >= mDwellDoubleClickTimeout)) {
+      InternalQueueDwellClick (APPLE_EVENT_TYPE_MOUSE_DOUBLE_CLICK, Modifiers);
+      InternalResetDwellClicking ();
+    } else if (!ClickDisabled && (mDwellClickTime >= mDwellClickTimeout)) {
+      InternalQueueDwellClick (APPLE_EVENT_TYPE_MOUSE_CLICK, Modifiers);
+      if (DoubleClickDisabled) {
+        InternalResetDwellClicking ();
+      }
+    }
+  } else {
+    InternalResetDwellClicking ();
+  }
+}
+
 // InternalSimplePointerPollNotifyFunction
 STATIC
 VOID
@@ -879,6 +1002,8 @@ InternalSimplePointerPollNotifyFunction (
 
     InternalHandleButtonInteraction (CommonStatus, &mLeftButtonInfo, Modifiers);
     InternalHandleButtonInteraction (CommonStatus, &mRightButtonInfo, Modifiers);
+
+    InternalHandleDwellClicking (Modifiers);
   }
 
   if (EFI_ERROR (CommonStatus)) {
@@ -944,24 +1069,9 @@ EventCreateSimplePointerPollEvent (
   )
 {
   EFI_STATUS  Status;
-  UINTN       DataSize;
   UINTN       Index;
 
   DEBUG ((DEBUG_VERBOSE, "EventCreateSimplePointerPollEvent\n"));
-
-  DataSize = sizeof (mUiScale);
-
-  Status = gRT->GetVariable (
-                  APPLE_UI_SCALE_VARIABLE_NAME,
-                  &gAppleVendorVariableGuid,
-                  NULL,
-                  &DataSize,
-                  (VOID *)&mUiScale
-                  );
-
-  if (EFI_ERROR (Status) || (mUiScale != 2)) {
-    mUiScale = 1;
-  }
 
   InternalRemoveUninstalledInstances (
     &mPointerProtocols,

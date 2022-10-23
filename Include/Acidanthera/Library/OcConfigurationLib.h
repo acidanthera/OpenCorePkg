@@ -633,16 +633,19 @@ OC_DECLARE (OC_UEFI_APFS)
 /// AppleInput is a set of options to configure OpenCore's reverse engingeered then customised implementation of the AppleEvent protocol.
 ///
 #define OC_UEFI_APPLEINPUT_FIELDS(_, __) \
-  _(OC_STRING                   , AppleEvent            ,     , OC_STRING_CONSTR ("Auto", _, __)  , OC_DESTR (OC_STRING) ) \
-  _(BOOLEAN                     , CustomDelays          ,     , FALSE                             , ()) \
-  _(UINT16                      , KeyInitialDelay       ,     , 50                                , ()) \
-  _(UINT16                      , KeySubsequentDelay    ,     , 5                                 , ()) \
-  _(BOOLEAN                     , GraphicsInputMirroring,     , FALSE                             , ()) \
-  _(UINT32                      , PointerPollMin        ,     , 0                                 , ()) \
-  _(UINT32                      , PointerPollMax        ,     , 0                                 , ()) \
-  _(UINT32                      , PointerPollMask       ,     , ((UINT32) (-1))                   , ()) \
-  _(UINT16                      , PointerSpeedDiv       ,     , 1                                 , ()) \
-  _(UINT16                      , PointerSpeedMul       ,     , 1                                 , ())
+  _(OC_STRING                   , AppleEvent                    ,     , OC_STRING_CONSTR ("Auto", _, __)  , OC_DESTR (OC_STRING) ) \
+  _(BOOLEAN                     , CustomDelays                  ,     , FALSE                             , ()) \
+  _(UINT16                      , KeyInitialDelay               ,     , 50                                , ()) \
+  _(UINT16                      , KeySubsequentDelay            ,     , 5                                 , ()) \
+  _(BOOLEAN                     , GraphicsInputMirroring        ,     , FALSE                             , ()) \
+  _(UINT32                      , PointerPollMin                ,     , 0                                 , ()) \
+  _(UINT32                      , PointerPollMax                ,     , 0                                 , ()) \
+  _(UINT32                      , PointerPollMask               ,     , ((UINT32) (-1))                   , ()) \
+  _(UINT16                      , PointerSpeedDiv               ,     , 1                                 , ()) \
+  _(UINT16                      , PointerSpeedMul               ,     , 1                                 , ()) \
+  _(UINT16                      , PointerDwellClickTimeout      ,     , 0                                 , ()) \
+  _(UINT16                      , PointerDwellDoubleClickTimeout,     , 0                                 , ()) \
+  _(UINT16                      , PointerDwellRadius            ,     , 0                                 , ())
 OC_DECLARE (OC_UEFI_APPLEINPUT)
 
 ///

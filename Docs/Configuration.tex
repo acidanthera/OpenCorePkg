@@ -7604,6 +7604,40 @@ for additional options.
   optionally be modified in combination with \texttt{PointerSpeedDiv}, according to user
   preference, to achieve customised mouse movement scaling.
 
+\item
+  \texttt{PointerDwellClickTimeout}\\
+  \textbf{Type}: \texttt{plist\ integer}\\
+  \textbf{Failsafe}: \texttt{0}\\
+  \textbf{Description}: Configure pointer dwell-clicking single left click timeout in
+  milliseconds in the OpenCore re-implementation of the Apple Event protocol.
+  Has no effect when using the OEM Apple implementation (see \texttt{AppleEvent} setting).
+
+  When the timeout expires, a single left click is issued at the current position.
+  \texttt{0} indicates the timeout is disabled.
+
+\item
+  \texttt{PointerDwellDoubleClickTimeout}\\
+  \textbf{Type}: \texttt{plist\ integer}\\
+  \textbf{Failsafe}: \texttt{0}\\
+  \textbf{Description}: Configure pointer dwell-clicking single left double click timeout in
+  milliseconds in the OpenCore re-implementation of the Apple Event protocol.
+  Has no effect when using the OEM Apple implementation (see \texttt{AppleEvent} setting).
+
+  When the timeout expires, a single left double click is issued at the current position.
+  \texttt{0} indicates the timeout is disabled.
+
+\item
+  \texttt{PointerDwellRadius}\\
+  \textbf{Type}: \texttt{plist\ integer}\\
+  \textbf{Failsafe}: \texttt{0}\\
+  \textbf{Description}: Configure pointer dwell-clicking tolerance radius in pixels in the
+  OpenCore re-implementation of the Apple Event protocol.
+  Has no effect when using the OEM Apple implementation (see \texttt{AppleEvent} setting).
+
+  The radius is scaled by \texttt{UIScale}. When the pointer leaves this radius, the timeouts for \texttt{PointerDwellClickTimeout}
+  and \texttt{PointerDwellDoubleClickTimeout} are reset and the new position is the centre
+  for the new dwell-clicking tolerance radius.
+
 \end{enumerate}
 
 \subsection{Audio Properties}\label{uefiaudioprops}

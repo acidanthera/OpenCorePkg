@@ -564,7 +564,10 @@ OcAppleEventInstallProtocol (
   IN UINT32   PointerPollMax,
   IN UINT32   PointerPollMask,
   IN UINT16   PointerSpeedDiv,
-  IN UINT16   PointerSpeedMul
+  IN UINT16   PointerSpeedMul,
+  IN UINT16   PointerDwellClickTimeout,
+  IN UINT16   PointerDwellDoubleClickTimeout,
+  IN UINT16   PointerDwellRadius
   )
 {
   EFI_STATUS            Status;
@@ -618,8 +621,14 @@ OcAppleEventInstallProtocol (
     GraphicsInputMirroring
     );
 
+  InternalInitializePointerUiScale ();
   InternalSetPointerPolling (PointerPollMin, PointerPollMax, PointerPollMask);
   InternalSetPointerSpeed (PointerSpeedDiv, PointerSpeedMul);
+  InternalSetDwellClicking (
+    PointerDwellClickTimeout,
+    PointerDwellDoubleClickTimeout,
+    PointerDwellRadius
+    );
 
   Status = gBS->InstallMultipleProtocolInterfaces (
                   &gImageHandle,

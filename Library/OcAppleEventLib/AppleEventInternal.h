@@ -165,6 +165,11 @@ InternalSetKeyBehaviour (
   );
 
 VOID
+InternalInitializePointerUiScale (
+  VOID
+  );
+
+VOID
 InternalSetPointerPolling (
   IN UINT32  PointerPollMin,
   IN UINT32  PointerPollMax,
@@ -175,6 +180,13 @@ VOID
 InternalSetPointerSpeed (
   IN UINT16  PointerSpeedDiv,
   IN UINT16  PointerSpeedMul
+  );
+
+VOID
+InternalSetDwellClicking (
+  IN UINT16  ClickTimeout,
+  IN UINT16  DoubleClickTimeout,
+  IN UINT16  Radius
   );
 
 extern UINT32  mPointerSpeedMul;

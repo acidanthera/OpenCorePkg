@@ -451,7 +451,10 @@ OcReinstallProtocols (
            Config->Uefi.AppleInput.PointerPollMax,
            Config->Uefi.AppleInput.PointerPollMask,
            Config->Uefi.AppleInput.PointerSpeedDiv,
-           Config->Uefi.AppleInput.PointerSpeedMul
+           Config->Uefi.AppleInput.PointerSpeedMul,
+           Config->Uefi.AppleInput.PointerDwellClickTimeout,
+           Config->Uefi.AppleInput.PointerDwellDoubleClickTimeout,
+           Config->Uefi.AppleInput.PointerDwellRadius
            ) == NULL)
      && InstallAppleEvent)
   {

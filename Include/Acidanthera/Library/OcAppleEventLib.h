@@ -24,23 +24,26 @@
 /**
   Install and initialise Apple Event protocol.
 
-  @param[in] Install                If false, do not install even when no suitable OEM version found.
-  @param[in] Reinstall              If true, force overwrite installed protocol.
-                                    If false, use Apple OEM protocol where possible.
-  @param[in] CustomDelays           If true, use key delays specified.
-                                    If false, use Apple OEM default key delay values.
-                                    OC builtin AppleEvent only.
-  @param[in] KeyInitialDelay        Key repeat initial delay in 10ms units.
-  @param[in] KeySubsequentDelay     Key repeat subsequent delay in 10ms units.
-                                    If zero, warn and use 1.
-  @param[in] GraphicsInputMirroring If true, disable Apple default behaviour which can
-                                    prevent keyboard input reaching non-Apple GUI UEFI apps.
-                                    OC builtin AppleEvent only.
-  @param[in] PointerPollMin         Pointer polling minimal period in ms.
-  @param[in] PointerPollMax         Pointer polling maximum period in ms.
-  @param[in] PointerPollMask        Pointer polling mask to choose polled handles.
-  @param[in] PointerSpeedDiv        Pointer speed divisor. If zero, warn and use 1.
-  @param[in] PointerSpeedMul        Pointer speed multiplier.
+  @param[in] Install                         If false, do not install even when no suitable OEM version found.
+  @param[in] Reinstall                       If true, force overwrite installed protocol.
+                                             If false, use Apple OEM protocol where possible.
+  @param[in] CustomDelays                    If true, use key delays specified.
+                                             If false, use Apple OEM default key delay values.
+                                             OC builtin AppleEvent only.
+  @param[in] KeyInitialDelay                 Key repeat initial delay in 10ms units.
+  @param[in] KeySubsequentDelay              Key repeat subsequent delay in 10ms units.
+                                             If zero, warn and use 1.
+  @param[in] GraphicsInputMirroring          If true, disable Apple default behaviour which can
+                                             prevent keyboard input reaching non-Apple GUI UEFI apps.
+                                             OC builtin AppleEvent only.
+  @param[in] PointerPollMin                  Pointer polling minimal period in ms.
+  @param[in] PointerPollMax                  Pointer polling maximum period in ms.
+  @param[in] PointerPollMask                 Pointer polling mask to choose polled handles.
+  @param[in] PointerSpeedDiv                 Pointer speed divisor. If zero, warn and use 1.
+  @param[in] PointerSpeedMul                 Pointer speed multiplier.
+  @param[in] PointerDwellClickTimeout        Pointer dwell-clicking single left click timeout.
+  @param[in] PointerDwellDoubleClickTimeout  Pointer dwell-clicking single left double click timeout.
+  @param[in] PointerDwellRadius              Pointer dwell-clicking tolerance radius in pixels.
 
   @retval installed or located protocol or NULL.
 **/
@@ -56,7 +59,10 @@ OcAppleEventInstallProtocol (
   IN UINT32   PointerPollMax,
   IN UINT32   PointerPollMask,
   IN UINT16   PointerSpeedDiv,
-  IN UINT16   PointerSpeedMul
+  IN UINT16   PointerSpeedMul,
+  IN UINT16   PointerDwellClickTimeout,
+  IN UINT16   PointerDwellDoubleClickTimeout,
+  IN UINT16   PointerDwellRadius
   );
 
 #endif // OC_APPLE_EVENT_LIB_H

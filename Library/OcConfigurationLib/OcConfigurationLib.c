@@ -764,16 +764,19 @@ OC_SCHEMA
 STATIC
 OC_SCHEMA
   mUefiAppleInputSchema[] = {
-  OC_SCHEMA_STRING_IN ("AppleEvent",              OC_GLOBAL_CONFIG, Uefi.AppleInput.AppleEvent),
-  OC_SCHEMA_BOOLEAN_IN ("CustomDelays",           OC_GLOBAL_CONFIG, Uefi.AppleInput.CustomDelays),
-  OC_SCHEMA_BOOLEAN_IN ("GraphicsInputMirroring", OC_GLOBAL_CONFIG, Uefi.AppleInput.GraphicsInputMirroring),
-  OC_SCHEMA_INTEGER_IN ("KeyInitialDelay",        OC_GLOBAL_CONFIG, Uefi.AppleInput.KeyInitialDelay),
-  OC_SCHEMA_INTEGER_IN ("KeySubsequentDelay",     OC_GLOBAL_CONFIG, Uefi.AppleInput.KeySubsequentDelay),
-  OC_SCHEMA_INTEGER_IN ("PointerPollMask",        OC_GLOBAL_CONFIG, Uefi.AppleInput.PointerPollMask),
-  OC_SCHEMA_INTEGER_IN ("PointerPollMax",         OC_GLOBAL_CONFIG, Uefi.AppleInput.PointerPollMax),
-  OC_SCHEMA_INTEGER_IN ("PointerPollMin",         OC_GLOBAL_CONFIG, Uefi.AppleInput.PointerPollMin),
-  OC_SCHEMA_INTEGER_IN ("PointerSpeedDiv",        OC_GLOBAL_CONFIG, Uefi.AppleInput.PointerSpeedDiv),
-  OC_SCHEMA_INTEGER_IN ("PointerSpeedMul",        OC_GLOBAL_CONFIG, Uefi.AppleInput.PointerSpeedMul),
+  OC_SCHEMA_STRING_IN ("AppleEvent",                      OC_GLOBAL_CONFIG, Uefi.AppleInput.AppleEvent),
+  OC_SCHEMA_BOOLEAN_IN ("CustomDelays",                   OC_GLOBAL_CONFIG, Uefi.AppleInput.CustomDelays),
+  OC_SCHEMA_BOOLEAN_IN ("GraphicsInputMirroring",         OC_GLOBAL_CONFIG, Uefi.AppleInput.GraphicsInputMirroring),
+  OC_SCHEMA_INTEGER_IN ("KeyInitialDelay",                OC_GLOBAL_CONFIG, Uefi.AppleInput.KeyInitialDelay),
+  OC_SCHEMA_INTEGER_IN ("KeySubsequentDelay",             OC_GLOBAL_CONFIG, Uefi.AppleInput.KeySubsequentDelay),
+  OC_SCHEMA_INTEGER_IN ("PointerDwellClickTimeout",       OC_GLOBAL_CONFIG, Uefi.AppleInput.PointerDwellClickTimeout),
+  OC_SCHEMA_INTEGER_IN ("PointerDwellDoubleClickTimeout", OC_GLOBAL_CONFIG, Uefi.AppleInput.PointerDwellDoubleClickTimeout),
+  OC_SCHEMA_INTEGER_IN ("PointerDwellRadius",             OC_GLOBAL_CONFIG, Uefi.AppleInput.PointerDwellRadius),
+  OC_SCHEMA_INTEGER_IN ("PointerPollMask",                OC_GLOBAL_CONFIG, Uefi.AppleInput.PointerPollMask),
+  OC_SCHEMA_INTEGER_IN ("PointerPollMax",                 OC_GLOBAL_CONFIG, Uefi.AppleInput.PointerPollMax),
+  OC_SCHEMA_INTEGER_IN ("PointerPollMin",                 OC_GLOBAL_CONFIG, Uefi.AppleInput.PointerPollMin),
+  OC_SCHEMA_INTEGER_IN ("PointerSpeedDiv",                OC_GLOBAL_CONFIG, Uefi.AppleInput.PointerSpeedDiv),
+  OC_SCHEMA_INTEGER_IN ("PointerSpeedMul",                OC_GLOBAL_CONFIG, Uefi.AppleInput.PointerSpeedMul),
 };
 
 STATIC
