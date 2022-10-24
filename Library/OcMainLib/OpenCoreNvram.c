@@ -203,12 +203,117 @@ OcAddNvram (
   }
 }
 
+#if defined (MDE_CPU_X64)
+// test rax, rax
+// jz ...
+STATIC CONST UINT8  CheckSecurityListGetSet[] = {
+  0x48, 0x85, 0xC0, 0x74
+};
+
+// xor rax, rax
+// jz ...
+STATIC CONST UINT8  DontCheckSecurityListGetSet[] = {
+  0x48, 0x31, 0xC0, 0x74
+};
+
+// test rbx, rbx
+// jz ...
+STATIC CONST UINT8  CheckSecurityListGetNext[] = {
+  0x48, 0x85, 0xDB, 0x74
+};
+
+// xor rbx, rbx
+// jz ...
+STATIC CONST UINT8  DontCheckSecurityListGetNext[] = {
+  0x48, 0x31, 0xDB, 0x74
+};
+#endif
+
+STATIC
+VOID
+UnprotectAppleNvram (
+  VOID
+  )
+{
+  EFI_STATUS  Status;
+  UINT32      GetVariableReplaceCount;
+  UINT32      SetVariableReplaceCount;
+  UINT32      GetNextVariableNameReplaceCount;
+
+ #if defined (MDE_CPU_X64)
+  GetVariableReplaceCount = ApplyPatch (
+                              CheckSecurityListGetSet,
+                              NULL,
+                              sizeof (CheckSecurityListGetSet),
+                              DontCheckSecurityListGetSet,
+                              NULL,
+                              (UINT8 *)gRT->GetVariable,
+                              0x80,
+                              1,
+                              0
+                              );
+
+  SetVariableReplaceCount = ApplyPatch (
+                              CheckSecurityListGetSet,
+                              NULL,
+                              sizeof (CheckSecurityListGetSet),
+                              DontCheckSecurityListGetSet,
+                              NULL,
+                              (UINT8 *)gRT->SetVariable,
+                              0x80,
+                              1,
+                              0
+                              );
+
+  GetNextVariableNameReplaceCount = ApplyPatch (
+                                      CheckSecurityListGetNext,
+                                      NULL,
+                                      sizeof (CheckSecurityListGetNext),
+                                      DontCheckSecurityListGetNext,
+                                      NULL,
+                                      (UINT8 *)gRT->GetNextVariableName,
+                                      0x100,
+                                      1,
+                                      0
+                                      );
+
+  Status = EFI_SUCCESS;
+
+  if (  (GetVariableReplaceCount != 1)
+     || (SetVariableReplaceCount != 1)
+     || (GetNextVariableNameReplaceCount != 1))
+  {
+    Status = EFI_NOT_FOUND;
+  }
+
+ #else
+  GetVariableReplaceCount         = 0;
+  SetVariableReplaceCount         = 0;
+  GetNextVariableNameReplaceCount = 0;
+
+  Status = EFI_UNSUPPORTED;
+ #endif
+
+  DEBUG ((
+    EFI_ERROR (Status) ? DEBUG_WARN : DEBUG_INFO,
+    "OC: UnprotectAppleNvram %u/%u/%u - %r\n",
+    GetVariableReplaceCount,
+    SetVariableReplaceCount,
+    GetNextVariableNameReplaceCount,
+    Status
+    ));
+}
+
 VOID
 OcLoadNvramSupport (
   IN OC_STORAGE_CONTEXT  *Storage,
   IN OC_GLOBAL_CONFIG    *Config
   )
 {
+  if (Config->Uefi.Quirks.UnprotectAppleNvram) {
+    UnprotectAppleNvram ();
+  }
+
   OcLoadLegacyNvram (
     Storage,
     &Config->Nvram.Legacy,

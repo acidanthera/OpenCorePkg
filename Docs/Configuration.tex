@@ -8728,6 +8728,18 @@ for additional options.
   \emph{Note}: This quirk is useful in cases where unsuccessful drive detection
   results in an absence of boot entries.
 
+\item
+  \texttt{UnprotectAppleNvram}\\
+  \textbf{Type}: \texttt{plist\ boolean}\\
+  \textbf{Failsafe}: \texttt{false}\\
+  \textbf{Description}: Unprotect blocked NVRAM variables on recent Apple firmware.
+
+  Newer Apple firmware wraps NVRAM access in various security checks. This quirk applies patches
+  which disable these checks, allowing OpenCore to set variables such as
+  \texttt{FA4CE28D-B62F-4C99-9CC3-6815686E30F9:gpu-power-prefs}, which are otherwise blocked.
+
+  \emph{Note}: This quirk lowers system security and should not be used unless specifically needed.
+
 \end{enumerate}
 
 \subsection{ReservedMemory Properties}\label{uefirsvdprops}

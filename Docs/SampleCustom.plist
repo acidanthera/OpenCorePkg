@@ -2287,6 +2287,8 @@
 			<integer>0</integer>
 			<key>UnblockFsConnect</key>
 			<false/>
+			<key>UnprotectAppleNvram</key>
+			<false/>
 		</dict>
 		<key>ReservedMemory</key>
 		<array>
