@@ -447,8 +447,9 @@ InternalCalculateARTFrequencyIntel (
   // this frequency on module entry to initialise a TimerLib instance, and at
   // a later point in time to gather CPU information.
   //
-  STATIC UINT64  ARTFrequency        = 0;
-  STATIC UINT64  CPUFrequencyFromART = 0;
+  STATIC BOOLEAN  ObtainedARTFreq     = FALSE;
+  STATIC UINT64   ARTFrequency        = 0;
+  STATIC UINT64   CPUFrequencyFromART = 0;
 
   UINT32  MaxId;
   UINT32  CpuVendor;
@@ -463,11 +464,14 @@ InternalCalculateARTFrequencyIntel (
   UINT8                          Model;
 
   if (Recalculate) {
+    ObtainedARTFreq     = FALSE;
     ARTFrequency        = 0;
     CPUFrequencyFromART = 0;
   }
 
-  if (ARTFrequency == 0) {
+  if (!ObtainedARTFreq) {
+    ObtainedARTFreq = TRUE;
+
     //
     // Get vendor CPUID 0x00000000
     //
@@ -686,6 +690,11 @@ InternalCalculateVMTFrequency (
   return CpuidEax * 1000ULL;
 }
 
+//
+// This function and everything called by it must not log (after the first early call
+// to it, which can log and cache results), otherwise it will generate a loop when it
+// gets called during first log line.
+//
 UINT64
 OcGetTSCFrequency (
   VOID

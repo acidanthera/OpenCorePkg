@@ -6,6 +6,7 @@ OpenCore Changelog
 - Fixed maximum click duration and double click speed for non-standard poll frequencies
 - Added support for pointer dwell-clicking
 - Prevented Apple firmware from adding additional security checks on top of emulated NVRAM driver
+- Fixed recursive loop on first log protocol line on some systems
 
 #### v0.8.5
 - Updated builtin firmware versions for SMBIOS and the rest
