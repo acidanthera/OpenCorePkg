@@ -376,6 +376,7 @@ VariableWriteServiceInitializeDxe (
   )
 {
   EFI_STATUS  Status;
+  VOID        *Interface;
 
   Status = VariableWriteServiceInitialize ();
   if (EFI_ERROR (Status)) {
@@ -389,14 +390,18 @@ VariableWriteServiceInitializeDxe (
   RecordSecureBootPolicyVarData ();
 
   //
-  // Install the Variable Write Architectural protocol.
+  // Install (but don't reinstall) the Variable Write Architectural protocol.
   //
-  Status = gBS->InstallProtocolInterface (
-                  &mHandle,
-                  &gEfiVariableWriteArchProtocolGuid,
-                  EFI_NATIVE_INTERFACE,
-                  NULL
-                  );
+  Status = gBS->LocateProtocol (&gEfiVariableWriteArchProtocolGuid, NULL, &Interface);
+  if (EFI_ERROR (Status)) {
+    Status = gBS->InstallProtocolInterface (
+                    &mHandle,
+                    &gEfiVariableWriteArchProtocolGuid,
+                    EFI_NATIVE_INTERFACE,
+                    NULL
+                    );
+  }
+
   ASSERT_EFI_ERROR (Status);
 }
 
@@ -574,6 +579,7 @@ VariableServiceInitialize (
   EFI_EVENT            ReadyToBootEvent;
   EFI_EVENT            EndOfDxeEvent;
   EFI_CREATE_EVENT_EX  OriginalCreateEventEx;
+  VOID                 *Interface;
 
   //
   // Probably worth noting that attempting to remove any pre-existing protocols here
@@ -602,17 +608,27 @@ VariableServiceInitialize (
   SystemTable->RuntimeServices->GetVariable         = VariableServiceGetVariable;
   SystemTable->RuntimeServices->GetNextVariableName = VariableServiceGetNextVariableName;
   SystemTable->RuntimeServices->SetVariable         = VariableServiceSetVariable;
-  SystemTable->RuntimeServices->QueryVariableInfo   = VariableServiceQueryVariableInfo;
+  //
+  // Avoid setting UEFI 2.0 interface members, since this must run on older and Apple firmware.
+  // TODO: Possibly add this back on version check, but nothing we are aware of uses this.
+  //
+  // SystemTable->RuntimeServices->QueryVariableInfo   = VariableServiceQueryVariableInfo;
 
   //
-  // Now install the Variable Runtime Architectural protocol on a new handle.
+  // Now install (but don't reinstall) the Variable Runtime Architectural protocol on a new handle.
+  // If we reinstall this on newer Apple firmware then the three runtime services functions
+  // above get preserved, but wrapped by additional Apple security.
   //
-  Status = gBS->InstallProtocolInterface (
-                  &mHandle,
-                  &gEfiVariableArchProtocolGuid,
-                  EFI_NATIVE_INTERFACE,
-                  NULL
-                  );
+  Status = gBS->LocateProtocol (&gEfiVariableArchProtocolGuid, NULL, &Interface);
+  if (EFI_ERROR (Status)) {
+    Status = gBS->InstallProtocolInterface (
+                    &mHandle,
+                    &gEfiVariableArchProtocolGuid,
+                    EFI_NATIVE_INTERFACE,
+                    NULL
+                    );
+  }
+
   ASSERT_EFI_ERROR (Status);
 
   if (!PcdGetBool (PcdEmuVariableNvModeEnable)) {
