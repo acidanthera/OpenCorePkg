@@ -28,9 +28,6 @@
 
 #define OC_LOG_BUFFER_SIZE  (2 * EFI_PAGE_SIZE)
 
-STATIC EFI_EVENT  mLogProtocolArrivedNotifyEvent;
-STATIC VOID       *mLogProtocolArrivedNotifyRegistration;
-
 STATIC UINT8  *mLogBuffer = NULL;
 STATIC UINT8  *mLogWalker = NULL;
 STATIC UINTN  mLogCount   = 0;
@@ -69,7 +66,6 @@ LogProtocolArrivedNotify (
   )
 {
   UINTN            Index;
-  EFI_STATUS       Status;
   OC_LOG_PROTOCOL  *OcLog;
   CHAR8            *Walker;
   UINTN            ErrorLevel;
@@ -78,17 +74,19 @@ LogProtocolArrivedNotify (
   //
   // Event arrives. Close it.
   //
-  gBS->CloseEvent (mLogProtocolArrivedNotifyEvent);
+  gBS->CloseEvent (Event);
 
-  Status = gBS->LocateProtocol (
-                  &gOcLogProtocolGuid,
-                  NULL,
-                  (VOID **)&OcLog
-                  );
+  OcLog = InternalGetOcLog ();
 
-  if (EFI_ERROR (Status) || (OcLog->Revision != OC_LOG_REVISION)) {
+  if (OcLog == NULL) {
     return;
   }
+
+  //
+  // Print messages without onscreen, as this has been done already.
+  //
+  CurrLogOpt      = OcLog->Options;
+  OcLog->Options &= ~OC_LOG_CONSOLE;
 
   Walker = (CHAR8 *)mLogBuffer;
   for (Index = 0; Index < mLogCount; ++Index) {
@@ -98,16 +96,7 @@ LogProtocolArrivedNotify (
     CopyMem (&ErrorLevel, Walker, sizeof (ErrorLevel));
     Walker += sizeof (ErrorLevel);
 
-    //
-    // Print debug message without onscreen, as it is done by OutputString.
-    //
-    CurrLogOpt      = OcLog->Options;
-    OcLog->Options &= ~OC_LOG_CONSOLE;
     DebugPrint (ErrorLevel, "%a", Walker);
-    //
-    // Restore original value.
-    //
-    OcLog->Options = CurrLogOpt;
 
     //
     // Skip message chars.
@@ -122,6 +111,11 @@ LogProtocolArrivedNotify (
     ++Walker;
   }
 
+  //
+  // Restore original value.
+  //
+  OcLog->Options = CurrLogOpt;
+
   FreePool (mLogBuffer);
   mLogBuffer = NULL;
 }
@@ -134,6 +128,8 @@ OcBufferEarlyLog (
   )
 {
   EFI_STATUS  Status;
+  EFI_EVENT   Event;
+  VOID        *Registration;
 
   if (mLogBuffer == NULL) {
     mLogBuffer = AllocatePool (OC_LOG_BUFFER_SIZE);
@@ -151,18 +147,18 @@ OcBufferEarlyLog (
                     TPL_NOTIFY,
                     LogProtocolArrivedNotify,
                     NULL,
-                    &mLogProtocolArrivedNotifyEvent
+                    &Event
                     );
 
     if (!EFI_ERROR (Status)) {
       Status = gBS->RegisterProtocolNotify (
                       &gOcLogProtocolGuid,
-                      mLogProtocolArrivedNotifyEvent,
-                      &mLogProtocolArrivedNotifyRegistration
+                      Event,
+                      &Registration
                       );
 
       if (EFI_ERROR (Status)) {
-        gBS->CloseEvent (mLogProtocolArrivedNotifyEvent);
+        gBS->CloseEvent (Event);
       }
     }
   }

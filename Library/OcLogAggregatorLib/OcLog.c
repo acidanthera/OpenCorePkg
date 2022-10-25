@@ -253,7 +253,6 @@ InternalLogAddEntry (
   UINT32                      KeySize;
   UINT32                      DataSize;
   UINT32                      TotalSize;
-  UINTN                       OldAsciiBufferOffset;
   UINTN                       WriteSize;
   UINTN                       WrittenSize;
 
@@ -365,15 +364,12 @@ InternalLogAddEntry (
     //
     // Write to internal buffer.
     //
-
-    OldAsciiBufferOffset = Private->AsciiBufferOffset;
-
     Status = AsciiStrCatS (Private->AsciiBuffer, Private->AsciiBufferSize, Private->TimingTxt);
     if (!EFI_ERROR (Status)) {
-      Private->AsciiBufferOffset += AsciiStrLen (Private->TimingTxt);
-      Status                      = AsciiStrCatS (Private->AsciiBuffer, Private->AsciiBufferSize, Private->LineBuffer);
+      Private->AsciiBufferWrittenOffset += AsciiStrLen (Private->TimingTxt);
+      Status                             = AsciiStrCatS (Private->AsciiBuffer, Private->AsciiBufferSize, Private->LineBuffer);
       if (!EFI_ERROR (Status)) {
-        Private->AsciiBufferOffset += AsciiStrLen (Private->LineBuffer);
+        Private->AsciiBufferWrittenOffset += AsciiStrLen (Private->LineBuffer);
       }
     }
 
@@ -381,16 +377,22 @@ InternalLogAddEntry (
     // Write to a file.
     //
     if (((OcLog->Options & OC_LOG_FILE) != 0) && (OcLog->FileSystem != NULL)) {
+      //
+      // Log lines may arrive when CurrentTpl > TPL_CALLBACK, we must batch them
+      // and emit them when we can, in both log methods.
+      //
       if (EfiGetCurrentTpl () <= TPL_CALLBACK) {
         if (OcLog->UnsafeLogFile != NULL) {
           //
           // For non-broken FAT32 driver this is fine. For driver with broken write
           // support (e.g. Aptio IV) this can result in corrupt file or unusable fs.
           //
-          WriteSize   = Private->AsciiBufferOffset - OldAsciiBufferOffset;
+          ASSERT (Private->AsciiBufferWrittenOffset >= Private->AsciiBufferFlushedOffset);
+          WriteSize   = Private->AsciiBufferWrittenOffset - Private->AsciiBufferFlushedOffset;
           WrittenSize = WriteSize;
-          OcLog->UnsafeLogFile->Write (OcLog->UnsafeLogFile, &WrittenSize, &Private->AsciiBuffer[OldAsciiBufferOffset]);
+          OcLog->UnsafeLogFile->Write (OcLog->UnsafeLogFile, &WrittenSize, &Private->AsciiBuffer[Private->AsciiBufferFlushedOffset]);
           OcLog->UnsafeLogFile->Flush (OcLog->UnsafeLogFile);
+          Private->AsciiBufferFlushedOffset += WrittenSize;
           if (WriteSize != WrittenSize) {
             DEBUG ((
               DEBUG_VERBOSE,

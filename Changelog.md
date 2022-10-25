@@ -5,8 +5,9 @@ OpenCore Changelog
 - Updated emulated NVRAM save script to automatically install as launch daemon (Yosemite+) or logout hook (older macOS)
 - Fixed maximum click duration and double click speed for non-standard poll frequencies
 - Added support for pointer dwell-clicking
-- Prevented Apple firmware from adding additional security checks on top of emulated NVRAM driver
-- Fixed recursive loop on first log protocol line on some systems
+- Prevented Apple firmware from adding security checks on top of emulated NVRAM driver
+- Fixed recursive loop crash at first non-early log line on some systems
+- Fixed early log preservation when using unsafe fast file logging
 
 #### v0.8.5
 - Updated builtin firmware versions for SMBIOS and the rest
