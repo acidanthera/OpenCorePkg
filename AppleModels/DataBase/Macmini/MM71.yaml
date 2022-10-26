@@ -1,7 +1,7 @@
 BIOSVendor: "Apple Inc."
-BIOSVersion: "433.140.2.0.0"
-BIOSLegacyVersion: "MM71.88Z.F000.B00.2204181522"
-BIOSReleaseDate: "04/18/2022"
+BIOSVersion: "474.0.0.0.0"
+BIOSLegacyVersion: "MM71.88Z.F000.B00.2208232138"
+BIOSReleaseDate: "08/23/2022"
 SystemManufacturer: "Apple Inc."
 SystemProductName: "Macmini7,1"
 SystemVersion: "1.0"
@@ -73,13 +73,13 @@ SmcEPCI: 0xF04008
 OEMStrings: |-
   Apple ROM Version
     Model:        MM71
-    EFI Version:  433.140.2.0.0
-    Built by:     root@4cn42
-    Date:         Mon Apr 18 15:22:50 PDT 2022
-    Revision:     433.140.2 (B&I)
+    EFI Version:  474.0.0.0.0
+    Built by:     root@888tp
+    Date:         Tue Aug 23 21:38:05 PDT 2022
+    Revision:     474 (B&I)
     ROM Version:  F000_B00
     Build Type:   Official Build, Release
-    Compiler:     clang-1316.0.21.3
+    Compiler:     clang-1400.0.29.1
 Specifications:
   CPUCodename:
     - "Haswell"
@@ -160,4 +160,4 @@ AppleModelYear:
   - 2017
   - 2018
 MinimumOSVersion: "10.10"
-MaximumOSVersion: "12.6"
+MaximumOSVersion: "12.6.1"

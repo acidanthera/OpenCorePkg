@@ -1,7 +1,7 @@
 BIOSVendor: "Apple Inc."
-BIOSVersion: "451.140.1.0.0"
-BIOSLegacyVersion: "MB91.88Z.F000.B00.2204111743"
-BIOSReleaseDate: "04/11/2022"
+BIOSVersion: "499.40.2.0.0"
+BIOSLegacyVersion: "MB91.88Z.F000.B00.2208220659"
+BIOSReleaseDate: "08/22/2022"
 SystemManufacturer: "Apple Inc."
 SystemProductName: "MacBook9,1"
 SystemVersion: "1.0"
@@ -74,17 +74,17 @@ SmcPlatform:
 SmcEPCI: 0xF0E007
 OEMStrings: |-
   Apple ROM Version
-    BIOS ID:      MB91.88Z.F000.B00.2204111743
+    BIOS ID:      MB91.88Z.F000.B00.2208220659
     Model:        MB91
-    EFI Version:  451.140.1.0.0
-    Built by:     root@pvl7m
-    Date:         Mon Apr 11 17:43:49 2022
-    Revision:     451.140.1 (B&I)
+    EFI Version:  499.40.2.0.0
+    Built by:     root@4vbq8
+    Date:         Mon Aug 22 06:59:53 2022
+    Revision:     499.40.2 (B&I)
     ROM Version:  F000_B00
     Build Type:   Official Build, RELEASE
-    Compiler:     clang-1316.0.21.3
-    UUID:         4A0CA362-C8F9-3B06-AEAE-B164E1EEBE84
-    UUID:         965898D2-D084-3A01-A97A-CD43C0FEEC29
+    Compiler:     clang-1400.0.29.1
+    UUID:         98E2511E-6246-350C-9CF4-194AE50EDBDF
+    UUID:         942F0AC4-FA12-3666-8DF6-8236AE20F6DE
 Specifications:
   CPUCodename:
     - "Skylake"
@@ -173,4 +173,4 @@ AppleModelYear:
   - 2016
   - 2017
 MinimumOSVersion: "10.11.4"
-MaximumOSVersion: "12.6"
+MaximumOSVersion: "12.6.1"

@@ -1,7 +1,7 @@
 BIOSVendor: "Apple Inc."
-BIOSVersion: "430.140.3.0.0"
-BIOSLegacyVersion: "IM161.88Z.F000.B00.2204181522"
-BIOSReleaseDate: "04/18/2022"
+BIOSVersion: "476.0.0.0.0"
+BIOSLegacyVersion: "IM161.88Z.F000.B00.2209061742"
+BIOSReleaseDate: "09/06/2022"
 SystemManufacturer: "Apple Inc."
 SystemProductName: "iMac16,1"
 SystemVersion: "1.0"
@@ -74,13 +74,13 @@ SmcEPCI: 0xF00008
 OEMStrings: |-
   Apple ROM Version
     Model:        IM161
-    EFI Version:  430.140.3.0.0
-    Built by:     root@qhffz
-    Date:         Mon Apr 18 15:22:57 PDT 2022
-    Revision:     430.140.3 (B&I)
+    EFI Version:  476.0.0.0.0
+    Built by:     root@5vgc8
+    Date:         Tue Sep  6 17:42:15 PDT 2022
+    Revision:     476 (B&I)
     ROM Version:  F000_B00
     Build Type:   Official Build, Release
-    Compiler:     clang-1316.0.21.3
+    Compiler:     clang-1400.0.29.1
 Specifications:
   CPUCodename:
     - "Broadwell"
@@ -184,4 +184,4 @@ AppleModelYear:
   - 2016
   - 2017
 MinimumOSVersion: "10.11"
-MaximumOSVersion: "12.6"
+MaximumOSVersion: "12.6.1"

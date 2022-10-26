@@ -8,6 +8,7 @@ OpenCore Changelog
 - Prevented Apple firmware from adding security checks on top of emulated NVRAM driver
 - Fixed recursive loop crash at first non-early log line on some systems
 - Fixed early log preservation when using unsafe fast file logging
+- Updated builtin firmware versions for SMBIOS and the rest
 
 #### v0.8.5
 - Updated builtin firmware versions for SMBIOS and the rest
