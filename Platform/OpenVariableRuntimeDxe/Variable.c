@@ -30,6 +30,8 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 #include "VariableParsing.h"
 #include "VariableRuntimeCache.h"
 
+#define EFI_VARIABLE_APPLE_BIT  0x80000000
+
 VARIABLE_MODULE_GLOBAL  *mVariableModuleGlobal;
 
 ///
@@ -2656,7 +2658,7 @@ VariableServiceSetVariable (
   // the delete operation of common authenticated variable at user physical presence.
   // So leave EFI_VARIABLE_AUTHENTICATED_WRITE_ACCESS attribute check to AuthVariableLib
   //
-  if ((Attributes & (~(EFI_VARIABLE_ATTRIBUTES_MASK | EFI_VARIABLE_AUTHENTICATED_WRITE_ACCESS))) != 0) {
+  if ((Attributes & (~(EFI_VARIABLE_ATTRIBUTES_MASK | EFI_VARIABLE_AUTHENTICATED_WRITE_ACCESS | EFI_VARIABLE_APPLE_BIT))) != 0) {
     return EFI_INVALID_PARAMETER;
   }
 
