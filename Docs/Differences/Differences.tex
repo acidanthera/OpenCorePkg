@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
-%DIF DEL PreviousConfiguration.tex   Wed Oct 12 15:33:32 2022
-%DIF ADD ../Configuration.tex        Sun Oct 23 18:41:15 2022
+%DIF DEL PreviousConfiguration.tex   Tue Oct 11 01:20:48 2022
+%DIF ADD ../Configuration.tex        Thu Oct 27 18:17:38 2022
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -4247,7 +4247,16 @@ nvram 4D1FDA02-38C7-4A6A-9CC6-4BCCA8B30102:oem-board   # SMBIOS Type2 ProductNam
   halt (stop execution) after obtaining a message of \texttt{HaltLevel}.
   Possible values match \texttt{DisplayLevel} values.
 
-\item
+  \DIFaddbegin \emph{\DIFadd{Note 1}}\DIFadd{: A halt will only occur if bit }\texttt{\DIFadd{0}} \DIFadd{(i.e. enable logging) for }\texttt{\DIFadd{Target}}
+  \DIFadd{under section }\texttt{\DIFadd{Misc->Debug}} \DIFadd{is set.
+}
+
+  \emph{\DIFadd{Note 2}}\DIFadd{: A halt will only occur after the configuration is loaded and logging is configured.
+  If any log messages occur at the specified halt level in early log (i.e. before this), they will
+  cause a halt when they are flushed to the log once it has been configured.
+}
+
+\DIFaddend \item
   \texttt{PasswordHash}\\
   \textbf{Type}: \texttt{plist\ data} 64 bytes\\
   \textbf{Failsafe}: all zero\\

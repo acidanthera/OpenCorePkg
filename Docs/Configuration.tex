@@ -4187,6 +4187,13 @@ nvram 4D1FDA02-38C7-4A6A-9CC6-4BCCA8B30102:oem-board   # SMBIOS Type2 ProductNam
   halt (stop execution) after obtaining a message of \texttt{HaltLevel}.
   Possible values match \texttt{DisplayLevel} values.
 
+  \emph{Note 1}: A halt will only occur if bit \texttt{0} (i.e. enable logging) for \texttt{Target}
+  under section \texttt{Misc->Debug} is set.
+
+  \emph{Note 2}: A halt will only occur after the configuration is loaded and logging is configured.
+  If any log messages occur at the specified halt level in early log (i.e. before this), they will
+  cause a halt when they are flushed to the log once it has been configured.
+
 \item
   \texttt{PasswordHash}\\
   \textbf{Type}: \texttt{plist\ data} 64 bytes\\
