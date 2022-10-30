@@ -388,7 +388,6 @@ VariableWriteServiceInitializeDxe (
   )
 {
   EFI_STATUS  Status;
-  VOID        *Interface;
 
   Status = VariableWriteServiceInitialize ();
   if (EFI_ERROR (Status)) {
@@ -402,17 +401,14 @@ VariableWriteServiceInitializeDxe (
   RecordSecureBootPolicyVarData ();
 
   //
-  // Install (but don't reinstall) the Variable Write Architectural protocol.
+  // Install the Variable Write Architectural protocol.
   //
-  Status = gBS->LocateProtocol (&gEfiVariableWriteArchProtocolGuid, NULL, &Interface);
-  if (EFI_ERROR (Status)) {
-    Status = gBS->InstallProtocolInterface (
-                    &mHandle,
-                    &gEfiVariableWriteArchProtocolGuid,
-                    EFI_NATIVE_INTERFACE,
-                    NULL
-                    );
-  }
+  Status = gBS->InstallProtocolInterface (
+                  &mHandle,
+                  &gEfiVariableWriteArchProtocolGuid,
+                  EFI_NATIVE_INTERFACE,
+                  NULL
+                  );
 
   ASSERT_EFI_ERROR (Status);
 }
@@ -655,7 +651,6 @@ VariableServiceInitialize (
   EFI_EVENT            ReadyToBootEvent;
   EFI_EVENT            EndOfDxeEvent;
   EFI_CREATE_EVENT_EX  OriginalCreateEventEx;
-  VOID                 *Interface;
 
   SaveAcpiGlobalVariable (SystemTable);
 
@@ -693,19 +688,18 @@ VariableServiceInitialize (
   // SystemTable->RuntimeServices->QueryVariableInfo   = VariableServiceQueryVariableInfo;
 
   //
-  // Now install (but don't reinstall) the Variable Runtime Architectural protocol on a new handle.
-  // If we reinstall this on newer Apple firmware then the three runtime services functions
-  // above get preserved, but wrapped by additional Apple security.
+  // Now install the Variable Runtime Architectural protocol on a new handle.
+  // When we reinstall this on newer Apple firmware then the three runtime services functions
+  // above get preserved, but wrapped by additional Apple security, which is believed to have
+  // desirable functionality, e.g. possibility of writing variables to different stores,
+  // allowing them to have intended effect.
   //
-  Status = gBS->LocateProtocol (&gEfiVariableArchProtocolGuid, NULL, &Interface);
-  if (EFI_ERROR (Status)) {
-    Status = gBS->InstallProtocolInterface (
-                    &mHandle,
-                    &gEfiVariableArchProtocolGuid,
-                    EFI_NATIVE_INTERFACE,
-                    NULL
-                    );
-  }
+  Status = gBS->InstallProtocolInterface (
+                  &mHandle,
+                  &gEfiVariableArchProtocolGuid,
+                  EFI_NATIVE_INTERFACE,
+                  NULL
+                  );
 
   ASSERT_EFI_ERROR (Status);
 
