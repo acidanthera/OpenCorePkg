@@ -682,10 +682,11 @@ VariableServiceInitialize (
   SystemTable->RuntimeServices->GetNextVariableName = VariableServiceGetNextVariableName;
   SystemTable->RuntimeServices->SetVariable         = VariableServiceSetVariable;
   //
-  // Avoid setting UEFI 2.0 interface members, since this must run on older and Apple firmware.
-  // TODO: Possibly add this back on version check, but nothing we are aware of uses this.
+  // Avoid setting UEFI 2.x interface member on EFI 1.x.
   //
-  // SystemTable->RuntimeServices->QueryVariableInfo   = VariableServiceQueryVariableInfo;
+  if (SystemTable->RuntimeServices->Hdr.Revision >= EFI_2_00_SYSTEM_TABLE_REVISION) {
+    SystemTable->RuntimeServices->QueryVariableInfo = VariableServiceQueryVariableInfo;
+  }
 
   //
   // Now install the Variable Runtime Architectural protocol on a new handle.
