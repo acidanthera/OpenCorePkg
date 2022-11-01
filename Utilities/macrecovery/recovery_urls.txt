@@ -44,5 +44,5 @@ Default version
 ./macrecovery.py -b Mac-E43C1C25D4880AD6 -m <real MLB> -os default  (newer)
 
 Latest version
-./macrecovery.py -b Mac-E43C1C25D4880AD6 -m 00000000000000000 -os latest
-./macrecovery.py -b Mac-E43C1C25D4880AD6 -m <real MLB> -os latest
+./macrecovery.py -b Mac-B4831CEBD52A0C4C -m 00000000000000000 -os latest
+./macrecovery.py -b Mac-B4831CEBD52A0C4C -m <real MLB> -os latest
