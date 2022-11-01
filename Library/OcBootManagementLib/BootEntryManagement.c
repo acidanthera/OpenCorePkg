@@ -1064,7 +1064,7 @@ AddBootEntryFromBless (
 }
 
 /**
-  Create bootable entries from recovery files (com.apple.boot.recovery) on the volume.
+  Create bootable entries from recovery files (com.apple.recovery.boot) on the volume.
 
   @param[in,out] BootContext   Context of filesystems.
   @param[in,out] FileSystem    Filesystem to scan for recovery.
