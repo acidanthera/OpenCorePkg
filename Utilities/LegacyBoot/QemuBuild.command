@@ -22,59 +22,109 @@ if [ ! -d ROOT ]; then
   exit 1
 fi
 
-rm -f OpenCore.dmg.sparseimage OpenCore.RO.raw OpenCore.RO.dmg
-hdiutil create -size 200m  -layout "UNIVERSAL HD"  -type SPARSE  -o OpenCore.dmg
-newDevice=$(hdiutil attach -nomount OpenCore.dmg.sparseimage |head -n 1 |  awk  '{print $1}')
-echo newdevice "$newDevice"
+if [ "$(uname)" = "Linux" ]; then
+  IMAGE=OpenCore.raw
+  DIR="$IMAGE.d"
+  NBD=/dev/nbd0
 
-diskutil partitionDisk "${newDevice}" 1 MBR fat32 TEST R
+  rm -rf "$DIR"
+  rm -f "$IMAGE" newbs origbs
+  mkdir -p "$DIR"
 
-# boot install script
-diskutil list
-N=$(echo "$newDevice" | tr -dc '0-9')
-echo "Will be installed to Disk ${N}"
+  # Create 200M MS-DOS bootable disk image with 1 FAT32 partition
+  modprobe nbd
+  qemu-img create -f raw "$IMAGE" 200M
+  qemu-nbd -f raw -c "$NBD" "$IMAGE"
+  fdisk "$NBD" << END
+  o
+  n
+  p
+  1
+  2048
+  409599
+  t
+  b
+  a
+  w
+END
+  mkfs.vfat -F32 ${NBD}p1
+
+  # Copy boot1f32 into FAT32 Boot Record
+  dd if=${NBD}p1 of=origbs count=1
+  cp -v boot1f32 newbs
+  dd if=origbs of=newbs skip=3 seek=3 bs=1 count=87 conv=notrunc
+  dd if=/dev/random of=newbs skip=496 seek=496 bs=1 count=14 conv=notrunc
+  dd if=newbs of=${NBD}p1 conv=notrunc
+
+  # Copy boot file and ESP contents into FAT32 file system
+  mount ${NBD}p1 "$DIR"
+  cp -v boot "$DIR"
+  cp -rv ROOT/* "$DIR"
+
+  # Remove temporary files
+  sleep 2
+  umount -R "$DIR"
+  qemu-nbd -d "$NBD"
+  rm -r "$DIR"
+  rm newbs origbs
+
+  # Copy boot0 into MBR
+  dd if=boot0 of="$IMAGE" bs=1 count=446 conv=notrunc
+elif [ "$(uname)" = "Darwin" ]; then
+  rm -f OpenCore.dmg.sparseimage OpenCore.RO.raw OpenCore.RO.dmg
+  hdiutil create -size 200m  -layout "UNIVERSAL HD"  -type SPARSE  -o OpenCore.dmg
+  newDevice=$(hdiutil attach -nomount OpenCore.dmg.sparseimage |head -n 1 |  awk  '{print $1}')
+  echo newdevice "$newDevice"
+
+  diskutil partitionDisk "${newDevice}" 1 MBR fat32 TEST R
+
+  # boot install script
+  diskutil list
+  N=$(echo "$newDevice" | tr -dc '0-9')
+  echo "Will be installed to Disk ${N}"
 
 
-if [[ ! $(diskutil info disk"${N}" |  sed -n 's/.*Device Node: *//p') ]]
-then
-  echo Disk "$N" not found
-  exit 1
-fi
+  if [[ ! $(diskutil info disk"${N}" |  sed -n 's/.*Device Node: *//p') ]]
+  then
+    echo Disk "$N" not found
+    exit 1
+  fi
 
-FS=$(diskutil info disk"${N}"s1 | sed -n 's/.*File System Personality: *//p')
-echo "$FS"
+  FS=$(diskutil info disk"${N}"s1 | sed -n 's/.*File System Personality: *//p')
+  echo "$FS"
 
-if [ "$FS" != "MS-DOS FAT32" ]
-then
-  echo "No FAT32 partition to install"
-  exit 1
-fi
+  if [ "$FS" != "MS-DOS FAT32" ]
+  then
+    echo "No FAT32 partition to install"
+    exit 1
+  fi
 
-# Write MBR
-sudo fdisk -f boot0 -u /dev/rdisk"${N}"
+  # Write MBR
+  sudo fdisk -f boot0 -u /dev/rdisk"${N}"
 
-diskutil umount disk"${N}"s1
-sudo dd if=/dev/rdisk"${N}"s1 count=1  of=origbs
-cp -v boot1f32 newbs
-sudo dd if=origbs of=newbs skip=3 seek=3 bs=1 count=87 conv=notrunc
-dd if=/dev/random of=newbs skip=496 seek=496 bs=1 count=14 conv=notrunc
-sudo dd if=newbs of=/dev/rdisk"${N}"s1
-diskutil mount disk"${N}"s1
+  diskutil umount disk"${N}"s1
+  sudo dd if=/dev/rdisk"${N}"s1 count=1  of=origbs
+  cp -v boot1f32 newbs
+  sudo dd if=origbs of=newbs skip=3 seek=3 bs=1 count=87 conv=notrunc
+  dd if=/dev/random of=newbs skip=496 seek=496 bs=1 count=14 conv=notrunc
+  sudo dd if=newbs of=/dev/rdisk"${N}"s1
+  diskutil mount disk"${N}"s1
 
-cp -v boot "$(diskutil info  disk"${N}"s1 |  sed -n 's/.*Mount Point: *//p')"
-cp -rv ROOT/* "$(diskutil info  disk"${N}"s1 |  sed -n 's/.*Mount Point: *//p')"
+  cp -v boot "$(diskutil info  disk"${N}"s1 |  sed -n 's/.*Mount Point: *//p')"
+  cp -rv ROOT/* "$(diskutil info  disk"${N}"s1 |  sed -n 's/.*Mount Point: *//p')"
 
-if [ "$(diskutil info  disk"${N}" |  sed -n 's/.*Content (IOContent): *//p')" == "FDisk_partition_scheme" ]
-then
-sudo fdisk -e /dev/rdisk"$N" <<-MAKEACTIVE
-p
-f 1
-w
-y
-q
+  if [ "$(diskutil info  disk"${N}" |  sed -n 's/.*Content (IOContent): *//p')" == "FDisk_partition_scheme" ]
+  then
+  sudo fdisk -e /dev/rdisk"$N" <<-MAKEACTIVE
+  p
+  f 1
+  w
+  y
+  q
 MAKEACTIVE
-fi
+  fi
 
-hdiutil detach "$newDevice"
-hdiutil convert -format UDRO OpenCore.dmg.sparseimage -o OpenCore.RO.dmg 
-qemu-img convert -f dmg -O raw OpenCore.RO.dmg OpenCore.RO.raw
+  hdiutil detach "$newDevice"
+  hdiutil convert -format UDRO OpenCore.dmg.sparseimage -o OpenCore.RO.dmg
+  qemu-img convert -f dmg -O raw OpenCore.RO.dmg OpenCore.RO.raw
+fi
