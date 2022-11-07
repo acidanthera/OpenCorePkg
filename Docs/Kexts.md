@@ -39,7 +39,7 @@ Kexts
 | [VoodooInput.kext](https://github.com/acidanthera/VoodooInput) | 15.0.0 (10.11) | — | — |
 | [VoodooSMBus.kext](https://github.com/leo-labs/VoodooSMBus) | 18.0.0 (10.14) | — | — |
 | [VoodooRMI.kext](https://github.com/VoodooSMBus/VoodooRMI) | 15.0.0 (10.11) | — | — |
-| [AlpsT4USB.kext](https://github.com/blankmac/AlpsT4USB) | — | — | — |
+| [AlpsHID.kext](https://github.com/blankmac/AlpsHID) | — | — | — |
 
 | Video and audio | MinKernel (Min macOS) | MaxKernel (Max macOS) | Note |
 |-----------------|-----------------------|-----------------------|------|
