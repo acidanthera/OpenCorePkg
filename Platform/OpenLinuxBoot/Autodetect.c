@@ -450,7 +450,7 @@ InsertRootOption (
   DEBUG ((
     (gLinuxBootFlags & LINUX_BOOT_LOG_VERBOSE) == 0 ? DEBUG_VERBOSE : DEBUG_INFO,
     "LNX: Creating \"root=PARTUUID=%g\"\n",
-    gPartuuid
+    &gPartuuid
     ));
 
   NewOption = OcFlexArrayInsertItem (Options, 0);
