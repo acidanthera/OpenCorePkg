@@ -182,7 +182,7 @@ CreateRootPartuuid (
     return EFI_OUT_OF_RESOURCES;
   }
 
-  NumPrinted = AsciiSPrint (*Dest, Length + 1, "%a%g", "root=PARTUUID=", gPartuuid);
+  NumPrinted = AsciiSPrint (*Dest, Length + 1, "%a%g", "root=PARTUUID=", &gPartuuid);
   ASSERT (NumPrinted == Length);
 
   //
@@ -450,7 +450,7 @@ InsertRootOption (
   DEBUG ((
     (gLinuxBootFlags & LINUX_BOOT_LOG_VERBOSE) == 0 ? DEBUG_VERBOSE : DEBUG_INFO,
     "LNX: Creating \"root=PARTUUID=%g\"\n",
-    gPartuuid
+    &gPartuuid
     ));
 
   NewOption = OcFlexArrayInsertItem (Options, 0);
