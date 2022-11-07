@@ -11,6 +11,7 @@ OpenCore Changelog
 - Resolved wake-from-sleep failure on EFI 1.1 systems (including earlier Macs) with standalone emulated NVRAM driver
 - Updated macrecovery commands with macOS 12 and 13, thx @Core-i99
 - Updates SSDT-BRG0 with macOS-specific STA to avoid compatibility issues on Windows, thx @Lorys89
+- Fixed memory issues in OpenLinuxBoot causing crashes on 32-bit UEFI firmware
 
 #### v0.8.5
 - Updated builtin firmware versions for SMBIOS and the rest
