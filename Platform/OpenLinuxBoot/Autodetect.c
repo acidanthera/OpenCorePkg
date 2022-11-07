@@ -182,7 +182,7 @@ CreateRootPartuuid (
     return EFI_OUT_OF_RESOURCES;
   }
 
-  NumPrinted = AsciiSPrint (*Dest, Length + 1, "%a%g", "root=PARTUUID=", gPartuuid);
+  NumPrinted = AsciiSPrint (*Dest, Length + 1, "%a%g", "root=PARTUUID=", &gPartuuid);
   ASSERT (NumPrinted == Length);
 
   //
