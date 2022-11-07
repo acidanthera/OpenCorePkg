@@ -45,6 +45,7 @@
   !else
     BaseMemoryLib|MdePkg/Library/BaseMemoryLib/BaseMemoryLib.inf
   !endif
+  BaseOverflowLib|MdePkg/Library/BaseOverflowLib/BaseOverflowLib.inf
   CacheMaintenanceLib|MdePkg/Library/BaseCacheMaintenanceLib/BaseCacheMaintenanceLib.inf
   IoLib|MdePkg/Library/BaseIoLibIntrinsic/BaseIoLibIntrinsic.inf
   LzmaDecompressLib|MdeModulePkg/Library/LzmaCustomDecompressLib/LzmaCustomDecompressLib.inf

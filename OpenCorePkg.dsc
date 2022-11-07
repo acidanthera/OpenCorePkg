@@ -51,6 +51,7 @@
   # Reproduced on ASUS M5A97 with AMD FX8320 CPU.
   # REF: https://github.com/acidanthera/bugtracker/issues/754
   BaseMemoryLib|MdePkg/Library/BaseMemoryLibRepStr/BaseMemoryLibRepStr.inf
+  BaseOverflowLib|MdePkg/Library/BaseOverflowLib/BaseOverflowLib.inf
   BaseRngLib|MdePkg/Library/BaseRngLib/BaseRngLib.inf
   BcfgCommandLib|ShellPkg/Library/UefiShellBcfgCommandLib/UefiShellBcfgCommandLib.inf
   CacheMaintenanceLib|MdePkg/Library/BaseCacheMaintenanceLib/BaseCacheMaintenanceLib.inf
