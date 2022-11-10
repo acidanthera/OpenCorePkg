@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
-%DIF DEL PreviousConfiguration.tex   Tue Oct 11 01:20:48 2022
-%DIF ADD ../Configuration.tex        Thu Oct 27 18:17:38 2022
+%DIF DEL PreviousConfiguration.tex   Thu Nov 10 03:21:14 2022
+%DIF ADD ../Configuration.tex        Thu Nov 10 03:21:14 2022
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -154,7 +154,7 @@
 
        \vspace{0.2in}
 
-       Reference Manual (0.8\DIFdelbegin \DIFdel{.5}\DIFdelend \DIFaddbegin \DIFadd{.6}\DIFaddend )
+       Reference Manual (0.8\DIFdelbegin \DIFdel{.6}\DIFdelend \DIFaddbegin \DIFadd{.7}\DIFaddend )
 
        \vspace{0.2in}
 
@@ -4247,16 +4247,14 @@ nvram 4D1FDA02-38C7-4A6A-9CC6-4BCCA8B30102:oem-board   # SMBIOS Type2 ProductNam
   halt (stop execution) after obtaining a message of \texttt{HaltLevel}.
   Possible values match \texttt{DisplayLevel} values.
 
-  \DIFaddbegin \emph{\DIFadd{Note 1}}\DIFadd{: A halt will only occur if bit }\texttt{\DIFadd{0}} \DIFadd{(i.e. enable logging) for }\texttt{\DIFadd{Target}}
-  \DIFadd{under section }\texttt{\DIFadd{Misc->Debug}} \DIFadd{is set.
-}
+  \emph{Note 1}: A halt will only occur if bit \texttt{0} (i.e. enable logging) for \texttt{Target}
+  under section \texttt{Misc->Debug} is set.
 
-  \emph{\DIFadd{Note 2}}\DIFadd{: A halt will only occur after the configuration is loaded and logging is configured.
+  \emph{Note 2}: A halt will only occur after the configuration is loaded and logging is configured.
   If any log messages occur at the specified halt level in early log (i.e. before this), they will
   cause a halt when they are flushed to the log once it has been configured.
-}
 
-\DIFaddend \item
+\item
   \texttt{PasswordHash}\\
   \textbf{Type}: \texttt{plist\ data} 64 bytes\\
   \textbf{Failsafe}: all zero\\
@@ -7110,28 +7108,28 @@ Recommended configuration settings for this driver:
 
 \begin{itemize}
 \tightlist
-  \item \texttt{OpenVariableRuntimeDxe.efi} loaded using \texttt{LoadEarly=true}\DIFdelbegin \DIFdel{(driver not required with OpenDuet)}\DIFdelend \DIFaddbegin \DIFadd{. OpenDuet users
-  should not load this driver, as it is included in OpenDuet}\DIFaddend .
+  \item \texttt{OpenVariableRuntimeDxe.efi} loaded using \texttt{LoadEarly=true}. OpenDuet users
+  should not load this driver, as it is included in OpenDuet.
   \item \texttt{OpenRuntime.efi} specified after \texttt{OpenVariableRuntimeDxe.efi} (when applicable),
   also loaded using \texttt{LoadEarly=true} for correct operation of \texttt{RequestBootVarRouting}.
-  \DIFaddbegin \begin{itemize}
+  \begin{itemize}
   \tightlist
-    \DIFaddend \item \DIFaddbegin \texttt{\DIFadd{RequestBootVarRouting}} \DIFadd{is never strictly needed while using emulated NVRAM, but
+    \item \texttt{RequestBootVarRouting} is never strictly needed while using emulated NVRAM, but
     it can be convenient to leave it set on a system which needs to switch between real and emulated NVRAM.
-    }\item \texttt{\DIFadd{RequestBootVarRouting}} \DIFadd{is never required on an OpenDuet system, since there are
+    \item \texttt{RequestBootVarRouting} is never required on an OpenDuet system, since there are
     no BIOS-managed boot entries to protect, therefore on OpenDuet recommended settings are
-    }\texttt{\DIFadd{LoadEarly=false}} \DIFadd{for }\texttt{\DIFadd{OpenRuntime.efi}} \DIFadd{and }\texttt{\DIFadd{RequestBootVarRouting=false}}\DIFadd{.
-  }\end{itemize}
-  \item \DIFaddend \texttt{LegacySchema} populated.
-  \DIFaddbegin \begin{itemize}
+    \texttt{LoadEarly=false} for \texttt{OpenRuntime.efi} and \texttt{RequestBootVarRouting=false}.
+  \end{itemize}
+  \item \texttt{LegacySchema} populated.
+  \begin{itemize}
   \tightlist
-    \DIFaddend \item \DIFaddbegin \DIFadd{For simpler testing (allows arbitrary test variables), and future-proofing against
-    changes in the variables required by macOS updates, use }\texttt{\DIFadd{<string>*</string>}} \DIFadd{settings, as
+    \item For simpler testing (allows arbitrary test variables), and future-proofing against
+    changes in the variables required by macOS updates, use \texttt{<string>*</string>} settings, as
     described in notes below.
-    }\item \DIFadd{For increased security, populate sections with known required keys only, as shown in OpenCore's
-    sample }\texttt{\DIFadd{.plist}} \DIFadd{files.
-  }\end{itemize}
-  \item \DIFaddend \texttt{ExposeSensitiveData} with at least bit \texttt{0x1} set to make \texttt{boot-path}
+    \item For increased security, populate sections with known required keys only, as shown in OpenCore's
+    sample \texttt{.plist} files.
+  \end{itemize}
+  \item \texttt{ExposeSensitiveData} with at least bit \texttt{0x1} set to make \texttt{boot-path}
   variable containing the OpenCore EFI partition UUID available to the \texttt{Launchd.command} script.
 \end{itemize}
 
@@ -7671,47 +7669,41 @@ for additional options.
 
   \emph{Note}: The recommended value for this option is \texttt{1}. This value may
   optionally be modified in combination with \texttt{PointerSpeedDiv}, according to user
-  preference, to achieve customised mouse movement scaling\DIFaddbegin \DIFadd{.
-}
+  preference, to achieve customised mouse movement scaling.
 
 \item
-  \texttt{\DIFadd{PointerDwellClickTimeout}}\\
-  \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ integer}}\\
-  \textbf{\DIFadd{Failsafe}}\DIFadd{: }\texttt{\DIFadd{0}}\\
-  \textbf{\DIFadd{Description}}\DIFadd{: Configure pointer dwell-clicking single left click timeout in
+  \texttt{PointerDwellClickTimeout}\\
+  \textbf{Type}: \texttt{plist\ integer}\\
+  \textbf{Failsafe}: \texttt{0}\\
+  \textbf{Description}: Configure pointer dwell-clicking single left click timeout in
   milliseconds in the OpenCore re-implementation of the Apple Event protocol.
-  Has no effect when using the OEM Apple implementation (see }\texttt{\DIFadd{AppleEvent}} \DIFadd{setting).
-}
+  Has no effect when using the OEM Apple implementation (see \texttt{AppleEvent} setting).
 
-  \DIFadd{When the timeout expires, a single left click is issued at the current position.
-  }\texttt{\DIFadd{0}} \DIFadd{indicates the timeout is disabled.
-}
+  When the timeout expires, a single left click is issued at the current position.
+  \texttt{0} indicates the timeout is disabled.
 
 \item
-  \texttt{\DIFadd{PointerDwellDoubleClickTimeout}}\\
-  \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ integer}}\\
-  \textbf{\DIFadd{Failsafe}}\DIFadd{: }\texttt{\DIFadd{0}}\\
-  \textbf{\DIFadd{Description}}\DIFadd{: Configure pointer dwell-clicking single left double click timeout in
+  \texttt{PointerDwellDoubleClickTimeout}\\
+  \textbf{Type}: \texttt{plist\ integer}\\
+  \textbf{Failsafe}: \texttt{0}\\
+  \textbf{Description}: Configure pointer dwell-clicking single left double click timeout in
   milliseconds in the OpenCore re-implementation of the Apple Event protocol.
-  Has no effect when using the OEM Apple implementation (see }\texttt{\DIFadd{AppleEvent}} \DIFadd{setting).
-}
+  Has no effect when using the OEM Apple implementation (see \texttt{AppleEvent} setting).
 
-  \DIFadd{When the timeout expires, a single left double click is issued at the current position.
-  }\texttt{\DIFadd{0}} \DIFadd{indicates the timeout is disabled.
-}
+  When the timeout expires, a single left double click is issued at the current position.
+  \texttt{0} indicates the timeout is disabled.
 
 \item
-  \texttt{\DIFadd{PointerDwellRadius}}\\
-  \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ integer}}\\
-  \textbf{\DIFadd{Failsafe}}\DIFadd{: }\texttt{\DIFadd{0}}\\
-  \textbf{\DIFadd{Description}}\DIFadd{: Configure pointer dwell-clicking tolerance radius in pixels in the
+  \texttt{PointerDwellRadius}\\
+  \textbf{Type}: \texttt{plist\ integer}\\
+  \textbf{Failsafe}: \texttt{0}\\
+  \textbf{Description}: Configure pointer dwell-clicking tolerance radius in pixels in the
   OpenCore re-implementation of the Apple Event protocol.
-  Has no effect when using the OEM Apple implementation (see }\texttt{\DIFadd{AppleEvent}} \DIFadd{setting).
-}
+  Has no effect when using the OEM Apple implementation (see \texttt{AppleEvent} setting).
 
-  \DIFadd{The radius is scaled by }\texttt{\DIFadd{UIScale}}\DIFadd{. When the pointer leaves this radius, the timeouts for }\texttt{\DIFadd{PointerDwellClickTimeout}}
-  \DIFadd{and }\texttt{\DIFadd{PointerDwellDoubleClickTimeout}} \DIFadd{are reset and the new position is the centre
-  for the new dwell-clicking tolerance radius}\DIFaddend .
+  The radius is scaled by \texttt{UIScale}. When the pointer leaves this radius, the timeouts for \texttt{PointerDwellClickTimeout}
+  and \texttt{PointerDwellDoubleClickTimeout} are reset and the new position is the centre
+  for the new dwell-clicking tolerance radius.
 
 \end{enumerate}
 
