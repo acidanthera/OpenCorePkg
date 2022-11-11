@@ -204,6 +204,10 @@ def save_image(url, sess, filename='', directory=''):
         'Cookie': '='.join(['AssetToken', sess])
     }
 
+    if not os.path.exists('com.apple.recovery.boot'):
+        os.mkdir('com.apple.recovery.boot')
+    directory = 'com.apple.recovery.boot'
+
     if filename == '':
         filename = os.path.basename(purl.path)
     if filename.find('/') >= 0 or filename == '':
