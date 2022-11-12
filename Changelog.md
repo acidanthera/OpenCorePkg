@@ -1,5 +1,8 @@
 OpenCore Changelog
 ==================
+#### v0.8.7
+- Removed unwanted clear screen when launching non-text boot entry
+
 #### v0.8.6
 - Updated NVRAM save script for compatibilty with earlier macOS (Snow Leopard+ tested)
 - Updated NVRAM save script to automatically install as launch daemon (Yosemite+) or logout hook (older macOS)

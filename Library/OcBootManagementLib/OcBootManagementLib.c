@@ -333,7 +333,10 @@ OcRunBootPicker (
         // Clear screen of previous console contents - e.g. from builtin picker,
         // log messages or previous console tool - before loading the entry.
         //
-        gST->ConOut->ClearScreen (gST->ConOut);
+        if (Chosen->LaunchInText) {
+          gST->ConOut->ClearScreen (gST->ConOut);
+        }
+
         if (Context->ShowMenu == OcShowSimpleBootMenu) {
           gST->ConOut->TestString (gST->ConOut, OC_CONSOLE_MARK_UNCONTROLLED);
         }
