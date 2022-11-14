@@ -24,7 +24,7 @@ except ImportError:
     from urlparse import urlparse
 
 SELF_DIR = os.path.dirname(os.path.realpath(__file__))
-COM_APPLE_RECOVERY_BOOT = 'com.apple.recovery.boot'
+DOWNLOAD_DIR = 'com.apple.recovery.boot'
 
 RECENT_MAC = 'Mac-7BA5B2D9E42DDD94'
 MLB_ZERO = '00000000000000000'
@@ -205,9 +205,9 @@ def save_image(url, sess, filename='', directory=''):
         'Cookie': '='.join(['AssetToken', sess])
     }
 
-    if not os.path.exists(COM_APPLE_RECOVERY_BOOT):
-        os.mkdir(COM_APPLE_RECOVERY_BOOT)
-    directory = COM_APPLE_RECOVERY_BOOT
+    if not os.path.exists(DOWNLOAD_DIR):
+        os.mkdir(DOWNLOAD_DIR)
+    directory = DOWNLOAD_DIR
 
     if filename == '':
         filename = os.path.basename(purl.path)
