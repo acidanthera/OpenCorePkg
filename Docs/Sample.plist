@@ -1062,6 +1062,8 @@
 			<string>None</string>
 			<key>HideAuxiliary</key>
 			<true/>
+			<key>HidePickerHibernate</key>
+			<false/>
 			<key>LauncherOption</key>
 			<string>Disabled</string>
 			<key>LauncherPath</key>

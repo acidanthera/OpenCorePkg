@@ -344,7 +344,8 @@ OC_DECLARE (OC_MISC_BLESS_ARRAY)
   _(BOOLEAN                     , PickerAudioAssist           ,     , FALSE                               , ())                   \
   _(BOOLEAN                     , HideAuxiliary               ,     , FALSE                               , ())                   \
   _(BOOLEAN                     , PollAppleHotKeys            ,     , FALSE                               , ())                   \
-  _(BOOLEAN                     , ShowPicker                  ,     , FALSE                               , ())
+  _(BOOLEAN                     , ShowPicker                  ,     , FALSE                               , ())                   \
+  _(BOOLEAN                     , HidePickerHibernate         ,     , FALSE                               , ())
 OC_DECLARE (OC_MISC_BOOT)
 
 #define OC_MISC_DEBUG_FIELDS(_, __) \
