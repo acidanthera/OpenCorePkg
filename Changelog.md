@@ -2,6 +2,10 @@ OpenCore Changelog
 ==================
 #### v0.8.7
 - Removed unwanted clear screen when launching non-text boot entry
+- Changed `Misc` -> `Boot` -> `ShowPicker` typing to string:
+  - `Default` - Show Picker always (equivalent to 0.8.6's ShowPicker=True)
+  - `Hide` - Never Show Picker (equivalent to 0.8.6's ShowPicker=False)
+  - `SkipOnHibernateWake` - Hide Picker if waking from macOS Hibernation
 
 #### v0.8.6
 - Updated NVRAM save script for compatibilty with earlier macOS (Snow Leopard+ tested)
