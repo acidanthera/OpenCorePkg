@@ -941,8 +941,10 @@ OcMiscBoot (
 
   if (!EFI_ERROR (Status)) {
     Context->PickerCommand = OcPickerBootAppleRecovery;
-  } else if ((AsciiStrCmp (ShowPicker, "Default") == 0) || (AsciiStrCmp (ShowPicker, "SkipOnHibernateWake") == 0)) {
-    if ((AsciiStrCmp (ShowPicker, "SkipOnHibernateWake") == 0) && OcIsAppleHibernateWake ()) {
+  } else if (AsciiStrCmp (ShowPicker, "Default") == 0) {
+    Context->PickerCommand = OcPickerShowPicker;
+  } else if (AsciiStrCmp (ShowPicker, "SkipOnHibernateWake") == 0) {
+    if (OcIsAppleHibernateWake ()) {
       Context->PickerCommand = OcPickerDefault;
     } else {
       Context->PickerCommand = OcPickerShowPicker;
