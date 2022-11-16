@@ -931,17 +931,18 @@ OcMiscBoot (
              );
 
   ShowPicker = OC_BLOB_GET (&Config->Misc.Boot.ShowPicker);
-  if (AsciiStrCmp (ShowPicker, "Default") != 0
-    && AsciiStrCmp (ShowPicker, "SkipHibernate") != 0
-    && AsciiStrCmp (ShowPicker, "None") != 0) {
+  if (  (AsciiStrCmp (ShowPicker, "Default") != 0)
+    && (AsciiStrCmp (ShowPicker, "SkipHibernate") != 0)
+    && (AsciiStrCmp (ShowPicker, "None") != 0))
+  {
     DEBUG ((DEBUG_WARN, "OC: Unknown ShowPicker: %a, using Default\n", ShowPicker));
     ShowPicker = "Default";
   }
 
   if (!EFI_ERROR (Status)) {
     Context->PickerCommand = OcPickerBootAppleRecovery;
-  } else if (AsciiStrCmp (ShowPicker, "Default") == 0 || AsciiStrCmp (ShowPicker, "SkipHibernate") == 0) {
-    if (AsciiStrCmp (ShowPicker, "SkipHibernate") == 0 && OcIsAppleHibernateWake ()) {
+  } else if ((AsciiStrCmp (ShowPicker, "Default") == 0) || (AsciiStrCmp (ShowPicker, "SkipHibernate") == 0)) {
+    if ((AsciiStrCmp (ShowPicker, "SkipHibernate") == 0) && OcIsAppleHibernateWake ()) {
       Context->PickerCommand = OcPickerDefault;
     } else {
       Context->PickerCommand = OcPickerShowPicker;
