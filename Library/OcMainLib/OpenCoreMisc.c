@@ -931,7 +931,7 @@ OcMiscBoot (
   if (!EFI_ERROR (Status)) {
     Context->PickerCommand = OcPickerBootAppleRecovery;
   } else if (OcIsAppleHibernateWake () && Config->Misc.Boot.HidePickerHibernate) {
-    Context->PickerCommand = FALSE;
+    Context->PickerCommand = OcPickerDefault;
   } else if (Config->Misc.Boot.ShowPicker) {
     Context->PickerCommand = OcPickerShowPicker;
   } else {
