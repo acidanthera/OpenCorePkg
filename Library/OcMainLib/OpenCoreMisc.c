@@ -932,8 +932,8 @@ OcMiscBoot (
 
   ShowPicker = OC_BLOB_GET (&Config->Misc.Boot.ShowPicker);
   if (  (AsciiStrCmp (ShowPicker, "Default") != 0)
-    && (AsciiStrCmp (ShowPicker, "SkipHibernate") != 0)
-    && (AsciiStrCmp (ShowPicker, "None") != 0))
+     && (AsciiStrCmp (ShowPicker, "SkipHibernate") != 0)
+     && (AsciiStrCmp (ShowPicker, "None") != 0))
   {
     DEBUG ((DEBUG_WARN, "OC: Unknown ShowPicker: %a, using Default\n", ShowPicker));
     ShowPicker = "Default";
