@@ -336,6 +336,7 @@ OC_DECLARE (OC_MISC_BLESS_ARRAY)
   _(OC_STRING                   , HibernateMode               ,     , OC_STRING_CONSTR ("None", _, __)    , OC_DESTR (OC_STRING)) \
   _(OC_STRING                   , LauncherOption              ,     , OC_STRING_CONSTR ("Disabled", _, __), OC_DESTR (OC_STRING) ) \
   _(OC_STRING                   , LauncherPath                ,     , OC_STRING_CONSTR ("Default", _, __) , OC_DESTR (OC_STRING) ) \
+  _(OC_STRING                   , ShowPicker                  ,     , OC_STRING_CONSTR ("Default", _, __) , OC_DESTR (OC_STRING) ) \
   _(UINT32                      , ConsoleAttributes           ,     , 0                                   , ())                   \
   _(UINT32                      , PickerAttributes            ,     , 0                                   , ())                   \
   _(OC_STRING                   , PickerVariant               ,     , OC_STRING_CONSTR ("Auto", _, __)    , OC_DESTR (OC_STRING)) \
@@ -343,9 +344,7 @@ OC_DECLARE (OC_MISC_BLESS_ARRAY)
   _(UINT32                      , Timeout                     ,     , 0                                   , ())                   \
   _(BOOLEAN                     , PickerAudioAssist           ,     , FALSE                               , ())                   \
   _(BOOLEAN                     , HideAuxiliary               ,     , FALSE                               , ())                   \
-  _(BOOLEAN                     , PollAppleHotKeys            ,     , FALSE                               , ())                   \
-  _(BOOLEAN                     , ShowPicker                  ,     , FALSE                               , ())                   \
-  _(BOOLEAN                     , HidePickerHibernate         ,     , FALSE                               , ())
+  _(BOOLEAN                     , PollAppleHotKeys            ,     , FALSE                               , ())
 OC_DECLARE (OC_MISC_BOOT)
 
 #define OC_MISC_DEBUG_FIELDS(_, __) \

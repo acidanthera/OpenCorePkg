@@ -1062,8 +1062,6 @@
 			<string>None</string>
 			<key>HideAuxiliary</key>
 			<true/>
-			<key>HidePickerHibernate</key>
-			<false/>
 			<key>LauncherOption</key>
 			<string>Disabled</string>
 			<key>LauncherPath</key>
@@ -1079,7 +1077,7 @@
 			<key>PollAppleHotKeys</key>
 			<false/>
 			<key>ShowPicker</key>
-			<true/>
+			<string>Default</string>
 			<key>TakeoffDelay</key>
 			<integer>0</integer>
 			<key>Timeout</key>
