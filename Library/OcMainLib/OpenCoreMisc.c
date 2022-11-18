@@ -935,8 +935,8 @@ OcMiscBoot (
      && (AsciiStrCmp (ShowPicker, "SkipOnHibernateWake") != 0)
      && (AsciiStrCmp (ShowPicker, "Never") != 0))
   {
-    DEBUG ((DEBUG_WARN, "OC: Unknown ShowPicker: %a, using Default\n", ShowPicker));
-    ShowPicker = "Default";
+    DEBUG ((DEBUG_WARN, "OC: Unknown ShowPicker: %a, using Always\n", ShowPicker));
+    ShowPicker = "Always";
   }
 
   if (!EFI_ERROR (Status)) {
