@@ -931,7 +931,7 @@ OcMiscBoot (
              );
 
   ShowPicker = OC_BLOB_GET (&Config->Misc.Boot.ShowPicker);
-  if (  (AsciiStrCmp (ShowPicker, "Default") != 0)
+  if (  (AsciiStrCmp (ShowPicker, "ShowAlways") != 0)
      && (AsciiStrCmp (ShowPicker, "SkipOnHibernateWake") != 0)
      && (AsciiStrCmp (ShowPicker, "Hide") != 0))
   {
@@ -941,7 +941,7 @@ OcMiscBoot (
 
   if (!EFI_ERROR (Status)) {
     Context->PickerCommand = OcPickerBootAppleRecovery;
-  } else if (AsciiStrCmp (ShowPicker, "Default") == 0) {
+  } else if (AsciiStrCmp (ShowPicker, "ShowAlways") == 0) {
     Context->PickerCommand = OcPickerShowPicker;
   } else if (AsciiStrCmp (ShowPicker, "SkipOnHibernateWake") == 0) {
     if (OcIsAppleHibernateWake ()) {
