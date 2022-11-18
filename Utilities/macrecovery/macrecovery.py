@@ -24,7 +24,6 @@ except ImportError:
     from urlparse import urlparse
 
 SELF_DIR = os.path.dirname(os.path.realpath(__file__))
-DOWNLOAD_DIR = 'com.apple.recovery.boot'
 
 RECENT_MAC = 'Mac-7BA5B2D9E42DDD94'
 MLB_ZERO = '00000000000000000'
@@ -196,7 +195,7 @@ def get_image_info(session, bid, mlb=MLB_ZERO, diag=False, os_type='default', ci
     return info
 
 
-def save_image(url, sess, filename='', directory=''):
+def save_image(url, sess, filename='', directory='com.apple.recovery.boot'):
     purl = urlparse(url)
     headers = {
         'Host': purl.hostname,
@@ -205,16 +204,15 @@ def save_image(url, sess, filename='', directory=''):
         'Cookie': '='.join(['AssetToken', sess])
     }
 
-    if not os.path.exists(DOWNLOAD_DIR):
-        os.mkdir(DOWNLOAD_DIR)
-    directory = DOWNLOAD_DIR
+    if not os.path.exists(directory):
+        os.mkdir(directory)
 
     if filename == '':
         filename = os.path.basename(purl.path)
     if filename.find('/') >= 0 or filename == '':
         raise RuntimeError('Invalid save path ' + filename)
 
-    print(f'Saving {url} to {DOWNLOAD_DIR}/{filename}...')
+    print(f'Saving {url} to {directory}/{filename}...')
 
     with open(os.path.join(directory, filename), 'wb') as fh:
         response = run_query(url, headers, raw=True)
@@ -285,9 +283,9 @@ def action_download(args):
         print(info)
     print(f'Downloading {info[INFO_PRODUCT]}...')
     dmgname = '' if args.basename == '' else args.basename + '.dmg'
-    dmgpath = save_image(info[INFO_IMAGE_LINK], info[INFO_IMAGE_SESS], dmgname, args.outdir)
+    dmgpath = save_image(info[INFO_IMAGE_LINK], info[INFO_IMAGE_SESS], dmgname)
     cnkname = '' if args.basename == '' else args.basename + '.chunklist'
-    cnkpath = save_image(info[INFO_SIGN_LINK], info[INFO_SIGN_SESS], cnkname, args.outdir)
+    cnkpath = save_image(info[INFO_SIGN_LINK], info[INFO_SIGN_SESS], cnkname)
     try:
         verify_image(dmgpath, cnkpath)
         return 0
