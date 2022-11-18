@@ -255,11 +255,11 @@ CheckMiscBoot (
   }
 
   ShowPicker = OC_BLOB_GET (&Config->Misc.Boot.ShowPicker);
-  if (  (AsciiStrCmp (ShowPicker, "ShowAlways") != 0)
+  if (  (AsciiStrCmp (ShowPicker, "Always") != 0)
      && (AsciiStrCmp (ShowPicker, "SkipOnHibernateWake") != 0)
-     && (AsciiStrCmp (ShowPicker, "Hide") != 0))
+     && (AsciiStrCmp (ShowPicker, "Never") != 0))
   {
-    DEBUG ((DEBUG_WARN, "Misc->Boot->ShowPicker is borked (Can only be ShowAlways, SkipOnHibernateWake, or None)!\n"));
+    DEBUG ((DEBUG_WARN, "Misc->Boot->ShowPicker is borked (Can only be Always, SkipOnHibernateWake, or Never)!\n"));
     ++ErrorCount;
   }
 
