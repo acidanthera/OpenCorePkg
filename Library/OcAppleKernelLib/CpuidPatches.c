@@ -1429,7 +1429,7 @@ PatchProvideCurrentCpuInfo (
     tscFCvtt2nValue = DivU64x64Remainder ((1000000000ULL << 32), tscFreqValue, NULL);
     tscFCvtn2tValue = DivU64x64Remainder(((1000000000ULL)  << 32), tscFCvtt2nValue, NULL);
     }
-    // For all other processors
+  // For all other processors
   else {
     busFreqValue    = CpuInfo->FSBFrequency;
     busFCvtt2nValue = DivU64x64Remainder ((1000000000ULL << 32), busFreqValue, NULL);
