@@ -3,6 +3,10 @@ OpenCore Changelog
 #### v0.8.7
 - Removed unwanted clear screen when launching non-text boot entry
 - Fixed TSC/FSB for AMD CPUs in ProvideCurrentCpuInfo, thx @Shaneee
+- Changed `Misc` -> `Boot` -> `ShowPicker` typing to string:
+  - `Always` - Always show picker (equivalent to 0.8.6's ShowPicker=True)
+  - `Never` - Never show picker (equivalent to 0.8.6's ShowPicker=False)
+  - `SkipOnHibernateWake` - Don't show picker if waking from macOS hibernation
 
 #### v0.8.6
 - Updated NVRAM save script for compatibilty with earlier macOS (Snow Leopard+ tested)

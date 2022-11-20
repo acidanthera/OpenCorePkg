@@ -3604,9 +3604,25 @@ the default boot entry choice will remain changed until the next manual reconfig
 
 \item
   \texttt{ShowPicker}\\
-  \textbf{Type}: \texttt{plist\ boolean}\\
-  \textbf{Failsafe}: \texttt{false}\\
-  \textbf{Description}: Show a simple picker to allow boot entry selection.
+  \textbf{Type}: \texttt{plist\ string}\\
+  \textbf{Failsafe}: \texttt{Always}\\
+  \textbf{Description}: Show a simple picker to allow boot entry selection:
+  \begin{itemize}
+  \tightlist
+  \item \texttt{Always} --- Always show picker.
+  \item \texttt{Never} --- Never show picker.
+  \item \texttt{SkipOnHibernateWake} --- Like \texttt{Always}, however doesn't show picker if waking from macOS hibernation.
+  \end{itemize}
+
+  Notes for \texttt{SkipOnHibernateWake}:
+  \begin{itemize}
+   \item Only supports macOS hibernation wake, Windows and Linux are currently out of scope.
+   \item Should only be used on systems with reliable hibernation wake in macOS, otherwise users may not
+   be able to visually see boot loops that may occur.
+  \item Highly recommended to pair this option with \texttt{PollAppleHotKeys}, allows to enter picker in
+  case of issues with hibernation wake.
+  \item Visual indication for hibernation wake is currently out of scope.
+  \end{itemize}
 
 \item
   \texttt{TakeoffDelay}\\

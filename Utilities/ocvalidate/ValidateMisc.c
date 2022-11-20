@@ -200,6 +200,7 @@ CheckMiscBoot (
   BOOLEAN               IsAudioSupportEnabled;
   CONST CHAR8           *LauncherOption;
   CONST CHAR8           *LauncherPath;
+  CONST CHAR8           *ShowPicker;
 
   ErrorCount = 0;
 
@@ -250,6 +251,15 @@ CheckMiscBoot (
   PickerVariant = OC_BLOB_GET (&Config->Misc.Boot.PickerVariant);
   if (PickerVariant[0] == '\0') {
     DEBUG ((DEBUG_WARN, "Misc->Boot->PickerVariant cannot be empty!\n"));
+    ++ErrorCount;
+  }
+
+  ShowPicker = OC_BLOB_GET (&Config->Misc.Boot.ShowPicker);
+  if (  (AsciiStrCmp (ShowPicker, "Always") != 0)
+     && (AsciiStrCmp (ShowPicker, "SkipOnHibernateWake") != 0)
+     && (AsciiStrCmp (ShowPicker, "Never") != 0))
+  {
+    DEBUG ((DEBUG_WARN, "Misc->Boot->ShowPicker is borked (Can only be Always, SkipOnHibernateWake, or Never)!\n"));
     ++ErrorCount;
   }
 
