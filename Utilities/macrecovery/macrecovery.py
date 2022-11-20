@@ -461,7 +461,7 @@ def main():
                         ' "selfcheck" checks whether MLB serial validation is possible, "verify" performs'
                         ' MLB serial verification, "guess" tries to find suitable mac model for MLB.')
     parser.add_argument('-o', '--outdir', type=str, default='com.apple.recovery.boot',
-                        help='customise output directory for downloading, defaults to current directory')
+                        help='customise output directory for downloading, defaults to com.apple.recovery.boot')
     parser.add_argument('-n', '--basename', type=str, default='',
                         help='customise base name for downloading, defaults to remote name')
     parser.add_argument('-b', '--board-id', type=str, default=RECENT_MAC,
