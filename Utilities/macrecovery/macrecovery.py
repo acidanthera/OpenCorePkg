@@ -283,9 +283,9 @@ def action_download(args):
         print(info)
     print(f'Downloading {info[INFO_PRODUCT]}...')
     dmgname = '' if args.basename == '' else args.basename + '.dmg'
-    dmgpath = save_image(info[INFO_IMAGE_LINK], info[INFO_IMAGE_SESS], dmgname)
+    dmgpath = save_image(info[INFO_IMAGE_LINK], info[INFO_IMAGE_SESS], dmgname, args.outdir)
     cnkname = '' if args.basename == '' else args.basename + '.chunklist'
-    cnkpath = save_image(info[INFO_SIGN_LINK], info[INFO_SIGN_SESS], cnkname)
+    cnkpath = save_image(info[INFO_SIGN_LINK], info[INFO_SIGN_SESS], cnkname, args.outdir)
     try:
         verify_image(dmgpath, cnkpath)
         return 0
@@ -460,7 +460,7 @@ def main():
                         help='Action to perform: "download" - performs recovery downloading,'
                         ' "selfcheck" checks whether MLB serial validation is possible, "verify" performs'
                         ' MLB serial verification, "guess" tries to find suitable mac model for MLB.')
-    parser.add_argument('-o', '--outdir', type=str, default=os.getcwd(),
+    parser.add_argument('-o', '--outdir', type=str, default='com.apple.recovery.boot',
                         help='customise output directory for downloading, defaults to current directory')
     parser.add_argument('-n', '--basename', type=str, default='',
                         help='customise base name for downloading, defaults to remote name')
