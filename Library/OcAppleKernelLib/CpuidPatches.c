@@ -1418,13 +1418,27 @@ PatchProvideCurrentCpuInfo (
   //
   // Perform TSC and FSB calculations. This is traditionally done in tsc.c in XNU.
   //
-  busFreqValue    = CpuInfo->FSBFrequency;
-  busFCvtt2nValue = DivU64x64Remainder ((1000000000ULL << 32), busFreqValue, NULL);
-  busFCvtn2tValue = DivU64x64Remainder (0xFFFFFFFFFFFFFFFFULL, busFCvtt2nValue, NULL);
+  // For AMD Processors
+  if ((CpuInfo->Family == 0xF) && ((CpuInfo->ExtFamily == 0x8) || (CpuInfo->ExtFamily == 0xA))) {
+    DEBUG ((DEBUG_INFO, "OCAK: Setting FSB and TSC for Family 0x%x and ExtFamily 0x%x\n", (UINT16)CpuInfo->Family, (UINT16)CpuInfo->ExtFamily));
+    busFreqValue    = CpuInfo->FSBFrequency;
+    busFCvtt2nValue = DivU64x64Remainder ((1000000000ULL << 32), busFreqValue, NULL);
+    busFCvtn2tValue = DivU64x64Remainder ((1000000000ULL << 32), busFCvtt2nValue, NULL);
 
-  tscFreqValue    = CpuInfo->CPUFrequency;
-  tscFCvtt2nValue = DivU64x64Remainder ((1000000000ULL << 32), tscFreqValue, NULL);
-  tscFCvtn2tValue = DivU64x64Remainder (0xFFFFFFFFFFFFFFFFULL, tscFCvtt2nValue, NULL);
+    tscFreqValue    = CpuInfo->CPUFrequency;
+    tscFCvtt2nValue = DivU64x64Remainder ((1000000000ULL << 32), tscFreqValue, NULL);
+    tscFCvtn2tValue = DivU64x64Remainder ((1000000000ULL  << 32), tscFCvtt2nValue, NULL);
+  }
+  // For all other processors
+  else {
+    busFreqValue    = CpuInfo->FSBFrequency;
+    busFCvtt2nValue = DivU64x64Remainder ((1000000000ULL << 32), busFreqValue, NULL);
+    busFCvtn2tValue = DivU64x64Remainder (0xFFFFFFFFFFFFFFFFULL, busFCvtt2nValue, NULL);
+
+    tscFreqValue    = CpuInfo->CPUFrequency;
+    tscFCvtt2nValue = DivU64x64Remainder ((1000000000ULL << 32), tscFreqValue, NULL);
+    tscFCvtn2tValue = DivU64x64Remainder (0xFFFFFFFFFFFFFFFFULL, tscFCvtt2nValue, NULL);
+  }
 
   tscGranularityValue = DivU64x64Remainder (tscFreqValue, busFreqValue, NULL);
 
