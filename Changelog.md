@@ -7,6 +7,7 @@ OpenCore Changelog
   - `Always` - Always show picker (equivalent to 0.8.6's ShowPicker=True)
   - `Never` - Never show picker (equivalent to 0.8.6's ShowPicker=False)
   - `SkipOnHibernateWake` - Don't show picker if waking from macOS hibernation
+- Changed macrecovery to download files into `com.apple.recovery.boot` by default, thx @dreamwhite
 
 #### v0.8.6
 - Updated NVRAM save script for compatibilty with earlier macOS (Snow Leopard+ tested)
