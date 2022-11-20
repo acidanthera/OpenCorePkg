@@ -195,7 +195,7 @@ def get_image_info(session, bid, mlb=MLB_ZERO, diag=False, os_type='default', ci
     return info
 
 
-def save_image(url, sess, filename='', directory='com.apple.recovery.boot'):
+def save_image(url, sess, filename='', directory=''):
     purl = urlparse(url)
     headers = {
         'Host': purl.hostname,
