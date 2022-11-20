@@ -2,6 +2,7 @@ OpenCore Changelog
 ==================
 #### v0.8.7
 - Removed unwanted clear screen when launching non-text boot entry
+- Fixed TSC/FSB for AMD CPUs in ProvideCurrentCpuInfo, thx @Shaneee
 
 #### v0.8.6
 - Updated NVRAM save script for compatibilty with earlier macOS (Snow Leopard+ tested)
