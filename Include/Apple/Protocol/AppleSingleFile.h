@@ -95,6 +95,6 @@ typedef struct {
   APPLE_SINGLE_FILE_CREATE    CreateFile;
 } APPLE_SINGLE_FILE_PROTOCOL;
 
-extern  gAppleSingleFileProtocolGuid;
+extern EFI_GUID  gAppleSingleFileProtocolGuid;
 
 #endif // APPLE_SINGLE_FILE_PROTOCOL_H
