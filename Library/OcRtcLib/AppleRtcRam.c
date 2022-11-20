@@ -302,7 +302,7 @@ OcAppleRtcRamInstallProtocol (
   if (Reinstall) {
     Status = OcUninstallAllProtocolInstances (&gAppleRtcRamProtocolGuid);
     if (EFI_ERROR (Status)) {
-      DEBUG ((DEBUG_ERROR, "OCRTC: Uninstall failed: %r\n", Status));
+      DEBUG ((DEBUG_ERROR, "OCRTC: Uninstall failed - %r\n", Status));
       return NULL;
     }
   } else {

@@ -524,7 +524,7 @@ OcAppleImg4VerificationInstallProtocol (
   if (Reinstall) {
     Status = OcUninstallAllProtocolInstances (&gAppleImg4VerificationProtocolGuid);
     if (EFI_ERROR (Status)) {
-      DEBUG ((DEBUG_ERROR, "OCI4: Uninstall failed: %r\n", Status));
+      DEBUG ((DEBUG_ERROR, "OCI4: Uninstall failed - %r\n", Status));
       return NULL;
     }
   } else {

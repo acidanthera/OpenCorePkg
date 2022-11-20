@@ -915,7 +915,7 @@ OcAppleSecureBootInstallProtocol (
   if (Reinstall) {
     Status = OcUninstallAllProtocolInstances (&gAppleSecureBootProtocolGuid);
     if (EFI_ERROR (Status)) {
-      DEBUG ((DEBUG_ERROR, "OCSB: Uninstall failed: %r\n", Status));
+      DEBUG ((DEBUG_ERROR, "OCSB: Uninstall failed - %r\n", Status));
       return NULL;
     }
   } else {

@@ -121,7 +121,7 @@ OcAppleEg2InfoInstallProtocol (
   if (Reinstall) {
     Status = OcUninstallAllProtocolInstances (&gAppleEg2InfoProtocolGuid);
     if (EFI_ERROR (Status)) {
-      DEBUG ((DEBUG_ERROR, "OCOS: Uninstall failed: %r\n", Status));
+      DEBUG ((DEBUG_ERROR, "OCEG: Uninstall failed - %r\n", Status));
       return NULL;
     }
   } else {
@@ -146,7 +146,7 @@ OcAppleEg2InfoInstallProtocol (
                       &Rotation
                       );
   if (!EFI_ERROR (Status)) {
-    DEBUG ((DEBUG_INFO, "OCOS: Discovered rotate NVRAM override to %u\n", Rotation));
+    DEBUG ((DEBUG_INFO, "OCEG: Discovered rotate NVRAM override to %u\n", Rotation));
     if (Rotation == 90) {
       mRotation = AppleDisplayRotate90;
     } else if (Rotation == 180) {

@@ -610,7 +610,7 @@ OcAppleEventInstallProtocol (
 
   Status = OcUninstallAllProtocolInstances (&gAppleEventProtocolGuid);
   if (EFI_ERROR (Status)) {
-    DEBUG ((DEBUG_ERROR, "OCAE: OEM uninstall failed: %r\n", Status));
+    DEBUG ((DEBUG_ERROR, "OCAE: OEM uninstall failed - %r\n", Status));
     return NULL;
   }
 

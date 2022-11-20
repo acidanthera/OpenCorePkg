@@ -97,7 +97,7 @@ OcAudioInstallProtocols (
     for (Index = 0; Index < ARRAY_SIZE (mAudioProtocols); ++Index) {
       Status = OcUninstallAllProtocolInstances (mAudioProtocols[Index]);
       if (EFI_ERROR (Status)) {
-        DEBUG ((DEBUG_ERROR, "OCAU: Uninstall %g failed: %r\n", mAudioProtocols[Index], Status));
+        DEBUG ((DEBUG_ERROR, "OCAU: Uninstall %g failed - %r\n", mAudioProtocols[Index], Status));
         return NULL;
       }
     }

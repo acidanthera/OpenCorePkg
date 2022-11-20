@@ -602,7 +602,7 @@ OcAppleKeyMapInstallProtocols (
     Status  = OcUninstallAllProtocolInstances (&gAppleKeyMapDatabaseProtocolGuid);
     Status2 = OcUninstallAllProtocolInstances (&gAppleKeyMapAggregatorProtocolGuid);
     if (EFI_ERROR (Status) || EFI_ERROR (Status2)) {
-      DEBUG ((DEBUG_ERROR, "OCKM: Uninstall failed: %r/%r\n", Status, Status2));
+      DEBUG ((DEBUG_ERROR, "OCKM: Uninstall failed - %r/%r\n", Status, Status2));
       return NULL;
     }
   } else {

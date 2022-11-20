@@ -210,7 +210,7 @@ OcOSInfoInstallProtocol (
   if (Reinstall) {
     Status = OcUninstallAllProtocolInstances (&gEfiOSInfoProtocolGuid);
     if (EFI_ERROR (Status)) {
-      DEBUG ((DEBUG_ERROR, "OCOS: Uninstall failed: %r\n", Status));
+      DEBUG ((DEBUG_ERROR, "OCOS: Uninstall failed - %r\n", Status));
       return NULL;
     }
   } else {

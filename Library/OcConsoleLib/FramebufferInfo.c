@@ -121,14 +121,14 @@ OcAppleFbInfoInstallProtocol (
                   );
 
   if (EFI_ERROR (Status)) {
-    DEBUG ((DEBUG_INFO, "OCOS: No GOP protocols for FB info, ignoring\n"));
+    DEBUG ((DEBUG_INFO, "OCFB: No GOP protocols for FB info, ignoring\n"));
     return NULL;
   }
 
   if (Reinstall) {
     Status = OcUninstallAllProtocolInstances (&gAppleFramebufferInfoProtocolGuid);
     if (EFI_ERROR (Status)) {
-      DEBUG ((DEBUG_ERROR, "OCOS: Uninstall failed: %r\n", Status));
+      DEBUG ((DEBUG_ERROR, "OCFB: Uninstall failed: %r\n", Status));
       return NULL;
     }
   } else {

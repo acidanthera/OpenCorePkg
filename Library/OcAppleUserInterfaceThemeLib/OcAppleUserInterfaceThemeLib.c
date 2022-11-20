@@ -57,7 +57,7 @@ OcAppleUserInterfaceThemeInstallProtocol (
   if (Reinstall) {
     Status = OcUninstallAllProtocolInstances (&gEfiUserInterfaceThemeProtocolGuid);
     if (EFI_ERROR (Status)) {
-      DEBUG ((DEBUG_ERROR, "OCUT: Uninstall failed: %r\n", Status));
+      DEBUG ((DEBUG_ERROR, "OCUT: Uninstall failed - %r\n", Status));
       return NULL;
     }
   } else {

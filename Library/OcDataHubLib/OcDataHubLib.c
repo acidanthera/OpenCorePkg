@@ -55,7 +55,7 @@ OcDataHubInstallProtocol (
   if (Reinstall) {
     Status = OcUninstallAllProtocolInstances (&gEfiDataHubProtocolGuid);
     if (EFI_ERROR (Status)) {
-      DEBUG ((DEBUG_ERROR, "OCDH: Uninstall failed: %r\n", Status));
+      DEBUG ((DEBUG_ERROR, "OCDH: Uninstall failed - %r\n", Status));
       return NULL;
     }
   } else {
