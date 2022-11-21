@@ -22,6 +22,7 @@ BoardType: 0xA
 BoardLocationInChassis: ""
 ChassisManufacturer: "Apple Inc."
 ChassisType: 0x7
+# ChassisType: 0x17
 ChassisVersion: "Mac-27AD2F918AE68F61"
 ChassisAssetTag: ""
 PlatformFeature: 0x0
@@ -76,10 +77,13 @@ Specifications:
     - "32GB DDR4 ECC"
   SystemReportName:
     - "Mac Pro (2019)"
+    - "Mac Pro (Rack, 2019)"
   MarketingName:
     - "Mac Pro (2019)"
+    - "Mac Pro (Rack, 2019)"
 # Note, first model code is used by macserial
 AppleModelCode:
+#Tower
   - "P7QM"
   - "PLXV"
   - "PLXW"
@@ -93,6 +97,8 @@ AppleModelCode:
   - "NYGV"
   - "K7GF"
   - "K7GD"
+#Rack
+  - "N5RN"
 # Note, first board code is used by macserial
 AppleBoardCode:
   - "K3F7"
