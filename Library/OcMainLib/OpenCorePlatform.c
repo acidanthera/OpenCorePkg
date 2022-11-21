@@ -397,6 +397,16 @@ OcPlatformUpdateSmbios (
       PlatformFeature = 0;
     }
 
+    //
+    // Override Chassis Type
+    // Primarily for MacPro7,1, where AppleSystemInfo.framework determines variant based off this property.
+    //   ChassisType = 07 : Tower
+    //   ChassisType = 23 : Rack Mount
+    //
+    if (Config->PlatformInfo.Generic.ChassisType != 0) {
+      Data.ChassisType = &Config->PlatformInfo.Generic.ChassisType;
+    }
+
     if (OC_BLOB_GET (&Config->PlatformInfo.Generic.SystemMemoryStatus)[0] != '\0') {
       SystemMemoryStatus = OC_BLOB_GET (&Config->PlatformInfo.Generic.SystemMemoryStatus);
 

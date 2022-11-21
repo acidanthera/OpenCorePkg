@@ -1378,6 +1378,8 @@
 		<dict>
 			<key>AdviseFeatures</key>
 			<false/>
+			<key>ChassisType</key>
+			<integer>0</integer>
 			<key>MLB</key>
 			<string></string>
 			<key>MaxBIOSVersion</key>

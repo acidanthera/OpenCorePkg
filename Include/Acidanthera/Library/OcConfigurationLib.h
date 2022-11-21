@@ -495,6 +495,7 @@ OC_DECLARE (OC_NVRAM_CONFIG)
   _(OC_STRING                   , SystemMemoryStatus ,     , OC_STRING_CONSTR ("Auto", _, __)             , OC_DESTR (OC_STRING) ) \
   _(UINT16                      , ProcessorType      ,     , 0                                            , () )                   \
   _(UINT8                       , Rom                , [6] , {0}                                          , () )                   \
+  _(UINT8                       , ChassisType        ,     , 0                                            , () )                   \
   _(BOOLEAN                     , SpoofVendor        ,     , FALSE                                        , () )                   \
   _(BOOLEAN                     , AdviseFeatures     ,     , FALSE                                        , () )                   \
   _(BOOLEAN                     , MaxBIOSVersion     ,     , FALSE                                        , () )
