@@ -1114,13 +1114,15 @@ OcScanForBootEntries (
   This is likely to return an incomplete list and can even give NULL,
   when only tools and system entries are present.
 
-  @param[in]  Context  Picker context.
+  @param[in]  Context       Picker context.
+  @param[in]  UseBootNextOnly  Use only BootNext.
 
   @retval boot context allocated from pool.
 **/
 OC_BOOT_CONTEXT *
 OcScanForDefaultBootEntry (
-  IN  OC_PICKER_CONTEXT  *Context
+  IN  OC_PICKER_CONTEXT  *Context,
+  IN  BOOLEAN            UseBootNextOnly
   );
 
 /**
@@ -1705,6 +1707,7 @@ OcToggleVoiceOver (
   @param[out]  BootOrderCount    Number of entries in boot order.
   @param[out]  Deduplicated      Whether the list was changed during deduplication, optional.
   @param[out]  HasBootNext       Whether the list starts with BootNext, optional
+  @param[in]   UseBootNextOnly   Return list containing BootNext entry only
 
   @retval  boot order entry list allocated from pool or NULL.
 **/
@@ -1714,7 +1717,8 @@ OcGetBootOrder (
   IN  BOOLEAN   WithBootNext,
   OUT UINTN     *BootOrderCount,
   OUT BOOLEAN   *Deduplicated  OPTIONAL,
-  OUT BOOLEAN   *HasBootNext   OPTIONAL
+  OUT BOOLEAN   *HasBootNext   OPTIONAL,
+  IN  BOOLEAN   UseBootNextOnly
   );
 
 /**
@@ -2069,6 +2073,17 @@ OcAddEntriesFromBootEntryProtocol (
   IN     CONST VOID *DefaultEntryId, OPTIONAL
   IN     BOOLEAN        CreateDefault,
   IN     BOOLEAN        CreateForHotKey
+  );
+
+/**
+  Launch Apple boot picker firmware application.
+
+  @retval EFI_SUCCESS   Picker was successfully executed, implies boot selection was returned in BootNext.
+  @retval other         Picker could not be launched, or error within picker application.
+**/
+EFI_STATUS
+OcLaunchAppleBootPicker (
+  VOID
   );
 
 #endif // OC_BOOT_MANAGEMENT_LIB_H

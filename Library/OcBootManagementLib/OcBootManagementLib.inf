@@ -74,15 +74,16 @@
   gAppleBootPickerFileGuid                      ## SOMETIMES_CONSUMES
 
 [Protocols]
-  gAppleBootPolicyProtocolGuid       ## PRODUCES
-  gAppleKeyMapAggregatorProtocolGuid ## SOMETIMES_CONSUMES
-  gEfiSimpleFileSystemProtocolGuid   ## SOMETIMES_CONSUMES
-  gEfiLoadedImageProtocolGuid        ## SOMETIMES_CONSUMES
-  gEfiUsbIoProtocolGuid              ## SOMETIMES_CONSUMES
-  gOcFirmwareRuntimeProtocolGuid     ## SOMETIMES_CONSUMES
-  gOcAudioProtocolGuid               ## SOMETIMES_CONSUMES
-  gAppleBeepGenProtocolGuid          ## SOMETIMES_CONSUMES
-  gOcBootEntryProtocolGuid           ## CONSUMES
+  gAppleBootPolicyProtocolGuid                  ## PRODUCES
+  gAppleKeyMapAggregatorProtocolGuid            ## SOMETIMES_CONSUMES
+  gEfiSimpleFileSystemProtocolGuid              ## SOMETIMES_CONSUMES
+  gEfiLoadedImageProtocolGuid                   ## SOMETIMES_CONSUMES
+  gEfiUsbIoProtocolGuid                         ## SOMETIMES_CONSUMES
+  gOcFirmwareRuntimeProtocolGuid                ## SOMETIMES_CONSUMES
+  gOcAudioProtocolGuid                          ## SOMETIMES_CONSUMES
+  gAppleBeepGenProtocolGuid                     ## SOMETIMES_CONSUMES
+  gOcBootEntryProtocolGuid                      ## CONSUMES
+  gAppleFirmwareUserInterfaceProtocolGuid       ## SOMETIMES_CONSUMES
 
 [LibraryClasses]
   BaseLib

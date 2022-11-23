@@ -8,6 +8,8 @@ OpenCore Changelog
   - `Never` - Never show picker (equivalent to 0.8.6's ShowPicker=False)
   - `SkipOnHibernateWake` - Don't show picker if waking from macOS hibernation
 - Changed macrecovery to download files into `com.apple.recovery.boot` by default, thx @dreamwhite
+- Supported Apple builtin picker (`BootKicker.efi` and `PickerMode` `Apple`) on non-EFI graphics cards
+- Enabled `PickerMode` `Apple` to successfully launch selected entry
 
 #### v0.8.6
 - Updated NVRAM save script for compatibilty with earlier macOS (Snow Leopard+ tested)

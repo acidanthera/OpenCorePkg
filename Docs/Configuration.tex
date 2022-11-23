@@ -3718,9 +3718,12 @@ the default boot entry choice will remain changed until the next manual reconfig
   with a long enough \texttt{KeyForgetThreshold}. If pressing and holding the key is not successful to reliably
   enter the picker, multiple repeated keypresses may be tried instead.
 
-  \emph{Note 3}: On Macs with problematic GOP, it may be difficult to access the Apple picker.
-  The \texttt{BootKicker} utility can be blessed to workaround this problem even without loading
-  OpenCore. On some Macs however, the \texttt{BootKicker} utility cannot be run from OpenCore.
+  \emph{Note 3}: On Macs with problematic GOP, it may be difficult to re-bless OpenCore if its bless status
+  is lost. The \texttt{BootKicker} utility can be used to work around this problem, if set up as a Tool
+  in OpenCore (e.g. on a CDROM) with \texttt{FullNvramAccess} enabled. It will launch the Apple picker,
+  which allows selection of an item to boot next (with \texttt{Enter}), or next and subsequently, i.e.
+  as the blessed entry (with \texttt{CTRL+Enter}), as normal. After the selection is made, the system
+  will reboot and the chosen entry will be booted.
 
 \item
   \texttt{PickerVariant}\\
@@ -6471,7 +6474,7 @@ Some of the known tools are listed below (builtin tools are marked with \textbf{
 
 \begin{tabular}{p{1.3in}p{5.55in}}
 \href{https://github.com/acidanthera/OpenCorePkg}{\texttt{BootKicker}}\textbf{*}
-& Enter Apple BootPicker menu (exclusive for Macs with compatible GPUs). \\
+& Display Apple BootPicker menu (for Macs with compatible firmware). \\
 \href{https://github.com/acidanthera/OpenCorePkg}{\texttt{ChipTune}}\textbf{*}
 & Test BeepGen protocol and generate audio signals of different style and length. \\
 \href{https://github.com/acidanthera/OpenCorePkg}{\texttt{CleanNvram}}\textbf{*}

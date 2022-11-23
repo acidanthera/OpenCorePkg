@@ -19,8 +19,9 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 #include <Library/MemoryAllocationLib.h>
 #include <Library/OcBootManagementLib.h>
 #include <Library/OcConsoleLib.h>
-#include <Library/OcMiscLib.h>
+#include <Library/OcDirectResetLib.h>
 #include <Library/OcFileLib.h>
+#include <Library/OcMiscLib.h>
 #include <Library/UefiApplicationEntryPoint.h>
 #include <Library/UefiBootServicesTableLib.h>
 #include <Library/UefiLib.h>
@@ -53,7 +54,8 @@ UefiMain (
 
   if (EFI_ERROR (Status)) {
     //
-    // Note: Ensure that stall value is within UINT32 in nanoseconds.
+    // Note: Ensure that stall value is within UINT32 in nanoseconds, for
+    // firmware such as APTIO IV with less robust Stall implementations.
     //
     for (Index = 0; Index < 10; ++Index) {
       gBS->Stall (SECONDS_TO_MICROSECONDS (1));
@@ -62,7 +64,16 @@ UefiMain (
     return Status;
   }
 
-  Status = OcRunFirmwareApplication (&gAppleBootPickerFileGuid, TRUE);
+  Status = OcLaunchAppleBootPicker ();
+
+  if (!EFI_ERROR (Status)) {
+    //
+    // DirectResetCold too soon after NVRAM write has been observed to lose values written.
+    // However Apple Picker can be very slow to exit, so added delay may well not be necessary.
+    //
+    gBS->Stall (100);
+    DirectResetCold ();
+  }
 
   Pixel.Raw = 0x0;
   if (Status == EFI_NOT_FOUND) {
@@ -76,17 +87,12 @@ UefiMain (
     //
     Pixel.Pixel.Red   = 0xFF;
     Pixel.Pixel.Green = 0xFF;
-  } else if (EFI_ERROR (Status) /* Status == EFI_INVALID_PARAMETER */) {
+  } else {
     //
     // Fuchsia. BootPicker does not load.
     //
     Pixel.Pixel.Blue = 0xFF;
     Pixel.Pixel.Red  = 0xFF;
-  } else {
-    //
-    // Green. BootPicker started but returned.
-    //
-    Pixel.Pixel.Green = 0xFF;
   }
 
   Gop->Blt (

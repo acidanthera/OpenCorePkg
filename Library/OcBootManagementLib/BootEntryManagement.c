@@ -1969,7 +1969,8 @@ OcScanForBootEntries (
     Context->BootOrder = InternalGetBootOrderForBooting (
                            BootContext->BootVariableGuid,
                            Context->BlacklistAppleUpdate,
-                           &Context->BootOrderCount
+                           &Context->BootOrderCount,
+                           FALSE
                            );
   }
 
@@ -2117,7 +2118,8 @@ OcScanForBootEntries (
 
 OC_BOOT_CONTEXT *
 OcScanForDefaultBootEntry (
-  IN  OC_PICKER_CONTEXT  *Context
+  IN  OC_PICKER_CONTEXT  *Context,
+  IN  BOOLEAN            UseBootNextOnly
   )
 {
   OC_BOOT_CONTEXT     *BootContext;
@@ -2163,7 +2165,8 @@ OcScanForDefaultBootEntry (
       Context->BootOrder = InternalGetBootOrderForBooting (
                              BootContext->BootVariableGuid,
                              Context->BlacklistAppleUpdate,
-                             &Context->BootOrderCount
+                             &Context->BootOrderCount,
+                             UseBootNextOnly
                              );
     }
 
@@ -2193,6 +2196,12 @@ OcScanForDefaultBootEntry (
           return BootContext;
         }
       }
+    }
+
+    if (UseBootNextOnly) {
+      OcFreeBootEntryProtocolHandles (&EntryProtocolHandles);
+      OcFreeBootContext (BootContext);
+      return NULL;
     }
 
     //

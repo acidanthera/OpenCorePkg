@@ -580,7 +580,8 @@ OcGetBootOrder (
   IN  BOOLEAN   WithBootNext,
   OUT UINTN     *BootOrderCount,
   OUT BOOLEAN   *Deduplicated  OPTIONAL,
-  OUT BOOLEAN   *HasBootNext   OPTIONAL
+  OUT BOOLEAN   *HasBootNext   OPTIONAL,
+  IN  BOOLEAN   UseBootNextOnly
   )
 {
   EFI_STATUS  Status;
@@ -633,37 +634,41 @@ OcGetBootOrder (
     }
   }
 
-  VariableSize = 0;
-  Status       = gRT->GetVariable (
-                        BootOrderName,
-                        BootVariableGuid,
-                        &VariableAttributes,
-                        &VariableSize,
-                        NULL
-                        );
+  if (UseBootNextOnly) {
+    Status = EFI_ABORTED;
+  } else {
+    VariableSize = 0;
+    Status       = gRT->GetVariable (
+                          BootOrderName,
+                          BootVariableGuid,
+                          &VariableAttributes,
+                          &VariableSize,
+                          NULL
+                          );
 
-  if (Status == EFI_BUFFER_TOO_SMALL) {
-    BootOrder = AllocatePool ((UINTN)WithBootNext * sizeof (BootNext) + VariableSize);
-    if (BootOrder == NULL) {
-      return NULL;
-    }
+    if (Status == EFI_BUFFER_TOO_SMALL) {
+      BootOrder = AllocatePool ((UINTN)WithBootNext * sizeof (BootNext) + VariableSize);
+      if (BootOrder == NULL) {
+        return NULL;
+      }
 
-    Status = gRT->GetVariable (
-                    BootOrderName,
-                    BootVariableGuid,
-                    &VariableAttributes,
-                    &VariableSize,
-                    BootOrder + (UINTN)WithBootNext
-                    );
-    if (  EFI_ERROR (Status)
-       || (VariableSize < sizeof (*BootOrder))
-       || (VariableSize % sizeof (*BootOrder) != 0))
-    {
-      FreePool (BootOrder);
-      Status = EFI_UNSUPPORTED;
+      Status = gRT->GetVariable (
+                      BootOrderName,
+                      BootVariableGuid,
+                      &VariableAttributes,
+                      &VariableSize,
+                      BootOrder + (UINTN)WithBootNext
+                      );
+      if (  EFI_ERROR (Status)
+         || (VariableSize < sizeof (*BootOrder))
+         || (VariableSize % sizeof (*BootOrder) != 0))
+      {
+        FreePool (BootOrder);
+        Status = EFI_UNSUPPORTED;
+      }
+    } else if (!EFI_ERROR (Status)) {
+      Status = EFI_NOT_FOUND;
     }
-  } else if (!EFI_ERROR (Status)) {
-    Status = EFI_NOT_FOUND;
   }
 
   if (EFI_ERROR (Status)) {
@@ -716,7 +721,8 @@ UINT16 *
 InternalGetBootOrderForBooting (
   IN  EFI_GUID  *BootVariableGuid,
   IN  BOOLEAN   BlacklistAppleUpdate,
-  OUT UINTN     *BootOrderCount
+  OUT UINTN     *BootOrderCount,
+  IN  BOOLEAN   UseBootNextOnly
   )
 {
   UINT16   *BootOrder;
@@ -737,10 +743,11 @@ InternalGetBootOrderForBooting (
                 HasFwBootNext == FALSE,
                 BootOrderCount,
                 NULL,
-                &HasBootNext
+                &HasBootNext,
+                UseBootNextOnly
                 );
   if (BootOrder == NULL) {
-    DEBUG ((DEBUG_INFO, "OCB: BootOrder/BootNext are not present or unsupported\n"));
+    DEBUG ((DEBUG_INFO, "OCB: BootOrder/BootNext are not present or unsupported %u %u\n", HasFwBootNext, UseBootNextOnly));
     return NULL;
   }
 
@@ -749,7 +756,7 @@ InternalGetBootOrderForBooting (
     DEBUG_INFO,
     "OCB: Found %u BootOrder entries with BootNext %a\n",
     (UINT32)*BootOrderCount,
-    HasBootNext ? "included" : "excluded"
+    UseBootNextOnly ? "only" : (HasBootNext ? "included" : "excluded")
     ));
   InternalDebugBootEnvironment (BootOrder, BootVariableGuid, *BootOrderCount);
   DEBUG_CODE_END ();
@@ -830,7 +837,8 @@ OcSetDefaultBootEntry (
                 FALSE,
                 &BootOrderCount,
                 NULL,
-                NULL
+                NULL,
+                FALSE
                 );
 
   MatchedEntry    = FALSE;

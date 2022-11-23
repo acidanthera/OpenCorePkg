@@ -175,7 +175,8 @@ UINT16 *
 InternalGetBootOrderForBooting (
   IN  EFI_GUID  *BootVariableGuid,
   IN  BOOLEAN   BlacklistAppleUpdate,
-  OUT UINTN     *BootOrderCount
+  OUT UINTN     *BootOrderCount,
+  IN  BOOLEAN   UseBootNextOnly
   );
 
 VOID

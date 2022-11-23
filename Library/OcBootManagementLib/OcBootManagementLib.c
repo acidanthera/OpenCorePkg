@@ -11,9 +11,10 @@
 
 #include <IndustryStandard/AppleCsrConfig.h>
 
+#include <Protocol/AppleBeepGen.h>
 #include <Protocol/AppleBootPolicy.h>
 #include <Protocol/AppleKeyMapAggregator.h>
-#include <Protocol/AppleBeepGen.h>
+#include <Protocol/AppleUserInterface.h>
 #include <Protocol/LoadedImage.h>
 #include <Protocol/OcAudio.h>
 #include <Protocol/SimpleTextOut.h>
@@ -32,6 +33,7 @@
 #include <Library/OcBootManagementLib.h>
 #include <Library/OcDevicePathLib.h>
 #include <Library/OcFileLib.h>
+#include <Library/OcMainLib.h>
 #include <Library/OcMiscLib.h>
 #include <Library/OcRtcLib.h>
 #include <Library/OcStringLib.h>
@@ -53,16 +55,10 @@ RunShowMenu (
   OC_BOOT_ENTRY  **BootEntries;
   UINT32         EntryReason;
 
-  if (  !BootContext->PickerContext->ApplePickerUnsupported
-     && (BootContext->PickerContext->PickerMode == OcPickerModeApple))
-  {
-    Status = OcRunFirmwareApplication (&gAppleBootPickerFileGuid, TRUE);
-    //
-    // This should not return on success.
-    //
-    DEBUG ((DEBUG_INFO, "OCB: Apple BootPicker failed on error - %r, fallback to builtin\n", Status));
-    BootContext->PickerContext->ApplePickerUnsupported = TRUE;
-  }
+  ASSERT (
+    BootContext->PickerContext->ApplePickerUnsupported
+         || (BootContext->PickerContext->PickerMode != OcPickerModeApple)
+    );
 
   BootEntries = OcEnumerateEntries (BootContext);
   if (BootEntries == NULL) {
@@ -169,6 +165,50 @@ InternalRunRequestPrivilege (
   return Status;
 }
 
+//
+// Since the Apple picker is GOP-based, it is reasonable to use specifically GOP to clear up after it.
+// Note that depending on settings, resetting ConsoleControl to text mode followed by ConOut->ClearScreen,
+// within the builtin picker, is not always sufficient to display it after the Apple picker, with no left-
+// over Apple picker baggage on screen, so we add this.
+//
+STATIC
+EFI_STATUS
+GopClearScreen (
+  VOID
+  )
+{
+  EFI_STATUS                           Status;
+  EFI_GRAPHICS_OUTPUT_PROTOCOL         *Gop;
+  EFI_GRAPHICS_OUTPUT_BLT_PIXEL_UNION  Pixel;
+
+  Status = gBS->HandleProtocol (
+                  gST->ConsoleOutHandle,
+                  &gEfiGraphicsOutputProtocolGuid,
+                  (VOID **)&Gop
+                  );
+
+  if (EFI_ERROR (Status)) {
+    return Status;
+  }
+
+  Pixel.Raw = 0x0;
+
+  Gop->Blt (
+         Gop,
+         &Pixel.Pixel,
+         EfiBltVideoFill,
+         0,
+         0,
+         0,
+         0,
+         Gop->Mode->Info->HorizontalResolution,
+         Gop->Mode->Info->VerticalResolution,
+         0
+         );
+
+  return EFI_UNSUPPORTED;
+}
+
 EFI_STATUS
 OcRunBootPicker (
   IN OC_PICKER_CONTEXT  *Context
@@ -180,6 +220,7 @@ OcRunBootPicker (
   OC_BOOT_ENTRY                      *Chosen;
   BOOLEAN                            SaidWelcome;
   OC_FIRMWARE_RUNTIME_PROTOCOL       *FwRuntime;
+  BOOLEAN                            IsApplePickerSelection;
 
   SaidWelcome = FALSE;
 
@@ -206,10 +247,16 @@ OcRunBootPicker (
     }
   }
 
+  IsApplePickerSelection = FALSE;
+
   if ((Context->PickerCommand == OcPickerShowPicker) && (Context->PickerMode == OcPickerModeApple)) {
-    Status = OcRunFirmwareApplication (&gAppleBootPickerFileGuid, TRUE);
-    DEBUG ((DEBUG_INFO, "OCB: Apple BootPicker failed - %r, fallback to builtin\n", Status));
-    Context->ApplePickerUnsupported = TRUE;
+    Status = OcLaunchAppleBootPicker ();
+    if (EFI_ERROR (Status)) {
+      DEBUG ((DEBUG_INFO, "OCB: Apple BootPicker failed - %r, fallback to builtin\n", Status));
+      Context->ApplePickerUnsupported = TRUE;
+    } else {
+      IsApplePickerSelection = TRUE;
+    }
   }
 
   if ((Context->PickerCommand != OcPickerShowPicker) && (Context->PickerCommand != OcPickerDefault)) {
@@ -221,10 +268,23 @@ OcRunBootPicker (
 
   while (TRUE) {
     //
+    // Never show Apple Picker twice, re-scan for entries if we previously successfully showed it.
+    //
+    if (IsApplePickerSelection && (Context->PickerMode != OcPickerModeApple)) {
+      IsApplePickerSelection  = FALSE;
+      Context->BootOrder      = NULL;
+      Context->BootOrderCount = 0;
+    }
+
+    //
     // Turbo-boost scanning when bypassing picker.
     //
-    if ((Context->PickerCommand == OcPickerDefault) || (Context->PickerCommand == OcPickerProtocolHotKey)) {
-      BootContext = OcScanForDefaultBootEntry (Context);
+    if (  (Context->PickerCommand == OcPickerDefault)
+       || (Context->PickerCommand == OcPickerProtocolHotKey)
+       || IsApplePickerSelection
+          )
+    {
+      BootContext = OcScanForDefaultBootEntry (Context, IsApplePickerSelection);
     } else {
       ASSERT (
         Context->PickerCommand == OcPickerShowPicker
@@ -241,13 +301,21 @@ OcRunBootPicker (
     //
     if (BootContext == NULL) {
       //
-      // TODO: Failed protocol hotkey can access OcPickerShowPicker mode even if
-      // this is denied by InternalRunRequestPrivilege above, is this OK?
+      // Because of this fallback code, failed protocol hotkey can access OcPickerShowPicker mode
+      // even if this is denied by InternalRunRequestPrivilege above. Believed to be acceptable
+      // as in a secure system any entry protocol drivers should be locked down and trusted.
       //
-      if (Context->HideAuxiliary || (Context->PickerCommand == OcPickerProtocolHotKey)) {
-        DEBUG ((DEBUG_INFO, "OCB: System has no boot entries, showing picker with auxiliary\n"));
+      if (Context->HideAuxiliary || (Context->PickerCommand == OcPickerProtocolHotKey) || IsApplePickerSelection) {
         Context->PickerCommand = OcPickerShowPicker;
         Context->HideAuxiliary = FALSE;
+        if (IsApplePickerSelection) {
+          DEBUG ((DEBUG_WARN, "OCB: Apple Picker returned no entry valid under OC, falling back to builtin\n"));
+          Context->PickerMode = OcPickerModeBuiltin;
+          GopClearScreen ();
+        } else {
+          DEBUG ((DEBUG_INFO, "OCB: System has no boot entries, showing picker with auxiliary\n"));
+        }
+
         continue;
       }
 
@@ -255,7 +323,7 @@ OcRunBootPicker (
       return EFI_NOT_FOUND;
     }
 
-    if (Context->PickerCommand == OcPickerShowPicker) {
+    if ((Context->PickerCommand == OcPickerShowPicker) && !IsApplePickerSelection) {
       DEBUG ((
         DEBUG_INFO,
         "OCB: Showing menu... %a\n",
@@ -315,7 +383,7 @@ OcRunBootPicker (
         Chosen->SetDefault
         ));
 
-      if (Context->PickerCommand == OcPickerShowPicker) {
+      if ((Context->PickerCommand == OcPickerShowPicker) && !IsApplePickerSelection) {
         ASSERT (Chosen->EntryIndex > 0);
 
         if (Chosen->SetDefault) {
@@ -452,6 +520,52 @@ OcRunFirmwareApplication (
       Status = EFI_UNSUPPORTED;
     }
   }
+
+  return Status;
+}
+
+EFI_STATUS
+OcLaunchAppleBootPicker (
+  VOID
+  )
+{
+  EFI_STATUS                              Status;
+  APPLE_FIRMWARE_USER_INTERFACE_PROTOCOL  *FirmwareUI;
+  UINT8                                   *aGopAlreadyConnected;
+
+  Status = gBS->LocateProtocol (
+                  &gAppleFirmwareUserInterfaceProtocolGuid,
+                  NULL,
+                  (VOID **)&FirmwareUI
+                  );
+
+  if (EFI_ERROR (Status)) {
+    DEBUG ((DEBUG_INFO, "OC: Cannot locate FirmwareUI protocol - %r\n", Status));
+  } else if (FirmwareUI->Revision != APPLE_FIRMWARE_USER_INTERFACE_PROTOCOL_REVISION) {
+    DEBUG ((
+      DEBUG_INFO,
+      "OC: Launch Apple picker incompatible FirmwareUI protocol revision %u != %u\n",
+      FirmwareUI->Revision,
+      APPLE_FIRMWARE_USER_INTERFACE_PROTOCOL_REVISION
+      ));
+    Status = EFI_UNSUPPORTED;
+  }
+
+  if (!EFI_ERROR (Status)) {
+    //
+    // Location of relevant byte variable within loaded driver.
+    //
+    aGopAlreadyConnected = (VOID *)((UINT8 *)FirmwareUI + sizeof (APPLE_FIRMWARE_USER_INTERFACE_PROTOCOL));
+
+    if (*aGopAlreadyConnected != 1) {
+      DEBUG ((DEBUG_WARN, "OC: Cannot force reconnect Apple GOP %u\n", *aGopAlreadyConnected));
+    } else {
+      *aGopAlreadyConnected = 0;
+      DEBUG ((DEBUG_INFO, "OC: Force reconnect Apple GOP\n"));
+    }
+  }
+
+  Status = OcRunFirmwareApplication (&gAppleBootPickerFileGuid, TRUE);
 
   return Status;
 }
