@@ -5,19 +5,14 @@
 #include <Ext4Dxe.h>
 
 #include <UserFile.h>
+#include <UserGlobalVar.h>
+#include <UserMemory.h>
 #include <string.h>
 
 #define MAP_TABLE_SIZE  0x100
 #define CHAR_FAT_VALID  0x01
 
 #define TO_UPPER(a)  (CHAR16) ((a) <= 0xFF ? mEngUpperMap[a] : (a))
-
-EFI_GUID  gEfiUnicodeCollationProtocolGuid = {
-  0x1D85CD7F, 0xF43D, 0x11D2, { 0x9A, 0x0C, 0x00, 0x90, 0x27, 0x3F, 0xC1, 0x4D }
-};
-EFI_GUID  gEfiDiskIo2ProtocolGuid = {
-  0x151c8eae, 0x7f2c, 0x472c, { 0x9e, 0x54, 0x98, 0x28, 0x19, 0x4f, 0x6a, 0x88 }
-};
 
 UINT8  _gPcd_FixedAtBuild_PcdUefiVariableDefaultLang[4]         = { 101, 110, 103, 0 };
 UINT8  _gPcd_FixedAtBuild_PcdUefiVariableDefaultPlatformLang[6] = { 101, 110, 45, 85, 83, 0 };
