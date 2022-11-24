@@ -8,7 +8,7 @@ OpenCore Changelog
   - `Never` - Never show picker (equivalent to 0.8.6's ShowPicker=False)
   - `SkipOnHibernateWake` - Don't show picker if waking from macOS hibernation
 - Changed macrecovery to download files into `com.apple.recovery.boot` by default, thx @dreamwhite
-- Supported Apple builtin picker (using `BootKicker.efi` or `PickerMode` `Apple`) on MacPro5,1 graphics cards with no firmware Mac-EFI support
+- Supported Apple builtin picker (using `BootKicker.efi` or `PickerMode` `Apple`) on MacPro5,1 graphics cards with no firmware Mac-EFI support (thx @cdf, @tsialex)
 - Enabled `PickerMode` `Apple` to successfully launch selected entry
 - Enabled `BootKicker.efi` to successfully launch selected entry (via reboot)
 
