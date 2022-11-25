@@ -32,7 +32,7 @@ Additional variables are supported to adjust the compilation process.
 - `DEBUG=1` — build with debugging information.
 - `FUZZ=1` — build with fuzzing enabled.
 - `FUZZ_JOBS=2` — run with 2 fuzzing jobs (defaults to 4).
-- `FUZZ_MEM=1024` - run with 1024 MB fuzzing memory limit (defaults to 4096).
+- `FUZZ_MEM=1024` - run with 1024 MB fuzzing memory limit (defaults to 4096)*.
 - `SANITIZE=1` — build with LLVM sanitizers enabled.
 - `CC=cc` — build with `cc` compiler (e.g. `i686-w64-mingw32-gcc` for Windows).
 - `DIST=Target` — build for target `Target` (e.g. `Darwin`, `Linux`, `Windows`).
@@ -44,6 +44,22 @@ Additional variables are supported to adjust the compilation process.
 - `SYDR=1` — change `$(SUFFIX)` to store compilation results for Sydr DSE in a directory distinct from the default one.
 
 Example 1. To build 32-bit version of utility on macOS (use High Sierra 10.13 or below):
+
+NOTE: If your program uses `UserBaseMemoryLib` and calls custom allocation functions, be sure that besides `FUZZ_MEM` limit you correctly set limit `mPoolAllocationSizeLimit` which defaults to the 512 MB in cases if your code could allocate more than this limit at single AllocatePool.
+
+To set up your limit, use `SetPoolAllocationSizeLimit` routine like shown in the example below:
+
+```
+...
+#include <UserMemory.h>
+
+int main(int argc, char *argv[]) {
+  SetPoolAllocationSizeLimit (SINGLE_ALLOCATION_MEMORY_LIMIT);
+  /* your code goes here */
+  return 0;
+}
+```
+
 
 ```sh
 UDK_ARCH=Ia32 make
