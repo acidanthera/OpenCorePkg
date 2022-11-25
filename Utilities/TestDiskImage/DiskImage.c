@@ -144,9 +144,17 @@ ContinueDmgLoop:
       OcAppleDiskImageFreeContext (&DmgContext);
     }
 
-    FreePool (Dmg);
-    FreePool (Chunklist);
-    FreePool (UncompDmg);
+    if (Dmg != NULL) {
+      FreePool (Dmg);
+    }
+
+    if (Chunklist != NULL) {
+      FreePool (Chunklist);
+    }
+
+    if (UncompDmg != NULL) {
+      FreePool (UncompDmg);
+    }
   }
 
   return 0;
