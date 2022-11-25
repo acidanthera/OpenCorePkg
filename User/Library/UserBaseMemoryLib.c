@@ -17,6 +17,12 @@
   #include <malloc.h>
 #endif // WIN32
 
+//
+// Limits single pool allocation size to 512MB by default.
+// Use SetPoolAllocationSizeLimit to change this limit.
+//
+UINTN  mPoolAllocationSizeLimit = BASE_512MB;
+
 UINTN  mPoolAllocations;
 UINTN  mPageAllocations;
 
@@ -24,6 +30,14 @@ UINT64  mPoolAllocationMask = MAX_UINT64;
 UINTN   mPoolAllocationIndex;
 UINT64  mPageAllocationMask = MAX_UINT64;
 UINTN   mPageAllocationIndex;
+
+VOID
+SetPoolAllocationSizeLimit (
+  UINTN  AllocationSize
+  )
+{
+  mPoolAllocationSizeLimit = AllocationSize;
+}
 
 VOID *
 EFIAPI
@@ -127,15 +141,30 @@ AllocatePool (
   IN  UINTN  AllocationSize
   )
 {
-  VOID  *Buffer;
+  VOID   *Buffer;
+  UINTN  RequestedAllocationSize;
 
-  if ((mPoolAllocationMask & (1ULL << mPoolAllocationIndex)) != 0) {
+  Buffer                  = NULL;
+  RequestedAllocationSize = 0;
+
+  if (((mPoolAllocationMask & (1ULL << mPoolAllocationIndex)) != 0) && (AllocationSize + 7ULL > AllocationSize)) {
     //
     // UEFI guarantees 8-byte alignment.
     //
-    Buffer = malloc ((AllocationSize + 7ULL) & ~7ULL);
-  } else {
-    Buffer = NULL;
+    RequestedAllocationSize = (AllocationSize + 7ULL) & ~7ULL;
+    //
+    // Check that we have not gone beyond the single allocation size limit
+    //
+    if (RequestedAllocationSize <= mPoolAllocationSizeLimit) {
+      Buffer = malloc (RequestedAllocationSize);
+    } else {
+      DEBUG ((
+        DEBUG_POOL,
+        "UMEM: Requested allocation size %u exceeds the pool allocation limit %u \n",
+        (UINT32)RequestedAllocationSize,
+        (UINT32)mPoolAllocationSizeLimit
+        ));
+    }
   }
 
   ++mPoolAllocationIndex;
@@ -219,24 +248,33 @@ AllocatePages (
   IN UINTN  Pages
   )
 {
-  VOID  *Memory;
+  VOID   *Memory;
+  UINTN  RequestedAllocationSize;
 
-  if ((mPageAllocationMask & (1ULL << mPageAllocationIndex)) != 0) {
- #ifdef WIN32
-    Memory = _aligned_malloc (Pages * EFI_PAGE_SIZE, EFI_PAGE_SIZE);
- #else // !WIN32
-    Memory = NULL;
-    INTN  RetVal;
+  Memory                  = NULL;
+  RequestedAllocationSize = Pages * EFI_PAGE_SIZE;
 
-    RetVal = posix_memalign (&Memory, EFI_PAGE_SIZE, Pages * EFI_PAGE_SIZE);
-    if (RetVal != 0) {
-      DEBUG ((DEBUG_ERROR, "posix_memalign returns error %d\n", RetVal));
+  if (((mPageAllocationMask & (1ULL << mPageAllocationIndex)) != 0) &&
+      ((Pages != 0) && (RequestedAllocationSize / Pages == EFI_PAGE_SIZE)))
+  {
+    //
+    // Check that we have not gone beyond the single allocation size limit
+    //
+    if (RequestedAllocationSize <= mPoolAllocationSizeLimit) {
+ #ifdef _WIN32
+      Memory = _aligned_malloc (RequestedAllocationSize, EFI_PAGE_SIZE);
+ #else // !_WIN32
       Memory = NULL;
-    }
+      INTN  RetVal;
 
- #endif // WIN32
-  } else {
-    Memory = NULL;
+      RetVal = posix_memalign (&Memory, EFI_PAGE_SIZE, RequestedAllocationSize);
+      if (RetVal != 0) {
+        DEBUG ((DEBUG_ERROR, "posix_memalign returns error %d\n", RetVal));
+        Memory = NULL;
+      }
+
+ #endif // _WIN32
+    }
   }
 
   ++mPageAllocationIndex;
@@ -270,6 +308,17 @@ FreePool (
     Buffer
     ));
 
+  //
+  // Check that we are freeing buffer produced by our AllocatePool implementation
+  //
+  if (mPoolAllocations == 0) {
+    DEBUG ((
+      DEBUG_ERROR,
+      "UMEM: Requested buffer to free allocated not by AllocatePool implementations \n"
+      ));
+    abort ();
+  }
+
   --mPoolAllocations;
 
   free (Buffer);
@@ -282,6 +331,8 @@ FreePages (
   IN UINTN  Pages
   )
 {
+  UINTN  BytesToFree;
+
   ASSERT (Buffer != NULL);
 
   DEBUG ((
@@ -291,7 +342,31 @@ FreePages (
     Buffer
     ));
 
-  mPageAllocations -= Pages;
+  //
+  // Check that requested pages count to free not exceeds total
+  // allocated pages count
+  //
+  if (Pages > mPageAllocations) {
+    DEBUG ((
+      DEBUG_ERROR,
+      "UMEM: Requested pages count %u to free exceeds total allocated pages %u\n",
+      (UINT32)Pages,
+      (UINT32)mPageAllocations
+      ));
+    abort ();
+  }
+
+  BytesToFree = Pages * EFI_PAGE_SIZE;
+  if ((Pages != 0) && (BytesToFree / Pages == EFI_PAGE_SIZE)) {
+    mPageAllocations -= Pages;
+  } else {
+    DEBUG ((
+      DEBUG_ERROR,
+      "UMEM: Passed pages count %u proceeds unsigned integer overflow during BytesToFree multiplication\n",
+      (UINT32)Pages
+      ));
+    abort ();
+  }
 
   FreePool (Buffer);
 }
