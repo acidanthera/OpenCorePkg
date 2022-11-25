@@ -1,7 +1,7 @@
 OpenCore Changelog
 ==================
 #### v0.8.7
-- Fixed logic of screen clear from GUI picker at boot entry launch (introduced in 0.7.0) to apply to text-mode entries only
+- Removed unwanted clear screen when launching non-text boot entry
 - Fixed TSC/FSB for AMD CPUs in ProvideCurrentCpuInfo, thx @Shaneee
 - Changed `Misc` -> `Boot` -> `ShowPicker` typing to string:
   - `Always` - Always show picker (equivalent to 0.8.6's ShowPicker=True)
