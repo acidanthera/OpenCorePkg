@@ -99,6 +99,21 @@ IsZeroBuffer (
   return TRUE;
 }
 
+BOOLEAN
+EFIAPI
+IsZeroGuid (
+  IN CONST GUID  *Guid
+  )
+{
+  UINT64  LowPartOfGuid;
+  UINT64  HighPartOfGuid;
+
+  LowPartOfGuid  = ReadUnaligned64 ((CONST UINT64 *)Guid);
+  HighPartOfGuid = ReadUnaligned64 ((CONST UINT64 *)Guid + 1);
+
+  return (BOOLEAN)(LowPartOfGuid == 0 && HighPartOfGuid == 0);
+}
+
 INTN
 EFIAPI
 CompareMem (
