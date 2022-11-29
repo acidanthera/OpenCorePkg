@@ -92,7 +92,7 @@ OcStartImage (
   EFI_STATUS                       Status;
   EFI_CONSOLE_CONTROL_SCREEN_MODE  OldMode;
     
-    CHAR16  *DevicePathText;
+  CHAR16  *DevicePathText;
 
   if (Chosen->DevicePath != NULL) {
     DevicePathText = ConvertDevicePathToText (Chosen->DevicePath, FALSE, FALSE);
