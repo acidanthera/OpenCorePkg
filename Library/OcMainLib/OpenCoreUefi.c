@@ -895,9 +895,9 @@ OcLoadUefiSupport (
   //
   // Setup Apple bootloader specific UEFI features.
   //
-//   if (Config->Booter.Quirks.EnableForAll) {
+  //   if (Config->Booter.Quirks.EnableForAll) {
   OcLoadBooterUefiSupport (Config, CpuInfo, Signature);
-//   }
+  //   }
   if (Config->Uefi.Quirks.ActivateHpetSupport) {
     ActivateHpetSupport ();
   }
