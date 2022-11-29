@@ -1057,8 +1057,7 @@
 	<key>Misc</key>
 	<dict>
 		<key>BlessOverride</key>
-		<array>
-		</array>
+		<array/>
 		<key>Boot</key>
 		<dict>
 			<key>ConsoleAttributes</key>
@@ -1082,9 +1081,7 @@
 			<key>PollAppleHotKeys</key>
 			<false/>
 			<key>ShowPicker</key>
-			<true/>
-			<key>SkipCustomEntryCheck</key>
-			<true/>
+			<string>Always</string>
 			<key>TakeoffDelay</key>
 			<integer>0</integer>
 			<key>Timeout</key>
