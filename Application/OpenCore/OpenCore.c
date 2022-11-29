@@ -91,7 +91,7 @@ OcStartImage (
 {
   EFI_STATUS                       Status;
   EFI_CONSOLE_CONTROL_SCREEN_MODE  OldMode;
-    
+
   CHAR16  *DevicePathText;
 
   if (Chosen->DevicePath != NULL) {
