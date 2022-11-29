@@ -145,6 +145,7 @@ OC_SCHEMA
 STATIC
 OC_SCHEMA
   mAcpiQuirksSchema[] = {
+  OC_SCHEMA_BOOLEAN_IN ("EnableForAll",     OC_GLOBAL_CONFIG, Acpi.Quirks.EnableForAll),
   OC_SCHEMA_BOOLEAN_IN ("FadtEnableReset",  OC_GLOBAL_CONFIG, Acpi.Quirks.FadtEnableReset),
   OC_SCHEMA_BOOLEAN_IN ("NormalizeHeaders", OC_GLOBAL_CONFIG, Acpi.Quirks.NormalizeHeaders),
   OC_SCHEMA_BOOLEAN_IN ("RebaseRegions",    OC_GLOBAL_CONFIG, Acpi.Quirks.RebaseRegions),
@@ -187,6 +188,7 @@ OC_SCHEMA
   OC_SCHEMA_BOOLEAN_IN ("DisableSingleUser",      OC_GLOBAL_CONFIG, Booter.Quirks.DisableSingleUser),
   OC_SCHEMA_BOOLEAN_IN ("DisableVariableWrite",   OC_GLOBAL_CONFIG, Booter.Quirks.DisableVariableWrite),
   OC_SCHEMA_BOOLEAN_IN ("DiscardHibernateMap",    OC_GLOBAL_CONFIG, Booter.Quirks.DiscardHibernateMap),
+  OC_SCHEMA_BOOLEAN_IN ("EnableForAll",           OC_GLOBAL_CONFIG, Booter.Quirks.EnableForAll),
   OC_SCHEMA_BOOLEAN_IN ("EnableSafeModeSlide",    OC_GLOBAL_CONFIG, Booter.Quirks.EnableSafeModeSlide),
   OC_SCHEMA_BOOLEAN_IN ("EnableWriteUnprotector", OC_GLOBAL_CONFIG, Booter.Quirks.EnableWriteUnprotector),
   OC_SCHEMA_BOOLEAN_IN ("ForceBooterSignature",   OC_GLOBAL_CONFIG, Booter.Quirks.ForceBooterSignature),
@@ -404,20 +406,21 @@ OC_SCHEMA
 
 STATIC
 OC_SCHEMA
-  mMiscConfigurationBootSchema[] = {
-  OC_SCHEMA_INTEGER_IN ("ConsoleAttributes", OC_GLOBAL_CONFIG, Misc.Boot.ConsoleAttributes),
-  OC_SCHEMA_STRING_IN ("HibernateMode",      OC_GLOBAL_CONFIG, Misc.Boot.HibernateMode),
-  OC_SCHEMA_BOOLEAN_IN ("HideAuxiliary",     OC_GLOBAL_CONFIG, Misc.Boot.HideAuxiliary),
-  OC_SCHEMA_STRING_IN ("LauncherOption",     OC_GLOBAL_CONFIG, Misc.Boot.LauncherOption),
-  OC_SCHEMA_STRING_IN ("LauncherPath",       OC_GLOBAL_CONFIG, Misc.Boot.LauncherPath),
-  OC_SCHEMA_INTEGER_IN ("PickerAttributes",  OC_GLOBAL_CONFIG, Misc.Boot.PickerAttributes),
-  OC_SCHEMA_BOOLEAN_IN ("PickerAudioAssist", OC_GLOBAL_CONFIG, Misc.Boot.PickerAudioAssist),
-  OC_SCHEMA_STRING_IN ("PickerMode",         OC_GLOBAL_CONFIG, Misc.Boot.PickerMode),
-  OC_SCHEMA_STRING_IN ("PickerVariant",      OC_GLOBAL_CONFIG, Misc.Boot.PickerVariant),
-  OC_SCHEMA_BOOLEAN_IN ("PollAppleHotKeys",  OC_GLOBAL_CONFIG, Misc.Boot.PollAppleHotKeys),
-  OC_SCHEMA_STRING_IN ("ShowPicker",         OC_GLOBAL_CONFIG, Misc.Boot.ShowPicker),
-  OC_SCHEMA_INTEGER_IN ("TakeoffDelay",      OC_GLOBAL_CONFIG, Misc.Boot.TakeoffDelay),
-  OC_SCHEMA_INTEGER_IN ("Timeout",           OC_GLOBAL_CONFIG, Misc.Boot.Timeout),
+mMiscConfigurationBootSchema[] = {
+  OC_SCHEMA_INTEGER_IN ("ConsoleAttributes",   OC_GLOBAL_CONFIG, Misc.Boot.ConsoleAttributes),
+  OC_SCHEMA_STRING_IN  ("HibernateMode",       OC_GLOBAL_CONFIG, Misc.Boot.HibernateMode),
+  OC_SCHEMA_BOOLEAN_IN ("HideAuxiliary",       OC_GLOBAL_CONFIG, Misc.Boot.HideAuxiliary),
+  OC_SCHEMA_STRING_IN  ("LauncherOption",      OC_GLOBAL_CONFIG, Misc.Boot.LauncherOption),
+  OC_SCHEMA_STRING_IN  ("LauncherPath",        OC_GLOBAL_CONFIG, Misc.Boot.LauncherPath),
+  OC_SCHEMA_INTEGER_IN ("PickerAttributes",    OC_GLOBAL_CONFIG, Misc.Boot.PickerAttributes),
+  OC_SCHEMA_BOOLEAN_IN ("PickerAudioAssist",   OC_GLOBAL_CONFIG, Misc.Boot.PickerAudioAssist),
+  OC_SCHEMA_STRING_IN  ("PickerMode",          OC_GLOBAL_CONFIG, Misc.Boot.PickerMode),
+  OC_SCHEMA_STRING_IN  ("PickerVariant",       OC_GLOBAL_CONFIG, Misc.Boot.PickerVariant),
+  OC_SCHEMA_BOOLEAN_IN ("PollAppleHotKeys",    OC_GLOBAL_CONFIG, Misc.Boot.PollAppleHotKeys),
+  OC_SCHEMA_BOOLEAN_IN ("ShowPicker",          OC_GLOBAL_CONFIG, Misc.Boot.ShowPicker),
+  OC_SCHEMA_BOOLEAN_IN ("SkipCustomEntryCheck", OC_GLOBAL_CONFIG, Misc.Boot.SkipCustomEntryCheck),
+  OC_SCHEMA_INTEGER_IN ("TakeoffDelay",        OC_GLOBAL_CONFIG, Misc.Boot.TakeoffDelay),
+  OC_SCHEMA_INTEGER_IN ("Timeout",             OC_GLOBAL_CONFIG, Misc.Boot.Timeout),
 };
 
 STATIC
