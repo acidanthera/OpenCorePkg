@@ -12,6 +12,7 @@ import hashlib
 import json
 import linecache
 import os
+import plistlib
 import random
 import struct
 import sys
@@ -288,6 +289,7 @@ def action_download(args):
     cnkpath = save_image(info[INFO_SIGN_LINK], info[INFO_SIGN_SESS], cnkname, args.outdir)
     try:
         verify_image(dmgpath, cnkpath)
+        get_basesystem_version(args)
         return 0
     except Exception as err:
         if isinstance(err, AssertionError) and str(err) == '':
@@ -453,6 +455,29 @@ def action_guess(args):
     print(f'UNKNOWN: Failed to determine supported models for MLB {mlb}!')
     return None
 
+def get_basesystem_version(args):
+    print('Extracting recovery version...')
+    os.system(f'hdiutil mount -plist {args.outdir}/BaseSystem.dmg > mount.plist')
+    with open('mount.plist', 'rb') as mount_plist:
+        pl = plistlib.load(mount_plist)
+
+        for mounts in pl['system-entities']:
+            if 'mount-point' in mounts.keys():
+                mount_point = mounts['mount-point']
+
+    app_name = [app for app in os.listdir(mount_point) if app.startswith('Install macOS')][0] # There can only be one Install macOS X.app application in BaseSystem.dmg
+
+    with open(f'{mount_point}/{app_name}/Contents/Info.plist', 'rb') as basesystem_info_plist:
+        version_plist = plistlib.load(basesystem_info_plist)
+        version = version_plist['DTPlatformVersion']
+    
+    with open(f'{args.outdir}/.contentDetails', 'w') as f:
+        print(f'Download recovery version is {version}. Writing to {args.outdir}/.contentDetails...')
+        f.write(f'macOS {version} Recovery')
+
+    print('Extracting recovery version completed!')
+    os.system(f'hdiutil unmount "{mount_point}"')
+    os.remove('mount.plist')
 
 def main():
     parser = argparse.ArgumentParser(description='Gather recovery information for Macs')
