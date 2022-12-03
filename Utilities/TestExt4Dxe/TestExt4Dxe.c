@@ -22,6 +22,8 @@ STATIC UINTN        mFuzzOffset;
 STATIC UINTN        mFuzzSize;
 STATIC CONST UINT8  *mFuzzPointer;
 
+STATIC EFI_SIMPLE_FILE_SYSTEM_PROTOCOL  *mEfiSfsInterface;
+
 STATIC UINT64  mOpenFileModes[OPEN_FILE_MODES_COUNT] = { EFI_FILE_MODE_READ, EFI_FILE_MODE_WRITE, EFI_FILE_MODE_CREATE };
 
 CHAR8  mEngUpperMap[MAP_TABLE_SIZE];
@@ -195,6 +197,47 @@ EfiLibUninstallAllDriverProtocols2 (
   return EFI_NOT_FOUND;
 }
 
+EFI_STATUS
+EFIAPI
+WrapInstallMultipleProtocolInterfaces (
+  IN OUT EFI_HANDLE  *Handle,
+  ...
+  )
+{
+  VA_LIST     Args;
+  EFI_STATUS  Status;
+  EFI_GUID    *Protocol;
+  VOID        *Interface;
+
+  if (Handle == NULL) {
+    return EFI_INVALID_PARAMETER;
+  }
+
+  VA_START (Args, Handle);
+  for (Status = EFI_SUCCESS; !EFI_ERROR (Status);) {
+    //
+    // If protocol is NULL, then it's the end of the list
+    //
+    Protocol = VA_ARG (Args, EFI_GUID *);
+    if (Protocol == NULL) {
+      break;
+    }
+
+    Interface = VA_ARG (Args, VOID *);
+
+    //
+    // If this is Sfs protocol then save interface into global state
+    //
+    if (CompareGuid (Protocol, &gEfiSimpleFileSystemProtocolGuid)) {
+      mEfiSfsInterface = Interface;
+    }
+  }
+
+  VA_END (Args);
+
+  return Status;
+}
+
 VOID
 FreeAll (
   IN CHAR16          *FileName,
@@ -261,7 +304,10 @@ ConfigureMemoryAllocations (
   mPoolAllocationIndex = 0;
   mPageAllocationIndex = 0;
 
-  SetPoolAllocationSizeLimit (BASE_4GB);
+  //
+  // Limit single pool allocation size to 3GB
+  //
+  SetPoolAllocationSizeLimit (BASE_1GB | BASE_2GB);
 
   Off = sizeof (UINT64);
   if (Size >= Off) {
@@ -285,26 +331,32 @@ TestExt4Dxe (
   UINTN        FuzzSize
   )
 {
-  EFI_STATUS         Status;
-  EXT4_PARTITION     *Part;
-  EXT4_FILE          *File;
-  EFI_FILE_PROTOCOL  *This;
-  UINTN              BufferSize;
-  VOID               *Buffer;
-  EFI_FILE_PROTOCOL  *NewHandle;
-  CHAR16             *FileName;
-  VOID               *Info;
-  UINTN              Len;
-  UINT64             Position;
-  UINT64             FileSize;
-  UINTN              Index;
+  EFI_STATUS             Status;
+  EXT4_PARTITION         *Part;
+  EXT4_FILE              *File;
+  EFI_FILE_PROTOCOL      *This;
+  EFI_DISK_IO_PROTOCOL   *DiskIo;
+  EFI_BLOCK_IO_PROTOCOL  *BlockIo;
+  EFI_HANDLE             DeviceHandle;
+  UINTN                  BufferSize;
+  VOID                   *Buffer;
+  EFI_FILE_PROTOCOL      *NewHandle;
+  CHAR16                 *FileName;
+  VOID                   *Info;
+  UINTN                  Len;
+  UINT64                 Position;
+  UINT64                 FileSize;
+  UINTN                  Index;
 
   Part       = NULL;
   BufferSize = 100;
 
-  mFuzzOffset  = 0;
-  mFuzzSize    = FuzzSize;
-  mFuzzPointer = FuzzData;
+  mFuzzOffset      = 0;
+  mFuzzSize        = FuzzSize;
+  mFuzzPointer     = FuzzData;
+  mEfiSfsInterface = NULL;
+
+  DeviceHandle = (EFI_HANDLE)0xDEADBEAFULL;
 
   //
   // Construct file name
@@ -317,7 +369,7 @@ TestExt4Dxe (
   ASAN_CHECK_MEMORY_REGION (FileName, BufferSize);
 
   if ((mFuzzSize - mFuzzOffset) < BufferSize) {
-    FreeAll (FileName, Part);
+    FreePool (FileName);
     return 0;
   }
 
@@ -326,52 +378,63 @@ TestExt4Dxe (
   mFuzzOffset  += BufferSize - 2;
 
   //
-  // Construct File System
+  // Construct BlockIo and DiskIo interfaces
   //
-  Part = AllocateZeroPool (sizeof (EXT4_PARTITION));
-  if (Part == NULL) {
-    FreeAll (FileName, Part);
+  DiskIo = AllocateZeroPool (sizeof (EFI_DISK_IO_PROTOCOL));
+  if (DiskIo == NULL) {
+    FreePool (FileName);
     return 0;
   }
+
+  ASAN_CHECK_MEMORY_REGION (DiskIo, sizeof (EFI_DISK_IO_PROTOCOL));
+
+  DiskIo->ReadDisk = FuzzReadDisk;
+
+  BlockIo = AllocateZeroPool (sizeof (EFI_BLOCK_IO_PROTOCOL));
+  if (BlockIo == NULL) {
+    FreePool (FileName);
+    FreePool (DiskIo);
+    return 0;
+  }
+
+  ASAN_CHECK_MEMORY_REGION (BlockIo, sizeof (EFI_BLOCK_IO_PROTOCOL));
+
+  BlockIo->Media = AllocateZeroPool (sizeof (EFI_BLOCK_IO_MEDIA));
+  if (BlockIo->Media == NULL) {
+    FreePool (FileName);
+    FreePool (DiskIo);
+    FreePool (BlockIo);
+    return 0;
+  }
+
+  ASAN_CHECK_MEMORY_REGION (BlockIo->Media, sizeof (EFI_BLOCK_IO_MEDIA));
+
+  //
+  // Check Ext4 SuperBlock magic like it done
+  // in Ext4IsBindingSupported routine
+  //
+  if (!Ext4SuperblockCheckMagic (DiskIo, BlockIo)) {
+    // Don't halt on bad magic, just keep going
+    DEBUG ((DEBUG_WARN, "[ext4] Superblock contains bad magic \n"));
+  }
+
+  //
+  // Open partition
+  //
+  Status = Ext4OpenPartition (DeviceHandle, DiskIo, NULL, BlockIo);
+
+  if (EFI_ERROR (Status)) {
+    DEBUG ((DEBUG_ERROR, "[ext4] Error mounting: %r\n", Status));
+    FreePool (FileName);
+    FreePool (BlockIo->Media);
+    FreePool (BlockIo);
+    FreePool (DiskIo);
+    return 0;
+  }
+
+  Part = (EXT4_PARTITION *)mEfiSfsInterface;
 
   ASAN_CHECK_MEMORY_REGION (Part, sizeof (EXT4_PARTITION));
-
-  InitializeListHead (&Part->OpenFiles);
-
-  Part->DiskIo = AllocateZeroPool (sizeof (EFI_DISK_IO_PROTOCOL));
-  if (Part->DiskIo == NULL) {
-    FreeAll (FileName, Part);
-    return 0;
-  }
-
-  ASAN_CHECK_MEMORY_REGION (Part->DiskIo, sizeof (EFI_DISK_IO_PROTOCOL));
-
-  Part->DiskIo->ReadDisk = FuzzReadDisk;
-
-  Part->BlockIo = AllocateZeroPool (sizeof (EFI_BLOCK_IO_PROTOCOL));
-  if (Part->BlockIo == NULL) {
-    FreeAll (FileName, Part);
-    return 0;
-  }
-
-  ASAN_CHECK_MEMORY_REGION (Part->BlockIo, sizeof (EFI_BLOCK_IO_PROTOCOL));
-
-  Part->BlockIo->Media = AllocateZeroPool (sizeof (EFI_BLOCK_IO_MEDIA));
-  if (Part->BlockIo->Media == NULL) {
-    FreeAll (FileName, Part);
-    return 0;
-  }
-
-  ASAN_CHECK_MEMORY_REGION (Part->BlockIo->Media, sizeof (EFI_BLOCK_IO_MEDIA));
-
-  Status = Ext4OpenSuperblock (Part);
-  if (EFI_ERROR (Status)) {
-    FreeAll (FileName, Part);
-    return 0;
-  }
-
-  Part->Interface.Revision   = EFI_SIMPLE_FILE_SYSTEM_PROTOCOL_REVISION;
-  Part->Interface.OpenVolume = Ext4OpenVolume;
 
   This = (EFI_FILE_PROTOCOL *)Part->Root;
 
@@ -504,6 +567,11 @@ LLVMFuzzerTestOneInput (
   if (FuzzSize == 0) {
     return 0;
   }
+
+  //
+  // Override InstallMultipleProtocolInterfaces with custom wrapper
+  //
+  gBS->InstallMultipleProtocolInterfaces = WrapInstallMultipleProtocolInterfaces;
 
   ConfigureMemoryAllocations (FuzzData, FuzzSize);
 
