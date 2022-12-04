@@ -11,7 +11,7 @@ OpenCore Changelog
 - Supported Apple builtin picker (using `BootKicker.efi` or `PickerMode` `Apple`) when running GPUs without Mac-EFI support on units such as the MacPro5,1 (thx @cdf, @tsialex)
 - Enabled `PickerMode` `Apple` to successfully launch selected entry
 - Enabled `BootKicker.efi` to successfully launch selected entry (via reboot) (thx @cdf)
-- Added spoof proof UEFI 2.x checking to OpenVariableRuntimeDxe, thx @dakangi
+- Added spoof proof UEFI 2.x checking to OpenVariableRuntimeDxe, thx @dakanji
 
 #### v0.8.6
 - Updated NVRAM save script for compatibilty with earlier macOS (Snow Leopard+ tested)
