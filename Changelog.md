@@ -8,7 +8,7 @@ OpenCore Changelog
   - `Never` - Never show picker (equivalent to 0.8.6's ShowPicker=False)
   - `SkipOnHibernateWake` - Don't show picker if waking from macOS hibernation
 - Changed macrecovery to download files into `com.apple.recovery.boot` by default, thx @dreamwhite
-- Supported Apple builtin picker (using `BootKicker.efi` or `PickerMode` `Apple`) on MacPro5,1 graphics cards with no firmware Mac-EFI support (thx @cdf, @tsialex)
+- Supported Apple builtin picker (using `BootKicker.efi` or `PickerMode` `Apple`) when running GPUs without Mac-EFI support on units such as the MacPro5,1 (thx @cdf, @tsialex)
 - Enabled `PickerMode` `Apple` to successfully launch selected entry
 - Enabled `BootKicker.efi` to successfully launch selected entry (via reboot) (thx @cdf)
 - Added spoof proof UEFI 2.x checking to OpenVariableRuntimeDxe, thx @dakangi
@@ -304,7 +304,7 @@ OpenCore Changelog
 - Fixed ACPI table magic corruption during patching
 - Fixed unnatural OpenCanopy and FileVault 2 cursor movement
 - Fixed OpenCanopy interrupt handling causing missed events and lag
-- Improved OpenCanopy double-click detection 
+- Improved OpenCanopy double-click detection
 - Reduced OpenCanopy touch input lag and improved usability
 - Improved keypress responsiveness in OpenCanopy and builtin pickers
 - Improved non-repeating key detection in OpenCanopy and builtin pickers
