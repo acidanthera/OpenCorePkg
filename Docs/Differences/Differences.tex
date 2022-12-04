@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
-%DIF DEL PreviousConfiguration.tex   Sat Nov 12 18:49:14 2022
-%DIF ADD ../Configuration.tex        Wed Nov 23 20:52:02 2022
+%DIF DEL PreviousConfiguration.tex   Sun Nov 20 12:50:09 2022
+%DIF ADD ../Configuration.tex        Sun Dec  4 19:13:10 2022
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -118,7 +118,7 @@
 %DIF HYPERREF PREAMBLE %DIF PREAMBLE
 \providecommand{\DIFadd}[1]{\texorpdfstring{\DIFaddtex{#1}}{#1}} %DIF PREAMBLE
 \providecommand{\DIFdel}[1]{\texorpdfstring{\DIFdeltex{#1}}{}} %DIF PREAMBLE
-%DIF COLORLISTINGS PREAMBLE %DIF PREAMBLE
+%DIF LISTINGS PREAMBLE %DIF PREAMBLE
 \RequirePackage{listings} %DIF PREAMBLE
 \RequirePackage{color} %DIF PREAMBLE
 \lstdefinelanguage{DIFcode}{ %DIF PREAMBLE
@@ -8671,8 +8671,8 @@ for additional options.
   \textbf{Failsafe}: \texttt{false}\\
   \textbf{Description}: Implement partial UEFI 2.x support on EFI 1.x firmware.
 
-  This setting allows running some software written for UEFI 2.x firmware like NVIDIA GOP
-  Option ROMs on hardware with older EFI 1.x firmware like \texttt{MacPro5,1}.
+  This setting allows running some software written for UEFI 2.x firmware\DIFdelbegin \DIFdel{like }\DIFdelend \DIFaddbegin \DIFadd{, such as }\DIFaddend NVIDIA GOP
+  Option ROMs\DIFaddbegin \DIFadd{, }\DIFaddend on hardware with older EFI 1.x firmware \DIFdelbegin \DIFdel{like }\DIFdelend \DIFaddbegin \DIFadd{(e.g. }\DIFaddend \texttt{MacPro5,1}\DIFaddbegin \DIFadd{)}\DIFaddend .
 
 \item
   \texttt{IgnoreInvalidFlexRatio}\\
@@ -9327,10 +9327,12 @@ than 1 meter to avoid output corruption. To additionally enable XNU kernel seria
 \item
   \textbf{Can I use this on Apple hardware or virtual machines?}
 
-  Sure, most relatively modern Mac models including \texttt{MacPro5,1} and virtual machines
-  are fully supported. Even though there are little to none specific details relevant to
-  Mac hardware, some ongoing instructions can be found on
-  \href{https://forums.macrumors.com/threads/opencore-on-the-mac-pro.2207814}{MacRumors.com}.
+  \DIFdelbegin \DIFdel{Sure, }\DIFdelend \DIFaddbegin \DIFadd{Yes. Virtual machines and }\DIFaddend most relatively modern Mac models\DIFdelbegin \DIFdel{including }\DIFdelend \DIFaddbegin \DIFadd{, as far back as the }\DIFaddend \texttt{\DIFdelbegin \DIFdel{MacPro5}\DIFdelend \DIFaddbegin \DIFadd{MacPro3}\DIFaddend ,1}\DIFdelbegin \DIFdel{and virtual machines
+  }\DIFdelend \DIFaddbegin \DIFadd{,
+  }\DIFaddend are fully supported. \DIFdelbegin \DIFdel{Even though there are little to none specific details }\DIFdelend \DIFaddbegin \DIFadd{While specific detail }\DIFaddend relevant to Mac hardware \DIFaddbegin \DIFadd{is often limited}\DIFaddend ,
+  some ongoing instructions can be found on
+  \DIFdelbegin %DIFDELCMD < \href{https://forums.macrumors.com/threads/opencore-on-the-mac-pro.2207814}{%%%
+\DIFdelend \DIFaddbegin \href{https://forums.macrumors.com/threads/2207814}{\DIFaddend MacRumors.com}.
 
 \item
   \textbf{Why must Find\&Replace patches be equal in size?}
