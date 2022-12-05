@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
 %DIF DEL PreviousConfiguration.tex   Sun Nov 20 12:50:09 2022
-%DIF ADD ../Configuration.tex        Sun Dec  4 19:13:10 2022
+%DIF ADD ../Configuration.tex        Tue Dec  6 01:39:25 2022
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -3389,7 +3389,24 @@ the default boot entry choice will remain changed until the next manual reconfig
   then \texttt{None} should be specified to hand-off hibernation state as is to OpenCore.
 
 \item
-  \texttt{HideAuxiliary}\\
+  \DIFaddbegin \texttt{\DIFadd{HibernateSkipsPicker}}\\
+  \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ boolean}}\\
+  \textbf{\DIFadd{Failsafe}}\DIFadd{: }\texttt{\DIFadd{false}}\\
+  \textbf{\DIFadd{Description}}\DIFadd{: Do not show picker if waking from macOS hibernation.
+}
+
+  \DIFadd{Limitations:
+  }\begin{itemize}
+   \item \DIFadd{Only supports macOS hibernation wake, Windows and Linux are currently out of scope.
+   }\item \DIFadd{Should only be used on systems with reliable hibernation wake in macOS, otherwise users may not
+   be able to visually see boot loops that may occur.
+  }\item \DIFadd{Highly recommended to pair this option with }\texttt{\DIFadd{PollAppleHotKeys}}\DIFadd{, allows to enter picker in
+  case of issues with hibernation wake.
+  }\item \DIFadd{Visual indication for hibernation wake is currently out of scope.
+  }\end{itemize}
+
+\item
+  \DIFaddend \texttt{HideAuxiliary}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
   \textbf{Description}: Set to \texttt{true} to hide auxiliary entries from the picker menu.
@@ -3664,30 +3681,12 @@ the default boot entry choice will remain changed until the next manual reconfig
 
 \item
   \texttt{ShowPicker}\\
-  \textbf{Type}: \texttt{plist\ \DIFdelbegin \DIFdel{boolean}\DIFdelend \DIFaddbegin \DIFadd{string}\DIFaddend }\\
-  \textbf{Failsafe}: \texttt{\DIFdelbegin \DIFdel{false}\DIFdelend \DIFaddbegin \DIFadd{Always}\DIFaddend }\\
-  \textbf{Description}: Show a simple picker to allow boot entry selection\DIFdelbegin \DIFdel{.
-}\DIFdelend \DIFaddbegin \DIFadd{:
-  }\begin{itemize}
-  \tightlist
-  \item \texttt{\DIFadd{Always}} \DIFadd{--- Always show picker.
-  }\item \texttt{\DIFadd{Never}} \DIFadd{--- Never show picker.
-  }\item \texttt{\DIFadd{SkipOnHibernateWake}} \DIFadd{--- Like }\texttt{\DIFadd{Always}}\DIFadd{, however doesn't show picker if waking from macOS hibernation.
-  }\end{itemize}
-\DIFaddend 
-
-  \DIFaddbegin \DIFadd{Notes for }\texttt{\DIFadd{SkipOnHibernateWake}}\DIFadd{:
-  }\begin{itemize}
-   \DIFaddend \item \DIFaddbegin \DIFadd{Only supports macOS hibernation wake, Windows and Linux are currently out of scope.
-   }\item \DIFadd{Should only be used on systems with reliable hibernation wake in macOS, otherwise users may not
-   be able to visually see boot loops that may occur.
-  }\item \DIFadd{Highly recommended to pair this option with }\texttt{\DIFadd{PollAppleHotKeys}}\DIFadd{, allows to enter picker in
-  case of issues with hibernation wake.
-  }\item \DIFadd{Visual indication for hibernation wake is currently out of scope.
-  }\end{itemize}
+  \textbf{Type}: \texttt{plist\ boolean}\\
+  \textbf{Failsafe}: \texttt{false}\\
+  \textbf{Description}: Show a simple picker to allow boot entry selection.
 
 \item
-  \DIFaddend \texttt{TakeoffDelay}\\
+  \texttt{TakeoffDelay}\\
   \textbf{Type}: \texttt{plist\ integer}, 32 bit\\
   \textbf{Failsafe}: \texttt{0}\\
   \textbf{Description}: Delay in microseconds executed before handling
