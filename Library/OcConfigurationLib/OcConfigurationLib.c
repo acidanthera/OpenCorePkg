@@ -405,19 +405,20 @@ OC_SCHEMA
 STATIC
 OC_SCHEMA
   mMiscConfigurationBootSchema[] = {
-  OC_SCHEMA_INTEGER_IN ("ConsoleAttributes", OC_GLOBAL_CONFIG, Misc.Boot.ConsoleAttributes),
-  OC_SCHEMA_STRING_IN ("HibernateMode",      OC_GLOBAL_CONFIG, Misc.Boot.HibernateMode),
-  OC_SCHEMA_BOOLEAN_IN ("HideAuxiliary",     OC_GLOBAL_CONFIG, Misc.Boot.HideAuxiliary),
-  OC_SCHEMA_STRING_IN ("LauncherOption",     OC_GLOBAL_CONFIG, Misc.Boot.LauncherOption),
-  OC_SCHEMA_STRING_IN ("LauncherPath",       OC_GLOBAL_CONFIG, Misc.Boot.LauncherPath),
-  OC_SCHEMA_INTEGER_IN ("PickerAttributes",  OC_GLOBAL_CONFIG, Misc.Boot.PickerAttributes),
-  OC_SCHEMA_BOOLEAN_IN ("PickerAudioAssist", OC_GLOBAL_CONFIG, Misc.Boot.PickerAudioAssist),
-  OC_SCHEMA_STRING_IN ("PickerMode",         OC_GLOBAL_CONFIG, Misc.Boot.PickerMode),
-  OC_SCHEMA_STRING_IN ("PickerVariant",      OC_GLOBAL_CONFIG, Misc.Boot.PickerVariant),
-  OC_SCHEMA_BOOLEAN_IN ("PollAppleHotKeys",  OC_GLOBAL_CONFIG, Misc.Boot.PollAppleHotKeys),
-  OC_SCHEMA_STRING_IN ("ShowPicker",         OC_GLOBAL_CONFIG, Misc.Boot.ShowPicker),
-  OC_SCHEMA_INTEGER_IN ("TakeoffDelay",      OC_GLOBAL_CONFIG, Misc.Boot.TakeoffDelay),
-  OC_SCHEMA_INTEGER_IN ("Timeout",           OC_GLOBAL_CONFIG, Misc.Boot.Timeout),
+  OC_SCHEMA_INTEGER_IN ("ConsoleAttributes",    OC_GLOBAL_CONFIG, Misc.Boot.ConsoleAttributes),
+  OC_SCHEMA_STRING_IN ("HibernateMode",         OC_GLOBAL_CONFIG, Misc.Boot.HibernateMode),
+  OC_SCHEMA_BOOLEAN_IN ("HibernateSkipsPicker", OC_GLOBAL_CONFIG, Misc.Boot.HibernateSkipsPicker),
+  OC_SCHEMA_BOOLEAN_IN ("HideAuxiliary",        OC_GLOBAL_CONFIG, Misc.Boot.HideAuxiliary),
+  OC_SCHEMA_STRING_IN ("LauncherOption",        OC_GLOBAL_CONFIG, Misc.Boot.LauncherOption),
+  OC_SCHEMA_STRING_IN ("LauncherPath",          OC_GLOBAL_CONFIG, Misc.Boot.LauncherPath),
+  OC_SCHEMA_INTEGER_IN ("PickerAttributes",     OC_GLOBAL_CONFIG, Misc.Boot.PickerAttributes),
+  OC_SCHEMA_BOOLEAN_IN ("PickerAudioAssist",    OC_GLOBAL_CONFIG, Misc.Boot.PickerAudioAssist),
+  OC_SCHEMA_STRING_IN ("PickerMode",            OC_GLOBAL_CONFIG, Misc.Boot.PickerMode),
+  OC_SCHEMA_STRING_IN ("PickerVariant",         OC_GLOBAL_CONFIG, Misc.Boot.PickerVariant),
+  OC_SCHEMA_BOOLEAN_IN ("PollAppleHotKeys",     OC_GLOBAL_CONFIG, Misc.Boot.PollAppleHotKeys),
+  OC_SCHEMA_BOOLEAN_IN ("ShowPicker",           OC_GLOBAL_CONFIG, Misc.Boot.ShowPicker),
+  OC_SCHEMA_INTEGER_IN ("TakeoffDelay",         OC_GLOBAL_CONFIG, Misc.Boot.TakeoffDelay),
+  OC_SCHEMA_INTEGER_IN ("Timeout",              OC_GLOBAL_CONFIG, Misc.Boot.Timeout),
 };
 
 STATIC
