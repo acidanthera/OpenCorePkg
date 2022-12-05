@@ -618,7 +618,7 @@ InternalCalculateVMTFrequency (
   }
 
   if (UnderHypervisor != NULL) {
-    *UnderHypervisor = CpuidVerEcx.Bits.NotUsed != 0;
+    *UnderHypervisor = CpuidVerEcx.Bits.ParaVirtualized != 0;
   }
 
   //
@@ -626,7 +626,7 @@ InternalCalculateVMTFrequency (
   // See https://github.com/acidanthera/audk/pull/2.
   // Get Hypervisor/Virtualization information.
   //
-  if (CpuidVerEcx.Bits.NotUsed == 0) {
+  if (CpuidVerEcx.Bits.ParaVirtualized == 0) {
     return 0;
   }
 
