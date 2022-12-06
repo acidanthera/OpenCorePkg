@@ -61,7 +61,7 @@ jobs:
 
   build-linux-clangpdb-gcc5:
     name: Linux CLANGPDB/GCC5
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v3
 
@@ -89,7 +89,7 @@ jobs:
 
   build-linux-clangdwarf:
     name: Linux CLANGDWARF
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     env:
       TOOLCHAINS: CLANGDWARF
     steps:
