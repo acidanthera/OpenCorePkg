@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
-%DIF DEL PreviousConfiguration.tex   Sun Nov 20 12:50:09 2022
-%DIF ADD ../Configuration.tex        Tue Dec  6 01:39:25 2022
+%DIF DEL PreviousConfiguration.tex   Wed Dec  7 01:34:37 2022
+%DIF ADD ../Configuration.tex        Wed Dec  7 01:34:37 2022
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -118,7 +118,7 @@
 %DIF HYPERREF PREAMBLE %DIF PREAMBLE
 \providecommand{\DIFadd}[1]{\texorpdfstring{\DIFaddtex{#1}}{#1}} %DIF PREAMBLE
 \providecommand{\DIFdel}[1]{\texorpdfstring{\DIFdeltex{#1}}{}} %DIF PREAMBLE
-%DIF LISTINGS PREAMBLE %DIF PREAMBLE
+%DIF COLORLISTINGS PREAMBLE %DIF PREAMBLE
 \RequirePackage{listings} %DIF PREAMBLE
 \RequirePackage{color} %DIF PREAMBLE
 \lstdefinelanguage{DIFcode}{ %DIF PREAMBLE
@@ -154,7 +154,7 @@
 
        \vspace{0.2in}
 
-       Reference Manual (0.8\DIFdelbegin \DIFdel{.6}\DIFdelend \DIFaddbegin \DIFadd{.7}\DIFaddend )
+       Reference Manual (0.8\DIFdelbegin \DIFdel{.7}\DIFdelend \DIFaddbegin \DIFadd{.8}\DIFaddend )
 
        \vspace{0.2in}
 
@@ -3389,24 +3389,23 @@ the default boot entry choice will remain changed until the next manual reconfig
   then \texttt{None} should be specified to hand-off hibernation state as is to OpenCore.
 
 \item
-  \DIFaddbegin \texttt{\DIFadd{HibernateSkipsPicker}}\\
-  \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ boolean}}\\
-  \textbf{\DIFadd{Failsafe}}\DIFadd{: }\texttt{\DIFadd{false}}\\
-  \textbf{\DIFadd{Description}}\DIFadd{: Do not show picker if waking from macOS hibernation.
-}
+  \texttt{HibernateSkipsPicker}\\
+  \textbf{Type}: \texttt{plist\ boolean}\\
+  \textbf{Failsafe}: \texttt{false}\\
+  \textbf{Description}: Do not show picker if waking from macOS hibernation.
 
-  \DIFadd{Limitations:
-  }\begin{itemize}
-   \item \DIFadd{Only supports macOS hibernation wake, Windows and Linux are currently out of scope.
-   }\item \DIFadd{Should only be used on systems with reliable hibernation wake in macOS, otherwise users may not
+  Limitations:
+  \begin{itemize}
+   \item Only supports macOS hibernation wake, Windows and Linux are currently out of scope.
+   \item Should only be used on systems with reliable hibernation wake in macOS, otherwise users may not
    be able to visually see boot loops that may occur.
-  }\item \DIFadd{Highly recommended to pair this option with }\texttt{\DIFadd{PollAppleHotKeys}}\DIFadd{, allows to enter picker in
+  \item Highly recommended to pair this option with \texttt{PollAppleHotKeys}, allows to enter picker in
   case of issues with hibernation wake.
-  }\item \DIFadd{Visual indication for hibernation wake is currently out of scope.
-  }\end{itemize}
+  \item Visual indication for hibernation wake is currently out of scope.
+  \end{itemize}
 
 \item
-  \DIFaddend \texttt{HideAuxiliary}\\
+  \texttt{HideAuxiliary}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
   \textbf{Description}: Set to \texttt{true} to hide auxiliary entries from the picker menu.
@@ -3779,14 +3778,12 @@ the default boot entry choice will remain changed until the next manual reconfig
   with a long enough \texttt{KeyForgetThreshold}. If pressing and holding the key is not successful to reliably
   enter the picker, multiple repeated keypresses may be tried instead.
 
-  \emph{Note 3}: On Macs with problematic GOP, it may be difficult to \DIFdelbegin \DIFdel{access the Apple picker}\DIFdelend \DIFaddbegin \DIFadd{re-bless OpenCore if its bless status
-  is lost}\DIFaddend . The \texttt{BootKicker} utility can be \DIFdelbegin \DIFdel{blessed to workaround this problemeven without loading
-  OpenCore . On some Macs however,
-  the }\DIFdelend \DIFaddbegin \DIFadd{used to work around this problem, if set up as a Tool
-  in OpenCore (e.g. on a CDROM) with }\texttt{\DIFadd{FullNvramAccess}} \DIFadd{enabled. It will launch the Apple picker,
-  which allows selection of an item to boot next (with }\texttt{\DIFadd{Enter}}\DIFadd{), or next and subsequently, i.e.
-  as the blessed entry (with }\DIFaddend \texttt{\DIFdelbegin \DIFdel{BootKicker}\DIFdelend \DIFaddbegin \DIFadd{CTRL+Enter}\DIFaddend }\DIFdelbegin \DIFdel{utility cannot be run from OpenCore}\DIFdelend \DIFaddbegin \DIFadd{), as normal. After the selection is made, the system
-  will reboot and the chosen entry will be booted}\DIFaddend .
+  \emph{Note 3}: On Macs with problematic GOP, it may be difficult to re-bless OpenCore if its bless status
+  is lost. The \texttt{BootKicker} utility can be used to work around this problem, if set up as a Tool
+  in OpenCore (e.g. on a CDROM) with \texttt{FullNvramAccess} enabled. It will launch the Apple picker,
+  which allows selection of an item to boot next (with \texttt{Enter}), or next and subsequently, i.e.
+  as the blessed entry (with \texttt{CTRL+Enter}), as normal. After the selection is made, the system
+  will reboot and the chosen entry will be booted.
 
 \item
   \texttt{PickerVariant}\\
@@ -6537,7 +6534,7 @@ Some of the known tools are listed below (builtin tools are marked with \textbf{
 
 \begin{tabular}{p{1.3in}p{5.55in}}
 \href{https://github.com/acidanthera/OpenCorePkg}{\texttt{BootKicker}}\textbf{*}
-& \DIFdelbegin \DIFdel{Enter }\DIFdelend \DIFaddbegin \DIFadd{Display }\DIFaddend Apple BootPicker menu (\DIFdelbegin \DIFdel{exclusive }\DIFdelend for Macs with compatible \DIFdelbegin \DIFdel{GPUs}\DIFdelend \DIFaddbegin \DIFadd{firmware}\DIFaddend ). \\
+& Display Apple BootPicker menu (for Macs with compatible firmware). \\
 \href{https://github.com/acidanthera/OpenCorePkg}{\texttt{ChipTune}}\textbf{*}
 & Test BeepGen protocol and generate audio signals of different style and length. \\
 \href{https://github.com/acidanthera/OpenCorePkg}{\texttt{CleanNvram}}\textbf{*}
@@ -8670,8 +8667,8 @@ for additional options.
   \textbf{Failsafe}: \texttt{false}\\
   \textbf{Description}: Implement partial UEFI 2.x support on EFI 1.x firmware.
 
-  This setting allows running some software written for UEFI 2.x firmware\DIFdelbegin \DIFdel{like }\DIFdelend \DIFaddbegin \DIFadd{, such as }\DIFaddend NVIDIA GOP
-  Option ROMs\DIFaddbegin \DIFadd{, }\DIFaddend on hardware with older EFI 1.x firmware \DIFdelbegin \DIFdel{like }\DIFdelend \DIFaddbegin \DIFadd{(e.g. }\DIFaddend \texttt{MacPro5,1}\DIFaddbegin \DIFadd{)}\DIFaddend .
+  This setting allows running some software written for UEFI 2.x firmware, such as NVIDIA GOP
+  Option ROMs, on hardware with older EFI 1.x firmware (e.g. \texttt{MacPro5,1}).
 
 \item
   \texttt{IgnoreInvalidFlexRatio}\\
@@ -9326,12 +9323,10 @@ than 1 meter to avoid output corruption. To additionally enable XNU kernel seria
 \item
   \textbf{Can I use this on Apple hardware or virtual machines?}
 
-  \DIFdelbegin \DIFdel{Sure, }\DIFdelend \DIFaddbegin \DIFadd{Yes. Virtual machines and }\DIFaddend most relatively modern Mac models\DIFdelbegin \DIFdel{including }\DIFdelend \DIFaddbegin \DIFadd{, as far back as the }\DIFaddend \texttt{\DIFdelbegin \DIFdel{MacPro5}\DIFdelend \DIFaddbegin \DIFadd{MacPro3}\DIFaddend ,1}\DIFdelbegin \DIFdel{and virtual machines
-  }\DIFdelend \DIFaddbegin \DIFadd{,
-  }\DIFaddend are fully supported. \DIFdelbegin \DIFdel{Even though there are little to none specific details }\DIFdelend \DIFaddbegin \DIFadd{While specific detail }\DIFaddend relevant to Mac hardware \DIFaddbegin \DIFadd{is often limited}\DIFaddend ,
+  Yes. Virtual machines and most relatively modern Mac models, as far back as the \texttt{MacPro3,1},
+  are fully supported. While specific detail relevant to Mac hardware is often limited,
   some ongoing instructions can be found on
-  \DIFdelbegin %DIFDELCMD < \href{https://forums.macrumors.com/threads/opencore-on-the-mac-pro.2207814}{%%%
-\DIFdelend \DIFaddbegin \href{https://forums.macrumors.com/threads/2207814}{\DIFaddend MacRumors.com}.
+  \href{https://forums.macrumors.com/threads/2207814}{MacRumors.com}.
 
 \item
   \textbf{Why must Find\&Replace patches be equal in size?}

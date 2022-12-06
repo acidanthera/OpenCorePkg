@@ -94,7 +94,7 @@
 
        \vspace{0.2in}
 
-       Reference Manual (0.8.6)
+       Reference Manual (0.8.7)
 
        \vspace{0.2in}
 
@@ -3329,6 +3329,22 @@ the default boot entry choice will remain changed until the next manual reconfig
   then \texttt{None} should be specified to hand-off hibernation state as is to OpenCore.
 
 \item
+  \texttt{HibernateSkipsPicker}\\
+  \textbf{Type}: \texttt{plist\ boolean}\\
+  \textbf{Failsafe}: \texttt{false}\\
+  \textbf{Description}: Do not show picker if waking from macOS hibernation.
+
+  Limitations:
+  \begin{itemize}
+   \item Only supports macOS hibernation wake, Windows and Linux are currently out of scope.
+   \item Should only be used on systems with reliable hibernation wake in macOS, otherwise users may not
+   be able to visually see boot loops that may occur.
+  \item Highly recommended to pair this option with \texttt{PollAppleHotKeys}, allows to enter picker in
+  case of issues with hibernation wake.
+  \item Visual indication for hibernation wake is currently out of scope.
+  \end{itemize}
+
+\item
   \texttt{HideAuxiliary}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
@@ -3702,9 +3718,12 @@ the default boot entry choice will remain changed until the next manual reconfig
   with a long enough \texttt{KeyForgetThreshold}. If pressing and holding the key is not successful to reliably
   enter the picker, multiple repeated keypresses may be tried instead.
 
-  \emph{Note 3}: On Macs with problematic GOP, it may be difficult to access the Apple picker.
-  The \texttt{BootKicker} utility can be blessed to workaround this problem even without loading
-  OpenCore. On some Macs however, the \texttt{BootKicker} utility cannot be run from OpenCore.
+  \emph{Note 3}: On Macs with problematic GOP, it may be difficult to re-bless OpenCore if its bless status
+  is lost. The \texttt{BootKicker} utility can be used to work around this problem, if set up as a Tool
+  in OpenCore (e.g. on a CDROM) with \texttt{FullNvramAccess} enabled. It will launch the Apple picker,
+  which allows selection of an item to boot next (with \texttt{Enter}), or next and subsequently, i.e.
+  as the blessed entry (with \texttt{CTRL+Enter}), as normal. After the selection is made, the system
+  will reboot and the chosen entry will be booted.
 
 \item
   \texttt{PickerVariant}\\
@@ -6455,7 +6474,7 @@ Some of the known tools are listed below (builtin tools are marked with \textbf{
 
 \begin{tabular}{p{1.3in}p{5.55in}}
 \href{https://github.com/acidanthera/OpenCorePkg}{\texttt{BootKicker}}\textbf{*}
-& Enter Apple BootPicker menu (exclusive for Macs with compatible GPUs). \\
+& Display Apple BootPicker menu (for Macs with compatible firmware). \\
 \href{https://github.com/acidanthera/OpenCorePkg}{\texttt{ChipTune}}\textbf{*}
 & Test BeepGen protocol and generate audio signals of different style and length. \\
 \href{https://github.com/acidanthera/OpenCorePkg}{\texttt{CleanNvram}}\textbf{*}
@@ -8588,8 +8607,8 @@ for additional options.
   \textbf{Failsafe}: \texttt{false}\\
   \textbf{Description}: Implement partial UEFI 2.x support on EFI 1.x firmware.
 
-  This setting allows running some software written for UEFI 2.x firmware like NVIDIA GOP
-  Option ROMs on hardware with older EFI 1.x firmware like \texttt{MacPro5,1}.
+  This setting allows running some software written for UEFI 2.x firmware, such as NVIDIA GOP
+  Option ROMs, on hardware with older EFI 1.x firmware (e.g. \texttt{MacPro5,1}).
 
 \item
   \texttt{IgnoreInvalidFlexRatio}\\
@@ -9244,10 +9263,10 @@ than 1 meter to avoid output corruption. To additionally enable XNU kernel seria
 \item
   \textbf{Can I use this on Apple hardware or virtual machines?}
 
-  Sure, most relatively modern Mac models including \texttt{MacPro5,1} and virtual machines
-  are fully supported. Even though there are little to none specific details relevant to
-  Mac hardware, some ongoing instructions can be found on
-  \href{https://forums.macrumors.com/threads/opencore-on-the-mac-pro.2207814}{MacRumors.com}.
+  Yes. Virtual machines and most relatively modern Mac models, as far back as the \texttt{MacPro3,1},
+  are fully supported. While specific detail relevant to Mac hardware is often limited,
+  some ongoing instructions can be found on
+  \href{https://forums.macrumors.com/threads/2207814}{MacRumors.com}.
 
 \item
   \textbf{Why must Find\&Replace patches be equal in size?}
