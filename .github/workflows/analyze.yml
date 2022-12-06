@@ -61,7 +61,7 @@ jobs:
 
   analyze-python-scripts:
     name: Python Scripts
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     env:
       JOB_TYPE: ANALYZE
     steps:
@@ -85,7 +85,7 @@ jobs:
 
   analyze-docs-linux:
     name: Documentation
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     if: github.repository_owner == 'acidanthera' && github.ref_name == 'master'
     steps:
       - uses: actions/checkout@v3
@@ -100,7 +100,7 @@ jobs:
 
   analyze-coverity:
     name: Coverity
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     env:
       JOB_TYPE: COVERITY
       TOOLCHAINS: GCC5
