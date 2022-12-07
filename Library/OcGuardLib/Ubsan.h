@@ -104,11 +104,8 @@ typedef __SSIZE_TYPE__ ssize_t;
 #define PRIx8 "hhx"
 #define PRIx16 "hx"
 #define PRIx32 "x"
-#define PRIx64 "llx"
 #define PRId32 "d"
-#define PRId64 "lld"
 #define PRIu32 "u"
-#define PRIu64 "llu"
 #endif
 
 // Hack limits in.

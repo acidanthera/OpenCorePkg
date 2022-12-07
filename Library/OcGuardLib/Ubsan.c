@@ -1369,7 +1369,7 @@ DeserializeNumberSigned(char *pBuffer, size_t zBUfferLength, struct CTypeDescrip
 	case WIDTH_16:
 		/* FALLTHROUGH */
 	case WIDTH_8:
-		snprintf(pBuffer, zBUfferLength, "%" PRId64, STATIC_CAST(int64_t, L));
+		snprintf(pBuffer, zBUfferLength, "%lld", STATIC_CAST(long long, L));
 		break;
 	}
 }
@@ -1400,7 +1400,7 @@ DeserializeNumberUnsigned(char *pBuffer, size_t zBUfferLength, struct CTypeDescr
 	case WIDTH_16:
 		/* FALLTHROUGH */
 	case WIDTH_8:
-		snprintf(pBuffer, zBUfferLength, "%" PRIu64, STATIC_CAST(uint64_t, L));
+		snprintf(pBuffer, zBUfferLength, "%llu", STATIC_CAST(unsigned long long, L));
 		break;
 	}
 }
