@@ -92,13 +92,13 @@ UserReadFile (
     return NULL;
   }
 
-  Buffer = AllocatePool (FileSize + 1);
+  Buffer = AllocatePool ((UINTN)FileSize + 1);
   if (Buffer == NULL) {
     fclose (FilePtr);
     return NULL;
   }
 
-  if (fread (Buffer, FileSize, 1, FilePtr) != 1) {
+  if (fread (Buffer, (size_t)FileSize, 1, FilePtr) != 1) {
     fclose (FilePtr);
     return NULL;
   }
@@ -106,7 +106,7 @@ UserReadFile (
   fclose (FilePtr);
 
   Buffer[FileSize] = 0;
-  *Size            = FileSize;
+  *Size            = (UINT32)FileSize;
 
   return Buffer;
 }
