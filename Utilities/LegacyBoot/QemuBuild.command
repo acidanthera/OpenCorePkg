@@ -23,6 +23,22 @@ if [ ! -d ROOT ]; then
 fi
 
 if [ "$(uname)" = "Linux" ]; then
+  if [ "$EUID" -ne 0 ]
+    then echo "Please run this script as root"
+    exit
+  fi
+  if [ "$(which qemu-nbd)" = "" ]; then
+    echo "Your QEMU installation doesn't contain qemu-nbd tool!"
+    exit 1
+  fi
+  if [ "$(which mkfs.vfat)" = "" ]; then
+    echo "mkfs.vfat not found, dosfstools package is missing?"
+    exit 1
+  fi
+  if [ "$(which fdisk)" = "" ]; then
+    echo "fdisk tool is missing!"
+    exit 1
+  fi
   IMAGE=OpenCore.raw
   DIR="$IMAGE.d"
   NBD=/dev/nbd0
@@ -34,8 +50,7 @@ if [ "$(uname)" = "Linux" ]; then
   # Create 200M MS-DOS bootable disk image with 1 FAT32 partition
   modprobe nbd
   qemu-img create -f raw "$IMAGE" 200M
-  qemu-nbd -f raw -c "$NBD" "$IMAGE"
-  fdisk "$NBD" << END
+  fdisk "$IMAGE" << END
   o
   n
   p
@@ -47,6 +62,9 @@ if [ "$(uname)" = "Linux" ]; then
   a
   w
 END
+  qemu-nbd -f raw --connect="$NBD" "$IMAGE"
+  # Wait a it after mounting
+  sleep 2
   mkfs.vfat -F32 ${NBD}p1
 
   # Copy boot1f32 into FAT32 Boot Record
@@ -57,7 +75,8 @@ END
   dd if=newbs of=${NBD}p1 conv=notrunc
 
   # Copy boot file and ESP contents into FAT32 file system
-  mount ${NBD}p1 "$DIR"
+  mount -t vfat ${NBD}p1 "$DIR" -o rw,noatime,uid="$(id -u)",gid="$(id -g)"
+  sleep 2
   cp -v boot "$DIR"
   cp -rv ROOT/* "$DIR"
 
@@ -70,6 +89,7 @@ END
 
   # Copy boot0 into MBR
   dd if=boot0 of="$IMAGE" bs=1 count=446 conv=notrunc
+  chown "$(whoami)" "$IMAGE"
 elif [ "$(uname)" = "Darwin" ]; then
   rm -f OpenCore.dmg.sparseimage OpenCore.RO.raw OpenCore.RO.dmg
   hdiutil create -size 200m  -layout "UNIVERSAL HD"  -type SPARSE  -o OpenCore.dmg
