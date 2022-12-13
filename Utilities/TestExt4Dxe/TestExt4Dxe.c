@@ -544,7 +544,14 @@ TestExt4Dxe (
       FileSize = EXT4_INODE_SIZE (File->Inode);
       if (FileSize < (UINT64)-1 - 1) {
         Position = FileSize + 1;
-        Ext4SetPosition (NewHandle, Position);
+        Status   = Ext4SetPosition (NewHandle, Position);
+        if (!EFI_ERROR (Status)) {
+          Buffer     = NULL;
+          BufferSize = 0;
+          Status     = Ext4ReadFile (NewHandle, &BufferSize, Buffer);
+
+          ASSERT (Status == EFI_DEVICE_ERROR);
+        }
       }
 
       Ext4Delete (NewHandle);
