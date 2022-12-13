@@ -1,7 +1,7 @@
 /System/Library/Keyboard Layouts/AppleKeyboardLayouts.bundle/Contents/Resources/AppleKeyboardLayouts-L.dat
 
 [30778] cs - Czech-QWERTY
-[30776] cs - Czech
+[-14193] cs - Czech
 [30764] et - Estonian
 [30767] hu - Hungarian-QWERTY
 [30763] hu - Hungarian
@@ -9,7 +9,7 @@
 [30761] lt - Lithuanian
 [30788] pl - Polish Pro
 [30762] pl - Polish
-[30777] sk - Slovak
+[-11013] sk - Slovak
 [30779] sk - Slovak-QWERTY
 [19529] bg - Bulgarian - Phonetic
 [19528] bg - Bulgarian
@@ -19,14 +19,14 @@
 [19456] ru - Russian
 [19458] ru - RussianWin
 [19521] sr-Cyrl - Serbian
-[195138] uk - Ukrainian-PC
+[-2354] uk - Ukrainian-PC
 [19518] uk - Ukrainian
 [12825] en - Colemak
 [16302] en - Dvorak - Left
 [16303] en - Dvorak - Right
 [16300] en - Dvorak
 [16301] en - DVORAK - QWERTY CMD
-[16384] ja - KANA
+[-3049] ja - KANA
 [251] fr - ABC-AZERTY
 [253] de - ABC-QWERTZ
 [252] en - ABC
@@ -40,6 +40,7 @@
 [2] en_GB - British
 [80] fr_CA - Canadian - CSA
 [29] en_CA - Canadian
+[-19336] fr_CA - CanadianFrench-PC
 [9] da - Danish
 [26] nl - Dutch
 [17] fi - Finnish
@@ -59,13 +60,17 @@
 [18] fr_CH - Swiss French
 [19] de_CH - Swiss German
 [88] to - Tongan
-[0] en_US - U.S
+[0] en_US - U.S.
 [15000] en_US - USInternational-PC
 [-17409] ko - 2SetHangul
+[-3] en - ABC-India
+[-29472] ff-Adlm - Adlam-QWERTY
 [-2902] fa - Afghan Dari
 [-2904] ps - Afghan Pashto
 [-2903] uz-Arab - Afghan Uzbek
+[-31882] sq - Albanian
 [-20000] ta - Anjal
+[-18940] apw - Apache
 [-17940] ar - Arabic-AZERTY
 [-17923] ar - Arabic-North_Africa
 [-18000] ar - Arabic-QWERTY
@@ -73,9 +78,11 @@
 [-17921] ar - Arabic PC
 [-28161] hy - Armenian-HM QWERTY
 [-28164] hy - Armenian-Western QWERTY
+[-14789] as - Assamese
 [-49] az-Latn - Azeri
 [-22529] bn - Bangla-QWERTY
 [-22528] bn - Bangla
+[-11396] brx - Bodo
 [-16899] zh-Hant - CangjieKeyboard
 [-26112] chr - Cherokee-Nation
 [-26113] chr - Cherokee-QWERTY
@@ -83,21 +90,29 @@
 [-69] hr - Croatian-PC
 [-20481] hi - Devanagari-QWERTY
 [-20480] hi - Devanagari
+[-17410] dv - Dhivehi-QWERTY
+[-25281] doi - Dogri
+[-2728] dz - Dzongkha
 [-47] fo - Faroese
 [-17] fi - Finnish Extended
 [-18] fi - FinnishSami-PC
+[-27432] am - Geez-QWERTY
 [-27650] ka - Georgian-QWERTY
+[-18133] de - German-DIN-2137
 [-18944] el - Greek
 [-18945] el - Greek Polytonic
 [-21505] gu - Gujarati-QWERTY
 [-21504] gu - Gujarati
 [-20993] pa - Gurmukhi-QWERTY
 [-20992] pa - Gurmukhi
+[-27472] rhg - Hanifi-Rohingya-QWERTY
 [-50] haw - Hawaiian
 [-18500] he - Hebrew-QWERTY
 [-18432] he - Hebrew
 [-18433] he - Hebrew-PC
 [-21] is - Icelandic
+[-32355] ig - Igbo
+[-30606] iu - Inuktitut-Nattilik
 [-30604] iu - Inuktitut-Nunavut
 [-30602] iu - Inuktitut-Nutaaq
 [-30600] iu - Inuktitut-QWERTY
@@ -106,15 +121,29 @@
 [-19000] ms-Arab - Jawi-QWERTY
 [-24065] kn - Kannada-QWERTY
 [-24064] kn - Kannada
+[-22530] ks-Deva - Kashmiri-Devanagari
 [-19501] kk - Kazakh
 [-26114] km - Khmer
+[-25282] kok - Konkani
+[-361] ku - Kurdish-Kurmanji
 [-17926] ckb - Kurdish-Sorani
+[19459] ky - Kyrgyz-Cyrillic
+[-26115] lo - Lao
+[89] es_419 - Latin American
+[-25283] mai - Maithili
 [-24577] ml - Malayalam-QWERTY
 [-24576] ml - Malayalam
 [-501] mt - Maltese
+[-22532] mni-Beng - Manipuri-Bengali
+[-22534] mni-Mtei - Manipuri-MeeteiMayek
 [-51] mi - Maori
+[-25284] mr - Marathi
+[-2276] mn - Mongolian-Cyrillic
 [-25601] my - Myanmar-QWERTY
-[-20484] ne - Nepali
+[-25602] my - Myanmar
+[-18939] nv - Navajo
+[-25286] ne - Nepali-IS16350
+[-31135] ne - Nepali
 [-1200] se - Northern Sami
 [-12] nb - Norwegian Extended
 [-13] nb - NorwegianSami-PC
@@ -126,27 +155,40 @@
 [-38] ro - Romanian-Standard
 [-39] ro - Romanian
 [-1201] se - Sami-PC
+[-52] sm - Samoan
+[-23064] sa - Sanskrit
+[-22538] sat-Deva - Santali-Devanagari
+[-22536] sat-Olck - Santali-OlChiki
 [-19521] sr-Latn - Serbian-Latin
+[-16901] sd-Deva - Sindhi-Devanagari
+[-22374] sd - Sindhi
 [-25089] si - Sinhala-QWERTY
 [-25088] si - Sinhala
 [-66] sl - Slovenian
 [-15] sv - SwedishSami-PC
+[-31486] syr - Syriac-Arabic
+[-30291] syr - Syriac-QWERTY
+[19460] tg - Tajik-Cyrillic
 [-20001] ta - Tamil99
 [-23553] te - Telugu-QWERTY
 [-23552] te - Telugu
-[-26626] th - Thai-PattaChote
+[-24616] th - Thai-PattaChote
 [-26624] th - Thai
 [-26628] bo - TibetanOtaniUS
 [-26625] bo - Tibetan-QWERTY
 [-2398] bo - Tibetan-Wylie
 [-36] tr - Turkish-QWERTY-PC
 [-35] tr - Turkish-QWERTY
-[-23] tr - Turkish-Standard
+[-5482] tr - Turkish-Standard
 [-24] tr - Turkish
+[15228] tk - Turkmen
 [-2] en - US Extended
+[-23205] uk - Ukrainian-QWERTY
 [-1] <null> - Unicode Hex Input
 [-17925] ur - Urdu
 [-27000] ug - Uyghur
+[19461] uz-Cyrl - Uzbek-Cyrillic
 [-31232] vi - Vietnamese
 [-790] cy - Welsh
+[-18501] yi - Yiddish-QWERTY
 [-16900] zh-Hant - Zhuyin Bopomofo
