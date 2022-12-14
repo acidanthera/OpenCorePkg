@@ -1,7 +1,7 @@
 BIOSVendor: "Apple Inc."
-BIOSVersion: "1916.40.8.0.0"
-BIOSLegacyVersion: "MP71.88Z.F000.B00.2209292253"
-BIOSReleaseDate: "09/29/2022"
+BIOSVersion: "1916.60.2.0.0"
+BIOSLegacyVersion: "MP71.88Z.F000.B00.2211301949"
+BIOSReleaseDate: "11/30/2022"
 SystemManufacturer: "Apple Inc."
 SystemProductName: "MacPro7,1"
 SystemVersion: "1.0"
@@ -48,17 +48,17 @@ SmcPlatform:
   - 0x00
 OEMStrings: |-
   Apple ROM Version
-    BIOS ID:      MP71.88Z.F000.B00.2209292253
+    BIOS ID:      MP71.88Z.F000.B00.2211301949
     Model:        MP71
-    EFI Version:  1916.40.8.0.0
-    Built by:     root@6hzq6
-    Date:         Thu Sep 29 22:53:28 2022
-    Revision:     1916.40.8 (B&I)
+    EFI Version:  1916.60.2.0.0
+    Built by:     root@l64zd
+    Date:         Wed Nov 30 19:49:22 2022
+    Revision:     1916.60.2 (B&I)
     ROM Version:  F000_B00
     Build Type:   Official Build, RELEASE
-    Compiler:     clang-1400.0.29.1
-    UUID:         230AC726-9849-35A2-86AF-4C51B1CD91BD
-    UUID:         1C988081-7EF8-3D99-AAD1-F7FC5C91572C
+    Compiler:     clang-1400.0.29.2
+    UUID:         C49A9121-F3F4-3DC8-B2D8-7329CC97413F
+    UUID:         680F73FE-A4DB-3D48-B3C5-0E4DA6633A95
 Specifications:
   CPUCodename:
     - "Cascade Lake"
