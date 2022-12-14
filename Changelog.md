@@ -2,6 +2,7 @@ OpenCore Changelog
 ==================
 #### v0.8.8
 - Updated underlying EDK II package to edk2-stable202211
+- Updated AppleKeyboardLayouts.txt from macOS 13.1
 - Updated builtin firmware versions for SMBIOS and the rest
 
 #### v0.8.7
