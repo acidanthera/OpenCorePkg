@@ -107,7 +107,7 @@ MiscToolsHasDuplication (
 
   if (  (AsciiStrCmp (MiscToolsPrimaryArgumentsString, MiscToolsSecondaryArgumentsString) == 0)
      && (AsciiStrCmp (MiscToolsPrimaryPathString, MiscToolsSecondaryPathString) == 0)
-     && MiscToolsPrimaryFullNvramAccess == MiscToolsSecondaryFullNvramAccess)
+     && (MiscToolsPrimaryFullNvramAccess == MiscToolsSecondaryFullNvramAccess))
   {
     DEBUG ((DEBUG_WARN, "Misc->Tools->Path: %a is duplicated ", MiscToolsPrimaryPathString));
     return TRUE;
