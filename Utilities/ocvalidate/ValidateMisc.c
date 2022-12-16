@@ -89,6 +89,8 @@ MiscToolsHasDuplication (
   CONST CHAR8                *MiscToolsSecondaryArgumentsString;
   CONST CHAR8                *MiscToolsPrimaryPathString;
   CONST CHAR8                *MiscToolsSecondaryPathString;
+  BOOLEAN                    MiscToolsPrimaryFullNvramAccess;
+  BOOLEAN                    MiscToolsSecondaryFullNvramAccess;
 
   MiscToolsPrimaryEntry             = *(CONST OC_MISC_TOOLS_ENTRY **)PrimaryEntry;
   MiscToolsSecondaryEntry           = *(CONST OC_MISC_TOOLS_ENTRY **)SecondaryEntry;
@@ -96,13 +98,16 @@ MiscToolsHasDuplication (
   MiscToolsSecondaryArgumentsString = OC_BLOB_GET (&MiscToolsSecondaryEntry->Arguments);
   MiscToolsPrimaryPathString        = OC_BLOB_GET (&MiscToolsPrimaryEntry->Path);
   MiscToolsSecondaryPathString      = OC_BLOB_GET (&MiscToolsSecondaryEntry->Path);
+  MiscToolsPrimaryFullNvramAccess   = MiscToolsPrimaryEntry->FullNvramAccess;
+  MiscToolsSecondaryFullNvramAccess = MiscToolsSecondaryEntry->FullNvramAccess;
 
   if (!MiscToolsPrimaryEntry->Enabled || !MiscToolsSecondaryEntry->Enabled) {
     return FALSE;
   }
 
   if (  (AsciiStrCmp (MiscToolsPrimaryArgumentsString, MiscToolsSecondaryArgumentsString) == 0)
-     && (AsciiStrCmp (MiscToolsPrimaryPathString, MiscToolsSecondaryPathString) == 0))
+     && (AsciiStrCmp (MiscToolsPrimaryPathString, MiscToolsSecondaryPathString) == 0)
+     && MiscToolsPrimaryFullNvramAccess == MiscToolsSecondaryFullNvramAccess)
   {
     DEBUG ((DEBUG_WARN, "Misc->Tools->Path: %a is duplicated ", MiscToolsPrimaryPathString));
     return TRUE;

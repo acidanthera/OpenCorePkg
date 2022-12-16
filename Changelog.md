@@ -4,6 +4,7 @@ OpenCore Changelog
 - Updated underlying EDK II package to edk2-stable202211
 - Updated AppleKeyboardLayouts.txt from macOS 13.1
 - Updated builtin firmware versions for SMBIOS and the rest
+- Updated ocvalidate to allow duplicate tool if FullNvramAccess is different
 
 #### v0.8.7
 - Removed unwanted clear screen when launching non-text boot entry
