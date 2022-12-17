@@ -59,70 +59,65 @@ jobs:
           tag: ${{ github.ref }}
           file_glob: true
 
-  build-linux-clangpdb-gcc5:
-    name: Linux CLANGPDB/GCC5
+  build-linux-clangpdb:
+    name: Linux CLANGPDB
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v3
 
-      - name: Install Dependencies
-        run: |
-          sudo apt-get update
-          sudo apt-get install nasm uuid-dev libssl-dev iasl
-          wget https://apt.llvm.org/llvm.sh
-          chmod +x llvm.sh
-          sudo ./llvm.sh 13
-          echo "/usr/lib/llvm-13/bin" >> $GITHUB_PATH
-
-      - name: CI Bootstrap
-        run: |
-          src=$(/usr/bin/curl -Lfs https://raw.githubusercontent.com/acidanthera/ocbuild/master/ci-bootstrap.sh) && eval "$src" || exit 1
-
-      - run: ./build_duet.tool
-      - run: ./build_oc.tool
+      - name: ./build_duet.tool
+        run: docker compose run -e TOOLCHAINS=CLANGPDB build-duet
+      - name: ./build_oc.tool
+        run: docker compose run -e TOOLCHAINS=CLANGPDB build-oc
 
       - name: Upload to Artifacts
         uses: actions/upload-artifact@v3
         with:
-          name: Linux CLANGPDB-GCC5 Artifacts
+          name: Linux CLANGPDB Artifacts
+          path: Binaries/*.zip
+
+  build-linux-gcc5:
+    name: Linux GCC5
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: ./build_duet.tool
+        run: docker compose run -e TOOLCHAINS=GCC5 build-duet
+      - name: ./build_oc.tool
+        run: docker compose run -e TOOLCHAINS=GCC5 build-oc
+
+      - name: Upload to Artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: Linux GCC5 Artifacts
           path: Binaries/*.zip
 
   build-linux-clangdwarf:
     name: Linux CLANGDWARF
     runs-on: ubuntu-22.04
-    env:
-      TOOLCHAINS: CLANGDWARF
     steps:
       - uses: actions/checkout@v3
 
-      - name: Install Dependencies
-        run: |
-          sudo apt-get update
-          sudo apt-get install nasm uuid-dev iasl doxygen texlive texlive-latex-extra
-          wget https://apt.llvm.org/llvm.sh
-          chmod +x llvm.sh
-          sudo ./llvm.sh 13
-          echo "/usr/lib/llvm-13/bin" >> $GITHUB_PATH
-
-      - name: CI Bootstrap
-        run: |
-          src=$(/usr/bin/curl -Lfs https://raw.githubusercontent.com/acidanthera/ocbuild/master/ci-bootstrap.sh) && eval "$src" || exit 1
-
-      - run: ./build_duet.tool
-      - run: ./build_oc.tool
-
-      - name: Docs
-        run: |
-          abort() { tail -200 log.txt ; exit 1 ; }
-          doxygen Doxyfile &> log.txt || abort
-          cd Doxy/latex || abort
-          make pdf &> log.txt || abort
+      - name: ./build_duet.tool
+        run: docker compose run -e TOOLCHAINS=CLANGDWARF build-duet
+      - name: ./build_oc.tool
+        run: docker compose run -e TOOLCHAINS=CLANGDWARF build-oc
 
       - name: Upload to Artifacts
         uses: actions/upload-artifact@v3
         with:
           name: Linux CLANGDWARF Artifacts
           path: Binaries/*.zip
+
+  build-linux-docs:
+    name: Linux Docs
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Docs
+        run: docker compose run build-docs
 
   build-windows:
     name: Windows VS2019

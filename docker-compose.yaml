@@ -1,0 +1,45 @@
+name: oc
+services:
+  dev-edk2:
+    build:
+      context: Dockerfiles/oc-dev-edk2
+      tags:
+        - "oc-dev-edk2"
+  dev-docs:
+    build:
+      context: Dockerfiles/oc-dev-docs
+      tags:
+        - "oc-dev-docs"
+  build-oc:
+    depends_on:
+      - dev-edk2
+    image: oc-dev-edk2
+    volumes:
+      - .:/com.docker.devenvironments.code
+    working_dir: /com.docker.devenvironments.code
+    entrypoint:
+      - /bin/bash
+      - -c
+      - "{ . ~/.edk2_rc.sh && eval \"$$(/usr/bin/curl -Lfs https://raw.githubusercontent.com/acidanthera/ocbuild/master/ci-bootstrap.sh)\" && ./build_oc.tool ; } || exit 1"
+  build-duet:
+    depends_on:
+      - dev-edk2
+    image: oc-dev-edk2
+    volumes:
+      - .:/com.docker.devenvironments.code
+    working_dir: /com.docker.devenvironments.code
+    entrypoint:
+      - /bin/bash
+      - -c
+      - "{ . ~/.edk2_rc.sh && eval \"$$(/usr/bin/curl -Lfs https://raw.githubusercontent.com/acidanthera/ocbuild/master/ci-bootstrap.sh)\" && ./build_duet.tool ; } || exit 1"
+  build-docs:
+    depends_on:
+      - dev-docs
+    image: oc-dev-docs
+    volumes:
+      - .:/com.docker.devenvironments.code
+    working_dir: /com.docker.devenvironments.code
+    entrypoint:
+      - /bin/bash
+      - -c
+      - "{ doxygen Doxyfile &> log.txt && cd Doxy/latex && make pdf &> log.txt ; } || { tail -200 log.txt ; exit 1 ; }"
