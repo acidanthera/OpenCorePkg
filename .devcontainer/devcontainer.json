@@ -1,0 +1,7 @@
+{
+  "name": "oc",
+  "dockerComposeFile": "../compose-dev.yaml",
+  "service": "dev-edk2-docs",
+  "workspaceFolder": "/com.docker.devenvironments.code",
+  "shutdownAction": "stopCompose"
+}
