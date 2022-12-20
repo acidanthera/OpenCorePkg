@@ -27,8 +27,8 @@ imgbuild() {
 
   echo "Generating Loader Image..."
 
-  GenFw --rebase 0x10000 -o "${BUILD_DIR_ARCH}/EfiLoaderRebased.efi" \
-    "${BUILD_DIR_ARCH}/EfiLoader.efi" || exit 1
+  ImageTool "${arch}" Rebase 0x10000 "${BUILD_DIR_ARCH}/EfiLoader.efi" "${BUILD_DIR_ARCH}/EfiLoaderRebased.efi" || exit 1
+
   "${FV_TOOLS}/EfiLdrImage" -o "${BUILD_DIR}/FV/Efildr${arch}" \
     "${BUILD_DIR_ARCH}/EfiLoaderRebased.efi" "${BUILD_DIR}/FV/DxeIpl${arch}.z" \
     "${BUILD_DIR}/FV/DxeMain${arch}.z" "${BUILD_DIR}/FV/DUETEFIMAINFV${arch}.z" || exit 1
