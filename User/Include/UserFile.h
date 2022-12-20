@@ -66,7 +66,7 @@ UserReadFile (
 VOID
 UserWriteFile (
   IN  CONST CHAR8  *FileName,
-  IN  VOID         *Data,
+  IN  CONST VOID   *Data,
   IN  UINT32       Size
   );
 

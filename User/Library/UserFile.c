@@ -114,11 +114,14 @@ UserReadFile (
 VOID
 UserWriteFile (
   IN  CONST CHAR8  *FileName,
-  IN  VOID         *Data,
+  IN  CONST VOID   *Data,
   IN  UINT32       Size
   )
 {
   FILE  *FilePtr;
+
+  ASSERT (FileName != NULL);
+  ASSERT (Data != NULL);
 
   FilePtr = fopen (FileName, "wb");
 
