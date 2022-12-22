@@ -5,6 +5,7 @@ abort() {
   exit 1
 }
 
+# shellcheck disable=SC2317
 cleanup() {
   echo "Cleaning up key"
   rm -rf "${KeyPath}"
