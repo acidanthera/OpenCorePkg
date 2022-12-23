@@ -68,3 +68,8 @@
   BaseLib
   BaseMemoryLib
   MemoryAllocationLib
+
+# REF: https://github.com/madler/zlib/issues/633
+[BuildOptions]
+  CLANGPDB:*_*_*_CC_FLAGS = -Wno-deprecated-non-prototype
+  CLANGGCC:*_*_*_CC_FLAGS = -Wno-deprecated-non-prototype
