@@ -115,20 +115,10 @@ package() {
       mkdir -p "${dstdir}/${arch}/${dir}" || exit 1
     done
 
-    # Mark binaries to be recognisable by OcBootManagementLib.
-    bootsig="${selfdir}/Library/OcBootManagementLib/BootSignature.bin"
-    efiOCBMs=(
-      "Bootstrap.efi"
-      "OpenCore.efi"
-      )
-    for efiOCBM in "${efiOCBMs[@]}"; do
-      dd if="${bootsig}" \
-         of="${arch}/${efiOCBM}" seek=64 bs=1 count=56 conv=notrunc || exit 1
-    done
-
     # copy OpenCore main program.
     cp "${arch}/OpenCore.efi" "${dstdir}/${arch}/EFI/OC" || exit 1
     printf "%s" "OpenCore" > "${dstdir}/${arch}/EFI/OC/.contentFlavour" || exit 1
+    printf "%s" "Disabled" > "${dstdir}/${arch}/EFI/OC/.contentVisibility" || exit 1
 
     local suffix="${arch}"
     if [ "${suffix}" = "X64" ]; then
@@ -136,6 +126,7 @@ package() {
     fi
     cp "${arch}/Bootstrap.efi" "${dstdir}/${arch}/EFI/BOOT/BOOT${suffix}.efi" || exit 1
     printf "%s" "OpenCore" > "${dstdir}/${arch}/EFI/BOOT/.contentFlavour" || exit 1
+    printf "%s" "Disabled" > "${dstdir}/${arch}/EFI/BOOT/.contentVisibility" || exit 1
 
     efiTools=(
       "BootKicker.efi"

@@ -190,56 +190,118 @@ ExpandShortFormBootPath (
 }
 
 /**
-  Check whether device path points to OpenCore bootloader.
+  Check boot entry visibility by device path.
 
   @param[in]  DevicePath   Device path of the entry.
 
-  @retval TRUE   Entry represents OpenCore bootloader.
-  @retval FALSE  Entry is not necessarily OpenCore bootloader.
+  @return Entry visibility
 **/
 STATIC
-BOOLEAN
-IsOpenCoreBootloader (
-  IN EFI_DEVICE_PATH_PROTOCOL  *DevicePath
+INTERNAL_ENTRY_VISIBILITY
+ReadEntryVisibility (
+  IN EFI_DEVICE_PATH_PROTOCOL  *DevicePath,
+  IN BOOLEAN                   IsFolder
   )
 {
-  STATIC CONST UINT32  OpenCoreMagicOffset = 0x40;
-  STATIC CONST UINT8   OpenCoreMagic[]     = {
-    0x0E, 0x1F, 0xBA, 0x10, 0x00, 0xB4, 0x09, 0xCD, 0x21, 0xB8, 0x01, 0x4C, 0xCD, 0x21, 0x0F, 0x0B,
-    0x4F, 0x70, 0x65, 0x6E, 0x43, 0x6F, 0x72, 0x65, 0x20, 0x42, 0x6F, 0x6F, 0x74, 0x6C, 0x6F, 0x61,
-    0x64, 0x65, 0x72, 0x20, 0x28, 0x63, 0x29, 0x20, 0x41, 0x63, 0x69, 0x64, 0x61, 0x6E, 0x74, 0x68,
-    0x65, 0x72, 0x61
-  };
+  EFI_STATUS                       Status;
+  EFI_SIMPLE_FILE_SYSTEM_PROTOCOL  *FileSystem;
+  EFI_HANDLE                       Device;
+  UINTN                            BooterPathSize;
+  UINTN                            BooterPathLength;
+  UINTN                            VisibilityPathSize;
+  CHAR16                           *VisibilityPath;
+  CHAR16                           *VisibilityTerminator;
+  BOOLEAN                          Result;
+  CHAR8                            *Visibility;
 
-  EFI_STATUS  Status;
-
-  EFI_FILE_PROTOCOL  *File;
-  UINT8              FileReadMagic[0x40];
-
-  Status = OcOpenFileByDevicePath (
-             &DevicePath,
-             &File,
-             EFI_FILE_MODE_READ,
-             0
-             );
+  Status = gBS->LocateDevicePath (
+                  &gEfiSimpleFileSystemProtocolGuid,
+                  &DevicePath,
+                  &Device
+                  );
   if (EFI_ERROR (Status)) {
-    return FALSE;
+    return BootEntryNormal;
   }
 
-  Status = OcGetFileData (
-             File,
-             OpenCoreMagicOffset,
-             sizeof (FileReadMagic),
-             FileReadMagic
-             );
-
-  File->Close (File);
-
+  Status = gBS->HandleProtocol (
+                  Device,
+                  &gEfiSimpleFileSystemProtocolGuid,
+                  (VOID **)&FileSystem
+                  );
   if (EFI_ERROR (Status)) {
-    return FALSE;
+    return BootEntryNormal;
   }
 
-  return CompareMem (FileReadMagic, OpenCoreMagic, sizeof (OpenCoreMagic)) == 0;
+  BooterPathSize = OcFileDevicePathFullNameSize (DevicePath);
+  Result         = OcOverflowAddUN (
+                     BooterPathSize,
+                     L_STR_SIZE (L"\\.contentVisibility"),
+                     &VisibilityPathSize
+                     );
+  if (Result) {
+    return BootEntryNormal;
+  }
+
+  VisibilityPath = AllocatePool (VisibilityPathSize);
+  if (VisibilityPath == NULL) {
+    return BootEntryNormal;
+  }
+
+  if (BooterPathSize > 0) {
+    OcFileDevicePathFullName (
+      VisibilityPath,
+      (FILEPATH_DEVICE_PATH *)DevicePath,
+      BooterPathSize
+      );
+  } else {
+    VisibilityPath[0] = '\0';
+  }
+
+  BooterPathLength = BooterPathSize / sizeof (CHAR16);
+
+  if (BooterPathSize == 0) {
+    VisibilityTerminator = VisibilityPath;
+  } else if (IsFolder && (VisibilityPath[BooterPathLength - 1] == L'\\')) {
+    VisibilityTerminator = VisibilityPath + BooterPathLength;
+  } else if (IsFolder) {
+    VisibilityPath[BooterPathLength] = L'\\';
+    VisibilityTerminator             = VisibilityPath + BooterPathLength + 1;
+  } else {
+    VisibilityTerminator = OcStrrChr (VisibilityPath, L'\\');
+    if (VisibilityTerminator != NULL) {
+      ++VisibilityTerminator;
+    } else {
+      VisibilityTerminator = VisibilityPath;
+    }
+  }
+
+  CopyMem (VisibilityTerminator, L".contentVisibility", sizeof (L".contentVisibility"));
+
+  //
+  // Note, this guarantees nul-termination.
+  //
+  Visibility = OcReadFile (FileSystem, VisibilityPath, NULL, 64);
+
+  FreePool (VisibilityPath);
+
+  if (Visibility == NULL) {
+    return BootEntryNormal;
+  }
+
+  if (AsciiStrnCmp (Visibility, "Disabled", L_STR_LEN ("Disabled")) == 0) {
+    FreePool (Visibility);
+    return BootEntryDisabled;
+  }
+
+  if (AsciiStrnCmp (Visibility, "Auxiliary", L_STR_LEN ("Auxiliary")) == 0) {
+    FreePool (Visibility);
+    return BootEntryAuxiliary;
+  }
+
+  DEBUG ((DEBUG_INFO, "OCB: Discovered unsupported .contentVisibility\n"));
+
+  FreePool (Visibility);
+  return BootEntryNormal;
 }
 
 /**
@@ -347,15 +409,16 @@ AddBootEntryOnFileSystem (
   IN     BOOLEAN                   Deduplicate
   )
 {
-  EFI_STATUS          Status;
-  OC_BOOT_ENTRY       *BootEntry;
-  OC_BOOT_ENTRY_TYPE  EntryType;
-  LIST_ENTRY          *Link;
-  OC_BOOT_ENTRY       *ExistingEntry;
-  CHAR16              *TextDevicePath;
-  BOOLEAN             IsFolder;
-  BOOLEAN             IsGeneric;
-  BOOLEAN             IsReallocated;
+  EFI_STATUS                 Status;
+  OC_BOOT_ENTRY              *BootEntry;
+  OC_BOOT_ENTRY_TYPE         EntryType;
+  LIST_ENTRY                 *Link;
+  OC_BOOT_ENTRY              *ExistingEntry;
+  CHAR16                     *TextDevicePath;
+  INTERNAL_ENTRY_VISIBILITY  Visibility;
+  BOOLEAN                    IsFolder;
+  BOOLEAN                    IsGeneric;
+  BOOLEAN                    IsReallocated;
 
   EntryType = OcGetBootDevicePathType (DevicePath, &IsFolder, &IsGeneric);
 
@@ -422,13 +485,23 @@ AddBootEntryOnFileSystem (
   }
 
   //
-  // Skip OpenCore bootloaders on own entry.
-  // We do not waste time doing this for other entries.
+  // Skip disabled entries, like OpenCore bootloader.
   //
-  if (  RecoveryPart ? FileSystem->RecoveryFs->LoaderFs : FileSystem->LoaderFs
-     && IsOpenCoreBootloader (DevicePath))
-  {
-    DEBUG ((DEBUG_INFO, "OCB: Discarding discovered OpenCore bootloader\n"));
+  Visibility = ReadEntryVisibility (DevicePath, IsFolder);
+  if (Visibility == BootEntryDisabled) {
+    DEBUG ((DEBUG_INFO, "OCB: Discarding disabled entry by visibility\n"));
+    if (IsReallocated) {
+      FreePool (DevicePath);
+    }
+
+    return EFI_UNSUPPORTED;
+  }
+
+  //
+  // Skip custom auxiliary entries.
+  //
+  if ((Visibility == BootEntryAuxiliary) && BootContext->PickerContext->HideAuxiliary) {
+    DEBUG ((DEBUG_INFO, "OCB: Discarding auxiliary entry by visibility\n"));
     if (IsReallocated) {
       FreePool (DevicePath);
     }
