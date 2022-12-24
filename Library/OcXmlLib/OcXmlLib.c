@@ -1650,13 +1650,13 @@ XmlNodeRemoveByIndex (
   CopyMem (
     &Node->Children->NodeList[Index],
     &Node->Children->NodeList[Index+1],
-    (Node->Children->NodeCount - 1 - Index) * sizeof (XML_NODE)
+    (Node->Children->NodeCount - 1 - Index) * sizeof (*Node->Children->NodeList)
     );
 
   //
   // Drop the last entry as the node above has been removed.
   //
-  ZeroMem (&Node->Children->NodeList[Node->Children->NodeCount-1], sizeof (XML_NODE));
+  ZeroMem (&Node->Children->NodeList[Node->Children->NodeCount-1], sizeof (*Node->Children->NodeList));
   --Node->Children->NodeCount;
 }
 

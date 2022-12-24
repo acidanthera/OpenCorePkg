@@ -6,6 +6,7 @@ OpenCore Changelog
 - Updated builtin firmware versions for SMBIOS and the rest
 - Updated ocvalidate to allow duplicate tool if FullNvramAccess is different
 - Fixed `Kernel` -> `Block` entries not being processed if one was skipped due to `Arch`
+- Fixed intermittent prelinking failures caused by XML corruption when kext blocking is enabled
 
 #### v0.8.7
 - Removed unwanted clear screen when launching non-text boot entry
