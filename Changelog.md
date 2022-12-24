@@ -5,6 +5,7 @@ OpenCore Changelog
 - Updated AppleKeyboardLayouts.txt from macOS 13.1
 - Updated builtin firmware versions for SMBIOS and the rest
 - Updated ocvalidate to allow duplicate tool if FullNvramAccess is different
+- Fixed `Kernel` -> `Block` entries not being processed if one was skipped due to `Arch`
 
 #### v0.8.7
 - Removed unwanted clear screen when launching non-text boot entry
