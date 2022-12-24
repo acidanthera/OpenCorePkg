@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
-%DIF DEL PreviousConfiguration.tex   Wed Dec  7 01:34:37 2022
-%DIF ADD ../Configuration.tex        Wed Dec  7 01:34:37 2022
+%DIF DEL PreviousConfiguration.tex   Thu Dec 22 13:44:17 2022
+%DIF ADD ../Configuration.tex        Sun Dec 25 02:50:21 2022
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -118,7 +118,7 @@
 %DIF HYPERREF PREAMBLE %DIF PREAMBLE
 \providecommand{\DIFadd}[1]{\texorpdfstring{\DIFaddtex{#1}}{#1}} %DIF PREAMBLE
 \providecommand{\DIFdel}[1]{\texorpdfstring{\DIFdeltex{#1}}{}} %DIF PREAMBLE
-%DIF COLORLISTINGS PREAMBLE %DIF PREAMBLE
+%DIF LISTINGS PREAMBLE %DIF PREAMBLE
 \RequirePackage{listings} %DIF PREAMBLE
 \RequirePackage{color} %DIF PREAMBLE
 \lstdefinelanguage{DIFcode}{ %DIF PREAMBLE
@@ -3179,11 +3179,13 @@ The algorithm to determine boot options behaves as follows:
   \item For disk device paths (not specifying a bootloader), execute ``bless'' (may return > 1 entry).
   \item For file device paths, check for presence on the file system directly.
   % Just kill all \EFI\APPLE\ paths.
-  \item On the OpenCore boot partition, exclude all OpenCore bootstrap files by file header checks.
+  \item \DIFdelbegin \DIFdel{On the OpenCore boot partition, exclude all OpenCore bootstrap files by file header checks}\DIFdelend \DIFaddbegin \DIFadd{Exclude entries if there is a }\texttt{\DIFadd{.contentVisibility}} \DIFadd{file near the bootloader or
+  inside the boot directory with }\texttt{\DIFadd{Disabled}} \DIFadd{contents (ASCII)}\DIFaddend .
   \item Mark device handle as \textit{used} in the list of partition handles if any.
   % Each partition handle will basically have a list of boot option entries for later quick lookup.
   \item Register the resulting entries as primary options and determine their types. \\
-  The option will become auxiliary for some types (e.g. Apple HFS recovery).
+  The option will become auxiliary for some types (e.g. Apple HFS recovery)
+  \DIFaddbegin \DIFadd{or if its }\texttt{\DIFadd{.contentVisibility}} \DIFadd{file contains }\texttt{\DIFadd{Auxiliary}}\DIFaddend .
   \end{itemize}
 \item For each partition handle:
   \begin{itemize}

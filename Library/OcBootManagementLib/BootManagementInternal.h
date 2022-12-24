@@ -114,6 +114,16 @@ typedef struct {
   BOOLEAN                     SkipRecovery;
 } INTERNAL_DEV_PATH_SCAN_INFO;
 
+///
+/// Entry visibility parameters set by .contentVisibility file.
+/// Hidden entries are not added to the list.
+///
+typedef enum {
+  BootEntryNormal,
+  BootEntryAuxiliary,
+  BootEntryDisabled,
+} INTERNAL_ENTRY_VISIBILITY;
+
 EFI_STATUS
 InternalCheckScanPolicy (
   IN  EFI_HANDLE  Handle,

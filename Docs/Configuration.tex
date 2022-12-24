@@ -3119,11 +3119,13 @@ The algorithm to determine boot options behaves as follows:
   \item For disk device paths (not specifying a bootloader), execute ``bless'' (may return > 1 entry).
   \item For file device paths, check for presence on the file system directly.
   % Just kill all \EFI\APPLE\ paths.
-  \item On the OpenCore boot partition, exclude all OpenCore bootstrap files by file header checks.
+  \item Exclude entries if there is a \texttt{.contentVisibility} file near the bootloader or
+  inside the boot directory with \texttt{Disabled} contents (ASCII).
   \item Mark device handle as \textit{used} in the list of partition handles if any.
   % Each partition handle will basically have a list of boot option entries for later quick lookup.
   \item Register the resulting entries as primary options and determine their types. \\
-  The option will become auxiliary for some types (e.g. Apple HFS recovery).
+  The option will become auxiliary for some types (e.g. Apple HFS recovery)
+  or if its \texttt{.contentVisibility} file contains \texttt{Auxiliary}.
   \end{itemize}
 \item For each partition handle:
   \begin{itemize}

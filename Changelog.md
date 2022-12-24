@@ -7,6 +7,8 @@ OpenCore Changelog
 - Updated ocvalidate to allow duplicate tool if FullNvramAccess is different
 - Fixed `Kernel` -> `Block` entries not being processed if one was skipped due to `Arch`
 - Fixed intermittent prelinking failures caused by XML corruption when kext blocking is enabled
+- Removed magic Acidanthera sequence from OpenCore files used for picker hiding
+- Added `.contentVisibility` to hide and disable boot entries
 
 #### v0.8.7
 - Removed unwanted clear screen when launching non-text boot entry
