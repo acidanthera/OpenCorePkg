@@ -21,7 +21,9 @@ BoardAssetTag: ""
 BoardType: 0xA
 BoardLocationInChassis: ""
 ChassisManufacturer: "Apple Inc."
+# Tower
 ChassisType: 0x7
+# Rack
 # ChassisType: 0x17
 ChassisVersion: "Mac-27AD2F918AE68F61"
 ChassisAssetTag: ""
@@ -83,7 +85,7 @@ Specifications:
     - "Mac Pro (Rack, 2019)"
 # Note, first model code is used by macserial
 AppleModelCode:
-#Tower
+# Tower
   - "P7QM"
   - "PLXV"
   - "PLXW"
@@ -97,7 +99,7 @@ AppleModelCode:
   - "NYGV"
   - "K7GF"
   - "K7GD"
-#Rack
+# Rack
   - "N5RN"
 # Note, first board code is used by macserial
 AppleBoardCode:
@@ -108,6 +110,7 @@ AppleModelYear:
   - 2020
   - 2021
   - 2022
+  - 2023
 MinimumOSVersion: "10.15.1"
 MaximumOSVersion: null
 AppleModelId: "J160"
