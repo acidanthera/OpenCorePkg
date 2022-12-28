@@ -65,6 +65,9 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
+      - name: Use Docker in rootless mode.
+        uses: ScribeMD/rootless-docker@0.2.2
+
       - name: ./build_duet.tool
         run: docker compose run -e TOOLCHAINS=CLANGPDB build-duet
       - name: ./build_oc.tool
@@ -81,6 +84,9 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v3
+
+      - name: Use Docker in rootless mode.
+        uses: ScribeMD/rootless-docker@0.2.2
 
       - name: ./build_duet.tool
         run: docker compose run -e TOOLCHAINS=GCC5 build-duet
@@ -99,6 +105,9 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
+      - name: Use Docker in rootless mode.
+        uses: ScribeMD/rootless-docker@0.2.2
+
       - name: ./build_duet.tool
         run: docker compose run -e TOOLCHAINS=CLANGDWARF build-duet
       - name: ./build_oc.tool
@@ -115,6 +124,9 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v3
+
+      - name: Use Docker in rootless mode.
+        uses: ScribeMD/rootless-docker@0.2.2
 
       - name: Docs
         run: docker compose run build-docs
