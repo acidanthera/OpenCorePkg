@@ -116,21 +116,21 @@ if [ ! -d "${FV_TOOLS}" ]; then
   exit 1
 fi
 
-if [ "${TARGETARCH}" = "" ]; then
-  TARGETARCH="X64"
-fi
-
-if [ "${TARGET}" = "" ]; then
-  TARGET="RELEASE"
-fi
-
-if [ "${TARGETCHAIN}" = "" ]; then
-  TARGETCHAIN="XCODE5"
-fi
-
 if [ "${INTREE}" != "" ]; then
   # In-tree compilation is merely for packing.
   cd .. || exit 1
+
+  if [ "${TARGETARCH}" = "" ]; then
+    TARGETARCH="X64"
+  fi
+
+  if [ "${TARGET}" = "" ]; then
+    TARGET="RELEASE"
+  fi
+
+  if [ "${TARGETCHAIN}" = "" ]; then
+    TARGETCHAIN="XCODE5"
+  fi
 
   build -a "${TARGETARCH}" -b "${TARGET}" -t "${TARGETCHAIN}" -p OpenCorePkg/OpenDuetPkg.dsc || exit 1
   BUILD_DIR="${WORKSPACE}/Build/OpenDuetPkg/${TARGET}_${TARGETCHAIN}"
