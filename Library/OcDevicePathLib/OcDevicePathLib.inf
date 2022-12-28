@@ -49,6 +49,7 @@
   UefiBootServicesTableLib
 
 [Guids]
+  gAppleSdCardVendorDevicePathGuid
   gEfiPartTypeSystemPartGuid
 
 [Protocols]
