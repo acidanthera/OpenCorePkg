@@ -79,7 +79,7 @@ package() {
     echo "Missing package directory $1 at $(pwd)"
     exit 1
   fi
-  
+
   if [ ! -d "$1"/../FV ]; then
     echo "Missing FV directory $1/../FV at $(pwd)"
     exit 1
@@ -137,7 +137,10 @@ if [ "${INTREE}" != "" ]; then
   BUILD_DIR_ARCH="${BUILD_DIR}/${TARGETARCH}"
   imgbuild "${TARGETARCH}"
 else
-  TARGETS=(DEBUG RELEASE)
+  if [ "$TARGETS" = "" ]; then
+    TARGETS=(DEBUG RELEASE)
+    export TARGETS
+  fi
   if [ "$ARCHS" = "" ]; then
     ARCHS=(X64 IA32)
     export ARCHS
@@ -146,7 +149,6 @@ else
   SELFPKG=OpenDuetPkg
   NO_ARCHIVES=1
 
-  export TARGETS
   export SELFPKG_DIR
   export SELFPKG
   export NO_ARCHIVES
