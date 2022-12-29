@@ -859,11 +859,14 @@ BmExpandHyperVDevicePath (
   EFI_DEVICE_PATH_PROTOCOL  *HvDevicePath;
   EFI_DEVICE_PATH_PROTOCOL  *Node;
   EFI_DEVICE_PATH_PROTOCOL  *NewDevicePath;
+  UINTN                     FilePathSize;
   UINTN                     HvSuffixSize;
   SCSI_DEVICE_PATH          *FileScsiPath;
   SCSI_DEVICE_PATH          *HvScsiPath;
 
   DebugPrintDevicePath (DEBUG_INFO, "OCDP: Expanding Hyper-V DP", FilePath);
+
+  FilePathSize = GetDevicePathSize (FilePath);
 
   //
   // Get SCSI device node from file path, if any.
@@ -926,6 +929,10 @@ BmExpandHyperVDevicePath (
         // Match the macOS-made DP till the filename.
         //
         HvSuffixSize = GetDevicePathSize (Node) - END_DEVICE_PATH_LENGTH;
+        if (FilePathSize < HvSuffixSize) {
+          break;
+        }
+
         if (CompareMem (Node, FilePath, HvSuffixSize) == 0) {
           NewDevicePath = AppendDevicePath (
                             HvDevicePath,
@@ -978,9 +985,12 @@ BmExpandAppleSDCardDevicePath (
   EFI_DEVICE_PATH_PROTOCOL  *SdDevicePath;
   EFI_DEVICE_PATH_PROTOCOL  *Node;
   EFI_DEVICE_PATH_PROTOCOL  *NewDevicePath;
+  UINTN                     FilePathSize;
   UINTN                     SdSuffixSize;
 
   DebugPrintDevicePath (DEBUG_INFO, "OCDP: Expanding SD card DP", FilePath);
+
+  FilePathSize = GetDevicePathSize (FilePath);
 
   Status = gBS->LocateHandleBuffer (
                   ByProtocol,
@@ -1017,6 +1027,10 @@ BmExpandAppleSDCardDevicePath (
         // Match the macOS-made DP till the filename.
         //
         SdSuffixSize = GetDevicePathSize (Node) - END_DEVICE_PATH_LENGTH;
+        if (FilePathSize < SdSuffixSize) {
+          break;
+        }
+
         if (CompareMem (Node, FilePath, SdSuffixSize) == 0) {
           NewDevicePath = AppendDevicePath (
                             SdDevicePath,
@@ -1068,9 +1082,9 @@ OcGetNextLoadOptionDevicePath (
   // CHANGE: Hyper-V support start.
 
   //
-  // Match ACPI_VMD0001_HID.
+  // Match ACPI_VMD0001_HID during the first call only.
   //
-  if (  (FullPath == NULL) ///< First and only call.
+  if (  (FullPath == NULL)
      && (DevicePathType (Node) == ACPI_DEVICE_PATH)
      && (DevicePathSubType (Node) == ACPI_DP)
      && (DevicePathNodeLength (Node) == sizeof (ACPI_HID_DEVICE_PATH)))
@@ -1097,9 +1111,9 @@ OcGetNextLoadOptionDevicePath (
   // CHANGE: Hyper-V support end.
 
   //
-  // Locate and match Apple SD card device path.
+  // Locate and match Apple SD card device path during the first call only.
   //
-  if (FullPath == NULL) { ///< First and only call.
+  if (FullPath == NULL) {
     for (DeviceNode = Node; !IsDevicePathEnd (DeviceNode); DeviceNode = NextDevicePathNode (DeviceNode)) {
       if ((DevicePathType (DeviceNode) == MESSAGING_DEVICE_PATH) && (DevicePathSubType (DeviceNode) == MSG_VENDOR_DP)) {
         VendorNode = (VENDOR_DEFINED_DEVICE_PATH *)DeviceNode;
