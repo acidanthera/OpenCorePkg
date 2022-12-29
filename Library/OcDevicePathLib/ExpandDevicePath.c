@@ -1057,12 +1057,12 @@ OcGetNextLoadOptionDevicePath (
   IN  EFI_DEVICE_PATH_PROTOCOL  *FullPath
   )
 {
-  EFI_HANDLE                Handle;
-  EFI_DEVICE_PATH_PROTOCOL  *Node;
-  EFI_DEVICE_PATH_PROTOCOL  *DeviceNode;
-  ACPI_HID_DEVICE_PATH      *AcpiNode;
-  VENDOR_DEFINED_DEVICE_PATH *VendorNode;
-  EFI_STATUS                Status;
+  EFI_HANDLE                  Handle;
+  EFI_DEVICE_PATH_PROTOCOL    *Node;
+  EFI_DEVICE_PATH_PROTOCOL    *DeviceNode;
+  ACPI_HID_DEVICE_PATH        *AcpiNode;
+  VENDOR_DEFINED_DEVICE_PATH  *VendorNode;
+  EFI_STATUS                  Status;
 
   ASSERT (FilePath != NULL);
 
