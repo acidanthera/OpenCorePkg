@@ -51,16 +51,16 @@ if [ "$(uname)" = "Linux" ]; then
   modprobe nbd
   qemu-img create -f raw "$IMAGE" 200M
   fdisk "$IMAGE" << END
-  o
-  n
-  p
-  1
-  2048
-  409599
-  t
-  b
-  a
-  w
+o
+n
+p
+1
+2048
+409599
+t
+b
+a
+w
 END
   qemu-nbd -f raw --connect="$NBD" "$IMAGE"
   # Wait a it after mounting
@@ -136,11 +136,11 @@ elif [ "$(uname)" = "Darwin" ]; then
   if [ "$(diskutil info  disk"${N}" |  sed -n 's/.*Content (IOContent): *//p')" == "FDisk_partition_scheme" ]
   then
   sudo fdisk -e /dev/rdisk"$N" <<-MAKEACTIVE
-  p
-  f 1
-  w
-  y
-  q
+p
+f 1
+w
+y
+q
 MAKEACTIVE
   fi
 
