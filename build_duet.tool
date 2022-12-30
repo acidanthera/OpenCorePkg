@@ -154,10 +154,13 @@ else
     ARCHS=(X64 IA32)
     export ARCHS
   fi
+
+  DISCARD_PACKAGES=OpenCorePkg
   SELFPKG_DIR="OpenCorePkg"
   SELFPKG=OpenDuetPkg
   NO_ARCHIVES=1
 
+  export DISCARD_PACKAGES
   export SELFPKG_DIR
   export SELFPKG
   export NO_ARCHIVES
