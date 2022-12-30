@@ -109,10 +109,19 @@ UNAME="$(uname)"
 if [ "$(echo "${UNAME}" | grep MINGW)" != "" ] || [ "$(echo "${UNAME}" | grep MSYS)" != "" ]; then
   UNAME="Windows"
 fi
+
+FV_TOOLS_BUILDDIR="$(pwd)/Utilities/BaseTools"
 FV_TOOLS="$(pwd)/Utilities/BaseTools/bin.${UNAME}"
 
+echo "Compiling BaseTools for your platform..."
+if [ "$UNAME" != "Windows" ]; then
+  make -C "$FV_TOOLS_BUILDDIR" || exit 1
+else
+  CC=gcc DIST=Windows make -C "$FV_TOOLS_BUILDDIR" || exit 1
+fi
+
 if [ ! -d "${FV_TOOLS}" ]; then
-  echo "ERROR: You need to compile BaseTools for your platform!"
+  echo "ERROR: Something goes wrong while compiling BaseTools for your platform!"
   exit 1
 fi
 
