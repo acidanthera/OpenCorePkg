@@ -6,6 +6,7 @@
 #include <UserBootServices.h>
 
 #include <stdio.h>
+#include <stdlib.h>
 
 EFI_BOOT_SERVICES  mBootServices = {
   .RaiseTPL                  = DummyRaiseTPL,
@@ -23,7 +24,10 @@ EFI_SYSTEM_TABLE  mSystemTable = {
   .ConOut       = &mConOut
 };
 
-EFI_RUNTIME_SERVICES  mRuntimeServices = { { 0 } };
+EFI_RUNTIME_SERVICES  mRuntimeServices = {
+  { 0 },
+  NULL
+};
 
 EFI_SYSTEM_TABLE   *gST = &mSystemTable;
 EFI_BOOT_SERVICES  *gBS = &mBootServices;
