@@ -13,6 +13,7 @@ OpenCore Changelog
 - Built in new secure PE/COFF loader
 - Added prebuilt mtoc universal binary with Apple Silicon support
 - Corrected OpenDuet build on Apple Silicon
+- Added SD cars device path support for boot device selection
 
 #### v0.8.7
 - Removed unwanted clear screen when launching non-text boot entry
