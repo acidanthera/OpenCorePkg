@@ -188,6 +188,15 @@ OcAcpiPatchTables (
     Patch.TableLength = UserPatch->TableLength;
     CopyMem (&Patch.OemTableId, UserPatch->OemTableId, sizeof (UserPatch->OemTableId));
 
+    DEBUG ((
+      DEBUG_INFO,
+      "OC: Applying %u byte ACPI patch patch at %u, skip %u, count %u\n",
+      Patch.Size,
+      (UINT32)Index,
+      Patch.Skip,
+      Patch.Count
+      ));
+
     Status = AcpiApplyPatch (Context, &Patch);
     if (EFI_ERROR (Status)) {
       DEBUG ((DEBUG_WARN, "OC: ACPI patcher failed %u - %r\n", Index, Status));

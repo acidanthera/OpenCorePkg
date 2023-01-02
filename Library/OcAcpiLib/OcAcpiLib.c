@@ -1255,8 +1255,6 @@ AcpiApplyPatch (
   UINT32                  ReplaceLimit;
   UINT32                  TablePrintSignature;
 
-  DEBUG ((DEBUG_INFO, "OCA: Applying %u byte ACPI patch skip %u, count %u\n", Patch->Size, Patch->Skip, Patch->Count));
-
   if (  (Context->Dsdt != NULL)
      && ((Patch->TableSignature == 0) || (Patch->TableSignature == EFI_ACPI_6_2_DIFFERENTIATED_SYSTEM_DESCRIPTION_TABLE_SIGNATURE))
      && ((Patch->TableLength == 0) || (Context->Dsdt->Length == Patch->TableLength))
