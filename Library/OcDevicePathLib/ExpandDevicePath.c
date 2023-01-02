@@ -11,6 +11,7 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 
 #include <IndustryStandard/Pci.h>
 
+#include <Guid/AppleDevicePath.h>
 #include <Guid/Gpt.h>
 
 #include <Protocol/BlockIo.h>
@@ -858,11 +859,14 @@ BmExpandHyperVDevicePath (
   EFI_DEVICE_PATH_PROTOCOL  *HvDevicePath;
   EFI_DEVICE_PATH_PROTOCOL  *Node;
   EFI_DEVICE_PATH_PROTOCOL  *NewDevicePath;
+  UINTN                     FilePathSize;
   UINTN                     HvSuffixSize;
   SCSI_DEVICE_PATH          *FileScsiPath;
   SCSI_DEVICE_PATH          *HvScsiPath;
 
   DebugPrintDevicePath (DEBUG_INFO, "OCDP: Expanding Hyper-V DP", FilePath);
+
+  FilePathSize = GetDevicePathSize (FilePath);
 
   //
   // Get SCSI device node from file path, if any.
@@ -925,6 +929,10 @@ BmExpandHyperVDevicePath (
         // Match the macOS-made DP till the filename.
         //
         HvSuffixSize = GetDevicePathSize (Node) - END_DEVICE_PATH_LENGTH;
+        if (FilePathSize < HvSuffixSize) {
+          break;
+        }
+
         if (CompareMem (Node, FilePath, HvSuffixSize) == 0) {
           NewDevicePath = AppendDevicePath (
                             HvDevicePath,
@@ -945,16 +953,116 @@ BmExpandHyperVDevicePath (
   return NULL;
 }
 
+/**
+  Match macOS-made SD card device path onto standard SD card UEFI device path.
+  macOS uses a vendor-specific path for SD card devices and produces paths like:
+  PciRoot(0x0)
+    /Pci(0x1A,0x0)
+    /VenMsg(C063C579-9F78-4BA5-9F42-D0B0149597A6,01000000000000000000000000000000)
+    /HD(2,GPT,D2BEDE60-7C48-4D94-8915-A579450E3C43,0x64028,0x7417FB0)
+
+  We need to match them on standard SD card device paths like:
+  PciRoot(0x0)
+    /Pci(0x1A,0x0)
+    /eMMC(0x0)
+    /Ctrl(0x0)
+    /HD(2,GPT,D2BEDE60-7C48-4D94-8915-A579450E3C43,0x64028,0x7417FB0)
+
+  @param[in] FilePath macOS-made device path with VenMsg parts trimmed (i.e. VenMsg(0x0, 0x0)/.../File).
+
+  @return  SD card device path or NULL.
+**/
+STATIC
+EFI_DEVICE_PATH_PROTOCOL *
+BmExpandAppleSDCardDevicePath (
+  IN  EFI_DEVICE_PATH_PROTOCOL  *FilePath
+  )
+{
+  EFI_STATUS                Status;
+  UINTN                     HandleCount;
+  UINTN                     Index;
+  EFI_HANDLE                *HandleBuffer;
+  EFI_DEVICE_PATH_PROTOCOL  *SdDevicePath;
+  EFI_DEVICE_PATH_PROTOCOL  *Node;
+  EFI_DEVICE_PATH_PROTOCOL  *NewDevicePath;
+  UINTN                     FilePathSize;
+  UINTN                     SdSuffixSize;
+
+  DebugPrintDevicePath (DEBUG_INFO, "OCDP: Expanding SD card DP", FilePath);
+
+  FilePathSize = GetDevicePathSize (FilePath);
+
+  Status = gBS->LocateHandleBuffer (
+                  ByProtocol,
+                  &gEfiSimpleFileSystemProtocolGuid,
+                  NULL,
+                  &HandleCount,
+                  &HandleBuffer
+                  );
+
+  if (EFI_ERROR (Status)) {
+    return NULL;
+  }
+
+  for (Index = 0; Index < HandleCount; ++Index) {
+    Status = gBS->HandleProtocol (
+                    HandleBuffer[Index],
+                    &gEfiDevicePathProtocolGuid,
+                    (VOID **)&SdDevicePath
+                    );
+    if (EFI_ERROR (Status)) {
+      continue;
+    }
+
+    DebugPrintDevicePath (DEBUG_INFO, "OCDP: Matching SD card DP", SdDevicePath);
+
+    for (Node = SdDevicePath; !IsDevicePathEnd (Node); Node = NextDevicePathNode (Node)) {
+      //
+      // Skip till we find the matching node in the middle of macOS-made DP.
+      //
+      if (  (DevicePathType (Node) == DevicePathType (FilePath))
+         && (DevicePathSubType (Node) == DevicePathSubType (FilePath)))
+      {
+        //
+        // Match the macOS-made DP till the filename.
+        //
+        SdSuffixSize = GetDevicePathSize (Node) - END_DEVICE_PATH_LENGTH;
+        if (FilePathSize < SdSuffixSize) {
+          break;
+        }
+
+        if (CompareMem (Node, FilePath, SdSuffixSize) == 0) {
+          NewDevicePath = AppendDevicePath (
+                            SdDevicePath,
+                            (VOID *)((UINTN)FilePath + SdSuffixSize)
+                            );
+          if (NewDevicePath != NULL) {
+            DebugPrintDevicePath (DEBUG_INFO, "OCDP: Matched SD card DP", NewDevicePath);
+          }
+
+          FreePool (HandleBuffer);
+          return NewDevicePath;
+        }
+      }
+    }
+  }
+
+  FreePool (HandleBuffer);
+  return NULL;
+}
+
 EFI_DEVICE_PATH_PROTOCOL *
 OcGetNextLoadOptionDevicePath (
   IN  EFI_DEVICE_PATH_PROTOCOL  *FilePath,
   IN  EFI_DEVICE_PATH_PROTOCOL  *FullPath
   )
 {
-  EFI_HANDLE                Handle;
-  EFI_DEVICE_PATH_PROTOCOL  *Node;
-  ACPI_HID_DEVICE_PATH      *AcpiNode;
-  EFI_STATUS                Status;
+  EFI_HANDLE                  Handle;
+  EFI_DEVICE_PATH_PROTOCOL    *Node;
+  EFI_DEVICE_PATH_PROTOCOL    *DeviceNode;
+  ACPI_HID_DEVICE_PATH        *AcpiNode;
+  VENDOR_DEFINED_DEVICE_PATH  *VendorNode;
+  EFI_STATUS                  Status;
 
   ASSERT (FilePath != NULL);
 
@@ -974,9 +1082,9 @@ OcGetNextLoadOptionDevicePath (
   // CHANGE: Hyper-V support start.
 
   //
-  // Match ACPI_VMD0001_HID.
+  // Match ACPI_VMD0001_HID during the first call only.
   //
-  if (  (FullPath == NULL) ///< First and only call.
+  if (  (FullPath == NULL)
      && (DevicePathType (Node) == ACPI_DEVICE_PATH)
      && (DevicePathSubType (Node) == ACPI_DP)
      && (DevicePathNodeLength (Node) == sizeof (ACPI_HID_DEVICE_PATH)))
@@ -1001,6 +1109,21 @@ OcGetNextLoadOptionDevicePath (
   }
 
   // CHANGE: Hyper-V support end.
+
+  //
+  // Locate and match Apple SD card device path during the first call only.
+  //
+  if (FullPath == NULL) {
+    for (DeviceNode = Node; !IsDevicePathEnd (DeviceNode); DeviceNode = NextDevicePathNode (DeviceNode)) {
+      if ((DevicePathType (DeviceNode) == MESSAGING_DEVICE_PATH) && (DevicePathSubType (DeviceNode) == MSG_VENDOR_DP)) {
+        VendorNode = (VENDOR_DEFINED_DEVICE_PATH *)DeviceNode;
+        if (CompareGuid (&gAppleSdCardVendorDevicePathGuid, &VendorNode->Guid)) {
+          Node = NextDevicePathNode (DeviceNode);
+          return BmExpandAppleSDCardDevicePath (Node);
+        }
+      }
+    }
+  }
 
   Status = gBS->LocateDevicePath (&gEfiBlockIoProtocolGuid, &Node, &Handle);
   if (!EFI_ERROR (Status) && IsDevicePathEnd (Node)) {
