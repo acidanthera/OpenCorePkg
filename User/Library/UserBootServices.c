@@ -25,8 +25,7 @@ EFI_SYSTEM_TABLE  mSystemTable = {
 };
 
 EFI_RUNTIME_SERVICES  mRuntimeServices = {
-  { 0 },
-  NULL
+  .Hdr = { 0 },
 };
 
 EFI_SYSTEM_TABLE   *gST = &mSystemTable;
