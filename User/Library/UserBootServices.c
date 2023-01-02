@@ -23,7 +23,7 @@ EFI_SYSTEM_TABLE  mSystemTable = {
   .ConOut       = &mConOut
 };
 
-EFI_RUNTIME_SERVICES  mRuntimeServices = { 0 };
+EFI_RUNTIME_SERVICES  mRuntimeServices = { { 0 } };
 
 EFI_SYSTEM_TABLE   *gST = &mSystemTable;
 EFI_BOOT_SERVICES  *gBS = &mBootServices;
