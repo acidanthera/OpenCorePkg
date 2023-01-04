@@ -58,6 +58,7 @@ extern BOOLEAN  _gPcd_FixedAtBuild_PcdImageLoaderSupportArmThumb;
 extern BOOLEAN  _gPcd_FixedAtBuild_PcdImageLoaderForceLoadDebug;
 extern BOOLEAN  _gPcd_FixedAtBuild_PcdImageLoaderTolerantLoad;
 extern BOOLEAN  _gPcd_FixedAtBuild_PcdImageLoaderSupportDebug;
+extern BOOLEAN  _gPcd_FixedAtBuild_PcdImageLoaderRemoveXForWX;
 extern UINT8    _gPcd_FixedAtBuild_PcdUefiVariableDefaultLang[4];
 extern UINT8    _gPcd_FixedAtBuild_PcdUefiVariableDefaultPlatformLang[6];
 extern UINT32   _gPcd_BinaryPatch_PcdSerialRegisterStride;
@@ -93,5 +94,6 @@ extern UINT32   _gPcd_BinaryPatch_PcdSerialRegisterStride;
 #define _PCD_GET_MODE_BOOL_PcdImageLoaderForceLoadDebug              _gPcd_FixedAtBuild_PcdImageLoaderForceLoadDebug
 #define _PCD_GET_MODE_BOOL_PcdImageLoaderTolerantLoad                _gPcd_FixedAtBuild_PcdImageLoaderTolerantLoad
 #define _PCD_GET_MODE_BOOL_PcdImageLoaderSupportDebug                _gPcd_FixedAtBuild_PcdImageLoaderSupportDebug
+#define _PCD_GET_MODE_BOOL_PcdImageLoaderRemoveXForWX                _gPcd_FixedAtBuild_PcdImageLoaderRemoveXForWX
 
 #endif // OC_USER_PCD_H
