@@ -85,7 +85,7 @@ OcForgeUefiSupport (
   //
   // Already too new.
   //
-  if (gST->Hdr.Revision >= EFI_2_30_SYSTEM_TABLE_REVISION) {
+  if (gST->Hdr.Revision >= EFI_2_00_SYSTEM_TABLE_REVISION) {
     return EFI_ALREADY_STARTED;
   }
 

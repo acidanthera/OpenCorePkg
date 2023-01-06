@@ -648,10 +648,8 @@ VariableServiceInitialize (
   )
 {
   EFI_STATUS           Status;
-  UINTN                OffsetQVI;
-  UINTN                HeaderQVI;
-  EFI_EVENT            EndOfDxeEvent;
   EFI_EVENT            ReadyToBootEvent;
+  EFI_EVENT            EndOfDxeEvent;
   EFI_CREATE_EVENT_EX  OriginalCreateEventEx;
 
   SaveAcpiGlobalVariable (SystemTable);
@@ -685,19 +683,16 @@ VariableServiceInitialize (
   SystemTable->RuntimeServices->SetVariable         = VariableServiceSetVariable;
   //
   // Avoid setting UEFI 2.x interface member on EFI 1.x.
+  // Note 1: It is important to set this when possible. We have completely replaced
+  // SetVariable and GetVariable, and QueryVariableInfo must be consistent with them
+  // if it exists at all.
+  // Note 2: We attempt to allow for a previous inconsistently faked UEFI 2+ by
+  // checking that space in the interface is actually available.
   //
-  // First test all systable elements as some may have been spoofed and pass a limited element check
-  // Then check that QueryVariableInfo is specifically available before setting the interface member
-  //
-  if (  ((SystemTable->Hdr.Revision >> 16U) > 1)
-     && ((SystemTable->BootServices->Hdr.Revision >> 16U) > 1)
-     && ((SystemTable->RuntimeServices->Hdr.Revision >> 16U) > 1))
+  if (  (SystemTable->RuntimeServices->Hdr.Revision >= EFI_2_00_SYSTEM_TABLE_REVISION)
+     && (SystemTable->RuntimeServices->Hdr.HeaderSize > OFFSET_OF (EFI_RUNTIME_SERVICES, QueryVariableInfo)))
   {
-    OffsetQVI = OFFSET_OF (EFI_RUNTIME_SERVICES, QueryVariableInfo);
-    HeaderQVI = OffsetQVI + sizeof (SystemTable->RuntimeServices->QueryVariableInfo);
-    if (SystemTable->RuntimeServices->Hdr.HeaderSize >= HeaderQVI) {
-      SystemTable->RuntimeServices->QueryVariableInfo = VariableServiceQueryVariableInfo;
-    }
+    SystemTable->RuntimeServices->QueryVariableInfo = VariableServiceQueryVariableInfo;
   }
 
   //
