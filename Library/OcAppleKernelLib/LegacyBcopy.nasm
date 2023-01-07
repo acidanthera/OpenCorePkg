@@ -52,7 +52,7 @@ Lbcopy:
 ; void *memcpy(void *dst, const void *src, size_t len)
 ; void *memmove(void *dst, const void *src, size_t len)
 ;
-; NB: These need to be 32 bytes from bcopy().
+; Note: These need to be 32 bytes from bcopy().
 ;------------------------------------------------------------------------------
 align 32
 Lmemcpy:

@@ -1837,7 +1837,7 @@ OcImageLoaderLoad (
   include spaces, and '\' can be used within quoted or unquoted values to escape any
   character (including space and '"').
 
-  NB Var names and values are left as pointers to within the original raw LoadOptions
+  Note: Var names and values are left as pointers to within the original raw LoadOptions
   string, which may be modified during processing.
 
   @param[in]   LoadedImage        Loaded image handle.
@@ -1867,7 +1867,7 @@ OcParseLoadOptions (
   character (including space and double quote).
   Comments (if any) run from hash symbol to end of same line.
 
-  NB Var names and values are left as pointers to within the raw string, which may
+  Note: Var names and values are left as pointers to within the raw string, which may
   be modified during processing.
 
   @param[in]   StrVars            Raw var string.

@@ -308,7 +308,7 @@ OcEnsureDirectoryFile (
 /**
   Process directory item.
 
-  NB Successful processing must return EFI_SUCCESS or EFI_NOT_FOUND, or further
+  Note: Successful processing must return EFI_SUCCESS or EFI_NOT_FOUND, or further
   processing will be aborted.
 
   Return EFI_NOT_FOUND to continue processing but act if no file found.

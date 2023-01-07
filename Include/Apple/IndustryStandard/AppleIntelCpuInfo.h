@@ -24,7 +24,7 @@
  *
  * These are meant to identify the CPU's marketing name - an
  * application can map these to (possibly) localized strings.
- * NB: the encodings of the CPU families are intentionally arbitrary.
+ * Note: the encodings of the CPU families are intentionally arbitrary.
  * There is no ordering, and you should never try to deduce whether
  * or not some feature is available based on the family.
  * Use feature flags (eg, hw.optional.altivec) to test for optional

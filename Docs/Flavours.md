@@ -138,7 +138,7 @@ If providing just one file, name it `Shell.icns` if the theming of the icon is g
  - **Shell** - Any shell-style tool
  - **UEFIShell:Shell** - EDK II UEFI Shell
    - As an example of how flavours work: **UEFIShell:Shell** will try `UEFIShell.icns`, then `Shell.icns` (and then, by OC default behaviour, `Tool.icns`, then `HardDrive.icns`)
-   - _**NB**: Including **UEFIShell** anywhere in the flavour triggers picker audio-assist for "UEFI Shell"_
+   - _**Note**: Including **UEFIShell** anywhere in the flavour triggers picker audio-assist for "UEFI Shell"_
  - **OpenShell:UEFIShell:Shell** - Themed specifically for OpenCore OpenShell (which is a variant of the EDK II UEFI Shell)
    - This is the recommended flavour to use for `OpenShell.efi`, as is done in the sample config files
    - Although this is the recommended *flavour*, icon artists are not required to provide this icon file, since this flavour will automatically find and use `Shell.icns` or `UEFIShell.icns` anyway
@@ -155,11 +155,11 @@ If providing `NVRAMTool.icns`, it should be themed so that it could be applied t
  - **ResetNVRAM:NVRAMTool** - Reset NVRAM tool  (`ResetNVRAM.icns`)
    - This is the recommended flavour, used for the entry created by the `ResetNvramEntry.efi` driver.
    - As another example of how flavours work: **ResetNVRAM:NVRAMTool** will look for `ResetNVRAM.icns`, then `NVRAMTool.icns` (and then, by OC default behaviour, `Tool.icns` then `HardDrive.icns`)
-   - **NB**: Including **ResetNVRAM** anywhere in a user flavour triggers picker audio-assist and builtin label support for "Reset NVRAM"
+   - **Note**: Including **ResetNVRAM** anywhere in a user flavour triggers picker audio-assist and builtin label support for "Reset NVRAM"
  - **ToggleSIP:NVRAMTool** - Icon themed for Toggle SIP tool  (`ToggleSIP.icns`)
  - **ToggleSIP_Enabled:ToggleSIP:NVRAMTool** - Icon themed for Toggle SIP tool when SIP is enabled (system is protected)
  - **ToggleSIP_Disabled:ToggleSIP:NVRAMTool** - Icon themed for Toggle SIP tool when SIP is disabled (system is unprotected)
-   - **NB**: Including **ToggleSIP_Enabled** or **ToggleSIP_Disabled** anywhere in a user flavour triggers picker audio-assist and builtin label support for the two states of the Toggle SIP menu entry
+   - **Note**: Including **ToggleSIP_Enabled** or **ToggleSIP_Disabled** anywhere in a user flavour triggers picker audio-assist and builtin label support for the two states of the Toggle SIP menu entry
 
 ### Other Tools
 

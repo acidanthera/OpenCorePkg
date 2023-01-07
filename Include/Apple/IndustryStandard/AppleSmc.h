@@ -20,7 +20,7 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 // we define SMC_MAKE_IDENTIFIER to produce Little Endian keys in UEFI (EFIAPI),
 // and Big Endian keys in all other places.
 //
-// NB: This code assumes Little Endian host byte order, which so far is the
+// Note: This code assumes Little Endian host byte order, which so far is the
 // only supported byte order in UEFI.
 //
 #ifdef EFIAPI

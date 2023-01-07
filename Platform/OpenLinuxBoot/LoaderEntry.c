@@ -87,7 +87,7 @@ typedef enum ENTRY_PARSE_STATE_ {
 // First match, therefore Ubuntu should come after similar variants,
 // and probably very short strings should come last in case they
 // occur elsewhere in another kernel version string.
-// NB: Should be kept in sync with Flavours.md.
+// Note: Should be kept in sync with Flavours.md.
 //
 STATIC
 CHAR8 *

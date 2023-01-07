@@ -320,7 +320,7 @@ GetPickerKeyInfo (
   }
 
   //
-  // NB As historically SHIFT handling here is considered a 'hotkey':
+  // Note: As historically SHIFT handling here is considered a 'hotkey':
   // it's original reason for being here is to fix difficulties in
   // detecting this and other hotkey modifiers during no-picker boot.
   //
@@ -792,7 +792,7 @@ OcInitHotKeys (
   }
 
   //
-  // NB Raw AKMA is also still used for HotKeys, since we really do need
+  // Note: Raw AKMA is also still used for HotKeys, since we really do need
   // three different types of keys response for fluent UI behaviour.
   //
 
