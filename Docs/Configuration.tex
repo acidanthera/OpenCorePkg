@@ -8720,7 +8720,9 @@ for additional options.
 
   \emph{Note 2}: While this quirk can increase GPU PCI BAR sizes, this will not
   work on most firmware as is, because the quirk does not relocate BARs in memory,
-  and they will likely overlap. Contributions to improve this feature are welcome.
+  and they will likely overlap. In most cases it is best to either update the
+  firmware to the latest version or customise it with a specialised driver
+  like \href{https://github.com/xCuri0/ReBarUEFI}{ReBarUEFI}.
 
 \item
   \texttt{TscSyncTimeout}\\
