@@ -667,6 +667,7 @@ An example command sequence is as follows:
 git clone --depth=1 https://github.com/acidanthera/audk UDK
 cd UDK
 git submodule update --init --recommend-shallow
+rm -rf OpenCorePkg
 git clone --depth=1 https://github.com/acidanthera/OpenCorePkg
 . ./edksetup.sh
 make -C BaseTools

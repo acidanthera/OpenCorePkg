@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
 %DIF DEL PreviousConfiguration.tex   Mon Jan  2 20:13:00 2023
-%DIF ADD ../Configuration.tex        Sat Jan  7 21:27:37 2023
+%DIF ADD ../Configuration.tex        Sun Jan  8 15:18:30 2023
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -723,15 +723,18 @@ users should also install \href{https://www.nasm.us}{NASM} and
 The latest Xcode version is recommended for use despite the toolchain name.
 An example command sequence is as follows:
 
-\begin{lstlisting}[caption=Compilation Commands, label=compile, style=ocbash]
+\DIFmodbegin
+\begin{lstlisting}[caption=Compilation Commands, label=compile, style=ocbash,alsolanguage=DIFcode]
 git clone --depth=1 https://github.com/acidanthera/audk UDK
 cd UDK
 git submodule update --init --recommend-shallow
+%DIF > rm -rf OpenCorePkg
 git clone --depth=1 https://github.com/acidanthera/OpenCorePkg
 . ./edksetup.sh
 make -C BaseTools
 build -a X64 -b RELEASE -t XCODE5 -p OpenCorePkg/OpenCorePkg.dsc
 \end{lstlisting}
+\DIFmodend
 
 For IDE usage Xcode projects are available in the root of the repositories. Another
 approach could be using \href{https://microsoft.github.io/language-server-protocol}{Language Server Protocols}. For example, \href{https://www.sublimetext.com}{Sublime Text} with
