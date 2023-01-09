@@ -14,10 +14,7 @@ CpuBreakpoint (
   VOID
   )
 {
-  ASSERT (FALSE);
-
-  while (TRUE) {
-  }
+  abort ();
 }
 
 VOID
