@@ -4,10 +4,14 @@
 **/
 
 #include <UserPcd.h>
+#include <Library/DebugLib.h>
 
 #define _PCD_VALUE_PcdUefiLibMaxPrintBufferSize         320U
 #define _PCD_VALUE_PcdUgaConsumeSupport                 ((BOOLEAN)1U)
-#define _PCD_VALUE_PcdDebugPropertyMask                 0x23U
+#define _PCD_VALUE_PcdDebugPropertyMask                 (\
+  DEBUG_PROPERTY_DEBUG_ASSERT_ENABLED \
+  | DEBUG_PROPERTY_DEBUG_PRINT_ENABLED \
+  | DEBUG_PROPERTY_ASSERT_BREAKPOINT_ENABLED )
 #define _PCD_VALUE_PcdDebugClearMemoryValue             0xAFU
 #define _PCD_VALUE_PcdFixedDebugPrintErrorLevel         0x80000002U
 #define _PCD_VALUE_PcdDebugPrintErrorLevel              0x80000002U
