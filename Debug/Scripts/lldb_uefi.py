@@ -374,7 +374,7 @@ class ReloadUefi:
                 entry = entry.GetChildMemberWithName('NormalImage')
                 self.parse_image(entry.GetChildMemberWithName('LoadedImageProtocolInstance'), syms)
             else:
-                print('Skipping unknown EFI_DEBUG_IMAGE_INFO (Type ' + str(image_type) + ')')
+                print(f'Skipping unknown EFI_DEBUG_IMAGE_INFO (Type {str(image_type)})')
             index = index + 1
         print('Loading new symbols...')
         for sym in syms:

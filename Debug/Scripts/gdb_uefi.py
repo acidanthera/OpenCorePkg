@@ -363,7 +363,7 @@ class ReloadUefi(gdb.Command):
                 entry = entry['NormalImage']
                 self.parse_image(entry['LoadedImageProtocolInstance'], syms)
             else:
-                print("Skipping unknown EFI_DEBUG_IMAGE_INFO(Type " + str(entry['ImageInfoType'].dereference()) + ")")
+                print(f"Skipping unknown EFI_DEBUG_IMAGE_INFO(Type {str(entry['ImageInfoType'].dereference())})")
             index += 1
         gdb.execute('symbol-file')
         print('Loading new symbols...')
