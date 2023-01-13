@@ -233,12 +233,13 @@ class ReloadUefi(gdb.Command):
     # Returns the symbol file name for a PE image.
     #
 
-    def pe_parse_debug(self, pe):
+    def pe_parse_debug(self, base):
+        pe = self.pe_headers(base)
         opt = self.pe_optional(pe)
         debug_dir_entry = opt['DataDirectory'][6]
-        dep = debug_dir_entry['VirtualAddress'] + opt['ImageBase']
+        dep = debug_dir_entry['VirtualAddress'] + int(base)
         dep = dep.cast(self.ptype('EFI_IMAGE_DEBUG_DIRECTORY_ENTRY'))
-        cvp = dep.dereference()['RVA'] + opt['ImageBase']
+        cvp = dep.dereference()['RVA'] + int(base)
         cvv = cvp.cast(self.ptype('UINT32')).dereference()
         if cvv == self.CV_NB10:
             return cvp + self.sizeof('EFI_IMAGE_DEBUG_CODEVIEW_NB10_ENTRY')
@@ -328,7 +329,7 @@ class ReloadUefi(gdb.Command):
         pe = self.pe_headers(base)
         opt = self.pe_optional(pe)
         file = self.pe_file(pe)
-        sym_name = self.pe_parse_debug(pe)
+        sym_name = self.pe_parse_debug(base)
         sections = self.pe_sections(opt, file, base)
 
         # For ELF and Mach-O-derived images...
@@ -362,7 +363,7 @@ class ReloadUefi(gdb.Command):
                 entry = entry['NormalImage']
                 self.parse_image(entry['LoadedImageProtocolInstance'], syms)
             else:
-                print(f"Skipping unknown EFI_DEBUG_IMAGE_INFO(Type 0x{entry['ImageInfoType'].dereference():x})")
+                print(f"Skipping unknown EFI_DEBUG_IMAGE_INFO(Type {str(entry['ImageInfoType'].dereference())})")
             index += 1
         gdb.execute('symbol-file')
         print('Loading new symbols...')

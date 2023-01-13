@@ -265,12 +265,13 @@ class ReloadUefi:
     # Returns the symbol file name for a PE image.
     #
 
-    def pe_parse_debug(self, pe):
+    def pe_parse_debug(self, base):
+        pe = self.pe_headers(base)
         opt = self.pe_optional(pe)
         debug_dir_entry = opt.GetValueForExpressionPath('.DataDirectory[6]')
-        dep = self.get_field(debug_dir_entry, 'VirtualAddress') + self.get_field(opt, 'ImageBase')
+        dep = self.get_field(debug_dir_entry, 'VirtualAddress') + base
         dep = self.typed_ptr(self.ptype('EFI_IMAGE_DEBUG_DIRECTORY_ENTRY'), dep)
-        cvp = self.get_field(dep, 'RVA') + self.get_field(opt, 'ImageBase')
+        cvp = self.get_field(dep, 'RVA') + base
         # FIXME: UINT32 should be used here instead of unsigned, but LLDB+PDB type system is broken.
         cvv = self.typed_ptr(self.ptype('unsigned'), cvp).Dereference().GetValueAsUnsigned()
         if cvv == self.CV_NB10:
@@ -310,7 +311,7 @@ class ReloadUefi:
         pe = self.pe_headers(base)
         opt = self.pe_optional(pe)
         file = self.pe_file(pe)
-        sym_address = self.pe_parse_debug(pe)
+        sym_address = self.pe_parse_debug(base)
         sections = self.pe_sections(opt, file, base)
 
         if sym_address == 0:
@@ -373,7 +374,7 @@ class ReloadUefi:
                 entry = entry.GetChildMemberWithName('NormalImage')
                 self.parse_image(entry.GetChildMemberWithName('LoadedImageProtocolInstance'), syms)
             else:
-                print(f'Skipping unknown EFI_DEBUG_IMAGE_INFO (Type 0x{image_type:x})')
+                print(f'Skipping unknown EFI_DEBUG_IMAGE_INFO (Type {str(image_type)})')
             index = index + 1
         print('Loading new symbols...')
         for sym in syms:
