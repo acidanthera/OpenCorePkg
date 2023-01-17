@@ -812,7 +812,7 @@ ResizeGpuBarsRbIo (
               continue;
             }
 
-            DEBUG ((DEBUG_VERBOSE, "OCDM: PCI device %u/%u has class %X\n", Index+1, HandleCount, ClassCode));
+            DEBUG ((DEBUG_VERBOSE, "OCDM: PCI device %u/%u/%u has class %X\n", Bus, Dev, Func, ClassCode));
 
             if (ClassCode.BaseCode != PCI_CLASS_DISPLAY) {
               continue;

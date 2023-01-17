@@ -693,6 +693,7 @@ OcLoadBooterUefiSupport (
   AbcSettings.ProvideMaxSlide        = Config->Booter.Quirks.ProvideMaxSlide;
   AbcSettings.ProtectUefiServices    = Config->Booter.Quirks.ProtectUefiServices;
   AbcSettings.RebuildAppleMemoryMap  = Config->Booter.Quirks.RebuildAppleMemoryMap;
+  AbcSettings.ResizeUsePciRbIo       = Config->Uefi.Quirks.ResizeUsePciRbIo;
   AbcSettings.ResizeAppleGpuBars     = Config->Booter.Quirks.ResizeAppleGpuBars;
   AbcSettings.SetupVirtualMap        = Config->Booter.Quirks.SetupVirtualMap;
   AbcSettings.SignalAppleOS          = Config->Booter.Quirks.SignalAppleOS;
@@ -956,7 +957,7 @@ OcLoadUefiSupport (
      && (Config->Uefi.Quirks.ResizeGpuBars < PciBarTotal))
   {
     DEBUG ((DEBUG_INFO, "OC: Setting GPU BARs to %d\n", Config->Uefi.Quirks.ResizeGpuBars));
-    ResizeGpuBars (Config->Uefi.Quirks.ResizeGpuBars, TRUE, TRUE);
+    ResizeGpuBars (Config->Uefi.Quirks.ResizeGpuBars, TRUE, Config->Uefi.Quirks.ResizeUsePciRbIo);
   }
 
   OcMiscUefiQuirksLoaded (Config);

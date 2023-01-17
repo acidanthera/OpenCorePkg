@@ -180,6 +180,10 @@ typedef struct OC_ABC_SETTINGS_ {
   ///
   BOOLEAN                 SyncRuntimePermissions;
   ///
+  /// Use PciRootBridgeIo for resizing GPU BARs
+  ///
+  BOOLEAN                 ResizeUsePciRbIo;
+  ///
   /// Reduce GPU BARs for macOS to maximum supported version.
   ///
   INT8                    ResizeAppleGpuBars;
