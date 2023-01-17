@@ -38,6 +38,7 @@
 
 [Protocols]
   gEfiPciIoProtocolGuid
+  gEfiPciRootBridgeIoProtocolGuid
   gEfiDecompressProtocolGuid
 
   # For handle parsing

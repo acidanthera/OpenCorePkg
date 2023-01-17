@@ -955,8 +955,8 @@ OcLoadUefiSupport (
   if (  (Config->Uefi.Quirks.ResizeGpuBars >= 0)
      && (Config->Uefi.Quirks.ResizeGpuBars < PciBarTotal))
   {
-    DEBUG ((DEBUG_INFO, "OC: Increasing GPU BARs to %d\n", Config->Uefi.Quirks.ResizeGpuBars));
-    ResizeGpuBars (Config->Uefi.Quirks.ResizeGpuBars, TRUE);
+    DEBUG ((DEBUG_INFO, "OC: Setting GPU BARs to %d\n", Config->Uefi.Quirks.ResizeGpuBars));
+    ResizeGpuBars (Config->Uefi.Quirks.ResizeGpuBars, TRUE, TRUE);
   }
 
   OcMiscUefiQuirksLoaded (Config);
