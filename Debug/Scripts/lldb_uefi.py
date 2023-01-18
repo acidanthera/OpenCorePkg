@@ -289,14 +289,14 @@ class ReloadUefi:
     # Prepares symbol load command with proper section information.
     # Currently supports Mach-O and single-section files.
     #
-    def get_sym_cmd(self, filename, orgbase, *_):
+    def get_sym_cmd(self, filename, orgbase, sections, *_):
         if filename.endswith('.pdb'):
             dll_file = filename.replace('.pdb', '.dll')
             module_cmd = f'target modules add -s {filename} {dll_file}'
         else:
             dll_file = filename
             module_cmd = f'target modules add {filename}'
-        map_cmd = f'target modules load -f {dll_file} -s 0x{orgbase:X}'
+        map_cmd = f"target modules load -f {dll_file} .text 0x{orgbase + sections['.text']:X} .data 0x{orgbase + sections['.data']:X}"
         return(module_cmd, map_cmd)
 
     #
