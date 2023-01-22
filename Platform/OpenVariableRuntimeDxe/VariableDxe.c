@@ -648,10 +648,8 @@ VariableServiceInitialize (
   )
 {
   EFI_STATUS           Status;
-  UINTN                OffsetQVI;
-  UINTN                HeaderQVI;
-  EFI_EVENT            EndOfDxeEvent;
   EFI_EVENT            ReadyToBootEvent;
+  EFI_EVENT            EndOfDxeEvent;
   EFI_CREATE_EVENT_EX  OriginalCreateEventEx;
 
   SaveAcpiGlobalVariable (SystemTable);
@@ -686,18 +684,16 @@ VariableServiceInitialize (
   //
   // Avoid setting UEFI 2.x interface member on EFI 1.x.
   //
-  // First test all systable elements as some may have been spoofed and pass a limited element check
-  // Then check that QueryVariableInfo is specifically available before setting the interface member
+  // Note 1: It is always desirable to overwrite the value here if it already exists:
+  //         we need a consistent runtime variable implementation.
   //
-  if (  ((SystemTable->Hdr.Revision >> 16U) > 1)
-     && ((SystemTable->BootServices->Hdr.Revision >> 16U) > 1)
-     && ((SystemTable->RuntimeServices->Hdr.Revision >> 16U) > 1))
-  {
-    OffsetQVI = OFFSET_OF (EFI_RUNTIME_SERVICES, QueryVariableInfo);
-    HeaderQVI = OffsetQVI + sizeof (SystemTable->RuntimeServices->QueryVariableInfo);
-    if (SystemTable->RuntimeServices->Hdr.HeaderSize >= HeaderQVI) {
-      SystemTable->RuntimeServices->QueryVariableInfo = VariableServiceQueryVariableInfo;
-    }
+  // Note 2: We ignore the theoretical situation where some other spoofer has modified
+  //         the gRT header revision but not allocated sufficient space for this method,
+  //         since this is a highly theoretical 'problem', and providing a solution for
+  //         it over-complicates the code, instead of just over-complicating this comment.
+  //
+  if (SystemTable->RuntimeServices->Hdr.Revision >= EFI_2_00_SYSTEM_TABLE_REVISION) {
+    SystemTable->RuntimeServices->QueryVariableInfo = VariableServiceQueryVariableInfo;
   }
 
   //
