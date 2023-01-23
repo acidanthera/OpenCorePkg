@@ -90,10 +90,10 @@ PciAddrOffset (
   INT32   Offset
   )
 {
-  UINT32  Reg  = (PciAddress & 0xffffffff00000000) >> 32;
-  UINT8   Bus  = (PciAddress & 0xff000000) >> 24;
-  UINT8   Dev  = (PciAddress & 0xff0000) >> 16;
-  UINT8   Func = (PciAddress & 0xff00) >> 8;
+  UINT32  Reg  = (UINT32)((PciAddress & 0xffffffff00000000) >> 32);
+  UINT8   Bus  = (UINT8)((PciAddress & 0xff000000) >> 24);
+  UINT8   Dev  = (UINT8)((PciAddress & 0xff0000) >> 16);
+  UINT8   Func = (UINT8)((PciAddress & 0xff00) >> 8);
 
   return EFI_PCI_ADDRESS (Bus, Dev, Func, (Reg + Offset));
 }
