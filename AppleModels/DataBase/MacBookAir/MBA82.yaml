@@ -1,7 +1,7 @@
 BIOSVendor: "Apple Inc."
-BIOSVersion: "1916.60.2.0.0"
-BIOSLegacyVersion: "MBA82.88Z.F000.B00.2211301948"
-BIOSReleaseDate: "11/30/2022"
+BIOSVersion: "1916.80.2.0.0"
+BIOSLegacyVersion: "MBA82.88Z.F000.B00.2212212024"
+BIOSReleaseDate: "12/21/2022"
 SystemManufacturer: "Apple Inc."
 SystemProductName: "MacBookAir8,2"
 SystemVersion: "1.0"
@@ -48,17 +48,17 @@ SmcPlatform:
   - 0x00
 OEMStrings: |-
   Apple ROM Version
-    BIOS ID:      MBA82.88Z.F000.B00.2211301948
+    BIOS ID:      MBA82.88Z.F000.B00.2212212024
     Model:        MBA82
-    EFI Version:  1916.60.2.0.0
-    Built by:     root@pc9x5
-    Date:         Wed Nov 30 19:48:32 2022
-    Revision:     1916.60.2 (B&I)
+    EFI Version:  1916.80.2.0.0
+    Built by:     root@vmcfr
+    Date:         Wed Dec 21 20:24:37 2022
+    Revision:     1916.80.2 (B&I)
     ROM Version:  F000_B00
     Build Type:   Official Build, RELEASE
     Compiler:     clang-1400.0.29.2
-    UUID:         16A72B1E-415E-36C4-8AE1-3EBE6BF7A692
-    UUID:         8062D728-6DB5-37E0-9648-0F964566C00F
+    UUID:         7F22F10B-0563-32CA-B4EC-DF1B07B51DBF
+    UUID:         9C9AB476-62A7-38EF-B996-3914305FB0AA
 Specifications:
   CPUCodename:
     - "Amber Lake Y"

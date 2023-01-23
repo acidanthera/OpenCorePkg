@@ -4,6 +4,7 @@ OpenCore Changelog
 - Improved debug logging when applying ACPI patches
 - Fixed loading macOS with legacy boot without Apple Secure Boot
 - Added Linux support to legacy boot BootInstall script
+- Updated builtin firmware versions for SMBIOS and the rest
 
 #### v0.8.8
 - Updated underlying EDK II package to edk2-stable202211
