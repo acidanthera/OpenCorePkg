@@ -87,13 +87,13 @@ STATIC
 UINT64
 PciAddrOffset (
   UINT64  PciAddress,
-  INTN    Offset
+  INT32   Offset
   )
 {
-  UINTN  Reg  = (PciAddress & 0xffffffff00000000) >> 32;
-  UINTN  Bus  = (PciAddress & 0xff000000) >> 24;
-  UINTN  Dev  = (PciAddress & 0xff0000) >> 16;
-  UINTN  Func = (PciAddress & 0xff00) >> 8;
+  UINT32  Reg  = (PciAddress & 0xffffffff00000000) >> 32;
+  UINT8   Bus  = (PciAddress & 0xff000000) >> 24;
+  UINT8   Dev  = (PciAddress & 0xff0000) >> 16;
+  UINT8   Func = (PciAddress & 0xff00) >> 8;
 
   return EFI_PCI_ADDRESS (Bus, Dev, Func, (Reg + Offset));
 }
@@ -456,7 +456,7 @@ SetResizableBarOnDeviceRbIo (
                                   EfiPciWidthUint32,
                                   PciAddrOffset (PciAddress, OFFSET_OF (PCI_TYPE00, Device.Bar)),
                                   PCI_MAX_BAR,
-                                  (VOID *)OldBar
+                                  OldBar
                                   );
   if (EFI_ERROR (Status)) {
     ZeroMem (OldBar, sizeof (OldBar));
@@ -566,7 +566,7 @@ SetResizableBarOnDeviceRbIo (
                                   EfiPciWidthUint32,
                                   PciAddrOffset (PciAddress, OFFSET_OF (PCI_TYPE00, Device.Bar)),
                                   PCI_MAX_BAR,
-                                  (VOID *)NewBar
+                                  NewBar
                                   );
   if (EFI_ERROR (Status)) {
     ZeroMem (NewBar, sizeof (NewBar));
@@ -599,7 +599,7 @@ SetResizableBarOnDeviceRbIo (
                                     EfiPciWidthUint32,
                                     PciAddrOffset (PciAddress, OFFSET_OF (PCI_TYPE00, Device.Bar)),
                                     PCI_MAX_BAR,
-                                    (VOID *)OldBar
+                                    OldBar
                                     );
     DEBUG ((DEBUG_INFO, "OCDM: Reprogrammed BARs to original - %r\n", Status));
   }
