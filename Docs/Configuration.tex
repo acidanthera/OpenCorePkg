@@ -8677,7 +8677,7 @@ for additional options.
 
   The quirk makes \texttt{ResizeGpuBars} and \texttt{ResizeAppleGpuBars} use \texttt{PciRootBridgeIo} instead of PciIo.
   This is needed on systems with a buggy \texttt{PciIo} implementation where trying to configure
-  Resizable BAR which results in \texttt{Capability I/O Error}. Typically this is needed on
+  Resizable BAR results in \texttt{Capability I/O Error}. Typically this is required on
   older systems which have been modified with \href{https://github.com/xCuri0/ReBarUEFI}{ReBarUEFI}.
 
 \item
