@@ -21,6 +21,7 @@
 
 #include <Library/BaseLib.h>
 #include <Library/BaseMemoryLib.h>
+#include <Library/MemoryAllocationLib.h>
 #include <Library/DebugLib.h>
 #include <Library/IoLib.h>
 #include <Library/UefiBootServicesTableLib.h>
@@ -79,11 +80,14 @@ LocatePciCapabilityPciIo (
   return EFI_NOT_FOUND;
 }
 
+//
 // Needed to access address larger than 256
+//
+STATIC
 UINT64
 PciAddrOffset (
-  UINTN  PciAddress,
-  INTN   Offset
+  UINT64  PciAddress,
+  INTN    Offset
   )
 {
   UINTN  Reg  = (PciAddress & 0xffffffff00000000) >> 32;
@@ -91,14 +95,14 @@ PciAddrOffset (
   UINTN  Dev  = (PciAddress & 0xff0000) >> 16;
   UINTN  Func = (PciAddress & 0xff00) >> 8;
 
-  return EFI_PCI_ADDRESS (Bus, Dev, Func, ((INT64)Reg + Offset));
+  return EFI_PCI_ADDRESS (Bus, Dev, Func, (Reg + Offset));
 }
 
 STATIC
 EFI_STATUS
 LocatePciCapabilityRbIo (
   IN  EFI_PCI_ROOT_BRIDGE_IO_PROTOCOL  *PciRootBridgeIo,
-  IN  UINTN                            PciAddress,
+  IN  UINT64                           PciAddress,
   IN  UINT16                           CapId,
   OUT UINT32                           *Offset
   )
@@ -381,7 +385,7 @@ STATIC
 EFI_STATUS
 SetResizableBarOnDeviceRbIo (
   IN EFI_PCI_ROOT_BRIDGE_IO_PROTOCOL  *PciRootBridgeIo,
-  IN UINTN                            PciAddress,
+  IN UINT64                           PciAddress,
   IN PCI_BAR_SIZE                     Size,
   IN BOOLEAN                          Increase
   )
@@ -398,9 +402,6 @@ SetResizableBarOnDeviceRbIo (
   UINT32                                                   OldBar[PCI_MAX_BAR];
   UINT32                                                   NewBar[PCI_MAX_BAR];
   INTN                                                     Bit;
-  BOOLEAN                                                  ChangedBars;
-
-  ChangedBars = FALSE;
 
   Status = LocatePciCapabilityRbIo (
              PciRootBridgeIo,
@@ -443,7 +444,7 @@ SetResizableBarOnDeviceRbIo (
                                   EfiPciWidthUint8,
                                   PciAddrOffset (PciAddress, ResizableBarOffset + sizeof (PCI_EXPRESS_EXTENDED_CAPABILITIES_HEADER)),
                                   sizeof (PCI_EXPRESS_EXTENDED_CAPABILITIES_RESIZABLE_BAR_ENTRY) * ResizableBarNumber,
-                                  (VOID *)Entries
+                                  Entries
                                   );
   if (EFI_ERROR (Status)) {
     DEBUG ((DEBUG_INFO, "OCDM: RBAR caps cannot be read - %r\n", Status));
@@ -556,55 +557,51 @@ SetResizableBarOnDeviceRbIo (
                            1,
                            &Entries[Index].ResizableBarControl.Uint32
                            );
-
-    ChangedBars = TRUE;
   }
 
-  if (ChangedBars) {
-    DEBUG_CODE_BEGIN ();
+  DEBUG_CODE_BEGIN ();
 
-    Status = PciRootBridgeIo->Pci.Read (
+  Status = PciRootBridgeIo->Pci.Read (
+                                  PciRootBridgeIo,
+                                  EfiPciWidthUint32,
+                                  PciAddrOffset (PciAddress, OFFSET_OF (PCI_TYPE00, Device.Bar)),
+                                  PCI_MAX_BAR,
+                                  (VOID *)NewBar
+                                  );
+  if (EFI_ERROR (Status)) {
+    ZeroMem (NewBar, sizeof (NewBar));
+  }
+
+  DEBUG ((
+    DEBUG_INFO,
+    "OCDM: New BAR %08X %08X %08X %08X %08X %08X - %r\n",
+    NewBar[0],
+    NewBar[1],
+    NewBar[2],
+    NewBar[3],
+    NewBar[4],
+    NewBar[5],
+    Status
+    ));
+
+  DEBUG_CODE_END ();
+
+  //
+  // PCI BARs are reset after resizing, so we must restore them. This follows the spec:
+  //   After writing the BAR Size field, the contents of the corresponding BAR are undefined.
+  //   To ensure that it contains a valid address after resizing the BAR, system software must
+  //   reprogram the BAR, and Set the Memory Space Enable bit (unless the resource is not allocated).
+  // TODO: We do not bother touching `Memory Space Enable` bit but strictly we should.
+  //
+  if (!IsZeroBuffer (OldBar, sizeof (OldBar))) {
+    Status = PciRootBridgeIo->Pci.Write (
                                     PciRootBridgeIo,
                                     EfiPciWidthUint32,
                                     PciAddrOffset (PciAddress, OFFSET_OF (PCI_TYPE00, Device.Bar)),
                                     PCI_MAX_BAR,
-                                    (VOID *)NewBar
+                                    (VOID *)OldBar
                                     );
-    if (EFI_ERROR (Status)) {
-      ZeroMem (NewBar, sizeof (NewBar));
-    }
-
-    DEBUG ((
-      DEBUG_INFO,
-      "OCDM: New BAR %08X %08X %08X %08X %08X %08X - %r\n",
-      NewBar[0],
-      NewBar[1],
-      NewBar[2],
-      NewBar[3],
-      NewBar[4],
-      NewBar[5],
-      Status
-      ));
-
-    DEBUG_CODE_END ();
-
-    //
-    // PCI BARs are reset after resizing, so we must restore them. This follows the spec:
-    //   After writing the BAR Size field, the contents of the corresponding BAR are undefined.
-    //   To ensure that it contains a valid address after resizing the BAR, system software must
-    //   reprogram the BAR, and Set the Memory Space Enable bit (unless the resource is not allocated).
-    // TODO: We do not bother touching `Memory Space Enable` bit but strictly we should.
-    //
-    if (!IsZeroBuffer (OldBar, sizeof (OldBar))) {
-      Status = PciRootBridgeIo->Pci.Write (
-                                      PciRootBridgeIo,
-                                      EfiPciWidthUint32,
-                                      PciAddrOffset (PciAddress, OFFSET_OF (PCI_TYPE00, Device.Bar)),
-                                      PCI_MAX_BAR,
-                                      (VOID *)OldBar
-                                      );
-      DEBUG ((DEBUG_INFO, "OCDM: Reprogrammed BARs to original - %r\n", Status));
-    }
+    DEBUG ((DEBUG_INFO, "OCDM: Reprogrammed BARs to original - %r\n", Status));
   }
 
   return EFI_SUCCESS;
@@ -690,16 +687,14 @@ ResizeGpuBarsPciIo (
   return EFI_NOT_FOUND;
 }
 
-EFI_STATUS
+STATIC
+BOOLEAN
 PciGetNextBusRange (
   IN OUT EFI_ACPI_ADDRESS_SPACE_DESCRIPTOR  **Descriptors,
   OUT UINT16                                *MinBus,
-  OUT UINT16                                *MaxBus,
-  OUT BOOLEAN                               *IsEnd
+  OUT UINT16                                *MaxBus
   )
 {
-  *IsEnd = FALSE;
-
   //
   // When *Descriptors is NULL, Configuration() is not implemented, so assume
   // range is 0~PCI_MAX_BUS
@@ -707,7 +702,7 @@ PciGetNextBusRange (
   if ((*Descriptors) == NULL) {
     *MinBus = 0;
     *MaxBus = PCI_MAX_BUS;
-    return EFI_SUCCESS;
+    return FALSE;
   }
 
   //
@@ -722,19 +717,16 @@ PciGetNextBusRange (
       *MinBus = (UINT16)(*Descriptors)->AddrRangeMin;
       *MaxBus = (UINT16)(*Descriptors)->AddrRangeMax;
       (*Descriptors)++;
-      return (EFI_SUCCESS);
+      return FALSE;
     }
 
     (*Descriptors)++;
   }
 
-  if ((*Descriptors)->Desc == ACPI_END_TAG_DESCRIPTOR) {
-    *IsEnd = TRUE;
-  }
-
-  return EFI_SUCCESS;
+  return TRUE;
 }
 
+STATIC
 EFI_STATUS
 ResizeGpuBarsRbIo (
   IN PCI_BAR_SIZE  Size,
@@ -748,11 +740,15 @@ ResizeGpuBarsRbIo (
   EFI_PCI_ROOT_BRIDGE_IO_PROTOCOL    *PciRootBridgeIo;
   EFI_ACPI_ADDRESS_SPACE_DESCRIPTOR  *Descriptors;
   UINT8                              HdrType;
-  UINT8                              Bus, Dev, Func;
-  UINT16                             MinBus, MaxBus;
-  BOOLEAN                            IsEnd, HasSuccess;
+  UINT8                              Bus;
+  UINT8                              Dev;
+  UINT8                              Func;
+  UINT16                             MinBus;
+  UINT16                             MaxBus;
+  BOOLEAN                            IsEnd;
+  BOOLEAN                            HasSuccess;
   PCI_CLASSCODE                      ClassCode;
-  UINTN                              PciAddress;
+  UINT64                             PciAddress;
 
   ASSERT (Size < PciBarTotal);
 
@@ -776,20 +772,19 @@ ResizeGpuBarsRbIo (
                     (VOID **)&PciRootBridgeIo
                     );
     if (EFI_ERROR (Status)) {
-      continue;
+      goto free;
     }
 
     PciRootBridgeIo->Configuration (PciRootBridgeIo, (VOID **)&Descriptors);
     if (EFI_ERROR (Status)) {
-      continue;
+      goto free;
     }
 
+    //
     // Not sure if multiple root bridge systems even exist but this should support them
+    //
     while (TRUE) {
-      Status = PciGetNextBusRange (&Descriptors, &MinBus, &MaxBus, &IsEnd);
-      if (EFI_ERROR (Status)) {
-        break;
-      }
+      IsEnd = PciGetNextBusRange (&Descriptors, &MinBus, &MaxBus);
 
       if (IsEnd || (Descriptors == NULL)) {
         break;
@@ -840,6 +835,9 @@ ResizeGpuBarsRbIo (
         }
       }
     }
+
+free:
+    FreePool (HandleBuffer[Index]);
   }
 
   if (HasSuccess) {
@@ -859,8 +857,8 @@ ResizeGpuBars (
   if (UseRbIo) {
     DEBUG ((DEBUG_INFO, "OCDM: RBAR using PciRootBridgeIo\n"));
     return ResizeGpuBarsRbIo (Size, Increase);
-  } else {
-    DEBUG ((DEBUG_INFO, "OCDM: RBAR using PciIo\n"));
-    return ResizeGpuBarsPciIo (Size, Increase);
   }
+
+  DEBUG ((DEBUG_INFO, "OCDM: RBAR using PciIo\n"));
+  return ResizeGpuBarsPciIo (Size, Increase);
 }
