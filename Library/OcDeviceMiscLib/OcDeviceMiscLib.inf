@@ -62,6 +62,7 @@
   PrintLib
   UefiLib
   UefiBootServicesTableLib
+  DxeServicesTableLib
 
 [Sources]
   ActivateHpetSupport.c

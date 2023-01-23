@@ -6,7 +6,8 @@
 #ifndef OC_BOOT_MANAGEMENT_LIB_H
 #define OC_BOOT_MANAGEMENT_LIB_H
 
-#include <Uefi.h>
+#include <PiDxe.h>
+#include <Guid/AppleVariable.h>
 #include <IndustryStandard/AppleBootArgs.h>
 #include <IndustryStandard/AppleHid.h>
 #include <Library/OcAppleBootPolicyLib.h>
@@ -19,6 +20,8 @@
 #include <Protocol/LoadedImage.h>
 #include <Protocol/AppleBeepGen.h>
 #include <Protocol/OcAudio.h>
+#include <Protocol/GraphicsOutput.h>
+#include <Protocol/AppleUserInterface.h>
 
 #if defined (OC_TARGET_DEBUG) || defined (OC_TARGET_NOOPT)
 // #define BUILTIN_DEMONSTRATE_TYPING
@@ -2073,6 +2076,17 @@ OcAddEntriesFromBootEntryProtocol (
   IN     CONST VOID *DefaultEntryId, OPTIONAL
   IN     BOOLEAN        CreateDefault,
   IN     BOOLEAN        CreateForHotKey
+  );
+
+/**
+  Force Apple Firmware UI to always reconnect to current console GOP.
+
+  @retval EFI_SUCCESS   Firmware UI ConnectGop method was successfully reset.
+  @retval other         Compatible firmware UI protocol for reset could not be found.
+**/
+EFI_STATUS
+OcUnlockAppleFirmwareUI (
+  VOID
   );
 
 /**

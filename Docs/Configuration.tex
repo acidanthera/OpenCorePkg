@@ -3723,10 +3723,15 @@ the default boot entry choice will remain changed until the next manual reconfig
 
   \emph{Note 3}: On Macs with problematic GOP, it may be difficult to re-bless OpenCore if its bless status
   is lost. The \texttt{BootKicker} utility can be used to work around this problem, if set up as a Tool
-  in OpenCore (e.g. on a CDROM) with \texttt{FullNvramAccess} enabled. It will launch the Apple picker,
-  which allows selection of an item to boot next (with \texttt{Enter}), or next and subsequently, i.e.
-  as the blessed entry (with \texttt{CTRL+Enter}), as normal. After the selection is made, the system
-  will reboot and the chosen entry will be booted.
+  in OpenCore with \texttt{FullNvramAccess} enabled. It will launch the Apple picker,
+  which allows selection of an item to boot next (with \texttt{Enter}), or next and from then on until
+  the next change (with \texttt{CTRL+Enter}). Note that after the selection is made, the system
+  \emph{will reboot} before the chosen entry is booted. While this behaviour might seem surprising,
+  it can be used both to switch which OpenCore installation is blessed, with \texttt{CTRL+Enter},
+  e.g. from a recovery OpenCore installation on CD (selected with the \texttt{C} key on boot) back
+  to the main installion of OpenCore on the hard drive, if this is lost after an NVRAM reset. It can
+  also be used, even when the native picker cannot be shown normally (unsupported GPU), to do a one-shot
+  boot without OpenCore, e.g. to another OS or tool, or to an earlier version of macOS.
 
 \item
   \texttt{PickerVariant}\\
@@ -6355,6 +6360,11 @@ even cause permanent firmware damage. Some of the known drivers are listed below
   any available writeable filesystem upon pressing \texttt{F10}.
   This is a modified version of \href{https://github.com/LongSoft/CrScreenshotDxe}{\texttt{CrScreenshotDxe}}
   driver by \href{https://github.com/NikolajSchlej}{Nikolaj Schlej}. \\
+\href{https://github.com/acidanthera/OpenCorePkg}{\texttt{EnableGop\{Direct\}}}\textbf{*}
+& Early beta release firmware-embeddable driver providing pre-OpenCore non-native GPU support
+  on MacPro5,1. Installation instructions can be found in the
+  \href{https://github.com/acidanthera/OpenCorePkg/blob/master/Staging/EnableGop/README.md}{\texttt{Utilities/EnableGop}}
+  directory of the OpenCore release zip file - proceed with caution. \\
 \href{https://github.com/acidanthera/OcBinaryData}{\texttt{ExFatDxe}}
 & Proprietary ExFAT file system driver for Bootcamp support commonly found in Apple
   firmware. For Sandy Bridge and earlier CPUs, the \texttt{ExFatDxeLegacy} driver should be

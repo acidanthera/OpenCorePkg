@@ -744,6 +744,12 @@
   ## @Prompt Use Pin Capabilities to identify audio outputs.
   gOpenCorePkgTokenSpaceGuid.PcdAudioControllerUsePinCapsForOutputs|TRUE|BOOLEAN|0x00000008
 
+  ## Indicates whether to build EnableGop driver with DirectGopRendering.<BR><BR>
+  ##   TRUE  - DirectGopRendering will be used.<BR>
+  ##   FALSE - DirectGopRendering will not be used.<BR>
+  ## @Prompt Use DirectGopRendering.
+  gOpenCorePkgTokenSpaceGuid.PcdEnableGopDirect|FALSE|BOOLEAN|0x00000009
+
 [PcdsFixedAtBuild]
   ## Defines the Console Control initialization mode set on entry.<BR><BR>
   ##   0 - EfiConsoleControlScreenText<BR>

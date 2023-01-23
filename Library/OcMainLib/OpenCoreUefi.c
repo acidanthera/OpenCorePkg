@@ -939,9 +939,7 @@ OcLoadUefiSupport (
     OcInstallPermissiveSecurityPolicy ();
   }
 
-  if (Config->Uefi.Quirks.ForgeUefiSupport) {
-    OcForgeUefiSupport ();
-  }
+  OcForgeUefiSupport (Config->Uefi.Quirks.ForgeUefiSupport, FALSE);
 
   if (Config->Uefi.Quirks.ReloadOptionRoms) {
     OcReloadOptionRoms ();

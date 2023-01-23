@@ -22,6 +22,7 @@
   BUILD_TARGETS           = RELEASE|DEBUG|NOOPT
   SKUID_IDENTIFIER        = DEFAULT
   DSC_SPECIFICATION       = 0x00010006
+  FLASH_DEFINITION        = OpenCorePkg/OpenCorePkg.fdf
 
   #
   # Network definition
@@ -319,6 +320,14 @@
   OpenCorePkg/Platform/ResetNvramEntry/ResetNvramEntry.inf
   OpenCorePkg/Platform/ToggleSipEntry/ToggleSipEntry.inf
   OpenCorePkg/Staging/AudioDxe/AudioDxe.inf
+  OpenCorePkg/Staging/EnableGop/EnableGop.inf {
+    <LibraryClasses>
+      DebugLib|OpenCorePkg/Library/OcDebugLibNull/OcDebugLibNull.inf
+  }
+  OpenCorePkg/Staging/EnableGop/EnableGopDirect.inf {
+    <LibraryClasses>
+      DebugLib|OpenCorePkg/Library/OcDebugLibNull/OcDebugLibNull.inf
+  }
   OpenCorePkg/Staging/OpenHfsPlus/OpenHfsPlus.inf
   OpenCorePkg/Tests/AcpiTest/AcpiTest.inf
   OpenCorePkg/Tests/AcpiTest/AcpiTestApp.inf

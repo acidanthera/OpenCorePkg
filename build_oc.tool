@@ -249,6 +249,32 @@ package() {
     fi
   done
 
+  # Copy Mac Pro GOP firmware driver.
+  mkdir -p "${dstdir}/Utilities/EnableGop" || exit 1
+  ENABLE_GOP_GUID="3FBA58B1-F8C0-41BC-ACD8-253043A3A17F"
+  ffsNames=(
+    "EnableGop"
+    "EnableGopDirect"
+    )
+  for ffsName in "${ffsNames[@]}"; do
+    cp "FV/Ffs/${ENABLE_GOP_GUID}${ffsName}/${ENABLE_GOP_GUID}.ffs" "${dstdir}/Utilities/EnableGop/${ffsName}.ffs" || exit 1
+  done
+  gopDrivers=(
+    "EnableGop.efi"
+    "EnableGopDirect.efi"
+    )
+  for file in "${gopDrivers[@]}"; do
+    cp "X64/${file}" "${dstdir}/Utilities/EnableGop"/ || exit 1
+  done
+  helpFiles=(
+    "README.md"
+    "UEFITool_Inserted_Screenshot.png"
+    "NvInsertEfi.sh"
+  )
+  for file in "${helpFiles[@]}"; do
+    cp "${selfdir}/Staging/EnableGop/${file}" "${dstdir}/Utilities/EnableGop"/ || exit 1
+  done
+
   utils=(
     "ACPIe"
     "acdtinfo"
