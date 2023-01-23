@@ -344,11 +344,11 @@ OcUseSystemTextOutput (
     ));
 
   if (Renderer == OcConsoleRendererSystemGraphics) {
+    OcConsoleControlInstallProtocol (&mConsoleControlProtocol, NULL, NULL);
     OcConsoleControlSetMode (EfiConsoleControlScreenGraphics);
-    OcConsoleControlInstallProtocol (&mConsoleControlProtocol, NULL, &mConsoleMode);
   } else if (Renderer == OcConsoleRendererSystemText) {
+    OcConsoleControlInstallProtocol (&mConsoleControlProtocol, NULL, NULL);
     OcConsoleControlSetMode (EfiConsoleControlScreenText);
-    OcConsoleControlInstallProtocol (&mConsoleControlProtocol, NULL, &mConsoleMode);
   } else {
     OcConsoleControlInstallProtocol (&mConsoleControlProtocol, &mOriginalConsoleControlProtocol, &mConsoleMode);
   }

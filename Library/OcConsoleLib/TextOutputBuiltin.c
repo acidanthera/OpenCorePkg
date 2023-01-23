@@ -973,8 +973,8 @@ OcUseBuiltinTextOutput (
   Status = AsciiTextResetEx (&mAsciiTextOutputProtocol, TRUE, TRUE);
 
   if (!EFI_ERROR (Status)) {
-    OcConsoleControlSetMode (Mode);
     OcConsoleControlInstallProtocol (&mConsoleControlProtocol, NULL, NULL);
+    OcConsoleControlSetMode (Mode);
 
     gST->ConOut    = &mAsciiTextOutputProtocol;
     gST->Hdr.CRC32 = 0;

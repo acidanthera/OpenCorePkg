@@ -72,9 +72,9 @@ OcConsoleControlSetMode (
 
 EFI_STATUS
 OcConsoleControlInstallProtocol (
-  IN  EFI_CONSOLE_CONTROL_PROTOCOL     *NewProtocol,
-  OUT EFI_CONSOLE_CONTROL_PROTOCOL     *OldProtocol  OPTIONAL,
-  OUT EFI_CONSOLE_CONTROL_SCREEN_MODE  *OldMode  OPTIONAL
+  IN  EFI_CONSOLE_CONTROL_PROTOCOL        *NewProtocol,
+  OUT EFI_CONSOLE_CONTROL_PROTOCOL        *OldProtocol  OPTIONAL,
+  IN OUT EFI_CONSOLE_CONTROL_SCREEN_MODE  *OldMode  OPTIONAL
   )
 {
   EFI_STATUS                    Status;

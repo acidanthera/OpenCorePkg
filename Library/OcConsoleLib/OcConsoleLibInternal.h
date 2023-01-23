@@ -49,11 +49,14 @@ OcSetConsoleModeForProtocol (
   IN  UINT32                           Height
   );
 
+//
+// Note: OldMode remains unchanged if no native console control protocol implementation is found.
+//
 EFI_STATUS
 OcConsoleControlInstallProtocol (
-  IN  EFI_CONSOLE_CONTROL_PROTOCOL     *NewProtocol,
-  OUT EFI_CONSOLE_CONTROL_PROTOCOL     *OldProtocol  OPTIONAL,
-  OUT EFI_CONSOLE_CONTROL_SCREEN_MODE  *OldMode  OPTIONAL
+  IN     EFI_CONSOLE_CONTROL_PROTOCOL     *NewProtocol,
+  OUT EFI_CONSOLE_CONTROL_PROTOCOL        *OldProtocol  OPTIONAL,
+  IN OUT EFI_CONSOLE_CONTROL_SCREEN_MODE  *OldMode  OPTIONAL
   );
 
 EFI_STATUS
