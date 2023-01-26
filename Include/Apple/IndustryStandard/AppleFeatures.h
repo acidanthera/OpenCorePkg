@@ -111,12 +111,17 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 //
 #define FW_FEATURE_PLATFORM_SECURITY_POLICY_02  0x00000800U       // 11
 //
-// Supports Apple Tamper Resistant Boot, which helps FindMyMac functionality.
+// Support Apple Tamper Resistant Boot, which helps FindMyMac functionality.
+// Firmware Locked bit is controlled by the same protocol which determines whether
+// firmware actually gets locked down by SPI registers at DXE start, on EFI-era Macs.
+// Firmware unlock can be triggered by pressing and holding power button at power up on
+// Mac Pro 144.0.0.0.0 firmware. Same protocol is present, but no known way to trigger
+// unlock, on similar era models such as iMac.
 // Not set on Macs with T2 via detected non APPLE_EFI_FIRMWARE_GEN3_ID_MAGIC.
 // See: /System/Library/PrivateFrameworks/FindMyMac.framework/XPCServices/com.apple.HasTRB.xpc/Contents/MacOS/com.apple.HasTRB.
 //
-#define FW_FEATURE_SUPPORTS_TRB   0x00001000U                     // 12
-#define FW_FEATURE_UNKNOWN_BIT13  0x00002000U                     // 13
+#define FW_FEATURE_FIRMWARE_LOCKED		0x00001000U       // 12
+#define FW_FEATURE_UNKNOWN_BIT13  		0x00002000U       // 13
 //
 // Supports USB 2.0 in the firmware. Found in AppleACPIPlatform.kext.
 //
