@@ -390,18 +390,21 @@ RenderResync (
   mPrivateColumn           = mPrivateRow = 0;
   This->Mode->CursorColumn = This->Mode->CursorRow = 0;
 
-  mGraphicsOutput->Blt (
-                     mGraphicsOutput,
-                     &mBackgroundColor.Pixel,
-                     EfiBltVideoFill,
-                     0,
-                     0,
-                     0,
-                     0,
-                     Info->HorizontalResolution,
-                     Info->VerticalResolution,
-                     0
-                     );
+  if (mConsoleMode == EfiConsoleControlScreenText) {
+    mGraphicsOutput->Blt (
+                       mGraphicsOutput,
+                       &mBackgroundColor.Pixel,
+                       EfiBltVideoFill,
+                       0,
+                       0,
+                       0,
+                       0,
+                       Info->HorizontalResolution,
+                       Info->VerticalResolution,
+                       0
+                       );
+  }
+
   return EFI_SUCCESS;
 }
 
@@ -968,9 +971,10 @@ OcUseBuiltinTextOutput (
     mFontScale = 1;
   }
 
-  DEBUG ((DEBUG_INFO, "OCC: Using builtin text renderer with %d scale\n", mFontScale));
+  DEBUG ((DEBUG_INFO, "OCC: Using builtin text renderer scale %u mode %u\n", mFontScale, Mode));
 
-  Status = AsciiTextResetEx (&mAsciiTextOutputProtocol, TRUE, TRUE);
+  mConsoleMode = Mode;
+  Status       = AsciiTextResetEx (&mAsciiTextOutputProtocol, TRUE, TRUE);
 
   if (!EFI_ERROR (Status)) {
     OcConsoleControlInstallProtocol (&mConsoleControlProtocol, NULL, NULL);
