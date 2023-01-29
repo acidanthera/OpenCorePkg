@@ -83,23 +83,25 @@
 !endif
 
 #
-# Ideally we would match the compressed layout of DXE drivers in Mac Pro 144.0.0.0.0 firmware,
-# as per the commented out lines, but Mac Pro will not load this with standard compression.
-# With lines commented out we make a different, non-compressed layout which the Mac Pro will load.
+# Uses patched GenSec to support legacy TianoCompress compression, producing an ffs which matches
+# those found in legacy Mac firmware.
 #
-# TODO: Is there a way to make a Tiano-compressed COMPRESS section, as in Mac Pro firmware, using
-# EDK-II build tools? If we manually reconstuct one with UEFITool 0.25.1, Mac Pro will load it.
+# Removing the wrapping COMPRESS and TIANO sections below gives an uncompressed ffs from non-patched
+# tools which Mac legacy firmware can read (at about four times the size of the compressed version).
 #
-# Note: `GUIDED A31280AD-481E-41B6-95E8-127F4C984779` will make a Tiano compressed GUIDED
-# section, but this is different and 144.0.0.0.0 will not load it.
+# Using standard (PI_STD) COMPRESS produces a compressed ffs which legacy Mac firmware cannot read.
+#
+# Note: `GUIDED A31280AD-481E-41B6-95E8-127F4C984779` with standard tools makes a Tiano compressed
+# GUIDED section, but this is different from a Tiano compressed COMPRESS section and legacy Mac
+# firmware also cannot read it.
 #
 [Rule.Common.DXE_DRIVER]
   FILE DRIVER = $(NAMED_GUID) Checksum {
-#    COMPRESS {
-#      GUIDED {
+    COMPRESS TIANO {
+      GUIDED {
         DXE_DEPEX    DXE_DEPEX Optional      $(INF_OUTPUT)/$(MODULE_NAME).depex
         PE32         PE32                    $(INF_OUTPUT)/$(MODULE_NAME).efi
         UI           STRING="$(MODULE_NAME)" Optional
-#      }
-#    }
+      }
+    }
   }
