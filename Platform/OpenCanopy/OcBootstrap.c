@@ -195,12 +195,20 @@ OcShowMenuByOc (
   GuiDrawLoop (&mDrawContext);
   ASSERT (mGuiContext.BootEntry != NULL || mGuiContext.Refresh);
 
+  //
+  // Do not use this clear screen, since the convention (not just in Apple firmware) seems to be
+  // for each UI step which finishes to leave its own graphics up for the next step to clear, so
+  // this matches that, and gives a slightly smoother looking, slightly faster boot.
+  //
+ #if 0
   if (!mGuiContext.Refresh) {
     //
     // Clear the screen only when we exit.
     //
     GuiClearScreen (&mDrawContext, &mGuiContext.BackgroundColor.Pixel);
   }
+
+ #endif
 
   //
   // Note, it is important to destruct GUI here, as we must ensure
@@ -261,6 +269,11 @@ OcShowPasswordByOc (
   GuiRedrawAndFlushScreen (&mDrawContext);
 
   GuiDrawLoop (&mDrawContext);
+
+  //
+  // Keep this clear screen, since it seems to match Mac firmware behaviour here better,
+  // and it gives a better sense of progress between (intentionally slow - computationally
+  // intensive) password verification and (can be slow) start of Recovery.
   //
   // Clear the screen only if we will not show BootPicker afterwards.
   //
