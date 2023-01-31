@@ -86,7 +86,7 @@
 # Uses patched GenSec to support legacy TianoCompress compression, producing an ffs which matches
 # those found in legacy Mac firmware.
 #
-# Removing the wrapping COMPRESS and TIANO sections below gives an uncompressed ffs from non-patched
+# Removing the wrapping COMPRESS and GUIDED sections below gives an uncompressed ffs from non-patched
 # tools which Mac legacy firmware can read (at about four times the size of the compressed version).
 #
 # Using standard (PI_STD) COMPRESS produces a compressed ffs which legacy Mac firmware cannot read.
