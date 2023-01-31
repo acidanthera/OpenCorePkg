@@ -9,6 +9,7 @@ OpenCore Changelog
 - Provided additional UEFI forge mode, for use in firmware drivers
 - Implemented firmware driver enabling pre-OpenCore graphics on non-natively supported GPUs on EFI-era Macs
 - Prevented unwanted clear screen to console background colour when in graphics mode
+- Added ResizeUsePciRbIo to workaround broken PciIo on some UEFI firmwares, thx @xCuri0
 
 #### v0.8.8
 - Updated underlying EDK II package to edk2-stable202211
