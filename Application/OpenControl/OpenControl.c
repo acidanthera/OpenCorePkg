@@ -44,7 +44,7 @@ UefiMain (
                     );
 
     if (EFI_ERROR (Status)) {
-      Print (L"FwRuntime protocol is unavilable - %r\n", Status);
+      Print (L"FwRuntime protocol is unavailable - %r\n", Status);
       return EFI_SUCCESS;
     }
 

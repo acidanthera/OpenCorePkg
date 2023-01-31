@@ -126,7 +126,7 @@ For further information on VBIOS modification, see:
 
 To use the provided `NvInsertEfi.sh` script:
 
- - Locate an appropriate version of the `nvflash` tool (avilable for Linux and Windows), which can be used to read
+ - Locate an appropriate version of the `nvflash` tool (available for Linux and Windows), which can be used to read
  from and write to your Nvidia GPU VBIOS.
  - Use `nvflash` to read a copy of your VBIOS.
  - Using a hex editor, search in the VBIOS for the byte sequence `F1 0E 00 00` with the byte sequence `55 AA` coming
