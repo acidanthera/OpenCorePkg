@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
-%DIF DEL PreviousConfiguration.tex   Mon Jan  2 20:13:00 2023
-%DIF ADD ../Configuration.tex        Sun Jan  8 15:18:30 2023
+%DIF DEL PreviousConfiguration.tex   Thu Jan 26 06:07:30 2023
+%DIF ADD ../Configuration.tex        Tue Jan 31 00:06:47 2023
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -118,7 +118,7 @@
 %DIF HYPERREF PREAMBLE %DIF PREAMBLE
 \providecommand{\DIFadd}[1]{\texorpdfstring{\DIFaddtex{#1}}{#1}} %DIF PREAMBLE
 \providecommand{\DIFdel}[1]{\texorpdfstring{\DIFdeltex{#1}}{}} %DIF PREAMBLE
-%DIF LISTINGS PREAMBLE %DIF PREAMBLE
+%DIF COLORLISTINGS PREAMBLE %DIF PREAMBLE
 \RequirePackage{listings} %DIF PREAMBLE
 \RequirePackage{color} %DIF PREAMBLE
 \lstdefinelanguage{DIFcode}{ %DIF PREAMBLE
@@ -3785,10 +3785,17 @@ the default boot entry choice will remain changed until the next manual reconfig
 
   \emph{Note 3}: On Macs with problematic GOP, it may be difficult to re-bless OpenCore if its bless status
   is lost. The \texttt{BootKicker} utility can be used to work around this problem, if set up as a Tool
-  in OpenCore (e.g. on a CDROM) with \texttt{FullNvramAccess} enabled. It will launch the Apple picker,
-  which allows selection of an item to boot next (with \texttt{Enter}), or next and subsequently, i.e.
-  as the blessed entry (with \texttt{CTRL+Enter}), as normal. After the selection is made, the system
-  will reboot and the chosen entry will be booted.
+  in OpenCore \DIFdelbegin \DIFdel{(e.g. on a CDROM) }\DIFdelend with \texttt{FullNvramAccess} enabled. It will launch the Apple picker,
+  which allows selection of an item to boot next (with \texttt{Enter}), or next and \DIFdelbegin \DIFdel{subsequently, i.e.
+  as the blessed entry }\DIFdelend \DIFaddbegin \DIFadd{from then on until
+  the next change }\DIFaddend (with \texttt{CTRL+Enter})\DIFdelbegin \DIFdel{, as normal. After }\DIFdelend \DIFaddbegin \DIFadd{. Note that after }\DIFaddend the selection is made, the system
+  \DIFdelbegin \DIFdel{will reboot and }\DIFdelend \DIFaddbegin \emph{\DIFadd{will reboot}} \DIFadd{before }\DIFaddend the chosen entry \DIFdelbegin \DIFdel{will be booted. }\DIFdelend \DIFaddbegin \DIFadd{is booted. While this behaviour might seem surprising,
+  it can be used both to switch which OpenCore installation is blessed, with }\texttt{\DIFadd{CTRL+Enter}}\DIFadd{,
+  e.g. from a recovery OpenCore installation on CD (selected with the }\texttt{\DIFadd{C}} \DIFadd{key on boot) back
+  to the main installion of OpenCore on the hard drive, if this is lost after an NVRAM reset. It can
+  also be used, even when the native picker cannot be shown normally (unsupported GPU), to do a one-shot
+  boot without OpenCore, e.g. to another OS or tool, or to an earlier version of macOS.
+}\DIFaddend 
 
 \item
   \texttt{PickerVariant}\\
@@ -6417,7 +6424,12 @@ even cause permanent firmware damage. Some of the known drivers are listed below
   any available writeable filesystem upon pressing \texttt{F10}.
   This is a modified version of \href{https://github.com/LongSoft/CrScreenshotDxe}{\texttt{CrScreenshotDxe}}
   driver by \href{https://github.com/NikolajSchlej}{Nikolaj Schlej}. \\
-\href{https://github.com/acidanthera/OcBinaryData}{\texttt{ExFatDxe}}
+\DIFaddbegin \href{https://github.com/acidanthera/OpenCorePkg}{\texttt{\DIFadd{EnableGop\{Direct\}}}}\textbf{\DIFadd{*}}
+& \DIFadd{Early beta release firmware-embeddable driver providing pre-OpenCore non-native GPU support
+  on MacPro5,1. Installation instructions can be found in the
+  }\href{https://github.com/acidanthera/OpenCorePkg/blob/master/Staging/EnableGop/README.md}{\texttt{\DIFadd{Utilities/EnableGop}}}
+  \DIFadd{directory of the OpenCore release zip file - proceed with caution. }\\
+\DIFaddend \href{https://github.com/acidanthera/OcBinaryData}{\texttt{ExFatDxe}}
 & Proprietary ExFAT file system driver for Bootcamp support commonly found in Apple
   firmware. For Sandy Bridge and earlier CPUs, the \texttt{ExFatDxeLegacy} driver should be
   used due to the lack of \texttt{RDRAND} instruction support. \\
