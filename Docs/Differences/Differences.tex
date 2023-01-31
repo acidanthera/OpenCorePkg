@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
-%DIF DEL PreviousConfiguration.tex   Thu Jan 26 06:07:30 2023
-%DIF ADD ../Configuration.tex        Tue Jan 31 00:06:47 2023
+%DIF DEL PreviousConfiguration.tex   Tue Jan 31 07:55:23 2023
+%DIF ADD ../Configuration.tex        Tue Jan 31 07:56:05 2023
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -8744,7 +8744,19 @@ for additional options.
   \end{itemize}
 
 \item
-  \texttt{ResizeGpuBars}\\
+  \DIFaddbegin \texttt{\DIFadd{ResizeUsePciRbIo}}\\
+  \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ boolean}}\\
+  \textbf{\DIFadd{Failsafe}}\DIFadd{: }\texttt{\DIFadd{false}}\\
+  \textbf{\DIFadd{Description}}\DIFadd{: Use PciRootBridgeIo for }\DIFaddend \texttt{ResizeGpuBars} \DIFaddbegin \DIFadd{and }\texttt{\DIFadd{ResizeAppleGpuBars}}
+
+  \DIFadd{The quirk makes }\texttt{\DIFadd{ResizeGpuBars}} \DIFadd{and }\texttt{\DIFadd{ResizeAppleGpuBars}} \DIFadd{use }\texttt{\DIFadd{PciRootBridgeIo}} \DIFadd{instead of PciIo.
+  This is needed on systems with a buggy }\texttt{\DIFadd{PciIo}} \DIFadd{implementation where trying to configure
+  Resizable BAR results in }\texttt{\DIFadd{Capability I/O Error}}\DIFadd{. Typically this is required on
+  older systems which have been modified with }\href{https://github.com/xCuri0/ReBarUEFI}{\DIFadd{ReBarUEFI}}\DIFadd{.
+}
+
+\item
+  \texttt{\DIFadd{ResizeGpuBars}}\DIFaddend \\
   \textbf{Type}: \texttt{plist\ integer}\\
   \textbf{Failsafe}: \texttt{-1}\\
   \textbf{Description}: Configure GPU PCI BAR sizes.

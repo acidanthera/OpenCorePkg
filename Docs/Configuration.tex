@@ -8680,6 +8680,17 @@ for additional options.
   \end{itemize}
 
 \item
+  \texttt{ResizeUsePciRbIo}\\
+  \textbf{Type}: \texttt{plist\ boolean}\\
+  \textbf{Failsafe}: \texttt{false}\\
+  \textbf{Description}: Use PciRootBridgeIo for \texttt{ResizeGpuBars} and \texttt{ResizeAppleGpuBars}
+
+  The quirk makes \texttt{ResizeGpuBars} and \texttt{ResizeAppleGpuBars} use \texttt{PciRootBridgeIo} instead of PciIo.
+  This is needed on systems with a buggy \texttt{PciIo} implementation where trying to configure
+  Resizable BAR results in \texttt{Capability I/O Error}. Typically this is required on
+  older systems which have been modified with \href{https://github.com/xCuri0/ReBarUEFI}{ReBarUEFI}.
+
+\item
   \texttt{ResizeGpuBars}\\
   \textbf{Type}: \texttt{plist\ integer}\\
   \textbf{Failsafe}: \texttt{-1}\\

@@ -140,7 +140,8 @@ typedef enum {
 EFI_STATUS
 ResizeGpuBars (
   IN PCI_BAR_SIZE  Size,
-  IN BOOLEAN       Increase
+  IN BOOLEAN       Increase,
+  IN BOOLEAN       UseRbIo
   );
 
 //

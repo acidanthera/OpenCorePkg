@@ -1243,7 +1243,7 @@ OcStartImage (
     if (  (BootCompat->Settings.ResizeAppleGpuBars >= 0)
        && (BootCompat->Settings.ResizeAppleGpuBars < PciBarTotal))
     {
-      ResizeGpuBars (BootCompat->Settings.ResizeAppleGpuBars, FALSE);
+      ResizeGpuBars (BootCompat->Settings.ResizeAppleGpuBars, FALSE, BootCompat->Settings.ResizeUsePciRbIo);
     }
   } else if (BootCompat->Settings.SignalAppleOS) {
     Status = gBS->LocateProtocol (

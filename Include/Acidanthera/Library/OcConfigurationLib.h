@@ -738,6 +738,7 @@ OC_DECLARE (OC_UEFI_PROTOCOL_OVERRIDES)
   _(BOOLEAN                     , ForgeUefiSupport            ,     , FALSE  , ()) \
   _(BOOLEAN                     , IgnoreInvalidFlexRatio      ,     , FALSE  , ()) \
   _(INT8                        , ResizeGpuBars               ,     , -1     , ()) \
+  _(BOOLEAN                     , ResizeUsePciRbIo            ,     , FALSE  , ()) \
   _(BOOLEAN                     , ReleaseUsbOwnership         ,     , FALSE  , ()) \
   _(BOOLEAN                     , ReloadOptionRoms            ,     , FALSE  , ()) \
   _(BOOLEAN                     , RequestBootVarRouting       ,     , FALSE  , ()) \
