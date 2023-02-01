@@ -680,6 +680,8 @@ ResizeGpuBarsPciIo (
     }
   }
 
+  FreePool (HandleBuffer);
+
   if (HasSuccess) {
     return EFI_SUCCESS;
   }
@@ -752,6 +754,8 @@ ResizeGpuBarsRbIo (
 
   ASSERT (Size < PciBarTotal);
 
+  HasSuccess = FALSE;
+
   Status = gBS->LocateHandleBuffer (
                   ByProtocol,
                   &gEfiPciRootBridgeIoProtocolGuid,
@@ -772,12 +776,12 @@ ResizeGpuBarsRbIo (
                     (VOID **)&PciRootBridgeIo
                     );
     if (EFI_ERROR (Status)) {
-      goto free;
+      continue;
     }
 
-    PciRootBridgeIo->Configuration (PciRootBridgeIo, (VOID **)&Descriptors);
+    Status = PciRootBridgeIo->Configuration (PciRootBridgeIo, (VOID **)&Descriptors);
     if (EFI_ERROR (Status)) {
-      goto free;
+      continue;
     }
 
     //
@@ -835,10 +839,9 @@ ResizeGpuBarsRbIo (
         }
       }
     }
-
-free:
-    FreePool (HandleBuffer[Index]);
   }
+
+  FreePool (HandleBuffer);
 
   if (HasSuccess) {
     return EFI_SUCCESS;
