@@ -63,6 +63,10 @@ The driver may be installed to VBIOS or to main firmware. It is expected that mo
 and most iMac users will chose VBIOS insertion, however both techniques work on both systems (but it is harder to modify the
 iMac firmware).
 
+Further discussion and community support for this driver is available at:
+
+ - https://forums.macrumors.com/threads/pre-opencore-gop-support-for-efi-era-imacs-and-mac-pros.2378942/
+
 ## Usage
 
 ## Install to firmware
@@ -146,9 +150,3 @@ Similar procedures as for Nvidia apply.
 
  - Further assistance and information may be available in the forums and pages listed above.
 
-## No longer supported: Install as Driver#### entry
-
-Early test versions of this driver included code to allow it to work when installed as a `Driver####` entry
-(`Driver####` entries do work when installed via `bcfg` and using MacPro4,1/5,1 firmware; they do not work on
-that firmware if using `efibootmgr`, and they are not supported by iMac firmware). This code has been removed
-in order to minimise the driver size for VBIOS insertion.
