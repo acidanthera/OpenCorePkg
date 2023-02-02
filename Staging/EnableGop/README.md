@@ -1,7 +1,7 @@
 # Provides standalone GOP driver for EFI era Mac Pro and iMac
 
 ## Status
-**Current status: Early beta release.**
+**Current status: Beta release.**
 
 This driver has been tested and is working on several iMac models
 with several different GPUs, and on several MacPro4,1/5,1 machines with several different GPUs. However, in the worst
