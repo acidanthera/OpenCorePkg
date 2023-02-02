@@ -73,6 +73,7 @@ KEXT_INFO  mKextInfo[] = {
   { "CPUFriendDataProvider.kext",                                           "",                                   "Contents/Info.plist" },
   { "CryptexFixup.kext",                                                    "Contents/MacOS/CryptexFixup",        "Contents/Info.plist" },
   { "DebugEnhancer.kext",                                                   "Contents/MacOS/DebugEnhancer",       "Contents/Info.plist" },
+  { "EmeraldSDHC.kext",                                                     "Contents/MacOS/EmeraldSDHC",         "Contents/Info.plist" },
   { "HibernationFixup.kext",                                                "Contents/MacOS/HibernationFixup",    "Contents/Info.plist" },
   { "NVMeFix.kext",                                                         "Contents/MacOS/NVMeFix",             "Contents/Info.plist" },
   { "RestrictEvents.kext",                                                  "Contents/MacOS/RestrictEvents",      "Contents/Info.plist" },

@@ -49,7 +49,6 @@ Kexts
 | [kXAudioDriver.kext](https://github.com/kxproject/kx-audio-driver) | — | — | — |
 | [Nvidia CUDA drivers](https://www.nvidia.com/object/mac-driver-archive.html) | 10.0.0 (10.6) | 17.9.9 (10.13) | — |
 | [Nvidia Web-drivers](https://gfe.nvidia.com/mac-update) | 12.0.0 (10.8) | 17.9.9 (10.13) | — |
-| [SNBGraphicsMojaveInstaller](https://github.com/Andrej-Antipov/SNBGraphicsMojaveInstaller) | 18.0.0 (10.14) | — | From 10.13 |
 | [VoodooHDA.kext](https://sourceforge.net/projects/voodoohda/) | — | — | — |
 | [WhateverGreen.kext](https://github.com/acidanthera/WhateverGreen) | 10.0.0 (10.6) | — | — |
 | [Polaris22Fixup.kext](https://github.com/osy86/Polaris22Fixup) | 18.0.0 (10.14) | — | — |
@@ -84,6 +83,7 @@ Kexts
 | [Sinetek-rtsx.kext](https://www.insanelymac.com/forum/topic/321080-sineteks-driver-for-realtek-rtsx-sdhc-card-readers/?do=findComment&comment=2376387) | — | — | — |
 | [VoodooSDHC.kext](https://github.com/lvs1974/VoodooSDHCMod) | — | — | — |
 | [RealtekCardReader.kext](https://github.com/0xFireWolf/RealtekCardReader) | — | — | — |
+| [EmeraldSDHC.kext](https://github.com/acidanthera/EmeraldSDHC) | — | — | — |
 
 | Other kexts | MinKernel (Min macOS) | MaxKernel (Max macOS) | Note |
 |-------------|-----------------------|-----------------------|------|
