@@ -136,7 +136,7 @@ To use the provided `NvInsertEfi.sh` script:
  - Using a hex editor, search in the VBIOS for the byte sequence `F1 0E 00 00` with the byte sequence `55 AA` coming
  close before it; the start address of the `55 AA` is the value needed for the insertion offset in the next step.
  - Run `./NvInsertEfi.sh {original}.rom EnableGop.efi {offset} {modified}/.rom`.
-   - Run `./NvInsertEfi.sh` with no argiments to see allowed formats for offset parameter.
+   - Run `./NvInsertEfi.sh` with no arguments to see allowed formats for offset parameter.
    - Only if you modified a rom file obtained via `flashrom` rather than `nvflash`, you should manually truncate
    the modified file's size to the original file's size at this point. (`nvflash` files only contain the used section
    of the VBIOS, and therefore must not be truncated.)
