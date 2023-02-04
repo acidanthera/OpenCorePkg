@@ -10,6 +10,7 @@ OpenCore Changelog
 - Implemented firmware driver enabling pre-OpenCore graphics on non-natively supported GPUs on EFI-era Macs
 - Prevented unwanted clear screen to console background colour when in graphics mode
 - Added `ResizeUsePciRbIo` quirk to workaround broken PciIo on some UEFI firmwares, thx @xCuri0
+- Fixed crash while using `SysReport` on older Atom systems
 
 #### v0.8.8
 - Updated underlying EDK II package to edk2-stable202211
