@@ -383,7 +383,7 @@ FreePages (
     abort ();
   }
 
-  FreePool (Buffer);
+  free (Buffer);
 }
 
 GUID *
