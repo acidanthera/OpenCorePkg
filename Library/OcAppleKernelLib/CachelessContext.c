@@ -398,7 +398,7 @@ ScanExtensions (
                        L"%s\\%s\\%s%s",
                        FilePath,
                        FileInfo->FileName,
-                       UseContents ? L"Contents\\MacOS\\" : L"\\",
+                       UseContents ? L"Contents\\MacOS\\" : L"",
                        BuiltinKext->BinaryFileName
                        );
             if (EFI_ERROR (Status)) {

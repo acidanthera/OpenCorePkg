@@ -11,6 +11,7 @@ OpenCore Changelog
 - Prevented unwanted clear screen to console background colour when in graphics mode
 - Added `ResizeUsePciRbIo` quirk to workaround broken PciIo on some UEFI firmwares, thx @xCuri0
 - Fixed crash while using `SysReport` on older Atom systems
+- Fixed kexts without a Contents folder not being patched during a cacheless boot
 
 #### v0.8.8
 - Updated underlying EDK II package to edk2-stable202211
