@@ -13,6 +13,7 @@ OpenCore Changelog
 - Fixed crash while using `SysReport` on older Atom systems
 - Fixed kexts without a Contents folder not being patched during a cacheless boot
 - Added read-only sections (`.rdata`) to all drivers for better memory protection when supported
+- Fixed crash while using `SysReport` on systems with non-audio HDA codecs
 
 #### v0.8.8
 - Updated underlying EDK II package to edk2-stable202211

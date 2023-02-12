@@ -840,6 +840,12 @@ HdaCodecProbeCodec (
     }
   }
 
+  // Do not support codecs without audio function groups (i.e. modem codecs).
+  if (HdaCodecDev->AudioFuncGroup == NULL) {
+    DEBUG ((DEBUG_INFO, "HDA:  | Codec contains no audio function groups\n"));
+    return EFI_UNSUPPORTED;
+  }
+
   return EFI_SUCCESS;
 }
 
