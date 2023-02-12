@@ -22,7 +22,7 @@ BITS 64
 extern ASM_PFX(SHA512_K)
 extern ASM_PFX(mIsAccelEnabled)
 
-section .rodata
+section RODATA_SECTION_NAME
 align 16
 ; Mask for byte-swapping a couple of qwords in an XMM register using (v)pshufb.
 XMM_QWORD_BSWAP:
