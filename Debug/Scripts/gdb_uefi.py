@@ -251,71 +251,9 @@ class ReloadUefi(gdb.Command):
 
     #
     # Prepares gdb symbol load command with proper section information.
-    # Currently supports Mach-O and single-section files.
     #
-    # TODO: Proper ELF support.
-    #
-    def get_sym_cmd(self, file, orgbase, sections, macho, fallack_base):
-        cmd = f'add-symbol-file {file}'
-
-        # Fallback case, no sections, just load .text.
-        if not sections.get('.text') or not sections.get('.data'):
-            cmd += f' 0x{fallack_base:x}'
-            return cmd
-
-        cmd += f" 0x{int(orgbase) + sections['.text']:x}"
-
-        if not macho or not os.path.exists(file):
-            # Another fallback, try to load data at least.
-            cmd += f" -s .data 0x{int(orgbase) + sections['.data']:x}"
-            return cmd
-
-        # 1. Parse Mach-O.
-        # FIXME: We should not rely on otool really.
-        commands = subprocess.check_output(['otool', '-l', file])
-        try:
-            lines = commands.decode('utf-8').split('\n')
-        except Exception:
-            lines = commands.split('\n')
-        in_sect = False
-        machsections = {}
-        for line in lines:
-            line = line.strip()
-            if line.startswith('Section'):
-                in_sect = True
-                sectname = None
-                segname = None
-            elif in_sect:
-                if line.startswith('sectname'):
-                    sectname = line.split()[1]
-                elif line.startswith('segname'):
-                    segname = line.split()[1]
-                elif line.startswith('addr'):
-                    machsections[segname + '.' + sectname] = int(line.split()[1], base=16)
-                    in_sect = False
-
-        # 2. Convert section names to gdb sections.
-        mapping = {
-            '__TEXT.__cstring':         '.cstring',
-            '__TEXT.__const':           '.const',
-            '__TEXT.__ustring':         '__TEXT.__ustring',
-            '__DATA.__const':           '.const_data',
-            '__DATA.__data':            '.data',
-            '__DATA.__bss':             '.bss',
-            '__DATA.__common':          '__DATA.__common',
-            # FIXME: These should not be loadable, but gdb still loads them :/
-            # '__DWARF.__apple_names':    '__DWARF.__apple_names',
-            # '__DWARF.__apple_namespac': '__DWARF.__apple_namespac',
-            # '__DWARF.__apple_types':    '__DWARF.__apple_types',
-            # '__DWARF.__apple_objc':     '__DWARF.__apple_objc',
-        }
-
-        # 3. Rebase.
-        for section, new_section in mapping.items():
-            if machsections.get(section):
-                cmd += f' -s {new_section} 0x{int(orgbase) + machsections[section]:x}'
-
-        return cmd
+    def get_sym_cmd(self, file, base, sections, macho):
+        return f'add-symbol-file {file} -o 0x{base:x}'
 
     #
     # Parses an EFI_LOADED_IMAGE_PROTOCOL, figuring out the symbol file name.
@@ -325,7 +263,7 @@ class ReloadUefi(gdb.Command):
     #
 
     def parse_image(self, image, syms):
-        orgbase = base = image['ImageBase']
+        base = image['ImageBase']
         pe = self.pe_headers(base)
         opt = self.pe_optional(pe)
         file = self.pe_file(pe)
@@ -345,7 +283,7 @@ class ReloadUefi(gdb.Command):
             elif sym_name_dbg != sym_name and os.path.exists(sym_name_dbg):
                 # TODO: implement .elf handling.
                 sym_name = sym_name_dbg
-            syms.append(self.get_sym_cmd(sym_name, int(orgbase), sections, macho, int(base)))
+            syms.append(self.get_sym_cmd(sym_name, int(base), sections, macho))
 
     #
     # Parses table EFI_DEBUG_IMAGE_INFO structures, builds
