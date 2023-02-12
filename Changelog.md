@@ -15,6 +15,7 @@ OpenCore Changelog
 - Added read-only sections (`.rdata`) to all drivers for better memory protection when supported
 - Fixed crash while using `SysReport` on systems with non-audio HDA codecs
 - Fixed debug script support for GDB and LLDB
+- Fixed legacy boot debug builds asserting on macOS loading
 
 #### v0.8.8
 - Updated underlying EDK II package to edk2-stable202211
