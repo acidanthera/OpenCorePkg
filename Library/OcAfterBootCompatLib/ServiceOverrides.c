@@ -1245,6 +1245,17 @@ OcStartImage (
     {
       ResizeGpuBars (BootCompat->Settings.ResizeAppleGpuBars, FALSE, BootCompat->Settings.ResizeUsePciRbIo);
     }
+
+    if (OcCheckArgumentFromEnv (
+          AppleLoadedImage,
+          BootCompat->ServicePtrs.GetVariable,
+          "-v",
+          L_STR_LEN ("-v"),
+          NULL
+          ))
+    {
+      gST->ConOut->ClearScreen (gST->ConOut);
+    }
   } else if (BootCompat->Settings.SignalAppleOS) {
     Status = gBS->LocateProtocol (
                     &gEfiOSInfoProtocolGuid,
