@@ -101,7 +101,7 @@
       GUIDED {
         DXE_DEPEX    DXE_DEPEX Optional      $(INF_OUTPUT)/$(MODULE_NAME).depex
         PE32         PE32                    $(INF_OUTPUT)/$(MODULE_NAME).efi
-        UI           STRING="$(MODULE_NAME)" Optional
+        UI           STRING="$(MODULE_NAME) $(VERSION_STRING)" Optional
       }
     }
   }

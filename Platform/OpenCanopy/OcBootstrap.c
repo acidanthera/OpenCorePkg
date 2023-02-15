@@ -196,9 +196,10 @@ OcShowMenuByOc (
   ASSERT (mGuiContext.BootEntry != NULL || mGuiContext.Refresh);
 
   //
-  // Do not use this clear screen, since the convention (not just in Apple firmware) seems to be
-  // for each UI step which finishes to leave its own graphics up for the next step to clear, so
-  // this matches that, and gives a slightly smoother looking, slightly faster boot.
+  // Do not use this clear screen, since the convention (in Apple native picker, but also
+  // other parts of other pre-boot UI) is for each UI step which finishes to leave its own
+  // graphics up for the next step to clear; this matches that, and gives a slightly smoother,
+  // slightly faster UI experience.
   //
  #if 0
   if (!mGuiContext.Refresh) {
