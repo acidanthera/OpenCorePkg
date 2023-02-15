@@ -41,7 +41,7 @@ details.
 
 #### Credits
 
-- The HermitCrabs Lab
+- [The HermitCrabs Lab](https://firmwaresecurity.com/tag/hermit-crab-labs/)
 - All projects providing third-party code (refer to file headers)
 - [AppleLife](https://applelife.ru) team and user-contributed resources
 - Chameleon and Clover teams for hints and legacy
