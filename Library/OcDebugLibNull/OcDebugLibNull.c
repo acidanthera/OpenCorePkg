@@ -196,22 +196,6 @@ DebugPrintLevelEnabled (
   return FALSE;
 }
 
-/**
-  Prints via gST->ConOut without any pool allocations.
-  Otherwise equivalent to Print.
-  Note: EFIAPI must be present for VA_ARGS forwarding (causes bugs with gcc).
-
-  @param[in]  Format  Formatted string.
-**/
-VOID
-EFIAPI
-OcPrintScreen (
-  IN  CONST CHAR16  *Format,
-  ...
-  )
-{
-}
-
 VOID
 #if defined (__GNUC__) || defined (__clang__)
 __attribute__ ((noinline))
@@ -257,41 +241,4 @@ DebugPrintHexDump (
   IN UINTN        Size
   )
 {
-}
-
-APPLE_DEBUG_LOG_PROTOCOL *
-OcAppleDebugLogInstallProtocol (
-  IN BOOLEAN  Reinstall
-  )
-{
-  return NULL;
-}
-
-VOID
-OcAppleDebugLogConfigure (
-  IN BOOLEAN  Enable
-  )
-{
-}
-
-VOID
-OcAppleDebugLogPerfAllocated (
-  IN OUT VOID   *PerfBuffer,
-  IN     UINTN  PerfBufferSize
-  )
-{
-}
-
-EFI_STATUS
-OcConfigureLogProtocol (
-  IN OC_LOG_OPTIONS                   Options,
-  IN CONST CHAR8                      *LogModules,
-  IN UINT32                           DisplayDelay,
-  IN UINTN                            DisplayLevel,
-  IN UINTN                            HaltLevel,
-  IN CONST CHAR16                     *LogPrefixPath  OPTIONAL,
-  IN EFI_SIMPLE_FILE_SYSTEM_PROTOCOL  *LogFileSystem  OPTIONAL
-  )
-{
-  return EFI_UNSUPPORTED;
 }
