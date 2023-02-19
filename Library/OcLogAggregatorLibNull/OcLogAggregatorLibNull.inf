@@ -1,0 +1,25 @@
+## @file
+#
+#  Component description file for null instance of OC Log Aggregator Library using the OcLog protocol.
+#
+#  Copyright (C) 2023, Mike Beaton. All rights reserved.<BR>
+#  SPDX-License-Identifier: BSD-3-Clause
+#
+##
+
+[Defines]
+  INF_VERSION     = 0x00010005
+  BASE_NAME       = OcLogAggregatorLibNull
+  FILE_GUID       = B748F380-1479-4014-B873-4185E514B54F
+  MODULE_TYPE     = BASE
+  VERSION_STRING  = 1.0
+  LIBRARY_CLASS   = OcLogAggregatorLib 
+
+# VALID_ARCHITECTURES = IA32 X64 IPF EBC
+
+[Packages]
+  OpenCorePkg/OpenCorePkg.dec
+  MdePkg/MdePkg.dec
+
+[Sources]
+  OcLogAggregatorLibNull.c

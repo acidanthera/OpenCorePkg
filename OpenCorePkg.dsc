@@ -271,6 +271,7 @@
   OpenCorePkg/Library/OcHiiDatabaseLib/OcHiiDatabaseLocalLib.inf
   OpenCorePkg/Library/OcInputLib/OcInputLib.inf
   OpenCorePkg/Library/OcLogAggregatorLib/OcLogAggregatorLib.inf
+  OpenCorePkg/Library/OcLogAggregatorLibNull/OcLogAggregatorLibNull.inf
   OpenCorePkg/Library/OcMachoLib/OcMachoLib.inf
   OpenCorePkg/Library/OcMainLib/OcMainLib.inf
   OpenCorePkg/Library/OcMemoryLib/OcMemoryLib.inf
