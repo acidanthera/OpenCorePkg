@@ -193,7 +193,7 @@ OcAcpiPatchTables (
       "OC: Applying %u byte ACPI patch (%a) at %u, skip %u, count %u\n",
       Patch.Size,
       UserPatch->Comment,
-      (UINT32)Index,
+      Index,
       Patch.Skip,
       Patch.Count
       ));
