@@ -117,9 +117,9 @@ OcAbcInitialize (
     Settings->AvoidRuntimeDefrag,
     Settings->DevirtualiseMmio,
     Settings->DisableSingleUser,
-    Settings->ForceBooterSignature,
     Settings->DisableVariableWrite,
     Settings->ProtectSecureBoot,
+    Settings->ForceBooterSignature,
     Settings->DiscardHibernateMap,
     Settings->EnableSafeModeSlide,
     Settings->EnableWriteUnprotector
