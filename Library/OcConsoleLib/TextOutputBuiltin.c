@@ -162,6 +162,7 @@ STATIC UINTN                                mConsoleWidth;
 STATIC UINTN                                mConsoleHeight;
 STATIC UINTN                                mConsoleMaxPosX;
 STATIC UINTN                                mConsoleMaxPosY;
+STATIC BOOLEAN                              mConsoleHasCleared;
 STATIC UINTN                                mPrivateColumn; ///< At least UEFI Shell trashes Mode values.
 STATIC UINTN                                mPrivateRow;    ///< At least UEFI Shell trashes Mode values.
 STATIC UINT32                               mConsoleGopMode;
@@ -381,11 +382,12 @@ RenderResync (
     return EFI_OUT_OF_RESOURCES;
   }
 
-  mConsoleGopMode = mGraphicsOutput->Mode->Mode;
-  mConsoleWidth   = (Info->HorizontalResolution / TGT_CHAR_WIDTH)  - 2 * SCR_PADD;
-  mConsoleHeight  = (Info->VerticalResolution   / TGT_CHAR_HEIGHT) - 2 * SCR_PADD;
-  mConsoleMaxPosX = 0;
-  mConsoleMaxPosY = 0;
+  mConsoleGopMode    = mGraphicsOutput->Mode->Mode;
+  mConsoleWidth      = (Info->HorizontalResolution / TGT_CHAR_WIDTH)  - 2 * SCR_PADD;
+  mConsoleHeight     = (Info->VerticalResolution   / TGT_CHAR_HEIGHT) - 2 * SCR_PADD;
+  mConsoleMaxPosX    = 0;
+  mConsoleMaxPosY    = 0;
+  mConsoleHasCleared = FALSE;
 
   mPrivateColumn           = mPrivateRow = 0;
   This->Mode->CursorColumn = This->Mode->CursorRow = 0;
@@ -740,13 +742,25 @@ AsciiTextClearScreen (
     }
   }
 
-  //
-  // X coordinate points to the right most coordinate of the last printed
-  // character, but after this character we may also have cursor.
-  // Y coordinate points to the top most coordinate of the last printed row.
-  //
-  Width  = TGT_PADD_WIDTH  + (mConsoleMaxPosX + 1) * TGT_CHAR_WIDTH;
-  Height = TGT_PADD_HEIGHT + (mConsoleMaxPosY + 1) * TGT_CHAR_HEIGHT;
+  if (mConsoleHasCleared) {
+    //
+    // X coordinate points to the right most coordinate of the last printed
+    // character, but after this character we may also have cursor.
+    // Y coordinate points to the top most coordinate of the last printed row.
+    //
+    Width  = TGT_PADD_WIDTH  + (mConsoleMaxPosX + 1) * TGT_CHAR_WIDTH;
+    Height = TGT_PADD_HEIGHT + (mConsoleMaxPosY + 1) * TGT_CHAR_HEIGHT;
+    Width  = MIN (Width, mGraphicsOutput->Mode->Info->HorizontalResolution);
+    Height = MIN (Height, mGraphicsOutput->Mode->Info->VerticalResolution);
+  } else {
+    //
+    // Clear full screen at least once when console clear screen is requested
+    // after switch to new mode.
+    //
+    Width              = mGraphicsOutput->Mode->Info->HorizontalResolution;
+    Height             = mGraphicsOutput->Mode->Info->VerticalResolution;
+    mConsoleHasCleared = TRUE;
+  }
 
   mGraphicsOutput->Blt (
                      mGraphicsOutput,
@@ -756,8 +770,8 @@ AsciiTextClearScreen (
                      0,
                      0,
                      0,
-                     MIN (Width, mGraphicsOutput->Mode->Info->HorizontalResolution),
-                     MIN (Height, mGraphicsOutput->Mode->Info->VerticalResolution),
+                     Width,
+                     Height,
                      0
                      );
 
@@ -894,7 +908,13 @@ ConsoleControlSetMode (
   IN EFI_CONSOLE_CONTROL_SCREEN_MODE  Mode
   )
 {
-  mConsoleMode = Mode;
+  if (mConsoleMode != Mode) {
+    mConsoleMode = Mode;
+    if (mConsoleMode == EfiConsoleControlScreenText) {
+      gST->ConOut->ClearScreen (gST->ConOut);
+    }
+  }
+
   return EFI_SUCCESS;
 }
 
