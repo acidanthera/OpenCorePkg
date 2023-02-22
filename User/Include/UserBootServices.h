@@ -56,6 +56,14 @@ DummyInstallConfigurationTable (
 
 EFI_STATUS
 EFIAPI
+DummyCalculateCrc32 (
+  IN  VOID    *Data,
+  IN  UINTN   DataSize,
+  OUT UINT32  *CrcOut
+  );
+
+EFI_STATUS
+EFIAPI
 NullTextOutputString (
   IN EFI_SIMPLE_TEXT_OUTPUT_PROTOCOL  *This,
   IN CHAR16                           *String

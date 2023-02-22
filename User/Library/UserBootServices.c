@@ -14,7 +14,7 @@ EFI_BOOT_SERVICES  mBootServices = {
   .LocateProtocol            = DummyLocateProtocol,
   .AllocatePages             = DummyAllocatePages,
   .InstallConfigurationTable = DummyInstallConfigurationTable,
-  .CalculateCrc32            = CalculateCrc32
+  .CalculateCrc32            = DummyCalculateCrc32
 };
 
 EFI_SIMPLE_TEXT_OUTPUT_PROTOCOL  mConOut = {
@@ -222,6 +222,22 @@ DummyInstallConfigurationTable (
     gST->NumberOfTableEntries++;
   }
 
+  return EFI_SUCCESS;
+}
+
+EFI_STATUS
+EFIAPI
+DummyCalculateCrc32 (
+  IN  VOID    *Data,
+  IN  UINTN   DataSize,
+  OUT UINT32  *CrcOut
+  )
+{
+  if ((Data == NULL) || (DataSize == 0) || (CrcOut == NULL)) {
+    return EFI_INVALID_PARAMETER;
+  }
+
+  *CrcOut = CalculateCrc32 (Data, DataSize);
   return EFI_SUCCESS;
 }
 
