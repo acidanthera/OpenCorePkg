@@ -24,6 +24,12 @@ DummyRaiseTPL (
   IN EFI_TPL  NewTpl
   );
 
+VOID
+EFIAPI
+DummyRestoreTPL (
+  IN EFI_TPL  NewTpl
+  );
+
 EFI_STATUS
 EFIAPI
 DummyLocateProtocol (

@@ -10,9 +10,11 @@
 
 EFI_BOOT_SERVICES  mBootServices = {
   .RaiseTPL                  = DummyRaiseTPL,
+  .RestoreTPL                = DummyRestoreTPL,
   .LocateProtocol            = DummyLocateProtocol,
   .AllocatePages             = DummyAllocatePages,
-  .InstallConfigurationTable = DummyInstallConfigurationTable
+  .InstallConfigurationTable = DummyInstallConfigurationTable,
+  .CalculateCrc32            = CalculateCrc32
 };
 
 EFI_SIMPLE_TEXT_OUTPUT_PROTOCOL  mConOut = {
@@ -47,9 +49,16 @@ DummyRaiseTPL (
   IN EFI_TPL  NewTpl
   )
 {
-  ASSERT (FALSE);
-
   return 0;
+}
+
+VOID
+EFIAPI
+DummyRestoreTPL (
+  IN EFI_TPL  NewTpl
+  )
+{
+  return;
 }
 
 EFI_STATUS
