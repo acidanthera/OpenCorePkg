@@ -1,11 +1,21 @@
 # Provides standalone GOP driver for EFI era Mac Pro and iMac
 
+## Releases
+
+EnableGop version (OpenCore version)
+### 1.1 (0.9.0)
+ - Fixed early verbose boot lines appearing over picker
+ - Added EnableGop version number to UI section
+
+### 1.0 (0.8.9)
+ - Initial public release
+
 ## Status
 **Current status: Beta release.**
 
 This driver has been tested and is working on several iMac models
 with several different GPUs, and on several MacPro4,1/5,1 machines with several different GPUs. However, in the worst
-case (and still quite possible) scenario, an incompatible or incorrectly installed driver
+case (and still possible) scenario, an incompatible or incorrectly installed driver
 in firmware may brick your hardware.
 
 *In all cases take a backup of the main firmware or VBIOS firmware which you are modifying, and confirm that
