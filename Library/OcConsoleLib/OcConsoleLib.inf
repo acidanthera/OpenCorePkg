@@ -66,6 +66,7 @@
   BaseMemoryLib
   DebugLib
   OcBlitLib
+  OcMiscLib
   MtrrLib
   UefiBootServicesTableLib
   UefiRuntimeServicesTableLib
