@@ -3,6 +3,7 @@ OpenCore Changelog
 #### v0.9.0
 - Resolved issues with verbose boot log appearing over picker graphics
 - Added version number to EnableGop UI section, so tool builders can track it
+- Added `ProvideCurrentCpuInfo` support for macOS 13.3 DP
 
 #### v0.8.9
 - Improved debug logging when applying ACPI patches
