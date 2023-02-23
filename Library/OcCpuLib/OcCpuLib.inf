@@ -35,6 +35,7 @@
 [LibraryClasses]
   BaseLib
   OcGuardLib
+  OcMiscLib
   OcVariableLib
   IoLib
   UefiRuntimeServicesTableLib

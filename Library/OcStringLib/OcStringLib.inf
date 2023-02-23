@@ -43,5 +43,6 @@
   BaseLib
   BaseMemoryLib
   MemoryAllocationLib
+  OcGuardLib
   PrintLib
   SortLib
