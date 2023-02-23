@@ -196,20 +196,25 @@ OcShowMenuByOc (
   ASSERT (mGuiContext.BootEntry != NULL || mGuiContext.Refresh);
 
   //
-  // Do not use this clear screen, since the convention (in Apple native picker, but also
-  // other parts of other pre-boot UI) is for each UI step which finishes to leave its own
-  // graphics up for the next step to clear; this matches that, and gives a slightly smoother,
-  // slightly faster UI experience.
+  // There are reasons to prefer not to perform this screen clear:
+  //  - If starting macOS, boot.efi performs the same screen clear to the same UI theme colour
+  //    immediately afterwards anyway
+  //  - The native Apple picker does not clear its graphics before exit (i.e. does not do this)
+  //  - Most OS booters in most circumstance perform their own screen clear
+  //  - Each screen clear on a slow GOP (such as direct GOP rendering) is a noticeable slowdown
+  // However:
+  //  - Windows without ACPI->Quirks->ResetLogoStatus does not clear any pre-existing graphics
+  //    - Ref: https://github.com/acidanthera/bugtracker/issues/2231
+  //  - Peforming this screen clear gives a sense of progress (i.e. something happens immediately
+  //    rather than nothing) if the selected entry will be very slow to start (e.g. Recovery, in
+  ///   some circumstances)
   //
- #if 0
   if (!mGuiContext.Refresh) {
     //
     // Clear the screen only when we exit.
     //
     GuiClearScreen (&mDrawContext, &mGuiContext.BackgroundColor.Pixel);
   }
-
- #endif
 
   //
   // Note, it is important to destruct GUI here, as we must ensure
@@ -272,13 +277,15 @@ OcShowPasswordByOc (
   GuiDrawLoop (&mDrawContext);
 
   //
-  // Keep this clear screen, since it seems to match Mac firmware behaviour here better,
-  // and it gives a better sense of progress between (intentionally slow - computationally
-  // intensive) password verification and (can be slow) start of Recovery.
-  //
-  // Clear the screen only if we will not show BootPicker afterwards.
+  // This screen clear is useful, even though the boot entry started will in general
+  // perform its own screen clear eventually anyway, since this gives a better sense
+  // of progress between (intentionally slow - computationally intensive) password
+  // verification and (can be slow) start of Recovery.
   //
   if (Context->PickerCommand != OcPickerShowPicker) {
+    //
+    // Clear the screen only if we will not show BootPicker afterwards.
+    //
     GuiClearScreen (&mDrawContext, &mGuiContext.BackgroundColor.Pixel);
   }
 
