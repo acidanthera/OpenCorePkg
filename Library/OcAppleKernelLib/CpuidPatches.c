@@ -1301,12 +1301,13 @@ PatchProvideCurrentCpuInfoMSR35h (
                Patcher,
                &mProvideCurrentCpuInfoTopologyCorePerPackageV1Patch
                );
-    if (EFI_ERROR (Status)) {
-      Status = PatcherApplyGenericPatch (
-                 Patcher,
-                 &mProvideCurrentCpuInfoTopologyCorePerPackageV1_5Patch
-                 );
-    }
+  }
+
+  if (EFI_ERROR (Status)) {
+    Status = PatcherApplyGenericPatch (
+               Patcher,
+               &mProvideCurrentCpuInfoTopologyCorePerPackageV1_5Patch
+               );
   }
 
   DEBUG ((DEBUG_INFO, "OCAK: Patching core per package count - %r\n", Status));
