@@ -18,7 +18,7 @@ with several different GPUs, and on several MacPro4,1/5,1 machines with several 
 case (and still possible) scenario, an incompatible or incorrectly installed driver
 in firmware may brick your hardware.
 
-*In all cases take a backup of the main firmware or VBIOS firmware which you are modifying, and confirm that
+*In all cases take a backup of the main firmware or vBIOS firmware which you are modifying, and confirm that
 you can successfully restore from this, before starting.*
 
 ## Recovery from bricked hardware
@@ -27,10 +27,10 @@ need a Matt card (which may breach intellectual property laws in some jurisdicti
 desolder and reprogram your own NVRAM chip.
  - If testing via firmware insertion on an iMac, you will need the ability to disassemble your iMac and
 reprogram its NVRAM chip using a SOIC clip attached to a CH341A controller running on another computer.
- - If testing via VBIOS insertion (iMac or Mac Pro), you will need the ability to disassemble your system,
+ - If testing via vBIOS insertion (iMac or Mac Pro), you will need the ability to disassemble your system,
 likely remove the heat sink from the graphics card, and then reprogram its NVRAM chip using a SOIC
 clip attached to a CH341A controller running on another computer.
-   - If testing via VBIOS insertion, in some cases it may also be possible
+   - If testing via vBIOS insertion, in some cases it may also be possible
 to use physical electrical connection to your GPU NVRAM chip in order to boot with no graphics, then connect
 to your machine with `ssh` (which must have been enabled beforehand) and reprogram the GPU NVRAM. Advice on
 this is not provided here, but may be found for instance on the iMac GPU related forum threads listed below.
@@ -51,9 +51,9 @@ The requirements for using this driver are:
  picker when started via the latest version of OpenCore tool `BootKicker.efi`) (otherwise, the driver will not work).
    - *Note*: If your OpenCore installation includes a required GOP driver for your graphics card (this is added
    automatically on some systems by recent versions of OpenCore Legacy Patcher, as a way to enable OpenCore menu
-   in cards such as ex-mining GPUs), then you would also need to burn that driver to the VBIOS of your graphics
+   in cards such as ex-mining GPUs), then you would also need to burn that driver to the vBIOS of your graphics
    card in order to obtain pre-OpenCore graphics; instructions for this are outside the scope of this tutorial,
-   although the procedures required for modifying VBIOS are similar to what is covered here.
+   although the procedures required for modifying vBIOS are similar to what is covered here.
 
 When installed, the driver should enable:
 
@@ -69,9 +69,9 @@ directory of the OpenCore release package.
 For GPUs needing `DirectGopRendering` in OpenCore configuration, use `EnableGopDirect.efi`, otherwise use `EnableGop.efi`
 as it renders faster on most other systems.
 
-The driver may be installed to VBIOS or to main firmware. It is expected that most Mac Pro users will use firmware insertion
-and most iMac users will chose VBIOS insertion, however both techniques work on both systems (but it is harder to modify the
-iMac firmware).
+The driver may be installed to vBIOS or to main firmware. It is expected that most Mac Pro users will use firmware insertion
+and most iMac users will chose vBIOS insertion, however both techniques work on both systems (but it is harder to modify the
+iMac firmware, since there is no simple way to enable writing to it).
 
 Further discussion and community support for this driver is available at:
 
@@ -86,7 +86,7 @@ well. Alternatively the kexts and executables which this uses can be sourced ind
 run from the command line.
 
 The firmware on the iMac cannot be updated without an initial hardware flash (SOIC clip plus CH341A controller), therefore
-the recommended approach on iMac systems is [VBIOS injection](#install-to-vbios). However, the below instructions for firmware
+the recommended approach on iMac systems is [vBIOS injection](#install-to-vBIOS). However, the below instructions for firmware
 injection do work, if you are willing to do a hardware flash of the resulting firmware file, or if you have already
 [unprotected your iMac firmware](https://forums.macrumors.com/threads/imac-2011-see-more-uefi-firmware-mod.2257435/page-3?post=31087001#post-31087001) -
 which reduces security, and is only recommended for those actively developing firmware modifications.
@@ -124,40 +124,35 @@ The end result, after saving and re-loading, should look like this:
 
 <img src="UEFITool_Inserted_Screenshot.png">
 
-## Install to VBIOS
+## Install to vBIOS
 
-Instructions and a script for inserting the driver into NVidia VBIOS are provided.
-Similar techniques are appropriate for AMD GPUs.
+Instructions and a script for inserting the driver into Nvidia or AMD vBIOS are provided.
 
-For further information on VBIOS modification, see:
+Please note all the cautions already given above about the difficulty of recovering, unless you are familiar with
+the procedures necessary, if this process fails.
+
+To use the provided `vBiosInsert.sh` script:
+
+ - Locate an appropriate version of the `nvflash` tool (Nvidia) or `amdvbflash` tool (AMD) (both are available for
+   Linux and Windows), which can be used to read from and write to the GPU vBIOS.
+ - Use that tool to read a copy of the vBIOS.
+ - Run `./vBiosInsertEfi.sh [-a|-n] {original}.rom EnableGop.efi {modified}.rom`, with `-a` for AMD and `-n` for Nvidia.
+ - The new file `{modified}.rom` may be burnt to the vBIOS firmware.
+
+In the case of AMD, considerably less space is normally available, due to a strict limit of 128k for legacy and EFI 
+parts of the larger ROM image. If there is not enough space (i.e. script reports
+data would be truncated) then it is necessary to [strip some legacy VGA parts of the
+vBIOS](https://github.com/Ausdauersportler/IMAC-EFI-BOOT-SCREEN/wiki/Deleting-the-VGA). This is beyond the scope
+of these instructions.
+
+If required to manually detect the GOP offset (this should normally be autodetected):
+
+> Using a hex editor, search in the vBIOS for the byte sequence `F1 0E 00 00` with the byte sequence `55 AA` coming
+ close before it; the start address of the `55 AA` is the GOP offset value needed.
+
+For further information on vBIOS modification, see:
 
  - https://forums.macrumors.com/threads/2011-imac-graphics-card-upgrade.1596614/
  - https://forums.macrumors.com/threads/imac-2011-maxwell-and-pascal-gpu-upgrade.2300989/
  - https://github.com/Ausdauersportler/IMAC-EFI-BOOT-SCREEN/wiki
  - https://winraid.level1techs.com/t/amd-and-nvidia-gop-update-no-requests-diy/30917
-
-### Nvidia
-
-To use the provided `NvInsertEfi.sh` script:
-
- - Locate an appropriate version of the `nvflash` tool (available for Linux and Windows), which can be used to read
- from and write to your Nvidia GPU VBIOS.
- - Use `nvflash` to read a copy of your VBIOS.
- - Using a hex editor, search in the VBIOS for the byte sequence `F1 0E 00 00` with the byte sequence `55 AA` coming
- close before it; the start address of the `55 AA` is the value needed for the insertion offset in the next step.
- - Run `./NvInsertEfi.sh {original}.rom EnableGop.efi {offset} {modified}/.rom`.
-   - Run `./NvInsertEfi.sh` with no arguments to see allowed formats for offset parameter.
-   - Only if you modified a rom file obtained via `flashrom` rather than `nvflash`, you should manually truncate
-   the modified file's size to the original file's size at this point. (`nvflash` files only contain the used section
-   of the VBIOS, and therefore must not be truncated.)
- - The new file `{modified}.rom` may be burnt to the VBIOS firmware.
- 
- Please note all the cautions already given above about the difficulty of recovering, unless you are familiar with
- the procedures necessary, if this process fails.
-
-### AMD
-
-Similar procedures as for Nvidia apply.
-
- - Further assistance and information may be available in the forums and pages listed above.
-

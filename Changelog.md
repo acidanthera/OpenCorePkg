@@ -4,6 +4,7 @@ OpenCore Changelog
 - Resolved issues with verbose boot log appearing over picker graphics
 - Added version number to EnableGop UI section, so tool builders can track it
 - Added `ProvideCurrentCpuInfo` support for macOS 13.3 DP
+- Added AMD support, GOP offset auto-detection and macOS 10.11+ support to EnableGop vBIOS insertion script
 
 #### v0.8.9
 - Improved debug logging when applying ACPI patches

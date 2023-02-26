@@ -269,7 +269,7 @@ package() {
   helpFiles=(
     "README.md"
     "UEFITool_Inserted_Screenshot.png"
-    "NvInsertEfi.sh"
+    "vBiosInsert.sh"
   )
   for file in "${helpFiles[@]}"; do
     cp "${selfdir}/Staging/EnableGop/${file}" "${dstdir}/Utilities/EnableGop"/ || exit 1
