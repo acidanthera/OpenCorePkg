@@ -22,6 +22,7 @@
 #define _PCD_VALUE_PcdVerifyNodeInList                  ((BOOLEAN)0U)
 #define _PCD_VALUE_PcdCpuNumberOfReservedVariableMtrrs  0x2U
 #define _PCD_VALUE_PcdMaximumDevicePathNodeCount        0U
+#define _PCD_VALUE_PcdFatReadOnlyMode                   ((BOOLEAN)1U)
 
 UINT32   _gPcd_FixedAtBuild_PcdUefiLibMaxPrintBufferSize             = _PCD_VALUE_PcdUefiLibMaxPrintBufferSize;
 BOOLEAN  _gPcd_FixedAtBuild_PcdUgaConsumeSupport                     = _PCD_VALUE_PcdUgaConsumeSupport;
@@ -44,4 +45,5 @@ BOOLEAN  _gPcd_FixedAtBuild_PcdImageLoaderForceLoadDebug             = FALSE;
 BOOLEAN  _gPcd_FixedAtBuild_PcdImageLoaderTolerantLoad               = TRUE;
 BOOLEAN  _gPcd_FixedAtBuild_PcdImageLoaderSupportDebug               = FALSE;
 BOOLEAN  _gPcd_FixedAtBuild_PcdImageLoaderRemoveXForWX               = FALSE;
+BOOLEAN  _gPcd_FeatureFlag_PcdFatReadOnlyMode                        = _PCD_VALUE_PcdFatReadOnlyMode;
 UINT32   _gPcd_BinaryPatch_PcdSerialRegisterStride                   = 0;

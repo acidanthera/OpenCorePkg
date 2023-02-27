@@ -62,6 +62,7 @@ extern BOOLEAN  _gPcd_FixedAtBuild_PcdImageLoaderSupportDebug;
 extern BOOLEAN  _gPcd_FixedAtBuild_PcdImageLoaderRemoveXForWX;
 extern UINT8    _gPcd_FixedAtBuild_PcdUefiVariableDefaultLang[4];
 extern UINT8    _gPcd_FixedAtBuild_PcdUefiVariableDefaultPlatformLang[6];
+extern BOOLEAN  _gPcd_FeatureFlag_PcdFatReadOnlyMode;
 extern UINT32   _gPcd_BinaryPatch_PcdSerialRegisterStride;
 
 #define _PCD_GET_MODE_32_PcdUefiLibMaxPrintBufferSize   _gPcd_FixedAtBuild_PcdUefiLibMaxPrintBufferSize
@@ -82,6 +83,7 @@ extern UINT32   _gPcd_BinaryPatch_PcdSerialRegisterStride;
 #define _PCD_GET_MODE_PTR_PcdUefiVariableDefaultLang          _gPcd_FixedAtBuild_PcdUefiVariableDefaultLang
 #define _PCD_GET_MODE_PTR_PcdUefiVariableDefaultPlatformLang  _gPcd_FixedAtBuild_PcdUefiVariableDefaultPlatformLang
 #define _PCD_GET_MODE_BOOL_PcdValidateOrderedCollection       ((BOOLEAN)0U)
+#define _PCD_GET_MODE_BOOL_PcdFatReadOnlyMode                 _gPcd_FeatureFlag_PcdFatReadOnlyMode
 #define _PCD_GET_MODE_32_PcdSerialRegisterStride              _gPcd_BinaryPatch_PcdSerialRegisterStride
 //
 // This will not be of any effect at userspace.
