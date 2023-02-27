@@ -42,6 +42,7 @@
 extern UINT32   _gPcd_FixedAtBuild_PcdUefiLibMaxPrintBufferSize;
 extern BOOLEAN  _gPcd_FixedAtBuild_PcdUgaConsumeSupport;
 extern UINT8    _gPcd_FixedAtBuild_PcdDebugPropertyMask;
+extern UINT8    _gPcd_FixedAtBuild_PcdDebugRaisePropertyMask;
 extern UINT8    _gPcd_FixedAtBuild_PcdDebugClearMemoryValue;
 extern UINT32   _gPcd_FixedAtBuild_PcdFixedDebugPrintErrorLevel;
 extern UINT32   _gPcd_FixedAtBuild_PcdDebugPrintErrorLevel;
@@ -66,6 +67,7 @@ extern UINT32   _gPcd_BinaryPatch_PcdSerialRegisterStride;
 #define _PCD_GET_MODE_32_PcdUefiLibMaxPrintBufferSize   _gPcd_FixedAtBuild_PcdUefiLibMaxPrintBufferSize
 #define _PCD_GET_MODE_BOOL_PcdUgaConsumeSupport         _gPcd_FixedAtBuild_PcdUgaConsumeSupport
 #define _PCD_GET_MODE_8_PcdDebugPropertyMask            _gPcd_FixedAtBuild_PcdDebugPropertyMask
+#define _PCD_GET_MODE_8_PcdDebugRaisePropertyMask       _gPcd_FixedAtBuild_PcdDebugRaisePropertyMask
 #define _PCD_GET_MODE_8_PcdDebugClearMemoryValue        _gPcd_FixedAtBuild_PcdDebugClearMemoryValue
 #define _PCD_GET_MODE_32_PcdFixedDebugPrintErrorLevel   _gPcd_FixedAtBuild_PcdFixedDebugPrintErrorLevel
 #define _PCD_GET_MODE_32_PcdDebugPrintErrorLevel        _gPcd_FixedAtBuild_PcdDebugPrintErrorLevel

@@ -12,6 +12,7 @@
   DEBUG_PROPERTY_DEBUG_ASSERT_ENABLED \
   | DEBUG_PROPERTY_DEBUG_PRINT_ENABLED \
   | DEBUG_PROPERTY_ASSERT_BREAKPOINT_ENABLED )
+#define _PCD_VALUE_PcdDebugRaisePropertyMask            DEBUG_PROPERTY_DEBUG_ASSERT_ENABLED
 #define _PCD_VALUE_PcdDebugClearMemoryValue             0xAFU
 #define _PCD_VALUE_PcdFixedDebugPrintErrorLevel         0x80000002U
 #define _PCD_VALUE_PcdDebugPrintErrorLevel              0x80000002U
@@ -25,6 +26,7 @@
 UINT32   _gPcd_FixedAtBuild_PcdUefiLibMaxPrintBufferSize             = _PCD_VALUE_PcdUefiLibMaxPrintBufferSize;
 BOOLEAN  _gPcd_FixedAtBuild_PcdUgaConsumeSupport                     = _PCD_VALUE_PcdUgaConsumeSupport;
 UINT8    _gPcd_FixedAtBuild_PcdDebugPropertyMask                     = _PCD_VALUE_PcdDebugPropertyMask;
+UINT8    _gPcd_FixedAtBuild_PcdDebugRaisePropertyMask                = _PCD_VALUE_PcdDebugRaisePropertyMask;
 UINT8    _gPcd_FixedAtBuild_PcdDebugClearMemoryValue                 = _PCD_VALUE_PcdDebugClearMemoryValue;
 UINT32   _gPcd_FixedAtBuild_PcdFixedDebugPrintErrorLevel             = _PCD_VALUE_PcdFixedDebugPrintErrorLevel;
 UINT32   _gPcd_FixedAtBuild_PcdDebugPrintErrorLevel                  = _PCD_VALUE_PcdDebugPrintErrorLevel;
