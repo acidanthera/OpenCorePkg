@@ -137,6 +137,7 @@ if [ "$AMD" -eq 1 ] ; then
   dd bs=1 if="$ROM_FILE" of="$tmpdir/keep_part.rom" skip=$(($AMD_SAFE_SIZE)) 2>/dev/null || exit 1
 else
   cp "$ROM_FILE" "$tmpdir/modify_part.rom" || exit 1
+  echo -n > "$tmpdir/keep_part.rom" || exit 1
 fi
 
 if [ "$GOP_OFFSET" = "-" ] ; then
@@ -218,11 +219,16 @@ fi
 if [ "$TRUNCATE" -eq 1 ] ; then
   dd bs=1 if="$tmpdir/combined.rom" of="$tmpdir/truncated.rom" count="$TRUNCATE_SIZE" 2>/dev/null || exit 1
 
-  ERROR=0
-  hexdump -v -e '1/8 " %016X\n"' "$tmpdir/truncated.rom" | tail | grep -q "FFFFFFFFFFFFFFFF" || ERROR=1
+  COUNT=$(hexdump -v -e '1/8 " %016X\n"' "temp/truncated.rom" | tail -n 8 | grep "FFFFFFFFFFFFFFFF" | wc -l)
+  if [ "$COUNT" -ne 8 ] ; then
+    # Some Nvidia ROMs, at least, incorrectly have 00000000 padding after active contents
+    # (it is incorrect, since writing only active contents using nvflash resets the rest to ffffffff).
+    # May also be relevant if we ever have any truly 00000000 default ROM images.
+    COUNT=$(hexdump -v -e '1/8 " %016X\n"' "temp/truncated.rom" | tail -n 8 | grep "0000000000000000" | wc -l)
+  fi
 
-  if [ "$ERROR" -eq 1 ] ; then
-    echo " - Not enough space within AMD $((TRUNCATE_SIZE / 1024))k limit - aborting!" && exit 1
+  if [ "$COUNT" -ne 8 ] ; then
+    echo " - Not enough space within $((TRUNCATE_SIZE / 1024))k limit - aborting!" && exit 1
   fi
 
   cat "$tmpdir/truncated.rom" "$tmpdir/keep_part.rom" > "$OUT_FILE" || exit 1
