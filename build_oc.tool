@@ -26,6 +26,7 @@ buildutil() {
     "TestMacho"
     "TestMp3"
     "TestExt4Dxe"
+    "TestFatDxe"
     "TestNtfsDxe"
     "TestPeCoff"
     "TestProcessKernel"
