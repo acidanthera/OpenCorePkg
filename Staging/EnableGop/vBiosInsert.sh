@@ -219,12 +219,12 @@ fi
 if [ "$TRUNCATE" -eq 1 ] ; then
   dd bs=1 if="$tmpdir/combined.rom" of="$tmpdir/truncated.rom" count="$TRUNCATE_SIZE" 2>/dev/null || exit 1
 
-  COUNT=$(hexdump -v -e '1/8 " %016X\n"' "temp/truncated.rom" | tail -n 8 | grep "FFFFFFFFFFFFFFFF" | wc -l)
+  COUNT=$(hexdump -v -e '1/8 " %016X\n"' "$tmpdir/truncated.rom" | tail -n 8 | grep "FFFFFFFFFFFFFFFF" | wc -l)
   if [ "$COUNT" -ne 8 ] ; then
     # Some Nvidia ROMs, at least, incorrectly have 00000000 padding after active contents
     # (it is incorrect, since writing only active contents using nvflash resets the rest to ffffffff).
     # May also be relevant if we ever have any truly 00000000 default ROM images.
-    COUNT=$(hexdump -v -e '1/8 " %016X\n"' "temp/truncated.rom" | tail -n 8 | grep "0000000000000000" | wc -l)
+    COUNT=$(hexdump -v -e '1/8 " %016X\n"' "$tmpdir/truncated.rom" | tail -n 8 | grep "0000000000000000" | wc -l)
   fi
 
   if [ "$COUNT" -ne 8 ] ; then
