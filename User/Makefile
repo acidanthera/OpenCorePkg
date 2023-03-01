@@ -167,7 +167,7 @@ ifneq ($(STANDALONE),1)
 	#
 	# Customised/Simplified implementations at userspace level.
 	#
-	OBJS    += UserBaseMemoryLib.o UserBootServices.o UserGlobalVar.o UserMath.o UserMisc.o UserPcd.o UserOcDummy.o
+	OBJS    += UserBaseMemoryLib.o UserBootServices.o UserGlobalVar.o UserMath.o UserMisc.o UserPcd.o UserUnicodeCollation.o UserOcDummy.o
 	#
 	# OcGuardLib targets.
 	#
@@ -213,6 +213,10 @@ ifneq ($(STANDALONE),1)
 	#
 	OBJS    += KernelVersion.o
 	#
+	# OcUnicodeCollationEngLib targets.
+	#
+	OBJS    += OcUnicodeCollationEngCommon.o
+	#
 	# OcVariableLib targets.
 	#
 	OBJS    += OcVariableLib.o
@@ -247,6 +251,7 @@ ifneq ($(STANDALONE),1)
 				$(OC_USER)/Library/OcCpuLib/Ia32:$\
 				$(OC_USER)/Library/OcMiscLib:$\
 				$(OC_USER)/Library/OcAppleKernelLib:$\
+				$(OC_USER)/Library/OcUnicodeCollationEngLib:$\
 				$(OC_USER)/Library/OcVariableLib
 endif
 

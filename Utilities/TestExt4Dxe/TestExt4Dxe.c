@@ -7,16 +7,10 @@
 #include <UserFile.h>
 #include <UserGlobalVar.h>
 #include <UserMemory.h>
+#include <UserUnicodeCollation.h>
 #include <string.h>
 
 #define OPEN_FILE_MODES_COUNT  3
-#define MAP_TABLE_SIZE         0x100
-#define CHAR_FAT_VALID         0x01
-
-#define TO_UPPER(a)  (CHAR16) ((a) <= 0xFF ? mEngUpperMap[a] : (a))
-
-UINT8  _gPcd_FixedAtBuild_PcdUefiVariableDefaultLang[4]         = { 101, 110, 103, 0 };
-UINT8  _gPcd_FixedAtBuild_PcdUefiVariableDefaultPlatformLang[6] = { 101, 110, 45, 85, 83, 0 };
 
 STATIC UINTN        mFuzzOffset;
 STATIC UINTN        mFuzzSize;
@@ -25,104 +19,6 @@ STATIC CONST UINT8  *mFuzzPointer;
 STATIC EFI_SIMPLE_FILE_SYSTEM_PROTOCOL  *mEfiSfsInterface;
 
 STATIC UINT64  mOpenFileModes[OPEN_FILE_MODES_COUNT] = { EFI_FILE_MODE_READ, EFI_FILE_MODE_WRITE, EFI_FILE_MODE_CREATE };
-
-CHAR8  mEngUpperMap[MAP_TABLE_SIZE];
-CHAR8  mEngLowerMap[MAP_TABLE_SIZE];
-CHAR8  mEngInfoMap[MAP_TABLE_SIZE];
-
-CHAR8  mOtherChars[] = {
-  '0',
-  '1',
-  '2',
-  '3',
-  '4',
-  '5',
-  '6',
-  '7',
-  '8',
-  '9',
-  '\\',
-  '.',
-  '_',
-  '^',
-  '$',
-  '~',
-  '!',
-  '#',
-  '%',
-  '&',
-  '-',
-  '{',
-  '}',
-  '(',
-  ')',
-  '@',
-  '`',
-  '\'',
-  '\0'
-};
-
-VOID
-UnicodeCollationInitializeMappingTables (
-  VOID
-  )
-{
-  UINTN  Index;
-  UINTN  Index2;
-
-  //
-  // Initialize mapping tables for the supported languages
-  //
-  for (Index = 0; Index < MAP_TABLE_SIZE; Index++) {
-    mEngUpperMap[Index] = (CHAR8)Index;
-    mEngLowerMap[Index] = (CHAR8)Index;
-    mEngInfoMap[Index]  = 0;
-
-    if (((Index >= 'a') && (Index <= 'z')) || ((Index >= 0xe0) && (Index <= 0xf6)) || ((Index >= 0xf8) && (Index <= 0xfe))) {
-      Index2               = Index - 0x20;
-      mEngUpperMap[Index]  = (CHAR8)Index2;
-      mEngLowerMap[Index2] = (CHAR8)Index;
-
-      mEngInfoMap[Index]  |= CHAR_FAT_VALID;
-      mEngInfoMap[Index2] |= CHAR_FAT_VALID;
-    }
-  }
-
-  for (Index = 0; mOtherChars[Index] != 0; Index++) {
-    Index2               = mOtherChars[Index];
-    mEngInfoMap[Index2] |= CHAR_FAT_VALID;
-  }
-}
-
-/**
-  Performs a case-insensitive comparison of two Null-terminated strings.
-
-  @param  This Protocol instance pointer.
-  @param  Str1 A pointer to a Null-terminated string.
-  @param  Str2 A pointer to a Null-terminated string.
-
-  @retval 0   Str1 is equivalent to Str2
-  @retval > 0 Str1 is lexically greater than Str2
-  @retval < 0 Str1 is lexically less than Str2
-
-**/
-INTN
-StriColl (
-  IN CHAR16  *Str1,
-  IN CHAR16  *Str2
-  )
-{
-  while (*Str1 != 0) {
-    if (TO_UPPER (*Str1) != TO_UPPER (*Str2)) {
-      break;
-    }
-
-    Str1 += 1;
-    Str2 += 1;
-  }
-
-  return TO_UPPER (*Str1) - TO_UPPER (*Str2);
-}
 
 /**
    Initialises Unicode collation, which is needed for case-insensitive string comparisons
@@ -138,7 +34,7 @@ Ext4InitialiseUnicodeCollation (
   EFI_HANDLE  DriverHandle
   )
 {
-  UnicodeCollationInitializeMappingTables ();
+  OcUnicodeCollationInitializeMappingTables ();
   return EFI_SUCCESS;
 }
 
@@ -159,7 +55,7 @@ Ext4StrCmpInsensitive (
   IN CHAR16  *Str2
   )
 {
-  return StriColl (Str1, Str2);
+  return EngStriColl (NULL, Str1, Str2);
 }
 
 EFI_STATUS
