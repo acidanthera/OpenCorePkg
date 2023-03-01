@@ -202,6 +202,11 @@ LLVMFuzzerTestOneInput (
     Status = FileGetInfo (NewHandle, &gEfiFileInfoGuid, &Len, Info);
     if (Status == EFI_BUFFER_TOO_SMALL) {
       Info = AllocateZeroPool (Len);
+      if (Info == NULL) {
+        FreeAll (FileName, Instance);
+        return 0;
+      }
+
       FileGetInfo (NewHandle, &gEfiFileInfoGuid, &Len, Info);
       FreePool (Info);
     }
@@ -210,6 +215,11 @@ LLVMFuzzerTestOneInput (
     Status = FileGetInfo (NewHandle, &gEfiFileSystemInfoGuid, &Len, Info);
     if (Status == EFI_BUFFER_TOO_SMALL) {
       Info = AllocateZeroPool (Len);
+      if (Info == NULL) {
+        FreeAll (FileName, Instance);
+        return 0;
+      }
+
       FileGetInfo (NewHandle, &gEfiFileSystemInfoGuid, &Len, Info);
       FreePool (Info);
     }
@@ -218,6 +228,11 @@ LLVMFuzzerTestOneInput (
     Status = FileGetInfo (NewHandle, &gEfiFileSystemVolumeLabelInfoIdGuid, &Len, Info);
     if (Status == EFI_BUFFER_TOO_SMALL) {
       Info = AllocateZeroPool (Len);
+      if (Info == NULL) {
+        FreeAll (FileName, Instance);
+        return 0;
+      }
+
       FileGetInfo (NewHandle, &gEfiFileSystemVolumeLabelInfoIdGuid, &Len, Info);
       FreePool (Info);
     }
