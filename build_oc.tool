@@ -275,6 +275,16 @@ package() {
     cp "${selfdir}/Staging/EnableGop/${file}" "${dstdir}/Utilities/EnableGop"/ || exit 1
   done
 
+  # Provide EDK-II BaseTools.
+  mkdir "${dstdir}/Utilities/BaseTools" || exit 1
+  if [ "$(unamer)" = "Windows" ]; then
+    cp "${selfdir}/UDK/BaseTools/Bin/Win32/EfiRom.exe" "${dstdir}/Utilities/BaseTools" || exit 1
+    cp "${selfdir}/UDK/BaseTools/Bin/Win32/GenFfs.exe" "${dstdir}/Utilities/BaseTools" || exit 1
+  else
+    cp "${selfdir}/UDK/BaseTools/Source/C/bin/EfiRom" "${dstdir}/Utilities/BaseTools" || exit 1
+    cp "${selfdir}/UDK/BaseTools/Source/C/bin/GenFfs" "${dstdir}/Utilities/BaseTools" || exit 1
+  fi
+
   utils=(
     "ACPIe"
     "acdtinfo"
