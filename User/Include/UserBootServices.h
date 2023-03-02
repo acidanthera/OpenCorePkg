@@ -69,4 +69,11 @@ NullTextOutputString (
   IN CHAR16                           *String
   );
 
+EFI_STATUS
+EFIAPI
+DummyGetTime (
+  OUT EFI_TIME               *Time,
+  OUT EFI_TIME_CAPABILITIES  *Capabilities
+  );
+
 #endif // OC_USER_BOOT_SERVICES_H
