@@ -81,7 +81,7 @@ Further discussion and community support for this driver is available at:
 
 ## Install to firmware
 
-For reading and writing to firmware on the Mac Pro, @Macschrauber's [Rom Dump](https://www.youtube.com/watch?v=q4NW00oyUKE) works
+For reading and writing to firmware on the Mac Pro, @Macschrauber's [Rom Dump](https://youtu.be/yHnZeht_isU) works
 well. Alternatively the kexts and executables which this uses can be sourced individually (or extracted from the Rom Dump app) and
 run from the command line.
 
