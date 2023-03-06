@@ -1,0 +1,53 @@
+## @file
+#  List available partitions on the system.
+#
+#  Copyright (c) 2021-2023, Vitaly Cheptsov. All rights reserved.<BR>
+#
+#  This program and the accompanying materials
+#  are licensed and made available under the terms and conditions of the BSD License
+#  which accompanies this distribution.  The full text of the license may be found at
+#  http://opensource.org/licenses/bsd-license.php
+#  THE PROGRAM IS DISTRIBUTED UNDER THE BSD LICENSE ON AN "AS IS" BASIS,
+#  WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
+#
+##
+
+[Defines]
+  INF_VERSION                    = 0x00010005
+  BASE_NAME                      = ListPartitions
+  FILE_GUID                      = 58856DD3-44DF-481A-BBD2-7ED13741EDF8
+  MODULE_TYPE                    = UEFI_APPLICATION
+  VERSION_STRING                 = 1.0
+  ENTRY_POINT                    = UefiMain
+
+#
+#  This flag specifies whether HII resource section is generated into PE image.
+#
+  UEFI_HII_RESOURCE_SECTION      = TRUE
+
+#
+# The following information is for reference only and not required by the build tools.
+#
+#  VALID_ARCHITECTURES           = IA32 X64 IPF EBC
+#
+
+[Sources]
+  ListPartitions.c
+
+[Packages]
+  MdePkg/MdePkg.dec
+  MdeModulePkg/MdeModulePkg.dec
+  OpenCorePkg/OpenCorePkg.dec
+  UefiCpuPkg/UefiCpuPkg.dec
+
+[Protocols]
+  gEfiBlockIoProtocolGuid                 ## CONSUMES
+
+[LibraryClasses]
+  OcConsoleControlEntryModeGenericLib
+  OcFileLib
+  DebugLib
+  UefiApplicationEntryPoint
+  UefiLib
+  PcdLib
+  IoLib

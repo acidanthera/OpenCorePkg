@@ -136,6 +136,7 @@ package() {
       "CsrUtil.efi"
       "GopStop.efi"
       "KeyTester.efi"
+      "ListPartitions.efi"
       "MmapDump.efi"
       "ResetSystem.efi"
       "RtcRw.efi"
