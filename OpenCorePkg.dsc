@@ -205,6 +205,7 @@
   OpenCorePkg/Application/GopPerf/GopPerf.inf
   OpenCorePkg/Application/GopStop/GopStop.inf
   OpenCorePkg/Application/KeyTester/KeyTester.inf
+  OpenCorePkg/Application/ListPartitions/ListPartitions.inf
   OpenCorePkg/Application/MmapDump/MmapDump.inf
   OpenCorePkg/Application/OpenControl/OpenControl.inf
   OpenCorePkg/Application/OpenCore/OpenCore.inf {
