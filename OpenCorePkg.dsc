@@ -432,3 +432,4 @@
   XCODE:RELEASE_*_*_CC_FLAGS    = $(OCPKG_BUILD_OPTIONS_GEN) $(OCPKG_ANAL_OPTIONS_GEN) -Oz -flto -fstack-protector-strong -ftrivial-auto-var-init=pattern
 
   !include NetworkPkg/NetworkBuildOptions.dsc.inc
+  !include MdePkg/MdeBuildOptions.dsc.inc
