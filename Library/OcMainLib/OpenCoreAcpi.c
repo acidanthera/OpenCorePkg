@@ -150,7 +150,7 @@ OcAcpiPatchTables (
       continue;
     }
 
-    Comment   = OC_BLOB_GET (&UserPatch->Comment);
+    Comment = OC_BLOB_GET (&UserPatch->Comment);
 
     //
     // Ignore patch if:
