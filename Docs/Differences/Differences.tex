@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
-%DIF DEL PreviousConfiguration.tex   Mon Mar  6 22:03:49 2023
-%DIF ADD ../Configuration.tex        Mon Mar  6 22:03:49 2023
+%DIF DEL PreviousConfiguration.tex   Thu Mar  9 06:57:33 2023
+%DIF ADD ../Configuration.tex        Thu Mar  9 22:49:02 2023
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -6878,7 +6878,7 @@ options for the driver may be specified in \texttt{UEFI/Drivers/Arguments}:
   \medskip
 
   As example usage, it is possible to use \texttt{+=} format to add
-  a \texttt{vt.handoff} options, such as \texttt{autopts+="vt.handoff=7"} or \texttt{autopts+="vt.handoff=3"}
+  a \texttt{vt.handoff} options, such as \texttt{\DIFdelbegin \DIFdel{autopts}\DIFdelend \DIFaddbegin \DIFadd{autoopts}\DIFaddend +="vt.handoff=7"} or \texttt{\DIFdelbegin \DIFdel{autopts}\DIFdelend \DIFaddbegin \DIFadd{autoopts}\DIFaddend +="vt.handoff=3"}
   (check \texttt{cat /proc/cmdline} when booted via the distro's default bootloader) on Ubuntu and related distros,
   in order to add the \texttt{vt.handoff} option to the auto-detected GRUB defaults, and avoid a flash of text
   showing before the distro splash screen.
