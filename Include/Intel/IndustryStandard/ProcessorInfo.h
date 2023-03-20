@@ -128,15 +128,15 @@
 #define MSR_DRAM_PERF_STATUS    0x61B
 #define MSR_DRAM_POWER_INFO     0x61C
 
-/// x86 Page Address Translation
+/// x86 Page Attribute Table (PAT) cache types
 enum {
-  PageAddressTranslationUncached       = 0,
-  PageAddressTranslationWriteCombining = 1,
-  PageAddressTranslationWriteThrough   = 4,
-  PageAddressTranslationWriteProtected = 5,
-  PageAddressTranslationWriteBack      = 6,
+  PageAttributeTableUncached       = 0,
+  PageAttributeTableWriteCombining = 1,
+  PageAttributeTableWriteThrough   = 4,
+  PageAttributeTableWriteProtected = 5,
+  PageAttributeTableWriteBack      = 6,
   /// Uncached, but can be overriden by MTRR
-  PageAddressTranslationOverridableUncached = 7,
+  PageAttributeTableOverridableUncached = 7,
 };
 
 #define K8_FIDVID_STATUS   0xC0010042
