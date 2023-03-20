@@ -391,17 +391,21 @@ OcGetCurrentPageTable (
 /**
   Return physical addrress for given virtual addrress.
 
-  @param[in]  PageTable       Page table to use for solving.
-  @param[in]  VirtualAddr     Virtual address to look up.
-  @param[out] PhysicalAddr    Physical address to return.
+  @param[in,out]  PageTable       Page table to use for solving.
+  @param[in]      VirtualAddr     Virtual address to look up.
+  @param[out]     PhysicalAddr    Physical address to return.
+  @param[out]     Level           Page table mapping level, 1, 2 or 4 for 1Gb, 2Mb or 4kb.
+  @param[out]     Bits            Page table raw mapping and flag bits.
 
   @retval EFI_SUCCESS on successful lookup.
 **/
 EFI_STATUS
 OcGetPhysicalAddress (
-  IN  PAGE_MAP_AND_DIRECTORY_POINTER  *PageTable  OPTIONAL,
-  IN  EFI_VIRTUAL_ADDRESS             VirtualAddr,
-  OUT EFI_PHYSICAL_ADDRESS            *PhysicalAddr
+  IN OUT  PAGE_MAP_AND_DIRECTORY_POINTER  *PageTable  OPTIONAL,
+  IN      EFI_VIRTUAL_ADDRESS             VirtualAddr,
+  OUT     EFI_PHYSICAL_ADDRESS            *PhysicalAddr,
+  OUT     UINTN                           *Level      OPTIONAL,
+  OUT     UINT64                          *Bits       OPTIONAL
   );
 
 /**

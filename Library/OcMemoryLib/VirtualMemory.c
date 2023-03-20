@@ -71,9 +71,11 @@ EnablePageTableWriteProtection (
 
 EFI_STATUS
 OcGetPhysicalAddress (
-  IN  PAGE_MAP_AND_DIRECTORY_POINTER  *PageTable  OPTIONAL,
-  IN  EFI_VIRTUAL_ADDRESS             VirtualAddr,
-  OUT EFI_PHYSICAL_ADDRESS            *PhysicalAddr
+  IN OUT  PAGE_MAP_AND_DIRECTORY_POINTER  *PageTable  OPTIONAL,
+  IN      EFI_VIRTUAL_ADDRESS             VirtualAddr,
+  OUT     EFI_PHYSICAL_ADDRESS            *PhysicalAddr,
+  OUT     UINTN                           *Level      OPTIONAL,
+  OUT     UINT64                          *Bits       OPTIONAL
   )
 {
   EFI_PHYSICAL_ADDRESS            Start;
@@ -128,6 +130,15 @@ OcGetPhysicalAddress (
     PTE1G         = (PAGE_TABLE_1G_ENTRY *)PDPE;
     Start         = PTE1G->Uint64 & PAGING_1G_ADDRESS_MASK_64;
     *PhysicalAddr = Start + VA.Pg1G.PhysPgOffset;
+
+    if (Level != NULL) {
+      *Level = 1;
+    }
+
+    if (Bits != NULL) {
+      *Bits = PTE1G->Uint64;
+    }
+
     return EFI_SUCCESS;
   }
 
@@ -150,6 +161,15 @@ OcGetPhysicalAddress (
     PTE2M         = (PAGE_TABLE_2M_ENTRY *)PDE;
     Start         = PTE2M->Uint64 & PAGING_2M_ADDRESS_MASK_64;
     *PhysicalAddr = Start + VA.Pg2M.PhysPgOffset;
+
+    if (Level != NULL) {
+      *Level = 2;
+    }
+
+    if (Bits != NULL) {
+      *Bits = PTE2M->Uint64;
+    }
+
     return EFI_SUCCESS;
   }
 
@@ -167,6 +187,14 @@ OcGetPhysicalAddress (
 
   Start         = PTE4K->Uint64 & PAGING_4K_ADDRESS_MASK_64;
   *PhysicalAddr = Start + VA.Pg4K.PhysPgOffset;
+
+  if (Level != NULL) {
+    *Level = 4;
+  }
+
+  if (Bits != NULL) {
+    *Bits = PTE4K->Uint64;
+  }
 
   return EFI_SUCCESS;
 }
