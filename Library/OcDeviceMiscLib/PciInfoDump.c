@@ -50,7 +50,7 @@ OcPciInfoDump (
   ASSERT (Root != NULL);
 
   FileBufferSize = SIZE_1KB;
-  FileBuffer     = (CHAR8 *)AllocateZeroPool (FileBufferSize);
+  FileBuffer     = AllocateZeroPool (FileBufferSize);
   if (FileBuffer == NULL) {
     return EFI_OUT_OF_RESOURCES;
   }

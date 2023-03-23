@@ -12,7 +12,7 @@
   BASE_NAME                      = EnableGopDirect
   FILE_GUID                      = 3FBA58B1-F8C0-41BC-ACD8-253043A3A17F
   MODULE_TYPE                    = DXE_DRIVER
-  VERSION_STRING                 = 1.1
+  VERSION_STRING                 = 1.2
   ENTRY_POINT                    = UefiMain
 
 #

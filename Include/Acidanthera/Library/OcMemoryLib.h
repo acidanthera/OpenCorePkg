@@ -377,6 +377,42 @@ OcSplitMemoryMapByAttributes (
   );
 
 /**
+  Checks if PAT is supported.
+
+  @retval TRUE  PAT is supported.
+  @retval FALSE PAT is not supported.
+
+**/
+BOOLEAN
+OcIsPatSupported (
+  VOID
+  );
+
+/**
+  Return short string representation of MTRR cache type, as used in Intel tables.
+
+  @param[in]  MtrrType      MTRR type.
+
+  @retval String representation.
+**/
+CHAR8 *
+OcGetMtrrTypeString (
+  UINT8  MtrrType
+  );
+
+/**
+  Return short string representation of PAT cache type, as used in Intel tables.
+
+  @param[in]  PatType       PAT type.
+
+  @retval String representation.
+**/
+CHAR8 *
+OcGetPatTypeString (
+  UINT8  PatType
+  );
+
+/**
   Return pointer to PML4 table in PageTable and PWT and PCD flags in Flags.
 
   @param[out]  Flags      Current page table PWT and PCT flags.
@@ -389,7 +425,7 @@ OcGetCurrentPageTable (
   );
 
 /**
-  Return physical addrress for given virtual addrress.
+  Return physical address for given virtual address.
 
   @param[in]  PageTable       Page table to use for solving.
   @param[in]  VirtualAddr     Virtual address to look up.
@@ -402,6 +438,52 @@ OcGetPhysicalAddress (
   IN  PAGE_MAP_AND_DIRECTORY_POINTER  *PageTable  OPTIONAL,
   IN  EFI_VIRTUAL_ADDRESS             VirtualAddr,
   OUT EFI_PHYSICAL_ADDRESS            *PhysicalAddr
+  );
+
+/**
+  Get page table info for a given virtual address.
+  Includes option to get or set Page Attribute Table (PAT) index for caching type.
+
+  @param[in]      PageTable       Page table to use for solving, and modify iff SetPat==TRUE.
+  @param[in]      VirtualAddr     Virtual address to look up.
+  @param[out]     PhysicalAddr    Physical address to return.
+  @param[out]     Level           Page table mapping level, 1, 2 or 4 for 1Gb, 2Mb or 4kb.
+  @param[out]     Bits            Page table mapping flag bits.
+  @param[in,out]  PatIndex        PAT index to get or set.
+  @param[in]      SetPat          If TRUE then set PatIndex if present, else get.
+
+  @retval EFI_SUCCESS on success.
+**/
+EFI_STATUS
+OcGetSetPageTableInfoForAddress (
+  IN      PAGE_MAP_AND_DIRECTORY_POINTER  *PageTable    OPTIONAL,
+  IN      EFI_VIRTUAL_ADDRESS             VirtualAddr,
+  OUT     EFI_PHYSICAL_ADDRESS            *PhysicalAddr OPTIONAL,
+  OUT     UINT8                           *Level        OPTIONAL,
+  OUT     UINT64                          *Bits         OPTIONAL,
+  IN OUT  PAT_INDEX                       *PatIndex     OPTIONAL,
+  IN      BOOLEAN                         SetPat
+  );
+
+/**
+  Set Page Attribute Table (PAT) index for an address range.
+  Assumes UEFI identity mapping between physical and virtual addresses.
+
+  @param[in]  PageTable       Page table to use and modify.
+  @param[in]  VirtualAddr     Address range start.
+  @param[in]  Length          Address range length.
+  @param[in]  PatIndex        PAT index to set.
+
+  @retval EFI_SUCCESS on success.
+  @retval EFI_INVALID_PARAMETER on invalid memory range.
+  @retval error - other error from called methods.
+**/
+EFI_STATUS
+OcSetPatIndexForAddressRange (
+  IN  PAGE_MAP_AND_DIRECTORY_POINTER  *PageTable  OPTIONAL,
+  IN  EFI_VIRTUAL_ADDRESS             VirtualAddr,
+  IN  UINT64                          Length,
+  IN  PAT_INDEX                       *PatIndex
   );
 
 /**
@@ -418,6 +500,28 @@ EFI_STATUS
 OcDescToMemoryType (
   IN  CHAR8            *MemoryTypeDesc,
   OUT EFI_MEMORY_TYPE  *MemoryType
+  );
+
+/**
+  Attempt to set entire MTRR range which starts with address to new MTRR cache type.
+  Use with caution - attempting to change cache-type on the fly of any region
+  used for code or data is likely to hang.
+  Works successfully to uncache GOP (i.e. WC->UC), producing visibly slower results,
+  on newer firmware where GOP range is set to WC in the first place.
+
+  @param[in]  Address       Start of range.
+  @param[in]  MtrrType      MTRR cache type to assign.
+  @param[out] Length        Length of range converted or attempted to be converted, when non-zero.
+
+  @retval EFI_SUCCESS if cache type is set and system is still running.
+  @retval EFI_UNSUPPORTED if MTRR is unsupported.
+  @retval error - other error from methods called.
+**/
+EFI_STATUS
+OcModifyMtrrRange (
+  IN  EFI_PHYSICAL_ADDRESS  Address,
+  IN  UINT8                 MtrrType,
+  OUT UINT64                *Length   OPTIONAL
   );
 
 /**

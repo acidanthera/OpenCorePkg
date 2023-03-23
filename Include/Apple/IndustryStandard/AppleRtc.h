@@ -296,7 +296,7 @@
 
   When HBKP SMC key is written VirtualSMC AES-128 encrypts the submitted value
   with a unique key and writes the result to an NVRAM variable (vsmc-key).
-  The AES encryption key goes to RTC at this addrress instead.
+  The AES encryption key goes to RTC at this address instead.
   Afterwards the EFI module implementing SMC protocol performs the decryption.
 
   TODO: Replace AES with one-time pad, i.e. increase the temporary key size

@@ -990,7 +990,7 @@ OcSetDefaultBootEntry (
     LoadOption->FilePathListLength = (UINT16)DevicePathSize;
     if (IsAsciiOptionName) {
       Status = AsciiStrnToUnicodeStrS (LoadOptionName, LoadOptionNameLen, (CHAR16 *)(LoadOption + 1), LoadOptionNameSize / sizeof (CHAR16), &CopiedLength);
-      ASSERT (!EFI_ERROR (Status));
+      ASSERT_EFI_ERROR (Status);
       ASSERT (CopiedLength == LoadOptionNameLen);
     } else {
       CopyMem (LoadOption + 1, LoadOptionName, LoadOptionNameSize);

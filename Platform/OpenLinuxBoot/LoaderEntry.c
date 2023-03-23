@@ -572,7 +572,7 @@ InternalIdVersionFromFileName (
   }
 
   Status = UnicodeStrnToAsciiStrS (FileName, IdEnd - FileName, OcId, IdEnd - FileName + 1, &NumCopied);
-  ASSERT (!EFI_ERROR (Status));
+  ASSERT_EFI_ERROR (Status);
   ASSERT (NumCopied == (UINTN)(IdEnd - FileName));
 
   Entry->OcId = OcId;
@@ -584,7 +584,7 @@ InternalIdVersionFromFileName (
     }
 
     Status = UnicodeStrnToAsciiStrS (VersionStart, VersionEnd - VersionStart, Version, VersionEnd - VersionStart + 1, &NumCopied);
-    ASSERT (!EFI_ERROR (Status));
+    ASSERT_EFI_ERROR (Status);
     ASSERT (NumCopied == (UINTN)(VersionEnd - VersionStart));
 
     Entry->Version = Version;

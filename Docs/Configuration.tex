@@ -8226,6 +8226,20 @@ for additional options.
   also be used, i.e. it may need to be overridden on Mac EFI.
 
 \item
+  \texttt{GopBurstMode}\\
+  \textbf{Type}: \texttt{plist\ boolean}\\
+  \textbf{Failsafe}: \texttt{false}\\
+  \textbf{Description}: Enable write-combining (WC) caching for GOP memory, if system firmware has not
+  already enabled it.
+
+  Some older firmware (e.g. EFI-era Macs) fails to set write-combining caching (aka burst mode)
+  for GOP memory, even though the CPU supports it. Setting this can give a considerable
+  speed-up for GOP operations, especially on systems which require \texttt{DirectGopRendering}.
+
+  \emph{Note}: This takes effect whether or not \texttt{DirectGopRendering} is set, and may
+  give some speed-up to GOP operations even when \texttt{DirectGopRendering} is \texttt{false}.
+
+\item
   \texttt{GopPassThrough}\\
   \textbf{Type}: \texttt{plist\ string}\\
   \textbf{Failsafe}: \texttt{Disabled}\\

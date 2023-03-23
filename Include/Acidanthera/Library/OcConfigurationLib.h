@@ -698,6 +698,7 @@ OC_DECLARE (OC_UEFI_INPUT)
   _(BOOLEAN                     , UgaPassThrough              ,     , FALSE  , ()) \
   _(BOOLEAN                     , DirectGopRendering          ,     , FALSE  , ()) \
   _(BOOLEAN                     , ForceResolution             ,     , FALSE  , ()) \
+  _(BOOLEAN                     , GopBurstMode                ,     , FALSE  , ()) \
   _(BOOLEAN                     , ReconnectGraphicsOnConnect  ,     , FALSE  , ())
 OC_DECLARE (OC_UEFI_OUTPUT)
 

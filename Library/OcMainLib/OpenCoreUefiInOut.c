@@ -259,6 +259,10 @@ OcLoadUefiOutputSupport (
     Status = EFI_UNSUPPORTED;
   }
 
+  if (Config->Uefi.Output.GopBurstMode) {
+    OcSetGopBurstMode ();
+  }
+
   if (Config->Uefi.Output.DirectGopRendering) {
     OcUseDirectGop (-1);
   }

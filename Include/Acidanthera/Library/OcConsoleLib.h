@@ -19,6 +19,8 @@
 #include <Protocol/AppleFramebufferInfo.h>
 #include <Protocol/AppleEg2Info.h>
 
+#include <Library/OcFileLib.h>
+
 /**
   Console renderer to use.
 **/
@@ -98,6 +100,17 @@ OcParseConsoleMode (
   OUT UINT32       *Width,
   OUT UINT32       *Height,
   OUT BOOLEAN      *Max
+  );
+
+/**
+  Use PAT to enable write-combining caching (burst mode) on GOP memory,
+  when it is suppported but firmware has not set it up.
+
+  @retval EFI_SUCCESS on success.
+**/
+EFI_STATUS
+OcSetGopBurstMode (
+  VOID
   );
 
 /**
@@ -223,6 +236,18 @@ OcAppleFbInfoInstallProtocol (
 APPLE_EG2_INFO_PROTOCOL *
 OcAppleEg2InfoInstallProtocol (
   IN BOOLEAN  Reinstall
+  );
+
+/**
+  Dump GOP info to the specified directory.
+
+  @param[in]  Root     Directory to write CPU data.
+
+  @retval EFI_SUCCESS on success.
+**/
+EFI_STATUS
+OcGopInfoDump (
+  IN EFI_FILE_PROTOCOL  *Root
   );
 
 #endif // OC_CONSOLE_LIB_H

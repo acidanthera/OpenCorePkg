@@ -30,6 +30,7 @@
   OpenCorePkg/OpenCorePkg.dec
   MdePkg/MdePkg.dec
   MdeModulePkg/MdeModulePkg.dec
+  UefiCpuPkg/UefiCpuPkg.dec
 
 [Guids]
   gEfiMemoryAttributesTableGuid
@@ -41,6 +42,7 @@
 [LibraryClasses]
   BaseLib
   UefiLib
+  MtrrLib
   OcGuardLib
   OcStringLib
 

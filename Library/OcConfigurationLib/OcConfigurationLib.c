@@ -817,6 +817,7 @@ OC_SCHEMA
   OC_SCHEMA_STRING_IN ("ConsoleMode",                 OC_GLOBAL_CONFIG, Uefi.Output.ConsoleMode),
   OC_SCHEMA_BOOLEAN_IN ("DirectGopRendering",         OC_GLOBAL_CONFIG, Uefi.Output.DirectGopRendering),
   OC_SCHEMA_BOOLEAN_IN ("ForceResolution",            OC_GLOBAL_CONFIG, Uefi.Output.ForceResolution),
+  OC_SCHEMA_BOOLEAN_IN ("GopBurstMode",               OC_GLOBAL_CONFIG, Uefi.Output.GopBurstMode),
   OC_SCHEMA_STRING_IN ("GopPassThrough",              OC_GLOBAL_CONFIG, Uefi.Output.GopPassThrough),
   OC_SCHEMA_BOOLEAN_IN ("IgnoreTextInGraphics",       OC_GLOBAL_CONFIG, Uefi.Output.IgnoreTextInGraphics),
   OC_SCHEMA_BOOLEAN_IN ("ProvideConsoleGop",          OC_GLOBAL_CONFIG, Uefi.Output.ProvideConsoleGop),

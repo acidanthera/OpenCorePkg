@@ -3,6 +3,15 @@
 ## Releases
 
 EnableGop version (OpenCore version)
+### 1.2 (0.9.1)
+ - Added GopBurstMode support
+
+*Note 1*: This should provide faster GOP rendering on all EnableGopDirect systems; and rendering at least at
+the same speed as before, and on some systems noticeably faster than before, on almost all EnableGop systems.
+
+*Note 2*: The compressed driver for version 1.2 is 1KB larger than for version 1.1, so for AMD vBIOSes which are
+tight on space version 1.1 may be used instead to avoid the need for VGA stripping to make additional space.
+
 ### 1.1 (0.9.0)
  - Fixed early verbose boot lines appearing over picker
  - Added EnableGop version number to UI section

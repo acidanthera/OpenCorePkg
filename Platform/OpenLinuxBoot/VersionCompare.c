@@ -202,13 +202,13 @@ DoVersionCompare (
         *((CHAR8 *)FragmentEnd1) = '\0';
         Status                   = AsciiStrDecimalToUintnS (FragmentStart1, NULL, &VersionFragment1);
         *((CHAR8 *)FragmentEnd1) = ChSave;
-        ASSERT (!EFI_ERROR (Status));
+        ASSERT_EFI_ERROR (Status);
 
         ChSave                   = *FragmentEnd2;
         *((CHAR8 *)FragmentEnd2) = '\0';
         Status                   = AsciiStrDecimalToUintnS (FragmentStart2, NULL, &VersionFragment2);
         *((CHAR8 *)FragmentEnd2) = ChSave;
-        ASSERT (!EFI_ERROR (Status));
+        ASSERT_EFI_ERROR (Status);
 
         Compare = VersionFragment1 - VersionFragment2;
       } else {

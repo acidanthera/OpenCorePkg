@@ -416,7 +416,7 @@ InsertOption (
       }
 
       Status = UnicodeStrnToAsciiStrS (Value, OptionsLength, *Option, OptionsLength + 1, &CopiedLength);
-      ASSERT (!EFI_ERROR (Status));
+      ASSERT_EFI_ERROR (Status);
       ASSERT (CopiedLength == OptionsLength);
     } else {
       *Option = AllocateCopyPool (OptionsLength + 1, Value);

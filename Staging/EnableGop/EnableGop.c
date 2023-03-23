@@ -40,6 +40,8 @@ LoadUefiOutputSupport (
     FALSE
     );
 
+  OcSetGopBurstMode ();
+
   if (FeaturePcdGet (PcdEnableGopDirect)) {
     OcUseDirectGop (-1);
   }
