@@ -225,33 +225,61 @@ Once you have got command line GDB or LLDB source level debugging working, setti
 is a matter of choosing an IDE which already knows about whichever of GDB or LLDB you will be using, and then extracting the relevant config
 setup which `efidebug.tool` would have applied for you.
 
-For example, this is a working setup for LLDB debugging in VS Code on macOS:
+For example, this is a working `launch.json` file for both LLDB and GDB debugging in VS Code:
 
 ```
 {
-    "name": "OC lldb",
-    "type": "cppdbg",
-    "request": "launch",
-    "targetArchitecture": "x64",
-    "program": "${workspaceFolder}/Debug/GdbSyms/Bin/X64_XCODE5/GdbSyms.dll",
-    "cwd": "${workspaceFolder}/Debug",
-    "MIMode": "lldb",
-    "setupCommands": [
-        {"text": "settings set plugin.process.gdb-remote.target-definition-file Scripts/x86_64_target_definition.py"},
-    ],
-    "customLaunchSetupCommands": [
-        {"text": "gdb-remote localhost:8864"},
-        {"text": "target create GdbSyms/Bin/X64_XCODE5/GdbSyms.dll", "ignoreFailures": true},
-        {"text": "command script import Scripts/lldb_uefi.py"},
-        {"text": "command script add -c lldb_uefi.ReloadUefi reload-uefi"},
-        {"text": "reload-uefi"},
-    ],
-    "launchCompleteCommand": "exec-continue",
-    "logging": {
-        "engineLogging": false,
-        "trace": true,
-        "traceResponse": true
-    }
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "OC lldb",
+            "type": "cppdbg",
+            "request": "launch",
+            "targetArchitecture": "x64",
+            "program": "${workspaceFolder}/Debug/GdbSyms/Bin/X64_XCODE5/GdbSyms.dll",
+            "cwd": "${workspaceFolder}/Debug",
+            "MIMode": "lldb",
+            "setupCommands": [
+                {"text": "settings set plugin.process.gdb-remote.target-definition-file Scripts/x86_64_target_definition.py"},
+            ],
+            "customLaunchSetupCommands": [
+                {"text": "gdb-remote localhost:8864"},
+                {"text": "target create GdbSyms/Bin/X64_XCODE5/GdbSyms.dll", "ignoreFailures": true},
+                {"text": "command script import Scripts/lldb_uefi.py"},
+                {"text": "command script add -c lldb_uefi.ReloadUefi reload-uefi"},
+                {"text": "reload-uefi"},
+            ],
+            "launchCompleteCommand": "exec-continue",
+            "logging": {
+                "engineLogging": false,
+                "trace": true,
+                "traceResponse": true
+            }
+        },
+        {
+            "name": "OC gdb",
+            "type": "cppdbg",
+            "request": "launch",
+            "targetArchitecture": "x64",
+            "program": "${workspaceFolder}/Debug/GdbSyms/Bin/X64_GCC5/GdbSyms.debug",
+            "cwd": "${workspaceFolder}/Debug",
+            "MIMode": "gdb",
+            "stopAtEntry": true,
+            "setupCommands": [
+                {"text": "set arch i386:x86-64:intel"},
+                {"text": "symbol-file ${workspaceFolder}/Debug/GdbSyms/Bin/X64_GCC5/GdbSyms.debug"},
+                {"text": "target remote localhost:8864"},
+                {"text": "source ${workspaceFolder}/Debug/Scripts/gdb_uefi.py"},
+                {"text": "reload-uefi"},
+            ],
+            "launchCompleteCommand": "exec-continue",
+            "logging": {
+                "engineLogging": false,
+                "trace": true,
+                "traceResponse": true
+            }
+        },
+    ]
 }
 ```
 
