@@ -1,7 +1,13 @@
 {
   "name": "oc",
-  "dockerComposeFile": "../compose-dev.yaml",
-  "service": "dev-edk2-docs",
-  "workspaceFolder": "/com.docker.devenvironments.code",
-  "shutdownAction": "stopCompose"
+  "build": {
+    "dockerfile": "../Dockerfiles/oc-dev/Dockerfile",
+    "context": "../Dockerfiles/oc-dev/",
+    "target": "oc-dev-docs",
+    "args": {
+      "OC_DEV_DOCS_BASE": "oc-dev-edk2"
+    }
+  },
+  "workspaceMount": "source=${localWorkspaceFolder},target=/com.docker.devenvironments.code,type=bind,consistency=cached",
+  "workspaceFolder": "/com.docker.devenvironments.code"
 }
