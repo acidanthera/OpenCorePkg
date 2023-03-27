@@ -14,6 +14,16 @@ services:
     depends_on:
       - dev-edk2
     image: oc-dev-edk2
+    environment:
+      - ARCHS
+      - ARCHS_EXT
+      - TARGETS
+      - RTARGETS
+      - TOOLCHAINS
+      - SKIP_TESTS
+      - SKIP_BUILD
+      - SKIP_PACKAGE
+      - BUILD_ARGUMENTS
     volumes:
       - .:/com.docker.devenvironments.code
     working_dir: /com.docker.devenvironments.code
@@ -25,6 +35,16 @@ services:
     depends_on:
       - dev-edk2
     image: oc-dev-edk2
+    environment:
+      - ARCHS
+      - ARCHS_EXT
+      - TARGETS
+      - RTARGETS
+      - TOOLCHAINS
+      - SKIP_TESTS
+      - SKIP_BUILD
+      - SKIP_PACKAGE
+      - BUILD_ARGUMENTS
     volumes:
       - .:/com.docker.devenvironments.code
     working_dir: /com.docker.devenvironments.code

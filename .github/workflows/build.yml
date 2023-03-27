@@ -69,9 +69,14 @@ jobs:
         uses: ScribeMD/rootless-docker@0.2.2
 
       - name: ./build_duet.tool
-        run: docker compose run -e TOOLCHAINS=CLANGPDB build-duet
+        run: docker compose run build-duet
+        env:
+          TOOLCHAINS: CLANGPDB
+
       - name: ./build_oc.tool
-        run: docker compose run -e TOOLCHAINS=CLANGPDB build-oc
+        run: docker compose run build-oc
+        env:
+          TOOLCHAINS: CLANGPDB
 
       - name: Upload to Artifacts
         uses: actions/upload-artifact@v3
@@ -89,9 +94,14 @@ jobs:
         uses: ScribeMD/rootless-docker@0.2.2
 
       - name: ./build_duet.tool
-        run: docker compose run -e TOOLCHAINS=GCC5 build-duet
+        run: docker compose run build-duet
+        env:
+          TOOLCHAINS: GCC5
+
       - name: ./build_oc.tool
-        run: docker compose run -e TOOLCHAINS=GCC5 build-oc
+        run: docker compose run build-oc
+        env:
+          TOOLCHAINS: GCC5
 
       - name: Upload to Artifacts
         uses: actions/upload-artifact@v3
@@ -109,9 +119,14 @@ jobs:
         uses: ScribeMD/rootless-docker@0.2.2
 
       - name: ./build_duet.tool
-        run: docker compose run -e TOOLCHAINS=CLANGDWARF build-duet
+        run: docker compose run build-duet
+        env:
+          TOOLCHAINS: CLANGDWARF
+
       - name: ./build_oc.tool
-        run: docker compose run -e TOOLCHAINS=CLANGDWARF build-oc
+        run: docker compose run build-oc
+        env:
+          TOOLCHAINS: CLANGDWARF
 
       - name: Upload to Artifacts
         uses: actions/upload-artifact@v3
