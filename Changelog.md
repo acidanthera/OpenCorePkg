@@ -3,6 +3,7 @@ OpenCore Changelog
 #### v0.9.1
 - Fixed long comment printing for ACPI patches, thx @corpnewt
 - Added sample config for VS Code source level debugging with `gdb`
+- Updated builtin firmware versions for SMBIOS and the rest
 
 #### v0.9.0
 - Resolved issues with verbose boot log appearing over picker graphics
