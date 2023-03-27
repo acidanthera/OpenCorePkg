@@ -15,14 +15,14 @@ services:
       - SKIP_PACKAGE
       - BUILD_ARGUMENTS
     volumes:
-      - .:/com.docker.devenvironments.code
+      - ${PWD}:/com.docker.devenvironments.code
     working_dir: /com.docker.devenvironments.code
   dev-docs:
     build:
       context: Dockerfiles/oc-dev
       target: oc-dev-docs
     volumes:
-      - .:/com.docker.devenvironments.code
+      - ${PWD}:/com.docker.devenvironments.code
     working_dir: /com.docker.devenvironments.code
   build-oc:
     extends:
