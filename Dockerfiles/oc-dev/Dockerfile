@@ -1,5 +1,6 @@
 ARG OC_DEV_DOCS_BASE=ubuntu:22.04
-FROM ubuntu:22.04 AS oc-dev-edk2
+ARG OC_DEV_PLATFORM=$BUILDPLATFORM
+FROM --platform=$OC_DEV_PLATFORM ubuntu:22.04 AS oc-dev-edk2
 
 ARG OC_DEV_EDK2_LLVM_VER=15
 ARG DEBIAN_FRONTEND=noninteractive
@@ -16,7 +17,7 @@ RUN apt-get update && \
 
 ENV PATH="$PATH:/usr/lib/llvm-${OC_DEV_EDK2_LLVM_VER}/bin"
 
-FROM $OC_DEV_DOCS_BASE AS oc-dev-docs
+FROM --platform=$OC_DEV_PLATFORM $OC_DEV_DOCS_BASE AS oc-dev-docs
 
 ARG DEBIAN_FRONTEND=noninteractive
 
