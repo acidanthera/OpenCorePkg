@@ -2,18 +2,8 @@ name: oc
 services:
   dev-edk2:
     build:
-      context: Dockerfiles/oc-dev-edk2
-      tags:
-        - "oc-dev-edk2"
-  dev-docs:
-    build:
-      context: Dockerfiles/oc-dev-docs
-      tags:
-        - "oc-dev-docs"
-  build-oc:
-    depends_on:
-      - dev-edk2
-    image: oc-dev-edk2
+      context: Dockerfiles/oc-dev
+      target: oc-dev-edk2
     environment:
       - ARCHS
       - ARCHS_EXT
@@ -27,38 +17,30 @@ services:
     volumes:
       - .:/com.docker.devenvironments.code
     working_dir: /com.docker.devenvironments.code
+  dev-docs:
+    build:
+      context: Dockerfiles/oc-dev
+      target: oc-dev-docs
+    volumes:
+      - .:/com.docker.devenvironments.code
+    working_dir: /com.docker.devenvironments.code
+  build-oc:
+    extends:
+      service: dev-edk2
     entrypoint:
       - /bin/bash
       - -c
       - "{ . ~/.edk2_rc.sh && eval \"$$(/usr/bin/curl -Lfs https://raw.githubusercontent.com/acidanthera/ocbuild/master/ci-bootstrap.sh)\" && ./build_oc.tool ; } || exit 1"
   build-duet:
-    depends_on:
-      - dev-edk2
-    image: oc-dev-edk2
-    environment:
-      - ARCHS
-      - ARCHS_EXT
-      - TARGETS
-      - RTARGETS
-      - TOOLCHAINS
-      - SKIP_TESTS
-      - SKIP_BUILD
-      - SKIP_PACKAGE
-      - BUILD_ARGUMENTS
-    volumes:
-      - .:/com.docker.devenvironments.code
-    working_dir: /com.docker.devenvironments.code
+    extends:
+      service: dev-edk2
     entrypoint:
       - /bin/bash
       - -c
       - "{ . ~/.edk2_rc.sh && eval \"$$(/usr/bin/curl -Lfs https://raw.githubusercontent.com/acidanthera/ocbuild/master/ci-bootstrap.sh)\" && ./build_duet.tool ; } || exit 1"
   build-docs:
-    depends_on:
-      - dev-docs
-    image: oc-dev-docs
-    volumes:
-      - .:/com.docker.devenvironments.code
-    working_dir: /com.docker.devenvironments.code
+    extends:
+      service: dev-docs
     entrypoint:
       - /bin/bash
       - -c
