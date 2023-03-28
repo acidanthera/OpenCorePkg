@@ -857,6 +857,71 @@ PATCHER_GENERIC_PATCH
 };
 
 STATIC
+CONST UINT8
+  mIOAHCIBlockStoragePatch133Find1[] = {
+  0x48, 0x8D, 0x3D, 0x00, 0x00, 0x00, 0x00,
+  0xBA, 0x09, 0x00, 0x00, 0x00
+};
+
+STATIC
+CONST UINT8
+  mIOAHCIBlockStoragePatch133Find2[] = {
+  0x48, 0x8D, 0x3D, 0x00, 0x00, 0x00, 0x00,
+  0xBA, 0x05, 0x00, 0x00, 0x00
+};
+
+STATIC
+CONST UINT8
+  mIOAHCIBlockStoragePatch133FindMask[] = {
+  0xFF, 0xFF, 0xFF, 0x00, 0x00, 0x00, 0x00,
+  0xFF, 0xFF, 0xFF, 0xFF, 0xFF
+};
+
+STATIC
+CONST UINT8
+  mIOAHCIBlockStoragePatch133Replace[] = {
+  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+  0xBA, 0x00, 0x00, 0x00, 0x00
+};
+
+STATIC
+CONST UINT8
+  mIOAHCIBlockStoragePatch133ReplaceMask[] = {
+  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+  0xFF, 0xFF, 0xFF, 0xFF, 0xFF
+};
+
+STATIC
+PATCHER_GENERIC_PATCH
+  mIOAHCIBlockStoragePatch133Part1 = {
+  .Comment     = DEBUG_POINTER ("IOAHCIBlockStorage trim 13.3+ part 1"),
+  .Base        = "__ZN24IOAHCIBlockStorageDriver23DetermineDeviceFeaturesEPt",
+  .Find        = mIOAHCIBlockStoragePatch133Find1,
+  .Mask        = mIOAHCIBlockStoragePatch133FindMask,
+  .Replace     = mIOAHCIBlockStoragePatch133Replace,
+  .ReplaceMask = mIOAHCIBlockStoragePatch133ReplaceMask,
+  .Size        = sizeof (mIOAHCIBlockStoragePatch133Find1),
+  .Count       = 1,
+  .Skip        = 0,
+  .Limit       = 4096
+};
+
+STATIC
+PATCHER_GENERIC_PATCH
+  mIOAHCIBlockStoragePatch133Part2 = {
+  .Comment     = DEBUG_POINTER ("IOAHCIBlockStorage trim 13.3+ part 2"),
+  .Base        = "__ZN24IOAHCIBlockStorageDriver23DetermineDeviceFeaturesEPt",
+  .Find        = mIOAHCIBlockStoragePatch133Find2,
+  .Mask        = mIOAHCIBlockStoragePatch133FindMask,
+  .Replace     = mIOAHCIBlockStoragePatch133Replace,
+  .ReplaceMask = mIOAHCIBlockStoragePatch133ReplaceMask,
+  .Size        = sizeof (mIOAHCIBlockStoragePatch133Find2),
+  .Count       = 1,
+  .Skip        = 0,
+  .Limit       = 4096
+};
+
+STATIC
 EFI_STATUS
 PatchThirdPartyDriveSupport (
   IN OUT PATCHER_CONTEXT  *Patcher OPTIONAL,
@@ -870,22 +935,44 @@ PatchThirdPartyDriveSupport (
     return EFI_NOT_FOUND;
   }
 
+  //
+  // Starting with macOS 13.3 (Darwin 22.4.0), a new set of patches are required, discovered by @vit9696.
+  //
+  if (OcMatchDarwinVersion (KernelVersion, KERNEL_VERSION (KERNEL_VERSION_VENTURA, 4, 0), 0)) {
+    Status = PatcherApplyGenericPatch (Patcher, &mIOAHCIBlockStoragePatch133Part1);
+    if (EFI_ERROR (Status)) {
+      DEBUG ((DEBUG_INFO, "OCAK: [FAIL] Failed to apply patch 13.3+ com.apple.iokit.IOAHCIBlockStorage part 1 - %r\n", Status));
+      return Status;
+    } else {
+      DEBUG ((DEBUG_INFO, "OCAK: [OK] Patch success 13.3+ com.apple.iokit.IOAHCIBlockStorage part 1\n"));
+    }
+
+    Status = PatcherApplyGenericPatch (Patcher, &mIOAHCIBlockStoragePatch133Part2);
+    if (EFI_ERROR (Status)) {
+      DEBUG ((DEBUG_INFO, "OCAK: [FAIL] Failed to apply patch 13.3+ com.apple.iokit.IOAHCIBlockStorage part 2 - %r\n", Status));
+    } else {
+      DEBUG ((DEBUG_INFO, "OCAK: [OK] Patch success 13.3+ com.apple.iokit.IOAHCIBlockStorage part 2\n"));
+    }
+
+    return Status;
+  }
+
   Status = PatcherApplyGenericPatch (Patcher, &mIOAHCIBlockStoragePatchV1);
   if (EFI_ERROR (Status)) {
-    DEBUG ((DEBUG_INFO, "OCAK: [FAIL] Failed to apply patch com.apple.iokit.IOAHCIBlockStorage V1 - %r\n", Status));
+    DEBUG ((DEBUG_INFO, "OCAK: [FAIL] Failed to apply patch legacy com.apple.iokit.IOAHCIBlockStorage V1 - %r\n", Status));
   } else {
-    DEBUG ((DEBUG_INFO, "OCAK: [OK] Patch success com.apple.iokit.IOAHCIBlockStorage V1\n"));
+    DEBUG ((DEBUG_INFO, "OCAK: [OK] Patch success legacy com.apple.iokit.IOAHCIBlockStorage V1\n"));
   }
 
   if (OcMatchDarwinVersion (KernelVersion, KERNEL_VERSION_CATALINA_MIN, 0)) {
     Status = PatcherApplyGenericPatch (Patcher, &mIOAHCIBlockStoragePatchV2);
     if (EFI_ERROR (Status)) {
-      DEBUG ((DEBUG_INFO, "OCAK: [FAIL] Failed to apply patch com.apple.iokit.IOAHCIBlockStorage V2 - %r\n", Status));
+      DEBUG ((DEBUG_INFO, "OCAK: [FAIL] Failed to apply patch legacy com.apple.iokit.IOAHCIBlockStorage V2 - %r\n", Status));
     } else {
-      DEBUG ((DEBUG_INFO, "OCAK: [OK] Patch success com.apple.iokit.IOAHCIBlockStorage V2\n"));
+      DEBUG ((DEBUG_INFO, "OCAK: [OK] Patch success legacy com.apple.iokit.IOAHCIBlockStorage V2\n"));
     }
   } else {
-    DEBUG ((DEBUG_INFO, "OCAK: [OK] Skipping IOAHCIBlockStorage V2 on %u\n", KernelVersion));
+    DEBUG ((DEBUG_INFO, "OCAK: [OK] Skipping IOAHCIBlockStorage legacy V2 on %u\n", KernelVersion));
   }
 
   //
@@ -895,7 +982,7 @@ PatchThirdPartyDriveSupport (
   if (  EFI_ERROR (Status)
      && OcMatchDarwinVersion (KernelVersion, KERNEL_VERSION_SNOW_LEOPARD_MIN, KERNEL_VERSION_SNOW_LEOPARD_MAX))
   {
-    DEBUG ((DEBUG_INFO, "OCAK: [OK] Assuming success for IOAHCIBlockStorage on %u\n", KernelVersion));
+    DEBUG ((DEBUG_INFO, "OCAK: [OK] Assuming success for legacy IOAHCIBlockStorage on %u\n", KernelVersion));
     return EFI_SUCCESS;
   }
 
