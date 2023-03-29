@@ -6,6 +6,7 @@ OpenCore Changelog
 - Updated builtin firmware versions for SMBIOS and the rest
 - Added GOP memory caching report to `SysReport`
 - Implemented `GopBurstMode` quirk for faster GOP operation on older firmware
+- Fixed `ThirdPartyDrives` quirk on macOS 13.3 and above
 
 #### v0.9.0
 - Resolved issues with verbose boot log appearing over picker graphics
