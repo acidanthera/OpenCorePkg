@@ -383,7 +383,11 @@ FreePages (
     abort ();
   }
 
+ #ifdef _WIN32
+  _aligned_free (Buffer);
+ #else
   free (Buffer);
+ #endif
 }
 
 GUID *
