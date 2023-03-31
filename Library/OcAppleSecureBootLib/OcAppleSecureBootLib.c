@@ -621,6 +621,7 @@ InternalGetImg4ByPath (
 
   Status = FileSystem->OpenVolume (FileSystem, &Root);
   if (EFI_ERROR (Status)) {
+    FreePool (Path);
     return EFI_NO_MEDIA;
   }
 
