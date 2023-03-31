@@ -64,6 +64,7 @@ OcPciInfoDump (
                   );
   if (EFI_ERROR (Status)) {
     DEBUG ((DEBUG_INFO, "OCDM: No PCI devices found for dumping - %r\n", Status));
+    FreePool (FileBuffer);
     return Status;
   }
 
