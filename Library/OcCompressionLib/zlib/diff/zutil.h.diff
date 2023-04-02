@@ -1,0 +1,13 @@
+--- /Users/user/Downloads/zlib-1.2.13/zutil.h	2022-10-07 05:43:18
++++ /Users/user/GitHub/OpenCorePkg/Library/OcCompressionLib/zlib/zutil.h	2023-04-01 22:46:51
+@@ -236,6 +236,10 @@
+    int ZLIB_INTERNAL zmemcmp OF((const Bytef* s1, const Bytef* s2, uInt len));
+    void ZLIB_INTERNAL zmemzero OF((Bytef* dest, uInt len));
+ #endif
++
++#define zmemcpy(Dst, Src, Size) CopyMem ((Dst), (Src), (Size))
++#define zmemcmp(Ptr1, Ptr2, Size) CompareMem ((Ptr1), (Ptr2), (Size))
++#define zmemzero(Dst, Size) ZeroMem ((Dst), (Size))
+ 
+ /* Diagnostic functions */
+ #ifdef ZLIB_DEBUG

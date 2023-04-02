@@ -49,3 +49,10 @@ VPATH   = ../../Library/OcConfigurationLib:$\
 	../../Library/OcCompressionLib/lzvn:$\
 	../../Library/OcCompressionLib/zlib
 include ../../User/Makefile
+
+#
+# Silence zlib warning.
+#
+ifeq ($(shell echo 'int a;' | "${CC}" -Wno-deprecated-non-prototype -x c -c - -o /dev/null 2>&1),)
+	CFLAGS += -Wno-deprecated-non-prototype
+endif
