@@ -2704,6 +2704,22 @@ Kernel and kext changes apply with the following effective order:
   typically have compatible AHCI controllers.
 
 \item
+  \texttt{FixAppleVTD}\\
+  \textbf{Type}: \texttt{plist\ boolean}\\
+  \textbf{Failsafe}: \texttt{false}\\
+  \textbf{Requirement}: 13.3\\
+  \textbf{Description}: Fixes WiFi and Ethernet when AppleVTD is enabled with
+  greater than 16GB memory.
+
+  In macOS 13.3, WiFi and Ethernet kexts will fail to establish a connection
+  when AppleVTD is enabled and the system has more than 16GB memory. This problem
+  only affects motherboards whose native DMA Remap table (DMAR) contains one or
+  more Reserved Memory Regions.
+
+  \emph{Note}: If your DMAR table does not contain Reserved Memory Regions, this
+  quirk should not be used. This is also not needed on AMD platforms.
+
+\item
   \texttt{ForceAquantiaEthernet}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\

@@ -350,6 +350,14 @@ ApplyKextPatches (
     DEBUG ((DEBUG_WARN, "[OK] Success KernelQuirkExternalDiskIcons\n"));
   }
 
+  Status = PrelinkedContextApplyQuirk (Context, KernelQuirkFixAppleVTD, KernelVersion);
+  if (EFI_ERROR (Status)) {
+    DEBUG ((DEBUG_WARN, "[FAIL] Failed to apply KernelQuirkFixAppleVTD - %r\n", Status));
+    FailedToProcess = TRUE;
+  } else {
+    DEBUG ((DEBUG_WARN, "[OK] Success KernelQuirkFixAppleVTD\n"));
+  }
+
   Status = PrelinkedContextApplyQuirk (Context, KernelQuirkForceAquantiaEthernet, KernelVersion);
   if (EFI_ERROR (Status)) {
     DEBUG ((DEBUG_WARN, "[FAIL] Failed to apply KernelQuirkForceAquantiaEthernet - %r\n", Status));

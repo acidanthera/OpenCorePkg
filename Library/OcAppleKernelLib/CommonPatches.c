@@ -2241,6 +2241,69 @@ PatchLegacyCommpage (
 
 STATIC
 CONST UINT8
+  mAppleVTDPatchFindCaseySJ[] = {
+  0x4C, 0x89, 0xF6, 0xE8,
+  0x9A, 0xFF, 0x00, 0x00
+};
+
+STATIC
+CONST UINT8
+  mAppleVTDPatchReplaceCaseySJ[] = {
+  0x4C, 0x89, 0xF6, 0x90,
+  0x90, 0x90, 0x90, 0x90
+};
+
+STATIC
+PATCHER_GENERIC_PATCH
+  mAppleVTDPatchCaseySJ = {
+  .Comment     = DEBUG_POINTER ("FixAppleVTDCaseySJ"),
+  .Base        = "__ZN11IOPCIBridge20addBridgeMemoryRangeEyyb",
+  .Find        = mAppleVTDPatchFindCaseySJ,
+  .Mask        = NULL,
+  .Replace     = mAppleVTDPatchReplaceCaseySJ,
+  .ReplaceMask = NULL,
+  .Size        = sizeof (mAppleVTDPatchFindCaseySJ),
+  .Count       = 1,
+  .Skip        = 0
+};
+
+STATIC
+EFI_STATUS
+PatchAppleVTD (
+  IN OUT PATCHER_CONTEXT  *Patcher OPTIONAL,
+  IN     UINT32           KernelVersion
+  )
+{
+  EFI_STATUS  Status;
+
+  //
+  // This patch is not required before macOS 13.3 (kernel 22.4.0)
+  //
+  if (!OcMatchDarwinVersion (KernelVersion, KERNEL_VERSION (KERNEL_VERSION_VENTURA, 4, 0), 0)) {
+    DEBUG ((DEBUG_INFO, "OCAK: [OK] Skipping patching AppleVTD on %u\n", KernelVersion));
+    return EFI_SUCCESS;
+  }
+
+  if (Patcher == NULL) {
+    DEBUG ((DEBUG_INFO, "OCAK: [OK] Skipping %a on NULL Patcher on %u\n", __func__, KernelVersion));
+    return EFI_NOT_FOUND;
+  }
+
+  //
+  // Shikumo's patch can be applied to a wider range, not limited to AQC 107 series,
+  // thus preferred.
+  //
+  Status = PatcherApplyGenericPatch (Patcher, &mAppleVTDPatchCaseySJ);
+  if (!EFI_ERROR (Status)) {
+    DEBUG ((DEBUG_INFO, "OCAK: [OK] Patch success AppleVTD CaseySJ\n"));
+    return Status;
+  }
+
+  return Status;
+}
+
+STATIC
+CONST UINT8
   mAquantiaEthernetPatchFindShikumo[] = {
   0x83, 0x7D, 0x00, 0x00,             ///< cmp dword [rbp+whatever], whatever
   0x0F, 0x84, 0x00, 0x00, 0x00, 0x00, ///< je unsupported
@@ -2561,6 +2624,7 @@ KERNEL_QUIRK  gKernelQuirks[] = {
   [KernelQuirkDummyPowerManagement]    = { "com.apple.driver.AppleIntelCPUPowerManagement", PatchDummyPowerManagement   },
   [KernelQuirkExtendBTFeatureFlags]    = { "com.apple.iokit.IOBluetoothFamily",             PatchBTFeatureFlags         },
   [KernelQuirkExternalDiskIcons]       = { "com.apple.driver.AppleAHCIPort",                PatchForceInternalDiskIcons },
+  [KernelQuirkFixAppleVTD          ]   = { "com.apple.iokit.IOPCIFamily",                   PatchAppleVTD               },
   [KernelQuirkForceAquantiaEthernet]   = { "com.apple.driver.AppleEthernetAquantiaAqtion",  PatchAquantiaEthernet       },
   [KernelQuirkForceSecureBootScheme]   = { "com.apple.security.AppleImage4",                PatchForceSecureBootScheme  },
   [KernelQuirkIncreasePciBarSize]      = { "com.apple.iokit.IOPCIFamily",                   PatchIncreasePciBarSize     },

@@ -570,6 +570,10 @@ typedef enum {
   //
   KernelQuirkExternalDiskIcons,
   //
+  // Enable WiFi and Ethernet in macOS 13.3+ with AppleVTD enabled
+  //
+  KernelQuirkFixAppleVTD,
+  //
   // Enable Aquantia AQtion AQC-107s support.
   //
   KernelQuirkForceAquantiaEthernet,

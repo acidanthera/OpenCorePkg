@@ -1015,6 +1015,8 @@
 			<false/>
 			<key>ExternalDiskIcons</key>
 			<false/>
+      <key>FixAppleVTD</key>
+      <false/>
 			<key>ForceAquantiaEthernet</key>
 			<false/>
 			<key>ForceSecureBootScheme</key>
