@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
-%DIF DEL PreviousConfiguration.tex   Fri Mar 17 21:49:13 2023
-%DIF ADD ../Configuration.tex        Tue Mar 28 00:23:38 2023
+%DIF DEL PreviousConfiguration.tex   Mon Apr  3 19:55:22 2023
+%DIF ADD ../Configuration.tex        Mon Apr  3 19:55:22 2023
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -154,7 +154,7 @@
 
        \vspace{0.2in}
 
-       Reference Manual (0.9\DIFdelbegin \DIFdel{.0}\DIFdelend \DIFaddbegin \DIFadd{.1}\DIFaddend )
+       Reference Manual (0.9\DIFdelbegin \DIFdel{.1}\DIFdelend \DIFaddbegin \DIFadd{.2}\DIFaddend )
 
        \vspace{0.2in}
 
@@ -6878,7 +6878,7 @@ options for the driver may be specified in \texttt{UEFI/Drivers/Arguments}:
   \medskip
 
   As example usage, it is possible to use \texttt{+=} format to add
-  a \texttt{vt.handoff} options, such as \texttt{\DIFdelbegin \DIFdel{autopts}\DIFdelend \DIFaddbegin \DIFadd{autoopts}\DIFaddend +="vt.handoff=7"} or \texttt{\DIFdelbegin \DIFdel{autopts}\DIFdelend \DIFaddbegin \DIFadd{autoopts}\DIFaddend +="vt.handoff=3"}
+  a \texttt{vt.handoff} options, such as \texttt{autoopts+="vt.handoff=7"} or \texttt{autoopts+="vt.handoff=3"}
   (check \texttt{cat /proc/cmdline} when booted via the distro's default bootloader) on Ubuntu and related distros,
   in order to add the \texttt{vt.handoff} option to the auto-detected GRUB defaults, and avoid a flash of text
   showing before the distro splash screen.
@@ -8283,24 +8283,21 @@ for additional options.
   This renderer fully supports \texttt{AppleEg2Info} protocol and will provide
   screen rotation for all EFI applications. In order to provide seamless rotation
   compatibility with \texttt{EfiBoot}, builtin \texttt{AppleFramebufferInfo} should
-  also be used, i.e. it may need to be overridden on Mac EFI\DIFaddbegin \DIFadd{.
-}
+  also be used, i.e. it may need to be overridden on Mac EFI.
 
 \item
-  \texttt{\DIFadd{GopBurstMode}}\\
-  \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ boolean}}\\
-  \textbf{\DIFadd{Failsafe}}\DIFadd{: }\texttt{\DIFadd{false}}\\
-  \textbf{\DIFadd{Description}}\DIFadd{: Enable write-combining (WC) caching for GOP memory, if system firmware has not
+  \texttt{GopBurstMode}\\
+  \textbf{Type}: \texttt{plist\ boolean}\\
+  \textbf{Failsafe}: \texttt{false}\\
+  \textbf{Description}: Enable write-combining (WC) caching for GOP memory, if system firmware has not
   already enabled it.
-}
 
-  \DIFadd{Some older firmware (e.g. EFI-era Macs) fails to set write-combining caching (aka burst mode)
+  Some older firmware (e.g. EFI-era Macs) fails to set write-combining caching (aka burst mode)
   for GOP memory, even though the CPU supports it. Setting this can give a considerable
-  speed-up for GOP operations, especially on systems which require }\texttt{\DIFadd{DirectGopRendering}}\DIFadd{.
-}
+  speed-up for GOP operations, especially on systems which require \texttt{DirectGopRendering}.
 
-  \emph{\DIFadd{Note}}\DIFadd{: This takes effect whether or not }\texttt{\DIFadd{DirectGopRendering}} \DIFadd{is set, and may
-  give some speed-up to GOP operations even when }\texttt{\DIFadd{DirectGopRendering}} \DIFadd{is }\texttt{\DIFadd{false}}\DIFaddend .
+  \emph{Note}: This takes effect whether or not \texttt{DirectGopRendering} is set, and may
+  give some speed-up to GOP operations even when \texttt{DirectGopRendering} is \texttt{false}.
 
 \item
   \texttt{GopPassThrough}\\
