@@ -47,7 +47,7 @@
   Eg2Info.c
   FramebufferInfo.c
   GopInfoDump.c
-  GopBurstMode.c
+  GopUtils.c
   GopPassThrough.c
   OcConsoleLib.c
   OcConsoleLibInternal.h

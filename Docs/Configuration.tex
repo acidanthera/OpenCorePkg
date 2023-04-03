@@ -8252,8 +8252,18 @@ for additional options.
   for GOP memory, even though the CPU supports it. Setting this can give a considerable
   speed-up for GOP operations, especially on systems which require \texttt{DirectGopRendering}.
 
-  \emph{Note}: This takes effect whether or not \texttt{DirectGopRendering} is set, and may
-  give some speed-up to GOP operations even when \texttt{DirectGopRendering} is \texttt{false}.
+  \emph{Note 1}: This quirk takes effect whether or not \texttt{DirectGopRendering} is set, and
+  in some cases may give a noticeable speed-up to GOP operations even when \texttt{DirectGopRendering}
+  is \texttt{false}.
+
+  \emph{Note 2}: On most systems from circa 2013 onwards, write-combining
+  caching is already applied by the firmware to GOP memory, in which case \texttt{GopBurstMode}
+  is unnecessary. On such systems enabling the quirk should normally be harmless, producing an
+  \texttt{OCC:} debug log entry indicating that burst mode is already started.
+
+  \emph{Note 3}: Some caution should be taken when enabling this quirk, as it has been observed
+  to cause hangs on a few systems. Since additional guards have been added to try to prevent this,
+  please log a bugtracker issue if such a system is found.
 
 \item
   \texttt{GopPassThrough}\\
