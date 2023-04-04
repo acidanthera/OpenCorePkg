@@ -2242,15 +2242,25 @@ PatchLegacyCommpage (
 STATIC
 CONST UINT8
   mAppleVTDPatchFindCaseySJ[] = {
-  0x4C, 0x89, 0xF6, 0xE8,
-  0x9A, 0xFF, 0x00, 0x00
+  0xE8, 0x00, 0x00, 0x00, 0x00
+};
+
+STATIC
+CONST UINT8
+  mAppleVTDPatchFindMaskCaseySJ[] = {
+  0xFF, 0x00, 0x00, 0x00, 0x00
 };
 
 STATIC
 CONST UINT8
   mAppleVTDPatchReplaceCaseySJ[] = {
-  0x4C, 0x89, 0xF6, 0x90,
-  0x90, 0x90, 0x90, 0x90
+  0x90, 0x90, 0x90, 0x90, 0x90
+};
+
+STATIC
+CONST UINT8
+  mAppleVTDPatchReplaceMaskCaseySJ[] = {
+  0xFF, 0xFF, 0xFF, 0xFF, 0xFF
 };
 
 STATIC
@@ -2259,9 +2269,9 @@ PATCHER_GENERIC_PATCH
   .Comment     = DEBUG_POINTER ("FixAppleVTDCaseySJ"),
   .Base        = "__ZN11IOPCIBridge20addBridgeMemoryRangeEyyb",
   .Find        = mAppleVTDPatchFindCaseySJ,
-  .Mask        = NULL,
+  .Mask        = mAppleVTDPatchFindMaskCaseySJ,
   .Replace     = mAppleVTDPatchReplaceCaseySJ,
-  .ReplaceMask = NULL,
+  .ReplaceMask = mAppleVTDPatchReplaceMaskCaseySJ,
   .Size        = sizeof (mAppleVTDPatchFindCaseySJ),
   .Count       = 1,
   .Skip        = 0
