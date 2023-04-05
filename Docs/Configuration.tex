@@ -2659,13 +2659,14 @@ Kernel and kext changes apply with the following effective order:
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
   \textbf{Requirement}: 13.3 (not required for older)\\
-  \textbf{Description}: Disables mapping PCI bridge device memory in IOMMU (VT-d),
-  which resolves compatibility issues with Wi-Fi, Ethernet and Thunderbolt
-  devices when AppleVTD is enabled on systems whose native DMAR table contains
-  one or more Reserved Memory Regions.
+  \textbf{Description}: Disables mapping PCI bridge device memory in IOMMU (VT-d).
 
-  \emph{Note 1}: This option is not needed on AMD systems or many/most Z690 and
-  newer platforms if native DMAR table does not contain any Reserved Memory Regions.
+  \emph{Note 1}: This resolves compatibility issues with Wi-Fi, Ethernet and
+  Thunderbolt devices when AppleVTD is enabled on systems whose native DMAR table
+  contains one or more Reserved Memory Regions.
+
+  \emph{Note 2}: This option is not needed on AMD systems or any Intel system
+  whose native DMAR table does not contain any Reserved Memory Regions.
 
 \item
   \texttt{DisableLinkeditJettison}\\
