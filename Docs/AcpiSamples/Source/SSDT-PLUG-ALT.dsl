@@ -82,7 +82,7 @@ DefinitionBlock ("", "SSDT", 2, "ACDT", "CpuPlugA", 0x00003000)
 
     Scope (\)
     {
-        Method (_OFF, 0, NotSerialized)  // _OFF: Power Off
+        Method (MO86, 0, NotSerialized)
         {
             If (_OSI ("Darwin"))
             {
@@ -118,7 +118,7 @@ DefinitionBlock ("", "SSDT", 2, "ACDT", "CpuPlugA", 0x00003000)
 
                 Method (_STA, 0, NotSerialized)  // _STA: Status
                 {
-                    Return (_OFF ())
+                    Return (MO86 ())
                 }
             }
 
@@ -127,7 +127,7 @@ DefinitionBlock ("", "SSDT", 2, "ACDT", "CpuPlugA", 0x00003000)
                 Return (\_SB.PR01) /* External reference */
                 Method (_STA, 0, NotSerialized)  // _STA: Status
                 {
-                    Return (_OFF ())
+                    Return (MO86 ())
                 }
             }
 
@@ -136,7 +136,7 @@ DefinitionBlock ("", "SSDT", 2, "ACDT", "CpuPlugA", 0x00003000)
                 Return (\_SB.PR02) /* External reference */
                 Method (_STA, 0, NotSerialized)  // _STA: Status
                 {
-                    Return (_OFF ())
+                    Return (MO86 ())
                 }
             }
 
@@ -145,7 +145,7 @@ DefinitionBlock ("", "SSDT", 2, "ACDT", "CpuPlugA", 0x00003000)
                 Return (\_SB.PR03) /* External reference */
                 Method (_STA, 0, NotSerialized)  // _STA: Status
                 {
-                    Return (_OFF ())
+                    Return (MO86 ())
                 }
             }
 
@@ -154,7 +154,7 @@ DefinitionBlock ("", "SSDT", 2, "ACDT", "CpuPlugA", 0x00003000)
                 Return (\_SB.PR04) /* External reference */
                 Method (_STA, 0, NotSerialized)  // _STA: Status
                 {
-                    Return (_OFF ())
+                    Return (MO86 ())
                 }
             }
 
@@ -163,7 +163,7 @@ DefinitionBlock ("", "SSDT", 2, "ACDT", "CpuPlugA", 0x00003000)
                 Return (\_SB.PR05) /* External reference */
                 Method (_STA, 0, NotSerialized)  // _STA: Status
                 {
-                    Return (_OFF ())
+                    Return (MO86 ())
                 }
             }
 
@@ -172,7 +172,7 @@ DefinitionBlock ("", "SSDT", 2, "ACDT", "CpuPlugA", 0x00003000)
                 Return (\_SB.PR06) /* External reference */
                 Method (_STA, 0, NotSerialized)  // _STA: Status
                 {
-                    Return (_OFF ())
+                    Return (MO86 ())
                 }
             }
 
@@ -181,7 +181,7 @@ DefinitionBlock ("", "SSDT", 2, "ACDT", "CpuPlugA", 0x00003000)
                 Return (\_SB.PR07) /* External reference */
                 Method (_STA, 0, NotSerialized)  // _STA: Status
                 {
-                    Return (_OFF ())
+                    Return (MO86 ())
                 }
             }
 
@@ -190,7 +190,7 @@ DefinitionBlock ("", "SSDT", 2, "ACDT", "CpuPlugA", 0x00003000)
                 Return (\_SB.PR08) /* External reference */
                 Method (_STA, 0, NotSerialized)  // _STA: Status
                 {
-                    Return (_OFF ())
+                    Return (MO86 ())
                 }
             }
 
@@ -199,7 +199,7 @@ DefinitionBlock ("", "SSDT", 2, "ACDT", "CpuPlugA", 0x00003000)
                 Return (\_SB.PR09) /* External reference */
                 Method (_STA, 0, NotSerialized)  // _STA: Status
                 {
-                    Return (_OFF ())
+                    Return (MO86 ())
                 }
             }
 
@@ -208,7 +208,7 @@ DefinitionBlock ("", "SSDT", 2, "ACDT", "CpuPlugA", 0x00003000)
                 Return (\_SB.PR10) /* External reference */
                 Method (_STA, 0, NotSerialized)  // _STA: Status
                 {
-                    Return (_OFF ())
+                    Return (MO86 ())
                 }
             }
 
@@ -217,7 +217,7 @@ DefinitionBlock ("", "SSDT", 2, "ACDT", "CpuPlugA", 0x00003000)
                 Return (\_SB.PR11) /* External reference */
                 Method (_STA, 0, NotSerialized)  // _STA: Status
                 {
-                    Return (_OFF ())
+                    Return (MO86 ())
                 }
             }
 
@@ -226,7 +226,7 @@ DefinitionBlock ("", "SSDT", 2, "ACDT", "CpuPlugA", 0x00003000)
                 Return (\_SB.PR12) /* External reference */
                 Method (_STA, 0, NotSerialized)  // _STA: Status
                 {
-                    Return (_OFF ())
+                    Return (MO86 ())
                 }
             }
 
@@ -235,7 +235,7 @@ DefinitionBlock ("", "SSDT", 2, "ACDT", "CpuPlugA", 0x00003000)
                 Return (\_SB.PR13) /* External reference */
                 Method (_STA, 0, NotSerialized)  // _STA: Status
                 {
-                    Return (_OFF ())
+                    Return (MO86 ())
                 }
             }
 
@@ -244,7 +244,7 @@ DefinitionBlock ("", "SSDT", 2, "ACDT", "CpuPlugA", 0x00003000)
                 Return (\_SB.PR14) /* External reference */
                 Method (_STA, 0, NotSerialized)  // _STA: Status
                 {
-                    Return (_OFF ())
+                    Return (MO86 ())
                 }
             }
 
@@ -253,7 +253,7 @@ DefinitionBlock ("", "SSDT", 2, "ACDT", "CpuPlugA", 0x00003000)
                 Return (\_SB.PR15) /* External reference */
                 Method (_STA, 0, NotSerialized)  // _STA: Status
                 {
-                    Return (_OFF ())
+                    Return (MO86 ())
                 }
             }
 
@@ -262,7 +262,7 @@ DefinitionBlock ("", "SSDT", 2, "ACDT", "CpuPlugA", 0x00003000)
                 Return (\_SB.PR16) /* External reference */
                 Method (_STA, 0, NotSerialized)  // _STA: Status
                 {
-                    Return (_OFF ())
+                    Return (MO86 ())
                 }
             }
 
@@ -271,7 +271,7 @@ DefinitionBlock ("", "SSDT", 2, "ACDT", "CpuPlugA", 0x00003000)
                 Return (\_SB.PR17) /* External reference */
                 Method (_STA, 0, NotSerialized)  // _STA: Status
                 {
-                    Return (_OFF ())
+                    Return (MO86 ())
                 }
             }
 
@@ -280,7 +280,7 @@ DefinitionBlock ("", "SSDT", 2, "ACDT", "CpuPlugA", 0x00003000)
                 Return (\_SB.PR18) /* External reference */
                 Method (_STA, 0, NotSerialized)  // _STA: Status
                 {
-                    Return (_OFF ())
+                    Return (MO86 ())
                 }
             }
 
@@ -289,7 +289,7 @@ DefinitionBlock ("", "SSDT", 2, "ACDT", "CpuPlugA", 0x00003000)
                 Return (\_SB.PR19) /* External reference */
                 Method (_STA, 0, NotSerialized)  // _STA: Status
                 {
-                    Return (_OFF ())
+                    Return (MO86 ())
                 }
             }
 
@@ -298,7 +298,7 @@ DefinitionBlock ("", "SSDT", 2, "ACDT", "CpuPlugA", 0x00003000)
                 Return (\_SB.PR20) /* External reference */
                 Method (_STA, 0, NotSerialized)  // _STA: Status
                 {
-                    Return (_OFF ())
+                    Return (MO86 ())
                 }
             }
 
@@ -307,7 +307,7 @@ DefinitionBlock ("", "SSDT", 2, "ACDT", "CpuPlugA", 0x00003000)
                 Return (\_SB.PR21) /* External reference */
                 Method (_STA, 0, NotSerialized)  // _STA: Status
                 {
-                    Return (_OFF ())
+                    Return (MO86 ())
                 }
             }
 
@@ -316,7 +316,7 @@ DefinitionBlock ("", "SSDT", 2, "ACDT", "CpuPlugA", 0x00003000)
                 Return (\_SB.PR22) /* External reference */
                 Method (_STA, 0, NotSerialized)  // _STA: Status
                 {
-                    Return (_OFF ())
+                    Return (MO86 ())
                 }
             }
 
@@ -325,7 +325,7 @@ DefinitionBlock ("", "SSDT", 2, "ACDT", "CpuPlugA", 0x00003000)
                 Return (\_SB.PR23) /* External reference */
                 Method (_STA, 0, NotSerialized)  // _STA: Status
                 {
-                    Return (_OFF ())
+                    Return (MO86 ())
                 }
             }
 
@@ -334,7 +334,7 @@ DefinitionBlock ("", "SSDT", 2, "ACDT", "CpuPlugA", 0x00003000)
                 Return (\_SB.PR24) /* External reference */
                 Method (_STA, 0, NotSerialized)  // _STA: Status
                 {
-                    Return (_OFF ())
+                    Return (MO86 ())
                 }
             }
 
@@ -343,7 +343,7 @@ DefinitionBlock ("", "SSDT", 2, "ACDT", "CpuPlugA", 0x00003000)
                 Return (\_SB.PR25) /* External reference */
                 Method (_STA, 0, NotSerialized)  // _STA: Status
                 {
-                    Return (_OFF ())
+                    Return (MO86 ())
                 }
             }
 
@@ -352,7 +352,7 @@ DefinitionBlock ("", "SSDT", 2, "ACDT", "CpuPlugA", 0x00003000)
                 Return (\_SB.PR26) /* External reference */
                 Method (_STA, 0, NotSerialized)  // _STA: Status
                 {
-                    Return (_OFF ())
+                    Return (MO86 ())
                 }
             }
 
@@ -361,7 +361,7 @@ DefinitionBlock ("", "SSDT", 2, "ACDT", "CpuPlugA", 0x00003000)
                 Return (\_SB.PR27) /* External reference */
                 Method (_STA, 0, NotSerialized)  // _STA: Status
                 {
-                    Return (_OFF ())
+                    Return (MO86 ())
                 }
             }
 
@@ -370,7 +370,7 @@ DefinitionBlock ("", "SSDT", 2, "ACDT", "CpuPlugA", 0x00003000)
                 Return (\_SB.PR28) /* External reference */
                 Method (_STA, 0, NotSerialized)  // _STA: Status
                 {
-                    Return (_OFF ())
+                    Return (MO86 ())
                 }
             }
 
@@ -379,7 +379,7 @@ DefinitionBlock ("", "SSDT", 2, "ACDT", "CpuPlugA", 0x00003000)
                 Return (\_SB.PR29) /* External reference */
                 Method (_STA, 0, NotSerialized)  // _STA: Status
                 {
-                    Return (_OFF ())
+                    Return (MO86 ())
                 }
             }
 
@@ -388,7 +388,7 @@ DefinitionBlock ("", "SSDT", 2, "ACDT", "CpuPlugA", 0x00003000)
                 Return (\_SB.PR30) /* External reference */
                 Method (_STA, 0, NotSerialized)  // _STA: Status
                 {
-                    Return (_OFF ())
+                    Return (MO86 ())
                 }
             }
 
@@ -397,7 +397,7 @@ DefinitionBlock ("", "SSDT", 2, "ACDT", "CpuPlugA", 0x00003000)
                 Return (\_SB.PR31) /* External reference */
                 Method (_STA, 0, NotSerialized)  // _STA: Status
                 {
-                    Return (_OFF ())
+                    Return (MO86 ())
                 }
             }
 
@@ -406,7 +406,7 @@ DefinitionBlock ("", "SSDT", 2, "ACDT", "CpuPlugA", 0x00003000)
                 Return (\_SB.PR32) /* External reference */
                 Method (_STA, 0, NotSerialized)  // _STA: Status
                 {
-                    Return (_OFF ())
+                    Return (MO86 ())
                 }
             }
 
@@ -415,7 +415,7 @@ DefinitionBlock ("", "SSDT", 2, "ACDT", "CpuPlugA", 0x00003000)
                 Return (\_SB.PR33) /* External reference */
                 Method (_STA, 0, NotSerialized)  // _STA: Status
                 {
-                    Return (_OFF ())
+                    Return (MO86 ())
                 }
             }
 
@@ -424,7 +424,7 @@ DefinitionBlock ("", "SSDT", 2, "ACDT", "CpuPlugA", 0x00003000)
                 Return (\_SB.PR34) /* External reference */
                 Method (_STA, 0, NotSerialized)  // _STA: Status
                 {
-                    Return (_OFF ())
+                    Return (MO86 ())
                 }
             }
 
@@ -433,7 +433,7 @@ DefinitionBlock ("", "SSDT", 2, "ACDT", "CpuPlugA", 0x00003000)
                 Return (\_SB.PR35) /* External reference */
                 Method (_STA, 0, NotSerialized)  // _STA: Status
                 {
-                    Return (_OFF ())
+                    Return (MO86 ())
                 }
             }
 
@@ -442,7 +442,7 @@ DefinitionBlock ("", "SSDT", 2, "ACDT", "CpuPlugA", 0x00003000)
                 Return (\_SB.PR36) /* External reference */
                 Method (_STA, 0, NotSerialized)  // _STA: Status
                 {
-                    Return (_OFF ())
+                    Return (MO86 ())
                 }
             }
 
@@ -451,7 +451,7 @@ DefinitionBlock ("", "SSDT", 2, "ACDT", "CpuPlugA", 0x00003000)
                 Return (\_SB.PR37) /* External reference */
                 Method (_STA, 0, NotSerialized)  // _STA: Status
                 {
-                    Return (_OFF ())
+                    Return (MO86 ())
                 }
             }
 
@@ -460,7 +460,7 @@ DefinitionBlock ("", "SSDT", 2, "ACDT", "CpuPlugA", 0x00003000)
                 Return (\_SB.PR38) /* External reference */
                 Method (_STA, 0, NotSerialized)  // _STA: Status
                 {
-                    Return (_OFF ())
+                    Return (MO86 ())
                 }
             }
 
@@ -469,7 +469,7 @@ DefinitionBlock ("", "SSDT", 2, "ACDT", "CpuPlugA", 0x00003000)
                 Return (\_SB.PR39) /* External reference */
                 Method (_STA, 0, NotSerialized)  // _STA: Status
                 {
-                    Return (_OFF ())
+                    Return (MO86 ())
                 }
             }
 
@@ -478,7 +478,7 @@ DefinitionBlock ("", "SSDT", 2, "ACDT", "CpuPlugA", 0x00003000)
                 Return (\_SB.PR40) /* External reference */
                 Method (_STA, 0, NotSerialized)  // _STA: Status
                 {
-                    Return (_OFF ())
+                    Return (MO86 ())
                 }
             }
 
@@ -487,7 +487,7 @@ DefinitionBlock ("", "SSDT", 2, "ACDT", "CpuPlugA", 0x00003000)
                 Return (\_SB.PR41) /* External reference */
                 Method (_STA, 0, NotSerialized)  // _STA: Status
                 {
-                    Return (_OFF ())
+                    Return (MO86 ())
                 }
             }
 
@@ -496,7 +496,7 @@ DefinitionBlock ("", "SSDT", 2, "ACDT", "CpuPlugA", 0x00003000)
                 Return (\_SB.PR42) /* External reference */
                 Method (_STA, 0, NotSerialized)  // _STA: Status
                 {
-                    Return (_OFF ())
+                    Return (MO86 ())
                 }
             }
 
@@ -505,7 +505,7 @@ DefinitionBlock ("", "SSDT", 2, "ACDT", "CpuPlugA", 0x00003000)
                 Return (\_SB.PR43) /* External reference */
                 Method (_STA, 0, NotSerialized)  // _STA: Status
                 {
-                    Return (_OFF ())
+                    Return (MO86 ())
                 }
             }
 
@@ -514,7 +514,7 @@ DefinitionBlock ("", "SSDT", 2, "ACDT", "CpuPlugA", 0x00003000)
                 Return (\_SB.PR44) /* External reference */
                 Method (_STA, 0, NotSerialized)  // _STA: Status
                 {
-                    Return (_OFF ())
+                    Return (MO86 ())
                 }
             }
 
@@ -523,7 +523,7 @@ DefinitionBlock ("", "SSDT", 2, "ACDT", "CpuPlugA", 0x00003000)
                 Return (\_SB.PR45) /* External reference */
                 Method (_STA, 0, NotSerialized)  // _STA: Status
                 {
-                    Return (_OFF ())
+                    Return (MO86 ())
                 }
             }
 
@@ -532,7 +532,7 @@ DefinitionBlock ("", "SSDT", 2, "ACDT", "CpuPlugA", 0x00003000)
                 Return (\_SB.PR46) /* External reference */
                 Method (_STA, 0, NotSerialized)  // _STA: Status
                 {
-                    Return (_OFF ())
+                    Return (MO86 ())
                 }
             }
 
@@ -541,7 +541,7 @@ DefinitionBlock ("", "SSDT", 2, "ACDT", "CpuPlugA", 0x00003000)
                 Return (\_SB.PR47) /* External reference */
                 Method (_STA, 0, NotSerialized)  // _STA: Status
                 {
-                    Return (_OFF ())
+                    Return (MO86 ())
                 }
             }
 
@@ -550,7 +550,7 @@ DefinitionBlock ("", "SSDT", 2, "ACDT", "CpuPlugA", 0x00003000)
                 Return (\_SB.PR48) /* External reference */
                 Method (_STA, 0, NotSerialized)  // _STA: Status
                 {
-                    Return (_OFF ())
+                    Return (MO86 ())
                 }
             }
 
@@ -559,7 +559,7 @@ DefinitionBlock ("", "SSDT", 2, "ACDT", "CpuPlugA", 0x00003000)
                 Return (\_SB.PR49) /* External reference */
                 Method (_STA, 0, NotSerialized)  // _STA: Status
                 {
-                    Return (_OFF ())
+                    Return (MO86 ())
                 }
             }
 
@@ -568,7 +568,7 @@ DefinitionBlock ("", "SSDT", 2, "ACDT", "CpuPlugA", 0x00003000)
                 Return (\_SB.PR50) /* External reference */
                 Method (_STA, 0, NotSerialized)  // _STA: Status
                 {
-                    Return (_OFF ())
+                    Return (MO86 ())
                 }
             }
 
@@ -577,7 +577,7 @@ DefinitionBlock ("", "SSDT", 2, "ACDT", "CpuPlugA", 0x00003000)
                 Return (\_SB.PR51) /* External reference */
                 Method (_STA, 0, NotSerialized)  // _STA: Status
                 {
-                    Return (_OFF ())
+                    Return (MO86 ())
                 }
             }
 
@@ -586,7 +586,7 @@ DefinitionBlock ("", "SSDT", 2, "ACDT", "CpuPlugA", 0x00003000)
                 Return (\_SB.PR52) /* External reference */
                 Method (_STA, 0, NotSerialized)  // _STA: Status
                 {
-                    Return (_OFF ())
+                    Return (MO86 ())
                 }
             }
 
@@ -595,7 +595,7 @@ DefinitionBlock ("", "SSDT", 2, "ACDT", "CpuPlugA", 0x00003000)
                 Return (\_SB.PR53) /* External reference */
                 Method (_STA, 0, NotSerialized)  // _STA: Status
                 {
-                    Return (_OFF ())
+                    Return (MO86 ())
                 }
             }
 
@@ -604,7 +604,7 @@ DefinitionBlock ("", "SSDT", 2, "ACDT", "CpuPlugA", 0x00003000)
                 Return (\_SB.PR54) /* External reference */
                 Method (_STA, 0, NotSerialized)  // _STA: Status
                 {
-                    Return (_OFF ())
+                    Return (MO86 ())
                 }
             }
 
@@ -613,7 +613,7 @@ DefinitionBlock ("", "SSDT", 2, "ACDT", "CpuPlugA", 0x00003000)
                 Return (\_SB.PR55) /* External reference */
                 Method (_STA, 0, NotSerialized)  // _STA: Status
                 {
-                    Return (_OFF ())
+                    Return (MO86 ())
                 }
             }
 
@@ -622,7 +622,7 @@ DefinitionBlock ("", "SSDT", 2, "ACDT", "CpuPlugA", 0x00003000)
                 Return (\_SB.PR56) /* External reference */
                 Method (_STA, 0, NotSerialized)  // _STA: Status
                 {
-                    Return (_OFF ())
+                    Return (MO86 ())
                 }
             }
 
@@ -631,7 +631,7 @@ DefinitionBlock ("", "SSDT", 2, "ACDT", "CpuPlugA", 0x00003000)
                 Return (\_SB.PR57) /* External reference */
                 Method (_STA, 0, NotSerialized)  // _STA: Status
                 {
-                    Return (_OFF ())
+                    Return (MO86 ())
                 }
             }
 
@@ -640,7 +640,7 @@ DefinitionBlock ("", "SSDT", 2, "ACDT", "CpuPlugA", 0x00003000)
                 Return (\_SB.PR58) /* External reference */
                 Method (_STA, 0, NotSerialized)  // _STA: Status
                 {
-                    Return (_OFF ())
+                    Return (MO86 ())
                 }
             }
 
@@ -649,7 +649,7 @@ DefinitionBlock ("", "SSDT", 2, "ACDT", "CpuPlugA", 0x00003000)
                 Return (\_SB.PR59) /* External reference */
                 Method (_STA, 0, NotSerialized)  // _STA: Status
                 {
-                    Return (_OFF ())
+                    Return (MO86 ())
                 }
             }
 
@@ -658,7 +658,7 @@ DefinitionBlock ("", "SSDT", 2, "ACDT", "CpuPlugA", 0x00003000)
                 Return (\_SB.PR60) /* External reference */
                 Method (_STA, 0, NotSerialized)  // _STA: Status
                 {
-                    Return (_OFF ())
+                    Return (MO86 ())
                 }
             }
 
@@ -667,7 +667,7 @@ DefinitionBlock ("", "SSDT", 2, "ACDT", "CpuPlugA", 0x00003000)
                 Return (\_SB.PR61) /* External reference */
                 Method (_STA, 0, NotSerialized)  // _STA: Status
                 {
-                    Return (_OFF ())
+                    Return (MO86 ())
                 }
             }
 
@@ -676,7 +676,7 @@ DefinitionBlock ("", "SSDT", 2, "ACDT", "CpuPlugA", 0x00003000)
                 Return (\_SB.PR62) /* External reference */
                 Method (_STA, 0, NotSerialized)  // _STA: Status
                 {
-                    Return (_OFF ())
+                    Return (MO86 ())
                 }
             }
 
@@ -685,7 +685,7 @@ DefinitionBlock ("", "SSDT", 2, "ACDT", "CpuPlugA", 0x00003000)
                 Return (\_SB.PR63) /* External reference */
                 Method (_STA, 0, NotSerialized)  // _STA: Status
                 {
-                    Return (_OFF ())
+                    Return (MO86 ())
                 }
             }
         }
