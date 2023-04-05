@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
-%DIF DEL PreviousConfiguration.tex   Mon Apr  3 19:55:22 2023
-%DIF ADD ../Configuration.tex        Mon Apr  3 19:55:22 2023
+%DIF DEL PreviousConfiguration.tex   Thu Apr  6 01:56:05 2023
+%DIF ADD ../Configuration.tex        Thu Apr  6 01:56:05 2023
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -118,7 +118,7 @@
 %DIF HYPERREF PREAMBLE %DIF PREAMBLE
 \providecommand{\DIFadd}[1]{\texorpdfstring{\DIFaddtex{#1}}{#1}} %DIF PREAMBLE
 \providecommand{\DIFdel}[1]{\texorpdfstring{\DIFdeltex{#1}}{}} %DIF PREAMBLE
-%DIF COLORLISTINGS PREAMBLE %DIF PREAMBLE
+%DIF LISTINGS PREAMBLE %DIF PREAMBLE
 \RequirePackage{listings} %DIF PREAMBLE
 \RequirePackage{color} %DIF PREAMBLE
 \lstdefinelanguage{DIFcode}{ %DIF PREAMBLE
@@ -2712,7 +2712,24 @@ Kernel and kext changes apply with the following effective order:
   \emph{Note 2}: Misconfigured IOMMU in the firmware may result in broken devices
   such as ethernet or Wi-Fi adapters. For instance, an ethernet adapter may cycle in link-up
   link-down state infinitely and a Wi-Fi adapter may fail to discover networks.
-  Gigabyte is one of the most common OEMs with these issues.
+  Gigabyte is one of the most common OEMs with these issues\DIFaddbegin \DIFadd{.
+}
+
+\item
+  \texttt{\DIFadd{DisableIoMapperMapping}}\\
+  \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ boolean}}\\
+  \textbf{\DIFadd{Failsafe}}\DIFadd{: }\texttt{\DIFadd{false}}\\
+  \textbf{\DIFadd{Requirement}}\DIFadd{: 13.3 (not required for older)}\\
+  \textbf{\DIFadd{Description}}\DIFadd{: Disables mapping PCI bridge device memory in IOMMU (VT-d).
+}
+
+  \emph{\DIFadd{Note 1}}\DIFadd{: This option resolves compatibility issues with Wi-Fi, Ethernet and
+  Thunderbolt devices when AppleVTD is enabled on systems where the native DMAR table
+  contains one or more Reserved Memory Regions.
+}
+
+  \emph{\DIFadd{Note 2}}\DIFadd{: This option is not needed on AMD systems or any Intel system
+  where the native DMAR table does not contain any Reserved Memory Regions}\DIFaddend .
 
 \item
   \texttt{DisableLinkeditJettison}\\
