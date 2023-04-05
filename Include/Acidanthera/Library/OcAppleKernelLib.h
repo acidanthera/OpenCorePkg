@@ -554,6 +554,10 @@ typedef enum {
   //
   KernelQuirkDisableIoMapper,
   //
+  // Disable mapping PCI bridge device memory in IOMMU (VT-d) to resolve compatibility issues.
+  //
+  KernelQuirkDisableIoMapperMapping,
+  //
   // Disable AppleRTC checksum writing.
   //
   KernelQuirkDisableRtcChecksum,
@@ -569,10 +573,6 @@ typedef enum {
   // Apply icon type patches to IOAHCIPort kext to force internal disk icons.
   //
   KernelQuirkExternalDiskIcons,
-  //
-  // Enable WiFi and Ethernet in macOS 13.3+ with AppleVTD enabled
-  //
-  KernelQuirkFixAppleVTD,
   //
   // Enable Aquantia AQtion AQC-107s support.
   //

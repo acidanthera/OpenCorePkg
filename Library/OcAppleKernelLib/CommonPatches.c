@@ -1096,6 +1096,58 @@ PatchAppleIoMapperSupport (
 
 STATIC
 CONST UINT8
+  mAppleIoMapperMappingPatchReplace[] = {
+  0xC3  ///< ret
+};
+
+STATIC
+PATCHER_GENERIC_PATCH
+  mAppleIoMapperMappingPatch = {
+  .Comment     = DEBUG_POINTER ("AppleIoMapperMapping"),
+  .Base        = "__ZN8AppleVTD14addMemoryRangeEyy",
+  .Find        = NULL,
+  .Mask        = NULL,
+  .Replace     = mAppleIoMapperMappingPatchReplace,
+  .ReplaceMask = NULL,
+  .Size        = sizeof (mAppleIoMapperMappingPatchReplace),
+  .Count       = 1,
+  .Skip        = 0
+};
+
+STATIC
+EFI_STATUS
+PatchAppleIoMapperMapping (
+  IN OUT PATCHER_CONTEXT  *Patcher OPTIONAL,
+  IN     UINT32           KernelVersion
+  )
+{
+  EFI_STATUS  Status;
+
+  //
+  // This patch is not required before macOS 13.3 (kernel 22.4.0)
+  //
+  if (!OcMatchDarwinVersion (KernelVersion, KERNEL_VERSION (KERNEL_VERSION_VENTURA, 4, 0), 0)) {
+    DEBUG ((DEBUG_INFO, "OCAK: [OK] Skipping AppleIoMapperMapping patch on %u\n", KernelVersion));
+    return EFI_SUCCESS;
+  }
+
+  if (Patcher == NULL) {
+    DEBUG ((DEBUG_INFO, "OCAK: [OK] Skipping %a on NULL Patcher on %u\n", __func__, KernelVersion));
+    return EFI_NOT_FOUND;
+  }
+
+  Status = PatcherApplyGenericPatch (Patcher, &mAppleIoMapperMappingPatch);
+  if (EFI_ERROR (Status)) {
+    DEBUG ((DEBUG_INFO, "OCAK: [FAIL] Failed to apply patch com.apple.iokit.IOPCIFamily AppleIoMapperMapping - %r\n", Status));
+  } else {
+    DEBUG ((DEBUG_INFO, "OCAK: [OK] Patch success com.apple.iokit.IOPCIFamily AppleIoMapperMapping\n"));
+  }
+
+  return Status;
+}
+
+STATIC
+CONST UINT8
   mAppleDummyCpuPmPatchReplace[] = {
   0xB8, 0x01, 0x00, 0x00, 0x00,  ///< mov eax, 1
   0xC3                           ///< ret
@@ -2241,83 +2293,6 @@ PatchLegacyCommpage (
 
 STATIC
 CONST UINT8
-  mAppleVTDPatchFindCaseySJ[] = {
-  0x4C, 0x89, 0xF6, 0xE8,
-  0x00, 0x00, 0x00, 0x00
-};
-
-STATIC
-CONST UINT8
-  mAppleVTDPatchFindMaskCaseySJ[] = {
-  0xFF, 0xFF, 0xFF, 0xFF,
-  0x00, 0x00, 0x00, 0x00
-};
-
-STATIC
-CONST UINT8
-  mAppleVTDPatchReplaceCaseySJ[] = {
-  0x4C, 0x89, 0xF6, 0x90,
-  0x90, 0x90, 0x90, 0x90
-};
-
-STATIC
-CONST UINT8
-  mAppleVTDPatchReplaceMaskCaseySJ[] = {
-  0x00, 0x00, 0x00, 0xFF,
-  0xFF, 0xFF, 0xFF, 0xFF
-};
-
-STATIC
-PATCHER_GENERIC_PATCH
-  mAppleVTDPatchCaseySJ = {
-  .Comment     = DEBUG_POINTER ("FixAppleVTDCaseySJ"),
-  .Base        = "__ZN11IOPCIBridge20addBridgeMemoryRangeEyyb",
-  .Find        = mAppleVTDPatchFindCaseySJ,
-  .Mask        = mAppleVTDPatchFindMaskCaseySJ,
-  .Replace     = mAppleVTDPatchReplaceCaseySJ,
-  .ReplaceMask = mAppleVTDPatchReplaceMaskCaseySJ,
-  .Size        = sizeof (mAppleVTDPatchFindCaseySJ),
-  .Count       = 1,
-  .Skip        = 0
-};
-
-STATIC
-EFI_STATUS
-PatchAppleVTD (
-  IN OUT PATCHER_CONTEXT  *Patcher OPTIONAL,
-  IN     UINT32           KernelVersion
-  )
-{
-  EFI_STATUS  Status;
-
-  //
-  // This patch is not required before macOS 13.3 (kernel 22.4.0)
-  //
-  if (!OcMatchDarwinVersion (KernelVersion, KERNEL_VERSION (KERNEL_VERSION_VENTURA, 4, 0), 0)) {
-    DEBUG ((DEBUG_INFO, "OCAK: [OK] Skipping patching AppleVTD on %u\n", KernelVersion));
-    return EFI_SUCCESS;
-  }
-
-  if (Patcher == NULL) {
-    DEBUG ((DEBUG_INFO, "OCAK: [OK] Skipping %a on NULL Patcher on %u\n", __func__, KernelVersion));
-    return EFI_NOT_FOUND;
-  }
-
-  //
-  // Shikumo's patch can be applied to a wider range, not limited to AQC 107 series,
-  // thus preferred.
-  //
-  Status = PatcherApplyGenericPatch (Patcher, &mAppleVTDPatchCaseySJ);
-  if (!EFI_ERROR (Status)) {
-    DEBUG ((DEBUG_INFO, "OCAK: [OK] Patch success AppleVTD CaseySJ\n"));
-    return Status;
-  }
-
-  return Status;
-}
-
-STATIC
-CONST UINT8
   mAquantiaEthernetPatchFindShikumo[] = {
   0x83, 0x7D, 0x00, 0x00,             ///< cmp dword [rbp+whatever], whatever
   0x0F, 0x84, 0x00, 0x00, 0x00, 0x00, ///< je unsupported
@@ -2634,11 +2609,11 @@ KERNEL_QUIRK  gKernelQuirks[] = {
   [KernelQuirkCustomSmbiosGuid1]       = { "com.apple.driver.AppleSMBIOS",                  PatchCustomSmbiosGuid       },
   [KernelQuirkCustomSmbiosGuid2]       = { "com.apple.driver.AppleACPIPlatform",            PatchCustomSmbiosGuid       },
   [KernelQuirkDisableIoMapper]         = { "com.apple.iokit.IOPCIFamily",                   PatchAppleIoMapperSupport   },
+  [KernelQuirkDisableIoMapperMapping]  = { "com.apple.iokit.IOPCIFamily",                   PatchAppleIoMapperMapping   },
   [KernelQuirkDisableRtcChecksum]      = { "com.apple.driver.AppleRTC",                     PatchAppleRtcChecksum       },
   [KernelQuirkDummyPowerManagement]    = { "com.apple.driver.AppleIntelCPUPowerManagement", PatchDummyPowerManagement   },
   [KernelQuirkExtendBTFeatureFlags]    = { "com.apple.iokit.IOBluetoothFamily",             PatchBTFeatureFlags         },
   [KernelQuirkExternalDiskIcons]       = { "com.apple.driver.AppleAHCIPort",                PatchForceInternalDiskIcons },
-  [KernelQuirkFixAppleVTD]             = { "com.apple.iokit.IOPCIFamily",                   PatchAppleVTD               },
   [KernelQuirkForceAquantiaEthernet]   = { "com.apple.driver.AppleEthernetAquantiaAqtion",  PatchAquantiaEthernet       },
   [KernelQuirkForceSecureBootScheme]   = { "com.apple.security.AppleImage4",                PatchForceSecureBootScheme  },
   [KernelQuirkIncreasePciBarSize]      = { "com.apple.iokit.IOPCIFamily",                   PatchIncreasePciBarSize     },
