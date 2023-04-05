@@ -1096,6 +1096,58 @@ PatchAppleIoMapperSupport (
 
 STATIC
 CONST UINT8
+  mAppleIoMapperMappingPatchReplace[] = {
+  0xC3  ///< ret
+};
+
+STATIC
+PATCHER_GENERIC_PATCH
+  mAppleIoMapperMappingPatch = {
+  .Comment     = DEBUG_POINTER ("AppleIoMapperMapping"),
+  .Base        = "__ZN8AppleVTD14addMemoryRangeEyy",
+  .Find        = NULL,
+  .Mask        = NULL,
+  .Replace     = mAppleIoMapperMappingPatchReplace,
+  .ReplaceMask = NULL,
+  .Size        = sizeof (mAppleIoMapperMappingPatchReplace),
+  .Count       = 1,
+  .Skip        = 0
+};
+
+STATIC
+EFI_STATUS
+PatchAppleIoMapperMapping (
+  IN OUT PATCHER_CONTEXT  *Patcher OPTIONAL,
+  IN     UINT32           KernelVersion
+  )
+{
+  EFI_STATUS  Status;
+
+  //
+  // This patch is not required before macOS 13.3 (kernel 22.4.0)
+  //
+  if (!OcMatchDarwinVersion (KernelVersion, KERNEL_VERSION (KERNEL_VERSION_VENTURA, 4, 0), 0)) {
+    DEBUG ((DEBUG_INFO, "OCAK: [OK] Skipping AppleIoMapperMapping patch on %u\n", KernelVersion));
+    return EFI_SUCCESS;
+  }
+
+  if (Patcher == NULL) {
+    DEBUG ((DEBUG_INFO, "OCAK: [OK] Skipping %a on NULL Patcher on %u\n", __func__, KernelVersion));
+    return EFI_NOT_FOUND;
+  }
+
+  Status = PatcherApplyGenericPatch (Patcher, &mAppleIoMapperMappingPatch);
+  if (EFI_ERROR (Status)) {
+    DEBUG ((DEBUG_INFO, "OCAK: [FAIL] Failed to apply patch com.apple.iokit.IOPCIFamily AppleIoMapperMapping - %r\n", Status));
+  } else {
+    DEBUG ((DEBUG_INFO, "OCAK: [OK] Patch success com.apple.iokit.IOPCIFamily AppleIoMapperMapping\n"));
+  }
+
+  return Status;
+}
+
+STATIC
+CONST UINT8
   mAppleDummyCpuPmPatchReplace[] = {
   0xB8, 0x01, 0x00, 0x00, 0x00,  ///< mov eax, 1
   0xC3                           ///< ret
@@ -2557,6 +2609,7 @@ KERNEL_QUIRK  gKernelQuirks[] = {
   [KernelQuirkCustomSmbiosGuid1]       = { "com.apple.driver.AppleSMBIOS",                  PatchCustomSmbiosGuid       },
   [KernelQuirkCustomSmbiosGuid2]       = { "com.apple.driver.AppleACPIPlatform",            PatchCustomSmbiosGuid       },
   [KernelQuirkDisableIoMapper]         = { "com.apple.iokit.IOPCIFamily",                   PatchAppleIoMapperSupport   },
+  [KernelQuirkDisableIoMapperMapping]  = { "com.apple.iokit.IOPCIFamily",                   PatchAppleIoMapperMapping   },
   [KernelQuirkDisableRtcChecksum]      = { "com.apple.driver.AppleRTC",                     PatchAppleRtcChecksum       },
   [KernelQuirkDummyPowerManagement]    = { "com.apple.driver.AppleIntelCPUPowerManagement", PatchDummyPowerManagement   },
   [KernelQuirkExtendBTFeatureFlags]    = { "com.apple.iokit.IOBluetoothFamily",             PatchBTFeatureFlags         },

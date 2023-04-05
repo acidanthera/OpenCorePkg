@@ -142,6 +142,10 @@ OcKernelApplyPatches (
       OcKernelApplyQuirk (KernelQuirkDisableIoMapper, CacheType, DarwinVersion, Context, NULL);
     }
 
+    if (Config->Kernel.Quirks.DisableIoMapperMapping) {
+      OcKernelApplyQuirk (KernelQuirkDisableIoMapperMapping, CacheType, DarwinVersion, Context, NULL);
+    }
+
     if (Config->Kernel.Quirks.DisableRtcChecksum) {
       OcKernelApplyQuirk (KernelQuirkDisableRtcChecksum, CacheType, DarwinVersion, Context, NULL);
     }
