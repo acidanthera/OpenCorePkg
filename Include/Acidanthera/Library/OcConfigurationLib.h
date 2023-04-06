@@ -287,6 +287,7 @@ OC_DECLARE (OC_KERNEL_PATCH_ARRAY)
   _(BOOLEAN                     , CustomPciSerialDevice       ,     , FALSE  , ()) \
   _(BOOLEAN                     , CustomSmbiosGuid            ,     , FALSE  , ()) \
   _(BOOLEAN                     , DisableIoMapper             ,     , FALSE  , ()) \
+  _(BOOLEAN                     , DisableIoMapperMapping      ,     , FALSE  , ()) \
   _(BOOLEAN                     , DisableLinkeditJettison     ,     , FALSE  , ()) \
   _(BOOLEAN                     , DisableRtcChecksum          ,     , FALSE  , ()) \
   _(BOOLEAN                     , ExtendBTFeatureFlags        ,     , FALSE  , ()) \

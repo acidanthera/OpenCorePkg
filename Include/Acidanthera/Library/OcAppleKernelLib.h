@@ -554,6 +554,10 @@ typedef enum {
   //
   KernelQuirkDisableIoMapper,
   //
+  // Disable mapping PCI bridge device memory in IOMMU (VT-d) to resolve compatibility issues.
+  //
+  KernelQuirkDisableIoMapperMapping,
+  //
   // Disable AppleRTC checksum writing.
   //
   KernelQuirkDisableRtcChecksum,

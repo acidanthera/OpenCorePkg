@@ -318,6 +318,14 @@ ApplyKextPatches (
     DEBUG ((DEBUG_WARN, "[OK] Success KernelQuirkDisableIoMapper\n"));
   }
 
+  Status = PrelinkedContextApplyQuirk (Context, KernelQuirkDisableIoMapperMapping, KernelVersion);
+  if (EFI_ERROR (Status)) {
+    DEBUG ((DEBUG_WARN, "[FAIL] Failed to apply KernelQuirkDisableIoMapperMapping - %r\n", Status));
+    FailedToProcess = TRUE;
+  } else {
+    DEBUG ((DEBUG_WARN, "[OK] Success KernelQuirkDisableIoMapperMapping\n"));
+  }
+
   Status = PrelinkedContextApplyQuirk (Context, KernelQuirkDisableRtcChecksum, KernelVersion);
   if (EFI_ERROR (Status)) {
     DEBUG ((DEBUG_WARN, "[FAIL] Failed to apply KernelQuirkDisableRtcChecksum - %r\n", Status));

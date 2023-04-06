@@ -356,6 +356,7 @@ OC_SCHEMA
   OC_SCHEMA_BOOLEAN_IN ("CustomPciSerialDevice",   OC_GLOBAL_CONFIG, Kernel.Quirks.CustomPciSerialDevice),
   OC_SCHEMA_BOOLEAN_IN ("CustomSMBIOSGuid",        OC_GLOBAL_CONFIG, Kernel.Quirks.CustomSmbiosGuid),
   OC_SCHEMA_BOOLEAN_IN ("DisableIoMapper",         OC_GLOBAL_CONFIG, Kernel.Quirks.DisableIoMapper),
+  OC_SCHEMA_BOOLEAN_IN ("DisableIoMapperMapping",  OC_GLOBAL_CONFIG, Kernel.Quirks.DisableIoMapperMapping),
   OC_SCHEMA_BOOLEAN_IN ("DisableLinkeditJettison", OC_GLOBAL_CONFIG, Kernel.Quirks.DisableLinkeditJettison),
   OC_SCHEMA_BOOLEAN_IN ("DisableRtcChecksum",      OC_GLOBAL_CONFIG, Kernel.Quirks.DisableRtcChecksum),
   OC_SCHEMA_BOOLEAN_IN ("ExtendBTFeatureFlags",    OC_GLOBAL_CONFIG, Kernel.Quirks.ExtendBTFeatureFlags),
