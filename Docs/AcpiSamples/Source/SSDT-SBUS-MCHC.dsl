@@ -37,7 +37,7 @@ DefinitionBlock ("", "SSDT", 2, "ACDT", "MCHCSBUS", 0x00000000)
          * The "diagsvault" is the diagnostic vault where messages are stored.
          * It's located at address 87 (0x57) on the SMBus controller.
          * While "diagsvault" may refer to diags, a hardware diagnosis program via EFI for Macs
-         * and communicates with the SMBus controller, the effect is really unknown for hacks.
+         * that communicates with the SMBus controller, the effect is really unknown for hacks.
          * Uncomment this with caution.
          */
 
