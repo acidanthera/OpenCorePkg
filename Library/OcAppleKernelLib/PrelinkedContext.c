@@ -940,7 +940,7 @@ PrelinkedSetLiluEFIVariables(
 
   OcSetSystemVariable (
     OC_LILU_PRELINKED_SYMBOLS_VARIABLE_NAME,
-    OPEN_CORE_INT_NVRAM_ATTR,
+    OPEN_CORE_NVRAM_ATTR,
     4,
     (void *) &Buffer,
     &gOcReadOnlyVariableGuid
