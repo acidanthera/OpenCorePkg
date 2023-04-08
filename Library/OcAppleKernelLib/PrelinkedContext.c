@@ -913,9 +913,8 @@ PrelinkedSetLiluEFIVariables(
   CONST PRELINKED_KEXT_SYMBOL  *SymbolsEnd;
   UINT32                       NumSymbols;
   CHAR8 *Buffer;
-  EFI_STATUS  Status;
 
-  /*Link  = GetFirstNode (&Context->PrelinkedKexts);
+  Link  = GetFirstNode (&Context->PrelinkedKexts);
   Kext  = NULL;
   while (!IsNull (&Context->PrelinkedKexts, Link)) {
     Kext = GET_PRELINKED_KEXT_FROM_LINK (Link);
@@ -925,13 +924,13 @@ PrelinkedSetLiluEFIVariables(
 
       SymbolsEnd = &Symbols[NumSymbols];
       while (Symbols < SymbolsEnd) {
-
+        // TODO lol
         Symbols++;
       }
     }
 
     Link = GetNextNode (&Context->PrelinkedKexts, Link);
-  }*/
+  }
 
   Buffer = AllocateRuntimePool(4096);
   if (!Buffer) return EFI_OUT_OF_RESOURCES;
@@ -946,6 +945,8 @@ PrelinkedSetLiluEFIVariables(
     (void *) &Buffer,
     &gOcReadOnlyVariableGuid
     );
+  
+  return EFI_SUCCESS;
 }
 
 EFI_STATUS
