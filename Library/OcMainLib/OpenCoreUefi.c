@@ -561,6 +561,13 @@ OcLoadAppleSecureBoot (
       OcGetLegacySecureBootECID (Config, &Config->Misc.Security.ApECID);
     }
 
+    //
+    // Forcibly disable single user mode in Apple Secure Boot mode.
+    // Previously EfiBoot correctly removed the -s argument from command-line,
+    // but for some reason it does not now.
+    //
+    Config->Booter.Quirks.DisableSingleUser = TRUE;
+
     Status = OcAppleImg4BootstrapValues (RealSecureBootModel, Config->Misc.Security.ApECID);
     if (EFI_ERROR (Status)) {
       DEBUG ((DEBUG_ERROR, "OC: Failed to bootstrap IMG4 NVRAM values - %r\n", Status));
