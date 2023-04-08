@@ -16,6 +16,8 @@
 
 #include <IndustryStandard/AppleKmodInfo.h>
 
+#include <Guid/OcVariable.h>
+
 #include <Library/BaseLib.h>
 #include <Library/BaseMemoryLib.h>
 #include <Library/DebugLib.h>
@@ -23,6 +25,7 @@
 #include <Library/OcAppleKernelLib.h>
 #include <Library/OcMachoLib.h>
 #include <Library/OcStringLib.h>
+#include <Library/OcVariableLib.h>
 
 #include "PrelinkedInternal.h"
 
@@ -897,6 +900,52 @@ PrelinkedInjectComplete (
   FreePool (ExportedInfo);
 
   return EFI_SUCCESS;
+}
+
+EFI_STATUS
+PrelinkedSetLiluEFIVariables(
+  IN OUT PRELINKED_CONTEXT  *Context
+  )
+{
+  LIST_ENTRY      *Link;
+  PRELINKED_KEXT  *Kext;
+  CONST PRELINKED_KEXT_SYMBOL  *Symbols;
+  CONST PRELINKED_KEXT_SYMBOL  *SymbolsEnd;
+  UINT32                       NumSymbols;
+  CHAR8 *Buffer;
+  EFI_STATUS  Status;
+
+  /*Link  = GetFirstNode (&Context->PrelinkedKexts);
+  Kext  = NULL;
+  while (!IsNull (&Context->PrelinkedKexts, Link)) {
+    Kext = GET_PRELINKED_KEXT_FROM_LINK (Link);
+    if (Kext->LinkedSymbolTable != NULL) {
+      NumSymbols = Kext->NumberOfSymbols;
+      Symbols    = Kext->LinkedSymbolTable;
+
+      SymbolsEnd = &Symbols[NumSymbols];
+      while (Symbols < SymbolsEnd) {
+
+        Symbols++;
+      }
+    }
+
+    Link = GetNextNode (&Context->PrelinkedKexts, Link);
+  }*/
+
+  Buffer = AllocateRuntimePool(4096);
+  if (!Buffer) return EFI_OUT_OF_RESOURCES;
+  Buffer[0] = 'H';
+  Buffer[1] = 'i';
+  Buffer[2] = '\0';
+
+  OcSetSystemVariable (
+    OC_LILU_PRELINKED_SYMBOLS_VARIABLE_NAME,
+    OPEN_CORE_INT_NVRAM_ATTR,
+    4,
+    (void *) &Buffer,
+    &gOcReadOnlyVariableGuid
+    );
 }
 
 EFI_STATUS

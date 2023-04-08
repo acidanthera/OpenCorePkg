@@ -844,6 +844,18 @@ PrelinkedInjectComplete (
   );
 
 /**
+  Pass info used during Lilu SysKC/AuxKC injection after prelinked kext injection.
+
+  @param[in,out] Context  Prelinked context.
+
+  @return  EFI_SUCCESS on success.
+**/
+EFI_STATUS
+PrelinkedSetLiluEFIVariables (
+  IN OUT PRELINKED_CONTEXT  *Context
+  );
+
+/**
   Updated required reserve size to inject this kext.
 
   @param[in,out] ReservedInfoSize  Current reserved PLIST size, updated.

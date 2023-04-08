@@ -754,6 +754,9 @@ OcKernelInjectKexts (
       );
 
     Status = PrelinkedInjectComplete (Context);
+    if (Status == EFI_SUCCESS) {
+      Status = PrelinkedSetLiluEFIVariables (Context);
+    }
   } else {
     Status = EFI_UNSUPPORTED;
   }
