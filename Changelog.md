@@ -4,7 +4,7 @@ OpenCore Changelog
 - Added `DisableIoMapperMapping` quirk, thx @CaseySJ
 - Fixed disabling single user mode when Apple Secure Boot is enabled
 - Improved guard checks for `GopBurstMode` on systems where it's not needed
-- Improved compatibilty of `GopBurstMode` with some very non-standard GOP implementations
+- Improved compatibility of `GopBurstMode` with some very non-standard GOP implementations
 
 #### v0.9.1
 - Fixed long comment printing for ACPI patches, thx @corpnewt
