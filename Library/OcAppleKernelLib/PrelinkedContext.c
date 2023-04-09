@@ -911,20 +911,28 @@ PrelinkedSetLiluEFIVariables(
   PRELINKED_KEXT  *Kext;
   CONST PRELINKED_KEXT_SYMBOL  *Symbols;
   CONST PRELINKED_KEXT_SYMBOL  *SymbolsEnd;
-  UINT32                       NumSymbols;
-  CHAR8 *Buffer;
+  UINT32                       NumSymbolsInKext;
+  UINT32                       NumSymbolsInPrelinked;
+  UINT32                       LengthOfPrelinkedSymbols;
+  VOID *Buffer;
+  LILU_PRELINKED_SYMBOLS_HEADER *LiluHeader;
+  LILU_PRELINKED_SYMBOLS_ENTRY *CurEntry;
 
+  // Figure out the value of NumSymbolsInPrelinked and LengthOfPrelinkedSymbols
   Link  = GetFirstNode (&Context->PrelinkedKexts);
   Kext  = NULL;
+  NumSymbolsInPrelinked = 0;
+  LengthOfPrelinkedSymbols = sizeof (LILU_PRELINKED_SYMBOLS);
   while (!IsNull (&Context->PrelinkedKexts, Link)) {
     Kext = GET_PRELINKED_KEXT_FROM_LINK (Link);
     if (Kext->LinkedSymbolTable != NULL) {
-      NumSymbols = Kext->NumberOfSymbols;
-      Symbols    = Kext->LinkedSymbolTable;
+      NumSymbolsInKext = Kext->NumberOfSymbols;
+      NumSymbolsInPrelinked += NumSymbolsInKext;
+      Symbols = Kext->LinkedSymbolTable;
 
-      SymbolsEnd = &Symbols[NumSymbols];
+      SymbolsEnd = &Symbols[NumSymbolsInKext];
       while (Symbols < SymbolsEnd) {
-        // TODO lol
+        LengthOfPrelinkedSymbols += sizeof (LILU_PRELINKED_SYMBOLS_ENTRY) + Symbols->Length + 1; // Account for \0
         Symbols++;
       }
     }
@@ -932,20 +940,57 @@ PrelinkedSetLiluEFIVariables(
     Link = GetNextNode (&Context->PrelinkedKexts, Link);
   }
 
-  Buffer = AllocateRuntimePool(4096);
+  // Allocate buffer and setup header
+  UINT64 LiluPrelinkedSymbolsAddr = (UINT64)AllocateRuntimePool(LengthOfPrelinkedSymbols);
+  Buffer = (VOID*)LiluPrelinkedSymbolsAddr;
   if (!Buffer) return EFI_OUT_OF_RESOURCES;
-  Buffer[0] = 'H';
-  Buffer[1] = 'i';
-  Buffer[2] = '\0';
 
-  OcSetSystemVariable (
-    OC_LILU_PRELINKED_SYMBOLS_VARIABLE_NAME,
+  LiluHeader = (LILU_PRELINKED_SYMBOLS_HEADER *)Buffer;
+  LiluHeader->Version = 0;
+  LiluHeader->Size = LengthOfPrelinkedSymbols;
+  LiluHeader->NumberOfSymbols = NumSymbolsInPrelinked;
+  
+  // Fill in the entries
+  CurEntry = (LILU_PRELINKED_SYMBOLS_ENTRY *)(LiluHeader + 1);
+  Link  = GetFirstNode (&Context->PrelinkedKexts);
+  Kext  = NULL;
+  while (!IsNull (&Context->PrelinkedKexts, Link)) {
+    Kext = GET_PRELINKED_KEXT_FROM_LINK (Link);
+    if (Kext->LinkedSymbolTable != NULL) {
+      NumSymbolsInKext = Kext->NumberOfSymbols;
+      Symbols = Kext->LinkedSymbolTable;
+
+      SymbolsEnd = &Symbols[NumSymbolsInKext];
+      while (Symbols < SymbolsEnd) {
+        CurEntry->EntryLength = sizeof (LILU_PRELINKED_SYMBOLS_ENTRY) + Symbols->Length + 1;
+        CurEntry->SymbolValue = Symbols->Value;
+        CurEntry->SymbolNameLength = Symbols->Length;
+        CopyMem (&CurEntry->SymbolName, Symbols->Name, Symbols->Length + 1);
+
+        CurEntry = (LILU_PRELINKED_SYMBOLS_ENTRY *)(((UINT8*)CurEntry) + CurEntry->EntryLength);
+        Symbols++;
+      }
+    }
+
+    Link = GetNextNode (&Context->PrelinkedKexts, Link);
+  }
+
+  DEBUG ((
+    DEBUG_INFO,
+    "OCAK: Lilu prelinked symbols are stored at 0x%llx with a size of 0x%x bytes and %d symbols\n",
+    LiluPrelinkedSymbolsAddr,
+    LengthOfPrelinkedSymbols,
+    NumSymbolsInPrelinked
+    ));
+
+  // Expose the physical address of the LILU_PRELINKED_SYMBOLS struct via an EFI variable
+  return OcSetSystemVariable (
+    OC_LILU_PRELINKED_SYMBOLS_ADDR_VARIABLE_NAME,
     OPEN_CORE_NVRAM_ATTR,
-    4,
-    (void *) &Buffer,
+    8,
+    (void *) &LiluPrelinkedSymbolsAddr,
     &gOcReadOnlyVariableGuid
     );
-  
   return EFI_SUCCESS;
 }
 

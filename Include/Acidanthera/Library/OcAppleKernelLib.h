@@ -653,6 +653,56 @@ typedef struct {
   KERNEL_QUIRK_PATCH_FUNCTION    *PatchFunction;
 } KERNEL_QUIRK;
 
+//
+// Prelinked symbols passed to Lilu
+//
+#pragma pack(1)
+typedef struct {
+  //
+  // Version of the format (currently 0)
+  //
+  UINT8 Version;
+  //
+  // Size of the entire LILU_PRELINKED_SYMBOLS struct
+  //
+  UINT32 Size;
+  //
+  // Number of symbols
+  //
+  UINT32 NumberOfSymbols;
+} LILU_PRELINKED_SYMBOLS_HEADER;
+
+typedef struct {
+  //
+  // Length of this entry
+  //
+  UINT32 EntryLength;
+  //
+  // Value of this symbol (or stab offset)
+  //
+  UINT64 SymbolValue;
+  //
+  // Length of this symbol's name
+  //
+  UINT32 SymbolNameLength;
+  //
+  // This symbols's name
+  //
+  CHAR8 SymbolName[0];
+} LILU_PRELINKED_SYMBOLS_ENTRY;
+
+typedef struct {
+  //
+  // The header
+  //
+  LILU_PRELINKED_SYMBOLS_HEADER Header;
+  //
+  // The symbols
+  //
+  LILU_PRELINKED_SYMBOLS_ENTRY Entries[0];
+} LILU_PRELINKED_SYMBOLS;
+#pragma pack()
+
 /**
   Applies the specified quirk.
 

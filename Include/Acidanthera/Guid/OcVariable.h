@@ -97,7 +97,7 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 //
 // Variable used for passing prelinkedkernel symbols to Lilu
 //
-#define OC_LILU_PRELINKED_SYMBOLS_VARIABLE_NAME L"lilu-prelinked-symbols"
+#define OC_LILU_PRELINKED_SYMBOLS_ADDR_VARIABLE_NAME L"lilu-prelinked-symbols-addr"
 
 //
 // 4D1FDA02-38C7-4A6A-9CC6-4BCCA8B30102
