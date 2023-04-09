@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
 %DIF DEL PreviousConfiguration.tex   Thu Apr  6 01:56:05 2023
-%DIF ADD ../Configuration.tex        Sat Apr  8 16:31:21 2023
+%DIF ADD ../Configuration.tex        Sun Apr  9 13:56:04 2023
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -2715,11 +2715,10 @@ Kernel and kext changes apply with the following effective order:
   \emph{Note 2}: Misconfigured IOMMU in the firmware may result in broken devices
   such as ethernet or Wi-Fi adapters. For instance, an ethernet adapter may cycle in link-up
   link-down state infinitely and a Wi-Fi adapter may fail to discover networks.
-  Gigabyte is one of the most common OEMs with these issues\DIFaddbegin \DIFadd{.
-}
+  Gigabyte is one of the most common OEMs with these issues.
 
 \item
-  \texttt{\DIFadd{DisableIoMapperMapping}}\\
+  \DIFaddbegin \texttt{\DIFadd{DisableIoMapperMapping}}\\
   \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ boolean}}\\
   \textbf{\DIFadd{Failsafe}}\DIFadd{: }\texttt{\DIFadd{false}}\\
   \textbf{\DIFadd{Requirement}}\DIFadd{: 13.3 (not required for older)}\\
@@ -2732,10 +2731,11 @@ Kernel and kext changes apply with the following effective order:
 }
 
   \emph{\DIFadd{Note 2}}\DIFadd{: This option is not needed on AMD systems or any Intel system
-  where the native DMAR table does not contain any Reserved Memory Regions}\DIFaddend .
+  where the native DMAR table does not contain any Reserved Memory Regions.
+}
 
 \item
-  \texttt{DisableLinkeditJettison}\\
+  \DIFaddend \texttt{DisableLinkeditJettison}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
   \textbf{Requirement}: 11\\
@@ -8316,8 +8316,21 @@ for additional options.
   for GOP memory, even though the CPU supports it. Setting this can give a considerable
   speed-up for GOP operations, especially on systems which require \texttt{DirectGopRendering}.
 
-  \emph{Note}: This takes effect whether or not \texttt{DirectGopRendering} is set, and may
-  give some speed-up to GOP operations even when \texttt{DirectGopRendering} is \texttt{false}.
+  \emph{Note \DIFaddbegin \DIFadd{1}\DIFaddend }: This \DIFaddbegin \DIFadd{quirk }\DIFaddend takes effect whether or not \texttt{DirectGopRendering} is set, and
+  \DIFdelbegin \DIFdel{may
+  give some }\DIFdelend \DIFaddbegin \DIFadd{in some cases may give a noticeable }\DIFaddend speed-up to GOP operations even when \texttt{DirectGopRendering}
+  is \texttt{false}\DIFaddbegin \DIFadd{.
+}
+
+  \emph{\DIFadd{Note 2}}\DIFadd{: On most systems from circa 2013 onwards, write-combining
+  caching is already applied by the firmware to GOP memory, in which case }\texttt{\DIFadd{GopBurstMode}}
+  \DIFadd{is unnecessary. On such systems enabling the quirk should normally be harmless, producing an
+  }\texttt{\DIFadd{OCC:}} \DIFadd{debug log entry indicating that burst mode is already started.
+}
+
+  \emph{\DIFadd{Note 3}}\DIFadd{: Some caution should be taken when enabling this quirk, as it has been observed
+  to cause hangs on a few systems. Since additional guards have been added to try to prevent this,
+  please log a bugtracker issue if such a system is found}\DIFaddend .
 
 \item
   \texttt{GopPassThrough}\\
