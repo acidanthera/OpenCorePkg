@@ -206,13 +206,14 @@ PhaseAllocatePool (
   return Buffer;
 }
 
+STATIC
 EFI_STATUS
-EFIAPI
-PhaseAllocatePages (
+InternalAllocatePagesAlign (
   IN     EFI_ALLOCATE_TYPE     Type,
   IN     EFI_MEMORY_TYPE       MemoryType,
   IN     UINTN                 Pages,
-  IN OUT EFI_PHYSICAL_ADDRESS  *Memory
+  IN OUT EFI_PHYSICAL_ADDRESS  *Memory,
+  IN     UINT32                Alignment
   )
 {
   VOID   *Buffer;
@@ -231,12 +232,12 @@ PhaseAllocatePages (
     //
     if (RequestedAllocationSize <= mPoolAllocationSizeLimit) {
  #ifdef _WIN32
-      Buffer = _aligned_malloc (RequestedAllocationSize, EFI_PAGE_SIZE);
+      Buffer = _aligned_malloc (RequestedAllocationSize, Alignment);
  #else // !_WIN32
       Buffer = NULL;
       INTN  RetVal;
 
-      RetVal = posix_memalign (&Buffer, EFI_PAGE_SIZE, RequestedAllocationSize);
+      RetVal = posix_memalign (&Buffer, Alignment, RequestedAllocationSize);
       if (RetVal != 0) {
         DEBUG ((DEBUG_ERROR, "posix_memalign returns error %d\n", RetVal));
         Buffer = NULL;
@@ -265,6 +266,24 @@ PhaseAllocatePages (
   *Memory = (UINTN)Buffer;
 
   return EFI_SUCCESS;
+}
+
+EFI_STATUS
+EFIAPI
+PhaseAllocatePages (
+  IN     EFI_ALLOCATE_TYPE     Type,
+  IN     EFI_MEMORY_TYPE       MemoryType,
+  IN     UINTN                 Pages,
+  IN OUT EFI_PHYSICAL_ADDRESS  *Memory
+  )
+{
+  return InternalAllocatePagesAlign (
+           Type,
+           MemoryType,
+           Pages,
+           Memory,
+           EFI_PAGE_SIZE
+           );
 }
 
 VOID
@@ -351,6 +370,39 @@ PhaseFreePages (
  #endif
 
   return EFI_SUCCESS;
+}
+
+VOID *
+InternalAllocateAlignedPages (
+  IN EFI_MEMORY_TYPE  MemoryType,
+  IN UINTN            Pages,
+  IN UINTN            Alignment
+  )
+{
+  EFI_STATUS            Status;
+  EFI_PHYSICAL_ADDRESS  Memory;
+
+  Status = InternalAllocatePagesAlign (
+             AllocateAnyPages,
+             MemoryType,
+             Pages,
+             &Memory,
+             EFI_PAGE_SIZE
+             );
+  if (EFI_ERROR (Status)) {
+    return NULL;
+  }
+
+  return (VOID *)(UINTN)Memory;
+}
+
+VOID
+InternalFreeAlignedPages (
+  IN VOID   *Buffer,
+  IN UINTN  Pages
+  )
+{
+  PhaseFreePages ((UINTN)Buffer, Pages);
 }
 
 GUID *
