@@ -18,7 +18,7 @@
 STATIC EFI_GET_MEMORY_SPACE_MAP  mOriginalGetMemorySpaceMap;
 
 //
-// Equivalent to a very cut down OcLoadUefiOutputSupport.
+// Close to a very cut down OcLoadUefiOutputSupport.
 //
 STATIC
 EFI_STATUS
@@ -30,6 +30,14 @@ LoadUefiOutputSupport (
 
   Status = OcProvideConsoleGop (FALSE);
   if (EFI_ERROR (Status)) {
+    //
+    // If we've already got console GOP assume it's set up correctly, however enable
+    // GopBurstMode as it can still provide a noticeable speed up (e.g. MP5,1 GT120).
+    //
+    if (Status == EFI_ALREADY_STARTED) {
+      OcSetGopBurstMode ();
+    }
+
     return Status;
   }
 

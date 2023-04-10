@@ -4,7 +4,8 @@
 
 EnableGop version (OpenCore version)
 ### 1.3 (0.9.2)
- - Included fix to GopBurstMode for non-standard memory reporting on AMD Radeon HD 7970 and similar
+ - Included fix to GopBurstMode for non-standard frame buffer information on AMD Radeon HD 7970 and similar
+ - Applied GopBurstMode even on natively supported cards, as it can provide a noticable speed up
 
 ### 1.2 (0.9.1)
  - Added GopBurstMode support
