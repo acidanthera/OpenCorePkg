@@ -5,6 +5,7 @@ OpenCore Changelog
 - Fixed disabling single user mode when Apple Secure Boot is enabled
 - Improved guard checks for `GopBurstMode` on systems where it's not needed
 - Improved compatibility of `GopBurstMode` with some very non-standard GOP implementations
+- Fixed possible hang with `GopBurstMode` enabled on DEBUG builds
 
 #### v0.9.1
 - Fixed long comment printing for ACPI patches, thx @corpnewt
