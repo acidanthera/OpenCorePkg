@@ -963,7 +963,7 @@ PrelinkedSetLiluEFIVariables(
       SymbolsEnd = &Symbols[NumSymbolsInKext];
       while (Symbols < SymbolsEnd) {
         CurEntry->EntryLength = sizeof (LILU_PRELINKED_SYMBOLS_ENTRY) + Symbols->Length + 1;
-        CurEntry->SymbolValue = Symbols->Value;
+        CurEntry->SymbolValue = Symbols->Value - 0xFFFFFF8000100000ULL; // KERNEL_HIB_VADDR
         CurEntry->SymbolNameLength = Symbols->Length;
         CopyMem (&CurEntry->SymbolName, Symbols->Name, Symbols->Length + 1);
 
