@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
-%DIF DEL PreviousConfiguration.tex   Thu Apr  6 01:56:05 2023
-%DIF ADD ../Configuration.tex        Sun Apr  9 13:56:04 2023
+%DIF DEL PreviousConfiguration.tex   Tue Apr 11 18:01:28 2023
+%DIF ADD ../Configuration.tex        Tue Apr 11 18:01:33 2023
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -118,7 +118,7 @@
 %DIF HYPERREF PREAMBLE %DIF PREAMBLE
 \providecommand{\DIFadd}[1]{\texorpdfstring{\DIFaddtex{#1}}{#1}} %DIF PREAMBLE
 \providecommand{\DIFdel}[1]{\texorpdfstring{\DIFdeltex{#1}}{}} %DIF PREAMBLE
-%DIF LISTINGS PREAMBLE %DIF PREAMBLE
+%DIF COLORLISTINGS PREAMBLE %DIF PREAMBLE
 \RequirePackage{listings} %DIF PREAMBLE
 \RequirePackage{color} %DIF PREAMBLE
 \lstdefinelanguage{DIFcode}{ %DIF PREAMBLE
@@ -2032,10 +2032,15 @@ Kernel and kext changes apply with the following effective order:
 \begin{itemize}
 \tightlist
 \item \texttt{Block} is processed.
-\item \texttt{Emulate} and \texttt{Quirks} are processed.
+\item \DIFaddbegin \texttt{\DIFadd{Add}} \DIFadd{and }\texttt{\DIFadd{Force}} \DIFadd{are processed.
+}\item \DIFaddend \texttt{Emulate} and \texttt{Quirks} are processed.
 \item \texttt{Patch} is processed.
-\item \texttt{Add} and \texttt{Force} are processed.
-\end{itemize}
+\DIFdelbegin %DIFDELCMD < \item %%%
+\item %DIFAUXCMD
+\texttt{\DIFdel{Add}} %DIFAUXCMD
+\DIFdel{and }\texttt{\DIFdel{Force}} %DIFAUXCMD
+\DIFdel{are processed.
+}\DIFdelend \end{itemize}
 
 \subsection{Properties}\label{kernelprops}
 

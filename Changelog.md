@@ -7,6 +7,7 @@ OpenCore Changelog
 - Improved compatibility of `GopBurstMode` with some very non-standard GOP implementations
 - Fixed possible hang with `GopBurstMode` enabled on DEBUG builds
 - Enabled `GopBurstMode` even with natively supported cards, in EnableGop firmware driver
+- Fixed inability to patch force-injected kexts
 
 #### v0.9.1
 - Fixed long comment printing for ACPI patches, thx @corpnewt
