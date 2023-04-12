@@ -169,9 +169,13 @@ ifneq ($(STANDALONE),1)
 	#
 	OBJS    += UserBaseMemoryLib.o UserBootServices.o UserGlobalVar.o UserMath.o UserMisc.o UserPcd.o UserUnicodeCollation.o UserOcDummy.o
 	#
+	# BaseOverflowLib targets.
+	#
+	OBJS    += BaseMath.o BaseBitOverflow.o BaseNativeOverflow.o BaseTripleOverflow.o BaseAlignment.o
+	#
 	# OcGuardLib targets.
 	#
-	OBJS    += BitOverflow.o NativeOverflow.o TripleOverflow.o Alignment.o
+	OBJS    += Math.o BitOverflow.o NativeOverflow.o TripleOverflow.o Alignment.o
 	#
 	# OcSerializeLib targets.
 	#
@@ -207,7 +211,7 @@ ifneq ($(STANDALONE),1)
 	#
 	# OcMiscLib targets.
 	#
-	OBJS    += Math.o ProtocolSupport.o DataPatcher.o PlatformInfo.o
+	OBJS    += ProtocolSupport.o DataPatcher.o PlatformInfo.o
 	#
 	# OcAppleKernelLib targets.
 	#
@@ -231,6 +235,7 @@ ifneq ($(STANDALONE),1)
 				$(UDK_PATH)/MdePkg/Library/BaseDebugPrintErrorLevelLib:$\
 				$(UDK_PATH)/MdePkg/Library/UefiDebugLibConOut:$\
 				$(UDK_PATH)/MdePkg/Library/BasePrintLib:$\
+				$(UDK_PATH)/MdePkg/Library/BaseOverflowLib:$\
 				$(UDK_PATH)/MdePkg/Library/BaseSafeIntLib:$\
 				$(UDK_PATH)/MdePkg/Library/BasePciLibPciExpress:$\
 				$(UDK_PATH)/MdePkg/Library/BasePciExpressLib:$\
