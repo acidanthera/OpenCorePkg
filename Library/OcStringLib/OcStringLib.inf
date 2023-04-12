@@ -42,7 +42,7 @@
 [LibraryClasses]
   BaseLib
   BaseMemoryLib
+  BaseOverflowLib
   MemoryAllocationLib
-  OcGuardLib
   PrintLib
   SortLib

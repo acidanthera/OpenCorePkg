@@ -82,7 +82,7 @@ PrelinkedFindLastLoadAddress (
       }
     }
 
-    if (OcOverflowAddU64 (LoadAddress, LoadSize, &LoadAddress)) {
+    if (BaseOverflowAddU64 (LoadAddress, LoadSize, &LoadAddress)) {
       return 0;
     }
 
@@ -550,7 +550,7 @@ PrelinkedInjectPrepare (
     //
     ASSERT (Context->PrelinkedSize % MACHO_PAGE_SIZE == 0);
     STATIC_ASSERT (
-      MACHO_PAGE_SIZE % OC_ALIGNOF (MACH_DYLD_CHAINED_STARTS_IN_SEGMENT) == 0,
+      MACHO_PAGE_SIZE % BASE_ALIGNOF (MACH_DYLD_CHAINED_STARTS_IN_SEGMENT) == 0,
       "KextsFixupChains may be unaligned"
       );
 
@@ -803,7 +803,7 @@ PrelinkedInjectComplete (
   //
   ExportedInfoSize++;
 
-  if (  OcOverflowAddU32 (Context->PrelinkedSize, MACHO_ALIGN (ExportedInfoSize), &NewSize)
+  if (  BaseOverflowAddU32 (Context->PrelinkedSize, MACHO_ALIGN (ExportedInfoSize), &NewSize)
      || (NewSize > Context->PrelinkedAllocSize))
   {
     FreePool (ExportedInfo);
@@ -914,7 +914,7 @@ PrelinkedReserveKextSize (
   //
   // For new fields.
   //
-  if (OcOverflowAddU32 (InfoPlistSize, PLIST_EXPANSION_SIZE, &InfoPlistSize)) {
+  if (BaseOverflowAddU32 (InfoPlistSize, PLIST_EXPANSION_SIZE, &InfoPlistSize)) {
     return EFI_INVALID_PARAMETER;
   }
 
@@ -932,8 +932,8 @@ PrelinkedReserveKextSize (
     }
   }
 
-  if (  OcOverflowAddU32 (*ReservedInfoSize, InfoPlistSize, &InfoPlistSize)
-     || OcOverflowAddU32 (*ReservedExeSize, ExecutableSize, &ExecutableSize))
+  if (  BaseOverflowAddU32 (*ReservedInfoSize, InfoPlistSize, &InfoPlistSize)
+     || BaseOverflowAddU32 (*ReservedExeSize, ExecutableSize, &ExecutableSize))
   {
     return EFI_INVALID_PARAMETER;
   }
@@ -1030,7 +1030,7 @@ PrelinkedInjectKext (
 
     AlignedExecutableSize = MACHO_ALIGN (ExecutableSize);
 
-    if (  OcOverflowAddU32 (KextOffset, AlignedExecutableSize, &NewPrelinkedSize)
+    if (  BaseOverflowAddU32 (KextOffset, AlignedExecutableSize, &NewPrelinkedSize)
        || (NewPrelinkedSize > Context->PrelinkedAllocSize)
        || (ExecutableSize == 0))
     {
@@ -1043,7 +1043,7 @@ PrelinkedInjectKext (
       );
 
     if (  !MachoInitializeContext (&ExecutableContext, &Context->Prelinked[KextOffset], ExecutableSize, 0, ExecutableSize, Context->Is32Bit)
-       || OcOverflowAddU64 (Context->PrelinkedLastLoadAddress, FileOffset, &LoadAddressOffset))
+       || BaseOverflowAddU64 (Context->PrelinkedLastLoadAddress, FileOffset, &LoadAddressOffset))
     {
       return EFI_INVALID_PARAMETER;
     }

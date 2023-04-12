@@ -245,18 +245,18 @@ OcAppendArgumentsToLoadedImage (
   //
   for (Index = 0; Index < ArgumentCount; ++Index) {
     ArgumentLength = AsciiStrSize (Arguments[Index]);
-    if (OcOverflowAddUN (TotalLength, ArgumentLength, &TotalLength)) {
+    if (BaseOverflowAddUN (TotalLength, ArgumentLength, &TotalLength)) {
       return FALSE;
     }
   }
 
-  if (OcOverflowMulUN (TotalLength, sizeof (CHAR16), &TotalLength)) {
+  if (BaseOverflowMulUN (TotalLength, sizeof (CHAR16), &TotalLength)) {
     return FALSE;
   }
 
   Replace |= LoadedImage->LoadOptionsSize < sizeof (CHAR16);
   if (  !Replace
-     && OcOverflowTriAddUN (TotalLength, sizeof (CHAR16), LoadedImage->LoadOptionsSize, &TotalLength))
+     && BaseOverflowTriAddUN (TotalLength, sizeof (CHAR16), LoadedImage->LoadOptionsSize, &TotalLength))
   {
     return FALSE;
   }

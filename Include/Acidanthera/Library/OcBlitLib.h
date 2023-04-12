@@ -12,7 +12,7 @@
 #define OC_BLIT_LIB
 
 #include <Protocol/GraphicsOutput.h>
-#include <Library/OcGuardLib.h>
+#include <Library/BaseOverflowLib.h>
 
 //
 // Limit bytes per pixel to most common value for simplicity.
@@ -35,7 +35,7 @@ typedef struct OC_BLIT_CONFIGURE {
   EFI_PIXEL_BITMASK            PixelMasks;
   INT8                         PixelShl[4];    // R-G-B-Rsvd
   INT8                         PixelShr[4];    // R-G-B-Rsvd
-  OC_ALIGNAS (64) UINT8            LineBuffer[];
+  BASE_ALIGNAS (64) UINT8            LineBuffer[];
 } OC_BLIT_CONFIGURE;
 
 /**

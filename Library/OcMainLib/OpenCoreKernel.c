@@ -903,7 +903,7 @@ OcKernelReadAppleKernel (
     return EFI_UNSUPPORTED;
   }
 
-  Result = OcOverflowTriAddU32 (
+  Result = BaseOverflowTriAddU32 (
              ReservedInfoSize,
              *ReservedExeSize,
              *LinkedExpansion,
@@ -1387,7 +1387,7 @@ OcKernelFileOpen (
       &NumReservedKexts
       );
 
-    Result = OcOverflowAddU32 (
+    Result = BaseOverflowAddU32 (
                ReservedInfoSize,
                ReservedExeSize,
                &ReservedFullSize

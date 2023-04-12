@@ -15,10 +15,10 @@
 #include <Base.h>
 
 #include <Library/BaseLib.h>
+#include <Library/BaseOverflowLib.h>
 #include <Library/DebugLib.h>
 #include <Library/MemoryAllocationLib.h>
 #include <Library/PrintLib.h>
-#include <Library/OcGuardLib.h>
 #include <Library/OcStringLib.h>
 
 // IsAsciiPrint
@@ -530,7 +530,7 @@ OcAsciiPrintBuffer (
 
   Status = AsciiStrCatS (*AsciiBuffer, *AsciiBufferSize, Tmp);
   if (Status == EFI_BUFFER_TOO_SMALL) {
-    if (OcOverflowMulUN (*AsciiBufferSize, 2, &NewBufferSize)) {
+    if (BaseOverflowMulUN (*AsciiBufferSize, 2, &NewBufferSize)) {
       return;
     }
 

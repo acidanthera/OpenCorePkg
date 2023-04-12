@@ -17,8 +17,8 @@
 
 #include <Library/BaseLib.h>
 #include <Library/BaseMemoryLib.h>
+#include <Library/BaseOverflowLib.h>
 #include <Library/DebugLib.h>
-#include <Library/OcGuardLib.h>
 #include <Library/OcMachoLib.h>
 
 #include "OcMachoLibInternal.h"
@@ -49,7 +49,7 @@ FatGetArchitectureOffset (
   ASSERT (FatSize != NULL);
 
   if (  (BufferSize < sizeof (MACH_FAT_HEADER))
-     || !OC_TYPE_ALIGNED (MACH_FAT_HEADER, Buffer))
+     || !BASE_TYPE_ALIGNED (MACH_FAT_HEADER, Buffer))
   {
     return EFI_INVALID_PARAMETER;
   }
@@ -73,7 +73,7 @@ FatGetArchitectureOffset (
     NumberOfFatArch = SwapBytes32 (NumberOfFatArch);
   }
 
-  if (  OcOverflowMulAddU32 (NumberOfFatArch, sizeof (MACH_FAT_ARCH), sizeof (MACH_FAT_HEADER), &TmpSize)
+  if (  BaseOverflowMulAddU32 (NumberOfFatArch, sizeof (MACH_FAT_ARCH), sizeof (MACH_FAT_HEADER), &TmpSize)
      || (TmpSize > BufferSize))
   {
     return EFI_INVALID_PARAMETER;
@@ -97,7 +97,7 @@ FatGetArchitectureOffset (
       }
 
       if (  (Offset == 0)
-         || OcOverflowAddU32 (Offset, Size, &TmpSize)
+         || BaseOverflowAddU32 (Offset, Size, &TmpSize)
          || (TmpSize > FullSize))
       {
         return EFI_INVALID_PARAMETER;

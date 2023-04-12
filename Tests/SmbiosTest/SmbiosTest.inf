@@ -54,7 +54,7 @@
   PcdLib
   IoLib
   PrintLib
-  OcGuardLib
+  BaseOverflowLib
   DevicePathLib
   OcDevicePropertyLib
   OcMiscLib

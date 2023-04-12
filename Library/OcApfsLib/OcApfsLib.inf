@@ -56,11 +56,11 @@
 [LibraryClasses]
   BaseLib
   BaseMemoryLib
+  BaseOverflowLib
   DebugLib
   DevicePathLib
   OcConsoleLib
   OcDriverConnectionLib
-  OcGuardLib
   OcMiscLib
   OcPeCoffLib
   OcPeCoffExtLib

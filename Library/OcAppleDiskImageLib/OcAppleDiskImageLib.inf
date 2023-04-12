@@ -25,13 +25,13 @@
 
 [LibraryClasses]
   BaseMemoryLib
+  BaseOverflowLib
   DebugLib
   DevicePathLib
   MemoryAllocationLib
   OcAppleRamDiskLib
   OcCompressionLib
   OcDevicePathLib
-  OcGuardLib
   OcXmlLib
   PrintLib
 

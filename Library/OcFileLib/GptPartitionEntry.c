@@ -21,13 +21,13 @@
 
 #include <Library/BaseLib.h>
 #include <Library/BaseMemoryLib.h>
+#include <Library/BaseOverflowLib.h>
 #include <Library/DebugLib.h>
 #include <Library/DevicePathLib.h>
 #include <Library/MemoryAllocationLib.h>
 #include <Library/OcDebugLogLib.h>
 #include <Library/OcDevicePathLib.h>
 #include <Library/OcFileLib.h>
-#include <Library/OcGuardLib.h>
 #include <Library/UefiBootServicesTableLib.h>
 
 STATIC EFI_GUID  mInternalDiskPartitionEntriesProtocolGuid = {
@@ -321,7 +321,7 @@ OcDiskFindSystemPartitionPath (
   // The partition's Device Path must be at least as big as the disk's (prefix)
   // plus an additional HardDrive node.
   //
-  Result = OcOverflowAddUN (
+  Result = BaseOverflowAddUN (
              DiskDpSize,
              sizeof (HARDDRIVE_DEVICE_PATH),
              &DiskDpCmpSize
@@ -468,7 +468,7 @@ OcGetDiskPartitions (
 
   FreePool (GptHeader);
 
-  Result = OcOverflowMulUN (NumPartitions, PartEntrySize, &PartEntriesSize);
+  Result = BaseOverflowMulUN (NumPartitions, PartEntrySize, &PartEntriesSize);
   if (Result || (MAX_UINTN - DiskContext.BlockSize < PartEntriesSize)) {
     DEBUG ((DEBUG_INFO, "OCPI: Partition entries size overflows\n"));
     return NULL;
@@ -476,7 +476,7 @@ OcGetDiskPartitions (
 
   PartEntriesSize = ALIGN_VALUE (PartEntriesSize, DiskContext.BlockSize);
 
-  Result = OcOverflowAddUN (
+  Result = BaseOverflowAddUN (
              sizeof (PartEntries),
              PartEntriesSize,
              &PartEntriesStructSize

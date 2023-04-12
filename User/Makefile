@@ -173,10 +173,6 @@ ifneq ($(STANDALONE),1)
 	#
 	OBJS    += BaseMath.o BaseBitOverflow.o BaseNativeOverflow.o BaseTripleOverflow.o BaseAlignment.o
 	#
-	# OcGuardLib targets.
-	#
-	OBJS    += Math.o BitOverflow.o NativeOverflow.o TripleOverflow.o Alignment.o
-	#
 	# OcSerializeLib targets.
 	#
 	OBJS    += OcSerializeLib.o
@@ -245,7 +241,6 @@ ifneq ($(STANDALONE),1)
 				$(UDK_PATH)/MdeModulePkg/Library/CommonMemoryAllocationLib:$\
 				$(UDK_PATH)/MdeModulePkg/Library/UefiSortLib:$\
 				$(UDK_PATH)/UefiCpuPkg/Library/MtrrLib:$\
-				$(OC_USER)/Library/OcGuardLib:$\
 				$(OC_USER)/Library/OcSerializeLib:$\
 				$(OC_USER)/Library/OcTemplateLib:$\
 				$(OC_USER)/Library/OcXmlLib:$\

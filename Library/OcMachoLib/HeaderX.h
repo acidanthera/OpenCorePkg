@@ -51,7 +51,7 @@ InternalSectionIsSane (
   }
 
   TopOfSegment = (Segment->VirtualAddress + Segment->Size);
-  Result       = MACH_X (OcOverflowAddU)(
+  Result       = MACH_X (BaseOverflowAddU)(
                    Section->Address,
                    Section->Size,
                    &TopOfSection
@@ -60,7 +60,7 @@ InternalSectionIsSane (
     return FALSE;
   }
 
-  Result = MACH_X (OcOverflowAddU)(
+  Result = MACH_X (BaseOverflowAddU)(
              Section->Offset,
              Section->Size,
              &TopOffsetX
@@ -70,7 +70,7 @@ InternalSectionIsSane (
   }
 
   if (Section->NumRelocations != 0) {
-    Result = OcOverflowMulAddU32 (
+    Result = BaseOverflowMulAddU32 (
                Section->NumRelocations,
                sizeof (MACH_RELOCATION_INFO),
                Section->RelocationsOffset,
@@ -173,7 +173,7 @@ MACH_X (
        Segment = MACH_X (MachoGetNextSegment)(Context, Segment)
        )
   {
-    if (MACH_X (OcOverflowAddU)(VmSize, Segment->Size, &VmSize)) {
+    if (MACH_X (BaseOverflowAddU)(VmSize, Segment->Size, &VmSize)) {
       return 0;
     }
 
@@ -428,7 +428,7 @@ MACH_X (
     // Ensure that it still fits. In legit files segments are ordered.
     // We do not care for other (the file will be truncated).
     //
-    if (  MACH_X (OcOverflowTriAddU)(CopyFileOffset, CurrentDelta, CopyVmSize, &CurrentSize)
+    if (  MACH_X (BaseOverflowTriAddU)(CopyFileOffset, CurrentDelta, CopyVmSize, &CurrentSize)
        || (!CalculateSizeOnly && (CurrentSize > DestinationSize)))
     {
       return 0;
@@ -631,7 +631,7 @@ MACH_X (
           AlignedOffset   = ALIGN_VALUE (SectionOffset + CurrentDelta, sizeof (MACH_RELOCATION_INFO));
           CurrentDelta    = AlignedOffset - SectionOffset;
 
-          if (  MACH_X (OcOverflowTriAddU)(CopyFileOffset, CurrentDelta, RelocationsSize, &CurrentSize)
+          if (  MACH_X (BaseOverflowTriAddU)(CopyFileOffset, CurrentDelta, RelocationsSize, &CurrentSize)
              || (!CalculateSizeOnly && (CurrentSize > DestinationSize)))
           {
             return 0;
@@ -693,7 +693,7 @@ MACH_X (
         AlignedOffset  = ALIGN_VALUE (SymbolsOffset + CurrentDelta, sizeof (MACH_NLIST_X));
         CurrentDelta   = AlignedOffset - SymbolsOffset;
 
-        if (  MACH_X (OcOverflowTriAddU)(CopyFileOffset, CurrentDelta, SymtabSize, &CurrentSize)
+        if (  MACH_X (BaseOverflowTriAddU)(CopyFileOffset, CurrentDelta, SymtabSize, &CurrentSize)
            || (!CalculateSizeOnly && (CurrentSize > DestinationSize)))
         {
           return 0;
@@ -712,7 +712,7 @@ MACH_X (
       //
       if (StringsOffset != 0) {
         CopyFileOffset = StringsOffset;
-        if (  MACH_X (OcOverflowTriAddU)(CopyFileOffset, CurrentDelta, Symtab->StringsSize, &CurrentSize)
+        if (  MACH_X (BaseOverflowTriAddU)(CopyFileOffset, CurrentDelta, Symtab->StringsSize, &CurrentSize)
            || (!CalculateSizeOnly && (CurrentSize > DestinationSize)))
         {
           return 0;
@@ -946,7 +946,7 @@ MACH_X (
   }
 
   if (  (FileSize < sizeof (*MachHeader))
-     || !OC_TYPE_ALIGNED (MACH_HEADER_X, MachData))
+     || !BASE_TYPE_ALIGNED (MACH_HEADER_X, MachData))
   {
     return FALSE;
   }
@@ -960,7 +960,7 @@ MACH_X (
     return FALSE;
   }
 
-  Result = OcOverflowAddUN (
+  Result = BaseOverflowAddUN (
              (UINTN)MachHeader->Commands,
              MachHeader->CommandsSize,
              &TopOfCommands
@@ -977,7 +977,7 @@ MACH_X (
        ++Index, Command = NEXT_MACH_LOAD_COMMAND (Command)
        )
   {
-    Result = OcOverflowAddUN (
+    Result = BaseOverflowAddUN (
                (UINTN)Command,
                sizeof (*Command),
                &TopOfCommand
@@ -991,7 +991,7 @@ MACH_X (
       return FALSE;
     }
 
-    Result = OcOverflowAddU32 (
+    Result = BaseOverflowAddU32 (
                CommandsSize,
                Command->CommandSize,
                &CommandsSize
@@ -1214,7 +1214,7 @@ MACH_X (
   // Context initialisation guarantees the command size is a multiple of 8.
   //
   STATIC_ASSERT (
-    OC_ALIGNOF (MACH_SEGMENT_COMMAND_X) <= sizeof (UINT64),
+    BASE_ALIGNOF (MACH_SEGMENT_COMMAND_X) <= sizeof (UINT64),
     "Alignment is not guaranteed."
     );
   NextSegment = (MACH_SEGMENT_COMMAND_X *)(VOID *)MachoGetNextCommand (
@@ -1226,7 +1226,7 @@ MACH_X (
     return NULL;
   }
 
-  Result = OcOverflowMulAddUN (
+  Result = BaseOverflowMulAddUN (
              NextSegment->NumSections,
              sizeof (*NextSegment->Sections),
              (UINTN)NextSegment->Sections,
@@ -1236,7 +1236,7 @@ MACH_X (
     return NULL;
   }
 
-  Result = MACH_X (OcOverflowAddU)(
+  Result = MACH_X (BaseOverflowAddU)(
              NextSegment->FileOffset,
              NextSegment->FileSize,
              &TopOfSegment
@@ -1311,7 +1311,7 @@ MACH_X (
        Segment = MACH_X (MachoGetNextSegment)(Context, Segment)
        )
   {
-    Result = OcOverflowAddU32 (
+    Result = BaseOverflowAddU32 (
                SectionIndex,
                Segment->NumSections,
                &NextSectionIndex

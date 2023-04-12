@@ -18,8 +18,8 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 
 #include <Library/BaseLib.h>
 #include <Library/BaseMemoryLib.h>
+#include <Library/BaseOverflowLib.h>
 #include <Library/DebugLib.h>
-#include <Library/OcGuardLib.h>
 #include <Library/OcMachoLib.h>
 #include <Library/OcStringLib.h>
 
@@ -178,7 +178,7 @@ MachoGetFunctionPrefixFromClassName (
   ASSERT (FunctionPrefix != NULL);
 
   BodySize = AsciiStrSize (ClassName);
-  Result   = OcOverflowAddUN (L_STR_LEN (OSOBJ_PREFIX), BodySize, &TotalSize);
+  Result   = BaseOverflowAddUN (L_STR_LEN (OSOBJ_PREFIX), BodySize, &TotalSize);
   if (Result || (FunctionPrefixSize < TotalSize)) {
     return FALSE;
   }
@@ -253,7 +253,7 @@ MachoGetVtableNameFromClassName (
 
   BodySize = AsciiStrSize (ClassName);
 
-  Result = OcOverflowAddUN (
+  Result = BaseOverflowAddUN (
              L_STR_LEN (VTABLE_PREFIX),
              BodySize,
              &TotalSize
@@ -293,7 +293,7 @@ MachoGetMetaVtableNameFromClassName (
 
   BodyLength = AsciiStrLen (ClassName);
 
-  Result = OcOverflowTriAddUN (
+  Result = BaseOverflowTriAddUN (
              L_STR_LEN (METACLASS_VTABLE_PREFIX),
              BodyLength,
              L_STR_SIZE (METACLASS_VTABLE_SUFFIX),
@@ -341,7 +341,7 @@ MachoGetFinalSymbolNameFromClassName (
 
   BodyLength = AsciiStrLen (ClassName);
 
-  Result = OcOverflowTriAddUN (
+  Result = BaseOverflowTriAddUN (
              L_STR_LEN (OSOBJ_PREFIX),
              BodyLength,
              L_STR_SIZE (FINAL_CLASS_TOKEN),

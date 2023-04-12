@@ -46,11 +46,11 @@
 
 [LibraryClasses]
   BaseMemoryLib
+  BaseOverflowLib
   DebugLib
   MemoryAllocationLib
   OcDevicePathLib
   OcFileLib
-  OcGuardLib
   OcMiscLib
   OcStringLib
   PrintLib

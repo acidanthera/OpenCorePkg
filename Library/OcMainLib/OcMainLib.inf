@@ -69,6 +69,7 @@
   gEfiMdeModulePkgTokenSpaceGuid.PcdSerialRegisterStride          ## CONSUMES
 
 [LibraryClasses]
+  BaseOverflowLib
   DevicePathLib
   IoLib
   OcAcpiLib
@@ -93,7 +94,6 @@
   OcDevicePropertyLib
   OcDriverConnectionLib
   OcFirmwareVolumeLib
-  OcGuardLib
   OcHashServicesLib
   OcLogAggregatorLib
   OcMachoLib

@@ -15,9 +15,9 @@
 #include <Uefi.h>
 
 #include <Library/BaseMemoryLib.h>
+#include <Library/BaseOverflowLib.h>
 #include <Library/DebugLib.h>
 #include <Library/MemoryAllocationLib.h>
-#include <Library/OcGuardLib.h>
 #include <Library/OcMp3Lib.h>
 #include "helix/mp3dec.h"
 
@@ -63,7 +63,7 @@ BufferResize (
   }
 
   OrgSize = *BufferSize;
-  if (OcOverflowMulU32 (OrgSize, 2, BufferSize)) {
+  if (BaseOverflowMulU32 (OrgSize, 2, BufferSize)) {
     FreePool (*Buffer);
     return FALSE;
   }

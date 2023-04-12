@@ -16,13 +16,13 @@
 
 #include <Library/BaseLib.h>
 #include <Library/BaseMemoryLib.h>
+#include <Library/BaseOverflowLib.h>
 #include <Library/DebugLib.h>
 #include <Library/MemoryAllocationLib.h>
 #include <Library/OcAppleChunklistLib.h>
 #include <Library/OcAppleDiskImageLib.h>
 #include <Library/OcCompressionLib.h>
 #include <Library/OcFileLib.h>
-#include <Library/OcGuardLib.h>
 
 #include "OcAppleDiskImageLibInternal.h"
 
@@ -120,7 +120,7 @@ OcAppleDiskImageInitializeContext (
     return FALSE;
   }
 
-  Result = OcOverflowMulU64 (
+  Result = BaseOverflowMulU64 (
              SectorCount,
              APPLE_DISK_IMAGE_SECTOR_SIZE,
              &OffsetTop
@@ -130,7 +130,7 @@ OcAppleDiskImageInitializeContext (
     return FALSE;
   }
 
-  Result = OcOverflowAddU64 (
+  Result = BaseOverflowAddU64 (
              XmlOffset,
              XmlLength,
              &OffsetTop
@@ -140,7 +140,7 @@ OcAppleDiskImageInitializeContext (
     return FALSE;
   }
 
-  Result = OcOverflowAddU64 (
+  Result = BaseOverflowAddU64 (
              DataForkOffset,
              DataForkLength,
              &OffsetTop
@@ -323,7 +323,7 @@ OcAppleDiskImageRead (
     LbaOffset = (LbaCurrent - (UINTN)DMG_SECTOR_START_ABS (BlockData, Chunk));
     LbaLength = ((UINTN)Chunk->SectorCount - LbaOffset);
 
-    Result = OcOverflowMulU64 (
+    Result = BaseOverflowMulU64 (
                LbaOffset,
                APPLE_DISK_IMAGE_SECTOR_SIZE,
                &ChunkOffset
@@ -332,7 +332,7 @@ OcAppleDiskImageRead (
       return FALSE;
     }
 
-    Result = OcOverflowMulU64 (
+    Result = BaseOverflowMulU64 (
                Chunk->SectorCount,
                APPLE_DISK_IMAGE_SECTOR_SIZE,
                &ChunkTotalLength

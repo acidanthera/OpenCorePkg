@@ -16,7 +16,7 @@
 #ifndef HECI_CLIENT_MSG_H
 #define HECI_CLIENT_MSG_H
 
-#include <Library/OcGuardLib.h>
+#include <Library/BaseOverflowLib.h>
 
 //
 // Select known clients

@@ -12,6 +12,7 @@
 
 #include <Library/BaseLib.h>
 #include <Library/BaseMemoryLib.h>
+#include <Library/BaseOverflowLib.h>
 #include <Library/BmpSupportLib.h>
 #include <Library/DebugLib.h>
 #include <Library/MemoryAllocationLib.h>
@@ -19,7 +20,6 @@
 #include <Library/OcBootManagementLib.h>
 #include <Library/OcCompressionLib.h>
 #include <Library/OcCpuLib.h>
-#include <Library/OcGuardLib.h>
 #include <Library/OcPngLib.h>
 #include <Library/TimerLib.h>
 #include <Library/UefiBootServicesTableLib.h>

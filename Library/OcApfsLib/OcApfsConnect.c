@@ -14,6 +14,7 @@
 
 #include "OcApfsInternal.h"
 #include <Library/BaseLib.h>
+#include <Library/BaseOverflowLib.h>
 #include <Library/DebugLib.h>
 #include <Library/MemoryAllocationLib.h>
 #include <Library/OcApfsLib.h>
@@ -22,7 +23,6 @@
 #include <Library/OcBootManagementLib.h>
 #include <Library/OcConsoleLib.h>
 #include <Library/OcDriverConnectionLib.h>
-#include <Library/OcGuardLib.h>
 #include <Library/UefiBootServicesTableLib.h>
 #include <Library/UefiRuntimeServicesTableLib.h>
 #include <Guid/OcVariable.h>

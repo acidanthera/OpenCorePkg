@@ -18,8 +18,8 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 
 #include <Library/BaseLib.h>
 #include <Library/BaseMemoryLib.h>
+#include <Library/BaseOverflowLib.h>
 #include <Library/DebugLib.h>
-#include <Library/OcGuardLib.h>
 #include <Library/OcMachoLib.h>
 
 #include "OcMachoLibInternal.h"

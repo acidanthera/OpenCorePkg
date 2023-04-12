@@ -21,6 +21,7 @@
 
 #include <Library/BaseLib.h>
 #include <Library/BaseMemoryLib.h>
+#include <Library/BaseOverflowLib.h>
 #include <Library/DebugLib.h>
 #include <Library/DevicePathLib.h>
 #include <Library/MemoryAllocationLib.h>
@@ -28,7 +29,6 @@
 #include <Library/PrintLib.h>
 #include <Library/UefiBootServicesTableLib.h>
 #include <Library/UefiRuntimeServicesTableLib.h>
-#include <Library/OcGuardLib.h>
 #include <Library/OcMiscLib.h>
 
 #define DEVICE_PATH_PROPERTY_DATA_SIGNATURE  \
@@ -639,7 +639,7 @@ InternalReadEfiVariableProperties (
                       );
 
     ++NumberOfVariables;
-    if (OcOverflowAddUN (BufferSize, DataSize, &BufferSize)) {
+    if (BaseOverflowAddUN (BufferSize, DataSize, &BufferSize)) {
       //
       // Should never trigger due to BufferSize being 4G at least.
       //

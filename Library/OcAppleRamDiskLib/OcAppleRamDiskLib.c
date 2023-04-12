@@ -19,11 +19,11 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 #include <Protocol/AppleRamDisk.h>
 
 #include <Library/BaseMemoryLib.h>
+#include <Library/BaseOverflowLib.h>
 #include <Library/OcDebugLogLib.h>
 #include <Library/MemoryAllocationLib.h>
 #include <Library/OcAppleRamDiskLib.h>
 #include <Library/OcFileLib.h>
-#include <Library/OcGuardLib.h>
 #include <Library/OcMemoryLib.h>
 #include <Library/OcMiscLib.h>
 #include <Library/OcCryptoLib.h>
@@ -257,7 +257,7 @@ InternalAppleRamDiskAllocate (
     "Extent table different from EFI_PAGE_SIZE is unsupported!"
     );
 
-  Result = OcOverflowAddUN (Size, EFI_PAGE_SIZE, &RemainingSize);
+  Result = BaseOverflowAddUN (Size, EFI_PAGE_SIZE, &RemainingSize);
   if (Result) {
     return NULL;
   }

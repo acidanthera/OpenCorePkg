@@ -15,7 +15,7 @@
 #ifndef OC_APPLE_KEYS_LIB_H
 #define OC_APPLE_KEYS_LIB_H
 
-#include <Library/OcGuardLib.h>
+#include <Library/BaseOverflowLib.h>
 #include <Library/OcCryptoLib.h>
 
 #define NUM_OF_PK  2

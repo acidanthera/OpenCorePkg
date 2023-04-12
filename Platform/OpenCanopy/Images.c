@@ -94,7 +94,7 @@ GuiIcnsToImageIcon (
     // 3. Record larger than file size is invalid.
     //
     if (  (RecordLength < sizeof (APPLE_ICNS_RECORD) + sizeof (UINT32))
-       || OcOverflowAddU32 (Offset, RecordLength, &Offset)
+       || BaseOverflowAddU32 (Offset, RecordLength, &Offset)
        || (Offset > IcnsImageSize))
     {
       return EFI_SECURITY_VIOLATION;

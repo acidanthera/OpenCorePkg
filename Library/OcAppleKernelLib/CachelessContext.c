@@ -17,12 +17,12 @@
 
 #include <Library/BaseLib.h>
 #include <Library/BaseMemoryLib.h>
+#include <Library/BaseOverflowLib.h>
 #include <Library/DebugLib.h>
 #include <Library/MemoryAllocationLib.h>
 #include <Library/PrintLib.h>
 #include <Library/OcAppleKernelLib.h>
 #include <Library/OcFileLib.h>
-#include <Library/OcGuardLib.h>
 #include <Library/OcStringLib.h>
 #include <Library/OcVirtualFsLib.h>
 
@@ -1308,7 +1308,7 @@ CachelessContextPerformInject (
           ContentsMacOs->Size = ContentsMacOsEntrySize;
           CopyMem (ContentsMacOs->FileName, L"MacOS", L_STR_SIZE (L"MacOS"));
           ContentsMacOs->Attribute = EFI_FILE_READ_ONLY | EFI_FILE_DIRECTORY;
-          if (OcOverflowAddU64 (SIZE_OF_EFI_FILE_INFO, StrSize (Kext->BinaryFileName), &ContentsMacOs->FileSize)) {
+          if (BaseOverflowAddU64 (SIZE_OF_EFI_FILE_INFO, StrSize (Kext->BinaryFileName), &ContentsMacOs->FileSize)) {
             FreePool (ContentsInfo);
             VirtualDirFree (VirtualFileHandle);
             return EFI_INVALID_PARAMETER;
@@ -1334,7 +1334,7 @@ CachelessContextPerformInject (
           // It should be safe to assume there will only be one binary ever requested per kext?
           //
         } else if (IsBinaryKext) {
-          if (OcOverflowAddUN (L_STR_SIZE (L"\\Contents\\MacOS\\"), StrSize (Kext->BinaryFileName), &BundleBinaryPathSize)) {
+          if (BaseOverflowAddUN (L_STR_SIZE (L"\\Contents\\MacOS\\"), StrSize (Kext->BinaryFileName), &BundleBinaryPathSize)) {
             return EFI_OUT_OF_RESOURCES;
           }
 

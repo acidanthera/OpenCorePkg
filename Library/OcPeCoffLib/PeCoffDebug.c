@@ -129,7 +129,7 @@ PeCoffLoaderRetrieveCodeViewInfo (
 
   DebugDirFileOffset = (Sections[SectIndex].PointerToRawData - Context->TeStrippedOffset) + DebugDirSectionOffset;
 
-  if (!IS_ALIGNED (DebugDirFileOffset, OC_ALIGNOF (EFI_IMAGE_DEBUG_DIRECTORY_ENTRY))) {
+  if (!IS_ALIGNED (DebugDirFileOffset, BASE_ALIGNOF (EFI_IMAGE_DEBUG_DIRECTORY_ENTRY))) {
     return;
   }
 
@@ -181,7 +181,7 @@ PeCoffLoaderRetrieveCodeViewInfo (
 
     Result = BaseOverflowAlignUpU32 (
                Context->SizeOfImage,
-               OC_ALIGNOF (UINT32),
+               BASE_ALIGNOF (UINT32),
                &DebugSizeOfImage
                );
     if (Result) {
@@ -239,7 +239,7 @@ PeCoffLoaderLoadCodeView (
                &DebugEntryRvaTop
                );
     if (  Result || (DebugEntryRvaTop > Context->SizeOfImage)
-       || !IS_ALIGNED (CodeViewEntry->RVA, OC_ALIGNOF (UINT32)))
+       || !IS_ALIGNED (CodeViewEntry->RVA, BASE_ALIGNOF (UINT32)))
     {
       Context->CodeViewRva = 0;
       return;
@@ -252,7 +252,7 @@ PeCoffLoaderLoadCodeView (
       return;
     }
 
-    CodeViewEntry->RVA = ALIGN_VALUE (Context->SizeOfImage, OC_ALIGNOF (UINT32));
+    CodeViewEntry->RVA = ALIGN_VALUE (Context->SizeOfImage, BASE_ALIGNOF (UINT32));
 
     ASSERT (Context->SizeOfImageDebugAdd >= (CodeViewEntry->RVA - Context->SizeOfImage) + CodeViewEntry->SizeOfData);
 
@@ -300,7 +300,7 @@ PeCoffGetPdbPath (
       PdbOffset = sizeof (EFI_IMAGE_DEBUG_CODEVIEW_NB10_ENTRY);
 
       STATIC_ASSERT (
-        OC_ALIGNOF (EFI_IMAGE_DEBUG_CODEVIEW_NB10_ENTRY) <= OC_ALIGNOF (UINT32),
+        BASE_ALIGNOF (EFI_IMAGE_DEBUG_CODEVIEW_NB10_ENTRY) <= BASE_ALIGNOF (UINT32),
         "The structure may be misalignedd."
         );
       break;
@@ -309,7 +309,7 @@ PeCoffGetPdbPath (
       PdbOffset = sizeof (EFI_IMAGE_DEBUG_CODEVIEW_RSDS_ENTRY);
 
       STATIC_ASSERT (
-        OC_ALIGNOF (EFI_IMAGE_DEBUG_CODEVIEW_RSDS_ENTRY) <= OC_ALIGNOF (UINT32),
+        BASE_ALIGNOF (EFI_IMAGE_DEBUG_CODEVIEW_RSDS_ENTRY) <= BASE_ALIGNOF (UINT32),
         "The structure may be misalignedd."
         );
       break;
@@ -318,7 +318,7 @@ PeCoffGetPdbPath (
       PdbOffset = sizeof (EFI_IMAGE_DEBUG_CODEVIEW_MTOC_ENTRY);
 
       STATIC_ASSERT (
-        OC_ALIGNOF (EFI_IMAGE_DEBUG_CODEVIEW_MTOC_ENTRY) <= OC_ALIGNOF (UINT32),
+        BASE_ALIGNOF (EFI_IMAGE_DEBUG_CODEVIEW_MTOC_ENTRY) <= BASE_ALIGNOF (UINT32),
         "The structure may be misalignedd."
         );
       break;

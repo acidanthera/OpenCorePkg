@@ -19,9 +19,9 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 
 #include <Library/BaseLib.h>
 #include <Library/BaseMemoryLib.h>
+#include <Library/BaseOverflowLib.h>
 #include <Library/DebugLib.h>
 #include <Library/OcAppleKernelLib.h>
-#include <Library/OcGuardLib.h>
 #include <Library/OcMachoLib.h>
 
 #include <Library/OcFileLib.h>
@@ -1418,13 +1418,13 @@ InternalProcessSymbolPointers (
     FirstSym   = Section->Section64.Reserved1;
   }
 
-  Result = OcOverflowAddU32 (FirstSym, NumSymbols, &OffsetTop);
+  Result = BaseOverflowAddU32 (FirstSym, NumSymbols, &OffsetTop);
   if (Result || (OffsetTop > DySymtab->NumIndirectSymbols)) {
     return FALSE;
   }
 
   MachSize = MachoGetFileSize (MachoContext);
-  Result   = OcOverflowMulAddU32 (
+  Result   = BaseOverflowMulAddU32 (
                DySymtab->NumIndirectSymbols,
                MachoContext->Is32Bit ? sizeof (UINT32) : sizeof (UINT64),
                DySymtab->IndirectSymbolsOffset,
@@ -1447,14 +1447,14 @@ InternalProcessSymbolPointers (
   //      action is required.
   //
   Tmp = (VOID *)((UINTN)FileData + DySymtab->IndirectSymbolsOffset);
-  if (!OC_TYPE_ALIGNED (UINT32, Tmp)) {
+  if (!BASE_TYPE_ALIGNED (UINT32, Tmp)) {
     return FALSE;
   }
 
   SymIndices = (UINT32 *)Tmp + FirstSym;
 
   IndirectSymPtr = (VOID *)((UINTN)FileData + (MachoContext->Is32Bit ? Section->Section32.Offset : Section->Section64.Offset));
-  if (MachoContext->Is32Bit ? !OC_TYPE_ALIGNED (UINT32, IndirectSymPtr) : !OC_TYPE_ALIGNED (UINT64, IndirectSymPtr)) {
+  if (MachoContext->Is32Bit ? !BASE_TYPE_ALIGNED (UINT32, IndirectSymPtr) : !BASE_TYPE_ALIGNED (UINT64, IndirectSymPtr)) {
     return FALSE;
   }
 
@@ -1606,7 +1606,7 @@ InternalPrelinkKext (
     return EFI_UNSUPPORTED;
   }
 
-  if (OcOverflowAddU64 (LoadAddress, FileOffset, &LoadAddressOffset)) {
+  if (BaseOverflowAddU64 (LoadAddress, FileOffset, &LoadAddressOffset)) {
     return EFI_INVALID_PARAMETER;
   }
 

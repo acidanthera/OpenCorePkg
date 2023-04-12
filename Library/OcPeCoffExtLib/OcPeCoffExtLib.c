@@ -24,6 +24,7 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 #include <Library/DebugLib.h>
 #include <Library/BaseLib.h>
 #include <Library/BaseMemoryLib.h>
+#include <Library/BaseOverflowLib.h>
 #include <Library/UefiRuntimeServicesTableLib.h>
 #include <Library/UefiBootServicesTableLib.h>
 #include <Library/MemoryAllocationLib.h>
@@ -31,7 +32,6 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 #include <Library/UefiLib.h>
 #include <Library/OcCryptoLib.h>
 #include <Library/OcAppleKeysLib.h>
-#include <Library/OcGuardLib.h>
 #include <Library/OcPeCoffLib.h>
 #include <Guid/AppleCertificate.h>
 
@@ -92,7 +92,7 @@ PeCoffGetSecurityDirectoryEntry (
     return RETURN_INVALID_PARAMETER;
   }
 
-  Result = OcOverflowAddU32 (
+  Result = BaseOverflowAddU32 (
              (*DirectoryEntry)->VirtualAddress,
              (*DirectoryEntry)->Size,
              &EntryTop
@@ -135,7 +135,7 @@ PeCoffGetAppleCertificateInfo (
     return EFI_UNSUPPORTED;
   }
 
-  if (!OC_TYPE_ALIGNED (APPLE_EFI_CERTIFICATE_INFO, SecDir->VirtualAddress)) {
+  if (!BASE_TYPE_ALIGNED (APPLE_EFI_CERTIFICATE_INFO, SecDir->VirtualAddress)) {
     DEBUG ((DEBUG_INFO, "OCPE: Certificate info is misaligned %X\n", SecDir->VirtualAddress));
     return EFI_UNSUPPORTED;
   }
@@ -146,7 +146,7 @@ PeCoffGetAppleCertificateInfo (
   *CertInfo = (APPLE_EFI_CERTIFICATE_INFO *)(
                                              (UINT8 *)Context->FileBuffer + SecDir->VirtualAddress
                                              );
-  if (  OcOverflowAddU32 ((*CertInfo)->CertOffset, (*CertInfo)->CertSize, &EndOffset)
+  if (  BaseOverflowAddU32 ((*CertInfo)->CertOffset, (*CertInfo)->CertSize, &EndOffset)
      || (EndOffset > FileSize))
   {
     DEBUG ((DEBUG_INFO, "OCPE: Certificate entry is beyond file area\n"));
@@ -181,7 +181,7 @@ PeCoffGetAppleSignature (
     return EFI_UNSUPPORTED;
   }
 
-  if (!OC_TYPE_ALIGNED (APPLE_EFI_CERTIFICATE, CertInfo->CertOffset)) {
+  if (!BASE_TYPE_ALIGNED (APPLE_EFI_CERTIFICATE, CertInfo->CertOffset)) {
     DEBUG ((DEBUG_INFO, "OCPE: Certificate is misaligned %X\n", CertInfo->CertOffset));
     return EFI_UNSUPPORTED;
   }

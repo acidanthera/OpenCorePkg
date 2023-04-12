@@ -208,8 +208,8 @@ InternalCreatePrelinkedKext (
     }
 
     SourceBase -= Prelinked->Is32Bit ? BaseSegment->Segment32.VirtualAddress : BaseSegment->Segment64.VirtualAddress;
-    if (  OcOverflowAddU64 (SourceBase, Prelinked->Is32Bit ? BaseSegment->Segment32.FileOffset : BaseSegment->Segment64.FileOffset, &SourceBase)
-       || OcOverflowAddU64 (SourceBase, SourceSize, &SourceEnd)
+    if (  BaseOverflowAddU64 (SourceBase, Prelinked->Is32Bit ? BaseSegment->Segment32.FileOffset : BaseSegment->Segment64.FileOffset, &SourceBase)
+       || BaseOverflowAddU64 (SourceBase, SourceSize, &SourceEnd)
        || (SourceEnd > Prelinked->PrelinkedSize))
     {
       return NULL;
@@ -524,7 +524,7 @@ InternalScanBuildLinkedVtables (
                    VtableLookups[Index].Vtable.Value,
                    &VtableMaxSize
                    );
-    if ((VtableData == NULL) || (Context->Is32Bit ? !OC_TYPE_ALIGNED (UINT32, VtableData) : !OC_TYPE_ALIGNED (UINT64, VtableData))) {
+    if ((VtableData == NULL) || (Context->Is32Bit ? !BASE_TYPE_ALIGNED (UINT32, VtableData) : !BASE_TYPE_ALIGNED (UINT64, VtableData))) {
       return EFI_UNSUPPORTED;
     }
 
@@ -540,13 +540,13 @@ InternalScanBuildLinkedVtables (
 
     VtableLookups[Index].Vtable.Data = VtableData;
 
-    if (OcOverflowAddU32 (NumEntries, NumEntriesTemp, &NumEntries)) {
+    if (BaseOverflowAddU32 (NumEntries, NumEntriesTemp, &NumEntries)) {
       return EFI_OUT_OF_RESOURCES;
     }
   }
 
-  if (  OcOverflowMulU32 (NumVtables, sizeof (*LinkedVtables), &ResultingSize)
-     || OcOverflowMulAddU32 (NumEntries, sizeof (*LinkedVtables->Entries), ResultingSize, &ResultingSize))
+  if (  BaseOverflowMulU32 (NumVtables, sizeof (*LinkedVtables), &ResultingSize)
+     || BaseOverflowMulAddU32 (NumEntries, sizeof (*LinkedVtables->Entries), ResultingSize, &ResultingSize))
   {
     return EFI_OUT_OF_RESOURCES;
   }

@@ -70,13 +70,13 @@
 [LibraryClasses]
   BaseLib
   BaseMemoryLib
+  BaseOverflowLib
   DebugLib
   FrameBufferBltLib
   MemoryAllocationLib
   MtrrLib
   OcCompressionLib
   OcConsoleLib
-  OcGuardLib
   OcMiscLib
   OcPngLib
   OcStorageLib

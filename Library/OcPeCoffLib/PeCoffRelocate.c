@@ -313,7 +313,7 @@ InternalApplyRelocation (
 
       // FIXME: 32-bit
 
-      if (!IS_ALIGNED (RelocTarget, OC_ALIGNOF (UINT16))) {
+      if (!IS_ALIGNED (RelocTarget, BASE_ALIGNOF (UINT16))) {
         return RETURN_UNSUPPORTED;
       }
 
@@ -429,7 +429,7 @@ PeCoffRelocateImage (
       return RETURN_UNSUPPORTED;
     }
 
-    if (!IS_ALIGNED (RelocWalker->SizeOfBlock, OC_ALIGNOF (EFI_IMAGE_BASE_RELOCATION_BLOCK))) {
+    if (!IS_ALIGNED (RelocWalker->SizeOfBlock, BASE_ALIGNOF (EFI_IMAGE_BASE_RELOCATION_BLOCK))) {
       return RETURN_UNSUPPORTED;
     }
 
@@ -680,7 +680,7 @@ PeCoffRelocateImageForRuntime (
                                                                           );
 
     STATIC_ASSERT (
-      (sizeof (UINT32) % OC_ALIGNOF (EFI_IMAGE_BASE_RELOCATION_BLOCK)) == 0,
+      (sizeof (UINT32) % BASE_ALIGNOF (EFI_IMAGE_BASE_RELOCATION_BLOCK)) == 0,
       "The following accesses must be performed unaligned."
       );
 
@@ -688,7 +688,7 @@ PeCoffRelocateImageForRuntime (
 
     SizeOfRelocs = RelocWalker->SizeOfBlock - sizeof (EFI_IMAGE_BASE_RELOCATION_BLOCK);
 
-    ASSERT (IS_ALIGNED (RelocWalker->SizeOfBlock, OC_ALIGNOF (EFI_IMAGE_BASE_RELOCATION_BLOCK)));
+    ASSERT (IS_ALIGNED (RelocWalker->SizeOfBlock, BASE_ALIGNOF (EFI_IMAGE_BASE_RELOCATION_BLOCK)));
     //
     // This division is safe due to the guarantee made above.
     //

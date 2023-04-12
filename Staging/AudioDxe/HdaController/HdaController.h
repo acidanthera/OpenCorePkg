@@ -28,7 +28,7 @@
 #include "AudioDxe.h"
 #include <IndustryStandard/HdaRegisters.h>
 
-#include <Library/OcGuardLib.h>
+#include <Library/BaseOverflowLib.h>
 
 //
 // Consumed protocols.

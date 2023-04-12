@@ -16,11 +16,11 @@
 
 #include <Library/BaseLib.h>
 #include <Library/BaseMemoryLib.h>
+#include <Library/BaseOverflowLib.h>
 #include <Library/DebugLib.h>
 #include <Library/MemoryAllocationLib.h>
 #include <Library/UefiBootServicesTableLib.h>
 #include <Library/UefiRuntimeServicesTableLib.h>
-#include <Library/OcGuardLib.h>
 #include <Library/OcFileLib.h>
 #include <Library/OcVirtualFsLib.h>
 
@@ -192,7 +192,7 @@ VirtualDirRead (
   // Ensure entry size matches string length.
   //
   FileStrSize = StrSize (DirEntry->FileInfo->FileName);
-  if (OcOverflowAddUN (SIZE_OF_EFI_FILE_INFO, FileStrSize, &ReadSize) || (ReadSize != DirEntry->FileInfo->Size)) {
+  if (BaseOverflowAddUN (SIZE_OF_EFI_FILE_INFO, FileStrSize, &ReadSize) || (ReadSize != DirEntry->FileInfo->Size)) {
     return EFI_DEVICE_ERROR;
   }
 

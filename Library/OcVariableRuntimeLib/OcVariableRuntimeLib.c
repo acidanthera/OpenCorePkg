@@ -280,7 +280,7 @@ SerializeSectionVariables (
                       );
     if (Status == EFI_BUFFER_TOO_SMALL) {
       while (DataSize > SaveContext->DataBufferSize) {
-        if (OcOverflowMulUN (SaveContext->DataBufferSize, 2, &SaveContext->DataBufferSize)) {
+        if (BaseOverflowMulUN (SaveContext->DataBufferSize, 2, &SaveContext->DataBufferSize)) {
           SaveContext->Status = EFI_OUT_OF_RESOURCES;
           return OcProcessVariableAbort;
         }
@@ -315,7 +315,7 @@ SerializeSectionVariables (
   Base64Encode (SaveContext->DataBuffer, DataSize, NULL, &Base64Size);
   if (Base64Size > SaveContext->Base64BufferSize) {
     while (Base64Size > SaveContext->Base64BufferSize) {
-      if (OcOverflowMulUN (SaveContext->Base64BufferSize, 2, &SaveContext->Base64BufferSize)) {
+      if (BaseOverflowMulUN (SaveContext->Base64BufferSize, 2, &SaveContext->Base64BufferSize)) {
         SaveContext->Status = EFI_OUT_OF_RESOURCES;
         return OcProcessVariableAbort;
       }
