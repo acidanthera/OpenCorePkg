@@ -357,6 +357,9 @@ RenderScroll (
                      );
 }
 
+//
+// Resync text renderer. May fail, e.g. if resolution is too small to use.
+//
 STATIC
 EFI_STATUS
 RenderResync (
@@ -997,8 +1000,13 @@ OcUseBuiltinTextOutput (
   Status       = AsciiTextResetEx (&mAsciiTextOutputProtocol, TRUE, TRUE);
 
   if (!EFI_ERROR (Status)) {
-    OcConsoleControlInstallProtocol (&mConsoleControlProtocol, NULL, NULL);
+    //
+    // We are intentionally setting the mode using the pre-existing protocol,
+    // if present, then not using the pre-existing protocol again, even if this
+    // means that subsequent mode changes can't 'really' change the mode.
+    //
     OcConsoleControlSetMode (Mode);
+    OcConsoleControlInstallProtocol (&mConsoleControlProtocol, NULL, NULL);
 
     gST->ConOut    = &mAsciiTextOutputProtocol;
     gST->Hdr.CRC32 = 0;

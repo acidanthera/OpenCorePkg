@@ -8,6 +8,7 @@ OpenCore Changelog
 - Fixed possible hang with `GopBurstMode` enabled on DEBUG builds
 - Enabled `GopBurstMode` even with natively supported cards, in EnableGop firmware driver
 - Fixed inability to patch force-injected kexts
+- Fixed `BuiltinGraphics` failure to display graphics in DEBUG builds on some systems since 0.8.9
 
 #### v0.9.1
 - Fixed long comment printing for ACPI patches, thx @corpnewt

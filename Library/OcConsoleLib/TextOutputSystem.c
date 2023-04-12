@@ -343,13 +343,22 @@ OcUseSystemTextOutput (
     ReplaceTabWithSpace
     ));
 
+  //
+  // For all except generic, set requested mode using pre-existing protocol, if
+  // present, before installing replacement.
+  // Note: We need the installed renderer to report the correct (intended) mode,
+  // even if there was no original protocol present.
+  //
   if (Renderer == OcConsoleRendererSystemGraphics) {
+    mConsoleMode = EfiConsoleControlScreenGraphics;
+    OcConsoleControlSetMode (mConsoleMode);
     OcConsoleControlInstallProtocol (&mConsoleControlProtocol, NULL, NULL);
-    OcConsoleControlSetMode (EfiConsoleControlScreenGraphics);
   } else if (Renderer == OcConsoleRendererSystemText) {
+    mConsoleMode = EfiConsoleControlScreenText;
+    OcConsoleControlSetMode (mConsoleMode);
     OcConsoleControlInstallProtocol (&mConsoleControlProtocol, NULL, NULL);
-    OcConsoleControlSetMode (EfiConsoleControlScreenText);
   } else {
+    ASSERT (Renderer == OcConsoleRendererSystemGeneric);
     OcConsoleControlInstallProtocol (&mConsoleControlProtocol, &mOriginalConsoleControlProtocol, &mConsoleMode);
   }
 
