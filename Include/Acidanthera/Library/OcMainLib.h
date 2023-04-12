@@ -14,12 +14,12 @@
 #ifndef OC_MAIN_LIB
 #define OC_MAIN_LIB
 
+#include <Library/BaseOverflowLib.h>
 #include <Library/OcAppleKernelLib.h>
 #include <Library/OcBootManagementLib.h>
 #include <Library/OcConfigurationLib.h>
 #include <Library/OcCpuLib.h>
 #include <Library/OcCryptoLib.h>
-#include <Library/OcGuardLib.h>
 #include <Library/OcMiscLib.h>
 #include <Library/OcStringLib.h>
 #include <Library/OcStorageLib.h>

@@ -55,11 +55,11 @@
 [LibraryClasses]
   BaseLib
   BaseMemoryLib
+  BaseOverflowLib
   DebugLib
   DevicePathLib
   IoLib
   MemoryAllocationLib
-  OcGuardLib
   PrintLib
   UefiLib
   UefiBootServicesTableLib

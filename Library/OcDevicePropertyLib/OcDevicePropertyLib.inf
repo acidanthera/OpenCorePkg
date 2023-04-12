@@ -52,6 +52,7 @@
 [LibraryClasses]
   BaseLib
   BaseMemoryLib
+  BaseOverflowLib
   DebugLib
   DevicePathLib
   MemoryAllocationLib
@@ -59,4 +60,3 @@
   PrintLib
   UefiBootServicesTableLib
   UefiRuntimeServicesTableLib
-  OcGuardLib

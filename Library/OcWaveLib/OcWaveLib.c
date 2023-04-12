@@ -19,9 +19,9 @@
 
 #include <Library/BaseLib.h>
 #include <Library/BaseMemoryLib.h>
+#include <Library/BaseOverflowLib.h>
 #include <Library/DebugLib.h>
 #include <Library/MemoryAllocationLib.h>
-#include <Library/OcGuardLib.h>
 #include <Library/OcWaveLib.h>
 
 EFI_STATUS

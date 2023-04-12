@@ -818,7 +818,7 @@ InternalIsEfiBootRt (
   DevicePathEnd = FindDevicePathEndNode (EfiBootDevicePath);
   ComponentSize = (UINTN)DevicePathEnd - (UINTN)EfiBootDevicePath;
 
-  Overflow = OcOverflowSubUN (
+  Overflow = BaseOverflowSubUN (
                EfiBootRtDevicePathRemSize,
                ComponentSize,
                &EfiBootRtDevicePathRemSize
@@ -992,12 +992,12 @@ InternalEfiBootRtGetKcgOffset (
   //
   // Compute the remaining space to the end of the image.
   //
-  Overflow = OcOverflowSubUN (
+  Overflow = BaseOverflowSubUN (
                (UINTN)EfiBootRtLoadOptions.KernelCallGate,
                ImageBase,
                &KcgOffset
                );
-  Overflow |= OcOverflowSubUN (
+  Overflow |= BaseOverflowSubUN (
                 SourceSize,
                 KcgOffset,
                 KcgSize

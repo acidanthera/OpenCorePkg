@@ -6,11 +6,11 @@
 #include "../Include/Uefi.h"
 
 #include <Library/OcPeCoffLib.h>
-#include <Library/OcGuardLib.h>
+#include <Library/BaseMemoryLib.h>
+#include <Library/BaseOverflowLib.h>
 #include <Library/MemoryAllocationLib.h>
 #include <Library/DebugLib.h>
 #include <Library/UefiBootServicesTableLib.h>
-#include <Library/BaseMemoryLib.h>
 
 #include <stdio.h>
 #include <string.h>
@@ -197,7 +197,7 @@ PeCoffTestLoadFull (
   }
 
   DestinationSize = Context.SizeOfImage + Context.SizeOfImageDebugAdd;
-  if (OcOverflowAddU32 (DestinationSize, Context.SectionAlignment, &DestinationSize)) {
+  if (BaseOverflowAddU32 (DestinationSize, Context.SectionAlignment, &DestinationSize)) {
     return EFI_UNSUPPORTED;
   }
 

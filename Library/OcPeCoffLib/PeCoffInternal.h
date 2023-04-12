@@ -16,11 +16,11 @@
 #include <Uefi.h>
 #include <Library/BaseLib.h>
 #include <Library/BaseMemoryLib.h>
+#include <Library/BaseOverflowLib.h>
 #include <Library/DebugLib.h>
 #include <Library/MemoryAllocationLib.h>
 #include <Library/PcdLib.h>
 #include <Library/OcPeCoffLib.h>
-#include <Library/OcGuardLib.h>
 
 #define PTR_TO_ADDR(Ptr, Size)  ((UINTN) Ptr)
 
@@ -34,11 +34,11 @@
 #define READ_ALIGNED_64(x)      (*(CONST UINT64 *) (CONST VOID *) (x))
 #define WRITE_ALIGNED_64(x, y)  do { *(UINT64 *) (VOID *) (x) = (y); } while (FALSE)
 
-#define BaseOverflowSubU16      OcOverflowSubU16
-#define BaseOverflowAddU32      OcOverflowAddU32
-#define BaseOverflowSubU32      OcOverflowSubU32
-#define BaseOverflowMulU32      OcOverflowMulU32
-#define BaseOverflowAlignUpU32  OcOverflowAlignUpU32
+#define BaseOverflowSubU16      BaseOverflowSubU16
+#define BaseOverflowAddU32      BaseOverflowAddU32
+#define BaseOverflowSubU32      BaseOverflowSubU32
+#define BaseOverflowMulU32      BaseOverflowMulU32
+#define BaseOverflowAlignUpU32  BaseOverflowAlignUpU32
 
 /**
   Returns the type of a Base Relocation.
@@ -73,12 +73,12 @@
   IMAGE_RELOC_TYPE_SUPPORTED (IMAGE_RELOC_TYPE (Reloc))
 
 //
-// 4 byte alignment has been replaced with OC_ALIGNOF (EFI_IMAGE_BASE_RELOCATION_BLOCK)
+// 4 byte alignment has been replaced with BASE_ALIGNOF (EFI_IMAGE_BASE_RELOCATION_BLOCK)
 // for proof simplicity. This obviously was the original intention of the
 // specification. Assert in case the equality is not given.
 //
 STATIC_ASSERT (
-  sizeof (UINT32) == OC_ALIGNOF (EFI_IMAGE_BASE_RELOCATION_BLOCK),
+  sizeof (UINT32) == BASE_ALIGNOF (EFI_IMAGE_BASE_RELOCATION_BLOCK),
   "The current model violates the PE specification"
   );
 

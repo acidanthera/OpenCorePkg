@@ -15,8 +15,8 @@
 #ifndef OC_STORAGE_LIB_H
 #define OC_STORAGE_LIB_H
 
+#include <Library/BaseOverflowLib.h>
 #include <Library/OcCryptoLib.h>
-#include <Library/OcGuardLib.h>
 #include <Library/OcFileLib.h>
 #include <Library/OcSerializeLib.h>
 

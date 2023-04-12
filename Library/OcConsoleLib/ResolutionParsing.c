@@ -13,9 +13,9 @@
 **/
 
 #include <Library/BaseLib.h>
+#include <Library/BaseOverflowLib.h>
 #include <Library/DebugLib.h>
 #include <Library/OcConsoleLib.h>
-#include <Library/OcGuardLib.h>
 
 /**
   Parse resolution string.
@@ -59,7 +59,7 @@ ParseResolution (
   TmpWidth = TmpHeight = 0;
 
   while (*String >= '0' && *String <= '9') {
-    if (OcOverflowMulAddU32 (TmpWidth, 10, *String++ - '0', &TmpWidth)) {
+    if (BaseOverflowMulAddU32 (TmpWidth, 10, *String++ - '0', &TmpWidth)) {
       return;
     }
   }
@@ -69,7 +69,7 @@ ParseResolution (
   }
 
   while (*String >= '0' && *String <= '9') {
-    if (OcOverflowMulAddU32 (TmpHeight, 10, *String++ - '0', &TmpHeight)) {
+    if (BaseOverflowMulAddU32 (TmpHeight, 10, *String++ - '0', &TmpHeight)) {
       return;
     }
   }
@@ -87,7 +87,7 @@ ParseResolution (
 
   TmpWidth = 0;
   while (*String >= '0' && *String <= '9') {
-    if (OcOverflowMulAddU32 (TmpWidth, 10, *String++ - '0', &TmpWidth)) {
+    if (BaseOverflowMulAddU32 (TmpWidth, 10, *String++ - '0', &TmpWidth)) {
       return;
     }
   }

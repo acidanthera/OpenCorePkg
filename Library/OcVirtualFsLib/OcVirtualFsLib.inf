@@ -48,7 +48,7 @@
 [LibraryClasses]
   BaseLib
   BaseMemoryLib
+  BaseOverflowLib
   DebugLib
   MemoryAllocationLib
-  OcGuardLib
 

@@ -88,6 +88,7 @@
 [LibraryClasses]
   BaseLib
   BaseMemoryLib
+  BaseOverflowLib
   DebugLib
   DevicePathLib
   MemoryAllocationLib
@@ -106,7 +107,6 @@
   OcDevicePathLib
   OcFileLib
   OcFlexArrayLib
-  OcGuardLib
   OcMachoLib
   OcMiscLib
   OcPeCoffLib

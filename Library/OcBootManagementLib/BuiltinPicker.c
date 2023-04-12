@@ -23,11 +23,11 @@
 
 #include <Library/BaseLib.h>
 #include <Library/BaseMemoryLib.h>
+#include <Library/BaseOverflowLib.h>
 #include <Library/OcConsoleLib.h>
 #include <Library/OcCryptoLib.h>
 #include <Library/OcDebugLogLib.h>
 #include <Library/DevicePathLib.h>
-#include <Library/OcGuardLib.h>
 #include <Library/OcTimerLib.h>
 #include <Library/OcTypingLib.h>
 #include <Library/MemoryAllocationLib.h>

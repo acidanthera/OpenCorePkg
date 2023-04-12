@@ -7,10 +7,10 @@
 
 #include <Base.h>
 #include <Library/BaseLib.h>
+#include <Library/BaseOverflowLib.h>
 #include <Library/MemoryAllocationLib.h>
 #include <Library/OcDebugLogLib.h>
 #include <Library/OcFlexArrayLib.h>
-#include <Library/OcGuardLib.h>
 #include <Library/PrintLib.h>
 
 OC_ASCII_STRING_BUFFER *
@@ -74,12 +74,12 @@ InternalAsciiStringBufferExtendBy (
     }
 
     NewSize = Buffer->BufferSize;
-    if (OcOverflowAddUN (Buffer->StringLength, AppendLength, TargetLength)) {
+    if (BaseOverflowAddUN (Buffer->StringLength, AppendLength, TargetLength)) {
       return EFI_OUT_OF_RESOURCES;
     }
 
     while (NewSize <= *TargetLength) {
-      if (OcOverflowMulUN (NewSize, 2, &NewSize)) {
+      if (BaseOverflowMulUN (NewSize, 2, &NewSize)) {
         return EFI_OUT_OF_RESOURCES;
       }
     }

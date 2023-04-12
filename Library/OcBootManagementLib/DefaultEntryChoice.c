@@ -162,7 +162,7 @@ InternalGetBootOptionPath (
   LoadOptionSize -= FilePathListSize;
 
   STATIC_ASSERT (
-    sizeof (*LoadOption) % OC_ALIGNOF (CHAR16) == 0,
+    sizeof (*LoadOption) % BASE_ALIGNOF (CHAR16) == 0,
     "The following accesses may be unaligned."
     );
 
@@ -961,7 +961,7 @@ OcSetDefaultBootEntry (
       if (LoadOptionIdSize > MAX_UINT16) {
         IsOverflow = TRUE;
       } else {
-        IsOverflow = OcOverflowAddU16 (SIZE_OF_FILEPATH_DEVICE_PATH, (UINT16)LoadOptionIdSize, &EntryIdLength);
+        IsOverflow = BaseOverflowAddU16 (SIZE_OF_FILEPATH_DEVICE_PATH, (UINT16)LoadOptionIdSize, &EntryIdLength);
       }
 
       if (IsOverflow) {

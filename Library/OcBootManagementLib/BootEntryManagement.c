@@ -233,7 +233,7 @@ ReadEntryVisibility (
   }
 
   BooterPathSize = OcFileDevicePathFullNameSize (DevicePath);
-  Result         = OcOverflowAddUN (
+  Result         = BaseOverflowAddUN (
                      BooterPathSize,
                      L_STR_SIZE (L"\\.contentVisibility"),
                      &VisibilityPathSize

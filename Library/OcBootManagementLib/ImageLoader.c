@@ -308,7 +308,7 @@ OcImageLoaderLoad (
   // https://github.com/mhaeuser/edk2/blob/2021-gsoc-secure-loader/MdePkg/Library/BaseUefiImageLib/CommonSupport.c#L19-L53
   //
   DestinationSize = ImageContext.SizeOfImage + ImageContext.SizeOfImageDebugAdd;
-  if (OcOverflowAddU32 (DestinationSize, ImageContext.SectionAlignment, &DestinationSize)) {
+  if (BaseOverflowAddU32 (DestinationSize, ImageContext.SectionAlignment, &DestinationSize)) {
     return RETURN_UNSUPPORTED;
   }
 

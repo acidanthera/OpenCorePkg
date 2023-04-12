@@ -23,13 +23,13 @@
 #include <Protocol/PciIo.h>
 #include <Library/BaseLib.h>
 #include <Library/BaseMemoryLib.h>
+#include <Library/BaseOverflowLib.h>
 #include <Library/DebugLib.h>
 #include <Library/IoLib.h>
 #include <Library/MemoryAllocationLib.h>
 #include <Library/OcCpuLib.h>
 #include <Library/PciLib.h>
 #include <Library/OcMiscLib.h>
-#include <Library/OcGuardLib.h>
 #include <Library/OcVariableLib.h>
 #include <Library/UefiBootServicesTableLib.h>
 #include <Library/UefiRuntimeServicesTableLib.h>
@@ -530,7 +530,7 @@ InternalCalculateARTFrequencyIntel (
         //
         if ((ARTFrequency == 0) && (MaxId >= CPUID_PROCESSOR_FREQUENCY)) {
           CPUFrequencyFromTSC = InternalCalculateTSCFromPMTimer (Recalculate);
-          ARTFrequency        = MultThenDivU64x64x32 (
+          ARTFrequency        = BaseMultThenDivU64x64x32 (
                                   CPUFrequencyFromTSC,
                                   CpuidDenominatorEax,
                                   CpuidNumeratorEbx,
@@ -564,7 +564,7 @@ InternalCalculateARTFrequencyIntel (
 
         ASSERT (ARTFrequency > 0ULL);
         if (CPUFrequencyFromART == 0ULL) {
-          CPUFrequencyFromART = MultThenDivU64x64x32 (
+          CPUFrequencyFromART = BaseMultThenDivU64x64x32 (
                                   ARTFrequency,
                                   CpuidNumeratorEbx,
                                   CpuidDenominatorEax,

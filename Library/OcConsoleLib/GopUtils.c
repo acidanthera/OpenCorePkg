@@ -14,10 +14,10 @@
 #include <IndustryStandard/VirtualMemory.h>
 
 #include <Library/BaseLib.h>
+#include <Library/BaseOverflowLib.h>
 #include <Library/DebugLib.h>
 #include <Library/MemoryAllocationLib.h>
 #include <Library/MtrrLib.h>
-#include <Library/OcGuardLib.h>
 #include <Library/OcMemoryLib.h>
 #include <Library/OcStringLib.h>
 #include <Library/PrintLib.h>
@@ -106,7 +106,7 @@ OcGopModeSafeFrameBufferSize (
     return Status;
   }
 
-  if (OcOverflowTriMulUN (
+  if (BaseOverflowTriMulUN (
         Mode->Info->PixelsPerScanLine,
         Mode->Info->VerticalResolution,
         BytesPerPixel,

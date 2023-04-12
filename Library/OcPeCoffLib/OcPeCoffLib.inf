@@ -32,9 +32,9 @@
 [LibraryClasses]
   BaseLib
   BaseMemoryLib
+  BaseOverflowLib
   DebugLib
   MemoryAllocationLib
-  OcGuardLib
 
 [FixedPcd]
   gOpenCorePkgTokenSpaceGuid.PcdImageLoaderRtRelocAllowTargetMismatch

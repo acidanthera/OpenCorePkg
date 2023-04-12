@@ -16,7 +16,7 @@
 #define SMBIOS_INTERNAL_H
 
 #include <IndustryStandard/AppleSmBios.h>
-#include <Library/OcGuardLib.h>
+#include <Library/BaseOverflowLib.h>
 #include <Library/OcSmbiosLib.h>
 
 //

@@ -60,11 +60,11 @@
   UefiDriverEntryPoint
   UefiRuntimeServicesTableLib
   BaseMemoryLib
+  BaseOverflowLib
   ReportStatusCodeLib
   DebugLib
   PcdLib
   UefiUsbLib
-  OcGuardLib
   ResetSystemLib
 
 [Guids]

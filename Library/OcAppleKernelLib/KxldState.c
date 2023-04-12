@@ -38,7 +38,7 @@ InternalGetKxldHeader (
   CONST KXLD_LINK_STATE_HEADER  *Header;
 
   if (  (KxldStateSize < sizeof (KXLD_LINK_STATE_HEADER))
-     || !OC_TYPE_ALIGNED (KXLD_LINK_STATE_HEADER, KxldState))
+     || !BASE_TYPE_ALIGNED (KXLD_LINK_STATE_HEADER, KxldState))
   {
     return NULL;
   }
@@ -81,19 +81,19 @@ InternalGetKxldVtables (
 
   if (CpuType == MachCpuTypeX86) {
     SymbolSize = sizeof (KXLD_SYM_ENTRY_32);
-    if (!OC_TYPE_ALIGNED (UINT32, Header->VtableOffset)) {
+    if (!BASE_TYPE_ALIGNED (UINT32, Header->VtableOffset)) {
       return NULL;
     }
   } else if (CpuType == MachCpuTypeX8664) {
     SymbolSize = sizeof (KXLD_SYM_ENTRY_64);
-    if (!OC_TYPE_ALIGNED (UINT64, Header->VtableOffset)) {
+    if (!BASE_TYPE_ALIGNED (UINT64, Header->VtableOffset)) {
       return NULL;
     }
   } else {
     return NULL;
   }
 
-  if (  OcOverflowMulAddU32 (Header->NumVtables, sizeof (KXLD_VTABLE_HEADER), Header->VtableOffset, &End)
+  if (  BaseOverflowMulAddU32 (Header->NumVtables, sizeof (KXLD_VTABLE_HEADER), Header->VtableOffset, &End)
      || (End > KxldStateSize))
   {
     return NULL;
@@ -102,7 +102,7 @@ InternalGetKxldVtables (
   Vtables = (KXLD_VTABLE_HEADER *)((UINT8 *)KxldState + Header->VtableOffset);
 
   for (Index = 0; Index < Header->NumVtables; ++Index) {
-    if (  OcOverflowMulAddU32 (Vtables[Index].NumEntries, SymbolSize, Vtables[Index].EntryOffset, &End)
+    if (  BaseOverflowMulAddU32 (Vtables[Index].NumEntries, SymbolSize, Vtables[Index].EntryOffset, &End)
        || (End > KxldStateSize))
     {
       return NULL;
@@ -137,19 +137,19 @@ InternalGetKxldSymbols (
 
   if (CpuType == MachCpuTypeX86) {
     SymbolSize = sizeof (KXLD_SYM_ENTRY_32);
-    if (!OC_TYPE_ALIGNED (UINT32, Header->SymbolOffset)) {
+    if (!BASE_TYPE_ALIGNED (UINT32, Header->SymbolOffset)) {
       return NULL;
     }
   } else if (CpuType == MachCpuTypeX8664) {
     SymbolSize = sizeof (KXLD_SYM_ENTRY_64);
-    if (!OC_TYPE_ALIGNED (UINT64, Header->SymbolOffset)) {
+    if (!BASE_TYPE_ALIGNED (UINT64, Header->SymbolOffset)) {
       return NULL;
     }
   } else {
     return NULL;
   }
 
-  if (  OcOverflowMulAddU32 (Header->NumSymbols, SymbolSize, Header->SymbolOffset, &End)
+  if (  BaseOverflowMulAddU32 (Header->NumSymbols, SymbolSize, Header->SymbolOffset, &End)
      || (End > KxldStateSize))
   {
     return NULL;
@@ -330,13 +330,13 @@ InternalKxldStateBuildLinkedVtables (
   NumEntries = 0;
 
   for (Index = 0; Index < NumVtables; ++Index) {
-    if (OcOverflowAddU32 (NumEntries, KxldVtables[Index].NumEntries, &NumEntries)) {
+    if (BaseOverflowAddU32 (NumEntries, KxldVtables[Index].NumEntries, &NumEntries)) {
       return EFI_OUT_OF_RESOURCES;
     }
   }
 
-  if (  OcOverflowMulU32 (NumVtables, sizeof (*LinkedVtables), &ResultingSize)
-     || OcOverflowMulAddU32 (NumEntries, sizeof (*LinkedVtables->Entries), ResultingSize, &ResultingSize))
+  if (  BaseOverflowMulU32 (NumVtables, sizeof (*LinkedVtables), &ResultingSize)
+     || BaseOverflowMulAddU32 (NumEntries, sizeof (*LinkedVtables->Entries), ResultingSize, &ResultingSize))
   {
     return EFI_OUT_OF_RESOURCES;
   }
@@ -467,13 +467,13 @@ InternalKxldStateRebuild (
   //
   // This is a requirement from 10.6.8, should be guaranteed?
   //
-  ASSERT (OC_POT_ALIGNED (MACHO_PAGE_SIZE, Context->PrelinkedLastAddress));
+  ASSERT (BASE_POT_ALIGNED (MACHO_PAGE_SIZE, Context->PrelinkedLastAddress));
 
   //
   // Append prelink state for 10.6.8
   //
   AlignedSize = MACHO_ALIGN (Context->PrelinkedStateKernelSize);
-  if (  OcOverflowAddU32 (Context->PrelinkedSize, AlignedSize, &NewSize)
+  if (  BaseOverflowAddU32 (Context->PrelinkedSize, AlignedSize, &NewSize)
      || (NewSize > Context->PrelinkedAllocSize))
   {
     return EFI_BUFFER_TOO_SMALL;
@@ -511,7 +511,7 @@ InternalKxldStateRebuild (
   Context->PrelinkedSize        += AlignedSize;
 
   AlignedSize = MACHO_ALIGN (Context->PrelinkedStateKextsSize);
-  if (  OcOverflowAddU32 (Context->PrelinkedSize, AlignedSize, &NewSize)
+  if (  BaseOverflowAddU32 (Context->PrelinkedSize, AlignedSize, &NewSize)
      || (NewSize > Context->PrelinkedAllocSize))
   {
     return EFI_BUFFER_TOO_SMALL;

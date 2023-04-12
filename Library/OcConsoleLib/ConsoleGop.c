@@ -21,6 +21,7 @@
 #include <Protocol/SimpleTextOut.h>
 
 #include <Library/BaseMemoryLib.h>
+#include <Library/BaseOverflowLib.h>
 #include <Library/BaseLib.h>
 #include <Library/DebugLib.h>
 #include <Library/OcBlitLib.h>
@@ -28,7 +29,6 @@
 #include <Library/MtrrLib.h>
 #include <Library/OcConsoleLib.h>
 #include <Library/OcMiscLib.h>
-#include <Library/OcGuardLib.h>
 #include <Library/UefiBootServicesTableLib.h>
 #include <Library/UefiRuntimeServicesTableLib.h>
 

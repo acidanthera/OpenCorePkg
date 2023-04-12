@@ -21,13 +21,13 @@
 #include <Library/UefiLib.h>
 #include <Library/BaseLib.h>
 #include <Library/BaseMemoryLib.h>
+#include <Library/BaseOverflowLib.h>
 #include <Library/DebugLib.h>
 #include <Library/DevicePathLib.h>
 #include <Library/MemoryAllocationLib.h>
 #include <Library/UefiBootServicesTableLib.h>
 #include <Library/OcDevicePathLib.h>
 #include <Library/OcFileLib.h>
-#include <Library/OcGuardLib.h>
 
 VOID *
 OcReadFile (
@@ -74,7 +74,7 @@ OcReadFile (
              &FileReadSize
              );
   if (  EFI_ERROR (Status)
-     || OcOverflowAddU32 (FileReadSize, sizeof (CHAR16), &FileBufferSize)
+     || BaseOverflowAddU32 (FileReadSize, sizeof (CHAR16), &FileBufferSize)
      || ((MaxFileSize > 0) && (FileReadSize > MaxFileSize)))
   {
     FileHandle->Close (FileHandle);

@@ -18,13 +18,13 @@
 #include <IndustryStandard/AppleFatBinaryImage.h>
 
 #include <Library/BaseLib.h>
+#include <Library/BaseOverflowLib.h>
 #include <Library/DebugLib.h>
 #include <Library/MemoryAllocationLib.h>
 #include <Library/OcAppleKernelLib.h>
 #include <Library/OcCompressionLib.h>
 #include <Library/OcCryptoLib.h>
 #include <Library/OcFileLib.h>
-#include <Library/OcGuardLib.h>
 
 //
 // Pick a reasonable maximum to fit.
@@ -52,7 +52,7 @@ ReplaceBuffer (
 {
   UINT8  *TmpBuffer;
 
-  if (OcOverflowAddU32 (TargetSize, ReservedSize, &TargetSize)) {
+  if (BaseOverflowAddU32 (TargetSize, ReservedSize, &TargetSize)) {
     return EFI_INVALID_PARAMETER;
   }
 
@@ -295,7 +295,7 @@ ReadAppleKernelImage (
   Compressed = FALSE;
 
   while (TRUE) {
-    if (!OC_TYPE_ALIGNED (UINT32, *Buffer)) {
+    if (!BASE_TYPE_ALIGNED (UINT32, *Buffer)) {
       DEBUG ((DEBUG_INFO, "OCAK: Misaligned kernel header %p at %08X\n", *Buffer, Offset));
       return EFI_INVALID_PARAMETER;
     }
@@ -591,7 +591,7 @@ ReadAppleMkext (
     return Status;
   }
 
-  if (OcOverflowAddU32 (*AllocatedSize, ReservedSize, AllocatedSize)) {
+  if (BaseOverflowAddU32 (*AllocatedSize, ReservedSize, AllocatedSize)) {
     FreePool (TmpMkext);
     return EFI_INVALID_PARAMETER;
   }

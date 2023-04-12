@@ -34,9 +34,9 @@
 [LibraryClasses]
   BaseLib
   BaseMemoryLib
+  BaseOverflowLib
   DebugLib
   UefiLib
-  OcGuardLib
 
 [Sources]
   OcWaveLib.c

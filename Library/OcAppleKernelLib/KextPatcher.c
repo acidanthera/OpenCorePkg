@@ -555,8 +555,8 @@ PatcherBlockKext (
   // Determine offset of kmod within file.
   //
   KmodOffset = Context->VirtualKmod - Context->VirtualBase;
-  if (  OcOverflowAddU64 (KmodOffset, Context->FileOffset, &KmodOffset)
-     || OcOverflowAddU64 (KmodOffset, Context->Is32Bit ? sizeof (KMOD_INFO_32_V1) : sizeof (KMOD_INFO_64_V1), &TmpOffset)
+  if (  BaseOverflowAddU64 (KmodOffset, Context->FileOffset, &KmodOffset)
+     || BaseOverflowAddU64 (KmodOffset, Context->Is32Bit ? sizeof (KMOD_INFO_32_V1) : sizeof (KMOD_INFO_64_V1), &TmpOffset)
      || (TmpOffset > MachSize))
   {
     return EFI_INVALID_PARAMETER;
@@ -577,7 +577,7 @@ PatcherBlockKext (
   }
 
   TmpOffset = StartAddr - Context->VirtualBase;
-  if (  OcOverflowAddU64 (TmpOffset, Context->FileOffset, &TmpOffset)
+  if (  BaseOverflowAddU64 (TmpOffset, Context->FileOffset, &TmpOffset)
      || (TmpOffset > MachSize - 6))
   {
     return EFI_BUFFER_TOO_SMALL;
@@ -649,7 +649,7 @@ KextFindKmodAddress (
     return FALSE;
   }
 
-  if (  OcOverflowTriAddU64 (Address, LoadAddress, Is32Bit ? Symbol->Symbol32.Value : Symbol->Symbol64.Value, &Address)
+  if (  BaseOverflowTriAddU64 (Address, LoadAddress, Is32Bit ? Symbol->Symbol32.Value : Symbol->Symbol64.Value, &Address)
      || (Address > LoadAddress + Size - (Is32Bit ? sizeof (KMOD_INFO_32_V1) : sizeof (KMOD_INFO_64_V1)))
      || (Is32Bit && (Address > MAX_UINT32)))
   {

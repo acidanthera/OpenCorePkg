@@ -39,7 +39,7 @@ PanicUnpack (
   UINT8        *UnpackedWalker;
   UINT64       Sequence;
 
-  if (OcOverflowMulUN (PackedSize, 8, UnpackedSize)) {
+  if (BaseOverflowMulUN (PackedSize, 8, UnpackedSize)) {
     return NULL;
   }
 
@@ -49,7 +49,7 @@ PanicUnpack (
   //
   *UnpackedSize /= 7;
   *UnpackedSize  = *UnpackedSize - (*UnpackedSize % 8);
-  if ((*UnpackedSize == 0) || OcOverflowAddUN (*UnpackedSize, 1, UnpackedSize)) {
+  if ((*UnpackedSize == 0) || BaseOverflowAddUN (*UnpackedSize, 1, UnpackedSize)) {
     return NULL;
   }
 
@@ -106,7 +106,7 @@ PanicExpandPutBuf (
 
     NewSize = MAX (NewSize, 8192);
 
-    if (OcOverflowMulUN (NewSize, 2, &NewSize)) {
+    if (BaseOverflowMulUN (NewSize, 2, &NewSize)) {
       if (*Buffer != NULL) {
         FreePool (*Buffer);
       }

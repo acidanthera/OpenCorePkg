@@ -25,7 +25,7 @@
 #include "HdaCodec.h"
 #include "HdaCodecComponentName.h"
 
-#include <Library/OcGuardLib.h>
+#include <Library/BaseOverflowLib.h>
 #include <Library/OcHdaDevicesLib.h>
 #include <Library/OcMiscLib.h>
 #include <Library/OcStringLib.h>
@@ -153,7 +153,7 @@ HdaCodecProbeWidget (
       // The first entry cannot be a range, nor can there be two sequential entries marked as a range.
       //
       if (IsRangedEntry && (ConnectionValue > ConnectionPrevValue)) {
-        if (OcOverflowAddU32 (HdaWidget->ConnectionCount, ConnectionValue - ConnectionPrevValue, &HdaWidget->ConnectionCount)) {
+        if (BaseOverflowAddU32 (HdaWidget->ConnectionCount, ConnectionValue - ConnectionPrevValue, &HdaWidget->ConnectionCount)) {
           return EFI_OUT_OF_RESOURCES;
         }
       }

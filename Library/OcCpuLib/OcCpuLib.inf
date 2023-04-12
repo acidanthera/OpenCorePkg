@@ -34,7 +34,7 @@
 
 [LibraryClasses]
   BaseLib
-  OcGuardLib
+  BaseOverflowLib
   OcMiscLib
   OcVariableLib
   IoLib

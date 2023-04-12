@@ -24,7 +24,7 @@
 #include <Library/MemoryAllocationLib.h>
 #include <Library/OcConsoleLib.h>
 #include <Library/OcMiscLib.h>
-#include <Library/OcGuardLib.h>
+#include <Library/BaseOverflowLib.h>
 #include <Library/UefiBootServicesTableLib.h>
 
 //
