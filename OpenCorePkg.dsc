@@ -139,7 +139,6 @@
   OcWaveLib|OpenCorePkg/Library/OcWaveLib/OcWaveLib.inf
   OcXmlLib|OpenCorePkg/Library/OcXmlLib/OcXmlLib.inf
   OcPeCoffExtLib|OpenCorePkg/Library/OcPeCoffExtLib/OcPeCoffExtLib.inf
-  OcPeCoffLib|OpenCorePkg/Library/OcPeCoffLib/OcPeCoffLib.inf
   OcVariableLib|OpenCorePkg/Library/OcVariableLib/OcVariableLib.inf
   OcVariableRuntimeLib|OpenCorePkg/Library/OcVariableRuntimeLib/OcVariableRuntimeLib.inf
   PcdLib|MdePkg/Library/BasePcdLibNull/BasePcdLibNull.inf
@@ -280,7 +279,6 @@
   OpenCorePkg/Library/OcMp3Lib/OcMp3Lib.inf
   OpenCorePkg/Library/OcOSInfoLib/OcOSInfoLib.inf
   OpenCorePkg/Library/OcPeCoffExtLib/OcPeCoffExtLib.inf
-  OpenCorePkg/Library/OcPeCoffLib/OcPeCoffLib.inf
   OpenCorePkg/Library/OcPngLib/OcPngLib.inf
   OpenCorePkg/Library/OcRngLib/OcRngLib.inf
   OpenCorePkg/Library/OcSerializeLib/OcSerializeLib.inf
@@ -391,6 +389,17 @@
   gEfiMdePkgTokenSpaceGuid.PcdFixedDebugPrintErrorLevel|0x80000042
 !endif
   gOpenCorePkgTokenSpaceGuid.PcdCanaryAllowRdtscFallback|TRUE
+
+  # ImageLoader settings
+  gEfiMdePkgTokenSpaceGuid.PcdImageLoaderRtRelocAllowTargetMismatch|FALSE
+  gEfiMdePkgTokenSpaceGuid.PcdImageLoaderHashProhibitOverlap|TRUE
+  gEfiMdePkgTokenSpaceGuid.PcdImageLoaderLoadHeader|TRUE
+  gEfiMdePkgTokenSpaceGuid.PcdImageLoaderDebugSupport|FALSE
+  gEfiMdePkgTokenSpaceGuid.PcdImageLoaderAllowMisalignedOffset|FALSE
+  gEfiMdePkgTokenSpaceGuid.PcdImageLoaderRemoveXForWX|FALSE
+  gEfiMdePkgTokenSpaceGuid.PcdImageLoaderWXorX|TRUE
+  gEfiMdePkgTokenSpaceGuid.PcdImageLoaderAlignmentPolicy|0xFFFFFFFF
+  gEfiMdePkgTokenSpaceGuid.PcdImageLoaderRelocTypePolicy|0xFFFFFFFF
 
 [PcdsPatchableInModule]
   gEfiMdeModulePkgTokenSpaceGuid.PcdSerialRegisterAccessWidth|8

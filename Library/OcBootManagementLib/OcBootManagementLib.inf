@@ -94,6 +94,7 @@
   MemoryAllocationLib
   PrintLib
   UefiBootServicesTableLib
+  UefiImageLib
   OcApfsLib
   OcAppleBootPolicyLib
   OcAppleChunklistLib
@@ -109,7 +110,6 @@
   OcFlexArrayLib
   OcMachoLib
   OcMiscLib
-  OcPeCoffLib
   OcRtcLib
   OcTypingLib
   OcVariableLib

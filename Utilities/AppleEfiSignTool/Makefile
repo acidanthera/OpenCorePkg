@@ -9,11 +9,12 @@ PRODUCT = $(PROJECT)$(INFIX)$(SUFFIX)
 OBJS    = $(PROJECT).o \
 	PeCoffDebug.o \
 	PeCoffHash.o \
+	PeCoffInfo.o \
 	PeCoffInit.o \
 	PeCoffLoad.o \
 	PeCoffRelocate.o \
 	OcPeCoffExtLib.o
-VPATH   = ../../Library/OcPeCoffLib:$\
+VPATH   = $(UDK_PATH)/MdePkg/Library/BasePeCoffLib2:$\
           ../../Library/OcPeCoffExtLib:$\
 
 include ../../User/Makefile
