@@ -206,6 +206,7 @@ OC_DECLARE (OC_DEV_PROP_CONFIG)
   _(OC_STRING                   , BundlePath       ,     , OC_STRING_CONSTR ("", _, __)     ,  OC_DESTR (OC_STRING) ) \
   _(OC_STRING                   , ExecutablePath   ,     , OC_STRING_CONSTR ("", _, __)     ,  OC_DESTR (OC_STRING) ) \
   _(OC_STRING                   , PlistPath        ,     , OC_STRING_CONSTR ("", _, __)     ,  OC_DESTR (OC_STRING) ) \
+  _(UINT8                       , KCType           ,     , 0                                ,  ()                   ) \
   _(UINT8 *                     , ImageData        ,     , NULL                             ,  OcFreePointer        ) \
   _(UINT32                      , ImageDataSize    ,     , 0                                ,  ()                   ) \
   _(CHAR8 *                     , PlistData        ,     , NULL                             ,  OcFreePointer        ) \

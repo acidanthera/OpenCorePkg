@@ -136,6 +136,7 @@ CheckKernelAdd (
   CONST CHAR8  *MaxKernel;
   CONST CHAR8  *MinKernel;
   CONST CHAR8  *PlistPath;
+  UINT8        KCType;
   UINTN        PlistFixedSize;
   UINTN        PlistPathSumSize;
   BOOLEAN      IsLiluUsed;
@@ -157,6 +158,7 @@ CheckKernelAdd (
     MaxKernel      = OC_BLOB_GET (&Config->Kernel.Add.Values[Index]->MaxKernel);
     MinKernel      = OC_BLOB_GET (&Config->Kernel.Add.Values[Index]->MinKernel);
     PlistPath      = OC_BLOB_GET (&Config->Kernel.Add.Values[Index]->PlistPath);
+    KCType         = Config->Kernel.Add.Values[Index]->KCType;
 
     //
     // Sanitise strings.
@@ -340,6 +342,14 @@ CheckKernelAdd (
         break;
       }
     }
+  }
+
+  //
+  // Check KCType
+  //
+  if (KCType > 2) {
+    DEBUG ((DEBUG_WARN, "Kernel->Add[%u]->KCType (currently set to %d) is borked!\n", Index, KCType));
+    ++ErrorCount;
   }
 
   //

@@ -332,6 +332,10 @@ typedef struct {
   // Prelinked is 32-bit.
   //
   BOOLEAN                                Is32Bit;
+  //
+  // Amount of kexts passed to Lilu for SysKC/AuxKC injection.
+  //
+  UINT32                                 LiluKextCount;
 } PRELINKED_CONTEXT;
 
 //
@@ -653,10 +657,10 @@ typedef struct {
   KERNEL_QUIRK_PATCH_FUNCTION    *PatchFunction;
 } KERNEL_QUIRK;
 
+#pragma pack(1)
 //
 // Prelinked symbols passed to Lilu
 //
-#pragma pack(1)
 typedef struct {
   //
   // Version of the format (currently 0)
@@ -701,6 +705,45 @@ typedef struct {
   //
   LILU_PRELINKED_SYMBOLS_ENTRY Entries[0];
 } LILU_PRELINKED_SYMBOLS;
+
+typedef struct {
+  //
+  // Version of the format (currently 0)
+  //
+  UINT8 Version;
+  //
+  // Length of this entry, including the plist and the executable
+  //
+  UINT32 EntryLength;
+  //
+  // KC type to inject into
+  //
+  UINT8 KCType;
+  //
+  // The bundle path
+  //
+  CHAR8 BundlePath[128];
+  //
+  // Offset to the plist
+  //
+  UINT32 InfoPlistOffset;
+  //
+  // Size of the plist
+  //
+  UINT32 InfoPlistSize;
+  //
+  // The executable path (Used iff ExecutableOffset != 0)
+  //
+  CHAR8 ExecutablePath[512];
+  //
+  // Offset to the executable (0 if there isn't an executable)
+  //
+  UINT32 ExecutableOffset;
+  //
+  // Size of the executable (Used iff ExecutableOffset != 0)
+  //
+  UINT32 ExecutableSize;
+} LILU_INJECTION_INFO;
 #pragma pack()
 
 /**
@@ -952,6 +995,34 @@ PrelinkedInjectKext (
   IN     UINT32             InfoPlistSize,
   IN     CONST CHAR8        *ExecutablePath OPTIONAL,
   IN OUT CONST UINT8        *Executable OPTIONAL,
+  IN     UINT32             ExecutableSize OPTIONAL,
+  OUT    CHAR8              BundleVersion[MAX_INFO_BUNDLE_VERSION_KEY_SIZE] OPTIONAL
+  );
+
+/**
+  Allocate a runtime memory buffer, place info required for kext injection in it, and pass the address to Lilu via an EFI variable.
+
+  @param[in,out] Context         Prelinked context.
+  @param[in]     KCType          Type of KC to inject into (1 = SysKC, 2 = AuxKC).
+  @param[in]     BundlePath      Kext bundle path (e.g. /L/E/mykext.kext).
+  @param[in,out] InfoPlist       Kext Info.plist.
+  @param[in]     InfoPlistSize   Kext Info.plist size.
+  @param[in,out] ExecutablePath  Kext executable path (e.g. Contents/MacOS/mykext), optional.
+  @param[in,out] Executable      Kext executable, optional.
+  @param[in]     ExecutableSize  Kext executable size, optional.
+  @param[out]    BundleVersion   Kext bundle version, optionally set on request.
+
+  @return  EFI_SUCCESS on success.
+**/
+EFI_STATUS
+PrelinkedPassKextToLilu (
+  IN OUT PRELINKED_CONTEXT  *Context,
+  IN     UINT8              KCType,
+  IN     CONST CHAR8        *BundlePath,
+  IN     CONST CHAR8        *InfoPlist,
+  IN     UINT32             InfoPlistSize,
+  IN     CONST CHAR8        *ExecutablePath OPTIONAL,
+  IN     CONST UINT8        *Executable OPTIONAL,
   IN     UINT32             ExecutableSize OPTIONAL,
   OUT    CHAR8              BundleVersion[MAX_INFO_BUNDLE_VERSION_KEY_SIZE] OPTIONAL
   );

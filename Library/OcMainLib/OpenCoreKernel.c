@@ -424,6 +424,11 @@ OcKernelLoadAndReserveKext (
     }
   }
 
+  // No need to reserve kext size for Lilu injections
+  if (Kext->KCType != 0) {
+    return;
+  }
+
   if ((CacheType == CacheTypeCacheless) || (CacheType == CacheTypeMkext)) {
     Status = MkextReserveKextSize (
                ReservedInfoSize,
@@ -640,17 +645,31 @@ OcKernelInjectKext (
                BundleVersion
                );
   } else if (CacheType == CacheTypePrelinked) {
-    Status = PrelinkedInjectKext (
-               Context,
-               IsForced ? Identifier : NULL,
-               IsForced ? BundlePath : FullPath,
-               Kext->PlistData,
-               Kext->PlistDataSize,
-               ExecutablePath,
-               Kext->ImageData,
-               Kext->ImageDataSize,
-               BundleVersion
-               );
+    if (Kext->KCType == 0) {
+      Status = PrelinkedInjectKext (
+                 Context,
+                 IsForced ? Identifier : NULL,
+                 IsForced ? BundlePath : FullPath,
+                 Kext->PlistData,
+                 Kext->PlistDataSize,
+                 ExecutablePath,
+                 Kext->ImageData,
+                 Kext->ImageDataSize,
+                 BundleVersion
+                 );
+    } else {
+      Status = PrelinkedPassKextToLilu (
+                 Context,
+                 Kext->KCType,
+                 BundlePath,
+                 Kext->PlistData,
+                 Kext->PlistDataSize,
+                 ExecutablePath,
+                 Kext->ImageData,
+                 Kext->ImageDataSize,
+                 BundleVersion
+                 );
+    }
   } else {
     Status = EFI_UNSUPPORTED;
   }

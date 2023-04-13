@@ -907,16 +907,18 @@ PrelinkedSetLiluEFIVariables(
   IN OUT PRELINKED_CONTEXT  *Context
   )
 {
-  LIST_ENTRY      *Link;
-  PRELINKED_KEXT  *Kext;
-  CONST PRELINKED_KEXT_SYMBOL  *Symbols;
-  CONST PRELINKED_KEXT_SYMBOL  *SymbolsEnd;
-  UINT32                       NumSymbolsInKext;
-  UINT32                       NumSymbolsInPrelinked;
-  UINT32                       LengthOfPrelinkedSymbols;
-  VOID *Buffer;
+  LIST_ENTRY                    *Link;
+  PRELINKED_KEXT                *Kext;
+  CONST PRELINKED_KEXT_SYMBOL   *Symbols;
+  CONST PRELINKED_KEXT_SYMBOL   *SymbolsEnd;
+  UINT32                        NumSymbolsInKext;
+  UINT32                        NumSymbolsInPrelinked;
+  UINT32                        LengthOfPrelinkedSymbols;
+  VOID                          *Buffer;
   LILU_PRELINKED_SYMBOLS_HEADER *LiluHeader;
-  LILU_PRELINKED_SYMBOLS_ENTRY *CurEntry;
+  LILU_PRELINKED_SYMBOLS_ENTRY  *CurEntry;
+  UINT64                        LiluPrelinkedSymbolsAddr;
+  EFI_STATUS                    Status;
 
   // Figure out the value of NumSymbolsInPrelinked and LengthOfPrelinkedSymbols
   Link  = GetFirstNode (&Context->PrelinkedKexts);
@@ -941,7 +943,7 @@ PrelinkedSetLiluEFIVariables(
   }
 
   // Allocate buffer and setup header
-  UINT64 LiluPrelinkedSymbolsAddr = (UINT64)AllocateRuntimePool(LengthOfPrelinkedSymbols);
+  LiluPrelinkedSymbolsAddr = (UINT64)AllocateRuntimePool(LengthOfPrelinkedSymbols);
   Buffer = (VOID*)LiluPrelinkedSymbolsAddr;
   if (!Buffer) return EFI_OUT_OF_RESOURCES;
 
@@ -984,14 +986,27 @@ PrelinkedSetLiluEFIVariables(
     ));
 
   // Expose the physical address of the LILU_PRELINKED_SYMBOLS struct via an EFI variable
-  return OcSetSystemVariable (
+  Status = OcSetSystemVariable (
     OC_LILU_PRELINKED_SYMBOLS_ADDR_VARIABLE_NAME,
     OPEN_CORE_NVRAM_ATTR,
     8,
     (void *) &LiluPrelinkedSymbolsAddr,
     &gOcReadOnlyVariableGuid
     );
-  return EFI_SUCCESS;
+
+  if (EFI_ERROR (Status)) {
+    FreePool (Buffer);
+    return Status;
+  }
+
+  // Tell Lilu the amount of kexts to inject
+  return OcSetSystemVariable (
+    OC_LILU_KEXT_COUNT_VARIABLE_NAME,
+    OPEN_CORE_NVRAM_ATTR,
+    4,
+    (void *) &Context->LiluKextCount,
+    &gOcReadOnlyVariableGuid
+    );
 }
 
 EFI_STATUS
@@ -1346,6 +1361,97 @@ PrelinkedInjectKext (
     // for KernelCollection support.
     //
     InsertTailList (&Context->InjectedKexts, &PrelinkedKext->InjectedLink);
+  }
+
+  return EFI_SUCCESS;
+}
+
+EFI_STATUS
+PrelinkedPassKextToLilu (
+  IN OUT PRELINKED_CONTEXT  *Context,
+  IN     UINT8              KCType,
+  IN     CONST CHAR8        *BundlePath,
+  IN     CONST CHAR8        *InfoPlist,
+  IN     UINT32             InfoPlistSize,
+  IN     CONST CHAR8        *ExecutablePath OPTIONAL,
+  IN     CONST UINT8        *Executable OPTIONAL,
+  IN     UINT32             ExecutableSize OPTIONAL,
+  OUT    CHAR8              BundleVersion[MAX_INFO_BUNDLE_VERSION_KEY_SIZE] OPTIONAL
+  )
+{
+  EFI_STATUS   Status;
+  CHAR16       EFIVarName[64];
+  VOID         *Buffer;
+  UINT32       EntryLength;
+  LILU_INJECTION_INFO *InjectionInfo;
+  UINT32       InfoPlistOffset;
+  UINT32       ExecutableOffset;
+
+  EntryLength = sizeof (LILU_INJECTION_INFO) + InfoPlistSize + ExecutableSize;
+  InfoPlistOffset = sizeof (LILU_INJECTION_INFO);
+  ExecutableOffset = InfoPlistOffset + InfoPlistSize;
+
+  // Allocate buffer and setup header
+  UINT64 LiluInjectionInfoAddr = (UINT64)AllocateRuntimePool(EntryLength);
+  Buffer = (VOID*)LiluInjectionInfoAddr;
+  if (!Buffer) return EFI_OUT_OF_RESOURCES;
+
+  InjectionInfo = (LILU_INJECTION_INFO *)Buffer;
+  InjectionInfo->Version = 0;
+  InjectionInfo->EntryLength = EntryLength;
+  if (AsciiStrCpyS (InjectionInfo->BundlePath, sizeof (InjectionInfo->BundlePath), BundlePath) != RETURN_SUCCESS) {
+    FreePool (Buffer);
+    return EFI_UNSUPPORTED;
+  }
+  InjectionInfo->KCType = KCType;
+  InjectionInfo->InfoPlistOffset = InfoPlistOffset;
+  InjectionInfo->InfoPlistSize = InfoPlistSize;
+
+  if (Executable != NULL) {
+    if (AsciiStrCpyS (InjectionInfo->ExecutablePath, sizeof (InjectionInfo->ExecutablePath), ExecutablePath) != RETURN_SUCCESS) {
+      FreePool (Buffer);
+      return EFI_UNSUPPORTED;
+    }
+    InjectionInfo->ExecutableOffset = ExecutableOffset;
+    InjectionInfo->ExecutableSize = ExecutableSize;
+  } else {
+    InjectionInfo->ExecutableOffset = 0;
+    InjectionInfo->ExecutableSize = 0;
+  }
+
+  CopyMem ((UINT8*)Buffer + InfoPlistOffset, InfoPlist, InfoPlistSize);
+  if (Executable != NULL) {
+    CopyMem ((UINT8*)Buffer + ExecutableOffset, Executable, ExecutableSize);
+  }
+
+  // Set EFIVarName
+  Status = OcUnicodeSafeSPrint (
+    EFIVarName,
+    sizeof (EFIVarName),
+    L"lilu-injection-info-%d",
+    Context->LiluKextCount
+    );
+  if (EFI_ERROR (Status)) {
+    FreePool (Buffer);
+    return EFI_INVALID_PARAMETER;
+  }
+
+  Status = OcSetSystemVariable (
+    EFIVarName,
+    OPEN_CORE_NVRAM_ATTR,
+    8,
+    &LiluInjectionInfoAddr,
+    &gOcReadOnlyVariableGuid
+    );
+  if (EFI_ERROR (Status)) {
+    return Status;
+  }
+
+  Context->LiluKextCount++;
+
+  // To make caller of the function happy
+  if (BundleVersion != NULL) {
+    BundleVersion = "1.0.0";
   }
 
   return EFI_SUCCESS;
