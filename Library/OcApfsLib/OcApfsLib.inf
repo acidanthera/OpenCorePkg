@@ -62,9 +62,9 @@
   OcConsoleLib
   OcDriverConnectionLib
   OcMiscLib
-  OcPeCoffLib
   OcPeCoffExtLib
   MemoryAllocationLib
   UefiBootServicesTableLib
   UefiLib
+  UefiImageLib
   UefiRuntimeServicesTableLib
