@@ -55,10 +55,6 @@ extern UINT32   _gPcd_FixedAtBuild_PcdMaximumDevicePathNodeCount;
 extern BOOLEAN  _gPcd_FixedAtBuild_PcdImageLoaderRtRelocAllowTargetMismatch;
 extern BOOLEAN  _gPcd_FixedAtBuild_PcdImageLoaderHashProhibitOverlap;
 extern BOOLEAN  _gPcd_FixedAtBuild_PcdImageLoaderLoadHeader;
-extern BOOLEAN  _gPcd_FixedAtBuild_PcdImageLoaderSupportArmThumb;
-extern BOOLEAN  _gPcd_FixedAtBuild_PcdImageLoaderForceLoadDebug;
-extern BOOLEAN  _gPcd_FixedAtBuild_PcdImageLoaderTolerantLoad;
-extern BOOLEAN  _gPcd_FixedAtBuild_PcdImageLoaderSupportDebug;
 extern BOOLEAN  _gPcd_FixedAtBuild_PcdImageLoaderDebugSupport;
 extern BOOLEAN  _gPcd_FixedAtBuild_PcdImageLoaderAllowMisalignedOffset;
 extern BOOLEAN  _gPcd_FixedAtBuild_PcdImageLoaderRemoveXForWX;
@@ -99,10 +95,6 @@ extern UINT32   _gPcd_BinaryPatch_PcdSerialRegisterStride;
 #define _PCD_GET_MODE_BOOL_PcdImageLoaderRtRelocAllowTargetMismatch  _gPcd_FixedAtBuild_PcdImageLoaderRtRelocAllowTargetMismatch
 #define _PCD_GET_MODE_BOOL_PcdImageLoaderHashProhibitOverlap         _gPcd_FixedAtBuild_PcdImageLoaderHashProhibitOverlap
 #define _PCD_GET_MODE_BOOL_PcdImageLoaderLoadHeader                  _gPcd_FixedAtBuild_PcdImageLoaderLoadHeader
-#define _PCD_GET_MODE_BOOL_PcdImageLoaderSupportArmThumb             _gPcd_FixedAtBuild_PcdImageLoaderSupportArmThumb
-#define _PCD_GET_MODE_BOOL_PcdImageLoaderForceLoadDebug              _gPcd_FixedAtBuild_PcdImageLoaderForceLoadDebug
-#define _PCD_GET_MODE_BOOL_PcdImageLoaderTolerantLoad                _gPcd_FixedAtBuild_PcdImageLoaderTolerantLoad
-#define _PCD_GET_MODE_BOOL_PcdImageLoaderSupportDebug                _gPcd_FixedAtBuild_PcdImageLoaderSupportDebug
 #define _PCD_GET_MODE_BOOL_PcdImageLoaderDebugSupport                _gPcd_FixedAtBuild_PcdImageLoaderDebugSupport
 #define _PCD_GET_MODE_BOOL_PcdImageLoaderAllowMisalignedOffset       _gPcd_FixedAtBuild_PcdImageLoaderAllowMisalignedOffset
 #define _PCD_GET_MODE_BOOL_PcdImageLoaderRemoveXForWX                _gPcd_FixedAtBuild_PcdImageLoaderRemoveXForWX
