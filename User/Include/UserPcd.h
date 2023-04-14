@@ -103,12 +103,11 @@ extern UINT32   _gPcd_BinaryPatch_PcdSerialRegisterStride;
 #define _PCD_GET_MODE_BOOL_PcdImageLoaderForceLoadDebug              _gPcd_FixedAtBuild_PcdImageLoaderForceLoadDebug
 #define _PCD_GET_MODE_BOOL_PcdImageLoaderTolerantLoad                _gPcd_FixedAtBuild_PcdImageLoaderTolerantLoad
 #define _PCD_GET_MODE_BOOL_PcdImageLoaderSupportDebug                _gPcd_FixedAtBuild_PcdImageLoaderSupportDebug
-#define _PCD_GET_MODE_BOOL_PcdImageLoaderDebugSupport             _gPcd_FixedAtBuild_PcdImageLoaderDebugSupport
-#define _PCD_GET_MODE_BOOL_PcdImageLoaderAllowMisalignedOffset              _gPcd_FixedAtBuild_PcdImageLoaderAllowMisalignedOffset
+#define _PCD_GET_MODE_BOOL_PcdImageLoaderDebugSupport                _gPcd_FixedAtBuild_PcdImageLoaderDebugSupport
+#define _PCD_GET_MODE_BOOL_PcdImageLoaderAllowMisalignedOffset       _gPcd_FixedAtBuild_PcdImageLoaderAllowMisalignedOffset
 #define _PCD_GET_MODE_BOOL_PcdImageLoaderRemoveXForWX                _gPcd_FixedAtBuild_PcdImageLoaderRemoveXForWX
-#define _PCD_GET_MODE_BOOL_PcdImageLoaderWXorX                _gPcd_FixedAtBuild_PcdImageLoaderWXorX
+#define _PCD_GET_MODE_BOOL_PcdImageLoaderWXorX                       _gPcd_FixedAtBuild_PcdImageLoaderWXorX
 #define _PCD_GET_MODE_32_PcdImageLoaderAlignmentPolicy               _gPcd_FixedAtBuild_PcdImageLoaderAlignmentPolicy
 #define _PCD_GET_MODE_32_PcdImageLoaderRelocTypePolicy               _gPcd_FixedAtBuild_PcdImageLoaderRelocTypePolicy
-
 
 #endif // OC_USER_PCD_H
