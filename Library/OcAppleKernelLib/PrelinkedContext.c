@@ -1428,7 +1428,7 @@ PrelinkedPassKextToLilu (
   Status = OcUnicodeSafeSPrint (
     EFIVarName,
     sizeof (EFIVarName),
-    L"lilu-injection-info-%d",
+    L"lilu-injection-info-addr-%d",
     Context->LiluKextCount
     );
   if (EFI_ERROR (Status)) {
