@@ -395,6 +395,11 @@ PrelinkedContextInit (
     }
 
     Context->PrelinkedLastLoadAddress = Context->LinkEditSegment->Segment64.VirtualAddress + Context->LinkEditSegment->Segment64.Size;
+
+    Context->LiluExclusionInfos = (LILU_EXCLUSION_INFO*)AllocateRuntimePool (LILU_EXCLUSION_INFO_SIZE_LIMIT_VERSION_0);
+    Context->LiluExclusionInfos->Header.Version = 0;
+    Context->LiluExclusionInfos->Header.Size = sizeof (LILU_EXCLUSION_INFO_HEADER);
+    Context->LiluExclusionInfos->Header.KextCount = 0;
   }
 
   //
@@ -488,6 +493,8 @@ PrelinkedContextFree (
   // We do not need to iterate InjectedKexts here, as its memory was freed above.
   //
   ZeroMem (&Context->InjectedKexts, sizeof (Context->InjectedKexts));
+
+  // Do not free Context->LiluExclusionInfos as it's passed to Lilu
 }
 
 EFI_STATUS
@@ -1001,11 +1008,22 @@ PrelinkedSetLiluEFIVariables(
   }
 
   // Tell Lilu the amount of kexts to inject
-  return OcSetSystemVariable (
+  Status = OcSetSystemVariable (
     OC_LILU_KEXT_COUNT_VARIABLE_NAME,
     OPEN_CORE_NVRAM_ATTR,
     4,
     (void *) &Context->LiluKextCount,
+    &Guid
+    );
+  if (EFI_ERROR (Status)) {
+    return Status;
+  }
+
+  return OcSetSystemVariable (
+    OC_LILU_EXCLUSION_INFO_ADDR_VARIABLE_NAME,
+    OPEN_CORE_NVRAM_ATTR,
+    8,
+    (void *) &Context->LiluExclusionInfos,
     &Guid
     );
 }
@@ -1530,4 +1548,34 @@ PrelinkedContextBlock (
   }
 
   return Exclude ? PatcherExcludePrelinkedKext (Identifier, &Patcher, Context) : PatcherBlockKext (&Patcher);
+}
+
+EFI_STATUS
+PrelinkedContextBlockViaLilu (
+  IN OUT PRELINKED_CONTEXT  *Context,
+  IN     CONST CHAR8        *Identifier,
+  IN     BOOLEAN            Exclude,
+  IN     UINT8              KCType
+  )
+{
+  LILU_EXCLUSION_INFO_ENTRY  *CurEntry;
+
+  ASSERT (Context != NULL);
+  ASSERT (Identifier != NULL);
+
+  if (Context->LiluExclusionInfos->Header.Size + sizeof (LILU_EXCLUSION_INFO_ENTRY) > LILU_EXCLUSION_INFO_SIZE_LIMIT_VERSION_0) {
+    DEBUG ((DEBUG_INFO, "OCAK: Size required for Lilu kext block (%d) is above the limit (%d)",
+            Context->LiluExclusionInfos->Header.Size + sizeof (LILU_EXCLUSION_INFO_ENTRY),
+            LILU_EXCLUSION_INFO_SIZE_LIMIT_VERSION_0));
+    return EFI_OUT_OF_RESOURCES;
+  }
+
+  CurEntry = &Context->LiluExclusionInfos->Entries[Context->LiluExclusionInfos->Header.KextCount];
+  AsciiStrCpyS (CurEntry->Identifier, sizeof (CurEntry->Identifier), Identifier);
+  CurEntry->Exclude = Exclude;
+  CurEntry->KCType = KCType;
+
+  Context->LiluExclusionInfos->Header.Size += sizeof (LILU_EXCLUSION_INFO_ENTRY);
+  Context->LiluExclusionInfos->Header.KextCount++;
+  return EFI_SUCCESS;
 }

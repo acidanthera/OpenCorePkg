@@ -168,6 +168,148 @@ typedef enum KERNEL_CACHE_TYPE_ {
 #define KERNEL_VERSION_MONTEREY_MAX       (KERNEL_VERSION_VENTURA_MIN - 1)
 
 //
+// Lilu integration structs
+//
+#pragma pack(1)
+//
+// Prelinked symbols passed to Lilu
+//
+typedef struct {
+  //
+  // Version of the format (currently 0)
+  //
+  UINT8 Version;
+  //
+  // Size of the entire LILU_PRELINKED_SYMBOLS struct
+  //
+  UINT32 Size;
+  //
+  // Number of symbols
+  //
+  UINT32 NumberOfSymbols;
+} LILU_PRELINKED_SYMBOLS_HEADER;
+
+typedef struct {
+  //
+  // Length of this entry
+  //
+  UINT32 EntryLength;
+  //
+  // Value of this symbol (or stab offset)
+  //
+  UINT64 SymbolValue;
+  //
+  // Length of this symbol's name
+  //
+  UINT32 SymbolNameLength;
+  //
+  // This symbols's name
+  //
+  CHAR8 SymbolName[0];
+} LILU_PRELINKED_SYMBOLS_ENTRY;
+
+typedef struct {
+  //
+  // The header
+  //
+  LILU_PRELINKED_SYMBOLS_HEADER Header;
+  //
+  // The symbols
+  //
+  LILU_PRELINKED_SYMBOLS_ENTRY Entries[0];
+} LILU_PRELINKED_SYMBOLS;
+
+//
+// Kext injection info/request passed to Lilu
+//
+typedef struct {
+  //
+  // Version of the format (currently 0)
+  //
+  UINT8 Version;
+  //
+  // Length of this entry, including the plist and the executable
+  //
+  UINT32 EntryLength;
+  //
+  // KC type to inject into
+  //
+  UINT8 KCType;
+  //
+  // The bundle path
+  //
+  CHAR8 BundlePath[128];
+  //
+  // Offset to the plist
+  //
+  UINT32 InfoPlistOffset;
+  //
+  // Size of the plist
+  //
+  UINT32 InfoPlistSize;
+  //
+  // The executable path (Used iff ExecutableOffset != 0)
+  //
+  CHAR8 ExecutablePath[512];
+  //
+  // Offset to the executable (0 if there isn't an executable)
+  //
+  UINT32 ExecutableOffset;
+  //
+  // Size of the executable (Used iff ExecutableOffset != 0)
+  //
+  UINT32 ExecutableSize;
+} LILU_INJECTION_INFO;
+
+//
+// Kext exclusion info/request passed to Lilu
+//
+typedef struct {
+  //
+  // Version of the format (currently 0)
+  //
+  UINT8 Version;
+  //
+  // Size of the entire LILU_EXCLUSION_INFO struct
+  //
+  UINT32 Size;
+  //
+  // Number of kexts to exclude
+  //
+  UINT32 KextCount;
+} LILU_EXCLUSION_INFO_HEADER;
+
+typedef struct {
+  //
+  // The kext identifier
+  //
+  CHAR8 Identifier[128];
+  //
+  // Whether to Block (false) or to Exclude (true)
+  //
+  BOOLEAN Exclude;
+  //
+  // The KC type
+  //
+  UINT8 KCType;
+} LILU_EXCLUSION_INFO_ENTRY;
+
+typedef struct {
+  //
+  // The header
+  //
+  LILU_EXCLUSION_INFO_HEADER Header;
+  //
+  // The kexts to exclude
+  //
+  LILU_EXCLUSION_INFO_ENTRY Entries[0];
+} LILU_EXCLUSION_INFO;
+
+// The maximize size of LILU_EXCLUSION_INFO allowed on version 0
+#define LILU_EXCLUSION_INFO_SIZE_LIMIT_VERSION_0 16384
+#pragma pack()
+
+//
 // Prelinked context used for kernel modification.
 //
 typedef struct {
@@ -336,6 +478,10 @@ typedef struct {
   // Amount of kexts passed to Lilu for SysKC/AuxKC injection.
   //
   UINT32                                 LiluKextCount;
+  //
+  // Exclusion info to pass to Lilu
+  //
+  LILU_EXCLUSION_INFO                    *LiluExclusionInfos;
 } PRELINKED_CONTEXT;
 
 //
@@ -657,95 +803,6 @@ typedef struct {
   KERNEL_QUIRK_PATCH_FUNCTION    *PatchFunction;
 } KERNEL_QUIRK;
 
-#pragma pack(1)
-//
-// Prelinked symbols passed to Lilu
-//
-typedef struct {
-  //
-  // Version of the format (currently 0)
-  //
-  UINT8 Version;
-  //
-  // Size of the entire LILU_PRELINKED_SYMBOLS struct
-  //
-  UINT32 Size;
-  //
-  // Number of symbols
-  //
-  UINT32 NumberOfSymbols;
-} LILU_PRELINKED_SYMBOLS_HEADER;
-
-typedef struct {
-  //
-  // Length of this entry
-  //
-  UINT32 EntryLength;
-  //
-  // Value of this symbol (or stab offset)
-  //
-  UINT64 SymbolValue;
-  //
-  // Length of this symbol's name
-  //
-  UINT32 SymbolNameLength;
-  //
-  // This symbols's name
-  //
-  CHAR8 SymbolName[0];
-} LILU_PRELINKED_SYMBOLS_ENTRY;
-
-typedef struct {
-  //
-  // The header
-  //
-  LILU_PRELINKED_SYMBOLS_HEADER Header;
-  //
-  // The symbols
-  //
-  LILU_PRELINKED_SYMBOLS_ENTRY Entries[0];
-} LILU_PRELINKED_SYMBOLS;
-
-typedef struct {
-  //
-  // Version of the format (currently 0)
-  //
-  UINT8 Version;
-  //
-  // Length of this entry, including the plist and the executable
-  //
-  UINT32 EntryLength;
-  //
-  // KC type to inject into
-  //
-  UINT8 KCType;
-  //
-  // The bundle path
-  //
-  CHAR8 BundlePath[128];
-  //
-  // Offset to the plist
-  //
-  UINT32 InfoPlistOffset;
-  //
-  // Size of the plist
-  //
-  UINT32 InfoPlistSize;
-  //
-  // The executable path (Used iff ExecutableOffset != 0)
-  //
-  CHAR8 ExecutablePath[512];
-  //
-  // Offset to the executable (0 if there isn't an executable)
-  //
-  UINT32 ExecutableOffset;
-  //
-  // Size of the executable (Used iff ExecutableOffset != 0)
-  //
-  UINT32 ExecutableSize;
-} LILU_INJECTION_INFO;
-#pragma pack()
-
 /**
   Applies the specified quirk.
 
@@ -1003,7 +1060,7 @@ PrelinkedInjectKext (
   Allocate a runtime memory buffer, place info required for kext injection in it, and pass the address to Lilu via an EFI variable.
 
   @param[in,out] Context         Prelinked context.
-  @param[in]     KCType          Type of KC to inject into (1 = SysKC, 2 = AuxKC).
+  @param[in]     KCType          Type of KC to inject into (2 = SysKC, 3 = AuxKC).
   @param[in]     BundlePath      Kext bundle path (e.g. /L/E/mykext.kext).
   @param[in,out] InfoPlist       Kext Info.plist.
   @param[in]     InfoPlistSize   Kext Info.plist size.
@@ -1073,6 +1130,24 @@ PrelinkedContextBlock (
   IN OUT PRELINKED_CONTEXT  *Context,
   IN     CONST CHAR8        *Identifier,
   IN     BOOLEAN            Exclude
+  );
+
+/**
+  Block kext in prelinked via Lilu.
+
+  @param[in,out] Context         Prelinked context.
+  @param[in]     Identifier      Kext bundle identifier.
+  @param[in]     Exclude         TRUE to exclude kext from KC.
+  @param[in]     KCType          The KC type of the kext to block.
+
+  @return  EFI_SUCCESS on success.
+**/
+EFI_STATUS
+PrelinkedContextBlockViaLilu (
+  IN OUT PRELINKED_CONTEXT  *Context,
+  IN     CONST CHAR8        *Identifier,
+  IN     BOOLEAN            Exclude,
+  IN     UINT8              KCType
   );
 
 /**

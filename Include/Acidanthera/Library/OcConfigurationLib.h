@@ -227,7 +227,8 @@ OC_DECLARE (OC_KERNEL_ADD_ARRAY)
   _(OC_STRING                   , Identifier       ,     , OC_STRING_CONSTR ("", _, __)         ,  OC_DESTR (OC_STRING) ) \
   _(OC_STRING                   , MaxKernel        ,     , OC_STRING_CONSTR ("", _, __)         ,  OC_DESTR (OC_STRING) ) \
   _(OC_STRING                   , MinKernel        ,     , OC_STRING_CONSTR ("", _, __)         ,  OC_DESTR (OC_STRING) ) \
-  _(OC_STRING                   , Strategy         ,     , OC_STRING_CONSTR ("Disable", _, __)  ,  OC_DESTR (OC_STRING) )
+  _(OC_STRING                   , Strategy         ,     , OC_STRING_CONSTR ("Disable", _, __)  ,  OC_DESTR (OC_STRING) ) \
+  _(UINT8                       , KCType           ,     , 0                                    ,  ()                   )
 OC_DECLARE (OC_KERNEL_BLOCK_ENTRY)
 
 #define OC_KERNEL_BLOCK_ARRAY_FIELDS(_, __) \
