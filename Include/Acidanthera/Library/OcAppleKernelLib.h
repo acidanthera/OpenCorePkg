@@ -178,45 +178,45 @@ typedef struct {
   //
   // Version of the format (currently 0)
   //
-  UINT8 Version;
+  UINT8     Version;
   //
   // Size of the entire LILU_PRELINKED_SYMBOLS struct
   //
-  UINT32 Size;
+  UINT32    Size;
   //
   // Number of symbols
   //
-  UINT32 NumberOfSymbols;
+  UINT32    NumberOfSymbols;
 } LILU_PRELINKED_SYMBOLS_HEADER;
 
 typedef struct {
   //
   // Length of this entry
   //
-  UINT32 EntryLength;
+  UINT32    EntryLength;
   //
   // Value of this symbol (or stab offset)
   //
-  UINT64 SymbolValue;
+  UINT64    SymbolValue;
   //
   // Length of this symbol's name
   //
-  UINT32 SymbolNameLength;
+  UINT32    SymbolNameLength;
   //
   // This symbols's name
   //
-  CHAR8 SymbolName[0];
+  CHAR8     SymbolName[0];
 } LILU_PRELINKED_SYMBOLS_ENTRY;
 
 typedef struct {
   //
   // The header
   //
-  LILU_PRELINKED_SYMBOLS_HEADER Header;
+  LILU_PRELINKED_SYMBOLS_HEADER    Header;
   //
   // The symbols
   //
-  LILU_PRELINKED_SYMBOLS_ENTRY Entries[0];
+  LILU_PRELINKED_SYMBOLS_ENTRY     Entries[0];
 } LILU_PRELINKED_SYMBOLS;
 
 //
@@ -226,39 +226,39 @@ typedef struct {
   //
   // Version of the format (currently 0)
   //
-  UINT8 Version;
+  UINT8     Version;
   //
   // Length of this entry, including the plist and the executable
   //
-  UINT32 EntryLength;
+  UINT32    EntryLength;
   //
   // KC type to inject into
   //
-  UINT8 KCKind;
+  UINT8     KCKind;
   //
   // The bundle path
   //
-  CHAR8 BundlePath[128];
+  CHAR8     BundlePath[128];
   //
   // Offset to the plist
   //
-  UINT32 InfoPlistOffset;
+  UINT32    InfoPlistOffset;
   //
   // Size of the plist
   //
-  UINT32 InfoPlistSize;
+  UINT32    InfoPlistSize;
   //
   // The executable path (Used iff ExecutableOffset != 0)
   //
-  CHAR8 ExecutablePath[512];
+  CHAR8     ExecutablePath[512];
   //
   // Offset to the executable (0 if there isn't an executable)
   //
-  UINT32 ExecutableOffset;
+  UINT32    ExecutableOffset;
   //
   // Size of the executable (Used iff ExecutableOffset != 0)
   //
-  UINT32 ExecutableSize;
+  UINT32    ExecutableSize;
 } LILU_INJECTION_INFO;
 
 //
@@ -268,45 +268,45 @@ typedef struct {
   //
   // Version of the format (currently 0)
   //
-  UINT8 Version;
+  UINT8     Version;
   //
   // Size of the entire LILU_EXCLUSION_INFO struct
   //
-  UINT32 Size;
+  UINT32    Size;
   //
   // Number of kexts to exclude
   //
-  UINT32 KextCount;
+  UINT32    KextCount;
 } LILU_EXCLUSION_INFO_HEADER;
 
 typedef struct {
   //
   // The kext identifier
   //
-  CHAR8 Identifier[128];
+  CHAR8      Identifier[128];
   //
   // Whether to Block (false) or to Exclude (true)
   //
-  BOOLEAN Exclude;
+  BOOLEAN    Exclude;
   //
   // The KC type
   //
-  UINT8 KCKind;
+  UINT8      KCKind;
 } LILU_EXCLUSION_INFO_ENTRY;
 
 typedef struct {
   //
   // The header
   //
-  LILU_EXCLUSION_INFO_HEADER Header;
+  LILU_EXCLUSION_INFO_HEADER    Header;
   //
   // The kexts to exclude
   //
-  LILU_EXCLUSION_INFO_ENTRY Entries[0];
+  LILU_EXCLUSION_INFO_ENTRY     Entries[0];
 } LILU_EXCLUSION_INFO;
 
 // The maximize size of LILU_EXCLUSION_INFO allowed on version 0
-#define LILU_EXCLUSION_INFO_SIZE_LIMIT_VERSION_0 16384
+#define LILU_EXCLUSION_INFO_SIZE_LIMIT_VERSION_0  16384
 #pragma pack()
 
 //
