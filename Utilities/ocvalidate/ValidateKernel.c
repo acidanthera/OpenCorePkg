@@ -315,6 +315,14 @@ CheckKernelAdd (
         }
       }
     }
+
+    //
+    // Check KCType
+    //
+    if (KCType > 2) {
+      DEBUG ((DEBUG_WARN, "Kernel->Add[%u]->KCType (currently set to %d) is borked!\n", Index, KCType));
+      ++ErrorCount;
+    }
   }
 
   //
@@ -342,14 +350,6 @@ CheckKernelAdd (
         break;
       }
     }
-  }
-
-  //
-  // Check KCType
-  //
-  if (KCType > 2) {
-    DEBUG ((DEBUG_WARN, "Kernel->Add[%u]->KCType (currently set to %d) is borked!\n", Index, KCType));
-    ++ErrorCount;
   }
 
   //

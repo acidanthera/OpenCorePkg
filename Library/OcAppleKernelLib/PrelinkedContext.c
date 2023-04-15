@@ -919,6 +919,7 @@ PrelinkedSetLiluEFIVariables(
   LILU_PRELINKED_SYMBOLS_ENTRY  *CurEntry;
   UINT64                        LiluPrelinkedSymbolsAddr;
   EFI_STATUS                    Status;
+  EFI_GUID                      Guid = OC_READ_ONLY_VARIABLE_GUID;
 
   // Figure out the value of NumSymbolsInPrelinked and LengthOfPrelinkedSymbols
   Link  = GetFirstNode (&Context->PrelinkedKexts);
@@ -991,7 +992,7 @@ PrelinkedSetLiluEFIVariables(
     OPEN_CORE_NVRAM_ATTR,
     8,
     (void *) &LiluPrelinkedSymbolsAddr,
-    &gOcReadOnlyVariableGuid
+    &Guid
     );
 
   if (EFI_ERROR (Status)) {
@@ -1005,7 +1006,7 @@ PrelinkedSetLiluEFIVariables(
     OPEN_CORE_NVRAM_ATTR,
     4,
     (void *) &Context->LiluKextCount,
-    &gOcReadOnlyVariableGuid
+    &Guid
     );
 }
 
@@ -1379,13 +1380,14 @@ PrelinkedPassKextToLilu (
   OUT    CHAR8              BundleVersion[MAX_INFO_BUNDLE_VERSION_KEY_SIZE] OPTIONAL
   )
 {
-  EFI_STATUS   Status;
-  CHAR16       EFIVarName[64];
-  VOID         *Buffer;
-  UINT32       EntryLength;
+  EFI_STATUS          Status;
+  CHAR16              EFIVarName[64];
+  VOID                *Buffer;
+  UINT32              EntryLength;
   LILU_INJECTION_INFO *InjectionInfo;
-  UINT32       InfoPlistOffset;
-  UINT32       ExecutableOffset;
+  UINT32              InfoPlistOffset;
+  UINT32              ExecutableOffset;
+  EFI_GUID            Guid = OC_READ_ONLY_VARIABLE_GUID;
 
   EntryLength = sizeof (LILU_INJECTION_INFO) + InfoPlistSize + ExecutableSize;
   InfoPlistOffset = sizeof (LILU_INJECTION_INFO);
@@ -1441,7 +1443,7 @@ PrelinkedPassKextToLilu (
     OPEN_CORE_NVRAM_ATTR,
     8,
     &LiluInjectionInfoAddr,
-    &gOcReadOnlyVariableGuid
+    &Guid
     );
   if (EFI_ERROR (Status)) {
     return Status;
