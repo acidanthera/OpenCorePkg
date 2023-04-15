@@ -408,7 +408,7 @@ OcKernelBlockKexts (
   BOOLEAN                Exclude;
   UINT32                 MaxKernel;
   UINT32                 MinKernel;
-  UINT8                  KCType;
+  UINT8                  KCKind;
 
   for (Index = 0; Index < Config->Kernel.Block.Count; ++Index) {
     Kext = Config->Kernel.Block.Values[Index];
@@ -423,7 +423,7 @@ OcKernelBlockKexts (
     Strategy  = OC_BLOB_GET (&Kext->Strategy);
     MaxKernel = OcParseDarwinVersion (OC_BLOB_GET (&Kext->MaxKernel));
     MinKernel = OcParseDarwinVersion (OC_BLOB_GET (&Kext->MinKernel));
-    KCType    = Kext->KCType;
+    KCKind    = Kext->KCKind;
 
     if (AsciiStrCmp (Arch, Is32Bit ? "x86_64" : "i386") == 0) {
       DEBUG ((
@@ -463,10 +463,10 @@ OcKernelBlockKexts (
     } else if (CacheType == CacheTypeMkext) {
       Status = MkextContextBlock (Context, Target, Exclude);
     } else if (CacheType == CacheTypePrelinked) {
-      if (KCType == 0) {
+      if (KCKind == 0) {
         Status = PrelinkedContextBlock (Context, Target, Exclude);
       } else {
-        Status = PrelinkedContextBlockViaLilu (Context, Target, Exclude, KCType);
+        Status = PrelinkedContextBlockViaLilu (Context, Target, Exclude, KCKind);
       }
     } else {
       Status = EFI_UNSUPPORTED;

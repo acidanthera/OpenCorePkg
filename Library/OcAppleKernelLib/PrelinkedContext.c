@@ -1388,7 +1388,7 @@ PrelinkedInjectKext (
 EFI_STATUS
 PrelinkedPassKextToLilu (
   IN OUT PRELINKED_CONTEXT  *Context,
-  IN     UINT8              KCType,
+  IN     UINT8              KCKind,
   IN     CONST CHAR8        *BundlePath,
   IN     CONST CHAR8        *InfoPlist,
   IN     UINT32             InfoPlistSize,
@@ -1423,7 +1423,7 @@ PrelinkedPassKextToLilu (
     FreePool (Buffer);
     return EFI_UNSUPPORTED;
   }
-  InjectionInfo->KCType = KCType;
+  InjectionInfo->KCKind = KCKind;
   InjectionInfo->InfoPlistOffset = InfoPlistOffset;
   InjectionInfo->InfoPlistSize = InfoPlistSize;
 
@@ -1555,7 +1555,7 @@ PrelinkedContextBlockViaLilu (
   IN OUT PRELINKED_CONTEXT  *Context,
   IN     CONST CHAR8        *Identifier,
   IN     BOOLEAN            Exclude,
-  IN     UINT8              KCType
+  IN     UINT8              KCKind
   )
 {
   LILU_EXCLUSION_INFO_ENTRY  *CurEntry;
@@ -1573,7 +1573,7 @@ PrelinkedContextBlockViaLilu (
   CurEntry = &Context->LiluExclusionInfos->Entries[Context->LiluExclusionInfos->Header.KextCount];
   AsciiStrCpyS (CurEntry->Identifier, sizeof (CurEntry->Identifier), Identifier);
   CurEntry->Exclude = Exclude;
-  CurEntry->KCType = KCType;
+  CurEntry->KCKind = KCKind;
 
   Context->LiluExclusionInfos->Header.Size += sizeof (LILU_EXCLUSION_INFO_ENTRY);
   Context->LiluExclusionInfos->Header.KextCount++;
