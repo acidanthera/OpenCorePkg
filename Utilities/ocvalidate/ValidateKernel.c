@@ -319,7 +319,7 @@ CheckKernelAdd (
     //
     // Check KCKind
     //
-    if (KCKind > 3) {
+    if ((KCKind == 0) || (KCKind > 3)) {
       DEBUG ((DEBUG_WARN, "Kernel->Add[%u]->KCKind (currently set to %d) is borked!\n", Index, KCKind));
       ++ErrorCount;
     }

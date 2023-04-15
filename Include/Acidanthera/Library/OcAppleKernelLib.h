@@ -1060,7 +1060,7 @@ PrelinkedInjectKext (
   Allocate a runtime memory buffer, place info required for kext injection in it, and pass the address to Lilu via an EFI variable.
 
   @param[in,out] Context         Prelinked context.
-  @param[in]     KCKind          Kind of KC to inject into (2 = SysKC, 3 = AuxKC).
+  @param[in]     KCKind          Kind of KC to inject into (1 = PrelinkedKC, 2 = SysKC, 3 = AuxKC).
   @param[in]     BundlePath      Kext bundle path (e.g. /L/E/mykext.kext).
   @param[in,out] InfoPlist       Kext Info.plist.
   @param[in]     InfoPlistSize   Kext Info.plist size.

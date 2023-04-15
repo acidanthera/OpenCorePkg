@@ -463,7 +463,7 @@ OcKernelBlockKexts (
     } else if (CacheType == CacheTypeMkext) {
       Status = MkextContextBlock (Context, Target, Exclude);
     } else if (CacheType == CacheTypePrelinked) {
-      if (KCKind == 0) {
+      if (KCKind == 1) {
         Status = PrelinkedContextBlock (Context, Target, Exclude);
       } else {
         Status = PrelinkedContextBlockViaLilu (Context, Target, Exclude, KCKind);

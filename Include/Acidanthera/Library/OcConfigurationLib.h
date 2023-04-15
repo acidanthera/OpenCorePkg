@@ -206,7 +206,7 @@ OC_DECLARE (OC_DEV_PROP_CONFIG)
   _(OC_STRING                   , BundlePath       ,     , OC_STRING_CONSTR ("", _, __)     ,  OC_DESTR (OC_STRING) ) \
   _(OC_STRING                   , ExecutablePath   ,     , OC_STRING_CONSTR ("", _, __)     ,  OC_DESTR (OC_STRING) ) \
   _(OC_STRING                   , PlistPath        ,     , OC_STRING_CONSTR ("", _, __)     ,  OC_DESTR (OC_STRING) ) \
-  _(UINT8                       , KCKind           ,     , 0                                ,  ()                   ) \
+  _(UINT8                       , KCKind           ,     , 1                                ,  ()                   ) \
   _(UINT8 *                     , ImageData        ,     , NULL                             ,  OcFreePointer        ) \
   _(UINT32                      , ImageDataSize    ,     , 0                                ,  ()                   ) \
   _(CHAR8 *                     , PlistData        ,     , NULL                             ,  OcFreePointer        ) \
@@ -228,7 +228,7 @@ OC_DECLARE (OC_KERNEL_ADD_ARRAY)
   _(OC_STRING                   , MaxKernel        ,     , OC_STRING_CONSTR ("", _, __)         ,  OC_DESTR (OC_STRING) ) \
   _(OC_STRING                   , MinKernel        ,     , OC_STRING_CONSTR ("", _, __)         ,  OC_DESTR (OC_STRING) ) \
   _(OC_STRING                   , Strategy         ,     , OC_STRING_CONSTR ("Disable", _, __)  ,  OC_DESTR (OC_STRING) ) \
-  _(UINT8                       , KCKind           ,     , 0                                    ,  ()                   )
+  _(UINT8                       , KCKind           ,     , 1                                    ,  ()                   )
 OC_DECLARE (OC_KERNEL_BLOCK_ENTRY)
 
 #define OC_KERNEL_BLOCK_ARRAY_FIELDS(_, __) \
