@@ -425,7 +425,7 @@ OcKernelLoadAndReserveKext (
   }
 
   // No need to reserve kext size for Lilu injections
-  if (Kext->KCKind != 0) {
+  if (Kext->KCType != 0) {
     return;
   }
 
@@ -645,7 +645,7 @@ OcKernelInjectKext (
                BundleVersion
                );
   } else if (CacheType == CacheTypePrelinked) {
-    if (Kext->KCKind == 0) {
+    if (Kext->KCType == 0) {
       Status = PrelinkedInjectKext (
                  Context,
                  IsForced ? Identifier : NULL,
@@ -660,7 +660,7 @@ OcKernelInjectKext (
     } else {
       Status = PrelinkedPassKextToLilu (
                  Context,
-                 Kext->KCKind,
+                 Kext->KCType,
                  BundlePath,
                  Kext->PlistData,
                  Kext->PlistDataSize,

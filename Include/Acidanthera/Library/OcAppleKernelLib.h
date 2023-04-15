@@ -234,7 +234,7 @@ typedef struct {
   //
   // KC type to inject into
   //
-  UINT8 KCKind;
+  UINT8 KCType;
   //
   // The bundle path
   //
@@ -291,7 +291,7 @@ typedef struct {
   //
   // The KC type
   //
-  UINT8 KCKind;
+  UINT8 KCType;
 } LILU_EXCLUSION_INFO_ENTRY;
 
 typedef struct {
@@ -1060,7 +1060,7 @@ PrelinkedInjectKext (
   Allocate a runtime memory buffer, place info required for kext injection in it, and pass the address to Lilu via an EFI variable.
 
   @param[in,out] Context         Prelinked context.
-  @param[in]     KCKind          Kind of KC to inject into (2 = SysKC, 3 = AuxKC).
+  @param[in]     KCType          Type of KC to inject into (2 = SysKC, 3 = AuxKC).
   @param[in]     BundlePath      Kext bundle path (e.g. /L/E/mykext.kext).
   @param[in,out] InfoPlist       Kext Info.plist.
   @param[in]     InfoPlistSize   Kext Info.plist size.
@@ -1074,7 +1074,7 @@ PrelinkedInjectKext (
 EFI_STATUS
 PrelinkedPassKextToLilu (
   IN OUT PRELINKED_CONTEXT  *Context,
-  IN     UINT8              KCKind,
+  IN     UINT8              KCType,
   IN     CONST CHAR8        *BundlePath,
   IN     CONST CHAR8        *InfoPlist,
   IN     UINT32             InfoPlistSize,
@@ -1138,7 +1138,7 @@ PrelinkedContextBlock (
   @param[in,out] Context         Prelinked context.
   @param[in]     Identifier      Kext bundle identifier.
   @param[in]     Exclude         TRUE to exclude kext from KC.
-  @param[in]     KCKind          The KC kind of the kext to block.
+  @param[in]     KCType          The KC type of the kext to block.
 
   @return  EFI_SUCCESS on success.
 **/
@@ -1147,7 +1147,7 @@ PrelinkedContextBlockViaLilu (
   IN OUT PRELINKED_CONTEXT  *Context,
   IN     CONST CHAR8        *Identifier,
   IN     BOOLEAN            Exclude,
-  IN     UINT8              KCKind
+  IN     UINT8              KCType
   );
 
 /**
