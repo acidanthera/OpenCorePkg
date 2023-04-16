@@ -924,7 +924,8 @@ PrelinkedSetLiluEFIVariables (
   VOID                           *Buffer;
   LILU_PRELINKED_SYMBOLS_HEADER  *LiluHeader;
   LILU_PRELINKED_SYMBOLS_ENTRY   *CurEntry;
-  UINT64                         LiluPrelinkedSymbolsAddr;
+  UINTN                          LiluPrelinkedSymbolsAddr;
+  UINT64                         LiluPrelinkedSymbolsAddr64;
   EFI_STATUS                     Status;
   EFI_GUID                       Guid = OC_READ_ONLY_VARIABLE_GUID;
 
@@ -951,7 +952,7 @@ PrelinkedSetLiluEFIVariables (
   }
 
   // Allocate buffer and setup header
-  LiluPrelinkedSymbolsAddr = (UINT64)AllocateRuntimePool (LengthOfPrelinkedSymbols);
+  LiluPrelinkedSymbolsAddr = (UINTN)AllocateRuntimePool (LengthOfPrelinkedSymbols);
   Buffer                   = (VOID *)LiluPrelinkedSymbolsAddr;
   if (!Buffer) {
     return EFI_OUT_OF_RESOURCES;
@@ -987,10 +988,11 @@ PrelinkedSetLiluEFIVariables (
     Link = GetNextNode (&Context->PrelinkedKexts, Link);
   }
 
+  LiluPrelinkedSymbolsAddr64 = (UINT64)LiluPrelinkedSymbolsAddr;
   DEBUG ((
     DEBUG_INFO,
     "OCAK: Lilu prelinked symbols are stored at 0x%llx with a size of 0x%x bytes and %d symbols\n",
-    LiluPrelinkedSymbolsAddr,
+    LiluPrelinkedSymbolsAddr64,
     LengthOfPrelinkedSymbols,
     NumSymbolsInPrelinked
     ));
@@ -1000,7 +1002,7 @@ PrelinkedSetLiluEFIVariables (
              OC_LILU_PRELINKED_SYMBOLS_ADDR_VARIABLE_NAME,
              OPEN_CORE_NVRAM_ATTR,
              8,
-             (void *)&LiluPrelinkedSymbolsAddr,
+             (void *)&LiluPrelinkedSymbolsAddr64,
              &Guid
              );
 
@@ -1407,6 +1409,8 @@ PrelinkedPassKextToLilu (
   LILU_INJECTION_INFO  *InjectionInfo;
   UINT32               InfoPlistOffset;
   UINT32               ExecutableOffset;
+  UINTN                LiluInjectionInfoAddr;
+  UINT64               LiluInjectionInfoAddr64;
   EFI_GUID             Guid = OC_READ_ONLY_VARIABLE_GUID;
 
   EntryLength      = sizeof (LILU_INJECTION_INFO) + InfoPlistSize + ExecutableSize;
@@ -1414,7 +1418,7 @@ PrelinkedPassKextToLilu (
   ExecutableOffset = InfoPlistOffset + InfoPlistSize;
 
   // Allocate buffer and setup header
-  UINT64  LiluInjectionInfoAddr = (UINT64)AllocateRuntimePool (EntryLength);
+  LiluInjectionInfoAddr = (UINTN)AllocateRuntimePool (EntryLength);
 
   Buffer = (VOID *)LiluInjectionInfoAddr;
   if (!Buffer) {
@@ -1463,13 +1467,14 @@ PrelinkedPassKextToLilu (
     return EFI_INVALID_PARAMETER;
   }
 
-  Status = OcSetSystemVariable (
-             EFIVarName,
-             OPEN_CORE_NVRAM_ATTR,
-             8,
-             &LiluInjectionInfoAddr,
-             &Guid
-             );
+  LiluInjectionInfoAddr64 = (UINT64)LiluInjectionInfoAddr;
+  Status                  = OcSetSystemVariable (
+                              EFIVarName,
+                              OPEN_CORE_NVRAM_ATTR,
+                              8,
+                              &LiluInjectionInfoAddr64,
+                              &Guid
+                              );
   if (EFI_ERROR (Status)) {
     return Status;
   }
