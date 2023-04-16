@@ -380,7 +380,7 @@
 				<key>PlistPath</key>
 				<string>Contents/Info.plist</string>
 				<key>KCKind</key>
-				<integer>1</key>
+				<integer>1</integer>
 			</dict>
 			<dict>
 				<key>Arch</key>
@@ -400,7 +400,7 @@
 				<key>PlistPath</key>
 				<string>Contents/Info.plist</string>
 				<key>KCKind</key>
-				<integer>1</key>
+				<integer>1</integer>
 			</dict>
 			<dict>
 				<key>Arch</key>
@@ -420,7 +420,7 @@
 				<key>PlistPath</key>
 				<string>Contents/Info.plist</string>
 				<key>KCKind</key>
-				<integer>1</key>
+				<integer>1</integer>
 			</dict>
 			<dict>
 				<key>Arch</key>
@@ -440,7 +440,7 @@
 				<key>PlistPath</key>
 				<string>Contents/Info.plist</string>
 				<key>KCKind</key>
-				<integer>1</key>
+				<integer>1</integer>
 			</dict>
 			<dict>
 				<key>Arch</key>
@@ -460,7 +460,7 @@
 				<key>PlistPath</key>
 				<string>Contents/Info.plist</string>
 				<key>KCKind</key>
-				<integer>1</key>
+				<integer>1</integer>
 			</dict>
 			<dict>
 				<key>Arch</key>
@@ -480,7 +480,7 @@
 				<key>PlistPath</key>
 				<string>Contents/Info.plist</string>
 				<key>KCKind</key>
-				<integer>1</key>
+				<integer>1</integer>
 			</dict>
 			<dict>
 				<key>Arch</key>
@@ -500,7 +500,7 @@
 				<key>PlistPath</key>
 				<string>Contents/Info.plist</string>
 				<key>KCKind</key>
-				<integer>1</key>
+				<integer>1</integer>
 			</dict>
 			<dict>
 				<key>Arch</key>
@@ -520,7 +520,7 @@
 				<key>PlistPath</key>
 				<string>Contents/Info.plist</string>
 				<key>KCKind</key>
-				<integer>1</key>
+				<integer>1</integer>
 			</dict>
 			<dict>
 				<key>Arch</key>
@@ -540,7 +540,7 @@
 				<key>PlistPath</key>
 				<string>Contents/Info.plist</string>
 				<key>KCKind</key>
-				<integer>1</key>
+				<integer>1</integer>
 			</dict>
 			<dict>
 				<key>Arch</key>
@@ -560,7 +560,7 @@
 				<key>PlistPath</key>
 				<string>Contents/Info.plist</string>
 				<key>KCKind</key>
-				<integer>1</key>
+				<integer>1</integer>
 			</dict>
 			<dict>
 				<key>Arch</key>
@@ -580,7 +580,7 @@
 				<key>PlistPath</key>
 				<string>Contents/Info.plist</string>
 				<key>KCKind</key>
-				<integer>1</key>
+				<integer>1</integer>
 			</dict>
 			<dict>
 				<key>Arch</key>
@@ -600,7 +600,7 @@
 				<key>PlistPath</key>
 				<string>Contents/Info.plist</string>
 				<key>KCKind</key>
-				<integer>1</key>
+				<integer>1</integer>
 			</dict>
 			<dict>
 				<key>Arch</key>
@@ -620,7 +620,7 @@
 				<key>PlistPath</key>
 				<string>Contents/Info.plist</string>
 				<key>KCKind</key>
-				<integer>1</key>
+				<integer>1</integer>
 			</dict>
 			<dict>
 				<key>Arch</key>
@@ -640,7 +640,7 @@
 				<key>PlistPath</key>
 				<string>Contents/Info.plist</string>
 				<key>KCKind</key>
-				<integer>1</key>
+				<integer>1</integer>
 			</dict>
 			<dict>
 				<key>Arch</key>
@@ -660,7 +660,7 @@
 				<key>PlistPath</key>
 				<string>Contents/Info.plist</string>
 				<key>KCKind</key>
-				<integer>1</key>
+				<integer>1</integer>
 			</dict>
 		</array>
 		<key>Block</key>
@@ -681,7 +681,7 @@
 				<key>Strategy</key>
 				<string>Disable</string>
 				<key>KCKind</key>
-				<integer>1</key>
+				<integer>1</integer>
 			</dict>
 		</array>
 		<key>Emulate</key>
@@ -719,7 +719,7 @@
 				<key>PlistPath</key>
 				<string>Contents/Info.plist</string>
 				<key>KCKind</key>
-				<integer>1</key>
+				<integer>1</integer>
 			</dict>
 		</array>
 		<key>Patch</key>
