@@ -2101,6 +2101,12 @@ Kernel and kext changes apply with the following effective order:
   (e.g. \texttt{Contents/MacOS/Lilu}).
 
 \item
+  \texttt{KCKind}\\
+  \textbf{Type}: \texttt{plist\ integer}\\
+  \textbf{Failsafe}: 1\\
+  \textbf{Description}: Which KC to inject the kext into (1=PrelinkedKC, 2=SysKC, 3=AuxKC.)
+
+\item
   \texttt{MaxKernel}\\
   \textbf{Type}: \texttt{plist\ string}\\
   \textbf{Failsafe}: Empty\\
@@ -2158,12 +2164,6 @@ Kernel and kext changes apply with the following effective order:
   \textbf{Description}: Kext \texttt{Info.plist} path relative to bundle
   (e.g. \texttt{Contents/Info.plist}).
 
-\item
-  \texttt{KCKind}\\
-  \textbf{Type}: \texttt{plist\ integer}\\
-  \textbf{Failsafe}: 1\\
-  \textbf{Description}: Which KC to inject the kext into (1=PrelinkedKC, 2=SysKC, 3=AuxKC.)
-
 \end{enumerate}
 
 \subsection{Block Properties}\label{kernelpropsblock}
@@ -2194,6 +2194,12 @@ Kernel and kext changes apply with the following effective order:
   \textbf{Failsafe}: Empty\\
   \textbf{Description}: Kext bundle identifier
     (e.g. \texttt{com.apple.driver.AppleTyMCEDriver}).
+
+\item
+  \texttt{KCKind}\\
+  \textbf{Type}: \texttt{plist\ integer}\\
+  \textbf{Failsafe}: 1\\
+  \textbf{Description}: Which KC to block the kext from (1=PrelinkedKC, 2=SysKC, 3=AuxKC.)
 
 \item
   \texttt{MaxKernel}\\
@@ -2230,12 +2236,6 @@ Kernel and kext changes apply with the following effective order:
   \emph{Note 2}: At this moment \texttt{Exclude} is only applied to \texttt{prelinkedkernel} and newer mechanisms.
 
   \emph{Note 3}: In most cases strategy \texttt{Exclude} requires the new kext to be injected as a replacement.
-
-\item
-  \texttt{KCKind}\\
-  \textbf{Type}: \texttt{plist\ integer}\\
-  \textbf{Failsafe}: 1\\
-  \textbf{Description}: Which KC to block the kext from (1=PrelinkedKC, 2=SysKC, 3=AuxKC.)
 
 \end{enumerate}
 
@@ -2391,6 +2391,12 @@ Kernel and kext changes apply with the following effective order:
   Only drivers which identifiers are not be found in the cache will be added.
 
 \item
+  \texttt{KCKind}\\
+  \textbf{Type}: \texttt{plist\ integer}\\
+  \textbf{Failsafe}: 1\\
+  \textbf{Description}: Which KC to inject the kext into (1=PrelinkedKC, 2=SysKC, 3=AuxKC.)
+
+\item
   \texttt{MaxKernel}\\
   \textbf{Type}: \texttt{plist\ string}\\
   \textbf{Failsafe}: Empty\\
@@ -2412,12 +2418,6 @@ Kernel and kext changes apply with the following effective order:
   \textbf{Failsafe}: Empty\\
   \textbf{Description}: Kext \texttt{Info.plist} path relative to bundle
   (e.g. \texttt{Contents/Info.plist}).
-
-\item
-  \texttt{KCKind}\\
-  \textbf{Type}: \texttt{plist\ integer}\\
-  \textbf{Failsafe}: 1\\
-  \textbf{Description}: Which KC to inject the kext into (1=PrelinkedKC, 2=SysKC, 3=AuxKC.)
 
 \end{enumerate}
 

@@ -373,14 +373,14 @@
 				<true/>
 				<key>ExecutablePath</key>
 				<string>Contents/MacOS/Lilu</string>
+				<key>KCKind</key>
+				<integer>1</integer>
 				<key>MaxKernel</key>
 				<string></string>
 				<key>MinKernel</key>
 				<string>8.0.0</string>
 				<key>PlistPath</key>
 				<string>Contents/Info.plist</string>
-				<key>KCKind</key>
-				<integer>1</integer>
 			</dict>
 			<dict>
 				<key>Arch</key>
@@ -393,14 +393,14 @@
 				<true/>
 				<key>ExecutablePath</key>
 				<string>Contents/MacOS/VirtualSMC</string>
+				<key>KCKind</key>
+				<integer>1</integer>
 				<key>MaxKernel</key>
 				<string></string>
 				<key>MinKernel</key>
 				<string>8.0.0</string>
 				<key>PlistPath</key>
 				<string>Contents/Info.plist</string>
-				<key>KCKind</key>
-				<integer>1</integer>
 			</dict>
 			<dict>
 				<key>Arch</key>
@@ -413,14 +413,14 @@
 				<true/>
 				<key>ExecutablePath</key>
 				<string>Contents/MacOS/WhateverGreen</string>
+				<key>KCKind</key>
+				<integer>1</integer>
 				<key>MaxKernel</key>
 				<string></string>
 				<key>MinKernel</key>
 				<string>10.0.0</string>
 				<key>PlistPath</key>
 				<string>Contents/Info.plist</string>
-				<key>KCKind</key>
-				<integer>1</integer>
 			</dict>
 			<dict>
 				<key>Arch</key>
@@ -433,14 +433,14 @@
 				<true/>
 				<key>ExecutablePath</key>
 				<string>Contents/MacOS/AppleALC</string>
+				<key>KCKind</key>
+				<integer>1</integer>
 				<key>MaxKernel</key>
 				<string></string>
 				<key>MinKernel</key>
 				<string>8.0.0</string>
 				<key>PlistPath</key>
 				<string>Contents/Info.plist</string>
-				<key>KCKind</key>
-				<integer>1</integer>
 			</dict>
 			<dict>
 				<key>Arch</key>
@@ -453,14 +453,14 @@
 				<false/>
 				<key>ExecutablePath</key>
 				<string>Contents/MacOS/IntelMausi</string>
+				<key>KCKind</key>
+				<integer>1</integer>
 				<key>MaxKernel</key>
 				<string></string>
 				<key>MinKernel</key>
 				<string>13.0.0</string>
 				<key>PlistPath</key>
 				<string>Contents/Info.plist</string>
-				<key>KCKind</key>
-				<integer>1</integer>
 			</dict>
 			<dict>
 				<key>Arch</key>
@@ -473,14 +473,14 @@
 				<false/>
 				<key>ExecutablePath</key>
 				<string></string>
+				<key>KCKind</key>
+				<integer>1</integer>
 				<key>MaxKernel</key>
 				<string></string>
 				<key>MinKernel</key>
 				<string>15.0.0</string>
 				<key>PlistPath</key>
 				<string>Contents/Info.plist</string>
-				<key>KCKind</key>
-				<integer>1</integer>
 			</dict>
 			<dict>
 				<key>Arch</key>
@@ -493,14 +493,14 @@
 				<false/>
 				<key>ExecutablePath</key>
 				<string></string>
+				<key>KCKind</key>
+				<integer>1</integer>
 				<key>MaxKernel</key>
 				<string></string>
 				<key>MinKernel</key>
 				<string>19.0.0</string>
 				<key>PlistPath</key>
 				<string>Contents/Info.plist</string>
-				<key>KCKind</key>
-				<integer>1</integer>
 			</dict>
 			<dict>
 				<key>Arch</key>
@@ -513,14 +513,14 @@
 				<false/>
 				<key>ExecutablePath</key>
 				<string>Contents/MacOS/VoodooPS2Controller</string>
+				<key>KCKind</key>
+				<integer>1</integer>
 				<key>MaxKernel</key>
 				<string></string>
 				<key>MinKernel</key>
 				<string>15.0.0</string>
 				<key>PlistPath</key>
 				<string>Contents/Info.plist</string>
-				<key>KCKind</key>
-				<integer>1</integer>
 			</dict>
 			<dict>
 				<key>Arch</key>
@@ -533,14 +533,14 @@
 				<false/>
 				<key>ExecutablePath</key>
 				<string>Contents/MacOS/VoodooPS2Keyboard</string>
+				<key>KCKind</key>
+				<integer>1</integer>
 				<key>MaxKernel</key>
 				<string></string>
 				<key>MinKernel</key>
 				<string>15.0.0</string>
 				<key>PlistPath</key>
 				<string>Contents/Info.plist</string>
-				<key>KCKind</key>
-				<integer>1</integer>
 			</dict>
 			<dict>
 				<key>Arch</key>
@@ -553,14 +553,14 @@
 				<false/>
 				<key>ExecutablePath</key>
 				<string>Contents/MacOS/VoodooPS2Mouse</string>
+				<key>KCKind</key>
+				<integer>1</integer>
 				<key>MaxKernel</key>
 				<string></string>
 				<key>MinKernel</key>
 				<string>15.0.0</string>
 				<key>PlistPath</key>
 				<string>Contents/Info.plist</string>
-				<key>KCKind</key>
-				<integer>1</integer>
 			</dict>
 			<dict>
 				<key>Arch</key>
@@ -573,14 +573,14 @@
 				<false/>
 				<key>ExecutablePath</key>
 				<string>Contents/MacOS/VoodooPS2Trackpad</string>
+				<key>KCKind</key>
+				<integer>1</integer>
 				<key>MaxKernel</key>
 				<string></string>
 				<key>MinKernel</key>
 				<string>15.0.0</string>
 				<key>PlistPath</key>
 				<string>Contents/Info.plist</string>
-				<key>KCKind</key>
-				<integer>1</integer>
 			</dict>
 			<dict>
 				<key>Arch</key>
@@ -593,14 +593,14 @@
 				<false/>
 				<key>ExecutablePath</key>
 				<string>Contents/MacOS/VoodooInput</string>
+				<key>KCKind</key>
+				<integer>1</integer>
 				<key>MaxKernel</key>
 				<string></string>
 				<key>MinKernel</key>
 				<string>15.0.0</string>
 				<key>PlistPath</key>
 				<string>Contents/Info.plist</string>
-				<key>KCKind</key>
-				<integer>1</integer>
 			</dict>
 			<dict>
 				<key>Arch</key>
@@ -613,14 +613,14 @@
 				<false/>
 				<key>ExecutablePath</key>
 				<string>Contents/MacOS/AirportBrcmFixup</string>
+				<key>KCKind</key>
+				<integer>1</integer>
 				<key>MaxKernel</key>
 				<string></string>
 				<key>MinKernel</key>
 				<string>12.0.0</string>
 				<key>PlistPath</key>
 				<string>Contents/Info.plist</string>
-				<key>KCKind</key>
-				<integer>1</integer>
 			</dict>
 			<dict>
 				<key>Arch</key>
@@ -633,14 +633,14 @@
 				<false/>
 				<key>ExecutablePath</key>
 				<string></string>
+				<key>KCKind</key>
+				<integer>1</integer>
 				<key>MaxKernel</key>
 				<string>19.9.9</string>
 				<key>MinKernel</key>
 				<string>12.0.0</string>
 				<key>PlistPath</key>
 				<string>Contents/Info.plist</string>
-				<key>KCKind</key>
-				<integer>1</integer>
 			</dict>
 			<dict>
 				<key>Arch</key>
@@ -653,14 +653,14 @@
 				<false/>
 				<key>ExecutablePath</key>
 				<string></string>
+				<key>KCKind</key>
+				<integer>1</integer>
 				<key>MaxKernel</key>
 				<string></string>
 				<key>MinKernel</key>
 				<string>17.0.0</string>
 				<key>PlistPath</key>
 				<string>Contents/Info.plist</string>
-				<key>KCKind</key>
-				<integer>1</integer>
 			</dict>
 		</array>
 		<key>Block</key>
@@ -674,14 +674,14 @@
 				<false/>
 				<key>Identifier</key>
 				<string>com.apple.driver.AppleTyMCEDriver</string>
+				<key>KCKind</key>
+				<integer>1</integer>
 				<key>MaxKernel</key>
 				<string></string>
 				<key>MinKernel</key>
 				<string></string>
 				<key>Strategy</key>
 				<string>Disable</string>
-				<key>KCKind</key>
-				<integer>1</integer>
 			</dict>
 		</array>
 		<key>Emulate</key>
@@ -712,14 +712,14 @@
 				<string>Contents/MacOS/IONetworkingFamily</string>
 				<key>Identifier</key>
 				<string>com.apple.iokit.IONetworkingFamily</string>
+				<key>KCKind</key>
+				<integer>1</integer>
 				<key>MaxKernel</key>
 				<string>13.99.99</string>
 				<key>MinKernel</key>
 				<string></string>
 				<key>PlistPath</key>
 				<string>Contents/Info.plist</string>
-				<key>KCKind</key>
-				<integer>1</integer>
 			</dict>
 		</array>
 		<key>Patch</key>
