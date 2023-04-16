@@ -107,7 +107,7 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 //
 // Variable used for passing the list of kexts to block/exclude to Lilu
 //
-#define OC_LILU_EXCLUSION_INFO_ADDR_VARIABLE_NAME  L"lilu-exclusion-info-addr"
+#define OC_LILU_BLOCK_INFO_ADDR_VARIABLE_NAME  L"lilu-block-info-addr"
 
 //
 // 4D1FDA02-38C7-4A6A-9CC6-4BCCA8B30102

@@ -262,7 +262,7 @@ typedef struct {
 } LILU_INJECTION_INFO;
 
 //
-// Kext exclusion info/request passed to Lilu
+// Kext block info/request passed to Lilu
 //
 typedef struct {
   //
@@ -270,14 +270,14 @@ typedef struct {
   //
   UINT8     Version;
   //
-  // Size of the entire LILU_EXCLUSION_INFO struct
+  // Size of the entire LILU_BLOCK_INFO struct
   //
   UINT32    Size;
   //
   // Number of kexts to exclude
   //
   UINT32    KextCount;
-} LILU_EXCLUSION_INFO_HEADER;
+} LILU_BLOCK_INFO_HEADER;
 
 typedef struct {
   //
@@ -292,21 +292,21 @@ typedef struct {
   // The KC type
   //
   UINT8      KCKind;
-} LILU_EXCLUSION_INFO_ENTRY;
+} LILU_BLOCK_INFO_ENTRY;
 
 typedef struct {
   //
   // The header
   //
-  LILU_EXCLUSION_INFO_HEADER    Header;
+  LILU_BLOCK_INFO_HEADER    Header;
   //
   // The kexts to exclude
   //
-  LILU_EXCLUSION_INFO_ENTRY     Entries[0];
-} LILU_EXCLUSION_INFO;
+  LILU_BLOCK_INFO_ENTRY     Entries[0];
+} LILU_BLOCK_INFO;
 
-// The maximize size of LILU_EXCLUSION_INFO allowed on version 0
-#define LILU_EXCLUSION_INFO_SIZE_LIMIT_VERSION_0  16384
+// The maximize size of LILU_BLOCK_INFO allowed on version 0
+#define LILU_BLOCK_INFO_SIZE_LIMIT_VERSION_0  16384
 #pragma pack()
 
 //
@@ -479,9 +479,9 @@ typedef struct {
   //
   UINT32                                 LiluKextCount;
   //
-  // Exclusion info to pass to Lilu
+  // Block info to pass to Lilu
   //
-  LILU_EXCLUSION_INFO                    *LiluExclusionInfos;
+  LILU_BLOCK_INFO                        *LiluBlockInfos;
 } PRELINKED_CONTEXT;
 
 //

@@ -396,10 +396,10 @@ PrelinkedContextInit (
 
     Context->PrelinkedLastLoadAddress = Context->LinkEditSegment->Segment64.VirtualAddress + Context->LinkEditSegment->Segment64.Size;
 
-    Context->LiluExclusionInfos                   = (LILU_EXCLUSION_INFO *)AllocateRuntimePool (LILU_EXCLUSION_INFO_SIZE_LIMIT_VERSION_0);
-    Context->LiluExclusionInfos->Header.Version   = 0;
-    Context->LiluExclusionInfos->Header.Size      = sizeof (LILU_EXCLUSION_INFO_HEADER);
-    Context->LiluExclusionInfos->Header.KextCount = 0;
+    Context->LiluBlockInfos                   = (LILU_BLOCK_INFO *)AllocateRuntimePool (LILU_BLOCK_INFO_SIZE_LIMIT_VERSION_0);
+    Context->LiluBlockInfos->Header.Version   = 0;
+    Context->LiluBlockInfos->Header.Size      = sizeof (LILU_BLOCK_INFO_HEADER);
+    Context->LiluBlockInfos->Header.KextCount = 0;
   }
 
   //
@@ -494,7 +494,7 @@ PrelinkedContextFree (
   //
   ZeroMem (&Context->InjectedKexts, sizeof (Context->InjectedKexts));
 
-  // Do not free Context->LiluExclusionInfos as it's passed to Lilu
+  // Do not free Context->LiluBlockInfos as it's passed to Lilu
 }
 
 EFI_STATUS
@@ -1024,10 +1024,10 @@ PrelinkedSetLiluEFIVariables (
   }
 
   return OcSetSystemVariable (
-           OC_LILU_EXCLUSION_INFO_ADDR_VARIABLE_NAME,
+           OC_LILU_BLOCK_INFO_ADDR_VARIABLE_NAME,
            OPEN_CORE_NVRAM_ATTR,
            8,
-           (void *)&Context->LiluExclusionInfos,
+           (void *)&Context->LiluBlockInfos,
            &Guid
            );
 }
@@ -1570,27 +1570,27 @@ PrelinkedContextBlockViaLilu (
   IN     UINT8              KCKind
   )
 {
-  LILU_EXCLUSION_INFO_ENTRY  *CurEntry;
+  LILU_BLOCK_INFO_ENTRY  *CurEntry;
 
   ASSERT (Context != NULL);
   ASSERT (Identifier != NULL);
 
-  if (Context->LiluExclusionInfos->Header.Size + sizeof (LILU_EXCLUSION_INFO_ENTRY) > LILU_EXCLUSION_INFO_SIZE_LIMIT_VERSION_0) {
+  if (Context->LiluBlockInfos->Header.Size + sizeof (LILU_BLOCK_INFO_ENTRY) > LILU_BLOCK_INFO_SIZE_LIMIT_VERSION_0) {
     DEBUG ((
       DEBUG_INFO,
       "OCAK: Size required for Lilu kext block (%d) is above the limit (%d)",
-      Context->LiluExclusionInfos->Header.Size + sizeof (LILU_EXCLUSION_INFO_ENTRY),
-      LILU_EXCLUSION_INFO_SIZE_LIMIT_VERSION_0
+      Context->LiluBlockInfos->Header.Size + sizeof (LILU_BLOCK_INFO_ENTRY),
+      LILU_BLOCK_INFO_SIZE_LIMIT_VERSION_0
       ));
     return EFI_OUT_OF_RESOURCES;
   }
 
-  CurEntry = &Context->LiluExclusionInfos->Entries[Context->LiluExclusionInfos->Header.KextCount];
+  CurEntry = &Context->LiluBlockInfos->Entries[Context->LiluBlockInfos->Header.KextCount];
   AsciiStrCpyS (CurEntry->Identifier, sizeof (CurEntry->Identifier), Identifier);
   CurEntry->Exclude = Exclude;
   CurEntry->KCKind  = KCKind;
 
-  Context->LiluExclusionInfos->Header.Size += sizeof (LILU_EXCLUSION_INFO_ENTRY);
-  Context->LiluExclusionInfos->Header.KextCount++;
+  Context->LiluBlockInfos->Header.Size += sizeof (LILU_BLOCK_INFO_ENTRY);
+  Context->LiluBlockInfos->Header.KextCount++;
   return EFI_SUCCESS;
 }
