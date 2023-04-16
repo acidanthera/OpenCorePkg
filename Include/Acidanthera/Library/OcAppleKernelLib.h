@@ -205,7 +205,7 @@ typedef struct {
   //
   // This symbols's name
   //
-  CHAR8     SymbolName[];
+  CHAR8     SymbolName[1];
 } LILU_PRELINKED_SYMBOLS_ENTRY;
 
 typedef struct {
@@ -216,7 +216,7 @@ typedef struct {
   //
   // The symbols
   //
-  LILU_PRELINKED_SYMBOLS_ENTRY     Entries[];
+  LILU_PRELINKED_SYMBOLS_ENTRY     Entries[1];
 } LILU_PRELINKED_SYMBOLS;
 
 //
@@ -302,7 +302,7 @@ typedef struct {
   //
   // The kexts to exclude
   //
-  LILU_BLOCK_INFO_ENTRY     Entries[];
+  LILU_BLOCK_INFO_ENTRY     Entries[1];
 } LILU_BLOCK_INFO;
 
 // The maximize size of LILU_BLOCK_INFO allowed on version 0

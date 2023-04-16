@@ -933,7 +933,7 @@ PrelinkedSetLiluEFIVariables (
   Link                     = GetFirstNode (&Context->PrelinkedKexts);
   Kext                     = NULL;
   NumSymbolsInPrelinked    = 0;
-  LengthOfPrelinkedSymbols = sizeof (LILU_PRELINKED_SYMBOLS);
+  LengthOfPrelinkedSymbols = sizeof (LILU_PRELINKED_SYMBOLS_HEADER);
   while (!IsNull (&Context->PrelinkedKexts, Link)) {
     Kext = GET_PRELINKED_KEXT_FROM_LINK (Link);
     if (Kext->LinkedSymbolTable != NULL) {
@@ -943,7 +943,7 @@ PrelinkedSetLiluEFIVariables (
 
       SymbolsEnd = &Symbols[NumSymbolsInKext];
       while (Symbols < SymbolsEnd) {
-        LengthOfPrelinkedSymbols += sizeof (LILU_PRELINKED_SYMBOLS_ENTRY) + Symbols->Length + 1; // Account for \0
+        LengthOfPrelinkedSymbols += sizeof (LILU_PRELINKED_SYMBOLS_ENTRY) + Symbols->Length;
         Symbols++;
       }
     }
@@ -975,7 +975,7 @@ PrelinkedSetLiluEFIVariables (
 
       SymbolsEnd = &Symbols[NumSymbolsInKext];
       while (Symbols < SymbolsEnd) {
-        CurEntry->EntryLength      = sizeof (LILU_PRELINKED_SYMBOLS_ENTRY) + Symbols->Length + 1;
+        CurEntry->EntryLength      = sizeof (LILU_PRELINKED_SYMBOLS_ENTRY) + Symbols->Length;
         CurEntry->SymbolValue      = Symbols->Value - 0xFFFFFF8000100000ULL; // KERNEL_HIB_VADDR
         CurEntry->SymbolNameLength = Symbols->Length;
         CopyMem (&CurEntry->SymbolName, Symbols->Name, Symbols->Length + 1);
