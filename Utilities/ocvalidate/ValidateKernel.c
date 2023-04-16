@@ -316,11 +316,8 @@ CheckKernelAdd (
       }
     }
 
-    //
-    // Check KCKind
-    //
     if ((KCKind == 0) || (KCKind > 3)) {
-      DEBUG ((DEBUG_WARN, "Kernel->Add[%u]->KCKind (currently set to %d) is borked!\n", Index, KCKind));
+      DEBUG ((DEBUG_WARN, "Kernel->Add[%u]->KCKind (currently set to %d) is borked (Can only be 1, 2, or 3)!\n", Index, KCKind));
       ++ErrorCount;
     }
   }
@@ -379,6 +376,7 @@ CheckKernelBlock (
   CONST CHAR8  *MinKernel;
   CONST CHAR8  *Identifier;
   CONST CHAR8  *Strategy;
+  UINT8        KCKind;
 
   ErrorCount = 0;
 
@@ -389,6 +387,7 @@ CheckKernelBlock (
     MaxKernel  = OC_BLOB_GET (&Config->Kernel.Block.Values[Index]->MaxKernel);
     MinKernel  = OC_BLOB_GET (&Config->Kernel.Block.Values[Index]->MinKernel);
     Strategy   = OC_BLOB_GET (&Config->Kernel.Block.Values[Index]->Strategy);
+    KCKind     = Config->Kernel.Block.Values[Index]->KCKind;
 
     //
     // Sanitise strings.
@@ -433,6 +432,11 @@ CheckKernelBlock (
        && (AsciiStrCmp (Strategy, "Exclude") != 0))
     {
       DEBUG ((DEBUG_WARN, "Kernel->Block[%u]->Strategy is borked (Can only be Disable or Exclude)!\n", Index));
+      ++ErrorCount;
+    }
+
+    if ((KCKind == 0) || (KCKind > 3)) {
+      DEBUG ((DEBUG_WARN, "Kernel->Block[%u]->KCKind (currently set to %d) is borked (Can only be 1, 2, or 3)!\n", Index, KCKind));
       ++ErrorCount;
     }
   }
