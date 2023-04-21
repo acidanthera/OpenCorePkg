@@ -2514,10 +2514,13 @@ Kernel and kext changes apply with the following effective order:
   \texttt{AppleCpuPmCfgLock}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
-  \textbf{Requirement}: 10.4-12\\
+  \textbf{Requirement}: 10.4\\
   \textbf{Description}: Disables \texttt{PKG\_CST\_CONFIG\_CONTROL} (\texttt{0xE2})
   MSR modification in AppleIntelCPUPowerManagement.kext, commonly causing early
   kernel panic, when it is locked from writing.
+
+  \emph{Note}: AppleIntelCPUPowerManagement.kext is removed as of macOS 13.
+  However, a legacy version can be injected and thus get patched using this quirk.
 
   Some types of firmware lock the \texttt{PKG\_CST\_CONFIG\_CONTROL} MSR
   register and the bundled \texttt{ControlMsrE2} tool can be used to check its
