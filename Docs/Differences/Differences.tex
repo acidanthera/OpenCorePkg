@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
 %DIF DEL PreviousConfiguration.tex   Wed Apr  5 14:22:58 2023
-%DIF ADD ../Configuration.tex        Fri Apr 21 11:04:21 2023
+%DIF ADD ../Configuration.tex        Sat Apr 22 15:22:44 2023
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -2736,11 +2736,11 @@ Kernel and kext changes apply with the following effective order:
 
   \emph{\DIFadd{Note 1}}\DIFadd{: This option resolves compatibility issues with Wi-Fi, Ethernet and
   Thunderbolt devices when AppleVTD is enabled on systems where the native DMAR table
-  contains one or more Reserved Memory Regions.
+  contains one or more Reserved Memory Regions and iGPU is enabled and more than
+  16 GB memory is installed.
 }
 
-  \emph{\DIFadd{Note 2}}\DIFadd{: This option is not needed on AMD systems or any Intel system
-  where the native DMAR table does not contain any Reserved Memory Regions.
+  \emph{\DIFadd{Note 2}}\DIFadd{: This option is not needed on AMD systems.
 }
 
 \item
