@@ -387,7 +387,7 @@ InternalAllocateAlignedPages (
              MemoryType,
              Pages,
              &Memory,
-             EFI_PAGE_SIZE
+             (UINT32)Alignment
              );
   if (EFI_ERROR (Status)) {
     return NULL;
