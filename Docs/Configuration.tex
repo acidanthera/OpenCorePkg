@@ -2668,10 +2668,10 @@ Kernel and kext changes apply with the following effective order:
 
   \emph{Note 1}: This option resolves compatibility issues with Wi-Fi, Ethernet and
   Thunderbolt devices when AppleVTD is enabled on systems where the native DMAR table
-  contains one or more Reserved Memory Regions.
+  contains one or more Reserved Memory Regions and iGPU is enabled and more than
+  16 GB memory is installed.
 
-  \emph{Note 2}: This option is not needed on AMD systems or any Intel system
-  where the native DMAR table does not contain any Reserved Memory Regions.
+  \emph{Note 2}: This option is not needed on AMD systems.
 
 \item
   \texttt{DisableLinkeditJettison}\\
