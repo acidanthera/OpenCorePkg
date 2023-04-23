@@ -952,8 +952,8 @@ PrelinkedSetLiluEFIVariables (
   }
 
   // Allocate buffer and setup header
-  LiluPrelinkedSymbolsAddr = (UINTN)AllocateRuntimePool (LengthOfPrelinkedSymbols);
-  Buffer                   = (VOID *)LiluPrelinkedSymbolsAddr;
+  Buffer                   = AllocateRuntimePool (LengthOfPrelinkedSymbols);
+  LiluPrelinkedSymbolsAddr = (UINTN)Buffer;
   if (!Buffer) {
     return EFI_OUT_OF_RESOURCES;
   }
@@ -1418,10 +1418,9 @@ PrelinkedPassKextToLilu (
   ExecutableOffset = InfoPlistOffset + InfoPlistSize;
 
   // Allocate buffer and setup header
-  LiluInjectionInfoAddr = (UINTN)AllocateRuntimePool (EntryLength);
-
-  Buffer = (VOID *)LiluInjectionInfoAddr;
-  if (!Buffer) {
+  Buffer = AllocateRuntimePool (EntryLength);
+  LiluInjectionInfoAddr = (UINTN)Buffer;
+  if (Buffer == NULL) {
     return EFI_OUT_OF_RESOURCES;
   }
 
