@@ -191,13 +191,13 @@ typedef struct {
 
 typedef struct {
   //
-  // Length of this entry
-  //
-  UINT32    EntryLength;
-  //
   // Value of this symbol (or stab offset)
   //
   UINT64    SymbolValue;
+  //
+  // Length of this entry
+  //
+  UINT32    EntryLength;
   //
   // Length of this symbol's name
   //
