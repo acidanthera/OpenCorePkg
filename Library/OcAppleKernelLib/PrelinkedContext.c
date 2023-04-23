@@ -1002,7 +1002,7 @@ PrelinkedSetLiluEFIVariables (
              OC_LILU_PRELINKED_SYMBOLS_ADDR_VARIABLE_NAME,
              OPEN_CORE_NVRAM_ATTR,
              8,
-             (void *)&LiluPrelinkedSymbolsAddr64,
+             &LiluPrelinkedSymbolsAddr64,
              &Guid
              );
 
@@ -1016,7 +1016,7 @@ PrelinkedSetLiluEFIVariables (
              OC_LILU_KEXT_COUNT_VARIABLE_NAME,
              OPEN_CORE_NVRAM_ATTR,
              4,
-             (void *)&Context->LiluKextCount,
+             &Context->LiluKextCount,
              &Guid
              );
   if (EFI_ERROR (Status)) {
@@ -1027,7 +1027,7 @@ PrelinkedSetLiluEFIVariables (
            OC_LILU_BLOCK_INFO_ADDR_VARIABLE_NAME,
            OPEN_CORE_NVRAM_ATTR,
            8,
-           (void *)&Context->LiluBlockInfos,
+           &Context->LiluBlockInfos,
            &Guid
            );
 }
