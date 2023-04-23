@@ -1571,7 +1571,7 @@ PrelinkedContextBlockViaLilu (
   ASSERT (Context != NULL);
   ASSERT (Identifier != NULL);
 
-  if (Context->LiluBlockInfos->Header.Size + sizeof (LILU_BLOCK_INFO_ENTRY) > LILU_BLOCK_INFO_SIZE_LIMIT_VERSION_0) {
+  if (Context->LiluBlockInfos->Header.Size > LILU_BLOCK_INFO_SIZE_LIMIT_VERSION_0 - sizeof (LILU_BLOCK_INFO_ENTRY)) {
     DEBUG ((
       DEBUG_INFO,
       "OCAK: Size required for Lilu kext block (%d) is above the limit (%d)",
