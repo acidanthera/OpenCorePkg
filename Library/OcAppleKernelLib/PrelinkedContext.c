@@ -1418,7 +1418,7 @@ PrelinkedPassKextToLilu (
   ExecutableOffset = InfoPlistOffset + InfoPlistSize;
 
   // Allocate buffer and setup header
-  Buffer = AllocateRuntimePool (EntryLength);
+  Buffer                = AllocateRuntimePool (EntryLength);
   LiluInjectionInfoAddr = (UINTN)Buffer;
   if (Buffer == NULL) {
     return EFI_OUT_OF_RESOURCES;
@@ -1427,8 +1427,8 @@ PrelinkedPassKextToLilu (
   InjectionInfo              = (LILU_INJECTION_INFO *)Buffer;
   InjectionInfo->Version     = 0;
   InjectionInfo->EntryLength = EntryLength;
-  Status = AsciiStrCpyS (InjectionInfo->BundlePath, sizeof (InjectionInfo->BundlePath), BundlePath);
-  if (EFI_ERROR(Status)) {
+  Status                     = AsciiStrCpyS (InjectionInfo->BundlePath, sizeof (InjectionInfo->BundlePath), BundlePath);
+  if (EFI_ERROR (Status)) {
     FreePool (Buffer);
     return Status;
   }
