@@ -252,6 +252,7 @@ LLVMFuzzerTestOneInput (
     return 0;
   }
 
+  PcdGet8 (PcdDebugRaisePropertyMask) = 0;
   // PcdGet32 (PcdFixedDebugPrintErrorLevel) |= DEBUG_POOL | DEBUG_PAGE;
   // PcdGet32 (PcdDebugPrintErrorLevel)      |= DEBUG_POOL | DEBUG_PAGE;
 
