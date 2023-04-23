@@ -773,7 +773,7 @@ OcKernelInjectKexts (
       );
 
     Status = PrelinkedInjectComplete (Context);
-    if (Status == EFI_SUCCESS) {
+    if (!EFI_ERROR (Status)) {
       Status = PrelinkedSetLiluEFIVariables (Context);
     }
   } else {
