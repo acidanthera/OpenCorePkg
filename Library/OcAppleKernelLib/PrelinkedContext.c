@@ -1427,9 +1427,10 @@ PrelinkedPassKextToLilu (
   InjectionInfo              = (LILU_INJECTION_INFO *)Buffer;
   InjectionInfo->Version     = 0;
   InjectionInfo->EntryLength = EntryLength;
-  if (AsciiStrCpyS (InjectionInfo->BundlePath, sizeof (InjectionInfo->BundlePath), BundlePath) != RETURN_SUCCESS) {
+  Status = AsciiStrCpyS (InjectionInfo->BundlePath, sizeof (InjectionInfo->BundlePath), BundlePath);
+  if (EFI_ERROR(Status)) {
     FreePool (Buffer);
-    return EFI_UNSUPPORTED;
+    return Status;
   }
 
   InjectionInfo->KCKind          = KCKind;
@@ -1437,9 +1438,10 @@ PrelinkedPassKextToLilu (
   InjectionInfo->InfoPlistSize   = InfoPlistSize;
 
   if (Executable != NULL) {
-    if (AsciiStrCpyS (InjectionInfo->ExecutablePath, sizeof (InjectionInfo->ExecutablePath), ExecutablePath) != RETURN_SUCCESS) {
+    Status = AsciiStrCpyS (InjectionInfo->ExecutablePath, sizeof (InjectionInfo->ExecutablePath), ExecutablePath);
+    if (EFI_ERROR (Status)) {
       FreePool (Buffer);
-      return EFI_UNSUPPORTED;
+      return Status;
     }
 
     InjectionInfo->ExecutableOffset = ExecutableOffset;
