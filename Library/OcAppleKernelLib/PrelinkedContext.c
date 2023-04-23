@@ -1482,11 +1482,6 @@ PrelinkedPassKextToLilu (
 
   Context->LiluKextCount++;
 
-  // To make caller of the function happy
-  if (BundleVersion != NULL) {
-    BundleVersion = "1.0.0";
-  }
-
   return EFI_SUCCESS;
 }
 
