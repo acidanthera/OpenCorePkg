@@ -197,6 +197,21 @@ AsciiArchIsLegal (
 }
 
 BOOLEAN
+AsciiKCTypeIsLegal (
+  IN  CONST CHAR8  *KCType
+  )
+{
+  if (  (AsciiStrCmp (KCType, "Boot") != 0)
+     && (AsciiStrCmp (KCType, "System") != 0)
+     && (AsciiStrCmp (KCType, "Auxiliary") != 0))
+  {
+    return FALSE;
+  }
+
+  return TRUE;
+}
+
+BOOLEAN
 AsciiPropertyIsLegal (
   IN  CONST CHAR8  *Property
   )

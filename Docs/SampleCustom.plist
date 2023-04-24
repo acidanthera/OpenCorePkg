@@ -373,8 +373,8 @@
 				<true/>
 				<key>ExecutablePath</key>
 				<string>Contents/MacOS/Lilu</string>
-				<key>KCKind</key>
-				<integer>1</integer>
+				<key>InjectionTarget</key>
+				<string>Boot</string>
 				<key>MaxKernel</key>
 				<string></string>
 				<key>MinKernel</key>
@@ -393,8 +393,8 @@
 				<true/>
 				<key>ExecutablePath</key>
 				<string>Contents/MacOS/VirtualSMC</string>
-				<key>KCKind</key>
-				<integer>1</integer>
+				<key>InjectionTarget</key>
+				<string>Boot</string>
 				<key>MaxKernel</key>
 				<string></string>
 				<key>MinKernel</key>
@@ -413,8 +413,8 @@
 				<true/>
 				<key>ExecutablePath</key>
 				<string>Contents/MacOS/WhateverGreen</string>
-				<key>KCKind</key>
-				<integer>1</integer>
+				<key>InjectionTarget</key>
+				<string>Boot</string>
 				<key>MaxKernel</key>
 				<string></string>
 				<key>MinKernel</key>
@@ -433,8 +433,8 @@
 				<true/>
 				<key>ExecutablePath</key>
 				<string>Contents/MacOS/AppleALC</string>
-				<key>KCKind</key>
-				<integer>1</integer>
+				<key>InjectionTarget</key>
+				<string>Boot</string>
 				<key>MaxKernel</key>
 				<string></string>
 				<key>MinKernel</key>
@@ -453,8 +453,8 @@
 				<false/>
 				<key>ExecutablePath</key>
 				<string>Contents/MacOS/IntelMausi</string>
-				<key>KCKind</key>
-				<integer>1</integer>
+				<key>InjectionTarget</key>
+				<string>Boot</string>
 				<key>MaxKernel</key>
 				<string></string>
 				<key>MinKernel</key>
@@ -473,8 +473,8 @@
 				<false/>
 				<key>ExecutablePath</key>
 				<string></string>
-				<key>KCKind</key>
-				<integer>1</integer>
+				<key>InjectionTarget</key>
+				<string>Boot</string>
 				<key>MaxKernel</key>
 				<string></string>
 				<key>MinKernel</key>
@@ -493,8 +493,8 @@
 				<false/>
 				<key>ExecutablePath</key>
 				<string></string>
-				<key>KCKind</key>
-				<integer>1</integer>
+				<key>InjectionTarget</key>
+				<string>Boot</string>
 				<key>MaxKernel</key>
 				<string></string>
 				<key>MinKernel</key>
@@ -513,8 +513,8 @@
 				<false/>
 				<key>ExecutablePath</key>
 				<string>Contents/MacOS/VoodooPS2Controller</string>
-				<key>KCKind</key>
-				<integer>1</integer>
+				<key>InjectionTarget</key>
+				<string>Boot</string>
 				<key>MaxKernel</key>
 				<string></string>
 				<key>MinKernel</key>
@@ -533,8 +533,8 @@
 				<false/>
 				<key>ExecutablePath</key>
 				<string>Contents/MacOS/VoodooPS2Keyboard</string>
-				<key>KCKind</key>
-				<integer>1</integer>
+				<key>InjectionTarget</key>
+				<string>Boot</string>
 				<key>MaxKernel</key>
 				<string></string>
 				<key>MinKernel</key>
@@ -553,8 +553,8 @@
 				<false/>
 				<key>ExecutablePath</key>
 				<string>Contents/MacOS/VoodooPS2Mouse</string>
-				<key>KCKind</key>
-				<integer>1</integer>
+				<key>InjectionTarget</key>
+				<string>Boot</string>
 				<key>MaxKernel</key>
 				<string></string>
 				<key>MinKernel</key>
@@ -573,8 +573,8 @@
 				<false/>
 				<key>ExecutablePath</key>
 				<string>Contents/MacOS/VoodooPS2Trackpad</string>
-				<key>KCKind</key>
-				<integer>1</integer>
+				<key>InjectionTarget</key>
+				<string>Boot</string>
 				<key>MaxKernel</key>
 				<string></string>
 				<key>MinKernel</key>
@@ -593,8 +593,8 @@
 				<false/>
 				<key>ExecutablePath</key>
 				<string>Contents/MacOS/VoodooInput</string>
-				<key>KCKind</key>
-				<integer>1</integer>
+				<key>InjectionTarget</key>
+				<string>Boot</string>
 				<key>MaxKernel</key>
 				<string></string>
 				<key>MinKernel</key>
@@ -613,8 +613,8 @@
 				<false/>
 				<key>ExecutablePath</key>
 				<string>Contents/MacOS/AirportBrcmFixup</string>
-				<key>KCKind</key>
-				<integer>1</integer>
+				<key>InjectionTarget</key>
+				<string>Boot</string>
 				<key>MaxKernel</key>
 				<string></string>
 				<key>MinKernel</key>
@@ -633,8 +633,8 @@
 				<false/>
 				<key>ExecutablePath</key>
 				<string></string>
-				<key>KCKind</key>
-				<integer>1</integer>
+				<key>InjectionTarget</key>
+				<string>Boot</string>
 				<key>MaxKernel</key>
 				<string>19.9.9</string>
 				<key>MinKernel</key>
@@ -653,8 +653,8 @@
 				<false/>
 				<key>ExecutablePath</key>
 				<string></string>
-				<key>KCKind</key>
-				<integer>1</integer>
+				<key>InjectionTarget</key>
+				<string>Boot</string>
 				<key>MaxKernel</key>
 				<string></string>
 				<key>MinKernel</key>
@@ -672,10 +672,10 @@
 				<string></string>
 				<key>Enabled</key>
 				<false/>
+				<key>ExclusionTarget</key>
+				<string>Boot</string>
 				<key>Identifier</key>
 				<string>com.apple.driver.AppleTyMCEDriver</string>
-				<key>KCKind</key>
-				<integer>1</integer>
 				<key>MaxKernel</key>
 				<string></string>
 				<key>MinKernel</key>
@@ -712,8 +712,6 @@
 				<string>Contents/MacOS/IONetworkingFamily</string>
 				<key>Identifier</key>
 				<string>com.apple.iokit.IONetworkingFamily</string>
-				<key>KCKind</key>
-				<integer>1</integer>
 				<key>MaxKernel</key>
 				<string>13.99.99</string>
 				<key>MinKernel</key>

@@ -2101,10 +2101,19 @@ Kernel and kext changes apply with the following effective order:
   (e.g. \texttt{Contents/MacOS/Lilu}).
 
 \item
-  \texttt{KCKind}\\
-  \textbf{Type}: \texttt{plist\ integer}\\
-  \textbf{Failsafe}: 1\\
-  \textbf{Description}: Which KC to inject the kext into (1=PrelinkedKC, 2=SysKC, 3=AuxKC.)
+  \texttt{InjectionTarget}\\
+  \textbf{Type}: \texttt{plist\ string}\\
+  \textbf{Failsafe}: \texttt{Boot} (Inject into the Boot Kext Collection)\\
+  \textbf{Description}: Injection target for the specific kernel extension. Ignored if running macOS 15 (Catalina) or older.
+
+  \hypertarget{injectiontarget}Valid values:
+
+  \begin{itemize}
+    \tightlist
+    \item \texttt{Boot} --- Inject into the Boot Kext Collection (default).
+    \item \texttt{System} --- Inject into the System Kext Collection (\texttt{/System/Library/Extensions}).
+    \item \texttt{Auxiliary} --- Inject into the Auxiliary Kext Collection (\texttt{/Library/Extensions}).
+  \end{itemize}
 
 \item
   \texttt{MaxKernel}\\
@@ -2196,10 +2205,12 @@ Kernel and kext changes apply with the following effective order:
     (e.g. \texttt{com.apple.driver.AppleTyMCEDriver}).
 
 \item
-  \texttt{KCKind}\\
-  \textbf{Type}: \texttt{plist\ integer}\\
-  \textbf{Failsafe}: 1\\
-  \textbf{Description}: Which KC to block the kext from (1=PrelinkedKC, 2=SysKC, 3=AuxKC.)
+  \texttt{ExclusionTarget}\\
+  \textbf{Type}: \texttt{plist\ string}\\
+  \textbf{Failsafe}: \texttt{Boot} (Block kext contained in the Boot Kext Collection)\\
+  \textbf{Description}: Exclusion target for the specific kernel extension. Ignored if running macOS 15 (Catalina) or older.
+
+  \emph{Note}: Refer to the \hyperlink{injectiontarget}{\texttt{Add\ InjectionTarget} description} for valid values.
 
 \item
   \texttt{MaxKernel}\\
@@ -2389,12 +2400,6 @@ Kernel and kext changes apply with the following effective order:
   \textbf{Description}: Kext identifier to perform presence checking
   before adding (e.g. \texttt{com.apple.iokit.IONetworkingFamily}).
   Only drivers which identifiers are not be found in the cache will be added.
-
-\item
-  \texttt{KCKind}\\
-  \textbf{Type}: \texttt{plist\ integer}\\
-  \textbf{Failsafe}: 1\\
-  \textbf{Description}: Which KC to inject the kext into (1=PrelinkedKC, 2=SysKC, 3=AuxKC.)
 
 \item
   \texttt{MaxKernel}\\

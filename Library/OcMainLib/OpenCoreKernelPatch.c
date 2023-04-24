@@ -408,7 +408,8 @@ OcKernelBlockKexts (
   BOOLEAN                Exclude;
   UINT32                 MaxKernel;
   UINT32                 MinKernel;
-  UINT8                  KCKind;
+  CONST CHAR8            *ExclusionTarget;
+  UINT8                  KCType;
 
   for (Index = 0; Index < Config->Kernel.Block.Count; ++Index) {
     Kext = Config->Kernel.Block.Values[Index];
@@ -417,13 +418,26 @@ OcKernelBlockKexts (
       continue;
     }
 
-    Target    = OC_BLOB_GET (&Kext->Identifier);
-    Comment   = OC_BLOB_GET (&Kext->Comment);
-    Arch      = OC_BLOB_GET (&Kext->Arch);
-    Strategy  = OC_BLOB_GET (&Kext->Strategy);
-    MaxKernel = OcParseDarwinVersion (OC_BLOB_GET (&Kext->MaxKernel));
-    MinKernel = OcParseDarwinVersion (OC_BLOB_GET (&Kext->MinKernel));
-    KCKind    = Kext->KCKind;
+    Target          = OC_BLOB_GET (&Kext->Identifier);
+    Comment         = OC_BLOB_GET (&Kext->Comment);
+    Arch            = OC_BLOB_GET (&Kext->Arch);
+    Strategy        = OC_BLOB_GET (&Kext->Strategy);
+    MaxKernel       = OcParseDarwinVersion (OC_BLOB_GET (&Kext->MaxKernel));
+    MinKernel       = OcParseDarwinVersion (OC_BLOB_GET (&Kext->MinKernel));
+    ExclusionTarget = OC_BLOB_GET (&Kext->ExclusionTarget);
+    Status          = AsciiKCTypeToInt (ExclusionTarget, &KCType);
+    if (EFI_ERROR (Status)) {
+      DEBUG ((
+        DEBUG_INFO,
+        "OC: %a blocker skips %a (%a) block at %u due to invalid exclusion target %a\n",
+        PRINT_KERNEL_CACHE_TYPE (CacheType),
+        Target,
+        Comment,
+        Index,
+        ExclusionTarget
+        ));
+      continue;
+    }
 
     if (AsciiStrCmp (Arch, Is32Bit ? "x86_64" : "i386") == 0) {
       DEBUG ((
@@ -463,10 +477,10 @@ OcKernelBlockKexts (
     } else if (CacheType == CacheTypeMkext) {
       Status = MkextContextBlock (Context, Target, Exclude);
     } else if (CacheType == CacheTypePrelinked) {
-      if (KCKind == 1) {
+      if (KCType == 1) {
         Status = PrelinkedContextBlock (Context, Target, Exclude);
       } else {
-        Status = PrelinkedContextBlockViaLilu (Context, Target, Exclude, KCKind);
+        Status = PrelinkedContextBlockViaLilu (Context, Target, Exclude, KCType);
       }
     } else {
       Status = EFI_UNSUPPORTED;

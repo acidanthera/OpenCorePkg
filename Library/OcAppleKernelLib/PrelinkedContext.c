@@ -1380,7 +1380,7 @@ PrelinkedInjectKext (
 EFI_STATUS
 PrelinkedPassKextToLilu (
   IN OUT PRELINKED_CONTEXT  *Context,
-  IN     UINT8              KCKind,
+  IN     UINT8              KCType,
   IN     CONST CHAR8        *BundlePath,
   IN     CONST CHAR8        *InfoPlist,
   IN     UINT32             InfoPlistSize,
@@ -1421,7 +1421,7 @@ PrelinkedPassKextToLilu (
     return Status;
   }
 
-  InjectionInfo->KCKind          = KCKind;
+  InjectionInfo->KCType          = KCType;
   InjectionInfo->InfoPlistOffset = InfoPlistOffset;
   InjectionInfo->InfoPlistSize   = InfoPlistSize;
 
@@ -1547,11 +1547,33 @@ PrelinkedContextBlock (
 }
 
 EFI_STATUS
+AsciiKCTypeToInt (
+  IN CONST CHAR8  *KCType,
+  OUT UINT8       *KCTypeInt
+  )
+{
+  ASSERT (KCType != NULL);
+  ASSERT (KCTypeInt != NULL);
+
+  if (AsciiStrCmp (KCType, "Boot") == 0) {
+    *KCTypeInt = 1;
+  } else if (AsciiStrCmp (KCType, "System") == 0) {
+    *KCTypeInt = 2;
+  } else if (AsciiStrCmp (KCType, "Auxiliary") == 0) {
+    *KCTypeInt = 3;
+  } else {
+    return EFI_INVALID_PARAMETER;
+  }
+
+  return EFI_SUCCESS;
+}
+
+EFI_STATUS
 PrelinkedContextBlockViaLilu (
   IN OUT PRELINKED_CONTEXT  *Context,
   IN     CONST CHAR8        *Identifier,
   IN     BOOLEAN            Exclude,
-  IN     UINT8              KCKind
+  IN     UINT8              KCType
   )
 {
   LILU_BLOCK_INFO_ENTRY  *CurEntry;
@@ -1572,7 +1594,7 @@ PrelinkedContextBlockViaLilu (
   CurEntry = &Context->LiluBlockInfos->Entries[Context->LiluBlockInfos->Header.KextCount];
   AsciiStrCpyS (CurEntry->Identifier, sizeof (CurEntry->Identifier), Identifier);
   CurEntry->Exclude = Exclude;
-  CurEntry->KCKind  = KCKind;
+  CurEntry->KCType  = KCType;
 
   Context->LiluBlockInfos->Header.Size += sizeof (LILU_BLOCK_INFO_ENTRY);
   Context->LiluBlockInfos->Header.KextCount++;

@@ -252,6 +252,7 @@ OcKernelLoadAndReserveKext (
   CHAR8        *Comment;
   CONST CHAR8  *Arch;
   CHAR8        *PlistPath;
+  CONST CHAR8  *InjectionTarget;
   CHAR8        *ExecutablePath;
   CHAR16       FullPath[OC_STORAGE_SAFE_PATH_MAX];
 
@@ -275,11 +276,12 @@ OcKernelLoadAndReserveKext (
     }
   }
 
-  Identifier = OC_BLOB_GET (&Kext->Identifier);
-  BundlePath = OC_BLOB_GET (&Kext->BundlePath);
-  Comment    = OC_BLOB_GET (&Kext->Comment);
-  Arch       = OC_BLOB_GET (&Kext->Arch);
-  PlistPath  = OC_BLOB_GET (&Kext->PlistPath);
+  Identifier      = OC_BLOB_GET (&Kext->Identifier);
+  BundlePath      = OC_BLOB_GET (&Kext->BundlePath);
+  Comment         = OC_BLOB_GET (&Kext->Comment);
+  Arch            = OC_BLOB_GET (&Kext->Arch);
+  PlistPath       = OC_BLOB_GET (&Kext->PlistPath);
+  InjectionTarget = OC_BLOB_GET (&Kext->InjectionTarget);
   if ((BundlePath[0] == '\0') || (PlistPath[0] == '\0') || (IsForced && (Identifier[0] == '\0'))) {
     DEBUG ((
       DEBUG_ERROR,
@@ -425,7 +427,7 @@ OcKernelLoadAndReserveKext (
   }
 
   // No need to reserve kext size for Lilu injections
-  if (Kext->KCKind != 1) {
+  if (AsciiStrCmp (InjectionTarget, "Boot") != 0) {
     return;
   }
 
@@ -570,7 +572,9 @@ OcKernelInjectKext (
   CHAR8        FullPath[OC_STORAGE_SAFE_PATH_MAX];
   UINT32       MaxKernel;
   UINT32       MinKernel;
+  CONST CHAR8  *InjectionTarget;
   CHAR8        BundleVersion[MAX_INFO_BUNDLE_VERSION_KEY_SIZE];
+  UINT8        KCType;
 
   if (!Kext->Enabled || (Kext->PlistData == NULL)) {
     return;
@@ -581,6 +585,25 @@ OcKernelInjectKext (
   Comment    = OC_BLOB_GET (&Kext->Comment);
   MaxKernel  = OcParseDarwinVersion (OC_BLOB_GET (&Kext->MaxKernel));
   MinKernel  = OcParseDarwinVersion (OC_BLOB_GET (&Kext->MinKernel));
+  if (!IsForced) {
+    InjectionTarget = OC_BLOB_GET (&Kext->InjectionTarget);
+    Status          = AsciiKCTypeToInt (InjectionTarget, &KCType);
+    if (EFI_ERROR (Status)) {
+      DEBUG ((
+        DEBUG_INFO,
+        "OC: %a%a injection skips %a (%a) kext at %u due to invalid injection target %a\n",
+        PRINT_KERNEL_CACHE_TYPE (CacheType),
+        IsForced ? " force" : "",
+        BundlePath,
+        Comment,
+        Index,
+        InjectionTarget
+        ));
+      return;
+    }
+  } else {
+    KCType = 1;
+  }
 
   //
   // Assume no bundle version from the beginning.
@@ -645,7 +668,7 @@ OcKernelInjectKext (
                BundleVersion
                );
   } else if (CacheType == CacheTypePrelinked) {
-    if (Kext->KCKind == 1) {
+    if (KCType == 1) {
       Status = PrelinkedInjectKext (
                  Context,
                  IsForced ? Identifier : NULL,
@@ -660,7 +683,7 @@ OcKernelInjectKext (
     } else {
       Status = PrelinkedPassKextToLilu (
                  Context,
-                 Kext->KCKind,
+                 KCType,
                  BundlePath,
                  Kext->PlistData,
                  Kext->PlistDataSize,

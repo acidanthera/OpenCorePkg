@@ -234,7 +234,7 @@ typedef struct {
   //
   // KC type to inject into
   //
-  UINT8     KCKind;
+  UINT8     KCType;
   //
   // The bundle path
   //
@@ -291,7 +291,7 @@ typedef struct {
   //
   // The KC type
   //
-  UINT8      KCKind;
+  UINT8      KCType;
 } LILU_BLOCK_INFO_ENTRY;
 
 typedef struct {
@@ -1082,7 +1082,7 @@ PrelinkedInjectKext (
   Allocate a runtime memory buffer, place info required for kext injection in it, and pass the address to Lilu via an EFI variable.
 
   @param[in,out] Context         Prelinked context.
-  @param[in]     KCKind          Kind of KC to inject into (1 = PrelinkedKC, 2 = SysKC, 3 = AuxKC).
+  @param[in]     KCType          Target Kext Collection's type.
   @param[in]     BundlePath      Kext bundle path (e.g. /L/E/mykext.kext).
   @param[in,out] InfoPlist       Kext Info.plist.
   @param[in]     InfoPlistSize   Kext Info.plist size.
@@ -1096,7 +1096,7 @@ PrelinkedInjectKext (
 EFI_STATUS
 PrelinkedPassKextToLilu (
   IN OUT PRELINKED_CONTEXT  *Context,
-  IN     UINT8              KCKind,
+  IN     UINT8              KCType,
   IN     CONST CHAR8        *BundlePath,
   IN     CONST CHAR8        *InfoPlist,
   IN     UINT32             InfoPlistSize,
@@ -1155,12 +1155,26 @@ PrelinkedContextBlock (
   );
 
 /**
+  Convert stringified KCType to UINT8.
+
+  @param[in]  KCType     Stringified KCType.
+  @param[out] KCTypeInt  Converted KCType.
+
+  @return  EFI_SUCCESS on success.
+**/
+EFI_STATUS
+AsciiKCTypeToInt (
+  IN CONST CHAR8  *KCType,
+  OUT UINT8       *KCTypeInt
+  );
+
+/**
   Block kext in prelinked via Lilu.
 
   @param[in,out] Context         Prelinked context.
   @param[in]     Identifier      Kext bundle identifier.
   @param[in]     Exclude         TRUE to exclude kext from KC.
-  @param[in]     KCKind          The KC kind of the kext to block.
+  @param[in]     KCType          Target Kext Collection's type.
 
   @return  EFI_SUCCESS on success.
 **/
@@ -1169,7 +1183,7 @@ PrelinkedContextBlockViaLilu (
   IN OUT PRELINKED_CONTEXT  *Context,
   IN     CONST CHAR8        *Identifier,
   IN     BOOLEAN            Exclude,
-  IN     UINT8              KCKind
+  IN     UINT8              KCType
   );
 
 /**

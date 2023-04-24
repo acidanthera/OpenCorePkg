@@ -197,20 +197,20 @@ OC_DECLARE (OC_DEV_PROP_CONFIG)
 /// KernelSpace kext adds.
 ///
 #define OC_KERNEL_ADD_ENTRY_FIELDS(_, __) \
-  _(BOOLEAN                     , Enabled          ,     , FALSE                            ,  ()                   ) \
   _(OC_STRING                   , Arch             ,     , OC_STRING_CONSTR ("Any", _, __)  ,  OC_DESTR (OC_STRING) ) \
-  _(OC_STRING                   , Comment          ,     , OC_STRING_CONSTR ("", _, __)     ,  OC_DESTR (OC_STRING) ) \
-  _(OC_STRING                   , MaxKernel        ,     , OC_STRING_CONSTR ("", _, __)     ,  OC_DESTR (OC_STRING) ) \
-  _(OC_STRING                   , MinKernel        ,     , OC_STRING_CONSTR ("", _, __)     ,  OC_DESTR (OC_STRING) ) \
-  _(OC_STRING                   , Identifier       ,     , OC_STRING_CONSTR ("", _, __)     ,  OC_DESTR (OC_STRING) ) \
   _(OC_STRING                   , BundlePath       ,     , OC_STRING_CONSTR ("", _, __)     ,  OC_DESTR (OC_STRING) ) \
+  _(OC_STRING                   , Comment          ,     , OC_STRING_CONSTR ("", _, __)     ,  OC_DESTR (OC_STRING) ) \
+  _(BOOLEAN                     , Enabled          ,     , FALSE                            ,  ()                   ) \
   _(OC_STRING                   , ExecutablePath   ,     , OC_STRING_CONSTR ("", _, __)     ,  OC_DESTR (OC_STRING) ) \
-  _(OC_STRING                   , PlistPath        ,     , OC_STRING_CONSTR ("", _, __)     ,  OC_DESTR (OC_STRING) ) \
-  _(UINT8                       , KCKind           ,     , 1                                ,  ()                   ) \
+  _(OC_STRING                   , Identifier       ,     , OC_STRING_CONSTR ("", _, __)     ,  OC_DESTR (OC_STRING) ) \
   _(UINT8 *                     , ImageData        ,     , NULL                             ,  OcFreePointer        ) \
   _(UINT32                      , ImageDataSize    ,     , 0                                ,  ()                   ) \
+  _(OC_STRING                   , InjectionTarget  ,     , OC_STRING_CONSTR ("Boot", _, __) ,  OC_DESTR (OC_STRING) ) \
+  _(OC_STRING                   , MaxKernel        ,     , OC_STRING_CONSTR ("", _, __)     ,  OC_DESTR (OC_STRING) ) \
+  _(OC_STRING                   , MinKernel        ,     , OC_STRING_CONSTR ("", _, __)     ,  OC_DESTR (OC_STRING) ) \
   _(CHAR8 *                     , PlistData        ,     , NULL                             ,  OcFreePointer        ) \
-  _(UINT32                      , PlistDataSize    ,     , 0                                ,  ()                   )
+  _(UINT32                      , PlistDataSize    ,     , 0                                ,  ()                   ) \
+  _(OC_STRING                   , PlistPath        ,     , OC_STRING_CONSTR ("", _, __)     ,  OC_DESTR (OC_STRING) )
 OC_DECLARE (OC_KERNEL_ADD_ENTRY)
 
 #define OC_KERNEL_ADD_ARRAY_FIELDS(_, __) \
@@ -221,11 +221,11 @@ OC_DECLARE (OC_KERNEL_ADD_ARRAY)
 /// KernelSpace kext blocks.
 ///
 #define OC_KERNEL_BLOCK_ENTRY_FIELDS(_, __) \
-  _(BOOLEAN                     , Enabled          ,     , FALSE                                ,  ()                   ) \
   _(OC_STRING                   , Arch             ,     , OC_STRING_CONSTR ("Any", _, __)      ,  OC_DESTR (OC_STRING) ) \
   _(OC_STRING                   , Comment          ,     , OC_STRING_CONSTR ("", _, __)         ,  OC_DESTR (OC_STRING) ) \
+  _(BOOLEAN                     , Enabled          ,     , FALSE                                ,  ()                   ) \
+  _(OC_STRING                   , ExclusionTarget  ,     , OC_STRING_CONSTR ("Boot", _, __)     ,  OC_DESTR (OC_STRING) ) \
   _(OC_STRING                   , Identifier       ,     , OC_STRING_CONSTR ("", _, __)         ,  OC_DESTR (OC_STRING) ) \
-  _(UINT8                       , KCKind           ,     , 1                                    ,  ()                   ) \
   _(OC_STRING                   , MaxKernel        ,     , OC_STRING_CONSTR ("", _, __)         ,  OC_DESTR (OC_STRING) ) \
   _(OC_STRING                   , MinKernel        ,     , OC_STRING_CONSTR ("", _, __)         ,  OC_DESTR (OC_STRING) ) \
   _(OC_STRING                   , Strategy         ,     , OC_STRING_CONSTR ("Disable", _, __)  ,  OC_DESTR (OC_STRING) )

@@ -136,7 +136,7 @@ CheckKernelAdd (
   CONST CHAR8  *MaxKernel;
   CONST CHAR8  *MinKernel;
   CONST CHAR8  *PlistPath;
-  UINT8        KCKind;
+  CONST CHAR8  *InjectionTarget;
   UINTN        PlistFixedSize;
   UINTN        PlistPathSumSize;
   BOOLEAN      IsLiluUsed;
@@ -151,14 +151,14 @@ CheckKernelAdd (
   ErrorCount = 0;
 
   for (Index = 0; Index < Config->Kernel.Add.Count; ++Index) {
-    Arch           = OC_BLOB_GET (&Config->Kernel.Add.Values[Index]->Arch);
-    BundlePath     = OC_BLOB_GET (&Config->Kernel.Add.Values[Index]->BundlePath);
-    Comment        = OC_BLOB_GET (&Config->Kernel.Add.Values[Index]->Comment);
-    ExecutablePath = OC_BLOB_GET (&Config->Kernel.Add.Values[Index]->ExecutablePath);
-    MaxKernel      = OC_BLOB_GET (&Config->Kernel.Add.Values[Index]->MaxKernel);
-    MinKernel      = OC_BLOB_GET (&Config->Kernel.Add.Values[Index]->MinKernel);
-    PlistPath      = OC_BLOB_GET (&Config->Kernel.Add.Values[Index]->PlistPath);
-    KCKind         = Config->Kernel.Add.Values[Index]->KCKind;
+    Arch            = OC_BLOB_GET (&Config->Kernel.Add.Values[Index]->Arch);
+    BundlePath      = OC_BLOB_GET (&Config->Kernel.Add.Values[Index]->BundlePath);
+    Comment         = OC_BLOB_GET (&Config->Kernel.Add.Values[Index]->Comment);
+    ExecutablePath  = OC_BLOB_GET (&Config->Kernel.Add.Values[Index]->ExecutablePath);
+    MaxKernel       = OC_BLOB_GET (&Config->Kernel.Add.Values[Index]->MaxKernel);
+    MinKernel       = OC_BLOB_GET (&Config->Kernel.Add.Values[Index]->MinKernel);
+    PlistPath       = OC_BLOB_GET (&Config->Kernel.Add.Values[Index]->PlistPath);
+    InjectionTarget = OC_BLOB_GET (&Config->Kernel.Add.Values[Index]->InjectionTarget);
 
     //
     // Sanitise strings.
@@ -235,6 +235,11 @@ CheckKernelAdd (
         AsciiStrLen (ExecutablePath),
         OC_STORAGE_SAFE_PATH_MAX - ExecutableFixedSize
         ));
+      ++ErrorCount;
+    }
+
+    if (!AsciiKCTypeIsLegal (InjectionTarget)) {
+      DEBUG ((DEBUG_WARN, "Kernel->Add[%u]->InjectionTarget is borked (Can only be Boot, System, or Auxiliary)!\n", Index));
       ++ErrorCount;
     }
 
@@ -315,11 +320,6 @@ CheckKernelAdd (
         }
       }
     }
-
-    if ((KCKind == 0) || (KCKind > 3)) {
-      DEBUG ((DEBUG_WARN, "Kernel->Add[%u]->KCKind (currently set to %d) is borked (Can only be 1, 2, or 3)!\n", Index, KCKind));
-      ++ErrorCount;
-    }
   }
 
   //
@@ -376,18 +376,18 @@ CheckKernelBlock (
   CONST CHAR8  *MinKernel;
   CONST CHAR8  *Identifier;
   CONST CHAR8  *Strategy;
-  UINT8        KCKind;
+  CONST CHAR8  *ExclusionTarget;
 
   ErrorCount = 0;
 
   for (Index = 0; Index < Config->Kernel.Block.Count; ++Index) {
-    Arch       = OC_BLOB_GET (&Config->Kernel.Block.Values[Index]->Arch);
-    Comment    = OC_BLOB_GET (&Config->Kernel.Block.Values[Index]->Comment);
-    Identifier = OC_BLOB_GET (&Config->Kernel.Block.Values[Index]->Identifier);
-    MaxKernel  = OC_BLOB_GET (&Config->Kernel.Block.Values[Index]->MaxKernel);
-    MinKernel  = OC_BLOB_GET (&Config->Kernel.Block.Values[Index]->MinKernel);
-    Strategy   = OC_BLOB_GET (&Config->Kernel.Block.Values[Index]->Strategy);
-    KCKind     = Config->Kernel.Block.Values[Index]->KCKind;
+    Arch            = OC_BLOB_GET (&Config->Kernel.Block.Values[Index]->Arch);
+    Comment         = OC_BLOB_GET (&Config->Kernel.Block.Values[Index]->Comment);
+    Identifier      = OC_BLOB_GET (&Config->Kernel.Block.Values[Index]->Identifier);
+    MaxKernel       = OC_BLOB_GET (&Config->Kernel.Block.Values[Index]->MaxKernel);
+    MinKernel       = OC_BLOB_GET (&Config->Kernel.Block.Values[Index]->MinKernel);
+    Strategy        = OC_BLOB_GET (&Config->Kernel.Block.Values[Index]->Strategy);
+    ExclusionTarget = OC_BLOB_GET (&Config->Kernel.Block.Values[Index]->ExclusionTarget);
 
     //
     // Sanitise strings.
@@ -404,6 +404,11 @@ CheckKernelBlock (
 
     if (!AsciiIdentifierIsLegal (Identifier, TRUE)) {
       DEBUG ((DEBUG_WARN, "Kernel->Block[%u]->Identifier contains illegal character!\n", Index));
+      ++ErrorCount;
+    }
+
+    if (!AsciiKCTypeIsLegal (ExclusionTarget)) {
+      DEBUG ((DEBUG_WARN, "Kernel->Block[%u]->ExclusionTarget is borked (Can only be Boot, System, or Auxiliary)!\n", Index));
       ++ErrorCount;
     }
 
@@ -432,11 +437,6 @@ CheckKernelBlock (
        && (AsciiStrCmp (Strategy, "Exclude") != 0))
     {
       DEBUG ((DEBUG_WARN, "Kernel->Block[%u]->Strategy is borked (Can only be Disable or Exclude)!\n", Index));
-      ++ErrorCount;
-    }
-
-    if ((KCKind == 0) || (KCKind > 3)) {
-      DEBUG ((DEBUG_WARN, "Kernel->Block[%u]->KCKind (currently set to %d) is borked (Can only be 1, 2, or 3)!\n", Index, KCKind));
       ++ErrorCount;
     }
   }
