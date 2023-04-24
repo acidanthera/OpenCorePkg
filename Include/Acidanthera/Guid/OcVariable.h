@@ -95,19 +95,9 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 #define OC_VENDOR_BOOT_NEXT_VARIABLE_NAME  OC_VENDOR_BOOT_VARIABLE_PREFIX L"Next"
 
 //
-// Variable used for passing prelinkedkernel symbols to Lilu
+// Variable used for passing info to Lilu
 //
-#define OC_LILU_PRELINKED_SYMBOLS_ADDR_VARIABLE_NAME  L"lilu-prelinked-symbols-addr"
-
-//
-// Variable used for passing the amount of kexts to inject to Lilu
-//
-#define OC_LILU_KEXT_COUNT_VARIABLE_NAME  L"lilu-kext-count"
-
-//
-// Variable used for passing the list of kexts to block/exclude to Lilu
-//
-#define OC_LILU_BLOCK_INFO_ADDR_VARIABLE_NAME  L"lilu-block-info-addr"
+#define OC_LILU_INFO_ADDR_VARIABLE_NAME  L"lilu-info"
 
 //
 // 4D1FDA02-38C7-4A6A-9CC6-4BCCA8B30102

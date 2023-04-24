@@ -910,7 +910,7 @@ PrelinkedInjectComplete (
 }
 
 EFI_STATUS
-PrelinkedSetLiluEFIVariables (
+PrelinkedSetLiluInfo (
   IN OUT PRELINKED_CONTEXT  *Context
   )
 {
@@ -926,6 +926,7 @@ PrelinkedSetLiluEFIVariables (
   LILU_PRELINKED_SYMBOLS_ENTRY   *CurEntry;
   UINTN                          LiluPrelinkedSymbolsAddr;
   UINT64                         LiluPrelinkedSymbolsAddr64;
+  LILU_INFO                      *LiluInfo;
   EFI_STATUS                     Status;
   EFI_GUID                       Guid = OC_READ_ONLY_VARIABLE_GUID;
 
@@ -997,39 +998,26 @@ PrelinkedSetLiluEFIVariables (
     NumSymbolsInPrelinked
     ));
 
-  // Expose the physical address of the LILU_PRELINKED_SYMBOLS struct via an EFI variable
-  Status = OcSetSystemVariable (
-             OC_LILU_PRELINKED_SYMBOLS_ADDR_VARIABLE_NAME,
-             OPEN_CORE_NVRAM_ATTR,
-             8,
-             &LiluPrelinkedSymbolsAddr64,
-             &Guid
-             );
-
-  if (EFI_ERROR (Status)) {
-    FreePool (Buffer);
-    return Status;
+  LiluInfo = AllocatePool (sizeof (LILU_INFO));
+  if (!LiluInfo) {
+    return EFI_OUT_OF_RESOURCES;
   }
 
-  // Tell Lilu the amount of kexts to inject
+  LiluInfo->Magic                = LILU_INFO_MAGIC;
+  LiluInfo->KextCount            = Context->LiluKextCount;
+  LiluInfo->PrelinkedSymbolsAddr = LiluPrelinkedSymbolsAddr64;
+  LiluInfo->BlockInfoAddr        = Context->LiluBlockInfos;
+
+  // Expose the Lilu info via a volatile + read-only EFI variable
   Status = OcSetSystemVariable (
-             OC_LILU_KEXT_COUNT_VARIABLE_NAME,
+             OC_LILU_INFO_ADDR_VARIABLE_NAME,
              OPEN_CORE_NVRAM_ATTR,
-             4,
-             &Context->LiluKextCount,
+             sizeof (LILU_INFO),
+             LiluInfo,
              &Guid
              );
-  if (EFI_ERROR (Status)) {
-    return Status;
-  }
-
-  return OcSetSystemVariable (
-           OC_LILU_BLOCK_INFO_ADDR_VARIABLE_NAME,
-           OPEN_CORE_NVRAM_ATTR,
-           8,
-           &Context->LiluBlockInfos,
-           &Guid
-           );
+  FreePool (LiluInfo);
+  return Status;
 }
 
 EFI_STATUS

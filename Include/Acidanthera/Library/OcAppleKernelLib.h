@@ -307,6 +307,28 @@ typedef struct {
 
 // The maximize size of LILU_BLOCK_INFO allowed on version 0
 #define LILU_BLOCK_INFO_SIZE_LIMIT_VERSION_0  16384
+
+typedef struct {
+  //
+  // The magic
+  //
+  UINT32    Magic;
+  //
+  // The amount of kexts to inject
+  //
+  UINT32    KextCount;
+  //
+  // The physical address of the LILU_PRELINKED_SYMBOLS struct
+  //
+  UINT64    PrelinkedSymbolsAddr;
+  //
+  // The physical address of the LILU_BLOCK_INFO struct
+  //
+  UINT64    BlockInfoAddr;
+} LILU_INFO;
+
+// The magic header of LILU_INFO
+#define LILU_INFO_MAGIC  0xC4EF7155
 #pragma pack()
 
 //
@@ -1001,7 +1023,7 @@ PrelinkedInjectComplete (
   @return  EFI_SUCCESS on success.
 **/
 EFI_STATUS
-PrelinkedSetLiluEFIVariables (
+PrelinkedSetLiluInfo (
   IN OUT PRELINKED_CONTEXT  *Context
   );
 
