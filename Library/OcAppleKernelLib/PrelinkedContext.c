@@ -1006,7 +1006,7 @@ PrelinkedSetLiluInfo (
   LiluInfo->Magic                = LILU_INFO_MAGIC;
   LiluInfo->KextCount            = Context->LiluKextCount;
   LiluInfo->PrelinkedSymbolsAddr = LiluPrelinkedSymbolsAddr64;
-  LiluInfo->BlockInfoAddr        = (UINT64)Context->LiluBlockInfos;
+  LiluInfo->BlockInfoAddr        = (UINTN)Context->LiluBlockInfos;
 
   // Expose the Lilu info via a volatile + read-only EFI variable
   Status = OcSetSystemVariable (
