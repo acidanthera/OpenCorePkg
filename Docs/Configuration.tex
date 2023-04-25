@@ -2101,12 +2101,12 @@ Kernel and kext changes apply with the following effective order:
   (e.g. \texttt{Contents/MacOS/Lilu}).
 
 \item
-  \texttt{InjectionTarget}\\
+  \texttt{TargetKC}\\
   \textbf{Type}: \texttt{plist\ string}\\
   \textbf{Failsafe}: \texttt{Boot} (Inject into the Boot Kext Collection)\\
-  \textbf{Description}: Injection target for the specific kernel extension. Ignored if running macOS 15 (Catalina) or older.
+  \textbf{Description}: Target KC for the specific kernel extension. Ignored if running macOS 15 (Catalina) or older.
 
-  \hypertarget{injectiontarget}Valid values:
+  \hypertarget{targetkc}Valid values:
 
   \begin{itemize}
     \tightlist
@@ -2205,12 +2205,12 @@ Kernel and kext changes apply with the following effective order:
     (e.g. \texttt{com.apple.driver.AppleTyMCEDriver}).
 
 \item
-  \texttt{ExclusionTarget}\\
+  \texttt{TargetKC}\\
   \textbf{Type}: \texttt{plist\ string}\\
   \textbf{Failsafe}: \texttt{Boot} (Block kext contained in the Boot Kext Collection)\\
-  \textbf{Description}: Exclusion target for the specific kernel extension. Ignored if running macOS 15 (Catalina) or older.
+  \textbf{Description}: Target KC for the specific kernel extension. Ignored if running macOS 15 (Catalina) or older.
 
-  \emph{Note}: Refer to the \hyperlink{injectiontarget}{\texttt{Add\ InjectionTarget} description} for valid values.
+  \emph{Note}: Refer to the \hyperlink{targetkc}{\texttt{Add\ TargetKC} description} for valid values.
 
 \item
   \texttt{MaxKernel}\\

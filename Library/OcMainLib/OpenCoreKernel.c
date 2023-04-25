@@ -252,7 +252,7 @@ OcKernelLoadAndReserveKext (
   CHAR8        *Comment;
   CONST CHAR8  *Arch;
   CHAR8        *PlistPath;
-  CONST CHAR8  *InjectionTarget;
+  CONST CHAR8  *TargetKC;
   CHAR8        *ExecutablePath;
   CHAR16       FullPath[OC_STORAGE_SAFE_PATH_MAX];
 
@@ -276,12 +276,12 @@ OcKernelLoadAndReserveKext (
     }
   }
 
-  Identifier      = OC_BLOB_GET (&Kext->Identifier);
-  BundlePath      = OC_BLOB_GET (&Kext->BundlePath);
-  Comment         = OC_BLOB_GET (&Kext->Comment);
-  Arch            = OC_BLOB_GET (&Kext->Arch);
-  PlistPath       = OC_BLOB_GET (&Kext->PlistPath);
-  InjectionTarget = OC_BLOB_GET (&Kext->InjectionTarget);
+  Identifier = OC_BLOB_GET (&Kext->Identifier);
+  BundlePath = OC_BLOB_GET (&Kext->BundlePath);
+  Comment    = OC_BLOB_GET (&Kext->Comment);
+  Arch       = OC_BLOB_GET (&Kext->Arch);
+  PlistPath  = OC_BLOB_GET (&Kext->PlistPath);
+  TargetKC   = OC_BLOB_GET (&Kext->TargetKC);
   if ((BundlePath[0] == '\0') || (PlistPath[0] == '\0') || (IsForced && (Identifier[0] == '\0'))) {
     DEBUG ((
       DEBUG_ERROR,
@@ -427,7 +427,7 @@ OcKernelLoadAndReserveKext (
   }
 
   // No need to reserve kext size for Lilu injections
-  if (AsciiStrCmp (InjectionTarget, "Boot") != 0) {
+  if (AsciiStrCmp (TargetKC, "Boot") != 0) {
     return;
   }
 
@@ -572,7 +572,7 @@ OcKernelInjectKext (
   CHAR8        FullPath[OC_STORAGE_SAFE_PATH_MAX];
   UINT32       MaxKernel;
   UINT32       MinKernel;
-  CONST CHAR8  *InjectionTarget;
+  CONST CHAR8  *TargetKC;
   CHAR8        BundleVersion[MAX_INFO_BUNDLE_VERSION_KEY_SIZE];
   UINT8        KCType;
 
@@ -586,18 +586,18 @@ OcKernelInjectKext (
   MaxKernel  = OcParseDarwinVersion (OC_BLOB_GET (&Kext->MaxKernel));
   MinKernel  = OcParseDarwinVersion (OC_BLOB_GET (&Kext->MinKernel));
   if (!IsForced) {
-    InjectionTarget = OC_BLOB_GET (&Kext->InjectionTarget);
-    Status          = AsciiKCTypeToInt (InjectionTarget, &KCType);
+    TargetKC = OC_BLOB_GET (&Kext->TargetKC);
+    Status   = AsciiKCTypeToInt (TargetKC, &KCType);
     if (EFI_ERROR (Status)) {
       DEBUG ((
         DEBUG_INFO,
-        "OC: %a%a injection skips %a (%a) kext at %u due to invalid injection target %a\n",
+        "OC: %a%a injection skips %a (%a) kext at %u due to invalid target KC %a\n",
         PRINT_KERNEL_CACHE_TYPE (CacheType),
         IsForced ? " force" : "",
         BundlePath,
         Comment,
         Index,
-        InjectionTarget
+        TargetKC
         ));
       return;
     }

@@ -265,15 +265,15 @@ OC_SCHEMA
 STATIC
 OC_SCHEMA
   mKernelAddSchemaEntry[] = {
-  OC_SCHEMA_STRING_IN ("Arch",            OC_KERNEL_ADD_ENTRY, Arch),
-  OC_SCHEMA_STRING_IN ("BundlePath",      OC_KERNEL_ADD_ENTRY, BundlePath),
-  OC_SCHEMA_STRING_IN ("Comment",         OC_KERNEL_ADD_ENTRY, Comment),
-  OC_SCHEMA_BOOLEAN_IN ("Enabled",        OC_KERNEL_ADD_ENTRY, Enabled),
-  OC_SCHEMA_STRING_IN ("ExecutablePath",  OC_KERNEL_ADD_ENTRY, ExecutablePath),
-  OC_SCHEMA_STRING_IN ("InjectionTarget", OC_KERNEL_ADD_ENTRY, InjectionTarget),
-  OC_SCHEMA_STRING_IN ("MaxKernel",       OC_KERNEL_ADD_ENTRY, MaxKernel),
-  OC_SCHEMA_STRING_IN ("MinKernel",       OC_KERNEL_ADD_ENTRY, MinKernel),
-  OC_SCHEMA_STRING_IN ("PlistPath",       OC_KERNEL_ADD_ENTRY, PlistPath),
+  OC_SCHEMA_STRING_IN ("Arch",           OC_KERNEL_ADD_ENTRY, Arch),
+  OC_SCHEMA_STRING_IN ("BundlePath",     OC_KERNEL_ADD_ENTRY, BundlePath),
+  OC_SCHEMA_STRING_IN ("Comment",        OC_KERNEL_ADD_ENTRY, Comment),
+  OC_SCHEMA_BOOLEAN_IN ("Enabled",       OC_KERNEL_ADD_ENTRY, Enabled),
+  OC_SCHEMA_STRING_IN ("ExecutablePath", OC_KERNEL_ADD_ENTRY, ExecutablePath),
+  OC_SCHEMA_STRING_IN ("MaxKernel",      OC_KERNEL_ADD_ENTRY, MaxKernel),
+  OC_SCHEMA_STRING_IN ("MinKernel",      OC_KERNEL_ADD_ENTRY, MinKernel),
+  OC_SCHEMA_STRING_IN ("PlistPath",      OC_KERNEL_ADD_ENTRY, PlistPath),
+  OC_SCHEMA_STRING_IN ("TargetKC",       OC_KERNEL_ADD_ENTRY, TargetKC),
 };
 
 STATIC
@@ -283,14 +283,14 @@ OC_SCHEMA
 STATIC
 OC_SCHEMA
   mKernelBlockSchemaEntry[] = {
-  OC_SCHEMA_STRING_IN ("Arch",            OC_KERNEL_BLOCK_ENTRY, Arch),
-  OC_SCHEMA_STRING_IN ("Comment",         OC_KERNEL_BLOCK_ENTRY, Comment),
-  OC_SCHEMA_BOOLEAN_IN ("Enabled",        OC_KERNEL_BLOCK_ENTRY, Enabled),
-  OC_SCHEMA_STRING_IN ("ExclusionTarget", OC_KERNEL_BLOCK_ENTRY, ExclusionTarget),
-  OC_SCHEMA_STRING_IN ("Identifier",      OC_KERNEL_BLOCK_ENTRY, Identifier),
-  OC_SCHEMA_STRING_IN ("MaxKernel",       OC_KERNEL_BLOCK_ENTRY, MaxKernel),
-  OC_SCHEMA_STRING_IN ("MinKernel",       OC_KERNEL_BLOCK_ENTRY, MinKernel),
-  OC_SCHEMA_STRING_IN ("Strategy",        OC_KERNEL_BLOCK_ENTRY, Strategy),
+  OC_SCHEMA_STRING_IN ("Arch",       OC_KERNEL_BLOCK_ENTRY, Arch),
+  OC_SCHEMA_STRING_IN ("Comment",    OC_KERNEL_BLOCK_ENTRY, Comment),
+  OC_SCHEMA_BOOLEAN_IN ("Enabled",   OC_KERNEL_BLOCK_ENTRY, Enabled),
+  OC_SCHEMA_STRING_IN ("Identifier", OC_KERNEL_BLOCK_ENTRY, Identifier),
+  OC_SCHEMA_STRING_IN ("MaxKernel",  OC_KERNEL_BLOCK_ENTRY, MaxKernel),
+  OC_SCHEMA_STRING_IN ("MinKernel",  OC_KERNEL_BLOCK_ENTRY, MinKernel),
+  OC_SCHEMA_STRING_IN ("Strategy",   OC_KERNEL_BLOCK_ENTRY, Strategy),
+  OC_SCHEMA_STRING_IN ("TargetKC",   OC_KERNEL_BLOCK_ENTRY, TargetKC),
 };
 
 STATIC

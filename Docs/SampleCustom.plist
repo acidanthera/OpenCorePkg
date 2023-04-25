@@ -373,7 +373,7 @@
 				<true/>
 				<key>ExecutablePath</key>
 				<string>Contents/MacOS/Lilu</string>
-				<key>InjectionTarget</key>
+				<key>TargetKC</key>
 				<string>Boot</string>
 				<key>MaxKernel</key>
 				<string></string>
@@ -393,7 +393,7 @@
 				<true/>
 				<key>ExecutablePath</key>
 				<string>Contents/MacOS/VirtualSMC</string>
-				<key>InjectionTarget</key>
+				<key>TargetKC</key>
 				<string>Boot</string>
 				<key>MaxKernel</key>
 				<string></string>
@@ -413,7 +413,7 @@
 				<true/>
 				<key>ExecutablePath</key>
 				<string>Contents/MacOS/WhateverGreen</string>
-				<key>InjectionTarget</key>
+				<key>TargetKC</key>
 				<string>Boot</string>
 				<key>MaxKernel</key>
 				<string></string>
@@ -433,7 +433,7 @@
 				<true/>
 				<key>ExecutablePath</key>
 				<string>Contents/MacOS/AppleALC</string>
-				<key>InjectionTarget</key>
+				<key>TargetKC</key>
 				<string>Boot</string>
 				<key>MaxKernel</key>
 				<string></string>
@@ -453,7 +453,7 @@
 				<false/>
 				<key>ExecutablePath</key>
 				<string>Contents/MacOS/IntelMausi</string>
-				<key>InjectionTarget</key>
+				<key>TargetKC</key>
 				<string>Boot</string>
 				<key>MaxKernel</key>
 				<string></string>
@@ -473,7 +473,7 @@
 				<false/>
 				<key>ExecutablePath</key>
 				<string></string>
-				<key>InjectionTarget</key>
+				<key>TargetKC</key>
 				<string>Boot</string>
 				<key>MaxKernel</key>
 				<string></string>
@@ -493,7 +493,7 @@
 				<false/>
 				<key>ExecutablePath</key>
 				<string></string>
-				<key>InjectionTarget</key>
+				<key>TargetKC</key>
 				<string>Boot</string>
 				<key>MaxKernel</key>
 				<string></string>
@@ -513,7 +513,7 @@
 				<false/>
 				<key>ExecutablePath</key>
 				<string>Contents/MacOS/VoodooPS2Controller</string>
-				<key>InjectionTarget</key>
+				<key>TargetKC</key>
 				<string>Boot</string>
 				<key>MaxKernel</key>
 				<string></string>
@@ -533,7 +533,7 @@
 				<false/>
 				<key>ExecutablePath</key>
 				<string>Contents/MacOS/VoodooPS2Keyboard</string>
-				<key>InjectionTarget</key>
+				<key>TargetKC</key>
 				<string>Boot</string>
 				<key>MaxKernel</key>
 				<string></string>
@@ -553,7 +553,7 @@
 				<false/>
 				<key>ExecutablePath</key>
 				<string>Contents/MacOS/VoodooPS2Mouse</string>
-				<key>InjectionTarget</key>
+				<key>TargetKC</key>
 				<string>Boot</string>
 				<key>MaxKernel</key>
 				<string></string>
@@ -573,7 +573,7 @@
 				<false/>
 				<key>ExecutablePath</key>
 				<string>Contents/MacOS/VoodooPS2Trackpad</string>
-				<key>InjectionTarget</key>
+				<key>TargetKC</key>
 				<string>Boot</string>
 				<key>MaxKernel</key>
 				<string></string>
@@ -593,7 +593,7 @@
 				<false/>
 				<key>ExecutablePath</key>
 				<string>Contents/MacOS/VoodooInput</string>
-				<key>InjectionTarget</key>
+				<key>TargetKC</key>
 				<string>Boot</string>
 				<key>MaxKernel</key>
 				<string></string>
@@ -613,7 +613,7 @@
 				<false/>
 				<key>ExecutablePath</key>
 				<string>Contents/MacOS/AirportBrcmFixup</string>
-				<key>InjectionTarget</key>
+				<key>TargetKC</key>
 				<string>Boot</string>
 				<key>MaxKernel</key>
 				<string></string>
@@ -633,7 +633,7 @@
 				<false/>
 				<key>ExecutablePath</key>
 				<string></string>
-				<key>InjectionTarget</key>
+				<key>TargetKC</key>
 				<string>Boot</string>
 				<key>MaxKernel</key>
 				<string>19.9.9</string>
@@ -653,7 +653,7 @@
 				<false/>
 				<key>ExecutablePath</key>
 				<string></string>
-				<key>InjectionTarget</key>
+				<key>TargetKC</key>
 				<string>Boot</string>
 				<key>MaxKernel</key>
 				<string></string>
@@ -672,7 +672,7 @@
 				<string></string>
 				<key>Enabled</key>
 				<false/>
-				<key>ExclusionTarget</key>
+				<key>TargetKC</key>
 				<string>Boot</string>
 				<key>Identifier</key>
 				<string>com.apple.driver.AppleTyMCEDriver</string>

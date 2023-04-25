@@ -408,7 +408,7 @@ OcKernelBlockKexts (
   BOOLEAN                Exclude;
   UINT32                 MaxKernel;
   UINT32                 MinKernel;
-  CONST CHAR8            *ExclusionTarget;
+  CONST CHAR8            *TargetKC;
   UINT8                  KCType;
 
   for (Index = 0; Index < Config->Kernel.Block.Count; ++Index) {
@@ -418,23 +418,23 @@ OcKernelBlockKexts (
       continue;
     }
 
-    Target          = OC_BLOB_GET (&Kext->Identifier);
-    Comment         = OC_BLOB_GET (&Kext->Comment);
-    Arch            = OC_BLOB_GET (&Kext->Arch);
-    Strategy        = OC_BLOB_GET (&Kext->Strategy);
-    MaxKernel       = OcParseDarwinVersion (OC_BLOB_GET (&Kext->MaxKernel));
-    MinKernel       = OcParseDarwinVersion (OC_BLOB_GET (&Kext->MinKernel));
-    ExclusionTarget = OC_BLOB_GET (&Kext->ExclusionTarget);
-    Status          = AsciiKCTypeToInt (ExclusionTarget, &KCType);
+    Target    = OC_BLOB_GET (&Kext->Identifier);
+    Comment   = OC_BLOB_GET (&Kext->Comment);
+    Arch      = OC_BLOB_GET (&Kext->Arch);
+    Strategy  = OC_BLOB_GET (&Kext->Strategy);
+    MaxKernel = OcParseDarwinVersion (OC_BLOB_GET (&Kext->MaxKernel));
+    MinKernel = OcParseDarwinVersion (OC_BLOB_GET (&Kext->MinKernel));
+    TargetKC  = OC_BLOB_GET (&Kext->TargetKC);
+    Status    = AsciiKCTypeToInt (TargetKC, &KCType);
     if (EFI_ERROR (Status)) {
       DEBUG ((
         DEBUG_INFO,
-        "OC: %a blocker skips %a (%a) block at %u due to invalid exclusion target %a\n",
+        "OC: %a blocker skips %a (%a) block at %u due to invalid target KC %a\n",
         PRINT_KERNEL_CACHE_TYPE (CacheType),
         Target,
         Comment,
         Index,
-        ExclusionTarget
+        TargetKC
         ));
       continue;
     }
