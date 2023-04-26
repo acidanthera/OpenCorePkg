@@ -283,7 +283,6 @@ InternalCreatePrelinkedKext (
   return NewKext;
 }
 
-STATIC
 VOID
 InternalScanCurrentPrelinkedKextLinkInfo (
   IN OUT PRELINKED_KEXT     *Kext,
@@ -337,7 +336,6 @@ InternalScanCurrentPrelinkedKextLinkInfo (
   }
 }
 
-STATIC
 EFI_STATUS
 InternalScanBuildLinkedSymbolTable (
   IN OUT PRELINKED_KEXT     *Kext,

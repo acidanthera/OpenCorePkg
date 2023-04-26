@@ -914,8 +914,16 @@ PrelinkedSetLiluInfo (
   IN OUT PRELINKED_CONTEXT  *Context
   )
 {
-  LIST_ENTRY                     *Link;
+  UINT32                         KextCount;
+  UINT32                         Index;
+  XML_NODE                       *KextPlist;
+  UINT32                         FieldCount;
+  UINT32                         FieldIndex;
+  CONST CHAR8                    *KextPlistKey;
+  XML_NODE                       *KextPlistValue;
+  CONST CHAR8                    *KextIdentifier;
   PRELINKED_KEXT                 *Kext;
+  LIST_ENTRY                     *Link;
   CONST PRELINKED_KEXT_SYMBOL    *Symbols;
   CONST PRELINKED_KEXT_SYMBOL    *SymbolsEnd;
   UINT32                         NumSymbolsInKext;
@@ -929,6 +937,39 @@ PrelinkedSetLiluInfo (
   LILU_INFO                      *LiluInfo;
   EFI_STATUS                     Status;
   EFI_GUID                       Guid = OC_READ_ONLY_VARIABLE_GUID;
+
+  // Build the linked symbol table of all prelinked kexts so that Lilu can link to them
+  KextCount = XmlNodeChildren (Context->KextList);
+  for (Index = 0; Index < KextCount; ++Index) {
+    KextPlist = PlistNodeCast (XmlNodeChild (Context->KextList, Index), PLIST_NODE_TYPE_DICT);
+
+    if (KextPlist == NULL) {
+      continue;
+    }
+
+    FieldCount = PlistDictChildren (KextPlist);
+    for (FieldIndex = 0; FieldIndex < FieldCount; ++FieldIndex) {
+      KextPlistKey = PlistKeyValue (PlistDictChild (KextPlist, FieldIndex, &KextPlistValue));
+      if (KextPlistKey == NULL) {
+        continue;
+      }
+
+      if (AsciiStrCmp (KextPlistKey, INFO_BUNDLE_IDENTIFIER_KEY) == 0) {
+        KextIdentifier = XmlNodeContent (KextPlistValue);
+        Kext           = InternalCachedPrelinkedKext (Context, KextIdentifier);
+        if (Kext == NULL) {
+          break;
+        }
+
+        if (Kext->LinkedSymbolTable == NULL) {
+          InternalScanCurrentPrelinkedKextLinkInfo (Kext, Context);
+          InternalScanBuildLinkedSymbolTable (Kext, Context);
+        }
+
+        break;
+      }
+    }
+  }
 
   // Figure out the value of NumSymbolsInPrelinked and LengthOfPrelinkedSymbols
   Link                     = GetFirstNode (&Context->PrelinkedKexts);
