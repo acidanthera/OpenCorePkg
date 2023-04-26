@@ -8123,7 +8123,7 @@ for additional options.
   UEFI firmware typically supports \texttt{ConsoleControl} with two
   rendering modes: \texttt{Graphics} and \texttt{Text}. Some types of firmware
   do not support \texttt{ConsoleControl} and rendering modes. OpenCore
-  and macOS expect text to only be shown in \texttt{Graphics} mode and
+  and macOS expect text to only be shown in \texttt{Text} mode but
   graphics to be drawn in any mode. Since this is not required by UEFI
   specification, exact behaviour varies.
 
@@ -8150,7 +8150,7 @@ for additional options.
   The use of \texttt{BuiltinGraphics} is straightforward.
   For most platforms, it is necessary to enable \texttt{ProvideConsoleGop}
   and set \texttt{Resolution} to \texttt{Max}. The \texttt{BuiltinText} variant is
-  an alternative \texttt{BuiltinGraphics} for some very old and defective
+  an alternative to \texttt{BuiltinGraphics} for some very old and defective
   laptop firmware, which can only draw in \texttt{Text} mode.
 
   The use of \texttt{System} protocols is more complicated. Typically,

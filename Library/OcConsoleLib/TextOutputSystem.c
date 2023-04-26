@@ -350,6 +350,7 @@ OcUseSystemTextOutput (
     OcConsoleControlSetMode (EfiConsoleControlScreenText);
     OcConsoleControlInstallProtocol (&mConsoleControlProtocol, NULL, &mConsoleMode);
   } else {
+    ASSERT (Renderer == OcConsoleRendererSystemGeneric);
     OcConsoleControlInstallProtocol (&mConsoleControlProtocol, &mOriginalConsoleControlProtocol, &mConsoleMode);
   }
 

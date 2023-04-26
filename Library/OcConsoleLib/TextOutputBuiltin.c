@@ -323,9 +323,12 @@ RenderScroll (
   VOID
   )
 {
+  UINTN  Width;
+
   //
-  // Move data.
+  // Move used screen region.
   //
+  Width = TGT_PADD_WIDTH + (mConsoleMaxPosX + 1) * TGT_CHAR_WIDTH;
   mGraphicsOutput->Blt (
                      mGraphicsOutput,
                      NULL,
@@ -334,7 +337,7 @@ RenderScroll (
                      TGT_PADD_HEIGHT + TGT_CHAR_HEIGHT,
                      0,
                      TGT_PADD_HEIGHT,
-                     mGraphicsOutput->Mode->Info->HorizontalResolution,
+                     MIN (Width, mGraphicsOutput->Mode->Info->HorizontalResolution),
                      TGT_CHAR_HEIGHT * (mConsoleHeight - 1),
                      0
                      );
@@ -350,12 +353,15 @@ RenderScroll (
                      0,
                      0,
                      TGT_PADD_HEIGHT + TGT_CHAR_HEIGHT * (mConsoleHeight - 1),
-                     mGraphicsOutput->Mode->Info->HorizontalResolution,
+                     MIN (Width, mGraphicsOutput->Mode->Info->HorizontalResolution),
                      TGT_CHAR_HEIGHT,
                      0
                      );
 }
 
+//
+// Resync - called on detected change of GOP mode and on reset.
+//
 STATIC
 EFI_STATUS
 RenderResync (
@@ -366,8 +372,8 @@ RenderResync (
 
   Info = mGraphicsOutput->Mode->Info;
 
-  if (  (Info->HorizontalResolution < TGT_CHAR_WIDTH * 3)
-     || (Info->VerticalResolution < TGT_CHAR_HEIGHT * 3))
+  if (  (Info->HorizontalResolution < TGT_CHAR_WIDTH * (2 * SCR_PADD + 1))
+     || (Info->VerticalResolution < TGT_CHAR_HEIGHT * (2 * SCR_PADD + 1)))
   {
     return EFI_LOAD_ERROR;
   }
@@ -590,11 +596,15 @@ AsciiTextTestString (
   )
 {
   if (StrCmp (String, OC_CONSOLE_MARK_UNCONTROLLED) == 0) {
+    //
+    // Set values which intentionally slightly overflow the screen clear calculations
+    // and get clamped to full screen.
+    //
     mConsoleMaxPosX = mGraphicsOutput->Mode->Info->HorizontalResolution / TGT_CHAR_WIDTH;
     mConsoleMaxPosY = mGraphicsOutput->Mode->Info->VerticalResolution   / TGT_CHAR_HEIGHT;
   } else if (StrCmp (String, OC_CONSOLE_MARK_CONTROLLED) == 0) {
     mConsoleMaxPosX = 0;
-    mConsoleMaxPosX = 0;
+    mConsoleMaxPosY = 0;
   }
 
   return EFI_SUCCESS;
@@ -697,11 +707,14 @@ AsciiTextSetAttribute (
     BgColor = BitFieldRead32 ((UINT32)Attribute, 4, 6);
 
     //
-    // Once we change the background we should redraw everything.
+    // Once we change the background colour, any clear screen must cover the whole screen.
     //
     if (mGraphicsEfiColors[BgColor] != mBackgroundColor.Raw) {
-      mConsoleMaxPosX = mConsoleWidth + SCR_PADD;
-      mConsoleMaxPosY = mConsoleHeight + SCR_PADD;
+      //
+      // Match uncontrolled values.
+      //
+      mConsoleMaxPosX = mGraphicsOutput->Mode->Info->HorizontalResolution / TGT_CHAR_WIDTH;
+      mConsoleMaxPosY = mGraphicsOutput->Mode->Info->VerticalResolution   / TGT_CHAR_HEIGHT;
     }
 
     mForegroundColor.Raw  = mGraphicsEfiColors[FgColor];
@@ -715,6 +728,11 @@ AsciiTextSetAttribute (
   return EFI_SUCCESS;
 }
 
+//
+// Note: This intentionally performs a partial screen clear, affecting only the
+// area containing text which has been written using our renderer, unless console
+// is marked uncontrolled prior to clearing.
+//
 STATIC
 EFI_STATUS
 EFIAPI
@@ -729,34 +747,41 @@ AsciiTextClearScreen (
 
   OldTpl = gBS->RaiseTPL (TPL_NOTIFY);
 
+  //
+  // No need to re-clear screen straight after resync; but note that the initial screen
+  // clear after reset, although of non-zero size, is intentionally very lightweight.
+  //
   if (mConsoleGopMode != mGraphicsOutput->Mode->Mode) {
     Status = RenderResync (This);
     if (EFI_ERROR (Status)) {
       gBS->RestoreTPL (OldTpl);
       return EFI_DEVICE_ERROR;
     }
+  } else {
+    //
+    // When controlled, we assume that only text which we rendered needs to be cleared.
+    // When marked uncontrolled anyone may have put content anywhere (in particular, graphics)
+    // so always clear full screen.
+    // mConsoleMaxPosX,Y coordinates are the top left coordinates of the of the greatest
+    // occupied character position. Because there is a cursor, there is always at least
+    // one character position occupied.
+    //
+    Width  = TGT_PADD_WIDTH  + (mConsoleMaxPosX + 1) * TGT_CHAR_WIDTH;
+    Height = TGT_PADD_HEIGHT + (mConsoleMaxPosY + 1) * TGT_CHAR_HEIGHT;
+
+    mGraphicsOutput->Blt (
+                       mGraphicsOutput,
+                       &mBackgroundColor.Pixel,
+                       EfiBltVideoFill,
+                       0,
+                       0,
+                       0,
+                       0,
+                       MIN (Width, mGraphicsOutput->Mode->Info->HorizontalResolution),
+                       MIN (Height, mGraphicsOutput->Mode->Info->VerticalResolution),
+                       0
+                       );
   }
-
-  //
-  // X coordinate points to the right most coordinate of the last printed
-  // character, but after this character we may also have cursor.
-  // Y coordinate points to the top most coordinate of the last printed row.
-  //
-  Width  = TGT_PADD_WIDTH  + (mConsoleMaxPosX + 1) * TGT_CHAR_WIDTH;
-  Height = TGT_PADD_HEIGHT + (mConsoleMaxPosY + 1) * TGT_CHAR_HEIGHT;
-
-  mGraphicsOutput->Blt (
-                     mGraphicsOutput,
-                     &mBackgroundColor.Pixel,
-                     EfiBltVideoFill,
-                     0,
-                     0,
-                     0,
-                     0,
-                     MIN (Width, mGraphicsOutput->Mode->Info->HorizontalResolution),
-                     MIN (Height, mGraphicsOutput->Mode->Info->VerticalResolution),
-                     0
-                     );
 
   //
   // Handle cursor.
@@ -766,8 +791,12 @@ AsciiTextClearScreen (
   FlushCursor (This->Mode->CursorVisible, mPrivateColumn, mPrivateRow);
 
   //
-  // We do not reset max here, as we may still scroll (e.g. in shell via page buttons).
+  // After clear screen, shell may scroll through old text via page up/down buttons,
+  // but it is okay to reset max x/y here anyway, as any old text is brought on via
+  // full redraw.
   //
+  mConsoleMaxPosX = 0;
+  mConsoleMaxPosY = 0;
 
   gBS->RestoreTPL (OldTpl);
   return EFI_SUCCESS;
