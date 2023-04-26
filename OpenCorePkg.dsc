@@ -396,7 +396,7 @@
   gEfiMdePkgTokenSpaceGuid.PcdImageLoaderLoadHeader|TRUE
   gEfiMdePkgTokenSpaceGuid.PcdImageLoaderDebugSupport|FALSE
   gEfiMdePkgTokenSpaceGuid.PcdImageLoaderAllowMisalignedOffset|FALSE
-  gEfiMdePkgTokenSpaceGuid.PcdImageLoaderRemoveXForWX|FALSE
+  gEfiMdePkgTokenSpaceGuid.PcdImageLoaderRemoveXForWX|TRUE
   gEfiMdePkgTokenSpaceGuid.PcdImageLoaderWXorX|TRUE
   gEfiMdePkgTokenSpaceGuid.PcdImageLoaderAlignmentPolicy|0xFFFFFFFF
   gEfiMdePkgTokenSpaceGuid.PcdImageLoaderRelocTypePolicy|0xFFFFFFFF
