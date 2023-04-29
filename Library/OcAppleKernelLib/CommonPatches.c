@@ -1030,6 +1030,8 @@ PatchForceInternalDiskIcons (
   //
   if (OcMatchDarwinVersion (KernelVersion, KERNEL_VERSION (KERNEL_VERSION_VENTURA, 4, 0), 0)) {
     mIOAHCIPortPatch.Count = 2;
+  } else {
+    mIOAHCIPortPatch.Count = 1;
   }
 
   Status = PatcherApplyGenericPatch (Patcher, &mIOAHCIPortPatch);
