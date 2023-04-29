@@ -1007,7 +1007,7 @@ PATCHER_GENERIC_PATCH
   .Replace     = mIOAHCIPortPatchReplace,
   .ReplaceMask = NULL,
   .Size        = sizeof (mIOAHCIPortPatchFind),
-  .Count       = 1,
+  .Count       = 1,  ///< 2 for macOS 13.3+
   .Skip        = 0
 };
 
@@ -1023,6 +1023,15 @@ PatchForceInternalDiskIcons (
   if (Patcher == NULL) {
     DEBUG ((DEBUG_INFO, "OCAK: [OK] Skipping %a on NULL Patcher on %u\n", __func__, KernelVersion));
     return EFI_NOT_FOUND;
+  }
+
+  //
+  // Override patch count to 2 on macOS 13.3+ (Darwin 22.4.0).
+  //
+  if (OcMatchDarwinVersion (KernelVersion, KERNEL_VERSION (KERNEL_VERSION_VENTURA, 4, 0), 0)) {
+    mIOAHCIPortPatch.Count = 2;
+  } else {
+    mIOAHCIPortPatch.Count = 1;
   }
 
   Status = PatcherApplyGenericPatch (Patcher, &mIOAHCIPortPatch);
