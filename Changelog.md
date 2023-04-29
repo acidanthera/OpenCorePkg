@@ -8,6 +8,7 @@ OpenCore Changelog
 - Fixed possible hang with `GopBurstMode` enabled on DEBUG builds
 - Enabled `GopBurstMode` even with natively supported cards, in EnableGop firmware driver
 - Fixed inability to patch force-injected kexts
+- Fixed `ExternalDiskIcons` quirk on macOS 13.3+, thx @fusion71au
 
 #### v0.9.1
 - Fixed long comment printing for ACPI patches, thx @corpnewt
