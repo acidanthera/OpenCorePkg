@@ -156,6 +156,13 @@ OcConsoleControlInstallProtocol (
     return EFI_SUCCESS;
   }
 
+  if (OldProtocol != NULL) {
+    ZeroMem (
+      OldProtocol,
+      sizeof (*OldProtocol)
+      );
+  }
+
   Status = gBS->InstallMultipleProtocolInterfaces (
                   &gST->ConsoleOutHandle,
                   &gEfiConsoleControlProtocolGuid,
@@ -166,4 +173,38 @@ OcConsoleControlInstallProtocol (
   DEBUG ((DEBUG_INFO, "OCC: Install console control, new - %r\n", Status));
 
   return Status;
+}
+
+EFI_STATUS
+OcConsoleControlRestoreProtocol (
+  IN EFI_CONSOLE_CONTROL_PROTOCOL  *OldProtocol
+  )
+{
+  EFI_STATUS                    Status;
+  EFI_CONSOLE_CONTROL_PROTOCOL  *ConsoleControl;
+
+  Status = gBS->HandleProtocol (
+                  &gST->ConsoleOutHandle,
+                  &gEfiConsoleControlProtocolGuid,
+                  (VOID *)&ConsoleControl
+                  );
+
+  if (OldProtocol->GetMode == NULL) {
+    Status = gBS->UninstallMultipleProtocolInterfaces (
+                    &gST->ConsoleOutHandle,
+                    &gEfiConsoleControlProtocolGuid,
+                    ConsoleControl,
+                    NULL
+                    );
+
+    return Status;
+  }
+
+  CopyMem (
+    ConsoleControl,
+    OldProtocol,
+    sizeof (*ConsoleControl)
+    );
+
+  return EFI_SUCCESS;
 }

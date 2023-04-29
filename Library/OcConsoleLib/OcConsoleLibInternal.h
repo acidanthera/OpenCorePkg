@@ -60,6 +60,11 @@ OcConsoleControlInstallProtocol (
   );
 
 EFI_STATUS
+OcConsoleControlRestoreProtocol (
+  IN EFI_CONSOLE_CONTROL_PROTOCOL  *OldProtocol
+  );
+
+EFI_STATUS
 OcUseBuiltinTextOutput (
   IN EFI_CONSOLE_CONTROL_SCREEN_MODE  InitialMode,
   IN EFI_CONSOLE_CONTROL_SCREEN_MODE  Mode

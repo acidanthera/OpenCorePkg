@@ -165,50 +165,6 @@ InternalRunRequestPrivilege (
   return Status;
 }
 
-//
-// Since the Apple picker is GOP-based, it is reasonable to use specifically GOP to clear up after it.
-// Note that depending on settings, resetting ConsoleControl to text mode followed by ConOut->ClearScreen,
-// within the builtin picker, is not always sufficient to display it after the Apple picker, with no left-
-// over Apple picker baggage on screen, so we add this.
-//
-STATIC
-EFI_STATUS
-GopClearScreen (
-  VOID
-  )
-{
-  EFI_STATUS                           Status;
-  EFI_GRAPHICS_OUTPUT_PROTOCOL         *Gop;
-  EFI_GRAPHICS_OUTPUT_BLT_PIXEL_UNION  Pixel;
-
-  Status = gBS->HandleProtocol (
-                  gST->ConsoleOutHandle,
-                  &gEfiGraphicsOutputProtocolGuid,
-                  (VOID **)&Gop
-                  );
-
-  if (EFI_ERROR (Status)) {
-    return Status;
-  }
-
-  Pixel.Raw = 0x0;
-
-  Gop->Blt (
-         Gop,
-         &Pixel.Pixel,
-         EfiBltVideoFill,
-         0,
-         0,
-         0,
-         0,
-         Gop->Mode->Info->HorizontalResolution,
-         Gop->Mode->Info->VerticalResolution,
-         0
-         );
-
-  return EFI_UNSUPPORTED;
-}
-
 EFI_STATUS
 OcRunBootPicker (
   IN OC_PICKER_CONTEXT  *Context
@@ -311,7 +267,7 @@ OcRunBootPicker (
         if (IsApplePickerSelection) {
           DEBUG ((DEBUG_WARN, "OCB: Apple Picker returned no entry valid under OC, falling back to builtin\n"));
           Context->PickerMode = OcPickerModeBuiltin;
-          GopClearScreen ();
+          gST->ConOut->TestString (gST->ConOut, OC_CONSOLE_MARK_UNCONTROLLED);
         } else {
           DEBUG ((DEBUG_INFO, "OCB: System has no boot entries, showing picker with auxiliary\n"));
         }
