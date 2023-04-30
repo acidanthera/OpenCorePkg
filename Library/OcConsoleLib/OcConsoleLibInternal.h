@@ -67,7 +67,9 @@ OcConsoleControlRestoreProtocol (
 EFI_STATUS
 OcUseBuiltinTextOutput (
   IN EFI_CONSOLE_CONTROL_SCREEN_MODE  InitialMode,
-  IN EFI_CONSOLE_CONTROL_SCREEN_MODE  Mode
+  IN EFI_CONSOLE_CONTROL_SCREEN_MODE  Mode,
+  IN UINT32                           Width,
+  IN UINT32                           Height
   );
 
 EFI_STATUS

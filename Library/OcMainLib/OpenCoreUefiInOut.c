@@ -348,20 +348,22 @@ OcLoadUefiOutputSupport (
     Renderer = OcConsoleRendererBuiltinGraphics;
   }
 
+  OcParseConsoleMode (
+    OC_BLOB_GET (&Config->Uefi.Output.ConsoleMode),
+    &Width,
+    &Height,
+    &SetMax
+    );
+
   OcSetupConsole (
     InitialMode,
     Renderer,
     Config->Uefi.Output.IgnoreTextInGraphics,
     Config->Uefi.Output.SanitiseClearScreen,
     Config->Uefi.Output.ClearScreenOnModeSwitch,
-    Config->Uefi.Output.ReplaceTabWithSpace
-    );
-
-  OcParseConsoleMode (
-    OC_BLOB_GET (&Config->Uefi.Output.ConsoleMode),
-    &Width,
-    &Height,
-    &SetMax
+    Config->Uefi.Output.ReplaceTabWithSpace,
+    Width,
+    Height
     );
 
   DEBUG ((

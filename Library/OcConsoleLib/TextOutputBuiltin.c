@@ -158,6 +158,10 @@ STATIC UINT32  mGraphicsEfiColors[16] = {
 };
 
 STATIC EFI_GRAPHICS_OUTPUT_PROTOCOL         *mGraphicsOutput;
+STATIC UINTN                                mConsolePaddingX;
+STATIC UINTN                                mConsolePaddingY;
+STATIC UINTN                                mUserWidth;
+STATIC UINTN                                mUserHeight;
 STATIC UINTN                                mConsoleWidth;
 STATIC UINTN                                mConsoleHeight;
 STATIC UINTN                                mConsoleMaxPosX;
@@ -172,12 +176,11 @@ STATIC EFI_GRAPHICS_OUTPUT_BLT_PIXEL_UNION  mForegroundColor;
 STATIC EFI_GRAPHICS_OUTPUT_BLT_PIXEL_UNION  *mCharacterBuffer;
 STATIC EFI_CONSOLE_CONTROL_SCREEN_MODE      mConsoleMode = EfiConsoleControlScreenText;
 
-#define SCR_PADD           1
 #define TGT_CHAR_WIDTH     ((UINTN)(ISO_CHAR_WIDTH) * mFontScale)
 #define TGT_CHAR_HEIGHT    ((UINTN)(ISO_CHAR_HEIGHT) * mFontScale)
 #define TGT_CHAR_AREA      ((TGT_CHAR_WIDTH) * (TGT_CHAR_HEIGHT))
-#define TGT_PADD_WIDTH     ((TGT_CHAR_WIDTH) * (SCR_PADD))
-#define TGT_PADD_HEIGHT    ((TGT_CHAR_HEIGHT) * (SCR_PADD))
+#define TGT_PADD_WIDTH     (mConsolePaddingX)
+#define TGT_PADD_HEIGHT    (mConsolePaddingY)
 #define TGT_CURSOR_X       mFontScale
 #define TGT_CURSOR_Y       ((TGT_CHAR_HEIGHT) - mFontScale)
 #define TGT_CURSOR_WIDTH   ((TGT_CHAR_WIDTH) - mFontScale*2)
@@ -370,14 +373,16 @@ RenderResync (
   )
 {
   EFI_GRAPHICS_OUTPUT_MODE_INFORMATION  *Info;
+  UINTN                                 MaxWidth;
+  UINTN                                 MaxHeight;
 
   Info = mGraphicsOutput->Mode->Info;
 
   //
   // Require space for at least 1x1 chars on the calculation below.
   //
-  if (  (Info->HorizontalResolution < TGT_CHAR_WIDTH  + (2 * TGT_PADD_WIDTH))
-     || (Info->VerticalResolution   < TGT_CHAR_HEIGHT + (2 * TGT_PADD_HEIGHT)))
+  if (  (Info->HorizontalResolution < TGT_CHAR_WIDTH)
+     || (Info->VerticalResolution   < TGT_CHAR_HEIGHT))
   {
     return EFI_LOAD_ERROR;
   }
@@ -391,9 +396,19 @@ RenderResync (
     return EFI_OUT_OF_RESOURCES;
   }
 
-  mConsoleGopMode      = mGraphicsOutput->Mode->Mode;
-  mConsoleWidth        = (Info->HorizontalResolution - (2 * TGT_PADD_WIDTH)) / TGT_CHAR_WIDTH;
-  mConsoleHeight       = (Info->VerticalResolution   - (2 * TGT_PADD_HEIGHT)) / TGT_CHAR_HEIGHT;
+  mConsoleGopMode = mGraphicsOutput->Mode->Mode;
+  MaxWidth        = Info->HorizontalResolution / TGT_CHAR_WIDTH;
+  MaxHeight       = Info->VerticalResolution / TGT_CHAR_HEIGHT;
+  if ((mUserWidth < 1) || (mUserHeight < 1)) {
+    mConsoleWidth  = MaxWidth;
+    mConsoleHeight = MaxHeight;
+  } else {
+    mConsoleWidth  = MIN (MaxWidth, mUserWidth);
+    mConsoleHeight = MIN (MaxHeight, mUserHeight);
+  }
+
+  mConsolePaddingX     = (Info->HorizontalResolution - (mConsoleWidth * TGT_CHAR_WIDTH)) / 2;
+  mConsolePaddingY     = (Info->VerticalResolution - (mConsoleHeight * TGT_CHAR_HEIGHT)) / 2;
   mConsoleMaxPosX      = 0;
   mConsoleMaxPosY      = 0;
   mConsoleUncontrolled = FALSE;
@@ -1017,7 +1032,9 @@ ConsoleControlInstall (
 EFI_STATUS
 OcUseBuiltinTextOutput (
   IN EFI_CONSOLE_CONTROL_SCREEN_MODE  InitialMode,
-  IN EFI_CONSOLE_CONTROL_SCREEN_MODE  Mode
+  IN EFI_CONSOLE_CONTROL_SCREEN_MODE  Mode,
+  IN UINT32                           Width,
+  IN UINT32                           Height
   )
 {
   EFI_STATUS                    Status;
@@ -1040,6 +1057,8 @@ OcUseBuiltinTextOutput (
 
   DEBUG ((DEBUG_INFO, "OCC: Using builtin text renderer with %d scale\n", mFontScale));
 
+  mUserWidth   = Width;
+  mUserHeight  = Height;
   mConsoleMode = InitialMode;
   OcConsoleControlSetMode (Mode);
   Status = OcConsoleControlInstallProtocol (&mConsoleControlProtocol, &OriginalConsoleControlProtocol, NULL); ///< Produces o/p using old, uncontrolled text protocol

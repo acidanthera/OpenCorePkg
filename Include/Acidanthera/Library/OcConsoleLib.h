@@ -51,6 +51,8 @@ typedef enum {
   @param[in] SanitiseClearScreen      Workaround ClearScreen breaking resolution.
   @param[in] ClearScreenOnModeSwitch  Clear graphic screen when switching to text mode.
   @param[in] ReplaceTabWithSpace      Replace invisible tab characters with spaces in OutputString.
+  @param[in] Width                    Width to set - applies to builtin renderer only.
+  @param[in] Height                   Height to set - applies to builtin renderer only.
 **/
 VOID
 OcSetupConsole (
@@ -59,7 +61,9 @@ OcSetupConsole (
   IN BOOLEAN                          IgnoreTextOutput,
   IN BOOLEAN                          SanitiseClearScreen,
   IN BOOLEAN                          ClearScreenOnModeSwitch,
-  IN BOOLEAN                          ReplaceTabWithSpace
+  IN BOOLEAN                          ReplaceTabWithSpace,
+  IN UINT32                           Width,
+  IN UINT32                           Height
   );
 
 /**

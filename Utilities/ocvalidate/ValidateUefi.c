@@ -643,11 +643,15 @@ CheckUefiOutput (
     &UserSetMax
     );
   if (  (ConsoleMode[0] != '\0')
-     && !UserSetMax
-     && ((UserWidth == 0) || (UserHeight == 0)))
+     && !UserSetMax)
   {
-    DEBUG ((DEBUG_WARN, "UEFI->Output->ConsoleMode is borked, please check Configurations.pdf!\n"));
-    ++ErrorCount;
+    if ((UserWidth == 0) || (UserHeight == 0)) {
+      DEBUG ((DEBUG_WARN, "UEFI->Output->ConsoleMode is borked, please check documentation!\n"));
+      ++ErrorCount;
+    } else if ((UserWidth < 80) || (UserHeight < 25)) {
+      DEBUG ((DEBUG_WARN, "UEFI->Output->ConsoleMode is below minumum supported console text resolution of 80x25, please fix!\n"));
+      ++ErrorCount;
+    }
   }
 
   //
@@ -665,7 +669,7 @@ CheckUefiOutput (
      && !UserSetMax
      && ((UserWidth == 0) || (UserHeight == 0)))
   {
-    DEBUG ((DEBUG_WARN, "UEFI->Output->Resolution is borked, please check Configurations.pdf!\n"));
+    DEBUG ((DEBUG_WARN, "UEFI->Output->Resolution is borked, please check documentation!\n"));
     ++ErrorCount;
   }
 
