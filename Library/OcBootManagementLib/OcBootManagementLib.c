@@ -189,6 +189,19 @@ OcRunBootPicker (
   }
 
   //
+  // Use builtin text renderer extension:
+  //  - Set for text-based picker, to mark dirty due to BIOS logo, early logs, etc.
+  //    (which are not cleared by initial resync when starting in console graphics mode).
+  //  - Do no set for graphics-based picker, since we want (expected behaviour, also
+  //    similar to how system renderers tend to behave) the debug log to continue on
+  //    over the graphics from the position it has reached so far, if we are running
+  //    in a mode which will show text output.
+  //
+  if (Context->ShowMenu == OcShowSimpleBootMenu) {
+    gST->ConOut->TestString (gST->ConOut, OC_CONSOLE_MARK_UNCONTROLLED);
+  }
+
+  //
   // This one is handled as is for Apple BootPicker for now.
   //
   if (Context->PickerCommand != OcPickerDefault) {
@@ -267,6 +280,10 @@ OcRunBootPicker (
         if (IsApplePickerSelection) {
           DEBUG ((DEBUG_WARN, "OCB: Apple Picker returned no entry valid under OC, falling back to builtin\n"));
           Context->PickerMode = OcPickerModeBuiltin;
+
+          //
+          // Clears all native picker graphics on switching back to text mode.
+          //
           gST->ConOut->TestString (gST->ConOut, OC_CONSOLE_MARK_UNCONTROLLED);
         } else {
           DEBUG ((DEBUG_INFO, "OCB: System has no boot entries, showing picker with auxiliary\n"));
@@ -354,14 +371,20 @@ OcRunBootPicker (
         }
 
         //
-        // Clear screen of previous console contents - e.g. from builtin picker,
-        // log messages or previous console tool - before loading the entry.
+        // If launching entry in text, clear screen of previous console contents - e.g. from
+        // builtin picker, log messages, or previous console tool - before loading the entry.
+        // Otherwise, if coming from graphics picker, set to trigger a full screen clear if anybody,
+        // but particularly macOS verbose boot, switches to text mode. (If running Canopy with
+        // a background mode of text, this still works: even though Builtin renderer only clears
+        // on change from graphics to text, macOS initially sets graphics, which stays uncontrolled,
+        // then back to text for verbose mode.)
+        // But if coming from text picker do not set uncontrolled, intentionally allowing initial
+        // verbose mode text to run on after the picker text.
         //
         if (Chosen->LaunchInText) {
+          gST->ConOut->TestString (gST->ConOut, OC_CONSOLE_MARK_UNCONTROLLED);
           gST->ConOut->ClearScreen (gST->ConOut);
-        }
-
-        if (Context->ShowMenu == OcShowSimpleBootMenu) {
+        } else if (BootContext->PickerContext->ShowMenu != OcShowSimpleBootMenu) {
           gST->ConOut->TestString (gST->ConOut, OC_CONSOLE_MARK_UNCONTROLLED);
         }
 

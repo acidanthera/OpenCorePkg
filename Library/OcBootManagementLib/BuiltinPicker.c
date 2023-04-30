@@ -429,11 +429,7 @@ OcShowSimpleBootMenu (
     gST->ConOut->SetAttribute (gST->ConOut, BootContext->PickerContext->ConsoleAttributes & 0x7FU);
   }
 
-  //
-  // Extension for OpenCore direct text render for faster redraw with custom background.
-  //
   gST->ConOut->ClearScreen (gST->ConOut);
-  gST->ConOut->TestString (gST->ConOut, OC_CONSOLE_MARK_CONTROLLED);
 
   while (TRUE) {
     if (FirstIndexRow != -1) {
@@ -858,7 +854,6 @@ OcShowSimplePasswordRequest (
   OcConsoleControlSetMode (EfiConsoleControlScreenText);
   gST->ConOut->EnableCursor (gST->ConOut, FALSE);
   gST->ConOut->ClearScreen (gST->ConOut);
-  gST->ConOut->TestString (gST->ConOut, OC_CONSOLE_MARK_CONTROLLED);
 
   for (Index = 0; Index < OC_PASSWORD_MAX_RETRIES; ++Index) {
     PwIndex = 0;

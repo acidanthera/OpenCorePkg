@@ -608,10 +608,6 @@ AsciiTextTestString (
 {
   if (StrCmp (String, OC_CONSOLE_MARK_UNCONTROLLED) == 0) {
     mConsoleUncontrolled = TRUE;
-  } else if (StrCmp (String, OC_CONSOLE_MARK_CONTROLLED) == 0) {
-    mConsoleMaxPosX      = 0;
-    mConsoleMaxPosY      = 0;
-    mConsoleUncontrolled = FALSE;
   }
 
   return EFI_SUCCESS;
@@ -1060,12 +1056,6 @@ OcUseBuiltinTextOutput (
              gST->Hdr.HeaderSize,
              &gST->Hdr.CRC32
              );
-
-      //
-      // Mark dirty due to BIOS logo, early logs, etc. - which will not be cleared
-      // by initial resync when starting in graphics mode.
-      //
-      gST->ConOut->TestString (gST->ConOut, OC_CONSOLE_MARK_UNCONTROLLED);
     }
   }
 
