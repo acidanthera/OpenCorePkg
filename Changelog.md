@@ -9,6 +9,10 @@ OpenCore Changelog
 - Enabled `GopBurstMode` even with natively supported cards, in EnableGop firmware driver
 - Fixed inability to patch force-injected kexts
 - Fixed `ExternalDiskIcons` quirk on macOS 13.3+, thx @fusion71au
+- Fixed various recent reversions and some longer-standing minor bugs in `Builtin` text renderer
+- Applied some additional minor optimizations to `Builtin` text renderer
+- Implemented `InitialMode` option to allow fine control over text renderer operating mode
+- Added support for `ConsoleMode` text resolution setting to `Builtin` renderer
 
 #### v0.9.1
 - Fixed long comment printing for ACPI patches, thx @corpnewt
