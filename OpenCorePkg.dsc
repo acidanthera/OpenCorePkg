@@ -22,7 +22,7 @@
   BUILD_TARGETS           = RELEASE|DEBUG|NOOPT
   SKUID_IDENTIFIER        = DEFAULT
   DSC_SPECIFICATION       = 0x00010006
-  FLASH_DEFINITION        = OpenCorePkg/OpenCorePkg.fdf
+  # FLASH_DEFINITION        = OpenCorePkg/OpenCorePkg.fdf
 
   #
   # Network definition
