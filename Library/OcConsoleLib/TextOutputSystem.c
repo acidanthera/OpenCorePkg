@@ -327,11 +327,12 @@ EFI_CONSOLE_CONTROL_PROTOCOL
 
 EFI_STATUS
 OcUseSystemTextOutput (
-  IN OC_CONSOLE_RENDERER  Renderer,
-  IN BOOLEAN              IgnoreTextOutput,
-  IN BOOLEAN              SanitiseClearScreen,
-  IN BOOLEAN              ClearScreenOnModeSwitch,
-  IN BOOLEAN              ReplaceTabWithSpace
+  IN EFI_CONSOLE_CONTROL_SCREEN_MODE  InitialMode,
+  IN OC_CONSOLE_RENDERER              Renderer,
+  IN BOOLEAN                          IgnoreTextOutput,
+  IN BOOLEAN                          SanitiseClearScreen,
+  IN BOOLEAN                          ClearScreenOnModeSwitch,
+  IN BOOLEAN                          ReplaceTabWithSpace
   )
 {
   DEBUG ((
@@ -343,15 +344,18 @@ OcUseSystemTextOutput (
     ReplaceTabWithSpace
     ));
 
+  mConsoleMode = InitialMode;
+
   if (Renderer == OcConsoleRendererSystemGraphics) {
     OcConsoleControlSetMode (EfiConsoleControlScreenGraphics);
-    OcConsoleControlInstallProtocol (&mConsoleControlProtocol, NULL, &mConsoleMode);
+    OcConsoleControlInstallProtocol (&mConsoleControlProtocol, NULL, NULL);
   } else if (Renderer == OcConsoleRendererSystemText) {
     OcConsoleControlSetMode (EfiConsoleControlScreenText);
-    OcConsoleControlInstallProtocol (&mConsoleControlProtocol, NULL, &mConsoleMode);
+    OcConsoleControlInstallProtocol (&mConsoleControlProtocol, NULL, NULL);
   } else {
     ASSERT (Renderer == OcConsoleRendererSystemGeneric);
-    OcConsoleControlInstallProtocol (&mConsoleControlProtocol, &mOriginalConsoleControlProtocol, &mConsoleMode);
+    OcConsoleControlSetMode (InitialMode);
+    OcConsoleControlInstallProtocol (&mConsoleControlProtocol, &mOriginalConsoleControlProtocol, NULL);
   }
 
   mIgnoreTextInGraphics    = IgnoreTextOutput;

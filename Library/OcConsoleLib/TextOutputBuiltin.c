@@ -977,6 +977,7 @@ ConsoleControlInstall (
 
 EFI_STATUS
 OcUseBuiltinTextOutput (
+  IN EFI_CONSOLE_CONTROL_SCREEN_MODE  InitialMode,
   IN EFI_CONSOLE_CONTROL_SCREEN_MODE  Mode
   )
 {
@@ -999,7 +1000,8 @@ OcUseBuiltinTextOutput (
 
   DEBUG ((DEBUG_INFO, "OCC: Using builtin text renderer with %d scale\n", mFontScale));
 
-  Status = AsciiTextResetEx (&mAsciiTextOutputProtocol, TRUE, TRUE);
+  mConsoleMode = InitialMode;
+  Status       = AsciiTextResetEx (&mAsciiTextOutputProtocol, TRUE, TRUE);
 
   if (!EFI_ERROR (Status)) {
     OcConsoleControlSetMode (Mode);

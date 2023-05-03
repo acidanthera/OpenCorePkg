@@ -548,6 +548,7 @@ CheckUefiOutput (
   )
 {
   UINT32       ErrorCount;
+  CONST CHAR8  *InitialMode;
   CONST CHAR8  *TextRenderer;
   CONST CHAR8  *GopPassThrough;
   BOOLEAN      IsTextRendererSystem;
@@ -571,6 +572,15 @@ CheckUefiOutput (
   //
   // Sanitise strings.
   //
+  InitialMode = OC_BLOB_GET (&Config->Uefi.Output.InitialMode);
+  if (  (AsciiStrCmp (InitialMode, "Auto") != 0)
+     && (AsciiStrCmp (InitialMode, "Text") != 0)
+     && (AsciiStrCmp (InitialMode, "Graphics") != 0))
+  {
+    DEBUG ((DEBUG_WARN, "UEFI->Output->InitialMode is illegal (Can only be Auto, Text, or Graphics)!\n"));
+    ++ErrorCount;
+  }
+
   TextRenderer = OC_BLOB_GET (&Config->Uefi.Output.TextRenderer);
   if (  (AsciiStrCmp (TextRenderer, "BuiltinGraphics") != 0)
      && (AsciiStrCmp (TextRenderer, "BuiltinText") != 0)

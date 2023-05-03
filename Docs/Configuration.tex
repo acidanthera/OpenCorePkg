@@ -8107,6 +8107,19 @@ for additional options.
 \begin{enumerate}
 
 \item
+  \texttt{InitialMode}\\
+  \textbf{Type}: \texttt{plist\ string}\\
+  \textbf{Failsafe}: \texttt{Auto}\\
+  \textbf{Description}: Selects initial \texttt{ConsoleControl} mode to use before applying \texttt{TextRenderer} option.
+
+  Available values are \texttt{Auto}, \texttt{Text} and \texttt{Graphics}.
+  When \texttt{Text} or \texttt{Graphics} are specified, will attempt to set the system
+  \texttt{ConsoleControl} protocol to the specified value, and will then report being in
+  specified mode even if it could not set it, e.g. if there is no system \texttt{ConsoleControl}
+  protocol. For \texttt{Auto}, reports the existing \texttt{ConsoleControl} mode, defaulting
+  to \texttt{Text} if there is no system \texttt{ConsoleControl} protocol.
+
+\item
   \texttt{TextRenderer}\\
   \textbf{Type}: \texttt{plist\ string}\\
   \textbf{Failsafe}: \texttt{BuiltinGraphics}\\
@@ -8161,7 +8174,22 @@ for additional options.
   and \texttt{ClearScreenOnModeSwitch} are more specific, and their use
   depends on the firmware.
 
-  \emph{Note}: Some Macs, such as the \texttt{MacPro5,1}, may have incompatible
+  \emph{Note 1}: As required to work round issues with some legacy firmware,
+  both \texttt{Builtin} protocols use the system \texttt{ConsoleControl} protocol
+  to set \texttt{Text} or \texttt{Graphics} mode as specified in the option name, but
+  then behave internally (e.g. as to whether text output is shown in \texttt{Text}
+  mode or suppressed in \texttt{Graphics} mode) and report to other systems as if they
+  were in the mode present \emph{before} the protocol was applied (defaulting
+  to \texttt{Text} mode when there is no system \texttt{ConsoleControl} protocol).
+  To control this internal mode value, the \texttt{InitialMode} option should be used.
+
+  \emph{Note 2}: The \texttt{System} protocols will set and report the mode
+  specified in the option name, as long as there is a native \texttt{ConsoleControl}
+  protocol. To gain control over the reported mode whether or not there is an existing
+  system \texttt{ConsoleControl} protocol, the \texttt{InitialMode} option should
+  be used.
+
+  \emph{Note 3}: Some Macs, such as the \texttt{MacPro5,1}, may have incompatible
   console output when using modern GPUs, and thus only \texttt{BuiltinGraphics}
   may work for them in such cases. NVIDIA GPUs may require additional
   \href{https://github.com/acidanthera/bugtracker/issues/1280}{firmware upgrades}.
@@ -8294,7 +8322,7 @@ for additional options.
   \textbf{Description}: Some types of firmware output text onscreen in both graphics and
   text mode. This is typically unexpected as random text may appear over
   graphical images and cause UI corruption. Setting this option to \texttt{true} will
-  discard all text output when console control is in a different mode from \texttt{Text}.
+  discard all text output if console control is not in \texttt{Text} mode.
 
   \emph{Note}: This option only applies to the \texttt{System} renderer.
 

@@ -70,6 +70,39 @@ OcConsoleControlSetMode (
   return OldMode;
 }
 
+EFI_CONSOLE_CONTROL_SCREEN_MODE
+OcConsoleControlGetMode (
+  VOID
+  )
+{
+  EFI_STATUS                       Status;
+  EFI_CONSOLE_CONTROL_PROTOCOL     *ConsoleControl;
+  EFI_CONSOLE_CONTROL_SCREEN_MODE  ExistingMode;
+
+  Status = OcHandleProtocolFallback (
+             &gST->ConsoleOutHandle,
+             &gEfiConsoleControlProtocolGuid,
+             (VOID *)&ConsoleControl
+             );
+
+  if (EFI_ERROR (Status)) {
+    return EfiConsoleControlScreenText;
+  }
+
+  Status = ConsoleControl->GetMode (
+                             ConsoleControl,
+                             &ExistingMode,
+                             NULL,
+                             NULL
+                             );
+
+  if (EFI_ERROR (Status)) {
+    return EfiConsoleControlScreenText;
+  }
+
+  return ExistingMode;
+}
+
 EFI_STATUS
 OcConsoleControlInstallProtocol (
   IN  EFI_CONSOLE_CONTROL_PROTOCOL        *NewProtocol,

@@ -42,6 +42,7 @@ typedef enum {
 /**
   Configure console control protocol with given options.
 
+  @param[in] InitialMode              Initial mode to use, or set max. value to use existing mode.
   @param[in] Renderer                 Renderer to use.
   @param[in] IgnoreTextOutput         Skip console output in text mode.
   @param[in] SanitiseClearScreen      Workaround ClearScreen breaking resolution.
@@ -50,11 +51,12 @@ typedef enum {
 **/
 VOID
 OcSetupConsole (
-  IN OC_CONSOLE_RENDERER  Renderer,
-  IN BOOLEAN              IgnoreTextOutput,
-  IN BOOLEAN              SanitiseClearScreen,
-  IN BOOLEAN              ClearScreenOnModeSwitch,
-  IN BOOLEAN              ReplaceTabWithSpace
+  IN EFI_CONSOLE_CONTROL_SCREEN_MODE  InitialMode,
+  IN OC_CONSOLE_RENDERER              Renderer,
+  IN BOOLEAN                          IgnoreTextOutput,
+  IN BOOLEAN                          SanitiseClearScreen,
+  IN BOOLEAN                          ClearScreenOnModeSwitch,
+  IN BOOLEAN                          ReplaceTabWithSpace
   );
 
 /**
@@ -67,6 +69,16 @@ OcSetupConsole (
 EFI_CONSOLE_CONTROL_SCREEN_MODE
 OcConsoleControlSetMode (
   IN EFI_CONSOLE_CONTROL_SCREEN_MODE  Mode
+  );
+
+/**
+  Get existing console control screen mode, default to text if no existing console control protocol.
+
+  @retval existing console control mode.
+**/
+EFI_CONSOLE_CONTROL_SCREEN_MODE
+OcConsoleControlGetMode (
+  VOID
   );
 
 /**
