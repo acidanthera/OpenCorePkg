@@ -399,7 +399,7 @@ RenderResync (
   mConsoleGopMode = mGraphicsOutput->Mode->Mode;
   MaxWidth        = Info->HorizontalResolution / TGT_CHAR_WIDTH;
   MaxHeight       = Info->VerticalResolution / TGT_CHAR_HEIGHT;
-  if ((mUserWidth < 1) || (mUserHeight < 1)) {
+  if ((mUserWidth == 0) || (mUserHeight == 0)) {
     mConsoleWidth  = MaxWidth;
     mConsoleHeight = MaxHeight;
   } else {
@@ -996,38 +996,6 @@ EFI_CONSOLE_CONTROL_PROTOCOL
   ConsoleControlSetMode,
   ConsoleControlLockStdIn
 };
-
-VOID
-ConsoleControlInstall (
-  VOID
-  )
-{
-  EFI_STATUS                    Status;
-  EFI_CONSOLE_CONTROL_PROTOCOL  *ConsoleControl;
-
-  Status = OcHandleProtocolFallback (
-             &gST->ConsoleOutHandle,
-             &gEfiConsoleControlProtocolGuid,
-             (VOID *)&ConsoleControl
-             );
-
-  if (!EFI_ERROR (Status)) {
-    ConsoleControl->SetMode (ConsoleControl, EfiConsoleControlScreenGraphics);
-
-    CopyMem (
-      ConsoleControl,
-      &mConsoleControlProtocol,
-      sizeof (mConsoleControlProtocol)
-      );
-  }
-
-  gBS->InstallMultipleProtocolInterfaces (
-         &gST->ConsoleOutHandle,
-         &gEfiConsoleControlProtocolGuid,
-         &mConsoleControlProtocol,
-         NULL
-         );
-}
 
 EFI_STATUS
 OcUseBuiltinTextOutput (

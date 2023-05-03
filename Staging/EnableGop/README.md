@@ -6,7 +6,7 @@ EnableGop version (OpenCore version)
 
 ### 1.4 (0.9.3)
  - Incorporates recent updates to OpenCore console control code, but no difference in behaviour compared
-   to version 1.3 is expect on any supported systems.
+   to version 1.3 is expected on any supported systems.
 
 ### 1.3 (0.9.2)
  - Included fix to GopBurstMode for non-standard frame buffer information on AMD Radeon HD 7970 and similar
