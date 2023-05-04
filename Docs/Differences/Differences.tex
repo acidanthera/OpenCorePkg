@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
-%DIF DEL PreviousConfiguration.tex   Wed Apr  5 14:22:58 2023
-%DIF ADD ../Configuration.tex        Sat Apr 22 15:22:44 2023
+%DIF DEL PreviousConfiguration.tex   Thu Apr 27 23:04:46 2023
+%DIF ADD ../Configuration.tex        Thu May  4 09:59:29 2023
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -8177,7 +8177,30 @@ for additional options.
 \begin{enumerate}
 
 \item
-  \texttt{TextRenderer}\\
+  \DIFaddbegin \texttt{\DIFadd{InitialMode}}\\
+  \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ string}}\\
+  \textbf{\DIFadd{Failsafe}}\DIFadd{: }\texttt{\DIFadd{Auto}}\\
+  \textbf{\DIFadd{Description}}\DIFadd{: Selects the internal }\texttt{\DIFadd{ConsoleControl}} \DIFadd{mode in
+  which }\DIFaddend \texttt{TextRenderer} \DIFaddbegin \DIFadd{will operate.
+}
+
+  \DIFadd{Available values are }\texttt{\DIFadd{Auto}}\DIFadd{, }\texttt{\DIFadd{Text}} \DIFadd{and }\texttt{\DIFadd{Graphics}}\DIFadd{.
+  }\texttt{\DIFadd{Text}} \DIFadd{and }\texttt{\DIFadd{Graphics}} \DIFadd{specify the named mode. }\texttt{\DIFadd{Auto}}
+  \DIFadd{uses the current mode of the system }\texttt{\DIFadd{ConsoleControl}} \DIFadd{protocol when
+  one exists, defaulting to }\texttt{\DIFadd{Text}} \DIFadd{mode otherwise.
+ }
+
+  \DIFadd{UEFI firmware typically supports }\texttt{\DIFadd{ConsoleControl}} \DIFadd{with two
+  rendering modes: }\texttt{\DIFadd{Graphics}} \DIFadd{and }\texttt{\DIFadd{Text}}\DIFadd{. Some types of firmware
+  do not provide a native }\texttt{\DIFadd{ConsoleControl}} \DIFadd{and rendering modes. OpenCore
+  and macOS expect text to only be shown in }\texttt{\DIFadd{Text}} \DIFadd{mode but
+  graphics to be drawn in any mode, and this is how the OpenCore }\texttt{\DIFadd{Builtin}}
+  \DIFadd{renderer behaves. Since this is not required by UEFI specification, behaviour
+  of the system }\texttt{\DIFadd{ConsoleControl}} \DIFadd{protocol, when it exists, varies.
+}
+
+\item
+  \texttt{\DIFadd{TextRenderer}}\DIFaddend \\
   \textbf{Type}: \texttt{plist\ string}\\
   \textbf{Failsafe}: \texttt{BuiltinGraphics}\\
   \textbf{Description}: Chooses renderer for text going through standard
@@ -8185,42 +8208,60 @@ for additional options.
 
   Currently two renderers are supported: \texttt{Builtin} and
   \texttt{System}. \texttt{System} renderer uses firmware services
-  for text rendering. \texttt{Builtin} \DIFdelbegin \DIFdel{bypassing }\DIFdelend \DIFaddbegin \DIFadd{bypasses }\DIFaddend firmware services
-  and performs text rendering on its own. Different renderers support
-  a different set of options. It is recommended to use \texttt{Builtin}
-  renderer, as it supports HiDPI mode and uses full screen resolution.
+  for text rendering\DIFaddbegin \DIFadd{, however with additional options provided to
+  santize the output}\DIFaddend . \texttt{Builtin} \DIFdelbegin \DIFdel{bypassing }\DIFdelend \DIFaddbegin \DIFadd{renderer bypasses }\DIFaddend firmware
+  services and performs text rendering on its own. \DIFdelbegin \DIFdel{Different renderers support
+  }\DIFdelend \DIFaddbegin \DIFadd{Each renderer
+  supports }\DIFaddend a different set of options. It is recommended to use
+  \texttt{Builtin} renderer, as it supports HiDPI mode and uses
+  full screen resolution.
 
-  UEFI firmware typically supports \texttt{ConsoleControl} with two
-  rendering modes: \texttt{Graphics} and \texttt{Text}. Some types of firmware
-  do not support \texttt{ConsoleControl} and rendering modes. OpenCore
-  and macOS expect text to only be shown in \texttt{Graphics} mode and
+  \DIFdelbegin \DIFdel{UEFI firmware typically supports }\DIFdelend \DIFaddbegin \DIFadd{Each renderer provides its own }\DIFaddend \texttt{ConsoleControl} \DIFdelbegin \DIFdel{with two
+  rendering modes: }\texttt{\DIFdel{Graphics}} %DIFAUXCMD
+\DIFdel{and }\texttt{\DIFdel{Text}}%DIFAUXCMD
+\DIFdel{. Some types of firmware
+  do not support }\DIFdelend \DIFaddbegin \DIFadd{protocol
+  (in the case of }\DIFaddend \texttt{\DIFdelbegin \DIFdel{ConsoleControl}%DIFDELCMD < \MBLOCKRIGHTBRACE %%%
+\DIFdel{and rendering modes. OpenCore
+  and macOS expect text to onlybe shown in }\texttt{\DIFdel{Graphics}} %DIFAUXCMD
+\DIFdel{mode and
   graphics to be drawn in any mode. Since this is not required by UEFI
-  specification, exact behaviour varies.
+  specification,
+  exact behaviour varies}\DIFdelend \DIFaddbegin \DIFadd{SystemGeneric}} \DIFadd{only, this passes some
+  operations through to the system }\texttt{\DIFadd{ConsoleControl}} \DIFadd{protocol,
+  if one exists)}\DIFaddend .
 
-  Valid values are combinations of text renderer and rendering mode:
+  Valid values \DIFaddbegin \DIFadd{of this option }\DIFaddend are combinations of \DIFdelbegin \DIFdel{text renderer and rendering mode :
+}\DIFdelend \DIFaddbegin \DIFadd{the renderer to use
+  and the }\texttt{\DIFadd{ConsoleControl}} \DIFadd{mode to set on the underlying system
+  }\texttt{\DIFadd{ConsoleControl}} \DIFadd{protocol before starting. To control the initial
+  mode of the provided }\texttt{\DIFadd{ConsoleControl}} \DIFadd{protocol once started, use
+  the }\texttt{\DIFadd{InitalMode}} \DIFadd{option.
+}\DIFaddend 
 
   \begin{itemize}
   \tightlist
   \item \texttt{BuiltinGraphics} --- Switch to \texttt{Graphics}
-    mode and use \texttt{Builtin} renderer with
+    mode \DIFdelbegin \DIFdel{and }\DIFdelend \DIFaddbegin \DIFadd{then }\DIFaddend use \texttt{Builtin} renderer with
     custom \texttt{ConsoleControl}.
   \item \texttt{BuiltinText} --- Switch to \texttt{Text}
-    mode and use \texttt{Builtin} renderer with
+    mode \DIFdelbegin \DIFdel{and }\DIFdelend \DIFaddbegin \DIFadd{then }\DIFaddend use \texttt{Builtin} renderer with
     custom \texttt{ConsoleControl}.
   \item \texttt{SystemGraphics} --- Switch to \texttt{Graphics}
-    mode and use \texttt{System} renderer with
+    mode \DIFdelbegin \DIFdel{and }\DIFdelend \DIFaddbegin \DIFadd{then }\DIFaddend use \texttt{System} renderer with
     custom \texttt{ConsoleControl}.
   \item \texttt{SystemText} --- Switch to \texttt{Text}
-    mode and use \texttt{System} renderer with
+    mode \DIFdelbegin \DIFdel{and }\DIFdelend \DIFaddbegin \DIFadd{then }\DIFaddend use \texttt{System} renderer with
     custom \texttt{ConsoleControl}.
   \item \texttt{SystemGeneric} --- Use \texttt{System} renderer with
-    system \texttt{ConsoleControl} assuming it behaves correctly.
+    \DIFaddbegin \DIFadd{custom a }\texttt{\DIFadd{ConsoleControl}} \DIFadd{protocol which passes its mode set and
+    get operations through to }\DIFaddend system \texttt{ConsoleControl} \DIFdelbegin \DIFdel{assuming it behaves correctly}\DIFdelend \DIFaddbegin \DIFadd{when it exists}\DIFaddend .
   \end{itemize}
 
   The use of \texttt{BuiltinGraphics} is straightforward.
   For most platforms, it is necessary to enable \texttt{ProvideConsoleGop}
   and set \texttt{Resolution} to \texttt{Max}. The \texttt{BuiltinText} variant is
-  an alternative \texttt{BuiltinGraphics} for some very old and defective
+  an alternative \DIFaddbegin \DIFadd{to }\DIFaddend \texttt{BuiltinGraphics} for some very old and defective
   laptop firmware, which can only draw in \texttt{Text} mode.
 
   The use of \texttt{System} protocols is more complicated. Typically,
@@ -8244,8 +8285,10 @@ for additional options.
   with the \texttt{WxH} (e.g. \texttt{80x24}) formatted string.
 
   Set to \texttt{Max} to attempt using the largest available console mode.
-  This option is currently ignored as the \texttt{Builtin} text renderer
+\DIFdelbegin \DIFdel{This option is currently ignored as the }\texttt{\DIFdel{Builtin}} %DIFAUXCMD
+\DIFdel{text renderer
   only supports one console mode.
+}\DIFdelend 
 
   \emph{Note}: This field is best left empty on most types of firmware.
 
@@ -8328,10 +8371,9 @@ for additional options.
   \emph{Note \DIFaddbegin \DIFadd{1}\DIFaddend }: This \DIFaddbegin \DIFadd{quirk }\DIFaddend takes effect whether or not \texttt{DirectGopRendering} is set, and
   \DIFdelbegin \DIFdel{may
   give some }\DIFdelend \DIFaddbegin \DIFadd{in some cases may give a noticeable }\DIFaddend speed-up to GOP operations even when \texttt{DirectGopRendering}
-  is \texttt{false}\DIFaddbegin \DIFadd{.
-}
+  is \texttt{false}.
 
-  \emph{\DIFadd{Note 2}}\DIFadd{: On most systems from circa 2013 onwards, write-combining
+  \DIFaddbegin \emph{\DIFadd{Note 2}}\DIFadd{: On most systems from circa 2013 onwards, write-combining
   caching is already applied by the firmware to GOP memory, in which case }\texttt{\DIFadd{GopBurstMode}}
   \DIFadd{is unnecessary. On such systems enabling the quirk should normally be harmless, producing an
   }\texttt{\DIFadd{OCC:}} \DIFadd{debug log entry indicating that burst mode is already started.
@@ -8339,9 +8381,10 @@ for additional options.
 
   \emph{\DIFadd{Note 3}}\DIFadd{: Some caution should be taken when enabling this quirk, as it has been observed
   to cause hangs on a few systems. Since additional guards have been added to try to prevent this,
-  please log a bugtracker issue if such a system is found}\DIFaddend .
+  please log a bugtracker issue if such a system is found.
+}
 
-\item
+\DIFaddend \item
   \texttt{GopPassThrough}\\
   \textbf{Type}: \texttt{plist\ string}\\
   \textbf{Failsafe}: \texttt{Disabled}\\
@@ -8367,7 +8410,7 @@ for additional options.
   \textbf{Description}: Some types of firmware output text onscreen in both graphics and
   text mode. This is typically unexpected as random text may appear over
   graphical images and cause UI corruption. Setting this option to \texttt{true} will
-  discard all text output when console control is in a different mode from \texttt{Text}.
+  discard all text output \DIFdelbegin \DIFdel{when }\DIFdelend \DIFaddbegin \DIFadd{if }\DIFaddend console control is \DIFdelbegin \DIFdel{in a different mode from }\DIFdelend \DIFaddbegin \DIFadd{not in }\DIFaddend \texttt{Text} \DIFaddbegin \DIFadd{mode}\DIFaddend .
 
   \emph{Note}: This option only applies to the \texttt{System} renderer.
 
