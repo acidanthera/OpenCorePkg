@@ -327,6 +327,10 @@ ListFile (
         case FILE_ITER:
           Status = FindFileIter (Filename, Type, DirFile, FileOrCtx);
           break;
+        default:
+          FreePool (Filename);
+          FreePool (DirFile);
+          return EFI_INVALID_PARAMETER;
       }
 
       FreePool (Filename);
