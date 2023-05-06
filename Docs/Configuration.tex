@@ -862,6 +862,8 @@ ACPI changes apply globally (to every operating system) with the following effec
 \item \texttt{Add} is processed.
 \end{itemize}
 
+\emph{Note}: \texttt{RebaseRegions} and \texttt{SyncTableIds} quirks are special and are processed after all other ACPI changes since they can only be applied on the final ACPI configuration including all the patches and added tables.
+
 Applying the changes globally resolves the problems of incorrect operating system
 detection (consistent with the ACPI specification, not possible before the operating
 system boots), operating system chainloading, and difficult ACPI debugging. Hence,

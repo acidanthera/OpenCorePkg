@@ -243,21 +243,21 @@ OcLoadAcpiSupport (
   //
   AcpiHandleHardwareSignature (&Context, Config->Acpi.Quirks.ResetHwSig);
 
-  if (Config->Acpi.Quirks.RebaseRegions) {
-    AcpiRelocateRegions (&Context);
-  }
-
   if (Config->Acpi.Quirks.NormalizeHeaders) {
     AcpiNormalizeHeaders (&Context);
-  }
-
-  if (Config->Acpi.Quirks.SyncTableIds) {
-    AcpiSyncTableIds (&Context);
   }
 
   OcAcpiPatchTables (Config, &Context);
 
   OcAcpiAddTables (Config, Storage, &Context);
+
+  if (Config->Acpi.Quirks.RebaseRegions) {
+    AcpiRelocateRegions (&Context);
+  }
+
+  if (Config->Acpi.Quirks.SyncTableIds) {
+    AcpiSyncTableIds (&Context);
+  }
 
   AcpiApplyContext (&Context);
 
