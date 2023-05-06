@@ -14,6 +14,7 @@ OpenCore Changelog
 - Implemented `InitialMode` option to allow fine control over text renderer operating mode
 - Added support for `ConsoleMode` text resolution setting to `Builtin` renderer
 - Fixed regression for ACPI quirks `RebaseRegions` and `SyncTableIds`
+- Updated build process to provide stable and bleeding-edge versions of `EnableGop`
 
 #### v0.9.1
 - Fixed long comment printing for ACPI patches, thx @corpnewt
