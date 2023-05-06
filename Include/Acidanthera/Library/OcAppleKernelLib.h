@@ -180,7 +180,7 @@ typedef struct {
   //
   UINT8     Version;
   //
-  // Size of the entire LILU_PRELINKED_SYMBOLS struct
+  // Size of all LILU_PRELINKED_SYMBOLS_* structs
   //
   UINT32    Size;
   //
@@ -205,19 +205,8 @@ typedef struct {
   //
   // This symbols's name
   //
-  CHAR8     SymbolName[1];
+  CHAR8     SymbolName[];
 } LILU_PRELINKED_SYMBOLS_ENTRY;
-
-typedef struct {
-  //
-  // The header
-  //
-  LILU_PRELINKED_SYMBOLS_HEADER    Header;
-  //
-  // The symbols
-  //
-  LILU_PRELINKED_SYMBOLS_ENTRY     Entries[1];
-} LILU_PRELINKED_SYMBOLS;
 
 //
 // Kext injection info/request passed to Lilu
