@@ -29,6 +29,9 @@
 
 #include "PrelinkedInternal.h"
 
+// Placing this in OcVariable.h causes redefinition error, so here it stays
+EFI_GUID  EFI_OC_READ_ONLY_VARIABLE_GUID = OC_READ_ONLY_VARIABLE_GUID;
+
 STATIC
 UINT64
 PrelinkedFindLastLoadAddress (
@@ -396,7 +399,12 @@ PrelinkedContextInit (
 
     Context->PrelinkedLastLoadAddress = Context->LinkEditSegment->Segment64.VirtualAddress + Context->LinkEditSegment->Segment64.Size;
 
-    Context->LiluBlockInfos                   = (LILU_BLOCK_INFO *)AllocateRuntimePool (LILU_BLOCK_INFO_SIZE_LIMIT_VERSION_0);
+    Context->LiluBlockInfos = AllocateRuntimePool (LILU_BLOCK_INFO_SIZE_LIMIT_VERSION_0);
+    if (Context->LiluBlockInfos == NULL) {
+      PrelinkedContextFree (Context);
+      return EFI_OUT_OF_RESOURCES;
+    }
+
     Context->LiluBlockInfos->Header.Version   = 0;
     Context->LiluBlockInfos->Header.Size      = sizeof (LILU_BLOCK_INFO_HEADER);
     Context->LiluBlockInfos->Header.KextCount = 0;
@@ -914,29 +922,26 @@ PrelinkedSetLiluInfo (
   IN OUT PRELINKED_CONTEXT  *Context
   )
 {
-  UINT32                         KextCount;
-  UINT32                         Index;
-  XML_NODE                       *KextPlist;
-  UINT32                         FieldCount;
-  UINT32                         FieldIndex;
-  CONST CHAR8                    *KextPlistKey;
-  XML_NODE                       *KextPlistValue;
-  CONST CHAR8                    *KextIdentifier;
-  PRELINKED_KEXT                 *Kext;
-  LIST_ENTRY                     *Link;
-  CONST PRELINKED_KEXT_SYMBOL    *Symbols;
-  CONST PRELINKED_KEXT_SYMBOL    *SymbolsEnd;
-  UINT32                         NumSymbolsInKext;
-  UINT32                         NumSymbolsInPrelinked;
-  UINT32                         LengthOfPrelinkedSymbols;
-  VOID                           *Buffer;
-  LILU_PRELINKED_SYMBOLS_HEADER  *LiluHeader;
-  LILU_PRELINKED_SYMBOLS_ENTRY   *CurEntry;
-  UINTN                          LiluPrelinkedSymbolsAddr;
-  UINT64                         LiluPrelinkedSymbolsAddr64;
-  LILU_INFO                      *LiluInfo;
-  EFI_STATUS                     Status;
-  EFI_GUID                       Guid = OC_READ_ONLY_VARIABLE_GUID;
+  UINT32                        KextCount;
+  UINT32                        Index;
+  XML_NODE                      *KextPlist;
+  UINT32                        FieldCount;
+  UINT32                        FieldIndex;
+  CONST CHAR8                   *KextPlistKey;
+  XML_NODE                      *KextPlistValue;
+  CONST CHAR8                   *KextIdentifier;
+  PRELINKED_KEXT                *Kext;
+  LIST_ENTRY                    *Link;
+  CONST PRELINKED_KEXT_SYMBOL   *Symbols;
+  CONST PRELINKED_KEXT_SYMBOL   *SymbolsEnd;
+  UINT32                        NumSymbolsInKext;
+  UINT32                        NumSymbolsInPrelinked;
+  UINT32                        LengthOfPrelinkedSymbols;
+  LILU_PRELINKED_SYMBOLS        *LiluPrelinkedSymbols;
+  LILU_PRELINKED_SYMBOLS_ENTRY  *CurEntry;
+  UINT64                        LiluPrelinkedSymbolsAddr;
+  LILU_INFO                     *LiluInfo;
+  EFI_STATUS                    Status;
 
   // Build the linked symbol table of all prelinked kexts so that Lilu can link to them
   KextCount = XmlNodeChildren (Context->KextList);
@@ -994,19 +999,18 @@ PrelinkedSetLiluInfo (
   }
 
   // Allocate buffer and setup header
-  Buffer                   = AllocateRuntimePool (LengthOfPrelinkedSymbols);
-  LiluPrelinkedSymbolsAddr = (UINTN)Buffer;
-  if (!Buffer) {
+  LiluPrelinkedSymbols     = AllocateRuntimePool (LengthOfPrelinkedSymbols);
+  LiluPrelinkedSymbolsAddr = (UINTN)LiluPrelinkedSymbols;
+  if (LiluPrelinkedSymbols == NULL) {
     return EFI_OUT_OF_RESOURCES;
   }
 
-  LiluHeader                  = (LILU_PRELINKED_SYMBOLS_HEADER *)Buffer;
-  LiluHeader->Version         = 0;
-  LiluHeader->Size            = LengthOfPrelinkedSymbols;
-  LiluHeader->NumberOfSymbols = NumSymbolsInPrelinked;
+  LiluPrelinkedSymbols->Header.Version         = 0;
+  LiluPrelinkedSymbols->Header.Size            = LengthOfPrelinkedSymbols;
+  LiluPrelinkedSymbols->Header.NumberOfSymbols = NumSymbolsInPrelinked;
 
   // Fill in the entries
-  CurEntry = (LILU_PRELINKED_SYMBOLS_ENTRY *)(LiluHeader + 1);
+  CurEntry = LiluPrelinkedSymbols->Entries;
   Link     = GetFirstNode (&Context->PrelinkedKexts);
   Kext     = NULL;
   while (!IsNull (&Context->PrelinkedKexts, Link)) {
@@ -1030,11 +1034,10 @@ PrelinkedSetLiluInfo (
     Link = GetNextNode (&Context->PrelinkedKexts, Link);
   }
 
-  LiluPrelinkedSymbolsAddr64 = (UINT64)LiluPrelinkedSymbolsAddr;
   DEBUG ((
     DEBUG_INFO,
     "OCAK: Lilu prelinked symbols are stored at 0x%llx with a size of 0x%x bytes and %d symbols\n",
-    LiluPrelinkedSymbolsAddr64,
+    LiluPrelinkedSymbolsAddr,
     LengthOfPrelinkedSymbols,
     NumSymbolsInPrelinked
     ));
@@ -1046,7 +1049,7 @@ PrelinkedSetLiluInfo (
 
   LiluInfo->Magic                = LILU_INFO_MAGIC;
   LiluInfo->KextCount            = Context->LiluKextCount;
-  LiluInfo->PrelinkedSymbolsAddr = LiluPrelinkedSymbolsAddr64;
+  LiluInfo->PrelinkedSymbolsAddr = LiluPrelinkedSymbolsAddr;
   LiluInfo->BlockInfoAddr        = (UINTN)Context->LiluBlockInfos;
 
   // Expose the Lilu info via a volatile + read-only EFI variable
@@ -1055,7 +1058,7 @@ PrelinkedSetLiluInfo (
              OPEN_CORE_NVRAM_ATTR,
              sizeof (LILU_INFO),
              LiluInfo,
-             &Guid
+             &EFI_OC_READ_ONLY_VARIABLE_GUID
              );
   FreePool (LiluInfo);
   return Status;
@@ -1440,7 +1443,6 @@ PrelinkedPassKextToLilu (
   UINT32               ExecutableOffset;
   UINTN                LiluInjectionInfoAddr;
   UINT64               LiluInjectionInfoAddr64;
-  EFI_GUID             Guid = OC_READ_ONLY_VARIABLE_GUID;
 
   EntryLength      = sizeof (LILU_INJECTION_INFO) + InfoPlistSize + ExecutableSize;
   InfoPlistOffset  = sizeof (LILU_INJECTION_INFO);
@@ -1503,7 +1505,7 @@ PrelinkedPassKextToLilu (
                               OPEN_CORE_NVRAM_ATTR,
                               8,
                               &LiluInjectionInfoAddr64,
-                              &Guid
+                              &EFI_OC_READ_ONLY_VARIABLE_GUID
                               );
   if (EFI_ERROR (Status)) {
     return Status;

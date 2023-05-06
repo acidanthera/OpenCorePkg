@@ -305,7 +305,7 @@ typedef struct {
   LILU_BLOCK_INFO_ENTRY     Entries[1];
 } LILU_BLOCK_INFO;
 
-// The maximize size of LILU_BLOCK_INFO allowed on version 0
+// The maximum size of LILU_BLOCK_INFO allowed on version 0
 #define LILU_BLOCK_INFO_SIZE_LIMIT_VERSION_0  16384
 
 typedef struct {
