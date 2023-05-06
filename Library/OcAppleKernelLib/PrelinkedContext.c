@@ -29,9 +29,6 @@
 
 #include "PrelinkedInternal.h"
 
-// Placing this in OcVariable.h causes redefinition error, so here it stays
-EFI_GUID  EFI_OC_READ_ONLY_VARIABLE_GUID = OC_READ_ONLY_VARIABLE_GUID;
-
 STATIC
 UINT64
 PrelinkedFindLastLoadAddress (
@@ -1052,14 +1049,18 @@ PrelinkedSetLiluInfo (
   LiluInfo->PrelinkedSymbolsAddr = LiluPrelinkedSymbolsAddr;
   LiluInfo->BlockInfoAddr        = (UINTN)Context->LiluBlockInfos;
 
+ #ifdef EFIUSER
+  Status = EFI_SUCCESS;
+ #else
   // Expose the Lilu info via a volatile + read-only EFI variable
   Status = OcSetSystemVariable (
              OC_LILU_INFO_ADDR_VARIABLE_NAME,
              OPEN_CORE_NVRAM_ATTR,
              sizeof (LILU_INFO),
              LiluInfo,
-             &EFI_OC_READ_ONLY_VARIABLE_GUID
+             &gOcReadOnlyVariableGuid
              );
+ #endif
   FreePool (LiluInfo);
   return Status;
 }
@@ -1500,13 +1501,17 @@ PrelinkedPassKextToLilu (
   }
 
   LiluInjectionInfoAddr64 = (UINT64)LiluInjectionInfoAddr;
-  Status                  = OcSetSystemVariable (
-                              EFIVarName,
-                              OPEN_CORE_NVRAM_ATTR,
-                              8,
-                              &LiluInjectionInfoAddr64,
-                              &EFI_OC_READ_ONLY_VARIABLE_GUID
-                              );
+ #ifdef EFIUSER
+  Status = EFI_SUCCESS;
+ #else
+  Status = OcSetSystemVariable (
+             EFIVarName,
+             OPEN_CORE_NVRAM_ATTR,
+             8,
+             &LiluInjectionInfoAddr64,
+             &gOcReadOnlyVariableGuid
+             );
+ #endif
   if (EFI_ERROR (Status)) {
     return Status;
   }
