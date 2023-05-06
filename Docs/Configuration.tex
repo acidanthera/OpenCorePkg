@@ -8123,8 +8123,8 @@ for additional options.
   do not provide a native \texttt{ConsoleControl} and rendering modes. OpenCore
   and macOS expect text to only be shown in \texttt{Text} mode but
   graphics to be drawn in any mode, and this is how the OpenCore \texttt{Builtin}
-  renderer behaves. Since this is not required by UEFI specification, behaviour
-  of the system \texttt{ConsoleControl} protocol, when it exists, varies.
+  renderer behaves. Since this is not required by the UEFI specification, behaviour
+  of the system \texttt{ConsoleControl} protocol, when it exists, may vary.
 
 \item
   \texttt{TextRenderer}\\
@@ -8134,11 +8134,11 @@ for additional options.
   console output.
 
   Currently two renderers are supported: \texttt{Builtin} and
-  \texttt{System}. \texttt{System} renderer uses firmware services
+  \texttt{System}. The \texttt{System} renderer uses firmware services
   for text rendering, however with additional options provided to
-  santize the output. \texttt{Builtin} renderer bypasses firmware
+  sanitize the output. The \texttt{Builtin} renderer bypasses firmware
   services and performs text rendering on its own. Each renderer
-  supports a different set of options. It is recommended to use
+  supports a different set of options. It is recommended to use the
   \texttt{Builtin} renderer, as it supports HiDPI mode and uses
   full screen resolution.
 
@@ -8151,7 +8151,7 @@ for additional options.
   and the \texttt{ConsoleControl} mode to set on the underlying system
   \texttt{ConsoleControl} protocol before starting. To control the initial
   mode of the provided \texttt{ConsoleControl} protocol once started, use
-  the \texttt{InitalMode} option.
+  the \texttt{InitialMode} option.
 
   \begin{itemize}
   \tightlist
