@@ -857,11 +857,12 @@ ACPI changes apply globally (to every operating system) with the following effec
 \begin{itemize}
 \tightlist
 \item \texttt{Delete} is processed.
-\item \texttt{Quirks} are processed, with the exception of \texttt{RebaseRegions} and \texttt{SyncTableIds}.
+\item \texttt{Quirks} are processed.
 \item \texttt{Patch} is processed.
 \item \texttt{Add} is processed.
-\item \texttt{RebaseRegions} and \texttt{SyncTableIds} are processed, if requested.
 \end{itemize}
+
+\emph{Note}: \texttt{RebaseRegions} and \texttt{SyncTableIds} quirks are special and are processed after all other ACPI changes since they can only be applied on the final ACPI configuration including all the patches and added tables.
 
 Applying the changes globally resolves the problems of incorrect operating system
 detection (consistent with the ACPI specification, not possible before the operating
