@@ -107,7 +107,10 @@ OcLoadLegacyNvram (
   Status = OcVariableRuntimeProtocol->LoadNvram (Storage, LegacyMap, LegacyOverwrite);
 
   if (EFI_ERROR (Status)) {
-    DEBUG ((DEBUG_WARN, "OCVAR: Emulated NVRAM load failed - %r\n", Status));
+    //
+    // Make this INFO rather then WARN, since it is expected on first boot with emulated NVRAM.
+    //
+    DEBUG ((DEBUG_INFO, "OCVAR: Emulated NVRAM load failed - %r\n", Status));
   }
 
   if (FwRuntime != NULL) {
