@@ -224,7 +224,7 @@ IsPrefixFiltered (
 
   Status = GetLogPrefix (FormattedString, Prefix);
   if (EFI_ERROR (Status)) {
-    return FALSE;
+    AsciiStrCpyS (Prefix, ARRAY_SIZE (Prefix), "?");
   }
 
   for (Index = 0; Index < FlexFilters->Count; ++Index) {
