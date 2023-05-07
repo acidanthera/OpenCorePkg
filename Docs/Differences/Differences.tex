@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
-%DIF DEL PreviousConfiguration.tex   Wed Apr  5 14:22:58 2023
-%DIF ADD ../Configuration.tex        Sat May  6 18:57:47 2023
+%DIF DEL PreviousConfiguration.tex   Fri May  5 21:18:04 2023
+%DIF ADD ../Configuration.tex        Sun May  7 11:45:23 2023
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -3960,7 +3960,11 @@ cat Kernel.panic | grep macOSProcessedStackshotData |
   \emph{Note 2}: Messages printed before the configuration of log protocol
   cannot be filtered.
 
-\item
+  \DIFaddbegin \emph{\DIFadd{Note 3}}\DIFadd{: To avoid missing key issues, warning and error log messages
+  are not filtered.
+}
+
+\DIFaddend \item
   \texttt{SysReport}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\

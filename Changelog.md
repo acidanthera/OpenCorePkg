@@ -16,6 +16,7 @@ OpenCore Changelog
 - Fixed regression for ACPI quirks `RebaseRegions` and `SyncTableIds`
 - Updated build process to provide stable and bleeding-edge versions of `EnableGop`
 - Implemented minor improvements in `PickerMode` `Apple`
+- Improved filtering algorithm for `LogModules` option
 
 #### v0.9.1
 - Fixed long comment printing for ACPI patches, thx @corpnewt
