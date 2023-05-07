@@ -999,6 +999,14 @@ OcCpuGetMsrReport (
     return;
   }
 
+  //
+  // Hypervisors virtualise MSRs so the values are either not present
+  // and cause a crash or are irrelevant as they report placeholders.
+  //
+  if (CpuInfo->Hypervisor) {
+    return;
+  }
+
   if (CpuInfo->CpuGeneration >= OcCpuGenerationNehalem) {
     //
     // MSR_PLATFORM_INFO

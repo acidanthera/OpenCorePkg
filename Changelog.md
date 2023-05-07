@@ -17,6 +17,7 @@ OpenCore Changelog
 - Updated build process to provide stable and bleeding-edge versions of `EnableGop`
 - Implemented minor improvements in `PickerMode` `Apple`
 - Improved filtering algorithm for `LogModules` option
+- Fixed crash when gathering system report on virtualised CPUs
 
 #### v0.9.1
 - Fixed long comment printing for ACPI patches, thx @corpnewt
