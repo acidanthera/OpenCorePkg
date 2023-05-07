@@ -681,6 +681,9 @@ OcKernelInjectKext (
                  BundleVersion
                  );
     } else {
+ #ifdef EFIUSER
+      Status = EFI_SUCCESS;
+ #else
       Status = PrelinkedPassKextToLilu (
                  Context,
                  KCType,
@@ -692,6 +695,7 @@ OcKernelInjectKext (
                  Kext->ImageDataSize,
                  BundleVersion
                  );
+ #endif
     }
   } else {
     Status = EFI_UNSUPPORTED;
@@ -796,9 +800,12 @@ OcKernelInjectKexts (
       );
 
     Status = PrelinkedInjectComplete (Context);
+ #ifndef EFIUSER
     if (!EFI_ERROR (Status)) {
       Status = PrelinkedSetLiluInfo (Context);
     }
+
+ #endif
   } else {
     Status = EFI_UNSUPPORTED;
   }

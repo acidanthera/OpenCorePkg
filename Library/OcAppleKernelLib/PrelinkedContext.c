@@ -915,157 +915,6 @@ PrelinkedInjectComplete (
 }
 
 EFI_STATUS
-PrelinkedSetLiluInfo (
-  IN OUT PRELINKED_CONTEXT  *Context
-  )
-{
-  UINT32                         KextCount;
-  UINT32                         Index;
-  XML_NODE                       *KextPlist;
-  UINT32                         FieldCount;
-  UINT32                         FieldIndex;
-  CONST CHAR8                    *KextPlistKey;
-  XML_NODE                       *KextPlistValue;
-  CONST CHAR8                    *KextIdentifier;
-  PRELINKED_KEXT                 *Kext;
-  LIST_ENTRY                     *Link;
-  CONST PRELINKED_KEXT_SYMBOL    *Symbols;
-  CONST PRELINKED_KEXT_SYMBOL    *SymbolsEnd;
-  UINT32                         NumSymbolsInKext;
-  UINT32                         NumSymbolsInPrelinked;
-  UINT32                         LengthOfPrelinkedSymbols;
-  LILU_PRELINKED_SYMBOLS_HEADER  *LiluPrelinkedSymbolsHeader;
-  LILU_PRELINKED_SYMBOLS_ENTRY   *CurEntry;
-  UINT64                         LiluPrelinkedSymbolsAddr;
-  LILU_INFO                      *LiluInfo;
-  EFI_STATUS                     Status;
-
-  // Build the linked symbol table of all prelinked kexts so that Lilu can link to them
-  KextCount = XmlNodeChildren (Context->KextList);
-  for (Index = 0; Index < KextCount; ++Index) {
-    KextPlist = PlistNodeCast (XmlNodeChild (Context->KextList, Index), PLIST_NODE_TYPE_DICT);
-
-    if (KextPlist == NULL) {
-      continue;
-    }
-
-    FieldCount = PlistDictChildren (KextPlist);
-    for (FieldIndex = 0; FieldIndex < FieldCount; ++FieldIndex) {
-      KextPlistKey = PlistKeyValue (PlistDictChild (KextPlist, FieldIndex, &KextPlistValue));
-      if (KextPlistKey == NULL) {
-        continue;
-      }
-
-      if (AsciiStrCmp (KextPlistKey, INFO_BUNDLE_IDENTIFIER_KEY) == 0) {
-        KextIdentifier = XmlNodeContent (KextPlistValue);
-        Kext           = InternalCachedPrelinkedKext (Context, KextIdentifier);
-        if (Kext == NULL) {
-          break;
-        }
-
-        if (Kext->LinkedSymbolTable == NULL) {
-          InternalScanCurrentPrelinkedKextLinkInfo (Kext, Context);
-          InternalScanBuildLinkedSymbolTable (Kext, Context);
-        }
-
-        break;
-      }
-    }
-  }
-
-  // Figure out the value of NumSymbolsInPrelinked and LengthOfPrelinkedSymbols
-  Link                     = GetFirstNode (&Context->PrelinkedKexts);
-  Kext                     = NULL;
-  NumSymbolsInPrelinked    = 0;
-  LengthOfPrelinkedSymbols = sizeof (LILU_PRELINKED_SYMBOLS_HEADER);
-  while (!IsNull (&Context->PrelinkedKexts, Link)) {
-    Kext = GET_PRELINKED_KEXT_FROM_LINK (Link);
-    if (Kext->LinkedSymbolTable != NULL) {
-      NumSymbolsInKext       = Kext->NumberOfSymbols;
-      NumSymbolsInPrelinked += NumSymbolsInKext;
-      Symbols                = Kext->LinkedSymbolTable;
-
-      SymbolsEnd = &Symbols[NumSymbolsInKext];
-      while (Symbols < SymbolsEnd) {
-        LengthOfPrelinkedSymbols += sizeof (LILU_PRELINKED_SYMBOLS_ENTRY) + Symbols->Length + 1; // Account for \0
-        Symbols++;
-      }
-    }
-
-    Link = GetNextNode (&Context->PrelinkedKexts, Link);
-  }
-
-  // Allocate buffer and setup header
-  LiluPrelinkedSymbolsHeader = AllocateRuntimePool (LengthOfPrelinkedSymbols);
-  LiluPrelinkedSymbolsAddr   = (UINTN)LiluPrelinkedSymbolsHeader;
-  if (LiluPrelinkedSymbolsHeader == NULL) {
-    return EFI_OUT_OF_RESOURCES;
-  }
-
-  LiluPrelinkedSymbolsHeader->Version         = 0;
-  LiluPrelinkedSymbolsHeader->Size            = LengthOfPrelinkedSymbols;
-  LiluPrelinkedSymbolsHeader->NumberOfSymbols = NumSymbolsInPrelinked;
-
-  // Fill in the entries
-  CurEntry = (LILU_PRELINKED_SYMBOLS_ENTRY *)(LiluPrelinkedSymbolsHeader + 1);
-  Link     = GetFirstNode (&Context->PrelinkedKexts);
-  Kext     = NULL;
-  while (!IsNull (&Context->PrelinkedKexts, Link)) {
-    Kext = GET_PRELINKED_KEXT_FROM_LINK (Link);
-    if (Kext->LinkedSymbolTable != NULL) {
-      NumSymbolsInKext = Kext->NumberOfSymbols;
-      Symbols          = Kext->LinkedSymbolTable;
-
-      SymbolsEnd = &Symbols[NumSymbolsInKext];
-      while (Symbols < SymbolsEnd) {
-        CurEntry->EntryLength      = sizeof (LILU_PRELINKED_SYMBOLS_ENTRY) + Symbols->Length + 1; // Account for \0
-        CurEntry->SymbolValue      = Symbols->Value - 0xFFFFFF8000100000ULL;                      // KERNEL_HIB_VADDR
-        CurEntry->SymbolNameLength = Symbols->Length;
-        CopyMem (&CurEntry->SymbolName, Symbols->Name, Symbols->Length + 1);
-
-        CurEntry = (LILU_PRELINKED_SYMBOLS_ENTRY *)(((UINT8 *)CurEntry) + CurEntry->EntryLength);
-        Symbols++;
-      }
-    }
-
-    Link = GetNextNode (&Context->PrelinkedKexts, Link);
-  }
-
-  DEBUG ((
-    DEBUG_INFO,
-    "OCAK: Lilu prelinked symbols are stored at 0x%llx with a size of 0x%x bytes and %d symbols\n",
-    LiluPrelinkedSymbolsAddr,
-    LengthOfPrelinkedSymbols,
-    NumSymbolsInPrelinked
-    ));
-
-  LiluInfo = AllocatePool (sizeof (LILU_INFO));
-  if (!LiluInfo) {
-    return EFI_OUT_OF_RESOURCES;
-  }
-
-  LiluInfo->Magic                = LILU_INFO_MAGIC;
-  LiluInfo->KextCount            = Context->LiluKextCount;
-  LiluInfo->PrelinkedSymbolsAddr = LiluPrelinkedSymbolsAddr;
-  LiluInfo->BlockInfoAddr        = (UINTN)Context->LiluBlockInfos;
-
- #ifdef EFIUSER
-  Status = EFI_SUCCESS;
- #else
-  // Expose the Lilu info via a volatile + read-only EFI variable
-  Status = OcSetSystemVariable (
-             OC_LILU_INFO_ADDR_VARIABLE_NAME,
-             OPEN_CORE_NVRAM_ATTR,
-             sizeof (LILU_INFO),
-             LiluInfo,
-             &gOcReadOnlyVariableGuid
-             );
- #endif
-  FreePool (LiluInfo);
-  return Status;
-}
-
-EFI_STATUS
 PrelinkedReserveKextSize (
   IN OUT UINT32   *ReservedInfoSize,
   IN OUT UINT32   *ReservedExeSize,
@@ -1422,6 +1271,154 @@ PrelinkedInjectKext (
   return EFI_SUCCESS;
 }
 
+#ifndef EFIUSER
+EFI_STATUS
+PrelinkedSetLiluInfo (
+  IN OUT PRELINKED_CONTEXT  *Context
+  )
+{
+  UINT32                         KextCount;
+  UINT32                         Index;
+  XML_NODE                       *KextPlist;
+  UINT32                         FieldCount;
+  UINT32                         FieldIndex;
+  CONST CHAR8                    *KextPlistKey;
+  XML_NODE                       *KextPlistValue;
+  CONST CHAR8                    *KextIdentifier;
+  PRELINKED_KEXT                 *Kext;
+  LIST_ENTRY                     *Link;
+  CONST PRELINKED_KEXT_SYMBOL    *Symbols;
+  CONST PRELINKED_KEXT_SYMBOL    *SymbolsEnd;
+  UINT32                         NumSymbolsInKext;
+  UINT32                         NumSymbolsInPrelinked;
+  UINT32                         LengthOfPrelinkedSymbols;
+  LILU_PRELINKED_SYMBOLS_HEADER  *LiluPrelinkedSymbolsHeader;
+  LILU_PRELINKED_SYMBOLS_ENTRY   *CurEntry;
+  UINT64                         LiluPrelinkedSymbolsAddr;
+  LILU_INFO                      *LiluInfo;
+  EFI_STATUS                     Status;
+
+  // Build the linked symbol table of all prelinked kexts so that Lilu can link to them
+  KextCount = XmlNodeChildren (Context->KextList);
+  for (Index = 0; Index < KextCount; ++Index) {
+    KextPlist = PlistNodeCast (XmlNodeChild (Context->KextList, Index), PLIST_NODE_TYPE_DICT);
+
+    if (KextPlist == NULL) {
+      continue;
+    }
+
+    FieldCount = PlistDictChildren (KextPlist);
+    for (FieldIndex = 0; FieldIndex < FieldCount; ++FieldIndex) {
+      KextPlistKey = PlistKeyValue (PlistDictChild (KextPlist, FieldIndex, &KextPlistValue));
+      if (KextPlistKey == NULL) {
+        continue;
+      }
+
+      if (AsciiStrCmp (KextPlistKey, INFO_BUNDLE_IDENTIFIER_KEY) == 0) {
+        KextIdentifier = XmlNodeContent (KextPlistValue);
+        Kext           = InternalCachedPrelinkedKext (Context, KextIdentifier);
+        if (Kext == NULL) {
+          break;
+        }
+
+        if (Kext->LinkedSymbolTable == NULL) {
+          InternalScanCurrentPrelinkedKextLinkInfo (Kext, Context);
+          InternalScanBuildLinkedSymbolTable (Kext, Context);
+        }
+
+        break;
+      }
+    }
+  }
+
+  // Figure out the value of NumSymbolsInPrelinked and LengthOfPrelinkedSymbols
+  Link                     = GetFirstNode (&Context->PrelinkedKexts);
+  Kext                     = NULL;
+  NumSymbolsInPrelinked    = 0;
+  LengthOfPrelinkedSymbols = sizeof (LILU_PRELINKED_SYMBOLS_HEADER);
+  while (!IsNull (&Context->PrelinkedKexts, Link)) {
+    Kext = GET_PRELINKED_KEXT_FROM_LINK (Link);
+    if (Kext->LinkedSymbolTable != NULL) {
+      NumSymbolsInKext       = Kext->NumberOfSymbols;
+      NumSymbolsInPrelinked += NumSymbolsInKext;
+      Symbols                = Kext->LinkedSymbolTable;
+
+      SymbolsEnd = &Symbols[NumSymbolsInKext];
+      while (Symbols < SymbolsEnd) {
+        LengthOfPrelinkedSymbols += sizeof (LILU_PRELINKED_SYMBOLS_ENTRY) + Symbols->Length + 1; // Account for \0
+        Symbols++;
+      }
+    }
+
+    Link = GetNextNode (&Context->PrelinkedKexts, Link);
+  }
+
+  // Allocate buffer and setup header
+  LiluPrelinkedSymbolsHeader = AllocateRuntimePool (LengthOfPrelinkedSymbols);
+  LiluPrelinkedSymbolsAddr   = (UINTN)LiluPrelinkedSymbolsHeader;
+  if (LiluPrelinkedSymbolsHeader == NULL) {
+    return EFI_OUT_OF_RESOURCES;
+  }
+
+  LiluPrelinkedSymbolsHeader->Version         = 0;
+  LiluPrelinkedSymbolsHeader->Size            = LengthOfPrelinkedSymbols;
+  LiluPrelinkedSymbolsHeader->NumberOfSymbols = NumSymbolsInPrelinked;
+
+  // Fill in the entries
+  CurEntry = (LILU_PRELINKED_SYMBOLS_ENTRY *)(LiluPrelinkedSymbolsHeader + 1);
+  Link     = GetFirstNode (&Context->PrelinkedKexts);
+  Kext     = NULL;
+  while (!IsNull (&Context->PrelinkedKexts, Link)) {
+    Kext = GET_PRELINKED_KEXT_FROM_LINK (Link);
+    if (Kext->LinkedSymbolTable != NULL) {
+      NumSymbolsInKext = Kext->NumberOfSymbols;
+      Symbols          = Kext->LinkedSymbolTable;
+
+      SymbolsEnd = &Symbols[NumSymbolsInKext];
+      while (Symbols < SymbolsEnd) {
+        CurEntry->EntryLength      = sizeof (LILU_PRELINKED_SYMBOLS_ENTRY) + Symbols->Length + 1; // Account for \0
+        CurEntry->SymbolValue      = Symbols->Value - 0xFFFFFF8000100000ULL;                      // KERNEL_HIB_VADDR
+        CurEntry->SymbolNameLength = Symbols->Length;
+        CopyMem (&CurEntry->SymbolName, Symbols->Name, Symbols->Length + 1);
+
+        CurEntry = (LILU_PRELINKED_SYMBOLS_ENTRY *)(((UINT8 *)CurEntry) + CurEntry->EntryLength);
+        Symbols++;
+      }
+    }
+
+    Link = GetNextNode (&Context->PrelinkedKexts, Link);
+  }
+
+  DEBUG ((
+    DEBUG_INFO,
+    "OCAK: Lilu prelinked symbols are stored at 0x%llx with a size of 0x%x bytes and %d symbols\n",
+    LiluPrelinkedSymbolsAddr,
+    LengthOfPrelinkedSymbols,
+    NumSymbolsInPrelinked
+    ));
+
+  LiluInfo = AllocatePool (sizeof (LILU_INFO));
+  if (!LiluInfo) {
+    return EFI_OUT_OF_RESOURCES;
+  }
+
+  LiluInfo->Magic                = LILU_INFO_MAGIC;
+  LiluInfo->KextCount            = Context->LiluKextCount;
+  LiluInfo->PrelinkedSymbolsAddr = LiluPrelinkedSymbolsAddr;
+  LiluInfo->BlockInfoAddr        = (UINTN)Context->LiluBlockInfos;
+
+  // Expose the Lilu info via a volatile + read-only EFI variable
+  Status = OcSetSystemVariable (
+             OC_LILU_INFO_ADDR_VARIABLE_NAME,
+             OPEN_CORE_NVRAM_ATTR,
+             sizeof (LILU_INFO),
+             LiluInfo,
+             &gOcReadOnlyVariableGuid
+             );
+  FreePool (LiluInfo);
+  return Status;
+}
+
 EFI_STATUS
 PrelinkedPassKextToLilu (
   IN OUT PRELINKED_CONTEXT  *Context,
@@ -1499,9 +1496,6 @@ PrelinkedPassKextToLilu (
     return EFI_INVALID_PARAMETER;
   }
 
- #ifdef EFIUSER
-  Status = EFI_SUCCESS;
- #else
   Status = OcSetSystemVariable (
              EFIVarName,
              OPEN_CORE_NVRAM_ATTR,
@@ -1509,7 +1503,6 @@ PrelinkedPassKextToLilu (
              &LiluInjectionInfoAddr,
              &gOcReadOnlyVariableGuid
              );
- #endif
   if (EFI_ERROR (Status)) {
     return Status;
   }
@@ -1518,6 +1511,8 @@ PrelinkedPassKextToLilu (
 
   return EFI_SUCCESS;
 }
+
+#endif
 
 EFI_STATUS
 PrelinkedContextApplyPatch (
