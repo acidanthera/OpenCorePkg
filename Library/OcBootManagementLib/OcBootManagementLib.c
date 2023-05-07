@@ -221,7 +221,7 @@ OcRunBootPicker (
   if ((Context->PickerCommand == OcPickerShowPicker) && (Context->PickerMode == OcPickerModeApple)) {
     Status = OcLaunchAppleBootPicker ();
     if (EFI_ERROR (Status)) {
-      DEBUG ((DEBUG_INFO, "OCB: Apple BootPicker failed - %r, fallback to builtin\n", Status));
+      DEBUG ((DEBUG_WARN, "OCB: Apple BootPicker failed - %r, fallback to builtin\n", Status));
       Context->ApplePickerUnsupported = TRUE;
     } else {
       IsApplePickerSelection = TRUE;
@@ -280,6 +280,12 @@ OcRunBootPicker (
         if (IsApplePickerSelection) {
           DEBUG ((DEBUG_WARN, "OCB: Apple Picker returned no entry valid under OC, falling back to builtin\n"));
           Context->PickerMode = OcPickerModeBuiltin;
+
+          //
+          // Zero here, not before starting Apple picker, to keep safety net of
+          // timeout in builtin picker if Apple picker cannot start.
+          //
+          Context->TimeoutSeconds = 0;
 
           //
           // Clears all native picker graphics on switching back to text mode.

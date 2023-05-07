@@ -15,6 +15,7 @@ OpenCore Changelog
 - Added support for `ConsoleMode` text resolution setting to `Builtin` renderer
 - Fixed regression for ACPI quirks `RebaseRegions` and `SyncTableIds`
 - Updated build process to provide stable and bleeding-edge versions of `EnableGop`
+- Implemented minor improvements in `PickerMode` `Apple`
 
 #### v0.9.1
 - Fixed long comment printing for ACPI patches, thx @corpnewt
