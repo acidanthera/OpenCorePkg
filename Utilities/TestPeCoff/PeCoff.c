@@ -8,7 +8,7 @@
 #include <Library/BaseMemoryLib.h>
 #include <Library/BaseOverflowLib.h>
 #include <Library/MemoryAllocationLib.h>
-#include <Library/UefiImageLib.h>
+#include <Library/PeCoffLib2.h>
 #include <Library/DebugLib.h>
 #include <Library/UefiBootServicesTableLib.h>
 

@@ -18,7 +18,6 @@
 #include <Library/BaseOverflowLib.h>
 #include <Library/DebugLib.h>
 #include <Library/MemoryAllocationLib.h>
-#include <Library/UefiImageLib.h>
 #include <Library/OcApfsLib.h>
 
 STATIC

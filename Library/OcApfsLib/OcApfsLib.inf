@@ -66,5 +66,4 @@
   MemoryAllocationLib
   UefiBootServicesTableLib
   UefiLib
-  UefiImageLib
   UefiRuntimeServicesTableLib
