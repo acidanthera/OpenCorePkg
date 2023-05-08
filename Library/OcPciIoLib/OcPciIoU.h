@@ -11,30 +11,16 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 #define _EFI_PCI_IO_PROTOCOL_H_
 
 #include <Uefi.h>
-
-#include <Guid/GlobalVariable.h>
-
 #include <Library/BaseLib.h>
-#include <Library/BaseOverflowLib.h>
 #include <Library/BaseMemoryLib.h>
 #include <Library/DebugLib.h>
 #include <Library/OcMiscLib.h>
-#include <Library/UefiDriverEntryPoint.h>
 #include <Library/UefiBootServicesTableLib.h>
-#include <Library/UefiRuntimeServicesTableLib.h>
 #include <Library/MemoryAllocationLib.h>
 
 #include <Protocol/PciRootBridgeIo.h>
-#include <Protocol/LoadFile2.h>
-#include <Protocol/PciIo.h>
-#include <Protocol/PciHotPlugInit.h>
 #include <Protocol/CpuIo2.h>
-#include <Protocol/BusSpecificDriverOverride.h>
 #include <Library/IoLib.h>
-
-#include <IndustryStandard/Pci.h>
-#include <IndustryStandard/PeImage2.h>
-#include <IndustryStandard/Acpi.h>
 
 #define MAX_IO_PORT_ADDRESS  0xFFFF
 

@@ -428,7 +428,7 @@ OcReinstallProtocols (
   }
 
   if (OcPciIoInstallProtocol (Config->Uefi.ProtocolOverrides.PciIo) == NULL) {
-    DEBUG ((DEBUG_INFO, "OC: Failed to install pci io protocol\n"));
+    DEBUG ((DEBUG_INFO, "OC: Failed to install cpuio/pcirootbridgeio overrides\n"));
   }
 
   InstallAppleEvent  = TRUE;

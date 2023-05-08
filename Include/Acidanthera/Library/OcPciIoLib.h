@@ -13,7 +13,7 @@
 #ifndef OC_PCI_IO_LIB_H
 #define OC_PCI_IO_LIB_H
 
-#include <Protocol/PciIo.h>
+#include <Protocol/CpuIo2.h>
 
 /**
   The user Entry Point for PciIo.
@@ -25,7 +25,7 @@
   @returns Installed protocol.
   @retval NULL  There was an error installing the protocol.
 **/
-EFI_PCI_IO_PROTOCOL *
+EFI_CPU_IO2_PROTOCOL *
 OcPciIoInstallProtocol (
   IN BOOLEAN  Reinstall
   );

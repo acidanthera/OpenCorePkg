@@ -9,32 +9,30 @@
 #include "OcPciIoU.h"
 #include <Library/OcPciIoLib.h>
 
-EFI_PCI_IO_PROTOCOL *
+EFI_CPU_IO2_PROTOCOL *
 OcPciIoInstallProtocol (
   IN BOOLEAN  Reinstall
   )
 {
   EFI_TPL                          tpl;
-  EFI_STATUS                       Status = 0;
-  EFI_CPU_IO2_PROTOCOL             *mCpuIo;
+  UINTN                            Index;
+  EFI_STATUS                       Status  = 0;
+  EFI_CPU_IO2_PROTOCOL             *mCpuIo = NULL;
   UINTN                            HandleCount;
   EFI_HANDLE                       *HandleBuffer;
   EFI_PCI_ROOT_BRIDGE_IO_PROTOCOL  *PciRootBridgeIo;
-  UINTN                            Index;
 
   if (Reinstall) {
-    // TODO: if we need it
+    return NULL;
   } else {
-    DEBUG ((DEBUG_INFO, "OCPIO: Init CpuIo2\n"));
     mCpuIo = InitializeCpuIo2 ();
-    DEBUG ((DEBUG_INFO, "OCPIO: Fixing CpuIo2\n"));
 
     tpl = gBS->RaiseTPL (TPL_HIGH_LEVEL);
-
-    if (EFI_ERROR (Status)) {
+    if (!mCpuIo) {
       return NULL;
     }
 
+    DEBUG ((DEBUG_INFO, "OCPIO: Fixing CpuIo2\n"));
     // Override with 64-bit MMIO compatible functions
     mCpuIo->Mem.Read  = CpuMemoryServiceRead;
     mCpuIo->Mem.Write = CpuMemoryServiceWrite;
@@ -47,6 +45,11 @@ OcPciIoInstallProtocol (
                     &HandleBuffer
                     );
 
+    if (EFI_ERROR (Status)) {
+      mCpuIo = NULL;
+      goto Free;
+    }
+
     for (Index = 0; Index < HandleCount; ++Index) {
       DEBUG ((DEBUG_INFO, "OCPIO: Fixing PciRootBridgeIo %d\n", Index));
       Status = gBS->HandleProtocol (
@@ -55,7 +58,8 @@ OcPciIoInstallProtocol (
                       (VOID **)&PciRootBridgeIo
                       );
       if (EFI_ERROR (Status)) {
-        continue;
+        mCpuIo = NULL;
+        goto Free;
       }
 
       // Override with 64-bit MMIO compatible functions
@@ -63,12 +67,10 @@ OcPciIoInstallProtocol (
       PciRootBridgeIo->Mem.Write = RootBridgeIoMemWrite;
     }
 
-    FreePool (HandleBuffer);
-
     gBS->RestoreTPL (tpl);
-
-    return NULL;
   }
 
-  return NULL;
+Free:
+  FreePool (HandleBuffer);
+  return mCpuIo;
 }
