@@ -43,9 +43,7 @@ Additional variables are supported to adjust the compilation process.
 - `WERROR=1` — treat compiler warnings as errors.
 - `SYDR=1` — change `$(SUFFIX)` to store compilation results for Sydr DSE in a directory distinct from the default one.
 
-Example 1. To build 32-bit version of utility on macOS (use High Sierra 10.13 or below):
-
-NOTE: If your program uses `UserBaseMemoryLib` and calls custom allocation functions, be sure that besides `FUZZ_MEM` limit you correctly set limit `mPoolAllocationSizeLimit` which defaults to the 512 MB in cases if your code could allocate more than this limit at single AllocatePool.
+*NOTE: If your program uses `UserBaseMemoryLib` and calls custom allocation functions, be sure that besides `FUZZ_MEM` limit you correctly set limit `mPoolAllocationSizeLimit` which defaults to the 512 MB in cases if your code could allocate more than this limit at single AllocatePool.
 
 To set up your limit, use `SetPoolAllocationSizeLimit` routine like shown in the example below:
 
@@ -60,6 +58,7 @@ int main(int argc, char *argv[]) {
 }
 ```
 
+Example 1. To build 32-bit version of utility on macOS (use High Sierra 10.13 or below):
 
 ```sh
 UDK_ARCH=Ia32 make
