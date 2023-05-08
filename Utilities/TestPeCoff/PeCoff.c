@@ -99,7 +99,10 @@ PeCoffTestLoad (
   CHAR8       *PdbPath;
   UINT32      PdbPathSize;
 
-  (VOID)PeCoffLoadImage (Context, Destination, DestinationSize);
+  Status = PeCoffLoadImage (Context, Destination, DestinationSize);
+  if (EFI_ERROR (Status)) {
+    return Status;
+  }
 
   Status = PeCoffGetPdbPath (Context, (CONST CHAR8 **)&PdbPath, &PdbPathSize);
   if (!EFI_ERROR (Status)) {
