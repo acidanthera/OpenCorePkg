@@ -14,29 +14,23 @@ OcPciIoInstallProtocol (
   IN BOOLEAN  Reinstall
   )
 {
-  EFI_TPL                          tpl;
+  EFI_TPL                          Tpl;
   UINTN                            Index;
-  EFI_STATUS                       Status  = 0;
-  EFI_CPU_IO2_PROTOCOL             *mCpuIo = NULL;
+  EFI_STATUS                       Status;
+  EFI_CPU_IO2_PROTOCOL             *mCpuIo;
   UINTN                            HandleCount;
   EFI_HANDLE                       *HandleBuffer;
   EFI_PCI_ROOT_BRIDGE_IO_PROTOCOL  *PciRootBridgeIo;
 
-  if (Reinstall) {
+  mCpuIo = InitializeCpuIo2 ();
+  if (!mCpuIo) {
     return NULL;
+  }
+
+  if (Reinstall) {
+    return mCpuIo;
   } else {
-    mCpuIo = InitializeCpuIo2 ();
-
-    tpl = gBS->RaiseTPL (TPL_HIGH_LEVEL);
-    if (!mCpuIo) {
-      return NULL;
-    }
-
-    DEBUG ((DEBUG_INFO, "OCPIO: Fixing CpuIo2\n"));
-    // Override with 64-bit MMIO compatible functions
-    mCpuIo->Mem.Read  = CpuMemoryServiceRead;
-    mCpuIo->Mem.Write = CpuMemoryServiceWrite;
-
+    Tpl = gBS->RaiseTPL (TPL_HIGH_LEVEL);
     Status = gBS->LocateHandleBuffer (
                     ByProtocol,
                     &gEfiPciRootBridgeIoProtocolGuid,
@@ -50,8 +44,14 @@ OcPciIoInstallProtocol (
       goto Free;
     }
 
+    DEBUG ((DEBUG_INFO, "OCPIO: Fixing CpuIo2\n"));
+    // Override with 64-bit MMIO compatible functions
+    mCpuIo->Mem.Read  = CpuMemoryServiceRead;
+    mCpuIo->Mem.Write = CpuMemoryServiceWrite;
+
     for (Index = 0; Index < HandleCount; ++Index) {
       DEBUG ((DEBUG_INFO, "OCPIO: Fixing PciRootBridgeIo %d\n", Index));
+
       Status = gBS->HandleProtocol (
                       HandleBuffer[Index],
                       &gEfiPciRootBridgeIoProtocolGuid,
@@ -61,16 +61,14 @@ OcPciIoInstallProtocol (
         mCpuIo = NULL;
         goto Free;
       }
-
       // Override with 64-bit MMIO compatible functions
       PciRootBridgeIo->Mem.Read  = RootBridgeIoMemRead;
       PciRootBridgeIo->Mem.Write = RootBridgeIoMemWrite;
     }
-
-    gBS->RestoreTPL (tpl);
   }
 
 Free:
+  gBS->RestoreTPL (Tpl);
   FreePool (HandleBuffer);
   return mCpuIo;
 }

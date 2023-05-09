@@ -48,6 +48,7 @@ EFI_CPU_IO2_PROTOCOL *
 InitializeCpuIo2 (
   )
 {
+  mCpuIo = NULL;
   gBS->LocateProtocol (
          &gEfiCpuIo2ProtocolGuid,
          NULL,
