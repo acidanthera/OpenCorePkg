@@ -30,7 +30,7 @@ OcPciIoInstallProtocol (
   if (Reinstall) {
     return mCpuIo;
   } else {
-    Tpl = gBS->RaiseTPL (TPL_HIGH_LEVEL);
+    Tpl    = gBS->RaiseTPL (TPL_HIGH_LEVEL);
     Status = gBS->LocateHandleBuffer (
                     ByProtocol,
                     &gEfiPciRootBridgeIoProtocolGuid,
@@ -61,6 +61,7 @@ OcPciIoInstallProtocol (
         mCpuIo = NULL;
         goto Free;
       }
+
       // Override with 64-bit MMIO compatible functions
       PciRootBridgeIo->Mem.Read  = RootBridgeIoMemRead;
       PciRootBridgeIo->Mem.Write = RootBridgeIoMemWrite;
