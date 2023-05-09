@@ -19,6 +19,7 @@ OpenCore Changelog
 - Improved filtering algorithm for `LogModules` and added `?` filter for matching non-standard log lines
 - Fixed crash when gathering system report on virtualised CPUs
 - Fixed unnecessary warning when first booting with emulated NVRAM
+- Enabled `AppleCpuPmCfgLock` quirk on macOS 13
 
 #### v0.9.1
 - Fixed long comment printing for ACPI patches, thx @corpnewt
