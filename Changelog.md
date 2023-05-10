@@ -1,5 +1,8 @@
 OpenCore Changelog
 ==================
+#### v0.9.3
+- Added `--force-codec` option to AudioDxe, thx @xCuri0
+
 #### v0.9.2
 - Added `DisableIoMapperMapping` quirk, thx @CaseySJ
 - Fixed disabling single user mode when Apple Secure Boot is enabled
@@ -44,8 +47,8 @@ OpenCore Changelog
 - Fixed incomplete console mode initialisation when started in graphics mode
 - Provided additional UEFI forge mode, for use in firmware drivers
 - Implemented firmware driver enabling pre-OpenCore graphics on non-natively supported GPUs on EFI-era Macs
-- Prevented unwanted clear screen to console background colour when in graphics mode
 - Added `ResizeUsePciRbIo` quirk to workaround broken PciIo on some UEFI firmwares, thx @xCuri0
+- Prevented unwanted clear screen to console background colour when in graphics mode
 - Fixed crash while using `SysReport` on older Atom systems
 - Fixed kexts without a Contents folder not being patched during a cacheless boot
 - Added read-only sections (`.rdata`) to all drivers for better memory protection when supported
