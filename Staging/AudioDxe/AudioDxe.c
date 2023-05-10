@@ -47,6 +47,12 @@ EFI_DEVICE_PATH_PROTOCOL *
 UINTN
   gCodecSetupDelay = 0;
 
+BOOLEAN
+  gForceCodec = FALSE;
+
+UINTN
+  gCodec = 0;
+
 /**
   HdaController Driver Binding.
 **/
@@ -119,6 +125,11 @@ AudioDxeInit (
     }
 
     OcParsedVarsGetInt (ParsedLoadOptions, L"--codec-setup-delay", &gCodecSetupDelay, OcStringFormatUnicode);
+
+    Status = OcParsedVarsGetInt (ParsedLoadOptions, L"--force-codec", &gCodec, OcStringFormatUnicode);
+    if (Status != EFI_NOT_FOUND) {
+      gForceCodec = TRUE;
+    }
 
     OcFlexArrayFree (&ParsedLoadOptions);
   } else if (Status != EFI_NOT_FOUND) {
