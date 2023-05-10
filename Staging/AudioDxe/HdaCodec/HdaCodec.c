@@ -1726,6 +1726,12 @@ HdaCodecDriverBindingSupported (
     goto CLOSE_CODEC;
   }
 
+  // Check --force-codec.
+  if (gUseForcedCodec && (gForcedCodec != CodecAddress)) {
+    Status = EFI_UNSUPPORTED;
+    goto CLOSE_CODEC;
+  }
+
   // Codec can be supported.
   DEBUG ((DEBUG_INFO, "HDA: Connecting codec 0x%X\n", CodecAddress));
   Status = EFI_SUCCESS;
