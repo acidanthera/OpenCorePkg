@@ -27,7 +27,6 @@ OcPciIoInstallProtocol (
     return NULL;
   }
 
-  DEBUG ((DEBUG_INFO, "OCPIO: Reinstall %d\n", Reinstall));
   if (!Reinstall) {
     return mCpuIo;
   } else {
