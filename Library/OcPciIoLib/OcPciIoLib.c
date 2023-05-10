@@ -27,7 +27,8 @@ OcPciIoInstallProtocol (
     return NULL;
   }
 
-  if (Reinstall) {
+  DEBUG ((DEBUG_INFO, "OCPIO: Reinstall %d\n", Reinstall));
+  if (!Reinstall) {
     return mCpuIo;
   } else {
     Tpl    = gBS->RaiseTPL (TPL_HIGH_LEVEL);
