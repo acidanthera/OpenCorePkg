@@ -186,6 +186,10 @@ OcSwitchToFallbackLegacyNvram (
   Status = OcVariableRuntimeProtocol->SwitchToFallback ();
 
   if (EFI_ERROR (Status)) {
-    DEBUG ((DEBUG_WARN, "OCVAR: Emulated NVRAM switch to fallback failed - %r\n", Status));
+    DEBUG ((
+      Status == EFI_ALREADY_STARTED ? DEBUG_INFO : DEBUG_WARN,
+      "OCVAR: Emulated NVRAM switch to fallback failed - %r\n",
+      Status
+      ));
   }
 }

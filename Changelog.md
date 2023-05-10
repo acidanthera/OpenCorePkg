@@ -2,6 +2,7 @@ OpenCore Changelog
 ==================
 #### v0.9.3
 - Added `--force-codec` option to AudioDxe, thx @xCuri0
+- Downgraded additional warning message in normal operation of emulated NVRAM to info
 
 #### v0.9.2
 - Added `DisableIoMapperMapping` quirk, thx @CaseySJ
