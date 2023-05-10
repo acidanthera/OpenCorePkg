@@ -1727,7 +1727,7 @@ HdaCodecDriverBindingSupported (
   }
 
   // Check --force-codec
-  if (gForceCodec && (gCodec != CodecAddress)) {
+  if (gUseForcedCodec && (gForcedCodec != CodecAddress)) {
     Status = EFI_UNSUPPORTED;
     goto CLOSE_CODEC;
   }

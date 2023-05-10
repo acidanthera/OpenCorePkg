@@ -120,15 +120,15 @@ UINTN
   gCodecSetupDelay;
 
 //
-// If to use forced codec
+// Whether to use forced codec.
 //
 extern BOOLEAN
-  gForceCodec;
+  gUseForcedCodec;
 
 //
-// Forced codec number
+// Forced codec number.
 //
 extern UINTN
-  gCodec;
+  gForcedCodec;
 
 #endif // EFI_AUDIODXE_H
