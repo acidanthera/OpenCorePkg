@@ -7006,6 +7006,11 @@ the driver within the \texttt{UEFI/Drivers} section:
   will be achieved by using \texttt{Audio} section \texttt{SetupDelay} if any audio setup delay
   is required. Where required, values of up to one second may be needed. \medskip
 
+  \item \texttt{-{}-force-codec} - Integer value, default \texttt{0}. \medskip
+
+  Force use of an audio codec, this value should be equal to \texttt{Audio} section \texttt{AudioCodec}.
+  Can result in faster boot especially when used in conjuction with \texttt{-{}-force-device}. \medskip
+
 	\item \texttt{-{}-force-device} - String value, no default. \medskip
 
   When this option is present and has a value (e.g. \texttt{-{}-force-device=PciRoot(0x0)/Pci(0x1f,0x3)}), it
@@ -7075,11 +7080,6 @@ the driver within the \texttt{UEFI/Drivers} section:
   be added to AudioDxe driver arguments.
   Not enabled by default, since restoring the flag can prevent sound from working in macOS on
   some other systems. \medskip
-
-  \item \texttt{-{}-force-codec} - Integer value, default \texttt{0}. \medskip
-
-  Force use of an audio codec, this value should be equal to \texttt{Audio} section \texttt{AudioCodec}.
-  Can result in faster boot especially when used in conjuction with \texttt{-{}-force-device}. \medskip
 \end{itemize}
 
 \subsection{OpenVariableRuntimeDxe}\label{emunvram}
