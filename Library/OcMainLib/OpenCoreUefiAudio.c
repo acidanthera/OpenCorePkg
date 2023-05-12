@@ -52,7 +52,7 @@ typedef struct OC_AUDIO_FILE_ {
   UINT32    Size;
 } OC_AUDIO_FILE;
 
-STATIC BOOLEAN ExitBSWait;
+STATIC BOOLEAN                    ExitBSWait;
 STATIC EFI_AUDIO_DECODE_PROTOCOL  *mAudioDecodeProtocol = NULL;
 
 STATIC
