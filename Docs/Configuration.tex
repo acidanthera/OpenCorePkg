@@ -7822,6 +7822,15 @@ for additional options.
   \hyperref[uefiaudio]{AudioDxe} section.
 
   \item
+  \texttt{ExitBSWait}\\
+  \textbf{Type}: \texttt{plist\ boolean}\\
+  \textbf{Failsafe}: \texttt{true}\\
+  \textbf{Description}: Wait for audio to finish playing on ExitBootServices
+
+  Enabled by default, you might want to disable this if you use a longer OCEFIAudio_VoiceOver_Boot
+  or other audio file.
+
+  \item
   \texttt{MaximumGain}\\
   \textbf{Type}: \texttt{plist\ integer}\\
   \textbf{Failsafe}: \texttt{-15}\\

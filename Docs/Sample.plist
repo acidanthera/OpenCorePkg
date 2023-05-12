@@ -1412,6 +1412,8 @@
 			<false/>
 			<key>DisconnectHda</key>
 			<false/>
+			<key>ExitBSWait</key>
+			<true/>
 			<key>MaximumGain</key>
 			<integer>-15</integer>
 			<key>MinimumAssistGain</key>

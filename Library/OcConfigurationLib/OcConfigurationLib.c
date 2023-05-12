@@ -790,6 +790,7 @@ OC_SCHEMA
   OC_SCHEMA_INTEGER_IN ("AudioOutMask",       OC_GLOBAL_CONFIG, Uefi.Audio.AudioOutMask),
   OC_SCHEMA_BOOLEAN_IN ("AudioSupport",       OC_GLOBAL_CONFIG, Uefi.Audio.AudioSupport),
   OC_SCHEMA_BOOLEAN_IN ("DisconnectHda",      OC_GLOBAL_CONFIG, Uefi.Audio.DisconnectHda),
+  OC_SCHEMA_BOOLEAN_IN ("ExitBSWait",         OC_GLOBAL_CONFIG, Uefi.Audio.ExitBSWait),
   OC_SCHEMA_INTEGER_IN ("MaximumGain",        OC_GLOBAL_CONFIG, Uefi.Audio.MaximumGain),
   OC_SCHEMA_INTEGER_IN ("MinimumAssistGain",  OC_GLOBAL_CONFIG, Uefi.Audio.MinimumAssistGain),
   OC_SCHEMA_INTEGER_IN ("MinimumAudibleGain", OC_GLOBAL_CONFIG, Uefi.Audio.MinimumAudibleGain),

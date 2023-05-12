@@ -664,7 +664,8 @@ OC_DECLARE (OC_UEFI_APPLEINPUT)
   _(INT8                        , MinimumAssistGain  ,     , -30                               , ()) \
   _(INT8                        , MinimumAudibleGain ,     , -128                              , ()) \
   _(BOOLEAN                     , ResetTrafficClass  ,     , FALSE                             , ()) \
-  _(BOOLEAN                     , DisconnectHda      ,     , FALSE                             , ())
+  _(BOOLEAN                     , DisconnectHda      ,     , FALSE                             , ()) \
+  _(BOOLEAN                     , ExitBSWait         ,     , TRUE                              , ())
 OC_DECLARE (OC_UEFI_AUDIO)
 
 ///

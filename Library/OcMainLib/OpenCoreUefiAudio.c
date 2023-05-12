@@ -52,6 +52,7 @@ typedef struct OC_AUDIO_FILE_ {
   UINT32    Size;
 } OC_AUDIO_FILE;
 
+STATIC BOOLEAN ExitBSWait;
 STATIC EFI_AUDIO_DECODE_PROTOCOL  *mAudioDecodeProtocol = NULL;
 
 STATIC
@@ -261,7 +262,7 @@ OcAudioExitBootServices (
   OC_AUDIO_PROTOCOL  *OcAudio;
 
   OcAudio = Context;
-  OcAudio->StopPlayback (OcAudio, TRUE);
+  OcAudio->StopPlayback (OcAudio, ExitBSWait);
 }
 
 VOID
@@ -288,6 +289,8 @@ OcLoadUefiAudioSupport (
     DEBUG ((DEBUG_INFO, "OC: Requested not to use audio\n"));
     return;
   }
+
+  ExitBSWait = Config->Uefi.Audio.ExitBSWait;
 
   Status = gBS->LocateProtocol (
                   &gEfiAudioDecodeProtocolGuid,
