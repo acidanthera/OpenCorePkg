@@ -17,59 +17,56 @@ OcPciIoInstallProtocol (
   EFI_TPL                          Tpl;
   UINTN                            Index;
   EFI_STATUS                       Status;
-  EFI_CPU_IO2_PROTOCOL             *mCpuIo;
+  EFI_CPU_IO2_PROTOCOL             *CpuIo;
   UINTN                            HandleCount;
   EFI_HANDLE                       *HandleBuffer;
   EFI_PCI_ROOT_BRIDGE_IO_PROTOCOL  *PciRootBridgeIo;
 
-  mCpuIo = InitializeCpuIo2 ();
-  if (!mCpuIo) {
+  CpuIo = InitializeCpuIo2 ();
+  if (!CpuIo) {
     return NULL;
   }
 
   if (!Reinstall) {
-    return mCpuIo;
-  } else {
-    Tpl    = gBS->RaiseTPL (TPL_HIGH_LEVEL);
-    Status = gBS->LocateHandleBuffer (
-                    ByProtocol,
-                    &gEfiPciRootBridgeIoProtocolGuid,
-                    NULL,
-                    &HandleCount,
-                    &HandleBuffer
-                    );
+    return CpuIo;
+  }
+  Tpl    = gBS->RaiseTPL (TPL_HIGH_LEVEL);
+  Status = gBS->LocateHandleBuffer (
+                  ByProtocol,
+                  &gEfiPciRootBridgeIoProtocolGuid,
+                  NULL,
+                  &HandleCount,
+                  &HandleBuffer
+                  );
 
-    if (EFI_ERROR (Status)) {
-      mCpuIo = NULL;
-      goto Free;
-    }
-
-    DEBUG ((DEBUG_INFO, "OCPIO: Fixing CpuIo2\n"));
-    // Override with 64-bit MMIO compatible functions
-    mCpuIo->Mem.Read  = CpuMemoryServiceRead;
-    mCpuIo->Mem.Write = CpuMemoryServiceWrite;
-
-    for (Index = 0; Index < HandleCount; ++Index) {
-      DEBUG ((DEBUG_INFO, "OCPIO: Fixing PciRootBridgeIo %d\n", Index));
-
-      Status = gBS->HandleProtocol (
-                      HandleBuffer[Index],
-                      &gEfiPciRootBridgeIoProtocolGuid,
-                      (VOID **)&PciRootBridgeIo
-                      );
-      if (EFI_ERROR (Status)) {
-        mCpuIo = NULL;
-        goto Free;
-      }
-
-      // Override with 64-bit MMIO compatible functions
-      PciRootBridgeIo->Mem.Read  = RootBridgeIoMemRead;
-      PciRootBridgeIo->Mem.Write = RootBridgeIoMemWrite;
-    }
+  if (EFI_ERROR (Status)) {
+    gBS->RestoreTPL (Tpl);
+    return NULL;
   }
 
-Free:
+  DEBUG ((DEBUG_INFO, "OCPIO: Fixing CpuIo2\n"));
+  // Override with 64-bit MMIO compatible functions
+  CpuIo->Mem.Read  = CpuMemoryServiceRead;
+  CpuIo->Mem.Write = CpuMemoryServiceWrite;
+
+  for (Index = 0; Index < HandleCount; ++Index) {
+    DEBUG ((DEBUG_INFO, "OCPIO: Fixing PciRootBridgeIo %d\n", Index));
+
+    Status = gBS->HandleProtocol (
+                    HandleBuffer[Index],
+                    &gEfiPciRootBridgeIoProtocolGuid,
+                    (VOID **)&PciRootBridgeIo
+                    );
+    if (EFI_ERROR (Status)) {
+        break;
+    }
+
+    // Override with 64-bit MMIO compatible functions
+    PciRootBridgeIo->Mem.Read  = RootBridgeIoMemRead;
+    PciRootBridgeIo->Mem.Write = RootBridgeIoMemWrite;
+  }
+
   gBS->RestoreTPL (Tpl);
   FreePool (HandleBuffer);
-  return mCpuIo;
+  return CpuIo;
 }
