@@ -30,6 +30,7 @@ OcPciIoInstallProtocol (
   if (!Reinstall) {
     return CpuIo;
   }
+
   Tpl    = gBS->RaiseTPL (TPL_HIGH_LEVEL);
   Status = gBS->LocateHandleBuffer (
                   ByProtocol,
@@ -58,7 +59,7 @@ OcPciIoInstallProtocol (
                     (VOID **)&PciRootBridgeIo
                     );
     if (EFI_ERROR (Status)) {
-        break;
+      break;
     }
 
     // Override with 64-bit MMIO compatible functions

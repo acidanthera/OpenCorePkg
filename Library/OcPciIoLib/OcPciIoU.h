@@ -25,7 +25,9 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 #define MAX_IO_PORT_ADDRESS  0xFFFF
 
 EFI_CPU_IO2_PROTOCOL *
-InitializeCpuIo2 ( VOID );
+InitializeCpuIo2 (
+  VOID
+  );
 
 /**
   Reads memory-mapped registers.
