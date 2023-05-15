@@ -254,11 +254,11 @@ CpuMemoryServiceRead (
     if (OperationWidth == EfiCpuIoWidthUint8) {
       *Uint8Buffer = MmioRead8 ((UINTN)Address);
     } else if (OperationWidth == EfiCpuIoWidthUint16) {
-      *((UINT16 *)Uint8Buffer) = ReadUnaligned16 ((UINT16 *)Address);
+      *((UINT16 *)Uint8Buffer) = ReadUnaligned16 ((UINT16 *)(UINTN)Address);
     } else if (OperationWidth == EfiCpuIoWidthUint32) {
-      *((UINT32 *)Uint8Buffer) = ReadUnaligned32 ((UINT32 *)Address);
+      *((UINT32 *)Uint8Buffer) = ReadUnaligned32 ((UINT32 *)(UINTN)Address);
     } else if (OperationWidth == EfiCpuIoWidthUint64) {
-      *((UINT64 *)Uint8Buffer) = ReadUnaligned64 ((UINT64 *)Address);
+      *((UINT64 *)Uint8Buffer) = ReadUnaligned64 ((UINT64 *)(UINTN)Address);
     }
   }
 
@@ -335,11 +335,11 @@ CpuMemoryServiceWrite (
     if (OperationWidth == EfiCpuIoWidthUint8) {
       MmioWrite8 ((UINTN)Address, *Uint8Buffer);
     } else if (OperationWidth == EfiCpuIoWidthUint16) {
-      WriteUnaligned16 ((UINT16 *)Address, *((UINT16 *)Uint8Buffer));
+      WriteUnaligned16 ((UINT16 *)(UINTN)Address, *((UINT16 *)Uint8Buffer));
     } else if (OperationWidth == EfiCpuIoWidthUint32) {
-      WriteUnaligned32 ((UINT32 *)Address, *((UINT32 *)Uint8Buffer));
+      WriteUnaligned32 ((UINT32 *)(UINTN)Address, *((UINT32 *)Uint8Buffer));
     } else if (OperationWidth == EfiCpuIoWidthUint64) {
-      WriteUnaligned64 ((UINT64 *)Address, *((UINT64 *)Uint8Buffer));
+      WriteUnaligned64 ((UINT64 *)(UINTN)Address, *((UINT64 *)Uint8Buffer));
     }
   }
 
