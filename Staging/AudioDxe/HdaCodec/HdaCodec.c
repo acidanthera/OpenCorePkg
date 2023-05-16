@@ -937,11 +937,14 @@ HdaCodecParsePorts (
           (HDA_VERB_GET_CONFIGURATION_DEFAULT_ASSOCIATION (HdaWidget->DefaultConfiguration) == 0))
       {
         DEBUG ((
-          DEBUG_VERBOSE,
-          "HDA:  | Ignoring widget @ 0x%X\n",
-          HdaWidget->NodeId
+          DEBUG_INFO,
+          "HDA:  | Would ignore widget @ 0x%X %u|%u|%u\n",
+          HdaWidget->NodeId,
+          HdaWidget->Type != HDA_WIDGET_TYPE_PIN_COMPLEX,
+          HDA_VERB_GET_CONFIGURATION_DEFAULT_PORT_CONN (HdaWidget->DefaultConfiguration) == HDA_CONFIG_DEFAULT_PORT_CONN_NONE,
+          HDA_VERB_GET_CONFIGURATION_DEFAULT_ASSOCIATION (HdaWidget->DefaultConfiguration) == 0
           ));
-        continue;
+        // continue;
       }
 
       if (PcdGetBool (PcdAudioControllerUsePinCapsForOutputs)) {
