@@ -5,6 +5,7 @@ OpenCore Changelog
 - Downgraded additional warning message in normal operation of emulated NVRAM to info
 - Disabled not present DVL0 device in SSDT-SBUS-MCHC by default, thx @stevezhengshiqi
 - Added Unicode font pages for some accented characters, plus box drawing and block elements, to `Builtin` text renderer
+- Improved support for overlong menu entries and very narrow console modes in builtin picker
 
 #### v0.9.2
 - Added `DisableIoMapperMapping` quirk, thx @CaseySJ

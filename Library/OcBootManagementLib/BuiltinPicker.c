@@ -82,12 +82,7 @@ STATIC TAB_FOCUS  mFocusListMinimal[] = {
  #endif
 };
 
-//
-// Clamp menu entries for 80 column screen using ellipses to avoid wrapping to next line.
-// TODO: (?) Update to actual text mode width, 80 is the guaranteed minimum.
-//
 #define MENU_PREFIX_LENGTH  (5)
-#define SAFE_ENTRY_LENGTH   (80 - MENU_PREFIX_LENGTH - 1)
 
 #define OC_KB_DBG_MAX_COLUMN           80
 #define OC_KB_DBG_DELTA_SAMPLE_COLUMN  0 // 40
@@ -348,6 +343,10 @@ OcShowSimpleBootMenu (
   BOOLEAN                            PlayedOnce;
   BOOLEAN                            PlayChosen;
   BOOLEAN                            ModifiersChanged;
+  UINTN                              Columns;
+  UINTN                              Rows;
+  UINTN                              SafeEntryLength;
+  UINTN                              SuffixLength;
 
  #if defined (BUILTIN_DEMONSTRATE_TYPING)
   INT32  TypingRow;
@@ -414,11 +413,28 @@ OcShowSimpleBootMenu (
   }
 
   //
-  // Fix overlong menu entries.
+  // Fix overlong menu entries. For very small screens, below a minimum width we
+  // overflow anyway, but other parts of menu will also have overflowed before this.
   //
+  gST->ConOut->QueryMode (gST->ConOut, gST->ConOut->Mode->Mode, &Columns, &Rows);
   for (Index = 0; Index < Count; Index++) {
-    if (StrLen (BootEntries[Index]->Name) > SAFE_ENTRY_LENGTH) {
-      StrCpyS (&BootEntries[Index]->Name[SAFE_ENTRY_LENGTH - L_STR_LEN (L"...")], L_STR_SIZE (L"..."), L"...");
+    SuffixLength = 0;
+    if (BootEntries[Index]->IsExternal) {
+      SuffixLength += L_STR_LEN (OC_MENU_EXTERNAL);
+    }
+
+    if (BootEntries[Index]->IsFolder) {
+      SuffixLength += L_STR_LEN (OC_MENU_DISK_IMAGE);
+    }
+
+    if (Columns > MENU_PREFIX_LENGTH + SuffixLength + L_STR_LEN (L"...") + 1) {
+      SafeEntryLength = Columns - MENU_PREFIX_LENGTH - SuffixLength;
+    } else {
+      SafeEntryLength = L_STR_LEN (L"...") + 1;
+    }
+
+    if (StrLen (BootEntries[Index]->Name) > SafeEntryLength) {
+      StrCpyS (&BootEntries[Index]->Name[SafeEntryLength - L_STR_LEN (L"...")], L_STR_SIZE (L"..."), L"...");
     }
   }
 
@@ -528,7 +544,12 @@ OcShowSimpleBootMenu (
           gST->ConOut->OutputString (gST->ConOut, OC_MENU_DISK_IMAGE);
         }
 
-        gST->ConOut->OutputString (gST->ConOut, L"\r\n");
+        //
+        // Forcing cursor each row instead of using CRLF gives correct entry positioning
+        // when we overflow horizontally (in very small modes) and enables writing entry
+        // text (clipped or otherwise) up to the last column.
+        //
+        gST->ConOut->SetCursorPosition (gST->ConOut, 0, MIN (FirstIndexRow + Index + 1, Rows - 1));
       }
 
       if ((BootContext->PickerContext->PickerAttributes & OC_ATTR_USE_MINIMAL_UI) == 0) {
