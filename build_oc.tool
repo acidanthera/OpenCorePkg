@@ -161,6 +161,7 @@ package() {
       "ChipTune.efi"
       "CleanNvram.efi"
       "CsrUtil.efi"
+      "FontTester.efi"
       "GopStop.efi"
       "KeyTester.efi"
       "ListPartitions.efi"
