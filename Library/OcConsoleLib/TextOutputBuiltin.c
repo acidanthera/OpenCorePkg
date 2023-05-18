@@ -600,6 +600,7 @@ STATIC BOOLEAN                              mConsoleUncontrolled;
 STATIC UINTN                                mPrivateColumn; ///< At least UEFI Shell trashes Mode values.
 STATIC UINTN                                mPrivateRow;    ///< At least UEFI Shell trashes Mode values.
 STATIC UINT32                               mConsoleGopMode;
+STATIC UINT8                                mUIScale;
 STATIC UINT8                                mFontScale;
 STATIC EFI_GRAPHICS_OUTPUT_BLT_PIXEL_UNION  mBackgroundColor;
 STATIC EFI_GRAPHICS_OUTPUT_BLT_PIXEL_UNION  mForegroundColor;
@@ -613,8 +614,11 @@ STATIC EFI_CONSOLE_CONTROL_SCREEN_MODE      mConsoleMode = EfiConsoleControlScre
 #define TGT_PADD_HEIGHT    (mConsolePaddingY)
 #define TGT_CURSOR_X       mFontScale
 #define TGT_CURSOR_Y       ((TGT_CHAR_HEIGHT) - mFontScale)
-#define TGT_CURSOR_WIDTH   ((TGT_CHAR_WIDTH) - mFontScale*2)
+#define TGT_CURSOR_WIDTH   ((TGT_CHAR_WIDTH) - mFontScale * 2)
 #define TGT_CURSOR_HEIGHT  (mFontScale)
+
+#define MIN_SUPPORTED_CONSOLE_WIDTH   (80)
+#define MIN_SUPPORTED_CONSOLE_HEIGHT  (25)
 
 /**
   Render character onscreen.
@@ -884,8 +888,8 @@ RenderResync (
   //
   // Require space for at least 1x1 chars on the calculation below.
   //
-  if (  (Info->HorizontalResolution < TGT_CHAR_WIDTH)
-     || (Info->VerticalResolution   < TGT_CHAR_HEIGHT))
+  if (  (Info->HorizontalResolution < ISO_CHAR_WIDTH)
+     || (Info->VerticalResolution   < ISO_CHAR_HEIGHT))
   {
     return EFI_LOAD_ERROR;
   }
@@ -894,14 +898,36 @@ RenderResync (
     FreePool (mCharacterBuffer);
   }
 
+  //
+  // Reset font scale and allocate for target size - may be over-allocated if we have to override below.
+  //
+  mFontScale       = mUIScale;
   mCharacterBuffer = AllocatePool (TGT_CHAR_AREA * sizeof (mCharacterBuffer[0]));
   if (mCharacterBuffer == NULL) {
     return EFI_OUT_OF_RESOURCES;
   }
 
   mConsoleGopMode = mGraphicsOutput->Mode->Mode;
-  MaxWidth        = Info->HorizontalResolution / TGT_CHAR_WIDTH;
-  MaxHeight       = Info->VerticalResolution / TGT_CHAR_HEIGHT;
+
+  //
+  // Override font scale to reach minimum supported text resolution, if needed and possible.
+  //
+  while (TRUE) {
+    MaxWidth  = Info->HorizontalResolution / TGT_CHAR_WIDTH;
+    MaxHeight = Info->VerticalResolution / TGT_CHAR_HEIGHT;
+    if (  (MaxWidth  >= MIN_SUPPORTED_CONSOLE_WIDTH)
+       && (MaxHeight >= MIN_SUPPORTED_CONSOLE_HEIGHT))
+    {
+      break;
+    }
+
+    if (mFontScale == 1) {
+      break;
+    }
+
+    mFontScale = 1;
+  }
+
   if ((mUserWidth == 0) || (mUserHeight == 0)) {
     mConsoleWidth  = MaxWidth;
     mConsoleHeight = MaxHeight;
@@ -1512,21 +1538,23 @@ OcUseBuiltinTextOutput (
   UINTN                         UiScaleSize;
   EFI_CONSOLE_CONTROL_PROTOCOL  OriginalConsoleControlProtocol;
 
-  UiScaleSize = sizeof (mFontScale);
+  UiScaleSize = sizeof (mUIScale);
 
   Status = gRT->GetVariable (
                   APPLE_UI_SCALE_VARIABLE_NAME,
                   &gAppleVendorVariableGuid,
                   NULL,
                   &UiScaleSize,
-                  (VOID *)&mFontScale
+                  (VOID *)&mUIScale
                   );
 
-  if (EFI_ERROR (Status) || (mFontScale != 2)) {
-    mFontScale = 1;
+  if (EFI_ERROR (Status) || (mUIScale != 2)) {
+    mUIScale = 1;
   }
 
-  DEBUG ((DEBUG_INFO, "OCC: Using builtin text renderer with %d scale\n", mFontScale));
+  mFontScale = mUIScale;
+
+  DEBUG ((DEBUG_INFO, "OCC: Using builtin text renderer with %d scale\n", mUIScale));
 
   mUserWidth   = Width;
   mUserHeight  = Height;
