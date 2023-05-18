@@ -7,6 +7,7 @@ OpenCore Changelog
 - Added Unicode font pages for some accented characters, plus box drawing and block elements, to `Builtin` text renderer
 - Improved support for overlong menu entries and very narrow console modes in builtin picker
 - Made `Builtin` text renderer ignore UI Scale, when required to ensure that text mode reaches minimum supported size of 80x25
+- Added save and restore of text and graphics mode round tools and failed boot entries
 
 #### v0.9.2
 - Added `DisableIoMapperMapping` quirk, thx @CaseySJ

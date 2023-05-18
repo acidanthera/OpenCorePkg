@@ -44,6 +44,70 @@
 #include <Library/UefiLib.h>
 #include <Library/ResetSystemLib.h>
 
+STATIC UINT32                           mSavedGopMode;
+STATIC EFI_CONSOLE_CONTROL_SCREEN_MODE  mSavedConsoleControlMode;
+STATIC INT32                            mSavedConsoleMode;
+
+STATIC
+EFI_STATUS
+SaveMode (
+  VOID
+  )
+{
+  EFI_STATUS                    Status;
+  EFI_GRAPHICS_OUTPUT_PROTOCOL  *Gop;
+
+  mSavedConsoleMode = gST->ConOut->Mode->Mode;
+
+  mSavedConsoleControlMode = OcConsoleControlGetMode ();
+
+  Status = gBS->HandleProtocol (
+                  gST->ConsoleOutHandle,
+                  &gEfiGraphicsOutputProtocolGuid,
+                  (VOID **)&Gop
+                  );
+
+  if (EFI_ERROR (Status)) {
+    mSavedGopMode = MAX_UINT32;
+  } else {
+    mSavedGopMode = Gop->Mode->Mode;
+  }
+
+  return Status;
+}
+
+STATIC
+EFI_STATUS
+RestoreMode (
+  VOID
+  )
+{
+  EFI_STATUS                    Status;
+  EFI_GRAPHICS_OUTPUT_PROTOCOL  *Gop;
+
+  if (mSavedGopMode == MAX_UINT32) {
+    Status = EFI_SUCCESS;
+  } else {
+    Status = gBS->HandleProtocol (
+                    gST->ConsoleOutHandle,
+                    &gEfiGraphicsOutputProtocolGuid,
+                    (VOID **)&Gop
+                    );
+
+    if (  !EFI_ERROR (Status)
+       && (Gop->Mode->Mode != mSavedGopMode))
+    {
+      Status = Gop->SetMode (Gop, mSavedGopMode);
+    }
+  }
+
+  OcConsoleControlSetMode (mSavedConsoleControlMode);
+
+  gST->ConOut->SetMode (gST->ConOut, mSavedConsoleMode);
+
+  return Status;
+}
+
 STATIC
 EFI_STATUS
 RunShowMenu (
@@ -409,6 +473,7 @@ OcRunBootPicker (
         }
       }
 
+      SaveMode ();
       FwRuntime = Chosen->FullNvramAccess ? OcDisableNvramProtection () : NULL;
 
       Status = OcLoadBootEntry (
@@ -418,6 +483,7 @@ OcRunBootPicker (
                  );
 
       OcRestoreNvramProtection (FwRuntime);
+      RestoreMode ();
 
       //
       // Do not wait on successful return code.
