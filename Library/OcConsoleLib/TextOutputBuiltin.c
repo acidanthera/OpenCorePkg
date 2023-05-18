@@ -1395,6 +1395,20 @@ AsciiTextSetCursorPosition (
     }
   }
 
+  //
+  // Clamping the row here successfully works round a bug in memtest86 where it
+  // does not re-read console text resolution when it changes the graphics mode.
+  // If changing between text resolutions >= 80x25, the issue is only visible
+  // in the position of the footer line on the text UI screen, and this fixes it.
+  //
+  if (Column >= mConsoleWidth) {
+    Column = mConsoleWidth - 1;
+  }
+
+  if (Row >= mConsoleHeight) {
+    Row = mConsoleHeight - 1;
+  }
+
   if ((Column < mConsoleWidth) && (Row < mConsoleHeight)) {
     FlushCursor (This->Mode->CursorVisible, mPrivateColumn, mPrivateRow);
     mPrivateColumn           = Column;
