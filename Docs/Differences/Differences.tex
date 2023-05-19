@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
-%DIF DEL PreviousConfiguration.tex   Fri May 12 15:15:27 2023
-%DIF ADD ../Configuration.tex        Fri May 19 13:11:23 2023
+%DIF DEL PreviousConfiguration.tex   Wed May 10 20:45:31 2023
+%DIF ADD ../Configuration.tex        Sat May 20 00:57:56 2023
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -118,7 +118,7 @@
 %DIF HYPERREF PREAMBLE %DIF PREAMBLE
 \providecommand{\DIFadd}[1]{\texorpdfstring{\DIFaddtex{#1}}{#1}} %DIF PREAMBLE
 \providecommand{\DIFdel}[1]{\texorpdfstring{\DIFdeltex{#1}}{}} %DIF PREAMBLE
-%DIF LISTINGS PREAMBLE %DIF PREAMBLE
+%DIF COLORLISTINGS PREAMBLE %DIF PREAMBLE
 \RequirePackage{listings} %DIF PREAMBLE
 \RequirePackage{color} %DIF PREAMBLE
 \lstdefinelanguage{DIFcode}{ %DIF PREAMBLE
@@ -2733,14 +2733,14 @@ Kernel and kext changes apply with the following effective order:
   Thunderbolt devices when AppleVTD is enabled on systems where the native DMAR table
   contains one or more Reserved Memory Regions and \DIFdelbegin \DIFdel{iGPU is enabled and }\DIFdelend more than 16 GB memory is installed.
   \DIFaddbegin \DIFadd{On some systems, this quirk is only needed when iGPU is enabled.
-}
-
-  \emph{\DIFadd{Note 1}}\DIFadd{: This quirk requires a native DMAR table that does not contain Reserved Memory
-  Regions or a substitute SSDT-DMAR.aml in which Reserved Memory Regions
-  have been removed.
 }\DIFaddend 
 
-  \emph{Note 2}: This option is not needed on AMD systems.
+  \DIFaddbegin \emph{\DIFadd{Note 1}}\DIFadd{: This quirk requires a native DMAR table that does not contain Reserved Memory
+  Regions or a substitute SSDT-DMAR.aml in which Reserved Memory Regions
+  have been removed.
+}
+
+  \DIFaddend \emph{Note 2}: This option is not needed on AMD systems.
 
 \item
   \texttt{DisableLinkeditJettison}\\
@@ -6453,7 +6453,10 @@ even cause permanent firmware damage. Some of the known drivers are listed below
 \href{https://github.com/acidanthera/OpenCorePkg}{\texttt{CrScreenshotDxe}}\textbf{*}
 & Screenshot making driver saving images to the root of OpenCore partition (ESP) or
   any available writeable filesystem upon pressing \texttt{F10}.
-  This is a modified version of \href{https://github.com/LongSoft/CrScreenshotDxe}{\texttt{CrScreenshotDxe}}
+  \DIFaddbegin \DIFadd{Accepts optional driver argument }\texttt{\DIFadd{-}{}\DIFadd{-enable-mouse-click}} \DIFadd{to additionally take
+  screenshot on mouse click. (It is recommended to enable this option only if a keypress
+  would prevent a specific screenshot, and disable it again after use.)
+  }\DIFaddend This is a modified version of \href{https://github.com/LongSoft/CrScreenshotDxe}{\texttt{CrScreenshotDxe}}
   driver by \href{https://github.com/NikolajSchlej}{Nikolaj Schlej}. \\
 \href{https://github.com/acidanthera/OpenCorePkg}{\texttt{EnableGop\{Direct\}}}\textbf{*}
 & Early beta release firmware-embeddable driver providing pre-OpenCore non-native GPU support

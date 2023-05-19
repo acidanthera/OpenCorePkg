@@ -6390,6 +6390,9 @@ even cause permanent firmware damage. Some of the known drivers are listed below
 \href{https://github.com/acidanthera/OpenCorePkg}{\texttt{CrScreenshotDxe}}\textbf{*}
 & Screenshot making driver saving images to the root of OpenCore partition (ESP) or
   any available writeable filesystem upon pressing \texttt{F10}.
+  Accepts optional driver argument \texttt{-{}-enable-mouse-click} to additionally take
+  screenshot on mouse click. (It is recommended to enable this option only if a keypress
+  would prevent a specific screenshot, and disable it again after use.)
   This is a modified version of \href{https://github.com/LongSoft/CrScreenshotDxe}{\texttt{CrScreenshotDxe}}
   driver by \href{https://github.com/NikolajSchlej}{Nikolaj Schlej}. \\
 \href{https://github.com/acidanthera/OpenCorePkg}{\texttt{EnableGop\{Direct\}}}\textbf{*}

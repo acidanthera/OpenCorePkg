@@ -20,14 +20,17 @@
   MdeModulePkg/MdeModulePkg.dec
 
 [LibraryClasses]
+  DebugLib
+  OcBootManagementLib
+  OcFileLib
+  OcFlexArrayLib
+  OcMiscLib
+  OcPngLib
+  PrintLib
+  TimerLib
   UefiBootServicesTableLib
   UefiRuntimeServicesTableLib
   UefiDriverEntryPoint
-  DebugLib
-  PrintLib
-  OcFileLib
-  OcMiscLib
-  OcPngLib
 
 [Protocols]
   gEfiGraphicsOutputProtocolGuid
