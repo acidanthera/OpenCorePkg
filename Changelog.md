@@ -83,7 +83,7 @@ OpenCore Changelog
 - Fixed TSC/FSB for AMD CPUs in ProvideCurrentCpuInfo, thx @Shaneee
 - Added `Misc` -> `Boot` -> `HibernateSkipsPicker` not to show picker if waking from macOS hibernation
 - Changed macrecovery to download files into `com.apple.recovery.boot` by default, thx @dreamwhite
-- Supported Apple builtin picker (using `BootKicker.efi` or `PickerMode` `Apple`) when running GPUs without Mac-EFI support on units such as the MacPro5,1 (thx @cdf, @tsialex)
+- Supported Apple native picker (using `BootKicker.efi` or `PickerMode` `Apple`) when running GPUs without Mac-EFI support on units such as the MacPro5,1 (thx @cdf, @tsialex)
 - Enabled `PickerMode` `Apple` to successfully launch selected entry
 - Enabled `BootKicker.efi` to successfully launch selected entry (via reboot) (thx @cdf)
 - Added spoof proof UEFI 2.x checking to OpenVariableRuntimeDxe, thx @dakanji
