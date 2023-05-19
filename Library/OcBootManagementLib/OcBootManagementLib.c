@@ -57,9 +57,9 @@ SaveMode (
   EFI_STATUS                    Status;
   EFI_GRAPHICS_OUTPUT_PROTOCOL  *Gop;
 
-  mSavedConsoleMode = gST->ConOut->Mode->Mode;
-
   mSavedConsoleControlMode = OcConsoleControlGetMode ();
+
+  mSavedConsoleMode = gST->ConOut->Mode->Mode;
 
   Status = gBS->HandleProtocol (
                   gST->ConsoleOutHandle,
@@ -73,6 +73,15 @@ SaveMode (
     mSavedGopMode = Gop->Mode->Mode;
   }
 
+  DEBUG ((
+    DEBUG_INFO,
+    "OCB: Saved mode %d/%d/%u - %r\n",
+    mSavedConsoleControlMode,
+    mSavedConsoleMode,
+    mSavedGopMode,
+    Status
+    ));
+
   return Status;
 }
 
@@ -84,7 +93,16 @@ RestoreMode (
 {
   EFI_STATUS                    Status;
   EFI_GRAPHICS_OUTPUT_PROTOCOL  *Gop;
+  UINT32                        FoundGopMode;
 
+  OcConsoleControlSetMode (mSavedConsoleControlMode);
+
+  //
+  // This can reset GOP resolution.
+  //
+  gST->ConOut->SetMode (gST->ConOut, mSavedConsoleMode);
+
+  FoundGopMode = MAX_UINT32;
   if (mSavedGopMode == MAX_UINT32) {
     Status = EFI_SUCCESS;
   } else {
@@ -94,16 +112,23 @@ RestoreMode (
                     (VOID **)&Gop
                     );
 
-    if (  !EFI_ERROR (Status)
-       && (Gop->Mode->Mode != mSavedGopMode))
-    {
-      Status = Gop->SetMode (Gop, mSavedGopMode);
+    if (!EFI_ERROR (Status)) {
+      FoundGopMode = Gop->Mode->Mode;
+      if (Gop->Mode->Mode != mSavedGopMode) {
+        Status = Gop->SetMode (Gop, mSavedGopMode);
+      }
     }
   }
 
-  OcConsoleControlSetMode (mSavedConsoleControlMode);
-
-  gST->ConOut->SetMode (gST->ConOut, mSavedConsoleMode);
+  DEBUG ((
+    DEBUG_INFO,
+    "OCB: Restored mode %d/%d/%u(%u) - %r\n",
+    mSavedConsoleControlMode,
+    mSavedConsoleMode,
+    mSavedGopMode,
+    FoundGopMode,
+    Status
+    ));
 
   return Status;
 }
