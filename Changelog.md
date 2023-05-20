@@ -6,7 +6,7 @@ OpenCore Changelog
 - Disabled not present DVL0 device in SSDT-SBUS-MCHC by default, thx @stevezhengshiqi
 - Added Unicode font pages for some accented characters, plus box drawing and block elements, to `Builtin` text renderer
 - Improved support for overlong menu entries and very narrow console modes in builtin picker
-- Made `Builtin` text renderer ignore UI Scale, when required to ensure that text mode reaches minimum supported size of 80x25
+- Made `Builtin` text renderer ignore UI Scale, when required to ensure that text mode reaches minimum UEFI supported size of 80x25
 - Added save and restore of text and graphics mode round tools and failed boot entries
 - Updated out-of-range cursor handling to work round minor display issue in memtest86
 - Added optional `--enable-mouse-click` argument to `CrScreenshotDxe` driver to additionally respond on mouse click
