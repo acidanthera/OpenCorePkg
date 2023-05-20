@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
 %DIF DEL PreviousConfiguration.tex   Wed May 10 20:45:31 2023
-%DIF ADD ../Configuration.tex        Sat May 20 00:57:56 2023
+%DIF ADD ../Configuration.tex        Sat May 20 08:58:22 2023
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -7085,14 +7085,14 @@ the driver within the \texttt{UEFI/Drivers} section:
   Amount of time in milliseconds to wait for all widgets to come fully on, applied per codec
   during driver connection phase. In most systems this should not be needed and a faster boot
   will be achieved by using \texttt{Audio} section \texttt{SetupDelay} if any audio setup delay
-  is required. Where required, values of up to one second may be needed\DIFaddbegin \DIFadd{. }\medskip
+  is required. Where required, values of up to one second may be needed. \medskip
 
-  \item \texttt{\DIFadd{-}{}\DIFadd{-force-codec}} \DIFadd{- Integer value, no default. }\medskip
+  \item \DIFaddbegin \texttt{\DIFadd{-}{}\DIFadd{-force-codec}} \DIFadd{- Integer value, no default. }\medskip
 
   \DIFadd{Force use of an audio codec, this value should be equal to }\texttt{\DIFadd{Audio}} \DIFadd{section }\texttt{\DIFadd{AudioCodec}}\DIFadd{.
-  Can result in faster boot especially when used in conjuction with }\texttt{\DIFadd{-}{}\DIFadd{-force-device}}\DIFaddend . \medskip
+  Can result in faster boot especially when used in conjuction with }\DIFaddend \texttt{-{}-force-device}\DIFaddbegin \DIFadd{. }\medskip
 
-	\item \texttt{-{}-force-device} - String value, no default. \medskip
+	\item \texttt{\DIFadd{-}{}\DIFadd{-force-device}} \DIFaddend - String value, no default. \medskip
 
   When this option is present and has a value (e.g. \texttt{-{}-force-device=PciRoot(0x0)/Pci(0x1f,0x3)}), it
   forces AudioDxe to connect to the specified PCI device, even if the device does not report itself as
@@ -7160,7 +7160,17 @@ the driver within the \texttt{UEFI/Drivers} section:
   be reversed on exit in order to avoid breaking sound in Windows or Linux. If so, this flag should
   be added to AudioDxe driver arguments.
   Not enabled by default, since restoring the flag can prevent sound from working in macOS on
-  some other systems. \medskip
+  some other systems\DIFaddbegin \DIFadd{. }\medskip
+
+	\item \texttt{\DIFadd{-}{}\DIFadd{-use-conn-none}} \DIFadd{- Boolean flag, enabled if present. }\medskip
+
+  \DIFadd{On some sound cards enabling this option will enable additional usable audio channels (e.g.
+  the bass or treble speaker of a pair, where only one is found without it).
+  }\medskip
+
+  \emph{\DIFadd{Note}}\DIFadd{: Enabling this option may increase the available channels, in which case any
+  custom setting of }\texttt{\DIFadd{AudioOutMask}} \DIFadd{may need to be changed to match the new channel list}\DIFaddend .
+  \medskip
 \end{itemize}
 
 \subsection{OpenVariableRuntimeDxe}\label{emunvram}

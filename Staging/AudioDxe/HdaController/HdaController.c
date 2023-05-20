@@ -34,6 +34,12 @@
 #include <Library/OcStringLib.h>
 #include <Library/PcdLib.h>
 
+BOOLEAN
+  gRestoreNoSnoop = FALSE;
+
+EFI_DEVICE_PATH_PROTOCOL *
+  gForcedControllerDevicePath = NULL;
+
 VOID
 EFIAPI
 HdaControllerStreamOutputPollTimerHandler (

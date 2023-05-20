@@ -32,27 +32,6 @@
 #include <Library/OcBootManagementLib.h>
 #include <Library/OcFlexArrayLib.h>
 
-UINTN
-  gGpioSetupStageMask = GPIO_SETUP_STAGE_NONE;
-
-UINTN
-  gGpioPinMask = GPIO_PIN_MASK_AUTO;
-
-BOOLEAN
-  gRestoreNoSnoop = FALSE;
-
-EFI_DEVICE_PATH_PROTOCOL *
-  gForcedControllerDevicePath = NULL;
-
-UINTN
-  gCodecSetupDelay = 0;
-
-BOOLEAN
-  gUseForcedCodec = FALSE;
-
-UINTN
-  gForcedCodec = 0;
-
 /**
   HdaController Driver Binding.
 **/
@@ -131,6 +110,8 @@ AudioDxeInit (
       gUseForcedCodec = TRUE;
     }
 
+    gCodecUseConnNoneNode = OcHasParsedVar (ParsedLoadOptions, L"--use-conn-none", OcStringFormatUnicode);
+
     OcFlexArrayFree (&ParsedLoadOptions);
   } else if (Status != EFI_NOT_FOUND) {
     return Status;
@@ -138,12 +119,15 @@ AudioDxeInit (
 
   DEBUG ((
     DEBUG_INFO,
-    "HDA: GPIO setup stages 0x%X GPIO pin mask 0x%X%a Restore NSNPEN %d Force device %s Setup delay %u\n",
+    "HDA: GPIO stages 0x%X mask 0x%X%a; Restore NSNPEN %d; Force device %s codec %u(%u); Conn none %u; Delay %u\n",
     gGpioSetupStageMask,
     gGpioPinMask,
     gGpioPinMask == 0 ? " (auto)" : "",
     gRestoreNoSnoop,
     DevicePathName,
+    gUseForcedCodec,
+    gForcedCodec,
+    gCodecUseConnNoneNode,
     gCodecSetupDelay
     ));
 

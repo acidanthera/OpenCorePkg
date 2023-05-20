@@ -7098,6 +7098,16 @@ the driver within the \texttt{UEFI/Drivers} section:
   be added to AudioDxe driver arguments.
   Not enabled by default, since restoring the flag can prevent sound from working in macOS on
   some other systems. \medskip
+
+	\item \texttt{-{}-use-conn-none} - Boolean flag, enabled if present. \medskip
+
+  On some sound cards enabling this option will enable additional usable audio channels (e.g.
+  the bass or treble speaker of a pair, where only one is found without it).
+  \medskip
+  
+  \emph{Note}: Enabling this option may increase the available channels, in which case any
+  custom setting of \texttt{AudioOutMask} may need to be changed to match the new channel list.
+  \medskip
 \end{itemize}
 
 \subsection{OpenVariableRuntimeDxe}\label{emunvram}

@@ -9,7 +9,8 @@ OpenCore Changelog
 - Made `Builtin` text renderer ignore UI Scale, when required to ensure that text mode reaches minimum supported size of 80x25
 - Added save and restore of text and graphics mode round tools and failed boot entries
 - Updated out-of-range cursor handling to work round minor display issue in memtest86
-- Add optional `--enable-mouse-click` argument to `CrScreenshotDxe` driver to additionally respond on mouse click
+- Added optional `--enable-mouse-click` argument to `CrScreenshotDxe` driver to additionally respond on mouse click
+- Added `--use-conn-none` option to `AudioDxe` driver to discover additional usable output channels on some systems
 
 #### v0.9.2
 - Added `DisableIoMapperMapping` quirk, thx @CaseySJ

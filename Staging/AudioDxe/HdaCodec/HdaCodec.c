@@ -30,6 +30,24 @@
 #include <Library/OcMiscLib.h>
 #include <Library/OcStringLib.h>
 
+UINTN
+  gGpioSetupStageMask = GPIO_SETUP_STAGE_NONE;
+
+UINTN
+  gGpioPinMask = GPIO_PIN_MASK_AUTO;
+
+UINTN
+  gCodecSetupDelay = 0;
+
+BOOLEAN
+  gUseForcedCodec = FALSE;
+
+UINTN
+  gForcedCodec = 0;
+
+BOOLEAN
+  gCodecUseConnNoneNode = FALSE;
+
 EFI_STATUS
 EFIAPI
 HdaCodecProbeWidget (
@@ -933,7 +951,7 @@ HdaCodecParsePorts (
       // If this is a pin complex but it has no connection to a port, also ignore it.
       // If the default association for the pin complex is zero, also ignore it.
       if ((HdaWidget->Type != HDA_WIDGET_TYPE_PIN_COMPLEX) ||
-          (HDA_VERB_GET_CONFIGURATION_DEFAULT_PORT_CONN (HdaWidget->DefaultConfiguration) == HDA_CONFIG_DEFAULT_PORT_CONN_NONE) ||
+          (!gCodecUseConnNoneNode && (HDA_VERB_GET_CONFIGURATION_DEFAULT_PORT_CONN (HdaWidget->DefaultConfiguration) == HDA_CONFIG_DEFAULT_PORT_CONN_NONE)) ||
           (HDA_VERB_GET_CONFIGURATION_DEFAULT_ASSOCIATION (HdaWidget->DefaultConfiguration) == 0))
       {
         DEBUG ((
