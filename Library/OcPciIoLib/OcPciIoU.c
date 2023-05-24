@@ -254,11 +254,11 @@ CpuMemoryServiceRead (
     if (OperationWidth == EfiCpuIoWidthUint8) {
       *((UINT8 *)Uint8Buffer) = *((UINT8 *)(UINTN)Address);
     } else if (OperationWidth == EfiCpuIoWidthUint16) {
-      *((UINT16 *)Uint8Buffer) = ReadUnaligned16 ((UINT16 *)(UINTN)Address);
+      WriteUnaligned16((UINT16 *)Uint8Buffer, ReadUnaligned16 ((UINT16 *)(UINTN)Address));
     } else if (OperationWidth == EfiCpuIoWidthUint32) {
-      *((UINT32 *)Uint8Buffer) = ReadUnaligned32 ((UINT32 *)(UINTN)Address);
+      WriteUnaligned32((UINT32 *)Uint8Buffer, ReadUnaligned32 ((UINT32 *)(UINTN)Address));
     } else if (OperationWidth == EfiCpuIoWidthUint64) {
-      *((UINT64 *)Uint8Buffer) = ReadUnaligned64 ((UINT64 *)(UINTN)Address);
+      WriteUnaligned64((UINT64 *)Uint8Buffer, ReadUnaligned64 ((UINT64 *)(UINTN)Address));
     }
   }
 
