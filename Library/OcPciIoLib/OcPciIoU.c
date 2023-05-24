@@ -9,9 +9,9 @@
 
 #include "OcPciIoU.h"
 
-EFI_CPU_IO2_PROTOCOL  *mCpuIo = NULL;
+STATIC EFI_CPU_IO2_PROTOCOL  *mCpuIo = NULL;
 
-UINT8  mInStride[] = {
+STATIC CONST UINT8  mInStride[] = {
   1,      // EfiCpuIoWidthUint8
   2,      // EfiCpuIoWidthUint16
   4,      // EfiCpuIoWidthUint32
@@ -29,7 +29,7 @@ UINT8  mInStride[] = {
 //
 // Lookup table for increment values based on transfer widths
 //
-UINT8  mOutStride[] = {
+STATIC CONST UINT8  mOutStride[] = {
   1,      // EfiCpuIoWidthUint8
   2,      // EfiCpuIoWidthUint16
   4,      // EfiCpuIoWidthUint32
@@ -252,7 +252,7 @@ CpuMemoryServiceRead (
   OperationWidth = (EFI_CPU_IO_PROTOCOL_WIDTH)(Width & 0x03);
   for (Uint8Buffer = Buffer; Count > 0; Address += InStride, Uint8Buffer += OutStride, Count--) {
     if (OperationWidth == EfiCpuIoWidthUint8) {
-      *Uint8Buffer = MmioRead8 ((UINTN)Address);
+      *((UINT8 *)Uint8Buffer) = *((UINT8 *)(UINTN)Address);
     } else if (OperationWidth == EfiCpuIoWidthUint16) {
       *((UINT16 *)Uint8Buffer) = ReadUnaligned16 ((UINT16 *)(UINTN)Address);
     } else if (OperationWidth == EfiCpuIoWidthUint32) {
@@ -333,7 +333,7 @@ CpuMemoryServiceWrite (
   OperationWidth = (EFI_CPU_IO_PROTOCOL_WIDTH)(Width & 0x03);
   for (Uint8Buffer = Buffer; Count > 0; Address += InStride, Uint8Buffer += OutStride, Count--) {
     if (OperationWidth == EfiCpuIoWidthUint8) {
-      MmioWrite8 ((UINTN)Address, *Uint8Buffer);
+      *((UINT8 *)(UINTN)Address) = *((UINT8 *)Uint8Buffer);
     } else if (OperationWidth == EfiCpuIoWidthUint16) {
       WriteUnaligned16 ((UINT16 *)(UINTN)Address, *((UINT16 *)Uint8Buffer));
     } else if (OperationWidth == EfiCpuIoWidthUint32) {
