@@ -23,7 +23,7 @@ OcPciIoInstallProtocol (
   EFI_PCI_ROOT_BRIDGE_IO_PROTOCOL  *PciRootBridgeIo;
 
   CpuIo = InitializeCpuIo2 ();
-  if (!CpuIo) {
+  if (CpuIo == NULL) {
     return NULL;
   }
 

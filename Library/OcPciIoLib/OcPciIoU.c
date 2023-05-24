@@ -51,7 +51,7 @@ InitializeCpuIo2 (
 {
   EFI_STATUS  Status;
 
-  if (mCpuIo) {
+  if (mCpuIo != NULL) {
     return mCpuIo;
   }
 
