@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
-%DIF DEL PreviousConfiguration.tex   Sun Jun  4 23:24:47 2023
-%DIF ADD ../Configuration.tex        Sun Jun  4 23:24:47 2023
+%DIF DEL PreviousConfiguration.tex   Wed May 10 20:45:31 2023
+%DIF ADD ../Configuration.tex        Sun Jun 11 05:44:24 2023
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -8289,7 +8289,49 @@ for additional options.
   \href{https://github.com/acidanthera/bugtracker/issues/1280}{firmware upgrades}.
 
 \item
-  \texttt{ConsoleMode}\\
+  \DIFaddbegin \texttt{\DIFadd{ConsoleFont}}\\
+  \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ string}}\\
+  \textbf{\DIFadd{Failsafe}}\DIFadd{: Empty (use OpenCore builtin console font)}\\
+  \textbf{\DIFadd{Description}}\DIFadd{: Specify the console font to use for OpenCore }\texttt{\DIFadd{Builtin}} \DIFadd{text renderer.
+}
+
+  \DIFadd{The font file must be located in }\texttt{\DIFadd{EFI/OC/Resources/Font/\{font-name\}.hex}} \DIFadd{and must
+  be 8x16 resolution. Various console fonts can be found online in either }\texttt{\DIFadd{.bdf}} \DIFadd{or
+  }\texttt{\DIFadd{.hex}} \DIFadd{format. }\texttt{\DIFadd{.bdf}} \DIFadd{can be converted to }\texttt{\DIFadd{.hex}} \DIFadd{format using }\texttt{\DIFadd{gbdfed}}
+  \DIFadd{(available for Linux or macOS).
+}
+
+  \DIFadd{There is often no need to change console font, the main use-case being to
+  provide an extended character set for those relatively rare EFI applications which
+  have multi-lingual support (e.g. }\texttt{\DIFadd{memtest86}}\DIFadd{).
+}
+
+  \DIFadd{The }\href{https://github.com/acidanthera/OcBinaryData}{\DIFadd{OcBinaryData repository}} \DIFadd{includes:
+  }\begin{itemize}
+    \tightlist
+    \item \href{https://terminus-font.sourceforge.net/}{\DIFadd{Terminus}} \DIFadd{--- A font with extensive character
+    support suitable for applications such as the above.
+    }\item \DIFadd{TerminusCore --- A lightly modified version of the Terminus font, making some glyphs
+    (}\texttt{\DIFadd{@KMRSTVWimrsw}}\DIFadd{) more similar to the free ISO Latin font used in XNU and OpenCore.
+  }\end{itemize}
+
+  \texttt{\DIFadd{Terminus}} \DIFadd{and }\texttt{\DIFadd{TerminusCore}} \DIFadd{are provided under the SIL Open Font License, Version 1.1.
+  Some additional GPL licensed fonts from the EPTO Fonts library, converted
+  to the required }\texttt{\DIFadd{.hex}} \DIFadd{format, can be found }\href{https://github.com/mikebeaton/epto-fonts}{\DIFadd{here}}\DIFadd{.
+}
+
+  \emph{\DIFadd{Note 1}}\DIFadd{: On many newer systems the }\texttt{\DIFadd{System}} \DIFadd{text renderer already provides a full
+  set of international characters, in which case this can be used without requiring the }\texttt{\DIFadd{Builtin}}
+  \DIFadd{renderer and a custom font.
+}
+
+  \emph{\DIFadd{Note 2}}\DIFadd{: This option only affects the }\texttt{\DIFadd{Builtin}} \DIFadd{text renderer and only takes effect from
+  the point at which the }\texttt{\DIFadd{Builtin}} \DIFadd{renderer is configured. When console output is visible before
+  this point, it is using the system console font.
+}
+
+\item
+  \DIFaddend \texttt{ConsoleMode}\\
   \textbf{Type}: \texttt{plist\ string}\\
   \textbf{Failsafe}: Empty (Maintain current console mode)\\
   \textbf{Description}: Sets console output mode as specified

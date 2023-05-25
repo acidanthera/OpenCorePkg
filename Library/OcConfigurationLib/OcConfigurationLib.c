@@ -816,6 +816,7 @@ STATIC
 OC_SCHEMA
   mUefiOutputSchema[] = {
   OC_SCHEMA_BOOLEAN_IN ("ClearScreenOnModeSwitch",    OC_GLOBAL_CONFIG, Uefi.Output.ClearScreenOnModeSwitch),
+  OC_SCHEMA_STRING_IN ("ConsoleFont",                 OC_GLOBAL_CONFIG, Uefi.Output.ConsoleFont),
   OC_SCHEMA_STRING_IN ("ConsoleMode",                 OC_GLOBAL_CONFIG, Uefi.Output.ConsoleMode),
   OC_SCHEMA_BOOLEAN_IN ("DirectGopRendering",         OC_GLOBAL_CONFIG, Uefi.Output.DirectGopRendering),
   OC_SCHEMA_BOOLEAN_IN ("ForceResolution",            OC_GLOBAL_CONFIG, Uefi.Output.ForceResolution),

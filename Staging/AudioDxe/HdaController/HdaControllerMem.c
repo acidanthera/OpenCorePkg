@@ -23,8 +23,8 @@
  */
 
 #include "HdaController.h"
-#include "Library/OcHdaDevicesLib.h"
-#include "Library/OcMiscLib.h"
+#include <Library/OcHdaDevicesLib.h>
+#include <Library/OcMiscLib.h>
 #include <IndustryStandard/HdaRegisters.h>
 
 EFI_STATUS

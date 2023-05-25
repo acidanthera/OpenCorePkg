@@ -57,6 +57,8 @@ LoadUefiOutputSupport (
   OcSetupConsole (
     EfiConsoleControlScreenGraphics,
     OcConsoleRendererBuiltinGraphics,
+    NULL,
+    NULL,
     FALSE,
     FALSE,
     FALSE,

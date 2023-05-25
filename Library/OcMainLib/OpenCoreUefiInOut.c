@@ -182,7 +182,8 @@ OcLoadUefiInputSupport (
 
 VOID
 OcLoadUefiOutputSupport (
-  IN OC_GLOBAL_CONFIG  *Config
+  IN OC_STORAGE_CONTEXT  *Storage,
+  IN OC_GLOBAL_CONFIG    *Config
   )
 {
   EFI_STATUS                       Status;
@@ -358,6 +359,8 @@ OcLoadUefiOutputSupport (
   OcSetupConsole (
     InitialMode,
     Renderer,
+    Storage,
+    OC_BLOB_GET (&Config->Uefi.Output.ConsoleFont),
     Config->Uefi.Output.IgnoreTextInGraphics,
     Config->Uefi.Output.SanitiseClearScreen,
     Config->Uefi.Output.ClearScreenOnModeSwitch,

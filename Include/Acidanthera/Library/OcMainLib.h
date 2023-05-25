@@ -279,11 +279,13 @@ OcLoadUefiInputSupport (
 /**
   Load UEFI output compatibility support.
 
+  @param[in]  Storage   OpenCore storage.
   @param[out] Config    OpenCore configuration.
 **/
 VOID
 OcLoadUefiOutputSupport (
-  IN OC_GLOBAL_CONFIG  *Config
+  IN OC_STORAGE_CONTEXT  *Storage,
+  IN OC_GLOBAL_CONFIG    *Config
   );
 
 /**

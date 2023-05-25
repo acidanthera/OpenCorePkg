@@ -24,6 +24,7 @@
 #include <Library/BaseLib.h>
 #include <Library/DebugLib.h>
 #include <Library/MemoryAllocationLib.h>
+#include <Library/OcBootManagementLib.h>
 #include <Library/OcConsoleLib.h>
 #include <Library/OcMiscLib.h>
 #include <Library/UefiBootServicesTableLib.h>
@@ -388,6 +389,8 @@ VOID
 OcSetupConsole (
   IN EFI_CONSOLE_CONTROL_SCREEN_MODE  InitialMode,
   IN OC_CONSOLE_RENDERER              Renderer,
+  IN OC_STORAGE_CONTEXT               *Storage  OPTIONAL,
+  IN CONST CHAR8                      *Font     OPTIONAL,
   IN BOOLEAN                          IgnoreTextOutput,
   IN BOOLEAN                          SanitiseClearScreen,
   IN BOOLEAN                          ClearScreenOnModeSwitch,
@@ -401,9 +404,9 @@ OcSetupConsole (
   }
 
   if (Renderer == OcConsoleRendererBuiltinGraphics) {
-    OcUseBuiltinTextOutput (InitialMode, EfiConsoleControlScreenGraphics, Width, Height);
+    OcUseBuiltinTextOutput (InitialMode, Storage, Font, EfiConsoleControlScreenGraphics, Width, Height);
   } else if (Renderer == OcConsoleRendererBuiltinText) {
-    OcUseBuiltinTextOutput (InitialMode, EfiConsoleControlScreenText, Width, Height);
+    OcUseBuiltinTextOutput (InitialMode, Storage, Font, EfiConsoleControlScreenText, Width, Height);
   } else {
     OcUseSystemTextOutput (
       InitialMode,
