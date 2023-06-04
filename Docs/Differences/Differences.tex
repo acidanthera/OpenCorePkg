@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
-%DIF DEL PreviousConfiguration.tex   Wed May 10 20:45:31 2023
-%DIF ADD ../Configuration.tex        Sat May 20 08:58:22 2023
+%DIF DEL PreviousConfiguration.tex   Sun Jun  4 23:24:47 2023
+%DIF ADD ../Configuration.tex        Sun Jun  4 23:24:47 2023
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -7160,7 +7160,8 @@ the driver within the \texttt{UEFI/Drivers} section:
   be reversed on exit in order to avoid breaking sound in Windows or Linux. If so, this flag should
   be added to AudioDxe driver arguments.
   Not enabled by default, since restoring the flag can prevent sound from working in macOS on
-  some other systems\DIFaddbegin \DIFadd{. }\medskip
+  some other systems. \medskip
+\DIFaddbegin 
 
 	\item \texttt{\DIFadd{-}{}\DIFadd{-use-conn-none}} \DIFadd{- Boolean flag, enabled if present. }\medskip
 
@@ -7169,9 +7170,9 @@ the driver within the \texttt{UEFI/Drivers} section:
   }\medskip
 
   \emph{\DIFadd{Note}}\DIFadd{: Enabling this option may increase the available channels, in which case any
-  custom setting of }\texttt{\DIFadd{AudioOutMask}} \DIFadd{may need to be changed to match the new channel list}\DIFaddend .
-  \medskip
-\end{itemize}
+  custom setting of }\texttt{\DIFadd{AudioOutMask}} \DIFadd{may need to be changed to match the new channel list.
+  }\medskip
+\DIFaddend \end{itemize}
 
 \subsection{OpenVariableRuntimeDxe}\label{emunvram}
 
@@ -8693,7 +8694,17 @@ for additional options.
   \textbf{Failsafe}: \texttt{false}\\
   \textbf{Description}: Replaces the OS Info protocol with a builtin
   version. This protocol is typically used by the firmware and other
-  applications to receive notifications from the macOS bootloader.
+  applications to receive notifications from the macOS bootloader\DIFaddbegin \DIFadd{.
+}
+
+\item
+  \texttt{\DIFadd{PciIo}}\\
+  \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ boolean}}\\
+  \textbf{\DIFadd{Failsafe}}\DIFadd{: }\texttt{\DIFadd{false}}\\
+  \textbf{\DIFadd{Description}}\DIFadd{: Replaces functions in CpuIo and PciRootBridgeIo with
+  64-bit MMIO compatible ones to fix }\texttt{\DIFadd{Invalid Parameter}} \DIFadd{when using 4G Decoding.
+  This affects UEFI drivers such as }\texttt{\DIFadd{AudioDxe}} \DIFadd{which access 64-bit MMIO devices.
+  Platforms earlier than APTIO V (Haswell and older) are typically affected}\DIFaddend .
 
 \item
   \texttt{UnicodeCollation}\\
