@@ -725,6 +725,7 @@ OC_DECLARE (OC_UEFI_OUTPUT)
   _(BOOLEAN                     , FirmwareVolume              ,     , FALSE  , ()) \
   _(BOOLEAN                     , HashServices                ,     , FALSE  , ()) \
   _(BOOLEAN                     , OSInfo                      ,     , FALSE  , ()) \
+  _(BOOLEAN                     , PciIo                       ,     , FALSE  , ()) \
   _(BOOLEAN                     , UnicodeCollation            ,     , FALSE  , ())
 OC_DECLARE (OC_UEFI_PROTOCOL_OVERRIDES)
 

@@ -8633,6 +8633,15 @@ for additional options.
   applications to receive notifications from the macOS bootloader.
 
 \item
+  \texttt{PciIo}\\
+  \textbf{Type}: \texttt{plist\ boolean}\\
+  \textbf{Failsafe}: \texttt{false}\\
+  \textbf{Description}: Replaces functions in CpuIo and PciRootBridgeIo with
+  64-bit MMIO compatible ones to fix \texttt{Invalid Parameter} when using 4G Decoding.
+  This affects UEFI drivers such as \texttt{AudioDxe} which access 64-bit MMIO devices.
+  Platforms earlier than APTIO V (Haswell and older) are typically affected.
+
+\item
   \texttt{UnicodeCollation}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
