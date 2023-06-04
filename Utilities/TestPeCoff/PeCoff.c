@@ -133,13 +133,20 @@ LoadConfig (
   IN  UINTN        Size
   )
 {
-  UINT32  Off;
+  UINT32  ConfigSize;
   UINT32  LastByte;
 
   mHashDependency = 0;
   mHashIndex      = 0;
-  Off             = sizeof (UINT8);
-  LastByte        = Data[Size - Off];
+
+  ConfigSize = 0;
+
+  if (Size - ConfigSize >= sizeof (UINT8)) {
+    ConfigSize += sizeof (UINT8);
+    LastByte    = Data[Size - ConfigSize];
+  } else {
+    LastByte = MAX_UINT8;
+  }
 
   PcdGetBool (PcdImageLoaderRtRelocAllowTargetMismatch) = (LastByte & 1U) != 0;
   PcdGetBool (PcdImageLoaderHashProhibitOverlap)        = (LastByte & 2U) != 0;
@@ -148,41 +155,29 @@ LoadConfig (
   PcdGetBool (PcdImageLoaderAllowMisalignedOffset)      = (LastByte & 16U) != 0;
   PcdGetBool (PcdImageLoaderRemoveXForWX)               = (LastByte & 32U) != 0;
 
-  Off += sizeof (UINT32);
-  if (Size >= Off) {
-    CopyMem (&LastByte, &Data[Size - Off], sizeof (UINT32));
+  if (Size - ConfigSize >= sizeof (UINT32)) {
+    ConfigSize += sizeof (UINT32);
+    CopyMem (&LastByte, &Data[Size - ConfigSize], sizeof (UINT32));
   } else {
     LastByte = MAX_UINT32;
   }
 
   PcdGet32 (PcdImageLoaderAlignmentPolicy) = LastByte;
 
-  Off += sizeof (UINT32);
-  if (Size >= Off) {
-    CopyMem (&LastByte, &Data[Size - Off], sizeof (UINT32));
+  if (Size - ConfigSize >= sizeof (UINT32)) {
+    ConfigSize += sizeof (UINT32);
+    CopyMem (&LastByte, &Data[Size - ConfigSize], sizeof (UINT32));
   } else {
     LastByte = MAX_UINT32;
   }
 
   PcdGet32 (PcdImageLoaderRelocTypePolicy) = LastByte;
 
-  Off += sizeof (UINT64);
-  if (Size >= Off) {
-    CopyMem (&mPoolAllocationMask, &Data[Size - Off], sizeof (UINT64));
-  } else {
-    mPoolAllocationMask = MAX_UINT64;
-  }
+  ConfigureMemoryAllocations (Data, Size, &ConfigSize);
 
-  Off += sizeof (UINT64);
-  if (Size >= Off) {
-    CopyMem (&mPageAllocationMask, &Data[Size - Off], sizeof (UINT64));
-  } else {
-    mPageAllocationMask = MAX_UINT64;
-  }
-
-  Off += sizeof (UINT64);
-  if (Size >= Off) {
-    CopyMem (&mHashesMask, &Data[Size - Off], sizeof (UINT64));
+  if (Size - ConfigSize >= sizeof (UINT64)) {
+    ConfigSize += sizeof (UINT64);
+    CopyMem (&mHashesMask, &Data[Size - ConfigSize], sizeof (UINT64));
   } else {
     mHashesMask = MAX_UINT64;
   }
