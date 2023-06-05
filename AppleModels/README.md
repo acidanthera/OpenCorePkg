@@ -24,7 +24,7 @@ for generic models and `BridgeOSUpdateCustomer.pkg` for T2 models (the entire re
 is available at [mesu.apple.com](https://mesu.apple.com/assets/bridgeos/com_apple_bridgeOSIPSW/com_apple_bridgeOSIPSW.xml))
 To use them do as follows:
 
-1. Visit suitable update catalogue by filling the OS versions (e.g. [this](https://swscan.apple.com/content/catalogs/others/index-13seed-13-12-10.16-10.15-10.14-10.13-10.12-10.11-10.10-10.9-mountainlion-lion-snowleopard-leopard.merged-1.sucatalog.gz) one for macOS 13 beta).  
+1. Visit suitable update catalogue by filling the OS versions (e.g. [this](https://swscan.apple.com/content/catalogs/others/index-14seed-14-13-12-10.16-10.15-10.14-10.13-10.12-10.11-10.10-10.9-mountainlion-lion-snowleopard-leopard.merged-1.sucatalog.gz) one for macOS 14 beta).  
 Note: This catalogue does not include `FirmwareUpdate.pkg` for macOS 11+. You can extract firmware images for generic models from `Install macOS Big Sur.app` (or newer).
 2. Download most recent `FirmwareUpdate.pkg` and `BridgeOSUpdateCustomer.pkg`.
 3. Extract `scap` and `fd` files from `FirmwareUpdate.pkg` and use them as is.
