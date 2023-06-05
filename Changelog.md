@@ -12,6 +12,7 @@ OpenCore Changelog
 - Added optional `--enable-mouse-click` argument to `CrScreenshotDxe` driver to additionally respond on mouse click
 - Added `--use-conn-none` option to `AudioDxe` driver to discover additional usable output channels on some systems
 - Added `PciIo` protocol override used to fix Aptio IV compatiblity with Above 4G BARs, thx @xCuri0
+- Fixed `AppleXcpmForceBoost` quirk on macOS 14
 
 #### v0.9.2
 - Added `DisableIoMapperMapping` quirk, thx @CaseySJ
