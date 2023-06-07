@@ -95,9 +95,9 @@ Kexts
 | [RTCMemoryFixup.kext](https://github.com/lvs1974/RTCMemoryFixup) | 12.0.0 (10.8) | — | — |
 | [WebCamera.kext](https://www.applelife.ru/threads/asus-x550vc-i-asus-x550cc.41752/page-130#post-593586) | — | — | — |
 | [TOSMotionSensor.kext](https://github.com/jslegendre/TOSMotionSensor) | — | — | — |
-| [FeatureUnlock.kext](https://github.com/acidanthera/FeatureUnlock) | 16.0.0 (10.12) | 22.9.9 (13) | — |
+| [FeatureUnlock.kext](https://github.com/acidanthera/FeatureUnlock) | 16.0.0 (10.12) | 23.9.9 (14) | — |
 | [MacHyperVSupport.kext](https://github.com/acidanthera/MacHyperVSupport) | 8.0.0 (10.4) | 22.9.9 (13) | — |
-| [CryptexFixup.kext](https://github.com/acidanthera/CryptexFixup) | 20.0.0 (11) | 22.9.9 (13) | — |
+| [CryptexFixup.kext](https://github.com/acidanthera/CryptexFixup) | 20.0.0 (11) | 23.9.9 (14) | — |
 
 More complete list with legacy kexts is hosted [here](https://docs.google.com/spreadsheets/d/15S-ocrkm_VTUJpKxNII-YUyQFd5VYdjbe0DHlZVCQyM). Full Lilu plugin list with legacy kexts is hosted [here](https://github.com/acidanthera/Lilu/blob/master/KnownPlugins.md). For developers only.   
 Acidanthera members are not affiliated with the authors of any kernel extensions but ones hosted at https://github.com/acidanthera. This list is provided for information purposes without warranty of any kind.  
