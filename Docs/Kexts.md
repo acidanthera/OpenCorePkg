@@ -19,7 +19,7 @@ Kexts
 | [AirPortAtheros40.kext](https://i.applelife.ru/2018/12/442854_AirPortAtheros40.kext.zip) | 18.0.0 (10.14) | — | From 10.13 |
 | [AirportBrcmFixup.kext](https://github.com/acidanthera/AirportBrcmFixup) | 12.0.0 (10.8) | 22.9.9 (13) | — |
 | [ATH9KFixup.kext](https://github.com/chunnann/ATH9KFixup) | — | — | — |
-| [BrcmPatchRAM](https://github.com/acidanthera/BrcmPatchRAM) | 14.0.0 (10.10) | 22.9.9 (13) | — |
+| [BrcmPatchRAM](https://github.com/acidanthera/BrcmPatchRAM) | 14.0.0 (10.10) | 23.9.9 (14) | — |
 | [IntelBluetoothFirmware](https://github.com/zxystd/IntelBluetoothFirmware) | — | — | — |
 | [MT7610](https://d86o2zu8ugzlg.cloudfront.net/mediatek-craft/drivers/MT7612_7610U_D5.0.1.25_SDK1.0.2.18_UI5.0.0.27_20151209.zip) | — | — | — |
 | [RT5370](https://d86o2zu8ugzlg.cloudfront.net/mediatek-craft/drivers/RTUSB_D2870-4.2.9.2_UI-4.0.9.6_2013_11_29.zip) | — | — | — |
@@ -44,7 +44,7 @@ Kexts
 | Video and audio | MinKernel (Min macOS) | MaxKernel (Max macOS) | Note |
 |-----------------|-----------------------|-----------------------|------|
 | [AppleALC.kext](https://github.com/acidanthera/AppleALC) | 8.0.0 (10.4) | 23.9.9 (14) | — |
-| [AppleALCU.kext](https://github.com/acidanthera/AppleALC) | 8.0.0 (10.4) | — | — |
+| [AppleALCU.kext](https://github.com/acidanthera/AppleALC) | 8.0.0 (10.4) | 23.9.9 (14) | — |
 | [EMUUSBAudio.kext](https://github.com/Wouter1/EMU-driver) | — | — | — |
 | [kXAudioDriver.kext](https://github.com/kxproject/kx-audio-driver) | — | — | — |
 | [Nvidia CUDA drivers](https://www.nvidia.com/object/mac-driver-archive.html) | 10.0.0 (10.6) | 17.9.9 (10.13) | — |
@@ -96,7 +96,7 @@ Kexts
 | [WebCamera.kext](https://www.applelife.ru/threads/asus-x550vc-i-asus-x550cc.41752/page-130#post-593586) | — | — | — |
 | [TOSMotionSensor.kext](https://github.com/jslegendre/TOSMotionSensor) | — | — | — |
 | [FeatureUnlock.kext](https://github.com/acidanthera/FeatureUnlock) | 16.0.0 (10.12) | 23.9.9 (14) | — |
-| [MacHyperVSupport.kext](https://github.com/acidanthera/MacHyperVSupport) | 8.0.0 (10.4) | 22.9.9 (13) | — |
+| [MacHyperVSupport.kext](https://github.com/acidanthera/MacHyperVSupport) | 8.0.0 (10.4) | 23.9.9 (14) | — |
 | [CryptexFixup.kext](https://github.com/acidanthera/CryptexFixup) | 20.0.0 (11) | 23.9.9 (14) | — |
 
 More complete list with legacy kexts is hosted [here](https://docs.google.com/spreadsheets/d/15S-ocrkm_VTUJpKxNII-YUyQFd5VYdjbe0DHlZVCQyM). Full Lilu plugin list with legacy kexts is hosted [here](https://github.com/acidanthera/Lilu/blob/master/KnownPlugins.md). For developers only.   
