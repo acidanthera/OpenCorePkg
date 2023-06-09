@@ -88,8 +88,8 @@ Kexts
 | Other kexts | MinKernel (Min macOS) | MaxKernel (Max macOS) | Note |
 |-------------|-----------------------|-----------------------|------|
 | [AppleIntelInfo.kext](https://github.com/headkaze/AppleIntelInfo) | — | — | — |
-| [DebugEnhancer.kext](https://github.com/acidanthera/DebugEnhancer) | 12.0.0 (10.8) | 22.9.9 (13) | — |
-| [HibernationFixup.kext](https://github.com/acidanthera/HibernationFixup) | 12.0.0 (10.8) | 22.9.9 (13) | — |
+| [DebugEnhancer.kext](https://github.com/acidanthera/DebugEnhancer) | 12.0.0 (10.8) | 23.9.9 (14) | — |
+| [HibernationFixup.kext](https://github.com/acidanthera/HibernationFixup) | 12.0.0 (10.8) | 23.9.9 (14) | — |
 | [Lilu.kext](https://github.com/acidanthera/Lilu) | 8.0.0 (10.4) | 23.9.9 (14) | — |
 | [RestrictEvents.kext](https://github.com/acidanthera/RestrictEvents) | 12.0.0 (10.8) | 23.9.9 (14) | — |
 | [RTCMemoryFixup.kext](https://github.com/lvs1974/RTCMemoryFixup) | 12.0.0 (10.8) | — | — |
