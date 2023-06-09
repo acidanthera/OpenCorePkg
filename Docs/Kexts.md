@@ -64,7 +64,7 @@ Kexts
 | [telemetrap.kext](https://forums.macrumors.com/posts/28447707) | 18.0.0 (10.14) | — | — |
 | [TSCAdjustReset.kext](https://github.com/interferenc/TSCAdjustReset) | — | — | — |
 | [VoodooTSCSync.kext](https://github.com/RehabMan/VoodooTSCSync) | — | — | — |
-| [CpuTscSync.kext](https://github.com/acidanthera/CpuTscSync) | 12.0.0 (10.8) | 22.9.9 (13) | — |
+| [CpuTscSync.kext](https://github.com/acidanthera/CpuTscSync) | 12.0.0 (10.8) | 23.9.9 (14) | — |
 | [VirtualSMC.kext](https://github.com/acidanthera/VirtualSMC) | 8.0.0 (10.4) | 23.9.9 (14) | — |
 | [SMCLightSensor.kext](https://github.com/acidanthera/VirtualSMC) | 10.0.0 (10.6) | — | Not tested 10.6 and 10.7 |
 | [SMCSuperIO.kext](https://github.com/acidanthera/VirtualSMC) | 10.0.0 (10.6) | — | Not tested 10.6 and 10.7 |
