@@ -13,6 +13,7 @@ OpenCore Changelog
 - Added `--use-conn-none` option to `AudioDxe` driver to discover additional usable output channels on some systems
 - Added `PciIo` protocol override used to fix Aptio IV compatiblity with Above 4G BARs, thx @xCuri0
 - Fixed `AppleXcpmForceBoost` quirk on macOS 14
+- Updated builtin firmware versions for SMBIOS and the rest
 
 #### v0.9.2
 - Added `DisableIoMapperMapping` quirk, thx @CaseySJ
