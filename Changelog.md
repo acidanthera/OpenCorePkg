@@ -15,6 +15,7 @@ OpenCore Changelog
 - Fixed `AppleXcpmForceBoost` quirk on macOS 14
 - Updated builtin firmware versions for SMBIOS and the rest
 - Added `ConsoleFont` option to load custom console font for `Builtin` renderer
+- Improved `XhciPortLimit` quirk on macOS 11 to 14
 
 #### v0.9.2
 - Added `DisableIoMapperMapping` quirk, thx @CaseySJ
