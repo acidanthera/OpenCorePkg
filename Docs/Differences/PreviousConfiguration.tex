@@ -94,7 +94,7 @@
 
        \vspace{0.2in}
 
-       Reference Manual (0.9.2)
+       Reference Manual (0.9.3)
 
        \vspace{0.2in}
 
@@ -2668,10 +2668,14 @@ Kernel and kext changes apply with the following effective order:
   \textbf{Requirement}: 13.3 (not required for older)\\
   \textbf{Description}: Disables mapping PCI bridge device memory in IOMMU (VT-d).
 
-  \emph{Note 1}: This option resolves compatibility issues with Wi-Fi, Ethernet and
+  This option resolves compatibility issues with Wi-Fi, Ethernet and
   Thunderbolt devices when AppleVTD is enabled on systems where the native DMAR table
-  contains one or more Reserved Memory Regions and iGPU is enabled and more than
-  16 GB memory is installed.
+  contains one or more Reserved Memory Regions and more than 16 GB memory is installed.
+  On some systems, this quirk is only needed when iGPU is enabled.
+
+  \emph{Note 1}: This quirk requires a native DMAR table that does not contain Reserved Memory
+  Regions or a substitute SSDT-DMAR.aml in which Reserved Memory Regions
+  have been removed.
 
   \emph{Note 2}: This option is not needed on AMD systems.
 
@@ -6386,6 +6390,9 @@ even cause permanent firmware damage. Some of the known drivers are listed below
 \href{https://github.com/acidanthera/OpenCorePkg}{\texttt{CrScreenshotDxe}}\textbf{*}
 & Screenshot making driver saving images to the root of OpenCore partition (ESP) or
   any available writeable filesystem upon pressing \texttt{F10}.
+  Accepts optional driver argument \texttt{-{}-enable-mouse-click} to additionally take
+  screenshot on mouse click. (It is recommended to enable this option only if a keypress
+  would prevent a specific screenshot, and disable it again after use.)
   This is a modified version of \href{https://github.com/LongSoft/CrScreenshotDxe}{\texttt{CrScreenshotDxe}}
   driver by \href{https://github.com/NikolajSchlej}{Nikolaj Schlej}. \\
 \href{https://github.com/acidanthera/OpenCorePkg}{\texttt{EnableGop\{Direct\}}}\textbf{*}
@@ -6522,6 +6529,8 @@ Some of the known tools are listed below (builtin tools are marked with \textbf{
 & Reset NVRAM alternative bundled as a standalone tool. \\
 \href{https://github.com/acidanthera/OpenCorePkg}{\texttt{CsrUtil}}\textbf{*}
 & Simple implementation of SIP-related features of Apple \texttt{csrutil}. \\
+\href{https://github.com/acidanthera/OpenCorePkg}{\texttt{FontTester}}\textbf{*}
+& Render the console font pages which the \texttt{Builtin} renderer provides. \\
 \href{https://github.com/acidanthera/OpenCorePkg}{\texttt{GopStop}}\textbf{*}
 & Test GraphicsOutput protocol with a
   \href{https://github.com/acidanthera/OpenCorePkg/tree/master/Application/GopStop}{simple scenario}. \\
@@ -7015,6 +7024,11 @@ the driver within the \texttt{UEFI/Drivers} section:
   will be achieved by using \texttt{Audio} section \texttt{SetupDelay} if any audio setup delay
   is required. Where required, values of up to one second may be needed. \medskip
 
+  \item \texttt{-{}-force-codec} - Integer value, no default. \medskip
+
+  Force use of an audio codec, this value should be equal to \texttt{Audio} section \texttt{AudioCodec}.
+  Can result in faster boot especially when used in conjuction with \texttt{-{}-force-device}. \medskip
+
 	\item \texttt{-{}-force-device} - String value, no default. \medskip
 
   When this option is present and has a value (e.g. \texttt{-{}-force-device=PciRoot(0x0)/Pci(0x1f,0x3)}), it
@@ -7084,6 +7098,16 @@ the driver within the \texttt{UEFI/Drivers} section:
   be added to AudioDxe driver arguments.
   Not enabled by default, since restoring the flag can prevent sound from working in macOS on
   some other systems. \medskip
+
+	\item \texttt{-{}-use-conn-none} - Boolean flag, enabled if present. \medskip
+
+  On some sound cards enabling this option will enable additional usable audio channels (e.g.
+  the bass or treble speaker of a pair, where only one is found without it).
+  \medskip
+  
+  \emph{Note}: Enabling this option may increase the available channels, in which case any
+  custom setting of \texttt{AudioOutMask} may need to be changed to match the new channel list.
+  \medskip
 \end{itemize}
 
 \subsection{OpenVariableRuntimeDxe}\label{emunvram}
@@ -8201,6 +8225,42 @@ for additional options.
   \href{https://github.com/acidanthera/bugtracker/issues/1280}{firmware upgrades}.
 
 \item
+  \texttt{ConsoleFont}\\
+  \textbf{Type}: \texttt{plist\ string}\\
+  \textbf{Failsafe}: Empty (use OpenCore builtin console font)\\
+  \textbf{Description}: Specify the console font to use for OpenCore \texttt{Builtin} text renderer.
+
+  The font file must be located in \texttt{EFI/OC/Resources/Font/\{font-name\}.hex} and must
+  be 8x16 resolution. Various console fonts can be found online in either \texttt{.bdf} or
+  \texttt{.hex} format. \texttt{.bdf} can be converted to \texttt{.hex} format using \texttt{gbdfed}
+  (available for Linux or macOS).
+
+  There is often no need to change console font, the main use-case being to
+  provide an extended character set for those relatively rare EFI applications which
+  have multi-lingual support (e.g. \texttt{memtest86}).
+
+  The \href{https://github.com/acidanthera/OcBinaryData}{OcBinaryData repository} includes:
+  \begin{itemize}
+    \tightlist
+    \item \href{https://terminus-font.sourceforge.net/}{Terminus} --- A font with extensive character
+    support suitable for applications such as the above.
+    \item TerminusCore --- A lightly modified version of the Terminus font, making some glyphs
+    (\texttt{@KMRSTVWimrsw}) more similar to the free ISO Latin font used in XNU and OpenCore.
+  \end{itemize}
+
+  \texttt{Terminus} and \texttt{TerminusCore} are provided under the SIL Open Font License, Version 1.1.
+  Some additional GPL licensed fonts from the EPTO Fonts library, converted
+  to the required \texttt{.hex} format, can be found \href{https://github.com/mikebeaton/epto-fonts}{here}.
+
+  \emph{Note 1}: On many newer systems the \texttt{System} text renderer already provides a full
+  set of international characters, in which case this can be used without requiring the \texttt{Builtin}
+  renderer and a custom font.
+
+  \emph{Note 2}: This option only affects the \texttt{Builtin} text renderer and only takes effect from
+  the point at which the \texttt{Builtin} renderer is configured. When console output is visible before
+  this point, it is using the system console font.
+
+\item
   \texttt{ConsoleMode}\\
   \textbf{Type}: \texttt{plist\ string}\\
   \textbf{Failsafe}: Empty (Maintain current console mode)\\
@@ -8607,6 +8667,15 @@ for additional options.
   \textbf{Description}: Replaces the OS Info protocol with a builtin
   version. This protocol is typically used by the firmware and other
   applications to receive notifications from the macOS bootloader.
+
+\item
+  \texttt{PciIo}\\
+  \textbf{Type}: \texttt{plist\ boolean}\\
+  \textbf{Failsafe}: \texttt{false}\\
+  \textbf{Description}: Replaces functions in CpuIo and PciRootBridgeIo with
+  64-bit MMIO compatible ones to fix \texttt{Invalid Parameter} when using 4G Decoding.
+  This affects UEFI drivers such as \texttt{AudioDxe} which access 64-bit MMIO devices.
+  Platforms earlier than APTIO V (Haswell and older) are typically affected.
 
 \item
   \texttt{UnicodeCollation}\\
