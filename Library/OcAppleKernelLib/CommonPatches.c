@@ -739,6 +739,14 @@ PatchUsbXhciPortLimit1 (
     DEBUG ((DEBUG_INFO, "OCAK: [OK] Patch success port com.apple.iokit.IOUSBHostFamily part 1\n"));
   }
 
+  //
+  // The following patch is only needed on macOS 11.1 (Darwin 20.2.0) and above; skip it otherwise.
+  //
+  if (!OcMatchDarwinVersion (KernelVersion, KERNEL_VERSION (KERNEL_VERSION_BIG_SUR, 2, 0), 0)) {
+    DEBUG ((DEBUG_INFO, "OCAK: [OK] Skipping port patch com.apple.iokit.IOUSBHostFamily part 2 on %u\n", KernelVersion));
+    return Status;
+  }
+
   Status = PatcherApplyGenericPatch (Patcher, &mRemoveUsbLimitIoP1Patch2);
   if (EFI_ERROR (Status)) {
     DEBUG ((DEBUG_INFO, "OCAK: [FAIL] Failed to apply port patch com.apple.iokit.IOUSBHostFamily part 2 - %r\n", Status));
