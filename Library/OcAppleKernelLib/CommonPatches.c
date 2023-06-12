@@ -645,26 +645,65 @@ PATCHER_GENERIC_PATCH
 
 STATIC
 CONST UINT8
-  mRemoveUsbLimitIoP1Find[] = {
+  mRemoveUsbLimitIoP1Find1[] = {
   0x0F, 0x0F, 0x87
 };
 
 STATIC
 CONST UINT8
-  mRemoveUsbLimitIoP1Replace[] = {
+  mRemoveUsbLimitIoP1Replace1[] = {
   0x40, 0x0F, 0x87
 };
 
 STATIC
 PATCHER_GENERIC_PATCH
-  mRemoveUsbLimitIoP1Patch = {
-  .Comment     = DEBUG_POINTER ("RemoveUsbLimitIoP1"),
+  mRemoveUsbLimitIoP1Patch1 = {
+  .Comment     = DEBUG_POINTER ("RemoveUsbLimitIoP1 part 1"),
   .Base        = "__ZN16AppleUSBHostPort15setPortLocationEj",
-  .Find        = mRemoveUsbLimitIoP1Find,
+  .Find        = mRemoveUsbLimitIoP1Find1,
   .Mask        = NULL,
-  .Replace     = mRemoveUsbLimitIoP1Replace,
+  .Replace     = mRemoveUsbLimitIoP1Replace1,
   .ReplaceMask = NULL,
-  .Size        = sizeof (mRemoveUsbLimitIoP1Replace),
+  .Size        = sizeof (mRemoveUsbLimitIoP1Replace1),
+  .Count       = 1,
+  .Skip        = 0,
+  .Limit       = 4096
+};
+
+STATIC
+CONST UINT8
+  mRemoveUsbLimitIoP1Find2[] = {
+  0x41, 0x83, 0x00, 0x0F,  ///< and whatever, 0x0Fh
+  0x41, 0xD3, 0x00,        ///< shl whatever, cl
+  0x00, 0x09, 0x00         ///< or ebx, whatever
+};
+
+STATIC
+CONST UINT8
+  mRemoveUsbLimitIoP1Replace2[] = {
+  0x41, 0x83, 0x00, 0x3F,  ///< and whatever, 0x3Fh
+  0x41, 0xD3, 0x00,        ///< shl whatever, cl
+  0x00, 0x09, 0x00         ///< or ebx, whatever
+};
+
+STATIC
+CONST UINT8
+  mRemoveUsbLimitIoP1Mask2[] = {
+  0xFF, 0xFF, 0x00, 0xFF,
+  0xFF, 0xFF, 0x00,
+  0x00, 0xFF, 0x00
+};
+
+STATIC
+PATCHER_GENERIC_PATCH
+  mRemoveUsbLimitIoP1Patch2 = {
+  .Comment     = DEBUG_POINTER ("RemoveUsbLimitIoP1 part 2"),
+  .Base        = "__ZN16AppleUSBHostPort15setPortLocationEj",
+  .Find        = mRemoveUsbLimitIoP1Find2,
+  .Mask        = mRemoveUsbLimitIoP1Mask2,
+  .Replace     = mRemoveUsbLimitIoP1Replace2,
+  .ReplaceMask = mRemoveUsbLimitIoP1Mask2,
+  .Size        = sizeof (mRemoveUsbLimitIoP1Replace2),
   .Count       = 1,
   .Skip        = 0,
   .Limit       = 4096
@@ -693,11 +732,26 @@ PatchUsbXhciPortLimit1 (
     return EFI_NOT_FOUND;
   }
 
-  Status = PatcherApplyGenericPatch (Patcher, &mRemoveUsbLimitIoP1Patch);
+  Status = PatcherApplyGenericPatch (Patcher, &mRemoveUsbLimitIoP1Patch1);
   if (EFI_ERROR (Status)) {
-    DEBUG ((DEBUG_INFO, "OCAK: [FAIL] Failed to apply port patch com.apple.iokit.IOUSBHostFamily - %r\n", Status));
+    DEBUG ((DEBUG_INFO, "OCAK: [FAIL] Failed to apply port patch com.apple.iokit.IOUSBHostFamily part 1 - %r\n", Status));
   } else {
-    DEBUG ((DEBUG_INFO, "OCAK: [OK] Patch success port com.apple.iokit.IOUSBHostFamily\n"));
+    DEBUG ((DEBUG_INFO, "OCAK: [OK] Patch success port com.apple.iokit.IOUSBHostFamily part 1\n"));
+  }
+
+  //
+  // The following patch is only needed on macOS 11.1 (Darwin 20.2.0) and above; skip it otherwise.
+  //
+  if (!OcMatchDarwinVersion (KernelVersion, KERNEL_VERSION (KERNEL_VERSION_BIG_SUR, 2, 0), 0)) {
+    DEBUG ((DEBUG_INFO, "OCAK: [OK] Skipping port patch com.apple.iokit.IOUSBHostFamily part 2 on %u\n", KernelVersion));
+    return Status;
+  }
+
+  Status = PatcherApplyGenericPatch (Patcher, &mRemoveUsbLimitIoP1Patch2);
+  if (EFI_ERROR (Status)) {
+    DEBUG ((DEBUG_INFO, "OCAK: [FAIL] Failed to apply port patch com.apple.iokit.IOUSBHostFamily part 2 - %r\n", Status));
+  } else {
+    DEBUG ((DEBUG_INFO, "OCAK: [OK] Patch success port com.apple.iokit.IOUSBHostFamily part 2\n"));
   }
 
   return Status;
