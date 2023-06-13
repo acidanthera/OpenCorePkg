@@ -231,6 +231,10 @@ InternalAllocatePagesAlign (
     // Check that we have not gone beyond the single allocation size limit
     //
     if (RequestedAllocationSize <= mPoolAllocationSizeLimit) {
+      if (Alignment < EFI_PAGE_SIZE) {
+        Alignment = EFI_PAGE_SIZE;
+      }
+
  #ifdef _WIN32
       Buffer = _aligned_malloc (RequestedAllocationSize, Alignment);
  #else // !_WIN32
