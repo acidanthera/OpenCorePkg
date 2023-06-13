@@ -27,7 +27,7 @@ imgbuild() {
 
   echo "Generating Loader Image..."
 
-  ImageTool GenImage -b 0x10000 -o "${BUILD_DIR_ARCH}/EfiLoaderRebased.efi" "${BUILD_DIR_ARCH}/EfiLoader.efi" || exit 1
+  ImageTool GenImage -c PE -x -b 0x10000 -o "${BUILD_DIR_ARCH}/EfiLoaderRebased.efi" "${BUILD_DIR_ARCH}/EfiLoader.efi" || exit 1
 
   "${FV_TOOLS}/EfiLdrImage" -o "${BUILD_DIR}/FV/Efildr${arch}" \
     "${BUILD_DIR_ARCH}/EfiLoaderRebased.efi" "${BUILD_DIR}/FV/DxeIpl${arch}.z" \
