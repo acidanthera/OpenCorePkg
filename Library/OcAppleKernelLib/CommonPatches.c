@@ -680,18 +680,26 @@ CONST UINT8
 
 STATIC
 CONST UINT8
-  mRemoveUsbLimitIoP1Replace2[] = {
-  0x41, 0x83, 0x00, 0x3F,  ///< and whatever, 0x3Fh
-  0x41, 0xD3, 0x00,        ///< shl whatever, cl
-  0x00, 0x09, 0x00         ///< or ebx, whatever
-};
-
-STATIC
-CONST UINT8
   mRemoveUsbLimitIoP1Mask2[] = {
   0xFF, 0xFF, 0x00, 0xFF,
   0xFF, 0xFF, 0x00,
   0x00, 0xFF, 0x00
+};
+
+STATIC
+CONST UINT8
+  mRemoveUsbLimitIoP1Replace2[] = {
+  0x00, 0x00, 0x00, 0x3F,
+  0x00, 0x00, 0x00,
+  0x00, 0x00, 0x00
+};
+
+STATIC
+CONST UINT8
+  mRemoveUsbLimitIoP1ReplaceMask2[] = {
+  0x00, 0x00, 0x00, 0xFF,
+  0x00, 0x00, 0x00,
+  0x00, 0x00, 0x00
 };
 
 STATIC
@@ -702,7 +710,7 @@ PATCHER_GENERIC_PATCH
   .Find        = mRemoveUsbLimitIoP1Find2,
   .Mask        = mRemoveUsbLimitIoP1Mask2,
   .Replace     = mRemoveUsbLimitIoP1Replace2,
-  .ReplaceMask = mRemoveUsbLimitIoP1Mask2,
+  .ReplaceMask = mRemoveUsbLimitIoP1ReplaceMask2,
   .Size        = sizeof (mRemoveUsbLimitIoP1Replace2),
   .Count       = 1,
   .Skip        = 0,
