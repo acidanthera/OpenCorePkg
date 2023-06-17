@@ -442,10 +442,11 @@ PatcherExcludePrelinkedKext (
   // Get file offset for 32-bit.
   //
   if (PatcherContext->Is32Bit) {
-    if (!GetTextBaseOffset(&PatcherContext->MachContext, &VirtualAddress, &FileOffset)) {
+    if (!GetTextBaseOffset (&PatcherContext->MachContext, &VirtualAddress, &FileOffset)) {
       return EFI_UNSUPPORTED;
     }
     VirtualAddress += FileOffset;
+
   } else {
     VirtualAddress = PatcherContext->VirtualBase;
   }
