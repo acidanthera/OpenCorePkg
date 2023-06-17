@@ -445,8 +445,8 @@ PatcherExcludePrelinkedKext (
     if (!GetTextBaseOffset (&PatcherContext->MachContext, &VirtualAddress, &FileOffset)) {
       return EFI_UNSUPPORTED;
     }
-    VirtualAddress += FileOffset;
 
+    VirtualAddress += FileOffset;
   } else {
     VirtualAddress = PatcherContext->VirtualBase;
   }
