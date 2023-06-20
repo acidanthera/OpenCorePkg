@@ -200,7 +200,8 @@ STATIC
 INTERNAL_ENTRY_VISIBILITY
 ReadEntryVisibility (
   IN EFI_DEVICE_PATH_PROTOCOL  *DevicePath,
-  IN BOOLEAN                   IsFolder
+  IN BOOLEAN                   IsFolder,
+  IN CONST CHAR8               *InstanceName
   )
 {
   EFI_STATUS                       Status;
@@ -211,8 +212,12 @@ ReadEntryVisibility (
   UINTN                            VisibilityPathSize;
   CHAR16                           *VisibilityPath;
   CHAR16                           *VisibilityTerminator;
+  BOOLEAN                          VisibilityFlag;
+  BOOLEAN                          CheckQualifiers;
+  BOOLEAN                          QualifiedVisibility;
   BOOLEAN                          Result;
   CHAR8                            *Visibility;
+  CHAR8                            QualifierString[OC_MAX_INSTANCE_IDENTIFIER_SIZE];
 
   Status = gBS->LocateDevicePath (
                   &gEfiSimpleFileSystemProtocolGuid,
@@ -275,12 +280,21 @@ ReadEntryVisibility (
     }
   }
 
-  CopyMem (VisibilityTerminator, L".contentVisibility", sizeof (L".contentVisibility"));
+  CopyMem (
+    VisibilityTerminator,
+    L".contentVisibility",
+    sizeof (L".contentVisibility")
+    );
 
   //
   // Note, this guarantees nul-termination.
   //
-  Visibility = OcReadFile (FileSystem, VisibilityPath, NULL, 64);
+  Visibility = OcReadFile (
+                 FileSystem,
+                 VisibilityPath,
+                 NULL,
+                 OC_MAX_VISIBILITY_INSTRUCTION_SIZE
+                 );
 
   FreePool (VisibilityPath);
 
@@ -288,19 +302,106 @@ ReadEntryVisibility (
     return BootEntryNormal;
   }
 
+  //
+  // Handle Visibility qualification presence/absence.
+  //
+  if (AsciiStrStr (Visibility, "~") == NULL) {
+    QualifiedVisibility = FALSE;
+    CheckQualifiers     = FALSE;
+  } else {
+    CheckQualifiers = TRUE;
+
+    AsciiSPrint (
+      QualifierString,
+      sizeof (QualifierString),
+      "~%a~",
+      InstanceName
+      );
+
+    if (AsciiStrStr (Visibility, QualifierString) != NULL) {
+      QualifiedVisibility = TRUE;
+    } else {
+      QualifiedVisibility = FALSE;
+    }
+  }
+
+  VisibilityFlag = FALSE;
+
+  //
+  // Handle 'Disabled' instruction.
+  //
   if (AsciiStrnCmp (Visibility, "Disabled", L_STR_LEN ("Disabled")) == 0) {
-    FreePool (Visibility);
-    return BootEntryDisabled;
+    //
+    // Check absolute content if content qualification is absent.
+    //
+    if (!CheckQualifiers) {
+      VisibilityFlag = TRUE;
+      DEBUG ((
+        DEBUG_INFO,
+        "OCB: Found .contentVisibility with instruction:- 'Disabled'\n"
+        ));
+    }
+
+    //
+    // Check for qualified contents if absolute contents were not
+    // previously found and content qualification is present.
+    //
+    if (!VisibilityFlag && CheckQualifiers && QualifiedVisibility) {
+      VisibilityFlag = TRUE;
+      DEBUG ((
+        DEBUG_INFO,
+        "OCB: Found .contentVisibility with instruction:- 'Disabled ... %a'\n",
+        InstanceName
+        ));
+    }
+
+    if (VisibilityFlag) {
+      FreePool (Visibility);
+
+      return BootEntryDisabled;
+    }
   }
 
+  //
+  // Handle 'Auxiliary' instruction.
+  //
   if (AsciiStrnCmp (Visibility, "Auxiliary", L_STR_LEN ("Auxiliary")) == 0) {
-    FreePool (Visibility);
-    return BootEntryAuxiliary;
+    //
+    // Check absolute content if content qualification is absent.
+    //
+    if (!CheckQualifiers) {
+      VisibilityFlag = TRUE;
+      DEBUG ((
+        DEBUG_INFO,
+        "OCB: Found .contentVisibility with instruction:- 'Auxiliary'\n"
+        ));
+    }
+
+    //
+    // Check for qualified contents if absolute contents were not
+    // previously found and content qualification is present.
+    //
+    if (!VisibilityFlag && CheckQualifiers && QualifiedVisibility) {
+      VisibilityFlag = TRUE;
+      DEBUG ((
+        DEBUG_INFO,
+        "OCB: Found .contentVisibility with instruction:- 'Auxiliary ... %a'\n",
+        InstanceName
+        ));
+    }
+
+    if (VisibilityFlag) {
+      FreePool (Visibility);
+
+      return BootEntryAuxiliary;
+    }
   }
 
-  DEBUG ((DEBUG_INFO, "OCB: Discovered unsupported .contentVisibility\n"));
-
+  //
+  // Visibility instruction is not applicable or is not valid.
+  //
   FreePool (Visibility);
+
   return BootEntryNormal;
 }
 
@@ -463,8 +564,13 @@ AddBootEntryOnFileSystem (
   //
   // Do not add recoveries when not requested (e.g. can be HFS+ recovery).
   //
-  if (BootContext->PickerContext->HideAuxiliary && (EntryType == OC_BOOT_APPLE_RECOVERY)) {
-    DEBUG ((DEBUG_INFO, "OCB: Discarding recovery entry due to auxiliary\n"));
+  if (  BootContext->PickerContext->HideAuxiliary
+     && (EntryType == OC_BOOT_APPLE_RECOVERY))
+  {
+    DEBUG ((
+      DEBUG_INFO,
+      "OCB: Discarding recovery entry due to 'Auxiliary' setting\n"
+      ));
     if (IsReallocated) {
       FreePool (DevicePath);
     }
@@ -475,8 +581,13 @@ AddBootEntryOnFileSystem (
   //
   // Do not add Time Machine when not requested.
   //
-  if (BootContext->PickerContext->HideAuxiliary && (EntryType == OC_BOOT_APPLE_TIME_MACHINE)) {
-    DEBUG ((DEBUG_INFO, "OCB: Discarding time machine entry due to auxiliary\n"));
+  if (  BootContext->PickerContext->HideAuxiliary
+     && (EntryType == OC_BOOT_APPLE_TIME_MACHINE))
+  {
+    DEBUG ((
+      DEBUG_INFO,
+      "OCB: Discarding time machine entry due to 'Auxiliary' setting\n"
+      ));
     if (IsReallocated) {
       FreePool (DevicePath);
     }
@@ -487,9 +598,13 @@ AddBootEntryOnFileSystem (
   //
   // Skip disabled entries, like OpenCore bootloader.
   //
-  Visibility = ReadEntryVisibility (DevicePath, IsFolder);
+  Visibility = ReadEntryVisibility (
+                 DevicePath,
+                 IsFolder,
+                 BootContext->PickerContext->InstanceIdentifier
+                 );
   if (Visibility == BootEntryDisabled) {
-    DEBUG ((DEBUG_INFO, "OCB: Discarding disabled entry by visibility\n"));
+    DEBUG ((DEBUG_INFO, "OCB: Entry disabled via .contentVisibility\n"));
     if (IsReallocated) {
       FreePool (DevicePath);
     }
@@ -501,7 +616,7 @@ AddBootEntryOnFileSystem (
   // Skip custom auxiliary entries.
   //
   if ((Visibility == BootEntryAuxiliary) && BootContext->PickerContext->HideAuxiliary) {
-    DEBUG ((DEBUG_INFO, "OCB: Discarding auxiliary entry by visibility\n"));
+    DEBUG ((DEBUG_INFO, "OCB: Entry hidden via .contentVisibility\n"));
     if (IsReallocated) {
       FreePool (DevicePath);
     }

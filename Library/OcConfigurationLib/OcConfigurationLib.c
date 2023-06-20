@@ -410,6 +410,7 @@ OC_SCHEMA
   OC_SCHEMA_STRING_IN ("HibernateMode",         OC_GLOBAL_CONFIG, Misc.Boot.HibernateMode),
   OC_SCHEMA_BOOLEAN_IN ("HibernateSkipsPicker", OC_GLOBAL_CONFIG, Misc.Boot.HibernateSkipsPicker),
   OC_SCHEMA_BOOLEAN_IN ("HideAuxiliary",        OC_GLOBAL_CONFIG, Misc.Boot.HideAuxiliary),
+  OC_SCHEMA_STRING_IN ("InstanceIdentifier",    OC_GLOBAL_CONFIG, Misc.Boot.InstanceIdentifier),
   OC_SCHEMA_STRING_IN ("LauncherOption",        OC_GLOBAL_CONFIG, Misc.Boot.LauncherOption),
   OC_SCHEMA_STRING_IN ("LauncherPath",          OC_GLOBAL_CONFIG, Misc.Boot.LauncherPath),
   OC_SCHEMA_INTEGER_IN ("PickerAttributes",     OC_GLOBAL_CONFIG, Misc.Boot.PickerAttributes),

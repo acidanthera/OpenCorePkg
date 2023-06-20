@@ -2,6 +2,7 @@ OpenCore Changelog
 ==================
 #### v0.9.4
 - Fixed kext blocker `Exclude` strategy for prelinked on 32-bit versions of macOS
+- Added `InstanceIdentifier` setting and option to limit `.contentVisibility` to specific OpenCore instances
 
 #### v0.9.3
 - Added `--force-codec` option to AudioDxe, thx @xCuri0
