@@ -328,18 +328,34 @@ ReadEntryVisibility (
   VisibilityFlag = FALSE;
 
   //
-  // Handle 'Disabled' instruction.
+  // Handle instruction: 'Ignore'.
+  // Handle instruction: 'Disabled' (Deprecated).
+  // Former instruction deprecated for legacy compatibility.
   //
-  if (AsciiStrnCmp (Visibility, "Disabled", L_STR_LEN ("Disabled")) == 0) {
+  if (  (AsciiStrnCmp (Visibility, "Ignore", L_STR_LEN ("Ignore")) == 0)
+     || ((AsciiStrnCmp (Visibility, "Disabled", L_STR_LEN ("Disabled")) == 0)))
+  {
     //
     // Check absolute content if content qualification is absent.
     //
     if (!CheckQualifiers) {
       VisibilityFlag = TRUE;
-      DEBUG ((
-        DEBUG_INFO,
-        "OCB: Found .contentVisibility with instruction:- 'Disabled'\n"
-        ));
+
+      DEBUG_CODE_BEGIN ();
+
+      if (AsciiStrnCmp (Visibility, "Ignore", L_STR_LEN ("Ignore")) == 0) {
+        DEBUG ((
+          DEBUG_INFO,
+          "OCB: Found visibility instruction:- Ignore on all instances\n"
+          ));
+      } else {
+        DEBUG ((
+          DEBUG_INFO,
+          "OCB: Found deprecated visibility instruction:- Disabled on all instances\n"
+          ));
+      }
+
+      DEBUG_CODE_END ();
     }
 
     //
@@ -348,11 +364,28 @@ ReadEntryVisibility (
     //
     if (!VisibilityFlag && CheckQualifiers && QualifiedVisibility) {
       VisibilityFlag = TRUE;
-      DEBUG ((
-        DEBUG_INFO,
-        "OCB: Found .contentVisibility with instruction:- 'Disabled ... %a'\n",
-        InstanceName
-        ));
+
+      DEBUG_CODE_BEGIN ();
+
+      if (AsciiStrnCmp (Visibility, "Ignore", L_STR_LEN ("Ignore")) == 0) {
+        DEBUG ((
+          DEBUG_INFO,
+          "OCB: Found visibility instruction:- Ignore on '%a' instances\n",
+          InstanceName
+          ));
+      } else {
+        DEBUG ((
+          DEBUG_INFO,
+          "OCB: Found deprecated visibility instruction:- Disabled on '%a' instances\n",
+          InstanceName
+          ));
+        DEBUG ((
+          DEBUG_WARN,
+          "OCB: Deprecated 'Disabled' instruction should not be qualified! Replace with 'Ignore'\n"
+          ));
+      }
+
+      DEBUG_CODE_END ();
     }
 
     if (VisibilityFlag) {
@@ -363,18 +396,34 @@ ReadEntryVisibility (
   }
 
   //
-  // Handle 'Auxiliary' instruction.
+  // Handle instruction: 'Cloak'.
+  // Handle instruction: 'Auxiliary' (Deprecated).
+  // Former instruction deprecated for legacy compatibility.
   //
-  if (AsciiStrnCmp (Visibility, "Auxiliary", L_STR_LEN ("Auxiliary")) == 0) {
+  if (  (AsciiStrnCmp (Visibility, "Cloak", L_STR_LEN ("Cloak")) == 0)
+     || ((AsciiStrnCmp (Visibility, "Auxiliary", L_STR_LEN ("Auxiliary")) == 0)))
+  {
     //
     // Check absolute content if content qualification is absent.
     //
     if (!CheckQualifiers) {
       VisibilityFlag = TRUE;
-      DEBUG ((
-        DEBUG_INFO,
-        "OCB: Found .contentVisibility with instruction:- 'Auxiliary'\n"
-        ));
+
+      DEBUG_CODE_BEGIN ();
+
+      if (AsciiStrnCmp (Visibility, "Cloak", L_STR_LEN ("Cloak")) == 0) {
+        DEBUG ((
+          DEBUG_INFO,
+          "OCB: Found visibility instruction:- Cloak on all instances\n"
+          ));
+      } else {
+        DEBUG ((
+          DEBUG_INFO,
+          "OCB: Found deprecated visibility instruction:- Auxiliary on all instances\n"
+          ));
+      }
+
+      DEBUG_CODE_END ();
     }
 
     //
@@ -383,11 +432,28 @@ ReadEntryVisibility (
     //
     if (!VisibilityFlag && CheckQualifiers && QualifiedVisibility) {
       VisibilityFlag = TRUE;
-      DEBUG ((
-        DEBUG_INFO,
-        "OCB: Found .contentVisibility with instruction:- 'Auxiliary ... %a'\n",
-        InstanceName
-        ));
+
+      DEBUG_CODE_BEGIN ();
+
+      if (AsciiStrnCmp (Visibility, "Cloak", L_STR_LEN ("Cloak")) == 0) {
+        DEBUG ((
+          DEBUG_INFO,
+          "OCB: Found visibility instruction:- Cloak on '%a' instances\n",
+          InstanceName
+          ));
+      } else {
+        DEBUG ((
+          DEBUG_INFO,
+          "OCB: Found deprecated visibility instruction:- Auxiliary on '%a' instances\n",
+          InstanceName
+          ));
+        DEBUG ((
+          DEBUG_WARN,
+          "OCB: Deprecated 'Auxiliary' instruction should not be qualified! Replace with 'Cloak'\n"
+          ));
+      }
+
+      DEBUG_CODE_END ();
     }
 
     if (VisibilityFlag) {
