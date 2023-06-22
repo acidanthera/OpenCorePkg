@@ -2442,7 +2442,7 @@ STATIC
 PATCHER_GENERIC_PATCH
   mAquantiaEthernetPatchMieze = {
   .Comment     = DEBUG_POINTER ("ForceAquantiaEthernetMieze"),
-  .Base        = "__ZN30AppleEthernetAquantiaAqtion10718checkConfigSupportERiS0_",
+  .Base        = NULL,
   .Find        = mAquantiaEthernetPatchFindMieze,
   .Mask        = mAquantiaEthernetPatchMaskMieze,
   .Replace     = mAquantiaEthernetPatchReplaceMieze,
