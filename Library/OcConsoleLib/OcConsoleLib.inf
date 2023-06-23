@@ -42,6 +42,8 @@
 
 [Sources]
   ConsoleControl.c
+  ConsoleFont.c
+  ConsoleFontLoader.c
   ConsoleGop.c
   ConsoleGopInternal.h
   Eg2Info.c
@@ -70,6 +72,7 @@
   OcBlitLib
   OcMemoryLib
   OcMiscLib
+  OcStorageLib
   MtrrLib
   UefiBootServicesTableLib
   UefiRuntimeServicesTableLib

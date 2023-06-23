@@ -1,7 +1,7 @@
 BIOSVendor: "Apple Inc."
-BIOSVersion: "509.0.0.0.0"
-BIOSLegacyVersion: "MBP143.88Z.F000.B00.2302021934"
-BIOSReleaseDate: "02/02/2023"
+BIOSVersion: "512.0.0.0.0"
+BIOSLegacyVersion: "MBP143.88Z.F000.B00.2304051556"
+BIOSReleaseDate: "04/05/2023"
 SystemManufacturer: "Apple Inc."
 SystemProductName: "MacBookPro14,3"
 SystemVersion: "1.0"
@@ -72,12 +72,12 @@ SmcPlatform:
 SmcEPCI: 0xF0A009
 OEMStrings: |-
   Apple ROM Version
-    BIOS ID:      MBP143.88Z.F000.B00.2302021934
+    BIOS ID:      MBP143.88Z.F000.B00.2304051556
     Model:        MBP143
-    EFI Version:  509.0.0.0.0
-    Built by:     root@8mcvx
-    Date:         Thu Feb  2 19:34:19 2023
-    Revision:     509 (B&I)
+    EFI Version:  512.0.0.0.0
+    Built by:     root@hrsj2
+    Date:         Wed Apr  5 15:56:39 2023
+    Revision:     512 (B&I)
     ROM Version:  F000_B00
     Build Type:   Official Build, RELEASE
     Compiler:     clang-1403.0.22.11
@@ -211,4 +211,4 @@ AppleModelYear:
   - 2017
   - 2018
 MinimumOSVersion: "10.12.5"
-MaximumOSVersion: null
+MaximumOSVersion: "13.4"

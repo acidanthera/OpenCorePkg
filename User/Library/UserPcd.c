@@ -48,3 +48,5 @@ UINT32   _gPcd_FixedAtBuild_PcdImageLoaderAlignmentPolicy            = 0xFFFFFFF
 UINT32   _gPcd_FixedAtBuild_PcdImageLoaderRelocTypePolicy            = 0x00;
 BOOLEAN  _gPcd_FeatureFlag_PcdFatReadOnlyMode                        = _PCD_VALUE_PcdFatReadOnlyMode;
 UINT32   _gPcd_BinaryPatch_PcdSerialRegisterStride                   = 0;
+UINT8    _gPcd_FixedAtBuild_PcdUefiImageFormatSupportNonFv           = 0x00;
+UINT8    _gPcd_FixedAtBuild_PcdUefiImageFormatSupportFv              = 0x03;

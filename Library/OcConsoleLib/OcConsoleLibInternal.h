@@ -24,6 +24,8 @@
 #define DEFAULT_COLOUR_DEPTH  32
 #define DEFAULT_REFRESH_RATE  60
 
+#define ISO_FONT_MAX_PAGE  1
+
 typedef struct {
   EFI_GRAPHICS_OUTPUT_PROTOCOL    *GraphicsOutput;
   EFI_UGA_DRAW_PROTOCOL           Uga;
@@ -67,6 +69,8 @@ OcConsoleControlRestoreProtocol (
 EFI_STATUS
 OcUseBuiltinTextOutput (
   IN EFI_CONSOLE_CONTROL_SCREEN_MODE  InitialMode,
+  IN OC_STORAGE_CONTEXT               *Storage  OPTIONAL,
+  IN CONST CHAR8                      *Font     OPTIONAL,
   IN EFI_CONSOLE_CONTROL_SCREEN_MODE  Mode,
   IN UINT32                           Width,
   IN UINT32                           Height
@@ -80,6 +84,19 @@ OcUseSystemTextOutput (
   IN BOOLEAN                          SanitiseClearScreen,
   IN BOOLEAN                          ClearScreenOnModeSwitch,
   IN BOOLEAN                          ReplaceTabWithSpace
+  );
+
+EFI_STATUS
+OcLoadConsoleFont (
+  IN  OC_STORAGE_CONTEXT  *Storage,
+  IN  CONST CHAR8         *FontName,
+  OUT OC_CONSOLE_FONT     **Font
+  );
+
+BOOLEAN
+OcConsoleFontContainsChar (
+  IN OC_CONSOLE_FONT  *ConsoleFont,
+  IN CHAR16           Char
   );
 
 #endif // OC_CONSOLE_LIB_INTERNAL_H

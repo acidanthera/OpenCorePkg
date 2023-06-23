@@ -556,6 +556,7 @@ CheckUefiOutput (
   BOOLEAN      IsIgnoreTextInGraphicsEnabled;
   BOOLEAN      IsReplaceTabWithSpaceEnabled;
   BOOLEAN      IsSanitiseClearScreenEnabled;
+  CONST CHAR8  *ConsoleFont;
   CONST CHAR8  *ConsoleMode;
   CONST CHAR8  *Resolution;
   UINT32       UserWidth;
@@ -597,7 +598,13 @@ CheckUefiOutput (
     IsTextRendererSystem = TRUE;
   }
 
-  if (!IsTextRendererSystem) {
+  if (IsTextRendererSystem) {
+    ConsoleFont = OC_BLOB_GET (&Config->Uefi.Output.ConsoleFont);
+    if (ConsoleFont[0] != '\0') {
+      DEBUG ((DEBUG_WARN, "UEFI->Output->ConsoleFont is specified on non-Builtin TextRenderer (currently %a)!\n", TextRenderer));
+      ++ErrorCount;
+    }
+  } else {
     IsClearScreenOnModeSwitchEnabled = Config->Uefi.Output.ClearScreenOnModeSwitch;
     if (IsClearScreenOnModeSwitchEnabled) {
       DEBUG ((DEBUG_WARN, "UEFI->Output->ClearScreenOnModeSwitch is enabled on non-System TextRenderer (currently %a)!\n", TextRenderer));

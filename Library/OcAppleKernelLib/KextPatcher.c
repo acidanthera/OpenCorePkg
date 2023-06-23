@@ -403,6 +403,7 @@ PatcherExcludePrelinkedKext (
   VOID                      *KextData;
   UINT64                    AddressMax;
   UINT64                    VirtualAddress;
+  UINT64                    FileOffset;
   UINT64                    Size;
   UINT64                    MaxSize;
 
@@ -438,11 +439,24 @@ PatcherExcludePrelinkedKext (
   MaxSize = AddressMax - PatcherContext->VirtualBase;
 
   //
+  // Get file offset for 32-bit.
+  //
+  if (PatcherContext->Is32Bit) {
+    if (!GetTextBaseOffset (&PatcherContext->MachContext, &VirtualAddress, &FileOffset)) {
+      return EFI_UNSUPPORTED;
+    }
+
+    VirtualAddress += FileOffset;
+  } else {
+    VirtualAddress = PatcherContext->VirtualBase;
+  }
+
+  //
   // Zero out kext memory through PatcherContext->MachContext.
   //
   KextData = MachoGetFilePointerByAddress (
                &PatcherContext->MachContext,
-               PatcherContext->VirtualBase,
+               VirtualAddress,
                NULL
                );
   if (KextData == NULL) {

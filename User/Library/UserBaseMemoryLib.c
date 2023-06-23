@@ -14,6 +14,8 @@
 #include <string.h>
 #include <stdlib.h>
 
+#include <UserMemory.h>
+
 #ifdef WIN32
   #include <malloc.h>
 #endif // WIN32
@@ -25,15 +27,40 @@ GLOBAL_REMOVE_IF_UNREFERENCED CONST EFI_MEMORY_TYPE  gPhaseDefaultCodeType = Efi
 // Limits single pool allocation size to 512MB by default.
 // Use SetPoolAllocationSizeLimit to change this limit.
 //
-UINTN  mPoolAllocationSizeLimit = BASE_512MB;
+STATIC UINTN  mPoolAllocationSizeLimit = BASE_512MB;
 
-UINTN  mPoolAllocations;
-UINTN  mPageAllocations;
+GLOBAL_REMOVE_IF_UNREFERENCED UINTN  mPoolAllocations;
+GLOBAL_REMOVE_IF_UNREFERENCED UINTN  mPageAllocations;
 
-UINT64  mPoolAllocationMask = MAX_UINT64;
-UINTN   mPoolAllocationIndex;
-UINT64  mPageAllocationMask = MAX_UINT64;
-UINTN   mPageAllocationIndex;
+STATIC UINT64  mPoolAllocationMask = MAX_UINT64;
+STATIC UINTN   mPoolAllocationIndex;
+STATIC UINT64  mPageAllocationMask = MAX_UINT64;
+STATIC UINTN   mPageAllocationIndex;
+
+VOID
+ConfigureMemoryAllocations (
+  IN     CONST UINT8  *Data,
+  IN     UINTN        Size,
+  IN OUT UINT32       *ConfigSize
+  )
+{
+  mPoolAllocationIndex = 0;
+  mPageAllocationIndex = 0;
+
+  if (Size - *ConfigSize >= sizeof (UINT64)) {
+    *ConfigSize += sizeof (UINT64);
+    CopyMem (&mPoolAllocationMask, &Data[Size - *ConfigSize], sizeof (UINT64));
+  } else {
+    mPoolAllocationMask = MAX_UINT64;
+  }
+
+  if (Size - *ConfigSize >= sizeof (UINT64)) {
+    *ConfigSize += sizeof (UINT64);
+    CopyMem (&mPageAllocationMask, &Data[Size - *ConfigSize], sizeof (UINT64));
+  } else {
+    mPageAllocationMask = MAX_UINT64;
+  }
+}
 
 VOID
 SetPoolAllocationSizeLimit (
@@ -231,6 +258,10 @@ InternalAllocatePagesAlign (
     // Check that we have not gone beyond the single allocation size limit
     //
     if (RequestedAllocationSize <= mPoolAllocationSizeLimit) {
+      if (Alignment < EFI_PAGE_SIZE) {
+        Alignment = EFI_PAGE_SIZE;
+      }
+
  #ifdef _WIN32
       Buffer = _aligned_malloc (RequestedAllocationSize, Alignment);
  #else // !_WIN32

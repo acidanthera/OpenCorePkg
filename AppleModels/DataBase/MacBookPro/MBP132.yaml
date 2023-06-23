@@ -1,7 +1,7 @@
 BIOSVendor: "Apple Inc."
-BIOSVersion: "509.0.0.0.0"
-BIOSLegacyVersion: "MBP132.88Z.F000.B00.2302021935"
-BIOSReleaseDate: "02/02/2023"
+BIOSVersion: "512.0.0.0.0"
+BIOSLegacyVersion: "MBP132.88Z.F000.B00.2304051556"
+BIOSReleaseDate: "04/05/2023"
 SystemManufacturer: "Apple Inc."
 SystemProductName: "MacBookPro13,2"
 SystemVersion: "1.0"
@@ -74,12 +74,12 @@ SmcPlatform:
 SmcEPCI: 0xF02009
 OEMStrings: |-
   Apple ROM Version
-    BIOS ID:      MBP132.88Z.F000.B00.2302021935
+    BIOS ID:      MBP132.88Z.F000.B00.2304051556
     Model:        MBP132
-    EFI Version:  509.0.0.0.0
-    Built by:     root@4dp8q
-    Date:         Thu Feb  2 19:35:58 2023
-    Revision:     509 (B&I)
+    EFI Version:  512.0.0.0.0
+    Built by:     root@nz57l
+    Date:         Wed Apr  5 15:56:07 2023
+    Revision:     512 (B&I)
     ROM Version:  F000_B00
     Build Type:   Official Build, RELEASE
     Compiler:     clang-1403.0.22.11
@@ -192,4 +192,4 @@ AppleModelYear:
   - 2016
   - 2017
 MinimumOSVersion: "10.12.1"
-MaximumOSVersion: "12.6.5"
+MaximumOSVersion: "12.6.6"

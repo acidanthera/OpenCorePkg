@@ -688,6 +688,7 @@ OC_DECLARE (OC_UEFI_INPUT)
 ///
 #define OC_UEFI_OUTPUT_FIELDS(_, __) \
   _(OC_STRING                   , ConsoleMode                 ,     , OC_STRING_CONSTR ("", _, __), OC_DESTR (OC_STRING)) \
+  _(OC_STRING                   , ConsoleFont                 ,     , OC_STRING_CONSTR ("", _, __), OC_DESTR (OC_STRING)) \
   _(OC_STRING                   , Resolution                  ,     , OC_STRING_CONSTR ("", _, __), OC_DESTR (OC_STRING)) \
   _(OC_STRING                   , InitialMode                 ,     , OC_STRING_CONSTR ("", _, __), OC_DESTR (OC_STRING)) \
   _(OC_STRING                   , TextRenderer                ,     , OC_STRING_CONSTR ("", _, __), OC_DESTR (OC_STRING)) \
@@ -727,6 +728,7 @@ OC_DECLARE (OC_UEFI_OUTPUT)
   _(BOOLEAN                     , FirmwareVolume              ,     , FALSE  , ()) \
   _(BOOLEAN                     , HashServices                ,     , FALSE  , ()) \
   _(BOOLEAN                     , OSInfo                      ,     , FALSE  , ()) \
+  _(BOOLEAN                     , PciIo                       ,     , FALSE  , ()) \
   _(BOOLEAN                     , UnicodeCollation            ,     , FALSE  , ())
 OC_DECLARE (OC_UEFI_PROTOCOL_OVERRIDES)
 

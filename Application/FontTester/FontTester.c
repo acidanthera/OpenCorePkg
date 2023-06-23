@@ -42,7 +42,7 @@ PrintFontPage (
   )
 {
   CHAR16  Char;
-  CHAR16  String[(NCOLUMNS * 2) + 1];
+  CHAR16  String[2];
   UINTN   Row;
   UINTN   Column;
 
@@ -51,26 +51,18 @@ PrintFontPage (
   Print (L"Page %u:", PageNumber);
   gST->ConOut->SetAttribute (gST->ConOut, EFI_BACKGROUND_BLACK | EFI_LIGHTGRAY);
 
-  for (Column = 0; Column < NCOLUMNS; Column++) {
-    String[Column * 2] = L' ';
-  }
-
-  String[NCOLUMNS * 2] = CHAR_NULL;
-  Char                 = PageNumber << 7;
+  String[1] = CHAR_NULL;
+  Char      = PageNumber << 7;
 
   for (Row = 0; Row < NROWS; Row++) {
     for (Column = 0; Column < NCOLUMNS; Column++) {
-      if (Char < 32) {
-        String[(Column * 2) + 1] = L'_';
-      } else {
-        String[(Column * 2) + 1] = Char;
-      }
+      String[0] = (Char < 32) ? L'_' : Char;
+
+      gST->ConOut->SetCursorPosition (gST->ConOut, CursorColumn + (Column * 2) + 1, CursorRow + Row + 1);
+      gST->ConOut->OutputString (gST->ConOut, String);
 
       ++Char;
     }
-
-    gST->ConOut->SetCursorPosition (gST->ConOut, CursorColumn, CursorRow + Row + 2);
-    gST->ConOut->OutputString (gST->ConOut, String);
   }
 }
 
@@ -124,8 +116,11 @@ UefiMain (
   IN EFI_SYSTEM_TABLE  *SystemTable
   )
 {
-  UINTN    Pos0;
-  UINTN    Pos1;
+  UINTN    Column0;
+  UINTN    Column1;
+  UINTN    Row0;
+  UINTN    Row1;
+  UINTN    Row2;
   INT32    OriginalAttribute;
   BOOLEAN  OriginalCursorVisible;
 
@@ -141,24 +136,27 @@ UefiMain (
   gST->ConOut->SetAttribute (gST->ConOut, EFI_BACKGROUND_BROWN | EFI_CYAN);
   Centre (APP_TITLE);
 
-  Pos0 = CentrePos (NCOLUMNS * 4 + GAP);
-  Pos1 = Pos0 + NCOLUMNS * 2 + GAP;
+  Column0 = CentrePos (NCOLUMNS * 4 + GAP);
+  Column1 = Column0 + NCOLUMNS * 2 + GAP;
+  Row0    = gST->ConOut->Mode->CursorRow + 2;
+  Row1    = Row0 + 10;
+  Row2    = Row1 + 10;
 
-  PrintFontPage (0, Pos0, 3);
-  PrintFontPage (1, Pos1, 3);
-  PrintFontPage (74, Pos0, 14);
-  PrintFontPage (75, Pos1, 14);
+  PrintFontPage (0, Column0, Row0);
+  PrintFontPage (67, Column1, Row0);
+  PrintFontPage (74, Column0, Row1);
+  PrintFontPage (75, Column1, Row1);
 
   //
-  // Give time for screenshot.
+  // Give time for F10 screenshot.
   //
   PauseSeconds (2);
 
-  Print (L"\r\n\r\n\r\n");
+  gST->ConOut->SetCursorPosition (gST->ConOut, 0, Row2);
   gST->ConOut->SetAttribute (gST->ConOut, EFI_BACKGROUND_RED | EFI_WHITE);
   Centre (L"Press any key...");
   WaitForKeyPress (L"");
-  Centre (L"Done.\r\n");
+  Centre (L"Done.");
 
   gST->ConOut->SetAttribute (gST->ConOut, OriginalAttribute);
   gST->ConOut->EnableCursor (gST->ConOut, OriginalCursorVisible);

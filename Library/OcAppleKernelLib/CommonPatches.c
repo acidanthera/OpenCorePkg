@@ -490,6 +490,14 @@ CONST UINT8
 
 STATIC
 CONST UINT8
+  mPerfCtrlFind4[] = {
+  0xB9, 0x99, 0x01, 0x00, 0x00, ///< mov ecx, 0x199
+  0x48, 0x89, 0xD8,             ///< mov rax, rbx
+  0x0F, 0x30                    ///< wrmsr
+};
+
+STATIC
+CONST UINT8
   mPerfCtrlMax[] = {
   0xB9, 0x99, 0x01, 0x00, 0x00, ///< mov ecx, 0x199
   0x31, 0xD2,                   ///< xor edx, edx
@@ -538,7 +546,8 @@ PatchAppleXcpmForceBoost (
     {
       if (  (CompareMem (&Current[4], &mPerfCtrlFind1[4], sizeof (mPerfCtrlFind1) - 4) == 0)
          || (CompareMem (&Current[4], &mPerfCtrlFind2[4], sizeof (mPerfCtrlFind2) - 4) == 0)
-         || (CompareMem (&Current[4], &mPerfCtrlFind3[4], sizeof (mPerfCtrlFind3) - 4) == 0))
+         || (CompareMem (&Current[4], &mPerfCtrlFind3[4], sizeof (mPerfCtrlFind3) - 4) == 0)
+         || (CompareMem (&Current[4], &mPerfCtrlFind4[4], sizeof (mPerfCtrlFind4) - 4) == 0))
       {
         break;
       }
@@ -636,26 +645,73 @@ PATCHER_GENERIC_PATCH
 
 STATIC
 CONST UINT8
-  mRemoveUsbLimitIoP1Find[] = {
+  mRemoveUsbLimitIoP1Find1[] = {
   0x0F, 0x0F, 0x87
 };
 
 STATIC
 CONST UINT8
-  mRemoveUsbLimitIoP1Replace[] = {
+  mRemoveUsbLimitIoP1Replace1[] = {
   0x40, 0x0F, 0x87
 };
 
 STATIC
 PATCHER_GENERIC_PATCH
-  mRemoveUsbLimitIoP1Patch = {
-  .Comment     = DEBUG_POINTER ("RemoveUsbLimitIoP1"),
+  mRemoveUsbLimitIoP1Patch1 = {
+  .Comment     = DEBUG_POINTER ("RemoveUsbLimitIoP1 part 1"),
   .Base        = "__ZN16AppleUSBHostPort15setPortLocationEj",
-  .Find        = mRemoveUsbLimitIoP1Find,
+  .Find        = mRemoveUsbLimitIoP1Find1,
   .Mask        = NULL,
-  .Replace     = mRemoveUsbLimitIoP1Replace,
+  .Replace     = mRemoveUsbLimitIoP1Replace1,
   .ReplaceMask = NULL,
-  .Size        = sizeof (mRemoveUsbLimitIoP1Replace),
+  .Size        = sizeof (mRemoveUsbLimitIoP1Replace1),
+  .Count       = 1,
+  .Skip        = 0,
+  .Limit       = 4096
+};
+
+STATIC
+CONST UINT8
+  mRemoveUsbLimitIoP1Find2[] = {
+  0x41, 0x83, 0x00, 0x0F,  ///< and whatever, 0x0Fh
+  0x41, 0xD3, 0x00,        ///< shl whatever, cl
+  0x00, 0x09, 0x00         ///< or ebx, whatever
+};
+
+STATIC
+CONST UINT8
+  mRemoveUsbLimitIoP1Mask2[] = {
+  0xFF, 0xFF, 0x00, 0xFF,
+  0xFF, 0xFF, 0x00,
+  0x00, 0xFF, 0x00
+};
+
+STATIC
+CONST UINT8
+  mRemoveUsbLimitIoP1Replace2[] = {
+  0x00, 0x00, 0x00, 0x3F,
+  0x00, 0x00, 0x00,
+  0x00, 0x00, 0x00
+};
+
+STATIC
+CONST UINT8
+  mRemoveUsbLimitIoP1ReplaceMask2[] = {
+  0x00, 0x00, 0x00, 0xFF,
+  0x00, 0x00, 0x00,
+  0x00, 0x00, 0x00
+};
+
+STATIC
+PATCHER_GENERIC_PATCH
+  mRemoveUsbLimitIoP1Patch2 = {
+  .Comment     = DEBUG_POINTER ("RemoveUsbLimitIoP1 part 2"),
+  .Base        = "__ZN16AppleUSBHostPort15setPortLocationEj",
+  .Find        = mRemoveUsbLimitIoP1Find2,
+  .Mask        = mRemoveUsbLimitIoP1Mask2,
+  .Replace     = mRemoveUsbLimitIoP1Replace2,
+  .ReplaceMask = mRemoveUsbLimitIoP1ReplaceMask2,
+  .Size        = sizeof (mRemoveUsbLimitIoP1Replace2),
   .Count       = 1,
   .Skip        = 0,
   .Limit       = 4096
@@ -684,11 +740,26 @@ PatchUsbXhciPortLimit1 (
     return EFI_NOT_FOUND;
   }
 
-  Status = PatcherApplyGenericPatch (Patcher, &mRemoveUsbLimitIoP1Patch);
+  Status = PatcherApplyGenericPatch (Patcher, &mRemoveUsbLimitIoP1Patch1);
   if (EFI_ERROR (Status)) {
-    DEBUG ((DEBUG_INFO, "OCAK: [FAIL] Failed to apply port patch com.apple.iokit.IOUSBHostFamily - %r\n", Status));
+    DEBUG ((DEBUG_INFO, "OCAK: [FAIL] Failed to apply port patch com.apple.iokit.IOUSBHostFamily part 1 - %r\n", Status));
   } else {
-    DEBUG ((DEBUG_INFO, "OCAK: [OK] Patch success port com.apple.iokit.IOUSBHostFamily\n"));
+    DEBUG ((DEBUG_INFO, "OCAK: [OK] Patch success port com.apple.iokit.IOUSBHostFamily part 1\n"));
+  }
+
+  //
+  // The following patch is only needed on macOS 11.1 (Darwin 20.2.0) and above; skip it otherwise.
+  //
+  if (!OcMatchDarwinVersion (KernelVersion, KERNEL_VERSION (KERNEL_VERSION_BIG_SUR, 2, 0), 0)) {
+    DEBUG ((DEBUG_INFO, "OCAK: [OK] Skipping port patch com.apple.iokit.IOUSBHostFamily part 2 on %u\n", KernelVersion));
+    return Status;
+  }
+
+  Status = PatcherApplyGenericPatch (Patcher, &mRemoveUsbLimitIoP1Patch2);
+  if (EFI_ERROR (Status)) {
+    DEBUG ((DEBUG_INFO, "OCAK: [FAIL] Failed to apply port patch com.apple.iokit.IOUSBHostFamily part 2 - %r\n", Status));
+  } else {
+    DEBUG ((DEBUG_INFO, "OCAK: [OK] Patch success port com.apple.iokit.IOUSBHostFamily part 2\n"));
   }
 
   return Status;
@@ -2299,33 +2370,37 @@ PatchLegacyCommpage (
 STATIC
 CONST UINT8
   mAquantiaEthernetPatchFindShikumo[] = {
-  0x83, 0x7D, 0x00, 0x00,             ///< cmp dword [rbp+whatever], whatever
-  0x0F, 0x84, 0x00, 0x00, 0x00, 0x00, ///< je unsupported
-  0x83, 0x7D                          ///< LBL:
+  0x31, 0xC0,                        ///< xor eax, eax
+  0xE8, 0x00, 0x00, 0x00, 0x00,      ///< call _IOLog
+  0x83, 0x7D, 0x00, 0x00,            ///< cmp dword [rbp+whatever], whatever
+  0x0F, 0x84, 0x00, 0x00, 0x00, 0x00 ///< je unsupported
 };
 
 STATIC
 CONST UINT8
   mAquantiaEthernetPatchFindMaskShikumo[] = {
-  0xFF, 0xFF, 0x00, 0x00,
-  0xFF, 0xFF, 0x00, 0x00,0x00,  0x00,
-  0xFF, 0xFF
+  0xFF, 0xFF,
+  0xFF, 0x00,0x00,  0x00, 0x00,
+  0xFF, 0xFF,0x00,  0x00,
+  0xFF, 0xFF,0x00,  0x00, 0x00, 0x00
 };
 
 STATIC
 CONST UINT8
   mAquantiaEthernetPatchReplaceShikumo[] = {
-  0x83, 0x7D, 0x00, 0x00,             ///< cmp dword [rbp+whatever], whatever
-  0xEB, 0x04, 0x90, 0x90, 0x90, 0x90, ///< jmp LBL
-  0x83, 0x7D                          ///< LBL:
+  0x00, 0x00,
+  0x00, 0x00,0x00,  0x00, 0x00,
+  0x00, 0x00,0x00,  0x00,
+  0x90, 0x90,0x90,  0x90, 0x90, 0x90, ///< nop (je unsupported)
 };
 
 STATIC
 CONST UINT8
   mAquantiaEthernetPatchReplaceMaskShikumo[] = {
-  0xFF, 0xFF, 0x00, 0x00,
-  0xFF, 0xFF, 0xFF, 0xFF,0xFF,  0xFF,
-  0xFF, 0xFF
+  0x00, 0x00,
+  0x00, 0x00,0x00,  0x00, 0x00,
+  0x00, 0x00,0x00,  0x00,
+  0xFF, 0xFF,0xFF,  0xFF, 0xFF, 0xFF
 };
 
 STATIC
@@ -2367,7 +2442,7 @@ STATIC
 PATCHER_GENERIC_PATCH
   mAquantiaEthernetPatchMieze = {
   .Comment     = DEBUG_POINTER ("ForceAquantiaEthernetMieze"),
-  .Base        = "__ZN30AppleEthernetAquantiaAqtion10718checkConfigSupportERiS0_",
+  .Base        = NULL,
   .Find        = mAquantiaEthernetPatchFindMieze,
   .Mask        = mAquantiaEthernetPatchMaskMieze,
   .Replace     = mAquantiaEthernetPatchReplaceMieze,
