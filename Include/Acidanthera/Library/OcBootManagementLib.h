@@ -32,6 +32,16 @@
 #endif
 
 /**
+  Maximum safe instance identifier size.
+**/
+#define OC_MAX_INSTANCE_IDENTIFIER_SIZE  64
+
+/**
+  Maximum allowed `.contentVisibility` file size.
+**/
+#define OC_MAX_CONTENT_VISIBILITY_SIZE  512
+
+/**
   Primary picker context.
 **/
 typedef struct OC_PICKER_CONTEXT_ OC_PICKER_CONTEXT;
@@ -934,6 +944,10 @@ struct OC_PICKER_CONTEXT_ {
   // Picker icon set variant (refer to docs for requested behaviour).
   //
   CONST CHAR8                 *PickerVariant;
+  //
+  // Boot loader instance identifier.
+  //
+  CONST CHAR8                 *InstanceIdentifier;
   //
   // Enable polling boot arguments.
   //

@@ -337,6 +337,7 @@ OC_DECLARE (OC_MISC_BLESS_ARRAY)
 #define OC_MISC_BOOT_FIELDS(_, __) \
   _(OC_STRING                   , PickerMode                  ,     , OC_STRING_CONSTR ("Builtin", _, __) , OC_DESTR (OC_STRING)) \
   _(OC_STRING                   , HibernateMode               ,     , OC_STRING_CONSTR ("None", _, __)    , OC_DESTR (OC_STRING)) \
+  _(OC_STRING                   , InstanceIdentifier          ,     , OC_STRING_CONSTR ("", _, __)        , OC_DESTR (OC_STRING)) \
   _(OC_STRING                   , LauncherOption              ,     , OC_STRING_CONSTR ("Disabled", _, __), OC_DESTR (OC_STRING) ) \
   _(OC_STRING                   , LauncherPath                ,     , OC_STRING_CONSTR ("Default", _, __) , OC_DESTR (OC_STRING) ) \
   _(UINT32                      , ConsoleAttributes           ,     , 0                                   , ())                   \

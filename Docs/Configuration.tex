@@ -3148,6 +3148,8 @@ installed on the media, while alternate options represent recovery options for t
 \end{itemize} \medskip
 \end{itemize}
 
+\subsubsection{Boot Algorithm}\label{bootalgorithm}
+
 The algorithm to determine boot options behaves as follows:
 
 \begin{enumerate}
@@ -3169,12 +3171,14 @@ The algorithm to determine boot options behaves as follows:
   \item For file device paths, check for presence on the file system directly.
   % Just kill all \EFI\APPLE\ paths.
   \item Exclude entries if there is a \texttt{.contentVisibility} file near the bootloader or
-  inside the boot directory with \texttt{Disabled} contents (ASCII).
+  inside the boot directory with \texttt{Disabled} contents (ASCII) (and if the current
+  \texttt{InstanceIentifier} matches an \texttt{Instance-List} if present, see following).
   \item Mark device handle as \textit{used} in the list of partition handles if any.
   % Each partition handle will basically have a list of boot option entries for later quick lookup.
   \item Register the resulting entries as primary options and determine their types. \\
   The option will become auxiliary for some types (e.g. Apple HFS recovery)
-  or if its \texttt{.contentVisibility} file contains \texttt{Auxiliary}.
+  or if its \texttt{.contentVisibility} file contains \texttt{Auxiliary} (and if the current
+  \texttt{InstanceIentifier} matches an \texttt{Instance-List} if present, see following).
   \end{itemize}
 \item For each partition handle:
   \begin{itemize}
@@ -3188,14 +3192,32 @@ The algorithm to determine boot options behaves as follows:
   \item Lookup alternate entries by ``bless'' recovery option list retrieval and predefined paths.
   \item Register the resulting entries as alternate auxiliary options and determine their types if found.
   \end{itemize}
-\item Custom entries and tools, except such pre-constructed previously, are added as primary options without any checks with respect to \texttt{Auxiliary}.
+\item Custom entries and tools, except such pre-constructed previously, are added as primary options
+without any checks with respect to \texttt{Auxiliary}.
 \item System entries, such as \texttt{Reset NVRAM}, are added as primary auxiliary options.
 \end{enumerate}
+
+The \texttt{.contentVisibility} file, when present, may optionally target only specific instances
+of OpenCore. Its contents are \texttt{[\{Instance-List\}:](Disabled|Auxiliary)}.
+If a colon (\texttt{:}) is present, the preceding \texttt{Instance-List} it is a comma separated
+list of \texttt{InstanceIdentifier} values (example: \texttt{OCA,OCB:Disabled}).
+When this list is present, the specified visibility is only applied if the
+\texttt{InstanceIdentifier} of the current instance of OpenCore is present in the list.
+When the list is not present, the specified visibility is applied for all instances of OpenCore.
+
+\emph{Note 1}: For any instance of OpenCore with no \texttt{InstanceIdentifier} value, the specified visibility
+from a \texttt{.contentVisibility} file with an \texttt{Instance-List} will never be applied.
+
+\emph{Note 2}: Visibilities with a visibility list will be treated as invalid, and so ignored, in earlier
+versions of OpenCore - which may be useful when comparing behaviour of older and newer versions.
+
+\emph{Note 3}: Avoid extraneous spaces in the \texttt{.contentVisibility} file: these will not be treated as
+whitespace, but as part of the adjacent token.
 
 The display order of the boot options in the OpenCore picker and the boot process
 are determined separately from the scanning algorithm.
 
-The display order as follows:
+The display order is as follows:
 
 \begin{itemize}
 \tightlist
@@ -3413,6 +3435,17 @@ the default boot entry choice will remain changed until the next manual reconfig
 
   To display all entries, the picker menu can be reloaded into ``Extended Mode'' by pressing the
   \texttt{Spacebar} key. Hiding auxiliary entries may increase boot performance on multi-disk systems.
+
+
+\item
+  \texttt{InstanceIdentifier}\\
+  \textbf{Type}: \texttt{plist\ string}\\
+  \textbf{Failsafe}: Empty\\
+  \textbf{Description}: An optional identifier for the current instance of OpenCore.
+
+  This should typically be a short alphanumeric string. The current use of this value is
+  to optionally target \texttt{.contentVisibility} files to specific instances of OpenCore,
+  as explained in the \hyperref[bootalgorithm]{Boot Algorithm} section.
 
 \item
   \texttt{LauncherOption}\\

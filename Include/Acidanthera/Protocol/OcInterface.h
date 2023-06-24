@@ -24,7 +24,7 @@
 
   WARNING: This protocol is currently undergoing active design.
 **/
-#define OC_INTERFACE_REVISION  8
+#define OC_INTERFACE_REVISION  9
 
 /**
   The GUID of the OC_INTERFACE_PROTOCOL.

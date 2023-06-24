@@ -200,7 +200,8 @@ STATIC
 INTERNAL_ENTRY_VISIBILITY
 ReadEntryVisibility (
   IN EFI_DEVICE_PATH_PROTOCOL  *DevicePath,
-  IN BOOLEAN                   IsFolder
+  IN BOOLEAN                   IsFolder,
+  IN CONST CHAR8               *InstanceIdentifier
   )
 {
   EFI_STATUS                       Status;
@@ -213,6 +214,9 @@ ReadEntryVisibility (
   CHAR16                           *VisibilityTerminator;
   BOOLEAN                          Result;
   CHAR8                            *Visibility;
+  CHAR8                            *VisibilityCommand;
+  CHAR8                            *Walker;
+  UINTN                            IdentifierLength;
 
   Status = gBS->LocateDevicePath (
                   &gEfiSimpleFileSystemProtocolGuid,
@@ -280,7 +284,7 @@ ReadEntryVisibility (
   //
   // Note, this guarantees nul-termination.
   //
-  Visibility = OcReadFile (FileSystem, VisibilityPath, NULL, 64);
+  Visibility = OcReadFile (FileSystem, VisibilityPath, NULL, OC_MAX_CONTENT_VISIBILITY_SIZE);
 
   FreePool (VisibilityPath);
 
@@ -288,17 +292,68 @@ ReadEntryVisibility (
     return BootEntryNormal;
   }
 
-  if (AsciiStrnCmp (Visibility, "Disabled", L_STR_LEN ("Disabled")) == 0) {
+  //
+  // Allow for terminating new line, but be strict about it -
+  // after removing this, things must match exactly.
+  //
+  Walker = AsciiStrStr (Visibility, "\r");
+  if (Walker != NULL) {
+    *Walker = '\0';
+  }
+
+  Walker = AsciiStrStr (Visibility, "\n");
+  if (Walker != NULL) {
+    *Walker = '\0';
+  }
+
+  Walker = AsciiStrStr (Visibility, ":");
+  if (Walker == NULL) {
+    VisibilityCommand = Visibility;
+  } else {
+    if (*InstanceIdentifier == '\0') {
+      DEBUG ((DEBUG_INFO, "OCB: No InstanceIdentifier, ignoring qualified visibility\n"));
+      FreePool (Visibility);
+      return BootEntryNormal;
+    }
+
+    *Walker++         = '\0';
+    VisibilityCommand = Walker;
+    Walker            = Visibility;
+
+    IdentifierLength = AsciiStrLen (InstanceIdentifier);
+    Status           = EFI_NOT_FOUND;
+    do {
+      if (  (AsciiStrnCmp (Walker, InstanceIdentifier, IdentifierLength) == 0)
+         && ((Walker[IdentifierLength] == '\0') || (Walker[IdentifierLength] == ',')))
+      {
+        Status = EFI_SUCCESS;
+        break;
+      }
+
+      Walker = AsciiStrStr (Walker, ",");
+      if (Walker != NULL) {
+        ++Walker;
+      }
+    } while (Walker != NULL);
+
+    if (EFI_ERROR (Status)) {
+      DEBUG ((DEBUG_INFO, "OCB: \"%a\" not present in \"%a\" ignoring visibility\n", InstanceIdentifier, Visibility));
+      FreePool (Visibility);
+      return BootEntryNormal;
+    }
+  }
+
+  if (AsciiStrCmp (VisibilityCommand, "Disabled") == 0) {
     FreePool (Visibility);
     return BootEntryDisabled;
   }
 
-  if (AsciiStrnCmp (Visibility, "Auxiliary", L_STR_LEN ("Auxiliary")) == 0) {
+  if (AsciiStrCmp (VisibilityCommand, "Auxiliary") == 0) {
     FreePool (Visibility);
     return BootEntryAuxiliary;
   }
 
-  DEBUG ((DEBUG_INFO, "OCB: Discovered unsupported .contentVisibility\n"));
+  DEBUG ((DEBUG_INFO, "OCB: Discovered unsupported visibility \"%a\"\n", VisibilityCommand));
 
   FreePool (Visibility);
   return BootEntryNormal;
@@ -487,7 +542,7 @@ AddBootEntryOnFileSystem (
   //
   // Skip disabled entries, like OpenCore bootloader.
   //
-  Visibility = ReadEntryVisibility (DevicePath, IsFolder);
+  Visibility = ReadEntryVisibility (DevicePath, IsFolder, BootContext->PickerContext->InstanceIdentifier);
   if (Visibility == BootEntryDisabled) {
     DEBUG ((DEBUG_INFO, "OCB: Discarding disabled entry by visibility\n"));
     if (IsReallocated) {
