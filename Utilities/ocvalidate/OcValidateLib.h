@@ -84,6 +84,18 @@ AsciiArchIsLegal (
   );
 
 /**
+  Check if an OpenCore Configuration stringified KCType matches specific conventions.
+
+  @param[in]  KCType                   Kext Collection type to be checked.
+
+  @retval     TRUE                     If KCType matches conventions.
+**/
+BOOLEAN
+AsciiKCTypeIsLegal (
+  IN  CONST CHAR8  *KCType
+  );
+
+/**
   Check if an OpenCore Configuration Property contains only ASCII printable characters.
   This is mainly used in Device Properties and NVRAM Properties.
 

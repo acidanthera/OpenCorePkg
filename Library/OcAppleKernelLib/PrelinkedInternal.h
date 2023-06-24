@@ -215,6 +215,24 @@ InternalCachedPrelinkedKernel (
   );
 
 /**
+  Scan a kext for __LINKEDIT and SymbolTable
+**/
+VOID
+InternalScanCurrentPrelinkedKextLinkInfo (
+  IN OUT PRELINKED_KEXT     *Kext,
+  IN     PRELINKED_CONTEXT  *Context
+  );
+
+/**
+  Construct Kext->LinkedSymbolTable using normal LINKEDIT building
+**/
+EFI_STATUS
+InternalScanBuildLinkedSymbolTable (
+  IN OUT PRELINKED_KEXT     *Kext,
+  IN     PRELINKED_CONTEXT  *Context
+  );
+
+/**
   Scan PRELINKED_KEXT for dependencies.
 **/
 EFI_STATUS

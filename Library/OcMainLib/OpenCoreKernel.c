@@ -252,6 +252,7 @@ OcKernelLoadAndReserveKext (
   CHAR8        *Comment;
   CONST CHAR8  *Arch;
   CHAR8        *PlistPath;
+  CONST CHAR8  *TargetKC;
   CHAR8        *ExecutablePath;
   CHAR16       FullPath[OC_STORAGE_SAFE_PATH_MAX];
 
@@ -280,6 +281,7 @@ OcKernelLoadAndReserveKext (
   Comment    = OC_BLOB_GET (&Kext->Comment);
   Arch       = OC_BLOB_GET (&Kext->Arch);
   PlistPath  = OC_BLOB_GET (&Kext->PlistPath);
+  TargetKC   = OC_BLOB_GET (&Kext->TargetKC);
   if ((BundlePath[0] == '\0') || (PlistPath[0] == '\0') || (IsForced && (Identifier[0] == '\0'))) {
     DEBUG ((
       DEBUG_ERROR,
@@ -424,6 +426,11 @@ OcKernelLoadAndReserveKext (
     }
   }
 
+  // No need to reserve kext size for Lilu injections
+  if (AsciiStrCmp (TargetKC, "Boot") != 0) {
+    return;
+  }
+
   if ((CacheType == CacheTypeCacheless) || (CacheType == CacheTypeMkext)) {
     Status = MkextReserveKextSize (
                ReservedInfoSize,
@@ -565,7 +572,9 @@ OcKernelInjectKext (
   CHAR8        FullPath[OC_STORAGE_SAFE_PATH_MAX];
   UINT32       MaxKernel;
   UINT32       MinKernel;
+  CONST CHAR8  *TargetKC;
   CHAR8        BundleVersion[MAX_INFO_BUNDLE_VERSION_KEY_SIZE];
+  UINT8        KCType;
 
   if (!Kext->Enabled || (Kext->PlistData == NULL)) {
     return;
@@ -576,6 +585,25 @@ OcKernelInjectKext (
   Comment    = OC_BLOB_GET (&Kext->Comment);
   MaxKernel  = OcParseDarwinVersion (OC_BLOB_GET (&Kext->MaxKernel));
   MinKernel  = OcParseDarwinVersion (OC_BLOB_GET (&Kext->MinKernel));
+  if (!IsForced) {
+    TargetKC = OC_BLOB_GET (&Kext->TargetKC);
+    Status   = AsciiKCTypeToInt (TargetKC, &KCType);
+    if (EFI_ERROR (Status)) {
+      DEBUG ((
+        DEBUG_INFO,
+        "OC: %a%a injection skips %a (%a) kext at %u due to invalid target KC %a\n",
+        PRINT_KERNEL_CACHE_TYPE (CacheType),
+        IsForced ? " force" : "",
+        BundlePath,
+        Comment,
+        Index,
+        TargetKC
+        ));
+      return;
+    }
+  } else {
+    KCType = 1;
+  }
 
   //
   // Assume no bundle version from the beginning.
@@ -640,17 +668,35 @@ OcKernelInjectKext (
                BundleVersion
                );
   } else if (CacheType == CacheTypePrelinked) {
-    Status = PrelinkedInjectKext (
-               Context,
-               IsForced ? Identifier : NULL,
-               IsForced ? BundlePath : FullPath,
-               Kext->PlistData,
-               Kext->PlistDataSize,
-               ExecutablePath,
-               Kext->ImageData,
-               Kext->ImageDataSize,
-               BundleVersion
-               );
+    if (KCType == 1) {
+      Status = PrelinkedInjectKext (
+                 Context,
+                 IsForced ? Identifier : NULL,
+                 IsForced ? BundlePath : FullPath,
+                 Kext->PlistData,
+                 Kext->PlistDataSize,
+                 ExecutablePath,
+                 Kext->ImageData,
+                 Kext->ImageDataSize,
+                 BundleVersion
+                 );
+    } else {
+ #ifdef EFIUSER
+      Status = EFI_SUCCESS;
+ #else
+      Status = PrelinkedPassKextToLilu (
+                 Context,
+                 KCType,
+                 BundlePath,
+                 Kext->PlistData,
+                 Kext->PlistDataSize,
+                 ExecutablePath,
+                 Kext->ImageData,
+                 Kext->ImageDataSize,
+                 BundleVersion
+                 );
+ #endif
+    }
   } else {
     Status = EFI_UNSUPPORTED;
   }
@@ -754,6 +800,12 @@ OcKernelInjectKexts (
       );
 
     Status = PrelinkedInjectComplete (Context);
+ #ifndef EFIUSER
+    if (!EFI_ERROR (Status)) {
+      Status = PrelinkedSetLiluInfo (Context);
+    }
+
+ #endif
   } else {
     Status = EFI_UNSUPPORTED;
   }

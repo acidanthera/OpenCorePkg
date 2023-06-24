@@ -379,6 +379,8 @@
 				<string>8.0.0</string>
 				<key>PlistPath</key>
 				<string>Contents/Info.plist</string>
+				<key>TargetKC</key>
+				<string>Boot</string>
 			</dict>
 			<dict>
 				<key>Arch</key>
@@ -397,6 +399,8 @@
 				<string>8.0.0</string>
 				<key>PlistPath</key>
 				<string>Contents/Info.plist</string>
+				<key>TargetKC</key>
+				<string>Boot</string>
 			</dict>
 			<dict>
 				<key>Arch</key>
@@ -415,6 +419,8 @@
 				<string>10.0.0</string>
 				<key>PlistPath</key>
 				<string>Contents/Info.plist</string>
+				<key>TargetKC</key>
+				<string>Boot</string>
 			</dict>
 			<dict>
 				<key>Arch</key>
@@ -433,6 +439,8 @@
 				<string>8.0.0</string>
 				<key>PlistPath</key>
 				<string>Contents/Info.plist</string>
+				<key>TargetKC</key>
+				<string>Boot</string>
 			</dict>
 			<dict>
 				<key>Arch</key>
@@ -451,6 +459,8 @@
 				<string>13.0.0</string>
 				<key>PlistPath</key>
 				<string>Contents/Info.plist</string>
+				<key>TargetKC</key>
+				<string>Boot</string>
 			</dict>
 			<dict>
 				<key>Arch</key>
@@ -469,6 +479,8 @@
 				<string>15.0.0</string>
 				<key>PlistPath</key>
 				<string>Contents/Info.plist</string>
+				<key>TargetKC</key>
+				<string>Boot</string>
 			</dict>
 			<dict>
 				<key>Arch</key>
@@ -487,6 +499,8 @@
 				<string>19.0.0</string>
 				<key>PlistPath</key>
 				<string>Contents/Info.plist</string>
+				<key>TargetKC</key>
+				<string>Boot</string>
 			</dict>
 			<dict>
 				<key>Arch</key>
@@ -505,6 +519,8 @@
 				<string>15.0.0</string>
 				<key>PlistPath</key>
 				<string>Contents/Info.plist</string>
+				<key>TargetKC</key>
+				<string>Boot</string>
 			</dict>
 			<dict>
 				<key>Arch</key>
@@ -523,6 +539,8 @@
 				<string>15.0.0</string>
 				<key>PlistPath</key>
 				<string>Contents/Info.plist</string>
+				<key>TargetKC</key>
+				<string>Boot</string>
 			</dict>
 			<dict>
 				<key>Arch</key>
@@ -541,6 +559,8 @@
 				<string>15.0.0</string>
 				<key>PlistPath</key>
 				<string>Contents/Info.plist</string>
+				<key>TargetKC</key>
+				<string>Boot</string>
 			</dict>
 			<dict>
 				<key>Arch</key>
@@ -559,6 +579,8 @@
 				<string>15.0.0</string>
 				<key>PlistPath</key>
 				<string>Contents/Info.plist</string>
+				<key>TargetKC</key>
+				<string>Boot</string>
 			</dict>
 			<dict>
 				<key>Arch</key>
@@ -577,6 +599,8 @@
 				<string>15.0.0</string>
 				<key>PlistPath</key>
 				<string>Contents/Info.plist</string>
+				<key>TargetKC</key>
+				<string>Boot</string>
 			</dict>
 			<dict>
 				<key>Arch</key>
@@ -595,6 +619,8 @@
 				<string>12.0.0</string>
 				<key>PlistPath</key>
 				<string>Contents/Info.plist</string>
+				<key>TargetKC</key>
+				<string>Boot</string>
 			</dict>
 			<dict>
 				<key>Arch</key>
@@ -613,6 +639,8 @@
 				<string>12.0.0</string>
 				<key>PlistPath</key>
 				<string>Contents/Info.plist</string>
+				<key>TargetKC</key>
+				<string>Boot</string>
 			</dict>
 			<dict>
 				<key>Arch</key>
@@ -631,6 +659,8 @@
 				<string>17.0.0</string>
 				<key>PlistPath</key>
 				<string>Contents/Info.plist</string>
+				<key>TargetKC</key>
+				<string>Boot</string>
 			</dict>
 			<dict>
 				<key>Arch</key>
@@ -649,6 +679,8 @@
 				<string>18.0.0</string>
 				<key>PlistPath</key>
 				<string>Contents/Info.plist</string>
+				<key>TargetKC</key>
+				<string>Boot</string>
 			</dict>
 		</array>
 		<key>Block</key>
@@ -668,6 +700,8 @@
 				<string></string>
 				<key>Strategy</key>
 				<string>Disable</string>
+				<key>TargetKC</key>
+				<string>Boot</string>
 			</dict>
 		</array>
 		<key>Emulate</key>

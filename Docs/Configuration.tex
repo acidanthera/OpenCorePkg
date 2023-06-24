@@ -2101,6 +2101,21 @@ Kernel and kext changes apply with the following effective order:
   (e.g. \texttt{Contents/MacOS/Lilu}).
 
 \item
+  \texttt{TargetKC}\\
+  \textbf{Type}: \texttt{plist\ string}\\
+  \textbf{Failsafe}: \texttt{Boot} (Inject into the Boot Kext Collection)\\
+  \textbf{Description}: Target KC for the specific kernel extension. Ignored if running macOS 15 (Catalina) or older.
+
+  \hypertarget{targetkc}Valid values:
+
+  \begin{itemize}
+    \tightlist
+    \item \texttt{Boot} --- Inject into the Boot Kext Collection (default).
+    \item \texttt{System} --- Inject into the System Kext Collection (\texttt{/System/Library/Extensions}).
+    \item \texttt{Auxiliary} --- Inject into the Auxiliary Kext Collection (\texttt{/Library/Extensions}).
+  \end{itemize}
+
+\item
   \texttt{MaxKernel}\\
   \textbf{Type}: \texttt{plist\ string}\\
   \textbf{Failsafe}: Empty\\
@@ -2188,6 +2203,14 @@ Kernel and kext changes apply with the following effective order:
   \textbf{Failsafe}: Empty\\
   \textbf{Description}: Kext bundle identifier
     (e.g. \texttt{com.apple.driver.AppleTyMCEDriver}).
+
+\item
+  \texttt{TargetKC}\\
+  \textbf{Type}: \texttt{plist\ string}\\
+  \textbf{Failsafe}: \texttt{Boot} (Block kext contained in the Boot Kext Collection)\\
+  \textbf{Description}: Target KC for the specific kernel extension. Ignored if running macOS 15 (Catalina) or older.
+
+  \emph{Note}: Refer to the \hyperlink{targetkc}{\texttt{Add\ TargetKC} description} for valid values.
 
 \item
   \texttt{MaxKernel}\\

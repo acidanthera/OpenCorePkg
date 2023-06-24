@@ -136,6 +136,7 @@ CheckKernelAdd (
   CONST CHAR8  *MaxKernel;
   CONST CHAR8  *MinKernel;
   CONST CHAR8  *PlistPath;
+  CONST CHAR8  *TargetKC;
   UINTN        PlistFixedSize;
   UINTN        PlistPathSumSize;
   BOOLEAN      IsLiluUsed;
@@ -157,6 +158,7 @@ CheckKernelAdd (
     MaxKernel      = OC_BLOB_GET (&Config->Kernel.Add.Values[Index]->MaxKernel);
     MinKernel      = OC_BLOB_GET (&Config->Kernel.Add.Values[Index]->MinKernel);
     PlistPath      = OC_BLOB_GET (&Config->Kernel.Add.Values[Index]->PlistPath);
+    TargetKC       = OC_BLOB_GET (&Config->Kernel.Add.Values[Index]->TargetKC);
 
     //
     // Sanitise strings.
@@ -233,6 +235,11 @@ CheckKernelAdd (
         AsciiStrLen (ExecutablePath),
         OC_STORAGE_SAFE_PATH_MAX - ExecutableFixedSize
         ));
+      ++ErrorCount;
+    }
+
+    if (!AsciiKCTypeIsLegal (TargetKC)) {
+      DEBUG ((DEBUG_WARN, "Kernel->Add[%u]->TargetKC is borked (Can only be Boot, System, or Auxiliary)!\n", Index));
       ++ErrorCount;
     }
 
@@ -369,6 +376,7 @@ CheckKernelBlock (
   CONST CHAR8  *MinKernel;
   CONST CHAR8  *Identifier;
   CONST CHAR8  *Strategy;
+  CONST CHAR8  *TargetKC;
 
   ErrorCount = 0;
 
@@ -379,6 +387,7 @@ CheckKernelBlock (
     MaxKernel  = OC_BLOB_GET (&Config->Kernel.Block.Values[Index]->MaxKernel);
     MinKernel  = OC_BLOB_GET (&Config->Kernel.Block.Values[Index]->MinKernel);
     Strategy   = OC_BLOB_GET (&Config->Kernel.Block.Values[Index]->Strategy);
+    TargetKC   = OC_BLOB_GET (&Config->Kernel.Block.Values[Index]->TargetKC);
 
     //
     // Sanitise strings.
@@ -395,6 +404,11 @@ CheckKernelBlock (
 
     if (!AsciiIdentifierIsLegal (Identifier, TRUE)) {
       DEBUG ((DEBUG_WARN, "Kernel->Block[%u]->Identifier contains illegal character!\n", Index));
+      ++ErrorCount;
+    }
+
+    if (!AsciiKCTypeIsLegal (TargetKC)) {
+      DEBUG ((DEBUG_WARN, "Kernel->Block[%u]->TargetKC is borked (Can only be Boot, System, or Auxiliary)!\n", Index));
       ++ErrorCount;
     }
 

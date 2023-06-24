@@ -95,6 +95,11 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 #define OC_VENDOR_BOOT_NEXT_VARIABLE_NAME  OC_VENDOR_BOOT_VARIABLE_PREFIX L"Next"
 
 //
+// Variable used for passing info to Lilu
+//
+#define OC_LILU_INFO_ADDR_VARIABLE_NAME  L"lilu-info"
+
+//
 // 4D1FDA02-38C7-4A6A-9CC6-4BCCA8B30102
 // This GUID is specifically used for normal variable access by Lilu kernel extension and its plugins.
 //

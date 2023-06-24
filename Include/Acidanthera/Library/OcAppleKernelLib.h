@@ -168,6 +168,159 @@ typedef enum KERNEL_CACHE_TYPE_ {
 #define KERNEL_VERSION_MONTEREY_MAX       (KERNEL_VERSION_VENTURA_MIN - 1)
 
 //
+// Lilu integration structs
+//
+#pragma pack(1)
+//
+// Prelinked symbols passed to Lilu
+//
+typedef struct {
+  //
+  // Version of the format (currently 0)
+  //
+  UINT8     Version;
+  //
+  // Size of all LILU_PRELINKED_SYMBOLS_* structs
+  //
+  UINT32    Size;
+  //
+  // Number of symbols
+  //
+  UINT32    NumberOfSymbols;
+} LILU_PRELINKED_SYMBOLS_HEADER;
+
+typedef struct {
+  //
+  // Value of this symbol (or stab offset)
+  //
+  UINT64    SymbolValue;
+  //
+  // Length of this entry
+  //
+  UINT32    EntryLength;
+  //
+  // Length of this symbol's name
+  //
+  UINT32    SymbolNameLength;
+  //
+  // This symbols's name
+  //
+  CHAR8     SymbolName[];
+} LILU_PRELINKED_SYMBOLS_ENTRY;
+
+//
+// Kext injection info/request passed to Lilu
+//
+typedef struct {
+  //
+  // Version of the format (currently 0)
+  //
+  UINT8     Version;
+  //
+  // Length of this entry, including the plist and the executable
+  //
+  UINT32    EntryLength;
+  //
+  // KC type to inject into
+  //
+  UINT8     KCType;
+  //
+  // The bundle path
+  //
+  CHAR8     BundlePath[128];
+  //
+  // Offset to the plist
+  //
+  UINT32    InfoPlistOffset;
+  //
+  // Size of the plist
+  //
+  UINT32    InfoPlistSize;
+  //
+  // The executable path (Used iff ExecutableOffset != 0)
+  //
+  CHAR8     ExecutablePath[512];
+  //
+  // Offset to the executable (0 if there isn't an executable)
+  //
+  UINT32    ExecutableOffset;
+  //
+  // Size of the executable (Used iff ExecutableOffset != 0)
+  //
+  UINT32    ExecutableSize;
+} LILU_INJECTION_INFO;
+
+//
+// Kext block info/request passed to Lilu
+//
+typedef struct {
+  //
+  // Version of the format (currently 0)
+  //
+  UINT8     Version;
+  //
+  // Size of the entire LILU_BLOCK_INFO struct
+  //
+  UINT32    Size;
+  //
+  // Number of kexts to exclude
+  //
+  UINT32    KextCount;
+} LILU_BLOCK_INFO_HEADER;
+
+typedef struct {
+  //
+  // The kext identifier
+  //
+  CHAR8      Identifier[128];
+  //
+  // Whether to Block (false) or to Exclude (true)
+  //
+  BOOLEAN    Exclude;
+  //
+  // The KC type
+  //
+  UINT8      KCType;
+} LILU_BLOCK_INFO_ENTRY;
+
+typedef struct {
+  //
+  // The header
+  //
+  LILU_BLOCK_INFO_HEADER    Header;
+  //
+  // The kexts to exclude
+  //
+  LILU_BLOCK_INFO_ENTRY     Entries[1];
+} LILU_BLOCK_INFO;
+
+// The maximum size of LILU_BLOCK_INFO allowed on version 0
+#define LILU_BLOCK_INFO_SIZE_LIMIT_VERSION_0  16384
+
+typedef struct {
+  //
+  // The magic
+  //
+  UINT32    Magic;
+  //
+  // The amount of kexts to inject
+  //
+  UINT32    KextCount;
+  //
+  // The physical address of the LILU_PRELINKED_SYMBOLS struct
+  //
+  UINT64    PrelinkedSymbolsAddr;
+  //
+  // The physical address of the LILU_BLOCK_INFO struct
+  //
+  UINT64    BlockInfoAddr;
+} LILU_INFO;
+
+// The magic header of LILU_INFO
+#define LILU_INFO_MAGIC  0xC4EF7155
+#pragma pack()
+
+//
 // Prelinked context used for kernel modification.
 //
 typedef struct {
@@ -332,6 +485,14 @@ typedef struct {
   // Prelinked is 32-bit.
   //
   BOOLEAN                                Is32Bit;
+  //
+  // Amount of kexts passed to Lilu for SysKC/AuxKC injection.
+  //
+  UINT32                                 LiluKextCount;
+  //
+  // Block info to pass to Lilu
+  //
+  LILU_BLOCK_INFO                        *LiluBlockInfos;
 } PRELINKED_CONTEXT;
 
 //
@@ -844,6 +1005,18 @@ PrelinkedInjectComplete (
   );
 
 /**
+  Pass info used during Lilu SysKC/AuxKC injection after prelinked kext injection.
+
+  @param[in,out] Context  Prelinked context.
+
+  @return  EFI_SUCCESS on success.
+**/
+EFI_STATUS
+PrelinkedSetLiluInfo (
+  IN OUT PRELINKED_CONTEXT  *Context
+  );
+
+/**
   Updated required reserve size to inject this kext.
 
   @param[in,out] ReservedInfoSize  Current reserved PLIST size, updated.
@@ -895,6 +1068,34 @@ PrelinkedInjectKext (
   );
 
 /**
+  Allocate a runtime memory buffer, place info required for kext injection in it, and pass the address to Lilu via an EFI variable.
+
+  @param[in,out] Context         Prelinked context.
+  @param[in]     KCType          Target Kext Collection's type.
+  @param[in]     BundlePath      Kext bundle path (e.g. /L/E/mykext.kext).
+  @param[in,out] InfoPlist       Kext Info.plist.
+  @param[in]     InfoPlistSize   Kext Info.plist size.
+  @param[in,out] ExecutablePath  Kext executable path (e.g. Contents/MacOS/mykext), optional.
+  @param[in,out] Executable      Kext executable, optional.
+  @param[in]     ExecutableSize  Kext executable size, optional.
+  @param[out]    BundleVersion   Kext bundle version, optionally set on request.
+
+  @return  EFI_SUCCESS on success.
+**/
+EFI_STATUS
+PrelinkedPassKextToLilu (
+  IN OUT PRELINKED_CONTEXT  *Context,
+  IN     UINT8              KCType,
+  IN     CONST CHAR8        *BundlePath,
+  IN     CONST CHAR8        *InfoPlist,
+  IN     UINT32             InfoPlistSize,
+  IN     CONST CHAR8        *ExecutablePath OPTIONAL,
+  IN     CONST UINT8        *Executable OPTIONAL,
+  IN     UINT32             ExecutableSize OPTIONAL,
+  OUT    CHAR8              BundleVersion[MAX_INFO_BUNDLE_VERSION_KEY_SIZE] OPTIONAL
+  );
+
+/**
   Apply kext patch to prelinked.
 
   @param[in,out] Context         Prelinked context.
@@ -940,6 +1141,38 @@ PrelinkedContextBlock (
   IN OUT PRELINKED_CONTEXT  *Context,
   IN     CONST CHAR8        *Identifier,
   IN     BOOLEAN            Exclude
+  );
+
+/**
+  Convert stringified KCType to UINT8.
+
+  @param[in]  KCType     Stringified KCType.
+  @param[out] KCTypeInt  Converted KCType.
+
+  @return  EFI_SUCCESS on success.
+**/
+EFI_STATUS
+AsciiKCTypeToInt (
+  IN CONST CHAR8  *KCType,
+  OUT UINT8       *KCTypeInt
+  );
+
+/**
+  Block kext in prelinked via Lilu.
+
+  @param[in,out] Context         Prelinked context.
+  @param[in]     Identifier      Kext bundle identifier.
+  @param[in]     Exclude         TRUE to exclude kext from KC.
+  @param[in]     KCType          Target Kext Collection's type.
+
+  @return  EFI_SUCCESS on success.
+**/
+EFI_STATUS
+PrelinkedContextBlockViaLilu (
+  IN OUT PRELINKED_CONTEXT  *Context,
+  IN     CONST CHAR8        *Identifier,
+  IN     BOOLEAN            Exclude,
+  IN     UINT8              KCType
   );
 
 /**
