@@ -679,6 +679,8 @@
 				<string>18.0.0</string>
 				<key>PlistPath</key>
 				<string>Contents/Info.plist</string>
+				<key>TargetKC</key>
+				<string>Boot</string>
 			</dict>
 		</array>
 		<key>Block</key>
