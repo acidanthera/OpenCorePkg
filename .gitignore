@@ -60,6 +60,7 @@ Utilities/ACPIe/ACPIe
 Utilities/acdtinfo/acdtinfo
 Utilities/disklabel/disklabel
 Utilities/EfiResTool/EfiResTool
+Utilities/ext4read/ext4read
 Utilities/macserial/macserial
 Utilities/icnspack/icnspack
 Utilities/ocpasswordgen/ocpasswordgen
