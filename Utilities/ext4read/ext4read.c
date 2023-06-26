@@ -11,8 +11,8 @@
 #include <UserMemory.h>
 #include <UserUnicodeCollation.h>
 
-STATIC UINTN                            mImageSize;
-STATIC CONST UINT8                      *mImagePointer;
+STATIC FILE                             *mImageFp;
+STATIC UINT64                           mImageSize;
 STATIC EFI_SIMPLE_FILE_SYSTEM_PROTOCOL  *mEfiSfsInterface;
 
 void
@@ -183,7 +183,13 @@ UserReadDisk (
     return EFI_INVALID_PARAMETER;
   }
 
-  CopyMem (Buffer, mImagePointer + Offset, BufferSize);
+  if (fseek (mImageFp, Offset, SEEK_SET) != 0) {
+    return EFI_VOLUME_CORRUPTED;
+  }
+
+  if (fread (Buffer, BufferSize, 1, mImageFp) != 1) {
+    return EFI_VOLUME_CORRUPTED;
+  }
 
   return EFI_SUCCESS;
 }
@@ -194,8 +200,8 @@ ENTRY_POINT (
   char  **argv
   )
 {
-  UINT8                  *Image;
-  UINT32                 ImageSize;
+  FILE                   *ImageFp;
+  UINT64                 ImageSize;
   EFI_STATUS             Status;
   EFI_FILE_INFO          *Info;
   UINTN                  Len;
@@ -210,6 +216,8 @@ ENTRY_POINT (
   VOID                   *TmpBuffer;
   EFI_FILE_PROTOCOL      *NewHandle;
 
+  SetPoolAllocationSizeLimit (BASE_1GB | BASE_2GB);
+
   DeviceHandle = (EFI_HANDLE)0xDEADBEAFULL;
 
   gBS->InstallMultipleProtocolInterfaces = WrapInstallMultipleProtocolInterfaces;
@@ -222,15 +230,34 @@ ENTRY_POINT (
   //
   // Open Ext4 user image
   //
-  Image = UserReadFile (argv[1], &ImageSize);
+  ImageFp = fopen (argv[1], "rb");
 
-  if (Image == NULL) {
-    DEBUG ((DEBUG_ERROR, "Read fail\n"));
+  if (ImageFp == NULL) {
+    DEBUG ((DEBUG_ERROR, "Can't open image file\n"));
     return EXIT_FAILURE;
   }
 
-  mImageSize    = ImageSize;
-  mImagePointer = Image;
+  if (fseek (ImageFp, 0, SEEK_END) != 0) {
+    DEBUG ((DEBUG_ERROR, "Can't set file position\n"));
+    fclose (ImageFp);
+    return EXIT_FAILURE;
+  }
+
+  ImageSize = ftell (ImageFp);
+  if (ImageSize <= 0) {
+    DEBUG ((DEBUG_ERROR, "Incorrect file size\n"));
+    fclose (ImageFp);
+    return EXIT_FAILURE;
+  }
+
+  if (fseek (ImageFp, 0, SEEK_SET) != 0) {
+    DEBUG ((DEBUG_ERROR, "Can't rewind file position to the start\n"));
+    fclose (ImageFp);
+    return EXIT_FAILURE;
+  }
+
+  mImageFp   = ImageFp;
+  mImageSize = ImageSize;
 
   //
   // Prepare Filename to read from partition
@@ -245,7 +272,7 @@ ENTRY_POINT (
   Status = AsciiStrToUnicodeStrS (argv[2], FileName, strlen (argv[2]) + 1);
   if (EFI_ERROR (Status)) {
     DEBUG ((DEBUG_ERROR, "Can't convert given filename into UnicodeStr\n"));
-    FreePool (Image);
+    fclose (ImageFp);
     FreePool (FileName);
     return EXIT_FAILURE;
   }
@@ -255,7 +282,7 @@ ENTRY_POINT (
   //
   DiskIo = AllocateZeroPool (sizeof (EFI_DISK_IO_PROTOCOL));
   if (DiskIo == NULL) {
-    FreePool (Image);
+    fclose (ImageFp);
     FreePool (FileName);
     return EXIT_FAILURE;
   }
@@ -264,7 +291,7 @@ ENTRY_POINT (
 
   BlockIo = AllocateZeroPool (sizeof (EFI_BLOCK_IO_PROTOCOL));
   if (BlockIo == NULL) {
-    FreePool (Image);
+    fclose (ImageFp);
     FreePool (FileName);
     FreePool (DiskIo);
     return EXIT_FAILURE;
@@ -272,7 +299,7 @@ ENTRY_POINT (
 
   BlockIo->Media = AllocateZeroPool (sizeof (EFI_BLOCK_IO_MEDIA));
   if (BlockIo->Media == NULL) {
-    FreePool (Image);
+    fclose (ImageFp);
     FreePool (FileName);
     FreePool (DiskIo);
     FreePool (BlockIo);
@@ -295,7 +322,7 @@ ENTRY_POINT (
 
   if (EFI_ERROR (Status)) {
     DEBUG ((DEBUG_ERROR, "[ext4] Error mounting: %r\n", Status));
-    FreePool (Image);
+    fclose (ImageFp);
     FreePool (FileName);
     FreePool (BlockIo->Media);
     FreePool (BlockIo);
@@ -322,7 +349,7 @@ ENTRY_POINT (
   if (Status == EFI_BUFFER_TOO_SMALL) {
     Info = AllocateZeroPool (Len);
     if (Info == NULL) {
-      FreePool (Image);
+      fclose (ImageFp);
       FreeAll (FileName, Part);
       return EXIT_FAILURE;
     }
@@ -331,7 +358,7 @@ ENTRY_POINT (
     if (EFI_ERROR (Status)) {
       DEBUG ((DEBUG_ERROR, "Couldn't get file information \n"));
       FreePool (Info);
-      FreePool (Image);
+      fclose (ImageFp);
       FreeAll (FileName, Part);
       return EXIT_FAILURE;
     }
@@ -339,10 +366,9 @@ ENTRY_POINT (
 
   Buffer     = AllocateZeroPool (Info->FileSize);
   BufferSize = Info->FileSize;
-
   if (Buffer == NULL) {
     FreePool (Info);
-    FreePool (Image);
+    fclose (ImageFp);
     FreeAll (FileName, Part);
     return EXIT_FAILURE;
   }
@@ -356,7 +382,7 @@ ENTRY_POINT (
     if (TmpBuffer == NULL) {
       FreePool (Buffer);
       FreePool (Info);
-      FreePool (Image);
+      fclose (ImageFp);
       FreeAll (FileName, Part);
       return EXIT_FAILURE;
     }
@@ -367,7 +393,7 @@ ENTRY_POINT (
     if (EFI_ERROR (Status)) {
       DEBUG ((DEBUG_WARN, "Couldn't read file with Status: %r \n", Status));
       FreePool (Info);
-      FreePool (Image);
+      fclose (ImageFp);
       FreeAll (FileName, Part);
       return EXIT_FAILURE;
     }
@@ -383,7 +409,7 @@ ENTRY_POINT (
   }
 
   FreePool (Buffer);
-  FreePool (Image);
+  fclose (ImageFp);
   FreeAll (FileName, Part);
   return EXIT_SUCCESS;
 }
