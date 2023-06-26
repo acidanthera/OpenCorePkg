@@ -71,6 +71,6 @@
 
 # REF: https://github.com/madler/zlib/issues/633
 [BuildOptions]
-  CLANGPDB:*_*_*_CC_FLAGS = -Wno-deprecated-non-prototype
-  CLANGGCC:*_*_*_CC_FLAGS = -Wno-deprecated-non-prototype
-  XCODE:*_*_*_CC_FLAGS    = -Wno-deprecated-non-prototype -Wno-unknown-warning-option
+  CLANGPDB:*_*_*_CC_FLAGS     = -Wno-deprecated-non-prototype
+  GCC:*_CLANGDWARF_*_CC_FLAGS = -Wno-deprecated-non-prototype
+  XCODE:*_*_*_CC_FLAGS        = -Wno-deprecated-non-prototype -Wno-unknown-warning-option
