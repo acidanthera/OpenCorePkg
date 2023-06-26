@@ -148,7 +148,7 @@ jobs:
 
   build-windows:
     name: Windows VS2019
-    runs-on: windows-2019
+    runs-on: windows-latest
     env:
       HAS_OPENSSL_BUILD: 0
       CC: gcc

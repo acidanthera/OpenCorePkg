@@ -15,11 +15,10 @@
 #include "OcApfsInternal.h"
 #include <Library/BaseLib.h>
 #include <Library/BaseMemoryLib.h>
+#include <Library/BaseOverflowLib.h>
 #include <Library/DebugLib.h>
 #include <Library/MemoryAllocationLib.h>
 #include <Library/OcApfsLib.h>
-#include <Library/OcGuardLib.h>
-#include <Library/OcPeCoffLib.h>
 
 STATIC
 UINT64
@@ -220,7 +219,7 @@ ApfsReadDriver (
   EFI_LBA                Lba;
 
   EfiFileSize = JumpStart->EfiFileLen / PrivateData->ApfsBlockSize + 1;
-  if (OcOverflowMulUN (EfiFileSize, PrivateData->ApfsBlockSize, &EfiFileSize)) {
+  if (BaseOverflowMulUN (EfiFileSize, PrivateData->ApfsBlockSize, &EfiFileSize)) {
     return EFI_SECURITY_VIOLATION;
   }
 
@@ -241,7 +240,7 @@ ApfsReadDriver (
                 );
 
     if (  (JumpStart->RecordExtents[Index].BlockCount > MAX_UINTN)
-       || OcOverflowMulUN ((UINTN)JumpStart->RecordExtents[Index].BlockCount, PrivateData->ApfsBlockSize, &ChunkSize)
+       || BaseOverflowMulUN ((UINTN)JumpStart->RecordExtents[Index].BlockCount, PrivateData->ApfsBlockSize, &ChunkSize)
        || (ChunkSize > EfiFileSize))
     {
       FreePool (EfiFile);

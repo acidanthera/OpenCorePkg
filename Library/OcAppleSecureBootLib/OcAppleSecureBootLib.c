@@ -22,11 +22,11 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 
 #include <Library/BaseLib.h>
 #include <Library/BaseMemoryLib.h>
+#include <Library/BaseOverflowLib.h>
 #include <Library/DebugLib.h>
 #include <Library/MemoryAllocationLib.h>
 #include <Library/OcDevicePathLib.h>
 #include <Library/OcFileLib.h>
-#include <Library/OcGuardLib.h>
 #include <Library/OcMiscLib.h>
 #include <Library/OcStringLib.h>
 #include <Library/PrintLib.h>
@@ -595,7 +595,7 @@ InternalGetImg4ByPath (
     return EFI_NO_MEDIA;
   }
 
-  Result = OcOverflowAddUN (
+  Result = BaseOverflowAddUN (
              ImagePathSize,
              ManifestSuffixMaxSize,
              &ManifestPathSize

@@ -331,7 +331,7 @@ XmlPushReference (
   }
 
   if (ReferenceNumber >= References->RefAllocCount) {
-    if (OcOverflowAddMulU32 (ReferenceNumber, 1, 2, &NewRefAllocCount)) {
+    if (BaseOverflowAddMulU32 (ReferenceNumber, 1, 2, &NewRefAllocCount)) {
       return FALSE;
     }
 
@@ -549,7 +549,7 @@ XmlParserPeek (
 
   ASSERT (Parser != NULL);
 
-  if (  !OcOverflowAddU32 (Parser->Position, N, &Position)
+  if (  !BaseOverflowAddU32 (Parser->Position, N, &Position)
      && (Position < Parser->Length))
   {
     return Parser->Buffer[Position];
@@ -611,7 +611,7 @@ XmlParserConsume (
   //
   // Move the position forward.
   //
-  if (  OcOverflowAddU32 (Parser->Position, N, &Parser->Position)
+  if (  BaseOverflowAddU32 (Parser->Position, N, &Parser->Position)
      || (Parser->Position > Parser->Length))
   {
     Parser->Position = Parser->Length;
@@ -1395,7 +1395,7 @@ XmlDocumentExport (
     // but the allocated buffer does. During this reallocation, we count the null terminator
     // of the plist header instead to ensure allocated buffer is the proper size.
     //
-    if (OcOverflowAddU32 (CurrentSize, L_STR_SIZE (XML_PLIST_HEADER), &NewSize)) {
+    if (BaseOverflowAddU32 (CurrentSize, L_STR_SIZE (XML_PLIST_HEADER), &NewSize)) {
       FreePool (Buffer);
       return NULL;
     }

@@ -548,6 +548,7 @@ CheckUefiOutput (
   )
 {
   UINT32       ErrorCount;
+  CONST CHAR8  *InitialMode;
   CONST CHAR8  *TextRenderer;
   CONST CHAR8  *GopPassThrough;
   BOOLEAN      IsTextRendererSystem;
@@ -555,6 +556,7 @@ CheckUefiOutput (
   BOOLEAN      IsIgnoreTextInGraphicsEnabled;
   BOOLEAN      IsReplaceTabWithSpaceEnabled;
   BOOLEAN      IsSanitiseClearScreenEnabled;
+  CONST CHAR8  *ConsoleFont;
   CONST CHAR8  *ConsoleMode;
   CONST CHAR8  *Resolution;
   UINT32       UserWidth;
@@ -571,6 +573,15 @@ CheckUefiOutput (
   //
   // Sanitise strings.
   //
+  InitialMode = OC_BLOB_GET (&Config->Uefi.Output.InitialMode);
+  if (  (AsciiStrCmp (InitialMode, "Auto") != 0)
+     && (AsciiStrCmp (InitialMode, "Text") != 0)
+     && (AsciiStrCmp (InitialMode, "Graphics") != 0))
+  {
+    DEBUG ((DEBUG_WARN, "UEFI->Output->InitialMode is illegal (Can only be Auto, Text, or Graphics)!\n"));
+    ++ErrorCount;
+  }
+
   TextRenderer = OC_BLOB_GET (&Config->Uefi.Output.TextRenderer);
   if (  (AsciiStrCmp (TextRenderer, "BuiltinGraphics") != 0)
      && (AsciiStrCmp (TextRenderer, "BuiltinText") != 0)
@@ -587,7 +598,13 @@ CheckUefiOutput (
     IsTextRendererSystem = TRUE;
   }
 
-  if (!IsTextRendererSystem) {
+  if (IsTextRendererSystem) {
+    ConsoleFont = OC_BLOB_GET (&Config->Uefi.Output.ConsoleFont);
+    if (ConsoleFont[0] != '\0') {
+      DEBUG ((DEBUG_WARN, "UEFI->Output->ConsoleFont is specified on non-Builtin TextRenderer (currently %a)!\n", TextRenderer));
+      ++ErrorCount;
+    }
+  } else {
     IsClearScreenOnModeSwitchEnabled = Config->Uefi.Output.ClearScreenOnModeSwitch;
     if (IsClearScreenOnModeSwitchEnabled) {
       DEBUG ((DEBUG_WARN, "UEFI->Output->ClearScreenOnModeSwitch is enabled on non-System TextRenderer (currently %a)!\n", TextRenderer));
@@ -633,11 +650,15 @@ CheckUefiOutput (
     &UserSetMax
     );
   if (  (ConsoleMode[0] != '\0')
-     && !UserSetMax
-     && ((UserWidth == 0) || (UserHeight == 0)))
+     && !UserSetMax)
   {
-    DEBUG ((DEBUG_WARN, "UEFI->Output->ConsoleMode is borked, please check Configurations.pdf!\n"));
-    ++ErrorCount;
+    if ((UserWidth == 0) || (UserHeight == 0)) {
+      DEBUG ((DEBUG_WARN, "UEFI->Output->ConsoleMode is borked, please check documentation!\n"));
+      ++ErrorCount;
+    } else if ((UserWidth < 80) || (UserHeight < 25)) {
+      DEBUG ((DEBUG_WARN, "UEFI->Output->ConsoleMode is below minumum supported console text resolution of 80x25, please fix!\n"));
+      ++ErrorCount;
+    }
   }
 
   //
@@ -655,7 +676,7 @@ CheckUefiOutput (
      && !UserSetMax
      && ((UserWidth == 0) || (UserHeight == 0)))
   {
-    DEBUG ((DEBUG_WARN, "UEFI->Output->Resolution is borked, please check Configurations.pdf!\n"));
+    DEBUG ((DEBUG_WARN, "UEFI->Output->Resolution is borked, please check documentation!\n"));
     ++ErrorCount;
   }
 

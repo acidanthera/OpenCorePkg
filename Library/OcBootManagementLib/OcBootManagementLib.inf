@@ -88,11 +88,13 @@
 [LibraryClasses]
   BaseLib
   BaseMemoryLib
+  BaseOverflowLib
   DebugLib
   DevicePathLib
   MemoryAllocationLib
   PrintLib
   UefiBootServicesTableLib
+  UefiImageLib
   OcApfsLib
   OcAppleBootPolicyLib
   OcAppleChunklistLib
@@ -106,10 +108,8 @@
   OcDevicePathLib
   OcFileLib
   OcFlexArrayLib
-  OcGuardLib
   OcMachoLib
   OcMiscLib
-  OcPeCoffLib
   OcRtcLib
   OcTypingLib
   OcVariableLib

@@ -17,9 +17,9 @@
 
 #include <Library/UefiLib.h>
 #include <Library/BaseMemoryLib.h>
+#include <Library/BaseOverflowLib.h>
 #include <Library/MtrrLib.h>
 #include <Library/OcDebugLogLib.h>
-#include <Library/OcGuardLib.h>
 #include <Library/OcMemoryLib.h>
 
 #include <Register/Intel/Cpuid.h>
@@ -173,7 +173,7 @@ OcSetPatIndexForAddressRange (
   EFI_PHYSICAL_ADDRESS  PhysicalAddr;
   UINT8                 Level;
 
-  if (OcOverflowAddU64 (VirtualAddr, Length, &EndAddr)) {
+  if (BaseOverflowAddU64 (VirtualAddr, Length, &EndAddr)) {
     return EFI_INVALID_PARAMETER;
   }
 

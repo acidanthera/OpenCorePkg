@@ -1,7 +1,7 @@
 BIOSVendor: "Apple Inc."
-BIOSVersion: "509.0.0.0.0"
-BIOSLegacyVersion: "IM181.88Z.F000.B00.2302021934"
-BIOSReleaseDate: "02/02/2023"
+BIOSVersion: "512.0.0.0.0"
+BIOSLegacyVersion: "IM181.88Z.F000.B00.2304051554"
+BIOSReleaseDate: "04/05/2023"
 SystemManufacturer: "Apple Inc."
 SystemProductName: "iMac18,1"
 SystemVersion: "1.0"
@@ -65,12 +65,12 @@ SmcPlatform:
 SmcEPCI: 0xF07009
 OEMStrings: |-
   Apple ROM Version
-    BIOS ID:      IM181.88Z.F000.B00.2302021934
+    BIOS ID:      IM181.88Z.F000.B00.2304051554
     Model:        IM181
-    EFI Version:  509.0.0.0.0
-    Built by:     root@l2snc
-    Date:         Thu Feb  2 19:34:49 2023
-    Revision:     509 (B&I)
+    EFI Version:  512.0.0.0.0
+    Built by:     root@p6h58
+    Date:         Wed Apr  5 15:54:52 2023
+    Revision:     512 (B&I)
     ROM Version:  F000_B00
     Build Type:   Official Build, RELEASE
     Compiler:     clang-1403.0.22.11
@@ -118,4 +118,4 @@ AppleModelYear:
   - 2020
   - 2021
 MinimumOSVersion: "10.12.4"
-MaximumOSVersion: null
+MaximumOSVersion: "13.4"

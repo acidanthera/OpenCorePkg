@@ -25,13 +25,15 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <Uefi.h>
 #include <Library/BaseLib.h>
 #include <Library/DebugLib.h>
-#include <Library/PrintLib.h>
-#include <Library/UefiDriverEntryPoint.h>
-#include <Library/UefiBootServicesTableLib.h>
-#include <Library/UefiRuntimeServicesTableLib.h>
+#include <Library/OcBootManagementLib.h>
 #include <Library/OcPngLib.h>
 #include <Library/OcFileLib.h>
 #include <Library/OcMiscLib.h>
+#include <Library/PrintLib.h>
+#include <Library/TimerLib.h>
+#include <Library/UefiDriverEntryPoint.h>
+#include <Library/UefiBootServicesTableLib.h>
+#include <Library/UefiRuntimeServicesTableLib.h>
 
 #include <Protocol/AppleEvent.h>
 #include <Protocol/GraphicsOutput.h>
@@ -43,6 +45,9 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // Keyboard protocol arrival event.
 //
 STATIC EFI_EVENT  mProtocolNotification;
+
+STATIC UINT64   mPreviousTime     = 0;
+STATIC BOOLEAN  mEnableMouseClick = FALSE;
 
 STATIC
 EFI_STATUS
@@ -310,6 +315,8 @@ AppleEventKeyHandler (
   IN VOID                     *NotifyContext
   )
 {
+  UINT64  CurrTime;
+
   //
   // Mark the context argument as used.
   //
@@ -318,15 +325,31 @@ AppleEventKeyHandler (
   //
   // Ignore invalid information if it happened to arrive.
   //
-  if ((Information == NULL) || ((Information->EventType & APPLE_EVENT_TYPE_KEY_UP) == 0)) {
+  if (Information == NULL) {
     return;
   }
 
-  if (Information->EventData.KeyData->AppleKeyCode == AppleHidUsbKbUsageKeyF10) {
+  if (  ((Information->EventType & APPLE_EVENT_TYPE_KEY_DOWN) != 0)
+     && (Information->EventData.KeyData->AppleKeyCode == AppleHidUsbKbUsageKeyF10))
+  {
     //
     // Take a screenshot for F10.
     //
     TakeScreenshot (NULL);
+  }
+
+  if (mEnableMouseClick && ((Information->EventType & APPLE_EVENT_TYPE_MOUSE_CLICK) != 0)) {
+    //
+    // Debounce, prevents multiple detections from one click.
+    //
+    CurrTime = GetTimeInNanoSecond (GetPerformanceCounter ());
+    if (CurrTime - mPreviousTime > MS_TO_NANOSECONDS (1000ULL)) {
+      //
+      // Take a screenshot for mouse click.
+      //
+      TakeScreenshot (NULL);
+      mPreviousTime = GetTimeInNanoSecond (GetPerformanceCounter ());
+    }
   }
 }
 
@@ -389,7 +412,7 @@ InstallKeyHandler (
       // Register key handler, which will later determine the combination.
       //
       Status = AppleEvent->RegisterHandler (
-                             APPLE_EVENT_TYPE_KEY_UP,
+                             APPLE_EVENT_TYPE_KEY_DOWN | (mEnableMouseClick ? APPLE_EVENT_TYPE_MOUSE_CLICK : APPLE_EVENT_TYPE_NONE),
                              AppleEventKeyHandler,
                              &AppleEventHandle,
                              NULL
@@ -500,8 +523,32 @@ CrScreenshotDxeEntry (
   IN EFI_SYSTEM_TABLE  *SystemTable
   )
 {
-  EFI_STATUS  Status;
-  VOID        *Registration;
+  EFI_STATUS                 Status;
+  VOID                       *Registration;
+  EFI_LOADED_IMAGE_PROTOCOL  *LoadedImage;
+  OC_FLEX_ARRAY              *ParsedLoadOptions;
+
+  //
+  // Parse optional driver params.
+  //
+  Status = gBS->HandleProtocol (
+                  ImageHandle,
+                  &gEfiLoadedImageProtocolGuid,
+                  (VOID **)&LoadedImage
+                  );
+
+  if (EFI_ERROR (Status)) {
+    return Status;
+  }
+
+  Status = OcParseLoadOptions (LoadedImage, &ParsedLoadOptions);
+  if (!EFI_ERROR (Status)) {
+    mEnableMouseClick = OcHasParsedVar (ParsedLoadOptions, L"--enable-mouse-click", OcStringFormatUnicode);
+
+    OcFlexArrayFree (&ParsedLoadOptions);
+  } else if (Status != EFI_NOT_FOUND) {
+    return Status;
+  }
 
   Status = InstallKeyHandler ();
   if (EFI_ERROR (Status)) {

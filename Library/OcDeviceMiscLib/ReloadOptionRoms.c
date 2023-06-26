@@ -26,7 +26,7 @@
 #include <Library/PrintLib.h>
 #include <Library/UefiBootServicesTableLib.h>
 #include <IndustryStandard/Pci23.h>
-#include <IndustryStandard/PeCoffImage.h>
+#include <IndustryStandard/PeImage2.h>
 #include <Protocol/Decompress.h>
 #include <Protocol/PciIo.h>
 

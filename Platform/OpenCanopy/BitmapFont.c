@@ -8,9 +8,9 @@
 #include <Base.h>
 
 #include <Library/BaseMemoryLib.h>
+#include <Library/BaseOverflowLib.h>
 #include <Library/DebugLib.h>
 #include <Library/MemoryAllocationLib.h>
-#include <Library/OcGuardLib.h>
 
 #include "OpenCanopy.h"
 #include "BmfLib.h"
@@ -329,17 +329,17 @@ BmfContextInitialize (
   MaxHeight = 0;
 
   for (Index = 0; Index < Context->NumChars; ++Index) {
-    Result = OcOverflowAddS32 (
+    Result = BaseOverflowAddS32 (
                Chars[Index].yoffset,
                Chars[Index].height,
                &Height
                );
-    Result |= OcOverflowAddS32 (
+    Result |= BaseOverflowAddS32 (
                 Chars[Index].xoffset,
                 Chars[Index].width,
                 &Width
                 );
-    Result |= OcOverflowAddS32 (
+    Result |= BaseOverflowAddS32 (
                 Chars[Index].xoffset,
                 Chars[Index].xadvance,
                 &Advance
@@ -412,12 +412,12 @@ BmfContextInitialize (
         return FALSE;
       }
 
-      Result = OcOverflowAddS32 (
+      Result = BaseOverflowAddS32 (
                  Char->xoffset + Char->width,
                  Pairs[Index].amount,
                  &Width
                  );
-      Result |= OcOverflowAddS32 (
+      Result |= BaseOverflowAddS32 (
                   Char->xoffset + Char->xadvance,
                   Pairs[Index].amount,
                   &Advance
@@ -544,7 +544,7 @@ BmfGetTextInfo (
       CurWidth += Pair->amount;
     }
 
-    Result = OcOverflowAddS32 (Width, CurWidth, &Width);
+    Result = BaseOverflowAddS32 (Width, CurWidth, &Width);
     if (Result) {
       DEBUG ((DEBUG_WARN, "BMF: width overflows\n"));
       FreePool (TextInfo);

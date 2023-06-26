@@ -65,12 +65,12 @@ GuiOutputConstruct (
      || (Gop->Mode->Info->VerticalResolution < MIN_RESOLUTION_VERTICAL * Scale))
   {
     DEBUG ((
-      DEBUG_INFO,
+      DEBUG_WARN,
       "OCUI: Expected at least %dx%d for resolution, actual %dx%d\n",
       MIN_RESOLUTION_HORIZONTAL * Scale,
       MIN_RESOLUTION_VERTICAL * Scale,
-      Context.Gop->Mode->Info->HorizontalResolution,
-      Context.Gop->Mode->Info->VerticalResolution
+      Gop->Mode->Info->HorizontalResolution,
+      Gop->Mode->Info->VerticalResolution
       ));
     return NULL;
   }

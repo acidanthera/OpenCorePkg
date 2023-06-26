@@ -39,11 +39,11 @@
 
 [LibraryClasses]
   BaseLib
+  BaseOverflowLib
   HobLib
   IoLib
   UefiLib
   OcFileLib
-  OcGuardLib
   OcStringLib
 
 [Sources]

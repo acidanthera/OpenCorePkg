@@ -45,9 +45,9 @@
 
 [LibraryClasses]
   BaseMemoryLib
+  BaseOverflowLib
   DebugLib
   MemoryAllocationLib
-  OcGuardLib
   PcdLib
   UefiBootServicesTableLib
   UefiLib

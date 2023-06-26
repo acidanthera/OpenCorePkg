@@ -410,6 +410,7 @@ OC_SCHEMA
   OC_SCHEMA_STRING_IN ("HibernateMode",         OC_GLOBAL_CONFIG, Misc.Boot.HibernateMode),
   OC_SCHEMA_BOOLEAN_IN ("HibernateSkipsPicker", OC_GLOBAL_CONFIG, Misc.Boot.HibernateSkipsPicker),
   OC_SCHEMA_BOOLEAN_IN ("HideAuxiliary",        OC_GLOBAL_CONFIG, Misc.Boot.HideAuxiliary),
+  OC_SCHEMA_STRING_IN ("InstanceIdentifier",    OC_GLOBAL_CONFIG, Misc.Boot.InstanceIdentifier),
   OC_SCHEMA_STRING_IN ("LauncherOption",        OC_GLOBAL_CONFIG, Misc.Boot.LauncherOption),
   OC_SCHEMA_STRING_IN ("LauncherPath",          OC_GLOBAL_CONFIG, Misc.Boot.LauncherPath),
   OC_SCHEMA_INTEGER_IN ("PickerAttributes",     OC_GLOBAL_CONFIG, Misc.Boot.PickerAttributes),
@@ -750,6 +751,7 @@ OC_SCHEMA
   OC_SCHEMA_BOOLEAN_IN ("FirmwareVolume",          OC_GLOBAL_CONFIG, Uefi.ProtocolOverrides.FirmwareVolume),
   OC_SCHEMA_BOOLEAN_IN ("HashServices",            OC_GLOBAL_CONFIG, Uefi.ProtocolOverrides.HashServices),
   OC_SCHEMA_BOOLEAN_IN ("OSInfo",                  OC_GLOBAL_CONFIG, Uefi.ProtocolOverrides.OSInfo),
+  OC_SCHEMA_BOOLEAN_IN ("PciIo",                   OC_GLOBAL_CONFIG, Uefi.ProtocolOverrides.PciIo),
   OC_SCHEMA_BOOLEAN_IN ("UnicodeCollation",        OC_GLOBAL_CONFIG, Uefi.ProtocolOverrides.UnicodeCollation)
 };
 
@@ -815,12 +817,14 @@ STATIC
 OC_SCHEMA
   mUefiOutputSchema[] = {
   OC_SCHEMA_BOOLEAN_IN ("ClearScreenOnModeSwitch",    OC_GLOBAL_CONFIG, Uefi.Output.ClearScreenOnModeSwitch),
+  OC_SCHEMA_STRING_IN ("ConsoleFont",                 OC_GLOBAL_CONFIG, Uefi.Output.ConsoleFont),
   OC_SCHEMA_STRING_IN ("ConsoleMode",                 OC_GLOBAL_CONFIG, Uefi.Output.ConsoleMode),
   OC_SCHEMA_BOOLEAN_IN ("DirectGopRendering",         OC_GLOBAL_CONFIG, Uefi.Output.DirectGopRendering),
   OC_SCHEMA_BOOLEAN_IN ("ForceResolution",            OC_GLOBAL_CONFIG, Uefi.Output.ForceResolution),
   OC_SCHEMA_BOOLEAN_IN ("GopBurstMode",               OC_GLOBAL_CONFIG, Uefi.Output.GopBurstMode),
   OC_SCHEMA_STRING_IN ("GopPassThrough",              OC_GLOBAL_CONFIG, Uefi.Output.GopPassThrough),
   OC_SCHEMA_BOOLEAN_IN ("IgnoreTextInGraphics",       OC_GLOBAL_CONFIG, Uefi.Output.IgnoreTextInGraphics),
+  OC_SCHEMA_STRING_IN ("InitialMode",                 OC_GLOBAL_CONFIG, Uefi.Output.InitialMode),
   OC_SCHEMA_BOOLEAN_IN ("ProvideConsoleGop",          OC_GLOBAL_CONFIG, Uefi.Output.ProvideConsoleGop),
   OC_SCHEMA_BOOLEAN_IN ("ReconnectGraphicsOnConnect", OC_GLOBAL_CONFIG, Uefi.Output.ReconnectGraphicsOnConnect),
   OC_SCHEMA_BOOLEAN_IN ("ReconnectOnResChange",       OC_GLOBAL_CONFIG, Uefi.Output.ReconnectOnResChange),

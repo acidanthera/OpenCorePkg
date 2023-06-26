@@ -3,7 +3,7 @@
 LIBRESSL_VERSION="3.5.3"
 LIBRESSL_NAME="libressl-${LIBRESSL_VERSION}"
 LIBRESSL_ARCHIVE="${LIBRESSL_NAME}.tar.gz"
-LIBRESSL_URL="https://ftp.openbsd.org/pub/OpenBSD/LibreSSL/${LIBRESSL_ARCHIVE}"
+LIBRESSL_URL="https://cdn.openbsd.org/pub/OpenBSD/LibreSSL/${LIBRESSL_ARCHIVE}"
 
 SRC_DIR=$(dirname "$0")
 cd "$SRC_DIR" || exit 1

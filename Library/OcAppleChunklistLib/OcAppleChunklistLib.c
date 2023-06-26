@@ -13,12 +13,12 @@
 #include <Uefi.h>
 
 #include <Library/BaseMemoryLib.h>
+#include <Library/BaseOverflowLib.h>
 #include <Library/DebugLib.h>
 #include <Library/MemoryAllocationLib.h>
 #include <Library/OcAppleChunklistLib.h>
 #include <Library/OcAppleRamDiskLib.h>
 #include <Library/OcCryptoLib.h>
-#include <Library/OcGuardLib.h>
 
 BOOLEAN
 OcAppleChunklistInitializeContext (
@@ -59,8 +59,8 @@ OcAppleChunklistInitializeContext (
   //
   // Ensure that chunk and signature addresses are valid in the first place.
   //
-  if (  OcOverflowAddUN ((UINTN)Buffer, (UINTN)ChunklistHeader->ChunkOffset, (UINTN *)&Context->Chunks)
-     || OcOverflowAddUN ((UINTN)Buffer, (UINTN)ChunklistHeader->SigOffset, (UINTN *)&Context->Signature))
+  if (  BaseOverflowAddUN ((UINTN)Buffer, (UINTN)ChunklistHeader->ChunkOffset, (UINTN *)&Context->Chunks)
+     || BaseOverflowAddUN ((UINTN)Buffer, (UINTN)ChunklistHeader->SigOffset, (UINTN *)&Context->Signature))
   {
     return FALSE;
   }
@@ -74,9 +74,9 @@ OcAppleChunklistInitializeContext (
 
   Context->ChunkCount = (UINTN)ChunklistHeader->ChunkCount;
 
-  if (  OcOverflowMulAddUN (sizeof (APPLE_CHUNKLIST_CHUNK), Context->ChunkCount, (UINTN)Context->Chunks, &DataEnd)
+  if (  BaseOverflowMulAddUN (sizeof (APPLE_CHUNKLIST_CHUNK), Context->ChunkCount, (UINTN)Context->Chunks, &DataEnd)
      || (DataEnd > (UINTN)Buffer + BufferSize)
-     || OcOverflowAddUN (sizeof (APPLE_CHUNKLIST_SIG), (UINTN)Context->Signature, &DataEnd)
+     || BaseOverflowAddUN (sizeof (APPLE_CHUNKLIST_SIG), (UINTN)Context->Signature, &DataEnd)
      || (DataEnd != (UINTN)Buffer + BufferSize))
   {
     return FALSE;

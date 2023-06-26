@@ -49,6 +49,7 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 #include <Library/OcSmcLib.h>
 #include <Library/OcOSInfoLib.h>
 #include <Library/OcUnicodeCollationEngGenericLib.h>
+#include <Library/OcPciIoLib.h>
 #include <Library/OcVariableLib.h>
 #include <Library/PrintLib.h>
 #include <Library/UefiBootServicesTableLib.h>
@@ -426,6 +427,10 @@ OcReinstallProtocols (
     DEBUG ((DEBUG_INFO, "OC: Failed to install key map protocols\n"));
   }
 
+  if (OcPciIoInstallProtocol (Config->Uefi.ProtocolOverrides.PciIo) == NULL) {
+    DEBUG ((DEBUG_INFO, "OC: Failed to install cpuio/pcirootbridgeio overrides\n"));
+  }
+
   InstallAppleEvent  = TRUE;
   OverrideAppleEvent = FALSE;
 
@@ -560,6 +565,13 @@ OcLoadAppleSecureBoot (
       DEBUG ((DEBUG_INFO, "OC: Discovered x86legacy with zero ECID, using system-id\n"));
       OcGetLegacySecureBootECID (Config, &Config->Misc.Security.ApECID);
     }
+
+    //
+    // Forcibly disable single user mode in Apple Secure Boot mode.
+    // Previously EfiBoot correctly removed the -s argument from command-line,
+    // but for some reason it does not now.
+    //
+    Config->Booter.Quirks.DisableSingleUser = TRUE;
 
     Status = OcAppleImg4BootstrapValues (RealSecureBootModel, Config->Misc.Security.ApECID);
     if (EFI_ERROR (Status)) {
@@ -1019,7 +1031,7 @@ OcLoadUefiSupport (
       );
   }
 
-  OcLoadUefiOutputSupport (Config);
+  OcLoadUefiOutputSupport (Storage, Config);
 
   OcLoadUefiAudioSupport (Storage, Config);
 

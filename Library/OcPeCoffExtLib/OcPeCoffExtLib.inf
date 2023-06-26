@@ -37,17 +37,17 @@
   OpenCorePkg/OpenCorePkg.dec
 
 [LibraryClasses]
+  UefiImageLib
   UefiRuntimeServicesTableLib
   UefiBootServicesTableLib
   MemoryAllocationLib
   BaseMemoryLib
+  BaseOverflowLib
   BaseLib
   UefiLib
   DebugLib
   OcAppleKeysLib
-  OcPeCoffLib
   OcCryptoLib
-  OcGuardLib
 
 [Guids]
   gAppleEfiCertificateGuid

@@ -24,6 +24,8 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 #include <Library/DebugLib.h>
 #include <Library/BaseLib.h>
 #include <Library/BaseMemoryLib.h>
+#include <Library/BaseOverflowLib.h>
+#include <Library/PeCoffLib2.h>
 #include <Library/UefiRuntimeServicesTableLib.h>
 #include <Library/UefiBootServicesTableLib.h>
 #include <Library/MemoryAllocationLib.h>
@@ -31,8 +33,6 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 #include <Library/UefiLib.h>
 #include <Library/OcCryptoLib.h>
 #include <Library/OcAppleKeysLib.h>
-#include <Library/OcGuardLib.h>
-#include <Library/OcPeCoffLib.h>
 #include <Guid/AppleCertificate.h>
 
 #include "OcPeCoffExtInternal.h"
@@ -40,7 +40,7 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 STATIC
 RETURN_STATUS
 PeCoffGetSecurityDirectoryEntry (
-  IN  PE_COFF_IMAGE_CONTEXT           *Context,
+  IN  PE_COFF_LOADER_IMAGE_CONTEXT    *Context,
   IN  UINT32                          FileSize,
   OUT CONST EFI_IMAGE_DATA_DIRECTORY  **DirectoryEntry
   )
@@ -54,7 +54,7 @@ PeCoffGetSecurityDirectoryEntry (
   ASSERT (DirectoryEntry != NULL);
 
   switch (Context->ImageType) {
-    case ImageTypePe32:
+    case PeCoffLoaderTypePe32:
       Pe32Hdr = (CONST EFI_IMAGE_NT_HEADERS32 *)(CONST VOID *)(
                                                                (CONST CHAR8 *)Context->FileBuffer + Context->ExeHdrOffset
                                                                );
@@ -66,7 +66,7 @@ PeCoffGetSecurityDirectoryEntry (
       *DirectoryEntry = &Pe32Hdr->DataDirectory[EFI_IMAGE_DIRECTORY_ENTRY_SECURITY];
       break;
 
-    case ImageTypePe32Plus:
+    case PeCoffLoaderTypePe32Plus:
       Pe32PlusHdr = (CONST EFI_IMAGE_NT_HEADERS64 *)(CONST VOID *)(
                                                                    (CONST CHAR8 *)Context->FileBuffer + Context->ExeHdrOffset
                                                                    );
@@ -92,7 +92,7 @@ PeCoffGetSecurityDirectoryEntry (
     return RETURN_INVALID_PARAMETER;
   }
 
-  Result = OcOverflowAddU32 (
+  Result = BaseOverflowAddU32 (
              (*DirectoryEntry)->VirtualAddress,
              (*DirectoryEntry)->Size,
              &EntryTop
@@ -107,11 +107,11 @@ PeCoffGetSecurityDirectoryEntry (
 STATIC
 EFI_STATUS
 PeCoffGetAppleCertificateInfo (
-  IN  PE_COFF_IMAGE_CONTEXT       *Context,
-  IN  UINT32                      FileSize,
-  OUT APPLE_EFI_CERTIFICATE_INFO  **CertInfo,
-  OUT UINT32                      *SecDirOffset,
-  OUT UINT32                      *SignedFileSize
+  IN  PE_COFF_LOADER_IMAGE_CONTEXT  *Context,
+  IN  UINT32                        FileSize,
+  OUT APPLE_EFI_CERTIFICATE_INFO    **CertInfo,
+  OUT UINT32                        *SecDirOffset,
+  OUT UINT32                        *SignedFileSize
   )
 {
   EFI_STATUS                      Status;
@@ -135,7 +135,7 @@ PeCoffGetAppleCertificateInfo (
     return EFI_UNSUPPORTED;
   }
 
-  if (!OC_TYPE_ALIGNED (APPLE_EFI_CERTIFICATE_INFO, SecDir->VirtualAddress)) {
+  if (!BASE_TYPE_ALIGNED (APPLE_EFI_CERTIFICATE_INFO, SecDir->VirtualAddress)) {
     DEBUG ((DEBUG_INFO, "OCPE: Certificate info is misaligned %X\n", SecDir->VirtualAddress));
     return EFI_UNSUPPORTED;
   }
@@ -146,7 +146,7 @@ PeCoffGetAppleCertificateInfo (
   *CertInfo = (APPLE_EFI_CERTIFICATE_INFO *)(
                                              (UINT8 *)Context->FileBuffer + SecDir->VirtualAddress
                                              );
-  if (  OcOverflowAddU32 ((*CertInfo)->CertOffset, (*CertInfo)->CertSize, &EndOffset)
+  if (  BaseOverflowAddU32 ((*CertInfo)->CertOffset, (*CertInfo)->CertSize, &EndOffset)
      || (EndOffset > FileSize))
   {
     DEBUG ((DEBUG_INFO, "OCPE: Certificate entry is beyond file area\n"));
@@ -164,9 +164,9 @@ PeCoffGetAppleCertificateInfo (
 STATIC
 EFI_STATUS
 PeCoffGetAppleSignature (
-  IN  PE_COFF_IMAGE_CONTEXT       *Context,
-  IN  APPLE_EFI_CERTIFICATE_INFO  *CertInfo,
-  OUT APPLE_SIGNATURE_CONTEXT     *SignatureContext
+  IN  PE_COFF_LOADER_IMAGE_CONTEXT  *Context,
+  IN  APPLE_EFI_CERTIFICATE_INFO    *CertInfo,
+  OUT APPLE_SIGNATURE_CONTEXT       *SignatureContext
   )
 {
   UINTN                  Index;
@@ -181,7 +181,7 @@ PeCoffGetAppleSignature (
     return EFI_UNSUPPORTED;
   }
 
-  if (!OC_TYPE_ALIGNED (APPLE_EFI_CERTIFICATE, CertInfo->CertOffset)) {
+  if (!BASE_TYPE_ALIGNED (APPLE_EFI_CERTIFICATE, CertInfo->CertOffset)) {
     DEBUG ((DEBUG_INFO, "OCPE: Certificate is misaligned %X\n", CertInfo->CertOffset));
     return EFI_UNSUPPORTED;
   }
@@ -263,10 +263,10 @@ PeCoffGetAppleSignature (
 STATIC
 EFI_STATUS
 PeCoffSanitiseAppleImage (
-  IN  PE_COFF_IMAGE_CONTEXT  *Context,
-  IN  UINT32                 SecDirOffset,
-  IN  UINT32                 SignedFileSize,
-  IN  UINT32                 FileSize
+  IN  PE_COFF_LOADER_IMAGE_CONTEXT  *Context,
+  IN  UINT32                        SecDirOffset,
+  IN  UINT32                        SignedFileSize,
+  IN  UINT32                        FileSize
   )
 {
   //
@@ -274,8 +274,8 @@ PeCoffSanitiseAppleImage (
   // one might add more PE types in the future technically.
   // Restrict file type as early as possible.
   //
-  if (  (Context->ImageType != ImageTypePe32)
-     && (Context->ImageType != ImageTypePe32Plus))
+  if (  (Context->ImageType != PeCoffLoaderTypePe32)
+     && (Context->ImageType != PeCoffLoaderTypePe32Plus))
   {
     DEBUG ((DEBUG_INFO, "OCPE: Unsupported image type %d for Apple Image\n", Context->ImageType));
     return EFI_UNSUPPORTED;
@@ -329,10 +329,10 @@ PeCoffSanitiseAppleImage (
 STATIC
 VOID
 PeCoffHashAppleImage (
-  IN  PE_COFF_IMAGE_CONTEXT  *Context,
-  IN  UINT32                 SecDirOffset,
-  IN  UINT32                 SignedFileSize,
-  OUT UINT8                  *Hash
+  IN  PE_COFF_LOADER_IMAGE_CONTEXT  *Context,
+  IN  UINT32                        SecDirOffset,
+  IN  UINT32                        SignedFileSize,
+  OUT UINT8                         *Hash
   )
 {
   UINTN           HashSize;
@@ -381,14 +381,14 @@ PeCoffVerifyAppleSignature (
   IN OUT UINT32  *ImageSize
   )
 {
-  EFI_STATUS                  ImageStatus;
-  PE_COFF_IMAGE_CONTEXT       ImageContext;
-  APPLE_SIGNATURE_CONTEXT     SignatureContext;
-  UINT8                       Hash[SHA256_DIGEST_SIZE];
-  BOOLEAN                     Success;
-  APPLE_EFI_CERTIFICATE_INFO  *CertInfo;
-  UINT32                      SecDirOffset;
-  UINT32                      SignedFileSize;
+  EFI_STATUS                    ImageStatus;
+  PE_COFF_LOADER_IMAGE_CONTEXT  ImageContext;
+  APPLE_SIGNATURE_CONTEXT       SignatureContext;
+  UINT8                         Hash[SHA256_DIGEST_SIZE];
+  BOOLEAN                       Success;
+  APPLE_EFI_CERTIFICATE_INFO    *CertInfo;
+  UINT32                        SecDirOffset;
+  UINT32                        SignedFileSize;
 
   ImageStatus = PeCoffInitializeContext (
                   &ImageContext,
@@ -472,12 +472,12 @@ PeCoffGetApfsDriverVersion (
   // apfs.efi versioning is more restricted than generic PE parsing.
   //
 
-  EFI_STATUS                ImageStatus;
-  PE_COFF_IMAGE_CONTEXT     ImageContext;
-  EFI_IMAGE_NT_HEADERS64    *OptionalHeader;
-  EFI_IMAGE_SECTION_HEADER  *SectionHeader;
-  APFS_DRIVER_VERSION       *DriverVersion;
-  UINT32                    ImageVersion;
+  EFI_STATUS                    ImageStatus;
+  PE_COFF_LOADER_IMAGE_CONTEXT  ImageContext;
+  EFI_IMAGE_NT_HEADERS64        *OptionalHeader;
+  EFI_IMAGE_SECTION_HEADER      *SectionHeader;
+  APFS_DRIVER_VERSION           *DriverVersion;
+  UINT32                        ImageVersion;
 
   ImageStatus = PeCoffInitializeContext (
                   &ImageContext,
@@ -490,7 +490,7 @@ PeCoffGetApfsDriverVersion (
   }
 
   if (  (ImageContext.Machine != IMAGE_FILE_MACHINE_X64)
-     || (ImageContext.ImageType != ImageTypePe32Plus)
+     || (ImageContext.ImageType != PeCoffLoaderTypePe32Plus)
      || (ImageContext.Subsystem != EFI_IMAGE_SUBSYSTEM_EFI_BOOT_SERVICE_DRIVER))
   {
     DEBUG ((DEBUG_INFO, "OCPE: PeCoff unsupported image\n"));

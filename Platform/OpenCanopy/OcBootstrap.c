@@ -59,10 +59,6 @@ OcShowMenuByOcEnter (
     return Status;
   }
 
-  //
-  // Extension for OpenCore builtin renderer to mark that we control text output here.
-  //
-  gST->ConOut->TestString (gST->ConOut, OC_CONSOLE_MARK_CONTROLLED);
   mPreviousMode = OcConsoleControlSetMode (EfiConsoleControlScreenGraphics);
 
   return EFI_SUCCESS;
@@ -75,10 +71,6 @@ OcShowMenuByOcLeave (
   )
 {
   GuiLibDestruct ();
-  //
-  // Extension for OpenCore builtin renderer to mark that we no longer control text output here.
-  //
-  gST->ConOut->TestString (gST->ConOut, OC_CONSOLE_MARK_UNCONTROLLED);
   OcConsoleControlSetMode (mPreviousMode);
 }
 

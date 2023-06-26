@@ -17,10 +17,10 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 #include <IndustryStandard/AppleMachoImage.h>
 
 #include <Library/BaseLib.h>
+#include <Library/BaseOverflowLib.h>
 #include <Library/DebugLib.h>
 #include <Library/MemoryAllocationLib.h>
 #include <Library/OcAppleKernelLib.h>
-#include <Library/OcGuardLib.h>
 #include <Library/OcMachoLib.h>
 
 #include "PrelinkedInternal.h"
@@ -522,7 +522,7 @@ InternalInitializeVtablePatchData (
   ASSERT (FileData != NULL);
 
   VtableData = (VOID *)((UINTN)FileData + VtableOffset);
-  if (MachoContext->Is32Bit ? !OC_TYPE_ALIGNED (UINT32, VtableData) : !OC_TYPE_ALIGNED (UINT64, VtableData)) {
+  if (MachoContext->Is32Bit ? !BASE_TYPE_ALIGNED (UINT32, VtableData) : !BASE_TYPE_ALIGNED (UINT64, VtableData)) {
     return FALSE;
   }
 
@@ -542,7 +542,7 @@ InternalInitializeVtablePatchData (
        )
   {
     if (VTABLE_ENTRY_X (MachoContext->Is32Bit, VtableData, EntryOffset) == 0) {
-      Result = OcOverflowAddU64 (
+      Result = BaseOverflowAddU64 (
                  MachoContext->Is32Bit ? VtableSymbol->Symbol32.Value : VtableSymbol->Symbol64.Value,
                  (EntryOffset * VTABLE_ENTRY_SIZE_X (MachoContext->Is32Bit)),
                  &FileOffset

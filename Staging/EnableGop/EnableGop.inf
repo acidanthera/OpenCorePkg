@@ -7,12 +7,15 @@
 #
 ##
 
+# Note: VERSION_STRING is compiled into the .ffs file, so updates to Staging/EnableGop/Release
+# folder contents should be built locally, or on non-master branch in CI, without -dev suffix
+# on VERSION_STRING, and then copied from the built Utilities/EnableGop/Pre-release folder.
 [Defines]
   INF_VERSION                    = 0x00010005
   BASE_NAME                      = EnableGop
   FILE_GUID                      = 3FBA58B1-F8C0-41BC-ACD8-253043A3A17F
   MODULE_TYPE                    = DXE_DRIVER
-  VERSION_STRING                 = 1.2
+  VERSION_STRING                 = 1.5-dev
   ENTRY_POINT                    = UefiMain
 
 #

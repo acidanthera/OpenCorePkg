@@ -21,13 +21,13 @@
 #include <Library/UefiLib.h>
 #include <Library/BaseLib.h>
 #include <Library/BaseMemoryLib.h>
+#include <Library/BaseOverflowLib.h>
 #include <Library/DebugLib.h>
 #include <Library/DevicePathLib.h>
 #include <Library/MemoryAllocationLib.h>
 #include <Library/UefiBootServicesTableLib.h>
 #include <Library/OcDevicePathLib.h>
 #include <Library/OcFileLib.h>
-#include <Library/OcGuardLib.h>
 
 VOID *
 OcGetFileInfo (
@@ -56,7 +56,7 @@ OcGetFileInfo (
     //
     // Some drivers (i.e. built-in 32-bit Apple HFS driver) may possibly omit null terminators from file info data.
     //
-    if (CompareGuid (InformationType, &gEfiFileInfoGuid) && OcOverflowAddUN (FileInfoSize, sizeof (CHAR16), &FileInfoSize)) {
+    if (CompareGuid (InformationType, &gEfiFileInfoGuid) && BaseOverflowAddUN (FileInfoSize, sizeof (CHAR16), &FileInfoSize)) {
       return NULL;
     }
 

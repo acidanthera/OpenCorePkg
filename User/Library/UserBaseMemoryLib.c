@@ -14,6 +14,8 @@
 #include <string.h>
 #include <stdlib.h>
 
+#include <UserMemory.h>
+
 #ifdef WIN32
   #include <malloc.h>
 #endif // WIN32
@@ -25,15 +27,40 @@ GLOBAL_REMOVE_IF_UNREFERENCED CONST EFI_MEMORY_TYPE  gPhaseDefaultCodeType = Efi
 // Limits single pool allocation size to 512MB by default.
 // Use SetPoolAllocationSizeLimit to change this limit.
 //
-UINTN  mPoolAllocationSizeLimit = BASE_512MB;
+STATIC UINTN  mPoolAllocationSizeLimit = BASE_512MB;
 
-UINTN  mPoolAllocations;
-UINTN  mPageAllocations;
+GLOBAL_REMOVE_IF_UNREFERENCED UINTN  mPoolAllocations;
+GLOBAL_REMOVE_IF_UNREFERENCED UINTN  mPageAllocations;
 
-UINT64  mPoolAllocationMask = MAX_UINT64;
-UINTN   mPoolAllocationIndex;
-UINT64  mPageAllocationMask = MAX_UINT64;
-UINTN   mPageAllocationIndex;
+STATIC UINT64  mPoolAllocationMask = MAX_UINT64;
+STATIC UINTN   mPoolAllocationIndex;
+STATIC UINT64  mPageAllocationMask = MAX_UINT64;
+STATIC UINTN   mPageAllocationIndex;
+
+VOID
+ConfigureMemoryAllocations (
+  IN     CONST UINT8  *Data,
+  IN     UINTN        Size,
+  IN OUT UINT32       *ConfigSize
+  )
+{
+  mPoolAllocationIndex = 0;
+  mPageAllocationIndex = 0;
+
+  if (Size - *ConfigSize >= sizeof (UINT64)) {
+    *ConfigSize += sizeof (UINT64);
+    CopyMem (&mPoolAllocationMask, &Data[Size - *ConfigSize], sizeof (UINT64));
+  } else {
+    mPoolAllocationMask = MAX_UINT64;
+  }
+
+  if (Size - *ConfigSize >= sizeof (UINT64)) {
+    *ConfigSize += sizeof (UINT64);
+    CopyMem (&mPageAllocationMask, &Data[Size - *ConfigSize], sizeof (UINT64));
+  } else {
+    mPageAllocationMask = MAX_UINT64;
+  }
+}
 
 VOID
 SetPoolAllocationSizeLimit (
@@ -206,13 +233,14 @@ PhaseAllocatePool (
   return Buffer;
 }
 
+STATIC
 EFI_STATUS
-EFIAPI
-PhaseAllocatePages (
+InternalAllocatePagesAlign (
   IN     EFI_ALLOCATE_TYPE     Type,
   IN     EFI_MEMORY_TYPE       MemoryType,
   IN     UINTN                 Pages,
-  IN OUT EFI_PHYSICAL_ADDRESS  *Memory
+  IN OUT EFI_PHYSICAL_ADDRESS  *Memory,
+  IN     UINT32                Alignment
   )
 {
   VOID   *Buffer;
@@ -230,13 +258,17 @@ PhaseAllocatePages (
     // Check that we have not gone beyond the single allocation size limit
     //
     if (RequestedAllocationSize <= mPoolAllocationSizeLimit) {
+      if (Alignment < EFI_PAGE_SIZE) {
+        Alignment = EFI_PAGE_SIZE;
+      }
+
  #ifdef _WIN32
-      Buffer = _aligned_malloc (RequestedAllocationSize, EFI_PAGE_SIZE);
+      Buffer = _aligned_malloc (RequestedAllocationSize, Alignment);
  #else // !_WIN32
       Buffer = NULL;
       INTN  RetVal;
 
-      RetVal = posix_memalign (&Buffer, EFI_PAGE_SIZE, RequestedAllocationSize);
+      RetVal = posix_memalign (&Buffer, Alignment, RequestedAllocationSize);
       if (RetVal != 0) {
         DEBUG ((DEBUG_ERROR, "posix_memalign returns error %d\n", RetVal));
         Buffer = NULL;
@@ -265,6 +297,24 @@ PhaseAllocatePages (
   *Memory = (UINTN)Buffer;
 
   return EFI_SUCCESS;
+}
+
+EFI_STATUS
+EFIAPI
+PhaseAllocatePages (
+  IN     EFI_ALLOCATE_TYPE     Type,
+  IN     EFI_MEMORY_TYPE       MemoryType,
+  IN     UINTN                 Pages,
+  IN OUT EFI_PHYSICAL_ADDRESS  *Memory
+  )
+{
+  return InternalAllocatePagesAlign (
+           Type,
+           MemoryType,
+           Pages,
+           Memory,
+           EFI_PAGE_SIZE
+           );
 }
 
 VOID
@@ -351,6 +401,39 @@ PhaseFreePages (
  #endif
 
   return EFI_SUCCESS;
+}
+
+VOID *
+InternalAllocateAlignedPages (
+  IN EFI_MEMORY_TYPE  MemoryType,
+  IN UINTN            Pages,
+  IN UINTN            Alignment
+  )
+{
+  EFI_STATUS            Status;
+  EFI_PHYSICAL_ADDRESS  Memory;
+
+  Status = InternalAllocatePagesAlign (
+             AllocateAnyPages,
+             MemoryType,
+             Pages,
+             &Memory,
+             (UINT32)Alignment
+             );
+  if (EFI_ERROR (Status)) {
+    return NULL;
+  }
+
+  return (VOID *)(UINTN)Memory;
+}
+
+VOID
+InternalFreeAlignedPages (
+  IN VOID   *Buffer,
+  IN UINTN  Pages
+  )
+{
+  PhaseFreePages ((UINTN)Buffer, Pages);
 }
 
 GUID *

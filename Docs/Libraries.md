@@ -19,7 +19,6 @@
 * OcGuardLib — Basic sanity checking (static assertions, overflow maths)
 * OcMachoLib — Mach-O image handling and transformation
 * OcMiscLib — Miscellaneous stuff not fitting elsewhere
-* OcPeCoffLib - EFI image management
 * OcPeCoffExtLib — EFI image management extras for Apple
 * OcPngLib — PNG image decoding
 * OcRtcLib — CMOS memory access

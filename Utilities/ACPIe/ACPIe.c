@@ -8,11 +8,11 @@
 #include <string.h>
 #include <Uefi/UefiBaseType.h>
 #include <Library/BaseMemoryLib.h>
+#include <Library/BaseOverflowLib.h>
 #include <Library/MemoryAllocationLib.h>
 #include <Library/DebugLib.h>
 #include <IndustryStandard/Acpi.h>
 #include <Library/OcAcpiLib.h>
-#include <Library/OcGuardLib.h>
 #include <IndustryStandard/AcpiAml.h>
 #include <UserFile.h>
 

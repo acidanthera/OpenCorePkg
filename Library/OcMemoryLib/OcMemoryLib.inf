@@ -41,9 +41,9 @@
 
 [LibraryClasses]
   BaseLib
+  BaseOverflowLib
   UefiLib
   MtrrLib
-  OcGuardLib
   OcStringLib
 
 [Sources]

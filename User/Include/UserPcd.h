@@ -55,15 +55,18 @@ extern UINT32   _gPcd_FixedAtBuild_PcdMaximumDevicePathNodeCount;
 extern BOOLEAN  _gPcd_FixedAtBuild_PcdImageLoaderRtRelocAllowTargetMismatch;
 extern BOOLEAN  _gPcd_FixedAtBuild_PcdImageLoaderHashProhibitOverlap;
 extern BOOLEAN  _gPcd_FixedAtBuild_PcdImageLoaderLoadHeader;
-extern BOOLEAN  _gPcd_FixedAtBuild_PcdImageLoaderSupportArmThumb;
-extern BOOLEAN  _gPcd_FixedAtBuild_PcdImageLoaderForceLoadDebug;
-extern BOOLEAN  _gPcd_FixedAtBuild_PcdImageLoaderTolerantLoad;
-extern BOOLEAN  _gPcd_FixedAtBuild_PcdImageLoaderSupportDebug;
+extern BOOLEAN  _gPcd_FixedAtBuild_PcdImageLoaderDebugSupport;
+extern BOOLEAN  _gPcd_FixedAtBuild_PcdImageLoaderAllowMisalignedOffset;
 extern BOOLEAN  _gPcd_FixedAtBuild_PcdImageLoaderRemoveXForWX;
+extern BOOLEAN  _gPcd_FixedAtBuild_PcdImageLoaderWXorX;
+extern UINT32   _gPcd_FixedAtBuild_PcdImageLoaderAlignmentPolicy;
+extern UINT32   _gPcd_FixedAtBuild_PcdImageLoaderRelocTypePolicy;
 extern UINT8    _gPcd_FixedAtBuild_PcdUefiVariableDefaultLang[4];
 extern UINT8    _gPcd_FixedAtBuild_PcdUefiVariableDefaultPlatformLang[6];
 extern BOOLEAN  _gPcd_FeatureFlag_PcdFatReadOnlyMode;
 extern UINT32   _gPcd_BinaryPatch_PcdSerialRegisterStride;
+extern UINT8    _gPcd_FixedAtBuild_PcdUefiImageFormatSupportNonFv;
+extern UINT8    _gPcd_FixedAtBuild_PcdUefiImageFormatSupportFv;
 
 #define _PCD_GET_MODE_32_PcdUefiLibMaxPrintBufferSize   _gPcd_FixedAtBuild_PcdUefiLibMaxPrintBufferSize
 #define _PCD_GET_MODE_BOOL_PcdUgaConsumeSupport         _gPcd_FixedAtBuild_PcdUgaConsumeSupport
@@ -94,10 +97,13 @@ extern UINT32   _gPcd_BinaryPatch_PcdSerialRegisterStride;
 #define _PCD_GET_MODE_BOOL_PcdImageLoaderRtRelocAllowTargetMismatch  _gPcd_FixedAtBuild_PcdImageLoaderRtRelocAllowTargetMismatch
 #define _PCD_GET_MODE_BOOL_PcdImageLoaderHashProhibitOverlap         _gPcd_FixedAtBuild_PcdImageLoaderHashProhibitOverlap
 #define _PCD_GET_MODE_BOOL_PcdImageLoaderLoadHeader                  _gPcd_FixedAtBuild_PcdImageLoaderLoadHeader
-#define _PCD_GET_MODE_BOOL_PcdImageLoaderSupportArmThumb             _gPcd_FixedAtBuild_PcdImageLoaderSupportArmThumb
-#define _PCD_GET_MODE_BOOL_PcdImageLoaderForceLoadDebug              _gPcd_FixedAtBuild_PcdImageLoaderForceLoadDebug
-#define _PCD_GET_MODE_BOOL_PcdImageLoaderTolerantLoad                _gPcd_FixedAtBuild_PcdImageLoaderTolerantLoad
-#define _PCD_GET_MODE_BOOL_PcdImageLoaderSupportDebug                _gPcd_FixedAtBuild_PcdImageLoaderSupportDebug
+#define _PCD_GET_MODE_BOOL_PcdImageLoaderDebugSupport                _gPcd_FixedAtBuild_PcdImageLoaderDebugSupport
+#define _PCD_GET_MODE_BOOL_PcdImageLoaderAllowMisalignedOffset       _gPcd_FixedAtBuild_PcdImageLoaderAllowMisalignedOffset
 #define _PCD_GET_MODE_BOOL_PcdImageLoaderRemoveXForWX                _gPcd_FixedAtBuild_PcdImageLoaderRemoveXForWX
+#define _PCD_GET_MODE_BOOL_PcdImageLoaderWXorX                       _gPcd_FixedAtBuild_PcdImageLoaderWXorX
+#define _PCD_GET_MODE_32_PcdImageLoaderAlignmentPolicy               _gPcd_FixedAtBuild_PcdImageLoaderAlignmentPolicy
+#define _PCD_GET_MODE_32_PcdImageLoaderRelocTypePolicy               _gPcd_FixedAtBuild_PcdImageLoaderRelocTypePolicy
+#define _PCD_GET_MODE_8_PcdUefiImageFormatSupportNonFv               _gPcd_FixedAtBuild_PcdUefiImageFormatSupportNonFv
+#define _PCD_GET_MODE_8_PcdUefiImageFormatSupportFv                  _gPcd_FixedAtBuild_PcdUefiImageFormatSupportFv
 
 #endif // OC_USER_PCD_H

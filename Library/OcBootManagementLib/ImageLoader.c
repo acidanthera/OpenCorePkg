@@ -28,6 +28,7 @@
 #include <Library/OcDebugLogLib.h>
 #include <Library/DevicePathLib.h>
 #include <Library/MemoryAllocationLib.h>
+#include <Library/MemoryAllocationLibEx.h>
 #include <Library/OcAppleSecureBootLib.h>
 #include <Library/OcBootManagementLib.h>
 #include <Library/OcDebugLogLib.h>
@@ -36,7 +37,7 @@
 #include <Library/OcMachoLib.h>
 #include <Library/OcMiscLib.h>
 #include <Library/OcStringLib.h>
-#include <Library/OcPeCoffLib.h>
+#include <Library/UefiImageLib.h>
 #include <Library/UefiBootServicesTableLib.h>
 #include <Library/UefiLib.h>
 #include <Library/UefiRuntimeServicesTableLib.h>
@@ -256,14 +257,17 @@ OcImageLoaderLoad (
   OUT EFI_HANDLE                *ImageHandle
   )
 {
-  EFI_STATUS                 Status;
-  EFI_STATUS                 ImageStatus;
-  PE_COFF_IMAGE_CONTEXT      ImageContext;
-  EFI_PHYSICAL_ADDRESS       DestinationArea;
-  UINT32                     DestinationSize;
-  VOID                       *DestinationBuffer;
-  OC_LOADED_IMAGE_PROTOCOL   *OcLoadedImage;
-  EFI_LOADED_IMAGE_PROTOCOL  *LoadedImage;
+  EFI_STATUS                       Status;
+  EFI_STATUS                       ImageStatus;
+  UEFI_IMAGE_LOADER_IMAGE_CONTEXT  ImageContext;
+  UINT32                           ImageSize;
+  UINT32                           DestinationSize;
+  UINT32                           DestinationPages;
+  UINT32                           DestinationAlignment;
+  EFI_PHYSICAL_ADDRESS             DestinationArea;
+  VOID                             *DestinationBuffer;
+  OC_LOADED_IMAGE_PROTOCOL         *OcLoadedImage;
+  EFI_LOADED_IMAGE_PROTOCOL        *LoadedImage;
 
   ASSERT (SourceBuffer != NULL);
 
@@ -277,7 +281,7 @@ OcImageLoaderLoad (
   //
   // Initialize the image context.
   //
-  ImageStatus = PeCoffInitializeContext (
+  ImageStatus = UefiImageInitializeContext (
                   &ImageContext,
                   SourceBuffer,
                   (UINT32)SourceSize
@@ -303,14 +307,10 @@ OcImageLoaderLoad (
     return EFI_UNSUPPORTED;
   }
 
-  //
-  // FIXME: This needs to be backported as a function:
-  // https://github.com/mhaeuser/edk2/blob/2021-gsoc-secure-loader/MdePkg/Library/BaseUefiImageLib/CommonSupport.c#L19-L53
-  //
-  DestinationSize = ImageContext.SizeOfImage + ImageContext.SizeOfImageDebugAdd;
-  if (OcOverflowAddU32 (DestinationSize, ImageContext.SectionAlignment, &DestinationSize)) {
-    return RETURN_UNSUPPORTED;
-  }
+  ImageSize            = UefiImageGetImageSize (&ImageContext);
+  DestinationPages     = EFI_SIZE_TO_PAGES (ImageSize);
+  DestinationSize      = EFI_PAGES_TO_SIZE (DestinationPages);
+  DestinationAlignment = UefiImageGetSegmentAlignment (&ImageContext);
 
   if (DestinationSize >= BASE_16MB) {
     DEBUG ((DEBUG_INFO, "OCB: PeCoff prohibits files over 16M (%u)\n", DestinationSize));
@@ -321,45 +321,36 @@ OcImageLoaderLoad (
   // Allocate the image destination memory.
   // FIXME: RT drivers require EfiRuntimeServicesCode.
   //
-  Status = gBS->AllocatePages (
-                  AllocateAnyPages,
-                  ImageContext.Subsystem == EFI_IMAGE_SUBSYSTEM_EFI_APPLICATION
+  Status = AllocateAlignedPagesEx (
+             AllocateAnyPages,
+             ImageContext.Subsystem == EFI_IMAGE_SUBSYSTEM_EFI_APPLICATION
       ? EfiLoaderCode : EfiBootServicesCode,
-                  EFI_SIZE_TO_PAGES (ImageContext.SizeOfImage),
-                  &DestinationArea
-                  );
+             DestinationPages,
+             DestinationAlignment,
+             &DestinationArea
+             );
+
   if (EFI_ERROR (Status)) {
+    DEBUG ((DEBUG_INFO, "OCB: PeCoff could allocate image buffer\n"));
     return Status;
   }
 
   DestinationBuffer = (VOID *)(UINTN)DestinationArea;
 
   //
-  // Load SourceBuffer into DestinationBuffer.
+  //  Load and relocate image for execution.
   //
-  ImageStatus = PeCoffLoadImage (
+  ImageStatus = UefiImageLoadImageForExecution (
                   &ImageContext,
                   DestinationBuffer,
-                  ImageContext.SizeOfImage
-                  );
-  if (EFI_ERROR (ImageStatus)) {
-    DEBUG ((DEBUG_INFO, "OCB: PeCoff load image error - %r\n", ImageStatus));
-    FreePages (DestinationBuffer, EFI_SIZE_TO_PAGES (ImageContext.SizeOfImage));
-    return EFI_UNSUPPORTED;
-  }
-
-  //
-  // Relocate the loaded image to the destination address.
-  //
-  ImageStatus = PeCoffRelocateImage (
-                  &ImageContext,
-                  (UINTN)DestinationBuffer,
+                  DestinationSize,
                   NULL,
                   0
                   );
+
   if (EFI_ERROR (ImageStatus)) {
-    DEBUG ((DEBUG_INFO, "OCB: PeCoff relocate image error - %r\n", ImageStatus));
-    FreePages (DestinationBuffer, EFI_SIZE_TO_PAGES (ImageContext.SizeOfImage));
+    DEBUG ((DEBUG_INFO, "OCB: PeCoff load image for execution error - %r\n", ImageStatus));
+    FreeAlignedPages (DestinationBuffer, DestinationPages);
     return EFI_UNSUPPORTED;
   }
 
@@ -368,13 +359,13 @@ OcImageLoaderLoad (
   //
   OcLoadedImage = AllocateZeroPool (sizeof (*OcLoadedImage));
   if (OcLoadedImage == NULL) {
-    FreePages (DestinationBuffer, EFI_SIZE_TO_PAGES (ImageContext.SizeOfImage));
+    FreeAlignedPages (DestinationBuffer, DestinationPages);
     return EFI_OUT_OF_RESOURCES;
   }
 
   OcLoadedImage->EntryPoint = (EFI_IMAGE_ENTRY_POINT)((UINTN)DestinationBuffer + ImageContext.AddressOfEntryPoint);
   OcLoadedImage->ImageArea  = DestinationArea;
-  OcLoadedImage->PageCount  = EFI_SIZE_TO_PAGES (ImageContext.SizeOfImage);
+  OcLoadedImage->PageCount  = DestinationPages;
   OcLoadedImage->Subsystem  = ImageContext.Subsystem;
 
   LoadedImage = &OcLoadedImage->LoadedImage;
@@ -383,7 +374,7 @@ OcImageLoaderLoad (
   LoadedImage->ParentHandle = ParentImageHandle;
   LoadedImage->SystemTable  = gST;
   LoadedImage->ImageBase    = DestinationBuffer;
-  LoadedImage->ImageSize    = ImageContext.SizeOfImage;
+  LoadedImage->ImageSize    = DestinationSize;
   //
   // FIXME: Support RT drivers.
   //
@@ -410,7 +401,7 @@ OcImageLoaderLoad (
   if (EFI_ERROR (Status)) {
     DEBUG ((DEBUG_INFO, "OCB: PeCoff proto install error - %r\n", Status));
     FreePool (OcLoadedImage);
-    FreePages (DestinationBuffer, EFI_SIZE_TO_PAGES (ImageContext.SizeOfImage));
+    FreeAlignedPages (DestinationBuffer, DestinationPages);
     return Status;
   }
 
@@ -464,7 +455,7 @@ InternalDirectUnloadImage (
     return Status;
   }
 
-  gBS->FreePages (OcLoadedImage->ImageArea, OcLoadedImage->PageCount);
+  FreeAlignedPages ((VOID *)(UINTN)OcLoadedImage->ImageArea, OcLoadedImage->PageCount);
   FreePool (OcLoadedImage);
   //
   // NOTE: Avoid EFI 1.10 extension of closing opened protocols.

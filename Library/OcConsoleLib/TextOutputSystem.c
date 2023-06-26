@@ -24,7 +24,7 @@
 #include <Library/MemoryAllocationLib.h>
 #include <Library/OcConsoleLib.h>
 #include <Library/OcMiscLib.h>
-#include <Library/OcGuardLib.h>
+#include <Library/BaseOverflowLib.h>
 #include <Library/UefiBootServicesTableLib.h>
 
 //
@@ -327,11 +327,12 @@ EFI_CONSOLE_CONTROL_PROTOCOL
 
 EFI_STATUS
 OcUseSystemTextOutput (
-  IN OC_CONSOLE_RENDERER  Renderer,
-  IN BOOLEAN              IgnoreTextOutput,
-  IN BOOLEAN              SanitiseClearScreen,
-  IN BOOLEAN              ClearScreenOnModeSwitch,
-  IN BOOLEAN              ReplaceTabWithSpace
+  IN EFI_CONSOLE_CONTROL_SCREEN_MODE  InitialMode,
+  IN OC_CONSOLE_RENDERER              Renderer,
+  IN BOOLEAN                          IgnoreTextOutput,
+  IN BOOLEAN                          SanitiseClearScreen,
+  IN BOOLEAN                          ClearScreenOnModeSwitch,
+  IN BOOLEAN                          ReplaceTabWithSpace
   )
 {
   DEBUG ((
@@ -343,14 +344,18 @@ OcUseSystemTextOutput (
     ReplaceTabWithSpace
     ));
 
+  mConsoleMode = InitialMode;
+
   if (Renderer == OcConsoleRendererSystemGraphics) {
-    OcConsoleControlInstallProtocol (&mConsoleControlProtocol, NULL, NULL);
     OcConsoleControlSetMode (EfiConsoleControlScreenGraphics);
-  } else if (Renderer == OcConsoleRendererSystemText) {
     OcConsoleControlInstallProtocol (&mConsoleControlProtocol, NULL, NULL);
+  } else if (Renderer == OcConsoleRendererSystemText) {
     OcConsoleControlSetMode (EfiConsoleControlScreenText);
+    OcConsoleControlInstallProtocol (&mConsoleControlProtocol, NULL, NULL);
   } else {
-    OcConsoleControlInstallProtocol (&mConsoleControlProtocol, &mOriginalConsoleControlProtocol, &mConsoleMode);
+    ASSERT (Renderer == OcConsoleRendererSystemGeneric);
+    OcConsoleControlSetMode (InitialMode);
+    OcConsoleControlInstallProtocol (&mConsoleControlProtocol, &mOriginalConsoleControlProtocol, NULL);
   }
 
   mIgnoreTextInGraphics    = IgnoreTextOutput;

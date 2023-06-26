@@ -1,6 +1,5 @@
 /** @file
-  Use PAT to enable write-combining caching (burst mode) on GOP memory,
-  when it is suppported but firmware has not set it up.
+  GOP buffer and pixel size utility methods, and GOP burst mode caching code.
 
   Copyright (C) 2023, Mike Beaton. All rights reserved.<BR>
   SPDX-License-Identifier: BSD-3-Clause
@@ -15,6 +14,7 @@
 #include <IndustryStandard/VirtualMemory.h>
 
 #include <Library/BaseLib.h>
+#include <Library/BaseOverflowLib.h>
 #include <Library/DebugLib.h>
 #include <Library/MemoryAllocationLib.h>
 #include <Library/MtrrLib.h>
@@ -25,6 +25,104 @@
 
 #define PAT_INDEX_TO_CHANGE  7
 
+EFI_STATUS
+OcGopModeBytesPerPixel (
+  IN  EFI_GRAPHICS_OUTPUT_PROTOCOL_MODE  *Mode,
+  OUT UINTN                              *BytesPerPixel
+  )
+{
+  UINT32  MergedMasks;
+
+  if (  (Mode == NULL)
+     || (Mode->Info == NULL))
+  {
+    ASSERT (
+      (Mode != NULL)
+           && (Mode->Info != NULL)
+      );
+    return EFI_UNSUPPORTED;
+  }
+
+  //
+  // This can occur without PixelBltOnly, including in rotated DirectGopRendering -
+  // see comment about PixelFormat in ConsoleGop.c RotateMode method.
+  //
+  if (Mode->FrameBufferBase == 0ULL) {
+    return EFI_UNSUPPORTED;
+  }
+
+  switch (Mode->Info->PixelFormat) {
+    case PixelRedGreenBlueReserved8BitPerColor:
+    case PixelBlueGreenRedReserved8BitPerColor:
+      *BytesPerPixel = sizeof (EFI_GRAPHICS_OUTPUT_BLT_PIXEL);
+      return EFI_SUCCESS;
+
+    case PixelBitMask:
+      break;
+
+    case PixelBltOnly:
+      return EFI_UNSUPPORTED;
+
+    default:
+      return EFI_INVALID_PARAMETER;
+  }
+
+  MergedMasks = Mode->Info->PixelInformation.RedMask
+                || Mode->Info->PixelInformation.GreenMask
+                || Mode->Info->PixelInformation.BlueMask
+                || Mode->Info->PixelInformation.ReservedMask;
+
+  if (MergedMasks == 0) {
+    return EFI_INVALID_PARAMETER;
+  }
+
+  *BytesPerPixel = (UINT32)((HighBitSet32 (MergedMasks) + 7) / 8);
+
+  return EFI_SUCCESS;
+}
+
+EFI_STATUS
+OcGopModeSafeFrameBufferSize (
+  IN  EFI_GRAPHICS_OUTPUT_PROTOCOL_MODE  *Mode,
+  OUT UINTN                              *FrameBufferSize
+  )
+{
+  EFI_STATUS  Status;
+  UINTN       BytesPerPixel;
+
+  if (  (Mode == NULL)
+     || (Mode->Info == NULL))
+  {
+    ASSERT (
+      (Mode != NULL)
+           && (Mode->Info != NULL)
+      );
+    return EFI_UNSUPPORTED;
+  }
+
+  Status = OcGopModeBytesPerPixel (Mode, &BytesPerPixel);
+
+  if (EFI_ERROR (Status)) {
+    return Status;
+  }
+
+  if (BaseOverflowTriMulUN (
+        Mode->Info->PixelsPerScanLine,
+        Mode->Info->VerticalResolution,
+        BytesPerPixel,
+        FrameBufferSize
+        ))
+  {
+    return EFI_INVALID_PARAMETER;
+  }
+
+  return EFI_SUCCESS;
+}
+
+//
+// Use PAT to enable write-combining caching (burst mode) on GOP memory,
+// when it is suppported but firmware has not set it up.
+//
 STATIC
 EFI_STATUS
 WriteCombineGop (
@@ -37,6 +135,7 @@ WriteCombineGop (
   PAGE_MAP_AND_DIRECTORY_POINTER  *PageTable;
   EFI_VIRTUAL_ADDRESS             VirtualAddress;
   EFI_PHYSICAL_ADDRESS            PhysicalAddress;
+  UINTN                           FrameBufferSize;
   UINT64                          Bits;
   UINT8                           Level;
   BOOLEAN                         HasMtrr;
@@ -49,6 +148,23 @@ WriteCombineGop (
 
   if (!SetPatWC) {
     return EFI_SUCCESS;
+  }
+
+  if (  (Gop == NULL)
+     || (Gop->Mode == NULL)
+     || (Gop->Mode->Info == NULL))
+  {
+    ASSERT (
+      (Gop != NULL)
+           && (Gop->Mode != NULL)
+           && (Gop->Mode->Info != NULL)
+      );
+    return EFI_UNSUPPORTED;
+  }
+
+  Status = OcGopModeSafeFrameBufferSize (Gop->Mode, &FrameBufferSize);
+  if (EFI_ERROR (Status)) {
+    return Status;
   }
 
   HasMtrr = IsMtrrSupported ();
@@ -81,8 +197,6 @@ WriteCombineGop (
 
     MtrrCacheType = MtrrGetMemoryAttribute (Gop->Mode->FrameBufferBase);
 
-    DEBUG_CODE_BEGIN ();
-
     VirtualAddress = Gop->Mode->FrameBufferBase;
 
     Status = OcGetSetPageTableInfoForAddress (
@@ -97,9 +211,8 @@ WriteCombineGop (
 
     DEBUG ((
       DEBUG_INFO,
-      "OCC: 0x%LX->0x%LX MTRR %u=%a PTE%u bits 0x%016LX PAT %u->%u=%a - %r\n",
+      "OCC: 0x%LX MTRR %u=%a PTE%u bits 0x%016LX PAT@%u->%u=%a - %r\n",
       VirtualAddress,
-      PhysicalAddress,
       MtrrCacheType,
       OcGetMtrrTypeString (MtrrCacheType),
       Level,
@@ -110,20 +223,27 @@ WriteCombineGop (
       Status
       ));
 
-    ASSERT_EFI_ERROR (Status);
+    if (EFI_ERROR (Status)) {
+      ASSERT (!AlreadySet);
+      return Status;
+    }
+
     ASSERT (VirtualAddress == PhysicalAddress);
 
     if (AlreadySet) {
       break;
     }
 
-    DEBUG_CODE_END ();
-
     //
-    // If MTRR is already set to WC, no need to set it via PAT.
-    // (Ignore implausible scenario where WC is set via MTRR but overridden via PAT.)
+    // Attempting to set again if set in PAT works on some systems (including if set
+    // before by us) but fails with a hang on some others, so avoid it even though we
+    // might otherwise prefer to make sure to set the whole memory for the current mode.
+    // Definitely no need to set again if set in MTRR.
     //
-    if (MtrrCacheType == CacheWriteCombining) {
+    if (  (MtrrCacheType == CacheWriteCombining)
+       || (GET_PAT_N (PatMsr, PatIndex.Index) == PatWriteCombining)
+          )
+    {
       return EFI_ALREADY_STARTED;
     }
 
@@ -161,7 +281,15 @@ WriteCombineGop (
       }
     }
 
-    Status = OcSetPatIndexForAddressRange (PageTable, Gop->Mode->FrameBufferBase, Gop->Mode->FrameBufferSize, &PatIndex);
+    //
+    // TODO: Use full GOP memory range not just range in use for current mode?
+    //
+    Status = OcSetPatIndexForAddressRange (
+               PageTable,
+               Gop->Mode->FrameBufferBase,
+               FrameBufferSize,
+               &PatIndex
+               );
 
     if (EFI_ERROR (Status)) {
       DEBUG ((DEBUG_ERROR, "OCC: Failed to set PAT index for range - %r\n", Status));
@@ -197,7 +325,11 @@ OcSetGopBurstMode (
 
   Status = WriteCombineGop (Gop, TRUE);
   if (EFI_ERROR (Status)) {
-    DEBUG ((DEBUG_WARN, "OCC: Failed to set burst mode - %r\n", Status));
+    DEBUG ((
+      (Status == EFI_ALREADY_STARTED) ? DEBUG_INFO : DEBUG_WARN,
+      "OCC: Failed to set burst mode - %r\n",
+      Status
+      ));
   }
 
   return Status;

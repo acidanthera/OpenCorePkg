@@ -182,19 +182,22 @@ OcLoadUefiInputSupport (
 
 VOID
 OcLoadUefiOutputSupport (
-  IN OC_GLOBAL_CONFIG  *Config
+  IN OC_STORAGE_CONTEXT  *Storage,
+  IN OC_GLOBAL_CONFIG    *Config
   )
 {
-  EFI_STATUS                    Status;
-  CONST CHAR8                   *AsciiRenderer;
-  CONST CHAR8                   *GopPassThrough;
-  EFI_GRAPHICS_OUTPUT_PROTOCOL  *Gop;
-  OC_CONSOLE_RENDERER           Renderer;
-  UINT32                        Width;
-  UINT32                        Height;
-  UINT32                        Bpp;
-  BOOLEAN                       SetMax;
-  UINT8                         UIScale;
+  EFI_STATUS                       Status;
+  CONST CHAR8                      *AsciiMode;
+  CONST CHAR8                      *AsciiRenderer;
+  CONST CHAR8                      *GopPassThrough;
+  EFI_GRAPHICS_OUTPUT_PROTOCOL     *Gop;
+  EFI_CONSOLE_CONTROL_SCREEN_MODE  InitialMode;
+  OC_CONSOLE_RENDERER              Renderer;
+  UINT32                           Width;
+  UINT32                           Height;
+  UINT32                           Bpp;
+  BOOLEAN                          SetMax;
+  UINT8                            UIScale;
 
   GopPassThrough = OC_BLOB_GET (&Config->Uefi.Output.GopPassThrough);
   if (AsciiStrCmp (GopPassThrough, "Enabled") == 0) {
@@ -316,6 +319,19 @@ OcLoadUefiOutputSupport (
     DEBUG ((DEBUG_INFO, "OC: Setting UIScale to %d - %r\n", UIScale, Status));
   }
 
+  AsciiMode = OC_BLOB_GET (&Config->Uefi.Output.InitialMode);
+
+  if ((AsciiMode[0] == '\0') || (AsciiStrCmp (AsciiMode, "Auto") == 0)) {
+    InitialMode = EfiConsoleControlScreenMaxValue;
+  } else if (AsciiStrCmp (AsciiMode, "Text") == 0) {
+    InitialMode = EfiConsoleControlScreenText;
+  } else if (AsciiStrCmp (AsciiMode, "Graphics") == 0) {
+    InitialMode = EfiConsoleControlScreenGraphics;
+  } else {
+    DEBUG ((DEBUG_WARN, "OC: Requested unknown initial mode %a\n", AsciiMode));
+    InitialMode = EfiConsoleControlScreenMaxValue;
+  }
+
   AsciiRenderer = OC_BLOB_GET (&Config->Uefi.Output.TextRenderer);
 
   if ((AsciiRenderer[0] == '\0') || (AsciiStrCmp (AsciiRenderer, "BuiltinGraphics") == 0)) {
@@ -333,19 +349,24 @@ OcLoadUefiOutputSupport (
     Renderer = OcConsoleRendererBuiltinGraphics;
   }
 
-  OcSetupConsole (
-    Renderer,
-    Config->Uefi.Output.IgnoreTextInGraphics,
-    Config->Uefi.Output.SanitiseClearScreen,
-    Config->Uefi.Output.ClearScreenOnModeSwitch,
-    Config->Uefi.Output.ReplaceTabWithSpace
-    );
-
   OcParseConsoleMode (
     OC_BLOB_GET (&Config->Uefi.Output.ConsoleMode),
     &Width,
     &Height,
     &SetMax
+    );
+
+  OcSetupConsole (
+    InitialMode,
+    Renderer,
+    Storage,
+    OC_BLOB_GET (&Config->Uefi.Output.ConsoleFont),
+    Config->Uefi.Output.IgnoreTextInGraphics,
+    Config->Uefi.Output.SanitiseClearScreen,
+    Config->Uefi.Output.ClearScreenOnModeSwitch,
+    Config->Uefi.Output.ReplaceTabWithSpace,
+    Width,
+    Height
     );
 
   DEBUG ((

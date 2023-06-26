@@ -783,9 +783,9 @@ OcKernelProcessPrelinked (
   if (!EFI_ERROR (Status)) {
     OcKernelBlockKexts (Config, DarwinVersion, Is32Bit, CacheTypePrelinked, &Context);
 
-    OcKernelApplyPatches (Config, mOcCpuInfo, DarwinVersion, Is32Bit, CacheTypePrelinked, &Context, NULL, 0);
-
     OcKernelInjectKexts (Config, CacheTypePrelinked, &Context, DarwinVersion, Is32Bit, LinkedExpansion, ReservedExeSize);
+
+    OcKernelApplyPatches (Config, mOcCpuInfo, DarwinVersion, Is32Bit, CacheTypePrelinked, &Context, NULL, 0);
 
     *KernelSize = Context.PrelinkedSize;
 
@@ -816,9 +816,9 @@ OcKernelProcessMkext (
 
   OcKernelBlockKexts (Config, DarwinVersion, Is32Bit, CacheTypeMkext, &Context);
 
-  OcKernelApplyPatches (Config, mOcCpuInfo, DarwinVersion, Is32Bit, CacheTypeMkext, &Context, NULL, 0);
-
   OcKernelInjectKexts (Config, CacheTypeMkext, &Context, DarwinVersion, Is32Bit, 0, 0);
+
+  OcKernelApplyPatches (Config, mOcCpuInfo, DarwinVersion, Is32Bit, CacheTypeMkext, &Context, NULL, 0);
 
   MkextInjectPatchComplete (&Context);
 
@@ -855,9 +855,9 @@ OcKernelInitCacheless (
 
   OcKernelBlockKexts (Config, DarwinVersion, Is32Bit, CacheTypeCacheless, Context);
 
-  OcKernelApplyPatches (Config, mOcCpuInfo, DarwinVersion, Is32Bit, CacheTypeCacheless, Context, NULL, 0);
-
   OcKernelInjectKexts (Config, CacheTypeCacheless, Context, DarwinVersion, Is32Bit, 0, 0);
+
+  OcKernelApplyPatches (Config, mOcCpuInfo, DarwinVersion, Is32Bit, CacheTypeCacheless, Context, NULL, 0);
 
   return CachelessContextOverlayExtensionsDir (Context, File);
 }
@@ -903,7 +903,7 @@ OcKernelReadAppleKernel (
     return EFI_UNSUPPORTED;
   }
 
-  Result = OcOverflowTriAddU32 (
+  Result = BaseOverflowTriAddU32 (
              ReservedInfoSize,
              *ReservedExeSize,
              *LinkedExpansion,
@@ -1387,7 +1387,7 @@ OcKernelFileOpen (
       &NumReservedKexts
       );
 
-    Result = OcOverflowAddU32 (
+    Result = BaseOverflowAddU32 (
                ReservedInfoSize,
                ReservedExeSize,
                &ReservedFullSize

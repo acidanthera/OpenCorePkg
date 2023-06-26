@@ -7,10 +7,10 @@
 
 #include <Uefi.h>
 #include <Library/BaseMemoryLib.h>
+#include <Library/BaseOverflowLib.h>
 #include <Library/MemoryAllocationLib.h>
 #include <Library/OcDebugLogLib.h>
 #include <Library/OcFlexArrayLib.h>
-#include <Library/OcGuardLib.h>
 
 #define INITIAL_NUM_ITEMS  (8)
 
@@ -95,7 +95,7 @@ InternalFlexArrayAddItem (
 
   if (FlexArray->Items == NULL) {
     FlexArray->AllocatedCount = INITIAL_NUM_ITEMS;
-    if (OcOverflowMulUN (FlexArray->AllocatedCount, FlexArray->ItemSize, &NewSize)) {
+    if (BaseOverflowMulUN (FlexArray->AllocatedCount, FlexArray->ItemSize, &NewSize)) {
       return NULL;
     }
 
@@ -109,7 +109,7 @@ InternalFlexArrayAddItem (
     ASSERT (FlexArray->Count <= FlexArray->AllocatedCount);
     ++(FlexArray->Count);
     if (FlexArray->Count > FlexArray->AllocatedCount) {
-      if (OcOverflowMulUN (FlexArray->AllocatedCount * FlexArray->ItemSize, 2, &NewSize)) {
+      if (BaseOverflowMulUN (FlexArray->AllocatedCount * FlexArray->ItemSize, 2, &NewSize)) {
         return NULL;
       }
 

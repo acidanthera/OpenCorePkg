@@ -366,4 +366,59 @@ HdaCodecDriverBindingStop (
   IN EFI_HANDLE                   *ChildHandleBuffer OPTIONAL
   );
 
+// GPIO setup stages.
+#define GPIO_SETUP_STAGE_DATA       BIT0
+#define GPIO_SETUP_STAGE_DIRECTION  BIT1
+#define GPIO_SETUP_STAGE_ENABLE     BIT2
+
+#define GPIO_SETUP_STAGE_NONE  0
+
+#define GPIO_SETUP_STAGE_ALL  (   \
+  GPIO_SETUP_STAGE_DATA         | \
+  GPIO_SETUP_STAGE_DIRECTION    | \
+  GPIO_SETUP_STAGE_ENABLE       \
+  )
+
+// GPIO setup pin mask.
+#define GPIO_PIN_MASK_AUTO  0              ///< Auto: use all reported available pins.
+
+//
+// Setup stage mask.
+//
+extern
+UINTN
+  gGpioSetupStageMask;
+
+//
+// GPIO pin mask.
+//
+extern
+UINTN
+  gGpioPinMask;
+
+//
+// Time to wait in microseconds per codec for all widgets to fully come on.
+//
+extern
+UINTN
+  gCodecSetupDelay;
+
+//
+// Whether to use forced codec.
+//
+extern BOOLEAN
+  gUseForcedCodec;
+
+//
+// Forced codec number.
+//
+extern UINTN
+  gForcedCodec;
+
+//
+// Whether to attempt to output on CONN_NONE nodes.
+//
+extern BOOLEAN
+  gCodecUseConnNoneNode;
+
 #endif

@@ -139,41 +139,6 @@ FreeAll (
   }
 }
 
-#ifdef MEMORY_MUTATIONS
-STATIC
-VOID
-ConfigureMemoryAllocations (
-  IN  CONST UINT8  *Data,
-  IN  UINTN        Size
-  )
-{
-  UINT32  Off;
-
-  mPoolAllocationIndex = 0;
-  mPageAllocationIndex = 0;
-
-  //
-  // Limit single pool allocation size to 3GB
-  //
-  SetPoolAllocationSizeLimit (BASE_1GB | BASE_2GB);
-
-  Off = sizeof (UINT64);
-  if (Size >= Off) {
-    CopyMem (&mPoolAllocationMask, &Data[Size - Off], sizeof (UINT64));
-  } else {
-    mPoolAllocationMask = MAX_UINT64;
-  }
-
-  Off += sizeof (UINT64);
-  if (Size >= Off) {
-    CopyMem (&mPageAllocationMask, &Data[Size - Off], sizeof (UINT64));
-  } else {
-    mPageAllocationMask = MAX_UINT64;
-  }
-}
-
-#endif
-
 STATIC
 INT32
 TestFatDxe (
@@ -449,6 +414,10 @@ LLVMFuzzerTestOneInput (
 {
   VOID  *NewData;
 
+ #ifdef MEMORY_MUTATIONS
+  UINT32  ConfigSize;
+ #endif
+
   if (FuzzSize == 0) {
     return 0;
   }
@@ -462,10 +431,10 @@ LLVMFuzzerTestOneInput (
   gBS->InstallMultipleProtocolInterfaces = WrapInstallMultipleProtocolInterfaces;
 
  #ifdef MEMORY_MUTATIONS
-  ConfigureMemoryAllocations (FuzzData, FuzzSize);
- #else
-  SetPoolAllocationSizeLimit (BASE_1GB | BASE_2GB);
+  ConfigSize = 0;
+  ConfigureMemoryAllocations (FuzzData, FuzzSize, &ConfigSize);
  #endif
+  SetPoolAllocationSizeLimit (BASE_1GB | BASE_2GB);
 
   NewData = AllocatePool (FuzzSize);
   if (NewData != NULL) {

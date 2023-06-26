@@ -42,9 +42,9 @@
 
 [LibraryClasses]
   BaseMemoryLib
+  BaseOverflowLib
   DebugLib
   MemoryAllocationLib
   UefiBootServicesTableLib
-  OcGuardLib
   OcMiscLib
   OcPngLib

@@ -42,12 +42,14 @@
 
 [Sources]
   ConsoleControl.c
+  ConsoleFont.c
+  ConsoleFontLoader.c
   ConsoleGop.c
   ConsoleGopInternal.h
   Eg2Info.c
   FramebufferInfo.c
   GopInfoDump.c
-  GopBurstMode.c
+  GopUtils.c
   GopPassThrough.c
   OcConsoleLib.c
   OcConsoleLibInternal.h
@@ -70,6 +72,7 @@
   OcBlitLib
   OcMemoryLib
   OcMiscLib
+  OcStorageLib
   MtrrLib
   UefiBootServicesTableLib
   UefiRuntimeServicesTableLib

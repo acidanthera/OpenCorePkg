@@ -58,8 +58,8 @@
 [LibraryClasses]
   BaseLib
   BaseMemoryLib
+  BaseOverflowLib
   MemoryAllocationLib
-  OcGuardLib
   OcMiscLib
   UefiBootServicesTableLib
   UefiRuntimeServicesTableLib

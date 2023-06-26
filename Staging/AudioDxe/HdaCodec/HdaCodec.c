@@ -25,10 +25,28 @@
 #include "HdaCodec.h"
 #include "HdaCodecComponentName.h"
 
-#include <Library/OcGuardLib.h>
+#include <Library/BaseOverflowLib.h>
 #include <Library/OcHdaDevicesLib.h>
 #include <Library/OcMiscLib.h>
 #include <Library/OcStringLib.h>
+
+UINTN
+  gGpioSetupStageMask = GPIO_SETUP_STAGE_NONE;
+
+UINTN
+  gGpioPinMask = GPIO_PIN_MASK_AUTO;
+
+UINTN
+  gCodecSetupDelay = 0;
+
+BOOLEAN
+  gUseForcedCodec = FALSE;
+
+UINTN
+  gForcedCodec = 0;
+
+BOOLEAN
+  gCodecUseConnNoneNode = FALSE;
 
 EFI_STATUS
 EFIAPI
@@ -153,7 +171,7 @@ HdaCodecProbeWidget (
       // The first entry cannot be a range, nor can there be two sequential entries marked as a range.
       //
       if (IsRangedEntry && (ConnectionValue > ConnectionPrevValue)) {
-        if (OcOverflowAddU32 (HdaWidget->ConnectionCount, ConnectionValue - ConnectionPrevValue, &HdaWidget->ConnectionCount)) {
+        if (BaseOverflowAddU32 (HdaWidget->ConnectionCount, ConnectionValue - ConnectionPrevValue, &HdaWidget->ConnectionCount)) {
           return EFI_OUT_OF_RESOURCES;
         }
       }
@@ -933,7 +951,7 @@ HdaCodecParsePorts (
       // If this is a pin complex but it has no connection to a port, also ignore it.
       // If the default association for the pin complex is zero, also ignore it.
       if ((HdaWidget->Type != HDA_WIDGET_TYPE_PIN_COMPLEX) ||
-          (HDA_VERB_GET_CONFIGURATION_DEFAULT_PORT_CONN (HdaWidget->DefaultConfiguration) == HDA_CONFIG_DEFAULT_PORT_CONN_NONE) ||
+          (!gCodecUseConnNoneNode && (HDA_VERB_GET_CONFIGURATION_DEFAULT_PORT_CONN (HdaWidget->DefaultConfiguration) == HDA_CONFIG_DEFAULT_PORT_CONN_NONE)) ||
           (HDA_VERB_GET_CONFIGURATION_DEFAULT_ASSOCIATION (HdaWidget->DefaultConfiguration) == 0))
       {
         DEBUG ((
@@ -1723,6 +1741,12 @@ HdaCodecDriverBindingSupported (
   // Get address of codec.
   Status = HdaIo->GetAddress (HdaIo, &CodecAddress);
   if (EFI_ERROR (Status)) {
+    goto CLOSE_CODEC;
+  }
+
+  // Check --force-codec.
+  if (gUseForcedCodec && (gForcedCodec != CodecAddress)) {
+    Status = EFI_UNSUPPORTED;
     goto CLOSE_CODEC;
   }
 

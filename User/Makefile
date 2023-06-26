@@ -169,9 +169,9 @@ ifneq ($(STANDALONE),1)
 	#
 	OBJS    += UserBaseMemoryLib.o UserBootServices.o UserGlobalVar.o UserMath.o UserMisc.o UserPcd.o UserUnicodeCollation.o UserOcDummy.o
 	#
-	# OcGuardLib targets.
+	# BaseOverflowLib targets.
 	#
-	OBJS    += BitOverflow.o NativeOverflow.o TripleOverflow.o Alignment.o
+	OBJS    += BaseMath.o BaseBitOverflow.o BaseNativeOverflow.o BaseTripleOverflow.o BaseAlignment.o
 	#
 	# OcSerializeLib targets.
 	#
@@ -207,7 +207,7 @@ ifneq ($(STANDALONE),1)
 	#
 	# OcMiscLib targets.
 	#
-	OBJS    += Math.o ProtocolSupport.o DataPatcher.o PlatformInfo.o
+	OBJS    += ProtocolSupport.o DataPatcher.o PlatformInfo.o
 	#
 	# OcAppleKernelLib targets.
 	#
@@ -231,6 +231,7 @@ ifneq ($(STANDALONE),1)
 				$(UDK_PATH)/MdePkg/Library/BaseDebugPrintErrorLevelLib:$\
 				$(UDK_PATH)/MdePkg/Library/UefiDebugLibConOut:$\
 				$(UDK_PATH)/MdePkg/Library/BasePrintLib:$\
+				$(UDK_PATH)/MdePkg/Library/BaseOverflowLib:$\
 				$(UDK_PATH)/MdePkg/Library/BaseSafeIntLib:$\
 				$(UDK_PATH)/MdePkg/Library/BasePciLibPciExpress:$\
 				$(UDK_PATH)/MdePkg/Library/BasePciExpressLib:$\
@@ -240,7 +241,6 @@ ifneq ($(STANDALONE),1)
 				$(UDK_PATH)/MdeModulePkg/Library/CommonMemoryAllocationLib:$\
 				$(UDK_PATH)/MdeModulePkg/Library/UefiSortLib:$\
 				$(UDK_PATH)/UefiCpuPkg/Library/MtrrLib:$\
-				$(OC_USER)/Library/OcGuardLib:$\
 				$(OC_USER)/Library/OcSerializeLib:$\
 				$(OC_USER)/Library/OcTemplateLib:$\
 				$(OC_USER)/Library/OcXmlLib:$\
@@ -335,9 +335,9 @@ coverage: $(PRODUCT) FORCE
 	$(LCOV) --no-checksum --zerocounters --directory .
 	$(LCOV) --no-checksum --capture --initial --directory . --output-file COVERAGE/trace.lcov_base
 	for f in $(FUZZ_DIR)/*; do  ./$(PRODUCT) $$f > /dev/null ; done || true
-	$(LCOV) --no-checksum --capture --directory . --rc lcov_branch_coverage=1  --rc lcov_excl_br_line='LCOV_EXCL_BR_LINE|ASSERT|DEBUG' --output-file COVERAGE/trace.lcov_info || exit 1
-	$(LCOV) --no-checksum -a COVERAGE/trace.lcov_base -a COVERAGE/trace.lcov_info --rc lcov_branch_coverage=1 --rc lcov_excl_br_line='LCOV_EXCL_BR_LINE|ASSERT|DEBUG' --output-file COVERAGE/trace.lcov_tmp || exit 1
-	$(LCOV) --no-checksum -r COVERAGE/trace.lcov_tmp /usr/include/\* --rc lcov_branch_coverage=1  --rc lcov_excl_br_line='LCOV_EXCL_BR_LINE|ASSERT|DEBUG' --output-file COVERAGE/trace.lcov_info_final || exit 1
+	$(LCOV) --no-checksum --capture --directory . --rc lcov_branch_coverage=1  --rc lcov_excl_br_line='LCOV_EXCL_BR_LINE|ASSERT|DEBUG|assert' --output-file COVERAGE/trace.lcov_info || exit 1
+	$(LCOV) --no-checksum -a COVERAGE/trace.lcov_base -a COVERAGE/trace.lcov_info --rc lcov_branch_coverage=1 --rc lcov_excl_br_line='LCOV_EXCL_BR_LINE|ASSERT|DEBUG|assert' --output-file COVERAGE/trace.lcov_tmp || exit 1
+	$(LCOV) --no-checksum -r COVERAGE/trace.lcov_tmp /usr/include/\* $(LCOV_EXCL) --rc lcov_branch_coverage=1  --rc lcov_excl_br_line='LCOV_EXCL_BR_LINE|ASSERT|DEBUG|assert' --output-file COVERAGE/trace.lcov_info_final || exit 1
 	$(GENHTML) --branch-coverage --output-directory COVERAGE COVERAGE/trace.lcov_info_final
 
 clean: FORCE

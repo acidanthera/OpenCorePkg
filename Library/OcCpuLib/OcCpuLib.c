@@ -19,9 +19,9 @@
 #include <Protocol/MpService.h>
 #include <Library/BaseLib.h>
 #include <Library/BaseMemoryLib.h>
+#include <Library/BaseOverflowLib.h>
 #include <Library/DebugLib.h>
 #include <Library/OcCpuLib.h>
-#include <Library/OcGuardLib.h>
 #include <Library/MemoryAllocationLib.h>
 #include <Library/UefiBootServicesTableLib.h>
 #include <IndustryStandard/ProcessorInfo.h>
@@ -353,7 +353,7 @@ ScanIntelFSBFrequency (
     if (MaxBusRatioDiv == 0) {
       CpuInfo->FSBFrequency = DivU64x32 (CpuInfo->CPUFrequency, MaxBusRatio);
     } else {
-      CpuInfo->FSBFrequency = MultThenDivU64x64x32 (
+      CpuInfo->FSBFrequency = BaseMultThenDivU64x64x32 (
                                 CpuInfo->CPUFrequency,
                                 2,
                                 2 * MaxBusRatio + 1,
@@ -996,6 +996,14 @@ OcCpuGetMsrReport (
   // The CPU model must be Intel, as MSRs are not available on other platforms.
   //
   if (CpuInfo->Vendor[0] != CPUID_VENDOR_INTEL) {
+    return;
+  }
+
+  //
+  // Hypervisors virtualise MSRs so the values are either not present
+  // and cause a crash or are irrelevant as they report placeholders.
+  //
+  if (CpuInfo->Hypervisor) {
     return;
   }
 

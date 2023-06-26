@@ -122,6 +122,7 @@
   OcMiscLib|OpenCorePkg/Library/OcMiscLib/OcMiscLib.inf
   OcMp3Lib|OpenCorePkg/Library/OcMp3Lib/OcMp3Lib.inf
   OcOSInfoLib|OpenCorePkg/Library/OcOSInfoLib/OcOSInfoLib.inf
+  OcPciIoLib|OpenCorePkg/Library/OcPciIoLib/OcPciIoLib.inf
   OcPngLib|OpenCorePkg/Library/OcPngLib/OcPngLib.inf
   OcRngLib|OpenCorePkg/Library/OcRngLib/OcRngLib.inf
   OcRtcLib|OpenCorePkg/Library/OcRtcLib/OcRtcLib.inf
@@ -139,7 +140,6 @@
   OcWaveLib|OpenCorePkg/Library/OcWaveLib/OcWaveLib.inf
   OcXmlLib|OpenCorePkg/Library/OcXmlLib/OcXmlLib.inf
   OcPeCoffExtLib|OpenCorePkg/Library/OcPeCoffExtLib/OcPeCoffExtLib.inf
-  OcPeCoffLib|OpenCorePkg/Library/OcPeCoffLib/OcPeCoffLib.inf
   OcVariableLib|OpenCorePkg/Library/OcVariableLib/OcVariableLib.inf
   OcVariableRuntimeLib|OpenCorePkg/Library/OcVariableRuntimeLib/OcVariableRuntimeLib.inf
   PcdLib|MdePkg/Library/BasePcdLibNull/BasePcdLibNull.inf
@@ -202,6 +202,7 @@
   OpenCorePkg/Application/ChipTune/ChipTune.inf
   OpenCorePkg/Application/CleanNvram/CleanNvram.inf
   OpenCorePkg/Application/CsrUtil/CsrUtil.inf
+  OpenCorePkg/Application/FontTester/FontTester.inf
   OpenCorePkg/Application/GopPerf/GopPerf.inf
   OpenCorePkg/Application/GopStop/GopStop.inf
   OpenCorePkg/Application/KeyTester/KeyTester.inf
@@ -280,7 +281,6 @@
   OpenCorePkg/Library/OcMp3Lib/OcMp3Lib.inf
   OpenCorePkg/Library/OcOSInfoLib/OcOSInfoLib.inf
   OpenCorePkg/Library/OcPeCoffExtLib/OcPeCoffExtLib.inf
-  OpenCorePkg/Library/OcPeCoffLib/OcPeCoffLib.inf
   OpenCorePkg/Library/OcPngLib/OcPngLib.inf
   OpenCorePkg/Library/OcRngLib/OcRngLib.inf
   OpenCorePkg/Library/OcSerializeLib/OcSerializeLib.inf
@@ -292,6 +292,7 @@
   OpenCorePkg/Library/OcTimerLib/OcTimerLib.inf
   OpenCorePkg/Library/OcUnicodeCollationEngLib/OcUnicodeCollationEngGenericLib.inf
   OpenCorePkg/Library/OcUnicodeCollationEngLib/OcUnicodeCollationEngLocalLib.inf
+  OpenCorePkg/Library/OcPciIoLib/OcPciIoLib.inf
   OpenCorePkg/Library/OcVirtualFsLib/OcVirtualFsLib.inf
   OpenCorePkg/Library/OcWaveLib/OcWaveLib.inf
   OpenCorePkg/Library/OcXmlLib/OcXmlLib.inf
@@ -391,6 +392,17 @@
   gEfiMdePkgTokenSpaceGuid.PcdFixedDebugPrintErrorLevel|0x80000042
 !endif
   gOpenCorePkgTokenSpaceGuid.PcdCanaryAllowRdtscFallback|TRUE
+
+  # ImageLoader settings
+  gEfiMdePkgTokenSpaceGuid.PcdImageLoaderRtRelocAllowTargetMismatch|FALSE
+  gEfiMdePkgTokenSpaceGuid.PcdImageLoaderHashProhibitOverlap|TRUE
+  gEfiMdePkgTokenSpaceGuid.PcdImageLoaderLoadHeader|TRUE
+  gEfiMdePkgTokenSpaceGuid.PcdImageLoaderDebugSupport|FALSE
+  gEfiMdePkgTokenSpaceGuid.PcdImageLoaderAllowMisalignedOffset|FALSE
+  gEfiMdePkgTokenSpaceGuid.PcdImageLoaderRemoveXForWX|TRUE
+  gEfiMdePkgTokenSpaceGuid.PcdImageLoaderWXorX|TRUE
+  gEfiMdePkgTokenSpaceGuid.PcdImageLoaderAlignmentPolicy|0xFFFFFFFF
+  gEfiMdePkgTokenSpaceGuid.PcdImageLoaderRelocTypePolicy|0xFFFFFFFF
 
 [PcdsPatchableInModule]
   gEfiMdeModulePkgTokenSpaceGuid.PcdSerialRegisterAccessWidth|8

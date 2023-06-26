@@ -13,10 +13,10 @@
 #include <Uefi.h>
 
 #include <Library/BaseLib.h>
+#include <Library/BaseOverflowLib.h>
 #include <Library/DebugLib.h>
 #include <Library/MemoryAllocationLib.h>
 #include <Library/OcAppleDiskImageLib.h>
-#include <Library/OcGuardLib.h>
 #include <Library/OcXmlLib.h>
 
 #include "OcAppleDiskImageLibInternal.h"
@@ -86,7 +86,7 @@ InternalSwapBlockData (
 
   BlockData->ChunkCount = SwapBytes32 (BlockData->ChunkCount);
 
-  Result = OcOverflowMulU32 (
+  Result = BaseOverflowMulU32 (
              BlockData->ChunkCount,
              sizeof (*BlockData->Chunks),
              &ChunksSize
@@ -113,7 +113,7 @@ InternalSwapBlockData (
     return FALSE;
   }
 
-  Result = OcOverflowAddU64 (
+  Result = BaseOverflowAddU64 (
              BlockData->SectorNumber,
              BlockData->SectorCount,
              &BlockSectorTop
@@ -139,7 +139,7 @@ InternalSwapBlockData (
     Chunk->CompressedOffset = SwapBytes64 (Chunk->CompressedOffset);
     Chunk->CompressedLength = SwapBytes64 (Chunk->CompressedLength);
 
-    Result = OcOverflowAddU64 (
+    Result = BaseOverflowAddU64 (
                Chunk->SectorNumber,
                Chunk->SectorCount,
                &ChunkSectorTop
@@ -148,7 +148,7 @@ InternalSwapBlockData (
       return FALSE;
     }
 
-    Result = OcOverflowAddU64 (
+    Result = BaseOverflowAddU64 (
                Chunk->CompressedOffset,
                Chunk->CompressedLength,
                &OffsetTop
@@ -240,7 +240,7 @@ InternalParsePlist (
     goto DONE_ERROR;
   }
 
-  Result = !OcOverflowMulU32 (NumDmgBlocks, sizeof (*DmgBlocks), &DmgBlocksSize);
+  Result = !BaseOverflowMulU32 (NumDmgBlocks, sizeof (*DmgBlocks), &DmgBlocksSize);
   if (!Result) {
     ///< Result must be FALSE on error, it's checked at DONE_ERROR
     goto DONE_ERROR;

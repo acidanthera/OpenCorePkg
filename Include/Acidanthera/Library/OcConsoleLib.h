@@ -15,10 +15,12 @@
 #ifndef OC_CONSOLE_LIB_H
 #define OC_CONSOLE_LIB_H
 
-#include <Protocol/ConsoleControl.h>
 #include <Protocol/AppleFramebufferInfo.h>
 #include <Protocol/AppleEg2Info.h>
+#include <Protocol/ConsoleControl.h>
+#include <Protocol/GraphicsOutput.h>
 
+#include <Library/OcBootManagementLib.h>
 #include <Library/OcFileLib.h>
 
 /**
@@ -35,25 +37,87 @@ typedef enum {
 /**
   Special commands sent to Builtin text renderer through TestString.
 **/
-#define OC_CONSOLE_MARK_CONTROLLED    L"MarkControlled"
+/**
+  Extension to notify OpenCore builtin renderer that any text it may have produced
+  on screen is mixed with graphics which it did not control.
+**/
 #define OC_CONSOLE_MARK_UNCONTROLLED  L"MarkUncontrolled"
+
+/**
+  Console font.
+ **/
+#define ISO_CHAR_WIDTH   (8u)
+#define ISO_CHAR_HEIGHT  (16u)
+
+#define OC_CONSOLE_FONT_FALLBACK_CHAR  (L'_')
+
+typedef struct _OC_CONSOLE_FONT_PAGE {
+  UINT8      *Glyphs;
+  UINT8      *GlyphOffsets;
+  UINT8      CharMin;
+  UINT8      CharMax;
+  UINT8      FontHead : 4;
+  UINT8      FontTail : 4;
+  BOOLEAN    LeftToRight;
+} OC_CONSOLE_FONT_PAGE;
+
+typedef struct _OC_CONSOLE_FONT {
+  OC_CONSOLE_FONT_PAGE    *Pages;
+  UINT16                  *PageOffsets;
+  UINT16                  PageMin;
+  UINT16                  PageMax;
+} OC_CONSOLE_FONT;
+
+typedef struct _OC_CONSOLE_FONT_RANGE {
+  CHAR16    Start;
+  UINT16    Length;
+} OC_CONSOLE_FONT_RANGE;
+
+/**
+  Free font used by XNU, plus unicode box drawing chars.
+**/
+extern OC_CONSOLE_FONT  gDefaultConsoleFont;
+
+/**
+  List of non-page 0 chars required by EFI.
+  Refs:
+    https://github.com/acidanthera/audk/blob/master/MdePkg/Include/Protocol/SimpleTextOut.h#L177-L178
+    https://github.com/acidanthera/audk/blob/master/MdePkg/Include/Protocol/SimpleTextOut.h#L34-L98
+**/
+extern OC_CONSOLE_FONT_RANGE  gEfiRequiredUnicodeChars[];
+
+/**
+  List of all chars present in Extended Unicode range.
+  Ref: https://int10h.org/oldschool-pc-fonts/fontlist/font?ibm_vga_8x16
+**/
+extern OC_CONSOLE_FONT_RANGE  gExtendedUnicodeChars[];
 
 /**
   Configure console control protocol with given options.
 
+  @param[in] InitialMode              Initial mode to use, or set max. value to use existing mode.
   @param[in] Renderer                 Renderer to use.
+  @param[in] Storage                  Storage context - only required if Font parameter is used.
+  @param[in] Font                     Font file to load. Use builtin font if NULL or empty string.
   @param[in] IgnoreTextOutput         Skip console output in text mode.
   @param[in] SanitiseClearScreen      Workaround ClearScreen breaking resolution.
   @param[in] ClearScreenOnModeSwitch  Clear graphic screen when switching to text mode.
   @param[in] ReplaceTabWithSpace      Replace invisible tab characters with spaces in OutputString.
+  @param[in] Width                    Width to set - applies to builtin renderer only.
+  @param[in] Height                   Height to set - applies to builtin renderer only.
 **/
 VOID
 OcSetupConsole (
-  IN OC_CONSOLE_RENDERER  Renderer,
-  IN BOOLEAN              IgnoreTextOutput,
-  IN BOOLEAN              SanitiseClearScreen,
-  IN BOOLEAN              ClearScreenOnModeSwitch,
-  IN BOOLEAN              ReplaceTabWithSpace
+  IN EFI_CONSOLE_CONTROL_SCREEN_MODE  InitialMode,
+  IN OC_CONSOLE_RENDERER              Renderer,
+  IN OC_STORAGE_CONTEXT               *Storage  OPTIONAL,
+  IN CONST CHAR8                      *Font     OPTIONAL,
+  IN BOOLEAN                          IgnoreTextOutput,
+  IN BOOLEAN                          SanitiseClearScreen,
+  IN BOOLEAN                          ClearScreenOnModeSwitch,
+  IN BOOLEAN                          ReplaceTabWithSpace,
+  IN UINT32                           Width,
+  IN UINT32                           Height
   );
 
 /**
@@ -66,6 +130,16 @@ OcSetupConsole (
 EFI_CONSOLE_CONTROL_SCREEN_MODE
 OcConsoleControlSetMode (
   IN EFI_CONSOLE_CONTROL_SCREEN_MODE  Mode
+  );
+
+/**
+  Get existing console control screen mode, default to text if no existing console control protocol.
+
+  @retval existing console control mode.
+**/
+EFI_CONSOLE_CONTROL_SCREEN_MODE
+OcConsoleControlGetMode (
+  VOID
   );
 
 /**
@@ -111,6 +185,47 @@ OcParseConsoleMode (
 EFI_STATUS
 OcSetGopBurstMode (
   VOID
+  );
+
+/**
+  Return the bytes per pixel for the current GOP mode.
+
+  GOP mode information does not include anything directly containing the bytes
+  per pixel, but there is a defined algorithm for working out this size, even for
+  non-standard pixel masks, and also a defined situation (PixelBltOnly pixel
+  format) where there is no such size.
+
+  @param[in]  Mode                GOP mode.
+  @param[in]  BytesPerPixel       Bytes per pixel for the mode in use.
+
+  @retval EFI_SUCCESS             Success.
+  @retval EFI_UNSUPPORTED         There is no frame buffer.
+  @retval EFI_INVALID_PARAMETER   Mode info parameters are outside valid ranges.
+**/
+EFI_STATUS
+OcGopModeBytesPerPixel (
+  IN  EFI_GRAPHICS_OUTPUT_PROTOCOL_MODE  *Mode,
+  OUT UINTN                              *BytesPerPixel
+  );
+
+/**
+  Return the frame buffer size in use for the current GOP mode, even where
+  Gop->Mode->FrameBufferSize misreports this.
+
+  Occasional GOP implementations report a frame buffer size far larger (e.g. ~100x)
+  than required for the actual mode in use.
+
+  @param[in]  Mode                GOP mode.
+  @param[in]  FrameBufferSize     Frame buffer size in use.
+
+  @retval EFI_SUCCESS             Success.
+  @retval EFI_UNSUPPORTED         There is no frame buffer.
+  @retval EFI_INVALID_PARAMETER   Size parameters are outside valid ranges.
+**/
+EFI_STATUS
+OcGopModeSafeFrameBufferSize (
+  IN  EFI_GRAPHICS_OUTPUT_PROTOCOL_MODE  *Mode,
+  OUT UINTN                              *FrameBufferSize
   );
 
 /**

@@ -69,6 +69,33 @@ buildutil() {
   popd || exit
 }
 
+get_inf_version() {
+  VER="VERSION_STRING"
+
+  if [ ! -f "${1}" ]; then
+    echo "Missing .inf file ${1}" > /dev/stderr
+    exit 1
+  fi
+
+  ver_line=$(grep -E "${VER} *=" "${1}")
+
+  if [ "${ver_line}" = "" ] ; then
+    echo "Missing ${VER} in ${1}" > /dev/stderr
+    exit 1
+  fi
+
+  read -ra ver_array <<<"${ver_line}"
+
+  if [ "${ver_array[0]}" != "${VER}" ] ||
+     [ "${ver_array[1]}" != "=" ] ||
+     [ "${ver_array[2]}" = "" ] ; then
+    echo "Malformed ${VER} line in ${1}" > /dev/stderr
+    exit 1
+  fi
+
+  echo "${ver_array[2]}"
+}
+
 package() {
   if [ ! -d "$1" ]; then
     echo "Missing package directory $1"
@@ -134,6 +161,7 @@ package() {
       "ChipTune.efi"
       "CleanNvram.efi"
       "CsrUtil.efi"
+      "FontTester.efi"
       "GopStop.efi"
       "KeyTester.efi"
       "ListPartitions.efi"
@@ -251,22 +279,30 @@ package() {
     fi
   done
 
-  # Copy Mac Pro GOP firmware driver.
-  mkdir -p "${dstdir}/Utilities/EnableGop" || exit 1
+  # Copy EFI-era Mac GOP firmware driver.
+  eg_ver=$(get_inf_version "${selfdir}/Staging/EnableGop/EnableGop.inf") || exit 1
+  egdirect_ver=$(get_inf_version "${selfdir}/Staging/EnableGop/EnableGopDirect.inf") || exit 1
+
+  if [ "${eg_ver}" != "${egdirect_ver}" ] ; then
+    echo "Mismatched EnableGop versions (${eg_ver} and ${egdirect_ver})!"
+    exit 1
+  fi
+
+  mkdir -p "${dstdir}/Utilities/EnableGop/Pre-release" || exit 1
   ENABLE_GOP_GUID="3FBA58B1-F8C0-41BC-ACD8-253043A3A17F"
   ffsNames=(
     "EnableGop"
     "EnableGopDirect"
     )
   for ffsName in "${ffsNames[@]}"; do
-    cp "FV/Ffs/${ENABLE_GOP_GUID}${ffsName}/${ENABLE_GOP_GUID}.ffs" "${dstdir}/Utilities/EnableGop/${ffsName}.ffs" || exit 1
+    cp "FV/Ffs/${ENABLE_GOP_GUID}${ffsName}/${ENABLE_GOP_GUID}.ffs" "${dstdir}/Utilities/EnableGop/Pre-release/${ffsName}_${eg_ver}.ffs" || exit 1
   done
   gopDrivers=(
-    "EnableGop.efi"
-    "EnableGopDirect.efi"
+    "EnableGop"
+    "EnableGopDirect"
     )
   for file in "${gopDrivers[@]}"; do
-    cp "X64/${file}" "${dstdir}/Utilities/EnableGop"/ || exit 1
+    cp "X64/${file}.efi" "${dstdir}/Utilities/EnableGop/Pre-release/${file}_${eg_ver}.efi" || exit 1
   done
   helpFiles=(
     "README.md"
@@ -276,6 +312,7 @@ package() {
   for file in "${helpFiles[@]}"; do
     cp "${selfdir}/Staging/EnableGop/${file}" "${dstdir}/Utilities/EnableGop"/ || exit 1
   done
+  cp "${selfdir}/Staging/EnableGop/Release/"* "${dstdir}/Utilities/EnableGop"/ || exit 1
 
   # Provide EDK-II BaseTools.
   mkdir "${dstdir}/Utilities/BaseTools" || exit 1

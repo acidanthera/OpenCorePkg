@@ -28,7 +28,7 @@
 #include "AudioDxe.h"
 #include <IndustryStandard/HdaRegisters.h>
 
-#include <Library/OcGuardLib.h>
+#include <Library/BaseOverflowLib.h>
 
 //
 // Consumed protocols.
@@ -617,5 +617,19 @@ VOID
 HdaControllerStreamAbort (
   IN HDA_STREAM  *HdaStream
   );
+
+//
+// Whether to restore NOSNOOPEN at exit.
+//
+extern
+BOOLEAN
+  gRestoreNoSnoop;
+
+//
+// Forced device path for HDA controller (ignore advertised class/subclass).
+//
+extern
+EFI_DEVICE_PATH_PROTOCOL *
+  gForcedControllerDevicePath;
 
 #endif

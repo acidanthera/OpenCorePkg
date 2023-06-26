@@ -10,7 +10,6 @@
 #define OC_PE_COFF_EXT_LIB_H
 
 #include <IndustryStandard/Apfs.h>
-#include <Library/OcPeCoffLib.h>
 
 /**
   Verify Apple COFF legacy signature.

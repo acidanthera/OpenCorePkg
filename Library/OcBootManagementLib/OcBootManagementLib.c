@@ -21,11 +21,11 @@
 
 #include <Library/BaseLib.h>
 #include <Library/BaseMemoryLib.h>
+#include <Library/BaseOverflowLib.h>
 #include <Library/OcConsoleLib.h>
 #include <Library/OcCryptoLib.h>
 #include <Library/OcDebugLogLib.h>
 #include <Library/DevicePathLib.h>
-#include <Library/OcGuardLib.h>
 #include <Library/OcTimerLib.h>
 #include <Library/OcTypingLib.h>
 #include <Library/MemoryAllocationLib.h>
@@ -43,6 +43,95 @@
 #include <Library/UefiRuntimeServicesTableLib.h>
 #include <Library/UefiLib.h>
 #include <Library/ResetSystemLib.h>
+
+STATIC UINT32                           mSavedGopMode;
+STATIC EFI_CONSOLE_CONTROL_SCREEN_MODE  mSavedConsoleControlMode;
+STATIC INT32                            mSavedConsoleMode;
+
+STATIC
+EFI_STATUS
+SaveMode (
+  VOID
+  )
+{
+  EFI_STATUS                    Status;
+  EFI_GRAPHICS_OUTPUT_PROTOCOL  *Gop;
+
+  mSavedConsoleControlMode = OcConsoleControlGetMode ();
+
+  mSavedConsoleMode = gST->ConOut->Mode->Mode;
+
+  Status = gBS->HandleProtocol (
+                  gST->ConsoleOutHandle,
+                  &gEfiGraphicsOutputProtocolGuid,
+                  (VOID **)&Gop
+                  );
+
+  if (EFI_ERROR (Status)) {
+    mSavedGopMode = MAX_UINT32;
+  } else {
+    mSavedGopMode = Gop->Mode->Mode;
+  }
+
+  DEBUG ((
+    DEBUG_INFO,
+    "OCB: Saved mode %d/%d/%u - %r\n",
+    mSavedConsoleControlMode,
+    mSavedConsoleMode,
+    mSavedGopMode,
+    Status
+    ));
+
+  return Status;
+}
+
+STATIC
+EFI_STATUS
+RestoreMode (
+  VOID
+  )
+{
+  EFI_STATUS                    Status;
+  EFI_GRAPHICS_OUTPUT_PROTOCOL  *Gop;
+  UINT32                        FoundGopMode;
+
+  OcConsoleControlSetMode (mSavedConsoleControlMode);
+
+  //
+  // This can reset GOP resolution.
+  //
+  gST->ConOut->SetMode (gST->ConOut, mSavedConsoleMode);
+
+  FoundGopMode = MAX_UINT32;
+  if (mSavedGopMode == MAX_UINT32) {
+    Status = EFI_SUCCESS;
+  } else {
+    Status = gBS->HandleProtocol (
+                    gST->ConsoleOutHandle,
+                    &gEfiGraphicsOutputProtocolGuid,
+                    (VOID **)&Gop
+                    );
+
+    if (!EFI_ERROR (Status)) {
+      FoundGopMode = Gop->Mode->Mode;
+      if (Gop->Mode->Mode != mSavedGopMode) {
+        Status = Gop->SetMode (Gop, mSavedGopMode);
+      }
+    }
+  }
+
+  DEBUG ((
+    DEBUG_INFO,
+    "OCB: Restored mode %d/%d/%u(%u) - %r\n",
+    mSavedConsoleControlMode,
+    mSavedConsoleMode,
+    mSavedGopMode,
+    FoundGopMode,
+    Status
+    ));
+
+  return Status;
+}
 
 STATIC
 EFI_STATUS
@@ -189,6 +278,19 @@ OcRunBootPicker (
   }
 
   //
+  // Use builtin text renderer extension:
+  //  - Set for text-based picker, to mark dirty due to BIOS logo, early logs, etc.
+  //    (which are not cleared by initial resync when starting in console graphics mode).
+  //  - Do no set for graphics-based picker, since we want (expected behaviour, also
+  //    similar to how system renderers tend to behave) the debug log to continue on
+  //    over the graphics from the position it has reached so far, if we are running
+  //    in a mode which will show text output.
+  //
+  if (Context->ShowMenu == OcShowSimpleBootMenu) {
+    gST->ConOut->TestString (gST->ConOut, OC_CONSOLE_MARK_UNCONTROLLED);
+  }
+
+  //
   // This one is handled as is for Apple BootPicker for now.
   //
   if (Context->PickerCommand != OcPickerDefault) {
@@ -208,7 +310,7 @@ OcRunBootPicker (
   if ((Context->PickerCommand == OcPickerShowPicker) && (Context->PickerMode == OcPickerModeApple)) {
     Status = OcLaunchAppleBootPicker ();
     if (EFI_ERROR (Status)) {
-      DEBUG ((DEBUG_INFO, "OCB: Apple BootPicker failed - %r, fallback to builtin\n", Status));
+      DEBUG ((DEBUG_WARN, "OCB: Apple BootPicker failed - %r, fallback to builtin\n", Status));
       Context->ApplePickerUnsupported = TRUE;
     } else {
       IsApplePickerSelection = TRUE;
@@ -267,6 +369,17 @@ OcRunBootPicker (
         if (IsApplePickerSelection) {
           DEBUG ((DEBUG_WARN, "OCB: Apple Picker returned no entry valid under OC, falling back to builtin\n"));
           Context->PickerMode = OcPickerModeBuiltin;
+
+          //
+          // Zero here, not before starting Apple picker, to keep safety net of
+          // timeout in builtin picker if Apple picker cannot start.
+          //
+          Context->TimeoutSeconds = 0;
+
+          //
+          // Clears all native picker graphics on switching back to text mode.
+          //
+          gST->ConOut->TestString (gST->ConOut, OC_CONSOLE_MARK_UNCONTROLLED);
         } else {
           DEBUG ((DEBUG_INFO, "OCB: System has no boot entries, showing picker with auxiliary\n"));
         }
@@ -353,14 +466,20 @@ OcRunBootPicker (
         }
 
         //
-        // Clear screen of previous console contents - e.g. from builtin picker,
-        // log messages or previous console tool - before loading the entry.
+        // If launching entry in text, clear screen of previous console contents - e.g. from
+        // builtin picker, log messages, or previous console tool - before loading the entry.
+        // Otherwise, if coming from graphics picker, set to trigger a full screen clear if anybody,
+        // but particularly macOS verbose boot, switches to text mode. (If running Canopy with
+        // a background mode of text, this still works: even though Builtin renderer only clears
+        // on change from graphics to text, macOS initially sets graphics, which stays uncontrolled,
+        // then back to text for verbose mode.)
+        // But if coming from text picker do not set uncontrolled, intentionally allowing initial
+        // verbose mode text to run on after the picker text.
         //
         if (Chosen->LaunchInText) {
+          gST->ConOut->TestString (gST->ConOut, OC_CONSOLE_MARK_UNCONTROLLED);
           gST->ConOut->ClearScreen (gST->ConOut);
-        }
-
-        if (Context->ShowMenu == OcShowSimpleBootMenu) {
+        } else if (BootContext->PickerContext->ShowMenu != OcShowSimpleBootMenu) {
           gST->ConOut->TestString (gST->ConOut, OC_CONSOLE_MARK_UNCONTROLLED);
         }
 
@@ -379,6 +498,7 @@ OcRunBootPicker (
         }
       }
 
+      SaveMode ();
       FwRuntime = Chosen->FullNvramAccess ? OcDisableNvramProtection () : NULL;
 
       Status = OcLoadBootEntry (
@@ -388,6 +508,7 @@ OcRunBootPicker (
                  );
 
       OcRestoreNvramProtection (FwRuntime);
+      RestoreMode ();
 
       //
       // Do not wait on successful return code.

@@ -13,10 +13,10 @@
 **/
 
 #include <Library/BaseMemoryLib.h>
+#include <Library/BaseOverflowLib.h>
 #include <Library/DebugLib.h>
 #include <Library/MemoryAllocationLib.h>
 #include <Library/OcAudioLib.h>
-#include <Library/OcGuardLib.h>
 #include <Library/OcMiscLib.h>
 #include <Library/UefiBootServicesTableLib.h>
 
@@ -90,8 +90,8 @@ InternalOcAudioGenBeep (
   //
   // Convert to microseconds.
   //
-  if (  OcOverflowMulUN (ToneLength, 1000, &ToneLength)
-     || OcOverflowMulUN (SilenceLength, 1000, &SilenceLength))
+  if (  BaseOverflowMulUN (ToneLength, 1000, &ToneLength)
+     || BaseOverflowMulUN (SilenceLength, 1000, &SilenceLength))
   {
     return EFI_INVALID_PARAMETER;
   }
@@ -111,7 +111,7 @@ InternalOcAudioGenBeep (
   // Rough signal time calculation, not sure whether we need to overcomplicate things right now.
   //
   ToneSlots = MAX (ToneLength / OC_BEEP_AUDIO_LENGTH, 1);
-  if (OcOverflowMulUN (ToneSlots, sizeof (mAudioBeepSignal), &BufferSize)) {
+  if (BaseOverflowMulUN (ToneSlots, sizeof (mAudioBeepSignal), &BufferSize)) {
     return EFI_INVALID_PARAMETER;
   }
 

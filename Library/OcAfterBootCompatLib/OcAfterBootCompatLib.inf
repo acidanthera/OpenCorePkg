@@ -55,6 +55,7 @@
 [LibraryClasses]
   BaseLib
   BaseMemoryLib
+  BaseOverflowLib
   DebugLib
   DevicePathLib
   MemoryAllocationLib
@@ -64,7 +65,6 @@
   OcCpuLib
   OcCryptoLib
   OcDeviceTreeLib
-  OcGuardLib
   OcLogAggregatorLib
   OcMemoryLib
   OcOSInfoLib

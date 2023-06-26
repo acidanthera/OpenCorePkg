@@ -16,13 +16,13 @@
 
 #include <Library/BaseLib.h>
 #include <Library/BaseMemoryLib.h>
+#include <Library/BaseOverflowLib.h>
 #include <Library/DebugLib.h>
 #include <Library/DevicePathLib.h>
 #include <Library/MemoryAllocationLib.h>
 #include <Library/OcAudioLib.h>
 #include <Library/OcDevicePathLib.h>
 #include <Library/OcFileLib.h>
-#include <Library/OcGuardLib.h>
 #include <Library/OcMiscLib.h>
 #include <Library/OcStringLib.h>
 #include <Library/PrintLib.h>
@@ -694,7 +694,7 @@ OcAudioDump (
         continue;
       }
 
-      if (OcOverflowMulAddUN (SIZE_4KB, HdaWidgetCount, SIZE_4KB, &FileBufferSize)) {
+      if (BaseOverflowMulAddUN (SIZE_4KB, HdaWidgetCount, SIZE_4KB, &FileBufferSize)) {
         HdaCodecInfo->FreeWidgetsBuffer (HdaWidgets, HdaWidgetCount);
         continue;
       }

@@ -5,12 +5,12 @@
 
 #include "../Include/Uefi.h"
 
-#include <Library/OcPeCoffLib.h>
-#include <Library/OcGuardLib.h>
+#include <Library/BaseMemoryLib.h>
+#include <Library/BaseOverflowLib.h>
 #include <Library/MemoryAllocationLib.h>
+#include <Library/PeCoffLib2.h>
 #include <Library/DebugLib.h>
 #include <Library/UefiBootServicesTableLib.h>
-#include <Library/BaseMemoryLib.h>
 
 #include <stdio.h>
 #include <string.h>
@@ -57,14 +57,14 @@ HashUpdate (
 STATIC
 EFI_STATUS
 PeCoffTestRtReloc (
-  IN OUT  PE_COFF_IMAGE_CONTEXT  *Context
+  IN OUT  PE_COFF_LOADER_IMAGE_CONTEXT  *Context
   )
 {
-  EFI_STATUS               Status;
-  PE_COFF_RUNTIME_CONTEXT  *RtCtx;
-  UINT32                   RtCtxSize;
+  EFI_STATUS                      Status;
+  PE_COFF_LOADER_RUNTIME_CONTEXT  *RtCtx;
+  UINT32                          RtCtxSize;
 
-  Status = PeCoffRelocationDataSize (Context, &RtCtxSize);
+  Status = PeCoffLoaderGetRuntimeContextSize (Context, &RtCtxSize);
   if (EFI_ERROR (Status)) {
     return EFI_UNSUPPORTED;
   }
@@ -80,7 +80,7 @@ PeCoffTestRtReloc (
     return Status;
   }
 
-  Status = PeCoffRelocateImageForRuntime (Context->ImageBuffer, Context->SizeOfImage, 0x96969696, RtCtx);
+  Status = PeCoffRuntimeRelocateImage (Context->ImageBuffer, Context->SizeOfImage, 0x96969696, RtCtx);
 
   FreePool (RtCtx);
 
@@ -90,18 +90,21 @@ PeCoffTestRtReloc (
 STATIC
 EFI_STATUS
 PeCoffTestLoad (
-  IN OUT  PE_COFF_IMAGE_CONTEXT  *Context,
-  OUT  VOID                      *Destination,
-  IN      UINT32                 DestinationSize
+  IN OUT  PE_COFF_LOADER_IMAGE_CONTEXT  *Context,
+  OUT  VOID                             *Destination,
+  IN      UINT32                        DestinationSize
   )
 {
   EFI_STATUS  Status;
   CHAR8       *PdbPath;
   UINT32      PdbPathSize;
 
-  (VOID)PeCoffLoadImage (Context, Destination, DestinationSize);
+  Status = PeCoffLoadImage (Context, Destination, DestinationSize);
+  if (EFI_ERROR (Status)) {
+    return Status;
+  }
 
-  Status = PeCoffGetPdbPath (Context, &PdbPath, &PdbPathSize);
+  Status = PeCoffGetPdbPath (Context, (CONST CHAR8 **)&PdbPath, &PdbPathSize);
   if (!EFI_ERROR (Status)) {
     ZeroMem (PdbPath, PdbPathSize);
   }
@@ -130,39 +133,51 @@ LoadConfig (
   IN  UINTN        Size
   )
 {
-  UINT32  Off;
+  UINT32  ConfigSize;
   UINT32  LastByte;
 
   mHashDependency = 0;
   mHashIndex      = 0;
-  Off             = sizeof (UINT8);
-  LastByte        = Data[Size - Off];
+
+  ConfigSize = 0;
+
+  if (Size - ConfigSize >= sizeof (UINT8)) {
+    ConfigSize += sizeof (UINT8);
+    LastByte    = Data[Size - ConfigSize];
+  } else {
+    LastByte = MAX_UINT8;
+  }
 
   PcdGetBool (PcdImageLoaderRtRelocAllowTargetMismatch) = (LastByte & 1U) != 0;
   PcdGetBool (PcdImageLoaderHashProhibitOverlap)        = (LastByte & 2U) != 0;
   PcdGetBool (PcdImageLoaderLoadHeader)                 = (LastByte & 4U) != 0;
-  PcdGetBool (PcdImageLoaderSupportArmThumb)            = (LastByte & 8U) != 0;
-  PcdGetBool (PcdImageLoaderForceLoadDebug)             = (LastByte & 16U) != 0;
-  PcdGetBool (PcdImageLoaderTolerantLoad)               = (LastByte & 32U) != 0;
-  PcdGetBool (PcdImageLoaderSupportDebug)               = (LastByte & 64U) != 0;
+  PcdGetBool (PcdImageLoaderDebugSupport)               = (LastByte & 8U) != 0;
+  PcdGetBool (PcdImageLoaderAllowMisalignedOffset)      = (LastByte & 16U) != 0;
+  PcdGetBool (PcdImageLoaderRemoveXForWX)               = (LastByte & 32U) != 0;
 
-  Off += sizeof (UINT64);
-  if (Size >= Off) {
-    CopyMem (&mPoolAllocationMask, &Data[Size - Off], sizeof (UINT64));
+  if (Size - ConfigSize >= sizeof (UINT32)) {
+    ConfigSize += sizeof (UINT32);
+    CopyMem (&LastByte, &Data[Size - ConfigSize], sizeof (UINT32));
   } else {
-    mPoolAllocationMask = MAX_UINT64;
+    LastByte = MAX_UINT32;
   }
 
-  Off += sizeof (UINT64);
-  if (Size >= Off) {
-    CopyMem (&mPageAllocationMask, &Data[Size - Off], sizeof (UINT64));
+  PcdGet32 (PcdImageLoaderAlignmentPolicy) = LastByte;
+
+  if (Size - ConfigSize >= sizeof (UINT32)) {
+    ConfigSize += sizeof (UINT32);
+    CopyMem (&LastByte, &Data[Size - ConfigSize], sizeof (UINT32));
   } else {
-    mPageAllocationMask = MAX_UINT64;
+    LastByte = MAX_UINT32;
   }
 
-  Off += sizeof (UINT64);
-  if (Size >= Off) {
-    CopyMem (&mHashesMask, &Data[Size - Off], sizeof (UINT64));
+  PcdGet32 (PcdImageLoaderRelocTypePolicy) = LastByte;
+
+  ConfigureMemoryAllocations (Data, Size, &ConfigSize);
+
+  if (Size - ConfigSize >= sizeof (UINT64)) {
+    ConfigSize += sizeof (UINT64);
+    CopyMem (&mHashesMask, &Data[Size - ConfigSize], sizeof (UINT64));
   } else {
     mHashesMask = MAX_UINT64;
   }
@@ -175,44 +190,50 @@ PeCoffTestLoadFull (
   IN  UINT32      FileSize
   )
 {
-  EFI_STATUS             Status;
-  BOOLEAN                Result;
-  PE_COFF_IMAGE_CONTEXT  Context;
-  VOID                   *Destination;
-  UINT32                 DestinationSize;
-  UINT8                  HashContext;
+  EFI_STATUS                    Status;
+  BOOLEAN                       Result;
+  PE_COFF_LOADER_IMAGE_CONTEXT  Context;
+  VOID                          *Destination;
+  UINT32                        ImageSize;
+  UINT32                        DestinationSize;
+  UINT32                        DestinationPages;
+  UINT32                        DestinationAlignment;
+  UINT8                         HashContext;
 
   Status = PeCoffInitializeContext (&Context, FileBuffer, FileSize);
   if (EFI_ERROR (Status)) {
     return EFI_UNSUPPORTED;
   }
 
-  Result = PeCoffHashImage (
+  Result = PeCoffHashImageAuthenticode (
              &Context,
-             HashUpdate,
-             &HashContext
+             &HashContext,
+             HashUpdate
              );
   if (!Result) {
     return EFI_UNSUPPORTED;
   }
 
-  DestinationSize = Context.SizeOfImage + Context.SizeOfImageDebugAdd;
-  if (OcOverflowAddU32 (DestinationSize, Context.SectionAlignment, &DestinationSize)) {
-    return EFI_UNSUPPORTED;
-  }
+  ImageSize            = PeCoffGetSizeOfImage (&Context);
+  DestinationPages     = EFI_SIZE_TO_PAGES (ImageSize);
+  DestinationSize      = EFI_PAGES_TO_SIZE (DestinationPages);
+  DestinationAlignment = PeCoffGetSectionAlignment (&Context);
 
   if (DestinationSize >= BASE_16MB) {
     return EFI_UNSUPPORTED;
   }
 
-  Destination = AllocatePages (EFI_SIZE_TO_PAGES (DestinationSize));
+  Destination = AllocateAlignedCodePages (
+                  DestinationPages,
+                  DestinationAlignment
+                  );
   if (Destination == NULL) {
     return EFI_UNSUPPORTED;
   }
 
   Status = PeCoffTestLoad (&Context, Destination, DestinationSize);
 
-  FreePages (Destination, EFI_SIZE_TO_PAGES (DestinationSize));
+  FreeAlignedPages (Destination, DestinationPages);
 
   return Status;
 }
@@ -229,6 +250,7 @@ LLVMFuzzerTestOneInput (
     return 0;
   }
 
+  PcdGet8 (PcdDebugRaisePropertyMask) = 0;
   // PcdGet32 (PcdFixedDebugPrintErrorLevel) |= DEBUG_POOL | DEBUG_PAGE;
   // PcdGet32 (PcdDebugPrintErrorLevel)      |= DEBUG_POOL | DEBUG_PAGE;
 

@@ -52,12 +52,12 @@
 [LibraryClasses]
   BaseLib
   BaseMemoryLib
+  BaseOverflowLib
   DebugLib
   DevicePathLib
   MemoryAllocationLib
   PrintLib
   UefiBootServicesTableLib
-  OcGuardLib
   OcFileLib
   OcStringLib
   OcXmlLib

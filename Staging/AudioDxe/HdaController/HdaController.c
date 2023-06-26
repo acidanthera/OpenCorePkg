@@ -25,7 +25,7 @@
 #include "HdaController.h"
 #include "HdaControllerComponentName.h"
 
-#include <Library/OcGuardLib.h>
+#include <Library/BaseOverflowLib.h>
 #include <Library/OcDeviceMiscLib.h>
 #include <Library/OcDebugLogLib.h>
 #include <Library/OcDevicePathLib.h>
@@ -33,6 +33,12 @@
 #include <Library/OcMiscLib.h>
 #include <Library/OcStringLib.h>
 #include <Library/PcdLib.h>
+
+BOOLEAN
+  gRestoreNoSnoop = FALSE;
+
+EFI_DEVICE_PATH_PROTOCOL *
+  gForcedControllerDevicePath = NULL;
 
 VOID
 EFIAPI
@@ -121,7 +127,7 @@ HdaControllerStreamOutputPollTimerHandler (
   HdaStream->DmaPositionLast = HdaStreamDmaPos;
 
   if (HdaStream->BufferActive) {
-    if (OcOverflowAddU32 (HdaStream->DmaPositionTotal, DmaChanged, &HdaStream->DmaPositionTotal)) {
+    if (BaseOverflowAddU32 (HdaStream->DmaPositionTotal, DmaChanged, &HdaStream->DmaPositionTotal)) {
       HdaControllerStreamAbort (HdaStream);
       return;
     }
@@ -153,7 +159,7 @@ HdaControllerStreamOutputPollTimerHandler (
 
       HdaSourceLength = HDA_BDL_BLOCKSIZE;
 
-      if (OcOverflowAddU32 (HdaStream->BufferSourcePosition, HdaSourceLength, &Tmp)) {
+      if (BaseOverflowAddU32 (HdaStream->BufferSourcePosition, HdaSourceLength, &Tmp)) {
         HdaControllerStreamAbort (HdaStream);
         return;
       }
@@ -170,7 +176,7 @@ HdaControllerStreamOutputPollTimerHandler (
       }
 
       CopyMem (HdaStream->BufferData + HdaNextBlock * HDA_BDL_BLOCKSIZE, HdaStream->BufferSource + HdaStream->BufferSourcePosition, HdaSourceLength);
-      if (OcOverflowAddU32 (HdaStream->BufferSourcePosition, HdaSourceLength, &HdaStream->BufferSourcePosition)) {
+      if (BaseOverflowAddU32 (HdaStream->BufferSourcePosition, HdaSourceLength, &HdaStream->BufferSourcePosition)) {
         HdaControllerStreamAbort (HdaStream);
         return;
       }

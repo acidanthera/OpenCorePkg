@@ -16,10 +16,10 @@
 
 #include <Library/BaseLib.h>
 #include <Library/BaseMemoryLib.h>
+#include <Library/BaseOverflowLib.h>
 #include <Library/DebugLib.h>
 #include <Library/MemoryAllocationLib.h>
 #include <Library/UefiBootServicesTableLib.h>
-#include <Library/OcGuardLib.h>
 #include <Library/OcVirtualFsLib.h>
 
 #include <Guid/FileInfo.h>
