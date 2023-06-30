@@ -1759,7 +1759,7 @@ PATCHER_GENERIC_PATCH
 
 STATIC
 CONST UINT8
-  mLapicKernelPanicMasterPatchLegacyFind[] = {
+  mLapicKernelPanicMasterPatchLegacyFind1[] = {
   0x48, 0x8D, 0x00, 0x00, 0x00, 0x00, 0x00, ///< lea whatever, qword [_debug_boot_arg] <- address masked out
   0x83, 0x00, 0x00,                         ///< cmp dword[whatever], 0 <- register masked out
   0x74, 0x00, 0x83, 0x00                    ///< context instructions
@@ -1767,7 +1767,7 @@ CONST UINT8
 
 STATIC
 CONST UINT8
-  mLapicKernelPanicMasterPatchLegacyMask[] = {
+  mLapicKernelPanicMasterPatchLegacyMask1[] = {
   0xFF, 0xFF, 0x00, 0x00, 0x00, 0x00, 0x00,
   0xFF, 0x00, 0x00,
   0xFF, 0x00, 0xFF, 0x00
@@ -1775,7 +1775,7 @@ CONST UINT8
 
 STATIC
 CONST UINT8
-  mLapicKernelPanicMasterPatchLegacyReplace[] = {
+  mLapicKernelPanicMasterPatchLegacyReplace1[] = {
   0x31, 0xC0,                                     ///< xor eax, eax
   0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, ///< nop
   0x00, 0x00, 0x00, 0x00
@@ -1783,7 +1783,7 @@ CONST UINT8
 
 STATIC
 CONST UINT8
-  mLapicKernelPanicMasterPatchLegacyReplaceMask[] = {
+  mLapicKernelPanicMasterPatchLegacyReplaceMask1[] = {
   0xFF, 0xFF,
   0xFF, 0xFF,0xFF,  0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
   0x00, 0x00,0x00,  0x00
@@ -1791,14 +1791,63 @@ CONST UINT8
 
 STATIC
 PATCHER_GENERIC_PATCH
-  mLapicKernelPanicMasterLegacyPatch = {
-  .Comment     = DEBUG_POINTER ("LapicKernelPanicMasterLegacy"),
+  mLapicKernelPanicMasterLegacyPatch1 = {
+  .Comment     = DEBUG_POINTER ("LapicKernelPanicMasterLegacy v1"),
   .Base        = "_lapic_interrupt",
-  .Find        = mLapicKernelPanicMasterPatchLegacyFind,
-  .Mask        = mLapicKernelPanicMasterPatchLegacyMask,
-  .Replace     = mLapicKernelPanicMasterPatchLegacyReplace,
-  .ReplaceMask = mLapicKernelPanicMasterPatchLegacyReplaceMask,
-  .Size        = sizeof (mLapicKernelPanicMasterPatchLegacyFind),
+  .Find        = mLapicKernelPanicMasterPatchLegacyFind1,
+  .Mask        = mLapicKernelPanicMasterPatchLegacyMask1,
+  .Replace     = mLapicKernelPanicMasterPatchLegacyReplace1,
+  .ReplaceMask = mLapicKernelPanicMasterPatchLegacyReplaceMask1,
+  .Size        = sizeof (mLapicKernelPanicMasterPatchLegacyFind1),
+  .Count       = 1,
+  .Skip        = 0,
+  .Limit       = 4096
+};
+
+STATIC
+CONST UINT8
+  mLapicKernelPanicMasterPatchLegacyFind2[] = {
+  0x48, 0x8D, 0x05, 0x00, 0x00, 0x00, 0x00, ///< lea rax, qword [_debug_boot_arg] <- address masked out
+  0x44, 0x8B, 0x00,                         ///< mov r8d, dword[rax]
+  0x45, 0x85, 0xC0,                         ///< test r8d, r8d
+  0x74, 0x00, 0x8B                          ///< context instructions
+};
+
+STATIC
+CONST UINT8
+  mLapicKernelPanicMasterPatchLegacyMask2[] = {
+  0xFF, 0xFF, 0xFF, 0x00, 0x00, 0x00, 0x00,
+  0xFF, 0xFF, 0xFF,
+  0xFF, 0xFF, 0xFF,
+  0xFF, 0x00, 0xFF
+};
+
+STATIC
+CONST UINT8
+  mLapicKernelPanicMasterPatchLegacyReplace2[] = {
+  0x31, 0xC0,                                                       ///< xor eax, eax
+  0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, ///< nop
+  0x00, 0x00, 0x00
+};
+
+STATIC
+CONST UINT8
+  mLapicKernelPanicMasterPatchLegacyReplaceMask2[] = {
+  0xFF, 0xFF,
+  0xFF, 0xFF,0xFF,  0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
+  0x00, 0x00,0x00
+};
+
+STATIC
+PATCHER_GENERIC_PATCH
+  mLapicKernelPanicMasterLegacyPatch2 = {
+  .Comment     = DEBUG_POINTER ("LapicKernelPanicMasterLegacy v2"),
+  .Base        = "_lapic_interrupt",
+  .Find        = mLapicKernelPanicMasterPatchLegacyFind2,
+  .Mask        = mLapicKernelPanicMasterPatchLegacyMask2,
+  .Replace     = mLapicKernelPanicMasterPatchLegacyReplace2,
+  .ReplaceMask = mLapicKernelPanicMasterPatchLegacyReplaceMask2,
+  .Size        = sizeof (mLapicKernelPanicMasterPatchLegacyFind2),
   .Count       = 1,
   .Skip        = 0,
   .Limit       = 4096
@@ -1812,6 +1861,7 @@ PatchLapicKernelPanic (
   )
 {
   EFI_STATUS  Status;
+  EFI_STATUS  Status2;
 
   //
   // This is a kernel patch, so Patcher cannot be NULL.
@@ -1833,8 +1883,9 @@ PatchLapicKernelPanic (
       //
       // Also patch away the master core check to never require lapic_dont_panic=1.
       //
-      Status = PatcherApplyGenericPatch (Patcher, &mLapicKernelPanicMasterLegacyPatch);
-      if (EFI_ERROR (Status)) {
+      Status  = PatcherApplyGenericPatch (Patcher, &mLapicKernelPanicMasterLegacyPatch1);
+      Status2 = PatcherApplyGenericPatch (Patcher, &mLapicKernelPanicMasterLegacyPatch2);
+      if (EFI_ERROR (Status) && EFI_ERROR (Status2)) {
         DEBUG ((DEBUG_INFO, "OCAK: [FAIL] Failed to apply extended legacy lapic patch - %r\n", Status));
       } else {
         DEBUG ((DEBUG_INFO, "OCAK: [OK] Patch success extended legacy lapic\n"));
