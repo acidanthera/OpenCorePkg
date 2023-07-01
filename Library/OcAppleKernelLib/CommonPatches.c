@@ -1687,6 +1687,70 @@ PATCHER_GENERIC_PATCH
 
 STATIC
 CONST UINT8
+  mLapicKernelPanicMasterPatchFind[] = {
+  0x83, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00  ///< cmp cs:_debug_boot_arg, 0 <- address masked out
+};
+
+STATIC
+CONST UINT8
+  mLapicKernelPanicMasterPatchMask[] = {
+  0xFF, 0x00, 0x00, 0x00, 0x00, 0xFF, 0xFF
+};
+
+STATIC
+CONST UINT8
+  mLapicKernelPanicMasterPatchReplace[] = {
+  0x31, 0xC0,                  ///< xor eax, eax
+  0x90, 0x90, 0x90, 0x90, 0x90 ///< nop
+};
+
+STATIC
+PATCHER_GENERIC_PATCH
+  mLapicKernelPanicMasterPatch = {
+  .Comment     = DEBUG_POINTER ("LapicKernelPanicMaster"),
+  .Base        = "_lapic_interrupt",
+  .Find        = mLapicKernelPanicMasterPatchFind,
+  .Mask        = mLapicKernelPanicMasterPatchMask,
+  .Replace     = mLapicKernelPanicMasterPatchReplace,
+  .ReplaceMask = NULL,
+  .Size        = sizeof (mLapicKernelPanicMasterPatchFind),
+  .Count       = 1,
+  .Skip        = 0,
+  .Limit       = 4096
+};
+
+STATIC
+EFI_STATUS
+PatchLapicKernel (
+  IN OUT PATCHER_CONTEXT  *Patcher,
+  IN     UINT32           KernelVersion
+  )
+{
+  EFI_STATUS  Status;
+
+  Status = PatcherApplyGenericPatch (Patcher, &mLapicKernelPanicPatch);
+  if (EFI_ERROR (Status)) {
+    DEBUG ((DEBUG_INFO, "OCAK: [FAIL] Failed to apply modern lapic patch - %r, trying legacy\n", Status));
+    return Status;
+  }
+
+  DEBUG ((DEBUG_INFO, "OCAK: [OK] Patch success lapic\n"));
+
+  //
+  // Patch away the master core check to never require lapic_dont_panic=1.
+  //
+  Status = PatcherApplyGenericPatch (Patcher, &mLapicKernelPanicMasterPatch);
+  if (EFI_ERROR (Status)) {
+    DEBUG ((DEBUG_INFO, "OCAK: [FAIL] Failed to apply extended modern lapic patch - %r\n", Status));
+  } else {
+    DEBUG ((DEBUG_INFO, "OCAK: [OK] Patch success extended modern lapic\n"));
+  }
+
+  return Status;
+}
+
+STATIC
+CONST UINT8
   mLapicKernelPanicPatchLegacyFind[] = {
   0x65, 0x8B, 0x04, 0x25, 0x14, 0x00, 0x00, 0x00,  ///< mov eax, gs:1Ch on 10.9.5, 14h on 10.7.5/10.8.5, and 3Ch on 10.6.8.
   0x48, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,        ///< lea rcx, _master_cpu
@@ -1721,40 +1785,6 @@ PATCHER_GENERIC_PATCH
   .Count       = 1,
   .Skip        = 0,
   .Limit       = 1024
-};
-
-STATIC
-CONST UINT8
-  mLapicKernelPanicMasterPatchFind[] = {
-  0x83, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00  ///< cmp cs:_debug_boot_arg, 0 <- address masked out
-};
-
-STATIC
-CONST UINT8
-  mLapicKernelPanicMasterPatchMask[] = {
-  0xFF, 0x00, 0x00, 0x00, 0x00, 0xFF, 0xFF
-};
-
-STATIC
-CONST UINT8
-  mLapicKernelPanicMasterPatchReplace[] = {
-  0x31, 0xC0,                  ///< xor eax, eax
-  0x90, 0x90, 0x90, 0x90, 0x90 ///< nop
-};
-
-STATIC
-PATCHER_GENERIC_PATCH
-  mLapicKernelPanicMasterPatch = {
-  .Comment     = DEBUG_POINTER ("LapicKernelPanicMaster"),
-  .Base        = "_lapic_interrupt",
-  .Find        = mLapicKernelPanicMasterPatchFind,
-  .Mask        = mLapicKernelPanicMasterPatchMask,
-  .Replace     = mLapicKernelPanicMasterPatchReplace,
-  .ReplaceMask = NULL,
-  .Size        = sizeof (mLapicKernelPanicMasterPatchFind),
-  .Count       = 1,
-  .Skip        = 0,
-  .Limit       = 4096
 };
 
 STATIC
@@ -1855,61 +1885,61 @@ PATCHER_GENERIC_PATCH
 
 STATIC
 EFI_STATUS
+PatchLapicKernelLegacy (
+  IN OUT PATCHER_CONTEXT  *Patcher,
+  IN     UINT32           KernelVersion
+  )
+{
+  EFI_STATUS  Status;
+
+  Status = PatcherApplyGenericPatch (Patcher, &mLapicKernelPanicLegacyPatch);
+  if (EFI_ERROR (Status)) {
+    DEBUG ((DEBUG_INFO, "OCAK: [FAIL] Failed to apply legacy lapic patch - %r\n", Status));
+    return Status;
+  }
+
+  DEBUG ((DEBUG_INFO, "OCAK: [OK] Patch success legacy lapic\n"));
+
+  //
+  // Patch away the master core check to never require lapic_dont_panic=1.
+  //
+  Status = PatcherApplyGenericPatch (Patcher, &mLapicKernelPanicMasterLegacyPatch1);
+  if (!EFI_ERROR (Status)) {
+    DEBUG ((DEBUG_INFO, "OCAK: [OK] Patch success extended legacy lapic v1\n"));
+    return Status;
+  }
+
+  DEBUG ((DEBUG_INFO, "OCAK: [FAIL] Failed to apply extended legacy lapic patch v1 - %r, trying legacy v2\n", Status));
+  Status = PatcherApplyGenericPatch (Patcher, &mLapicKernelPanicMasterLegacyPatch2);
+  if (!EFI_ERROR (Status)) {
+    DEBUG ((DEBUG_INFO, "OCAK: [OK] Patch success extended legacy lapic v2\n"));
+  } else {
+    DEBUG ((DEBUG_INFO, "OCAK: [FAIL] Failed to apply extended legacy lapic patch v2 - %r\n", Status));
+  }
+
+  return Status;
+}
+
+STATIC
+EFI_STATUS
 PatchLapicKernelPanic (
   IN OUT PATCHER_CONTEXT  *Patcher,
   IN     UINT32           KernelVersion
   )
 {
   EFI_STATUS  Status;
-  EFI_STATUS  Status2;
 
   //
   // This is a kernel patch, so Patcher cannot be NULL.
   //
   ASSERT (Patcher != NULL);
 
-  //
-  // This one is for <= 10.15 release kernels.
-  // TODO: Fix debug kernels and check whether we want more patches.
-  //
-  Status = PatcherApplyGenericPatch (Patcher, &mLapicKernelPanicPatch);
-  if (EFI_ERROR (Status)) {
-    DEBUG ((DEBUG_INFO, "OCAK: [FAIL] Failed to apply modern lapic patch - %r, trying legacy\n", Status));
-
-    Status = PatcherApplyGenericPatch (Patcher, &mLapicKernelPanicLegacyPatch);
-    if (!EFI_ERROR (Status)) {
-      DEBUG ((DEBUG_INFO, "OCAK: [OK] Patch success legacy lapic\n"));
-
-      //
-      // Also patch away the master core check to never require lapic_dont_panic=1.
-      //
-      Status  = PatcherApplyGenericPatch (Patcher, &mLapicKernelPanicMasterLegacyPatch1);
-      Status2 = PatcherApplyGenericPatch (Patcher, &mLapicKernelPanicMasterLegacyPatch2);
-      if (EFI_ERROR (Status) && EFI_ERROR (Status2)) {
-        DEBUG ((DEBUG_INFO, "OCAK: [FAIL] Failed to apply extended legacy lapic patch - %r\n", Status));
-      } else {
-        DEBUG ((DEBUG_INFO, "OCAK: [OK] Patch success extended legacy lapic\n"));
-      }
-    } else {
-      DEBUG ((DEBUG_INFO, "OCAK: [FAIL] Failed to apply legacy lapic patch - %r\n", Status));
-    }
-  } else {
-    DEBUG ((DEBUG_INFO, "OCAK: [OK] Patch success lapic\n"));
-
-    //
-    // Also patch away the master core check to never require lapic_dont_panic=1.
-    // This one is optional, and seems to never be required in real world.
-    //
-    Status = PatcherApplyGenericPatch (Patcher, &mLapicKernelPanicMasterPatch);
-    if (EFI_ERROR (Status)) {
-      DEBUG ((DEBUG_INFO, "OCAK: [FAIL] Failed to apply extended modern lapic patch - %r\n", Status));
-    } else {
-      DEBUG ((DEBUG_INFO, "OCAK: [OK] Patch success extended modern lapic\n"));
-    }
-
-    Status = EFI_SUCCESS;
+  Status = PatchLapicKernel (Patcher, KernelVersion);
+  if (!EFI_ERROR (Status)) {
+    return Status;
   }
 
+  Status = PatchLapicKernelLegacy (Patcher, KernelVersion);
   return Status;
 }
 
