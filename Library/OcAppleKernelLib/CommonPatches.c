@@ -1653,14 +1653,14 @@ STATIC
 CONST UINT8
   mLapicKernelPanicPatchFind[] = {
   0x65, 0x8B, 0x04, 0x25, 0x00, 0x00, 0x00, 0x00,  ///< mov eax, gs:1Ch or gs:18h on 10.15.4+ or gs:20h on 11.0.
-  0x3B, 0x00, 0x00, 0x00, 0x00, 0x00               ///< cmp eax, cs:_master_cpu <- address masked out
+  0x3B, 0x05, 0x00, 0x00, 0x00, 0x00               ///< cmp eax, cs:_master_cpu <- address masked out
 };
 
 STATIC
 CONST UINT8
   mLapicKernelPanicPatchMask[] = {
   0xFF, 0xFF, 0xFF, 0xFF, 0xC3, 0xFF, 0xFF, 0xFF,
-  0xFF, 0x00, 0x00, 0x00, 0x00, 0x00
+  0xFF, 0xFF, 0x00, 0x00, 0x00, 0x00
 };
 
 STATIC
@@ -1680,44 +1680,6 @@ PATCHER_GENERIC_PATCH
   .Replace     = mLapicKernelPanicPatchReplace,
   .ReplaceMask = NULL,
   .Size        = sizeof (mLapicKernelPanicPatchReplace),
-  .Count       = 1,
-  .Skip        = 0,
-  .Limit       = 1024
-};
-
-STATIC
-CONST UINT8
-  mLapicKernelPanicPatchLegacyFind[] = {
-  0x65, 0x8B, 0x04, 0x25, 0x10, 0x00, 0x00, 0x00,  ///< mov eax, gs:1Ch on 10.9.5 and 14h on 10.8.5.
-  0x48, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,        ///< lea rcx, _master_cpu
-  0x00, 0x00                                       ///< cmp eax, [rcx]
-};
-
-STATIC
-CONST UINT8
-  mLapicKernelPanicPatchLegacyMask[] = {
-  0xFF, 0xFF, 0xFF, 0xFF, 0xF3, 0xFF, 0xFF, 0xFF,
-  0xFF, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-  0x00, 0x00
-};
-
-STATIC
-CONST UINT8
-  mLapicKernelPanicPatchLegacyReplace[] = {
-  0x31, 0xC0,                                                                              ///< xor eax, eax
-  0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90 ///< nop
-};
-
-STATIC
-PATCHER_GENERIC_PATCH
-  mLapicKernelPanicLegacyPatch = {
-  .Comment     = DEBUG_POINTER ("LapicKernelPanicLegacy"),
-  .Base        = "_lapic_interrupt",
-  .Find        = mLapicKernelPanicPatchLegacyFind,
-  .Mask        = mLapicKernelPanicPatchLegacyMask,
-  .Replace     = mLapicKernelPanicPatchLegacyReplace,
-  .ReplaceMask = NULL,
-  .Size        = sizeof (mLapicKernelPanicPatchLegacyReplace),
   .Count       = 1,
   .Skip        = 0,
   .Limit       = 1024
@@ -1759,6 +1721,207 @@ PATCHER_GENERIC_PATCH
 
 STATIC
 EFI_STATUS
+PatchLapicKernel (
+  IN OUT PATCHER_CONTEXT  *Patcher,
+  IN     UINT32           KernelVersion
+  )
+{
+  EFI_STATUS  Status;
+
+  Status = PatcherApplyGenericPatch (Patcher, &mLapicKernelPanicPatch);
+  if (EFI_ERROR (Status)) {
+    DEBUG ((DEBUG_INFO, "OCAK: [FAIL] Failed to apply modern lapic patch - %r, trying legacy\n", Status));
+    return Status;
+  }
+
+  DEBUG ((DEBUG_INFO, "OCAK: [OK] Patch success lapic\n"));
+
+  //
+  // Patch away the master core check to never require lapic_dont_panic=1.
+  //
+  Status = PatcherApplyGenericPatch (Patcher, &mLapicKernelPanicMasterPatch);
+  if (EFI_ERROR (Status)) {
+    DEBUG ((DEBUG_INFO, "OCAK: [FAIL] Failed to apply extended modern lapic patch - %r\n", Status));
+  } else {
+    DEBUG ((DEBUG_INFO, "OCAK: [OK] Patch success extended modern lapic\n"));
+  }
+
+  return Status;
+}
+
+STATIC
+CONST UINT8
+  mLapicKernelPanicPatchLegacyFind[] = {
+  0x65, 0x8B, 0x04, 0x25, 0x14, 0x00, 0x00, 0x00,  ///< mov eax, gs:1Ch on 10.9.5, 14h on 10.7.5/10.8.5, and 3Ch on 10.6.8.
+  0x48, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,        ///< lea rcx, _master_cpu
+  0x00, 0x00                                       ///< cmp eax, [rcx]
+};
+
+STATIC
+CONST UINT8
+  mLapicKernelPanicPatchLegacyMask[] = {
+  0xFF, 0xFF, 0xFF, 0xFF, 0xD7, 0xFF, 0xFF, 0xFF,
+  0xFF, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+  0x00, 0x00
+};
+
+STATIC
+CONST UINT8
+  mLapicKernelPanicPatchLegacyReplace[] = {
+  0x31, 0xC0,                                                                              ///< xor eax, eax
+  0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90 ///< nop
+};
+
+STATIC
+PATCHER_GENERIC_PATCH
+  mLapicKernelPanicLegacyPatch = {
+  .Comment     = DEBUG_POINTER ("LapicKernelPanicLegacy"),
+  .Base        = "_lapic_interrupt",
+  .Find        = mLapicKernelPanicPatchLegacyFind,
+  .Mask        = mLapicKernelPanicPatchLegacyMask,
+  .Replace     = mLapicKernelPanicPatchLegacyReplace,
+  .ReplaceMask = NULL,
+  .Size        = sizeof (mLapicKernelPanicPatchLegacyReplace),
+  .Count       = 1,
+  .Skip        = 0,
+  .Limit       = 1024
+};
+
+STATIC
+CONST UINT8
+  mLapicKernelPanicMasterPatchLegacyFind1[] = {
+  0x48, 0x8D, 0x00, 0x00, 0x00, 0x00, 0x00, ///< lea whatever, qword [_debug_boot_arg] <- address masked out
+  0x83, 0x00, 0x00,                         ///< cmp dword[whatever], 0 <- register masked out
+  0x74, 0x00, 0x83, 0x00                    ///< context instructions
+};
+
+STATIC
+CONST UINT8
+  mLapicKernelPanicMasterPatchLegacyMask1[] = {
+  0xFF, 0xFF, 0x00, 0x00, 0x00, 0x00, 0x00,
+  0xFF, 0x00, 0x00,
+  0xFF, 0x00, 0xFF, 0x00
+};
+
+STATIC
+CONST UINT8
+  mLapicKernelPanicMasterPatchLegacyReplace1[] = {
+  0x31, 0xC0,                                     ///< xor eax, eax
+  0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, ///< nop
+  0x00, 0x00, 0x00, 0x00
+};
+
+STATIC
+CONST UINT8
+  mLapicKernelPanicMasterPatchLegacyReplaceMask1[] = {
+  0xFF, 0xFF,
+  0xFF, 0xFF,0xFF,  0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
+  0x00, 0x00,0x00,  0x00
+};
+
+STATIC
+PATCHER_GENERIC_PATCH
+  mLapicKernelPanicMasterLegacyPatch1 = {
+  .Comment     = DEBUG_POINTER ("LapicKernelPanicMasterLegacy v1"),
+  .Base        = "_lapic_interrupt",
+  .Find        = mLapicKernelPanicMasterPatchLegacyFind1,
+  .Mask        = mLapicKernelPanicMasterPatchLegacyMask1,
+  .Replace     = mLapicKernelPanicMasterPatchLegacyReplace1,
+  .ReplaceMask = mLapicKernelPanicMasterPatchLegacyReplaceMask1,
+  .Size        = sizeof (mLapicKernelPanicMasterPatchLegacyFind1),
+  .Count       = 1,
+  .Skip        = 0,
+  .Limit       = 4096
+};
+
+STATIC
+CONST UINT8
+  mLapicKernelPanicMasterPatchLegacyFind2[] = {
+  0x48, 0x8D, 0x05, 0x00, 0x00, 0x00, 0x00, ///< lea rax, qword [_debug_boot_arg] <- address masked out
+  0x44, 0x8B, 0x00,                         ///< mov r8d, dword[rax]
+  0x45, 0x85, 0xC0,                         ///< test r8d, r8d
+  0x74, 0x00, 0x8B                          ///< context instructions
+};
+
+STATIC
+CONST UINT8
+  mLapicKernelPanicMasterPatchLegacyMask2[] = {
+  0xFF, 0xFF, 0xFF, 0x00, 0x00, 0x00, 0x00,
+  0xFF, 0xFF, 0xFF,
+  0xFF, 0xFF, 0xFF,
+  0xFF, 0x00, 0xFF
+};
+
+STATIC
+CONST UINT8
+  mLapicKernelPanicMasterPatchLegacyReplace2[] = {
+  0x31, 0xC0,                                                       ///< xor eax, eax
+  0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, ///< nop
+  0x00, 0x00, 0x00
+};
+
+STATIC
+CONST UINT8
+  mLapicKernelPanicMasterPatchLegacyReplaceMask2[] = {
+  0xFF, 0xFF,
+  0xFF, 0xFF,0xFF,  0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
+  0x00, 0x00,0x00
+};
+
+STATIC
+PATCHER_GENERIC_PATCH
+  mLapicKernelPanicMasterLegacyPatch2 = {
+  .Comment     = DEBUG_POINTER ("LapicKernelPanicMasterLegacy v2"),
+  .Base        = "_lapic_interrupt",
+  .Find        = mLapicKernelPanicMasterPatchLegacyFind2,
+  .Mask        = mLapicKernelPanicMasterPatchLegacyMask2,
+  .Replace     = mLapicKernelPanicMasterPatchLegacyReplace2,
+  .ReplaceMask = mLapicKernelPanicMasterPatchLegacyReplaceMask2,
+  .Size        = sizeof (mLapicKernelPanicMasterPatchLegacyFind2),
+  .Count       = 1,
+  .Skip        = 0,
+  .Limit       = 4096
+};
+
+STATIC
+EFI_STATUS
+PatchLapicKernelLegacy (
+  IN OUT PATCHER_CONTEXT  *Patcher,
+  IN     UINT32           KernelVersion
+  )
+{
+  EFI_STATUS  Status;
+
+  Status = PatcherApplyGenericPatch (Patcher, &mLapicKernelPanicLegacyPatch);
+  if (EFI_ERROR (Status)) {
+    DEBUG ((DEBUG_INFO, "OCAK: [FAIL] Failed to apply legacy lapic patch - %r\n", Status));
+    return Status;
+  }
+
+  DEBUG ((DEBUG_INFO, "OCAK: [OK] Patch success legacy lapic\n"));
+
+  //
+  // Patch away the master core check to never require lapic_dont_panic=1.
+  //
+  Status = PatcherApplyGenericPatch (Patcher, &mLapicKernelPanicMasterLegacyPatch1);
+  if (!EFI_ERROR (Status)) {
+    DEBUG ((DEBUG_INFO, "OCAK: [OK] Patch success extended legacy lapic v1\n"));
+    return Status;
+  }
+
+  DEBUG ((DEBUG_INFO, "OCAK: [FAIL] Failed to apply extended legacy lapic patch v1 - %r, trying legacy v2\n", Status));
+  Status = PatcherApplyGenericPatch (Patcher, &mLapicKernelPanicMasterLegacyPatch2);
+  if (!EFI_ERROR (Status)) {
+    DEBUG ((DEBUG_INFO, "OCAK: [OK] Patch success extended legacy lapic v2\n"));
+  } else {
+    DEBUG ((DEBUG_INFO, "OCAK: [FAIL] Failed to apply extended legacy lapic patch v2 - %r\n", Status));
+  }
+
+  return Status;
+}
+
+STATIC
+EFI_STATUS
 PatchLapicKernelPanic (
   IN OUT PATCHER_CONTEXT  *Patcher,
   IN     UINT32           KernelVersion
@@ -1771,37 +1934,12 @@ PatchLapicKernelPanic (
   //
   ASSERT (Patcher != NULL);
 
-  //
-  // This one is for <= 10.15 release kernels.
-  // TODO: Fix debug kernels and check whether we want more patches.
-  //
-  Status = PatcherApplyGenericPatch (Patcher, &mLapicKernelPanicPatch);
-  if (EFI_ERROR (Status)) {
-    DEBUG ((DEBUG_INFO, "OCAK: [FAIL] Failed to apply modern lapic patch - %r\n", Status));
-
-    Status = PatcherApplyGenericPatch (Patcher, &mLapicKernelPanicLegacyPatch);
-    if (!EFI_ERROR (Status)) {
-      DEBUG ((DEBUG_INFO, "OCAK: [OK] Patch success legacy lapic\n"));
-    } else {
-      DEBUG ((DEBUG_INFO, "OCAK: [FAIL] Failed to apply modern lapic patch - %r\n", Status));
-    }
-  } else {
-    DEBUG ((DEBUG_INFO, "OCAK: [OK] Patch success lapic\n"));
-
-    //
-    // Also patch away the master core check to never require lapic_dont_panic=1.
-    // This one is optional, and seems to never be required in real world.
-    //
-    Status = PatcherApplyGenericPatch (Patcher, &mLapicKernelPanicMasterPatch);
-    if (EFI_ERROR (Status)) {
-      DEBUG ((DEBUG_INFO, "OCAK: [FAIL] Failed to apply extended lapic patch - %r\n", Status));
-    } else {
-      DEBUG ((DEBUG_INFO, "OCAK: [OK] Patch success extended lapic\n"));
-    }
-
-    Status = EFI_SUCCESS;
+  Status = PatchLapicKernel (Patcher, KernelVersion);
+  if (!EFI_ERROR (Status)) {
+    return Status;
   }
 
+  Status = PatchLapicKernelLegacy (Patcher, KernelVersion);
   return Status;
 }
 
