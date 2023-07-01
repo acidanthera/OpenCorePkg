@@ -4,6 +4,7 @@ OpenCore Changelog
 - Fixed kext blocker `Exclude` strategy for prelinked on 32-bit versions of macOS
 - Fixed `ForceAquantiaEthernet` quirk on macOS 14 beta 2, thx @Shikumo
 - Added `InstanceIdentifier` and option to target `.contentVisibility` to specific instances (thx @dakanji)
+- Improved `LapicKernelPanic` quirk on legacy versions of macOS
 
 #### v0.9.3
 - Added `--force-codec` option to AudioDxe, thx @xCuri0
