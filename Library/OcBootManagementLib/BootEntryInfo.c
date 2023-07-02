@@ -16,6 +16,7 @@
 
 #include <Guid/AppleBless.h>
 #include <IndustryStandard/AppleDiskLabel.h>
+#include <IndustryStandard/AppleIcon.h>
 
 #include <Library/BaseLib.h>
 #include <Library/BaseMemoryLib.h>
@@ -29,6 +30,58 @@
 #include <Library/PrintLib.h>
 #include <Library/UefiBootServicesTableLib.h>
 
+EFI_STATUS
+InternalReadBootEntryFile (
+  IN  EFI_SIMPLE_FILE_SYSTEM_PROTOCOL  *FileSystem,
+  IN  CONST CHAR16                     *DirectoryName,
+  IN  CONST CHAR16                     *Filename,
+  IN  UINT32                           MaxFileSize,
+  IN  UINT32                           MinFileSize,
+  OUT VOID                             **FileData,
+  OUT UINT32                           *DataSize OPTIONAL
+  )
+{
+  CHAR16   *FilePath;
+  UINTN    FilePathSize;
+  UINT32   FileReadSize;
+  BOOLEAN  Result;
+
+  Result = BaseOverflowAddUN (
+             StrSize (DirectoryName),
+             StrSize (Filename) - sizeof (CHAR16),
+             &FilePathSize
+             );
+  if (Result) {
+    return EFI_OUT_OF_RESOURCES;
+  }
+
+  FilePath = AllocatePool (FilePathSize);
+
+  if (FilePath == NULL) {
+    return EFI_OUT_OF_RESOURCES;
+  }
+
+  UnicodeSPrint (FilePath, FilePathSize, L"%s%s", DirectoryName, Filename);
+  *FileData = OcReadFile (FileSystem, FilePath, &FileReadSize, MaxFileSize);
+
+  FreePool (FilePath);
+
+  if (*FileData == NULL) {
+    return EFI_NOT_FOUND;
+  }
+
+  if (FileReadSize < MinFileSize) {
+    FreePool (*FileData);
+    return EFI_UNSUPPORTED;
+  }
+
+  if (DataSize != NULL) {
+    *DataSize = FileReadSize;
+  }
+
+  return EFI_SUCCESS;
+}
+
 CHAR16 *
 InternalGetAppleDiskLabel (
   IN  EFI_SIMPLE_FILE_SYSTEM_PROTOCOL  *FileSystem,
@@ -36,35 +89,31 @@ InternalGetAppleDiskLabel (
   IN  CONST CHAR16                     *LabelFilename
   )
 {
-  CHAR16  *DiskLabelPath;
-  UINTN   DiskLabelPathSize;
-  CHAR8   *AsciiDiskLabel;
-  CHAR16  *UnicodeDiskLabel;
-  UINT32  DiskLabelLength;
+  EFI_STATUS  Status;
+  CHAR8       *AsciiDiskLabel;
+  CHAR16      *UnicodeDiskLabel;
+  UINT32      DiskLabelLength;
 
-  DiskLabelPathSize = StrSize (BootDirectoryName) + StrSize (LabelFilename) - sizeof (CHAR16);
-  DiskLabelPath     = AllocatePool (DiskLabelPathSize);
+  Status = InternalReadBootEntryFile (
+             FileSystem,
+             BootDirectoryName,
+             LabelFilename,
+             OC_MAX_VOLUME_LABEL_SIZE,
+             0,
+             (VOID **)&AsciiDiskLabel,
+             &DiskLabelLength
+             );
 
-  if (DiskLabelPath == NULL) {
+  if (EFI_ERROR (Status)) {
     return NULL;
   }
 
-  UnicodeSPrint (DiskLabelPath, DiskLabelPathSize, L"%s%s", BootDirectoryName, LabelFilename);
-  DEBUG ((DEBUG_INFO, "OCB: Trying to get label from %s\n", DiskLabelPath));
-
-  AsciiDiskLabel = (CHAR8 *)OcReadFile (FileSystem, DiskLabelPath, &DiskLabelLength, OC_MAX_VOLUME_LABEL_SIZE);
-  FreePool (DiskLabelPath);
-
-  if (AsciiDiskLabel != NULL) {
-    UnicodeDiskLabel = AsciiStrCopyToUnicode (AsciiDiskLabel, DiskLabelLength);
-    if (UnicodeDiskLabel != NULL) {
-      UnicodeFilterString (UnicodeDiskLabel, TRUE);
-    }
-
-    FreePool (AsciiDiskLabel);
-  } else {
-    UnicodeDiskLabel = NULL;
+  UnicodeDiskLabel = AsciiStrCopyToUnicode (AsciiDiskLabel, DiskLabelLength);
+  if (UnicodeDiskLabel != NULL) {
+    UnicodeFilterString (UnicodeDiskLabel, TRUE);
   }
+
+  FreePool (AsciiDiskLabel);
 
   return UnicodeDiskLabel;
 }
@@ -72,75 +121,29 @@ InternalGetAppleDiskLabel (
 CHAR8 *
 InternalGetContentFlavour (
   IN  EFI_SIMPLE_FILE_SYSTEM_PROTOCOL  *FileSystem,
-  IN  CONST CHAR16                     *BootDirectoryName,
-  IN  CONST CHAR16                     *FlavourFilename
+  IN  CONST CHAR16                     *BootDirectoryName
   )
 {
-  CHAR16  *ContentFlavourPath;
-  UINTN   ContentFlavourPathSize;
-  CHAR8   *AsciiContentFlavour;
-  UINT32  ContentFlavourLength;
+  EFI_STATUS  Status;
+  CHAR8       *AsciiContentFlavour;
 
-  ContentFlavourPathSize = StrSize (BootDirectoryName) + StrSize (FlavourFilename) - sizeof (CHAR16);
-  ContentFlavourPath     = AllocatePool (ContentFlavourPathSize);
+  Status = InternalReadBootEntryFile (
+             FileSystem,
+             BootDirectoryName,
+             L".contentFlavour",
+             OC_MAX_CONTENT_FLAVOUR_SIZE,
+             0,
+             (VOID **)&AsciiContentFlavour,
+             NULL
+             );
 
-  if (ContentFlavourPath == NULL) {
+  if (EFI_ERROR (Status)) {
     return NULL;
   }
 
-  UnicodeSPrint (ContentFlavourPath, ContentFlavourPathSize, L"%s%s", BootDirectoryName, FlavourFilename);
-  DEBUG ((DEBUG_INFO, "OCB: Trying to get flavour from %s\n", ContentFlavourPath));
-
-  AsciiContentFlavour = (CHAR8 *)OcReadFile (FileSystem, ContentFlavourPath, &ContentFlavourLength, OC_MAX_CONTENT_FLAVOUR_SIZE);
-  FreePool (ContentFlavourPath);
-
-  if (AsciiContentFlavour != NULL) {
-    AsciiFilterString (AsciiContentFlavour, TRUE);
-  }
+  AsciiFilterString (AsciiContentFlavour, TRUE);
 
   return AsciiContentFlavour;
-}
-
-EFI_STATUS
-InternalGetAppleImage (
-  IN  EFI_SIMPLE_FILE_SYSTEM_PROTOCOL  *FileSystem,
-  IN  CONST CHAR16                     *DirectoryName,
-  IN  CONST CHAR16                     *LabelFilename,
-  OUT VOID                             **ImageData,
-  OUT UINT32                           *DataSize
-  )
-{
-  CHAR16  *ImagePath;
-  UINTN   ImagePathSize;
-
-  ImagePathSize = StrSize (DirectoryName) + StrSize (LabelFilename) - sizeof (CHAR16);
-  ImagePath     = AllocatePool (ImagePathSize);
-
-  if (ImagePath == NULL) {
-    return EFI_OUT_OF_RESOURCES;
-  }
-
-  UnicodeSPrint (ImagePath, ImagePathSize, L"%s%s", DirectoryName, LabelFilename);
-  DEBUG ((DEBUG_INFO, "OCB: Trying to get image from %s\n", ImagePath));
-
-  *ImageData = OcReadFile (FileSystem, ImagePath, DataSize, BASE_16MB);
-
-  FreePool (ImagePath);
-
-  if (*ImageData == NULL) {
-    return EFI_NOT_FOUND;
-  }
-
-  //
-  // Whether it is disk label or .icns, disk label is always smaller.
-  // Early abort on obviously small images.
-  //
-  if (*DataSize <= sizeof (APPLE_DISK_LABEL)) {
-    FreePool (*ImageData);
-    return EFI_UNSUPPORTED;
-  }
-
-  return EFI_SUCCESS;
 }
 
 STATIC
@@ -233,29 +236,25 @@ InternalGetAppleVersion (
   )
 {
   EFI_STATUS  Status;
-  CHAR16      *SystemVersionPath;
-  UINTN       SystemVersionPathSize;
   CHAR8       *SystemVersionData;
   UINT32      SystemVersionDataSize;
 
-  SystemVersionPathSize = StrSize (DirectoryName) + L_STR_SIZE_NT (L"SystemVersion.plist");
-  SystemVersionPath     = AllocatePool (SystemVersionPathSize);
+  Status = InternalReadBootEntryFile (
+             FileSystem,
+             DirectoryName,
+             L"SystemVersion.plist",
+             BASE_1MB,
+             0,
+             (VOID **)&SystemVersionData,
+             &SystemVersionDataSize
+             );
 
-  if (SystemVersionPath == NULL) {
-    return EFI_OUT_OF_RESOURCES;
+  if (EFI_ERROR (Status)) {
+    return EFI_NOT_FOUND;
   }
 
-  UnicodeSPrint (SystemVersionPath, SystemVersionPathSize, L"%s%s", DirectoryName, L"SystemVersion.plist");
-  DEBUG ((DEBUG_INFO, "OCB: Trying to get Apple version from %s\n", SystemVersionPath));
-  SystemVersionData = (CHAR8 *)OcReadFile (FileSystem, SystemVersionPath, &SystemVersionDataSize, BASE_1MB);
-  FreePool (SystemVersionPath);
-
-  if (SystemVersionData != NULL) {
-    Status = GetAppleVersionFromPlist (SystemVersionData, SystemVersionDataSize, AppleVersion);
-    FreePool (SystemVersionData);
-  } else {
-    Status = EFI_NOT_FOUND;
-  }
+  Status = GetAppleVersionFromPlist (SystemVersionData, SystemVersionDataSize, AppleVersion);
+  FreePool (SystemVersionData);
 
   return Status;
 }
@@ -402,53 +401,17 @@ OcGetBootEntryLabelImage (
   OUT UINT32             *DataLength
   )
 {
-  EFI_STATUS                       Status;
-  CHAR16                           *BootDirectoryName;
-  EFI_HANDLE                       Device;
-  EFI_SIMPLE_FILE_SYSTEM_PROTOCOL  *FileSystem;
-
-  *ImageData  = NULL;
-  *DataLength = 0;
-
-  if ((BootEntry->Type & (OC_BOOT_EXTERNAL_TOOL | OC_BOOT_SYSTEM)) != 0) {
-    return EFI_NOT_FOUND;
-  }
-
-  ASSERT (BootEntry->DevicePath != NULL);
-
-  Status = OcBootPolicyDevicePathToDirPath (
-             BootEntry->DevicePath,
-             &BootDirectoryName,
-             &Device
-             );
-
-  if (EFI_ERROR (Status)) {
-    return Status;
-  }
-
-  Status = gBS->HandleProtocol (
-                  Device,
-                  &gEfiSimpleFileSystemProtocolGuid,
-                  (VOID **)&FileSystem
-                  );
-
-  if (EFI_ERROR (Status)) {
-    FreePool (BootDirectoryName);
-    return Status;
-  }
-
-  Status = InternalGetAppleImage (
-             FileSystem,
-             BootDirectoryName,
-             Scale == 2 ? L".disk_label_2x" : L".disk_label",
-             ImageData,
-             DataLength
-             );
-
-  DEBUG ((DEBUG_INFO, "OCB: Get normal label %s - %r\n", BootEntry->Name, Status));
-  FreePool (BootDirectoryName);
-
-  return Status;
+  return OcGetBootEntryFile (
+           BootEntry,
+           Scale == 2 ? L".disk_label_2x" : L".disk_label",
+           "label",
+           BASE_16MB,
+           sizeof (APPLE_DISK_LABEL),
+           ImageData,
+           DataLength,
+           TRUE,
+           FALSE
+           );
 }
 
 EFI_STATUS
@@ -460,28 +423,80 @@ OcGetBootEntryIcon (
   OUT UINT32             *DataLength
   )
 {
+  return OcGetBootEntryFile (
+           BootEntry,
+           L".VolumeIcon.icns",
+           "volume icon",
+           BASE_16MB,
+           sizeof (APPLE_ICNS_RECORD) * 2,
+           ImageData,
+           DataLength,
+           FALSE,
+           TRUE
+           );
+}
+
+EFI_STATUS
+EFIAPI
+InternalGetBootEntryFile (
+  IN  EFI_DEVICE_PATH_PROTOCOL  *DevicePath,
+  IN  CONST CHAR16              *FileName,
+  IN  CONST CHAR16              *DebugBootEntryName,
+  IN  CONST CHAR8               *DebugFileType,
+  IN  UINT32                    MaxFileSize,
+  IN  UINT32                    MinFileSize,
+  OUT VOID                      **FileData,
+  OUT UINT32                    *DataLength,
+  IN  BOOLEAN                   SearchAtLeaf,
+  IN  BOOLEAN                   SearchAtRoot
+  )
+{
   EFI_STATUS                       Status;
   CHAR16                           *BootDirectoryName;
   CHAR16                           *GuidPrefix;
-  EFI_HANDLE                       Device;
   EFI_SIMPLE_FILE_SYSTEM_PROTOCOL  *FileSystem;
 
-  *ImageData  = NULL;
+  ASSERT (SearchAtLeaf || SearchAtRoot);
+  ASSERT (DevicePath != NULL);
+
+  *FileData   = NULL;
   *DataLength = 0;
 
-  if ((BootEntry->Type & (OC_BOOT_EXTERNAL_TOOL | OC_BOOT_SYSTEM)) != 0) {
-    return EFI_NOT_FOUND;
-  }
-
-  ASSERT (BootEntry->DevicePath != NULL);
-
   Status = OcBootPolicyDevicePathToDirPath (
-             BootEntry->DevicePath,
+             DevicePath,
              &BootDirectoryName,
-             &Device
+             &FileSystem
              );
 
   if (EFI_ERROR (Status)) {
+    return Status;
+  }
+
+  Status = EFI_NOT_FOUND;
+
+  if (SearchAtLeaf) {
+    Status = InternalReadBootEntryFile (
+               FileSystem,
+               BootDirectoryName,
+               FileName,
+               MaxFileSize,
+               MinFileSize,
+               FileData,
+               DataLength
+               );
+  }
+
+  if (!EFI_ERROR (Status) || !SearchAtRoot) {
+    DEBUG ((
+      DEBUG_INFO,
+      "OCB: Get %a for %s - %r\n",
+      DebugFileType,
+      DebugBootEntryName,
+      Status
+      ));
+
+    FreePool (BootDirectoryName);
+
     return Status;
   }
 
@@ -492,27 +507,18 @@ OcGetBootEntryIcon (
     GuidPrefix = NULL;
   }
 
-  Status = gBS->HandleProtocol (
-                  Device,
-                  &gEfiSimpleFileSystemProtocolGuid,
-                  (VOID **)&FileSystem
-                  );
-
-  if (EFI_ERROR (Status)) {
-    FreePool (BootDirectoryName);
-    return Status;
-  }
-
   //
   // OC-specific location, per-GUID and hence per-OS, below Preboot volume root.
   // Not recognised by Apple bootpicker.
   //
   if (GuidPrefix != NULL) {
-    Status = InternalGetAppleImage (
+    Status = InternalReadBootEntryFile (
                FileSystem,
                GuidPrefix,
-               L".VolumeIcon.icns",
-               ImageData,
+               FileName,
+               MaxFileSize,
+               MinFileSize,
+               FileData,
                DataLength
                );
   } else {
@@ -524,19 +530,22 @@ OcGetBootEntryIcon (
   // at /System/Volumes/Preboot/), shared by all OSes on a volume.
   //
   if (EFI_ERROR (Status)) {
-    Status = InternalGetAppleImage (
+    Status = InternalReadBootEntryFile (
                FileSystem,
                L"",
-               L".VolumeIcon.icns",
-               ImageData,
+               FileName,
+               MaxFileSize,
+               MinFileSize,
+               FileData,
                DataLength
                );
   }
 
   DEBUG ((
     DEBUG_INFO,
-    "OCB: OcGetBootEntryIcon - %s in %s (volume icon) - %r\n",
-    BootEntry->Name,
+    "OCB: Get %a for %s %s - %r\n",
+    DebugFileType,
+    DebugBootEntryName,
     GuidPrefix,
     Status
     ));
@@ -544,6 +553,66 @@ OcGetBootEntryIcon (
   FreePool (BootDirectoryName);
 
   return Status;
+}
+
+EFI_STATUS
+EFIAPI
+OcGetBootEntryFileFromDevicePath (
+  IN  EFI_DEVICE_PATH_PROTOCOL  *DevicePath,
+  IN  CONST CHAR16              *FileName,
+  IN  CONST CHAR8               *DebugFileType,
+  IN  UINT32                    MaxFileSize,
+  IN  UINT32                    MinFileSize,
+  OUT VOID                      **FileData,
+  OUT UINT32                    *DataLength,
+  IN  BOOLEAN                   SearchAtLeaf,
+  IN  BOOLEAN                   SearchAtRoot
+  )
+{
+  return InternalGetBootEntryFile (
+           DevicePath,
+           FileName,
+           L"boot entry",
+           DebugFileType,
+           MaxFileSize,
+           MinFileSize,
+           FileData,
+           DataLength,
+           SearchAtLeaf,
+           SearchAtRoot
+           );
+}
+
+EFI_STATUS
+EFIAPI
+OcGetBootEntryFile (
+  IN  OC_BOOT_ENTRY  *BootEntry,
+  IN  CONST CHAR16   *FileName,
+  IN  CONST CHAR8    *DebugFileType,
+  IN  UINT32         MaxFileSize,
+  IN  UINT32         MinFileSize,
+  OUT VOID           **FileData,
+  OUT UINT32         *DataLength,
+  IN  BOOLEAN        SearchAtLeaf,
+  IN  BOOLEAN        SearchAtRoot
+  )
+{
+  if ((BootEntry->Type & (OC_BOOT_EXTERNAL_TOOL | OC_BOOT_SYSTEM)) != 0) {
+    return EFI_NOT_FOUND;
+  }
+
+  return InternalGetBootEntryFile (
+           BootEntry->DevicePath,
+           FileName,
+           BootEntry->Name,
+           DebugFileType,
+           MaxFileSize,
+           MinFileSize,
+           FileData,
+           DataLength,
+           SearchAtLeaf,
+           SearchAtRoot
+           );
 }
 
 //
@@ -623,7 +692,6 @@ InternalDescribeBootEntry (
   EFI_STATUS                       Status;
   CHAR16                           *BootDirectoryName;
   CHAR16                           *TmpBootName;
-  EFI_HANDLE                       Device;
   UINT32                           BcdSize;
   EFI_SIMPLE_FILE_SYSTEM_PROTOCOL  *FileSystem;
   CHAR8                            *ContentFlavour;
@@ -642,21 +710,10 @@ InternalDescribeBootEntry (
   Status = OcBootPolicyDevicePathToDirPath (
              BootEntry->DevicePath,
              &BootDirectoryName,
-             &Device
+             &FileSystem
              );
 
   if (EFI_ERROR (Status)) {
-    return Status;
-  }
-
-  Status = gBS->HandleProtocol (
-                  Device,
-                  &gEfiSimpleFileSystemProtocolGuid,
-                  (VOID **)&FileSystem
-                  );
-
-  if (EFI_ERROR (Status)) {
-    FreePool (BootDirectoryName);
     return Status;
   }
 
@@ -755,7 +812,7 @@ InternalDescribeBootEntry (
   // Get user-specified or builtin content flavour.
   //
   if ((BootContext->PickerContext->PickerAttributes & OC_ATTR_USE_FLAVOUR_ICON) != 0) {
-    BootEntry->Flavour = InternalGetContentFlavour (FileSystem, BootDirectoryName, L".contentFlavour");
+    BootEntry->Flavour = InternalGetContentFlavour (FileSystem, BootDirectoryName);
   }
 
   if ((BootEntry->Flavour == NULL) || (AsciiStrCmp (BootEntry->Flavour, OC_FLAVOUR_AUTO) == 0)) {

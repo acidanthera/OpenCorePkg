@@ -3147,15 +3147,15 @@ The algorithm to determine boot options behaves as follows:
   \item For disk device paths (not specifying a bootloader), execute ``bless'' (may return > 1 entry).
   \item For file device paths, check for presence on the file system directly.
   % Just kill all \EFI\APPLE\ paths.
-  \item Exclude entries if there is a \texttt{.contentVisibility} file near the bootloader or
-  inside the boot directory with \texttt{Disabled} contents (ASCII) (and if the current
-  \texttt{InstanceIentifier} matches an \texttt{Instance-List} if present, see following).
+  \item Exclude entries if there is a \texttt{.contentVisibility} file at a relevant location (see below)
+  with \texttt{Disabled} contents (ASCII) (and if the current \texttt{InstanceIentifier} matches an \texttt{Instance-List}
+  if present, see below).
   \item Mark device handle as \textit{used} in the list of partition handles if any.
   % Each partition handle will basically have a list of boot option entries for later quick lookup.
   \item Register the resulting entries as primary options and determine their types. \\
   The option will become auxiliary for some types (e.g. Apple HFS recovery)
   or if its \texttt{.contentVisibility} file contains \texttt{Auxiliary} (and if the current
-  \texttt{InstanceIentifier} matches an \texttt{Instance-List} if present, see following).
+  \texttt{InstanceIentifier} matches an \texttt{Instance-List} if present, see below).
   \end{itemize}
 \item For each partition handle:
   \begin{itemize}
@@ -3173,6 +3173,25 @@ The algorithm to determine boot options behaves as follows:
 without any checks with respect to \texttt{Auxiliary}.
 \item System entries, such as \texttt{Reset NVRAM}, are added as primary auxiliary options.
 \end{enumerate}
+
+A \texttt{.contentVisibility} file may be placed next to the bootloader (such as \texttt{boot.efi}),
+or in the boot folder (for DMG folder based boot items). Example locations, as seen from within macOS, are:
+\begin{itemize}
+\tightlist
+\item \texttt{/System/Volumes/Preboot/\{GUID\}/System/Library/CoreServices/.contentVisibility}
+\item \texttt{/Volumes/\{ESP\}/EFI/BOOT/.contentVisibility}
+\end{itemize}
+In addition a \texttt{.contentVisibility} file may be placed in the instance-specific (for macOS) or absolute
+root folders related to a boot entry, for example:
+\begin{itemize}
+\tightlist
+\item \texttt{/System/Volumes/Preboot/\{GUID\}/.contentVisibility}
+\item \texttt{/System/Volumes/Preboot/.contentVisibility}
+\item \texttt{/Volumes/\{ESP\}/.contentVisibility} (\emph{not recommended})
+\end{itemize}
+These root folder locations are supported specifically for macOS, because non-Apple files next to the Apple bootloader
+are removed by macOS updates. It is supported but not recommended to place a \texttt{.contentVisibility} file in a
+non-macOS root location (such as the last location shown above), because it will hide all entries on the drive.
 
 The \texttt{.contentVisibility} file, when present, may optionally target only specific instances
 of OpenCore. Its contents are \texttt{[\{Instance-List\}:](Disabled|Auxiliary)}.

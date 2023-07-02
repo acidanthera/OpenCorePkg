@@ -199,96 +199,34 @@ ExpandShortFormBootPath (
 STATIC
 INTERNAL_ENTRY_VISIBILITY
 ReadEntryVisibility (
-  IN EFI_DEVICE_PATH_PROTOCOL  *DevicePath,
-  IN BOOLEAN                   IsFolder,
-  IN CONST CHAR8               *InstanceIdentifier
+  IN OC_PICKER_CONTEXT         *Context,
+  IN EFI_DEVICE_PATH_PROTOCOL  *DevicePath
   )
 {
-  EFI_STATUS                       Status;
-  EFI_SIMPLE_FILE_SYSTEM_PROTOCOL  *FileSystem;
-  EFI_HANDLE                       Device;
-  UINTN                            BooterPathSize;
-  UINTN                            BooterPathLength;
-  UINTN                            VisibilityPathSize;
-  CHAR16                           *VisibilityPath;
-  CHAR16                           *VisibilityTerminator;
-  BOOLEAN                          Result;
-  CHAR8                            *Visibility;
-  CHAR8                            *VisibilityCommand;
-  CHAR8                            *Walker;
-  UINTN                            IdentifierLength;
-
-  Status = gBS->LocateDevicePath (
-                  &gEfiSimpleFileSystemProtocolGuid,
-                  &DevicePath,
-                  &Device
-                  );
-  if (EFI_ERROR (Status)) {
-    return BootEntryNormal;
-  }
-
-  Status = gBS->HandleProtocol (
-                  Device,
-                  &gEfiSimpleFileSystemProtocolGuid,
-                  (VOID **)&FileSystem
-                  );
-  if (EFI_ERROR (Status)) {
-    return BootEntryNormal;
-  }
-
-  BooterPathSize = OcFileDevicePathFullNameSize (DevicePath);
-  Result         = BaseOverflowAddUN (
-                     BooterPathSize,
-                     L_STR_SIZE (L"\\.contentVisibility"),
-                     &VisibilityPathSize
-                     );
-  if (Result) {
-    return BootEntryNormal;
-  }
-
-  VisibilityPath = AllocatePool (VisibilityPathSize);
-  if (VisibilityPath == NULL) {
-    return BootEntryNormal;
-  }
-
-  if (BooterPathSize > 0) {
-    OcFileDevicePathFullName (
-      VisibilityPath,
-      (FILEPATH_DEVICE_PATH *)DevicePath,
-      BooterPathSize
-      );
-  } else {
-    VisibilityPath[0] = '\0';
-  }
-
-  BooterPathLength = BooterPathSize / sizeof (CHAR16);
-
-  if (BooterPathSize == 0) {
-    VisibilityTerminator = VisibilityPath;
-  } else if (IsFolder && (VisibilityPath[BooterPathLength - 1] == L'\\')) {
-    VisibilityTerminator = VisibilityPath + BooterPathLength;
-  } else if (IsFolder) {
-    VisibilityPath[BooterPathLength] = L'\\';
-    VisibilityTerminator             = VisibilityPath + BooterPathLength + 1;
-  } else {
-    VisibilityTerminator = OcStrrChr (VisibilityPath, L'\\');
-    if (VisibilityTerminator != NULL) {
-      ++VisibilityTerminator;
-    } else {
-      VisibilityTerminator = VisibilityPath;
-    }
-  }
-
-  CopyMem (VisibilityTerminator, L".contentVisibility", sizeof (L".contentVisibility"));
+  EFI_STATUS  Status;
+  CHAR8       *Visibility;
+  CHAR8       *VisibilityCommand;
+  CHAR8       *Walker;
+  UINTN       IdentifierLength;
 
   //
-  // Note, this guarantees nul-termination.
+  // Allow root location as well as leaf, because this is a non-Apple file which will
+  // get deleted at update if placed next to boot.efi in macOS.
+  // Leaf (next to bootloader) is recommended location for non-macOS.
   //
-  Visibility = OcReadFile (FileSystem, VisibilityPath, NULL, OC_MAX_CONTENT_VISIBILITY_SIZE);
+  Status = OcGetBootEntryFileFromDevicePath (
+             DevicePath,
+             L".contentVisibility",
+             "visibility",
+             OC_MAX_CONTENT_VISIBILITY_SIZE,
+             0,
+             (VOID **)&Visibility,
+             NULL,
+             TRUE,
+             TRUE
+             );
 
-  FreePool (VisibilityPath);
-
-  if (Visibility == NULL) {
+  if (EFI_ERROR (Status)) {
     return BootEntryNormal;
   }
 
@@ -310,7 +248,7 @@ ReadEntryVisibility (
   if (Walker == NULL) {
     VisibilityCommand = Visibility;
   } else {
-    if (*InstanceIdentifier == '\0') {
+    if (*(Context->InstanceIdentifier) == '\0') {
       DEBUG ((DEBUG_INFO, "OCB: No InstanceIdentifier, ignoring qualified visibility\n"));
       FreePool (Visibility);
       return BootEntryNormal;
@@ -320,10 +258,10 @@ ReadEntryVisibility (
     VisibilityCommand = Walker;
     Walker            = Visibility;
 
-    IdentifierLength = AsciiStrLen (InstanceIdentifier);
+    IdentifierLength = AsciiStrLen (Context->InstanceIdentifier);
     Status           = EFI_NOT_FOUND;
     do {
-      if (  (AsciiStrnCmp (Walker, InstanceIdentifier, IdentifierLength) == 0)
+      if (  (AsciiStrnCmp (Walker, Context->InstanceIdentifier, IdentifierLength) == 0)
          && ((Walker[IdentifierLength] == '\0') || (Walker[IdentifierLength] == ',')))
       {
         Status = EFI_SUCCESS;
@@ -337,7 +275,7 @@ ReadEntryVisibility (
     } while (Walker != NULL);
 
     if (EFI_ERROR (Status)) {
-      DEBUG ((DEBUG_INFO, "OCB: \"%a\" not present in \"%a\" ignoring visibility\n", InstanceIdentifier, Visibility));
+      DEBUG ((DEBUG_INFO, "OCB: \"%a\" not present in \"%a\" ignoring visibility\n", Context->InstanceIdentifier, Visibility));
       FreePool (Visibility);
       return BootEntryNormal;
     }
@@ -542,7 +480,7 @@ AddBootEntryOnFileSystem (
   //
   // Skip disabled entries, like OpenCore bootloader.
   //
-  Visibility = ReadEntryVisibility (DevicePath, IsFolder, BootContext->PickerContext->InstanceIdentifier);
+  Visibility = ReadEntryVisibility (BootContext->PickerContext, DevicePath);
   if (Visibility == BootEntryDisabled) {
     DEBUG ((DEBUG_INFO, "OCB: Discarding disabled entry by visibility\n"));
     if (IsReallocated) {
@@ -713,7 +651,6 @@ InternalAddBootEntryFromCustomEntry (
   FILEPATH_DEVICE_PATH             *FilePath;
   CHAR8                            *ContentFlavour;
   CHAR16                           *BootDirectoryName;
-  EFI_HANDLE                       Device;
   EFI_SIMPLE_FILE_SYSTEM_PROTOCOL  *SimpleFileSystem;
   CONST EFI_PARTITION_ENTRY        *PartitionEntry;
 
@@ -857,39 +794,31 @@ InternalAddBootEntryFromCustomEntry (
       Status = OcBootPolicyDevicePathToDirPath (
                  BootEntry->DevicePath,
                  &BootDirectoryName,
-                 &Device
+                 &SimpleFileSystem
                  );
 
       if (!EFI_ERROR (Status)) {
-        Status = gBS->HandleProtocol (
-                        Device,
-                        &gEfiSimpleFileSystemProtocolGuid,
-                        (VOID **)&SimpleFileSystem
-                        );
+        ContentFlavour = InternalGetContentFlavour (SimpleFileSystem, BootDirectoryName);
 
-        if (!EFI_ERROR (Status)) {
-          ContentFlavour = InternalGetContentFlavour (SimpleFileSystem, BootDirectoryName, L".contentFlavour");
-
-          if (ContentFlavour != NULL) {
-            //
-            // 'Auto' read from file means do not override.
-            //
-            if (AsciiStrCmp (ContentFlavour, OC_FLAVOUR_AUTO) == 0) {
-              FreePool (ContentFlavour);
-            } else {
-              if (BootEntry->Flavour != NULL) {
-                FreePool (BootEntry->Flavour);
-              }
-
-              BootEntry->Flavour = ContentFlavour;
+        if (ContentFlavour != NULL) {
+          //
+          // 'Auto' read from file means do not override.
+          //
+          if (AsciiStrCmp (ContentFlavour, OC_FLAVOUR_AUTO) == 0) {
+            FreePool (ContentFlavour);
+          } else {
+            if (BootEntry->Flavour != NULL) {
+              FreePool (BootEntry->Flavour);
             }
-          }
 
-          //
-          // There is no need for the additional flavour fixup from BootEntryInfo.c, since type
-          // OC_BOOT_EXTERNAL_OS does not need fixing up, and already determines our voiceover.
-          //
+            BootEntry->Flavour = ContentFlavour;
+          }
         }
+
+        //
+        // There is no need for the additional flavour fixup from BootEntryInfo.c, since type
+        // OC_BOOT_EXTERNAL_OS does not need fixing up, and already determines our voiceover.
+        //
 
         FreePool (BootDirectoryName);
       }

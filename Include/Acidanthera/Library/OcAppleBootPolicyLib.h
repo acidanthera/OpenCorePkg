@@ -101,22 +101,24 @@ OcBootPolicyGetBootFileEx (
   );
 
 /**
-  Retrieves information about DevicePath.
+  Retrieves folder and file system associated with DevicePath.
 
   @param[in]  DevicePath          The device path to describe.
   @param[out] BootPathName        A pointer into which the folder portion of
-                                  DevicePath is returned.
-  @param[out] Device              A pointer into which the device handle of
-                                  DevicePath is returned.
+                                  DevicePath is returned. When EFI_SUCCESS is
+                                  returned, caller is responsible for freeing
+                                  this pool memory.
+  @param[out] FileSystem          A pointer into which the simple file system
+                                  for the folder is returned.
 
   @retval EFI_SUCCESS  The operation has been completed successfully.
   @retval other        DevicePath is not a valid file path.
 **/
 EFI_STATUS
 OcBootPolicyDevicePathToDirPath (
-  IN  EFI_DEVICE_PATH_PROTOCOL  *DevicePath,
-  OUT CHAR16                    **BootPathName,
-  OUT EFI_HANDLE                *Device
+  IN  EFI_DEVICE_PATH_PROTOCOL         *DevicePath,
+  OUT CHAR16                           **BootPathName,
+  OUT EFI_SIMPLE_FILE_SYSTEM_PROTOCOL  **FileSystem
   );
 
 /**

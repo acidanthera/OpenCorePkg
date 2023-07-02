@@ -2114,4 +2114,68 @@ OcLaunchAppleBootPicker (
   VOID
   );
 
+/**
+  Read boot entry meta-data file from boot entry device path.
+  May be used before before OC_BOOT_ENTRY struct is created.
+
+  @param[in]  DevicePath          Boot entry device path.
+  @param[in]  FileName            File name to search for.
+  @param[in]  DebugFileType       Brief description of file for use in debug messages.
+  @param[in]  MaxFileSize         Maximum allowed file size (inclusive).
+  @param[in]  MinFileSize         Minimum allowed file size (inclusive).
+  @param[out] FileData            Returned file data.
+  @param[out] DataLength          Returned data length.
+  @param[in]  SearchAtLeaf        Search next to boot file (or in boot folder) first.
+  @param[in]  SearchAtRoot        After SearchAtLeaf, if specific, search at OC-specific
+                                  GUID sub-folder location, followed by FS root.
+
+  @retval EFI_SUCCESS   File was located, validated against allowed length, and returned.
+  @retval other         File could not be located, or had invalid length.
+**/
+EFI_STATUS
+EFIAPI
+OcGetBootEntryFileFromDevicePath (
+  IN  EFI_DEVICE_PATH_PROTOCOL  *DevicePath,
+  IN  CONST CHAR16              *FileName,
+  IN  CONST CHAR8               *DebugFileType,
+  IN  UINT32                    MaxFileSize,
+  IN  UINT32                    MinFileSize,
+  OUT VOID                      **FileData,
+  OUT UINT32                    *DataLength,
+  IN  BOOLEAN                   SearchAtLeaf,
+  IN  BOOLEAN                   SearchAtRoot
+  );
+
+/**
+  Read boot entry meta-data file.
+  Validates that boot entry is external tool or OS type.
+
+  @param[in]  BootEntry           Boot entry.
+  @param[in]  FileName            File name to search for.
+  @param[in]  DebugFileType       Brief description of file for use in debug messages.
+  @param[in]  MaxFileSize         Maximum allowed file size (inclusive).
+  @param[in]  MinFileSize         Minimum allowed file size (inclusive).
+  @param[out] FileData            Returned file data.
+  @param[out] DataLength          Returned data length.
+  @param[in]  SearchAtLeaf        Search next to boot file (or in boot folder) first.
+  @param[in]  SearchAtRoot        After SearchAtLeaf, if specific, search at OC-specific
+                                  GUID sub-folder location, followed by FS root.
+
+  @retval EFI_SUCCESS   Boot entry was correct type, file was located, validated against allowed length, and returned.
+  @retval other         Boot entry was incorrect type, or file could not be located, or had invalid length.
+**/
+EFI_STATUS
+EFIAPI
+OcGetBootEntryFile (
+  IN  OC_BOOT_ENTRY  *BootEntry,
+  IN  CONST CHAR16   *FileName,
+  IN  CONST CHAR8    *DebugFileType,
+  IN  UINT32         MaxFileSize,
+  IN  UINT32         MinFileSize,
+  OUT VOID           **FileData,
+  OUT UINT32         *DataLength,
+  IN  BOOLEAN        SearchAtLeaf,
+  IN  BOOLEAN        SearchAtRoot
+  );
+
 #endif // OC_BOOT_MANAGEMENT_LIB_H

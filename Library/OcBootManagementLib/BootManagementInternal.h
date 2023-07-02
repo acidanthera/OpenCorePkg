@@ -152,8 +152,7 @@ InternalGetAppleDiskLabel (
 CHAR8 *
 InternalGetContentFlavour (
   IN  EFI_SIMPLE_FILE_SYSTEM_PROTOCOL  *FileSystem,
-  IN  CONST CHAR16                     *BootDirectoryName,
-  IN  CONST CHAR16                     *FlavourFilename
+  IN  CONST CHAR16                     *BootDirectoryName
   );
 
 EFI_STATUS

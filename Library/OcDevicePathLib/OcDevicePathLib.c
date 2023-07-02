@@ -1145,8 +1145,8 @@ OcFileDevicePathFullNameSize (
 
   @param[out] PathName      On output, the full file path of FilePath.
   @param[in]  FilePath      The File Device Path to inspect.
-  @param[in]  PathNameSize  The size, in bytes, of PathnName.  Must equal the
-                            actual fill file path size.
+  @param[in]  PathNameSize  The size, in bytes, of PathName.  Must equal the
+                            actual full file path size.
 
 **/
 VOID
