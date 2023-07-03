@@ -204,6 +204,7 @@ TestExt4Dxe (
   EFI_HANDLE             DeviceHandle;
   UINTN                  BufferSize;
   VOID                   *Buffer;
+  VOID                   *TmpBuffer;
   EFI_FILE_PROTOCOL      *NewHandle;
   CHAR16                 *FileName;
   VOID                   *Info;
@@ -308,24 +309,35 @@ TestExt4Dxe (
   for (Index = 0; Index < OPEN_FILE_MODES_COUNT; Index++) {
     Status = Ext4Open (This, &NewHandle, FileName, mOpenFileModes[Index], 0);
     if (Status == EFI_SUCCESS) {
-      Buffer     = NULL;
-      BufferSize = 0;
-      Status     = Ext4ReadFile (NewHandle, &BufferSize, Buffer);
+      //
+      // Try to read 100 bytes
+      //
+      Buffer     = AllocateZeroPool (100);
+      BufferSize = 100;
+      if (Buffer == NULL) {
+        FreeAll (FileName, Part);
+        return 0;
+      }
+
+      Status = Ext4ReadFile (NewHandle, &BufferSize, Buffer);
       if (Status == EFI_BUFFER_TOO_SMALL) {
-        Buffer = AllocateZeroPool (BufferSize);
-        if (Buffer == NULL) {
+        TmpBuffer = ReallocatePool (100, BufferSize, Buffer);
+        if (TmpBuffer == NULL) {
+          FreePool (Buffer);
           FreeAll (FileName, Part);
           return 0;
         }
 
+        Buffer = TmpBuffer;
+
         ASAN_CHECK_MEMORY_REGION (Buffer, BufferSize);
 
         Ext4ReadFile (NewHandle, &BufferSize, Buffer);
-
-        Ext4WriteFile (NewHandle, &BufferSize, Buffer);
-
-        FreePool (Buffer);
       }
+
+      Ext4WriteFile (NewHandle, &BufferSize, Buffer);
+
+      FreePool (Buffer);
 
       Len    = 0;
       Info   = NULL;
@@ -381,24 +393,32 @@ TestExt4Dxe (
       Position = (UINT64)-1;
       Status   = Ext4SetPosition (NewHandle, Position);
       if (!EFI_ERROR (Status)) {
-        Buffer     = NULL;
-        BufferSize = 0;
-        Status     = Ext4ReadFile (NewHandle, &BufferSize, Buffer);
+        Buffer     = AllocateZeroPool (100);
+        BufferSize = 100;
+        if (Buffer == NULL) {
+          FreeAll (FileName, Part);
+          return 0;
+        }
+
+        Status = Ext4ReadFile (NewHandle, &BufferSize, Buffer);
         if (Status == EFI_BUFFER_TOO_SMALL) {
-          Buffer = AllocateZeroPool (BufferSize);
-          if (Buffer == NULL) {
+          TmpBuffer = ReallocatePool (100, BufferSize, Buffer);
+          if (TmpBuffer == NULL) {
+            FreePool (Buffer);
             FreeAll (FileName, Part);
             return 0;
           }
 
+          Buffer = TmpBuffer;
+
           ASAN_CHECK_MEMORY_REGION (Buffer, BufferSize);
 
           Ext4ReadFile (NewHandle, &BufferSize, Buffer);
-
-          Ext4WriteFile (NewHandle, &BufferSize, Buffer);
-
-          FreePool (Buffer);
         }
+
+        Ext4WriteFile (NewHandle, &BufferSize, Buffer);
+
+        FreePool (Buffer);
       }
 
       //
@@ -410,11 +430,17 @@ TestExt4Dxe (
         Position = FileSize + 1;
         Status   = Ext4SetPosition (NewHandle, Position);
         if (!EFI_ERROR (Status)) {
-          Buffer     = NULL;
-          BufferSize = 0;
-          Status     = Ext4ReadFile (NewHandle, &BufferSize, Buffer);
+          Buffer     = AllocateZeroPool (100);
+          BufferSize = 100;
+          if (Buffer == NULL) {
+            FreeAll (FileName, Part);
+            return 0;
+          }
+
+          Status = Ext4ReadFile (NewHandle, &BufferSize, Buffer);
 
           ASSERT (Status == EFI_DEVICE_ERROR);
+          FreePool (Buffer);
         }
       }
 

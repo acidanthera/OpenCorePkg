@@ -10,6 +10,7 @@ buildutil() {
     "AppleEfiSignTool"
     "ACPIe"
     "EfiResTool"
+    "ext4read"
     "LogoutHook"
     "acdtinfo"
     "disklabel"
