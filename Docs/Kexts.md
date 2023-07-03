@@ -77,7 +77,7 @@ Kexts
 | [IOElectrify.kext](https://github.com/the-darkvoid/macOS-IOElectrify) | — | — | — |
 | [Legacy_InternalHub-EHCx.kext](https://applelife.ru/posts/537459) | 15.0.0 (10.11) | — | — |
 | [Legacy_USB3.kext](https://applelife.ru/posts/537459) | 15.0.0 (10.11) | — | — |
-| [NVMeFix.kext](https://github.com/acidanthera/NVMeFix) | 18.0.0 (10.14) | 22.9.9 (13) | — |
+| [NVMeFix.kext](https://github.com/acidanthera/NVMeFix) | 18.0.0 (10.14) | 23.9.9 (14) | — |
 | [USBWakeFixup.kext](https://github.com/osy86/USBWakeFixup) | — | — | — |
 | [SASMegaRAID.kext](https://github.com/dukzcry/osx-goodies) | — | — | — |
 | [Sinetek-rtsx.kext](https://www.insanelymac.com/forum/topic/321080-sineteks-driver-for-realtek-rtsx-sdhc-card-readers/?do=findComment&comment=2376387) | — | — | — |
