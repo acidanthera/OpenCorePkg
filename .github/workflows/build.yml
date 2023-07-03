@@ -85,7 +85,7 @@ jobs:
           path: Binaries/*.zip
 
   build-linux-gcc5:
-    name: Linux GCC5
+    name: Linux GCC
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v3
@@ -96,17 +96,17 @@ jobs:
       - name: ./build_duet.tool
         run: docker compose run build-duet
         env:
-          TOOLCHAINS: GCC5
+          TOOLCHAINS: GCC
 
       - name: ./build_oc.tool
         run: docker compose run build-oc
         env:
-          TOOLCHAINS: GCC5
+          TOOLCHAINS: GCC
 
       - name: Upload to Artifacts
         uses: actions/upload-artifact@v3
         with:
-          name: Linux GCC5 Artifacts
+          name: Linux GCC Artifacts
           path: Binaries/*.zip
 
   build-linux-clangdwarf:

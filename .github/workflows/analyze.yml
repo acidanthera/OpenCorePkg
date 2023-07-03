@@ -103,7 +103,7 @@ jobs:
     runs-on: ubuntu-22.04
     env:
       JOB_TYPE: COVERITY
-      TOOLCHAINS: GCC5
+      TOOLCHAINS: GCC
     if: github.repository_owner == 'acidanthera' && github.event_name != 'pull_request'
     steps:
       - uses: actions/checkout@v3
