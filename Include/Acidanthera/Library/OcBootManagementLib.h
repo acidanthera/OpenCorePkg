@@ -2126,8 +2126,8 @@ OcLaunchAppleBootPicker (
   @param[out] FileData            Returned file data.
   @param[out] DataLength          Returned data length.
   @param[in]  SearchAtLeaf        Search next to boot file (or in boot folder) first.
-  @param[in]  SearchAtRoot        After SearchAtLeaf, if specific, search at OC-specific
-                                  GUID sub-folder location, followed by FS root.
+  @param[in]  SearchAtRoot        After SearchAtLeaf (if specified), search at OC-specific
+                                  GUID sub-folder location (if present), then at FS root.
 
   @retval EFI_SUCCESS   File was located, validated against allowed length, and returned.
   @retval other         File could not be located, or had invalid length.
@@ -2158,8 +2158,8 @@ OcGetBootEntryFileFromDevicePath (
   @param[out] FileData            Returned file data.
   @param[out] DataLength          Returned data length.
   @param[in]  SearchAtLeaf        Search next to boot file (or in boot folder) first.
-  @param[in]  SearchAtRoot        After SearchAtLeaf, if specific, search at OC-specific
-                                  GUID sub-folder location, followed by FS root.
+  @param[in]  SearchAtRoot        After SearchAtLeaf (if specified), search at OC-specific
+                                  GUID sub-folder location (if present), then at FS root.
 
   @retval EFI_SUCCESS   Boot entry was correct type, file was located, validated against allowed length, and returned.
   @retval other         Boot entry was incorrect type, or file could not be located, or had invalid length.
