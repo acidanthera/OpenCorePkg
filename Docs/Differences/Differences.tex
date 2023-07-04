@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
-%DIF DEL PreviousConfiguration.tex   Wed Jun 14 22:10:31 2023
-%DIF ADD ../Configuration.tex        Fri Jun 23 19:53:46 2023
+%DIF DEL PreviousConfiguration.tex   Sun Jul  2 15:34:28 2023
+%DIF ADD ../Configuration.tex        Tue Jul  4 01:26:50 2023
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -3207,15 +3207,16 @@ installed on the media, while alternate options represent recovery options for t
   \item For disk device paths (not specifying a bootloader), execute ``bless'' (may return > 1 entry).
   \item For file device paths, check for presence on the file system directly.
   % Just kill all \EFI\APPLE\ paths.
-  \item Exclude entries if there is a \texttt{.contentVisibility} file near the bootloader or
-  inside the boot directory with \texttt{Disabled} contents (ASCII) \DIFaddbegin \DIFadd{(and if the current
-  }\texttt{\DIFadd{InstanceIentifier}} \DIFadd{matches an }\texttt{\DIFadd{Instance-List}} \DIFadd{if present, see following)}\DIFaddend .
+  \item Exclude entries if there is a \texttt{.contentVisibility} file \DIFdelbegin \DIFdel{near the bootloader or
+  inside the boot directory }\DIFdelend \DIFaddbegin \DIFadd{at a relevant location (see below)
+  }\DIFaddend with \texttt{Disabled} contents (ASCII) \DIFaddbegin \DIFadd{(and if the current }\texttt{\DIFadd{InstanceIentifier}} \DIFadd{matches an }\texttt{\DIFadd{Instance-List}}
+  \DIFadd{if present, see below)}\DIFaddend .
   \item Mark device handle as \textit{used} in the list of partition handles if any.
   % Each partition handle will basically have a list of boot option entries for later quick lookup.
   \item Register the resulting entries as primary options and determine their types. \\
   The option will become auxiliary for some types (e.g. Apple HFS recovery)
   or if its \texttt{.contentVisibility} file contains \texttt{Auxiliary} \DIFaddbegin \DIFadd{(and if the current
-  }\texttt{\DIFadd{InstanceIentifier}} \DIFadd{matches an }\texttt{\DIFadd{Instance-List}} \DIFadd{if present, see following)}\DIFaddend .
+  }\texttt{\DIFadd{InstanceIentifier}} \DIFadd{matches an }\texttt{\DIFadd{Instance-List}} \DIFadd{if present, see below)}\DIFaddend .
   \end{itemize}
 \item For each partition handle:
   \begin{itemize}
@@ -3234,7 +3235,27 @@ without any checks with respect to \texttt{Auxiliary}.
 \item System entries, such as \texttt{Reset NVRAM}, are added as primary auxiliary options.
 \end{enumerate}
 
-The \DIFaddbegin \texttt{\DIFadd{.contentVisibility}} \DIFadd{file, when present, may optionally target only specific instances
+\DIFaddbegin \DIFadd{A }\texttt{\DIFadd{.contentVisibility}} \DIFadd{file may be placed next to the bootloader (such as }\texttt{\DIFadd{boot.efi}}\DIFadd{),
+or in the boot folder (for DMG folder based boot items). Example locations, as seen from within macOS, are:
+}\begin{itemize}
+\tightlist
+\item \texttt{\DIFadd{/System/Volumes/Preboot/\{GUID\}/System/Library/CoreServices/.contentVisibility}}
+\item \texttt{\DIFadd{/Volumes/\{ESP\}/EFI/BOOT/.contentVisibility}}
+\end{itemize}
+\DIFadd{In addition a }\texttt{\DIFadd{.contentVisibility}} \DIFadd{file may be placed in the instance-specific (for macOS) or absolute
+root folders related to a boot entry, for example:
+}\begin{itemize}
+\tightlist
+\item \texttt{\DIFadd{/System/Volumes/Preboot/\{GUID\}/.contentVisibility}}
+\item \texttt{\DIFadd{/System/Volumes/Preboot/.contentVisibility}}
+\item \texttt{\DIFadd{/Volumes/\{ESP\}/.contentVisibility}} \DIFadd{(}\emph{\DIFadd{not recommended}}\DIFadd{)
+}\end{itemize}
+\DIFadd{These root folder locations are supported specifically for macOS, because non-Apple files next to the Apple bootloader
+are removed by macOS updates. It is supported but not recommended to place a }\texttt{\DIFadd{.contentVisibility}} \DIFadd{file in a
+non-macOS root location (such as the last location shown above), because it will hide all entries on the drive.
+}
+
+\DIFadd{The }\texttt{\DIFadd{.contentVisibility}} \DIFadd{file, when present, may optionally target only specific instances
 of OpenCore. Its contents are }\texttt{[\DIFadd{\{Instance-List\}:}]\DIFadd{(Disabled|Auxiliary)}}\DIFadd{.
 If a colon (}\texttt{\DIFadd{:}}\DIFadd{) is present, the preceding }\texttt{\DIFadd{Instance-List}} \DIFadd{it is a comma separated
 list of }\texttt{\DIFadd{InstanceIdentifier}} \DIFadd{values (example: }\texttt{\DIFadd{OCA,OCB:Disabled}}\DIFadd{).
@@ -3255,7 +3276,7 @@ versions of OpenCore - which may be useful when comparing behaviour of older and
 whitespace, but as part of the adjacent token.
 }
 
-\DIFadd{The }\DIFaddend display order of the boot options in the OpenCore picker and the boot process
+\DIFaddend The display order of the boot options in the OpenCore picker and the boot process
 are determined separately from the scanning algorithm.
 
 The display order \DIFaddbegin \DIFadd{is }\DIFaddend as follows:
