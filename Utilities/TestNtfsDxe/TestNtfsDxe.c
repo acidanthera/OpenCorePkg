@@ -82,6 +82,7 @@ LLVMFuzzerTestOneInput (
   EFI_FILE_PROTOCOL  *This;
   UINTN              BufferSize;
   VOID               *Buffer;
+  VOID               *TmpBuffer;
   EFI_FILE_PROTOCOL  *NewHandle;
   CHAR16             *FileName;
   VOID               *Info;
@@ -176,26 +177,34 @@ LLVMFuzzerTestOneInput (
   //
   Status = FileOpen (This, &NewHandle, FileName, EFI_FILE_MODE_READ, 0);
   if (Status == EFI_SUCCESS) {
-    Buffer     = NULL;
-    BufferSize = 0;
-    Status     = FileRead (NewHandle, &BufferSize, Buffer);
+    Buffer     = AllocateZeroPool (100);
+    BufferSize = 100;
+    if (Buffer == NULL) {
+      FreeAll (FileName, Instance);
+      return 0;
+    }
+
+    Status = FileRead (NewHandle, &BufferSize, Buffer);
     if (Status == EFI_BUFFER_TOO_SMALL) {
-      Buffer = AllocateZeroPool (BufferSize);
-      if (Buffer == NULL) {
+      TmpBuffer = ReallocatePool (100, BufferSize, Buffer);
+      if (TmpBuffer == NULL) {
+        FreePool (Buffer);
         FreeAll (FileName, Instance);
         return 0;
       }
 
+      Buffer = TmpBuffer;
+
       ASAN_CHECK_MEMORY_REGION (Buffer, BufferSize);
 
       FileRead (NewHandle, &BufferSize, Buffer);
-
-      FileWrite (NewHandle, &BufferSize, Buffer);
-
-      FileFlush (NewHandle);
-
-      FreePool (Buffer);
     }
+
+    FileWrite (NewHandle, &BufferSize, Buffer);
+
+    FileFlush (NewHandle);
+
+    FreePool (Buffer);
 
     Len    = 0;
     Info   = NULL;

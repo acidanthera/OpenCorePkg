@@ -150,6 +150,7 @@ TestFatDxe (
   EFI_FILE_PROTOCOL      *VolumeRootDir;
   UINTN                  BufferSize;
   VOID                   *Buffer;
+  VOID                   *TmpBuffer;
   EFI_FILE_PROTOCOL      *NewHandle;
   CHAR16                 *FileName;
   VOID                   *Info;
@@ -258,27 +259,39 @@ TestFatDxe (
   //
   Status = FatOpen (VolumeRootDir, &NewHandle, FileName, EFI_FILE_MODE_READ, 0);
   if (Status == EFI_SUCCESS) {
-    Buffer     = NULL;
-    BufferSize = 0;
-    Status     = FatRead (NewHandle, &BufferSize, Buffer);
+    //
+    // Try to read 100 bytes
+    //
+    Buffer     = AllocateZeroPool (100);
+    BufferSize = 100;
+    if (Buffer == NULL) {
+      FatClose (NewHandle);
+      FreeAll (FileName, Volume, VolumeRootDir);
+      return 0;
+    }
+
+    Status = FatRead (NewHandle, &BufferSize, Buffer);
     if (Status == EFI_BUFFER_TOO_SMALL) {
-      Buffer = AllocateZeroPool (BufferSize);
-      if (Buffer == NULL) {
+      TmpBuffer = ReallocatePool (100, BufferSize, Buffer);
+      if (TmpBuffer == NULL) {
+        FreePool (Buffer);
         FatClose (NewHandle);
         FreeAll (FileName, Volume, VolumeRootDir);
         return 0;
       }
 
+      Buffer = TmpBuffer;
+
       ASAN_CHECK_MEMORY_REGION (Buffer, BufferSize);
 
       FatRead (NewHandle, &BufferSize, Buffer);
-
-      FatWrite (NewHandle, &BufferSize, Buffer);
-
-      FatFlush (NewHandle);
-
-      FreePool (Buffer);
     }
+
+    FatWrite (NewHandle, &BufferSize, Buffer);
+
+    FatFlush (NewHandle);
+
+    FreePool (Buffer);
 
     //
     // Set/Get file info
@@ -358,27 +371,37 @@ TestFatDxe (
     Position = (UINT64)-1;
     Status   = FatSetPosition (NewHandle, Position);
     if (!EFI_ERROR (Status)) {
-      Buffer     = NULL;
-      BufferSize = 0;
-      Status     = FatRead (NewHandle, &BufferSize, Buffer);
+      Buffer     = AllocateZeroPool (100);
+      BufferSize = 100;
+
+      if (Buffer == NULL) {
+        FatClose (NewHandle);
+        FreeAll (FileName, Volume, VolumeRootDir);
+        return 0;
+      }
+
+      Status = FatRead (NewHandle, &BufferSize, Buffer);
       if (Status == EFI_BUFFER_TOO_SMALL) {
-        Buffer = AllocateZeroPool (BufferSize);
-        if (Buffer == NULL) {
+        TmpBuffer = ReallocatePool (100, BufferSize, Buffer);
+        if (TmpBuffer == NULL) {
+          FreePool (Buffer);
           FatClose (NewHandle);
           FreeAll (FileName, Volume, VolumeRootDir);
           return 0;
         }
 
+        Buffer = TmpBuffer;
+
         ASAN_CHECK_MEMORY_REGION (Buffer, BufferSize);
 
         FatRead (NewHandle, &BufferSize, Buffer);
-
-        FatWrite (NewHandle, &BufferSize, Buffer);
-
-        FatFlush (NewHandle);
-
-        FreePool (Buffer);
       }
+
+      FatWrite (NewHandle, &BufferSize, Buffer);
+
+      FatFlush (NewHandle);
+
+      FreePool (Buffer);
     }
 
     //
@@ -390,11 +413,18 @@ TestFatDxe (
       Position = FileSize + 1;
       Status   = FatSetPosition (NewHandle, Position);
       if (!EFI_ERROR (Status)) {
-        Buffer     = NULL;
-        BufferSize = 0;
-        Status     = FatRead (NewHandle, &BufferSize, Buffer);
+        Buffer     = AllocateZeroPool (100);
+        BufferSize = 100;
+        if (Buffer == NULL) {
+          FatClose (NewHandle);
+          FreeAll (FileName, Volume, VolumeRootDir);
+          return 0;
+        }
+
+        Status = FatRead (NewHandle, &BufferSize, Buffer);
 
         ASSERT (Status == EFI_DEVICE_ERROR);
+        FreePool (Buffer);
       }
     }
 
