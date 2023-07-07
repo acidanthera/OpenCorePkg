@@ -79,8 +79,8 @@
 
 // Intel Braswell
 
-#define R_BRSW_PMC_ACPI_BASE         0x40
-#define B_BRSW_PMC_ACPI_BASE_BAR     0xFFFFFE00
+#define R_BRSW_PMC_ACPI_BASE      0x40
+#define B_BRSW_PMC_ACPI_BASE_BAR  0xFFFFFE00
 
 // AMD Bolton (AMD Bolton Register Reference Guide 3.03)
 
