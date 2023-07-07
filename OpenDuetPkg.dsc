@@ -212,6 +212,9 @@
   MdeModulePkg/Bus/Usb/UsbMouseDxe/UsbMouseDxe.inf
   MdeModulePkg/Bus/Usb/UsbKbDxe/UsbKbDxe.inf
 
+  # BiosBootBlock Support
+  OpenCorePkg/Legacy/BootPlatform/BlockIoDxe/BlockIoDxe.inf
+
   # ISA Support
   OvmfPkg/SioBusDxe/SioBusDxe.inf
   MdeModulePkg/Bus/Isa/Ps2KeyboardDxe/Ps2KeyboardDxe.inf
