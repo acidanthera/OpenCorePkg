@@ -68,7 +68,7 @@ PatchAppleCpuPmCfgLock (
 
   if (Patcher == NULL) {
     DEBUG ((DEBUG_INFO, "OCAK: [OK] Skipping %a on NULL Patcher on kernel version %u\n", __func__, KernelVersion));
-    return EFI_NOT_FOUND;
+    return OcMatchDarwinVersion (KernelVersion, KERNEL_VERSION_VENTURA_MIN, 0) ? EFI_SUCCESS : EFI_NOT_FOUND;
   }
 
   Count     = 0;
