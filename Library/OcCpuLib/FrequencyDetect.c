@@ -73,7 +73,12 @@ InternalGetPmTimerAddr (
     // but it is referred to as PMC I/O space, and the addressing is done through BAR2.
     // In addition to that on B360 and friends PMC controller may be just missing.
     //
-    if ((PciRead8 (PCI_ICH_LPC_ADDRESS (R_ICH_LPC_ACPI_CNTL)) & B_ICH_LPC_ACPI_CNTL_ACPI_EN) != 0) {
+    if ((PciRead16 (PCI_ICH_LPC_ADDRESS (2)) == V_VLV_PMC_PCI_DEVICE_ID) || (PciRead16 (PCI_ICH_LPC_ADDRESS (2)) == V_CHT_PMC_PCI_DEVICE_ID)) {
+      TimerAddr = (PciRead32 (PCI_ICH_LPC_ADDRESS (R_BRSW_PMC_ACPI_BASE)) & B_BRSW_PMC_ACPI_BASE_BAR) + R_ACPI_PM1_TMR;
+      if (Type != NULL) {
+        *Type = "Braswell PMC";
+      }
+    } else if ((PciRead8 (PCI_ICH_LPC_ADDRESS (R_ICH_LPC_ACPI_CNTL)) & B_ICH_LPC_ACPI_CNTL_ACPI_EN) != 0) {
       TimerAddr = (PciRead16 (PCI_ICH_LPC_ADDRESS (R_ICH_LPC_ACPI_BASE)) & B_ICH_LPC_ACPI_BASE_BAR) + R_ACPI_PM1_TMR;
       if (Type != NULL) {
         *Type = "LPC";

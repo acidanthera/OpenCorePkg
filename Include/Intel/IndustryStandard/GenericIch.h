@@ -36,6 +36,8 @@
 
 #define V_ICH_PCI_VENDOR_ID        0x8086    ///< Intel vendor-id
 #define V_PIIX4_PMC_PCI_DEVICE_ID  0x7113    ///< Intel PIIX4 PMC device-id
+#define V_VLV_PMC_PCI_DEVICE_ID    0x0F1C    ///< Intel Valley View PMC device-id
+#define V_CHT_PMC_PCI_DEVICE_ID    0x229C    ///< Intel Bay-Trail/Cherry-Trail PMC device-id
 
 // IchAcpiCntr   Control for the ICH's ACPI Counter.
 
@@ -74,6 +76,11 @@
 #define R_ICH_PMC_BAR2_BASE         R_ICH_BAR2_BASE
 #define B_ICH_PMC_BAR2_BASE_BAR     B_ICH_BAR2_BASE_BAR
 #define B_ICH_PMC_BAR2_BASE_BAR_EN  B_ICH_BAR2_BASE_BAR_EN
+
+// Intel Braswell
+
+#define R_BRSW_PMC_ACPI_BASE         0x40
+#define B_BRSW_PMC_ACPI_BASE_BAR     0xFFFFFE00
 
 // AMD Bolton (AMD Bolton Register Reference Guide 3.03)
 

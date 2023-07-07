@@ -428,6 +428,9 @@ ScanIntelProcessor (
   UINT64                                            Msr;
   CPUID_CACHE_PARAMS_EAX                            CpuidCacheEax;
   CPUID_CACHE_PARAMS_EBX                            CpuidCacheEbx;
+  CPUID_EXTENDED_TOPOLOGY_EAX                       CpuidExTopologyEax;
+  CPUID_EXTENDED_TOPOLOGY_EBX                       CpuidExTopologyEbx;
+  CPUID_EXTENDED_TOPOLOGY_ECX                       CpuidExTopologyEcx;
   MSR_SANDY_BRIDGE_PKG_CST_CONFIG_CONTROL_REGISTER  PkgCstConfigControl;
   UINT16                                            CoreCount;
   CONST CHAR8                                       *TimerSourceType;
@@ -555,7 +558,6 @@ ScanIntelProcessor (
         || (Cpu->CpuGeneration == OcCpuGenerationYonahMerom)
         || (Cpu->CpuGeneration == OcCpuGenerationPenryn)
         || (Cpu->CpuGeneration == OcCpuGenerationBonnell)
-        || (Cpu->CpuGeneration == OcCpuGenerationSilvermont)
         || Cpu->Hypervisor))
   {
     AsmCpuidEx (CPUID_CACHE_PARAMS, 0, &CpuidCacheEax.Uint32, &CpuidCacheEbx.Uint32, NULL, NULL);
@@ -574,6 +576,19 @@ ScanIntelProcessor (
         Cpu->ThreadCount = Cpu->CoreCount;
       }
     }
+  } else if (Cpu->CpuGeneration == OcCpuGenerationSilvermont) {
+    //
+    // MSR 0x35 is unsupported, and CPUID leaf 4 does not give correct information on Silvermont Celeron/Atom processors.
+    // Use CPUID leaf 11 instead.
+    // No Hyperthreading on these processors, should be ok to assume logical processor count == core count.
+    //
+    // Level 0 - threads per core.
+    AsmCpuidEx (CPUID_EXTENDED_TOPOLOGY, 0, &CpuidExTopologyEax.Uint32, &CpuidExTopologyEbx.Uint32, &CpuidExTopologyEcx.Uint32, NULL);
+
+    // Level 1 - total logical processor count.
+    AsmCpuidEx (CPUID_EXTENDED_TOPOLOGY, 1, &CpuidExTopologyEax.Uint32, &CpuidExTopologyEbx.Uint32, &CpuidExTopologyEcx.Uint32, NULL);
+    Cpu->CoreCount   = (UINT16)GetPowerOfTwo32 (CpuidExTopologyEbx.Bits.LogicalProcessors);
+    Cpu->ThreadCount = Cpu->CoreCount;
   } else if (Cpu->CpuGeneration == OcCpuGenerationWestmere) {
     Msr              = AsmReadMsr64 (MSR_CORE_THREAD_COUNT);
     Cpu->CoreCount   = (UINT16)BitFieldRead64 (Msr, 16, 19);
@@ -1357,7 +1372,6 @@ InternalDetectIntelProcessorGeneration (
         break;
       case CPU_MODEL_BONNELL:
       case CPU_MODEL_BONNELL_MID:
-      case CPU_MODEL_AVOTON: /* perhaps should be distinct */
         CpuGeneration = OcCpuGenerationBonnell;
         break;
       case CPU_MODEL_DALES_32NM:
@@ -1372,6 +1386,7 @@ InternalDetectIntelProcessorGeneration (
       case CPU_MODEL_SILVERMONT:
       case CPU_MODEL_GOLDMONT:
       case CPU_MODEL_AIRMONT:
+      case CPU_MODEL_AVOTON:
         CpuGeneration = OcCpuGenerationSilvermont;
         break;
       case CPU_MODEL_IVYBRIDGE:

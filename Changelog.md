@@ -6,6 +6,8 @@ OpenCore Changelog
 - Added `InstanceIdentifier` to OpenCore and option to target `.contentVisibility` to specific instances (thx @dakanji)
 - Improved `LapicKernelPanic` quirk on legacy versions of macOS
 - Allowed `.contentVisibility` in same boot FS root locations as `.VolumeIcon.icns`, in order to survive macOS updates
+- Fixed incorrect core count on Silvermont Atom/Celeron processors
+- Fixed PM timer detection on Silvermont Atom/Celeron processors for TSC calculations
 
 #### v0.9.3
 - Added `--force-codec` option to AudioDxe, thx @xCuri0
