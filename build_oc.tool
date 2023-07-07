@@ -268,15 +268,22 @@ package() {
   # Copy OpenDuetPkg booter.
   for arch in "${ARCHS[@]}"; do
     local tgt
-    local booter
+    local booter_bio
     tgt="$(basename "$(pwd)")"
     booter="$(pwd)/../../OpenDuetPkg/${tgt}/${arch}/boot"
+    booter_bio="$(pwd)/../../OpenDuetPkg/${tgt}/${arch}/boot-blockio"
 
     if [ -f "${booter}" ]; then
       echo "Copying OpenDuetPkg boot file from ${booter}..."
       cp "${booter}" "${dstdir}/Utilities/LegacyBoot/boot${arch}" || exit 1
     else
       echo "Failed to find OpenDuetPkg at ${booter}!"
+    fi
+    if [ -f "${booter_bio}" ]; then
+      echo "Copying OpenDuetPkg BlockIO boot file from ${booter_bio}..."
+      cp "${booter_bio}" "${dstdir}/Utilities/LegacyBoot/boot${arch}-blockio" || exit 1
+    else
+      echo "Failed to find OpenDuetPkg BlockIO at ${booter_bio}!"
     fi
   done
 
