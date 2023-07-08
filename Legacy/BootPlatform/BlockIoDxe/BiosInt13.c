@@ -418,18 +418,15 @@ Edd30BiosReadBlocks (
   EFI_BLOCK_IO_MEDIA         *Media;
   BIOS_BLOCK_IO_DEV          *BiosBlockIoDev;
   EDD_DEVICE_ADDRESS_PACKET  *AddressPacket;
-  //
-  // I exist only for readability
-  //
-  IA32_REGISTER_SET      Regs;
-  UINT64                 TransferBuffer;
-  UINTN                  NumberOfBlocks;
-  UINTN                  TransferByteSize;
-  UINTN                  BlockSize;
-  BIOS_LEGACY_DRIVE      *Bios;
-  UINTN                  CarryFlag;
-  UINTN                  MaxTransferBlocks;
-  EFI_BLOCK_IO_PROTOCOL  *BlockIo;
+  IA32_REGISTER_SET          Regs;
+  UINT64                     TransferBuffer;
+  UINTN                      NumberOfBlocks;
+  UINTN                      TransferByteSize;
+  UINTN                      BlockSize;
+  BIOS_LEGACY_DRIVE          *Bios;
+  UINTN                      CarryFlag;
+  UINTN                      MaxTransferBlocks;
+  EFI_BLOCK_IO_PROTOCOL      *BlockIo;
 
   Media     = This->Media;
   BlockSize = Media->BlockSize;
@@ -566,18 +563,15 @@ Edd30BiosWriteBlocks (
   EFI_BLOCK_IO_MEDIA         *Media;
   BIOS_BLOCK_IO_DEV          *BiosBlockIoDev;
   EDD_DEVICE_ADDRESS_PACKET  *AddressPacket;
-  //
-  // I exist only for readability
-  //
-  IA32_REGISTER_SET      Regs;
-  UINT64                 TransferBuffer;
-  UINTN                  NumberOfBlocks;
-  UINTN                  TransferByteSize;
-  UINTN                  BlockSize;
-  BIOS_LEGACY_DRIVE      *Bios;
-  UINTN                  CarryFlag;
-  UINTN                  MaxTransferBlocks;
-  EFI_BLOCK_IO_PROTOCOL  *BlockIo;
+  IA32_REGISTER_SET          Regs;
+  UINT64                     TransferBuffer;
+  UINTN                      NumberOfBlocks;
+  UINTN                      TransferByteSize;
+  UINTN                      BlockSize;
+  BIOS_LEGACY_DRIVE          *Bios;
+  UINTN                      CarryFlag;
+  UINTN                      MaxTransferBlocks;
+  EFI_BLOCK_IO_PROTOCOL      *BlockIo;
 
   Media     = This->Media;
   BlockSize = Media->BlockSize;
@@ -803,18 +797,15 @@ Edd11BiosReadBlocks (
   EFI_BLOCK_IO_MEDIA         *Media;
   BIOS_BLOCK_IO_DEV          *BiosBlockIoDev;
   EDD_DEVICE_ADDRESS_PACKET  *AddressPacket;
-  //
-  // I exist only for readability
-  //
-  IA32_REGISTER_SET      Regs;
-  UINT64                 TransferBuffer;
-  UINTN                  NumberOfBlocks;
-  UINTN                  TransferByteSize;
-  UINTN                  BlockSize;
-  BIOS_LEGACY_DRIVE      *Bios;
-  UINTN                  CarryFlag;
-  UINTN                  MaxTransferBlocks;
-  EFI_BLOCK_IO_PROTOCOL  *BlockIo;
+  IA32_REGISTER_SET          Regs;
+  UINT64                     TransferBuffer;
+  UINTN                      NumberOfBlocks;
+  UINTN                      TransferByteSize;
+  UINTN                      BlockSize;
+  BIOS_LEGACY_DRIVE          *Bios;
+  UINTN                      CarryFlag;
+  UINTN                      MaxTransferBlocks;
+  EFI_BLOCK_IO_PROTOCOL      *BlockIo;
 
   Media     = This->Media;
   BlockSize = Media->BlockSize;
@@ -958,18 +949,15 @@ Edd11BiosWriteBlocks (
   EFI_BLOCK_IO_MEDIA         *Media;
   BIOS_BLOCK_IO_DEV          *BiosBlockIoDev;
   EDD_DEVICE_ADDRESS_PACKET  *AddressPacket;
-  //
-  // I exist only for readability
-  //
-  IA32_REGISTER_SET      Regs;
-  UINT64                 TransferBuffer;
-  UINTN                  NumberOfBlocks;
-  UINTN                  TransferByteSize;
-  UINTN                  BlockSize;
-  BIOS_LEGACY_DRIVE      *Bios;
-  UINTN                  CarryFlag;
-  UINTN                  MaxTransferBlocks;
-  EFI_BLOCK_IO_PROTOCOL  *BlockIo;
+  IA32_REGISTER_SET          Regs;
+  UINT64                     TransferBuffer;
+  UINTN                      NumberOfBlocks;
+  UINTN                      TransferByteSize;
+  UINTN                      BlockSize;
+  BIOS_LEGACY_DRIVE          *Bios;
+  UINTN                      CarryFlag;
+  UINTN                      MaxTransferBlocks;
+  EFI_BLOCK_IO_PROTOCOL      *BlockIo;
 
   Media     = This->Media;
   BlockSize = Media->BlockSize;
