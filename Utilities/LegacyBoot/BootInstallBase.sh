@@ -4,7 +4,7 @@
 
 cd "$(dirname "$0")" || exit 1
 
-if [ ! -f "boot${ARCHS}" ] || [ ! -f boot0 ] || [ ! -f boot1f32 ]; then
+if [ ! -f "boot${ARCHS}${DUET_SUFFIX}" ] || [ ! -f boot0 ] || [ ! -f boot1f32 ]; then
   echo "Boot files are missing from this package!"
   echo "You probably forgot to build DuetPkg first."
   exit 1
@@ -26,7 +26,7 @@ if [ "$(uname)" = "Linux" ]; then
 
   rm -f newbs origbs
 
-  echo "Select the disk where you want to install boot files:"
+  echo "Select the disk where you want to install boot files (${ARCHS}${DUET_SUFFIX}):"
   lsblk -d | tail -n+2 | cut -d" " -f1
   echo "Example: sda"
   read -r DRIVE
@@ -65,7 +65,7 @@ if [ "$(uname)" = "Linux" ]; then
   mkdir -p "${p}" || exit 1
   mount -t vfat "${EFI_PART}" "${p}" -o rw,noatime,uid="$(id -u)",gid="$(id -g)" || exit 1
 
-  cp -v "boot${ARCHS}" "${p}/boot" || exit 1
+  cp -v "boot${ARCHS}${DUET_SUFFIX}" "${p}/boot" || exit 1
 
   echo Check "${p}" boot drive EFI folder to install OpenCorePkg
 
@@ -86,7 +86,7 @@ else
 
   diskutil list
   echo "Disable SIP in the case of any problems with installation!!!"
-  echo "Enter disk number to install to:"
+  echo "Enter disk number to install OpenDuet (${ARCHS}${DUET_SUFFIX}) to:"
   read -r N
 
   if ! diskutil info disk"${N}" |  grep -q "/dev/disk"; then
@@ -110,12 +110,12 @@ else
   sudo dd if=newbs of=/dev/rdisk"${N}"s1
   #if [[ "$(sudo diskutil mount disk"${N}"s1)" == *"mounted" ]]
   if sudo diskutil mount disk"${N}"s1 | grep -q mounted; then
-    cp -v "boot${ARCHS}" "$(diskutil info  disk"${N}"s1 |  sed -n 's/.*Mount Point: *//p')/boot"
+    cp -v "boot${ARCHS}${DUET_SUFFIX}" "$(diskutil info  disk"${N}"s1 |  sed -n 's/.*Mount Point: *//p')/boot"
   else
     p=/tmp/$(uuidgen)/EFI
     mkdir -p "${p}" || exit 1
     sudo mount_msdos /dev/disk"${N}"s1 "${p}" || exit 1
-    cp -v "boot${ARCHS}" "${p}/boot" || exit 1
+    cp -v "boot${ARCHS}${DUET_SUFFIX}" "${p}/boot" || exit 1
     open "${p}"
   fi
 
