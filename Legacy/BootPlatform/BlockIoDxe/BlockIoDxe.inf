@@ -36,8 +36,6 @@
   UefiLib
   DevicePathLib
   MemoryAllocationLib
-  SerialPortLib
-
 
 [Protocols]
   gEfiBlockIoProtocolGuid    ## BY_START
@@ -45,7 +43,6 @@
   gEfiDevicePathProtocolGuid ## TO_START
   gEfiPciIoProtocolGuid      ## TO_START
   gEfiLegacy8259ProtocolGuid ## TO_START
-
 
 [Guids]
   gEfiLegacyBiosGuid ## PRODUCES            ## UNDEFINED
