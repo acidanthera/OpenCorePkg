@@ -8,6 +8,7 @@ OpenCore Changelog
 - Allowed `.contentVisibility` in same boot FS root locations as `.VolumeIcon.icns`, in order to survive macOS updates
 - Fixed incorrect core count on Silvermont Atom/Celeron processors
 - Fixed PM timer detection on Silvermont Atom/Celeron processors for TSC calculations
+- Fixed PM timer detection on non-Intel chipsets when booted through OpenDuet
 
 #### v0.9.3
 - Added `--force-codec` option to AudioDxe, thx @xCuri0
