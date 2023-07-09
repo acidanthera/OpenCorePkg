@@ -151,12 +151,13 @@ InternalGetPmTimerAddr (
     //
     HobAcpiDescription = GetFirstGuidHob (&gEfiAcpiDescriptionGuid);
     if (HobAcpiDescription != NULL) {
-      ASSERT (sizeof (EFI_ACPI_DESCRIPTION) == GET_GUID_HOB_DATA_SIZE (HobAcpiDescription));
-      AcpiDescription = (EFI_ACPI_DESCRIPTION *)GET_GUID_HOB_DATA (HobAcpiDescription);
+      if (sizeof (EFI_ACPI_DESCRIPTION) >= GET_GUID_HOB_DATA_SIZE (HobAcpiDescription)) {
+        AcpiDescription = (EFI_ACPI_DESCRIPTION *)GET_GUID_HOB_DATA (HobAcpiDescription);
 
-      TimerAddr = (UINTN)AcpiDescription->PM_TMR_BLK.Address;
-      if (Type != NULL) {
-        *Type = "ACPI HOB";
+        TimerAddr = (UINTN)AcpiDescription->PM_TMR_BLK.Address;
+        if (Type != NULL) {
+          *Type = "ACPI HOB";
+        }
       }
     }
   }
