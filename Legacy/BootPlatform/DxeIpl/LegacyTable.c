@@ -21,10 +21,14 @@ Revision History:
 #include "DxeIpl.h"
 #include "HobGeneration.h"
 
+#include <Library/PciLib.h>
+
 #define MPS_PTR     SIGNATURE_32('_','M','P','_')
 #define SMBIOS_PTR  SIGNATURE_32('_','S','M','_')
 
 #define EBDA_BASE_ADDRESS  0x40E
+
+#define PCI_VENDOR_NVIDIA  0x10DE
 
 VOID *
 FindAcpiRsdPtr (
@@ -327,15 +331,24 @@ PrepareFadtTable (
       );
     AcpiDescription->RESET_VALUE = Fadt->ResetValue;
   } else {
-    //
-    // Use mostly universal default of 0xCF9.
-    //
-    AcpiDescription->RESET_REG.Address           = 0xCF9;
+    if (PciRead16 (0) == PCI_VENDOR_NVIDIA) {
+      //
+      // Use 0x64 / 0xFE on NVIDIA chipset platforms.
+      //
+      AcpiDescription->RESET_REG.Address = 0x64;
+      AcpiDescription->RESET_VALUE       = 0xFE;
+    } else {
+      //
+      // Use mostly universal default of 0xCF9.
+      //
+      AcpiDescription->RESET_REG.Address = 0xCF9;
+      AcpiDescription->RESET_VALUE       = 6;
+    }
+
     AcpiDescription->RESET_REG.AddressSpaceId    = EFI_ACPI_3_0_SYSTEM_IO;
     AcpiDescription->RESET_REG.RegisterBitWidth  = 8;
     AcpiDescription->RESET_REG.RegisterBitOffset = 0;
     AcpiDescription->RESET_REG.AccessSize        = EFI_ACPI_3_0_BYTE;
-    AcpiDescription->RESET_VALUE                 = 6;
   }
 
   //

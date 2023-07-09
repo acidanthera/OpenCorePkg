@@ -40,6 +40,7 @@
   OcMemoryLib
   OcMiscLib
   PrintLib
+  PciLib
 
 [Guids]
   gEfiAcpi10TableGuid
