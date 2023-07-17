@@ -160,8 +160,7 @@ jobs:
 
       - name: Install Dependencies
         run: |
-          choco install make nasm zip --no-progress
-          choco install iasl --no-progress --version=2017.11.10
+          choco install make nasm zip iasl --no-progress
 
       - name: CI Bootstrap
         run: |
