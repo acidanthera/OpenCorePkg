@@ -28,7 +28,7 @@ jobs:
 
       - name: CI Bootstrap
         run: |
-          set -x && src=$(/usr/bin/curl -Lfs https://raw.githubusercontent.com/acidanthera/ocbuild/test-xcode-14/ci-bootstrap.sh) && eval "$src" || exit 1
+          set -x && src=$(/usr/bin/curl -LfsS https://raw.githubusercontent.com/acidanthera/ocbuild/test-xcode-14/ci-bootstrap.sh) && eval "$src" || exit 1
 
       - name: Run shellcheck
         run: find . \( -name "*.tool" -o -name "*.command" -o -name "*.sh" \) -exec sh -c 'for TargetFile; do shellcheck --severity=info "${TargetFile}" || exit 1; done' sh {} +
@@ -115,7 +115,7 @@ jobs:
 
       - name: CI Bootstrap
         run: |
-          set -x && src=$(/usr/bin/curl -Lfs https://raw.githubusercontent.com/acidanthera/ocbuild/test-xcode-14/ci-bootstrap.sh) && eval "$src" || exit 1
+          set -x && src=$(/usr/bin/curl -LfsS https://raw.githubusercontent.com/acidanthera/ocbuild/test-xcode-14/ci-bootstrap.sh) && eval "$src" || exit 1
 
       - run: ./build_oc.tool --skip-build --skip-package
 
