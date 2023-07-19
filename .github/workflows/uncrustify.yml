@@ -25,7 +25,7 @@ jobs:
 
       - name: CI Bootstrap
         run: |
-          src=$(/usr/bin/curl -Lfs https://raw.githubusercontent.com/acidanthera/ocbuild/test-xcode-14/ci-bootstrap.sh) && eval "$src" || exit 1
+          set -x && src=$(/usr/bin/curl -Lfs https://raw.githubusercontent.com/acidanthera/ocbuild/test-xcode-14/ci-bootstrap.sh) && eval "$src" || exit 1
 
       - name: Run Uncrustify
         run: |
