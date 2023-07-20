@@ -284,25 +284,30 @@ OcImageLoaderLoad (
   ImageStatus = UefiImageInitializeContext (
                   &ImageContext,
                   SourceBuffer,
-                  (UINT32)SourceSize
+                  (UINT32)SourceSize,
+                  UEFI_IMAGE_SOURCE_FV
                   );
   if (EFI_ERROR (ImageStatus)) {
     DEBUG ((DEBUG_INFO, "OCB: PeCoff init failure - %r\n", ImageStatus));
     return EFI_UNSUPPORTED;
   }
 
+  if (ImageContext.FormatIndex != UefiImageFormatPe) {
+    ASSERT (FALSE);
+  }
+
   //
   // Reject images that are not meant for the platform's architecture.
   //
-  if (ImageContext.Machine != OC_IMAGE_FILE_MACHINE) {
-    DEBUG ((DEBUG_INFO, "OCB: PeCoff wrong machine - %x\n", ImageContext.Machine));
+  if (ImageContext.Ctx.Pe.Machine != OC_IMAGE_FILE_MACHINE) {
+    DEBUG ((DEBUG_INFO, "OCB: PeCoff wrong machine - %x\n", ImageContext.Ctx.Pe.Machine));
     return EFI_UNSUPPORTED;
   }
 
   //
   // Reject RT drivers for the moment.
   //
-  if (ImageContext.Subsystem == EFI_IMAGE_SUBSYSTEM_EFI_RUNTIME_DRIVER) {
+  if (ImageContext.Ctx.Pe.Subsystem == EFI_IMAGE_SUBSYSTEM_EFI_RUNTIME_DRIVER) {
     DEBUG ((DEBUG_INFO, "OCB: PeCoff no support for RT drivers\n"));
     return EFI_UNSUPPORTED;
   }
@@ -323,7 +328,7 @@ OcImageLoaderLoad (
   //
   Status = AllocateAlignedPagesEx (
              AllocateAnyPages,
-             ImageContext.Subsystem == EFI_IMAGE_SUBSYSTEM_EFI_APPLICATION
+             ImageContext.Ctx.Pe.Subsystem == EFI_IMAGE_SUBSYSTEM_EFI_APPLICATION
       ? EfiLoaderCode : EfiBootServicesCode,
              DestinationPages,
              DestinationAlignment,
@@ -363,10 +368,10 @@ OcImageLoaderLoad (
     return EFI_OUT_OF_RESOURCES;
   }
 
-  OcLoadedImage->EntryPoint = (EFI_IMAGE_ENTRY_POINT)((UINTN)DestinationBuffer + ImageContext.AddressOfEntryPoint);
+  OcLoadedImage->EntryPoint = (EFI_IMAGE_ENTRY_POINT)((UINTN)DestinationBuffer + ImageContext.Ctx.Pe.AddressOfEntryPoint);
   OcLoadedImage->ImageArea  = DestinationArea;
   OcLoadedImage->PageCount  = DestinationPages;
-  OcLoadedImage->Subsystem  = ImageContext.Subsystem;
+  OcLoadedImage->Subsystem  = ImageContext.Ctx.Pe.Subsystem;
 
   LoadedImage = &OcLoadedImage->LoadedImage;
 
@@ -378,7 +383,7 @@ OcImageLoaderLoad (
   //
   // FIXME: Support RT drivers.
   //
-  if (ImageContext.Subsystem == EFI_IMAGE_SUBSYSTEM_EFI_APPLICATION) {
+  if (ImageContext.Ctx.Pe.Subsystem == EFI_IMAGE_SUBSYSTEM_EFI_APPLICATION) {
     LoadedImage->ImageCodeType = EfiLoaderCode;
     LoadedImage->ImageDataType = EfiLoaderData;
   } else {
