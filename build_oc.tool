@@ -204,6 +204,8 @@ package() {
       "OpenRuntime.efi"
       "OpenUsbKbDxe.efi"
       "OpenVariableRuntimeDxe.efi"
+      "ProBookFanReset.efi"
+      "ProBookWifiWhlistOff.efi"
       "Ps2KeyboardDxe.efi"
       "Ps2MouseDxe.efi"
       "ResetNvramEntry.efi"

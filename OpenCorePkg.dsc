@@ -331,6 +331,8 @@
       DebugLib|OpenCorePkg/Library/OcDebugLibNull/OcDebugLibNull.inf
   }
   OpenCorePkg/Staging/OpenHfsPlus/OpenHfsPlus.inf
+  OpenCorePkg/Staging/ProBook6sC200sBiosFanReset/ProBookFanReset.inf
+  OpenCorePkg/Staging/ProBook6sC200sBiosWifiWhlistOff/ProBookWifiWhlistOff.inf
   OpenCorePkg/Tests/AcpiTest/AcpiTest.inf
   OpenCorePkg/Tests/AcpiTest/AcpiTestApp.inf
   OpenCorePkg/Tests/CryptoTest/CryptoTest.inf

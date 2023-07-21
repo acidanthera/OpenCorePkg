@@ -1,0 +1,48 @@
+## @file
+#  Defeat BIOS Wi-Fi whitelist on ProBook 4330s, 4530s, and 4730s
+#  models (HM65 Intel 6 series / C200 series chipset boards).
+#
+#  WARNING: Using this module on any other laptop model might
+#  brick the device.
+#
+#  Original code by RehabMan, OpenCore port by Ubihazard.
+#
+#  Copyright (C) 2013 RehabMan
+#                2023 Ubihazard
+#
+#  This program and the accompanying materials are licensed and made
+#  available under the terms and conditions of the GNU General Public
+#  License (GPL-2.0). The full text of the license may be found at
+#  https://opensource.org/license/gpl-2-0/
+#
+#  This program is distributed in the hope that it will be useful, but
+#  WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+#  or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License
+#  for more details.
+##
+
+[Defines]
+  INF_VERSION                    = 0x00010005
+  BASE_NAME                      = ProBookWifiWhlistOff
+  FILE_GUID                      = 5624B853-7DF6-4B10-A7ED-770F86B253E3
+  MODULE_TYPE                    = UEFI_DRIVER
+  VERSION_STRING                 = 1.0
+  ENTRY_POINT                    = ProBookWifiWhlistOffEntry
+
+[Sources]
+  ProBookWifiWhlistOff.h
+  ProBookWifiWhlistOff.c
+
+[Packages]
+  MdePkg/MdePkg.dec
+  OpenCorePkg/OpenCorePkg.dec
+
+[LibraryClasses]
+  UefiLib
+  UefiDriverEntryPoint
+
+[BuildOptions]
+
+[Guids]
+
+[Protocols]
