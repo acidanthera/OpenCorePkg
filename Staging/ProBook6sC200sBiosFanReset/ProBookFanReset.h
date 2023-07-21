@@ -45,7 +45,7 @@
 #define EC_FAN_CONTROL      (0x2F)      // FTGC in DSDT
 
 #if 0
-#include "io_inline.h"
+  #include "io_inline.h"
 #endif
 
 #endif

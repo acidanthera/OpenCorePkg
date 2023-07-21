@@ -51,7 +51,7 @@
 
 // ---
 
-#define true 1
+#define true  1
 #define false 0
 
 typedef unsigned char byte;
@@ -61,45 +61,45 @@ typedef unsigned char byte;
 EFI_STATUS
 EFIAPI
 ProBookWifiWhlistOffEntry (
-    IN EFI_HANDLE       ImageHandle,
-    IN EFI_SYSTEM_TABLE *SystemTable
+  IN EFI_HANDLE       ImageHandle,
+  IN EFI_SYSTEM_TABLE *SystemTable
 )
 {
-    // BIOS whitelist hack below is based on this bit
-    // of info in ProBook DSDT:
-    //
-    //   OperationRegion (RCRB, SystemMemory, 0xFED1C000, 0x4000)
-    //   Field (RCRB, DWordAcc, Lock, Preserve)
-    //   {
-    //     Offset (0x1A8),
-    //     APMC,   2,
-    //     Offset (0x1000),
-    //     Offset (0x3000),
-    //     Offset (0x3404),
-    //     HPAS,   2,
-    //         ,   5,
-    //     HPAE,   1,
-    //     Offset (0x3418),
-    //         ,   1,
-    //         ,   1,
-    //     SATD,   1,
-    //     SMBD,   1,
-    //     HDAD,   1,
-    //     Offset (0x341A),
-    //     RP1D,   1,
-    //     RP2D,   1,
-    //     RP3D,   1,
-    //     RP4D,   1, //! target bit (set to 1 to disable PCIe card in that slot)
-    //     RP5D,   1,
-    //     RP6D,   1,
-    //     RP7D,   1,
-    //     RP8D,   1
-    //   }
-    //
-    // The code below writes zero to RP4D:
-    // bit 3 at address 0xFED1C000 + 0x341A.
+  // BIOS whitelist hack below is based on this bit
+  // of info in ProBook DSDT:
+  //
+  //   OperationRegion (RCRB, SystemMemory, 0xFED1C000, 0x4000)
+  //   Field (RCRB, DWordAcc, Lock, Preserve)
+  //   {
+  //     Offset (0x1A8),
+  //     APMC,   2,
+  //     Offset (0x1000),
+  //     Offset (0x3000),
+  //     Offset (0x3404),
+  //     HPAS,   2,
+  //         ,   5,
+  //     HPAE,   1,
+  //     Offset (0x3418),
+  //         ,   1,
+  //         ,   1,
+  //     SATD,   1,
+  //     SMBD,   1,
+  //     HDAD,   1,
+  //     Offset (0x341A),
+  //     RP1D,   1,
+  //     RP2D,   1,
+  //     RP3D,   1,
+  //     RP4D,   1, //! target bit (set to 1 to disable PCIe card in that slot)
+  //     RP5D,   1,
+  //     RP6D,   1,
+  //     RP7D,   1,
+  //     RP8D,   1
+  //   }
+  //
+  // The code below writes zero to RP4D:
+  // bit 3 at address 0xFED1C000 + 0x341A.
 
-    *((byte*)0xFED1F41A) &= (byte)((1 << 3) ^ 0xFF);
+  *((byte*)0xFED1F41A) &= (byte)((1 << 3) ^ 0xFF);
 
-    return EFI_SUCCESS;
+  return EFI_SUCCESS;
 }
