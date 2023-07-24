@@ -64,3 +64,5 @@ change firmware volume size. To do this update `NumBlocks` in `DuetPkg.fdf`
 
 *Note*: OHCI driver is not bundled with DuetPkg (and EDK II) and can be found in
 `edk2-platforms/Silicon/Intel/QuarkSocPkg/QuarkSouthCluster/Usb/Ohci/Dxe`.
+
+Default OpenDuet configuration uses UHCI/EHCI and ATA/AHCI drivers and is named `boot`. Alternative OpenDuet configuration substituting these for BlockIoDxe is named `boot-blockio`. This alternative configuration can be used on non-Intel chipsets (i.e. nForce) or situations where the storage controller is poorly supported or unsupported (i.e. RAID controllers) and should be placed at the root of the partition with a name of `boot`.
