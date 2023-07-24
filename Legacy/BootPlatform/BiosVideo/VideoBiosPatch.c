@@ -323,7 +323,7 @@ PatchAtiVbiosCustom (
     AtomModeTiming->usCRTC_V_SyncStart = Height + VSyncStart;
     AtomModeTiming->usCRTC_V_SyncWidth = VSyncEnd;
 
-    AtomModeTiming->usPixelClock = ClockHz;
+    AtomModeTiming->usPixelClock = (UINT16) ClockHz;
   } else {
     AtomDtdTiming = (ATOM_DTD_FORMAT *)&AtomVesaTimings->aModeTimings;
 
@@ -337,7 +337,7 @@ PatchAtiVbiosCustom (
     AtomDtdTiming->usVSyncOffset    = VSyncStart;
     AtomDtdTiming->usVSyncWidth     = VSyncEnd;
 
-    AtomDtdTiming->usPixClk = ClockHz;
+    AtomDtdTiming->usPixClk = (UINT16) ClockHz;
   }
 
   return TRUE;
