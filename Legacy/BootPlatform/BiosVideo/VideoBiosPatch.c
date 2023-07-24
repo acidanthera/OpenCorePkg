@@ -13,6 +13,7 @@
 **/
 
 #include "BiosVideo.h"
+#include "AtomBios.h"
 
 STATIC
 BOOLEAN
@@ -242,6 +243,106 @@ PatchIntelVbiosCustom (
            ) != 0;
 }
 
+STATIC
+BOOLEAN
+PatchAtiVbiosCustom (
+  IN UINT8   *Vbios,
+  IN UINT32  VbiosSize,
+  IN UINT16  Width,
+  IN UINT16  Height
+  )
+{
+  ATOM_ROM_HEADER            *AtomHeader;
+  ATOM_MASTER_DATA_TABLE     *AtomMasterDataTable;
+  ATOM_STANDARD_VESA_TIMING  *AtomVesaTimings;
+  UINT16                     AtomVesaTimingsLength;
+  ATOM_MODE_TIMING           *AtomModeTiming;
+  ATOM_DTD_FORMAT            *AtomDtdTiming;
+
+  UINT32  ClockHz;
+  UINT16  HSyncStart;
+  UINT16  HSyncEnd;
+  UINT16  HBlank;
+  UINT16  VSyncStart;
+  UINT16  VSyncEnd;
+  UINT16  VBlank;
+
+  //
+  // Ensure magic value is correct.
+  //
+  if (AsciiStrCmp ((CHAR8 *)(Vbios + OFFSET_ATOM_ROM_MAGIC), ATOM_ROM_MAGIC_STR) != 0) {
+    return FALSE;
+  }
+
+  //
+  // Locate ATI ATOM header in the VBIOS and verify signature string is correct.
+  // Data tables list in VBIOS contains the VESA resolution sets.
+  //
+  AtomHeader = (ATOM_ROM_HEADER *)(Vbios + (*(UINT16 *)(Vbios + OFFSET_TO_POINTER_TO_ATOM_ROM_HEADER)));
+  if (AsciiStrCmp ((CHAR8 *)AtomHeader->uaFirmWareSignature, ATOM_ROM_HEADER_SIGNATURE_STR) != 0) {
+    return FALSE;
+  }
+
+  AtomMasterDataTable = (ATOM_MASTER_DATA_TABLE *)(Vbios + AtomHeader->usMasterDataTableOffset);
+  AtomVesaTimings     = (ATOM_STANDARD_VESA_TIMING *)(Vbios + AtomMasterDataTable->ListOfDataTables.StandardVESA_Timing);
+
+  AtomVesaTimingsLength = AtomVesaTimings->sHeader.usStructureSize - sizeof (AtomVesaTimings->sHeader);
+  if (AtomVesaTimingsLength < sizeof (ATOM_MODE_TIMING)) {
+    return FALSE;
+  }
+
+  //
+  // Calculate and patch timings based upon desired resolution.
+  //
+  CalculateGtfTimings (
+    Width,
+    Height,
+    60,
+    &ClockHz,
+    &HSyncStart,
+    &HSyncEnd,
+    &HBlank,
+    &VSyncStart,
+    &VSyncEnd,
+    &VBlank
+    );
+
+  //
+  // Two possible formats for timings exist, selection is based on total size of timings array.
+  //
+  if (AtomVesaTimingsLength % sizeof (ATOM_MODE_TIMING) == 0) {
+    AtomModeTiming = (ATOM_MODE_TIMING *)&AtomVesaTimings->aModeTimings;
+
+    AtomModeTiming->usCRTC_H_Total     = Width + HBlank;
+    AtomModeTiming->usCRTC_H_Disp      = Width;
+    AtomModeTiming->usCRTC_H_SyncStart = Width + HSyncStart;
+    AtomModeTiming->usCRTC_H_SyncWidth = HSyncEnd;
+
+    AtomModeTiming->usCRTC_V_Total     = Height + VBlank;
+    AtomModeTiming->usCRTC_V_Disp      = Height;
+    AtomModeTiming->usCRTC_V_SyncStart = Height + VSyncStart;
+    AtomModeTiming->usCRTC_V_SyncWidth = VSyncEnd;
+
+    AtomModeTiming->usPixelClock = (UINT16)ClockHz;
+  } else {
+    AtomDtdTiming = (ATOM_DTD_FORMAT *)&AtomVesaTimings->aModeTimings;
+
+    AtomDtdTiming->usHBlanking_Time = HBlank;
+    AtomDtdTiming->usHActive        = Width;
+    AtomDtdTiming->usHSyncOffset    = HSyncStart;
+    AtomDtdTiming->usHSyncWidth     = HSyncEnd;
+
+    AtomDtdTiming->usVBlanking_Time = VBlank;
+    AtomDtdTiming->usVActive        = Height;
+    AtomDtdTiming->usVSyncOffset    = VSyncStart;
+    AtomDtdTiming->usVSyncWidth     = VSyncEnd;
+
+    AtomDtdTiming->usPixClk = (UINT16)ClockHz;
+  }
+
+  return TRUE;
+}
+
 EFI_STATUS
 EFIAPI
 BiosVideoForceResolutionSetResolution (
@@ -306,6 +407,10 @@ BiosVideoForceResolutionSetResolution (
   switch (BiosVideoPrivate->PciVendorId) {
     case PCI_VENDOR_INTEL:
       Result = PatchIntelVbiosCustom (Vbios, LEGACY_REGION_SIZE, (UINT16)Width, (UINT16)Height);
+      break;
+
+    case PCI_VENDOR_ATI:
+      Result = PatchAtiVbiosCustom (Vbios, LEGACY_REGION_SIZE, (UINT16)Width, (UINT16)Height);
       break;
   }
 

@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
-%DIF DEL PreviousConfiguration.tex   Sun Jul  2 15:34:28 2023
-%DIF ADD ../Configuration.tex        Tue Jul  4 01:26:50 2023
+%DIF DEL PreviousConfiguration.tex   Mon Jun 12 21:24:42 2023
+%DIF ADD ../Configuration.tex        Sun Jul 23 20:58:07 2023
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -3496,12 +3496,11 @@ the default boot entry choice will remain changed until the next manual reconfig
   \end{itemize}
 
   To display all entries, the picker menu can be reloaded into ``Extended Mode'' by pressing the
-  \texttt{Spacebar} key. Hiding auxiliary entries may increase boot performance on multi-disk systems\DIFaddbegin \DIFadd{.
-}
+  \texttt{Spacebar} key. Hiding auxiliary entries may increase boot performance on multi-disk systems.
 
 
 \item
-  \texttt{\DIFadd{InstanceIdentifier}}\\
+  \DIFaddbegin \texttt{\DIFadd{InstanceIdentifier}}\\
   \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ string}}\\
   \textbf{\DIFadd{Failsafe}}\DIFadd{: Empty}\\
   \textbf{\DIFadd{Description}}\DIFadd{: An optional identifier for the current instance of OpenCore.
@@ -3509,10 +3508,11 @@ the default boot entry choice will remain changed until the next manual reconfig
 
   \DIFadd{This should typically be a short alphanumeric string. The current use of this value is
   to optionally target }\texttt{\DIFadd{.contentVisibility}} \DIFadd{files to specific instances of OpenCore,
-  as explained in the }\hyperref[bootalgorithm]{Boot Algorithm} \DIFadd{section}\DIFaddend .
+  as explained in the }\hyperref[bootalgorithm]{Boot Algorithm} \DIFadd{section.
+}
 
 \item
-  \texttt{LauncherOption}\\
+  \DIFaddend \texttt{LauncherOption}\\
   \textbf{Type}: \texttt{plist\ string}\\
   \textbf{Failsafe}: \texttt{Disabled}\\
   \textbf{Description}: Register the launcher option in the firmware preferences for persistence.
@@ -8428,7 +8428,7 @@ for additional options.
 
   \emph{Note}: This option depends on the \href{https://github.com/acidanthera/OpenCorePkg/blob/master/Include/Acidanthera/Protocol/OcForceResolution.h}{\texttt{OC\_FORCE\_RESOLUTION\_PROTOCOL}}
   protocol being present. This protocol is currently only supported by \texttt{OpenDuetPkg}. The
-  \texttt{OpenDuetPkg} implementation currently only supports Intel iGPUs.
+  \texttt{OpenDuetPkg} implementation currently only supports Intel iGPUs \DIFaddbegin \DIFadd{and certain ATI GPUs}\DIFaddend .
 
 \item
   \texttt{ClearScreenOnModeSwitch}\\

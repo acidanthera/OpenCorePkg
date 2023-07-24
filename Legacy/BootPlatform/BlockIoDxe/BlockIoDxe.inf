@@ -1,0 +1,58 @@
+## @file
+# BIOS Block IO module.
+#
+# This is the UEFI driver to thunk legacy BIOS int13 interface into UEFI block IO interface.
+# Once connected it installs EfiBlockIoProtocol on top of legacy BIOS int13.
+#
+# Copyright (c) 1999 - 2014, Intel Corporation. All rights reserved.<BR>
+#
+# SPDX-License-Identifier: BSD-2-Clause-Patent
+#
+##
+
+[Defines]
+  INF_VERSION                    = 0x00010005
+  BASE_NAME                      = BlockIoDxe
+  MODULE_UNI_FILE                = BlockIoDxe.uni
+  FILE_GUID                      = 4495E47E-42A9-4007-8c17-B6664F909D04
+  MODULE_TYPE                    = UEFI_DRIVER
+  VERSION_STRING                 = 1.0
+
+  ENTRY_POINT                    = BiosBlockIoDriverEntryPoint
+
+[Sources]
+  BiosBlkIo.h
+  Edd.h
+  BiosBlkIo.c
+  BiosInt13.c
+  ComponentName.c
+  LegacyBiosThunk.c
+
+[LibraryClasses]
+  UefiDriverEntryPoint
+  DebugLib
+  BaseMemoryLib
+  UefiBootServicesTableLib
+  UefiLib
+  DevicePathLib
+  MemoryAllocationLib
+
+[Protocols]
+  gEfiBlockIoProtocolGuid    ## BY_START
+  gEfiDevicePathProtocolGuid ## BY_START
+  gEfiDevicePathProtocolGuid ## TO_START
+  gEfiPciIoProtocolGuid      ## TO_START
+  gEfiLegacy8259ProtocolGuid ## TO_START
+
+[Guids]
+  gEfiLegacyBiosGuid ## PRODUCES            ## UNDEFINED
+  gBlockIoVendorGuid ## SOMETIMES_CONSUMES  ## UNDEFINED
+
+[Packages]
+  MdePkg/MdePkg.dec
+  OpenCorePkg/OpenCorePkg.dec
+  OpenCorePkg/OpenDuetPkg.dec
+  OvmfPkg/OvmfPkg.dec
+
+[UserExtensions.TianoCore."ExtraFiles"]
+  BlockIoDxeExtra.uni

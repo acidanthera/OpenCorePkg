@@ -1,0 +1,17 @@
+// /** @file
+// BIOS Block IO module.
+//
+// This is the UEFI driver to thunk legacy BIOS int13 interface into UEFI block IO interface.
+// Once connected it installs EfiBlockIoProtocol on top of legacy BIOS int13.
+//
+// Copyright (c) 1999 - 2018, Intel Corporation. All rights reserved.<BR>
+//
+// SPDX-License-Identifier: BSD-2-Clause-Patent
+//
+// **/
+
+
+#string STR_MODULE_ABSTRACT             #language en-US "BIOS Block IO module"
+
+#string STR_MODULE_DESCRIPTION          #language en-US "This is the UEFI driver to thunk legacy BIOS int13 interface into the UEFI block IO interface. Once connected, it installs EfiBlockIoProtocol on top of legacy BIOS int13."
+
