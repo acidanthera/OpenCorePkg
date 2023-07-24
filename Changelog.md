@@ -11,6 +11,7 @@ OpenCore Changelog
 - Fixed PM timer detection on non-Intel chipsets when booted through OpenDuet
 - Fixed `FadtEnableReset` on NVIDIA nForce chipset platforms
 - Added BlockIoDxe alternative OpenDuet variant
+- Added support for ATI cards when using `ForceResolution` option
 
 #### v0.9.3
 - Added `--force-codec` option to AudioDxe, thx @xCuri0
