@@ -45,6 +45,7 @@
   DmgBootSupport.c
   HotKeySupport.c
   ImageLoader.c
+  LegacyBootSupport.c
   PolicyManagement.c
   OcBootManagementLib.c
 

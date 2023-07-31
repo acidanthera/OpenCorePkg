@@ -125,6 +125,19 @@ typedef enum {
 } INTERNAL_ENTRY_VISIBILITY;
 
 EFI_STATUS
+InternalLoadAppleLegacyInterface (
+  IN  EFI_HANDLE                ParentImageHandle,
+  IN  EFI_DEVICE_PATH_PROTOCOL  *HdDevicePath,
+  OUT EFI_HANDLE                *ImageHandle
+  );
+
+BOOLEAN
+InternalDiskContainsBootcode (
+  IN EFI_HANDLE  DiskHandle,
+  IN BOOLEAN     UseBlockIo2
+  );
+
+EFI_STATUS
 InternalCheckScanPolicy (
   IN  EFI_HANDLE  Handle,
   IN  UINT32      Policy,
