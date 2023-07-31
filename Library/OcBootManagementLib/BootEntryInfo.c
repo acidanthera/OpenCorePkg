@@ -890,3 +890,29 @@ InternalDescribeBootEntry (
 
   return EFI_SUCCESS;
 }
+
+EFI_STATUS
+InternalDescribeLegacyBootEntry (
+  IN     OC_BOOT_CONTEXT    *BootContext,
+  IN     OC_LEGACY_OS_TYPE  LegacyOsType,
+  IN OUT OC_BOOT_ENTRY      *BootEntry
+  )
+{
+  ASSERT (LegacyOsType != OcLegacyOsTypeNone);
+
+  //
+  // Name is based on previously detected boot sector type.
+  //
+  switch (LegacyOsType) {
+    case OcLegacyOsTypeWindowsBootmgr:
+    case OcLegacyOsTypeWindowsNtldr:
+      BootEntry->Type = OC_BOOT_WINDOWS;
+      BootEntry->Name = AllocateCopyPool (sizeof (L"Windows (legacy)"), L"Windows (legacy)");
+      break;
+
+    default:
+      break;
+  }
+
+  return EFI_SUCCESS;
+}

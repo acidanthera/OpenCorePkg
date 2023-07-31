@@ -1596,6 +1596,92 @@ AddBootEntryFromBootOption (
 }
 
 /**
+  Create bootable entries from legacy boot partitons.
+
+  @param[in,out] BootContext   Context of filesystems.
+  @param[in,out] FileSystem    Filesystem to scan for recovery.
+
+  @retval EFI_SUCCESS on success.
+**/
+STATIC
+EFI_STATUS
+AddBootEntryFromLegacyPartition (
+  IN OUT OC_BOOT_CONTEXT     *BootContext,
+  IN OUT OC_BOOT_FILESYSTEM  *FileSystem
+  )
+{
+  EFI_STATUS                Status;
+  EFI_DEVICE_PATH_PROTOCOL  *DevicePath;
+  OC_BOOT_ENTRY             *BootEntry;
+
+  //
+  // Only support legacy filesystems.
+  //
+  if (FileSystem->LegacyOsType == OcLegacyOsTypeNone) {
+    return EFI_UNSUPPORTED;
+  }
+
+  Status = gBS->HandleProtocol (
+                  FileSystem->Handle,
+                  &gEfiDevicePathProtocolGuid,
+                  (VOID **)&DevicePath
+                  );
+  if (EFI_ERROR (Status)) {
+    return EFI_UNSUPPORTED;
+  }
+
+  DebugPrintDevicePath (DEBUG_INFO, "OCB: Adding legacy entry for disk", DevicePath);
+
+  //
+  // Allocate, initialise, and describe boot entry.
+  //
+  BootEntry = AllocateZeroPool (sizeof (*BootEntry));
+  if (BootEntry == NULL) {
+    return EFI_OUT_OF_RESOURCES;
+  }
+
+  BootEntry->IsExternal   = FileSystem->External;
+  BootEntry->DevicePath   = DevicePath;
+  BootEntry->LegacyOsType = FileSystem->LegacyOsType;
+  BootEntry->LaunchInText = TRUE;
+
+  //
+  // Load options are set based on type of disk.
+  // Internal disk = "HD"
+  // External disk = "USB"
+  // Optical disk  = "CD"
+  //
+  // TODO: Support optical media.
+  //
+  if (BootEntry->IsExternal) {
+    BootEntry->LoadOptionsSize = L_STR_SIZE ("USB");
+    BootEntry->LoadOptions     = AllocateCopyPool (L_STR_SIZE ("USB"), "USB");
+  } else {
+    BootEntry->LoadOptionsSize = L_STR_SIZE ("HD");
+    BootEntry->LoadOptions     = AllocateCopyPool (L_STR_SIZE ("HD"), "HD");
+  }
+
+  if (BootEntry->LoadOptions == NULL) {
+    FreePool (BootEntry);
+    return EFI_OUT_OF_RESOURCES;
+  }
+
+  Status = InternalDescribeLegacyBootEntry (BootContext, FileSystem->LegacyOsType, BootEntry);
+  if (EFI_ERROR (Status)) {
+    FreePool (BootEntry);
+    return Status;
+  }
+
+  RegisterBootOption (
+    BootContext,
+    FileSystem,
+    BootEntry
+    );
+
+  return EFI_SUCCESS;
+}
+
+/**
   Allocate a new filesystem entry in boot entries
   in case it can be used according to current ScanPolicy.
 
@@ -1608,9 +1694,10 @@ AddBootEntryFromBootOption (
 STATIC
 EFI_STATUS
 AddFileSystemEntry (
-  IN OUT OC_BOOT_CONTEXT  *BootContext,
-  IN     EFI_HANDLE       FileSystemHandle,
-  OUT OC_BOOT_FILESYSTEM  **FileSystemEntry  OPTIONAL
+  IN OUT OC_BOOT_CONTEXT    *BootContext,
+  IN     EFI_HANDLE         FileSystemHandle,
+  IN     OC_LEGACY_OS_TYPE  LegacyOsType,
+  OUT OC_BOOT_FILESYSTEM    **FileSystemEntry  OPTIONAL
   )
 {
   EFI_STATUS                Status;
@@ -1624,6 +1711,7 @@ AddFileSystemEntry (
   Status = InternalCheckScanPolicy (
              FileSystemHandle,
              BootContext->PickerContext->ScanPolicy,
+             LegacyOsType != OcLegacyOsTypeNone,
              &IsExternal
              );
 
@@ -1644,10 +1732,11 @@ AddFileSystemEntry (
 
   DEBUG ((
     DEBUG_INFO,
-    "OCB: Adding fs %p (E:%d|L:%d|P:%r) - %s\n",
+    "OCB: Adding fs %p (E:%d|L:%d|B:%d|P:%r) - %s\n",
     FileSystemHandle,
     IsExternal,
     LoaderFs,
+    LegacyOsType,
     Status,
     OC_HUMAN_STRING (TextDevicePath)
     ));
@@ -1672,6 +1761,7 @@ AddFileSystemEntry (
   Entry->RecoveryFs      = NULL;
   Entry->External        = IsExternal;
   Entry->LoaderFs        = LoaderFs;
+  Entry->LegacyOsType    = LegacyOsType;
   Entry->HasSelfRecovery = FALSE;
   InsertTailList (&BootContext->FileSystems, &Entry->Link);
   ++BootContext->FileSystemCount;
@@ -1815,7 +1905,7 @@ InternalFileSystemForHandle (
     return NULL;
   }
 
-  Status = AddFileSystemEntry (BootContext, FileSystemHandle, &FileSystem);
+  Status = AddFileSystemEntry (BootContext, FileSystemHandle, FALSE, &FileSystem);
   if (!EFI_ERROR (Status)) {
     return FileSystem;
   }
@@ -1830,11 +1920,12 @@ BuildFileSystemList (
   IN BOOLEAN            Empty
   )
 {
-  OC_BOOT_CONTEXT  *BootContext;
-  EFI_STATUS       Status;
-  UINTN            NoHandles;
-  EFI_HANDLE       *Handles;
-  UINTN            Index;
+  OC_BOOT_CONTEXT    *BootContext;
+  EFI_STATUS         Status;
+  OC_LEGACY_OS_TYPE  LegacyOsType;
+  UINTN              NoHandles;
+  EFI_HANDLE         *Handles;
+  UINTN              Index;
 
   BootContext = AllocatePool (sizeof (*BootContext));
   if (BootContext == NULL) {
@@ -1857,6 +1948,9 @@ BuildFileSystemList (
     return BootContext;
   }
 
+  //
+  // Add readable filesystems.
+  //
   Status = gBS->LocateHandleBuffer (
                   ByProtocol,
                   &gEfiSimpleFileSystemProtocolGuid,
@@ -1872,11 +1966,43 @@ BuildFileSystemList (
     AddFileSystemEntry (
       BootContext,
       Handles[Index],
+      FALSE,
       NULL
       );
   }
 
   FreePool (Handles);
+
+  //
+  // Add legacy partitions with valid boot sectors if on a supported legacy platform.
+  //
+  if (Context->LegacyBootType != OcLegacyBootTypeNone) {
+    Status = gBS->LocateHandleBuffer (
+                    ByProtocol,
+                    &gEfiBlockIoProtocolGuid,
+                    NULL,
+                    &NoHandles,
+                    &Handles
+                    );
+    if (EFI_ERROR (Status)) {
+      return BootContext;
+    }
+
+    for (Index = 0; Index < NoHandles; ++Index) {
+      LegacyOsType = InternalGetDiskLegacyOsType (Handles[Index], FALSE);
+      if (LegacyOsType == OcLegacyOsTypeNone) {
+        continue;
+      }
+
+      AddFileSystemEntry (
+        BootContext,
+        Handles[Index],
+        LegacyOsType,
+        NULL
+        );
+    }
+  }
+
   return BootContext;
 }
 
@@ -2079,28 +2205,40 @@ OcScanForBootEntries (
   {
     FileSystem = BASE_CR (Link, OC_BOOT_FILESYSTEM, Link);
 
-    PartitionEntry                  = OcGetGptPartitionEntry (FileSystem->Handle);
-    IsDefaultEntryProtocolPartition = (
-                                         (DefaultEntryId != NULL)
-                                      && CompareGuid (
-                                           &DefaultEntryPartuuid,
-                                           (PartitionEntry == NULL) ? &gEfiPartTypeUnusedGuid : &PartitionEntry->UniquePartitionGUID
-                                           )
-                                         );
+    if (FileSystem->LegacyOsType != OcLegacyOsTypeNone) {
+      //
+      // Process legacy boot partition.
+      //
+      if (IsListEmpty (&FileSystem->BootEntries)) {
+        AddBootEntryFromLegacyPartition (
+          BootContext,
+          FileSystem
+          );
+      }
+    } else {
+      PartitionEntry                  = OcGetGptPartitionEntry (FileSystem->Handle);
+      IsDefaultEntryProtocolPartition = (
+                                           (DefaultEntryId != NULL)
+                                        && CompareGuid (
+                                             &DefaultEntryPartuuid,
+                                             (PartitionEntry == NULL) ? &gEfiPartTypeUnusedGuid : &PartitionEntry->UniquePartitionGUID
+                                             )
+                                           );
 
-    //
-    // No entries, or only entry pre-created from boot entry protocol,
-    // so process this directory with Apple Bless.
-    //
-    if (IsDefaultEntryProtocolPartition || IsListEmpty (&FileSystem->BootEntries)) {
-      AddBootEntryFromBless (
-        BootContext,
-        FileSystem,
-        gAppleBootPolicyPredefinedPaths,
-        gAppleBootPolicyNumPredefinedPaths,
-        FALSE,
-        FALSE
-        );
+      //
+      // No entries, or only entry pre-created from boot entry protocol,
+      // so process this directory with Apple Bless.
+      //
+      if (IsDefaultEntryProtocolPartition || IsListEmpty (&FileSystem->BootEntries)) {
+        AddBootEntryFromBless (
+          BootContext,
+          FileSystem,
+          gAppleBootPolicyPredefinedPaths,
+          gAppleBootPolicyNumPredefinedPaths,
+          FALSE,
+          FALSE
+          );
+      }
     }
 
     //

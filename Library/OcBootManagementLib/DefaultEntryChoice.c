@@ -1577,14 +1577,22 @@ InternalLoadBootEntry (
 
   DEBUG_CODE_END ();
 
-  Status = gBS->LoadImage (
-                  FALSE,
-                  ParentHandle,
-                  DevicePath,
-                  EntryData,
-                  EntryDataSize,
-                  EntryHandle
-                  );
+  if (BootEntry->LegacyOsType != OcLegacyOsTypeNone) {
+    Status = InternalLoadAppleLegacyInterface (
+               ParentHandle,
+               DevicePath,
+               EntryHandle
+               );
+  } else {
+    Status = gBS->LoadImage (
+                    FALSE,
+                    ParentHandle,
+                    DevicePath,
+                    EntryData,
+                    EntryDataSize,
+                    EntryHandle
+                    );
+  }
 
   if (EntryData != NULL) {
     FreePool (EntryData);

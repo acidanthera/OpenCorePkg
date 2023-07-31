@@ -56,7 +56,7 @@ CheckLegacySignature (
 
   Offset = 0;
 
-  return FindPattern ((CONST UINT8 *)SignatureStr, NULL, (CONST UINT32) AsciiStrLen (SignatureStr), Buffer, BufferSize, &Offset);
+  return FindPattern ((CONST UINT8 *)SignatureStr, NULL, (CONST UINT32)AsciiStrLen (SignatureStr), Buffer, BufferSize, &Offset);
 }
 
 STATIC
@@ -236,16 +236,16 @@ InternalLoadAppleLegacyInterface (
   return Status;
 }
 
-BOOLEAN
-InternalDiskContainsBootcode (
-  IN EFI_HANDLE  DiskHandle,
-  IN BOOLEAN     UseBlockIo2
+OC_LEGACY_OS_TYPE
+InternalGetDiskLegacyOsType (
+  IN  EFI_HANDLE  DiskHandle,
+  IN  BOOLEAN     UseBlockIo2
   )
 {
-  EFI_STATUS  Status;
-  UINT8       *Buffer;
-  UINT32      BufferSize;
-  BOOLEAN     BootcodeResult;
+  EFI_STATUS         Status;
+  UINT8              *Buffer;
+  UINT32             BufferSize;
+  OC_LEGACY_OS_TYPE  LegacyOsType;
 
   OC_DISK_CONTEXT  DiskContext;
 
@@ -253,7 +253,7 @@ InternalDiskContainsBootcode (
 
   Status = OcDiskInitializeContext (&DiskContext, DiskHandle, UseBlockIo2);
   if (EFI_ERROR (Status)) {
-    return FALSE;
+    return OcLegacyOsTypeNone;
   }
 
   //
@@ -263,7 +263,7 @@ InternalDiskContainsBootcode (
   Buffer     = AllocatePool (BufferSize);
   if (Buffer == NULL) {
     DEBUG ((DEBUG_INFO, "OCBP: Buffer allocation error\n"));
-    return FALSE;
+    return OcLegacyOsTypeNone;
   }
 
   Status = OcDiskRead (
@@ -275,23 +275,21 @@ InternalDiskContainsBootcode (
 
   if (EFI_ERROR (Status)) {
     FreePool (Buffer);
-    return FALSE;
+    return OcLegacyOsTypeNone;
   }
 
   //
   // Validate sector contents and check for known signatures
   // indicating the partition is bootable.
   //
-  BootcodeResult = FALSE;
+  LegacyOsType = OcLegacyOsTypeNone;
   if (CheckLegacySignature ("BOOTMGR", Buffer, BufferSize)) {
-    DEBUG ((DEBUG_INFO, "OCB: Found Windows BOOTMGR\n"));
-    BootcodeResult = TRUE;
+    LegacyOsType = OcLegacyOsTypeWindowsBootmgr;
   } else if (CheckLegacySignature ("NTLDR", Buffer, BufferSize)) {
-    DEBUG ((DEBUG_INFO, "OCB: Found Windows NTLDR\n"));
-    BootcodeResult = TRUE;
+    LegacyOsType = OcLegacyOsTypeWindowsNtldr;
   }
 
   FreePool (Buffer);
 
-  return BootcodeResult;
+  return LegacyOsType;
 }

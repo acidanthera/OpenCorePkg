@@ -939,6 +939,14 @@ OcMiscBoot (
   Context->InstanceIdentifier   = AsciiInstanceIdentifier;
   Context->BlacklistAppleUpdate = Config->Misc.Security.BlacklistAppleUpdate;
 
+  //
+  // Apple legacy boot interface is only available on Apple platforms.
+  //
+  Context->LegacyBootType = OcLegacyBootTypeNone;
+  if (OcStriCmp (L"Apple", gST->FirmwareVendor) == 0) {
+    Context->LegacyBootType = OcLegacyBootTypeApple;
+  }
+
   if ((Config->Misc.Security.ExposeSensitiveData & OCS_EXPOSE_VERSION_UI) != 0) {
     Context->TitleSuffix = OcMiscGetVersionString ();
   }
