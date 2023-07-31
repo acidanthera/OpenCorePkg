@@ -226,7 +226,7 @@ InternalPartitionGetDiskHandle (
 
   @retval Device Path or NULL
 **/
-EFI_DEVICE_PATH_PROTOCOL*
+EFI_DEVICE_PATH_PROTOCOL *
 OcDiskGetDevicePath (
   IN EFI_DEVICE_PATH_PROTOCOL  *HdDevicePath
   )
@@ -277,7 +277,7 @@ OcPartitionGetDiskHandle (
   IN EFI_DEVICE_PATH_PROTOCOL  *HdDevicePath
   )
 {
-  BOOLEAN                      Dummy;
+  BOOLEAN  Dummy;
 
   ASSERT (HdDevicePath != NULL);
 

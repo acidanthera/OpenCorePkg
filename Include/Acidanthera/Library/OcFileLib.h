@@ -489,7 +489,7 @@ OcOpenFileByDevicePath (
 
   @retval Device Path or NULL
 **/
-EFI_DEVICE_PATH_PROTOCOL*
+EFI_DEVICE_PATH_PROTOCOL *
 OcDiskGetDevicePath (
   IN EFI_DEVICE_PATH_PROTOCOL  *HdDevicePath
   );
