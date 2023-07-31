@@ -49,7 +49,7 @@ BOOLEAN
 CheckLegacySignature (
   IN CONST CHAR8  *SignatureStr,
   IN UINT8        *Buffer,
-  IN UINTN        BufferSize
+  IN UINT32       BufferSize
   )
 {
   UINT32  Offset;
@@ -244,7 +244,7 @@ InternalDiskContainsBootcode (
 {
   EFI_STATUS  Status;
   UINT8       *Buffer;
-  UINTN       BufferSize;
+  UINT32      BufferSize;
   BOOLEAN     BootcodeResult;
 
   OC_DISK_CONTEXT  DiskContext;
