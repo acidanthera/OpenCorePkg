@@ -56,7 +56,7 @@ CheckLegacySignature (
 
   Offset = 0;
 
-  return FindPattern ((CONST UINT8 *)SignatureStr, NULL, AsciiStrLen (SignatureStr), Buffer, BufferSize, &Offset);
+  return FindPattern ((CONST UINT8 *)SignatureStr, NULL, (CONST UINT32) AsciiStrLen (SignatureStr), Buffer, BufferSize, &Offset);
 }
 
 STATIC
