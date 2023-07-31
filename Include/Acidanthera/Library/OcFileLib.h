@@ -483,6 +483,18 @@ OcOpenFileByDevicePath (
   );
 
 /**
+  Retrieve the disk's Device Path from a partition's Device Path.
+
+  @param[in] HdDevicePath  The Device Path of the partition.
+
+  @retval Device Path or NULL
+**/
+EFI_DEVICE_PATH_PROTOCOL*
+OcDiskGetDevicePath (
+  IN EFI_DEVICE_PATH_PROTOCOL  *HdDevicePath
+  );
+
+/**
   Retrieve the disk's device handle from a partition's Device Path.
 
   @param[in] HdDevicePath  The Device Path of the partition.
