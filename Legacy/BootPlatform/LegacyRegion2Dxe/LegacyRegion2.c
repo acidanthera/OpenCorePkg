@@ -733,6 +733,7 @@ DetectChipset (
       mPamPciFunc     = 6;
       break;
 
+    case 0x0a8010de:
     case 0x0a8210de:
     case 0x0a8610de:
       /// NForce MCP79 and similar (PAM 0xC0-0xC7).
