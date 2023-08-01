@@ -40,7 +40,7 @@ jobs:
 
       - name: CI Bootstrap
         run: |
-          src=$(/usr/bin/curl -Lfs https://raw.githubusercontent.com/acidanthera/ocbuild/test-xcode-14/ci-bootstrap.sh) && eval "$src" || exit 1
+          src=$(/usr/bin/curl -LfsS https://raw.githubusercontent.com/acidanthera/ocbuild/master/ci-bootstrap.sh) && eval "$src" || exit 1
 
       - run: ./build_duet.tool
       - run: ./build_oc.tool
@@ -164,7 +164,7 @@ jobs:
 
       - name: CI Bootstrap
         run: |
-          src=$(curl -Lfs https://raw.githubusercontent.com/acidanthera/ocbuild/test-xcode-14/ci-bootstrap.sh) && eval "$src" || exit 1
+          src=$(curl - https://raw.githubusercontent.com/acidanthera/ocbuild/master/ci-bootstrap.sh) && eval "$src" || exit 1
 
       - run: ./build_duet.tool
       - run: ./build_oc.tool
