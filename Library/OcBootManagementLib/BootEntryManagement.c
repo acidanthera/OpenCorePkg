@@ -1640,8 +1640,13 @@ AddBootEntryFromLegacyPartition (
     return EFI_OUT_OF_RESOURCES;
   }
 
+  BootEntry->DevicePath = DuplicateDevicePath (DevicePath);
+  if (BootEntry->DevicePath == NULL) {
+    FreePool (BootEntry);
+    return EFI_OUT_OF_RESOURCES;
+  }
+
   BootEntry->IsExternal   = FileSystem->External;
-  BootEntry->DevicePath   = DevicePath;
   BootEntry->LegacyOsType = FileSystem->LegacyOsType;
   BootEntry->LaunchInText = TRUE;
 
@@ -2001,6 +2006,8 @@ BuildFileSystemList (
         NULL
         );
     }
+
+    FreePool (Handles);
   }
 
   return BootContext;
