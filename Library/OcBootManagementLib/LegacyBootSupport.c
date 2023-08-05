@@ -47,16 +47,15 @@ static CONST EFI_DEVICE_PATH_PROTOCOL  *AppleLegacyInterfaceMediaDevicePathPath 
 STATIC
 BOOLEAN
 CheckLegacySignature (
-  IN CONST CHAR8  *SignatureStr,
-  IN UINT8        *Buffer,
-  IN UINT32       BufferSize
+  IN CONST CHAR8         *SignatureStr,
+  IN MASTER_BOOT_RECORD  *Pbr
   )
 {
   UINT32  Offset;
 
   Offset = 0;
 
-  return FindPattern ((CONST UINT8 *)SignatureStr, NULL, (CONST UINT32)AsciiStrLen (SignatureStr), Buffer, BufferSize, &Offset);
+  return FindPattern ((CONST UINT8 *)SignatureStr, NULL, (CONST UINT32)AsciiStrLen (SignatureStr), (CONST UINT8 *)Pbr, sizeof (*Pbr), &Offset);
 }
 
 STATIC
@@ -317,9 +316,9 @@ InternalGetPartitionLegacyOsType (
   // indicating the partition is bootable.
   //
   LegacyOsType = OcLegacyOsTypeNone;
-  if (CheckLegacySignature ("BOOTMGR", Pbr, MBR_SIZE)) {
+  if (CheckLegacySignature ("BOOTMGR", Pbr)) {
     LegacyOsType = OcLegacyOsTypeWindowsBootmgr;
-  } else if (CheckLegacySignature ("NTLDR", Pbr, MBR_SIZE)) {
+  } else if (CheckLegacySignature ("NTLDR", Pbr)) {
     LegacyOsType = OcLegacyOsTypeWindowsNtldr;
   }
 
