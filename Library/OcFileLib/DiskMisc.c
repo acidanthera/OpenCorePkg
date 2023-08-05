@@ -173,8 +173,9 @@ InternalDebugPrintPartitionEntry (
 
 STATIC
 EFI_HANDLE
-InternalPartitionGetDiskHandle (
+InternalGetDiskHandle (
   IN  EFI_DEVICE_PATH_PROTOCOL  *HdDevicePath,
+  IN  BOOLEAN                   IsPartitionPath,
   OUT BOOLEAN                   *HasBlockIo2
   )
 {
@@ -188,7 +189,12 @@ InternalPartitionGetDiskHandle (
   ASSERT (HdDevicePath != NULL);
   ASSERT (HasBlockIo2 != NULL);
 
-  DiskPath = OcDiskGetDevicePath (HdDevicePath);
+  if (IsPartitionPath) {
+    DiskPath = OcDiskGetDevicePath (HdDevicePath);
+  } else {
+    DiskPath = HdDevicePath;
+  }
+
   TempPath = DiskPath;
   Status   = gBS->LocateDevicePath (
                     &gEfiBlockIo2ProtocolGuid,
@@ -216,7 +222,9 @@ InternalPartitionGetDiskHandle (
     DiskHandle = NULL;
   }
 
-  FreePool (DiskPath);
+  if (IsPartitionPath && (DiskPath != NULL)) {
+    FreePool (DiskPath);
+  }
 
   return DiskHandle;
 }
@@ -283,8 +291,9 @@ OcPartitionGetDiskHandle (
 
   ASSERT (HdDevicePath != NULL);
 
-  return InternalPartitionGetDiskHandle (
+  return InternalGetDiskHandle (
            HdDevicePath,
+           TRUE,
            &Dummy
            );
 }
@@ -611,8 +620,9 @@ OcGetGptPartitionEntry (
     return NULL;
   }
 
-  DiskHandle = InternalPartitionGetDiskHandle (
+  DiskHandle = InternalGetDiskHandle (
                  FsDevicePath,
+                 TRUE,
                  &HasBlockIo2
                  );
   if (DiskHandle == NULL) {
@@ -721,4 +731,104 @@ OcGetDiskMbrTable (
   }
 
   return Mbr;
+}
+
+EFI_DEVICE_PATH_PROTOCOL *
+OcDiskFindActiveMbrPartitionPath (
+  IN  EFI_DEVICE_PATH_PROTOCOL  *DiskDevicePath,
+  OUT UINTN                     *PartitionDevicePathSize
+  )
+{
+  EFI_STATUS  Status;
+  EFI_HANDLE  DiskHandle;
+  BOOLEAN     HasBlockIo2;
+  UINTN       Index;
+  INT32       ActivePartition;
+
+  UINTN                     NoHandles;
+  EFI_HANDLE                *Handles;
+  EFI_DEVICE_PATH_PROTOCOL  *DevicePath;
+  HARDDRIVE_DEVICE_PATH     *HdNode;
+  MASTER_BOOT_RECORD        *Mbr;
+
+  ASSERT (DiskDevicePath != NULL);
+  ASSERT (PartitionDevicePathSize != NULL);
+
+  //
+  // Get MBR partition table from disk.
+  //
+  DiskHandle = InternalGetDiskHandle (
+                 DiskDevicePath,
+                 FALSE,
+                 &HasBlockIo2
+                 );
+  if (DiskHandle == NULL) {
+    return NULL;
+  }
+
+  Mbr = OcGetDiskMbrTable (
+          DiskHandle,
+          HasBlockIo2
+          );
+  if (Mbr == NULL) {
+    return NULL;
+  }
+
+  //
+  // Determine active partition based on first one with active partition set.
+  // Multiple active partitions should not occur but possible.
+  //
+  ActivePartition = -1;
+  for (Index = 0; Index < MAX_MBR_PARTITIONS; Index++) {
+    if (Mbr->Partition[Index].BootIndicator == 0x80) {
+      ActivePartition = (INT32)Index;
+    }
+  }
+
+  //
+  // No active partitions present.
+  //
+  if (ActivePartition == -1) {
+    DEBUG ((DEBUG_INFO, "OCPI: No active partitions found in MBR\n"));
+    FreePool (Mbr);
+    return NULL;
+  }
+
+  Status = gBS->LocateHandleBuffer (
+                  ByProtocol,
+                  &gEfiBlockIoProtocolGuid,
+                  NULL,
+                  &NoHandles,
+                  &Handles
+                  );
+  if (EFI_ERROR (Status)) {
+    FreePool (Mbr);
+    return NULL;
+  }
+
+  for (Index = 0; Index < NoHandles; Index++) {
+    DevicePath = DevicePathFromHandle (Handles[Index]);
+    if (DevicePath == NULL) {
+      continue;
+    }
+
+    if (CompareMem (DevicePath, DiskDevicePath, GetDevicePathSize (DiskDevicePath) - END_DEVICE_PATH_LENGTH) == 0) {
+      HdNode = (HARDDRIVE_DEVICE_PATH *)FindDevicePathNodeWithType (
+                                          DevicePath,
+                                          MEDIA_DEVICE_PATH,
+                                          MEDIA_HARDDRIVE_DP
+                                          );
+      if (HdNode != NULL) {
+        if (HdNode->PartitionStart == *((UINT32 *)Mbr->Partition[ActivePartition].StartingLBA)) {
+          DebugPrintDevicePath (DEBUG_INFO, "OCPI: Got active MBR partition device path", DevicePath);
+          FreePool (Mbr);
+          *PartitionDevicePathSize = GetDevicePathSize (DevicePath);
+          return DevicePath;
+        }
+      }
+    }
+  }
+
+  FreePool (Mbr);
+  return NULL;
 }

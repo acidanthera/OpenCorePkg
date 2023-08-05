@@ -618,6 +618,12 @@ OcGetDiskMbrTable (
   IN BOOLEAN     UseBlockIo2
   );
 
+EFI_DEVICE_PATH_PROTOCOL *
+OcDiskFindActiveMbrPartitionPath (
+  IN  EFI_DEVICE_PATH_PROTOCOL  *DiskDevicePath,
+  OUT UINTN                     *PartitionDevicePathSize
+  );
+
 /**
   Creates a device path for a firmware file.
 
