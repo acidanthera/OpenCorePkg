@@ -19,6 +19,8 @@
 
 #include <Guid/FileInfo.h>
 
+#include <IndustryStandard/Mbr.h>
+
 #include <Protocol/SimpleFileSystem.h>
 #include <Protocol/DevicePath.h>
 #include <Protocol/BlockIo.h>
@@ -600,6 +602,20 @@ OcGetDiskPartitions (
 CONST EFI_PARTITION_ENTRY *
 OcGetGptPartitionEntry (
   IN EFI_HANDLE  FsHandle
+  );
+
+/**
+  Retrieve the disk MBR table, if applicable.
+
+  @param[in]  DiskHandle   Disk device handle to retrive MBR partition table from.
+  @param[in]  UseBlockIo2  Use 2nd revision of Block I/O if available.
+
+  @retval partition entry list or NULL.
+**/
+MASTER_BOOT_RECORD *
+OcGetDiskMbrTable (
+  IN EFI_HANDLE  DiskHandle,
+  IN BOOLEAN     UseBlockIo2
   );
 
 /**

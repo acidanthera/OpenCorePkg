@@ -1994,7 +1994,7 @@ BuildFileSystemList (
     }
 
     for (Index = 0; Index < NoHandles; ++Index) {
-      LegacyOsType = InternalGetDiskLegacyOsType (Handles[Index], FALSE);
+      LegacyOsType = InternalGetPartitionLegacyOsType (Handles[Index]);
       if (LegacyOsType == OcLegacyOsTypeNone) {
         continue;
       }

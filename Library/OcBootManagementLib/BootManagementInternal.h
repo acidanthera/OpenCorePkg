@@ -132,9 +132,8 @@ InternalLoadAppleLegacyInterface (
   );
 
 OC_LEGACY_OS_TYPE
-InternalGetDiskLegacyOsType (
-  IN  EFI_HANDLE  DiskHandle,
-  IN  BOOLEAN     UseBlockIo2
+InternalGetPartitionLegacyOsType (
+  IN  EFI_HANDLE  PartitionHandle
   );
 
 EFI_STATUS

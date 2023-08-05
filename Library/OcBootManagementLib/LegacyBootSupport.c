@@ -14,6 +14,8 @@
 
 #include "BootManagementInternal.h"
 
+#include <IndustryStandard/Mbr.h>
+
 #include <Protocol/DevicePath.h>
 
 #include <Library/BaseLib.h>
@@ -28,8 +30,6 @@
 #include <Library/UefiBootServicesTableLib.h>
 #include <Library/UefiLib.h>
 #include <Library/UefiRuntimeServicesTableLib.h>
-
-#define MBR_SECTOR_SIZE  512
 
 //
 // PIWG firmware media device path for Apple legacy interface.
@@ -237,44 +237,78 @@ InternalLoadAppleLegacyInterface (
 }
 
 OC_LEGACY_OS_TYPE
-InternalGetDiskLegacyOsType (
-  IN  EFI_HANDLE  DiskHandle,
-  IN  BOOLEAN     UseBlockIo2
+InternalGetPartitionLegacyOsType (
+  IN  EFI_HANDLE  PartitionHandle
   )
 {
-  EFI_STATUS         Status;
-  UINT8              *Buffer;
-  UINT32             BufferSize;
-  OC_LEGACY_OS_TYPE  LegacyOsType;
+  EFI_STATUS          Status;
+  MASTER_BOOT_RECORD  *Mbr;
+  MASTER_BOOT_RECORD  *Pbr;
+  OC_LEGACY_OS_TYPE   LegacyOsType;
 
-  OC_DISK_CONTEXT  DiskContext;
+  EFI_DEVICE_PATH_PROTOCOL  *DevicePath;
+  OC_DISK_CONTEXT           DiskContext;
+  EFI_HANDLE                DiskHandle;
 
-  ASSERT (DiskHandle != NULL);
+  ASSERT (PartitionHandle != NULL);
 
-  Status = OcDiskInitializeContext (&DiskContext, DiskHandle, UseBlockIo2);
+  //
+  // Read MBR of whole disk.
+  //
+  DevicePath = DevicePathFromHandle (PartitionHandle);
+  if (DevicePath == NULL) {
+    return OcLegacyOsTypeNone;
+  }
+
+  DebugPrintDevicePath (DEBUG_INFO, "OCB: Reading MBR of disk", DevicePath);
+
+  DiskHandle = OcPartitionGetDiskHandle (DevicePath);
+  if (DiskHandle == NULL) {
+    return OcLegacyOsTypeNone;
+  }
+
+  Mbr = OcGetDiskMbrTable (DiskHandle, TRUE);
+  if (Mbr == NULL) {
+    DEBUG ((DEBUG_INFO, "OCB: Disk does not contain a valid MBR partition table\n"));
+    return OcLegacyOsTypeNone;
+  }
+
+  FreePool (Mbr);
+
+  //
+  // Retrieve the first sector of the partition.
+  //
+  Status = OcDiskInitializeContext (
+             &DiskContext,
+             PartitionHandle,
+             TRUE
+             );
   if (EFI_ERROR (Status)) {
     return OcLegacyOsTypeNone;
   }
 
-  //
-  // Retrieve the first sector of the disk.
-  //
-  BufferSize = ALIGN_VALUE (MBR_SECTOR_SIZE, DiskContext.BlockSize);
-  Buffer     = AllocatePool (BufferSize);
-  if (Buffer == NULL) {
-    DEBUG ((DEBUG_INFO, "OCBP: Buffer allocation error\n"));
+  Pbr = (MASTER_BOOT_RECORD *)AllocatePool (MBR_SIZE);
+  if (Pbr == NULL) {
+    DEBUG ((DEBUG_INFO, "OCB: Buffer allocation error\n"));
     return OcLegacyOsTypeNone;
   }
 
   Status = OcDiskRead (
              &DiskContext,
              0,
-             BufferSize,
-             Buffer
+             MBR_SIZE,
+             Pbr
              );
-
   if (EFI_ERROR (Status)) {
-    FreePool (Buffer);
+    FreePool (Pbr);
+    return OcLegacyOsTypeNone;
+  }
+
+  //
+  // Validate signature in PBR.
+  //
+  if (Pbr->Signature != MBR_SIGNATURE) {
+    FreePool (Pbr);
     return OcLegacyOsTypeNone;
   }
 
@@ -283,13 +317,13 @@ InternalGetDiskLegacyOsType (
   // indicating the partition is bootable.
   //
   LegacyOsType = OcLegacyOsTypeNone;
-  if (CheckLegacySignature ("BOOTMGR", Buffer, BufferSize)) {
+  if (CheckLegacySignature ("BOOTMGR", Pbr, MBR_SIZE)) {
     LegacyOsType = OcLegacyOsTypeWindowsBootmgr;
-  } else if (CheckLegacySignature ("NTLDR", Buffer, BufferSize)) {
+  } else if (CheckLegacySignature ("NTLDR", Pbr, MBR_SIZE)) {
     LegacyOsType = OcLegacyOsTypeWindowsNtldr;
   }
 
-  FreePool (Buffer);
+  FreePool (Pbr);
 
   return LegacyOsType;
 }

@@ -14,6 +14,8 @@
 
 #include <Guid/Gpt.h>
 
+#include <IndustryStandard/Mbr.h>
+
 #include <Protocol/BlockIo.h>
 #include <Protocol/BlockIo2.h>
 #include <Protocol/DiskIo.h>
@@ -654,4 +656,69 @@ OcGetGptPartitionEntry (
   }
 
   return PartEntry;
+}
+
+MASTER_BOOT_RECORD *
+OcGetDiskMbrTable (
+  IN EFI_HANDLE  DiskHandle,
+  IN BOOLEAN     UseBlockIo2
+  )
+{
+  EFI_STATUS          Status;
+  MASTER_BOOT_RECORD  *Mbr;
+  OC_DISK_CONTEXT     DiskContext;
+  UINTN               Index;
+  BOOLEAN             IsProtectiveMbr;
+
+  ASSERT (DiskHandle != NULL);
+
+  //
+  // Read first sector containing MBR table.
+  //
+  Status = OcDiskInitializeContext (&DiskContext, DiskHandle, UseBlockIo2);
+  if (EFI_ERROR (Status)) {
+    return NULL;
+  }
+
+  Mbr = (MASTER_BOOT_RECORD *)AllocatePool (sizeof (*Mbr));
+  if (Mbr == NULL) {
+    return NULL;
+  }
+
+  Status = OcDiskRead (&DiskContext, 0, sizeof (*Mbr), Mbr);
+  if (EFI_ERROR (Status)) {
+    FreePool (Mbr);
+    return NULL;
+  }
+
+  //
+  // Validate MBR signatures.
+  //
+  // If MBR is a protective one (as part of a GPT disk), ignore.
+  // Protective MBR is defined as a single partition of type 0xEE, other three partitions are to be zero.
+  //
+  if (Mbr->Signature != MBR_SIGNATURE) {
+    FreePool (Mbr);
+    return NULL;
+  }
+
+  if (  (Mbr->Partition[0].OSIndicator == PMBR_GPT_PARTITION)
+     && (*((UINT32 *)Mbr->Partition[0].StartingLBA) == 0x01)
+     && (*((UINT32 *)Mbr->Partition[0].SizeInLBA) != 0))
+  {
+    IsProtectiveMbr = TRUE;
+    for (Index = 1; Index < MAX_MBR_PARTITIONS; Index++) {
+      if ((*((UINT32 *)Mbr->Partition[Index].StartingLBA) != 0) || (*((UINT32 *)Mbr->Partition[Index].SizeInLBA) != 0)) {
+        IsProtectiveMbr = FALSE;
+        break;
+      }
+    }
+
+    if (IsProtectiveMbr) {
+      FreePool (Mbr);
+      return NULL;
+    }
+  }
+
+  return Mbr;
 }
