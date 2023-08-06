@@ -259,8 +259,6 @@ InternalGetPartitionLegacyOsType (
     return OcLegacyOsTypeNone;
   }
 
-  DebugPrintDevicePath (DEBUG_INFO, "OCB: Reading MBR of disk", DevicePath);
-
   DiskHandle = OcPartitionGetDiskHandle (DevicePath);
   if (DiskHandle == NULL) {
     return OcLegacyOsTypeNone;
@@ -268,7 +266,7 @@ InternalGetPartitionLegacyOsType (
 
   Mbr = OcGetDiskMbrTable (DiskHandle, TRUE);
   if (Mbr == NULL) {
-    DEBUG ((DEBUG_INFO, "OCB: Disk does not contain a valid MBR partition table\n"));
+    DEBUG ((DEBUG_VERBOSE, "OCB: Disk does not contain a valid MBR partition table\n"));
     return OcLegacyOsTypeNone;
   }
 
@@ -277,6 +275,7 @@ InternalGetPartitionLegacyOsType (
   //
   // Retrieve the first sector of the partition.
   //
+  DebugPrintDevicePath (DEBUG_INFO, "OCB: Reading MBR of disk", DevicePath);
   Status = OcDiskInitializeContext (
              &DiskContext,
              PartitionHandle,
