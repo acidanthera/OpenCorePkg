@@ -336,6 +336,16 @@ OcGetBootDevicePathType (
     *IsFolder = FALSE;
   }
 
+  //
+  // Detect firmware images such as the Apple legacy loader interface.
+  //
+  // Certain Mac models lock up if any additional probing of the device path
+  // is performed when the Apple legacy loader interface is being started.
+  //
+  if (DevicePath->Type == MEDIA_DEVICE_PATH && DevicePath->SubType == MEDIA_PIWG_FW_FILE_DP) {
+    return OC_BOOT_UNKNOWN;
+  }
+
   Path = OcCopyDevicePathFullName (DevicePath, NULL);
   if (Path == NULL) {
     return OC_BOOT_UNKNOWN;
