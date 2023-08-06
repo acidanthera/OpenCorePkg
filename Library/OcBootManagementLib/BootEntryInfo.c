@@ -911,6 +911,8 @@ InternalDescribeLegacyBootEntry (
       break;
 
     default:
+      BootEntry->Type = OC_BOOT_UNKNOWN;
+      BootEntry->Name = AllocateCopyPool (sizeof (L"Unknown OS (legacy)"), L"Unknown OS (legacy)");
       break;
   }
 
