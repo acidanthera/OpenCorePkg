@@ -167,7 +167,8 @@ typedef enum OC_LEGACY_BOOT_TYPE_ {
 typedef enum OC_LEGACY_OS_TYPE_ {
   OcLegacyOsTypeNone,
   OcLegacyOsTypeWindowsNtldr,
-  OcLegacyOsTypeWindowsBootmgr
+  OcLegacyOsTypeWindowsBootmgr,
+  OcLegacyOsTypeIsoLinux
 } OC_LEGACY_OS_TYPE;
 
 /**

@@ -1234,11 +1234,14 @@ AddBootEntryFromLegacyPartition (
   // External disk = "USB"
   // Optical disk  = "CD"
   //
-  // TODO: Support optical media.
-  //
   if (BootEntry->IsExternal) {
-    BootEntry->LoadOptionsSize = L_STR_SIZE ("USB");
-    BootEntry->LoadOptions     = AllocateCopyPool (L_STR_SIZE ("USB"), "USB");
+    if (OcIsDiskCdRom (BootEntry->DevicePath)) {
+      BootEntry->LoadOptionsSize = L_STR_SIZE ("CD");
+      BootEntry->LoadOptions     = AllocateCopyPool (L_STR_SIZE ("CD"), "CD");
+    } else {
+      BootEntry->LoadOptionsSize = L_STR_SIZE ("USB");
+      BootEntry->LoadOptions     = AllocateCopyPool (L_STR_SIZE ("USB"), "USB");
+    }
   } else {
     BootEntry->LoadOptionsSize = L_STR_SIZE ("HD");
     BootEntry->LoadOptions     = AllocateCopyPool (L_STR_SIZE ("HD"), "HD");

@@ -55,7 +55,14 @@ CheckLegacySignature (
 
   Offset = 0;
 
-  return FindPattern ((CONST UINT8 *)SignatureStr, NULL, (CONST UINT32)AsciiStrLen (SignatureStr), (CONST UINT8 *)Pbr, sizeof (*Pbr), &Offset);
+  return FindPattern (
+           (CONST UINT8 *)SignatureStr,
+           NULL,
+           (CONST UINT32)AsciiStrLen (SignatureStr),
+           Pbr->BootStrapCode,
+           sizeof (Pbr->BootStrapCode),
+           &Offset
+           );
 }
 
 STATIC
@@ -166,28 +173,30 @@ InternalLoadAppleLegacyInterface (
   // Get device path to disk to be booted.
   // TODO: Handle CD booting, device path is not required in that case.
   //
-  WholeDiskPath = OcDiskGetDevicePath (HdDevicePath);
-  if (WholeDiskPath == NULL) {
-    return EFI_INVALID_PARAMETER;
-  }
+  if (!OcIsDiskCdRom (HdDevicePath)) {
+    WholeDiskPath = OcDiskGetDevicePath (HdDevicePath);
+    if (WholeDiskPath == NULL) {
+      return EFI_INVALID_PARAMETER;
+    }
 
-  DebugPrintDevicePath (DEBUG_INFO, "OCB: Legacy disk device path", WholeDiskPath);
+    DebugPrintDevicePath (DEBUG_INFO, "OCB: Legacy disk device path", WholeDiskPath);
 
-  // TODO: Mark target partition as active on pure MBR and hybrid GPT disks.
-  // Macs only boot the active partition.
+    // TODO: Mark target partition as active on pure MBR and hybrid GPT disks.
+    // Macs only boot the active partition.
 
-  //
-  // Set BootCampHD variable pointing to target disk.
-  //
-  Status = gRT->SetVariable (
-                  APPLE_BOOT_CAMP_HD_VARIABLE_NAME,
-                  &gAppleBootVariableGuid,
-                  EFI_VARIABLE_BOOTSERVICE_ACCESS | EFI_VARIABLE_RUNTIME_ACCESS | EFI_VARIABLE_NON_VOLATILE,
-                  GetDevicePathSize (WholeDiskPath),
-                  WholeDiskPath
-                  );
-  if (EFI_ERROR (Status)) {
-    return Status;
+    //
+    // Set BootCampHD variable pointing to target disk.
+    //
+    Status = gRT->SetVariable (
+                    APPLE_BOOT_CAMP_HD_VARIABLE_NAME,
+                    &gAppleBootVariableGuid,
+                    EFI_VARIABLE_BOOTSERVICE_ACCESS | EFI_VARIABLE_RUNTIME_ACCESS | EFI_VARIABLE_NON_VOLATILE,
+                    GetDevicePathSize (WholeDiskPath),
+                    WholeDiskPath
+                    );
+    if (EFI_ERROR (Status)) {
+      return Status;
+    }
   }
 
   //
@@ -242,7 +251,7 @@ InternalGetPartitionLegacyOsType (
 {
   EFI_STATUS          Status;
   MASTER_BOOT_RECORD  *Mbr;
-  MASTER_BOOT_RECORD  *Pbr;
+  UINTN               MbrSize;
   OC_LEGACY_OS_TYPE   LegacyOsType;
 
   EFI_DEVICE_PATH_PROTOCOL  *DevicePath;
@@ -258,6 +267,7 @@ InternalGetPartitionLegacyOsType (
   if (DevicePath == NULL) {
     return OcLegacyOsTypeNone;
   }
+
   DebugPrintDevicePath (DEBUG_VERBOSE, "OCB: Reading MBR for disk", DevicePath);
 
   DiskHandle = OcPartitionGetDiskHandle (DevicePath);
@@ -271,43 +281,51 @@ InternalGetPartitionLegacyOsType (
     return OcLegacyOsTypeNone;
   }
 
-  FreePool (Mbr);
+  //
+  // For hard disk devices, get PBR sector instead.
+  //
+  if (!OcIsDiskCdRom (DevicePath)) {
+    FreePool (Mbr);
 
-  //
-  // Retrieve the first sector of the partition.
-  //
-  DebugPrintDevicePath (DEBUG_INFO, "OCB: Reading PBR for partition", DevicePath);
-  Status = OcDiskInitializeContext (
-             &DiskContext,
-             PartitionHandle,
-             TRUE
-             );
-  if (EFI_ERROR (Status)) {
-    return OcLegacyOsTypeNone;
+    //
+    // Retrieve the first sector of the partition.
+    //
+    DebugPrintDevicePath (DEBUG_VERBOSE, "OCB: Reading PBR for partition", DevicePath);
+    Status = OcDiskInitializeContext (
+               &DiskContext,
+               PartitionHandle,
+               TRUE
+               );
+    if (EFI_ERROR (Status)) {
+      return OcLegacyOsTypeNone;
+    }
+
+    MbrSize = ALIGN_VALUE (sizeof (*Mbr), DiskContext.BlockSize);
+    Mbr     = (MASTER_BOOT_RECORD *)AllocatePool (MbrSize);
+    if (Mbr == NULL) {
+      DEBUG ((DEBUG_INFO, "OCB: Buffer allocation error\n"));
+      return OcLegacyOsTypeNone;
+    }
+
+    Status = OcDiskRead (
+               &DiskContext,
+               0,
+               MbrSize,
+               Mbr
+               );
+    if (EFI_ERROR (Status)) {
+      FreePool (Mbr);
+      return OcLegacyOsTypeNone;
+    }
   }
 
-  Pbr = (MASTER_BOOT_RECORD *)AllocatePool (MBR_SIZE);
-  if (Pbr == NULL) {
-    DEBUG ((DEBUG_INFO, "OCB: Buffer allocation error\n"));
-    return OcLegacyOsTypeNone;
-  }
-
-  Status = OcDiskRead (
-             &DiskContext,
-             0,
-             MBR_SIZE,
-             Pbr
-             );
-  if (EFI_ERROR (Status)) {
-    FreePool (Pbr);
-    return OcLegacyOsTypeNone;
-  }
+  DebugPrintHexDump (DEBUG_INFO, "OCB: MbrHEX", Mbr->BootStrapCode, sizeof (Mbr->BootStrapCode));
 
   //
-  // Validate signature in PBR.
+  // Validate signature in MBR.
   //
-  if (Pbr->Signature != MBR_SIGNATURE) {
-    FreePool (Pbr);
+  if (Mbr->Signature != MBR_SIGNATURE) {
+    FreePool (Mbr);
     return OcLegacyOsTypeNone;
   }
 
@@ -315,14 +333,20 @@ InternalGetPartitionLegacyOsType (
   // Validate sector contents and check for known signatures
   // indicating the partition is bootable.
   //
-  LegacyOsType = OcLegacyOsTypeNone;
-  if (CheckLegacySignature ("BOOTMGR", Pbr)) {
+  if (CheckLegacySignature ("BOOTMGR", Mbr)) {
     LegacyOsType = OcLegacyOsTypeWindowsBootmgr;
-  } else if (CheckLegacySignature ("NTLDR", Pbr)) {
+  } else if (CheckLegacySignature ("NTLDR", Mbr)) {
     LegacyOsType = OcLegacyOsTypeWindowsNtldr;
+  } else if (  CheckLegacySignature ("ISOLINUX", Mbr)
+            || CheckLegacySignature ("isolinux", Mbr))
+  {
+    LegacyOsType = OcLegacyOsTypeIsoLinux;
+  } else {
+    LegacyOsType = OcLegacyOsTypeNone;
+    DEBUG ((DEBUG_INFO, "OCB: Unknown legacy bootsector signature\n"));
   }
 
-  FreePool (Pbr);
+  FreePool (Mbr);
 
   return LegacyOsType;
 }

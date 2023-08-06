@@ -241,21 +241,28 @@ OcDiskGetDevicePath (
   IN EFI_DEVICE_PATH_PROTOCOL  *HdDevicePath
   )
 {
-  EFI_DEVICE_PATH_PROTOCOL     *PrefixPath;
-  EFI_DEVICE_PATH_PROTOCOL     *TempPath;
-  CONST HARDDRIVE_DEVICE_PATH  *HdNode;
+  EFI_DEVICE_PATH_PROTOCOL        *PrefixPath;
+  EFI_DEVICE_PATH_PROTOCOL        *TempPath;
+  CONST EFI_DEVICE_PATH_PROTOCOL  *HdNode;
 
   ASSERT (HdDevicePath != NULL);
 
-  HdNode = (HARDDRIVE_DEVICE_PATH *)(
-                                     FindDevicePathNodeWithType (
-                                       HdDevicePath,
-                                       MEDIA_DEVICE_PATH,
-                                       MEDIA_HARDDRIVE_DP
-                                       )
-                                     );
+  HdNode = FindDevicePathNodeWithType (
+             HdDevicePath,
+             MEDIA_DEVICE_PATH,
+             MEDIA_HARDDRIVE_DP
+             );
   if (HdNode == NULL) {
-    return NULL;
+    HdNode = FindDevicePathNodeWithType (
+               HdDevicePath,
+               MEDIA_DEVICE_PATH,
+               MEDIA_CDROM_DP
+               );
+    if (HdNode == NULL) {
+      return NULL;
+    }
+
+    DEBUG ((DEBUG_INFO, "got cdrom\n"));
   }
 
   PrefixPath = DuplicateDevicePath (HdDevicePath);
@@ -296,6 +303,29 @@ OcPartitionGetDiskHandle (
            TRUE,
            &Dummy
            );
+}
+
+BOOLEAN
+OcIsDiskCdRom (
+  IN EFI_DEVICE_PATH_PROTOCOL  *DiskDevicePath
+  )
+{
+  EFI_DEVICE_PATH_PROTOCOL  *DevicePathWalker;
+
+  ASSERT (DiskDevicePath != NULL);
+
+  DevicePathWalker = DiskDevicePath;
+  while (!IsDevicePathEnd (DevicePathWalker)) {
+    if (  (DevicePathType (DevicePathWalker) == MEDIA_DEVICE_PATH)
+       && (DevicePathSubType (DevicePathWalker) == MEDIA_CDROM_DP))
+    {
+      return TRUE;
+    }
+
+    DevicePathWalker = NextDevicePathNode (DevicePathWalker);
+  }
+
+  return FALSE;
 }
 
 EFI_DEVICE_PATH_PROTOCOL *
@@ -676,6 +706,7 @@ OcGetDiskMbrTable (
 {
   EFI_STATUS          Status;
   MASTER_BOOT_RECORD  *Mbr;
+  UINTN               MbrSize;
   OC_DISK_CONTEXT     DiskContext;
   UINTN               Index;
   BOOLEAN             IsProtectiveMbr;
@@ -685,17 +716,27 @@ OcGetDiskMbrTable (
   //
   // Read first sector containing MBR table.
   //
-  Status = OcDiskInitializeContext (&DiskContext, DiskHandle, UseBlockIo2);
+  Status = OcDiskInitializeContext (
+             &DiskContext,
+             DiskHandle,
+             UseBlockIo2
+             );
   if (EFI_ERROR (Status)) {
     return NULL;
   }
 
-  Mbr = (MASTER_BOOT_RECORD *)AllocatePool (sizeof (*Mbr));
+  MbrSize = ALIGN_VALUE (sizeof (*Mbr), DiskContext.BlockSize);
+  Mbr     = (MASTER_BOOT_RECORD *)AllocatePool (MbrSize);
   if (Mbr == NULL) {
     return NULL;
   }
 
-  Status = OcDiskRead (&DiskContext, 0, sizeof (*Mbr), Mbr);
+  Status = OcDiskRead (
+             &DiskContext,
+             0,
+             MbrSize,
+             Mbr
+             );
   if (EFI_ERROR (Status)) {
     FreePool (Mbr);
     return NULL;
