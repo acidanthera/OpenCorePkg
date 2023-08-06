@@ -258,6 +258,7 @@ InternalGetPartitionLegacyOsType (
   if (DevicePath == NULL) {
     return OcLegacyOsTypeNone;
   }
+  DebugPrintDevicePath (DEBUG_VERBOSE, "OCB: Reading MBR for disk", DevicePath);
 
   DiskHandle = OcPartitionGetDiskHandle (DevicePath);
   if (DiskHandle == NULL) {
@@ -275,7 +276,7 @@ InternalGetPartitionLegacyOsType (
   //
   // Retrieve the first sector of the partition.
   //
-  DebugPrintDevicePath (DEBUG_INFO, "OCB: Reading MBR of disk", DevicePath);
+  DebugPrintDevicePath (DEBUG_INFO, "OCB: Reading PBR for partition", DevicePath);
   Status = OcDiskInitializeContext (
              &DiskContext,
              PartitionHandle,
