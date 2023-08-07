@@ -16,8 +16,6 @@
 
 #include <IndustryStandard/Mbr.h>
 
-#include <Protocol/DevicePath.h>
-
 #include <Library/BaseLib.h>
 #include <Library/BaseMemoryLib.h>
 #include <Library/DevicePathLib.h>
@@ -30,6 +28,9 @@
 #include <Library/UefiBootServicesTableLib.h>
 #include <Library/UefiLib.h>
 #include <Library/UefiRuntimeServicesTableLib.h>
+
+#include <Protocol/DevicePath.h>
+#include <Protocol/Legacy8259.h>
 
 //
 // PIWG firmware media device path for Apple legacy interface.
@@ -348,4 +349,30 @@ InternalGetPartitionLegacyOsType (
   FreePool (Mbr);
 
   return LegacyOsType;
+}
+
+OC_LEGACY_BOOT_TYPE
+InternalGetLegacyBootType (
+  VOID
+  )
+{
+  EFI_STATUS                Status;
+  EFI_LEGACY_8259_PROTOCOL  *Legacy8259;
+  OC_LEGACY_BOOT_TYPE       BootType;
+
+  //
+  // Apple legacy boot interface is only available on Apple platforms.
+  // Use legacy 16-bit thunks on legacy PC platforms.
+  //
+  BootType = OcLegacyBootTypeNone;
+  if (OcStriCmp (L"Apple", gST->FirmwareVendor) == 0) {
+    BootType = OcLegacyBootTypeApple;
+  } else {
+    Status = gBS->LocateProtocol (&gEfiLegacy8259ProtocolGuid, NULL, (VOID **)&Legacy8259);
+    if (!EFI_ERROR (Status) && (Legacy8259 != NULL)) {
+      BootType = OcLegacyBootTypeLegacyBios;
+    }
+  }
+
+  return BootType;
 }

@@ -136,6 +136,11 @@ InternalGetPartitionLegacyOsType (
   IN  EFI_HANDLE  PartitionHandle
   );
 
+OC_LEGACY_BOOT_TYPE
+InternalGetLegacyBootType (
+  VOID
+  );
+
 EFI_STATUS
 InternalCheckScanPolicy (
   IN  EFI_HANDLE  Handle,

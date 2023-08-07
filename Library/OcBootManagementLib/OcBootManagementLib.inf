@@ -53,6 +53,7 @@
   OpenCorePkg/OpenCorePkg.dec
   MdePkg/MdePkg.dec
   MdeModulePkg/MdeModulePkg.dec
+  OvmfPkg/OvmfPkg.dec
   UefiCpuPkg/UefiCpuPkg.dec
 
 [Guids]
@@ -85,6 +86,7 @@
   gAppleBeepGenProtocolGuid                     ## SOMETIMES_CONSUMES
   gOcBootEntryProtocolGuid                      ## CONSUMES
   gAppleFirmwareUserInterfaceProtocolGuid       ## SOMETIMES_CONSUMES
+  gEfiLegacy8259ProtocolGuid                    ## SOMETIMES_CONSUMES
 
 [LibraryClasses]
   BaseLib

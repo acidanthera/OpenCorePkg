@@ -158,7 +158,8 @@ typedef UINT32 OC_BOOT_ENTRY_TYPE;
 **/
 typedef enum OC_LEGACY_BOOT_TYPE_ {
   OcLegacyBootTypeNone,
-  OcLegacyBootTypeApple
+  OcLegacyBootTypeApple,
+  OcLegacyBootTypeLegacyBios
 } OC_LEGACY_BOOT_TYPE;
 
 /**
