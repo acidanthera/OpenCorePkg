@@ -1578,11 +1578,16 @@ InternalLoadBootEntry (
   DEBUG_CODE_END ();
 
   if (BootEntry->LegacyOsType != OcLegacyOsTypeNone) {
-    Status = InternalLoadAppleLegacyInterface (
-               ParentHandle,
-               DevicePath,
-               EntryHandle
-               );
+    if (Context->LegacyBootType == OcLegacyBootTypeApple) {
+      Status = InternalLoadAppleLegacyInterface (
+                 ParentHandle,
+                 DevicePath,
+                 EntryHandle
+                 );
+    } else {
+      DEBUG ((DEBUG_INFO, "OCB: Unsupported legacy interface type: %u\n", Context->LegacyBootType));
+      Status = EFI_UNSUPPORTED;
+    }
   } else {
     Status = gBS->LoadImage (
                     FALSE,

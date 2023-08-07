@@ -171,7 +171,6 @@ InternalLoadAppleLegacyInterface (
 
   //
   // Get device path to disk to be booted.
-  // TODO: Handle CD booting, device path is not required in that case.
   //
   if (!OcIsDiskCdRom (HdDevicePath)) {
     WholeDiskPath = OcDiskGetDevicePath (HdDevicePath);
