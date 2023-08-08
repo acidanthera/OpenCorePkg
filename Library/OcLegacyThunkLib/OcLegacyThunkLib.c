@@ -19,7 +19,7 @@
 /**
   Initialize legacy environment for BIOS INI caller.
 
-  @param ThunkContext   the instance pointer of THUNK_CONTEXT
+  @param ThunkContext   The instance pointer of THUNK_CONTEXT.
 **/
 VOID
 OcLegacyThunkInitializeBiosIntCaller (
@@ -125,13 +125,14 @@ OcLegacyThunkInitializeInterruptRedirection (
   of BiosInt. Regs will contain the 16-bit register context on entry and
   exit.
 
-  @param  This    Protocol instance pointer.
-  @param  BiosInt Processor interrupt vector to invoke
-  @param  Reg     Register contexted passed into (and returned) from thunk to 16-bit mode
+  @param  ThunkContext    The instance pointer of THUNK_CONTEXT.
+  @param  Legacy8259      Instance pointer for EFI_LEGACY_8259_PROTOCOL.
+  @param  BiosInt         Processor interrupt vector to invoke
+  @param  Reg             Register contexted passed into (and returned) from thunk to 16-bit mode
 
   @retval TRUE   Thunk completed, and there were no BIOS errors in the target code.
                  See Regs for status.
-  @retval FALSE  There was a BIOS erro in the target code.
+  @retval FALSE  There was a BIOS error in the target code.
 **/
 BOOLEAN
 EFIAPI
