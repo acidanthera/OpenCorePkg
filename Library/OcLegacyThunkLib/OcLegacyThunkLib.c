@@ -185,8 +185,8 @@ OcLegacyThunkBiosInt86 (
   ThunkRegSet.E.SS  = (UINT16)(((UINTN)Stack16 >> 16) << 12);
   ThunkRegSet.E.ESP = (UINT16)(UINTN)Stack16;
 
-  ThunkRegSet.E.Eip                    = (UINT16)((volatile UINT32 *)NULL)[BiosInt];
-  ThunkRegSet.E.CS                     = (UINT16)(((volatile UINT32 *)NULL)[BiosInt] >> 16);
+  ThunkRegSet.E.Eip           = (UINT16)((volatile UINT32 *)NULL)[BiosInt];
+  ThunkRegSet.E.CS            = (UINT16)(((volatile UINT32 *)NULL)[BiosInt] >> 16);
   ThunkContext->RealModeState = &ThunkRegSet;
   AsmThunk16 (ThunkContext);
 
