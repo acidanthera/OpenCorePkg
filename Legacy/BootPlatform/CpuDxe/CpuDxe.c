@@ -1138,7 +1138,8 @@ Returns:
     InstallInterruptHandler (InterruptVector, SystemTimerHandler);
   }
 
-  OcLegacyThunkInitializeBiosIntCaller (&mThunkContext);
+  Status = OcLegacyThunkInitializeBiosIntCaller (&mThunkContext);
+  ASSERT_EFI_ERROR (Status);
 
   //
   // Install CPU Architectural Protocol and the thunk protocol

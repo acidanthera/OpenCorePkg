@@ -25,7 +25,7 @@
 
   @param ThunkContext   The instance pointer of THUNK_CONTEXT.
 **/
-VOID
+EFI_STATUS
 OcLegacyThunkInitializeBiosIntCaller (
   IN OUT THUNK_CONTEXT  *ThunkContext
   );
@@ -40,7 +40,7 @@ OcLegacyThunkInitializeBiosIntCaller (
    @param Legacy8259  Instance pointer for EFI_LEGACY_8259_PROTOCOL.
 
 **/
-VOID
+EFI_STATUS
 OcLegacyThunkInitializeInterruptRedirection (
   IN EFI_LEGACY_8259_PROTOCOL  *Legacy8259
   );

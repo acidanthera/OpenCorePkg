@@ -21,7 +21,7 @@
 
   @param ThunkContext   The instance pointer of THUNK_CONTEXT.
 **/
-VOID
+EFI_STATUS
 OcLegacyThunkInitializeBiosIntCaller (
   THUNK_CONTEXT  *ThunkContext
   )
@@ -44,7 +44,9 @@ OcLegacyThunkInitializeBiosIntCaller (
                             EFI_SIZE_TO_PAGES (LegacyRegionSize),
                             &LegacyRegionBase
                             );
-  ASSERT_EFI_ERROR (Status);
+  if (EFI_ERROR (Status)) {
+    return Status;
+  }
 
   ZeroMem ((VOID *)(UINTN)LegacyRegionBase, LegacyRegionSize);
 
@@ -52,6 +54,7 @@ OcLegacyThunkInitializeBiosIntCaller (
   ThunkContext->RealModeBufferSize = LegacyRegionSize;
   ThunkContext->ThunkAttributes    = THUNK_ATTRIBUTE_BIG_REAL_MODE|THUNK_ATTRIBUTE_DISABLE_A20_MASK_INT_15;
   AsmPrepareThunk16 (ThunkContext);
+  return Status;
 }
 
 /**
@@ -64,7 +67,7 @@ OcLegacyThunkInitializeBiosIntCaller (
    @param Legacy8259  Instance pointer for EFI_LEGACY_8259_PROTOCOL.
 
 **/
-VOID
+EFI_STATUS
 OcLegacyThunkInitializeInterruptRedirection (
   IN  EFI_LEGACY_8259_PROTOCOL  *Legacy8259
   )
@@ -98,7 +101,9 @@ OcLegacyThunkInitializeInterruptRedirection (
                               EFI_SIZE_TO_PAGES (LegacyRegionLength),
                               &LegacyRegionBase
                               );
-  ASSERT_EFI_ERROR (Status);
+  if (EFI_ERROR (Status)) {
+    return Status;
+  }
 
   //
   // Copy code to legacy region
@@ -118,6 +123,9 @@ OcLegacyThunkInitializeInterruptRedirection (
   for (Index = 0; Index < 8; Index++) {
     IdtArray[ProtectedModeBaseVector + Index] = ((EFI_SEGMENT (LegacyRegionBase + Index * 4)) << 16) | (EFI_OFFSET (LegacyRegionBase + Index * 4));
   }
+
+  return Status;
+}
 }
 
 /**

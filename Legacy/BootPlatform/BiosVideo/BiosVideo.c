@@ -209,8 +209,15 @@ BiosVideoDriverBindingStart (
       goto Done;
     }
 
-    OcLegacyThunkInitializeBiosIntCaller (&mThunkContext);
-    OcLegacyThunkInitializeInterruptRedirection (mLegacy8259);
+    Status = OcLegacyThunkInitializeBiosIntCaller (&mThunkContext);
+    if (EFI_ERROR (Status)) {
+      goto Done;
+    }
+
+    Status = OcLegacyThunkInitializeInterruptRedirection (mLegacy8259);
+    if (EFI_ERROR (Status)) {
+      goto Done;
+    }
   }
 
   //
