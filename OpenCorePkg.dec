@@ -901,6 +901,9 @@
   OcInputLib|Include/Acidanthera/Library/OcInputLib.h
 
   ##  @libraryclass
+  OcLegacyThunkLib|Include/Acidanthera/Library/OcLegacyThunkLib.h
+
+  ##  @libraryclass
   OcLogAggregatorLib|Include/Acidanthera/Library/OcLogAggregatorLib.h
 
   ##  @libraryclass

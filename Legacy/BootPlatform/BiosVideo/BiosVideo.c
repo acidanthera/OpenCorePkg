@@ -209,8 +209,8 @@ BiosVideoDriverBindingStart (
       goto Done;
     }
 
-    InitializeBiosIntCaller (&mThunkContext);
-    InitializeInterruptRedirection (mLegacy8259);
+    OcLegacyThunkInitializeBiosIntCaller (&mThunkContext);
+    OcLegacyThunkInitializeInterruptRedirection (mLegacy8259);
   }
 
   //
@@ -622,12 +622,12 @@ BiosVideoChildHandleUninstall (
   //
   Regs.H.AH = 0x00;
   Regs.H.AL = 0x03;
-  LegacyBiosInt86 (BiosVideoPrivate, 0x10, &Regs);
+  OcLegacyThunkBiosInt86 (BiosVideoPrivate->ThunkContext, BiosVideoPrivate->Legacy8259, 0x10, &Regs);
 
   Regs.H.AH = 0x11;
   Regs.H.AL = 0x14;
   Regs.H.BL = 0;
-  LegacyBiosInt86 (BiosVideoPrivate, 0x10, &Regs);
+  OcLegacyThunkBiosInt86 (BiosVideoPrivate->ThunkContext, BiosVideoPrivate->Legacy8259, 0x10, &Regs);
 
   //
   // Do not disable IO/memory decode since that would prevent legacy ROM from working
@@ -712,7 +712,7 @@ BiosVideoGetVbeData (
   Regs.E.ES                                            = EFI_SEGMENT ((UINTN)BiosVideoPrivate->VbeInformationBlock);
   Regs.X.DI                                            = EFI_OFFSET ((UINTN)BiosVideoPrivate->VbeInformationBlock);
 
-  LegacyBiosInt86 (BiosVideoPrivate, 0x10, &Regs);
+  OcLegacyThunkBiosInt86 (BiosVideoPrivate->ThunkContext, BiosVideoPrivate->Legacy8259, 0x10, &Regs);
 
   Status = EFI_DEVICE_ERROR;
 
@@ -772,7 +772,7 @@ BiosVideoGetVbeData (
     Regs.E.ES = EFI_SEGMENT ((UINTN)BiosVideoPrivate->VbeModeInformationBlock);
     Regs.X.DI = EFI_OFFSET ((UINTN)BiosVideoPrivate->VbeModeInformationBlock);
 
-    LegacyBiosInt86 (BiosVideoPrivate, 0x10, &Regs);
+    OcLegacyThunkBiosInt86 (BiosVideoPrivate->ThunkContext, BiosVideoPrivate->Legacy8259, 0x10, &Regs);
 
     //
     // See if the call succeeded.  If it didn't, then try the next mode.
@@ -984,7 +984,7 @@ BiosVideoGetVbeData (
   Regs.E.ES = EFI_SEGMENT ((UINTN)BiosVideoPrivate->VbeEdidDataBlock);
   Regs.X.DI = EFI_OFFSET ((UINTN)BiosVideoPrivate->VbeEdidDataBlock);
 
-  LegacyBiosInt86 (BiosVideoPrivate, 0x10, &Regs);
+  OcLegacyThunkBiosInt86 (BiosVideoPrivate->ThunkContext, BiosVideoPrivate->Legacy8259, 0x10, &Regs);
 
   //
   // If the call succeed, populate EDID Discovered protocol.
@@ -1533,7 +1533,7 @@ BiosVideoSetModeWorker (
     // Set VGA Mode
     //
     Regs.X.AX = ModeData->VbeModeNumber;
-    LegacyBiosInt86 (BiosVideoPrivate, 0x10, &Regs);
+    OcLegacyThunkBiosInt86 (BiosVideoPrivate->ThunkContext, BiosVideoPrivate->Legacy8259, 0x10, &Regs);
   } else {
     //
     // Allocate a working buffer for BLT operations to the VBE frame buffer
@@ -1554,7 +1554,7 @@ BiosVideoSetModeWorker (
     Regs.E.ES = EFI_SEGMENT ((UINTN)BiosVideoPrivate->VbeCrtcInformationBlock);
     Regs.X.DI = EFI_OFFSET ((UINTN)BiosVideoPrivate->VbeCrtcInformationBlock);
 
-    LegacyBiosInt86 (BiosVideoPrivate, 0x10, &Regs);
+    OcLegacyThunkBiosInt86 (BiosVideoPrivate->ThunkContext, BiosVideoPrivate->Legacy8259, 0x10, &Regs);
 
     //
     // Check to see if the call succeeded
@@ -2652,12 +2652,12 @@ BiosVideoVgaMiniPortSetMode (
       //
       Regs.H.AH = 0x00;
       Regs.H.AL = 0x83;
-      LegacyBiosInt86 (BiosVideoPrivate, 0x10, &Regs);
+      OcLegacyThunkBiosInt86 (BiosVideoPrivate->ThunkContext, BiosVideoPrivate->Legacy8259, 0x10, &Regs);
 
       Regs.H.AH = 0x11;
       Regs.H.AL = 0x14;
       Regs.H.BL = 0;
-      LegacyBiosInt86 (BiosVideoPrivate, 0x10, &Regs);
+      OcLegacyThunkBiosInt86 (BiosVideoPrivate->ThunkContext, BiosVideoPrivate->Legacy8259, 0x10, &Regs);
 
       break;
 
@@ -2667,12 +2667,12 @@ BiosVideoVgaMiniPortSetMode (
       //
       Regs.H.AH = 0x00;
       Regs.H.AL = 0x83;
-      LegacyBiosInt86 (BiosVideoPrivate, 0x10, &Regs);
+      OcLegacyThunkBiosInt86 (BiosVideoPrivate->ThunkContext, BiosVideoPrivate->Legacy8259, 0x10, &Regs);
 
       Regs.H.AH = 0x11;
       Regs.H.AL = 0x12;
       Regs.H.BL = 0;
-      LegacyBiosInt86 (BiosVideoPrivate, 0x10, &Regs);
+      OcLegacyThunkBiosInt86 (BiosVideoPrivate->ThunkContext, BiosVideoPrivate->Legacy8259, 0x10, &Regs);
       break;
 
     default:

@@ -106,6 +106,7 @@
   OcDevicePathLib|OpenCorePkg/Library/OcDevicePathLib/OcDevicePathLib.inf
   OcFileLib|OpenCorePkg/Library/OcFileLib/OcFileLib.inf
   OcGuardLib|OpenCorePkg/Library/OcGuardLib/OcGuardLib.inf
+  OcLegacyThunkLib|OpenCorePkg/Library/OcLegacyThunkLib/OcLegacyThunkLib.inf
   OcMemoryLib|OpenCorePkg/Library/OcMemoryLib/OcMemoryLib.inf
   OcMiscLib|OpenCorePkg/Library/OcMiscLib/OcMiscLib.inf
   OcStringLib|OpenCorePkg/Library/OcStringLib/OcStringLib.inf

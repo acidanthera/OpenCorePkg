@@ -26,6 +26,7 @@
   ENTRY_POINT                    = InitializeCpu
 
 [Packages]
+  OpenCorePkg/OpenCorePkg.dec
   OpenCorePkg/OpenDuetPkg.dec
   MdePkg/MdePkg.dec
   OvmfPkg/OvmfPkg.dec
@@ -35,6 +36,7 @@
   PrintLib
   UefiBootServicesTableLib
   BaseMemoryLib
+  OcLegacyThunkLib
 
 [Sources.Ia32]
   Ia32/CpuInterrupt.nasm

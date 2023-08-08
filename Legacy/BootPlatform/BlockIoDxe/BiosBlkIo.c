@@ -255,8 +255,8 @@ BiosBlockIoDriverBindingStart (
     goto Error;
   }
 
-  InitializeBiosIntCaller (&mThunkContext);
-  InitializeInterruptRedirection (Legacy8259);
+  OcLegacyThunkInitializeBiosIntCaller (&mThunkContext);
+  OcLegacyThunkInitializeInterruptRedirection (Legacy8259);
 
   //
   // Open the IO Abstraction(s) needed

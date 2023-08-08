@@ -1,18 +1,20 @@
 /** @file
-  Provide legacy thunk interface for accessing Bios Video Rom.
+  This file implements thunking to legacy 16-bit environment.
 
-Copyright (c) 2006 - 2007, Intel Corporation. All rights reserved.<BR>
-This program and the accompanying materials
-are licensed and made available under the terms and conditions of the BSD License
-which accompanies this distribution.  The full text of the license may be found at
-http://opensource.org/licenses/bsd-license.php
-
-THE PROGRAM IS DISTRIBUTED UNDER THE BSD LICENSE ON AN "AS IS" BASIS,
-WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
-
+  Copyright (c) 2023, Goldfish64. All rights reserved.<BR>
+  Copyright (c) 2006 - 2007, Intel Corporation. All rights reserved.<BR>
+  SPDX-License-Identifier: BSD-2-Clause
 **/
 
-#include "BiosVideo.h"
+#include <Uefi.h>
+
+#include <Library/UefiLib.h>
+#include <Library/DebugLib.h>
+#include <Library/BaseLib.h>
+#include <Library/UefiBootServicesTableLib.h>
+#include <Library/BaseMemoryLib.h>
+#include <Library/MemoryAllocationLib.h>
+#include <Library/OcLegacyThunkLib.h>
 
 /**
   Initialize legacy environment for BIOS INI caller.
@@ -20,7 +22,7 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
   @param ThunkContext   the instance pointer of THUNK_CONTEXT
 **/
 VOID
-InitializeBiosIntCaller (
+OcLegacyThunkInitializeBiosIntCaller (
   THUNK_CONTEXT  *ThunkContext
   )
 {
@@ -63,7 +65,7 @@ InitializeBiosIntCaller (
 
 **/
 VOID
-InitializeInterruptRedirection (
+OcLegacyThunkInitializeInterruptRedirection (
   IN  EFI_LEGACY_8259_PROTOCOL  *Legacy8259
   )
 {
@@ -133,10 +135,11 @@ InitializeInterruptRedirection (
 **/
 BOOLEAN
 EFIAPI
-LegacyBiosInt86 (
-  IN  BIOS_VIDEO_DEV     *BiosDev,
-  IN  UINT8              BiosInt,
-  IN  IA32_REGISTER_SET  *Regs
+OcLegacyThunkBiosInt86 (
+  IN  THUNK_CONTEXT             *ThunkContext,
+  IN  EFI_LEGACY_8259_PROTOCOL  *Legacy8259,
+  IN  UINT8                     BiosInt,
+  IN  IA32_REGISTER_SET         *Regs
   )
 {
   UINTN              Status;
@@ -174,23 +177,23 @@ LegacyBiosInt86 (
   //
   // Set Legacy16 state. 0x08, 0x70 is legacy 8259 vector bases.
   //
-  Status = BiosDev->Legacy8259->SetMode (BiosDev->Legacy8259, Efi8259LegacyMode, NULL, NULL);
+  Status = Legacy8259->SetMode (Legacy8259, Efi8259LegacyMode, NULL, NULL);
   ASSERT_EFI_ERROR (Status);
 
-  Stack16 = (UINT16 *)((UINT8 *)BiosDev->ThunkContext->RealModeBuffer + BiosDev->ThunkContext->RealModeBufferSize - sizeof (UINT16));
+  Stack16 = (UINT16 *)((UINT8 *)ThunkContext->RealModeBuffer + ThunkContext->RealModeBufferSize - sizeof (UINT16));
 
   ThunkRegSet.E.SS  = (UINT16)(((UINTN)Stack16 >> 16) << 12);
   ThunkRegSet.E.ESP = (UINT16)(UINTN)Stack16;
 
   ThunkRegSet.E.Eip                    = (UINT16)((volatile UINT32 *)NULL)[BiosInt];
   ThunkRegSet.E.CS                     = (UINT16)(((volatile UINT32 *)NULL)[BiosInt] >> 16);
-  BiosDev->ThunkContext->RealModeState = &ThunkRegSet;
-  AsmThunk16 (BiosDev->ThunkContext);
+  ThunkContext->RealModeState = &ThunkRegSet;
+  AsmThunk16 (ThunkContext);
 
   //
   // Restore protected mode interrupt state
   //
-  Status = BiosDev->Legacy8259->SetMode (BiosDev->Legacy8259, Efi8259ProtectedMode, NULL, NULL);
+  Status = Legacy8259->SetMode (Legacy8259, Efi8259ProtectedMode, NULL, NULL);
   ASSERT_EFI_ERROR (Status);
 
   //

@@ -114,6 +114,7 @@
   OcHeciLib|OpenCorePkg/Library/OcHeciLib/OcHeciLib.inf
   OcHiiDatabaseLocalLib|OpenCorePkg/Library/OcHiiDatabaseLib/OcHiiDatabaseLocalLib.inf
   OcInputLib|OpenCorePkg/Library/OcInputLib/OcInputLib.inf
+  OcLegacyThunkLib|OpenCorePkg/Library/OcLegacyThunkLib/OcLegacyThunkLib.inf
   OcLogAggregatorLib|OpenCorePkg/Library/OcLogAggregatorLib/OcLogAggregatorLib.inf
   OcMachoLib|OpenCorePkg/Library/OcMachoLib/OcMachoLib.inf
   OcMacInfoLib|OpenCorePkg/Library/OcMacInfoLib/OcMacInfoLib.inf
