@@ -30,14 +30,14 @@ services:
     entrypoint:
       - /bin/bash
       - -c
-      - "{ . ~/.edk2_rc.sh && eval \"$$(/usr/bin/curl -Lfs https://raw.githubusercontent.com/acidanthera/ocbuild/master/ci-bootstrap.sh)\" && ./build_oc.tool ; } || exit 1"
+      - "{ . ~/.edk2_rc.sh && eval \"$$(/usr/bin/curl -LfsS https://raw.githubusercontent.com/acidanthera/ocbuild/master/ci-bootstrap.sh)\" && ./build_oc.tool ; } || exit 1"
   build-duet:
     extends:
       service: dev-edk2
     entrypoint:
       - /bin/bash
       - -c
-      - "{ . ~/.edk2_rc.sh && eval \"$$(/usr/bin/curl -Lfs https://raw.githubusercontent.com/acidanthera/ocbuild/master/ci-bootstrap.sh)\" && ./build_duet.tool ; } || exit 1"
+      - "{ . ~/.edk2_rc.sh && eval \"$$(/usr/bin/curl -LfsS https://raw.githubusercontent.com/acidanthera/ocbuild/master/ci-bootstrap.sh)\" && ./build_duet.tool ; } || exit 1"
   build-docs:
     extends:
       service: dev-docs
