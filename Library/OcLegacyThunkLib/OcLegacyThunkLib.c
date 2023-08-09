@@ -8,13 +8,20 @@
 
 #include <Uefi.h>
 
-#include <Library/UefiLib.h>
-#include <Library/DebugLib.h>
+#include <IndustryStandard/Pci.h>
+
 #include <Library/BaseLib.h>
-#include <Library/UefiBootServicesTableLib.h>
 #include <Library/BaseMemoryLib.h>
+#include <Library/DebugLib.h>
+#include <Library/IoLib.h>
 #include <Library/MemoryAllocationLib.h>
+#include <Library/OcDeviceMiscLib.h>
 #include <Library/OcLegacyThunkLib.h>
+#include <Library/UefiBootServicesTableLib.h>
+#include <Library/UefiLib.h>
+
+#include <Protocol/PciIo.h>
+#include <Protocol/Timer.h>
 
 /**
   Initialize legacy environment for BIOS INI caller.
