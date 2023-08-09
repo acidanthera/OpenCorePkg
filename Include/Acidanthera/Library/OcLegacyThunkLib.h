@@ -46,6 +46,14 @@ OcLegacyThunkInitializeInterruptRedirection (
   );
 
 /**
+   Disconnect all EFI graphics device handles in preparation for calling to legacy mode.
+**/
+VOID
+OcLegacyThunkDisconnectEfiGraphics (
+  VOID
+  );
+
+/**
   Thunk to 16-bit real mode and execute a software interrupt with a vector
   of BiosInt. Regs will contain the 16-bit register context on entry and
   exit.

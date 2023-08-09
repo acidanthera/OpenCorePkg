@@ -126,6 +126,66 @@ OcLegacyThunkInitializeInterruptRedirection (
 
   return Status;
 }
+
+/**
+   Disconnect all EFI graphics device handles in preparation for calling to legacy mode.
+**/
+VOID
+OcLegacyThunkDisconnectEfiGraphics (
+  VOID
+  )
+{
+  EFI_STATUS           Status;
+  UINTN                HandleCount;
+  EFI_HANDLE           *HandleBuffer;
+  UINTN                Index;
+  EFI_PCI_IO_PROTOCOL  *PciIo;
+  PCI_CLASSCODE        ClassCode;
+
+  Status = gBS->LocateHandleBuffer (
+                  ByProtocol,
+                  &gEfiPciIoProtocolGuid,
+                  NULL,
+                  &HandleCount,
+                  &HandleBuffer
+                  );
+  if (EFI_ERROR (Status)) {
+    return;
+  }
+
+  for (Index = 0; Index < HandleCount; ++Index) {
+    Status = gBS->HandleProtocol (
+                    HandleBuffer[Index],
+                    &gEfiPciIoProtocolGuid,
+                    (VOID **)&PciIo
+                    );
+
+    if (EFI_ERROR (Status)) {
+      continue;
+    }
+
+    Status = PciIo->Pci.Read (
+                          PciIo,
+                          EfiPciIoWidthUint8,
+                          PCI_CLASSCODE_OFFSET,
+                          sizeof (PCI_CLASSCODE) / sizeof (UINT8),
+                          &ClassCode
+                          );
+    if (EFI_ERROR (Status)) {
+      continue;
+    }
+
+    if ((ClassCode.BaseCode == PCI_CLASS_DISPLAY) && (ClassCode.SubClassCode == PCI_CLASS_DISPLAY_VGA)) {
+      Status = gBS->DisconnectController (
+            HandleBuffer[Index],
+            NULL,
+            NULL
+            );
+      DEBUG ((DEBUG_INFO, "OCLT: Disconnected graphics controller - %r\n", Status));
+    }
+  }
+
+  FreePool (HandleBuffer);
 }
 
 /**
