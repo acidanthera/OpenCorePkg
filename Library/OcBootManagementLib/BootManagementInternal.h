@@ -125,27 +125,9 @@ typedef enum {
 } INTERNAL_ENTRY_VISIBILITY;
 
 EFI_STATUS
-InternalLoadAppleLegacyInterface (
-  IN  EFI_HANDLE                ParentImageHandle,
-  IN  EFI_DEVICE_PATH_PROTOCOL  *HdDevicePath,
-  OUT EFI_HANDLE                *ImageHandle
-  );
-
-OC_LEGACY_OS_TYPE
-InternalGetPartitionLegacyOsType (
-  IN  EFI_HANDLE  PartitionHandle
-  );
-
-OC_LEGACY_BOOT_TYPE
-InternalGetLegacyBootType (
-  VOID
-  );
-
-EFI_STATUS
 InternalCheckScanPolicy (
   IN  EFI_HANDLE  Handle,
   IN  UINT32      Policy,
-  IN  BOOLEAN     Legacy,
   OUT BOOLEAN     *External OPTIONAL
   );
 
@@ -249,22 +231,6 @@ EFI_STATUS
 InternalDescribeBootEntry (
   IN     OC_BOOT_CONTEXT  *BootContext,
   IN OUT OC_BOOT_ENTRY    *BootEntry
-  );
-
-/**
-  Describe legacy boot entry contents by setting fields other than DevicePath.
-
-  @param[in]      BootContext   Boot context.
-  @param[in]      LegacyOsType  Legacy OS type.
-  @param[in,out]  BootEntry     Located boot entry.
-
-  @retval EFI_SUCCESS   The entry point is described successfully.
-**/
-EFI_STATUS
-InternalDescribeLegacyBootEntry (
-  IN     OC_BOOT_CONTEXT    *BootContext,
-  IN     OC_LEGACY_OS_TYPE  LegacyOsType,
-  IN OUT OC_BOOT_ENTRY      *BootEntry
   );
 
 BOOLEAN

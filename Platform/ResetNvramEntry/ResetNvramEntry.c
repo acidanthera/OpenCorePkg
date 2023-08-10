@@ -39,7 +39,8 @@ WaitForChime (
 STATIC
 EFI_STATUS
 SystemActionResetNvram (
-  IN OUT          OC_PICKER_CONTEXT  *PickerContext
+  IN OUT          OC_PICKER_CONTEXT  *PickerContext,
+  IN              VOID               *ActionContext
   )
 {
   UINT8  ResetNVRam = 1;

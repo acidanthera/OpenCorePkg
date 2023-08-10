@@ -76,4 +76,16 @@ OcLegacyThunkBiosInt86 (
   IN  IA32_REGISTER_SET         *Regs
   );
 
+BOOLEAN
+EFIAPI
+OcLegacyThunkFarCall86 (
+  IN  THUNK_CONTEXT             *ThunkContext,
+  IN  EFI_LEGACY_8259_PROTOCOL  *Legacy8259,
+  IN  UINT16                    Segment,
+  IN  UINT16                    Offset,
+  IN  IA32_REGISTER_SET         *Regs,
+  IN  VOID                      *Stack,
+  IN  UINTN                     StackSize
+  );
+
 #endif // OC_LEGACY_THUNK_LIB_H

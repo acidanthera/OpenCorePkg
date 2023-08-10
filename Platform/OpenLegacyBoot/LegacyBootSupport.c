@@ -1,18 +1,9 @@
 /** @file
-  Copyright (C) 2023, Goldfish64. All rights reserved.
-
-  All rights reserved.
-
-  This program and the accompanying materials
-  are licensed and made available under the terms and conditions of the BSD License
-  which accompanies this distribution.  The full text of the license may be found at
-  http://opensource.org/licenses/bsd-license.php
-
-  THE PROGRAM IS DISTRIBUTED UNDER THE BSD LICENSE ON AN "AS IS" BASIS,
-  WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
+  Copyright (C) 2023, Goldfish64. All rights reserved.<BR>
+  SPDX-License-Identifier: BSD-3-Clause
 **/
 
-#include "BootManagementInternal.h"
+#include "LegacyBootInternal.h"
 
 #include <IndustryStandard/Mbr.h>
 
@@ -20,17 +11,20 @@
 #include <Library/BaseMemoryLib.h>
 #include <Library/DevicePathLib.h>
 #include <Library/MemoryAllocationLib.h>
+#include <Library/OcBootManagementLib.h>
 #include <Library/OcDebugLogLib.h>
 #include <Library/OcDevicePathLib.h>
 #include <Library/OcFileLib.h>
+#include <Library/OcLegacyThunkLib.h>
 #include <Library/OcMiscLib.h>
-#include <Library/PrintLib.h>
 #include <Library/UefiBootServicesTableLib.h>
 #include <Library/UefiLib.h>
 #include <Library/UefiRuntimeServicesTableLib.h>
 
 #include <Protocol/DevicePath.h>
 #include <Protocol/Legacy8259.h>
+
+THUNK_CONTEXT  mThunkContext;
 
 //
 // PIWG firmware media device path for Apple legacy interface.
@@ -45,7 +39,7 @@ static CONST EFI_DEVICE_PATH_PROTOCOL  *AppleLegacyInterfaceMediaDevicePathPath 
 
 #define MAX_APPLE_LEGACY_DEVICE_PATHS  16
 
-STATIC
+// STATIC
 BOOLEAN
 CheckLegacySignature (
   IN CONST CHAR8         *SignatureStr,
@@ -155,6 +149,34 @@ ScanAppleLegacyInterfacePaths (
 
   DevicePaths[PathCount] = NULL;
   return EFI_SUCCESS;
+}
+
+EFI_STATUS
+InternalIsLegacyInterfaceSupported (
+  OUT BOOLEAN  *IsAppleInterfaceSupported
+  )
+{
+  EFI_STATUS                Status;
+  EFI_LEGACY_8259_PROTOCOL  *Legacy8259;
+
+  ASSERT (IsAppleInterfaceSupported != NULL);
+
+  //
+  // Apple legacy boot interface is only available on Apple platforms.
+  // Use legacy 16-bit thunks on legacy PC platforms.
+  //
+  if (OcStriCmp (L"Apple", gST->FirmwareVendor) == 0) {
+    *IsAppleInterfaceSupported = TRUE;
+    return EFI_SUCCESS;
+  } else {
+    Status = gBS->LocateProtocol (&gEfiLegacy8259ProtocolGuid, NULL, (VOID **)&Legacy8259);
+    if (!EFI_ERROR (Status) && (Legacy8259 != NULL)) {
+      *IsAppleInterfaceSupported = FALSE;
+      return EFI_SUCCESS;
+    }
+  }
+
+  return EFI_UNSUPPORTED;
 }
 
 EFI_STATUS
@@ -268,7 +290,7 @@ InternalGetPartitionLegacyOsType (
     return OcLegacyOsTypeNone;
   }
 
-  DebugPrintDevicePath (DEBUG_VERBOSE, "OCB: Reading MBR for disk", DevicePath);
+  DebugPrintDevicePath (DEBUG_INFO, "OCB: Reading MBR for disk", DevicePath);
 
   DiskHandle = OcPartitionGetDiskHandle (DevicePath);
   if (DiskHandle == NULL) {
@@ -277,7 +299,7 @@ InternalGetPartitionLegacyOsType (
 
   Mbr = OcGetDiskMbrTable (DiskHandle, TRUE);
   if (Mbr == NULL) {
-    DEBUG ((DEBUG_VERBOSE, "OCB: Disk does not contain a valid MBR partition table\n"));
+    DEBUG ((DEBUG_INFO, "OCB: Disk does not contain a valid MBR partition table\n"));
     return OcLegacyOsTypeNone;
   }
 
@@ -290,7 +312,7 @@ InternalGetPartitionLegacyOsType (
     //
     // Retrieve the first sector of the partition.
     //
-    DebugPrintDevicePath (DEBUG_VERBOSE, "OCB: Reading PBR for partition", DevicePath);
+    DebugPrintDevicePath (DEBUG_INFO, "OCB: Reading PBR for partition", DevicePath);
     Status = OcDiskInitializeContext (
                &DiskContext,
                PartitionHandle,
@@ -351,28 +373,79 @@ InternalGetPartitionLegacyOsType (
   return LegacyOsType;
 }
 
-OC_LEGACY_BOOT_TYPE
-InternalGetLegacyBootType (
-  VOID
+EFI_STATUS
+InternalLoadLegacyMbr (
+  IN  EFI_DEVICE_PATH_PROTOCOL  *HdDevicePath
   )
 {
-  EFI_STATUS                Status;
+  EFI_STATUS          Status;
+  EFI_HANDLE          DiskHandle;
+  MASTER_BOOT_RECORD  *Mbr;
+  IA32_REGISTER_SET   Regs;
+  UINT8               *MbrPtr = (UINT8 *)0x7C00;
+
   EFI_LEGACY_8259_PROTOCOL  *Legacy8259;
-  OC_LEGACY_BOOT_TYPE       BootType;
 
   //
-  // Apple legacy boot interface is only available on Apple platforms.
-  // Use legacy 16-bit thunks on legacy PC platforms.
+  // Locate required protocols.
   //
-  BootType = OcLegacyBootTypeNone;
-  if (OcStriCmp (L"Apple", gST->FirmwareVendor) == 0) {
-    BootType = OcLegacyBootTypeApple;
-  } else {
-    Status = gBS->LocateProtocol (&gEfiLegacy8259ProtocolGuid, NULL, (VOID **)&Legacy8259);
-    if (!EFI_ERROR (Status) && (Legacy8259 != NULL)) {
-      BootType = OcLegacyBootTypeLegacyBios;
-    }
+  Status = gBS->LocateProtocol (
+                  &gEfiLegacy8259ProtocolGuid,
+                  NULL,
+                  (VOID **)&Legacy8259
+                  );
+  if (EFI_ERROR (Status)) {
+    DEBUG ((DEBUG_INFO, "OCB: Could not locate Legacy8259 protocol\n"));
+    return Status;
   }
 
-  return BootType;
+  DebugPrintDevicePath (DEBUG_INFO, "OCB: Reading MBR for disk", HdDevicePath);
+
+  DiskHandle = OcPartitionGetDiskHandle (HdDevicePath);
+  if (DiskHandle == NULL) {
+    return EFI_INVALID_PARAMETER;
+  }
+
+  Mbr = OcGetDiskMbrTable (DiskHandle, TRUE);
+  if (Mbr == NULL) {
+    DEBUG ((DEBUG_INFO, "OCB: Disk does not contain a valid MBR partition table\n"));
+    return EFI_INVALID_PARAMETER;
+  }
+
+  //
+  // Create and initialize thunk structures.
+  //
+  Status = OcLegacyThunkInitializeBiosIntCaller (&mThunkContext);
+  if (EFI_ERROR (Status)) {
+    return Status;
+  }
+
+  Status = OcLegacyThunkInitializeInterruptRedirection (Legacy8259);
+  if (EFI_ERROR (Status)) {
+    return Status;
+  }
+
+  DEBUG ((DEBUG_INFO, "OCB: Preparing to boot legacy system\n"));
+
+  OcLegacyThunkDisconnectEfiGraphics ();
+
+  CopyMem (MbrPtr, Mbr, sizeof (*Mbr));
+
+  ZeroMem (&Regs, sizeof (Regs));
+  Regs.X.DX = 0x82;
+  OcLegacyThunkFarCall86 (
+    &mThunkContext,
+    Legacy8259,
+    0,
+    0x7c00,
+    &Regs,
+    NULL,
+    0
+    );
+
+  DEBUG ((DEBUG_INFO, "here\n"));
+  while (TRUE) {
+  }
+
+  return EFI_SUCCESS;
 }

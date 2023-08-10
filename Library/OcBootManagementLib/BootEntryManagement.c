@@ -720,10 +720,11 @@ InternalAddBootEntryFromCustomEntry (
     ));
 
   if (CustomEntry->SystemAction) {
-    BootEntry->Type          = OC_BOOT_SYSTEM;
-    BootEntry->SystemAction  = CustomEntry->SystemAction;
-    BootEntry->AudioBasePath = CustomEntry->AudioBasePath;
-    BootEntry->AudioBaseType = CustomEntry->AudioBaseType;
+    BootEntry->Type                = OC_BOOT_SYSTEM;
+    BootEntry->SystemAction        = CustomEntry->SystemAction;
+    BootEntry->SystemActionContext = CustomEntry->SystemActionContext;
+    BootEntry->AudioBasePath       = CustomEntry->AudioBasePath;
+    BootEntry->AudioBaseType       = CustomEntry->AudioBaseType;
   } else if (CustomEntry->Tool) {
     BootEntry->Type = OC_BOOT_EXTERNAL_TOOL;
     UnicodeUefiSlashes (PathName);
@@ -1174,100 +1175,6 @@ AddBootEntryFromSelfRecovery (
 }
 
 /**
-  Create bootable entries from legacy boot partitons.
-
-  @param[in,out] BootContext   Context of filesystems.
-  @param[in,out] FileSystem    Filesystem to scan for recovery.
-
-  @retval EFI_SUCCESS on success.
-**/
-STATIC
-EFI_STATUS
-AddBootEntryFromLegacyPartition (
-  IN OUT OC_BOOT_CONTEXT     *BootContext,
-  IN OUT OC_BOOT_FILESYSTEM  *FileSystem
-  )
-{
-  EFI_STATUS                Status;
-  EFI_DEVICE_PATH_PROTOCOL  *DevicePath;
-  OC_BOOT_ENTRY             *BootEntry;
-
-  //
-  // Only support legacy filesystems.
-  //
-  if (FileSystem->LegacyOsType == OcLegacyOsTypeNone) {
-    return EFI_UNSUPPORTED;
-  }
-
-  Status = gBS->HandleProtocol (
-                  FileSystem->Handle,
-                  &gEfiDevicePathProtocolGuid,
-                  (VOID **)&DevicePath
-                  );
-  if (EFI_ERROR (Status)) {
-    return EFI_UNSUPPORTED;
-  }
-
-  DebugPrintDevicePath (DEBUG_INFO, "OCB: Adding legacy entry for disk", DevicePath);
-
-  //
-  // Allocate, initialise, and describe boot entry.
-  //
-  BootEntry = AllocateZeroPool (sizeof (*BootEntry));
-  if (BootEntry == NULL) {
-    return EFI_OUT_OF_RESOURCES;
-  }
-
-  BootEntry->DevicePath = DuplicateDevicePath (DevicePath);
-  if (BootEntry->DevicePath == NULL) {
-    FreePool (BootEntry);
-    return EFI_OUT_OF_RESOURCES;
-  }
-
-  BootEntry->IsExternal   = FileSystem->External;
-  BootEntry->LegacyOsType = FileSystem->LegacyOsType;
-  BootEntry->LaunchInText = TRUE;
-
-  //
-  // Load options are set based on type of disk.
-  // Internal disk = "HD"
-  // External disk = "USB"
-  // Optical disk  = "CD"
-  //
-  if (BootEntry->IsExternal) {
-    if (OcIsDiskCdRom (BootEntry->DevicePath)) {
-      BootEntry->LoadOptionsSize = L_STR_SIZE ("CD");
-      BootEntry->LoadOptions     = AllocateCopyPool (L_STR_SIZE ("CD"), "CD");
-    } else {
-      BootEntry->LoadOptionsSize = L_STR_SIZE ("USB");
-      BootEntry->LoadOptions     = AllocateCopyPool (L_STR_SIZE ("USB"), "USB");
-    }
-  } else {
-    BootEntry->LoadOptionsSize = L_STR_SIZE ("HD");
-    BootEntry->LoadOptions     = AllocateCopyPool (L_STR_SIZE ("HD"), "HD");
-  }
-
-  if (BootEntry->LoadOptions == NULL) {
-    FreePool (BootEntry);
-    return EFI_OUT_OF_RESOURCES;
-  }
-
-  Status = InternalDescribeLegacyBootEntry (BootContext, FileSystem->LegacyOsType, BootEntry);
-  if (EFI_ERROR (Status)) {
-    FreePool (BootEntry);
-    return Status;
-  }
-
-  RegisterBootOption (
-    BootContext,
-    FileSystem,
-    BootEntry
-    );
-
-  return EFI_SUCCESS;
-}
-
-/**
   Create bootable entries from boot options.
 
   @param[in,out] BootContext                Context of filesystems.
@@ -1303,13 +1210,11 @@ AddBootEntryFromBootOption (
   EFI_DEVICE_PATH_PROTOCOL  *DevicePath;
   EFI_DEVICE_PATH_PROTOCOL  *RemainingDevicePath;
   EFI_DEVICE_PATH_PROTOCOL  *ExpandedDevicePath;
-  EFI_DEVICE_PATH_PROTOCOL  *ActivePartitionDevicePath;
   EFI_HANDLE                FileSystemHandle;
   OC_BOOT_FILESYSTEM        *FileSystem;
   UINTN                     DevicePathSize;
   INTN                      NumPatchedNodes;
   BOOLEAN                   IsAppleLegacy;
-  BOOLEAN                   IsLegacyEntry;
   BOOLEAN                   IsRoot;
   EFI_LOAD_OPTION           *LoadOption;
   UINTN                     LoadOptionSize;
@@ -1358,7 +1263,6 @@ AddBootEntryFromBootOption (
   // BootCamp device path will point to disk instead of partition.
   //
   IsAppleLegacy = InternalIsAppleLegacyLoadApp (DevicePath);
-  IsLegacyEntry = FALSE;
   if (IsAppleLegacy) {
     FreePool (DevicePath);
     Status = GetVariable2 (
@@ -1400,15 +1304,7 @@ AddBootEntryFromBootOption (
   }
 
   //
-  // Handle Apple BootCamp device path.
-  //
-  // If we have a legacy installation of Windows in place, Device Path
-  // will point to disk containing the active partition to boot. This will
-  // need to be expanded to the full Device Path of the active partition.
-  //
-  // If not, locate the EFI partition Device Path to boot Windows in UEFI mode.
-  // Installing Windows on Macs that normally use legacy mode for Boot Camp
-  // will exhibit this behavior if Windows is selected as a startup disk from within macOS.
+  // Expand BootCamp device path to EFI partition device path.
   //
   if (IsAppleLegacy) {
     //
@@ -1421,36 +1317,12 @@ AddBootEntryFromBootOption (
       return EFI_NOT_FOUND;
     }
 
-    //
-    // Attempt to locate active MBR partition Device Path.
-    //
-    RemainingDevicePath       = DevicePath;
-    ActivePartitionDevicePath = OcDiskFindActiveMbrPartitionPath (
-                                  DevicePath,
-                                  &DevicePathSize
-                                  );
-    if (ActivePartitionDevicePath != NULL) {
-      DevicePath = ActivePartitionDevicePath;
-      Status     = gBS->LocateDevicePath (
-                          &gEfiBlockIoProtocolGuid,
-                          &ActivePartitionDevicePath,
-                          &FileSystemHandle
-                          );
-
-      if (!EFI_ERROR (Status)) {
-        IsLegacyEntry = TRUE;
-      }
-
-      //
-      // Expand BootCamp device path to EFI partition device path.
-      //
-    } else {
-      DevicePath = OcDiskFindSystemPartitionPath (
-                     DevicePath,
-                     &DevicePathSize,
-                     &FileSystemHandle
-                     );
-    }
+    RemainingDevicePath = DevicePath;
+    DevicePath          = OcDiskFindSystemPartitionPath (
+                            DevicePath,
+                            &DevicePathSize,
+                            &FileSystemHandle
+                            );
 
     FreePool (RemainingDevicePath);
 
@@ -1470,9 +1342,8 @@ AddBootEntryFromBootOption (
     }
 
     //
-    // The Device Path returned by OcDiskFindActiveMbrPartitionPath() and
-    // OcDiskFindSystemPartitionPath() is a pointer to an installed protocol.
-    // Duplicate it so we own the memory.
+    // The Device Path returned by OcDiskFindSystemPartitionPath() is a pointer
+    // to an installed protocol. Duplicate it so we own the memory.
     //
     if (DevicePath != NULL) {
       DevicePath = AllocateCopyPool (DevicePathSize, DevicePath);
@@ -1695,39 +1566,32 @@ AddBootEntryFromBootOption (
     FreePool (DevicePath);
   }
 
-  if (IsLegacyEntry) {
-    Status = AddBootEntryFromLegacyPartition (
-               BootContext,
-               FileSystem
-               );
-  } else {
-    //
-    // We may have a Boot#### entry pointing to macOS with full DP (up to boot.efi),
-    // so IsRoot will be true. However, if this is APFS, we may still have:
-    // - Recovery for this macOS.
-    // - Another macOS installation.
-    // We can only detect them with bless, so we invoke bless in deduplication mode.
-    // We also detect only the Core Apple Boot Policy predefined booter paths to
-    // avoid detection of e.g. generic booters (such as BOOTx64) to avoid
-    // duplicates.
-    //
-    // The amount of paths depends on the kind of the entry.
-    // - If this is a root entry (i.e. it points to the partition)
-    //   we invoke full bless, as it may be Windows entry created by legacy NVRAM script.
-    // - If this is a full entry (i.e. it points to the bootloader)
-    //   we invoke partial bless, which ignores BOOTx64.efi.
-    //   Ignoring BOOTx64.efi is important as we may already have bootmgfw.efi as our entry,
-    //   and we do not want to see Windows added twice.
-    //
-    Status = AddBootEntryFromBless (
-               BootContext,
-               FileSystem,
-               gAppleBootPolicyPredefinedPaths,
-               IsRoot ? gAppleBootPolicyNumPredefinedPaths : gAppleBootPolicyCoreNumPredefinedPaths,
-               LazyScan,
-               TRUE
-               );
-  }
+  //
+  // We may have a Boot#### entry pointing to macOS with full DP (up to boot.efi),
+  // so IsRoot will be true. However, if this is APFS, we may still have:
+  // - Recovery for this macOS.
+  // - Another macOS installation.
+  // We can only detect them with bless, so we invoke bless in deduplication mode.
+  // We also detect only the Core Apple Boot Policy predefined booter paths to
+  // avoid detection of e.g. generic booters (such as BOOTx64) to avoid
+  // duplicates.
+  //
+  // The amount of paths depends on the kind of the entry.
+  // - If this is a root entry (i.e. it points to the partition)
+  //   we invoke full bless, as it may be Windows entry created by legacy NVRAM script.
+  // - If this is a full entry (i.e. it points to the bootloader)
+  //   we invoke partial bless, which ignores BOOTx64.efi.
+  //   Ignoring BOOTx64.efi is important as we may already have bootmgfw.efi as our entry,
+  //   and we do not want to see Windows added twice.
+  //
+  Status = AddBootEntryFromBless (
+             BootContext,
+             FileSystem,
+             gAppleBootPolicyPredefinedPaths,
+             IsRoot ? gAppleBootPolicyNumPredefinedPaths : gAppleBootPolicyCoreNumPredefinedPaths,
+             LazyScan,
+             TRUE
+             );
 
   return Status;
 }
@@ -1745,10 +1609,9 @@ AddBootEntryFromBootOption (
 STATIC
 EFI_STATUS
 AddFileSystemEntry (
-  IN OUT OC_BOOT_CONTEXT    *BootContext,
-  IN     EFI_HANDLE         FileSystemHandle,
-  IN     OC_LEGACY_OS_TYPE  LegacyOsType,
-  OUT OC_BOOT_FILESYSTEM    **FileSystemEntry  OPTIONAL
+  IN OUT OC_BOOT_CONTEXT  *BootContext,
+  IN     EFI_HANDLE       FileSystemHandle,
+  OUT OC_BOOT_FILESYSTEM  **FileSystemEntry  OPTIONAL
   )
 {
   EFI_STATUS                Status;
@@ -1762,7 +1625,6 @@ AddFileSystemEntry (
   Status = InternalCheckScanPolicy (
              FileSystemHandle,
              BootContext->PickerContext->ScanPolicy,
-             LegacyOsType != OcLegacyOsTypeNone,
              &IsExternal
              );
 
@@ -1783,11 +1645,10 @@ AddFileSystemEntry (
 
   DEBUG ((
     DEBUG_INFO,
-    "OCB: Adding fs %p (E:%d|L:%d|B:%d|P:%r) - %s\n",
+    "OCB: Adding fs %p (E:%d|L:%d|P:%r) - %s\n",
     FileSystemHandle,
     IsExternal,
     LoaderFs,
-    LegacyOsType,
     Status,
     OC_HUMAN_STRING (TextDevicePath)
     ));
@@ -1812,7 +1673,6 @@ AddFileSystemEntry (
   Entry->RecoveryFs      = NULL;
   Entry->External        = IsExternal;
   Entry->LoaderFs        = LoaderFs;
-  Entry->LegacyOsType    = LegacyOsType;
   Entry->HasSelfRecovery = FALSE;
   InsertTailList (&BootContext->FileSystems, &Entry->Link);
   ++BootContext->FileSystemCount;
@@ -1956,7 +1816,7 @@ InternalFileSystemForHandle (
     return NULL;
   }
 
-  Status = AddFileSystemEntry (BootContext, FileSystemHandle, FALSE, &FileSystem);
+  Status = AddFileSystemEntry (BootContext, FileSystemHandle, &FileSystem);
   if (!EFI_ERROR (Status)) {
     return FileSystem;
   }
@@ -1971,12 +1831,11 @@ BuildFileSystemList (
   IN BOOLEAN            Empty
   )
 {
-  OC_BOOT_CONTEXT    *BootContext;
-  EFI_STATUS         Status;
-  OC_LEGACY_OS_TYPE  LegacyOsType;
-  UINTN              NoHandles;
-  EFI_HANDLE         *Handles;
-  UINTN              Index;
+  OC_BOOT_CONTEXT  *BootContext;
+  EFI_STATUS       Status;
+  UINTN            NoHandles;
+  EFI_HANDLE       *Handles;
+  UINTN            Index;
 
   BootContext = AllocatePool (sizeof (*BootContext));
   if (BootContext == NULL) {
@@ -1999,9 +1858,6 @@ BuildFileSystemList (
     return BootContext;
   }
 
-  //
-  // Add readable filesystems.
-  //
   Status = gBS->LocateHandleBuffer (
                   ByProtocol,
                   &gEfiSimpleFileSystemProtocolGuid,
@@ -2017,45 +1873,11 @@ BuildFileSystemList (
     AddFileSystemEntry (
       BootContext,
       Handles[Index],
-      FALSE,
       NULL
       );
   }
 
   FreePool (Handles);
-
-  //
-  // Add legacy partitions with valid boot sectors if on a supported legacy platform.
-  //
-  if (Context->LegacyBootType != OcLegacyBootTypeNone) {
-    Status = gBS->LocateHandleBuffer (
-                    ByProtocol,
-                    &gEfiBlockIoProtocolGuid,
-                    NULL,
-                    &NoHandles,
-                    &Handles
-                    );
-    if (EFI_ERROR (Status)) {
-      return BootContext;
-    }
-
-    for (Index = 0; Index < NoHandles; ++Index) {
-      LegacyOsType = InternalGetPartitionLegacyOsType (Handles[Index]);
-      if (LegacyOsType == OcLegacyOsTypeNone) {
-        continue;
-      }
-
-      AddFileSystemEntry (
-        BootContext,
-        Handles[Index],
-        LegacyOsType,
-        NULL
-        );
-    }
-
-    FreePool (Handles);
-  }
-
   return BootContext;
 }
 
@@ -2258,40 +2080,28 @@ OcScanForBootEntries (
   {
     FileSystem = BASE_CR (Link, OC_BOOT_FILESYSTEM, Link);
 
-    if (FileSystem->LegacyOsType != OcLegacyOsTypeNone) {
-      //
-      // Process legacy boot partition.
-      //
-      if (IsListEmpty (&FileSystem->BootEntries)) {
-        AddBootEntryFromLegacyPartition (
-          BootContext,
-          FileSystem
-          );
-      }
-    } else {
-      PartitionEntry                  = OcGetGptPartitionEntry (FileSystem->Handle);
-      IsDefaultEntryProtocolPartition = (
-                                           (DefaultEntryId != NULL)
-                                        && CompareGuid (
-                                             &DefaultEntryPartuuid,
-                                             (PartitionEntry == NULL) ? &gEfiPartTypeUnusedGuid : &PartitionEntry->UniquePartitionGUID
-                                             )
-                                           );
+    PartitionEntry                  = OcGetGptPartitionEntry (FileSystem->Handle);
+    IsDefaultEntryProtocolPartition = (
+                                         (DefaultEntryId != NULL)
+                                      && CompareGuid (
+                                           &DefaultEntryPartuuid,
+                                           (PartitionEntry == NULL) ? &gEfiPartTypeUnusedGuid : &PartitionEntry->UniquePartitionGUID
+                                           )
+                                         );
 
-      //
-      // No entries, or only entry pre-created from boot entry protocol,
-      // so process this directory with Apple Bless.
-      //
-      if (IsDefaultEntryProtocolPartition || IsListEmpty (&FileSystem->BootEntries)) {
-        AddBootEntryFromBless (
-          BootContext,
-          FileSystem,
-          gAppleBootPolicyPredefinedPaths,
-          gAppleBootPolicyNumPredefinedPaths,
-          FALSE,
-          FALSE
-          );
-      }
+    //
+    // No entries, or only entry pre-created from boot entry protocol,
+    // so process this directory with Apple Bless.
+    //
+    if (IsDefaultEntryProtocolPartition || IsListEmpty (&FileSystem->BootEntries)) {
+      AddBootEntryFromBless (
+        BootContext,
+        FileSystem,
+        gAppleBootPolicyPredefinedPaths,
+        gAppleBootPolicyNumPredefinedPaths,
+        FALSE,
+        FALSE
+        );
     }
 
     //
@@ -2633,7 +2443,7 @@ OcLoadBootEntry (
 
   if ((BootEntry->Type & OC_BOOT_SYSTEM) != 0) {
     ASSERT (BootEntry->SystemAction != NULL);
-    return BootEntry->SystemAction (Context);
+    return BootEntry->SystemAction (Context, BootEntry->SystemActionContext);
   }
 
   Status = InternalLoadBootEntry (

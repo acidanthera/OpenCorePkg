@@ -324,11 +324,6 @@ OcRunBootPicker (
     Context->HideAuxiliary = FALSE;
   }
 
-  //
-  // Get legacy boot mode.
-  //
-  Context->LegacyBootType = InternalGetLegacyBootType ();
-
   while (TRUE) {
     //
     // Never show Apple Picker twice, re-scan for entries if we previously successfully showed it.

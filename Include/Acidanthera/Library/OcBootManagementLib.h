@@ -154,25 +154,6 @@ typedef UINT32 OC_BOOT_ENTRY_TYPE;
 #define OC_BOOT_SYSTEM              BIT8
 
 /**
-  Legacy system boot type.
-**/
-typedef enum OC_LEGACY_BOOT_TYPE_ {
-  OcLegacyBootTypeNone,
-  OcLegacyBootTypeApple,
-  OcLegacyBootTypeLegacyBios
-} OC_LEGACY_BOOT_TYPE;
-
-/**
-  Legacy operating system type.
-**/
-typedef enum OC_LEGACY_OS_TYPE_ {
-  OcLegacyOsTypeNone,
-  OcLegacyOsTypeWindowsNtldr,
-  OcLegacyOsTypeWindowsBootmgr,
-  OcLegacyOsTypeIsoLinux
-} OC_LEGACY_OS_TYPE;
-
-/**
   Picker mode.
 **/
 typedef enum OC_PICKER_MODE_ {
@@ -209,7 +190,8 @@ typedef enum OC_PICKER_MODE_ {
 typedef
 EFI_STATUS
 (*OC_BOOT_SYSTEM_ACTION) (
-  IN OUT          OC_PICKER_CONTEXT  *PickerContext
+  IN OUT          OC_PICKER_CONTEXT  *PickerContext,
+  IN              VOID               *ActionContext
   );
 
 /**
@@ -230,6 +212,10 @@ typedef struct OC_BOOT_ENTRY_ {
   // Action to perform on execution. Only valid for system entries.
   //
   OC_BOOT_SYSTEM_ACTION       SystemAction;
+  //
+  // Context for action to perform on execution for system entries.
+  //
+  VOID                        *SystemActionContext;
   //
   // Id under which to save entry as default.
   //
@@ -280,11 +266,6 @@ typedef struct OC_BOOT_ENTRY_ {
   // Set when entry is identified as macOS installer.
   //
   BOOLEAN                     IsAppleInstaller;
-  //
-  // Describes type of legacy OS to be booted.
-  // Set when entry is to be booted through legacy interface.
-  //
-  OC_LEGACY_OS_TYPE           LegacyOsType;
   //
   // Should make this option default boot option.
   //
@@ -371,10 +352,6 @@ struct OC_BOOT_FILESYSTEM_ {
   // Loader filesystem.
   //
   BOOLEAN               LoaderFs;
-  //
-  // Legacy bootsector type.
-  //
-  OC_LEGACY_OS_TYPE     LegacyOsType;
   //
   // Contains recovery on the filesystem.
   //
@@ -627,6 +604,10 @@ typedef struct {
   // System action. Boot Entry Protocol only. Optional.
   //
   OC_BOOT_SYSTEM_ACTION    SystemAction;
+  //
+  // System action context. Boot Entry Protocol only. Optional.
+  //
+  VOID                     *SystemActionContext;
   //
   // Audio base path for system action. Boot Entry Protocol only. Optional.
   //
@@ -976,10 +957,6 @@ struct OC_PICKER_CONTEXT_ {
   // Boot loader instance identifier.
   //
   CONST CHAR8                 *InstanceIdentifier;
-  //
-  // Legacy boot method type.
-  //
-  OC_LEGACY_BOOT_TYPE         LegacyBootType;
   //
   // Enable polling boot arguments.
   //

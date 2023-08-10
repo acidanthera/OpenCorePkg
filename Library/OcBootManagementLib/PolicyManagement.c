@@ -299,7 +299,6 @@ EFI_STATUS
 InternalCheckScanPolicy (
   IN  EFI_HANDLE  Handle,
   IN  UINT32      Policy,
-  IN  BOOLEAN     Legacy,
   OUT BOOLEAN     *External OPTIONAL
   )
 {
@@ -315,7 +314,7 @@ InternalCheckScanPolicy (
     return EFI_SECURITY_VIOLATION;
   }
 
-  if (!Legacy && ((Policy & OC_SCAN_FILE_SYSTEM_LOCK) != 0)) {
+  if ((Policy & OC_SCAN_FILE_SYSTEM_LOCK) != 0) {
     FileSystemPolicy = OcGetFileSystemPolicyType (Handle);
 
     if ((Policy & FileSystemPolicy) == 0) {

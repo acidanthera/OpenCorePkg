@@ -198,6 +198,7 @@ package() {
       "NvmExpressDxe.efi"
       "OpenCanopy.efi"
       "OpenHfsPlus.efi"
+      "OpenLegacyBoot.efi"
       "OpenLinuxBoot.efi"
       "OpenNtfsDxe.efi"
       "OpenPartitionDxe.efi"
