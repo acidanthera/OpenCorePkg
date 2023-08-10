@@ -184,10 +184,10 @@ OcLegacyThunkDisconnectEfiGraphics (
 
     if ((ClassCode.BaseCode == PCI_CLASS_DISPLAY) && (ClassCode.SubClassCode == PCI_CLASS_DISPLAY_VGA)) {
       Status = gBS->DisconnectController (
-            HandleBuffer[Index],
-            NULL,
-            NULL
-            );
+                      HandleBuffer[Index],
+                      NULL,
+                      NULL
+                      );
       DEBUG ((DEBUG_INFO, "OCLT: Disconnected graphics controller - %r\n", Status));
     }
   }

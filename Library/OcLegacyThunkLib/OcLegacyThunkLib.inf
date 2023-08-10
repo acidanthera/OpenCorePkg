@@ -37,6 +37,7 @@
   MdePkg/MdePkg.dec
   OpenCorePkg/OpenCorePkg.dec
   OvmfPkg/OvmfPkg.dec
+  UefiCpuPkg/UefiCpuPkg.dec
 
 [Protocols]
   gEfiLegacy8259ProtocolGuid
