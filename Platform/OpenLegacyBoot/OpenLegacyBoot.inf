@@ -39,6 +39,7 @@
   gEfiLegacy8259ProtocolGuid          ## SOMETIMES_CONSUMES
  
 [Sources]
+  BiosDisk.c
   LegacyBootInternal.h
   LegacyBootSupport.c
   OpenLegacyBoot.c

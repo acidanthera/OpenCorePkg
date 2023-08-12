@@ -108,6 +108,8 @@ SystemActionDoLegacyBoot (
       DEBUG ((DEBUG_WARN, "LEG: Failure while starting Apple legacy interface - %r\n", Status));
       return Status;
     }
+  } else {
+    InternalLoadLegacyPbr (LegacyContext->DevicePath, LegacyContext->FsHandle);
   }
 
   return EFI_SUCCESS;

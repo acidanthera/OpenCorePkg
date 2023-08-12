@@ -43,6 +43,13 @@ typedef struct {
 } OPEN_LEGACY_BOOT_CONTEXT;
 
 EFI_STATUS
+InternalGetBiosDiskNumber (
+  IN      THUNK_CONTEXT             *ThunkContext,
+  IN      EFI_LEGACY_8259_PROTOCOL  *Legacy8259,
+  OUT  UINT8                        *DriveNumber
+  );
+
+EFI_STATUS
 InternalIsLegacyInterfaceSupported (
   OUT BOOLEAN  *IsAppleInterfaceSupported
   );
@@ -60,8 +67,9 @@ InternalGetPartitionLegacyOsType (
   );
 
 EFI_STATUS
-InternalLoadLegacyMbr (
-  IN  EFI_DEVICE_PATH_PROTOCOL  *HdDevicePath
+InternalLoadLegacyPbr (
+  IN  EFI_DEVICE_PATH_PROTOCOL  *PartitionPath,
+  IN  EFI_HANDLE                PartitionHandle
   );
 
 #endif // LEGACY_BOOT_INTERNAL_H

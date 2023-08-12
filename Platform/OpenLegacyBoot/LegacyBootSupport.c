@@ -356,20 +356,25 @@ InternalGetPartitionLegacyOsType (
 }
 
 EFI_STATUS
-InternalLoadLegacyMbr (
-  IN  EFI_DEVICE_PATH_PROTOCOL  *HdDevicePath
+InternalLoadLegacyPbr (
+  IN  EFI_DEVICE_PATH_PROTOCOL  *PartitionPath,
+  IN  EFI_HANDLE                PartitionHandle
   )
 {
   EFI_STATUS          Status;
   EFI_HANDLE          DiskHandle;
   MASTER_BOOT_RECORD  *Mbr;
-  IA32_REGISTER_SET   Regs;
-  UINT8               *MbrPtr = (UINT8 *)0x7C00;
+  MASTER_BOOT_RECORD  *Pbr;
+  UINTN               PbrSize;
+  OC_DISK_CONTEXT     DiskContext;
 
+  IA32_REGISTER_SET         Regs;
+  MASTER_BOOT_RECORD        *MbrPtr = (MASTER_BOOT_RECORD *)0x0600;
+  MASTER_BOOT_RECORD        *PbrPtr = (MASTER_BOOT_RECORD *)0x7C00;
   EFI_LEGACY_8259_PROTOCOL  *Legacy8259;
 
   //
-  // Locate required protocols.
+  // Locate Legacy8259 protocol.
   //
   Status = gBS->LocateProtocol (
                   &gEfiLegacy8259ProtocolGuid,
@@ -377,20 +382,55 @@ InternalLoadLegacyMbr (
                   (VOID **)&Legacy8259
                   );
   if (EFI_ERROR (Status)) {
-    DEBUG ((DEBUG_INFO, "OCB: Could not locate Legacy8259 protocol\n"));
+    DEBUG ((DEBUG_INFO, "LEG: Could not locate Legacy8259 protocol\n"));
     return Status;
   }
 
-  DebugPrintDevicePath (DEBUG_INFO, "OCB: Reading MBR for disk", HdDevicePath);
+  //
+  // Retrieve the PBR from partition.
+  //
+  Status = OcDiskInitializeContext (
+             &DiskContext,
+             PartitionHandle,
+             TRUE
+             );
+  if (EFI_ERROR (Status)) {
+    return Status;
+  }
 
-  DiskHandle = OcPartitionGetDiskHandle (HdDevicePath);
+  PbrSize = ALIGN_VALUE (sizeof (*Pbr), DiskContext.BlockSize);
+  Pbr     = (MASTER_BOOT_RECORD *)AllocatePool (PbrSize);
+  if (Pbr == NULL) {
+    DEBUG ((DEBUG_INFO, "LEG: Buffer allocation error\n"));
+    return EFI_OUT_OF_RESOURCES;
+  }
+
+  Status = OcDiskRead (
+             &DiskContext,
+             0,
+             PbrSize,
+             Pbr
+             );
+  if (EFI_ERROR (Status)) {
+    FreePool (Pbr);
+    return Status;
+  }
+
+  DebugPrintHexDump (DEBUG_INFO, "LEG: PbrHEX", (UINT8 *)Pbr, sizeof (*Pbr));
+
+  //
+  // Retrieve MBR from disk.
+  //
+  DiskHandle = OcPartitionGetDiskHandle (PartitionPath);
   if (DiskHandle == NULL) {
+    FreePool (Pbr);
     return EFI_INVALID_PARAMETER;
   }
 
   Mbr = OcGetDiskMbrTable (DiskHandle, TRUE);
   if (Mbr == NULL) {
-    DEBUG ((DEBUG_INFO, "OCB: Disk does not contain a valid MBR partition table\n"));
+    DEBUG ((DEBUG_INFO, "LEG: Disk does not contain a valid MBR partition table\n"));
+    FreePool (Pbr);
     return EFI_INVALID_PARAMETER;
   }
 
@@ -399,22 +439,42 @@ InternalLoadLegacyMbr (
   //
   Status = OcLegacyThunkInitializeBiosIntCaller (&mThunkContext);
   if (EFI_ERROR (Status)) {
+    FreePool (Pbr);
+    FreePool (Mbr);
     return Status;
   }
 
   Status = OcLegacyThunkInitializeInterruptRedirection (Legacy8259);
   if (EFI_ERROR (Status)) {
+    FreePool (Pbr);
+    FreePool (Mbr);
     return Status;
   }
 
-  DEBUG ((DEBUG_INFO, "OCB: Preparing to boot legacy system\n"));
+  //
+  // Determine BIOS disk number.
+  //
+  InternalGetBiosDiskNumber (&mThunkContext, Legacy8259, NULL);
+
+  //
+  // Copy MBR and PBR to low memory locations for booting.
+  //
+  CopyMem (PbrPtr, Pbr, sizeof (*Pbr));
+  CopyMem (MbrPtr, Mbr, sizeof (*Mbr));
+
+  DebugPrintHexDump (DEBUG_INFO, "LEG: PbrPtr", (UINT8 *)PbrPtr, sizeof (*PbrPtr));
 
   OcLegacyThunkDisconnectEfiGraphics ();
 
-  CopyMem (MbrPtr, Mbr, sizeof (*Mbr));
 
+  //
+  // Thunk to real mode and invoke legacy boot sector.
+  // If successful, this function will not return.
+  //
   ZeroMem (&Regs, sizeof (Regs));
-  Regs.X.DX = 0x82;
+
+  Regs.H.DL = 0x80;
+  Regs.X.SI = (UINT16)(UINTN)&MbrPtr->Partition[2];
   OcLegacyThunkFarCall86 (
     &mThunkContext,
     Legacy8259,
