@@ -6,8 +6,26 @@
 #ifndef LEGACY_BOOT_INTERNAL_H
 #define LEGACY_BOOT_INTERNAL_H
 
-extern EFI_HANDLE  gImageHandle;
-extern BOOLEAN     gIsAppleInterfaceSupported;
+#include <Uefi.h>
+
+#include <IndustryStandard/Mbr.h>
+
+#include <Library/BaseLib.h>
+#include <Library/BaseMemoryLib.h>
+#include <Library/DevicePathLib.h>
+#include <Library/MemoryAllocationLib.h>
+#include <Library/OcBootManagementLib.h>
+#include <Library/OcDebugLogLib.h>
+#include <Library/OcDevicePathLib.h>
+#include <Library/OcFileLib.h>
+#include <Library/OcLegacyThunkLib.h>
+#include <Library/OcMiscLib.h>
+#include <Library/UefiBootServicesTableLib.h>
+#include <Library/UefiLib.h>
+#include <Library/UefiRuntimeServicesTableLib.h>
+
+#include <Protocol/DevicePath.h>
+#include <Protocol/Legacy8259.h>
 
 /**
   Legacy operating system type.
@@ -18,6 +36,11 @@ typedef enum OC_LEGACY_OS_TYPE_ {
   OcLegacyOsTypeWindowsBootmgr,
   OcLegacyOsTypeIsoLinux
 } OC_LEGACY_OS_TYPE;
+
+typedef struct {
+  EFI_HANDLE                  FsHandle;
+  EFI_DEVICE_PATH_PROTOCOL    *DevicePath;
+} OPEN_LEGACY_BOOT_CONTEXT;
 
 EFI_STATUS
 InternalIsLegacyInterfaceSupported (

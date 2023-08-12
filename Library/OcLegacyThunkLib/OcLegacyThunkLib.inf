@@ -41,6 +41,7 @@
 
 [Protocols]
   gEfiLegacy8259ProtocolGuid
+  gEfiTimerArchProtocolGuid
 
 [LibraryClasses]
   BaseMemoryLib

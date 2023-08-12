@@ -7,22 +7,10 @@
 
 #include "LegacyBootInternal.h"
 
-#include <Uefi.h>
-#include <Guid/Gpt.h>
-#include <Library/BaseLib.h>
-#include <Library/DevicePathLib.h>
-#include <Library/MemoryAllocationLib.h>
-#include <Library/OcBootManagementLib.h>
-#include <Library/OcDebugLogLib.h>
-#include <Library/OcFileLib.h>
-#include <Library/OcFlexArrayLib.h>
-#include <Library/OcStringLib.h>
-#include <Library/UefiBootServicesTableLib.h>
-
 #include <Protocol/OcBootEntry.h>
 
-EFI_HANDLE  gImageHandle;
-BOOLEAN     gIsAppleInterfaceSupported;
+STATIC EFI_HANDLE  mImageHandle;
+STATIC BOOLEAN     mIsAppleInterfaceSupported;
 
 VOID
 InternalFreePickerEntry (
@@ -63,23 +51,28 @@ InternalFreePickerEntry (
 STATIC
 EFI_STATUS
 SystemActionDoLegacyBoot (
-  IN OUT          OC_PICKER_CONTEXT  *PickerContext,
-  IN              VOID               *ActionContext
+  IN OUT  OC_PICKER_CONTEXT  *PickerContext,
+  IN      VOID               *ActionContext
   )
 {
   EFI_STATUS                 Status;
   EFI_HANDLE                 LoadedImageHandle;
   EFI_LOADED_IMAGE_PROTOCOL  *LoadedImage;
-  EFI_DEVICE_PATH_PROTOCOL   *DevicePath;
+  OPEN_LEGACY_BOOT_CONTEXT   *LegacyContext;
 
-  DevicePath = (EFI_DEVICE_PATH_PROTOCOL *)ActionContext;
+  LegacyContext = (OPEN_LEGACY_BOOT_CONTEXT *)ActionContext;
 
-  if (gIsAppleInterfaceSupported) {
-    DebugPrintDevicePath (DEBUG_INFO, "LEG: Device path", DevicePath);
-
+  //
+  // Load and start legacy OS.
+  //
+  // On Macs, use the Apple legacy interface.
+  // On other systems, use the Legacy8259 protocol.
+  //
+  DebugPrintDevicePath (DEBUG_INFO, "LEG: Legacy device path", LegacyContext->DevicePath);
+  if (mIsAppleInterfaceSupported) {
     Status = InternalLoadAppleLegacyInterface (
-               gImageHandle,
-               DevicePath,
+               mImageHandle,
+               LegacyContext->DevicePath,
                &LoadedImageHandle
                );
     if (EFI_ERROR (Status)) {
@@ -190,17 +183,22 @@ OcGetLegacyBootEntries (
     return EFI_NOT_FOUND;
   }
 
-  PickerEntry                      = AllocateZeroPool (sizeof (*PickerEntry));
-  PickerEntry->Id                  = "legacy_boot";
-  PickerEntry->Name                = "Windows (legacy)";
-  PickerEntry->Path                = NULL;
-  PickerEntry->Arguments           = NULL;
-  PickerEntry->Flavour             = OC_FLAVOUR_WINDOWS;
-  PickerEntry->Tool                = FALSE;
-  PickerEntry->TextMode            = TRUE;
-  PickerEntry->RealPath            = FALSE;
-  PickerEntry->SystemAction        = SystemActionDoLegacyBoot;
-  PickerEntry->SystemActionContext = DevicePathFromHandle (Device);
+  PickerEntry               = AllocateZeroPool (sizeof (*PickerEntry));
+  PickerEntry->Id           = "legacy_boot";
+  PickerEntry->Name         = "Windows (legacy)";
+  PickerEntry->Path         = NULL;
+  PickerEntry->Arguments    = NULL;
+  PickerEntry->Flavour      = OC_FLAVOUR_WINDOWS;
+  PickerEntry->Tool         = FALSE;
+  PickerEntry->TextMode     = TRUE;
+  PickerEntry->RealPath     = FALSE;
+  PickerEntry->SystemAction = SystemActionDoLegacyBoot;
+
+  OPEN_LEGACY_BOOT_CONTEXT  *contex = (OPEN_LEGACY_BOOT_CONTEXT *)AllocateZeroPool (sizeof (OPEN_LEGACY_BOOT_CONTEXT));
+
+  contex->DevicePath               = DevicePathFromHandle (Device);
+  contex->FsHandle                 = Device;
+  PickerEntry->SystemActionContext = contex;
 
   *Entries    = PickerEntry;
   *NumEntries = 1;
@@ -251,15 +249,15 @@ UefiMain (
 {
   EFI_STATUS  Status;
 
-  gImageHandle = ImageHandle;
+  mImageHandle = ImageHandle;
 
-  Status = InternalIsLegacyInterfaceSupported (&gIsAppleInterfaceSupported);
+  Status = InternalIsLegacyInterfaceSupported (&mIsAppleInterfaceSupported);
   if (EFI_ERROR (Status)) {
     DEBUG ((DEBUG_WARN, "LEG: Legacy boot interface is supported on this system\n"));
     return Status;
   }
 
-  DEBUG ((DEBUG_INFO, "LEG: Apple legacy interface: %d\n", gIsAppleInterfaceSupported));
+  DEBUG ((DEBUG_INFO, "LEG: Apple legacy interface: %d\n", mIsAppleInterfaceSupported));
 
   Status = gBS->InstallMultipleProtocolInterfaces (
                   &ImageHandle,

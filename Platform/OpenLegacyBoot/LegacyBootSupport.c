@@ -5,24 +5,6 @@
 
 #include "LegacyBootInternal.h"
 
-#include <IndustryStandard/Mbr.h>
-
-#include <Library/BaseLib.h>
-#include <Library/BaseMemoryLib.h>
-#include <Library/DevicePathLib.h>
-#include <Library/MemoryAllocationLib.h>
-#include <Library/OcBootManagementLib.h>
-#include <Library/OcDebugLogLib.h>
-#include <Library/OcDevicePathLib.h>
-#include <Library/OcFileLib.h>
-#include <Library/OcLegacyThunkLib.h>
-#include <Library/OcMiscLib.h>
-#include <Library/UefiBootServicesTableLib.h>
-#include <Library/UefiLib.h>
-#include <Library/UefiRuntimeServicesTableLib.h>
-
-#include <Protocol/DevicePath.h>
-#include <Protocol/Legacy8259.h>
 
 THUNK_CONTEXT  mThunkContext;
 
