@@ -32,8 +32,7 @@ STATIC BOOLEAN  mShowCsr;
 STATIC
 EFI_STATUS
 SystemActionSetSip (
-  IN OUT          OC_PICKER_CONTEXT  *Context,
-  IN              VOID               *ActionContext
+  IN OUT          OC_PICKER_CONTEXT  *Context
   )
 {
   EFI_STATUS  Status;

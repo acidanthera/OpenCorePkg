@@ -50,17 +50,14 @@ InternalFreePickerEntry (
 
 STATIC
 EFI_STATUS
-SystemActionDoLegacyBoot (
-  IN OUT  OC_PICKER_CONTEXT  *PickerContext,
-  IN      VOID               *ActionContext
+ExternalSystemActionDoLegacyBoot (
+  IN OUT          OC_PICKER_CONTEXT         *PickerContext,
+  IN              EFI_DEVICE_PATH_PROTOCOL  *DevicePath
   )
 {
   EFI_STATUS                 Status;
   EFI_HANDLE                 LoadedImageHandle;
   EFI_LOADED_IMAGE_PROTOCOL  *LoadedImage;
-  OPEN_LEGACY_BOOT_CONTEXT   *LegacyContext;
-
-  LegacyContext = (OPEN_LEGACY_BOOT_CONTEXT *)ActionContext;
 
   //
   // Load and start legacy OS.
@@ -68,11 +65,11 @@ SystemActionDoLegacyBoot (
   // On Macs, use the Apple legacy interface.
   // On other systems, use the Legacy8259 protocol.
   //
-  DebugPrintDevicePath (DEBUG_INFO, "LEG: Legacy device path", LegacyContext->DevicePath);
+  DebugPrintDevicePath (DEBUG_INFO, "LEG: Legacy device path", DevicePath);
   if (mIsAppleInterfaceSupported) {
     Status = InternalLoadAppleLegacyInterface (
                mImageHandle,
-               LegacyContext->DevicePath,
+               DevicePath,
                &LoadedImageHandle
                );
     if (EFI_ERROR (Status)) {
@@ -109,7 +106,7 @@ SystemActionDoLegacyBoot (
       return Status;
     }
   } else {
-    InternalLoadLegacyPbr (LegacyContext->DevicePath, LegacyContext->FsHandle);
+    InternalLoadLegacyPbr (DevicePath, OcPartitionGetPartitionHandle (DevicePath));
   }
 
   return EFI_SUCCESS;
@@ -185,22 +182,21 @@ OcGetLegacyBootEntries (
     return EFI_NOT_FOUND;
   }
 
-  PickerEntry               = AllocateZeroPool (sizeof (*PickerEntry));
-  PickerEntry->Id           = "legacy_boot";
-  PickerEntry->Name         = "Windows (legacy)";
-  PickerEntry->Path         = NULL;
-  PickerEntry->Arguments    = NULL;
-  PickerEntry->Flavour      = OC_FLAVOUR_WINDOWS;
-  PickerEntry->Tool         = FALSE;
-  PickerEntry->TextMode     = TRUE;
-  PickerEntry->RealPath     = FALSE;
-  PickerEntry->SystemAction = SystemActionDoLegacyBoot;
+  CHAR16  *str2 = ConvertDevicePathToText (DevicePathFromHandle (Device), FALSE, FALSE);
+  CHAR8   *str  = AllocateZeroPool (StrLen (str2) + 1);
 
-  OPEN_LEGACY_BOOT_CONTEXT  *contex = (OPEN_LEGACY_BOOT_CONTEXT *)AllocateZeroPool (sizeof (OPEN_LEGACY_BOOT_CONTEXT));
+  UnicodeStrToAsciiStrS (str2, str, StrLen (str2) + 1);
 
-  contex->DevicePath               = DevicePathFromHandle (Device);
-  contex->FsHandle                 = Device;
-  PickerEntry->SystemActionContext = contex;
+  PickerEntry                       = AllocateZeroPool (sizeof (*PickerEntry));
+  PickerEntry->Id                   = str;
+  PickerEntry->Name                 = "Windows (legacy)";
+  PickerEntry->Path                 = NULL;
+  PickerEntry->Arguments            = NULL;
+  PickerEntry->Flavour              = OC_FLAVOUR_WINDOWS;
+  PickerEntry->Tool                 = FALSE;
+  PickerEntry->TextMode             = TRUE;
+  PickerEntry->RealPath             = FALSE;
+  PickerEntry->ExternalSystemAction = ExternalSystemActionDoLegacyBoot;
 
   *Entries    = PickerEntry;
   *NumEntries = 1;

@@ -37,11 +37,6 @@ typedef enum OC_LEGACY_OS_TYPE_ {
   OcLegacyOsTypeIsoLinux
 } OC_LEGACY_OS_TYPE;
 
-typedef struct {
-  EFI_HANDLE                  FsHandle;
-  EFI_DEVICE_PATH_PROTOCOL    *DevicePath;
-} OPEN_LEGACY_BOOT_CONTEXT;
-
 EFI_STATUS
 InternalGetBiosDiskNumber (
   IN      THUNK_CONTEXT             *ThunkContext,

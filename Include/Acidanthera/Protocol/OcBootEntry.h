@@ -28,7 +28,7 @@
 
   WARNING: This protocol is currently undergoing active design.
 **/
-#define OC_BOOT_ENTRY_PROTOCOL_REVISION  4
+#define OC_BOOT_ENTRY_PROTOCOL_REVISION  5
 
 /**
   Forward declaration of OC_BOOT_ENTRY_PROTOCOL structure.

@@ -5,7 +5,6 @@
 
 #include "LegacyBootInternal.h"
 
-
 THUNK_CONTEXT  mThunkContext;
 
 //
@@ -465,7 +464,6 @@ InternalLoadLegacyPbr (
   DebugPrintHexDump (DEBUG_INFO, "LEG: PbrPtr", (UINT8 *)PbrPtr, sizeof (*PbrPtr));
 
   OcLegacyThunkDisconnectEfiGraphics ();
-
 
   //
   // Thunk to real mode and invoke legacy boot sector.

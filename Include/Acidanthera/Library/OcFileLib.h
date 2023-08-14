@@ -509,6 +509,17 @@ OcPartitionGetDiskHandle (
   );
 
 /**
+  Retrieve the partition's device handle from a partition's Device Path.
+
+  @param[in] HdDevicePath  The Device Path of the partition.
+
+**/
+EFI_HANDLE
+OcPartitionGetPartitionHandle (
+  IN EFI_DEVICE_PATH_PROTOCOL  *HdDevicePath
+  );
+
+/**
   Check if disk is a CD-ROM device.
 
   @param[in] HdDevicePath  The Device Path of the disk.
@@ -633,7 +644,8 @@ OcGetDiskMbrTable (
 EFI_DEVICE_PATH_PROTOCOL *
 OcDiskFindActiveMbrPartitionPath (
   IN  EFI_DEVICE_PATH_PROTOCOL  *DiskDevicePath,
-  OUT UINTN                     *PartitionDevicePathSize
+  OUT UINTN                     *PartitionDevicePathSize,
+  OUT EFI_HANDLE                *PartitionDeviceHandle
   );
 
 /**

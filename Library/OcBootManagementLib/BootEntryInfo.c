@@ -597,7 +597,7 @@ OcGetBootEntryFile (
   IN  BOOLEAN        SearchAtRoot
   )
 {
-  if ((BootEntry->Type & (OC_BOOT_EXTERNAL_TOOL | OC_BOOT_SYSTEM)) != 0) {
+  if ((BootEntry->Type & (OC_BOOT_EXTERNAL_TOOL | OC_BOOT_SYSTEM | OC_BOOT_EXTERNAL_SYSTEM)) != 0) {
     return EFI_NOT_FOUND;
   }
 

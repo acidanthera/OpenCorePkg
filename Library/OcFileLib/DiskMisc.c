@@ -305,6 +305,28 @@ OcPartitionGetDiskHandle (
            );
 }
 
+/**
+  Retrieve the partition's device handle from a partition's Device Path.
+
+  @param[in] HdDevicePath  The Device Path of the partition.
+
+**/
+EFI_HANDLE
+OcPartitionGetPartitionHandle (
+  IN EFI_DEVICE_PATH_PROTOCOL  *HdDevicePath
+  )
+{
+  BOOLEAN  Dummy;
+
+  ASSERT (HdDevicePath != NULL);
+
+  return InternalGetDiskHandle (
+           HdDevicePath,
+           FALSE,
+           &Dummy
+           );
+}
+
 BOOLEAN
 OcIsDiskCdRom (
   IN EFI_DEVICE_PATH_PROTOCOL  *DiskDevicePath
@@ -777,7 +799,8 @@ OcGetDiskMbrTable (
 EFI_DEVICE_PATH_PROTOCOL *
 OcDiskFindActiveMbrPartitionPath (
   IN  EFI_DEVICE_PATH_PROTOCOL  *DiskDevicePath,
-  OUT UINTN                     *PartitionDevicePathSize
+  OUT UINTN                     *PartitionDevicePathSize,
+  OUT EFI_HANDLE                *PartitionDeviceHandle
   )
 {
   EFI_STATUS  Status;
@@ -785,15 +808,41 @@ OcDiskFindActiveMbrPartitionPath (
   BOOLEAN     HasBlockIo2;
   UINTN       Index;
   INT32       ActivePartition;
+  BOOLEAN     Result;
+  INTN        CmpResult;
 
   UINTN                     NoHandles;
   EFI_HANDLE                *Handles;
-  EFI_DEVICE_PATH_PROTOCOL  *DevicePath;
+  EFI_DEVICE_PATH_PROTOCOL  *PartitionDevicePath;
   HARDDRIVE_DEVICE_PATH     *HdNode;
   MASTER_BOOT_RECORD        *Mbr;
 
+  UINTN                     DiskDpSize;
+  UINTN                     DiskDpCmpSize;
+  EFI_DEVICE_PATH_PROTOCOL  *HdDevicePath;
+  UINTN                     HdDpSize;
+
   ASSERT (DiskDevicePath != NULL);
   ASSERT (PartitionDevicePathSize != NULL);
+  ASSERT (PartitionDeviceHandle != NULL);
+
+  DebugPrintDevicePath (
+    DEBUG_INFO,
+    "OCPI: Locating MBR disk's active partition",
+    (EFI_DEVICE_PATH_PROTOCOL *)DiskDevicePath
+    );
+
+  Status = gBS->LocateHandleBuffer (
+                  ByProtocol,
+                  &gEfiSimpleFileSystemProtocolGuid,
+                  NULL,
+                  &NoHandles,
+                  &Handles
+                  );
+  if (EFI_ERROR (Status)) {
+    DEBUG ((DEBUG_INFO, "OCPI: Failed to locate FS handles\n"));
+    return NULL;
+  }
 
   //
   // Get MBR partition table from disk.
@@ -835,41 +884,68 @@ OcDiskFindActiveMbrPartitionPath (
     return NULL;
   }
 
-  Status = gBS->LocateHandleBuffer (
-                  ByProtocol,
-                  &gEfiBlockIoProtocolGuid,
-                  NULL,
-                  &NoHandles,
-                  &Handles
-                  );
-  if (EFI_ERROR (Status)) {
+  //
+  // The partition's Device Path must be at least as big as the disk's (prefix)
+  // plus an additional HardDrive node.
+  //
+  DiskDpSize = GetDevicePathSize (DiskDevicePath);
+  Result     = BaseOverflowAddUN (
+                 DiskDpSize,
+                 sizeof (HARDDRIVE_DEVICE_PATH),
+                 &DiskDpCmpSize
+                 );
+  if (Result) {
+    DEBUG ((DEBUG_INFO, "OCPI: HD node would overflow DP\n"));
     FreePool (Mbr);
     return NULL;
   }
 
+  PartitionDevicePath = NULL;
+
   for (Index = 0; Index < NoHandles; Index++) {
-    DevicePath = DevicePathFromHandle (Handles[Index]);
-    if (DevicePath == NULL) {
+    HdDevicePath = DevicePathFromHandle (Handles[Index]);
+    if (HdDevicePath == NULL) {
       continue;
     }
 
-    if (CompareMem (DevicePath, DiskDevicePath, GetDevicePathSize (DiskDevicePath) - END_DEVICE_PATH_LENGTH) == 0) {
+    HdDpSize = GetDevicePathSize (HdDevicePath);
+    if (HdDpSize < DiskDpCmpSize) {
+      continue;
+    }
+
+    //
+    // Verify the partition's Device Path has the disk's prefixed.
+    //
+    CmpResult = CompareMem (
+                  HdDevicePath,
+                  DiskDevicePath,
+                  DiskDpSize - END_DEVICE_PATH_LENGTH
+                  );
+    if (CmpResult != 0) {
+      continue;
+    }
+
+    if (CompareMem (HdDevicePath, DiskDevicePath, GetDevicePathSize (DiskDevicePath) - END_DEVICE_PATH_LENGTH) == 0) {
       HdNode = (HARDDRIVE_DEVICE_PATH *)FindDevicePathNodeWithType (
-                                          DevicePath,
+                                          HdDevicePath,
                                           MEDIA_DEVICE_PATH,
                                           MEDIA_HARDDRIVE_DP
                                           );
       if (HdNode != NULL) {
         if (HdNode->PartitionStart == *((UINT32 *)Mbr->Partition[ActivePartition].StartingLBA)) {
-          DebugPrintDevicePath (DEBUG_INFO, "OCPI: Got active MBR partition device path", DevicePath);
-          FreePool (Mbr);
-          *PartitionDevicePathSize = GetDevicePathSize (DevicePath);
-          return DevicePath;
+          DebugPrintDevicePath (DEBUG_INFO, "OCPI: Got active MBR partition device path", HdDevicePath);
+
+          PartitionDevicePath      = HdDevicePath;
+          *PartitionDevicePathSize = HdDpSize;
+          *PartitionDeviceHandle   = Handles[Index];
+          break;
         }
       }
     }
   }
 
+  FreePool (Handles);
   FreePool (Mbr);
-  return NULL;
+
+  return PartitionDevicePath;
 }
