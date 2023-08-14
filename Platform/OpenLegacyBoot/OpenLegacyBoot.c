@@ -31,17 +31,9 @@ InternalFreePickerEntry (
     FreePool ((CHAR8 *)Entry->Id);
   }
 
-  if (Entry->Name != NULL) {
+  /*if (Entry->Name != NULL) {
     FreePool ((CHAR8 *)Entry->Name);
-  }
-
-  if (Entry->Path != NULL) {
-    FreePool ((CHAR8 *)Entry->Path);
-  }
-
-  if (Entry->Arguments != NULL) {
-    FreePool ((CHAR8 *)Entry->Arguments);
-  }
+  }*/
 
   if (Entry->Flavour != NULL) {
     FreePool ((CHAR8 *)Entry->Flavour);
@@ -212,7 +204,6 @@ OcFreeLegacyBootEntries (
   IN   UINTN            NumEntries
   )
 {
-  return;
   UINTN  Index;
 
   ASSERT (Entries   != NULL);

@@ -160,8 +160,8 @@ InternalGetBiosDiskNumber (
     return Status;
   }
 
-  DeviceAddressPacket = (DEVICE_ADDRESS_PACKET *)DeviceAddressPacketAddress;
-  Buffer              = (UINT8 *)DeviceAddressPacketAddress + 0x200;
+  DeviceAddressPacket = (DEVICE_ADDRESS_PACKET *)(UINTN)DeviceAddressPacketAddress;
+  Buffer              = (UINT8 *)(UINTN)DeviceAddressPacketAddress + 0x200;
 
   //
   // Locate disk with matching checksum of first few sectors.
