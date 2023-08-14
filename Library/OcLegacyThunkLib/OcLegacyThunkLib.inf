@@ -46,6 +46,7 @@
 [LibraryClasses]
   BaseMemoryLib
   DebugLib
+  IoLib
   MemoryAllocationLib
   UefiBootServicesTableLib
   UefiLib
