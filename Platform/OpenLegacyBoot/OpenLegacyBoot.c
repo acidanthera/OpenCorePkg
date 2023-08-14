@@ -57,7 +57,7 @@ ExternalSystemActionDoLegacyBoot (
   // On Macs, use the Apple legacy interface.
   // On other systems, use the Legacy8259 protocol.
   //
-  DebugPrintDevicePath (DEBUG_INFO, "LEG: Legacy device path", DevicePath);
+  DebugPrintDevicePath (DEBUG_INFO, "OLB: Legacy device path", DevicePath);
   if (mIsAppleInterfaceSupported) {
     Status = InternalLoadAppleLegacyInterface (
                mImageHandle,
@@ -65,7 +65,7 @@ ExternalSystemActionDoLegacyBoot (
                &LoadedImageHandle
                );
     if (EFI_ERROR (Status)) {
-      DEBUG ((DEBUG_WARN, "LEG: Failure while loading Apple legacy interface - %r\n", Status));
+      DEBUG ((DEBUG_WARN, "OLB: Failure while loading Apple legacy interface - %r\n", Status));
       return Status;
     }
 
@@ -75,7 +75,7 @@ ExternalSystemActionDoLegacyBoot (
                     (VOID **)&LoadedImage
                     );
     if (EFI_ERROR (Status)) {
-      DEBUG ((DEBUG_WARN, "LEG: Failure while loading Apple legacy interface - %r\n", Status));
+      DEBUG ((DEBUG_WARN, "OLB: Failure while loading Apple legacy interface - %r\n", Status));
       return Status;
     }
 
@@ -94,7 +94,7 @@ ExternalSystemActionDoLegacyBoot (
       ));
     Status = gBS->StartImage (LoadedImageHandle, NULL, NULL);
     if (EFI_ERROR (Status)) {
-      DEBUG ((DEBUG_WARN, "LEG: Failure while starting Apple legacy interface - %r\n", Status));
+      DEBUG ((DEBUG_WARN, "OLB: Failure while starting Apple legacy interface - %r\n", Status));
       return Status;
     }
   } else {
@@ -139,7 +139,7 @@ OcGetLegacyBootEntries (
                    (VOID **)&FileSystem
                    );
    if (EFI_ERROR (Status)) {
-     DEBUG ((DEBUG_WARN, "LEG: Missing filesystem - %r\n", Status));
+     DEBUG ((DEBUG_WARN, "OLB: Missing filesystem - %r\n", Status));
      return Status;
    }
 
@@ -151,7 +151,7 @@ OcGetLegacyBootEntries (
                           &RootDirectory
                           );
    if (EFI_ERROR (Status)) {
-     DEBUG ((DEBUG_WARN, "LEG: Invalid root volume - %r\n", Status));
+     DEBUG ((DEBUG_WARN, "OLB: Invalid root volume - %r\n", Status));
      return Status;
    }
 
@@ -161,7 +161,7 @@ OcGetLegacyBootEntries (
   // Disallow all but NTFS filesystems.
   //
   // if ((FileSystemPolicy & OC_SCAN_ALLOW_FS_NTFS) != 0) {
-  //   DEBUG ((DEBUG_INFO, "LEG: Not scanning non-NTFS filesystem\n"));
+  //   DEBUG ((DEBUG_INFO, "OLB: Not scanning non-NTFS filesystem\n"));
   //  Status = EFI_NOT_FOUND;
   // }
 
@@ -242,11 +242,11 @@ UefiMain (
 
   Status = InternalIsLegacyInterfaceSupported (&mIsAppleInterfaceSupported);
   if (EFI_ERROR (Status)) {
-    DEBUG ((DEBUG_WARN, "LEG: Legacy boot interface is supported on this system\n"));
+    DEBUG ((DEBUG_WARN, "OLB: Legacy boot interface is supported on this system\n"));
     return Status;
   }
 
-  DEBUG ((DEBUG_INFO, "LEG: Apple legacy interface: %d\n", mIsAppleInterfaceSupported));
+  DEBUG ((DEBUG_INFO, "OLB: Apple legacy interface: %d\n", mIsAppleInterfaceSupported));
 
   Status = gBS->InstallMultipleProtocolInterfaces (
                   &ImageHandle,

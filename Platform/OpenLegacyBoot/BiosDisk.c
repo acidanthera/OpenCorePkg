@@ -57,13 +57,13 @@ BiosDiskReset (
   CarryFlag = OcLegacyThunkBiosInt86 (ThunkContext, Legacy8259, 0x13, &Regs);
 
   if (CarryFlag != 0) {
-    DEBUG ((DEBUG_WARN, "LEG: Failed to reset BIOS disk %u, error 0x%X\n", DriveNumber, Regs.H.AL));
+    DEBUG ((DEBUG_WARN, "OLB: Failed to reset BIOS disk %u, error 0x%X\n", DriveNumber, Regs.H.AL));
     if (Regs.H.AL == BIOS_RESET_FAILED) {
       Regs.H.AH = 0x00;
       Regs.H.DL = DriveNumber;
       CarryFlag = OcLegacyThunkBiosInt86 (ThunkContext, Legacy8259, 0x13, &Regs);
       if (CarryFlag != 0) {
-        DEBUG ((DEBUG_WARN, "LEG: Failed to reset BIOS disk %u, error 0x%X\n", DriveNumber, Regs.H.AH));
+        DEBUG ((DEBUG_WARN, "OLB: Failed to reset BIOS disk %u, error 0x%X\n", DriveNumber, Regs.H.AH));
         return EFI_DEVICE_ERROR;
       }
     }
@@ -156,7 +156,7 @@ InternalGetBiosDiskNumber (
                                       &DeviceAddressPacketAddress
                                       );
   if (EFI_ERROR (Status)) {
-    DEBUG ((DEBUG_WARN, "LEG: Failure allocating low memory packet for BIOS disk read - %r\n", Status));
+    DEBUG ((DEBUG_WARN, "OLB: Failure allocating low memory packet for BIOS disk read - %r\n", Status));
     return Status;
   }
 

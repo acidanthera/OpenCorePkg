@@ -182,7 +182,7 @@ InternalLoadAppleLegacyInterface (
       return EFI_INVALID_PARAMETER;
     }
 
-    DebugPrintDevicePath (DEBUG_INFO, "OCB: Legacy disk device path", WholeDiskPath);
+    DebugPrintDevicePath (DEBUG_INFO, "OLB: Legacy disk device path", WholeDiskPath);
 
     // TODO: Mark target partition as active on pure MBR and hybrid GPT disks.
     // Macs only boot the active partition.
@@ -227,7 +227,7 @@ InternalLoadAppleLegacyInterface (
         UnicodeDevicePath = ConvertDevicePathToText (LegacyDevicePaths[Index], FALSE, FALSE);
         DEBUG ((
           DEBUG_INFO,
-          "OCB: Loaded Apple legacy interface at dp %s - %r\n",
+          "OLB: Loaded Apple legacy interface at dp %s - %r\n",
           UnicodeDevicePath != NULL ? UnicodeDevicePath : L"<null>",
           Status
           ));
@@ -271,7 +271,7 @@ InternalGetPartitionLegacyOsType (
     return OcLegacyOsTypeNone;
   }
 
-  DebugPrintDevicePath (DEBUG_INFO, "OCB: Reading MBR for disk", DevicePath);
+  DebugPrintDevicePath (DEBUG_INFO, "OLB: Reading MBR for disk", DevicePath);
 
   DiskHandle = OcPartitionGetDiskHandle (DevicePath);
   if (DiskHandle == NULL) {
@@ -280,7 +280,7 @@ InternalGetPartitionLegacyOsType (
 
   Mbr = OcGetDiskMbrTable (DiskHandle, TRUE);
   if (Mbr == NULL) {
-    DEBUG ((DEBUG_INFO, "OCB: Disk does not contain a valid MBR partition table\n"));
+    DEBUG ((DEBUG_INFO, "OLB: Disk does not contain a valid MBR partition table\n"));
     return OcLegacyOsTypeNone;
   }
 
@@ -293,7 +293,7 @@ InternalGetPartitionLegacyOsType (
     //
     // Retrieve the first sector of the partition.
     //
-    DebugPrintDevicePath (DEBUG_INFO, "OCB: Reading PBR for partition", DevicePath);
+    DebugPrintDevicePath (DEBUG_INFO, "OLB: Reading PBR for partition", DevicePath);
     Status = OcDiskInitializeContext (
                &DiskContext,
                PartitionHandle,
@@ -306,7 +306,7 @@ InternalGetPartitionLegacyOsType (
     MbrSize = ALIGN_VALUE (sizeof (*Mbr), DiskContext.BlockSize);
     Mbr     = (MASTER_BOOT_RECORD *)AllocatePool (MbrSize);
     if (Mbr == NULL) {
-      DEBUG ((DEBUG_INFO, "OCB: Buffer allocation error\n"));
+      DEBUG ((DEBUG_INFO, "OLB: Buffer allocation error\n"));
       return OcLegacyOsTypeNone;
     }
 
@@ -322,7 +322,7 @@ InternalGetPartitionLegacyOsType (
     }
   }
 
-  DebugPrintHexDump (DEBUG_INFO, "OCB: MbrHEX", Mbr->BootStrapCode, sizeof (Mbr->BootStrapCode));
+  DebugPrintHexDump (DEBUG_INFO, "OLB: MbrHEX", Mbr->BootStrapCode, sizeof (Mbr->BootStrapCode));
 
   //
   // Validate signature in MBR.
@@ -346,7 +346,7 @@ InternalGetPartitionLegacyOsType (
     LegacyOsType = OcLegacyOsTypeIsoLinux;
   } else {
     LegacyOsType = OcLegacyOsTypeNone;
-    DEBUG ((DEBUG_INFO, "OCB: Unknown legacy bootsector signature\n"));
+    DEBUG ((DEBUG_INFO, "OLB: Unknown legacy bootsector signature\n"));
   }
 
   FreePool (Mbr);
@@ -381,7 +381,7 @@ InternalLoadLegacyPbr (
                   (VOID **)&Legacy8259
                   );
   if (EFI_ERROR (Status)) {
-    DEBUG ((DEBUG_INFO, "LEG: Could not locate Legacy8259 protocol\n"));
+    DEBUG ((DEBUG_INFO, "OLB: Could not locate Legacy8259 protocol\n"));
     return Status;
   }
 
@@ -400,7 +400,7 @@ InternalLoadLegacyPbr (
   PbrSize = ALIGN_VALUE (sizeof (*Pbr), DiskContext.BlockSize);
   Pbr     = (MASTER_BOOT_RECORD *)AllocatePool (PbrSize);
   if (Pbr == NULL) {
-    DEBUG ((DEBUG_INFO, "LEG: Buffer allocation error\n"));
+    DEBUG ((DEBUG_INFO, "OLB: Buffer allocation error\n"));
     return EFI_OUT_OF_RESOURCES;
   }
 
@@ -415,7 +415,7 @@ InternalLoadLegacyPbr (
     return Status;
   }
 
-  DebugPrintHexDump (DEBUG_INFO, "LEG: PbrHEX", (UINT8 *)Pbr, sizeof (*Pbr));
+  DebugPrintHexDump (DEBUG_INFO, "OLB: PbrHEX", (UINT8 *)Pbr, sizeof (*Pbr));
 
   //
   // Retrieve MBR from disk.
@@ -428,7 +428,7 @@ InternalLoadLegacyPbr (
 
   Mbr = OcGetDiskMbrTable (DiskHandle, TRUE);
   if (Mbr == NULL) {
-    DEBUG ((DEBUG_INFO, "LEG: Disk does not contain a valid MBR partition table\n"));
+    DEBUG ((DEBUG_INFO, "OLB: Disk does not contain a valid MBR partition table\n"));
     FreePool (Pbr);
     return EFI_INVALID_PARAMETER;
   }
@@ -461,9 +461,10 @@ InternalLoadLegacyPbr (
   CopyMem (PbrPtr, Pbr, sizeof (*Pbr));
   CopyMem (MbrPtr, Mbr, sizeof (*Mbr));
 
-  DebugPrintHexDump (DEBUG_INFO, "LEG: PbrPtr", (UINT8 *)PbrPtr, sizeof (*PbrPtr));
+  DebugPrintHexDump (DEBUG_INFO, "OLB: PbrPtr", (UINT8 *)PbrPtr, sizeof (*PbrPtr));
 
   OcLegacyThunkDisconnectEfiGraphics ();
+  ReleaseUsbOwnership ();
 
   //
   // Thunk to real mode and invoke legacy boot sector.
