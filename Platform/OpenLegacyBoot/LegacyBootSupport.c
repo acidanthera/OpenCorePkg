@@ -464,7 +464,6 @@ InternalLoadLegacyPbr (
   DebugPrintHexDump (DEBUG_INFO, "OLB: PbrPtr", (UINT8 *)PbrPtr, sizeof (*PbrPtr));
 
   OcLegacyThunkDisconnectEfiGraphics ();
-  ReleaseUsbOwnership ();
 
   //
   // Thunk to real mode and invoke legacy boot sector.
