@@ -63,8 +63,7 @@ InternalGetPartitionLegacyOsType (
 
 EFI_STATUS
 InternalLoadLegacyPbr (
-  IN  EFI_DEVICE_PATH_PROTOCOL  *PartitionPath,
-  IN  EFI_HANDLE                PartitionHandle
+  IN  EFI_DEVICE_PATH_PROTOCOL  *PartitionPath
   );
 
 #endif // LEGACY_BOOT_INTERNAL_H

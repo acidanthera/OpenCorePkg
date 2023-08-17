@@ -98,7 +98,7 @@ ExternalSystemActionDoLegacyBoot (
       return Status;
     }
   } else {
-    InternalLoadLegacyPbr (DevicePath, OcPartitionGetPartitionHandle (DevicePath));
+    InternalLoadLegacyPbr (DevicePath);
   }
 
   return EFI_SUCCESS;

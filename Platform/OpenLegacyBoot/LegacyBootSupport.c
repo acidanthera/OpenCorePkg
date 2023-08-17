@@ -168,6 +168,9 @@ InternalLoadAppleLegacyInterface (
   )
 {
   EFI_STATUS                Status;
+  EFI_HANDLE                DiskHandle;
+  EFI_HANDLE                PartitionHandle;
+  UINT8                     PartitionIndex;
   EFI_DEVICE_PATH_PROTOCOL  *WholeDiskPath;
   EFI_DEVICE_PATH_PROTOCOL  **LegacyDevicePaths;
   CHAR16                    *UnicodeDevicePath;
@@ -184,8 +187,28 @@ InternalLoadAppleLegacyInterface (
 
     DebugPrintDevicePath (DEBUG_INFO, "OLB: Legacy disk device path", WholeDiskPath);
 
-    // TODO: Mark target partition as active on pure MBR and hybrid GPT disks.
-    // Macs only boot the active partition.
+    //
+    // Mark target partition as active.
+    //
+    DiskHandle = OcPartitionGetDiskHandle (HdDevicePath);
+    if (DiskHandle == NULL) {
+      return EFI_INVALID_PARAMETER;
+    }
+
+    PartitionHandle = OcPartitionGetPartitionHandle (HdDevicePath);
+    if (PartitionHandle == NULL) {
+      return EFI_INVALID_PARAMETER;
+    }
+
+    Status = OcDiskGetMbrPartitionIndex (PartitionHandle, &PartitionIndex);
+    if (EFI_ERROR (Status)) {
+      return Status;
+    }
+
+    Status = OcDiskMarkMbrPartitionActive (DiskHandle, PartitionIndex);
+    if (EFI_ERROR (Status)) {
+      return Status;
+    }
 
     //
     // Set BootCampHD variable pointing to target disk.
@@ -356,16 +379,15 @@ InternalGetPartitionLegacyOsType (
 
 EFI_STATUS
 InternalLoadLegacyPbr (
-  IN  EFI_DEVICE_PATH_PROTOCOL  *PartitionPath,
-  IN  EFI_HANDLE                PartitionHandle
+  IN  EFI_DEVICE_PATH_PROTOCOL  *PartitionPath
   )
 {
   EFI_STATUS          Status;
   EFI_HANDLE          DiskHandle;
+  EFI_HANDLE          PartitionHandle;
   MASTER_BOOT_RECORD  *Mbr;
   MASTER_BOOT_RECORD  *Pbr;
-  UINTN               PbrSize;
-  OC_DISK_CONTEXT     DiskContext;
+  UINT8               PartitionIndex;
 
   IA32_REGISTER_SET         Regs;
   MASTER_BOOT_RECORD        *MbrPtr = (MASTER_BOOT_RECORD *)0x0600;
@@ -386,30 +408,21 @@ InternalLoadLegacyPbr (
   }
 
   //
-  // Retrieve the PBR from partition.
+  // Retrieve the PBR from partition and partition index.
   //
-  Status = OcDiskInitializeContext (
-             &DiskContext,
-             PartitionHandle,
-             TRUE
-             );
-  if (EFI_ERROR (Status)) {
-    return Status;
+  PartitionHandle = OcPartitionGetPartitionHandle (PartitionPath);
+  if (PartitionHandle == NULL) {
+    DEBUG ((DEBUG_INFO, "OLB: Could not locate partition handle\n"));
+    return EFI_INVALID_PARAMETER;
   }
 
-  PbrSize = ALIGN_VALUE (sizeof (*Pbr), DiskContext.BlockSize);
-  Pbr     = (MASTER_BOOT_RECORD *)AllocatePool (PbrSize);
+  Pbr = OcGetDiskMbrTable (PartitionHandle, FALSE);
   if (Pbr == NULL) {
-    DEBUG ((DEBUG_INFO, "OLB: Buffer allocation error\n"));
-    return EFI_OUT_OF_RESOURCES;
+    DEBUG ((DEBUG_INFO, "OLB: Partition does not contain a valid PBR\n"));
+    return EFI_INVALID_PARAMETER;
   }
 
-  Status = OcDiskRead (
-             &DiskContext,
-             0,
-             PbrSize,
-             Pbr
-             );
+  Status = OcDiskGetMbrPartitionIndex (PartitionHandle, &PartitionIndex);
   if (EFI_ERROR (Status)) {
     FreePool (Pbr);
     return Status;
@@ -432,6 +445,8 @@ InternalLoadLegacyPbr (
     FreePool (Pbr);
     return EFI_INVALID_PARAMETER;
   }
+
+  DebugPrintHexDump (DEBUG_INFO, "OLB: MbrHEX", (UINT8 *)Mbr, sizeof (*Mbr));
 
   //
   // Create and initialize thunk structures.
@@ -472,7 +487,7 @@ InternalLoadLegacyPbr (
   ZeroMem (&Regs, sizeof (Regs));
 
   Regs.H.DL = 0x80;
-  Regs.X.SI = (UINT16)(UINTN)&MbrPtr->Partition[2];
+  Regs.X.SI = (UINT16)(UINTN)&MbrPtr->Partition[PartitionIndex];
   OcLegacyThunkFarCall86 (
     &mThunkContext,
     Legacy8259,

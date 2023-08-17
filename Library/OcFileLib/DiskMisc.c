@@ -40,6 +40,8 @@ STATIC EFI_GUID  mInternalPartitionEntryProtocolGuid = {
   0x9FC6B19, 0xB8A1, 0x4A01, { 0x8D, 0xB1, 0x87, 0x94, 0xE7, 0x63, 0x4C, 0xA5 }
 };
 
+#define MBR_PARTITION_ACTIVE  0x80
+
 EFI_STATUS
 OcDiskInitializeContext (
   OUT OC_DISK_CONTEXT  *Context,
@@ -48,6 +50,9 @@ OcDiskInitializeContext (
   )
 {
   EFI_STATUS  Status;
+
+  ASSERT (Context != NULL);
+  ASSERT (DiskHandle != NULL);
 
   //
   // Retrieve the Block I/O protocol.
@@ -131,6 +136,41 @@ OcDiskRead (
                                   );
   } else {
     Status = Context->BlockIo->ReadBlocks (
+                                 Context->BlockIo,
+                                 Context->MediaId,
+                                 Lba,
+                                 BufferSize,
+                                 Buffer
+                                 );
+  }
+
+  return Status;
+}
+
+EFI_STATUS
+OcDiskWrite (
+  IN OC_DISK_CONTEXT  *Context,
+  IN UINT64           Lba,
+  IN UINTN            BufferSize,
+  IN VOID             *Buffer
+  )
+{
+  EFI_STATUS  Status;
+
+  ASSERT (Context->BlockIo != NULL || Context->BlockIo2 != NULL);
+  ASSERT ((BufferSize & (Context->BlockSize - 1)) == 0);
+
+  if (Context->BlockIo2 != NULL) {
+    Status = Context->BlockIo2->WriteBlocksEx (
+                                  Context->BlockIo2,
+                                  Context->MediaId,
+                                  Lba,
+                                  NULL,
+                                  BufferSize,
+                                  Buffer
+                                  );
+  } else {
+    Status = Context->BlockIo->WriteBlocks (
                                  Context->BlockIo,
                                  Context->MediaId,
                                  Lba,
@@ -723,7 +763,7 @@ OcGetGptPartitionEntry (
 MASTER_BOOT_RECORD *
 OcGetDiskMbrTable (
   IN EFI_HANDLE  DiskHandle,
-  IN BOOLEAN     UseBlockIo2
+  IN BOOLEAN     CheckPartitions
   )
 {
   EFI_STATUS          Status;
@@ -741,7 +781,7 @@ OcGetDiskMbrTable (
   Status = OcDiskInitializeContext (
              &DiskContext,
              DiskHandle,
-             UseBlockIo2
+             TRUE
              );
   if (EFI_ERROR (Status)) {
     return NULL;
@@ -775,25 +815,176 @@ OcGetDiskMbrTable (
     return NULL;
   }
 
-  if (  (Mbr->Partition[0].OSIndicator == PMBR_GPT_PARTITION)
-     && (*((UINT32 *)Mbr->Partition[0].StartingLBA) == 0x01)
-     && (*((UINT32 *)Mbr->Partition[0].SizeInLBA) != 0))
-  {
-    IsProtectiveMbr = TRUE;
-    for (Index = 1; Index < MAX_MBR_PARTITIONS; Index++) {
-      if ((*((UINT32 *)Mbr->Partition[Index].StartingLBA) != 0) || (*((UINT32 *)Mbr->Partition[Index].SizeInLBA) != 0)) {
-        IsProtectiveMbr = FALSE;
-        break;
+  if (CheckPartitions) {
+    if (  (Mbr->Partition[0].OSIndicator == PMBR_GPT_PARTITION)
+       && (*((UINT32 *)Mbr->Partition[0].StartingLBA) == 0x01)
+       && (*((UINT32 *)Mbr->Partition[0].SizeInLBA) != 0))
+    {
+      IsProtectiveMbr = TRUE;
+      for (Index = 1; Index < MAX_MBR_PARTITIONS; Index++) {
+        if ((*((UINT32 *)Mbr->Partition[Index].StartingLBA) != 0) || (*((UINT32 *)Mbr->Partition[Index].SizeInLBA) != 0)) {
+          IsProtectiveMbr = FALSE;
+          break;
+        }
       }
-    }
 
-    if (IsProtectiveMbr) {
-      FreePool (Mbr);
-      return NULL;
+      if (IsProtectiveMbr) {
+        FreePool (Mbr);
+        return NULL;
+      }
     }
   }
 
   return Mbr;
+}
+
+EFI_STATUS
+OcDiskGetMbrPartitionIndex (
+  IN  EFI_HANDLE  PartitionHandle,
+  OUT UINT8       *PartitionIndex
+  )
+{
+  EFI_STATUS                   Status;
+  MASTER_BOOT_RECORD           *Mbr;
+  EFI_DEVICE_PATH_PROTOCOL     *DevicePath;
+  EFI_HANDLE                   DiskHandle;
+  CONST HARDDRIVE_DEVICE_PATH  *HdNode;
+  UINT8                        Index;
+
+  ASSERT (PartitionHandle != NULL);
+  ASSERT (PartitionIndex != NULL);
+
+  //
+  // Retrieve the partition Device Path information.
+  //
+  DevicePath = DevicePathFromHandle (PartitionHandle);
+  if (DevicePath == NULL) {
+    DEBUG ((DEBUG_INFO, "OCPI: Failed to retrieve Device Path\n"));
+    return EFI_UNSUPPORTED;
+  }
+
+  HdNode = (HARDDRIVE_DEVICE_PATH *)(
+                                     FindDevicePathNodeWithType (
+                                       DevicePath,
+                                       MEDIA_DEVICE_PATH,
+                                       MEDIA_HARDDRIVE_DP
+                                       )
+                                     );
+  if (HdNode == NULL) {
+    DEBUG ((DEBUG_INFO, "OCPI: Device Path does not describe a partition\n"));
+    return EFI_UNSUPPORTED;
+  }
+
+  DiskHandle = OcPartitionGetDiskHandle (DevicePath);
+  if (DiskHandle == NULL) {
+    return EFI_UNSUPPORTED;
+  }
+
+  //
+  // Get MBR from partition's disk.
+  //
+  Mbr = OcGetDiskMbrTable (
+          DiskHandle,
+          TRUE
+          );
+  if (Mbr == NULL) {
+    DEBUG ((DEBUG_INFO, "OCPI: Disk does not have an MBR partition table\n"));
+    return EFI_UNSUPPORTED;
+  }
+
+  Status = EFI_NOT_FOUND;
+  for (Index = 0; Index < MAX_MBR_PARTITIONS; Index++) {
+    if (  (*((UINT32 *)Mbr->Partition[Index].StartingLBA) == HdNode->PartitionStart)
+       && (*((UINT32 *)Mbr->Partition[Index].SizeInLBA) == HdNode->PartitionSize))
+    {
+      *PartitionIndex = Index;
+      Status          = EFI_SUCCESS;
+      break;
+    }
+  }
+
+  FreePool (Mbr);
+
+  return Status;
+}
+
+EFI_STATUS
+OcDiskMarkMbrPartitionActive (
+  IN  EFI_HANDLE  DiskHandle,
+  IN  UINT8       PartitionIndex
+  )
+{
+  EFI_STATUS          Status;
+  MASTER_BOOT_RECORD  *Mbr;
+  UINTN               MbrSize;
+  UINTN               Index;
+  OC_DISK_CONTEXT     DiskContext;
+
+  ASSERT (DiskHandle != NULL);
+  ASSERT (PartitionIndex < MAX_MBR_PARTITIONS);
+
+  //
+  // Read first sector containing MBR table.
+  //
+  Status = OcDiskInitializeContext (
+             &DiskContext,
+             DiskHandle,
+             TRUE
+             );
+  if (EFI_ERROR (Status)) {
+    return Status;
+  }
+
+  MbrSize = ALIGN_VALUE (sizeof (*Mbr), DiskContext.BlockSize);
+  Mbr     = (MASTER_BOOT_RECORD *)AllocatePool (MbrSize);
+  if (Mbr == NULL) {
+    return EFI_OUT_OF_RESOURCES;
+  }
+
+  Status = OcDiskRead (
+             &DiskContext,
+             0,
+             MbrSize,
+             Mbr
+             );
+  if (EFI_ERROR (Status)) {
+    FreePool (Mbr);
+    return Status;
+  }
+
+  //
+  // Validate MBR signatures.
+  //
+  // If MBR is a protective one (as part of a GPT disk), ignore.
+  // Protective MBR is defined as a single partition of type 0xEE, other three partitions are to be zero.
+  //
+  if (Mbr->Signature != MBR_SIGNATURE) {
+    FreePool (Mbr);
+    return EFI_UNSUPPORTED;
+  }
+
+  //
+  // Mark desired partition as active.
+  //
+  for (Index = 0; Index < MAX_MBR_PARTITIONS; Index++) {
+    Mbr->Partition[Index].BootIndicator = 0x00;
+  }
+
+  Mbr->Partition[PartitionIndex].BootIndicator = MBR_PARTITION_ACTIVE;
+
+  //
+  // Write MBR to disk.
+  //
+  Status = OcDiskWrite (
+             &DiskContext,
+             0,
+             MbrSize,
+             Mbr
+             );
+
+  FreePool (Mbr);
+
+  return Status;
 }
 
 EFI_DEVICE_PATH_PROTOCOL *
@@ -858,7 +1049,7 @@ OcDiskFindActiveMbrPartitionPath (
 
   Mbr = OcGetDiskMbrTable (
           DiskHandle,
-          HasBlockIo2
+          TRUE
           );
   if (Mbr == NULL) {
     return NULL;
@@ -870,8 +1061,9 @@ OcDiskFindActiveMbrPartitionPath (
   //
   ActivePartition = -1;
   for (Index = 0; Index < MAX_MBR_PARTITIONS; Index++) {
-    if (Mbr->Partition[Index].BootIndicator == 0x80) {
+    if (Mbr->Partition[Index].BootIndicator == MBR_PARTITION_ACTIVE) {
       ActivePartition = (INT32)Index;
+      break;
     }
   }
 
