@@ -20,11 +20,12 @@ static CONST EFI_DEVICE_PATH_PROTOCOL  *AppleLegacyInterfaceMediaDevicePathPath 
 
 #define MAX_APPLE_LEGACY_DEVICE_PATHS  16
 
-// STATIC
+STATIC
 BOOLEAN
 CheckLegacySignature (
-  IN CONST CHAR8         *SignatureStr,
-  IN MASTER_BOOT_RECORD  *Pbr
+  IN CONST CHAR8  *SignatureStr,
+  IN CONST UINT8  *Buffer,
+  IN CONST UINTN  BufferSize
   )
 {
   UINT32  Offset;
@@ -35,8 +36,8 @@ CheckLegacySignature (
            (CONST UINT8 *)SignatureStr,
            NULL,
            (CONST UINT32)AsciiStrLen (SignatureStr),
-           Pbr->BootStrapCode,
-           sizeof (Pbr->BootStrapCode),
+           Buffer,
+           BufferSize,
            &Offset
            );
 }
@@ -272,99 +273,82 @@ InternalLoadAppleLegacyInterface (
 
 OC_LEGACY_OS_TYPE
 InternalGetPartitionLegacyOsType (
-  IN  EFI_HANDLE  PartitionHandle
+  IN EFI_HANDLE  PartitionHandle,
+  IN BOOLEAN     IsCdRomSupported
   )
 {
-  EFI_STATUS          Status;
-  MASTER_BOOT_RECORD  *Mbr;
-  UINTN               MbrSize;
-  OC_LEGACY_OS_TYPE   LegacyOsType;
-
+  EFI_STATUS                Status;
+  UINT8                     *Buffer;
+  UINTN                     BufferSize;
+  MASTER_BOOT_RECORD        *Mbr;
   EFI_DEVICE_PATH_PROTOCOL  *DevicePath;
-  OC_DISK_CONTEXT           DiskContext;
   EFI_HANDLE                DiskHandle;
+  OC_LEGACY_OS_TYPE         LegacyOsType;
 
   ASSERT (PartitionHandle != NULL);
 
-  //
-  // Read MBR of whole disk.
-  //
   DevicePath = DevicePathFromHandle (PartitionHandle);
   if (DevicePath == NULL) {
     return OcLegacyOsTypeNone;
   }
-
-  DebugPrintDevicePath (DEBUG_INFO, "OLB: Reading MBR for disk", DevicePath);
 
   DiskHandle = OcPartitionGetDiskHandle (DevicePath);
   if (DiskHandle == NULL) {
     return OcLegacyOsTypeNone;
   }
 
-  Mbr = OcGetDiskMbrTable (DiskHandle, TRUE);
-  if (Mbr == NULL) {
-    DEBUG ((DEBUG_INFO, "OLB: Disk does not contain a valid MBR partition table\n"));
-    return OcLegacyOsTypeNone;
-  }
+  //
+  // For CD devices, validate El-Torito structures.
+  // For hard disk and USB devices, validate MBR and PBR of target partition.
+  //
+  if (OcIsDiskCdRom (DevicePath)) {
+    if (!IsCdRomSupported) {
+      DEBUG ((DEBUG_INFO, "OLB: CD-ROM boot not supported on this platform\n"));
+      return OcLegacyOsTypeNone;
+    }
 
-  //
-  // For hard disk devices, get PBR sector instead.
-  //
-  if (!OcIsDiskCdRom (DevicePath)) {
+    DebugPrintDevicePath (DEBUG_INFO, "OLB: Reading El-Torito for CDROM", DevicePath);
+    Status = OcDiskReadElTorito (DevicePath, &Buffer, &BufferSize);
+    if (EFI_ERROR (Status)) {
+      DEBUG ((DEBUG_INFO, "OLB: Failed reading El-Torito - %r\n", Status));
+      return OcLegacyOsTypeNone;
+    }
+  } else {
+    DebugPrintDevicePath (DEBUG_INFO, "OLB: Reading MBR for parent disk", DevicePath);
+    Mbr = OcGetDiskMbrTable (DiskHandle, TRUE);
+    if (Mbr == NULL) {
+      DEBUG ((DEBUG_INFO, "OLB: Disk does not contain a valid MBR\n"));
+      return OcLegacyOsTypeNone;
+    }
+
     FreePool (Mbr);
 
     //
-    // Retrieve the first sector of the partition.
+    // Retrieve PBR for partition.
     //
     DebugPrintDevicePath (DEBUG_INFO, "OLB: Reading PBR for partition", DevicePath);
-    Status = OcDiskInitializeContext (
-               &DiskContext,
-               PartitionHandle,
-               TRUE
-               );
-    if (EFI_ERROR (Status)) {
-      return OcLegacyOsTypeNone;
-    }
-
-    MbrSize = ALIGN_VALUE (sizeof (*Mbr), DiskContext.BlockSize);
-    Mbr     = (MASTER_BOOT_RECORD *)AllocatePool (MbrSize);
+    Mbr = OcGetDiskMbrTable (PartitionHandle, FALSE);
     if (Mbr == NULL) {
-      DEBUG ((DEBUG_INFO, "OLB: Buffer allocation error\n"));
+      DEBUG ((DEBUG_INFO, "OLB: Partition does not contain a valid PBR\n"));
       return OcLegacyOsTypeNone;
     }
 
-    Status = OcDiskRead (
-               &DiskContext,
-               0,
-               MbrSize,
-               Mbr
-               );
-    if (EFI_ERROR (Status)) {
-      FreePool (Mbr);
-      return OcLegacyOsTypeNone;
-    }
+    Buffer     = (UINT8 *)Mbr;
+    BufferSize = sizeof (*Mbr);
   }
 
-  DebugPrintHexDump (DEBUG_INFO, "OLB: MbrHEX", Mbr->BootStrapCode, sizeof (Mbr->BootStrapCode));
-
-  //
-  // Validate signature in MBR.
-  //
-  if (Mbr->Signature != MBR_SIGNATURE) {
-    FreePool (Mbr);
-    return OcLegacyOsTypeNone;
-  }
+  DebugPrintHexDump (DEBUG_INFO, "OLB: PbrHEX", Buffer, BufferSize);
 
   //
   // Validate sector contents and check for known signatures
   // indicating the partition is bootable.
   //
-  if (CheckLegacySignature ("BOOTMGR", Mbr)) {
+  if (CheckLegacySignature ("BOOTMGR", Buffer, BufferSize)) {
     LegacyOsType = OcLegacyOsTypeWindowsBootmgr;
-  } else if (CheckLegacySignature ("NTLDR", Mbr)) {
+  } else if (CheckLegacySignature ("NTLDR", Buffer, BufferSize)) {
     LegacyOsType = OcLegacyOsTypeWindowsNtldr;
-  } else if (  CheckLegacySignature ("ISOLINUX", Mbr)
-            || CheckLegacySignature ("isolinux", Mbr))
+  } else if (  CheckLegacySignature ("ISOLINUX", Buffer, BufferSize)
+            || CheckLegacySignature ("isolinux", Buffer, BufferSize))
   {
     LegacyOsType = OcLegacyOsTypeIsoLinux;
   } else {
@@ -372,7 +356,7 @@ InternalGetPartitionLegacyOsType (
     DEBUG ((DEBUG_INFO, "OLB: Unknown legacy bootsector signature\n"));
   }
 
-  FreePool (Mbr);
+  FreePool (Buffer);
 
   return LegacyOsType;
 }
@@ -441,7 +425,7 @@ InternalLoadLegacyPbr (
 
   Mbr = OcGetDiskMbrTable (DiskHandle, TRUE);
   if (Mbr == NULL) {
-    DEBUG ((DEBUG_INFO, "OLB: Disk does not contain a valid MBR partition table\n"));
+    DEBUG ((DEBUG_INFO, "OLB: Disk does not contain a valid MBR\n"));
     FreePool (Pbr);
     return EFI_INVALID_PARAMETER;
   }

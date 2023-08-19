@@ -43,13 +43,17 @@ InternalFreePickerEntry (
 STATIC
 EFI_STATUS
 ExternalSystemActionDoLegacyBoot (
-  IN OUT          OC_PICKER_CONTEXT         *PickerContext,
-  IN              EFI_DEVICE_PATH_PROTOCOL  *DevicePath
+  IN OUT          OC_PICKER_CONTEXT  *PickerContext,
+  IN              VOID               *ActionContext
   )
 {
   EFI_STATUS                 Status;
   EFI_HANDLE                 LoadedImageHandle;
   EFI_LOADED_IMAGE_PROTOCOL  *LoadedImage;
+  LEGACY_ENTRY_CONTEXT       *LegacyContext;
+  CONST CHAR8                *Args;
+
+  LegacyContext = ActionContext;
 
   //
   // Load and start legacy OS.
@@ -57,11 +61,11 @@ ExternalSystemActionDoLegacyBoot (
   // On Macs, use the Apple legacy interface.
   // On other systems, use the Legacy8259 protocol.
   //
-  DebugPrintDevicePath (DEBUG_INFO, "OLB: Legacy device path", DevicePath);
+  DebugPrintDevicePath (DEBUG_INFO, "OLB: Legacy device path", LegacyContext->DevicePath);
   if (mIsAppleInterfaceSupported) {
     Status = InternalLoadAppleLegacyInterface (
                mImageHandle,
-               DevicePath,
+               LegacyContext->DevicePath,
                &LoadedImageHandle
                );
     if (EFI_ERROR (Status)) {
@@ -69,6 +73,9 @@ ExternalSystemActionDoLegacyBoot (
       return Status;
     }
 
+    //
+    // Specify boot device type on loaded image.
+    //
     Status = gBS->HandleProtocol (
                     LoadedImageHandle,
                     &gEfiLoadedImageProtocolGuid,
@@ -82,23 +89,21 @@ ExternalSystemActionDoLegacyBoot (
     LoadedImage->LoadOptionsSize = 0;
     LoadedImage->LoadOptions     = NULL;
 
-    CONST CHAR8  *Args;
-
-    Args = AllocateCopyPool (L_STR_SIZE ("HD"), "HD");
+    if (OcIsDiskCdRom (LegacyContext->DevicePath)) {
+      Args = AllocateCopyPool (L_STR_SIZE ("CD"), "CD");
+    } else {
+      Args = AllocateCopyPool (L_STR_SIZE ("HD"), "HD");
+    }
 
     OcAppendArgumentsToLoadedImage (LoadedImage, &Args, 1, TRUE);
-    DEBUG ((
-      DEBUG_INFO,
-      "OCB: Args <%s>\n",
-      LoadedImage->LoadOptions
-      ));
+
     Status = gBS->StartImage (LoadedImageHandle, NULL, NULL);
     if (EFI_ERROR (Status)) {
       DEBUG ((DEBUG_WARN, "OLB: Failure while starting Apple legacy interface - %r\n", Status));
       return Status;
     }
   } else {
-    InternalLoadLegacyPbr (DevicePath);
+    InternalLoadLegacyPbr (LegacyContext->DevicePath);
   }
 
   return EFI_SUCCESS;
@@ -114,84 +119,96 @@ OcGetLegacyBootEntries (
   OUT       UINTN                   *NumEntries
   )
 {
-  // EFI_STATUS                       Status;
-  // EFI_SIMPLE_FILE_SYSTEM_PROTOCOL  *FileSystem;
-  // EFI_FILE_PROTOCOL                *RootDirectory;
-  // UINT32                           FileSystemPolicy;
+  EFI_STATUS  Status;
+  UINTN       NoHandles;
+  EFI_HANDLE  *Handles;
+  UINTN       HandleIndex;
 
-  OC_LEGACY_OS_TYPE  LegacyType;
-  OC_PICKER_ENTRY    *PickerEntry;
+  EFI_HANDLE                BlockDeviceHandle;
+  EFI_DEVICE_PATH_PROTOCOL  *BlockDevicePath;
+  OC_LEGACY_OS_TYPE         LegacyOsType;
+  OC_FLEX_ARRAY             *FlexPickerEntries;
+  OC_PICKER_ENTRY           *PickerEntry;
+
+  ASSERT (PickerContext != NULL);
+  ASSERT (Entries     != NULL);
+  ASSERT (NumEntries  != NULL);
 
   //
-  // No custom entries.
+  // Custom entries only.
   //
-  if (Device == NULL) {
+  if (Device != NULL) {
     return EFI_NOT_FOUND;
   }
 
-  //
-  // Open partition file system.
-  //
-
-  /* Status = gBS->HandleProtocol (
-                   Device,
-                   &gEfiSimpleFileSystemProtocolGuid,
-                   (VOID **)&FileSystem
-                   );
-   if (EFI_ERROR (Status)) {
-     DEBUG ((DEBUG_WARN, "OLB: Missing filesystem - %r\n", Status));
-     return Status;
-   }
-
-   //
-   // Get handle to partiton root directory.
-   //
-   Status = FileSystem->OpenVolume (
-                          FileSystem,
-                          &RootDirectory
-                          );
-   if (EFI_ERROR (Status)) {
-     DEBUG ((DEBUG_WARN, "OLB: Invalid root volume - %r\n", Status));
-     return Status;
-   }
-
-   FileSystemPolicy = OcGetFileSystemPolicyType (Device);*/
-
-  //
-  // Disallow all but NTFS filesystems.
-  //
-  // if ((FileSystemPolicy & OC_SCAN_ALLOW_FS_NTFS) != 0) {
-  //   DEBUG ((DEBUG_INFO, "OLB: Not scanning non-NTFS filesystem\n"));
-  //  Status = EFI_NOT_FOUND;
-  // }
-
-  //
-  // Scan for boot entry (only one entry per filesystem).
-  //
-  LegacyType = InternalGetPartitionLegacyOsType (Device);
-  // RootDirectory->Close (RootDirectory);
-  if (LegacyType == OcLegacyOsTypeNone) {
-    return EFI_NOT_FOUND;
+  FlexPickerEntries = OcFlexArrayInit (sizeof (OC_PICKER_ENTRY), (OC_FLEX_ARRAY_FREE_ITEM)InternalFreePickerEntry);
+  if (FlexPickerEntries == NULL) {
+    return EFI_OUT_OF_RESOURCES;
   }
 
-  CHAR16  *str2 = ConvertDevicePathToText (DevicePathFromHandle (Device), FALSE, FALSE);
-  CHAR8   *str  = AllocateZeroPool (StrLen (str2) + 1);
+  //
+  // Get all Block I/O handles.
+  //
+  Status = gBS->LocateHandleBuffer (
+                  ByProtocol,
+                  &gEfiBlockIoProtocolGuid,
+                  NULL,
+                  &NoHandles,
+                  &Handles
+                  );
+  if (EFI_ERROR (Status)) {
+    DEBUG ((DEBUG_WARN, "OLB: Failed to get Block I/O handles - %r\n", Status));
+    OcFlexArrayFree (&FlexPickerEntries);
+    return Status;
+  }
 
-  UnicodeStrToAsciiStrS (str2, str, StrLen (str2) + 1);
+  for (HandleIndex = 0; HandleIndex < NoHandles; HandleIndex++) {
+    BlockDeviceHandle = Handles[HandleIndex];
 
-  PickerEntry                       = AllocateZeroPool (sizeof (*PickerEntry));
-  PickerEntry->Id                   = str;
-  PickerEntry->Name                 = "Windows (legacy)";
-  PickerEntry->Path                 = NULL;
-  PickerEntry->Arguments            = NULL;
-  PickerEntry->Flavour              = OC_FLAVOUR_WINDOWS;
-  PickerEntry->Tool                 = FALSE;
-  PickerEntry->TextMode             = TRUE;
-  PickerEntry->RealPath             = FALSE;
-  PickerEntry->ExternalSystemAction = ExternalSystemActionDoLegacyBoot;
+    //
+    // Detect legacy OS type.
+    //
+    LegacyOsType = InternalGetPartitionLegacyOsType (BlockDeviceHandle, mIsAppleInterfaceSupported);
+    if (LegacyOsType == OcLegacyOsTypeNone) {
+      continue;
+    }
 
-  *Entries    = PickerEntry;
-  *NumEntries = 1;
+    BlockDevicePath = DevicePathFromHandle (BlockDeviceHandle);
+    if (BlockDevicePath == NULL) {
+      DEBUG ((DEBUG_INFO, "OLB: Could not find Device Path for block device\n"));
+      continue;
+    }
+
+    //
+    // Create picker entry.
+    //
+    PickerEntry = OcFlexArrayAddItem (FlexPickerEntries);
+    if (PickerEntry == NULL) {
+      OcFlexArrayFree (&FlexPickerEntries);
+      return EFI_OUT_OF_RESOURCES;
+    }
+
+    CHAR16  *str2 = ConvertDevicePathToText (BlockDevicePath, FALSE, FALSE);
+    CHAR8   *str  = AllocateZeroPool (StrLen (str2) + 1);
+
+    UnicodeStrToAsciiStrS (str2, str, StrLen (str2) + 1);
+
+    PickerEntry->Id                   = str;
+    PickerEntry->Name                 = "Windows (legacy)";
+    PickerEntry->Path                 = NULL;
+    PickerEntry->Arguments            = NULL;
+    PickerEntry->Flavour              = OC_FLAVOUR_WINDOWS;
+    PickerEntry->Tool                 = FALSE;
+    PickerEntry->TextMode             = TRUE;
+    PickerEntry->RealPath             = FALSE;
+    PickerEntry->ExternalSystemAction = ExternalSystemActionDoLegacyBoot;
+
+    LEGACY_ENTRY_CONTEXT  *LegacyContext = AllocateZeroPool (sizeof (LEGACY_ENTRY_CONTEXT));
+    LegacyContext->DevicePath                = BlockDevicePath;
+    PickerEntry->ExternalSystemActionContext = LegacyContext;
+  }
+
+  OcFlexArrayFreeContainer (&FlexPickerEntries, (VOID **)Entries, NumEntries);
 
   return EFI_SUCCESS;
 }

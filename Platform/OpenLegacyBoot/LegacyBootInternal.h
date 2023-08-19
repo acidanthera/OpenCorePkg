@@ -37,6 +37,10 @@ typedef enum OC_LEGACY_OS_TYPE_ {
   OcLegacyOsTypeIsoLinux
 } OC_LEGACY_OS_TYPE;
 
+typedef struct {
+  EFI_DEVICE_PATH_PROTOCOL    *DevicePath;
+} LEGACY_ENTRY_CONTEXT;
+
 EFI_STATUS
 InternalGetBiosDiskNumber (
   IN      THUNK_CONTEXT             *ThunkContext,
@@ -58,7 +62,8 @@ InternalLoadAppleLegacyInterface (
 
 OC_LEGACY_OS_TYPE
 InternalGetPartitionLegacyOsType (
-  IN  EFI_HANDLE  PartitionHandle
+  IN EFI_HANDLE  PartitionHandle,
+  IN BOOLEAN     IsCdRomSupported
   );
 
 EFI_STATUS
