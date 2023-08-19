@@ -301,8 +301,6 @@ OcDiskGetDevicePath (
     if (HdNode == NULL) {
       return NULL;
     }
-
-    DEBUG ((DEBUG_INFO, "got cdrom\n"));
   }
 
   PrefixPath = DuplicateDevicePath (HdDevicePath);
@@ -388,6 +386,72 @@ OcIsDiskCdRom (
   }
 
   return FALSE;
+}
+
+EFI_STATUS
+OcDiskReadElTorito (
+  IN  EFI_DEVICE_PATH_PROTOCOL  *DiskDevicePath,
+  OUT UINT8                     **Buffer,
+  OUT UINTN                     *BufferSize
+  )
+{
+  EFI_STATUS  Status;
+  UINT8       *BootBuffer;
+  UINTN       BootBufferSize;
+
+  CDROM_DEVICE_PATH  *CdNode;
+  EFI_HANDLE         DiskHandle;
+  OC_DISK_CONTEXT    DiskContext;
+
+  ASSERT (DiskDevicePath != NULL);
+  ASSERT (Buffer != NULL);
+  ASSERT (BufferSize != NULL);
+
+  //
+  // Retrieve the CD-ROM Device Path information.
+  //
+  CdNode = (CDROM_DEVICE_PATH *)(
+                                 FindDevicePathNodeWithType (
+                                   DiskDevicePath,
+                                   MEDIA_DEVICE_PATH,
+                                   MEDIA_CDROM_DP
+                                   )
+                                 );
+  if (CdNode == NULL) {
+    DEBUG ((DEBUG_INFO, "OCPI: Device Path does not describe a CD-ROM\n"));
+    return EFI_UNSUPPORTED;
+  }
+
+  DiskHandle = OcPartitionGetDiskHandle (DiskDevicePath);
+
+  Status = OcDiskInitializeContext (&DiskContext, DiskHandle, TRUE);
+  if (EFI_ERROR (Status)) {
+    return Status;
+  }
+
+  //
+  // TODO: Unclear whether the sector size here is the native CD size 2048 or 512.
+  //
+  BootBufferSize = CdNode->PartitionSize * DiskContext.BlockSize;
+  BootBuffer     = AllocatePool (BootBufferSize);
+  if (BootBuffer == NULL) {
+    return EFI_OUT_OF_RESOURCES;
+  }
+
+  Status = OcDiskRead (
+             &DiskContext,
+             CdNode->PartitionStart,
+             BootBufferSize,
+             BootBuffer
+             );
+  if (EFI_ERROR (Status)) {
+    FreePool (BootBuffer);
+    return Status;
+  }
+
+  *Buffer     = BootBuffer;
+  *BufferSize = BootBufferSize;
+  return EFI_SUCCESS;
 }
 
 EFI_DEVICE_PATH_PROTOCOL *

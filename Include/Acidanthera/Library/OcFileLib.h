@@ -522,13 +522,29 @@ OcPartitionGetPartitionHandle (
 /**
   Check if disk is a CD-ROM device.
 
-  @param[in] HdDevicePath  The Device Path of the disk.
+  @param[in] DiskDevicePath  The Device Path of the disk.
 
   @retval Device Path or NULL
 **/
 BOOLEAN
 OcIsDiskCdRom (
   IN EFI_DEVICE_PATH_PROTOCOL  *DiskDevicePath
+  );
+
+/**
+  Read El-Torito boot sector from CD-ROM device.
+
+  @param[in]  DiskDevicePath  The Device Path of the disk.
+  @param[out] Buffer          Pointer to pool-allocated buffer containing the boot sector data.
+  @param[out] BufferSize      Size of Buffer.
+
+  @retval EFI_SUCCESS on success.
+**/
+EFI_STATUS
+OcDiskReadElTorito (
+  IN  EFI_DEVICE_PATH_PROTOCOL  *DiskDevicePath,
+  OUT UINT8                     **Buffer,
+  OUT UINTN                     *BufferSize
   );
 
 /**
