@@ -24,8 +24,8 @@ STATIC
 BOOLEAN
 CheckLegacySignature (
   IN CONST CHAR8  *SignatureStr,
-  IN CONST UINT8  *Buffer,
-  IN CONST UINTN  BufferSize
+  IN       UINT8  *Buffer,
+  IN       UINTN  BufferSize
   )
 {
   UINT32  Offset;
@@ -37,7 +37,7 @@ CheckLegacySignature (
            NULL,
            (CONST UINT32)AsciiStrLen (SignatureStr),
            Buffer,
-           BufferSize,
+           (UINT32)BufferSize,
            &Offset
            );
 }
