@@ -432,7 +432,7 @@ OcDiskReadElTorito (
   //
   // TODO: Unclear whether the sector size here is the native CD size 2048 or 512.
   //
-  BootBufferSize = CdNode->PartitionSize * DiskContext.BlockSize;
+  BootBufferSize = (UINTN)(CdNode->PartitionSize * DiskContext.BlockSize);
   BootBuffer     = AllocatePool (BootBufferSize);
   if (BootBuffer == NULL) {
     return EFI_OUT_OF_RESOURCES;
