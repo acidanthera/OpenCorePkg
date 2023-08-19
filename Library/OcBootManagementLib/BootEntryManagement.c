@@ -725,6 +725,7 @@ InternalAddBootEntryFromCustomEntry (
     BootEntry->ExternalSystemActionContext = CustomEntry->ExternalSystemActionContext;
     BootEntry->AudioBasePath               = CustomEntry->AudioBasePath;
     BootEntry->AudioBaseType               = CustomEntry->AudioBaseType;
+    BootEntry->IsExternal                  = CustomEntry->External;
   } else if (CustomEntry->SystemAction) {
     BootEntry->Type          = OC_BOOT_SYSTEM;
     BootEntry->SystemAction  = CustomEntry->SystemAction;

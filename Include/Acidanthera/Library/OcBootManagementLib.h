@@ -634,6 +634,10 @@ typedef struct {
   // External boot system action context. Boot Entry Protocol only. Optional.
   //
   VOID                              *ExternalSystemActionContext;
+  //
+  // Whether this entry should be labeled as external to the system. Boot Entry Protocol only. Optional.
+  //
+  BOOLEAN                           External;
 } OC_PICKER_ENTRY;
 
 /**

@@ -12,8 +12,27 @@
 STATIC EFI_HANDLE  mImageHandle;
 STATIC BOOLEAN     mIsAppleInterfaceSupported;
 
+STATIC
+CHAR8 *
+GetLegacyEntryName (
+  OC_LEGACY_OS_TYPE  LegacyOsType
+  )
+{
+  return AllocateCopyPool (L_STR_SIZE ("Windows (legacy)"), "Windows (legacy)");
+}
+
+STATIC
+CHAR8 *
+GetLegacyEntryFlavour (
+  OC_LEGACY_OS_TYPE  LegacyOsType
+  )
+{
+  return AllocateCopyPool (L_STR_SIZE (OC_FLAVOUR_WINDOWS), OC_FLAVOUR_WINDOWS);
+}
+
+STATIC
 VOID
-InternalFreePickerEntry (
+FreePickerEntry (
   IN   OC_PICKER_ENTRY  *Entry
   )
 {
@@ -23,20 +42,20 @@ InternalFreePickerEntry (
     return;
   }
 
-  //
-  // TODO: Is this un-CONST casting okay?
-  // (Are they CONST because they are not supposed to be freed when used as before?)
-  //
   if (Entry->Id != NULL) {
     FreePool ((CHAR8 *)Entry->Id);
   }
 
-  /*if (Entry->Name != NULL) {
+  if (Entry->Name != NULL) {
     FreePool ((CHAR8 *)Entry->Name);
-  }*/
+  }
 
   if (Entry->Flavour != NULL) {
     FreePool ((CHAR8 *)Entry->Flavour);
+  }
+
+  if (Entry->ExternalSystemActionContext != NULL) {
+    FreePool (Entry->ExternalSystemActionContext);
   }
 }
 
@@ -123,12 +142,19 @@ OcGetLegacyBootEntries (
   UINTN       NoHandles;
   EFI_HANDLE  *Handles;
   UINTN       HandleIndex;
+  UINT32      ScanPolicy;
+  BOOLEAN     IsExternal;
+
+  CHAR16  *UnicodeDevicePath;
+  CHAR8   *AsciiDevicePath;
+  UINTN   AsciiDevicePathSize;
 
   EFI_HANDLE                BlockDeviceHandle;
   EFI_DEVICE_PATH_PROTOCOL  *BlockDevicePath;
   OC_LEGACY_OS_TYPE         LegacyOsType;
   OC_FLEX_ARRAY             *FlexPickerEntries;
   OC_PICKER_ENTRY           *PickerEntry;
+  LEGACY_ENTRY_CONTEXT      *LegacyContext;
 
   ASSERT (PickerContext != NULL);
   ASSERT (Entries     != NULL);
@@ -141,7 +167,7 @@ OcGetLegacyBootEntries (
     return EFI_NOT_FOUND;
   }
 
-  FlexPickerEntries = OcFlexArrayInit (sizeof (OC_PICKER_ENTRY), (OC_FLEX_ARRAY_FREE_ITEM)InternalFreePickerEntry);
+  FlexPickerEntries = OcFlexArrayInit (sizeof (OC_PICKER_ENTRY), (OC_FLEX_ARRAY_FREE_ITEM)FreePickerEntry);
   if (FlexPickerEntries == NULL) {
     return EFI_OUT_OF_RESOURCES;
   }
@@ -166,6 +192,17 @@ OcGetLegacyBootEntries (
     BlockDeviceHandle = Handles[HandleIndex];
 
     //
+    // If device type locking is set and this device is not allowed,
+    // skip device.
+    //
+    if ((PickerContext->ScanPolicy & OC_SCAN_DEVICE_LOCK) != 0) {
+      ScanPolicy = OcGetDevicePolicyType (BlockDeviceHandle, &IsExternal);
+      if ((ScanPolicy & PickerContext->ScanPolicy) == 0) {
+        continue;
+      }
+    }
+
+    //
     // Detect legacy OS type.
     //
     LegacyOsType = InternalGetPartitionLegacyOsType (BlockDeviceHandle, mIsAppleInterfaceSupported);
@@ -180,7 +217,7 @@ OcGetLegacyBootEntries (
     }
 
     //
-    // Create picker entry.
+    // Create and add picker entry to entries.
     //
     PickerEntry = OcFlexArrayAddItem (FlexPickerEntries);
     if (PickerEntry == NULL) {
@@ -188,24 +225,59 @@ OcGetLegacyBootEntries (
       return EFI_OUT_OF_RESOURCES;
     }
 
-    CHAR16  *str2 = ConvertDevicePathToText (BlockDevicePath, FALSE, FALSE);
-    CHAR8   *str  = AllocateZeroPool (StrLen (str2) + 1);
+    //
+    // Device Path will be used as ID and is required for default entry matching.
+    //
+    UnicodeDevicePath = ConvertDevicePathToText (BlockDevicePath, FALSE, FALSE);
+    if (UnicodeDevicePath == NULL) {
+      OcFlexArrayFree (&FlexPickerEntries);
+      return EFI_OUT_OF_RESOURCES;
+    }
 
-    UnicodeStrToAsciiStrS (str2, str, StrLen (str2) + 1);
+    AsciiDevicePathSize = (StrLen (UnicodeDevicePath) + 1) * sizeof (CHAR8);
+    AsciiDevicePath     = AllocatePool (AsciiDevicePathSize);
+    if (AsciiDevicePath == NULL) {
+      FreePool (UnicodeDevicePath);
+      OcFlexArrayFree (&FlexPickerEntries);
+      return EFI_OUT_OF_RESOURCES;
+    }
 
-    PickerEntry->Id                   = str;
-    PickerEntry->Name                 = "Windows (legacy)";
-    PickerEntry->Path                 = NULL;
-    PickerEntry->Arguments            = NULL;
-    PickerEntry->Flavour              = OC_FLAVOUR_WINDOWS;
-    PickerEntry->Tool                 = FALSE;
-    PickerEntry->TextMode             = TRUE;
-    PickerEntry->RealPath             = FALSE;
-    PickerEntry->ExternalSystemAction = ExternalSystemActionDoLegacyBoot;
+    Status = UnicodeStrToAsciiStrS (UnicodeDevicePath, AsciiDevicePath, AsciiDevicePathSize);
+    FreePool (UnicodeDevicePath);
+    if (EFI_ERROR (Status)) {
+      FreePool (AsciiDevicePath);
+      OcFlexArrayFree (&FlexPickerEntries);
+      return Status;
+    }
 
-    LEGACY_ENTRY_CONTEXT  *LegacyContext = AllocateZeroPool (sizeof (LEGACY_ENTRY_CONTEXT));
-    LegacyContext->DevicePath                = BlockDevicePath;
+    //
+    // Context referencing booted entry later on.
+    //
+    LegacyContext = AllocateZeroPool (sizeof (*LegacyContext));
+    if (LegacyContext == NULL) {
+      FreePool (AsciiDevicePath);
+      OcFlexArrayFree (&FlexPickerEntries);
+      return EFI_OUT_OF_RESOURCES;
+    }
+
+    LegacyContext->DevicePath = BlockDevicePath;
+
+    PickerEntry->Id        = AsciiDevicePath;
+    PickerEntry->Name      = GetLegacyEntryName (LegacyOsType);
+    PickerEntry->Path      = NULL;
+    PickerEntry->Arguments = NULL;
+    PickerEntry->Flavour   = GetLegacyEntryFlavour (LegacyOsType);
+    PickerEntry->Tool      = FALSE;
+    PickerEntry->TextMode  = FALSE;
+    PickerEntry->RealPath  = FALSE;
+
+    PickerEntry->ExternalSystemAction        = ExternalSystemActionDoLegacyBoot;
     PickerEntry->ExternalSystemActionContext = LegacyContext;
+
+    if ((PickerEntry->Name == NULL) || (PickerEntry->Flavour == NULL)) {
+      OcFlexArrayFree (&FlexPickerEntries);
+      return EFI_OUT_OF_RESOURCES;
+    }
   }
 
   OcFlexArrayFreeContainer (&FlexPickerEntries, (VOID **)Entries, NumEntries);
@@ -230,7 +302,7 @@ OcFreeLegacyBootEntries (
   }
 
   for (Index = 0; Index < NumEntries; Index++) {
-    InternalFreePickerEntry (&(*Entries)[Index]);
+    FreePickerEntry (&(*Entries)[Index]);
   }
 
   FreePool (*Entries);
