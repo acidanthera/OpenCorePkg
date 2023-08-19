@@ -70,7 +70,7 @@ ExternalSystemActionDoLegacyBoot (
   EFI_HANDLE                 LoadedImageHandle;
   EFI_LOADED_IMAGE_PROTOCOL  *LoadedImage;
   LEGACY_ENTRY_CONTEXT       *LegacyContext;
-  CONST CHAR8                *Args;
+  CONST CHAR8                *AppleBootArg;
 
   LegacyContext = ActionContext;
 
@@ -88,12 +88,12 @@ ExternalSystemActionDoLegacyBoot (
                &LoadedImageHandle
                );
     if (EFI_ERROR (Status)) {
-      DEBUG ((DEBUG_WARN, "OLB: Failure while loading Apple legacy interface - %r\n", Status));
+      DEBUG ((DEBUG_INFO, "OLB: Failure while loading Apple legacy interface - %r\n", Status));
       return Status;
     }
 
     //
-    // Specify boot device type on loaded image.
+    // Specify boot device type argument on loaded image.
     //
     Status = gBS->HandleProtocol (
                     LoadedImageHandle,
@@ -101,7 +101,8 @@ ExternalSystemActionDoLegacyBoot (
                     (VOID **)&LoadedImage
                     );
     if (EFI_ERROR (Status)) {
-      DEBUG ((DEBUG_WARN, "OLB: Failure while loading Apple legacy interface - %r\n", Status));
+      DEBUG ((DEBUG_INFO, "OLB: Failure while loading Apple legacy interface - %r\n", Status));
+      gBS->UnloadImage (LoadedImageHandle);
       return Status;
     }
 
@@ -109,20 +110,30 @@ ExternalSystemActionDoLegacyBoot (
     LoadedImage->LoadOptions     = NULL;
 
     if (OcIsDiskCdRom (LegacyContext->DevicePath)) {
-      Args = AllocateCopyPool (L_STR_SIZE ("CD"), "CD");
+      AppleBootArg = "CD";
+    } else if (LegacyContext->IsExternal) {
+      AppleBootArg = "USB";
     } else {
-      Args = AllocateCopyPool (L_STR_SIZE ("HD"), "HD");
+      AppleBootArg = "HD";
     }
 
-    OcAppendArgumentsToLoadedImage (LoadedImage, &Args, 1, TRUE);
+    if (!OcAppendArgumentsToLoadedImage (LoadedImage, &AppleBootArg, 1, TRUE)) {
+      gBS->UnloadImage (LoadedImageHandle);
+      return EFI_INVALID_PARAMETER;
+    }
 
     Status = gBS->StartImage (LoadedImageHandle, NULL, NULL);
     if (EFI_ERROR (Status)) {
-      DEBUG ((DEBUG_WARN, "OLB: Failure while starting Apple legacy interface - %r\n", Status));
+      DEBUG ((DEBUG_INFO, "OLB: Failure while starting Apple legacy interface - %r\n", Status));
+      gBS->UnloadImage (LoadedImageHandle);
       return Status;
     }
   } else {
-    InternalLoadLegacyPbr (LegacyContext->DevicePath);
+    Status = InternalLoadLegacyPbr (LegacyContext->DevicePath);
+    if (EFI_ERROR (Status)) {
+      DEBUG ((DEBUG_INFO, "OLB: Failure while starting legacy PBR interface - %r\n", Status));
+      return Status;
+    }
   }
 
   return EFI_SUCCESS;
@@ -183,7 +194,7 @@ OcGetLegacyBootEntries (
                   &Handles
                   );
   if (EFI_ERROR (Status)) {
-    DEBUG ((DEBUG_WARN, "OLB: Failed to get Block I/O handles - %r\n", Status));
+    DEBUG ((DEBUG_INFO, "OLB: Failed to get Block I/O handles - %r\n", Status));
     OcFlexArrayFree (&FlexPickerEntries);
     return Status;
   }
@@ -195,11 +206,9 @@ OcGetLegacyBootEntries (
     // If device type locking is set and this device is not allowed,
     // skip device.
     //
-    if ((PickerContext->ScanPolicy & OC_SCAN_DEVICE_LOCK) != 0) {
-      ScanPolicy = OcGetDevicePolicyType (BlockDeviceHandle, &IsExternal);
-      if ((ScanPolicy & PickerContext->ScanPolicy) == 0) {
-        continue;
-      }
+    ScanPolicy = OcGetDevicePolicyType (BlockDeviceHandle, &IsExternal);
+    if (((PickerContext->ScanPolicy & OC_SCAN_DEVICE_LOCK) != 0) && ((ScanPolicy & PickerContext->ScanPolicy) == 0)) {
+      continue;
     }
 
     //
@@ -261,6 +270,7 @@ OcGetLegacyBootEntries (
     }
 
     LegacyContext->DevicePath = BlockDevicePath;
+    LegacyContext->IsExternal = IsExternal;
 
     PickerEntry->Id        = AsciiDevicePath;
     PickerEntry->Name      = GetLegacyEntryName (LegacyOsType);
@@ -270,6 +280,7 @@ OcGetLegacyBootEntries (
     PickerEntry->Tool      = FALSE;
     PickerEntry->TextMode  = FALSE;
     PickerEntry->RealPath  = FALSE;
+    PickerEntry->External  = IsExternal;
 
     PickerEntry->ExternalSystemAction        = ExternalSystemActionDoLegacyBoot;
     PickerEntry->ExternalSystemActionContext = LegacyContext;

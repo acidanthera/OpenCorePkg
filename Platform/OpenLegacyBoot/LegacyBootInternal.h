@@ -39,6 +39,7 @@ typedef enum OC_LEGACY_OS_TYPE_ {
 
 typedef struct {
   EFI_DEVICE_PATH_PROTOCOL    *DevicePath;
+  BOOLEAN                     IsExternal;
 } LEGACY_ENTRY_CONTEXT;
 
 EFI_STATUS
