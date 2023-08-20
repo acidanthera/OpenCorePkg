@@ -724,8 +724,13 @@ InternalAddBootEntryFromCustomEntry (
     BootEntry->ExternalSystemAction = CustomEntry->ExternalSystemAction;
     BootEntry->AudioBasePath        = CustomEntry->AudioBasePath;
     BootEntry->AudioBaseType        = CustomEntry->AudioBaseType;
-    BootEntry->DevicePath           = CustomEntry->ExternalSystemDevicePath;
     BootEntry->IsExternal           = CustomEntry->External;
+    BootEntry->DevicePath           = DuplicateDevicePath (CustomEntry->ExternalSystemDevicePath);
+
+    if (BootEntry->DevicePath == NULL) {
+      FreeBootEntry (BootEntry);
+      return EFI_OUT_OF_RESOURCES;
+    }
   } else if (CustomEntry->SystemAction) {
     BootEntry->Type          = OC_BOOT_SYSTEM;
     BootEntry->SystemAction  = CustomEntry->SystemAction;
