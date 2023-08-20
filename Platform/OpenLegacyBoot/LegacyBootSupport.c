@@ -372,6 +372,7 @@ InternalLoadLegacyPbr (
   MASTER_BOOT_RECORD  *Mbr;
   MASTER_BOOT_RECORD  *Pbr;
   UINT8               PartitionIndex;
+  UINT8               BiosDiskAddress;
 
   IA32_REGISTER_SET         Regs;
   MASTER_BOOT_RECORD        *MbrPtr = (MASTER_BOOT_RECORD *)0x0600;
@@ -452,7 +453,18 @@ InternalLoadLegacyPbr (
   //
   // Determine BIOS disk number.
   //
-  InternalGetBiosDiskNumber (&mThunkContext, Legacy8259, NULL);
+  Status = InternalGetBiosDiskAddress (
+             &mThunkContext,
+             Legacy8259,
+             DiskHandle,
+             &BiosDiskAddress
+             );
+  if (EFI_ERROR (Status)) {
+    DEBUG ((DEBUG_INFO, "OLB: Disk address could not be determined\n"));
+    FreePool (Pbr);
+    FreePool (Mbr);
+    return Status;
+  }
 
   //
   // Copy MBR and PBR to low memory locations for booting.
@@ -470,7 +482,7 @@ InternalLoadLegacyPbr (
   //
   ZeroMem (&Regs, sizeof (Regs));
 
-  Regs.H.DL = 0x80;
+  Regs.H.DL = BiosDiskAddress;
   Regs.X.SI = (UINT16)(UINTN)&MbrPtr->Partition[PartitionIndex];
   OcLegacyThunkFarCall86 (
     &mThunkContext,
@@ -482,9 +494,7 @@ InternalLoadLegacyPbr (
     0
     );
 
-  DEBUG ((DEBUG_INFO, "here\n"));
-  while (TRUE) {
-  }
+  DEBUG ((DEBUG_WARN, "OLB: Failure calling legacy boot sector\n"));
 
-  return EFI_SUCCESS;
+  return EFI_INVALID_PARAMETER;
 }

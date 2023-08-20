@@ -38,10 +38,11 @@ typedef enum OC_LEGACY_OS_TYPE_ {
 } OC_LEGACY_OS_TYPE;
 
 EFI_STATUS
-InternalGetBiosDiskNumber (
-  IN      THUNK_CONTEXT             *ThunkContext,
-  IN      EFI_LEGACY_8259_PROTOCOL  *Legacy8259,
-  OUT  UINT8                        *DriveNumber
+InternalGetBiosDiskAddress (
+  IN  THUNK_CONTEXT             *ThunkContext,
+  IN  EFI_LEGACY_8259_PROTOCOL  *Legacy8259,
+  IN  EFI_HANDLE                DiskHandle,
+  OUT UINT8                     *DriveNumber
   );
 
 EFI_STATUS

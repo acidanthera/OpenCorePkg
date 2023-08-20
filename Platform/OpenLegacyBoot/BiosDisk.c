@@ -39,6 +39,8 @@ typedef struct {
   UINT64    Lba;
 } DEVICE_ADDRESS_PACKET;
 
+#define BIOS_DISK_CHECK_BUFFER_SECTOR_COUNT  4
+
 STATIC
 EFI_STATUS
 BiosDiskReset (
@@ -127,47 +129,93 @@ BiosDiskReadExtSectors (
   Regs.E.DS = EFI_SEGMENT (DeviceAddressPacket);
   CarryFlag = OcLegacyThunkBiosInt86 (ThunkContext, Legacy8259, 0x13, &Regs);
 
-  DEBUG ((DEBUG_INFO, "carry %u\n", CarryFlag));
+  if (CarryFlag != 0) {
+    return EFI_DEVICE_ERROR;
+  }
 
   return EFI_SUCCESS;
 }
 
 EFI_STATUS
-InternalGetBiosDiskNumber (
-  IN      THUNK_CONTEXT             *ThunkContext,
-  IN      EFI_LEGACY_8259_PROTOCOL  *Legacy8259,
-  OUT  UINT8                        *DriveNumber
+InternalGetBiosDiskAddress (
+  IN  THUNK_CONTEXT             *ThunkContext,
+  IN  EFI_LEGACY_8259_PROTOCOL  *Legacy8259,
+  IN  EFI_HANDLE                DiskHandle,
+  OUT UINT8                     *DriveAddress
   )
 {
   EFI_STATUS             Status;
+  OC_DISK_CONTEXT        DiskContext;
   UINT8                  DriveAddr;
   EFI_PHYSICAL_ADDRESS   DeviceAddressPacketAddress;
   DEVICE_ADDRESS_PACKET  *DeviceAddressPacket;
-  UINT8                  *Buffer;
+  UINT8                  *BiosBuffer;
+  UINTN                  BiosBufferPages;
+  UINT32                 BiosCrc32;
+  UINT8                  *DiskBuffer;
+  UINTN                  DiskBufferSize;
+  UINT32                 DiskCrc32;
+  BOOLEAN                MatchedDisk;
+
+  //
+  // Read sectors from EFI disk device.
+  //
+  Status = OcDiskInitializeContext (&DiskContext, DiskHandle, TRUE);
+  if (EFI_ERROR (Status)) {
+    return Status;
+  }
+
+  DiskBufferSize = ALIGN_VALUE (BIOS_DISK_CHECK_BUFFER_SECTOR_COUNT * MBR_SIZE, DiskContext.BlockSize);
+  DiskBuffer     = AllocatePool (DiskBufferSize);
+  if (DiskBuffer == NULL) {
+    return EFI_OUT_OF_RESOURCES;
+  }
+
+  Status = OcDiskRead (
+             &DiskContext,
+             0,
+             DiskBufferSize,
+             DiskBuffer
+             );
+  if (EFI_ERROR (Status)) {
+    FreePool (DiskBuffer);
+    return Status;
+  }
+
+  gBS->CalculateCrc32 (
+         DiskBuffer,
+         BIOS_DISK_CHECK_BUFFER_SECTOR_COUNT * MBR_SIZE,
+         &DiskCrc32
+         );
+  DEBUG ((DEBUG_INFO, "OLB: EFI disk CRC32: 0x%X\n", DiskCrc32));
 
   //
   // Allocate low memory buffer for disk reads.
   //
   DeviceAddressPacketAddress = (SIZE_1MB - 1);
+  BiosBufferPages            = EFI_SIZE_TO_PAGES (sizeof (*DeviceAddressPacket) + (BIOS_DISK_CHECK_BUFFER_SECTOR_COUNT * MBR_SIZE)) + 1;
   Status                     = gBS->AllocatePages (
                                       AllocateMaxAddress,
                                       EfiBootServicesData,
-                                      EFI_SIZE_TO_PAGES (sizeof (*DeviceAddressPacket) + (MBR_SIZE * 4)) + 1,
+                                      BiosBufferPages,
                                       &DeviceAddressPacketAddress
                                       );
   if (EFI_ERROR (Status)) {
     DEBUG ((DEBUG_INFO, "OLB: Failure allocating low memory packet for BIOS disk read - %r\n", Status));
+    FreePool (DiskBuffer);
     return Status;
   }
 
   DeviceAddressPacket = (DEVICE_ADDRESS_PACKET *)(UINTN)DeviceAddressPacketAddress;
-  Buffer              = (UINT8 *)(UINTN)DeviceAddressPacketAddress + 0x200;
+  BiosBuffer          = (UINT8 *)(UINTN)DeviceAddressPacketAddress + 0x200;
 
   //
-  // Locate disk with matching checksum of first few sectors.
+  // Read sectors from each BIOS disk.
+  // Compare against sectors from EFI disk to determine BIOS disk address.
   //
+  MatchedDisk = FALSE;
   for (DriveAddr = 0x80; DriveAddr < 0x88; DriveAddr++) {
-    DEBUG ((DEBUG_INFO, "drive %X\n", DriveAddr));
+    DEBUG ((DEBUG_INFO, "OLB: Reading BIOS drive 0x%X\n", DriveAddr));
 
     //
     // Reset disk and verify INT13H extensions are supported.
@@ -183,7 +231,7 @@ InternalGetBiosDiskNumber (
     }
 
     //
-    // Read sectors from disk.
+    // Read first 4 sectors from disk.
     //
     Status = BiosDiskReadExtSectors (
                ThunkContext,
@@ -191,15 +239,37 @@ InternalGetBiosDiskNumber (
                DeviceAddressPacket,
                DriveAddr,
                0,
-               4,
-               Buffer
+               BIOS_DISK_CHECK_BUFFER_SECTOR_COUNT,
+               BiosBuffer
                );
     if (EFI_ERROR (Status)) {
       continue;
     }
 
-    DebugPrintHexDump (DEBUG_INFO, "raw bios bytes", Buffer, 512);
+    //
+    // Calculate CRC32 of BIOS disk sectors.
+    //
+    gBS->CalculateCrc32 (
+           BiosBuffer,
+           BIOS_DISK_CHECK_BUFFER_SECTOR_COUNT * MBR_SIZE,
+           &BiosCrc32
+           );
+    DEBUG ((DEBUG_INFO, "OLB: BIOS disk CRC32: 0x%X\n", BiosCrc32));
+
+    if (BiosCrc32 == DiskCrc32) {
+      DEBUG ((DEBUG_INFO, "OLB: Matched BIOS disk address 0x%X\n", DriveAddr));
+
+      MatchedDisk   = TRUE;
+      *DriveAddress = DriveAddr;
+      break;
+    }
   }
 
-  return EFI_SUCCESS;
+  FreePool (DiskBuffer);
+  gBS->FreePages (
+         DeviceAddressPacketAddress,
+         BiosBufferPages
+         );
+
+  return MatchedDisk ? EFI_SUCCESS : EFI_NOT_FOUND;
 }

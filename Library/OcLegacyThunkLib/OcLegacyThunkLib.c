@@ -339,9 +339,8 @@ OcLegacyThunkFarCall86 (
   UINT16             *Stack16;
   IA32_REGISTER_SET  ThunkRegSet;
   BOOLEAN            Ret;
-  // BOOLEAN               InterruptState;
-  UINT64   TimerPeriod;
-  BOOLEAN  Enabled;
+  UINT64             TimerPeriod;
+  BOOLEAN            Enabled;
 
   EFI_TIMER_ARCH_PROTOCOL  *TimerProtocol;
 
@@ -405,8 +404,8 @@ OcLegacyThunkFarCall86 (
   ASSERT_EFI_ERROR (Status);
 
   //
-  // Clear the error flag; thunk code may set it. Stack16 should be the high address
-  // Make Statk16 address the low 16 bit must be not zero.
+  // Clear the error flag; thunk code may set it. Stack16 should be the high address.
+  // Make Stack16 address the low 16 bit must be not zero.
   //
   Stack16 = (UINT16 *)((UINT8 *)ThunkContext->RealModeBuffer + ThunkContext->RealModeBufferSize - sizeof (UINT16));
 
@@ -426,6 +425,9 @@ OcLegacyThunkFarCall86 (
   ThunkContext->RealModeState = &ThunkRegSet;
   AsmThunk16 (ThunkContext);
 
+  //
+  // EFI is likely trashed if we get here, but attempt to restore state.
+  //
   if ((Stack != NULL) && (StackSize != 0)) {
     //
     // Copy low memory stack to Stack
