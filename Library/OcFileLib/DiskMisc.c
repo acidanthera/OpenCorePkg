@@ -1089,13 +1089,13 @@ OcDiskFindActiveMbrPartitionPath (
 
   Status = gBS->LocateHandleBuffer (
                   ByProtocol,
-                  &gEfiSimpleFileSystemProtocolGuid,
+                  &gEfiBlockIoProtocolGuid,
                   NULL,
                   &NoHandles,
                   &Handles
                   );
   if (EFI_ERROR (Status)) {
-    DEBUG ((DEBUG_INFO, "OCPI: Failed to locate FS handles\n"));
+    DEBUG ((DEBUG_INFO, "OCPI: Failed to locate Block I/O handles\n"));
     return NULL;
   }
 

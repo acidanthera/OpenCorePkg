@@ -1327,7 +1327,7 @@ AddBootEntryFromBootOption (
     }
 
     //
-    // Attempt to handle detected legacy OS.
+    // Attempt to handle detected legacy OS via Apple legacy interface.
     //
     RemainingDevicePath = DevicePath;
     DevicePath          = OcDiskFindActiveMbrPartitionPath (
@@ -1340,34 +1340,30 @@ AddBootEntryFromBootOption (
     // Disk with MBR or hybrid MBR was detected.
     //
     if (DevicePath != NULL) {
-      //
-      // Ensure that we are allowed to boot from this filesystem.
-      //
-      FileSystem = InternalFileSystemForHandle (BootContext, FileSystemHandle, TRUE, NULL);
-      if (FileSystem != NULL) {
-        TextDevicePath = ConvertDevicePathToText (DevicePath, FALSE, FALSE);
-        if (TextDevicePath != NULL) {
-          //
-          // Add entry from externally provided legacy interface.
-          //
-          Status = OcAddEntriesFromBootEntryProtocol (
-                     BootContext,
-                     FileSystem,
-                     EntryProtocolHandles,
-                     EntryProtocolHandleCount,
-                     TextDevicePath,
-                     TRUE,
-                     FALSE
-                     );
-          if (!EFI_ERROR (Status)) {
-            if (EntryProtocolId != NULL) {
-              *EntryProtocolId = TextDevicePath;
-            }
-
-            IsAppleLegacyHandled = TRUE;
-          } else {
-            FreePool (TextDevicePath);
+      TextDevicePath = ConvertDevicePathToText (DevicePath, FALSE, FALSE);
+      if (TextDevicePath != NULL) {
+        //
+        // Add entry from externally provided legacy interface.
+        // Boot entry ID must be active partition Device Path.
+        //
+        Status = OcAddEntriesFromBootEntryProtocol (
+                   BootContext,
+                   CustomFileSystem,
+                   EntryProtocolHandles,
+                   EntryProtocolHandleCount,
+                   TextDevicePath,
+                   TRUE,
+                   FALSE
+                   );
+        if (!EFI_ERROR (Status)) {
+          if (EntryProtocolId != NULL) {
+            *EntryProtocolId = TextDevicePath;
           }
+
+          FileSystem           = CustomFileSystem;
+          IsAppleLegacyHandled = TRUE;
+        } else {
+          FreePool (TextDevicePath);
         }
       }
     }
@@ -2156,8 +2152,6 @@ OcScanForBootEntries (
                                            )
                                          );
 
-    IsDefaultEntryProtocolPartition = (DefaultEntryId != NULL);
-
     //
     // No entries, or only entry pre-created from boot entry protocol,
     // so process this directory with Apple Bless.
@@ -2195,11 +2189,6 @@ OcScanForBootEntries (
     AddBootEntryFromSelfRecovery (BootContext, FileSystem);
   }
 
-  if (DefaultEntryId != NULL) {
-    FreePool (DefaultEntryId);
-    DefaultEntryId = NULL;
-  }
-
   if (CustomFileSystem != NULL) {
     //
     // Insert the custom file system last for entry order.
@@ -2220,10 +2209,15 @@ OcScanForBootEntries (
       CustomFileSystem,
       EntryProtocolHandles,
       EntryProtocolHandleCount,
-      NULL,
+      DefaultEntryId,
       FALSE,
       FALSE
       );
+  }
+
+  if (DefaultEntryId != NULL) {
+    FreePool (DefaultEntryId);
+    DefaultEntryId = NULL;
   }
 
   OcFreeBootEntryProtocolHandles (&EntryProtocolHandles);
