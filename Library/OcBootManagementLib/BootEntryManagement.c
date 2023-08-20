@@ -720,12 +720,12 @@ InternalAddBootEntryFromCustomEntry (
     ));
 
   if (CustomEntry->ExternalSystemAction) {
-    BootEntry->Type                        = OC_BOOT_EXTERNAL_SYSTEM;
-    BootEntry->ExternalSystemAction        = CustomEntry->ExternalSystemAction;
-    BootEntry->ExternalSystemActionContext = CustomEntry->ExternalSystemActionContext;
-    BootEntry->AudioBasePath               = CustomEntry->AudioBasePath;
-    BootEntry->AudioBaseType               = CustomEntry->AudioBaseType;
-    BootEntry->IsExternal                  = CustomEntry->External;
+    BootEntry->Type                 = OC_BOOT_EXTERNAL_SYSTEM;
+    BootEntry->ExternalSystemAction = CustomEntry->ExternalSystemAction;
+    BootEntry->AudioBasePath        = CustomEntry->AudioBasePath;
+    BootEntry->AudioBaseType        = CustomEntry->AudioBaseType;
+    BootEntry->DevicePath           = CustomEntry->ExternalSystemDevicePath;
+    BootEntry->IsExternal           = CustomEntry->External;
   } else if (CustomEntry->SystemAction) {
     BootEntry->Type          = OC_BOOT_SYSTEM;
     BootEntry->SystemAction  = CustomEntry->SystemAction;
@@ -2512,7 +2512,7 @@ OcLoadBootEntry (
 
   if ((BootEntry->Type & OC_BOOT_EXTERNAL_SYSTEM) != 0) {
     ASSERT (BootEntry->ExternalSystemAction != NULL);
-    return BootEntry->ExternalSystemAction (Context, BootEntry->ExternalSystemActionContext);
+    return BootEntry->ExternalSystemAction (Context, BootEntry->DevicePath);
   }
 
   if ((BootEntry->Type & OC_BOOT_SYSTEM) != 0) {

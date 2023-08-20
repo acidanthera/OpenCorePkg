@@ -53,26 +53,21 @@ FreePickerEntry (
   if (Entry->Flavour != NULL) {
     FreePool ((CHAR8 *)Entry->Flavour);
   }
-
-  if (Entry->ExternalSystemActionContext != NULL) {
-    FreePool (Entry->ExternalSystemActionContext);
-  }
 }
 
 STATIC
 EFI_STATUS
 ExternalSystemActionDoLegacyBoot (
-  IN OUT          OC_PICKER_CONTEXT  *PickerContext,
-  IN              VOID               *ActionContext
+  IN OUT  OC_PICKER_CONTEXT         *PickerContext,
+  IN      EFI_DEVICE_PATH_PROTOCOL  *DevicePath
   )
 {
   EFI_STATUS                 Status;
+  EFI_HANDLE                 DiskHandle;
   EFI_HANDLE                 LoadedImageHandle;
   EFI_LOADED_IMAGE_PROTOCOL  *LoadedImage;
-  LEGACY_ENTRY_CONTEXT       *LegacyContext;
+  BOOLEAN                    IsExternal;
   CONST CHAR8                *AppleBootArg;
-
-  LegacyContext = ActionContext;
 
   //
   // Load and start legacy OS.
@@ -80,11 +75,16 @@ ExternalSystemActionDoLegacyBoot (
   // On Macs, use the Apple legacy interface.
   // On other systems, use the Legacy8259 protocol.
   //
-  DebugPrintDevicePath (DEBUG_INFO, "OLB: Legacy device path", LegacyContext->DevicePath);
+  DebugPrintDevicePath (DEBUG_INFO, "OLB: Legacy device path", DevicePath);
   if (mIsAppleInterfaceSupported) {
+    DiskHandle = OcPartitionGetPartitionHandle (DevicePath);
+    if (DiskHandle == NULL) {
+      return EFI_INVALID_PARAMETER;
+    }
+
     Status = InternalLoadAppleLegacyInterface (
                mImageHandle,
-               LegacyContext->DevicePath,
+               DevicePath,
                &LoadedImageHandle
                );
     if (EFI_ERROR (Status)) {
@@ -109,18 +109,23 @@ ExternalSystemActionDoLegacyBoot (
     LoadedImage->LoadOptionsSize = 0;
     LoadedImage->LoadOptions     = NULL;
 
-    if (OcIsDiskCdRom (LegacyContext->DevicePath)) {
+    OcGetDevicePolicyType (DiskHandle, &IsExternal);
+
+    if (OcIsDiskCdRom (DevicePath)) {
       AppleBootArg = "CD";
-    } else if (LegacyContext->IsExternal) {
+    } else if (IsExternal) {
       AppleBootArg = "USB";
     } else {
       AppleBootArg = "HD";
     }
 
-    if (!OcAppendArgumentsToLoadedImage (LoadedImage, &AppleBootArg, 1, TRUE)) {
-      gBS->UnloadImage (LoadedImageHandle);
-      return EFI_INVALID_PARAMETER;
-    }
+    OcAppendArgumentsToLoadedImage (
+      LoadedImage,
+      &AppleBootArg,
+      1,
+      TRUE
+      );
+    DEBUG ((DEBUG_INFO, "OLB: Apple legacy interface args <%s>\n", LoadedImage->LoadOptions));
 
     Status = gBS->StartImage (LoadedImageHandle, NULL, NULL);
     if (EFI_ERROR (Status)) {
@@ -129,7 +134,7 @@ ExternalSystemActionDoLegacyBoot (
       return Status;
     }
   } else {
-    Status = InternalLoadLegacyPbr (LegacyContext->DevicePath);
+    Status = InternalLoadLegacyPbr (DevicePath);
     if (EFI_ERROR (Status)) {
       DEBUG ((DEBUG_INFO, "OLB: Failure while starting legacy PBR interface - %r\n", Status));
       return Status;
@@ -165,7 +170,6 @@ OcGetLegacyBootEntries (
   OC_LEGACY_OS_TYPE         LegacyOsType;
   OC_FLEX_ARRAY             *FlexPickerEntries;
   OC_PICKER_ENTRY           *PickerEntry;
-  LEGACY_ENTRY_CONTEXT      *LegacyContext;
 
   ASSERT (PickerContext != NULL);
   ASSERT (Entries     != NULL);
@@ -259,31 +263,17 @@ OcGetLegacyBootEntries (
       return Status;
     }
 
-    //
-    // Context referencing booted entry later on.
-    //
-    LegacyContext = AllocateZeroPool (sizeof (*LegacyContext));
-    if (LegacyContext == NULL) {
-      FreePool (AsciiDevicePath);
-      OcFlexArrayFree (&FlexPickerEntries);
-      return EFI_OUT_OF_RESOURCES;
-    }
-
-    LegacyContext->DevicePath = BlockDevicePath;
-    LegacyContext->IsExternal = IsExternal;
-
-    PickerEntry->Id        = AsciiDevicePath;
-    PickerEntry->Name      = GetLegacyEntryName (LegacyOsType);
-    PickerEntry->Path      = NULL;
-    PickerEntry->Arguments = NULL;
-    PickerEntry->Flavour   = GetLegacyEntryFlavour (LegacyOsType);
-    PickerEntry->Tool      = FALSE;
-    PickerEntry->TextMode  = FALSE;
-    PickerEntry->RealPath  = FALSE;
-    PickerEntry->External  = IsExternal;
-
-    PickerEntry->ExternalSystemAction        = ExternalSystemActionDoLegacyBoot;
-    PickerEntry->ExternalSystemActionContext = LegacyContext;
+    PickerEntry->Id                       = AsciiDevicePath;
+    PickerEntry->Name                     = GetLegacyEntryName (LegacyOsType);
+    PickerEntry->Path                     = NULL;
+    PickerEntry->Arguments                = NULL;
+    PickerEntry->Flavour                  = GetLegacyEntryFlavour (LegacyOsType);
+    PickerEntry->Tool                     = FALSE;
+    PickerEntry->TextMode                 = FALSE;
+    PickerEntry->RealPath                 = FALSE;
+    PickerEntry->External                 = IsExternal;
+    PickerEntry->ExternalSystemAction     = ExternalSystemActionDoLegacyBoot;
+    PickerEntry->ExternalSystemDevicePath = BlockDevicePath;
 
     if ((PickerEntry->Name == NULL) || (PickerEntry->Flavour == NULL)) {
       OcFlexArrayFree (&FlexPickerEntries);

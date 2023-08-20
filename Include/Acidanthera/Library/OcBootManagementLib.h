@@ -200,8 +200,8 @@ EFI_STATUS
 typedef
 EFI_STATUS
 (*OC_BOOT_EXTERNAL_SYSTEM_ACTION) (
-  IN OUT          OC_PICKER_CONTEXT  *PickerContext,
-  IN              VOID               *ActionContext
+  IN OUT  OC_PICKER_CONTEXT         *PickerContext,
+  IN      EFI_DEVICE_PATH_PROTOCOL  *DevicePath
   );
 
 /**
@@ -226,10 +226,6 @@ typedef struct OC_BOOT_ENTRY_ {
   // Action to perform on execution. Only valid for external boot system entries.
   //
   OC_BOOT_EXTERNAL_SYSTEM_ACTION    ExternalSystemAction;
-  //
-  // Action to perform on execution. Only valid for external boot system entries.
-  //
-  VOID                              *ExternalSystemActionContext;
   //
   // Id under which to save entry as default.
   //
@@ -631,9 +627,9 @@ typedef struct {
   //
   OC_BOOT_EXTERNAL_SYSTEM_ACTION    ExternalSystemAction;
   //
-  // External boot system action context. Boot Entry Protocol only. Optional.
+  // External boot system Device Path. Boot Entry Protocol only. Optional.
   //
-  VOID                              *ExternalSystemActionContext;
+  EFI_DEVICE_PATH_PROTOCOL          *ExternalSystemDevicePath;
   //
   // Whether this entry should be labeled as external to the system. Boot Entry Protocol only. Optional.
   //
