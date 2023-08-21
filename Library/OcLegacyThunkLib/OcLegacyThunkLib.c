@@ -379,9 +379,11 @@ OcLegacyThunkFarCall86 (
                   NULL,
                   (VOID **)&TimerProtocol
                   );
-  if (EFI_ERROR (Status)) {
+  if (!EFI_ERROR (Status)) {
     TimerProtocol->GetTimerPeriod (TimerProtocol, &TimerPeriod);
     TimerProtocol->SetTimerPeriod (TimerProtocol, 0);
+  } else {
+    TimerProtocol = NULL;
   }
 
   //
@@ -446,7 +448,9 @@ OcLegacyThunkFarCall86 (
   //
   // Enable and restore rate of DXE Timer
   //
-  // Private->Timer->SetTimerPeriod (Private->Timer, TimerPeriod);
+  if (TimerProtocol != NULL) {
+    TimerProtocol->SetTimerPeriod (TimerProtocol, TimerPeriod);
+  }
 
   //
   // End critical section
