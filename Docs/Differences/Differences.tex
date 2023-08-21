@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
-%DIF DEL PreviousConfiguration.tex   Wed Aug 23 09:25:38 2023
-%DIF ADD ../Configuration.tex        Thu Sep  7 19:58:34 2023
+%DIF DEL PreviousConfiguration.tex   Sun Aug 13 19:03:22 2023
+%DIF ADD ../Configuration.tex        Sun Sep 10 19:20:43 2023
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -1744,7 +1744,7 @@ To view their current state, use the \texttt{pmset -g} command in Terminal.
   such as \texttt{DevirtualiseMmio}, \texttt{ProtectMemoryRegions}, or \texttt{RebuildAppleMemoryMap},
   and may also obstruct other quirks depending on the scope of such.
 
-  GRUB shim makes similar on-the-fly changes to various UEFI image services,
+  GRUB \DIFdelbegin \DIFdel{shim }\DIFdelend \DIFaddbegin \DIFadd{Shim }\DIFaddend makes similar on-the-fly changes to various UEFI image services,
   which are also protected against by this quirk.
 
   \emph{Note 1}: On VMware, the need for this quirk may be determined by the appearance of the
@@ -6878,9 +6878,15 @@ Note however that the following differences are normal and do not need to be fix
   as distro boots successfully.
 \end{itemize}
 
-If using OpenLinuxBoot with Secure Boot, users may wish to use the \texttt{shim-to-cert.tool} included in OpenCore
+If using OpenLinuxBoot with Secure Boot, users may wish to \DIFdelbegin \DIFdel{use the }\texttt{\DIFdel{shim-to-cert.tool}} %DIFAUXCMD
+\DIFdel{included in OpenCore
 utilities, which can be used to extract the public key needed to boot a distro's kernels directly, as done when using OpenCore
-with OpenLinuxBoot, rather than via GRUB shim. For non-GRUB distros, the required public key must be found by user research.
+with OpenLinuxBoot, rather than via GRUB shim.
+For non-GRUB distros, the required public key must be found by user research.
+}\DIFdelend \DIFaddbegin \DIFadd{install
+a user built, user signed Shim bootloader giving SBAT and MOK integration, as explained in
+}\href{https://github.com/acidanthera/OpenCorePkg/tree/master/Utilities/ShimUtils}{\DIFadd{OpenCore ShimUtils}}\DIFadd{.
+}\DIFaddend 
 
 \subsubsection{Configuration}
 
@@ -8993,11 +8999,11 @@ for additional options.
   \DIFaddbegin \texttt{\DIFadd{ShimRetainProtocol}}\\
   \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ boolean}}\\
   \textbf{\DIFadd{Failsafe}}\DIFadd{: }\texttt{\DIFadd{false}}\\
-  \textbf{\DIFadd{Description}}\DIFadd{: Request Linux shim to keep protocol installed for subsequent image loads.
+  \textbf{\DIFadd{Description}}\DIFadd{: Request Linux Shim to keep protocol installed for subsequent image loads.
 }
 
-  \DIFadd{This option is only required if chaining OpenCore from shim. It must be set in order to allow
-  OpenCore to launch items which are verified by certificates present in shim, but not in the
+  \DIFadd{This option is only required if chaining OpenCore from Shim. It must be set in order to allow
+  OpenCore to launch items which are verified by certificates present in Shim, but not in the
   system Secure Boot database.
 }
 
@@ -9338,15 +9344,17 @@ requires several steps and careful configuration of certain settings as explaine
   the same private key.
 \item Sign all third-party operating system (not made by Microsoft or Apple)
   bootloaders if needed. For Linux there is an option to install
-  Microsoft-signed Shim bootloader as explained on e.g.
-  \href{https://wiki.debian.org/SecureBoot}{Debian Wiki}.
+  \DIFdelbegin \DIFdel{Microsoft-signed Shim bootloader as explained on e.g.
+  }%DIFDELCMD < \href{https://wiki.debian.org/SecureBoot}{%%%
+\DIFdel{Debian Wiki}\DIFdelend \DIFaddbegin \DIFadd{a user built, user signed Shim bootloader giving SBAT and MOK integration, as explained in
+  }\href{https://github.com/acidanthera/OpenCorePkg/tree/master/Utilities/ShimUtils}{\DIFadd{OpenCore ShimUtils}\DIFaddend }.
 \item Enable UEFI Secure Boot in firmware preferences and install the
   certificate with a private key. Details on how to generate a certificate
   can be found in various articles, such as \href{https://habr.com/en/post/273497}{this one},
   and are out of the scope of this document. If Windows is needed one
   will also need to add the
   \href{http://go.microsoft.com/fwlink/?LinkID=321192}{Microsoft Windows Production CA 2011}.
-  To launch option ROMs or to use signed Linux drivers,
+  To launch option ROMs or to use signed Linux drivers \DIFaddbegin \DIFadd{if not using a user build of Shim}\DIFaddend ,
   \href{http://go.microsoft.com/fwlink/?LinkId=321194}{Microsoft UEFI Driver Signing CA} will also be needed.
 \item Password-protect changing firmware settings to ensure that UEFI Secure Boot
   cannot be disabled without the user's knowledge.
