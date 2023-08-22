@@ -1,5 +1,8 @@
 OpenCore Changelog
 ==================
+#### v0.9.5
+- Fixed GUID formatting for legacy NVRAM saving
+
 #### v0.9.4
 - Fixed kext blocker `Exclude` strategy for prelinked on 32-bit versions of macOS
 - Fixed `ForceAquantiaEthernet` quirk on macOS 14 beta 2, thx @Shikumo
