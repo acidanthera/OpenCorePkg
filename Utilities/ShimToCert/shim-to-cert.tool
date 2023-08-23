@@ -41,7 +41,10 @@ vendor_deauthorized_offset=$(dd if="$sectfile" ibs=1 skip=12 count=4 2>/dev/null
 # extract cert or db
 certfile=$(mktemp) || { rm "$sectfile"; exit 1; }
 
-dd if="$sectfile" ibs=1 skip="$vendor_authorized_offset" count="$vendor_authorized_size" 2>/dev/null > "$certfile" || { rm "$sectfile"; rm "$certfile"; exit 1; }
+# extract db
+if [ "$vendor_authorized_size" -ne "0" ]; then
+    dd if="$sectfile" ibs=1 skip="$vendor_authorized_offset" count="$vendor_authorized_size" 2>/dev/null > "$certfile" || { rm "$sectfile"; rm "$certfile"; exit 1; }
+fi
 
 # extract dbx
 if [ "$vendor_deauthorized_size" -ne "0" ]; then
@@ -50,6 +53,12 @@ if [ "$vendor_deauthorized_size" -ne "0" ]; then
 fi
 
 rm "$sectfile"
+
+if [ "$vendor_authorized_size" -eq "0" ]; then
+    echo "Empty vendor_authorized section."
+    rm "$certfile"
+    exit 0
+fi
 
 # valid as single cert?
 openssl x509 -noout -inform der -in "$certfile" 2>/dev/null

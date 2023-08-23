@@ -465,7 +465,7 @@ SaveNvram (
                Context.StringBuffer,
                "\t\t<key>%g</key>%c"
                "\t\t<dict>%c",
-               Context.SectionGuid,
+               &Context.SectionGuid,
                '\n',
                '\n'
                );
