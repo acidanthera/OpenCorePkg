@@ -11,12 +11,12 @@ THUNK_CONTEXT  mThunkContext;
 // PIWG firmware media device path for Apple legacy interface.
 // FwFile(2B0585EB-D8B8-49A9-8B8CE21B01AEF2B7)
 //
-static CONST UINT8                     AppleLegacyInterfaceMediaDevicePathData[] = {
+STATIC CONST UINT8                     AppleLegacyInterfaceMediaDevicePathData[] = {
   0x04, 0x06, 0x14, 0x00, 0xEB, 0x85, 0x05, 0x2B,
   0xB8, 0xD8, 0xA9, 0x49, 0x8B, 0x8C, 0xE2, 0x1B,
-  0x01, 0xAE, 0xF2, 0xB7, 0x7F, 0xFF, 0x04, 0x00,
+  0x01, 0xAE, 0xF2, 0xB7, 0x7F, 0xFF, 0x04, 0x00
 };
-static CONST EFI_DEVICE_PATH_PROTOCOL  *AppleLegacyInterfaceMediaDevicePathPath = (EFI_DEVICE_PATH_PROTOCOL *)AppleLegacyInterfaceMediaDevicePathData;
+STATIC CONST EFI_DEVICE_PATH_PROTOCOL  *AppleLegacyInterfaceMediaDevicePathPath = (EFI_DEVICE_PATH_PROTOCOL *)AppleLegacyInterfaceMediaDevicePathData;
 
 #define MAX_APPLE_LEGACY_DEVICE_PATHS  16
 
@@ -162,10 +162,8 @@ InternalIsLegacyInterfaceSupported (
 }
 
 EFI_STATUS
-InternalLoadAppleLegacyInterface (
-  IN  EFI_HANDLE                ParentImageHandle,
-  IN  EFI_DEVICE_PATH_PROTOCOL  *HdDevicePath,
-  OUT EFI_HANDLE                *ImageHandle
+InternalSetBootCampHDPath (
+  IN  EFI_DEVICE_PATH_PROTOCOL  *HdDevicePath
   )
 {
   EFI_STATUS                Status;
@@ -173,58 +171,60 @@ InternalLoadAppleLegacyInterface (
   EFI_HANDLE                PartitionHandle;
   UINT8                     PartitionIndex;
   EFI_DEVICE_PATH_PROTOCOL  *WholeDiskPath;
+
+  WholeDiskPath = OcDiskGetDevicePath (HdDevicePath);
+  if (WholeDiskPath == NULL) {
+    return EFI_INVALID_PARAMETER;
+  }
+
+  DebugPrintDevicePath (DEBUG_INFO, "OLB: Legacy disk device path", WholeDiskPath);
+
+  //
+  // Mark target partition as active.
+  //
+  DiskHandle = OcPartitionGetDiskHandle (HdDevicePath);
+  if (DiskHandle == NULL) {
+    return EFI_INVALID_PARAMETER;
+  }
+
+  PartitionHandle = OcPartitionGetPartitionHandle (HdDevicePath);
+  if (PartitionHandle == NULL) {
+    return EFI_INVALID_PARAMETER;
+  }
+
+  Status = OcDiskGetMbrPartitionIndex (PartitionHandle, &PartitionIndex);
+  if (EFI_ERROR (Status)) {
+    return Status;
+  }
+
+  Status = OcDiskMarkMbrPartitionActive (DiskHandle, PartitionIndex);
+  if (EFI_ERROR (Status)) {
+    return Status;
+  }
+
+  //
+  // Set BootCampHD variable pointing to target disk.
+  //
+  return gRT->SetVariable (
+                APPLE_BOOT_CAMP_HD_VARIABLE_NAME,
+                &gAppleBootVariableGuid,
+                EFI_VARIABLE_BOOTSERVICE_ACCESS | EFI_VARIABLE_RUNTIME_ACCESS | EFI_VARIABLE_NON_VOLATILE,
+                GetDevicePathSize (WholeDiskPath),
+                WholeDiskPath
+                );
+}
+
+EFI_STATUS
+InternalLoadAppleLegacyInterface (
+  IN  EFI_HANDLE                ParentImageHandle,
+  OUT EFI_DEVICE_PATH_PROTOCOL  **ImageDevicePath,
+  OUT EFI_HANDLE                *ImageHandle
+  )
+{
+  EFI_STATUS                Status;
   EFI_DEVICE_PATH_PROTOCOL  **LegacyDevicePaths;
   CHAR16                    *UnicodeDevicePath;
   UINTN                     Index;
-
-  //
-  // Get device path to disk to be booted.
-  //
-  if (!OcIsDiskCdRom (HdDevicePath)) {
-    WholeDiskPath = OcDiskGetDevicePath (HdDevicePath);
-    if (WholeDiskPath == NULL) {
-      return EFI_INVALID_PARAMETER;
-    }
-
-    DebugPrintDevicePath (DEBUG_INFO, "OLB: Legacy disk device path", WholeDiskPath);
-
-    //
-    // Mark target partition as active.
-    //
-    DiskHandle = OcPartitionGetDiskHandle (HdDevicePath);
-    if (DiskHandle == NULL) {
-      return EFI_INVALID_PARAMETER;
-    }
-
-    PartitionHandle = OcPartitionGetPartitionHandle (HdDevicePath);
-    if (PartitionHandle == NULL) {
-      return EFI_INVALID_PARAMETER;
-    }
-
-    Status = OcDiskGetMbrPartitionIndex (PartitionHandle, &PartitionIndex);
-    if (EFI_ERROR (Status)) {
-      return Status;
-    }
-
-    Status = OcDiskMarkMbrPartitionActive (DiskHandle, PartitionIndex);
-    if (EFI_ERROR (Status)) {
-      return Status;
-    }
-
-    //
-    // Set BootCampHD variable pointing to target disk.
-    //
-    Status = gRT->SetVariable (
-                    APPLE_BOOT_CAMP_HD_VARIABLE_NAME,
-                    &gAppleBootVariableGuid,
-                    EFI_VARIABLE_BOOTSERVICE_ACCESS | EFI_VARIABLE_RUNTIME_ACCESS | EFI_VARIABLE_NON_VOLATILE,
-                    GetDevicePathSize (WholeDiskPath),
-                    WholeDiskPath
-                    );
-    if (EFI_ERROR (Status)) {
-      return Status;
-    }
-  }
 
   //
   // Get list of possible locations for Apple legacy interface and attempt to load.
@@ -246,9 +246,11 @@ InternalLoadAppleLegacyInterface (
                       ImageHandle
                       );
       if (Status != EFI_NOT_FOUND) {
+        *ImageDevicePath = LegacyDevicePaths[Index];
+
         DEBUG_CODE_BEGIN ();
 
-        UnicodeDevicePath = ConvertDevicePathToText (LegacyDevicePaths[Index], FALSE, FALSE);
+        UnicodeDevicePath = ConvertDevicePathToText (*ImageDevicePath, FALSE, FALSE);
         DEBUG ((
           DEBUG_INFO,
           "OLB: Loaded Apple legacy interface at dp %s - %r\n",

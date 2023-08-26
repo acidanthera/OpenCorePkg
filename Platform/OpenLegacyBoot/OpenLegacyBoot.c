@@ -12,6 +12,20 @@
 STATIC EFI_HANDLE  mImageHandle;
 STATIC BOOLEAN     mIsAppleInterfaceSupported;
 
+//
+// Fallback PIWG firmware media device path for Apple legacy interface.
+// MemoryMapped(0xB,0xFFE00000,0xFFF9FFFF)/FvFile(2B0585EB-D8B8-49A9-8B8C-E21B01AEF2B7)
+//
+STATIC CONST UINT8                     AppleLegacyInterfaceFallbackDevicePathData[] = {
+  0x01, 0x03, 0x18, 0x00, 0x0B, 0x00, 0x00, 0x00,
+  0x00, 0x00, 0xE0, 0xFF, 0x00, 0x00, 0x00, 0x00,
+  0xFF, 0xFF, 0xF9, 0xFF, 0x00, 0x00, 0x00, 0x00,
+  0x04, 0x06, 0x14, 0x00, 0xEB, 0x85, 0x05, 0x2B,
+  0xB8, 0xD8, 0xA9, 0x49, 0x8B, 0x8C, 0xE2, 0x1B,
+  0x01, 0xAE, 0xF2, 0xB7, 0x7F, 0xFF, 0x04, 0x00
+};
+STATIC CONST EFI_DEVICE_PATH_PROTOCOL  *AppleLegacyInterfaceFallbackDevicePathPath = (EFI_DEVICE_PATH_PROTOCOL *)AppleLegacyInterfaceFallbackDevicePathData;
+
 STATIC
 CHAR8 *
 GetLegacyEntryName (
@@ -65,9 +79,21 @@ ExternalSystemActionDoLegacyBoot (
   EFI_STATUS                 Status;
   EFI_HANDLE                 DiskHandle;
   EFI_HANDLE                 LoadedImageHandle;
+  EFI_DEVICE_PATH_PROTOCOL   *LoadedImageDevicePath;
   EFI_LOADED_IMAGE_PROTOCOL  *LoadedImage;
   BOOLEAN                    IsExternal;
   CONST CHAR8                *AppleBootArg;
+
+  //
+  // Set BootCampHD to desired disk Device Path for non-CD devices.
+  //
+  if (!OcIsDiskCdRom (DevicePath)) {
+    Status = InternalSetBootCampHDPath (DevicePath);
+    if (EFI_ERROR (Status)) {
+      DEBUG ((DEBUG_INFO, "OLB: Failure while setting BootCampHD variable - %r\n", Status));
+      return Status;
+    }
+  }
 
   //
   // Load and start legacy OS.
@@ -84,7 +110,7 @@ ExternalSystemActionDoLegacyBoot (
 
     Status = InternalLoadAppleLegacyInterface (
                mImageHandle,
-               DevicePath,
+               &LoadedImageDevicePath,
                &LoadedImageHandle
                );
     if (EFI_ERROR (Status)) {
@@ -141,6 +167,62 @@ ExternalSystemActionDoLegacyBoot (
     }
   }
 
+  return EFI_SUCCESS;
+}
+
+STATIC
+EFI_STATUS
+ExternalSystemGetDevicePath (
+  IN OUT  OC_PICKER_CONTEXT         *PickerContext,
+  IN OUT  EFI_DEVICE_PATH_PROTOCOL  **DevicePath
+  )
+{
+  EFI_STATUS                Status;
+  EFI_HANDLE                LoadedImageHandle;
+  EFI_DEVICE_PATH_PROTOCOL  *LoadedImageDevicePath;
+  EFI_DEVICE_PATH_PROTOCOL  *AppleLoaderDevicePath;
+
+  //
+  // Set BootCampHD to desired disk Device Path for non-CD devices.
+  //
+  if (!OcIsDiskCdRom (*DevicePath)) {
+    Status = InternalSetBootCampHDPath (*DevicePath);
+    if (EFI_ERROR (Status)) {
+      DEBUG ((DEBUG_INFO, "OLB: Failure while setting BootCampHD variable - %r\n", Status));
+      return Status;
+    }
+  }
+
+  //
+  // Locate Apple legacy interface loader.
+  //
+  // On Macs, use the Apple legacy interface and set BootCampHD.
+  // On other systems, use a default placeholder path.
+  //
+  DebugPrintDevicePath (DEBUG_INFO, "OLB: Legacy device path", *DevicePath);
+  if (mIsAppleInterfaceSupported) {
+    Status = InternalLoadAppleLegacyInterface (
+               mImageHandle,
+               &LoadedImageDevicePath,
+               &LoadedImageHandle
+               );
+    if (EFI_ERROR (Status)) {
+      DEBUG ((DEBUG_INFO, "OLB: Failure while loading Apple legacy interface - %r\n", Status));
+      return Status;
+    }
+
+    gBS->UnloadImage (LoadedImageHandle);
+
+    AppleLoaderDevicePath = DuplicateDevicePath (LoadedImageDevicePath);
+  } else {
+    AppleLoaderDevicePath = DuplicateDevicePath (AppleLegacyInterfaceFallbackDevicePathPath);
+  }
+
+  if (AppleLoaderDevicePath == NULL) {
+    return EFI_OUT_OF_RESOURCES;
+  }
+
+  *DevicePath = AppleLoaderDevicePath;
   return EFI_SUCCESS;
 }
 
@@ -263,17 +345,18 @@ OcGetLegacyBootEntries (
       return Status;
     }
 
-    PickerEntry->Id                       = AsciiDevicePath;
-    PickerEntry->Name                     = GetLegacyEntryName (LegacyOsType);
-    PickerEntry->Path                     = NULL;
-    PickerEntry->Arguments                = NULL;
-    PickerEntry->Flavour                  = GetLegacyEntryFlavour (LegacyOsType);
-    PickerEntry->Tool                     = FALSE;
-    PickerEntry->TextMode                 = FALSE;
-    PickerEntry->RealPath                 = FALSE;
-    PickerEntry->External                 = IsExternal;
-    PickerEntry->ExternalSystemAction     = ExternalSystemActionDoLegacyBoot;
-    PickerEntry->ExternalSystemDevicePath = BlockDevicePath;
+    PickerEntry->Id                          = AsciiDevicePath;
+    PickerEntry->Name                        = GetLegacyEntryName (LegacyOsType);
+    PickerEntry->Path                        = NULL;
+    PickerEntry->Arguments                   = NULL;
+    PickerEntry->Flavour                     = GetLegacyEntryFlavour (LegacyOsType);
+    PickerEntry->Tool                        = FALSE;
+    PickerEntry->TextMode                    = FALSE;
+    PickerEntry->RealPath                    = FALSE;
+    PickerEntry->External                    = IsExternal;
+    PickerEntry->ExternalSystemAction        = ExternalSystemActionDoLegacyBoot;
+    PickerEntry->ExternalSystemGetDevicePath = ExternalSystemGetDevicePath;
+    PickerEntry->ExternalSystemDevicePath    = BlockDevicePath;
 
     if ((PickerEntry->Name == NULL) || (PickerEntry->Flavour == NULL)) {
       OcFlexArrayFree (&FlexPickerEntries);

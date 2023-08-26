@@ -51,9 +51,14 @@ InternalIsLegacyInterfaceSupported (
   );
 
 EFI_STATUS
+InternalSetBootCampHDPath (
+  IN  EFI_DEVICE_PATH_PROTOCOL  *HdDevicePath
+  );
+
+EFI_STATUS
 InternalLoadAppleLegacyInterface (
   IN  EFI_HANDLE                ParentImageHandle,
-  IN  EFI_DEVICE_PATH_PROTOCOL  *HdDevicePath,
+  OUT EFI_DEVICE_PATH_PROTOCOL  **ImageDevicePath,
   OUT EFI_HANDLE                *ImageHandle
   );
 

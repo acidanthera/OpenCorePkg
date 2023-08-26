@@ -205,6 +205,16 @@ EFI_STATUS
   );
 
 /**
+  Gets Device Path for external boot system boot entry.
+**/
+typedef
+EFI_STATUS
+(*OC_BOOT_EXTERNAL_SYSTEM_GET_DP) (
+  IN OUT  OC_PICKER_CONTEXT         *PickerContext,
+  IN OUT  EFI_DEVICE_PATH_PROTOCOL  **DevicePath
+  );
+
+/**
   Discovered boot entry.
   Note, inner resources must be freed with FreeBootEntry.
 **/
@@ -226,6 +236,10 @@ typedef struct OC_BOOT_ENTRY_ {
   // Action to perform on execution. Only valid for external boot system entries.
   //
   OC_BOOT_EXTERNAL_SYSTEM_ACTION    ExternalSystemAction;
+  //
+  // Gets Device Path for external boot system boot entry. Only valid for external boot system entries.
+  //
+  OC_BOOT_EXTERNAL_SYSTEM_GET_DP    ExternalSystemGetDevicePath;
   //
   // Id under which to save entry as default.
   //
@@ -626,6 +640,10 @@ typedef struct {
   // External boot system action. Boot Entry Protocol only. Optional.
   //
   OC_BOOT_EXTERNAL_SYSTEM_ACTION    ExternalSystemAction;
+  //
+  // Gets Device Path for external boot system boot entry. Boot Entry Protocol only. Optional.
+  //
+  OC_BOOT_EXTERNAL_SYSTEM_GET_DP    ExternalSystemGetDevicePath;
   //
   // External boot system Device Path. Boot Entry Protocol only. Optional.
   //
