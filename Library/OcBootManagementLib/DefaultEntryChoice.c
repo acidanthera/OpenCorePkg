@@ -1022,7 +1022,6 @@ OcSetDefaultBootEntry (
     }
 
     if (ExtSystemDevPath != NULL) {
-      DebugPrintHexDump (DEBUG_INFO, "hex", (UINT8 *)ExtSystemDevPath, DevicePathSize);
       CopyMem ((UINT8 *)(LoadOption + 1) + LoadOptionNameSize, ExtSystemDevPath, DevicePathSize);
     } else if (!Entry->IsCustom) {
       CopyMem ((UINT8 *)(LoadOption + 1) + LoadOptionNameSize, Entry->DevicePath, DevicePathSize);
