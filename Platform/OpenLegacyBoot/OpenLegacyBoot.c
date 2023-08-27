@@ -45,6 +45,43 @@ GetLegacyEntryFlavour (
 }
 
 STATIC
+CHAR8 *
+LoadAppleDiskLabel (
+  IN OUT  OC_PICKER_CONTEXT  *PickerContext,
+  IN      EFI_HANDLE         DiskHandle
+  )
+{
+  EFI_STATUS                       Status;
+  CHAR8                            *DiskLabel;
+  EFI_SIMPLE_FILE_SYSTEM_PROTOCOL  *FileSystem;
+
+  DiskLabel = NULL;
+  if ((PickerContext->PickerAttributes & OC_ATTR_USE_DISK_LABEL_FILE) != 0) {
+    Status = gBS->HandleProtocol (
+                    DiskHandle,
+                    &gEfiSimpleFileSystemProtocolGuid,
+                    (VOID **)&FileSystem
+                    );
+    if (EFI_ERROR (Status)) {
+      return NULL;
+    }
+
+    DiskLabel = OcReadFile (FileSystem, L".contentDetails", NULL, 0);
+    if (DiskLabel == NULL) {
+      DiskLabel = OcReadFile (FileSystem, L".disk_label.contentDetails", NULL, 0);
+    }
+
+    if (DiskLabel == NULL) {
+      DEBUG ((DEBUG_INFO, "OLB: %s %s not present\n", L".contentDetails", L".disk_label.contentDetails"));
+    } else {
+      DEBUG ((DEBUG_INFO, "OLB: Found disk label '%a'\n", DiskLabel));
+    }
+  }
+
+  return DiskLabel;
+}
+
+STATIC
 VOID
 FreePickerEntry (
   IN   OC_PICKER_ENTRY  *Entry
@@ -345,8 +382,12 @@ OcGetLegacyBootEntries (
       return Status;
     }
 
+    PickerEntry->Name = LoadAppleDiskLabel (PickerContext, BlockDeviceHandle);
+    if (PickerEntry->Name == NULL) {
+      PickerEntry->Name = GetLegacyEntryName (LegacyOsType);
+    }
+
     PickerEntry->Id                          = AsciiDevicePath;
-    PickerEntry->Name                        = GetLegacyEntryName (LegacyOsType);
     PickerEntry->Path                        = NULL;
     PickerEntry->Arguments                   = NULL;
     PickerEntry->Flavour                     = GetLegacyEntryFlavour (LegacyOsType);
