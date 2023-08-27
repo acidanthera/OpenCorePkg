@@ -110,12 +110,13 @@ FileOpen (
 
   CopyMem (NewFile->Path, CleanPath, StrnSizeS (CleanPath, MAX_PATH));
 
-  Index = StrnLenS (CleanPath, MAX_PATH);
-  if (Index == MAX_PATH) {
+  Length = StrnLenS (CleanPath, MAX_PATH);
+  if (Length == MAX_PATH) {
     DEBUG ((DEBUG_INFO, "NTFS: CleanPath is too long.\n"));
     return EFI_OUT_OF_RESOURCES;
   }
 
+  Index = Length;
   while (Index > 0) {
     --Index;
     if (CleanPath[Index] == L'/') {
@@ -125,7 +126,7 @@ FileOpen (
   }
 
   DirName           = (Index == 0) ? L"/" : CleanPath;
-  NewFile->BaseName = (Index == 0) ? L"\0" : &NewFile->Path[Index + 1U];
+  NewFile->BaseName = (Index == Length) ? L"\0" : &NewFile->Path[Index + 1U];
 
   Status = NtfsDir (FileSystem, DirName, NewFile, INFO_HOOK);
   if (EFI_ERROR (Status)) {
