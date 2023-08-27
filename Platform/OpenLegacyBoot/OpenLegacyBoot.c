@@ -12,6 +12,8 @@
 STATIC EFI_HANDLE  mImageHandle;
 STATIC BOOLEAN     mIsAppleInterfaceSupported;
 
+STATIC OC_FLEX_ARRAY  *mHiddenDevicePaths;
+
 //
 // Fallback PIWG firmware media device path for Apple legacy interface.
 // MemoryMapped(0xB,0xFFE00000,0xFFF9FFFF)/FvFile(2B0585EB-D8B8-49A9-8B8C-E21B01AEF2B7)
@@ -277,12 +279,15 @@ OcGetLegacyBootEntries (
   UINTN       NoHandles;
   EFI_HANDLE  *Handles;
   UINTN       HandleIndex;
+  UINTN       DevicePathIndex;
+  BOOLEAN     SkipHiddenDevice;
   UINT32      ScanPolicy;
   BOOLEAN     IsExternal;
 
   CHAR16  *UnicodeDevicePath;
   CHAR8   *AsciiDevicePath;
   UINTN   AsciiDevicePathSize;
+  CHAR16  **HiddenUnicodeDevicePath;
 
   EFI_HANDLE                BlockDeviceHandle;
   EFI_DEVICE_PATH_PROTOCOL  *BlockDevicePath;
@@ -334,17 +339,49 @@ OcGetLegacyBootEntries (
       continue;
     }
 
+    BlockDevicePath = DevicePathFromHandle (BlockDeviceHandle);
+    if (BlockDevicePath == NULL) {
+      DEBUG ((DEBUG_INFO, "OLB: Could not find Device Path for block device\n"));
+      continue;
+    }
+
+    //
+    // Device Path will be used as ID and is required for default entry matching.
+    //
+    UnicodeDevicePath = ConvertDevicePathToText (BlockDevicePath, FALSE, FALSE);
+    if (UnicodeDevicePath == NULL) {
+      OcFlexArrayFree (&FlexPickerEntries);
+      return EFI_OUT_OF_RESOURCES;
+    }
+
+    //
+    // Skip device if on hidden list.
+    //
+    if (mHiddenDevicePaths != NULL) {
+      SkipHiddenDevice = FALSE;
+      for (DevicePathIndex = 0; DevicePathIndex < mHiddenDevicePaths->Count; DevicePathIndex++) {
+        HiddenUnicodeDevicePath = (CHAR16 **)OcFlexArrayItemAt (mHiddenDevicePaths, DevicePathIndex);
+        ASSERT (HiddenUnicodeDevicePath != NULL);
+
+        if (StrCmp (UnicodeDevicePath, *HiddenUnicodeDevicePath) == 0) {
+          DEBUG ((DEBUG_INFO, "OLB: Skipping hidden device %s\n", *HiddenUnicodeDevicePath));
+          SkipHiddenDevice = TRUE;
+          break;
+        }
+      }
+
+      if (SkipHiddenDevice) {
+        FreePool (UnicodeDevicePath);
+        continue;
+      }
+    }
+
     //
     // Detect legacy OS type.
     //
     LegacyOsType = InternalGetPartitionLegacyOsType (BlockDeviceHandle, mIsAppleInterfaceSupported);
     if (LegacyOsType == OcLegacyOsTypeNone) {
-      continue;
-    }
-
-    BlockDevicePath = DevicePathFromHandle (BlockDeviceHandle);
-    if (BlockDevicePath == NULL) {
-      DEBUG ((DEBUG_INFO, "OLB: Could not find Device Path for block device\n"));
+      FreePool (UnicodeDevicePath);
       continue;
     }
 
@@ -353,15 +390,7 @@ OcGetLegacyBootEntries (
     //
     PickerEntry = OcFlexArrayAddItem (FlexPickerEntries);
     if (PickerEntry == NULL) {
-      OcFlexArrayFree (&FlexPickerEntries);
-      return EFI_OUT_OF_RESOURCES;
-    }
-
-    //
-    // Device Path will be used as ID and is required for default entry matching.
-    //
-    UnicodeDevicePath = ConvertDevicePathToText (BlockDevicePath, FALSE, FALSE);
-    if (UnicodeDevicePath == NULL) {
+      FreePool (UnicodeDevicePath);
       OcFlexArrayFree (&FlexPickerEntries);
       return EFI_OUT_OF_RESOURCES;
     }
@@ -450,9 +479,37 @@ UefiMain (
   IN EFI_SYSTEM_TABLE  *SystemTable
   )
 {
-  EFI_STATUS  Status;
+  EFI_STATUS                 Status;
+  EFI_LOADED_IMAGE_PROTOCOL  *LoadedImage;
+  CHAR16                     *DevicePathNames;
+  OC_FLEX_ARRAY              *ParsedLoadOptions;
 
-  mImageHandle = ImageHandle;
+  Status = gBS->HandleProtocol (
+                  ImageHandle,
+                  &gEfiLoadedImageProtocolGuid,
+                  (VOID **)&LoadedImage
+                  );
+  if (EFI_ERROR (Status)) {
+    return Status;
+  }
+
+  mImageHandle       = ImageHandle;
+  mHiddenDevicePaths = NULL;
+
+  Status = OcParseLoadOptions (LoadedImage, &ParsedLoadOptions);
+  if (!EFI_ERROR (Status)) {
+    OcParsedVarsGetUnicodeStr (ParsedLoadOptions, L"--hide-devices", &DevicePathNames);
+    if (DevicePathNames != NULL) {
+      mHiddenDevicePaths = OcStringSplit (DevicePathNames, L';', OcStringFormatUnicode);
+      if (mHiddenDevicePaths == NULL) {
+        return EFI_OUT_OF_RESOURCES;
+      }
+    }
+  } else {
+    if (Status != EFI_NOT_FOUND) {
+      return Status;
+    }
+  }
 
   Status = InternalIsLegacyInterfaceSupported (&mIsAppleInterfaceSupported);
   if (EFI_ERROR (Status)) {
