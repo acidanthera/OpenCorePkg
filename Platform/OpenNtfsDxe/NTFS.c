@@ -343,18 +343,10 @@ NTFSStop (
     return Status;
   }
 
-  Instance = (EFI_FS *)NTFS;
-
-  FreeAttr (&Instance->RootIndex->Attr);
-  FreeAttr (&Instance->MftStart->Attr);
-  FreePool (Instance->RootIndex->FileRecord);
-  FreePool (Instance->MftStart->FileRecord);
-  FreePool (Instance->RootIndex->File);
-
   Status = gBS->UninstallMultipleProtocolInterfaces (
                   Controller,
                   &gEfiSimpleFileSystemProtocolGuid,
-                  &NTFS,
+                  NTFS,
                   NULL
                   );
   if (EFI_ERROR (Status)) {
@@ -373,6 +365,14 @@ NTFSStop (
   if (EFI_ERROR (Status)) {
     return Status;
   }
+
+  Instance = (EFI_FS *)NTFS;
+
+  FreeAttr (&Instance->RootIndex->Attr);
+  FreeAttr (&Instance->MftStart->Attr);
+  FreePool (Instance->RootIndex->FileRecord);
+  FreePool (Instance->MftStart->FileRecord);
+  FreePool (Instance->RootIndex->File);
 
   return EFI_SUCCESS;
 }
