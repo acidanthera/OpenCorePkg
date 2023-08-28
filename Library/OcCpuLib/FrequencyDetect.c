@@ -136,7 +136,7 @@ InternalGetPmTimerAddr (
       TimerAddr = MmioRead32 (
                     R_AMD_ACPI_MMIO_BASE + R_AMD_ACPI_MMIO_PMIO_BASE + R_AMD_ACPI_PM_TMR_BLOCK
                     );
-      if (TimerAddr == UINT32_MAX) {
+      if (TimerAddr == MAX_UINT32) {
         TimerAddr = 0;
       } else {
         if (Type != NULL) {
