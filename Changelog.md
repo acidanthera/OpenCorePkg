@@ -4,6 +4,7 @@ OpenCore Changelog
 - Fixed GUID formatting for legacy NVRAM saving
 - Fixed inability to open files in root directory on an NTFS filesystem
 - Fixed hang while unloading NTFS driver
+- Added UEFI quirk `ShimRetainProtocol`, allowing OpenCore chained from shim to verify Linux using shim's certificates
 
 #### v0.9.4
 - Fixed kext blocker `Exclude` strategy for prelinked on 32-bit versions of macOS

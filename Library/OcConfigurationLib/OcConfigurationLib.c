@@ -727,6 +727,7 @@ OC_SCHEMA
   OC_SCHEMA_BOOLEAN_IN ("RequestBootVarRouting",    OC_GLOBAL_CONFIG, Uefi.Quirks.RequestBootVarRouting),
   OC_SCHEMA_INTEGER_IN ("ResizeGpuBars",            OC_GLOBAL_CONFIG, Uefi.Quirks.ResizeGpuBars),
   OC_SCHEMA_BOOLEAN_IN ("ResizeUsePciRbIo",         OC_GLOBAL_CONFIG, Uefi.Quirks.ResizeUsePciRbIo),
+  OC_SCHEMA_BOOLEAN_IN ("ShimRetainProtocol",       OC_GLOBAL_CONFIG, Uefi.Quirks.ShimRetainProtocol),
   OC_SCHEMA_INTEGER_IN ("TscSyncTimeout",           OC_GLOBAL_CONFIG, Uefi.Quirks.TscSyncTimeout),
   OC_SCHEMA_BOOLEAN_IN ("UnblockFsConnect",         OC_GLOBAL_CONFIG, Uefi.Quirks.UnblockFsConnect)
 };

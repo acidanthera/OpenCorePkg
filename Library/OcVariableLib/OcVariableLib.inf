@@ -17,6 +17,7 @@
   OcVariableLib.c
   LegacyNvramSupport.c
   LegacyNvramWrapper.c
+  Shim.c
   Sip.c
   VariableManagement.c
 
@@ -41,6 +42,7 @@
   gOcReadOnlyVariableGuid                       ## SOMETIMES_CONSUMES
   gOcVendorVariableGuid                         ## SOMETIMES_CONSUMES
   gOcWriteOnlyVariableGuid                      ## SOMETIMES_CONSUMES
+  gShimLockGuid                                 ## SOMETIMES_CONSUMES
 
 [Protocols]
   gOcFirmwareRuntimeProtocolGuid                ## SOMETIMES_CONSUMES

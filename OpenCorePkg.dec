@@ -24,6 +24,7 @@
   Include/Acidanthera
   Include/Apple
   Include/Generic
+  Include/Grub2
   Include/Intel
   Include/Microsoft
   Include/Nvidia
@@ -469,6 +470,9 @@
 
   ## Include/Microsoft/Guid/MicrosoftVariable.h
   gMicrosoftVariableGuid                     = { 0x77FA9ABD, 0x0359, 0x4D32, { 0xBD, 0x60, 0x28, 0xF4, 0xE7, 0x8F, 0x78, 0x4B }}
+
+  ## Include/Shim/Guid/ShimLock.h
+  gShimLockGuid                              = { 0x605DAB50, 0xE046, 0x4300, { 0xAB, 0xB6, 0x3D, 0xD8, 0x10, 0xDD, 0x8B, 0x23 }}
 
 [Protocols]
   ## Include/Acidanthera/Protocol/AudioDecode.h

@@ -344,4 +344,14 @@ OcSwitchToFallbackLegacyNvram (
   VOID
   );
 
+/**
+  If Required is TRUE set volatile BS-only ShimRetainProtocol variable to 1.
+
+  @param[in]  Required        Is ShimRetainProtocol required.
+**/
+EFI_STATUS
+OcShimRetainProtocol (
+  IN BOOLEAN  Required
+  );
+
 #endif // OC_VARIABLE_LIB_H

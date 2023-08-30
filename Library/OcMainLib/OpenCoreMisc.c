@@ -43,6 +43,8 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 
 #include <Protocol/OcInterface.h>
 
+#include <ShimVars.h>
+
 STATIC
 VOID
 OcStoreLoadPath (
@@ -450,6 +452,11 @@ OcMiscEarlyInit (
     DEBUG ((DEBUG_ERROR, "OC: Failed to load configuration!\n"));
     CpuDeadLoop ();
     return EFI_UNSUPPORTED; ///< Should be unreachable.
+  }
+
+  Status = OcShimRetainProtocol (Config->Uefi.Quirks.ShimRetainProtocol);
+  if (EFI_ERROR (Status)) {
+    DEBUG ((DEBUG_WARN, "OC: Failed to set %g:%s\n", &gShimLockGuid, SHIM_RETAIN_PROTOCOL));
   }
 
   OcLoadDrivers (Storage, Config, NULL, TRUE);

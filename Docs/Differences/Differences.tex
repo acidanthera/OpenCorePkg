@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
-%DIF DEL PreviousConfiguration.tex   Sun Aug 13 12:38:11 2023
-%DIF ADD ../Configuration.tex        Sun Aug 13 12:38:11 2023
+%DIF DEL PreviousConfiguration.tex   Sun Aug 13 19:03:22 2023
+%DIF ADD ../Configuration.tex        Wed Aug 30 22:12:39 2023
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -8935,7 +8935,7 @@ for additional options.
   or corrupted in any way.
   \end{itemize}
 
-\item
+  \item
   \texttt{ResizeUsePciRbIo}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
@@ -8944,7 +8944,19 @@ for additional options.
   The quirk makes \texttt{ResizeGpuBars} and \texttt{ResizeAppleGpuBars} use \texttt{PciRootBridgeIo} instead of PciIo.
   This is needed on systems with a buggy \texttt{PciIo} implementation where trying to configure
   Resizable BAR results in \texttt{Capability I/O Error}. Typically this is required on
-  older systems which have been modified with \href{https://github.com/xCuri0/ReBarUEFI}{ReBarUEFI}.
+  older systems which have been modified with \href{https://github.com/xCuri0/ReBarUEFI}{ReBarUEFI}\DIFaddbegin \DIFadd{.
+}
+
+  \item
+  \texttt{\DIFadd{ShimRetainProtocol}}\\
+  \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ boolean}}\\
+  \textbf{\DIFadd{Failsafe}}\DIFadd{: }\texttt{\DIFadd{false}}\\
+  \textbf{\DIFadd{Description}}\DIFadd{: Request Linux shim to keep protocol installed for subsequent image loads.
+}
+
+  \DIFadd{This option is only required if chaining OpenCore from shim. It must be set in order to allow
+  OpenCore to launch items which are verified by certificates present in shim, but not in the
+  system Secure Boot database}\DIFaddend .
 
 \item
   \texttt{ResizeGpuBars}\\
