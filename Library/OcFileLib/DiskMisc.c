@@ -881,12 +881,14 @@ OcGetDiskMbrTable (
 
   if (CheckPartitions) {
     if (  (Mbr->Partition[0].OSIndicator == PMBR_GPT_PARTITION)
-       && (*((UINT32 *)Mbr->Partition[0].StartingLBA) == 0x01)
-       && (*((UINT32 *)Mbr->Partition[0].SizeInLBA) != 0))
+       && (ReadUnaligned32 ((UINT32 *)Mbr->Partition[0].StartingLBA) == 0x01)
+       && (ReadUnaligned32 ((UINT32 *)Mbr->Partition[0].SizeInLBA) != 0))
     {
       IsProtectiveMbr = TRUE;
       for (Index = 1; Index < MAX_MBR_PARTITIONS; Index++) {
-        if ((*((UINT32 *)Mbr->Partition[Index].StartingLBA) != 0) || (*((UINT32 *)Mbr->Partition[Index].SizeInLBA) != 0)) {
+        if (  (ReadUnaligned32 ((UINT32 *)Mbr->Partition[Index].StartingLBA) != 0)
+           || (ReadUnaligned32 ((UINT32 *)Mbr->Partition[Index].SizeInLBA) != 0))
+        {
           IsProtectiveMbr = FALSE;
           break;
         }
@@ -958,8 +960,8 @@ OcDiskGetMbrPartitionIndex (
 
   Status = EFI_NOT_FOUND;
   for (Index = 0; Index < MAX_MBR_PARTITIONS; Index++) {
-    if (  (*((UINT32 *)Mbr->Partition[Index].StartingLBA) == HdNode->PartitionStart)
-       && (*((UINT32 *)Mbr->Partition[Index].SizeInLBA) == HdNode->PartitionSize))
+    if (  (ReadUnaligned32 ((UINT32 *)Mbr->Partition[Index].StartingLBA) == HdNode->PartitionStart)
+       && (ReadUnaligned32 ((UINT32 *)Mbr->Partition[Index].SizeInLBA) == HdNode->PartitionSize))
     {
       *PartitionIndex = Index;
       Status          = EFI_SUCCESS;
