@@ -4052,6 +4052,7 @@ nvram 4D1FDA02-38C7-4A6A-9CC6-4BCCA8B30102:boot-log |
   \item \texttt{OCRST} --- ResetSystem
   \item \texttt{OCUI} --- OpenCanopy
   \item \texttt{OC} --- OpenCore main, also OcMainLib
+  \item \texttt{OLB} --- OpenLegacyBoot
   \item \texttt{VMOPT} --- VerifyMemOpt
   \end{itemize}
 
@@ -6481,9 +6482,13 @@ even cause permanent firmware damage. Some of the known drivers are listed below
 & \hyperref[ueficanopy]{OpenCore plugin} implementing graphical interface. \\
 \href{https://github.com/acidanthera/OpenCorePkg}{\texttt{OpenRuntime}}\textbf{*}
 & \hyperref[uefiruntime]{OpenCore plugin} implementing \texttt{OC\_FIRMWARE\_RUNTIME} protocol. \\
+\href{https://github.com/acidanthera/OpenCorePkg}{\texttt{OpenLegacyBoot}}\textbf{*}
+& \hyperref[legacyboot]{OpenCore plugin} implementing \texttt{OC\_BOOT\_ENTRY\_PROTOCOL}
+  to allow detection and booting of legacy operating systems from OpenCore on Macs, OpenDuet
+  and systems with a CSM. \\
 \href{https://github.com/acidanthera/OpenCorePkg}{\texttt{OpenLinuxBoot}}\textbf{*}
 & \hyperref[uefilinux]{OpenCore plugin} implementing \texttt{OC\_BOOT\_ENTRY\_PROTOCOL}
-  to allow direct detection and booting of Linux distributiuons from OpenCore, without
+  to allow direct detection and booting of Linux distributions from OpenCore, without
   chainloading via GRUB. \\
 \href{https://github.com/acidanthera/OpenCorePkg}{\texttt{OpenNtfsDxe}}\textbf{*}
 & New Technologies File System (NTFS) read-only driver.
@@ -6705,6 +6710,40 @@ functioning. Feature highlights:
   an untrusted operating system (e.g. \texttt{DisableVariableWrite}).
   \item UEFI Runtime Services memory protection management to workaround read-only
   mapping (e.g. \texttt{EnableWriteUnprotector}).
+\end{itemize}
+
+\subsection{OpenLegacyBoot}\label{legacyboot}
+OpenLegacyBoot is an OpenCore plugin implementing \texttt{OC\_BOOT\_ENTRY\_PROTOCOL}.
+It aims to detect and boot legacy installed operating systems.
+
+Usage:
+
+\begin{itemize}
+\tightlist
+  \item Add \texttt{OpenLegacyBoot.efi} and also optionally (see below) \texttt{OpenNtfsDxe.efi} to the \texttt{config.plist}
+  \texttt{Drivers} section.
+  \item Install Windows or another legacy operating system as normal if this has not been done earlier -- OpenLegacyBoot is
+  not involved in this stage and may be unable to boot from installation media such as a USB device.
+  \item Reboot into OpenCore: the installed legacy operating system should appear and boot directly from OpenCore
+  when selected.
+\end{itemize}
+
+OpenLegacyBoot does not require any additional filesystem drivers such as \texttt{OpenNtfsDxe.efi} to be loaded for
+base functionality, but loading them will enable the use of \texttt{.contentDetails} and \texttt{.VolumeIcon.icns}
+files for boot entry customisation.
+
+\subsubsection{Configuration}
+
+No additional configuration should work well in most circumstances, but if required the following
+options for the driver may be specified in \texttt{UEFI/Drivers/Arguments}:
+
+\begin{itemize}
+  \tightlist
+	\item \texttt{-{}-hide-devices} - String value, no default. \medskip
+
+  When this option is present and has one or more values separated by semicolons \\
+  (e.g. -{}-hide-devices=PciRoot(0x0)/Pci(0x1F,0x2)/Sata(0x0,0xFFFF,0x0)/HD(2,GPT,...)), 
+  it disables scanning the specified disks for legacy operating system boot sectors.\medskip
 \end{itemize}
 
 \subsection{OpenLinuxBoot}\label{uefilinux}
@@ -9257,7 +9296,8 @@ requires several steps and careful configuration of certain settings as explaine
   some extra precautions. Things to consider:
 
   \begin{itemize}
-  \item MBR (Master Boot Record) installations are legacy and will not be supported.
+  \item MBR (Master Boot Record) installations are legacy and are only supported
+  with the OpenLegacyBoot driver.
   \item All the modifications applied (to ACPI, NVRAM, SMBIOS, etc.) are supposed
   to be operating system agnostic, i.e. apply equally regardless of the OS booted.
   This enables Boot Camp software experience on Windows.
