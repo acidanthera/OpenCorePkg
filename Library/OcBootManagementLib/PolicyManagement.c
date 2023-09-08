@@ -75,6 +75,19 @@ OcGetDevicePolicyType (
       SubType = DevicePathSubType (DevicePathWalker);
       switch (SubType) {
         case MSG_SATA_DP:
+          //
+          // Check if this SATA Bus has a CD connected.
+          //
+          DevicePathWalker = NextDevicePathNode (DevicePathWalker);
+          if (  !IsDevicePathEnd (DevicePathWalker)
+             && (DevicePathType (DevicePathWalker) == MEDIA_DEVICE_PATH)
+             && (DevicePathSubType (DevicePathWalker) == MEDIA_CDROM_DP))
+          {
+            if (External != NULL) {
+              *External = TRUE;
+            }
+          }
+
           return OC_SCAN_ALLOW_DEVICE_SATA;
         case MSG_SASEX_DP:
           return OC_SCAN_ALLOW_DEVICE_SASEX;
@@ -333,6 +346,16 @@ OcGetBootDevicePathType (
 
   if (IsFolder != NULL) {
     *IsFolder = FALSE;
+  }
+
+  //
+  // Detect firmware images such as the Apple legacy loader interface.
+  //
+  // Certain Mac models lock up if any additional probing of the device path
+  // is performed when the Apple legacy loader interface is being started.
+  //
+  if ((DevicePath->Type == MEDIA_DEVICE_PATH) && (DevicePath->SubType == MEDIA_PIWG_FW_FILE_DP)) {
+    return OC_BOOT_UNKNOWN;
   }
 
   Path = OcCopyDevicePathFullName (DevicePath, NULL);

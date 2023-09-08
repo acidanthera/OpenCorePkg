@@ -1,0 +1,45 @@
+## @file
+#  Legacy boot entry protocol implementation.
+#
+#  Copyright (C) 2023, Goldfish64. All rights reserved.<BR>
+#  SPDX-License-Identifier: BSD-3-Clause
+##
+
+
+[Defines]
+  INF_VERSION    = 0x00010005
+  BASE_NAME      = OpenLegacyBoot
+  ENTRY_POINT    = UefiMain
+  FILE_GUID      = 4BE5FC32-9434-4799-9F8F-ECD579025074
+  MODULE_TYPE    = UEFI_DRIVER
+  VERSION_STRING = 1.0
+
+[Packages]
+  OpenCorePkg/OpenCorePkg.dec
+  MdePkg/MdePkg.dec
+  MdeModulePkg/MdeModulePkg.dec
+  OvmfPkg/OvmfPkg.dec
+
+[Guids]
+  gAppleLegacyLoadAppFileGuid         ## SOMETIMES_CONSUMES
+
+[LibraryClasses]
+  DebugLib
+  OcBootManagementLib
+  OcFileLib
+  OcFlexArrayLib
+  OcLegacyThunkLib
+  SortLib
+  UefiBootServicesTableLib
+  UefiDriverEntryPoint
+  UefiLib
+
+[Protocols]
+  gOcBootEntryProtocolGuid            ## PRODUCES
+  gEfiLegacy8259ProtocolGuid          ## SOMETIMES_CONSUMES
+ 
+[Sources]
+  BiosDisk.c
+  LegacyBootInternal.h
+  LegacyBootSupport.c
+  OpenLegacyBoot.c

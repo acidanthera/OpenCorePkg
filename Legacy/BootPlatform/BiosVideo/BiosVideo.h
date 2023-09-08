@@ -47,6 +47,7 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 #include <Library/MemoryAllocationLib.h>
 #include <Library/DevicePathLib.h>
 
+#include <Library/OcLegacyThunkLib.h>
 #include <Library/OcMemoryLib.h>
 #include <Library/OcMiscLib.h>
 
@@ -54,13 +55,6 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 #include <IndustryStandard/Edid.h>
 
 #include "VesaBiosExtensions.h"
-
-//
-// ** CHANGE **
-// Legacy region base is now 0x0C0000 instead of 0x100000.
-//
-#define LEGACY_REGION_BASE  0x0C0000
-#define LEGACY_REGION_SIZE  0x10000
 
 //
 // Vendor IDs.
@@ -170,9 +164,6 @@ typedef struct {
 #define BIOS_VIDEO_DEV_FROM_OC_FORCE_RESOLUTION_THIS(a)  CR (a, BIOS_VIDEO_DEV, OcForceResolution, BIOS_VIDEO_DEV_SIGNATURE)
 
 #define GRAPHICS_OUTPUT_INVALIDE_MODE_NUMBER  0xffff
-
-#define EFI_SEGMENT(_Adr)  (UINT16) ((UINT16) (((UINTN) (_Adr)) >> 4) & 0xf000)
-#define EFI_OFFSET(_Adr)   (UINT16) (((UINT16) ((UINTN) (_Adr))) & 0xffff)
 
 //
 // Global Variables
@@ -552,52 +543,6 @@ BiosVideoIsVga (
 #define VGA_GRAPHICS_CONTROLLER_COLOR_DONT_CARE_REGISTER  0x07
 
 #define VGA_GRAPHICS_CONTROLLER_BIT_MASK_REGISTER  0x08
-
-/**
-  Initialize legacy environment for BIOS INI caller.
-
-  @param ThunkContext   the instance pointer of THUNK_CONTEXT
-**/
-VOID
-InitializeBiosIntCaller (
-  THUNK_CONTEXT  *ThunkContext
-  );
-
-/**
-   Initialize interrupt redirection code and entries, because
-   IDT Vectors 0x68-0x6f must be redirected to IDT Vectors 0x08-0x0f.
-   Or the interrupt will lost when we do thunk.
-   NOTE: We do not reset 8259 vector base, because it will cause pending
-   interrupt lost.
-
-   @param Legacy8259  Instance pointer for EFI_LEGACY_8259_PROTOCOL.
-
-**/
-VOID
-InitializeInterruptRedirection (
-  IN  EFI_LEGACY_8259_PROTOCOL  *Legacy8259
-  );
-
-/**
-  Thunk to 16-bit real mode and execute a software interrupt with a vector
-  of BiosInt. Regs will contain the 16-bit register context on entry and
-  exit.
-
-  @param  This    Protocol instance pointer.
-  @param  BiosInt Processor interrupt vector to invoke
-  @param  Reg     Register contexted passed into (and returned) from thunk to 16-bit mode
-
-  @retval TRUE   Thunk completed, and there were no BIOS errors in the target code.
-                 See Regs for status.
-  @retval FALSE  There was a BIOS erro in the target code.
-**/
-BOOLEAN
-EFIAPI
-LegacyBiosInt86 (
-  IN  BIOS_VIDEO_DEV     *BiosDev,
-  IN  UINT8              BiosInt,
-  IN  IA32_REGISTER_SET  *Regs
-  );
 
 /**
   Force the specified resolution and reconnect the controller.

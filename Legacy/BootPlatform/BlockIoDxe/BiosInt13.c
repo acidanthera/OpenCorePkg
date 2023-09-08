@@ -137,7 +137,7 @@ Int13GetDeviceParameters (
 
   Regs.H.AH = 0x08;
   Regs.H.DL = Drive->Number;
-  CarryFlag = LegacyBiosInt86 (BiosBlockIoDev, 0x13, &Regs);
+  CarryFlag = OcLegacyThunkBiosInt86 (BiosBlockIoDev->ThunkContext, BiosBlockIoDev->Legacy8259, 0x13, &Regs);
   DEBUG ((DEBUG_INIT, "Int13GetDeviceParameters: INT 13 08 DL=%02x : CF=%d AH=%02x\n", Drive->Number, CarryFlag, Regs.H.AH));
   if ((CarryFlag != 0) || (Regs.H.AH != 0x00)) {
     Drive->ErrorCode = Regs.H.AH;
@@ -192,7 +192,7 @@ Int13Extensions (
   Regs.H.AH = 0x41;
   Regs.X.BX = 0x55aa;
   Regs.H.DL = Drive->Number;
-  CarryFlag = LegacyBiosInt86 (BiosBlockIoDev, 0x13, &Regs);
+  CarryFlag = OcLegacyThunkBiosInt86 (BiosBlockIoDev->ThunkContext, BiosBlockIoDev->Legacy8259, 0x13, &Regs);
   DEBUG ((DEBUG_INIT, "Int13Extensions: INT 13 41 DL=%02x : CF=%d BX=%04x\n", Drive->Number, CarryFlag, Regs.X.BX));
 
   if ((CarryFlag != 0) || (Regs.X.BX != 0xaa55)) {
@@ -242,7 +242,7 @@ GetDriveParameters (
   mLegacyDriverUnder1Mb->Parameters.StructureSize = (UINT16)sizeof (EDD_DRIVE_PARAMETERS);
   Regs.E.DS                                       = EFI_SEGMENT ((UINTN)(&mLegacyDriverUnder1Mb->Parameters));
   Regs.X.SI                                       = EFI_OFFSET ((UINTN)(&mLegacyDriverUnder1Mb->Parameters));
-  CarryFlag                                       = LegacyBiosInt86 (BiosBlockIoDev, 0x13, &Regs);
+  CarryFlag                                       = OcLegacyThunkBiosInt86 (BiosBlockIoDev->ThunkContext, BiosBlockIoDev->Legacy8259, 0x13, &Regs);
   DEBUG ((DEBUG_INIT, "GetDriveParameters: INT 13 48 DL=%02x : CF=%d AH=%02x\n", Drive->Number, CarryFlag, Regs.H.AH));
   if ((CarryFlag != 0) || (Regs.H.AH != 0x00)) {
     Drive->ErrorCode = Regs.H.AH;
@@ -265,7 +265,7 @@ GetDriveParameters (
     //
     Regs.H.AH = 0x20;
     Regs.H.DL = Drive->Number;
-    CarryFlag = LegacyBiosInt86 (BiosBlockIoDev, 0x13, &Regs);
+    CarryFlag = OcLegacyThunkBiosInt86 (BiosBlockIoDev->ThunkContext, BiosBlockIoDev->Legacy8259, 0x13, &Regs);
     DEBUG ((DEBUG_INIT, "GetDriveParameters: INT 13 20 DL=%02x : CF=%d AL=%02x\n", Drive->Number, CarryFlag, Regs.H.AL));
     if (CarryFlag != 0) {
       //
@@ -482,7 +482,7 @@ Edd30BiosReadBlocks (
     Regs.X.SI = EFI_OFFSET (AddressPacket);
     Regs.E.DS = EFI_SEGMENT (AddressPacket);
 
-    CarryFlag = LegacyBiosInt86 (BiosBlockIoDev, 0x13, &Regs);
+    CarryFlag = OcLegacyThunkBiosInt86 (BiosBlockIoDev->ThunkContext, BiosBlockIoDev->Legacy8259, 0x13, &Regs);
     DEBUG (
       (
        DEBUG_BLKIO, "Edd30BiosReadBlocks: INT 13 42 DL=%02x : CF=%d AH=%02x\n", BiosBlockIoDev->Bios.Number,
@@ -631,7 +631,7 @@ Edd30BiosWriteBlocks (
     Regs.X.SI = EFI_OFFSET (AddressPacket);
     Regs.E.DS = EFI_SEGMENT (AddressPacket);
 
-    CarryFlag = LegacyBiosInt86 (BiosBlockIoDev, 0x13, &Regs);
+    CarryFlag = OcLegacyThunkBiosInt86 (BiosBlockIoDev->ThunkContext, BiosBlockIoDev->Legacy8259, 0x13, &Regs);
     DEBUG (
       (
        DEBUG_BLKIO, "Edd30BiosWriteBlocks: INT 13 43 DL=%02x : CF=%d AH=%02x\n", BiosBlockIoDev->Bios.Number,
@@ -730,7 +730,7 @@ BiosBlockIoReset (
 
   Regs.H.AH = 0x00;
   Regs.H.DL = BiosBlockIoDev->Bios.Number;
-  CarryFlag = LegacyBiosInt86 (BiosBlockIoDev, 0x13, &Regs);
+  CarryFlag = OcLegacyThunkBiosInt86 (BiosBlockIoDev->ThunkContext, BiosBlockIoDev->Legacy8259, 0x13, &Regs);
   DEBUG (
     (
      DEBUG_INIT, "BiosBlockIoReset: INT 13 00 DL=%02x : CF=%d AH=%02x\n", BiosBlockIoDev->Bios.Number, CarryFlag,
@@ -742,7 +742,7 @@ BiosBlockIoReset (
     if (Regs.H.AL == BIOS_RESET_FAILED) {
       Regs.H.AH = 0x00;
       Regs.H.DL = BiosBlockIoDev->Bios.Number;
-      CarryFlag = LegacyBiosInt86 (BiosBlockIoDev, 0x13, &Regs);
+      CarryFlag = OcLegacyThunkBiosInt86 (BiosBlockIoDev->ThunkContext, BiosBlockIoDev->Legacy8259, 0x13, &Regs);
       DEBUG (
         (
          DEBUG_INIT, "BiosBlockIoReset: INT 13 00 DL=%02x : CF=%d AH=%02x\n", BiosBlockIoDev->Bios.Number, CarryFlag,
@@ -867,7 +867,7 @@ Edd11BiosReadBlocks (
     Regs.X.SI = EFI_OFFSET (AddressPacket);
     Regs.E.DS = EFI_SEGMENT (AddressPacket);
 
-    CarryFlag = LegacyBiosInt86 (BiosBlockIoDev, 0x13, &Regs);
+    CarryFlag = OcLegacyThunkBiosInt86 (BiosBlockIoDev->ThunkContext, BiosBlockIoDev->Legacy8259, 0x13, &Regs);
     DEBUG (
       (
        DEBUG_BLKIO, "Edd11BiosReadBlocks: INT 13 42 DL=%02x : CF=%d AH=%02x : LBA 0x%lx  Block(s) %0d \n",
@@ -1025,7 +1025,7 @@ Edd11BiosWriteBlocks (
     TransferByteSize = NumberOfBlocks * BlockSize;
     CopyMem ((VOID *)(UINTN)TransferBuffer, Buffer, TransferByteSize);
 
-    CarryFlag = LegacyBiosInt86 (BiosBlockIoDev, 0x13, &Regs);
+    CarryFlag = OcLegacyThunkBiosInt86 (BiosBlockIoDev->ThunkContext, BiosBlockIoDev->Legacy8259, 0x13, &Regs);
     DEBUG (
       (
        DEBUG_BLKIO, "Edd11BiosWriteBlocks: INT 13 43 DL=%02x : CF=%d AH=%02x\n: LBA 0x%lx  Block(s) %0d \n",
@@ -1217,7 +1217,7 @@ BiosReadLegacyDrive (
          EFI_SEGMENT (mEdd11Buffer))
         );
 
-      CarryFlag = LegacyBiosInt86 (BiosBlockIoDev, 0x13, &Regs);
+      CarryFlag = OcLegacyThunkBiosInt86 (BiosBlockIoDev->ThunkContext, BiosBlockIoDev->Legacy8259, 0x13, &Regs);
       DEBUG (
         (
          DEBUG_BLKIO, "BiosReadLegacyDrive: INT 13 02 DL=%02x : CF=%d AH=%02x\n", BiosBlockIoDev->Bios.Number,
@@ -1422,7 +1422,7 @@ BiosWriteLegacyDrive (
          EFI_SEGMENT (mEdd11Buffer))
         );
 
-      CarryFlag = LegacyBiosInt86 (BiosBlockIoDev, 0x13, &Regs);
+      CarryFlag = OcLegacyThunkBiosInt86 (BiosBlockIoDev->ThunkContext, BiosBlockIoDev->Legacy8259, 0x13, &Regs);
       DEBUG (
         (
          DEBUG_BLKIO, "BiosWriteLegacyDrive: INT 13 03 DL=%02x : CF=%d AH=%02x\n", BiosBlockIoDev->Bios.Number,

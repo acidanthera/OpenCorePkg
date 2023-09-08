@@ -90,8 +90,6 @@ kPartTypePMBR       EQU  0xee           ; On all GUID Partition Table disks a Pr
                                         ; reserving the entire space used on the disk by the GPT partitions,
                                         ; including all headers.
 
-kPartActive         EQU  0x80           ; active flag enabled
-kPartInactive       EQU  0x00           ; active flag disabled
 kEFISystemGUID      EQU  0x3BC93EC9     ; last 4 bytes of EFI System Partition Type GUID:
                                         ; C12A7328-F81F-11D2-BA4B-00A0C93EC93B
 kBasicDataGUID      EQU  0xC79926B7     ; last 4 bytes of Basic Data System Partition Type GUID:
@@ -253,8 +251,7 @@ find_boot:
 .loop:
 
     ;
-    ; First scan through the partition table looking for the active
-    ; partition.
+    ; First scan through the partition table looking for the protective MBR.
     ;
 %if DEBUG
     mov     al, [si + part.type]       ; print partition type
@@ -266,36 +263,18 @@ find_boot:
     cmp     BYTE [si + part.type], 0                ; unused partition?
     je      .continue                               ; skip to next entry
     cmp     BYTE [si + part.type], kPartTypePMBR    ; check for Protective MBR
-    jne     .tryToBootIfActive
-
-    mov     BYTE [si + part.bootid], kPartInactive  ; found Protective MBR
-                                                    ; clear active flag to make sure this protective
-                                                    ; partition won't be used as a bootable partition.
-    mov     bl, 1                                   ; Assume we can deal with GPT but try to scan
-                                                    ; later if not found any other bootable partitions.
-
-.tryToBootIfActive:
-    ; We're going to try to boot a partition if it is active
-    cmp     BYTE [si + part.bootid], kPartActive
     jne     .continue
 
-    ;
-    ; Found boot partition, read boot sector to memory.
-    ;
-
-    xor     dh, dh      ; Argument for loadBootSector to skip file system signature check.
-    call    loadBootSector
-    jne     .continue
-    jmp     SHORT initBootLoader
+    mov     bl, 1                                   ; found Protective MBR
+                                                    ; GPT header should be at LBA 1
 
 .continue:
     add     si, BYTE part_size              ; advance SI to next partition entry
     loop    .loop                           ; loop through all partition entries
 
     ;
-    ; Scanned all partitions but not found any with active flag enabled
-    ; Anyway if we found a protective MBR before we still have a chance
-    ; for a possible GPT Header at LBA 1
+    ; Partition scan completed
+    ; If a protective MBR was found there should be a GPT header at LBA 1
     ;
     dec     bl
     jnz     .exit                           ; didn't find Protective MBR before

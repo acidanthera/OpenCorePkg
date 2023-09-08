@@ -795,6 +795,7 @@ OcSetDefaultBootEntry (
   UINTN            BootChosenIndex;
   UINTN            Index;
   UINTN            DevicePathSize;
+  UINTN            ExtSystemDevPathSize;
   UINTN            LoadOptionSize;
   UINTN            LoadOptionIdSize;
   UINTN            LoadOptionNameSize;
@@ -804,6 +805,7 @@ OcSetDefaultBootEntry (
 
   CONST OC_CUSTOM_BOOT_DEVICE_PATH     *CustomDevPath;
   CONST OC_ENTRY_PROTOCOL_DEVICE_PATH  *EntryProtocolDevPath;
+  EFI_DEVICE_PATH_PROTOCOL             *ExtSystemDevPath;
   VENDOR_DEVICE_PATH                   *DestCustomDevPath;
   FILEPATH_DEVICE_PATH                 *DestCustomEntryName;
   EFI_DEVICE_PATH_PROTOCOL             *DestCustomEndNode;
@@ -820,6 +822,20 @@ OcSetDefaultBootEntry (
   //
   if (Entry->DevicePath == NULL) {
     return EFI_INVALID_PARAMETER;
+  }
+
+  //
+  // Get final device path for external boot system entries.
+  //
+  ExtSystemDevPath = NULL;
+  if ((Entry->Type == OC_BOOT_EXTERNAL_SYSTEM) && (Entry->ExternalSystemGetDevicePath != NULL)) {
+    ExtSystemDevPath = Entry->DevicePath;
+    Status           = Entry->ExternalSystemGetDevicePath (Context, &ExtSystemDevPath);
+    if (EFI_ERROR (Status)) {
+      ExtSystemDevPath = NULL;
+    } else {
+      ExtSystemDevPathSize = GetDevicePathSize (ExtSystemDevPath);
+    }
   }
 
   if (Context->CustomBootGuid) {
@@ -874,35 +890,42 @@ OcSetDefaultBootEntry (
       continue;
     }
 
-    BootOptionRemainingDevicePath = BootOptionDevicePath;
-    Status                        = gBS->LocateDevicePath (
-                                           &gEfiSimpleFileSystemProtocolGuid,
-                                           &BootOptionRemainingDevicePath,
-                                           &DeviceHandle
-                                           );
-
-    if (!EFI_ERROR (Status)) {
-      MatchedEntry = InternalMatchBootEntryByDevicePath (
-                       Entry,
-                       BootOptionDevicePath,
-                       BootOptionRemainingDevicePath,
-                       LoadOption->FilePathListLength,
-                       FALSE
-                       );
+    if (ExtSystemDevPath != NULL) {
+      DevicePathSize = GetDevicePathSize (BootOptionDevicePath);
+      if (DevicePathSize >= ExtSystemDevPathSize) {
+        MatchedEntry = CompareMem (BootOptionDevicePath, ExtSystemDevPath, ExtSystemDevPathSize) == 0;
+      }
     } else {
-      CustomDevPath = InternalGetOcCustomDevPath (BootOptionDevicePath);
-      if (CustomDevPath != NULL) {
-        MatchedEntry = InternalMatchCustomBootEntryByDevicePath (
+      BootOptionRemainingDevicePath = BootOptionDevicePath;
+      Status                        = gBS->LocateDevicePath (
+                                             &gEfiSimpleFileSystemProtocolGuid,
+                                             &BootOptionRemainingDevicePath,
+                                             &DeviceHandle
+                                             );
+
+      if (!EFI_ERROR (Status)) {
+        MatchedEntry = InternalMatchBootEntryByDevicePath (
                          Entry,
-                         CustomDevPath
+                         BootOptionDevicePath,
+                         BootOptionRemainingDevicePath,
+                         LoadOption->FilePathListLength,
+                         FALSE
                          );
       } else {
-        EntryProtocolDevPath = InternalGetOcEntryProtocolDevPath (BootOptionDevicePath);
-        if (EntryProtocolDevPath != NULL) {
-          MatchedEntry = InternalMatchEntryProtocolEntryByDevicePath (
+        CustomDevPath = InternalGetOcCustomDevPath (BootOptionDevicePath);
+        if (CustomDevPath != NULL) {
+          MatchedEntry = InternalMatchCustomBootEntryByDevicePath (
                            Entry,
-                           EntryProtocolDevPath
+                           CustomDevPath
                            );
+        } else {
+          EntryProtocolDevPath = InternalGetOcEntryProtocolDevPath (BootOptionDevicePath);
+          if (EntryProtocolDevPath != NULL) {
+            MatchedEntry = InternalMatchEntryProtocolEntryByDevicePath (
+                             Entry,
+                             EntryProtocolDevPath
+                             );
+          }
         }
       }
     }
@@ -950,7 +973,9 @@ OcSetDefaultBootEntry (
       }
     }
 
-    if (!Entry->IsCustom) {
+    if (ExtSystemDevPath != NULL) {
+      DevicePathSize = ExtSystemDevPathSize;
+    } else if (!Entry->IsCustom) {
       DevicePathSize = GetDevicePathSize (Entry->DevicePath);
     } else {
       DevicePathSize = SIZE_OF_OC_CUSTOM_BOOT_DEVICE_PATH
@@ -996,7 +1021,9 @@ OcSetDefaultBootEntry (
       CopyMem (LoadOption + 1, LoadOptionName, LoadOptionNameSize);
     }
 
-    if (!Entry->IsCustom) {
+    if (ExtSystemDevPath != NULL) {
+      CopyMem ((UINT8 *)(LoadOption + 1) + LoadOptionNameSize, ExtSystemDevPath, DevicePathSize);
+    } else if (!Entry->IsCustom) {
       CopyMem ((UINT8 *)(LoadOption + 1) + LoadOptionNameSize, Entry->DevicePath, DevicePathSize);
     } else {
       DestCustomDevPath = (VENDOR_DEVICE_PATH *)(
@@ -1056,6 +1083,11 @@ OcSetDefaultBootEntry (
                     );
 
     FreePool (LoadOption);
+
+    if (ExtSystemDevPath != NULL) {
+      FreePool (ExtSystemDevPath);
+      ExtSystemDevPath = NULL;
+    }
 
     if (EFI_ERROR (Status)) {
       DEBUG ((
@@ -1515,6 +1547,7 @@ InternalLoadBootEntry (
   //
   // System entries are not loaded but called directly.
   //
+  ASSERT ((BootEntry->Type & OC_BOOT_EXTERNAL_SYSTEM) == 0);
   ASSERT ((BootEntry->Type & OC_BOOT_SYSTEM) == 0);
   ASSERT (Context != NULL);
   ASSERT (DmgLoadContext != NULL);

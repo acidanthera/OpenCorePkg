@@ -26,7 +26,6 @@
   BiosBlkIo.c
   BiosInt13.c
   ComponentName.c
-  LegacyBiosThunk.c
 
 [LibraryClasses]
   UefiDriverEntryPoint
@@ -36,6 +35,7 @@
   UefiLib
   DevicePathLib
   MemoryAllocationLib
+  OcLegacyThunkLib
 
 [Protocols]
   gEfiBlockIoProtocolGuid    ## BY_START

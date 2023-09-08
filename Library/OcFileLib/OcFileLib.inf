@@ -33,7 +33,7 @@
   LocateFileSystem.c
   OpenFile.c
   ReadFile.c
-  GptPartitionEntry.c
+  DiskMisc.c
   FirmwareFile.c
   FileMisc.c
 

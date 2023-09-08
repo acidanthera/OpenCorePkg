@@ -26,6 +26,7 @@ Abstract:
 #include <Library/BaseLib.h>
 #include <Library/BaseMemoryLib.h>
 #include <Library/DebugLib.h>
+#include <Library/OcLegacyThunkLib.h>
 #include <Library/PrintLib.h>
 #include <Library/UefiBootServicesTableLib.h>
 
@@ -128,13 +129,6 @@ VOID
 EFIAPI
 InitDescriptor (
   VOID
-  );
-
-BOOLEAN
-EFIAPI
-LegacyBiosInt86 (
-  IN  UINT8                  BiosInt,
-  IN  EFI_IA32_REGISTER_SET  *Regs
   );
 
 #endif

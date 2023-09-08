@@ -250,14 +250,6 @@ OcAddEntriesFromBootEntryProtocol (
 
   ASSERT (!CreateDefault || (DefaultEntryId != NULL));
 
-  //
-  // Non-filesystem entries cannot be saved as normal default boot option,
-  // but can be triggered as default boot item by boot entry protocol hotkey.
-  //
-  if (!CreateForHotKey && CreateDefault && (FileSystem->Handle == OC_CUSTOM_FS_HANDLE)) {
-    return EFI_NOT_FOUND;
-  }
-
   AddEntriesContext.ReturnStatus    = EFI_NOT_FOUND;
   AddEntriesContext.BootContext     = BootContext;
   AddEntriesContext.FileSystem      = FileSystem;

@@ -114,6 +114,7 @@
   OcHeciLib|OpenCorePkg/Library/OcHeciLib/OcHeciLib.inf
   OcHiiDatabaseLocalLib|OpenCorePkg/Library/OcHiiDatabaseLib/OcHiiDatabaseLocalLib.inf
   OcInputLib|OpenCorePkg/Library/OcInputLib/OcInputLib.inf
+  OcLegacyThunkLib|OpenCorePkg/Library/OcLegacyThunkLib/OcLegacyThunkLib.inf
   OcLogAggregatorLib|OpenCorePkg/Library/OcLogAggregatorLib/OcLogAggregatorLib.inf
   OcMachoLib|OpenCorePkg/Library/OcMachoLib/OcMachoLib.inf
   OcMacInfoLib|OpenCorePkg/Library/OcMacInfoLib/OcMacInfoLib.inf
@@ -298,6 +299,7 @@
   OpenCorePkg/Legacy/BootPlatform/BiosVideo/BiosVideo.inf
   OpenCorePkg/Platform/CrScreenshotDxe/CrScreenshotDxe.inf
   OpenCorePkg/Platform/OpenCanopy/OpenCanopy.inf
+  OpenCorePkg/Platform/OpenLegacyBoot/OpenLegacyBoot.inf
   OpenCorePkg/Platform/OpenLinuxBoot/OpenLinuxBoot.inf
   OpenCorePkg/Platform/OpenNtfsDxe/OpenNtfsDxe.inf
   OpenCorePkg/Platform/OpenPartitionDxe/PartitionDxe.inf

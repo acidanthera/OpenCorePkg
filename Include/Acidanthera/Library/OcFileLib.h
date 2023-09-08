@@ -19,6 +19,8 @@
 
 #include <Guid/FileInfo.h>
 
+#include <IndustryStandard/Mbr.h>
+
 #include <Protocol/SimpleFileSystem.h>
 #include <Protocol/DevicePath.h>
 #include <Protocol/BlockIo.h>
@@ -483,6 +485,18 @@ OcOpenFileByDevicePath (
   );
 
 /**
+  Retrieve the disk's Device Path from a partition's Device Path.
+
+  @param[in] HdDevicePath  The Device Path of the partition.
+
+  @retval Device Path or NULL
+**/
+EFI_DEVICE_PATH_PROTOCOL *
+OcDiskGetDevicePath (
+  IN EFI_DEVICE_PATH_PROTOCOL  *HdDevicePath
+  );
+
+/**
   Retrieve the disk's device handle from a partition's Device Path.
 
   @param[in] HdDevicePath  The Device Path of the partition.
@@ -492,6 +506,45 @@ OcOpenFileByDevicePath (
 EFI_HANDLE
 OcPartitionGetDiskHandle (
   IN EFI_DEVICE_PATH_PROTOCOL  *HdDevicePath
+  );
+
+/**
+  Retrieve the partition's device handle from a partition's Device Path.
+
+  @param[in] HdDevicePath  The Device Path of the partition.
+
+**/
+EFI_HANDLE
+OcPartitionGetPartitionHandle (
+  IN EFI_DEVICE_PATH_PROTOCOL  *HdDevicePath
+  );
+
+/**
+  Check if disk is a CD-ROM device.
+
+  @param[in] DiskDevicePath  The Device Path of the disk.
+
+  @retval Device Path or NULL
+**/
+BOOLEAN
+OcIsDiskCdRom (
+  IN EFI_DEVICE_PATH_PROTOCOL  *DiskDevicePath
+  );
+
+/**
+  Read El-Torito boot sector from CD-ROM device.
+
+  @param[in]  DiskDevicePath  The Device Path of the disk.
+  @param[out] Buffer          Pointer to pool-allocated buffer containing the boot sector data.
+  @param[out] BufferSize      Size of Buffer.
+
+  @retval EFI_SUCCESS on success.
+**/
+EFI_STATUS
+OcDiskReadElTorito (
+  IN  EFI_DEVICE_PATH_PROTOCOL  *DiskDevicePath,
+  OUT UINT8                     **Buffer,
+  OUT UINTN                     *BufferSize
   );
 
 /**
@@ -555,6 +608,24 @@ OcDiskRead (
   );
 
 /**
+  Write information to disk.
+
+  @param[in]  Context     Disk I/O context.
+  @param[in]  Lba         LBA number to write to.
+  @param[in]  BufferSize  Buffer size allocated in Buffer.
+  @param[out] Buffer      Buffer containing data to write.
+
+  @retval EFI_SUCCESS on success.
+**/
+EFI_STATUS
+OcDiskWrite (
+  IN OC_DISK_CONTEXT  *Context,
+  IN UINT64           Lba,
+  IN UINTN            BufferSize,
+  IN VOID             *Buffer
+  );
+
+/**
   OC partition list.
 **/
 typedef struct {
@@ -588,6 +659,64 @@ OcGetDiskPartitions (
 CONST EFI_PARTITION_ENTRY *
 OcGetGptPartitionEntry (
   IN EFI_HANDLE  FsHandle
+  );
+
+/**
+  Retrieve the disk MBR table, if applicable.
+
+  @param[in]  DiskHandle      Disk device handle to retrive MBR partition table from.
+  @param[in]  CheckPartitions Check partition layout. This should be FALSE for a PBR.
+
+  @retval MBR partition table or NULL.
+**/
+MASTER_BOOT_RECORD *
+OcGetDiskMbrTable (
+  IN EFI_HANDLE  DiskHandle,
+  IN BOOLEAN     CheckPartitions
+  );
+
+/**
+  Retrieve the MBR partition index for the specified partition.
+
+  @param[in]  PartitionHandle   Partition device handle to retrieve MBR partition index for.
+  @param[out] PartitionIndex    Pointer to store partition index in.
+
+  @retval EFI_SUCCESS on success.
+**/
+EFI_STATUS
+OcDiskGetMbrPartitionIndex (
+  IN  EFI_HANDLE  PartitionHandle,
+  OUT UINT8       *PartitionIndex
+  );
+
+/**
+  Mark specified MBR partition as active.
+
+  @param[in]  DiskHandle        Disk device handle containing MBR partition table
+  @param[in]  PartitionIndex    MBR partition index.
+
+  @retval EFI_SUCCESS on success.
+**/
+EFI_STATUS
+OcDiskMarkMbrPartitionActive (
+  IN  EFI_HANDLE  DiskHandle,
+  IN  UINT8       PartitionIndex
+  );
+
+/**
+  Locate the disk's active MBR partition.
+
+  @param[in]  DiskDevicePath            The Device Path of the disk to scan.
+  @param[out] PartitionDevicePathSize   The size of the returned Device Path.
+  @param[out] PartitionDeviceHandle     Device handle of the returned partition.
+
+  @return The device path protocol from the discovered handle or NULL.
+**/
+EFI_DEVICE_PATH_PROTOCOL *
+OcDiskFindActiveMbrPartitionPath (
+  IN  EFI_DEVICE_PATH_PROTOCOL  *DiskDevicePath,
+  OUT UINTN                     *PartitionDevicePathSize,
+  OUT EFI_HANDLE                *PartitionDeviceHandle
   );
 
 /**
