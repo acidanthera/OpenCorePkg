@@ -9272,8 +9272,9 @@ requires several steps and careful configuration of certain settings as explaine
   the same private key.
 \item Sign all third-party operating system (not made by Microsoft or Apple)
   bootloaders if needed. For Linux there is an option to install
-  a user built, user signed Shim bootloader giving SBAT and MOK integration, as explained in
-  \href{https://github.com/acidanthera/OpenCorePkg/tree/master/Utilities/ShimUtils}{OpenCore ShimUtils}.
+  a user built, user signed Shim bootloader giving SBAT and MOK integration,
+  as explained in the \texttt{/Utilities/ShimUtils} directory of OpenCore
+  source or releases.
 \item Enable UEFI Secure Boot in firmware preferences and install the
   certificate with a private key. Details on how to generate a certificate
   can be found in various articles, such as \href{https://habr.com/en/post/273497}{this one},

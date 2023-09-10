@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
 %DIF DEL PreviousConfiguration.tex   Sun Aug 13 19:03:22 2023
-%DIF ADD ../Configuration.tex        Sun Sep 10 19:20:43 2023
+%DIF ADD ../Configuration.tex        Sun Sep 10 22:27:43 2023
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -9345,9 +9345,10 @@ requires several steps and careful configuration of certain settings as explaine
 \item Sign all third-party operating system (not made by Microsoft or Apple)
   bootloaders if needed. For Linux there is an option to install
   \DIFdelbegin \DIFdel{Microsoft-signed Shim bootloader as explained on e.g.
-  }%DIFDELCMD < \href{https://wiki.debian.org/SecureBoot}{%%%
-\DIFdel{Debian Wiki}\DIFdelend \DIFaddbegin \DIFadd{a user built, user signed Shim bootloader giving SBAT and MOK integration, as explained in
-  }\href{https://github.com/acidanthera/OpenCorePkg/tree/master/Utilities/ShimUtils}{\DIFadd{OpenCore ShimUtils}\DIFaddend }.
+  }\href{https://wiki.debian.org/SecureBoot}{\DIFdel{Debian Wiki}}%DIFAUXCMD
+\DIFdelend \DIFaddbegin \DIFadd{a user built, user signed Shim bootloader giving SBAT and MOK integration,
+  as explained in the }\texttt{\DIFadd{/Utilities/ShimUtils}} \DIFadd{directory of OpenCore
+  source or releases}\DIFaddend .
 \item Enable UEFI Secure Boot in firmware preferences and install the
   certificate with a private key. Details on how to generate a certificate
   can be found in various articles, such as \href{https://habr.com/en/post/273497}{this one},
