@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
-%DIF DEL PreviousConfiguration.tex   Mon Sep 11 18:49:28 2023
-%DIF ADD ../Configuration.tex        Mon Sep 11 18:49:28 2023
+%DIF DEL PreviousConfiguration.tex   Mon Sep 11 18:27:04 2023
+%DIF ADD ../Configuration.tex        Mon Sep 11 18:27:07 2023
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -6774,7 +6774,8 @@ functioning. Feature highlights:
 
 \subsection{OpenLegacyBoot}\label{legacyboot}
 OpenLegacyBoot is an OpenCore plugin implementing \texttt{OC\_BOOT\_ENTRY\_PROTOCOL}.
-It aims to detect and boot legacy installed operating systems.
+It aims to detect and boot legacy installed operating systems \DIFaddbegin \DIFadd{on supported systems, such as
+OpenDuet and Mac models capable of legacy booting}\DIFaddend .
 
 Usage:
 
@@ -9358,7 +9359,7 @@ requires several steps and careful configuration of certain settings as explaine
 
   \begin{itemize}
   \item MBR (Master Boot Record) installations are legacy and are only supported
-  with the OpenLegacyBoot driver.
+  with the OpenLegacyBoot driver \DIFaddbegin \DIFadd{on legacy systems}\DIFaddend .
   \item All the modifications applied (to ACPI, NVRAM, SMBIOS, etc.) are supposed
   to be operating system agnostic, i.e. apply equally regardless of the OS booted.
   This enables Boot Camp software experience on Windows.
