@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
-%DIF DEL PreviousConfiguration.tex   Sun Aug 13 19:03:22 2023
-%DIF ADD ../Configuration.tex        Sun Sep 10 22:27:43 2023
+%DIF DEL PreviousConfiguration.tex   Mon Sep 11 18:49:28 2023
+%DIF ADD ../Configuration.tex        Mon Sep 11 18:49:28 2023
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -154,7 +154,7 @@
 
        \vspace{0.2in}
 
-       Reference Manual (0.9\DIFdelbegin \DIFdel{.4}\DIFdelend \DIFaddbegin \DIFadd{.5}\DIFaddend )
+       Reference Manual (0.9\DIFdelbegin \DIFdel{.5}\DIFdelend \DIFaddbegin \DIFadd{.6}\DIFaddend )
 
        \vspace{0.2in}
 
@@ -1744,7 +1744,7 @@ To view their current state, use the \texttt{pmset -g} command in Terminal.
   such as \texttt{DevirtualiseMmio}, \texttt{ProtectMemoryRegions}, or \texttt{RebuildAppleMemoryMap},
   and may also obstruct other quirks depending on the scope of such.
 
-  GRUB \DIFdelbegin \DIFdel{shim }\DIFdelend \DIFaddbegin \DIFadd{Shim }\DIFaddend makes similar on-the-fly changes to various UEFI image services,
+  GRUB Shim makes similar on-the-fly changes to various UEFI image services,
   which are also protected against by this quirk.
 
   \emph{Note 1}: On VMware, the need for this quirk may be determined by the appearance of the
@@ -4112,8 +4112,8 @@ nvram 4D1FDA02-38C7-4A6A-9CC6-4BCCA8B30102:boot-log |
   \item \texttt{OCRST} --- ResetSystem
   \item \texttt{OCUI} --- OpenCanopy
   \item \texttt{OC} --- OpenCore main, also OcMainLib
-  \item \DIFaddbegin \texttt{\DIFadd{OLB}} \DIFadd{--- OpenLegacyBoot
-  }\item \DIFaddend \texttt{VMOPT} --- VerifyMemOpt
+  \item \texttt{OLB} --- OpenLegacyBoot
+  \item \texttt{VMOPT} --- VerifyMemOpt
   \end{itemize}
 
   \label{oc-mod-libs}
@@ -6542,13 +6542,13 @@ even cause permanent firmware damage. Some of the known drivers are listed below
 & \hyperref[ueficanopy]{OpenCore plugin} implementing graphical interface. \\
 \href{https://github.com/acidanthera/OpenCorePkg}{\texttt{OpenRuntime}}\textbf{*}
 & \hyperref[uefiruntime]{OpenCore plugin} implementing \texttt{OC\_FIRMWARE\_RUNTIME} protocol. \\
-\DIFaddbegin \href{https://github.com/acidanthera/OpenCorePkg}{\texttt{\DIFadd{OpenLegacyBoot}}}\textbf{\DIFadd{*}}
-& \hyperref[legacyboot]{OpenCore plugin} \DIFadd{implementing }\texttt{\DIFadd{OC\_BOOT\_ENTRY\_PROTOCOL}}
-  \DIFadd{to allow detection and booting of legacy operating systems from OpenCore on Macs, OpenDuet
-  and systems with a CSM. }\\
-\DIFaddend \href{https://github.com/acidanthera/OpenCorePkg}{\texttt{OpenLinuxBoot}}\textbf{*}
+\href{https://github.com/acidanthera/OpenCorePkg}{\texttt{OpenLegacyBoot}}\textbf{*}
+& \hyperref[legacyboot]{OpenCore plugin} implementing \texttt{OC\_BOOT\_ENTRY\_PROTOCOL}
+  to allow detection and booting of legacy operating systems from OpenCore on Macs, OpenDuet
+  and systems with a CSM. \\
+\href{https://github.com/acidanthera/OpenCorePkg}{\texttt{OpenLinuxBoot}}\textbf{*}
 & \hyperref[uefilinux]{OpenCore plugin} implementing \texttt{OC\_BOOT\_ENTRY\_PROTOCOL}
-  to allow direct detection and booting of Linux \DIFdelbegin \DIFdel{distributiuons }\DIFdelend \DIFaddbegin \DIFadd{distributions }\DIFaddend from OpenCore, without
+  to allow direct detection and booting of Linux distributions from OpenCore, without
   chainloading via GRUB. \\
 \href{https://github.com/acidanthera/OpenCorePkg}{\texttt{OpenNtfsDxe}}\textbf{*}
 & New Technologies File System (NTFS) read-only driver.
@@ -6772,45 +6772,41 @@ functioning. Feature highlights:
   mapping (e.g. \texttt{EnableWriteUnprotector}).
 \end{itemize}
 
-\DIFaddbegin \subsection{\DIFadd{OpenLegacyBoot}}\label{legacyboot}
-\DIFadd{OpenLegacyBoot is an OpenCore plugin implementing }\texttt{\DIFadd{OC\_BOOT\_ENTRY\_PROTOCOL}}\DIFadd{.
+\subsection{OpenLegacyBoot}\label{legacyboot}
+OpenLegacyBoot is an OpenCore plugin implementing \texttt{OC\_BOOT\_ENTRY\_PROTOCOL}.
 It aims to detect and boot legacy installed operating systems.
-}
 
-\DIFadd{Usage:
-}
+Usage:
 
 \begin{itemize}
 \tightlist
-  \item \DIFadd{Add }\texttt{\DIFadd{OpenLegacyBoot.efi}} \DIFadd{and also optionally (see below) }\texttt{\DIFadd{OpenNtfsDxe.efi}} \DIFadd{to the }\texttt{\DIFadd{config.plist}}
-  \texttt{\DIFadd{Drivers}} \DIFadd{section.
-  }\item \DIFadd{Install Windows or another legacy operating system as normal if this has not been done earlier -- OpenLegacyBoot is
+  \item Add \texttt{OpenLegacyBoot.efi} and also optionally (see below) \texttt{OpenNtfsDxe.efi} to the \texttt{config.plist}
+  \texttt{Drivers} section.
+  \item Install Windows or another legacy operating system as normal if this has not been done earlier -- OpenLegacyBoot is
   not involved in this stage and may be unable to boot from installation media such as a USB device.
-  }\item \DIFadd{Reboot into OpenCore: the installed legacy operating system should appear and boot directly from OpenCore
+  \item Reboot into OpenCore: the installed legacy operating system should appear and boot directly from OpenCore
   when selected.
-}\end{itemize}
+\end{itemize}
 
-\DIFadd{OpenLegacyBoot does not require any additional filesystem drivers such as }\texttt{\DIFadd{OpenNtfsDxe.efi}} \DIFadd{to be loaded for
-base functionality, but loading them will enable the use of }\texttt{\DIFadd{.contentDetails}} \DIFadd{and }\texttt{\DIFadd{.VolumeIcon.icns}}
-\DIFadd{files for boot entry customisation.
-}
+OpenLegacyBoot does not require any additional filesystem drivers such as \texttt{OpenNtfsDxe.efi} to be loaded for
+base functionality, but loading them will enable the use of \texttt{.contentDetails} and \texttt{.VolumeIcon.icns}
+files for boot entry customisation.
 
-\subsubsection{\DIFadd{Configuration}}
+\subsubsection{Configuration}
 
-\DIFadd{No additional configuration should work well in most circumstances, but if required the following
-options for the driver may be specified in }\texttt{\DIFadd{UEFI/Drivers/Arguments}}\DIFadd{:
-}
+No additional configuration should work well in most circumstances, but if required the following
+options for the driver may be specified in \texttt{UEFI/Drivers/Arguments}:
 
 \begin{itemize}
   \tightlist
-	\item \texttt{\DIFadd{-}{}\DIFadd{-hide-devices}} \DIFadd{- String value, no default. }\medskip
+	\item \texttt{-{}-hide-devices} - String value, no default. \medskip
 
-  \DIFadd{When this option is present and has one or more values separated by semicolons }\\
-  \DIFadd{(e.g. -}{}\DIFadd{-hide-devices=PciRoot(0x0)/Pci(0x1F,0x2)/Sata(0x0,0xFFFF,0x0)/HD(2,GPT,...)), 
-  it disables scanning the specified disks for legacy operating system boot sectors.}\medskip
+  When this option is present and has one or more values separated by semicolons \\
+  (e.g. -{}-hide-devices=PciRoot(0x0)/Pci(0x1F,0x2)/Sata(0x0,0xFFFF,0x0)/HD(2,GPT,...)), 
+  it disables scanning the specified disks for legacy operating system boot sectors.\medskip
 \end{itemize}
 
-\DIFaddend \subsection{OpenLinuxBoot}\label{uefilinux}
+\subsection{OpenLinuxBoot}\label{uefilinux}
 
 OpenLinuxBoot is an OpenCore plugin implementing \texttt{OC\_BOOT\_ENTRY\_PROTOCOL}.
 It aims to automatically detect and boot most Linux distros without additional configuration.
@@ -6878,15 +6874,9 @@ Note however that the following differences are normal and do not need to be fix
   as distro boots successfully.
 \end{itemize}
 
-If using OpenLinuxBoot with Secure Boot, users may wish to \DIFdelbegin \DIFdel{use the }\texttt{\DIFdel{shim-to-cert.tool}} %DIFAUXCMD
-\DIFdel{included in OpenCore
-utilities, which can be used to extract the public key needed to boot a distro's kernels directly, as done when using OpenCore
-with OpenLinuxBoot, rather than via GRUB shim.
-For non-GRUB distros, the required public key must be found by user research.
-}\DIFdelend \DIFaddbegin \DIFadd{install
+If using OpenLinuxBoot with Secure Boot, users may wish to install
 a user built, user signed Shim bootloader giving SBAT and MOK integration, as explained in
-}\href{https://github.com/acidanthera/OpenCorePkg/tree/master/Utilities/ShimUtils}{\DIFadd{OpenCore ShimUtils}}\DIFadd{.
-}\DIFaddend 
+\href{https://github.com/acidanthera/OpenCorePkg/tree/master/Utilities/ShimUtils}{OpenCore ShimUtils}.
 
 \subsubsection{Configuration}
 
@@ -8996,19 +8986,17 @@ for additional options.
   older systems which have been modified with \href{https://github.com/xCuri0/ReBarUEFI}{ReBarUEFI}.
 
   \item
-  \DIFaddbegin \texttt{\DIFadd{ShimRetainProtocol}}\\
-  \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ boolean}}\\
-  \textbf{\DIFadd{Failsafe}}\DIFadd{: }\texttt{\DIFadd{false}}\\
-  \textbf{\DIFadd{Description}}\DIFadd{: Request Linux Shim to keep protocol installed for subsequent image loads.
-}
+  \texttt{ShimRetainProtocol}\\
+  \textbf{Type}: \texttt{plist\ boolean}\\
+  \textbf{Failsafe}: \texttt{false}\\
+  \textbf{Description}: Request Linux Shim to keep protocol installed for subsequent image loads.
 
-  \DIFadd{This option is only required if chaining OpenCore from Shim. It must be set in order to allow
+  This option is only required if chaining OpenCore from Shim. It must be set in order to allow
   OpenCore to launch items which are verified by certificates present in Shim, but not in the
   system Secure Boot database.
-}
 
 \item
-  \DIFaddend \texttt{ResizeGpuBars}\\
+  \texttt{ResizeGpuBars}\\
   \textbf{Type}: \texttt{plist\ integer}\\
   \textbf{Failsafe}: \texttt{-1}\\
   \textbf{Description}: Configure GPU PCI BAR sizes.
@@ -9344,18 +9332,16 @@ requires several steps and careful configuration of certain settings as explaine
   the same private key.
 \item Sign all third-party operating system (not made by Microsoft or Apple)
   bootloaders if needed. For Linux there is an option to install
-  \DIFdelbegin \DIFdel{Microsoft-signed Shim bootloader as explained on e.g.
-  }\href{https://wiki.debian.org/SecureBoot}{\DIFdel{Debian Wiki}}%DIFAUXCMD
-\DIFdelend \DIFaddbegin \DIFadd{a user built, user signed Shim bootloader giving SBAT and MOK integration,
-  as explained in the }\texttt{\DIFadd{/Utilities/ShimUtils}} \DIFadd{directory of OpenCore
-  source or releases}\DIFaddend .
+  a user built, user signed Shim bootloader giving SBAT and MOK integration,
+  as explained in the \texttt{/Utilities/ShimUtils} directory of OpenCore
+  source or releases.
 \item Enable UEFI Secure Boot in firmware preferences and install the
   certificate with a private key. Details on how to generate a certificate
   can be found in various articles, such as \href{https://habr.com/en/post/273497}{this one},
   and are out of the scope of this document. If Windows is needed one
   will also need to add the
   \href{http://go.microsoft.com/fwlink/?LinkID=321192}{Microsoft Windows Production CA 2011}.
-  To launch option ROMs or to use signed Linux drivers \DIFaddbegin \DIFadd{if not using a user build of Shim}\DIFaddend ,
+  To launch option ROMs or to use signed Linux drivers if not using a user build of Shim,
   \href{http://go.microsoft.com/fwlink/?LinkId=321194}{Microsoft UEFI Driver Signing CA} will also be needed.
 \item Password-protect changing firmware settings to ensure that UEFI Secure Boot
   cannot be disabled without the user's knowledge.
@@ -9371,9 +9357,8 @@ requires several steps and careful configuration of certain settings as explaine
   some extra precautions. Things to consider:
 
   \begin{itemize}
-  \item MBR (Master Boot Record) installations are legacy and \DIFdelbegin \DIFdel{will not be supported
-  }\DIFdelend \DIFaddbegin \DIFadd{are only supported
-  with the OpenLegacyBoot driver}\DIFaddend .
+  \item MBR (Master Boot Record) installations are legacy and are only supported
+  with the OpenLegacyBoot driver.
   \item All the modifications applied (to ACPI, NVRAM, SMBIOS, etc.) are supposed
   to be operating system agnostic, i.e. apply equally regardless of the OS booted.
   This enables Boot Camp software experience on Windows.
