@@ -59,7 +59,7 @@ else
     if [ "$VERSION" = "" ] ; then
         echo -e "${RED}Expected version number not present${NC}"
     else
-        echo -e "Version: ${LIGHT_GREEN}${VERSION}${NC} (${VERSION}+, if own build)"
+        echo -e "Version: ${LIGHT_GREEN}${VERSION}${NC} (${VERSION}+, if user build)"
     fi
 
     # shellcheck disable=SC2016
