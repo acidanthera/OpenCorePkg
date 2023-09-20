@@ -1,4 +1,8 @@
 ## OpenCore Discussion Forums
+- AppleLife.ru in Russian:
+  - [Development](https://applelife.ru/threads/razrabotka-opencore.2943955)
+  - [Discussion](https://applelife.ru/threads/opencore-obsuzhdenie-i-ustanovka.2944066/)
+  - [Icon sets](https://applelife.ru/threads/kastomizacija-opencanopy.2945020/)
 
 - MacRumors.com in English:
   - [Big Sur on Unsupported Macs](https://forums.macrumors.com/threads/macos-11-big-sur-on-unsupported-macs-thread.2242172/)
