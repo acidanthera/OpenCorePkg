@@ -131,6 +131,7 @@ UserWriteFile (
   }
 
   if (fwrite (Data, Size, 1, FilePtr) != 1) {
+    fclose (FilePtr);
     abort ();
   }
 
