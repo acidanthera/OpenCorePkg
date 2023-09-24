@@ -3012,15 +3012,15 @@ to install and troubleshoot such macOS installations.
       \texttt{x86\_64}, \texttt{i386}, \texttt{i386-user32}.
   \end{enumerate}
 
-  Unlike macOS~10.7 (where certain board identifiers are treated as the \texttt{i386}
-  only machines), and macOS~10.5 or earlier (where \texttt{x86\_64} is not supported
-  by the macOS kernel), macOS~10.6 is very special. The architecture choice on macOS~10.6
-  depends on many factors including not only the board identifier, but also the macOS
-  product type (client vs server), macOS point release, and amount of RAM. The detection
-  of all these is complicated and impractical, as several point releases had implementation
-  flaws resulting in a failure to properly execute the server detection in the first place.
-  For this reason, OpenCore on macOS~10.6 falls back on the \texttt{x86\_64}
-  architecture whenever it is supported by the board, as it is on macOS~10.7.
+  Kernel architecture selection on macOS~10.6 and 10.7 depends on multiple
+  factors such as the board identifier, the macOS product type (client vs server),
+  macOS point release, as well as the amount of RAM present. It is not practical
+  for OpenCore to enumerate and process all these variables; especially given
+  that several macOS point releases had implementation flaws that affect the
+  server detection process in the first place. Hence, when \texttt{Auto} is set,
+  OpenCore falls back on the \texttt{x86\_64} architecture whenever this is
+  supported by the board when loading macOS~10.6 or 10.7. The 32-bit options can
+  however be explicitly configured when required.
 
   A 64-bit Mac model compatibility matrix corresponding to actual
   EfiBoot behaviour on macOS 10.6.8 and 10.7.5 is outlined below.
