@@ -1,7 +1,7 @@
 BIOSVendor: "Apple Inc."
-BIOSVersion: "2005.0.0.0.0"
-BIOSLegacyVersion: "MM81.88Z.F000.B00.2305212054"
-BIOSReleaseDate: "05/21/2023"
+BIOSVersion: "2020.0.1.0.0"
+BIOSLegacyVersion: "MM81.88Z.F000.B00.2308162010"
+BIOSReleaseDate: "08/16/2023"
 SystemManufacturer: "Apple Inc."
 SystemProductName: "Macmini8,1"
 SystemVersion: "1.0"
@@ -48,15 +48,15 @@ SmcPlatform:
   - 0x00
 OEMStrings: |-
   Apple ROM Version
-    BIOS ID:      MM81.88Z.F000.B00.2305212054
+    BIOS ID:      MM81.88Z.F000.B00.2308162010
     Model:        MM81
-    EFI Version:  2005.0.0.0.0
-    Built by:     root@f6tjh
-    Date:         Sun May 21 20:54:30 2023
-    Revision:     2005 (B&I)
+    EFI Version:  2020.0.1.0.0
+    Built by:     root@pmq6g
+    Date:         Wed Aug 16 20:10:19 2023
+    Revision:     2020.0.1 (B&I)
     ROM Version:  F000_B00
     Build Type:   Official Build, RELEASE
-    Compiler:     clang-1500.0.23.7.1
+    Compiler:     clang-1500.0.37.1
     UUID:         8C275A88-DA74-3A11-B14B-52BE1E9E3CD6
     UUID:         B3866747-A385-35F1-9D28-C54FF7CF024F
 Specifications:

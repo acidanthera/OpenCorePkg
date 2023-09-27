@@ -1,5 +1,8 @@
 OpenCore Changelog
 ==================
+#### v0.9.6
+- Updated builtin firmware versions for SMBIOS and the rest
+
 #### v0.9.5
 - Fixed GUID formatting for legacy NVRAM saving
 - Fixed inability to open files in root directory on an NTFS filesystem

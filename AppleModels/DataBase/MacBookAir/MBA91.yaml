@@ -1,7 +1,7 @@
 BIOSVendor: "Apple Inc."
-BIOSVersion: "2005.0.0.0.0"
-BIOSLegacyVersion: "MBA91.88Z.F000.B00.2305212103"
-BIOSReleaseDate: "05/21/2023"
+BIOSVersion: "2020.0.1.0.0"
+BIOSLegacyVersion: "MBA91.88Z.F000.B00.2308162020"
+BIOSReleaseDate: "08/16/2023"
 SystemManufacturer: "Apple Inc."
 SystemProductName: "MacBookAir9,1"
 SystemVersion: "1.0"
@@ -43,15 +43,15 @@ SmcPlatform:
   - 0x00
 OEMStrings: |-
   Apple ROM Version
-    BIOS ID:      MBA91.88Z.F000.B00.2305212103
+    BIOS ID:      MBA91.88Z.F000.B00.2308162020
     Model:        MBA91
-    EFI Version:  2005.0.0.0.0
-    Built by:     root@nbhfh
-    Date:         Sun May 21 21:03:03 2023
-    Revision:     2005 (B&I)
+    EFI Version:  2020.0.1.0.0
+    Built by:     root@nkrt7
+    Date:         Wed Aug 16 20:20:01 2023
+    Revision:     2020.0.1 (B&I)
     ROM Version:  F000_B00
     Build Type:   Official Build, RELEASE
-    Compiler:     clang-1500.0.23.7.1
+    Compiler:     clang-1500.0.37.1
     UUID:         24DDC534-324B-330E-B8D1-89F89BC3E851
     UUID:         002864CD-1C60-33A6-9B1D-092FD6C7C9B6
 Specifications:

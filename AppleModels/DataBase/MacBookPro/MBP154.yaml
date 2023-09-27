@@ -1,7 +1,7 @@
 BIOSVendor: "Apple Inc."
-BIOSVersion: "2005.0.0.0.0"
-BIOSLegacyVersion: "MBP154.88Z.F000.B00.2305212105"
-BIOSReleaseDate: "05/21/2023"
+BIOSVersion: "2020.0.1.0.0"
+BIOSLegacyVersion: "MBP154.88Z.F000.B00.2308162021"
+BIOSReleaseDate: "08/16/2023"
 SystemManufacturer: "Apple Inc."
 SystemProductName: "MacBookPro15,4"
 SystemVersion: "1.0"
@@ -55,15 +55,15 @@ SmcPlatform:
   - 0x00
 OEMStrings: |-
   Apple ROM Version
-    BIOS ID:      MBP154.88Z.F000.B00.2305212105
+    BIOS ID:      MBP154.88Z.F000.B00.2308162021
     Model:        MBP154
-    EFI Version:  2005.0.0.0.0
-    Built by:     root@8bztd
-    Date:         Sun May 21 21:05:50 2023
-    Revision:     2005 (B&I)
+    EFI Version:  2020.0.1.0.0
+    Built by:     root@d7nkc
+    Date:         Wed Aug 16 20:21:22 2023
+    Revision:     2020.0.1 (B&I)
     ROM Version:  F000_B00
     Build Type:   Official Build, RELEASE
-    Compiler:     clang-1500.0.23.7.1
+    Compiler:     clang-1500.0.37.1
     UUID:         8C275A88-DA74-3A11-B14B-52BE1E9E3CD6
     UUID:         2D105BA9-D12D-3169-B758-4159DCDC578C
 Specifications:
