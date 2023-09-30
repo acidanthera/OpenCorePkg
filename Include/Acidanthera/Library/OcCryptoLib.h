@@ -150,7 +150,7 @@ union uint512_u {
   UINT64    QWORD[8];
 };
 
-typedef struct STREEBOG_CONTEXT {
+typedef struct STREEBOG_CONTEXT_ {
   UINT8              buffer[64];
   union uint512_u    hash;
   union uint512_u    h;
