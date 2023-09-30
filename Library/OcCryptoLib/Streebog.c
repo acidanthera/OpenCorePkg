@@ -79,9 +79,9 @@ Pad (
 STATIC
 VOID
 Add512 (
-  CONST union uint512_u  *x,
-  CONST union uint512_u  *y,
-  union uint512_u        *r
+  CONST UINT512  *x,
+  CONST UINT512  *y,
+  UINT512        *r
   )
 {
 #if (defined (__BYTE_ORDER__) && __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__) || defined(MDE_CPU_IA32) || defined(MDE_CPU_X64)
@@ -125,18 +125,18 @@ Add512 (
 STATIC
 VOID
 g (
-  union uint512_u        *h,
-  CONST union uint512_u  *N,
+  UINT512        *h,
+  CONST UINT512  *N,
   CONST UINT8            *m
   )
 {
-  union uint512_u  Ki, data;
+  UINT512  Ki, data;
   UINT32           i;
 
   XLPS (h, N, (&data));
 
   Ki = data;
-  XLPS ((&Ki), ((const union uint512_u *)&m[0]), (&data));
+  XLPS ((&Ki), ((const UINT512 *)&m[0]), (&data));
 
   for (i = 0; i < 11; i++) {
     ROUND (i, (&Ki), (&data));
@@ -146,7 +146,7 @@ g (
   X ((&Ki), (&data), (&data));
 
   X ((&data), h, (&data));
-  X ((&data), ((const union uint512_u *)&m[0]), h);
+  X ((&data), ((const UINT512 *)&m[0]), h);
 }
 
 STATIC
@@ -164,8 +164,8 @@ MasCpy (
 STATIC
 VOID
 Uint512uCpy (
-  union uint512_u        *to,
-  CONST union uint512_u  *from
+  UINT512        *to,
+  CONST UINT512  *from
   )
 {
   for (INT32 i = 0; i < 8; ++i) {
@@ -180,7 +180,7 @@ Stage2 (
   CONST UINT8       *Data
   )
 {
-  union uint512_u  m;
+  UINT512  m;
 
   MasCpy ((UINT8 *)&m, Data);
   g (&(Context->h), &(Context->N), (CONST UINT8 *)&m);
@@ -195,7 +195,7 @@ Stage3 (
   STREEBOG_CONTEXT  *Context
   )
 {
-  union uint512_u  buf = {
+  UINT512  buf = {
     { 0 }
   };
 
@@ -214,7 +214,7 @@ Stage3 (
   Add512 (&(Context->N), &buf, &(Context->N));
   Add512 (
     &(Context->Sigma),
-    (const union uint512_u *)&Context->buffer[0],
+    (const UINT512 *)&Context->buffer[0],
     &(Context->Sigma)
     );
 

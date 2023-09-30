@@ -146,16 +146,16 @@ typedef struct SHA512_CONTEXT_ {
 
 typedef SHA512_CONTEXT SHA384_CONTEXT;
 
-union uint512_u {
-  UINT64    QWORD[8];
-};
+typedef struct UINT512_ {
+  UINT64  QWORD[8];
+} UINT512;
 
 typedef struct STREEBOG_CONTEXT_ {
   UINT8              buffer[64];
-  union uint512_u    hash;
-  union uint512_u    h;
-  union uint512_u    N;
-  union uint512_u    Sigma;
+  UINT512    hash;
+  UINT512    h;
+  UINT512    N;
+  UINT512    Sigma;
   UINT32             bufsize;
   UINT32             digest_size;
 } STREEBOG_CONTEXT;
