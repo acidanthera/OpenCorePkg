@@ -186,7 +186,7 @@ ENTRY_POINT (
 
   Streebog256 (M1, ARRAY_SIZE (M1), hash);
 
-  LocalFlag = !CompareMem(hash, H1_256, HASHSIZE / 2);
+  LocalFlag = CompareMem (hash, H1_256, HASHSIZE / 2) == 0;
 
   if (LocalFlag) {
     DEBUG ((DEBUG_ERROR, "M1 256 OK\n"));
@@ -198,7 +198,7 @@ ENTRY_POINT (
   LocalFlag = 1;
   Streebog512 (M1, ARRAY_SIZE (M1), hash);
 
-  LocalFlag = !CompareMem(hash, H1_512, HASHSIZE);
+  LocalFlag = CompareMem (hash, H1_512, HASHSIZE) == 0;
   
   if (LocalFlag) {
     DEBUG ((DEBUG_ERROR, "M1 512 OK\n"));
@@ -209,7 +209,7 @@ ENTRY_POINT (
 
   Streebog256 (M2, ARRAY_SIZE (M2), hash);
 
-  LocalFlag = !CompareMem(hash, H2_256, HASHSIZE / 2);
+  LocalFlag = CompareMem (hash, H2_256, HASHSIZE / 2) == 0;
 
   if (LocalFlag) {
     DEBUG ((DEBUG_ERROR, "M2 256 OK\n"));
@@ -220,7 +220,7 @@ ENTRY_POINT (
 
   Streebog512 (M2, ARRAY_SIZE (M2), hash);
 
-  LocalFlag = !CompareMem(hash, H2_512, HASHSIZE);
+  LocalFlag = CompareMem (hash, H2_512, HASHSIZE) == 0;
 
   if (LocalFlag) {
     DEBUG ((DEBUG_ERROR, "M2 512 OK\n"));
