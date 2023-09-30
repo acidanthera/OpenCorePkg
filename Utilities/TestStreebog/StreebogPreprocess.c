@@ -184,7 +184,7 @@ ENTRY_POINT (
   UINT8  Flag      = 1;
   UINT8  LocalFlag = 1;
 
-  Streebog256 (M1, 63, hash);
+  Streebog256 (M1, ARRAY_SIZE (M1), hash);
 
   LocalFlag = !CompareMem(hash, H1_256, HASHSIZE / 2);
 
@@ -196,7 +196,7 @@ ENTRY_POINT (
   }
 
   LocalFlag = 1;
-  Streebog512 (M1, 63, hash);
+  Streebog512 (M1, ARRAY_SIZE (M1), hash);
 
   LocalFlag = !CompareMem(hash, H1_512, HASHSIZE);
   
@@ -207,7 +207,7 @@ ENTRY_POINT (
     Flag = 0;
   }
 
-  Streebog256 (M2, 72, hash);
+  Streebog256 (M2, ARRAY_SIZE (M2), hash);
 
   LocalFlag = !CompareMem(hash, H2_256, HASHSIZE / 2);
 
@@ -218,7 +218,7 @@ ENTRY_POINT (
     Flag = 0;
   }
 
-  Streebog512 (M2, 72, hash);
+  Streebog512 (M2, ARRAY_SIZE (M2), hash);
 
   LocalFlag = !CompareMem(hash, H2_512, HASHSIZE);
 
