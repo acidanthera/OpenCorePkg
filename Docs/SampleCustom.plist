@@ -590,7 +590,7 @@
 				<key>ExecutablePath</key>
 				<string>Contents/MacOS/AirportBrcmFixup</string>
 				<key>MaxKernel</key>
-				<string>22.9.9</string>
+				<string></string>
 				<key>MinKernel</key>
 				<string>12.0.0</string>
 				<key>PlistPath</key>
@@ -626,7 +626,7 @@
 				<key>ExecutablePath</key>
 				<string></string>
 				<key>MaxKernel</key>
-				<string>22.9.9</string>
+				<string></string>
 				<key>MinKernel</key>
 				<string>17.0.0</string>
 				<key>PlistPath</key>
@@ -644,7 +644,7 @@
 				<key>ExecutablePath</key>
 				<string>Contents/MacOS/NVMeFix</string>
 				<key>MaxKernel</key>
-				<string>22.9.9</string>
+				<string></string>
 				<key>MinKernel</key>
 				<string>18.0.0</string>
 				<key>PlistPath</key>

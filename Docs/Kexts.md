@@ -17,7 +17,7 @@ Kexts
 | Wi-Fi and bluetooth | MinKernel (Min macOS) | MaxKernel (Max macOS) | Note |
 |---------------------|-----------------------|-----------------------|------|
 | [AirPortAtheros40.kext](https://i.applelife.ru/2018/12/442854_AirPortAtheros40.kext.zip) | 18.0.0 (10.14) | — | From 10.13 |
-| [AirportBrcmFixup.kext](https://github.com/acidanthera/AirportBrcmFixup) | 12.0.0 (10.8) | 22.9.9 (13) | — |
+| [AirportBrcmFixup.kext](https://github.com/acidanthera/AirportBrcmFixup) | 12.0.0 (10.8) | 23.9.9 (14) | — |
 | [ATH9KFixup.kext](https://github.com/chunnann/ATH9KFixup) | — | — | — |
 | [BrcmPatchRAM](https://github.com/acidanthera/BrcmPatchRAM) | 14.0.0 (10.10) | 23.9.9 (14) | — |
 | [IntelBluetoothFirmware](https://github.com/zxystd/IntelBluetoothFirmware) | — | — | — |
