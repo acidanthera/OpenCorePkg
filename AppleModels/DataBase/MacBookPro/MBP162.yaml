@@ -84,6 +84,8 @@ AppleModelCode:
 # Note, first board code is used by macserial
 AppleBoardCode:
   - "P8PG"
+  - "PCLJ"
+  - "PCVJ"
 # Note, first year is used by macserial
 AppleModelYear:
   - 2020
