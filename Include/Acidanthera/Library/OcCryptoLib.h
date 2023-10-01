@@ -41,20 +41,24 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 //
 // Digest sizes.
 //
-#define MD5_DIGEST_SIZE     16
-#define SHA1_DIGEST_SIZE    20
-#define SHA256_DIGEST_SIZE  32
-#define SHA384_DIGEST_SIZE  48
-#define SHA512_DIGEST_SIZE  64
+#define MD5_DIGEST_SIZE          16
+#define SHA1_DIGEST_SIZE         20
+#define SHA256_DIGEST_SIZE       32
+#define SHA384_DIGEST_SIZE       48
+#define SHA512_DIGEST_SIZE       64
+#define STREEBOG256_DIGEST_SIZE  256
+#define STREEBOG512_DIGEST_SIZE  512
 
-#define OC_MAX_SHA_DIGEST_SIZE  SHA512_DIGEST_SIZE
+#define OC_MAX_SHA_DIGEST_SIZE   STREEBOG512_DIGEST_SIZE
 
 //
 // Block sizes.
 //
-#define SHA256_BLOCK_SIZE  64
-#define SHA512_BLOCK_SIZE  128
-#define SHA384_BLOCK_SIZE  SHA512_BLOCK_SIZE
+#define SHA256_BLOCK_SIZE        64
+#define SHA512_BLOCK_SIZE        128
+#define SHA384_BLOCK_SIZE        SHA512_BLOCK_SIZE
+#define STREEBOG256_BLOCK_SIZE   512
+#define STREEBOG512_BLOCK_SIZE   STREEBOG256_BLOCK_SIZE
 
 //
 // Derived parameters.
@@ -424,7 +428,14 @@ Streebog256Update (
 VOID
 Streebog256Final (
   STREEBOG_CONTEXT  *Context,
-  UINT8             *Digest
+  UINT8             *HashDigest
+  );
+
+VOID
+Streebog256 (
+  CONST UINT8  *Data,
+  UINT8        *Digest,
+  UINTN        Length
   );
 
 VOID
@@ -446,17 +457,10 @@ Streebog512Final (
   );
 
 VOID
-Streebog256 (
-  CONST UINT8  *Data,
-  UINT32       Length,
-  UINT8        *Digest
-  );
-
-VOID
 Streebog512 (
   CONST UINT8  *Data,
-  UINT32       Length,
-  UINT8        *Digest
+  UINT8        *Digest,
+  UINTN        Length
   );
 
 BOOLEAN
