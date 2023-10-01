@@ -435,7 +435,7 @@ VOID
 Streebog256 (
   CONST UINT8  *Data,
   UINT8        *Digest,
-  UINTN        Length
+  UINT32       Length
   );
 
 VOID
@@ -460,7 +460,7 @@ VOID
 Streebog512 (
   CONST UINT8  *Data,
   UINT8        *Digest,
-  UINTN        Length
+  UINT32        Length
   );
 
 BOOLEAN
