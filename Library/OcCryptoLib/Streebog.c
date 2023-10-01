@@ -228,15 +228,15 @@ VOID
 GOST34112012Update (
   STREEBOG_CONTEXT  *Context,
   CONST UINT8       *Data,
-  UINT32            len
+  UINT32            Length
   )
 {
   UINT32  chunksize;
 
   if (Context->bufsize) {
     chunksize = 64 - Context->bufsize;
-    if (chunksize > len) {
-      chunksize = len;
+    if (chunksize > Length) {
+      chunksize = Length;
     }
 
     for (UINT32 i = 0; i < chunksize; ++i) {
@@ -244,8 +244,8 @@ GOST34112012Update (
     }
 
     Context->bufsize += chunksize;
-    len          -= chunksize;
-    Data         += chunksize;
+    Length           -= chunksize;
+    Data             += chunksize;
 
     if (Context->bufsize == 64) {
       Stage2 (Context, Context->buffer);
@@ -254,26 +254,26 @@ GOST34112012Update (
     }
   }
 
-  while (len > 63) {
+  while (Length > 63) {
     Stage2 (Context, Data);
 
     Data += 64;
-    len  -= 64;
+    Length  -= 64;
   }
 
-  if (len) {
-    for (UINT32 i = 0; i < len; ++i) {
+  if (Length) {
+    for (UINT32 i = 0; i < Length; ++i) {
       ((UINT8 *)(&Context->buffer))[i] = Data[i];
     }
 
-    Context->bufsize = len;
+    Context->bufsize = Length;
   }
 }
 
 VOID
 GOST34112012Final (
   STREEBOG_CONTEXT  *Context,
-  UINT8            *digest
+  UINT8            *Digest
   )
 {
   Stage3 (Context);
@@ -282,11 +282,11 @@ GOST34112012Final (
 
   if (Context->digest_size == 256) {
     for (INT32 i = 0; i < 32; ++i) {
-      digest[i] = ((UINT8 *)&(Context->hash.QWORD[4]))[i];
+      Digest[i] = ((UINT8 *)&(Context->hash.QWORD[4]))[i];
     }
   } else {
     for (INT32 i = 0; i < 64; ++i) {
-      digest[i] = ((UINT8 *)&(Context->hash.QWORD[0]))[i];
+      Digest[i] = ((UINT8 *)&(Context->hash.QWORD[0]))[i];
     }
   }
 }
@@ -303,19 +303,34 @@ VOID
 Streebog256Update (
   STREEBOG_CONTEXT  *Context,
   CONST UINT8       *Data,
-  UINT32            len
+  UINT32            Length
   )
 {
-  GOST34112012Update (Context, Data, len);
+  GOST34112012Update (Context, Data, Length);
 }
 
 VOID
 Streebog256Final (
   STREEBOG_CONTEXT  *Context,
-  UINT8            *digest
+  UINT8            *Digest
   )
 {
-  GOST34112012Final (Context, digest);
+  GOST34112012Final (Context, Digest);
+}
+
+VOID
+Streebog256 (
+  CONST UINT8  *Data,
+  UINT8        *Digest,
+  UINTN        Length
+  )
+{
+  STREEBOG_CONTEXT  Context;
+
+  Streebog256Init (&Context);
+  Streebog256Update (&Context, Data, Length);
+  Streebog256Final (&Context, Digest);
+  SecureZeroMem (&Context, sizeof(Context));
 }
 
 VOID
@@ -330,48 +345,33 @@ VOID
 Streebog512Update (
   STREEBOG_CONTEXT  *Context,
   CONST UINT8      *Data,
-  UINT32           len
+  UINT32           Length
   )
 {
-  GOST34112012Update (Context, Data, len);
+  GOST34112012Update (Context, Data, Length);
 }
 
 VOID
 Streebog512Final (
   STREEBOG_CONTEXT  *Context,
-  UINT8            *digest
+  UINT8            *Digest
   )
 {
-  GOST34112012Final (Context, digest);
-}
-
-VOID
-Streebog256 (
-  CONST UINT8  *Data,
-  UINT32       len,
-  UINT8        *digest
-  )
-{
-  STREEBOG_CONTEXT  Context;
-
-  Streebog256Init (&Context);
-  Streebog256Update (&Context, Data, len);
-  Streebog256Final (&Context, digest);
-  SecureZeroMem (&Context, sizeof(Context));
+  GOST34112012Final (Context, Digest);
 }
 
 VOID
 Streebog512 (
   CONST UINT8  *Data,
-  UINT32       len,
-  UINT8        *digest
+  UINT8        *Digest,
+  UINTN        Length
   )
 {
   STREEBOG_CONTEXT  Context;
 
   Streebog512Init (&Context);
-  Streebog512Update (&Context, Data, len);
-  Streebog512Final (&Context, digest);
+  Streebog512Update (&Context, Data, Length);
+  Streebog512Final (&Context, Digest);
   SecureZeroMem (&Context, sizeof(Context));
 }
 
