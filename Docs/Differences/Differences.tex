@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
-%DIF DEL PreviousConfiguration.tex   Wed Sep 27 10:25:48 2023
-%DIF ADD ../Configuration.tex        Wed Sep 27 10:25:48 2023
+%DIF DEL PreviousConfiguration.tex   Mon Oct  9 15:13:53 2023
+%DIF ADD ../Configuration.tex        Mon Oct  9 15:31:36 2023
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -3072,15 +3072,18 @@ to install and troubleshoot such macOS installations.
       \texttt{x86\_64}, \texttt{i386}, \texttt{i386-user32}.
   \end{enumerate}
 
-  Unlike macOS~10.7 (where certain board identifiers are treated as the \texttt{i386}
+  Unlike macOS~10.7 (where certain board identifiers are treated as \DIFdelbegin \DIFdel{the }\DIFdelend \texttt{i386}
   only machines), and macOS~10.5 or earlier (where \texttt{x86\_64} is not supported
   by the macOS kernel), macOS~10.6 is very special. The architecture choice on macOS~10.6
   depends on many factors including not only the board identifier, but also the macOS
   product type (client vs server), macOS point release, and amount of RAM. The detection
   of all these is complicated and impractical, as several point releases had implementation
   flaws resulting in a failure to properly execute the server detection in the first place.
-  For this reason, OpenCore on macOS~10.6 falls back on the \texttt{x86\_64}
-  architecture whenever it is supported by the board, as it is on macOS~10.7.
+  For this reason \DIFaddbegin \DIFadd{when }\texttt{\DIFadd{Auto}} \DIFadd{is set}\DIFaddend , OpenCore on macOS~10.6 falls back
+  \DIFdelbegin \DIFdel{on }\DIFdelend \DIFaddbegin \DIFadd{to }\DIFaddend the \texttt{x86\_64} architecture \DIFdelbegin \DIFdel{whenever }\DIFdelend \DIFaddbegin \DIFadd{when }\DIFaddend it is supported by the board, as
+  \DIFdelbegin \DIFdel{it is }\DIFdelend on macOS~10.7. \DIFaddbegin \DIFadd{The 32-bit }\texttt{\DIFadd{KernelArch}} \DIFadd{options can still be configured
+  explicitly however.
+}\DIFaddend 
 
   A 64-bit Mac model compatibility matrix corresponding to actual
   EfiBoot behaviour on macOS 10.6.8 and 10.7.5 is outlined below.
