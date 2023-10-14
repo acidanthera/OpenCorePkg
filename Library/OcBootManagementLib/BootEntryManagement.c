@@ -192,6 +192,7 @@ ExpandShortFormBootPath (
 /**
   Check boot entry visibility by device path.
 
+  @param[in]  Context      Picker context.
   @param[in]  DevicePath   Device path of the entry.
 
   @return Entry visibility

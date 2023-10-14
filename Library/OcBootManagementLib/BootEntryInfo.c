@@ -401,6 +401,7 @@ OcGetBootEntryLabelImage (
   OUT UINT32             *DataLength
   )
 {
+  ASSERT (DataLength != NULL);
   return OcGetBootEntryFile (
            BootEntry,
            Scale == 2 ? L".disk_label_2x" : L".disk_label",
@@ -423,6 +424,7 @@ OcGetBootEntryIcon (
   OUT UINT32             *DataLength
   )
 {
+  ASSERT (DataLength != NULL);
   return OcGetBootEntryFile (
            BootEntry,
            L".VolumeIcon.icns",
@@ -446,7 +448,7 @@ InternalGetBootEntryFile (
   IN  UINT32                    MaxFileSize,
   IN  UINT32                    MinFileSize,
   OUT VOID                      **FileData,
-  OUT UINT32                    *DataLength,
+  OUT UINT32                    *DataLength OPTIONAL,
   IN  BOOLEAN                   SearchAtLeaf,
   IN  BOOLEAN                   SearchAtRoot
   )
@@ -458,9 +460,12 @@ InternalGetBootEntryFile (
 
   ASSERT (SearchAtLeaf || SearchAtRoot);
   ASSERT (DevicePath != NULL);
+  ASSERT (FileData != NULL);
 
-  *FileData   = NULL;
-  *DataLength = 0;
+  *FileData = NULL;
+  if (DataLength != NULL) {
+    *DataLength = 0;
+  }
 
   Status = OcBootPolicyDevicePathToDirPath (
              DevicePath,
@@ -564,7 +569,7 @@ OcGetBootEntryFileFromDevicePath (
   IN  UINT32                    MaxFileSize,
   IN  UINT32                    MinFileSize,
   OUT VOID                      **FileData,
-  OUT UINT32                    *DataLength,
+  OUT UINT32                    *DataLength OPTIONAL,
   IN  BOOLEAN                   SearchAtLeaf,
   IN  BOOLEAN                   SearchAtRoot
   )
@@ -592,7 +597,7 @@ OcGetBootEntryFile (
   IN  UINT32         MaxFileSize,
   IN  UINT32         MinFileSize,
   OUT VOID           **FileData,
-  OUT UINT32         *DataLength,
+  OUT UINT32         *DataLength OPTIONAL,
   IN  BOOLEAN        SearchAtLeaf,
   IN  BOOLEAN        SearchAtRoot
   )
