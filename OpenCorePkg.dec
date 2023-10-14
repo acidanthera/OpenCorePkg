@@ -890,9 +890,6 @@
   OcFlexArrayLib|Include/Acidanthera/Library/OcFlexArrayLib.h
 
   ##  @libraryclass
-  OcGuardLib|Include/Acidanthera/Library/OcGuardLib.h
-
-  ##  @libraryclass
   OcHashServicesLib|Include/Acidanthera/Library/OcHashServicesLib.h
 
   ##  @libraryclass

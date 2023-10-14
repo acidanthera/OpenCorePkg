@@ -29,12 +29,6 @@
 #
 
 [Sources]
-  Alignment.c
-  BitOverflow.c
-  GuardInternals.h
-  Math.c
-  NativeOverflow.c
-  TripleOverflow.c
   Ubsan.c
   Ubsan.h
   UbsanPrintf.c
