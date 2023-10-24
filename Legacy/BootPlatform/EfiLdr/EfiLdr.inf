@@ -35,9 +35,9 @@
   PrintLib
   LzmaDecompressLib
   SerialPortLib
+  UefiImageOnlyFvLib
 
 [Sources]
-  PeLoader.h
   Support.h
   EfiLdrHandoff.h
   EfiLdr.h

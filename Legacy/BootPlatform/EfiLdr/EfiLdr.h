@@ -25,7 +25,7 @@ Revision History:
 #include "EfiLdrHandoff.h"
 
 #include <Protocol/LoadedImage.h>
-#include <IndustryStandard/PeImage.h>
+#include <IndustryStandard/PeImage2.h>
 #include <Library/BaseLib.h>
 #include <Library/BaseMemoryLib.h>
 #include <Library/PrintLib.h>
@@ -84,6 +84,15 @@ typedef
 VOID
 (EFIAPI *EFI_MAIN_ENTRYPOINT)(
   IN EFILDRHANDOFF  *Handoff
+  );
+
+EFI_STATUS
+EfiLdrLoadImage (
+  IN VOID                   *FHand,
+  IN UINT32                 BufferSize,
+  IN EFILDR_LOADED_IMAGE    *Image,
+  IN UINTN                  *NumberOfMemoryMapEntries,
+  IN EFI_MEMORY_DESCRIPTOR  *EfiMemoryDescriptor
   );
 
 #endif //_DUET_EFI_LOADER_H_

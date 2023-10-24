@@ -20,7 +20,6 @@ Revision History:
 
 #include "EfiLdr.h"
 #include "Support.h"
-#include "PeLoader.h"
 #include "LzmaDecompress.h"
 
 #include <Library/SerialPortLib.h>
@@ -142,8 +141,9 @@ EfiLoader (
   //
   // Load and relocate the EFI PE/COFF Firmware Image
   //
-  Status = EfiLdrPeCoffLoadPeImage (
+  Status = EfiLdrLoadImage (
              (VOID *)(UINTN)(EFI_DECOMPRESSED_BUFFER_ADDRESS),
+             DestinationSize,
              &DxeIplImage,
              &NumberOfMemoryMapEntries,
              EfiMemoryDescriptor
@@ -184,8 +184,9 @@ EfiLoader (
   //
   // Load and relocate the EFI PE/COFF Firmware Image
   //
-  Status = EfiLdrPeCoffLoadPeImage (
+  Status = EfiLdrLoadImage (
              (VOID *)(UINTN)(EFI_DECOMPRESSED_BUFFER_ADDRESS),
+             DestinationSize,
              &DxeCoreImage,
              &NumberOfMemoryMapEntries,
              EfiMemoryDescriptor
