@@ -55,29 +55,29 @@
 
 [Rule.Common.DXE_CORE]
   FILE DXE_CORE = $(NAMED_GUID) {
-    PE32     PE32           $(INF_OUTPUT)/$(MODULE_NAME).efi
+    UE           UE                      $(INF_OUTPUT)/$(MODULE_NAME).efi
   }
 
 [Rule.Common.UEFI_DRIVER]
   FILE DRIVER = $(NAMED_GUID) {
     DXE_DEPEX    DXE_DEPEX Optional      $(INF_OUTPUT)/$(MODULE_NAME).depex
-    PE32         PE32                    $(INF_OUTPUT)/$(MODULE_NAME).efi
+    UE           UE                      $(INF_OUTPUT)/$(MODULE_NAME).efi
   }
 
 [Rule.Common.UEFI_DRIVER.BINARY]
   FILE DRIVER = $(NAMED_GUID) {
     DXE_DEPEX    DXE_DEPEX Optional      |.depex
-    PE32         PE32                    |.efi
+    UE           UE                      |.efi
   }
 
 [Rule.Common.DXE_DRIVER]
   FILE DRIVER = $(NAMED_GUID) {
     DXE_DEPEX    DXE_DEPEX Optional      $(INF_OUTPUT)/$(MODULE_NAME).depex
-    PE32         PE32                    $(INF_OUTPUT)/$(MODULE_NAME).efi
+    UE           UE                      $(INF_OUTPUT)/$(MODULE_NAME).efi
   }
 
 [Rule.Common.DXE_RUNTIME_DRIVER]
   FILE DRIVER = $(NAMED_GUID) {
     DXE_DEPEX    DXE_DEPEX Optional      $(INF_OUTPUT)/$(MODULE_NAME).depex
-    PE32         PE32                    $(INF_OUTPUT)/$(MODULE_NAME).efi
+    UE           UE                      $(INF_OUTPUT)/$(MODULE_NAME).efi
   }
