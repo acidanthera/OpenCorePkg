@@ -34,15 +34,18 @@ Big Sur
 Monterey
 ./macrecovery.py -b Mac-E43C1C25D4880AD6 -m 00000000000000000
 
+Ventura
+./macrecovery.py -b Mac-B4831CEBD52A0C4C -m 00000000000000000
+
 Diagnostics
-./macrecovery.py -b Mac-E43C1C25D4880AD6 -m 00000000000000000 -diag
-./macrecovery.py -b Mac-E43C1C25D4880AD6 -m 00000000000GDVQ00 -diag
-./macrecovery.py -b Mac-E43C1C25D4880AD6 <real MLB> -diag
+./macrecovery.py -b Mac-7BA5B2D9E42DDD94 -m 00000000000000000 -diag
+./macrecovery.py -b Mac-7BA5B2D9E42DDD94 -m 00000000000GDVQ00 -diag
+./macrecovery.py -b Mac-7BA5B2D9E42DDD94 <real MLB> -diag
 
 Default version
-./macrecovery.py -b Mac-E43C1C25D4880AD6 -m 00000000000GDVQ00       (oldest)
-./macrecovery.py -b Mac-E43C1C25D4880AD6 -m <real MLB> -os default  (newer)
+./macrecovery.py -b Mac-7BA5B2D9E42DDD94 -m 00000000000GDVQ00       (oldest)
+./macrecovery.py -b Mac-7BA5B2D9E42DDD94 -m <real MLB> -os default  (newer)
 
 Latest version
-./macrecovery.py -b Mac-B4831CEBD52A0C4C -m 00000000000000000 -os latest
-./macrecovery.py -b Mac-B4831CEBD52A0C4C -m <real MLB> -os latest
+./macrecovery.py -b Mac-7BA5B2D9E42DDD94 -m 00000000000000000 -os latest
+./macrecovery.py -b Mac-7BA5B2D9E42DDD94 -m <real MLB> -os latest
