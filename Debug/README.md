@@ -279,6 +279,29 @@ For example, this is a working `launch.json` file for both LLDB and GDB debuggin
                 "traceResponse": true
             }
         },
+        {
+            "name": "OC gdb (32/32)",
+            "type": "cppdbg",
+            "request": "launch",
+            "targetArchitecture": "x86",
+            "program": "${workspaceFolder}/Debug/GdbSyms/Bin/Ia32_GCC5/GdbSyms.debug",
+            "cwd": "${workspaceFolder}/Debug",
+            "MIMode": "gdb",
+            "stopAtEntry": true,
+            "setupCommands": [
+                {"text": "set arch i386"},
+                {"text": "symbol-file ${workspaceFolder}/Debug/GdbSyms/Bin/Ia32_GCC5/GdbSyms.debug"},
+                {"text": "target remote localhost:8832"},
+                {"text": "source ${workspaceFolder}/Debug/Scripts/gdb_uefi.py"},
+                {"text": "reload-uefi"},
+            ],
+            "launchCompleteCommand": "exec-continue",
+            "logging": {
+                "engineLogging": false,
+                "trace": true,
+                "traceResponse": true
+            }
+        },
     ]
 }
 ```
