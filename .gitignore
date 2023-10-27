@@ -90,3 +90,6 @@ Utilities/TestProcessKernel/ProcessKernel
 Utilities/TestNtfsDxe/TestNtfsDxe
 Utilities/TestExt4Dxe/TestExt4Dxe
 Utilities/TestFatDxe/TestFatDxe
+Utilities/LegacyBoot/ROOT
+Utilities/LegacyBoot/OpenCore.raw
+Utilities/LegacyBoot/boot
