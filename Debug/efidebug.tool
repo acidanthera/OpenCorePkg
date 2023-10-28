@@ -12,8 +12,6 @@
 #                  defaults to X64; use CPU_ARCH=Ia32 to debug 32-bit firmware on 32-bit CPU
 # GDB_ARCH      - GDB `set arch` value
 #                  defaults to correct value for CPU_ARCH
-# LLDB_ARCH     - LLDB `--arch` value
-#                  defaults to correct value for CPU_ARCH
 # EFI_PORT      - debugger TCP connection port
 #                  defaults to 8864 for X64 and 8832 for Ia32
 # EFI_HOST      - debugger TCP connection host
@@ -79,14 +77,6 @@ choose_debugger() {
       GDB_ARCH="i386:x86-64:intel"
     else
       GDB_ARCH="i386"
-    fi
-  fi
-
-  if [ "${LLDB_ARCH}" = "" ]; then
-    if [ "${CPU_ARCH}" = "X64" ]; then
-      LLDB_ARCH="x86_64"
-    else
-      LLDB_ARCH="i386"
     fi
   fi
 
@@ -167,11 +157,9 @@ choose_debugger() {
   fi
 
   if [ "${CPU_ARCH}" = "X64" ]; then
-    LLDB_TARGET_DEFINITION1="-o"
-    LLDB_TARGET_DEFINITION2="settings set plugin.process.gdb-remote.target-definition-file Scripts/x86_64_target_definition.py"
+    lldb_target_definition="settings set plugin.process.gdb-remote.target-definition-file Scripts/x86_64_target_definition.py"
   else
-    LLDB_TARGET_DEFINITION1=""
-    LLDB_TARGET_DEFINITION2=""
+    lldb_target_definition="settings set target.default-arch ${EFI_TRIPLE}"
   fi
 }
 
@@ -186,8 +174,7 @@ if [ "${EFI_DEBUGGER}" = "GDB" ] || [ "${EFI_DEBUGGER}" = "gdb" ]; then
     -ex "b DebugBreak" \
     "${EFI_SYMS}"
 elif [ "${EFI_DEBUGGER}" = "LLDB" ] || [ "${EFI_DEBUGGER}" = "lldb" ]; then
-  "$LLDB" --arch "${LLDB_ARCH}" \
-    "${LLDB_TARGET_DEFINITION1}" "${LLDB_TARGET_DEFINITION2}" \
+  "$LLDB" -o "${lldb_target_definition}" \
     -o "gdb-remote ${EFI_HOST}:${EFI_PORT}" \
     -o "target create ${EFI_SYMS_PDB} ${EFI_SYMS}" \
     -o "command script import Scripts/lldb_uefi.py" \
