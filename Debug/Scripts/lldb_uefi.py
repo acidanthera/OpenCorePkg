@@ -67,9 +67,15 @@ class ReloadUefi:
     # Returns typed SBValue for an address.
     #
     def typed_ptr(self, typename, address):
-        target = self.debugger.GetSelectedTarget()
-        sbdata = lldb.SBData.CreateDataFromInt(address, size=self.typetarget.GetAddressByteSize())
+        target = self.activetarget
+        sbdata = lldb.SBData.CreateDataFromInt(address, size=8) ##< size=8 required on 32-bit as well as 64-bit, or resultant pointer cannot be dereferenced.
         return target.CreateValueFromData('ptr', sbdata, typename)
+
+    #
+    # Cast pointer in way which works round fragilities of 32-bit handling (simple ptr.Cast(type) works in 64-bit).
+    #     
+    def cast_ptr(self, type, ptr):
+        return self.typed_ptr(type, ptr.GetValueAsUnsigned())
 
     #
     # Computes CRC32 on an array of data.
@@ -77,18 +83,28 @@ class ReloadUefi:
 
     def crc32(self, data):
         return binascii.crc32(data) & 0xFFFFFFFF
+    
+    #
+    # GetChildMemberWithName working round fragilities of 32-bit handling.
+    #
+
+    def get_child_member_with_name(self, value, field_name):
+        member = value.GetChildMemberWithName(field_name)
+        if member.TypeIsPointerType():
+            member = self.cast_ptr(member.GetType(), member)
+        return member
 
     #
     # Gets a field from struct as an unsigned value.
     #
 
-    def get_field(self, value, field_name=None, force_bytes=False, single_entry=False):
+    def get_field(self, value, field_name=None, force_bytes=False, force_int=False, single_entry=False):
         if field_name is not None:
-            member = value.GetChildMemberWithName(field_name)
+            member = self.get_child_member_with_name(value, field_name)
         else:
             member = value
 
-        if member.GetByteSize() > self.typetarget.GetAddressByteSize() or force_bytes:
+        if (not force_int and member.GetByteSize() > self.typetarget.GetAddressByteSize()) or force_bytes:
             sbdata = member.GetData()
             byte_size = sbdata.GetByteSize()
             data = array.array('B')
@@ -132,7 +148,7 @@ class ReloadUefi:
     #
 
     def set_field(self, value, field_name, data):
-        member = value.GetChildMemberWithName(field_name)
+        member = self.get_child_member_with_name(value, field_name)
         data = lldb.SBData.CreateDataFromInt(data, size=member.GetByteSize())
         error = lldb.SBError()
         member.SetData(data, error)
@@ -147,14 +163,14 @@ class ReloadUefi:
         estp_t = self.ptype('EFI_SYSTEM_TABLE_POINTER')
         while True:
             estp = self.typed_ptr(estp_t, address)
-            if self.get_field(estp, 'Signature') == self.EST_SIGNATURE:
+            if self.get_field(estp, 'Signature', force_int=True) == self.EST_SIGNATURE:
                 oldcrc = self.get_field(estp, 'Crc32')
                 self.set_field(estp, 'Crc32', 0)
                 newcrc = self.crc32(self.get_field(estp.Dereference()))
                 self.set_field(estp, 'Crc32', oldcrc)
                 if newcrc == oldcrc:
                     print(f'EFI_SYSTEM_TABLE_POINTER @ 0x{address:x}')
-                    return estp.GetChildMemberWithName('EfiSystemTableBase')
+                    return self.get_child_member_with_name(estp, 'EfiSystemTableBase')
 
             address += 4 * 2**20
             if address >= 2**32:
@@ -171,12 +187,12 @@ class ReloadUefi:
         while index != count:
             # GetChildAtIndex accesses inner structure fields, so we have to use the fugly way.
             cfg_entry = cfg_table.GetValueForExpressionPath(f'[{index}]')
-            cfg_guid = cfg_entry.GetChildMemberWithName('VendorGuid')
+            cfg_guid = self.get_child_member_with_name(cfg_entry, 'VendorGuid')
             if self.get_field(cfg_guid, 'Data1') == guid[0] and \
                self.get_field(cfg_guid, 'Data2') == guid[1] and \
                self.get_field(cfg_guid, 'Data3') == guid[2] and \
                self.get_field(cfg_guid, 'Data4', True).tolist() == guid[3]:
-                return cfg_entry.GetChildMemberWithName('VendorTable')
+                return self.get_child_member_with_name(cfg_entry, 'VendorTable')
             index += 1
         return self.EINVAL
 
@@ -213,6 +229,7 @@ class ReloadUefi:
         if self.get_field(dosh, 'e_magic') == self.DOS_MAGIC:
             h_addr = h_addr + self.get_field(dosh, 'e_lfanew')
         return self.typed_ptr(head_t, h_addr)
+
     #
     # Returns a dictionary with PE sections.
     #
@@ -245,10 +262,10 @@ class ReloadUefi:
 
     def pe_file(self, pe):
         if self.pe_is_64(pe):
-            obj = pe.GetChildMemberWithName('Pe32Plus')
+            obj = self.get_child_member_with_name(pe, 'Pe32Plus')
         else:
-            obj = pe.GetChildMemberWithName('Pe32')
-        return obj.GetChildMemberWithName('FileHeader')
+            obj = self.get_child_member_with_name(pe, 'Pe32')
+        return self.get_child_member_with_name(obj, 'FileHeader')
 
     #
     # Returns the PE (not so) optional header.
@@ -256,10 +273,10 @@ class ReloadUefi:
 
     def pe_optional(self, pe):
         if self.pe_is_64(pe):
-            obj = pe.GetChildMemberWithName('Pe32Plus')
+            obj = self.get_child_member_with_name(pe, 'Pe32Plus')
         else:
-            obj = pe.GetChildMemberWithName('Pe32')
-        return obj.GetChildMemberWithName('OptionalHeader')
+            obj = self.get_child_member_with_name(pe, 'Pe32')
+        return self.get_child_member_with_name(obj, 'OptionalHeader')
 
     #
     # Returns the symbol file name for a PE image.
@@ -371,10 +388,10 @@ class ReloadUefi:
             entry = edii.GetValueForExpressionPath(f'[{index}]')
             image_type = self.get_field(entry, 'ImageInfoType', single_entry=True)
             if image_type == 1:
-                entry = entry.GetChildMemberWithName('NormalImage')
-                self.parse_image(entry.GetChildMemberWithName('LoadedImageProtocolInstance'), syms)
+                entry = self.get_child_member_with_name(entry, 'NormalImage')
+                self.parse_image(self.get_child_member_with_name(entry, 'LoadedImageProtocolInstance'), syms)
             else:
-                print(f'Skipping unknown EFI_DEBUG_IMAGE_INFO (Type {str(image_type)})')
+                print(f'Skipping unknown EFI_DEBUG_IMAGE_INFO (ImageInfoType {image_type})')
             index = index + 1
         print('Loading new symbols...')
         for sym in syms:
@@ -389,12 +406,12 @@ class ReloadUefi:
 
     def parse_dh(self, dh):
         dh_t = self.ptype('EFI_DEBUG_IMAGE_INFO_TABLE_HEADER')
-        dh = dh.Cast(dh_t)
+        dh = self.cast_ptr(dh_t, dh)
         print(f"DebugImageInfoTable @ 0x{self.get_field(dh, 'EfiDebugImageInfoTable'):x}, 0x{self.get_field(dh, 'TableSize'):x} entries")
         if self.get_field(dh, 'UpdateStatus') & self.DEBUG_IS_UPDATING:
             print('EfiDebugImageInfoTable update in progress, retry later')
             return
-        self.parse_edii(dh.GetChildMemberWithName('EfiDebugImageInfoTable'), self.get_field(dh, 'TableSize'))
+        self.parse_edii(self.get_child_member_with_name(dh, 'EfiDebugImageInfoTable'), self.get_field(dh, 'TableSize'))
 
     #
     # Parses EFI_SYSTEM_TABLE, in order to load image symbols.
@@ -402,10 +419,10 @@ class ReloadUefi:
 
     def parse_est(self, est):
         est_t = self.ptype('EFI_SYSTEM_TABLE')
-        est = est.Cast(est_t)
+        est = self.cast_ptr(est_t, est)
         print(f"Connected to {UefiMisc.parse_utf16(self.get_field(est, 'FirmwareVendor'))}(Rev. 0x{self.get_field(est, 'FirmwareRevision'):x}")
         print(f"ConfigurationTable @ 0x{self.get_field(est, 'ConfigurationTable'):x}, 0x{self.get_field(est, 'NumberOfTableEntries'):x} entries")
-        dh = self.search_config(est.GetChildMemberWithName('ConfigurationTable'), self.get_field(est, 'NumberOfTableEntries'), self.DEBUG_GUID)
+        dh = self.search_config(self.get_child_member_with_name(est, 'ConfigurationTable'), self.get_field(est, 'NumberOfTableEntries'), self.DEBUG_GUID)
         if dh == self.EINVAL:
             print('No EFI_DEBUG_IMAGE_INFO_TABLE_HEADER')
             return
