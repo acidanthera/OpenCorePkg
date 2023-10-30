@@ -4,6 +4,7 @@ OpenCore Changelog
 - Updated builtin firmware versions for SMBIOS and the rest
 - Fixed hang while generating boot entries on some systems
 - Added `efidebug.tool` support for 32-bit on 32-bit using GDB or LLDB
+- Fixed potential incorrect values in kernel image capabilities calculation
 
 #### v0.9.5
 - Fixed GUID formatting for legacy NVRAM saving

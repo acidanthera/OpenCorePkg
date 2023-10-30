@@ -270,6 +270,17 @@ OcImageLoaderLoad (
   OC_LOADED_IMAGE_PROTOCOL         *OcLoadedImage;
   EFI_LOADED_IMAGE_PROTOCOL        *LoadedImage;
 
+  //
+  // For OcImageLoaderLoad always assume target default.
+  //
+ #ifdef MDE_CPU_IA32
+  mImageLoaderCaps = OC_KERN_CAPABILITY_K32_U32 | OC_KERN_CAPABILITY_K32_U64;
+ #else
+  mImageLoaderCaps = OC_KERN_CAPABILITY_K64_U64;
+ #endif
+
+  mImageLoaderCapsHandle = NULL;
+
   ASSERT (SourceBuffer != NULL);
 
   //
@@ -410,6 +421,8 @@ OcImageLoaderLoad (
     FreeAlignedPages (DestinationBuffer, DestinationPages);
     return Status;
   }
+
+  mImageLoaderCapsHandle = *ImageHandle;
 
   DEBUG ((DEBUG_VERBOSE, "OCB: Loaded image at %p\n", *ImageHandle));
 
