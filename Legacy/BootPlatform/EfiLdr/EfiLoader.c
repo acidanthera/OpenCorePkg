@@ -22,8 +22,6 @@ Revision History:
 #include "Support.h"
 #include "LzmaDecompress.h"
 
-#include <Library/SerialPortLib.h>
-
 EFILDR_LOADED_IMAGE  DxeCoreImage;
 EFILDR_LOADED_IMAGE  DxeIplImage;
 
@@ -84,7 +82,6 @@ EfiLoader (
              &DestinationSize,
              &ScratchSize
              );
-
   if (EFI_ERROR (Status)) {
     SystemHang ("Failed to get decompress information for BFV!\n");
   }
@@ -95,7 +92,6 @@ EfiLoader (
               (VOID *)(UINTN)EFI_DECOMPRESSED_BUFFER_ADDRESS,
               (VOID *)(UINTN)((EFI_DECOMPRESSED_BUFFER_ADDRESS + DestinationSize + 0x1000) & 0xfffff000)
               );
-
   if (EFI_ERROR (Status)) {
     SystemHang ("Failed to decompress BFV!\n");
   }
@@ -161,7 +157,6 @@ EfiLoader (
   // Decompress the image
   //
   Status = LzmaUefiDecompressGetInfo (
-
              (VOID *)(UINTN)(EFILDR_HEADER_ADDRESS + EFILDRImage->Offset),
              EFILDRImage->Length,
              &DestinationSize,
