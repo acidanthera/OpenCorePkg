@@ -35,7 +35,7 @@
   PrintLib
   LzmaDecompressLib
   SerialPortLib
-  UefiImageOnlyFvLib
+  UefiImageOnlyNonFvLib
 
 [Sources]
   Support.h

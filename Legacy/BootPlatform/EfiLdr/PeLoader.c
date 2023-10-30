@@ -40,7 +40,7 @@ EfiLdrLoadImage (
              &ImageContext,
              FHand,
              BufferSize,
-             UEFI_IMAGE_SOURCE_FV
+             UEFI_IMAGE_SOURCE_NON_FV
              );
   if (EFI_ERROR (Status)) {
     return Status;
@@ -71,7 +71,7 @@ EfiLdrLoadImage (
       return EFI_INVALID_PARAMETER;
   }
 
-  Image->NoPages = EFI_SIZE_TO_PAGES (BufferSize);
+  Image->NoPages = EFI_SIZE_TO_PAGES (UefiImageGetImageSize (&ImageContext));
 
   //
   // Compute the amount of memory needed to load the image and
