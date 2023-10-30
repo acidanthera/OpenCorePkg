@@ -14,7 +14,7 @@
 ##
 
   BlockSize          = 0x10000
-  NumBlocks          = 32
+  NumBlocks          = 22
   FvAlignment        = 16         #FV alignment and FV attributes setting.
   ERASE_POLARITY     = 1
   MEMORY_MAPPED      = TRUE
