@@ -17,18 +17,18 @@
 #include <Library/MemoryAllocationLib.h>
 #include <Library/OcCompressionLib.h>
 
-voidpf ZLIB_INTERNAL zcalloc (opaque, items, size)
-    voidpf opaque;
-    unsigned items;
-    unsigned size;
+voidpf ZLIB_INTERNAL zcalloc (
+    voidpf opaque,
+    unsigned items,
+    unsigned size)
 {
   (void) opaque;
   return (voidpf) AllocatePool (items * size);
 }
 
-void ZLIB_INTERNAL zcfree (opaque, ptr)
-    voidpf opaque;
-    voidpf ptr;
+void ZLIB_INTERNAL zcfree (
+    voidpf opaque,
+    voidpf ptr)
 {
   (void) opaque;
   FreePool (ptr);
