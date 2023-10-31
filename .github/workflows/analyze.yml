@@ -28,7 +28,7 @@ jobs:
 
       - name: CI Bootstrap
         run: |
-          src=$(/usr/bin/curl -Lfs https://raw.githubusercontent.com/acidanthera/ocbuild/master/ci-bootstrap.sh) && eval "$src" || exit 1
+          src=$(/usr/bin/curl -Lfs https://raw.githubusercontent.com/acidanthera/ocbuild/build-0.8.7/ci-bootstrap.sh) && eval "$src" || exit 1
 
       - name: Run shellcheck
         run: find . \( -name "*.tool" -o -name "*.command" -o -name "*.sh" \) -exec sh -c 'for TargetFile; do shellcheck --severity=info "${TargetFile}" || exit 1; done' sh {} +
@@ -73,7 +73,7 @@ jobs:
 
       - name: Run prospector
         run: |
-          /usr/bin/curl -L https://raw.githubusercontent.com/acidanthera/ocbuild/master/prospector/profile.yml -o profile.yml || exit 1
+          /usr/bin/curl -L https://raw.githubusercontent.com/acidanthera/ocbuild/build-0.8.7/prospector/profile.yml -o profile.yml || exit 1
           python3 -m prospector . -P ./profile.yml | tee prospector_result.txt || exit 1
 
       - name: Upload prospector result to Artifacts
@@ -115,14 +115,14 @@ jobs:
 
       - name: CI Bootstrap
         run: |
-          src=$(/usr/bin/curl -Lfs https://raw.githubusercontent.com/acidanthera/ocbuild/master/ci-bootstrap.sh) && eval "$src" || exit 1
+          src=$(/usr/bin/curl -Lfs https://raw.githubusercontent.com/acidanthera/ocbuild/build-0.8.7/ci-bootstrap.sh) && eval "$src" || exit 1
 
       - run: ./build_oc.tool --skip-build --skip-package
 
       - name: Run Coverity
         working-directory: UDK
         run: |
-          src=$(/usr/bin/curl -Lfs https://raw.githubusercontent.com/acidanthera/ocbuild/master/coverity/covstrap-linux.sh) && eval "$src" || exit 1
+          src=$(/usr/bin/curl -Lfs https://raw.githubusercontent.com/acidanthera/ocbuild/build-0.8.7/coverity/covstrap-linux.sh) && eval "$src" || exit 1
         env:
           COVERITY_SCAN_TOKEN: ${{ secrets.COVERITY_SCAN_TOKEN }}
           COVERITY_SCAN_EMAIL: ${{ secrets.COVERITY_SCAN_EMAIL }}
