@@ -33,6 +33,7 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 #include <Library/UefiLib.h>
 #include <Library/OcCryptoLib.h>
 #include <Library/OcAppleKeysLib.h>
+#include <Library/OcStringLib.h>
 #include <Guid/AppleCertificate.h>
 
 #include "OcPeCoffExtInternal.h"
@@ -493,7 +494,7 @@ PeCoffGetApfsDriverVersion (
      || (ImageContext.ImageType != PeCoffLoaderTypePe32Plus)
      || (ImageContext.Subsystem != EFI_IMAGE_SUBSYSTEM_EFI_BOOT_SERVICE_DRIVER))
   {
-    DEBUG ((DEBUG_INFO, "OCPE: PeCoff unsupported image\n"));
+    DEBUG ((DEBUG_INFO, "OCPE: PeCoff apfs unsupported image\n"));
     return EFI_UNSUPPORTED;
   }
 
@@ -539,5 +540,27 @@ PeCoffGetApfsDriverVersion (
   }
 
   *DriverVersionPtr = DriverVersion;
+  return EFI_SUCCESS;
+}
+
+EFI_STATUS
+OcPatchLegacyEfi (
+  IN  VOID    *DriverBuffer,
+  IN  UINT32  DriverSize
+  )
+{
+  EFI_STATUS                    ImageStatus;
+  PE_COFF_LOADER_IMAGE_CONTEXT  ImageContext;
+
+  ImageStatus = InternalPeCoffFixup (
+                  &ImageContext,
+                  DriverBuffer,
+                  DriverSize
+                  );
+  if (EFI_ERROR (ImageStatus)) {
+    DEBUG ((DEBUG_WARN, "OCPE: PeCoff legacy patch failure - %r\n", ImageStatus));
+    return EFI_UNSUPPORTED;
+  }
+
   return EFI_SUCCESS;
 }

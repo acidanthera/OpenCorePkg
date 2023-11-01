@@ -5,6 +5,7 @@ OpenCore Changelog
 - Fixed hang while generating boot entries on some systems
 - Added `efidebug.tool` support for 32-bit on 32-bit using GDB or LLDB
 - Fixed potential incorrect values in kernel image capabilities calculation
+- Added `FixupAppleEfiImages` quirk to allow booting Mac OS X 10.4 and 10.5 boot.efi images on modern secure image loaders
 
 #### v0.9.5
 - Fixed GUID formatting for legacy NVRAM saving

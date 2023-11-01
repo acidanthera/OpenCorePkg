@@ -1,6 +1,11 @@
 /** @file
-  Implements APIs to verify PE/COFF Images for further processing.
+  Implements APIs to fix certain issues in legacy EFI files in memory before loading.
 
+  Very closely based on MdePkg/Library/BasePeCoffLib2/PeCoffInit.c, and intentionally
+  kept more similar to that file than it would otherwise need to be, to easily allow
+  diffing and importing future changes if required.
+
+  Copyright (c) 2023, Mike Beaton, Vitaly Cheptsov. All rights reserved.<BR>
   Copyright (c) 2020 - 2021, Marvin Häuser. All rights reserved.<BR>
   Copyright (c) 2020, Vitaly Cheptsov. All rights reserved.<BR>
   Copyright (c) 2020, ISP RAS. All rights reserved.<BR>
@@ -23,6 +28,7 @@
 #include <Library/DebugLib.h>
 #include <Library/PcdLib.h>
 #include <Library/PeCoffLib2.h>
+#include <Library/OcStringLib.h>
 
 #include "BasePeCoffLib2Internals.h"
 
@@ -57,9 +63,12 @@ InternalVerifySections (
 {
   BOOLEAN                        Overflow;
   UINT32                         NextSectRva;
+  UINT32                         FixupOffset;
+  UINT32                         FixupVirtualSize;
+  CHAR8                          SectionName[EFI_IMAGE_SIZEOF_SHORT_NAME + 1];
   UINT32                         SectRawEnd;
   UINT16                         SectionIndex;
-  CONST EFI_IMAGE_SECTION_HEADER *Sections;
+  EFI_IMAGE_SECTION_HEADER       *Sections;
 
   ASSERT (Context != NULL);
   ASSERT (IS_POW2 (Context->SectionAlignment));
@@ -72,8 +81,8 @@ InternalVerifySections (
     return RETURN_VOLUME_CORRUPTED;
   }
 
-  Sections = (CONST EFI_IMAGE_SECTION_HEADER *) (CONST VOID *) (
-               (CONST CHAR8 *) Context->FileBuffer + Context->SectionsOffset
+  Sections = (EFI_IMAGE_SECTION_HEADER *) (VOID *) (
+               (CHAR8 *) Context->FileBuffer + Context->SectionsOffset
                );
   //
   // The first Image section must begin the Image memory space, or it must be
@@ -102,20 +111,19 @@ InternalVerifySections (
     }
   }
 
+  SectionName[L_STR_LEN (SectionName)] = '\0';
   *StartAddress = NextSectRva;
   //
   // Verify all Image sections are valid.
   //
   for (SectionIndex = 0; SectionIndex < Context->NumberOfSections; ++SectionIndex) {
+    AsciiStrnCpyS (SectionName, L_STR_SIZE (SectionName), (CHAR8 *)Sections[SectionIndex].Name, EFI_IMAGE_SIZEOF_SHORT_NAME);
     //
-    // Verify the Image section adheres to the W^X principle, if the policy
-    // demands it.
+    // Fix up W^X errors in memory.
     //
-    if (PcdGetBool (PcdImageLoaderWXorX) && !PcdGetBool (PcdImageLoaderRemoveXForWX)) {
-      if ((Sections[SectionIndex].Characteristics & (EFI_IMAGE_SCN_MEM_EXECUTE | EFI_IMAGE_SCN_MEM_WRITE)) == (EFI_IMAGE_SCN_MEM_EXECUTE | EFI_IMAGE_SCN_MEM_WRITE)) {
-        DEBUG_RAISE ();
-        return RETURN_VOLUME_CORRUPTED;
-      }
+    if ((Sections[SectionIndex].Characteristics & (EFI_IMAGE_SCN_MEM_EXECUTE | EFI_IMAGE_SCN_MEM_WRITE)) == (EFI_IMAGE_SCN_MEM_EXECUTE | EFI_IMAGE_SCN_MEM_WRITE)) {
+      Sections[SectionIndex].Characteristics &= ~EFI_IMAGE_SCN_MEM_EXECUTE;
+      DEBUG ((DEBUG_INFO, "OCPE: Fixup W^X for %a\n", SectionName));
     }
     //
     // Verify the Image sections are disjoint (relaxed) or adjacent (strict)
@@ -130,8 +138,33 @@ InternalVerifySections (
       }
     } else {
       if (Sections[SectionIndex].VirtualAddress < NextSectRva) {
-        DEBUG_RAISE ();
-        return RETURN_VOLUME_CORRUPTED;
+        //
+        // Disallow overlap fixup unless we're ovelapping into an empty section.
+        //
+        if (Sections[SectionIndex].SizeOfRawData > 0) {
+          DEBUG_RAISE ();
+          return RETURN_VOLUME_CORRUPTED;
+        }
+        //
+        // Fix up section overlap errors in memory.
+        //
+        FixupOffset = NextSectRva - Sections[SectionIndex].VirtualAddress;
+        FixupVirtualSize = Sections[SectionIndex].VirtualSize;
+        if (FixupOffset > Sections[SectionIndex].VirtualSize) {
+          Sections[SectionIndex].VirtualSize = 0;
+        } else {
+          Sections[SectionIndex].VirtualSize -= FixupOffset;
+        }
+        DEBUG ((
+          DEBUG_INFO,
+          "OCPE: Fixup section overlap for %a 0x%X(0x%X)->0x%X(0x%X)\n",
+          SectionName,
+          Sections[SectionIndex].VirtualAddress,
+          FixupVirtualSize,
+          NextSectRva,
+          Sections[SectionIndex].VirtualSize
+        ));
+        Sections[SectionIndex].VirtualAddress = NextSectRva;
       }
       //
       // If the Image section address is not aligned by the Image section
@@ -646,7 +679,7 @@ InternalInitializePe (
 }
 
 RETURN_STATUS
-PeCoffInitializeContext (
+InternalPeCoffFixup (
   OUT PE_COFF_LOADER_IMAGE_CONTEXT  *Context,
   IN  CONST VOID                    *FileBuffer,
   IN  UINT32                        FileSize
@@ -654,6 +687,19 @@ PeCoffInitializeContext (
 {
   RETURN_STATUS               Status;
   CONST EFI_IMAGE_DOS_HEADER *DosHdr;
+
+  //
+  // Failure of these asserts can be fixed if needed by not using the Pcd
+  // values above, we do not do this initially to make it simpler to compare
+  // this file with BasePeCoffLib2/PeCoffInit.c.
+  // STATIC_ASSERT not suitable here: 'not an integral constant expression'.
+  //
+  if ((PcdGet32 (PcdImageLoaderAlignmentPolicy) & PCD_ALIGNMENT_POLICY_CONTIGUOUS_SECTIONS) == 0) {
+    ASSERT (FALSE);
+  }
+  if (PcdGetBool (PcdImageLoaderAllowMisalignedOffset)) {
+    ASSERT (FALSE);
+  }
 
   ASSERT (Context != NULL);
   ASSERT (FileBuffer != NULL || FileSize == 0);
