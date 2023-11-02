@@ -61,14 +61,14 @@ InternalVerifySections (
   OUT    UINT32                        *StartAddress
   )
 {
-  BOOLEAN                        Overflow;
-  UINT32                         NextSectRva;
-  UINT32                         FixupOffset;
-  UINT32                         FixupVirtualSize;
-  CHAR8                          SectionName[EFI_IMAGE_SIZEOF_SHORT_NAME + 1];
-  UINT32                         SectRawEnd;
-  UINT16                         SectionIndex;
-  EFI_IMAGE_SECTION_HEADER       *Sections;
+  BOOLEAN                   Overflow;
+  UINT32                    NextSectRva;
+  UINT32                    FixupOffset;
+  UINT32                    FixupVirtualSize;
+  CHAR8                     SectionName[EFI_IMAGE_SIZEOF_SHORT_NAME + 1];
+  UINT32                    SectRawEnd;
+  UINT16                    SectionIndex;
+  EFI_IMAGE_SECTION_HEADER  *Sections;
 
   ASSERT (Context != NULL);
   ASSERT (IS_POW2 (Context->SectionAlignment));
@@ -81,9 +81,9 @@ InternalVerifySections (
     return RETURN_VOLUME_CORRUPTED;
   }
 
-  Sections = (EFI_IMAGE_SECTION_HEADER *) (VOID *) (
-               (CHAR8 *) Context->FileBuffer + Context->SectionsOffset
-               );
+  Sections = (EFI_IMAGE_SECTION_HEADER *)(VOID *)(
+                                                  (CHAR8 *)Context->FileBuffer + Context->SectionsOffset
+                                                  );
   //
   // The first Image section must begin the Image memory space, or it must be
   // adjacent to the Image Headers.
@@ -112,7 +112,7 @@ InternalVerifySections (
   }
 
   SectionName[L_STR_LEN (SectionName)] = '\0';
-  *StartAddress = NextSectRva;
+  *StartAddress                        = NextSectRva;
   //
   // Verify all Image sections are valid.
   //
@@ -125,6 +125,7 @@ InternalVerifySections (
       Sections[SectionIndex].Characteristics &= ~EFI_IMAGE_SCN_MEM_EXECUTE;
       DEBUG ((DEBUG_INFO, "OCPE: Fixup W^X for %a\n", SectionName));
     }
+
     //
     // Verify the Image sections are disjoint (relaxed) or adjacent (strict)
     // depending on whether unaligned Image sections may be loaded or not.
@@ -145,16 +146,18 @@ InternalVerifySections (
           DEBUG_RAISE ();
           return RETURN_VOLUME_CORRUPTED;
         }
+
         //
         // Fix up section overlap errors in memory.
         //
-        FixupOffset = NextSectRva - Sections[SectionIndex].VirtualAddress;
+        FixupOffset      = NextSectRva - Sections[SectionIndex].VirtualAddress;
         FixupVirtualSize = Sections[SectionIndex].VirtualSize;
         if (FixupOffset > Sections[SectionIndex].VirtualSize) {
           Sections[SectionIndex].VirtualSize = 0;
         } else {
           Sections[SectionIndex].VirtualSize -= FixupOffset;
         }
+
         DEBUG ((
           DEBUG_INFO,
           "OCPE: Fixup section overlap for %a 0x%X(0x%X)->0x%X(0x%X)\n",
@@ -163,9 +166,10 @@ InternalVerifySections (
           FixupVirtualSize,
           NextSectRva,
           Sections[SectionIndex].VirtualSize
-        ));
+          ));
         Sections[SectionIndex].VirtualAddress = NextSectRva;
       }
+
       //
       // If the Image section address is not aligned by the Image section
       // alignment, fall back to important architecture-specific page sizes if
@@ -180,14 +184,16 @@ InternalVerifySections (
 
         if (IS_ALIGNED (Sections[SectionIndex].VirtualAddress, RUNTIME_PAGE_ALLOCATION_GRANULARITY)) {
           Context->SectionAlignment = RUNTIME_PAGE_ALLOCATION_GRANULARITY;
-        } else if (DEFAULT_PAGE_ALLOCATION_GRANULARITY < RUNTIME_PAGE_ALLOCATION_GRANULARITY
-         && IS_ALIGNED (Sections[SectionIndex].VirtualAddress, DEFAULT_PAGE_ALLOCATION_GRANULARITY)) {
+        } else if (  (DEFAULT_PAGE_ALLOCATION_GRANULARITY < RUNTIME_PAGE_ALLOCATION_GRANULARITY)
+                  && IS_ALIGNED (Sections[SectionIndex].VirtualAddress, DEFAULT_PAGE_ALLOCATION_GRANULARITY))
+        {
           Context->SectionAlignment = DEFAULT_PAGE_ALLOCATION_GRANULARITY;
         } else {
           Context->SectionAlignment = 1;
         }
       }
     }
+
     //
     // Verify the Image sections with data are in bounds of the file buffer.
     //
@@ -207,6 +213,7 @@ InternalVerifySections (
         return RETURN_VOLUME_CORRUPTED;
       }
     }
+
     //
     // Determine the end of the current Image section.
     //
@@ -219,6 +226,7 @@ InternalVerifySections (
       DEBUG_RAISE ();
       return RETURN_VOLUME_CORRUPTED;
     }
+
     //
     // VirtualSize does not need to be aligned, so align the result if needed.
     //
@@ -234,6 +242,7 @@ InternalVerifySections (
       }
     }
   }
+
   //
   // Set SizeOfImage to the aligned end address of the last ImageSection.
   //
@@ -249,25 +258,26 @@ InternalVerifySections (
     // safe to align to.
     //
     Overflow = BaseOverflowAlignUpU32 (
-                NextSectRva,
-                Context->SectionAlignment,
-                &Context->SizeOfImage
-                );
+                 NextSectRva,
+                 Context->SectionAlignment,
+                 &Context->SizeOfImage
+                 );
     if (Overflow) {
       Context->SectionAlignment = RUNTIME_PAGE_ALLOCATION_GRANULARITY;
-      Overflow = BaseOverflowAlignUpU32 (
-                  NextSectRva,
-                  Context->SectionAlignment,
-                  &Context->SizeOfImage
-                  );
-      if (DEFAULT_PAGE_ALLOCATION_GRANULARITY < RUNTIME_PAGE_ALLOCATION_GRANULARITY
-      && Overflow) {
+      Overflow                  = BaseOverflowAlignUpU32 (
+                                    NextSectRva,
+                                    Context->SectionAlignment,
+                                    &Context->SizeOfImage
+                                    );
+      if (  (DEFAULT_PAGE_ALLOCATION_GRANULARITY < RUNTIME_PAGE_ALLOCATION_GRANULARITY)
+         && Overflow)
+      {
         Context->SectionAlignment = DEFAULT_PAGE_ALLOCATION_GRANULARITY;
-        Overflow = BaseOverflowAlignUpU32 (
-                    NextSectRva,
-                    Context->SectionAlignment,
-                    &Context->SizeOfImage
-                    );
+        Overflow                  = BaseOverflowAlignUpU32 (
+                                      NextSectRva,
+                                      Context->SectionAlignment,
+                                      &Context->SizeOfImage
+                                      );
       }
 
       if (Overflow) {
@@ -300,8 +310,8 @@ InternalValidateRelocInfo (
   IN UINT32                              StartAddress
   )
 {
-  BOOLEAN Overflow;
-  UINT32  SectRvaEnd;
+  BOOLEAN  Overflow;
+  UINT32   SectRvaEnd;
 
   ASSERT (Context != NULL);
   ASSERT (!Context->RelocsStripped || Context->RelocDirSize == 0);
@@ -316,6 +326,7 @@ InternalValidateRelocInfo (
       DEBUG_RAISE ();
       return RETURN_VOLUME_CORRUPTED;
     }
+
     //
     // Verify the Relocation Directory does not overlap with the Image Headers.
     //
@@ -323,6 +334,7 @@ InternalValidateRelocInfo (
       DEBUG_RAISE ();
       return RETURN_VOLUME_CORRUPTED;
     }
+
     //
     // Verify the Relocation Directory is contained in the Image memory space.
     //
@@ -331,10 +343,11 @@ InternalValidateRelocInfo (
                  Context->RelocDirSize,
                  &SectRvaEnd
                  );
-    if (Overflow || SectRvaEnd > Context->SizeOfImage) {
+    if (Overflow || (SectRvaEnd > Context->SizeOfImage)) {
       DEBUG_RAISE ();
       return RETURN_VOLUME_CORRUPTED;
     }
+
     //
     // Verify the Relocation Directory start is sufficiently aligned.
     //
@@ -343,11 +356,12 @@ InternalValidateRelocInfo (
       return RETURN_VOLUME_CORRUPTED;
     }
   }
+
   //
   // Verify the preferred Image load address is sufficiently aligned.
   //
   // FIXME: Only with force-aligned sections? What to do with XIP?
-  if (!IS_ALIGNED (Context->ImageBase, (UINT64) Context->SectionAlignment)) {
+  if (!IS_ALIGNED (Context->ImageBase, (UINT64)Context->SectionAlignment)) {
     DEBUG_RAISE ();
     return RETURN_VOLUME_CORRUPTED;
   }
@@ -375,35 +389,36 @@ InternalInitializePe (
   IN     UINT32                        FileSize
   )
 {
-  BOOLEAN                               Overflow;
-  CONST EFI_IMAGE_NT_HEADERS_COMMON_HDR *PeCommon;
-  CONST EFI_IMAGE_NT_HEADERS32          *Pe32;
-  CONST EFI_IMAGE_NT_HEADERS64          *Pe32Plus;
-  CONST CHAR8                           *OptHdrPtr;
-  UINT32                                HdrSizeWithoutDataDir;
-  UINT32                                MinSizeOfOptionalHeader;
-  UINT32                                MinSizeOfHeaders;
-  CONST EFI_IMAGE_DATA_DIRECTORY        *RelocDir;
-  CONST EFI_IMAGE_DATA_DIRECTORY        *SecDir;
-  UINT32                                SecDirEnd;
-  UINT32                                NumberOfRvaAndSizes;
-  RETURN_STATUS                         Status;
-  UINT32                                StartAddress;
+  BOOLEAN                                Overflow;
+  CONST EFI_IMAGE_NT_HEADERS_COMMON_HDR  *PeCommon;
+  CONST EFI_IMAGE_NT_HEADERS32           *Pe32;
+  CONST EFI_IMAGE_NT_HEADERS64           *Pe32Plus;
+  CONST CHAR8                            *OptHdrPtr;
+  UINT32                                 HdrSizeWithoutDataDir;
+  UINT32                                 MinSizeOfOptionalHeader;
+  UINT32                                 MinSizeOfHeaders;
+  CONST EFI_IMAGE_DATA_DIRECTORY         *RelocDir;
+  CONST EFI_IMAGE_DATA_DIRECTORY         *SecDir;
+  UINT32                                 SecDirEnd;
+  UINT32                                 NumberOfRvaAndSizes;
+  RETURN_STATUS                          Status;
+  UINT32                                 StartAddress;
 
   ASSERT (Context != NULL);
   ASSERT (sizeof (EFI_IMAGE_NT_HEADERS_COMMON_HDR) + sizeof (UINT16) <= FileSize - Context->ExeHdrOffset);
   if (!PcdGetBool (PcdImageLoaderAllowMisalignedOffset)) {
     ASSERT (IS_ALIGNED (Context->ExeHdrOffset, ALIGNOF (EFI_IMAGE_NT_HEADERS_COMMON_HDR)));
   }
+
   //
   // Locate the PE Optional Header.
   //
-  OptHdrPtr = (CONST CHAR8 *) Context->FileBuffer + Context->ExeHdrOffset;
+  OptHdrPtr  = (CONST CHAR8 *)Context->FileBuffer + Context->ExeHdrOffset;
   OptHdrPtr += sizeof (EFI_IMAGE_NT_HEADERS_COMMON_HDR);
 
   STATIC_ASSERT (
     IS_ALIGNED (ALIGNOF (EFI_IMAGE_NT_HEADERS_COMMON_HDR), ALIGNOF (UINT16))
-   && IS_ALIGNED (sizeof (EFI_IMAGE_NT_HEADERS_COMMON_HDR), ALIGNOF (UINT16)),
+                && IS_ALIGNED (sizeof (EFI_IMAGE_NT_HEADERS_COMMON_HDR), ALIGNOF (UINT16)),
     "The following operation might be an unaligned access."
     );
   //
@@ -413,7 +428,7 @@ InternalInitializePe (
   // section, it may not be aligned, or it may be too large. No data can
   // possibly be loaded past the last Image section anyway.
   //
-  switch (*(CONST UINT16 *) (CONST VOID *) OptHdrPtr) {
+  switch (*(CONST UINT16 *)(CONST VOID *)OptHdrPtr) {
     case EFI_IMAGE_NT_OPTIONAL_HDR32_MAGIC:
       //
       // Verify the PE32 header is in bounds of the file buffer.
@@ -422,6 +437,7 @@ InternalInitializePe (
         DEBUG_RAISE ();
         return RETURN_VOLUME_CORRUPTED;
       }
+
       //
       // The PE32 header offset is always sufficiently aligned.
       //
@@ -432,9 +448,9 @@ InternalInitializePe (
       //
       // Populate the common data with information from the Optional Header.
       //
-      Pe32 = (CONST EFI_IMAGE_NT_HEADERS32 *) (CONST VOID *) (
-               (CONST CHAR8 *) Context->FileBuffer + Context->ExeHdrOffset
-               );
+      Pe32 = (CONST EFI_IMAGE_NT_HEADERS32 *)(CONST VOID *)(
+                                                            (CONST CHAR8 *)Context->FileBuffer + Context->ExeHdrOffset
+                                                            );
 
       Context->ImageType           = PeCoffLoaderTypePe32;
       Context->Subsystem           = Pe32->Subsystem;
@@ -460,20 +476,23 @@ InternalInitializePe (
         DEBUG_RAISE ();
         return RETURN_VOLUME_CORRUPTED;
       }
+
       //
       // Verify the PE32+ header offset is sufficiently aligned.
       //
-      if (!PcdGetBool (PcdImageLoaderAllowMisalignedOffset)
-        && !IS_ALIGNED (Context->ExeHdrOffset, ALIGNOF (EFI_IMAGE_NT_HEADERS64))) {
+      if (  !PcdGetBool (PcdImageLoaderAllowMisalignedOffset)
+         && !IS_ALIGNED (Context->ExeHdrOffset, ALIGNOF (EFI_IMAGE_NT_HEADERS64)))
+      {
         DEBUG_RAISE ();
         return RETURN_VOLUME_CORRUPTED;
       }
+
       //
       // Populate the common data with information from the Optional Header.
       //
-      Pe32Plus = (CONST EFI_IMAGE_NT_HEADERS64 *) (CONST VOID *) (
-                   (CONST CHAR8 *) Context->FileBuffer + Context->ExeHdrOffset
-                   );
+      Pe32Plus = (CONST EFI_IMAGE_NT_HEADERS64 *)(CONST VOID *)(
+                                                                (CONST CHAR8 *)Context->FileBuffer + Context->ExeHdrOffset
+                                                                );
 
       Context->ImageType           = PeCoffLoaderTypePe32Plus;
       Context->Subsystem           = Pe32Plus->Subsystem;
@@ -498,6 +517,7 @@ InternalInitializePe (
       DEBUG_RAISE ();
       return RETURN_UNSUPPORTED;
   }
+
   //
   // Disallow Images with unknown directories.
   //
@@ -505,6 +525,7 @@ InternalInitializePe (
     DEBUG_RAISE ();
     return RETURN_VOLUME_CORRUPTED;
   }
+
   //
   // Verify the Image alignment is a power of 2.
   //
@@ -533,20 +554,23 @@ InternalInitializePe (
     DEBUG_RAISE ();
     return RETURN_VOLUME_CORRUPTED;
   }
+
   //
   // Verify the Section Headers offset is sufficiently aligned.
   //
-  if (!PcdGetBool (PcdImageLoaderAllowMisalignedOffset)
-    && !IS_ALIGNED (Context->SectionsOffset, ALIGNOF (EFI_IMAGE_SECTION_HEADER))) {
+  if (  !PcdGetBool (PcdImageLoaderAllowMisalignedOffset)
+     && !IS_ALIGNED (Context->SectionsOffset, ALIGNOF (EFI_IMAGE_SECTION_HEADER)))
+  {
     DEBUG_RAISE ();
     return RETURN_VOLUME_CORRUPTED;
   }
+
   //
   // This arithmetic cannot overflow because all values are sufficiently
   // bounded.
   //
   MinSizeOfOptionalHeader = HdrSizeWithoutDataDir +
-                              NumberOfRvaAndSizes * sizeof (EFI_IMAGE_DATA_DIRECTORY);
+                            NumberOfRvaAndSizes * sizeof (EFI_IMAGE_DATA_DIRECTORY);
 
   ASSERT (MinSizeOfOptionalHeader >= HdrSizeWithoutDataDir);
 
@@ -559,13 +583,14 @@ InternalInitializePe (
   //
   Overflow = BaseOverflowAddU32 (
                Context->SectionsOffset,
-               (UINT32) PeCommon->FileHeader.NumberOfSections * sizeof (EFI_IMAGE_SECTION_HEADER),
+               (UINT32)PeCommon->FileHeader.NumberOfSections * sizeof (EFI_IMAGE_SECTION_HEADER),
                &MinSizeOfHeaders
                );
   if (Overflow) {
     DEBUG_RAISE ();
     return RETURN_VOLUME_CORRUPTED;
   }
+
   //
   // Verify the Image Header sizes are sane. SizeOfHeaders contains all header
   // components (DOS, PE Common and Optional Header).
@@ -579,6 +604,7 @@ InternalInitializePe (
     DEBUG_RAISE ();
     return RETURN_VOLUME_CORRUPTED;
   }
+
   //
   // Verify the Image Headers are in bounds of the file buffer.
   //
@@ -586,6 +612,7 @@ InternalInitializePe (
     DEBUG_RAISE ();
     return RETURN_VOLUME_CORRUPTED;
   }
+
   //
   // Populate the Image context with information from the Common Header.
   //
@@ -593,14 +620,14 @@ InternalInitializePe (
   Context->Machine          = PeCommon->FileHeader.Machine;
   Context->RelocsStripped   =
     (
-      PeCommon->FileHeader.Characteristics & EFI_IMAGE_FILE_RELOCS_STRIPPED
+     PeCommon->FileHeader.Characteristics & EFI_IMAGE_FILE_RELOCS_STRIPPED
     ) != 0;
 
   if (EFI_IMAGE_DIRECTORY_ENTRY_BASERELOC < NumberOfRvaAndSizes) {
     Context->RelocDirRva  = RelocDir->VirtualAddress;
     Context->RelocDirSize = RelocDir->Size;
 
-    if (Context->RelocsStripped && Context->RelocDirSize != 0) {
+    if (Context->RelocsStripped && (Context->RelocDirSize != 0)) {
       DEBUG_RAISE ();
       return RETURN_VOLUME_CORRUPTED;
     }
@@ -620,10 +647,11 @@ InternalInitializePe (
                  Context->SecDirSize,
                  &SecDirEnd
                  );
-    if (Overflow || SecDirEnd > FileSize) {
+    if (Overflow || (SecDirEnd > FileSize)) {
       DEBUG_RAISE ();
       return RETURN_VOLUME_CORRUPTED;
     }
+
     //
     // Verify the Security Directory is sufficiently aligned.
     //
@@ -631,13 +659,15 @@ InternalInitializePe (
       DEBUG_RAISE ();
       return RETURN_VOLUME_CORRUPTED;
     }
+
     //
     // Verify the Security Directory size is sufficiently aligned, and that if
     // it is not empty, it can fit at least one certificate.
     //
-    if (Context->SecDirSize != 0
-     && (!IS_ALIGNED (Context->SecDirSize, IMAGE_CERTIFICATE_ALIGN)
-      || Context->SecDirSize < sizeof (WIN_CERTIFICATE))) {
+    if (  (Context->SecDirSize != 0)
+       && (  !IS_ALIGNED (Context->SecDirSize, IMAGE_CERTIFICATE_ALIGN)
+          || (Context->SecDirSize < sizeof (WIN_CERTIFICATE))))
+    {
       DEBUG_RAISE ();
       return RETURN_VOLUME_CORRUPTED;
     }
@@ -648,6 +678,7 @@ InternalInitializePe (
     ASSERT (Context->SecDirOffset == 0);
     ASSERT (Context->SecDirSize == 0);
   }
+
   //
   // Verify the Image sections are Well-formed.
   //
@@ -660,6 +691,7 @@ InternalInitializePe (
     DEBUG_RAISE ();
     return Status;
   }
+
   //
   // Verify the entry point is in bounds of the Image buffer.
   //
@@ -667,6 +699,7 @@ InternalInitializePe (
     DEBUG_RAISE ();
     return RETURN_VOLUME_CORRUPTED;
   }
+
   //
   // Verify the basic Relocation information is well-formed.
   //
@@ -686,7 +719,7 @@ InternalPeCoffFixup (
   )
 {
   RETURN_STATUS               Status;
-  CONST EFI_IMAGE_DOS_HEADER *DosHdr;
+  CONST EFI_IMAGE_DOS_HEADER  *DosHdr;
 
   //
   // Failure of these asserts can be fixed if needed by not using the Pcd
@@ -697,6 +730,7 @@ InternalPeCoffFixup (
   if ((PcdGet32 (PcdImageLoaderAlignmentPolicy) & PCD_ALIGNMENT_POLICY_CONTIGUOUS_SECTIONS) == 0) {
     ASSERT (FALSE);
   }
+
   if (PcdGetBool (PcdImageLoaderAllowMisalignedOffset)) {
     ASSERT (FALSE);
   }
@@ -713,17 +747,19 @@ InternalPeCoffFixup (
   //
   // Check whether the DOS Image Header is present.
   //
-  if (sizeof (*DosHdr) <= FileSize
-   && *(CONST UINT16 *) (CONST VOID *) FileBuffer == EFI_IMAGE_DOS_SIGNATURE) {
-    DosHdr = (CONST EFI_IMAGE_DOS_HEADER *) (CONST VOID *) (
-               (CONST CHAR8 *) FileBuffer
-               );
+  if (  (sizeof (*DosHdr) <= FileSize)
+     && (*(CONST UINT16 *)(CONST VOID *)FileBuffer == EFI_IMAGE_DOS_SIGNATURE))
+  {
+    DosHdr = (CONST EFI_IMAGE_DOS_HEADER *)(CONST VOID *)(
+                                                          (CONST CHAR8 *)FileBuffer
+                                                          );
     //
     // Verify the DOS Image Header and the Executable Header are in bounds of
     // the file buffer, and that they are disjoint.
     //
-    if (sizeof (EFI_IMAGE_DOS_HEADER) > DosHdr->e_lfanew
-     || DosHdr->e_lfanew > FileSize) {
+    if (  (sizeof (EFI_IMAGE_DOS_HEADER) > DosHdr->e_lfanew)
+       || (DosHdr->e_lfanew > FileSize))
+    {
       DEBUG_RAISE ();
       return RETURN_VOLUME_CORRUPTED;
     }
@@ -732,11 +768,13 @@ InternalPeCoffFixup (
     //
     // Verify the Execution Header offset is sufficiently aligned.
     //
-    if (!PcdGetBool (PcdImageLoaderAllowMisalignedOffset)
-      && !IS_ALIGNED (Context->ExeHdrOffset, ALIGNOF (EFI_IMAGE_NT_HEADERS_COMMON_HDR))) {
+    if (  !PcdGetBool (PcdImageLoaderAllowMisalignedOffset)
+       && !IS_ALIGNED (Context->ExeHdrOffset, ALIGNOF (EFI_IMAGE_NT_HEADERS_COMMON_HDR)))
+    {
       return RETURN_UNSUPPORTED;
     }
   }
+
   //
   // Verify the file buffer can hold a PE Common Header.
   //
@@ -751,9 +789,10 @@ InternalPeCoffFixup (
   //
   // Verify the Image Executable Header has a PE signature.
   //
-  if (*(CONST UINT32 *) (CONST VOID *) ((CONST CHAR8 *) FileBuffer + Context->ExeHdrOffset) != EFI_IMAGE_NT_SIGNATURE) {
+  if (*(CONST UINT32 *)(CONST VOID *)((CONST CHAR8 *)FileBuffer + Context->ExeHdrOffset) != EFI_IMAGE_NT_SIGNATURE) {
     return RETURN_UNSUPPORTED;
   }
+
   //
   // Verify the PE Image Header is well-formed.
   //
