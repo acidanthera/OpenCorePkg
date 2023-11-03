@@ -899,7 +899,7 @@ OcLoadUefiSupport (
 
   OcReinstallProtocols (Config);
 
-  OcImageLoaderInit (Config->Booter.Quirks.ProtectUefiServices);
+  OcImageLoaderInit (Config->Booter.Quirks.ProtectUefiServices, Config->Booter.Quirks.FixupAppleEfiImages);
 
   OcLoadAppleSecureBoot (Config, CpuInfo);
 

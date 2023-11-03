@@ -25,12 +25,13 @@
 
 
 #
-#  VALID_ARCHITECTURES           = X64
+#  VALID_ARCHITECTURES           = IA32 X64
 #
 
 [Sources]
   OcPeCoffExtInternal.h
   OcPeCoffExtLib.c
+  OcPeCoffFixup.c
 
 [Packages]
   MdePkg/MdePkg.dec
@@ -48,7 +49,13 @@
   DebugLib
   OcAppleKeysLib
   OcCryptoLib
+  OcStringLib
 
 [Guids]
   gAppleEfiCertificateGuid
   gEfiCertTypeRsa2048Sha256Guid
+
+[FixedPcd]
+  gEfiMdePkgTokenSpaceGuid.PcdImageLoaderAlignmentPolicy
+  gEfiMdePkgTokenSpaceGuid.PcdImageLoaderAllowMisalignedOffset
+  gEfiMdePkgTokenSpaceGuid.PcdDebugRaisePropertyMask

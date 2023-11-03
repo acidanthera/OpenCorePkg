@@ -36,6 +36,7 @@
 #include <Library/OcFileLib.h>
 #include <Library/OcMachoLib.h>
 #include <Library/OcMiscLib.h>
+#include <Library/OcPeCoffExtLib.h>
 #include <Library/OcStringLib.h>
 #include <Library/UefiImageLib.h>
 #include <Library/UefiBootServicesTableLib.h>
@@ -82,6 +83,7 @@ STATIC EFI_HANDLE                 mImageLoaderCapsHandle;
 STATIC BOOLEAN                    mImageLoaderEnabled;
 
 STATIC BOOLEAN  mProtectUefiServices;
+STATIC BOOLEAN  mFixupAppleEfiImages;
 
 STATIC EFI_IMAGE_LOAD          mPreservedLoadImage;
 STATIC EFI_IMAGE_START         mPreservedStartImage;
@@ -865,6 +867,26 @@ InternalEfiLoadImage (
     // Determine its capabilities.
     //
     if (!EFI_ERROR (Status) && (RealSize != SourceSize) && (RealSize >= EFI_PAGE_SIZE)) {
+      if (mFixupAppleEfiImages) {
+        if (SecureBootStatus == EFI_SUCCESS) {
+          DEBUG ((DEBUG_INFO, "OCB: Secure boot, fixup legacy efi ignored\n"));
+        } else {
+          Status = OcPatchLegacyEfi (SourceBuffer, RealSize);
+          //
+          // Error can mean incompletely patched image, so we should fail.
+          // Any error not the result of incomplete patching would in general not load anyway.
+          //
+          if (EFI_ERROR (Status)) {
+            DEBUG ((DEBUG_WARN, "OCB: PatchLegacyEfi - %r\n", Status));
+            if (AllocatedBuffer != NULL) {
+              FreePool (AllocatedBuffer);
+            }
+
+            return Status;
+          }
+        }
+      }
+
       mImageLoaderCaps = DetectCapabilities (SourceBuffer, RealSize);
     }
 
@@ -1087,10 +1109,12 @@ InternalEfiExit (
 
 VOID
 OcImageLoaderInit (
-  IN     CONST BOOLEAN  ProtectUefiServices
+  IN     CONST BOOLEAN  ProtectUefiServices,
+  IN     CONST BOOLEAN  FixupAppleEfiImages
   )
 {
   mProtectUefiServices = ProtectUefiServices;
+  mFixupAppleEfiImages = FixupAppleEfiImages;
 
   mOriginalEfiLoadImage   = gBS->LoadImage;
   mOriginalEfiStartImage  = gBS->StartImage;

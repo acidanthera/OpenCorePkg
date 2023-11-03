@@ -1611,6 +1611,34 @@ To view their current state, use the \texttt{pmset -g} command in Terminal.
   Refer to the \texttt{OCABC: MAT support is 1/0} log entry to determine whether MAT is supported.
 
 \item
+  \texttt{FixupAppleEfiImages}\\
+  \textbf{Type}: \texttt{plist\ boolean}\\
+  \textbf{Failsafe}: \texttt{false}\\
+  \textbf{Description}: Fix errors in early Mac OS X boot.efi images.
+
+  Modern secure PE loaders will refuse to load \texttt{boot.efi} images from
+  Mac OS X 10.4 and 10.5 due to these files containing \texttt{W\^{}X} errors
+  and illegal overlapping sections.
+
+  This quirk detects these issues and pre-processes such images in memory,
+  so that a modern loader can accept them.
+
+  Pre-processing in memory is incompatible with secure boot, as the image loaded
+  is not the image on disk, so you cannot sign files which are loaded in this way
+  based on their original disk image contents.
+  Certain firmware will offer to register the hash of new, unknown images - this would
+  still work. On the other hand, it is not particularly realistic to want to
+  start such early, insecure images with secure boot anyway.
+
+  \emph{Note 1}: The quirk is only applied to Apple-specific `fat' (both 32-bit and 64-bit
+  versions in one image) \texttt{.efi} files, and is never applied during the Apple secure
+  boot path for newer macOS.
+
+  \emph{Note 2}: The quirk is only needed for loading Mac OS X 10.4 and 10.5, and even then
+  only if the firmware itself includes a modern, more secure PE COFF image loader. This includes
+  current builds of OpenDuet.
+
+\item
   \texttt{ForceBooterSignature}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\

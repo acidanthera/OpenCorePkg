@@ -43,4 +43,19 @@ PeCoffGetApfsDriverVersion (
   OUT APFS_DRIVER_VERSION  **DriverVersionPtr
   );
 
+/**
+  Detect and patch W^X and section overlap errors in legacy boot.efi.
+  Expected to make changes in 10.4 and 10.5 only.
+
+  @param[in]  DriverBuffer      Image buffer.
+  @param[in]  DriverSize        Size of the image.
+
+  @retval EFI_SUCCESS on success.
+**/
+EFI_STATUS
+OcPatchLegacyEfi (
+  IN  VOID    *DriverBuffer,
+  IN  UINT32  DriverSize
+  );
+
 #endif // OC_PE_COFF_EXT_LIB_H

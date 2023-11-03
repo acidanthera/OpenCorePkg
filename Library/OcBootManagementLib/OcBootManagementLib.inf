@@ -110,6 +110,7 @@
   OcFlexArrayLib
   OcMachoLib
   OcMiscLib
+  OcPeCoffExtLib
   OcRtcLib
   OcTypingLib
   OcVariableLib

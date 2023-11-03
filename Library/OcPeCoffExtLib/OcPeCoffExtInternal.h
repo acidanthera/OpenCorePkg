@@ -29,4 +29,31 @@ typedef struct APPLE_SIGNATURE_CONTEXT_ {
   UINT8                Signature[256];
 } APPLE_SIGNATURE_CONTEXT;
 
+/**
+  Fix W^X and section overlap issues in loaded TE, PE32, or PE32+ Image in
+  memory while initialising Context.
+
+  Closely based on PeCoffInitializeContext from PeCoffLib2.
+
+  The approach of modifying the image in memory is basically incompatible
+  with secure boot, athough:
+    a) Certain firmware may allow optionally registering the hash of any
+       image which does not load, which would still work.
+    b) It is fairly crazy anyway to want to apply secure boot to the old,
+       insecure .efi files which need these fixups.
+
+  @param[out] Context     The context describing the Image.
+  @param[in]  FileBuffer  The file data to parse as PE Image.
+  @param[in]  FileSize    The size, in Bytes, of FileBuffer.
+
+  @retval RETURN_SUCCESS  The Image context has been initialised successfully.
+  @retval other           The file data is malformed.
+**/
+RETURN_STATUS
+InternalPeCoffFixup (
+  OUT PE_COFF_LOADER_IMAGE_CONTEXT  *Context,
+  IN  CONST VOID                    *FileBuffer,
+  IN  UINT32                        FileSize
+  );
+
 #endif // OC_PE_COFF_EXT_INTERNAL_H
