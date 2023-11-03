@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
-%DIF DEL PreviousConfiguration.tex   Mon Oct  9 15:13:53 2023
-%DIF ADD ../Configuration.tex        Mon Oct  9 15:31:36 2023
+%DIF DEL PreviousConfiguration.tex   Sat Oct 14 23:52:14 2023
+%DIF ADD ../Configuration.tex        Fri Nov  3 11:07:05 2023
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -118,7 +118,7 @@
 %DIF HYPERREF PREAMBLE %DIF PREAMBLE
 \providecommand{\DIFadd}[1]{\texorpdfstring{\DIFaddtex{#1}}{#1}} %DIF PREAMBLE
 \providecommand{\DIFdel}[1]{\texorpdfstring{\DIFdeltex{#1}}{}} %DIF PREAMBLE
-%DIF COLORLISTINGS PREAMBLE %DIF PREAMBLE
+%DIF LISTINGS PREAMBLE %DIF PREAMBLE
 \RequirePackage{listings} %DIF PREAMBLE
 \RequirePackage{color} %DIF PREAMBLE
 \lstdefinelanguage{DIFcode}{ %DIF PREAMBLE
@@ -1671,7 +1671,41 @@ To view their current state, use the \texttt{pmset -g} command in Terminal.
   Refer to the \texttt{OCABC: MAT support is 1/0} log entry to determine whether MAT is supported.
 
 \item
-  \texttt{ForceBooterSignature}\\
+  \DIFaddbegin \texttt{\DIFadd{FixupAppleEfiImages}}\\
+  \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ boolean}}\\
+  \textbf{\DIFadd{Failsafe}}\DIFadd{: }\texttt{\DIFadd{false}}\\
+  \textbf{\DIFadd{Description}}\DIFadd{: Fix errors in early Mac OS X boot.efi images.
+}
+
+  \DIFadd{Modern secure PE loaders will refuse to load }\texttt{\DIFadd{boot.efi}} \DIFadd{images from
+  Mac OS X 10.4 and 10.5 due to these files containing }\texttt{\DIFadd{W\^{}X}} \DIFadd{errors
+  and illegal overlapping sections.
+}
+
+  \DIFadd{This quirk detects these issues and pre-processes such images in memory,
+  so that a modern loader can accept them.
+}
+
+  \DIFadd{Pre-processing in memory is incompatible with secure boot, as the image loaded
+  is not the image on disk, so you cannot sign files which are loaded in this way
+  based on their original disk image contents.
+  Certain firmware will offer to register the hash of new, unknown images - this would
+  still work. On the other hand, it is not particularly realistic to want to
+  start such early, insecure images with secure boot anyway.
+}
+
+  \emph{\DIFadd{Note 1}}\DIFadd{: The quirk is only applied to Apple-specific `fat' (both 32-bit and 64-bit
+  versions in one image) }\texttt{\DIFadd{.efi}} \DIFadd{files, and is never applied during the Apple secure
+  boot path for newer macOS.
+}
+
+  \emph{\DIFadd{Note 2}}\DIFadd{: The quirk is only needed for loading Mac OS X 10.4 and 10.5, and even then
+  only if the firmware itself includes a modern, more secure PE COFF image loader. This includes
+  current builds of OpenDuet.
+}
+
+\item
+  \DIFaddend \texttt{ForceBooterSignature}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
   \textbf{Description}: Set macOS \texttt{boot-signature} to OpenCore launcher.
