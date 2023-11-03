@@ -67,7 +67,7 @@
 [Rule.Common.UEFI_DRIVER.BINARY]
   FILE DRIVER = $(NAMED_GUID) {
     DXE_DEPEX    DXE_DEPEX Optional      |.depex
-    UE           UE                      |.efi
+    PE32         PE32                    |.efi
   }
 
 [Rule.Common.DXE_DRIVER]
