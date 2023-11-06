@@ -1,5 +1,8 @@
 OpenCore Changelog
 ==================
+#### v0.9.7
+- Updated recovery_urls.txt
+
 #### v0.9.6
 - Updated builtin firmware versions for SMBIOS and the rest
 - Fixed hang while generating boot entries on some systems
