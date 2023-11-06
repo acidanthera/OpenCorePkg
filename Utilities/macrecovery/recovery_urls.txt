@@ -39,11 +39,11 @@ Ventura
 
 Diagnostics
 ./macrecovery.py -b Mac-7BA5B2D9E42DDD94 -m 00000000000000000 -diag
-./macrecovery.py -b Mac-7BA5B2D9E42DDD94 -m 00000000000GDVQ00 -diag
+./macrecovery.py -b Mac-7BA5B2D9E42DDD94 -m 00000000000JG3600 -diag
 ./macrecovery.py -b Mac-7BA5B2D9E42DDD94 <real MLB> -diag
 
 Default version
-./macrecovery.py -b Mac-7BA5B2D9E42DDD94 -m 00000000000GDVQ00       (oldest)
+./macrecovery.py -b Mac-7BA5B2D9E42DDD94 -m 00000000000JG3600       (oldest)
 ./macrecovery.py -b Mac-7BA5B2D9E42DDD94 -m <real MLB> -os default  (newer)
 
 Latest version
