@@ -94,7 +94,7 @@
 
        \vspace{0.2in}
 
-       Reference Manual (0.9.5)
+       Reference Manual (0.9.6)
 
        \vspace{0.2in}
 
@@ -1611,6 +1611,34 @@ To view their current state, use the \texttt{pmset -g} command in Terminal.
   Refer to the \texttt{OCABC: MAT support is 1/0} log entry to determine whether MAT is supported.
 
 \item
+  \texttt{FixupAppleEfiImages}\\
+  \textbf{Type}: \texttt{plist\ boolean}\\
+  \textbf{Failsafe}: \texttt{false}\\
+  \textbf{Description}: Fix errors in early Mac OS X boot.efi images.
+
+  Modern secure PE loaders will refuse to load \texttt{boot.efi} images from
+  Mac OS X 10.4 and 10.5 due to these files containing \texttt{W\^{}X} errors
+  and illegal overlapping sections.
+
+  This quirk detects these issues and pre-processes such images in memory,
+  so that a modern loader can accept them.
+
+  Pre-processing in memory is incompatible with secure boot, as the image loaded
+  is not the image on disk, so you cannot sign files which are loaded in this way
+  based on their original disk image contents.
+  Certain firmware will offer to register the hash of new, unknown images - this would
+  still work. On the other hand, it is not particularly realistic to want to
+  start such early, insecure images with secure boot anyway.
+
+  \emph{Note 1}: The quirk is only applied to Apple-specific `fat' (both 32-bit and 64-bit
+  versions in one image) \texttt{.efi} files, and is never applied during the Apple secure
+  boot path for newer macOS.
+
+  \emph{Note 2}: The quirk is only needed for loading Mac OS X 10.4 and 10.5, and even then
+  only if the firmware itself includes a modern, more secure PE COFF image loader. This includes
+  current builds of OpenDuet.
+
+\item
   \texttt{ForceBooterSignature}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
@@ -3012,15 +3040,17 @@ to install and troubleshoot such macOS installations.
       \texttt{x86\_64}, \texttt{i386}, \texttt{i386-user32}.
   \end{enumerate}
 
-  Unlike macOS~10.7 (where certain board identifiers are treated as the \texttt{i386}
+  Unlike macOS~10.7 (where certain board identifiers are treated as \texttt{i386}
   only machines), and macOS~10.5 or earlier (where \texttt{x86\_64} is not supported
   by the macOS kernel), macOS~10.6 is very special. The architecture choice on macOS~10.6
   depends on many factors including not only the board identifier, but also the macOS
   product type (client vs server), macOS point release, and amount of RAM. The detection
   of all these is complicated and impractical, as several point releases had implementation
   flaws resulting in a failure to properly execute the server detection in the first place.
-  For this reason, OpenCore on macOS~10.6 falls back on the \texttt{x86\_64}
-  architecture whenever it is supported by the board, as it is on macOS~10.7.
+  For this reason when \texttt{Auto} is set, OpenCore on macOS~10.6 falls back
+  to the \texttt{x86\_64} architecture when it is supported by the board, as
+  on macOS~10.7. The 32-bit \texttt{KernelArch} options can still be configured
+  explicitly however.
 
   A 64-bit Mac model compatibility matrix corresponding to actual
   EfiBoot behaviour on macOS 10.6.8 and 10.7.5 is outlined below.
@@ -5170,7 +5200,7 @@ troubleshooting:
 
   \begin{itemize}
   \item \texttt{boot-save-log=VALUE} --- debug log save mode for normal boot.
-  	\begin{itemize}
+    \begin{itemize}
     \item \texttt{0}
     \item \texttt{1}
     \item \texttt{2} --- (default).
@@ -5178,7 +5208,7 @@ troubleshooting:
     \item \texttt{4} --- (save to file).
     \end{itemize}
   \item \texttt{wake-save-log=VALUE} --- debug log save mode for hibernation wake.
-  	\begin{itemize}
+    \begin{itemize}
     \item \texttt{0} --- disabled.
     \item \texttt{1}
     \item \texttt{2} --- (default).
@@ -6714,7 +6744,8 @@ functioning. Feature highlights:
 
 \subsection{OpenLegacyBoot}\label{legacyboot}
 OpenLegacyBoot is an OpenCore plugin implementing \texttt{OC\_BOOT\_ENTRY\_PROTOCOL}.
-It aims to detect and boot legacy installed operating systems.
+It aims to detect and boot legacy installed operating systems on supported systems, such as
+OpenDuet and Mac models capable of legacy booting.
 
 Usage:
 
@@ -6739,10 +6770,10 @@ options for the driver may be specified in \texttt{UEFI/Drivers/Arguments}:
 
 \begin{itemize}
   \tightlist
-	\item \texttt{-{}-hide-devices} - String value, no default. \medskip
+  \item \texttt{-{}-hide-devices} - String value, no default. \medskip
 
   When this option is present and has one or more values separated by semicolons \\
-  (e.g. -{}-hide-devices=PciRoot(0x0)/Pci(0x1F,0x2)/Sata(0x0,0xFFFF,0x0)/HD(2,GPT,...)), 
+  (e.g. -{}-hide-devices=PciRoot(0x0)/Pci(0x1F,0x2)/Sata(0x0,0xFFFF,0x0)/HD(2,GPT,...)),
   it disables scanning the specified disks for legacy operating system boot sectors.\medskip
 \end{itemize}
 
@@ -6825,7 +6856,7 @@ options for the driver may be specified in \texttt{UEFI/Drivers/Arguments}:
 
 \begin{itemize}
 \tightlist
-	\item \texttt{flags} - Default: all flags are set except the following:
+  \item \texttt{flags} - Default: all flags are set except the following:
   \begin{itemize}
   \tightlist
     \item \texttt{LINUX\_BOOT\_ADD\_RW},
@@ -6834,7 +6865,7 @@ options for the driver may be specified in \texttt{UEFI/Drivers/Arguments}:
   \end{itemize}
   \medskip
 
-	Available flags are: \medskip
+  Available flags are: \medskip
 
   \begin{itemize}
   \tightlist
@@ -6842,43 +6873,43 @@ options for the driver may be specified in \texttt{UEFI/Drivers/Arguments}:
     Allows scanning for entries on EFI System Partition.
     \item \texttt{0x00000002} (bit \texttt{1}) --- \texttt{LINUX\_BOOT\_SCAN\_XBOOTLDR},
     Allows scanning for entries on Extended Boot Loader Partition.
-	  \item \texttt{0x00000004} (bit \texttt{2}) --- \texttt{LINUX\_BOOT\_SCAN\_LINUX\_ROOT},
-	  Allows scanning for entries on Linux Root filesystems.
-	  \item \texttt{0x00000008} (bit \texttt{3}) --- \texttt{LINUX\_BOOT\_SCAN\_LINUX\_DATA},
-	  Allows scanning for entries on Linux Data filesystems.
-	  \item \texttt{0x00000080} (bit \texttt{7}) --- \texttt{LINUX\_BOOT\_SCAN\_OTHER},
-	  Allows scanning for entries on file systems not matched by any of the above. \medskip
+    \item \texttt{0x00000004} (bit \texttt{2}) --- \texttt{LINUX\_BOOT\_SCAN\_LINUX\_ROOT},
+    Allows scanning for entries on Linux Root filesystems.
+    \item \texttt{0x00000008} (bit \texttt{3}) --- \texttt{LINUX\_BOOT\_SCAN\_LINUX\_DATA},
+    Allows scanning for entries on Linux Data filesystems.
+    \item \texttt{0x00000080} (bit \texttt{7}) --- \texttt{LINUX\_BOOT\_SCAN\_OTHER},
+    Allows scanning for entries on file systems not matched by any of the above. \medskip
 
-	  The following notes apply to all of the above options: \medskip
+    The following notes apply to all of the above options: \medskip
 
-	  \emph{Note 1}: Apple filesystems APFS and HFS are never scanned.
+    \emph{Note 1}: Apple filesystems APFS and HFS are never scanned.
     \medskip
 
-	  \emph{Note 2}: Regardless of the above flags, a file system must first be
-	  allowed by \texttt{Misc/Security/ScanPolicy} before it can be seen by
+    \emph{Note 2}: Regardless of the above flags, a file system must first be
+    allowed by \texttt{Misc/Security/ScanPolicy} before it can be seen by
     OpenLinuxBoot or any other \texttt{OC\_BOOT\_ENTRY\_PROTOCOL} driver.
     \medskip
 
-	  \emph{Note 3}: It is recommended to enable scanning \texttt{LINUX\_ROOT} and \texttt{LINUX\_DATA}
+    \emph{Note 3}: It is recommended to enable scanning \texttt{LINUX\_ROOT} and \texttt{LINUX\_DATA}
     in both OpenLinuxBoot flags and \texttt{Misc/Security/ScanPolicy} in order to be sure to detect
     all valid Linux installs, since Linux boot filesystems are very often marked as \texttt{LINUX\_DATA}.
     \medskip
 
-	  \item \texttt{0x00000100} (bit \texttt{8}) --- \texttt{LINUX\_BOOT\_ALLOW\_AUTODETECT},
-	  If set allows autodetecting and linking \texttt{vmlinuz*} and \texttt{init*} ramdisk files
-	  when \texttt{loader/entries} files are not found.
-	  \item \texttt{0x00000200} (bit \texttt{9}) --- \texttt{LINUX\_BOOT\_USE\_LATEST},
-	  When a Linux entry generated by OpenLinuxBoot is selected as the default boot entry
+    \item \texttt{0x00000100} (bit \texttt{8}) --- \texttt{LINUX\_BOOT\_ALLOW\_AUTODETECT},
+    If set allows autodetecting and linking \texttt{vmlinuz*} and \texttt{init*} ramdisk files
+    when \texttt{loader/entries} files are not found.
+    \item \texttt{0x00000200} (bit \texttt{9}) --- \texttt{LINUX\_BOOT\_USE\_LATEST},
+    When a Linux entry generated by OpenLinuxBoot is selected as the default boot entry
     in OpenCore, automatically switch to the latest kernel when a new version is installed. \medskip
 
-	  When this option is set, an internal menu entry id is shared between kernel versions from the same install
+    When this option is set, an internal menu entry id is shared between kernel versions from the same install
     of Linux. Linux boot options are always sorted highest kernel version first, so this means that
     the latest kernel version of the same install always shows as the default, with this option set. \medskip
 
-	  \emph{Note}: This option is recommended on all systems. \medskip
+    \emph{Note}: This option is recommended on all systems. \medskip
 
-	  \item \texttt{0x00000400} (bit \texttt{10}) --- \texttt{LINUX\_BOOT\_ADD\_RO},
-	  This option applies to autodetected Linux only (i.e. not to BLSpec or
+    \item \texttt{0x00000400} (bit \texttt{10}) --- \texttt{LINUX\_BOOT\_ADD\_RO},
+    This option applies to autodetected Linux only (i.e. not to BLSpec or
     Fedora-style distributions which have \texttt{/loader/entries/*.conf} files).
     Some distributions run a filesystem check on loading which requires the root
     filesystem to initially be mounted read-only via the \texttt{ro} kernel option, which requires this
@@ -6888,8 +6919,8 @@ options for the driver may be specified in \texttt{UEFI/Drivers/Arguments}:
     When there are multiple distros and it is required to specify this option for specific distros only, use
     \texttt{autoopts:\{PARTUUID\}+=ro} to manually add the option where required, instead of using this flag.
 
-	  \item \texttt{0x00000800} (bit \texttt{11}) --- \texttt{LINUX\_BOOT\_ADD\_RW},
-	  Like \texttt{LINUX\_BOOT\_ADD\_RO}, this option applies to autodetected Linux only. It is not
+    \item \texttt{0x00000800} (bit \texttt{11}) --- \texttt{LINUX\_BOOT\_ADD\_RW},
+    Like \texttt{LINUX\_BOOT\_ADD\_RO}, this option applies to autodetected Linux only. It is not
     required for most distros (which usually require either \texttt{ro} or nothing to be added to
     detected boot options), but is required on some Arch-derived distros, e.g. EndeavourOS.
     When there are multiple distros and it is required to specify this option for specific distros only, use
@@ -6897,27 +6928,27 @@ options for the driver may be specified in \texttt{UEFI/Drivers/Arguments}:
     If this option and \texttt{LINUX\_BOOT\_ADD\_RO} are both specified, only this option is applied
     and \texttt{LINUX\_BOOT\_ADD\_RO} is ignored.
 
-	  \item \texttt{0x00002000} (bit \texttt{13}) --- \texttt{LINUX\_BOOT\_ALLOW\_CONF\_AUTO\_ROOT},
-	  In some instances of \texttt{BootLoaderSpecByDefault} in combination with \texttt{ostree}, the
+    \item \texttt{0x00002000} (bit \texttt{13}) --- \texttt{LINUX\_BOOT\_ALLOW\_CONF\_AUTO\_ROOT},
+    In some instances of \texttt{BootLoaderSpecByDefault} in combination with \texttt{ostree}, the
     \texttt{/loader/entries/*.conf} files do not specify a required \texttt{root=...} kernel
     option -- it is added by GRUB. If this bit is set and this situation is detected, then
     automatically add this option. (Required for example by Endless OS.)
-	  \item \texttt{0x00004000} (bit \texttt{14}) --- \texttt{LINUX\_BOOT\_LOG\_VERBOSE},
-	  Add additional debug log info about files encountered and autodetect options added while scanning for
+    \item \texttt{0x00004000} (bit \texttt{14}) --- \texttt{LINUX\_BOOT\_LOG\_VERBOSE},
+    Add additional debug log info about files encountered and autodetect options added while scanning for
     Linux boot entries.
-	  \item \texttt{0x00008000} (bit \texttt{15}) --- \texttt{LINUX\_BOOT\_ADD\_DEBUG\_INFO},
-	  Adds a human readable file system type, followed by the first eight characters of the
-	  partition's unique partition uuid, to each generated entry name. Can help with debugging
-	  the origin of entries generated by the driver when there are multiple Linux installs on
-	  one system.
+    \item \texttt{0x00008000} (bit \texttt{15}) --- \texttt{LINUX\_BOOT\_ADD\_DEBUG\_INFO},
+    Adds a human readable file system type, followed by the first eight characters of the
+    partition's unique partition uuid, to each generated entry name. Can help with debugging
+    the origin of entries generated by the driver when there are multiple Linux installs on
+    one system.
   \end{itemize} \medskip
 
-	Flag values can be specified in hexadecimal beginning with \texttt{0x} or in decimal,
+  Flag values can be specified in hexadecimal beginning with \texttt{0x} or in decimal,
   e.g. \texttt{flags=0x80} or \texttt{flags=128}. It is also possible to specify flags to
   add or remove, using syntax such as \texttt{flags+=0xC000} to add all debugging
   options or \texttt{flags-=0x400} to remove the \texttt{LINUX\_BOOT\_ADD\_RO} option. \medskip
 
-	\item \texttt{autoopts:\{PARTUUID\}[+]="\{options\}"} - Default: not set. \medskip
+  \item \texttt{autoopts:\{PARTUUID\}[+]="\{options\}"} - Default: not set. \medskip
 
   Allows manually specifying kernel options to use in autodetect mode for a given partition only.
   Replace the text \texttt{\{PARTUUID\}} with the specific partition UUID on which the kernels are stored
@@ -6935,7 +6966,7 @@ options for the driver may be specified in \texttt{UEFI/Drivers/Arguments}:
   Linux \texttt{mount} command, and then find out the partuuid of relevant mounted partitions by examining the
   output of \texttt{ls -l /dev/disk/by-partuuid}. \medskip
 
-	\item \texttt{autoopts[+]="\{options\}"} - Default: None specified. \medskip
+  \item \texttt{autoopts[+]="\{options\}"} - Default: None specified. \medskip
 
   Allows manually specifying kernel options to use in autodetect mode. The alternative format \texttt{autoopts:\{PARTUUID\}}
   is more suitable where there are multiple distros, but \texttt{autoopts} with no PARTUUID required may be more
@@ -7108,7 +7139,7 @@ the driver within the \texttt{UEFI/Drivers} section:
 
 \begin{itemize}
   \tightlist
-	\item \texttt{-{}-codec-setup-delay} - Integer value, default \texttt{0}. \medskip
+  \item \texttt{-{}-codec-setup-delay} - Integer value, default \texttt{0}. \medskip
 
   Amount of time in milliseconds to wait for all widgets to come fully on, applied per codec
   during driver connection phase. In most systems this should not be needed and a faster boot
@@ -7120,7 +7151,7 @@ the driver within the \texttt{UEFI/Drivers} section:
   Force use of an audio codec, this value should be equal to \texttt{Audio} section \texttt{AudioCodec}.
   Can result in faster boot especially when used in conjuction with \texttt{-{}-force-device}. \medskip
 
-	\item \texttt{-{}-force-device} - String value, no default. \medskip
+  \item \texttt{-{}-force-device} - String value, no default. \medskip
 
   When this option is present and has a value (e.g. \texttt{-{}-force-device=PciRoot(0x0)/Pci(0x1f,0x3)}), it
   forces AudioDxe to connect to the specified PCI device, even if the device does not report itself as
@@ -7139,7 +7170,7 @@ the driver within the \texttt{UEFI/Drivers} section:
   \item \texttt{-{}-gpio-setup} - Default value is \texttt{0} (GPIO setup disabled) if argument is not provided,
   or \texttt{7} (all GPIO setup stages stages enabled) if the argument is provided with no value. \medskip
 
-	Available values, which may be combined by adding, are: \medskip
+  Available values, which may be combined by adding, are: \medskip
 
   \begin{itemize}
   \tightlist
@@ -7163,9 +7194,9 @@ the driver within the \texttt{UEFI/Drivers} section:
   sound (previous sounds are not allowed to finish before new sounds start) on a small number
   of other systems, hence this option is not enabled by default. \medskip
 
-	\item \texttt{-{}-gpio-pins} - Default: \texttt{0}, auto-detect. \medskip
+  \item \texttt{-{}-gpio-pins} - Default: \texttt{0}, auto-detect. \medskip
 
-	Specifies which GPIO pins should be operated on by \texttt{-{}-gpio-setup}. This is a bit mask,
+  Specifies which GPIO pins should be operated on by \texttt{-{}-gpio-setup}. This is a bit mask,
   with possible values from \texttt{0x0} to \texttt{0xFF}. The usable maximum depends on
   the number if available pins on the audio out function group of the codec in use, e.g. it is
   \texttt{0x3} (lowest two bits) if two GPIO pins are present, \texttt{0x7} if three pins are present,
@@ -7182,7 +7213,7 @@ the driver within the \texttt{UEFI/Drivers} section:
   Values for driver parameters can be specified in hexadecimal beginning with \texttt{0x} or
   in decimal, e.g. \texttt{-{}-gpio-pins=0x12} or \texttt{-{}-gpio-pins=18}. \medskip
 
-	\item \texttt{-{}-restore-nosnoop} - Boolean flag, enabled if present. \medskip
+  \item \texttt{-{}-restore-nosnoop} - Boolean flag, enabled if present. \medskip
 
   AudioDxe clears the Intel HDA No Snoop Enable (NSNPEN) bit. On some systems, this change must
   be reversed on exit in order to avoid breaking sound in Windows or Linux. If so, this flag should
@@ -7190,12 +7221,12 @@ the driver within the \texttt{UEFI/Drivers} section:
   Not enabled by default, since restoring the flag can prevent sound from working in macOS on
   some other systems. \medskip
 
-	\item \texttt{-{}-use-conn-none} - Boolean flag, enabled if present. \medskip
+  \item \texttt{-{}-use-conn-none} - Boolean flag, enabled if present. \medskip
 
   On some sound cards enabling this option will enable additional usable audio channels (e.g.
   the bass or treble speaker of a pair, where only one is found without it).
   \medskip
-  
+
   \emph{Note}: Enabling this option may increase the available channels, in which case any
   custom setting of \texttt{AudioOutMask} may need to be changed to match the new channel list.
   \medskip
@@ -8241,7 +8272,7 @@ for additional options.
   \texttt{Text} and \texttt{Graphics} specify the named mode. \texttt{Auto}
   uses the current mode of the system \texttt{ConsoleControl} protocol when
   one exists, defaulting to \texttt{Text} mode otherwise.
- 
+
   UEFI firmware typically supports \texttt{ConsoleControl} with two
   rendering modes: \texttt{Graphics} and \texttt{Text}. Some types of firmware
   do not provide a native \texttt{ConsoleControl} and rendering modes. OpenCore
@@ -9298,7 +9329,7 @@ requires several steps and careful configuration of certain settings as explaine
 
   \begin{itemize}
   \item MBR (Master Boot Record) installations are legacy and are only supported
-  with the OpenLegacyBoot driver.
+  with the OpenLegacyBoot driver on legacy systems.
   \item All the modifications applied (to ACPI, NVRAM, SMBIOS, etc.) are supposed
   to be operating system agnostic, i.e. apply equally regardless of the OS booted.
   This enables Boot Camp software experience on Windows.
