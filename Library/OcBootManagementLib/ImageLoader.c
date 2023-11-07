@@ -785,9 +785,12 @@ InternalEfiLoadImage (
   )
 {
   EFI_STATUS  SecureBootStatus;
+  EFI_STATUS  FilterStatus;
   EFI_STATUS  Status;
   VOID        *AllocatedBuffer;
   UINT32      RealSize;
+  UINT32      SignedFileSize;
+  BOOLEAN     IsFat;
 
   mImageLoaderCapsHandle = NULL;
 
@@ -857,37 +860,61 @@ InternalEfiLoadImage (
   if (SourceBuffer != NULL) {
     RealSize = (UINT32)SourceSize;
  #ifdef MDE_CPU_IA32
-    Status = FatFilterArchitecture32 ((UINT8 **)&SourceBuffer, &RealSize);
+    FilterStatus = FatFilterArchitecture32 ((UINT8 **)&SourceBuffer, &RealSize);
  #else
-    Status = FatFilterArchitecture64 ((UINT8 **)&SourceBuffer, &RealSize);
+    FilterStatus = FatFilterArchitecture64 ((UINT8 **)&SourceBuffer, &RealSize);
  #endif
 
-    //
-    // This is FAT image.
-    // Determine its capabilities.
-    //
-    if (!EFI_ERROR (Status) && (RealSize != SourceSize) && (RealSize >= EFI_PAGE_SIZE)) {
-      if (mFixupAppleEfiImages) {
-        if (SecureBootStatus == EFI_SUCCESS) {
-          DEBUG ((DEBUG_INFO, "OCB: Secure boot, fixup legacy efi ignored\n"));
-        } else {
-          Status = OcPatchLegacyEfi (SourceBuffer, RealSize);
-          //
-          // Error can mean incompletely patched image, so we should fail.
-          // Any error not the result of incomplete patching would in general not load anyway.
-          //
-          if (EFI_ERROR (Status)) {
-            DEBUG ((DEBUG_WARN, "OCB: PatchLegacyEfi - %r\n", Status));
-            if (AllocatedBuffer != NULL) {
-              FreePool (AllocatedBuffer);
-            }
+    IsFat = !EFI_ERROR (FilterStatus) && (RealSize != SourceSize) && (RealSize >= EFI_PAGE_SIZE);
 
-            return Status;
-          }
+    if (IsFat) {
+      mImageLoaderCaps = DetectCapabilities (SourceBuffer, RealSize);
+    }
+
+    //
+    // Use mImageLoaderConfigure != NULL as a proxy for loaded kernel support,
+    // and only apply FixupAppleEfiImages while this is set.
+    //
+    if (mFixupAppleEfiImages && (mImageLoaderConfigure != NULL)) {
+      if (SecureBootStatus == EFI_SUCCESS) {
+        DEBUG ((DEBUG_INFO, "OCB: Secure boot, fixup efi ignored\n"));
+        Status = EFI_SUCCESS;
+      } else if (IsFat) {
+        DEBUG ((DEBUG_INFO, "OCB: Fat binary, fixup efi...\n"));
+        Status = OcPatchLegacyEfi (SourceBuffer, RealSize);
+      } else {
+        //
+        // Overlapping sections not expected outside of fat binaries (and even then
+        // only in 32-bit slices), so verify signature allowing for W^X errors only.
+        //
+        SignedFileSize = RealSize;
+        Status         = PeCoffVerifyAppleSignature (SourceBuffer, &SignedFileSize);
+        if (!EFI_ERROR (Status)) {
+          DEBUG ((
+            DEBUG_INFO,
+            "OCB: Apple signed binary %u->%u, fixup efi...\n",
+            RealSize,
+            SignedFileSize
+            ));
+          RealSize = SignedFileSize;
+          Status   = OcPatchLegacyEfi (SourceBuffer, RealSize);
+        } else {
+          DEBUG ((DEBUG_INFO, "OCB: Not Apple signed binary, fixup efi ignored\n"));
+          Status = EFI_SUCCESS;
         }
       }
 
-      mImageLoaderCaps = DetectCapabilities (SourceBuffer, RealSize);
+      //
+      // Error can mean incompletely patched image, so we should fail.
+      // Any error not the result of incomplete patching would in general not load anyway.
+      //
+      if (EFI_ERROR (Status)) {
+        if (AllocatedBuffer != NULL) {
+          FreePool (AllocatedBuffer);
+        }
+
+        return Status;
+      }
     }
 
     DEBUG ((
@@ -898,10 +925,10 @@ InternalEfiLoadImage (
       SourceBuffer,
       RealSize,
       mImageLoaderCaps,
-      Status
+      FilterStatus
       ));
 
-    if (!EFI_ERROR (Status)) {
+    if (!EFI_ERROR (FilterStatus)) {
       SourceSize = RealSize;
     } else if (AllocatedBuffer != NULL) {
       SourceBuffer = NULL;
