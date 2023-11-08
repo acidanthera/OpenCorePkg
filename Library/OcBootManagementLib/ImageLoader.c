@@ -888,7 +888,7 @@ InternalEfiLoadImage (
         // only in 32-bit slices), so verify signature allowing for W^X errors only.
         //
         SignedFileSize = RealSize;
-        Status         = PeCoffVerifyAppleSignature (SourceBuffer, &SignedFileSize);
+        Status         = PeCoffVerifyAppleSignature (SourceBuffer, &SignedFileSize, FALSE);
         if (!EFI_ERROR (Status)) {
           DEBUG ((
             DEBUG_INFO,

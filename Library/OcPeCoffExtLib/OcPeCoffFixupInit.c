@@ -45,10 +45,13 @@
   memory space space.
   The section data must be in bounds bounds of the file buffer.
 
-  @param[in,out] Context       The context describing the Image. Must have been
-                               initialised by PeCoffInitializeContext().
-  @param[in]     FileSize      The size, in Bytes, of Context->FileBuffer.
-  @param[out]    StartAddress  On output, the RVA of the first Image section.
+  @param[in,out] Context        The context describing the Image. Must have been
+                                initialised by PeCoffInitializeContext().
+  @param[in]     FileSize       The size, in Bytes, of Context->FileBuffer.
+  @param[out]    StartAddress   On output, the RVA of the first Image section.
+  @param[in]     InMemoryFixup  If TRUE, fixes are made to image in memory.
+                                If FALSE, Context is initialised as if fixes were
+                                made, but no changes are made to loaded image.
 
   @retval RETURN_SUCCESS  The Image section Headers are well-formed.
   @retval other           The Image section Headers are malformed.
@@ -58,13 +61,17 @@ RETURN_STATUS
 InternalVerifySections (
   IN OUT PE_COFF_LOADER_IMAGE_CONTEXT  *Context,
   IN     UINT32                        FileSize,
-  OUT    UINT32                        *StartAddress
+  OUT    UINT32                        *StartAddress,
+  IN     BOOLEAN                       InMemoryFixup
   )
 {
   BOOLEAN                   Overflow;
   UINT32                    NextSectRva;
   UINT32                    FixupOffset;
-  UINT32                    FixupVirtualSize;
+  UINT32                    PreFixupVirtualAddress;
+  UINT32                    PostFixupVirtualAddress;
+  UINT32                    PreFixupVirtualSize;
+  UINT32                    PostFixupVirtualSize;
   CHAR8                     SectionName[EFI_IMAGE_SIZEOF_SHORT_NAME + 1];
   UINT32                    SectRawEnd;
   UINT16                    SectionIndex;
@@ -122,8 +129,11 @@ InternalVerifySections (
     // Fix up W^X errors in memory.
     //
     if ((Sections[SectionIndex].Characteristics & (EFI_IMAGE_SCN_MEM_EXECUTE | EFI_IMAGE_SCN_MEM_WRITE)) == (EFI_IMAGE_SCN_MEM_EXECUTE | EFI_IMAGE_SCN_MEM_WRITE)) {
-      Sections[SectionIndex].Characteristics &= ~EFI_IMAGE_SCN_MEM_EXECUTE;
-      DEBUG ((DEBUG_INFO, "OCPE: Fixup W^X for %a\n", SectionName));
+      if (InMemoryFixup) {
+        Sections[SectionIndex].Characteristics &= ~EFI_IMAGE_SCN_MEM_EXECUTE;
+      }
+
+      DEBUG ((DEBUG_INFO, "OCPE: %u fixup W^X for %a\n", InMemoryFixup, SectionName));
     }
 
     //
@@ -132,6 +142,10 @@ InternalVerifySections (
     // Unaligned Image sections have been observed with iPXE Option ROMs and old
     // Apple Mac OS X bootloaders.
     //
+    PreFixupVirtualAddress  = Sections[SectionIndex].VirtualAddress;
+    PostFixupVirtualAddress = PreFixupVirtualAddress;
+    PreFixupVirtualSize     = Sections[SectionIndex].VirtualSize;
+    PostFixupVirtualSize    = PreFixupVirtualSize;
     if ((PcdGet32 (PcdImageLoaderAlignmentPolicy) & PCD_ALIGNMENT_POLICY_CONTIGUOUS_SECTIONS) == 0) {
       if (Sections[SectionIndex].VirtualAddress != NextSectRva) {
         DEBUG_RAISE ();
@@ -150,24 +164,29 @@ InternalVerifySections (
         //
         // Fix up section overlap errors in memory.
         //
-        FixupOffset      = NextSectRva - Sections[SectionIndex].VirtualAddress;
-        FixupVirtualSize = Sections[SectionIndex].VirtualSize;
+        FixupOffset = NextSectRva - Sections[SectionIndex].VirtualAddress;
         if (FixupOffset > Sections[SectionIndex].VirtualSize) {
-          Sections[SectionIndex].VirtualSize = 0;
+          PostFixupVirtualSize = 0;
         } else {
-          Sections[SectionIndex].VirtualSize -= FixupOffset;
+          PostFixupVirtualSize -= FixupOffset;
+        }
+
+        PostFixupVirtualAddress = NextSectRva;
+        if (InMemoryFixup) {
+          Sections[SectionIndex].VirtualAddress = PostFixupVirtualAddress;
+          Sections[SectionIndex].VirtualSize    = PostFixupVirtualSize;
         }
 
         DEBUG ((
           DEBUG_INFO,
-          "OCPE: Fixup section overlap for %a 0x%X(0x%X)->0x%X(0x%X)\n",
+          "OCPE: %u fixup section overlap for %a 0x%X(0x%X)->0x%X(0x%X)\n",
+          InMemoryFixup,
           SectionName,
-          Sections[SectionIndex].VirtualAddress,
-          FixupVirtualSize,
-          NextSectRva,
-          Sections[SectionIndex].VirtualSize
+          PreFixupVirtualAddress,
+          PreFixupVirtualSize,
+          PostFixupVirtualAddress,
+          PostFixupVirtualSize
           ));
-        Sections[SectionIndex].VirtualAddress = NextSectRva;
       }
 
       //
@@ -176,16 +195,16 @@ InternalVerifySections (
       // possible, to ensure the Image can have memory protection applied.
       // Otherwise, report no alignment for the Image.
       //
-      if (!IS_ALIGNED (Sections[SectionIndex].VirtualAddress, Context->SectionAlignment)) {
+      if (!IS_ALIGNED (PostFixupVirtualAddress, Context->SectionAlignment)) {
         STATIC_ASSERT (
           DEFAULT_PAGE_ALLOCATION_GRANULARITY <= RUNTIME_PAGE_ALLOCATION_GRANULARITY,
           "This code must be adapted to consider the reversed order."
           );
 
-        if (IS_ALIGNED (Sections[SectionIndex].VirtualAddress, RUNTIME_PAGE_ALLOCATION_GRANULARITY)) {
+        if (IS_ALIGNED (PostFixupVirtualAddress, RUNTIME_PAGE_ALLOCATION_GRANULARITY)) {
           Context->SectionAlignment = RUNTIME_PAGE_ALLOCATION_GRANULARITY;
         } else if (  (DEFAULT_PAGE_ALLOCATION_GRANULARITY < RUNTIME_PAGE_ALLOCATION_GRANULARITY)
-                  && IS_ALIGNED (Sections[SectionIndex].VirtualAddress, DEFAULT_PAGE_ALLOCATION_GRANULARITY))
+                  && IS_ALIGNED (PostFixupVirtualAddress, DEFAULT_PAGE_ALLOCATION_GRANULARITY))
         {
           Context->SectionAlignment = DEFAULT_PAGE_ALLOCATION_GRANULARITY;
         } else {
@@ -218,8 +237,8 @@ InternalVerifySections (
     // Determine the end of the current Image section.
     //
     Overflow = BaseOverflowAddU32 (
-                 Sections[SectionIndex].VirtualAddress,
-                 Sections[SectionIndex].VirtualSize,
+                 PostFixupVirtualAddress,
+                 PostFixupVirtualSize,
                  &NextSectRva
                  );
     if (Overflow) {
@@ -375,9 +394,12 @@ InternalValidateRelocInfo (
   Used offsets and ranges must be aligned and in the bounds of the raw file.
   Image section Headers and basic Relocation information must be Well-formed.
 
-  @param[in,out] Context   The context describing the Image. Must have been
-                           initialised by PeCoffInitializeContext().
-  @param[in]     FileSize  The size, in Bytes, of Context->FileBuffer.
+  @param[in,out] Context        The context describing the Image. Must have been
+                                initialised by PeCoffInitializeContext().
+  @param[in]     FileSize       The size, in Bytes, of Context->FileBuffer.
+  @param[in]     InMemoryFixup  If TRUE, fixes are made to image in memory.
+                                If FALSE, Context is initialised as if fixes were
+                                made, but no changes are made to loaded image.
 
   @retval RETURN_SUCCESS  The PE Image is Well-formed.
   @retval other           The PE Image is malformed.
@@ -386,7 +408,8 @@ STATIC
 RETURN_STATUS
 InternalInitializePe (
   IN OUT PE_COFF_LOADER_IMAGE_CONTEXT  *Context,
-  IN     UINT32                        FileSize
+  IN     UINT32                        FileSize,
+  IN     BOOLEAN                       InMemoryFixup
   )
 {
   BOOLEAN                                Overflow;
@@ -685,7 +708,8 @@ InternalInitializePe (
   Status = InternalVerifySections (
              Context,
              FileSize,
-             &StartAddress
+             &StartAddress,
+             InMemoryFixup
              );
   if (Status != RETURN_SUCCESS) {
     DEBUG_RAISE ();
@@ -712,14 +736,20 @@ InternalInitializePe (
 }
 
 RETURN_STATUS
-InternalPeCoffFixup (
+OcPeCoffFixupInitializeContext (
   OUT PE_COFF_LOADER_IMAGE_CONTEXT  *Context,
   IN  CONST VOID                    *FileBuffer,
-  IN  UINT32                        FileSize
+  IN  UINT32                        FileSize,
+  IN  BOOLEAN                       InMemoryFixup
   )
 {
   RETURN_STATUS               Status;
   CONST EFI_IMAGE_DOS_HEADER  *DosHdr;
+
+ #ifndef EFIUSER
+  // The only expected calling path with InMemoryFixup == FALSE is from AppleEfiSignTool.
+  ASSERT (InMemoryFixup);
+ #endif
 
   //
   // Failure of these asserts can be fixed if needed by not using the Pcd
@@ -796,7 +826,7 @@ InternalPeCoffFixup (
   //
   // Verify the PE Image Header is well-formed.
   //
-  Status = InternalInitializePe (Context, FileSize);
+  Status = InternalInitializePe (Context, FileSize, InMemoryFixup);
   if (Status != RETURN_SUCCESS) {
     return Status;
   }

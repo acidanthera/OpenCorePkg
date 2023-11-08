@@ -2,7 +2,7 @@
 
 AppleEfiSignTool – Tool for signing and verifying Apple EFI binaries.
 
-Copyright (c) 2018, savvas
+Copyright (c) 2018-2023, savvas, PMheart, vit9696, mikebeaton
 
 All rights reserved.
 
@@ -21,11 +21,12 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 #include <Library/MemoryAllocationLib.h>
 #include <Library/OcMachoLib.h>
 #include <Library/OcPeCoffExtLib.h>
+#include <Library/OcStringLib.h>
 #include <Library/PcdLib.h>
 
 #include <UserFile.h>
 
-#define  APPLE_EFI_SIGN_TOOL_VERSION  "1.0"
+#define  APPLE_EFI_SIGN_TOOL_VERSION  "1.1"
 
 typedef enum {
   PE_ARCH_32,
@@ -44,10 +45,15 @@ PrintHelp (
     "AppleEfiSignTool v%a – Tool for verifying Apple EFI binaries\n",
     APPLE_EFI_SIGN_TOOL_VERSION
     ));
-  DEBUG ((DEBUG_ERROR, "It supports PE and Fat binaries.\n"));
+  DEBUG ((DEBUG_ERROR, "Supports PE and Fat binaries.\n"));
+  DEBUG ((DEBUG_ERROR, "Displays signing info. Displays APFS info if image is APFS driver.\n"));
+  DEBUG ((DEBUG_ERROR, "Also shows image PE COFF fixups when -f is specified.\n"));
 
-  DEBUG ((DEBUG_ERROR, "Usage: ./AppleEfiSignTool <path/to/image>\n"));
-  DEBUG ((DEBUG_ERROR, "Example: ./AppleEfiSignTool path/to/apfs.efi\n"));
+  DEBUG ((DEBUG_ERROR, "\nUsage: ./AppleEfiSignTool [-f] <path/to/image>\n"));
+  DEBUG ((DEBUG_ERROR, " -f force FixupAppleEfiImages quirk\n"));
+  DEBUG ((DEBUG_ERROR, "    Quirk is required to avoid ASSERT if processing images with section overlap\n"));
+  DEBUG ((DEBUG_ERROR, "    errors; applied automatically for 32-bit slices within parent Fat binary.\n"));
+  DEBUG ((DEBUG_ERROR, "\nExample: ./AppleEfiSignTool path/to/apfs.efi\n"));
 }
 
 /**
@@ -55,7 +61,7 @@ PrintHelp (
 
   @param[in,out]  Image      A pointer to image file buffer.
   @param[in]      ImageSize  Size of Image.
-  @param[out]     IsFat      Will be set to TRUE if Image is a FAT binary.
+  @param[out]     IsFat      Will be set to TRUE if Image is a FAT binary, or left unchanged otherwise.
   @param[in]      Arch       Image architechure.
 
   @return  0 if Image is successfully verified, otherwise EXIT_FAILURE.
@@ -65,7 +71,8 @@ INT32
 VerifySignature (
   IN  OUT  UINT8          *Image,
   IN       UINT32         ImageSize,
-  OUT  BOOLEAN            *IsFat,
+  IN OUT   BOOLEAN        *IsFat,
+  IN       BOOLEAN        ForceFixup,
   IN       PE_IMAGE_ARCH  Arch
   )
 {
@@ -100,10 +107,16 @@ VerifySignature (
 
   DEBUG ((DEBUG_ERROR, "SIGN: Discovered %a slice\n", Slice));
   OrgImageSize = ImageSize;
-  Status       = PeCoffVerifyAppleSignature (
-                   Image,
-                   &ImageSize
-                   );
+  //
+  // Additional processing is required to check PE_ARCH_32 images when using
+  // new PE COFF loader, due to overlapping sections. W^X errors in other Apple
+  // binaries should be handled anyway, due to Pcd settings.
+  //
+  Status = PeCoffVerifyAppleSignature (
+             Image,
+             &ImageSize,
+             ForceFixup || (IsFat && (Arch == PE_ARCH_32))
+             );
   DEBUG ((
     DEBUG_ERROR,
     "SIGN: Signature check - %r (%u -> %u)\n",
@@ -128,6 +141,7 @@ ENTRY_POINT (
   UINT32               ImageSize;
   UINT8                *ImageFileBuffer;
   BOOLEAN              IsFat;
+  BOOLEAN              ForceFixup;
   INT32                RetVal;
   APFS_DRIVER_VERSION  *DriverVersion;
   EFI_STATUS           Status;
@@ -139,14 +153,19 @@ ENTRY_POINT (
   PcdGet32 (PcdDebugPrintErrorLevel)      |= DEBUG_INFO;
 
   //
-  // Print usage.
+  // Process args or print usage.
   //
-  if (argc != 2) {
+  if (argc == 2) {
+    ForceFixup    = FALSE;
+    ImageFileName = argv[1];
+  } else if ((argc == 3) && (AsciiStrCmp ("-f", argv[1]) == 0)) {
+    ForceFixup    = TRUE;
+    ImageFileName = argv[2];
+  } else {
     PrintHelp ();
     return EXIT_FAILURE;
   }
 
-  ImageFileName   = argv[1];
   ImageFileBuffer = UserReadFile (ImageFileName, &ImageSize);
   if (ImageFileBuffer == NULL) {
     DEBUG ((DEBUG_ERROR, "Failed to read %a\n", ImageFileName));
@@ -155,13 +174,13 @@ ENTRY_POINT (
 
   IsFat   = FALSE;
   RetVal  = EXIT_SUCCESS;
-  RetVal |= VerifySignature (ImageFileBuffer, ImageSize, &IsFat, PE_ARCH_32);
-  RetVal |= VerifySignature (ImageFileBuffer, ImageSize, &IsFat, PE_ARCH_64);
+  RetVal |= VerifySignature (ImageFileBuffer, ImageSize, &IsFat, ForceFixup, PE_ARCH_32);
+  RetVal |= VerifySignature (ImageFileBuffer, ImageSize, &IsFat, ForceFixup, PE_ARCH_64);
   if (!IsFat) {
-    RetVal |= VerifySignature (ImageFileBuffer, ImageSize, &IsFat, PE_ARCH_ANY);
+    RetVal |= VerifySignature (ImageFileBuffer, ImageSize, &IsFat, ForceFixup, PE_ARCH_ANY);
   }
 
-  Status = PeCoffGetApfsDriverVersion (ImageFileBuffer, ImageSize, &DriverVersion);
+  Status = PeCoffGetApfsDriverVersion (ImageFileBuffer, ImageSize, &DriverVersion, ForceFixup);
   if (!EFI_ERROR (Status)) {
     DEBUG ((
       DEBUG_ERROR,
@@ -189,7 +208,7 @@ LLVMFuzzerTestOneInput (
   volatile UINTN       Walker;
   UINTN                Index;
 
-  Status = PeCoffGetApfsDriverVersion ((UINT8 *)Data, (UINT32)Size, &DriverVersion);
+  Status = PeCoffGetApfsDriverVersion ((UINT8 *)Data, (UINT32)Size, &DriverVersion, FALSE);
   if (!EFI_ERROR (Status)) {
     Walker = 0;
     for (Index = 0; Index < sizeof (*DriverVersion); ++Index) {
@@ -208,7 +227,7 @@ LLVMFuzzerTestOneInput (
       CopyMem (Copy, Data, Size);
 
       NewSize = (UINT32)Size;
-      PeCoffVerifyAppleSignature (Copy, &NewSize);
+      PeCoffVerifyAppleSignature (Copy, &NewSize, FALSE);
       FreePool (Copy);
     }
   }

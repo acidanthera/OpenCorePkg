@@ -31,7 +31,7 @@
 [Sources]
   OcPeCoffExtInternal.h
   OcPeCoffExtLib.c
-  OcPeCoffFixup.c
+  OcPeCoffFixupInit.c
 
 [Packages]
   MdePkg/MdePkg.dec
@@ -45,6 +45,7 @@
   BaseMemoryLib
   BaseOverflowLib
   BaseLib
+  PcdLib
   UefiLib
   DebugLib
   OcAppleKeysLib
@@ -58,4 +59,6 @@
 [FixedPcd]
   gEfiMdePkgTokenSpaceGuid.PcdImageLoaderAlignmentPolicy
   gEfiMdePkgTokenSpaceGuid.PcdImageLoaderAllowMisalignedOffset
+  gEfiMdePkgTokenSpaceGuid.PcdImageLoaderRemoveXForWX
+  gEfiMdePkgTokenSpaceGuid.PcdImageLoaderWXorX
   gEfiMdePkgTokenSpaceGuid.PcdDebugRaisePropertyMask

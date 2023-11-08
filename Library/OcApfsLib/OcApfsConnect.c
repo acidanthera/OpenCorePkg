@@ -98,7 +98,8 @@ ApfsVerifyDriverVersion (
   Status = PeCoffGetApfsDriverVersion (
              DriverBuffer,
              DriverSize,
-             &DriverVersion
+             &DriverVersion,
+             FALSE
              );
   if (EFI_ERROR (Status)) {
     DEBUG ((
@@ -249,7 +250,8 @@ ApfsStartDriver (
 
   Status = PeCoffVerifyAppleSignature (
              DriverBuffer,
-             &DriverSize
+             &DriverSize,
+             FALSE
              );
   if (EFI_ERROR (Status)) {
     DEBUG ((

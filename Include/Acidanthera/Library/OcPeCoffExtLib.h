@@ -10,29 +10,37 @@
 #define OC_PE_COFF_EXT_LIB_H
 
 #include <IndustryStandard/Apfs.h>
+#include <Library/PeCoffLib2.h>
 
 /**
   Verify Apple COFF legacy signature.
   Image buffer is sanitized where necessary (zeroed),
   and an updated length is returned through size parameter.
 
-  @param[in,out]  PeImage    Image buffer.
-  @param[in,out]  ImageSize  Size of the image.
+  @param[in,out]  PeImage                    Image buffer.
+  @param[in,out]  ImageSize                  Size of the image.
+  @param[in]      HandleOverlappingSections  Handle very broken Apple efi images.
+                                             Only expected to be required in userspace tools,
+                                             and will assert otherwise.
 
   @retval EFI_SUCCESS on success.
 **/
 EFI_STATUS
 PeCoffVerifyAppleSignature (
-  IN OUT VOID    *PeImage,
-  IN OUT UINT32  *ImageSize
+  IN OUT VOID     *PeImage,
+  IN OUT UINT32   *ImageSize,
+  IN     BOOLEAN  HandleOverlappingSections
   );
 
 /**
   Obtain APFS driver version.
 
-  @param[in]  DriverBuffer      Image buffer.
-  @param[in]  DriverSize        Size of the image.
-  @param[out] DriverVersionPtr  Driver version within image buffer.
+  @param[in]  DriverBuffer               Image buffer.
+  @param[in]  DriverSize                 Size of the image.
+  @param[out] DriverVersionPtr           Driver version within image buffer.
+  @param[in]  HandleOverlappingSections  Handle very broken Apple efi images.
+                                         Only expected to be required in userspace tools,
+                                         and will assert otherwise.
 
   @retval EFI_SUCCESS on success.
 **/
@@ -40,12 +48,14 @@ EFI_STATUS
 PeCoffGetApfsDriverVersion (
   IN  VOID                 *DriverBuffer,
   IN  UINT32               DriverSize,
-  OUT APFS_DRIVER_VERSION  **DriverVersionPtr
+  OUT APFS_DRIVER_VERSION  **DriverVersionPtr,
+  IN  BOOLEAN              HandleOverlappingSections
   );
 
 /**
-  Detect and patch W^X and section overlap errors in legacy boot.efi.
-  Expected to make changes in 10.4 and 10.5 only.
+  Detect and patch W^X and overlapping section errors in legacy boot.efi.
+  Expected to fix overlapping sections in 10.4 and 10.5 32-bit only, and
+  W^X errors in most macOS binaries.
 
   @param[in]  DriverBuffer      Image buffer.
   @param[in]  DriverSize        Size of the image.
@@ -56,6 +66,37 @@ EFI_STATUS
 OcPatchLegacyEfi (
   IN  VOID    *DriverBuffer,
   IN  UINT32  DriverSize
+  );
+
+/**
+  Fix W^X and section overlap issues in loaded TE, PE32, or PE32+ Image in
+  memory while initialising Context.
+
+  Closely based on PeCoffInitializeContext from PeCoffLib2.
+
+  The approach of modifying the image in memory is basically incompatible
+  with secure boot, although:
+    a) Certain firmware may allow optionally registering the hash of any
+       image which does not load, which would still work.
+    b) It is fairly crazy anyway to want to apply secure boot to the old,
+       insecure .efi files which need these fixups.
+
+  @param[out] Context        The context describing the Image.
+  @param[in]  FileBuffer     The file data to parse as PE Image.
+  @param[in]  FileSize       The size, in Bytes, of FileBuffer.
+  @param[in]  InMemoryFixup  If TRUE, fixes are made to image in memory.
+                             If FALSE, Context is initialised as if fixes were
+                             made, but no changes are made to loaded image.
+
+  @retval RETURN_SUCCESS  The Image context has been initialised successfully.
+  @retval other           The file data is malformed.
+**/
+RETURN_STATUS
+OcPeCoffFixupInitializeContext (
+  OUT PE_COFF_LOADER_IMAGE_CONTEXT  *Context,
+  IN  CONST VOID                    *FileBuffer,
+  IN  UINT32                        FileSize,
+  IN  BOOLEAN                       InMemoryFixup
   );
 
 #endif // OC_PE_COFF_EXT_LIB_H

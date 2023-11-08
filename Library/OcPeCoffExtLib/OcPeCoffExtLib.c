@@ -29,6 +29,7 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 #include <Library/UefiRuntimeServicesTableLib.h>
 #include <Library/UefiBootServicesTableLib.h>
 #include <Library/MemoryAllocationLib.h>
+#include <Library/PcdLib.h>
 #include <Library/PrintLib.h>
 #include <Library/UefiLib.h>
 #include <Library/OcCryptoLib.h>
@@ -378,8 +379,9 @@ PeCoffHashAppleImage (
 
 EFI_STATUS
 PeCoffVerifyAppleSignature (
-  IN OUT VOID    *PeImage,
-  IN OUT UINT32  *ImageSize
+  IN OUT VOID     *PeImage,
+  IN OUT UINT32   *ImageSize,
+  IN     BOOLEAN  HandleOverlappingSections
   )
 {
   EFI_STATUS                    ImageStatus;
@@ -391,13 +393,45 @@ PeCoffVerifyAppleSignature (
   UINT32                        SecDirOffset;
   UINT32                        SignedFileSize;
 
-  ImageStatus = PeCoffInitializeContext (
-                  &ImageContext,
-                  PeImage,
-                  *ImageSize
-                  );
+  if (!HandleOverlappingSections) {
+    //
+    // BasePeCoffLib2 version will not successfully read legacy Apple images
+    // unless the specified Pcds are set.
+    //
+    if (PcdGetBool (PcdImageLoaderWXorX) && !PcdGetBool (PcdImageLoaderRemoveXForWX)) {
+      ASSERT (FALSE);
+    }
+
+    ImageStatus = PeCoffInitializeContext (
+                    &ImageContext,
+                    PeImage,
+                    *ImageSize
+                    );
+  } else {
+ #ifndef EFIUSER
+    // We prefer to use genuine internals of BasePeCoffLib2, but cannot if we are
+    // verifying the signature of a file which may have overlapping sections.
+    // There is no circumstance where this should occur while loading live macOS,
+    // so the only expected calling path is from AppleEfiSignTool.
+    ASSERT (FALSE);
+    ImageStatus = EFI_UNSUPPORTED;
+ #else
+    //
+    // Set up ImageContext for broken images as if fixups had been applied but
+    // without modifying the image in memory, so that we can find the security
+    // section but still verify the image.
+    //
+    ImageStatus = OcPeCoffFixupInitializeContext (
+                    &ImageContext,
+                    PeImage,
+                    *ImageSize,
+                    FALSE
+                    );
+ #endif
+  }
+
   if (EFI_ERROR (ImageStatus)) {
-    DEBUG ((DEBUG_INFO, "OCPE: PeCoff init failure - %r\n", ImageStatus));
+    DEBUG ((DEBUG_INFO, "OCPE: PeCoff verify init failure - %r\n", ImageStatus));
     return EFI_UNSUPPORTED;
   }
 
@@ -466,7 +500,8 @@ EFI_STATUS
 PeCoffGetApfsDriverVersion (
   IN  VOID                 *DriverBuffer,
   IN  UINT32               DriverSize,
-  OUT APFS_DRIVER_VERSION  **DriverVersionPtr
+  OUT APFS_DRIVER_VERSION  **DriverVersionPtr,
+  IN  BOOLEAN              HandleOverlappingSections
   )
 {
   //
@@ -480,13 +515,45 @@ PeCoffGetApfsDriverVersion (
   APFS_DRIVER_VERSION           *DriverVersion;
   UINT32                        ImageVersion;
 
-  ImageStatus = PeCoffInitializeContext (
-                  &ImageContext,
-                  DriverBuffer,
-                  DriverSize
-                  );
+  if (!HandleOverlappingSections) {
+    //
+    // BasePeCoffLib2 version will not successfully read legacy Apple images
+    // unless the specified Pcds are set.
+    //
+    if (PcdGetBool (PcdImageLoaderWXorX) && !PcdGetBool (PcdImageLoaderRemoveXForWX)) {
+      ASSERT (FALSE);
+    }
+
+    ImageStatus = PeCoffInitializeContext (
+                    &ImageContext,
+                    DriverBuffer,
+                    DriverSize
+                    );
+  } else {
+ #ifndef EFIUSER
+    // We prefer to use genuine internals of BasePeCoffLib2, but cannot if we
+    // are checking for potential APFS information in an image which may have
+    // overlapping sections. There is no circumstance where this should occur
+    // while loading live macOS, so the only expected calling path is from
+    // AppleEfiSignTool.
+    ASSERT (FALSE);
+    ImageStatus = EFI_UNSUPPORTED;
+ #else
+    //
+    // Modified version, like PeCoffInitializeContext but fixes up W^X and
+    // overlapping section errors within images as it goes.
+    //
+    ImageStatus = OcPeCoffFixupInitializeContext (
+                    &ImageContext,
+                    DriverBuffer,
+                    DriverSize,
+                    TRUE
+                    );
+ #endif
+  }
+
   if (EFI_ERROR (ImageStatus)) {
-    DEBUG ((DEBUG_INFO, "OCPE: PeCoff init apfs failure - %r\n", ImageStatus));
+    DEBUG ((DEBUG_INFO, "OCPE: PeCoff apfs init failure - %r\n", ImageStatus));
     return EFI_UNSUPPORTED;
   }
 
@@ -552,10 +619,11 @@ OcPatchLegacyEfi (
   EFI_STATUS                    ImageStatus;
   PE_COFF_LOADER_IMAGE_CONTEXT  ImageContext;
 
-  ImageStatus = InternalPeCoffFixup (
+  ImageStatus = OcPeCoffFixupInitializeContext (
                   &ImageContext,
                   DriverBuffer,
-                  DriverSize
+                  DriverSize,
+                  TRUE
                   );
   if (EFI_ERROR (ImageStatus)) {
     DEBUG ((DEBUG_WARN, "OCPE: PeCoff legacy patch failure - %r\n", ImageStatus));
