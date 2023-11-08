@@ -182,12 +182,12 @@ else
     export ARCHS
   fi
 
-  DISCARD_PACKAGES=OpenCorePkg
+  DISCARD_SUBMODULES=OpenCorePkg
   SELFPKG_DIR="OpenCorePkg"
   SELFPKG=OpenDuetPkg
   NO_ARCHIVES=1
 
-  export DISCARD_PACKAGES
+  export DISCARD_SUBMODULES
   export SELFPKG_DIR
   export SELFPKG
   export NO_ARCHIVES
