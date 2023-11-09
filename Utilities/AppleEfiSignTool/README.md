@@ -1,8 +1,10 @@
-AppleEfiSignTool v1.0
+AppleEfiSignTool v1.1
 =====================
 
-Open source tool for signing and verifying Apple EFI binaries. It supports PE and AppleFat binaries.
+Open source tool for verifying Apple EFI binary signatures. Supports PE and Apple Fat binaries.
 
 ## Capabilities
-- Verifies the AppleFatBinary digital signature
-- Verifies the ApplePEImage digital signature
+- Verifies Apple Fat binary digital signatures
+- Verifies Apple PE image digital signatures
+- Displays APFS version information if image is APFS driver
+- Displays W^X and section overlap fixups when -f option is used

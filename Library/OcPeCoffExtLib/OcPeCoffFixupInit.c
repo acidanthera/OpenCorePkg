@@ -712,7 +712,7 @@ InternalInitializePe (
 }
 
 RETURN_STATUS
-InternalPeCoffFixup (
+OcPeCoffFixupInitializeContext (
   OUT PE_COFF_LOADER_IMAGE_CONTEXT  *Context,
   IN  CONST VOID                    *FileBuffer,
   IN  UINT32                        FileSize

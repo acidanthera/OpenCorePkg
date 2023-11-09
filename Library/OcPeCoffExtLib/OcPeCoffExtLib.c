@@ -376,33 +376,25 @@ PeCoffHashAppleImage (
   Sha256Final (&HashContext, Hash);
 }
 
+#ifndef EFIUSER
+STATIC
+#endif
 EFI_STATUS
-PeCoffVerifyAppleSignature (
-  IN OUT VOID    *PeImage,
-  IN OUT UINT32  *ImageSize
+InternalPeCoffVerifyAppleSignatureFromContext (
+  IN OUT PE_COFF_LOADER_IMAGE_CONTEXT  *ImageContext,
+  IN OUT  UINT32                       *ImageSize
   )
 {
-  EFI_STATUS                    ImageStatus;
-  PE_COFF_LOADER_IMAGE_CONTEXT  ImageContext;
-  APPLE_SIGNATURE_CONTEXT       SignatureContext;
-  UINT8                         Hash[SHA256_DIGEST_SIZE];
-  BOOLEAN                       Success;
-  APPLE_EFI_CERTIFICATE_INFO    *CertInfo;
-  UINT32                        SecDirOffset;
-  UINT32                        SignedFileSize;
-
-  ImageStatus = PeCoffInitializeContext (
-                  &ImageContext,
-                  PeImage,
-                  *ImageSize
-                  );
-  if (EFI_ERROR (ImageStatus)) {
-    DEBUG ((DEBUG_INFO, "OCPE: PeCoff init failure - %r\n", ImageStatus));
-    return EFI_UNSUPPORTED;
-  }
+  EFI_STATUS                  ImageStatus;
+  APPLE_SIGNATURE_CONTEXT     SignatureContext;
+  UINT8                       Hash[SHA256_DIGEST_SIZE];
+  BOOLEAN                     Success;
+  APPLE_EFI_CERTIFICATE_INFO  *CertInfo;
+  UINT32                      SecDirOffset;
+  UINT32                      SignedFileSize;
 
   ImageStatus = PeCoffGetAppleCertificateInfo (
-                  &ImageContext,
+                  ImageContext,
                   *ImageSize,
                   &CertInfo,
                   &SecDirOffset,
@@ -414,7 +406,7 @@ PeCoffVerifyAppleSignature (
   }
 
   ImageStatus = PeCoffGetAppleSignature (
-                  &ImageContext,
+                  ImageContext,
                   CertInfo,
                   &SignatureContext
                   );
@@ -424,7 +416,7 @@ PeCoffVerifyAppleSignature (
   }
 
   ImageStatus = PeCoffSanitiseAppleImage (
-                  &ImageContext,
+                  ImageContext,
                   SecDirOffset,
                   SignedFileSize,
                   *ImageSize
@@ -437,7 +429,7 @@ PeCoffVerifyAppleSignature (
   *ImageSize = SignedFileSize;
 
   PeCoffHashAppleImage (
-    &ImageContext,
+    ImageContext,
     SecDirOffset,
     SignedFileSize,
     &Hash[0]
@@ -463,36 +455,49 @@ PeCoffVerifyAppleSignature (
 }
 
 EFI_STATUS
-PeCoffGetApfsDriverVersion (
-  IN  VOID                 *DriverBuffer,
-  IN  UINT32               DriverSize,
-  OUT APFS_DRIVER_VERSION  **DriverVersionPtr
+PeCoffVerifyAppleSignature (
+  IN OUT VOID    *PeImage,
+  IN OUT UINT32  *ImageSize
+  )
+{
+  EFI_STATUS                    ImageStatus;
+  PE_COFF_LOADER_IMAGE_CONTEXT  ImageContext;
+
+  ImageStatus = PeCoffInitializeContext (
+                  &ImageContext,
+                  PeImage,
+                  *ImageSize
+                  );
+  if (EFI_ERROR (ImageStatus)) {
+    DEBUG ((DEBUG_INFO, "OCPE: PeCoff verify init failure - %r\n", ImageStatus));
+    return EFI_UNSUPPORTED;
+  }
+
+  return InternalPeCoffVerifyAppleSignatureFromContext (&ImageContext, ImageSize);
+}
+
+#ifndef EFIUSER
+STATIC
+#endif
+EFI_STATUS
+InternalPeCoffGetApfsDriverVersionFromContext (
+  IN  PE_COFF_LOADER_IMAGE_CONTEXT  *ImageContext,
+  IN  UINT32                        DriverSize,
+  OUT APFS_DRIVER_VERSION           **DriverVersionPtr
   )
 {
   //
   // apfs.efi versioning is more restricted than generic PE parsing.
   //
 
-  EFI_STATUS                    ImageStatus;
-  PE_COFF_LOADER_IMAGE_CONTEXT  ImageContext;
-  EFI_IMAGE_NT_HEADERS64        *OptionalHeader;
-  EFI_IMAGE_SECTION_HEADER      *SectionHeader;
-  APFS_DRIVER_VERSION           *DriverVersion;
-  UINT32                        ImageVersion;
+  EFI_IMAGE_NT_HEADERS64    *OptionalHeader;
+  EFI_IMAGE_SECTION_HEADER  *SectionHeader;
+  APFS_DRIVER_VERSION       *DriverVersion;
+  UINT32                    ImageVersion;
 
-  ImageStatus = PeCoffInitializeContext (
-                  &ImageContext,
-                  DriverBuffer,
-                  DriverSize
-                  );
-  if (EFI_ERROR (ImageStatus)) {
-    DEBUG ((DEBUG_INFO, "OCPE: PeCoff init apfs failure - %r\n", ImageStatus));
-    return EFI_UNSUPPORTED;
-  }
-
-  if (  (ImageContext.Machine != IMAGE_FILE_MACHINE_X64)
-     || (ImageContext.ImageType != PeCoffLoaderTypePe32Plus)
-     || (ImageContext.Subsystem != EFI_IMAGE_SUBSYSTEM_EFI_BOOT_SERVICE_DRIVER))
+  if (  (ImageContext->Machine != IMAGE_FILE_MACHINE_X64)
+     || (ImageContext->ImageType != PeCoffLoaderTypePe32Plus)
+     || (ImageContext->Subsystem != EFI_IMAGE_SUBSYSTEM_EFI_BOOT_SERVICE_DRIVER))
   {
     DEBUG ((DEBUG_INFO, "OCPE: PeCoff apfs unsupported image\n"));
     return EFI_UNSUPPORTED;
@@ -502,8 +507,8 @@ PeCoffGetApfsDriverVersion (
   // Get image version. The header is already verified for us.
   //
   OptionalHeader = (EFI_IMAGE_NT_HEADERS64 *)(
-                                              (CONST UINT8 *)ImageContext.FileBuffer
-                                              + ImageContext.ExeHdrOffset
+                                              (CONST UINT8 *)ImageContext->FileBuffer
+                                              + ImageContext->ExeHdrOffset
                                               );
   ImageVersion = (UINT32)OptionalHeader->MajorImageVersion << 16
                  | (UINT32)OptionalHeader->MinorImageVersion;
@@ -513,8 +518,8 @@ PeCoffGetApfsDriverVersion (
   // but it can be smaller than APFS version.
   //
   SectionHeader = (EFI_IMAGE_SECTION_HEADER *)(
-                                               (CONST UINT8 *)ImageContext.FileBuffer
-                                               + ImageContext.SectionsOffset
+                                               (CONST UINT8 *)ImageContext->FileBuffer
+                                               + ImageContext->SectionsOffset
                                                );
 
   if (AsciiStrnCmp ((CHAR8 *)SectionHeader->Name, ".text", sizeof (SectionHeader->Name)) != 0) {
@@ -529,7 +534,7 @@ PeCoffGetApfsDriverVersion (
   // Finally get driver version.
   //
   DriverVersion = (APFS_DRIVER_VERSION  *)(
-                                           (CONST UINT8 *)ImageContext.FileBuffer
+                                           (CONST UINT8 *)ImageContext->FileBuffer
                                            + SectionHeader->PointerToRawData
                                            );
 
@@ -544,6 +549,29 @@ PeCoffGetApfsDriverVersion (
 }
 
 EFI_STATUS
+PeCoffGetApfsDriverVersion (
+  IN  VOID                 *DriverBuffer,
+  IN  UINT32               DriverSize,
+  OUT APFS_DRIVER_VERSION  **DriverVersionPtr
+  )
+{
+  EFI_STATUS                    ImageStatus;
+  PE_COFF_LOADER_IMAGE_CONTEXT  ImageContext;
+
+  ImageStatus = PeCoffInitializeContext (
+                  &ImageContext,
+                  DriverBuffer,
+                  DriverSize
+                  );
+  if (EFI_ERROR (ImageStatus)) {
+    DEBUG ((DEBUG_INFO, "OCPE: PeCoff apfs init failure - %r\n", ImageStatus));
+    return EFI_UNSUPPORTED;
+  }
+
+  return InternalPeCoffGetApfsDriverVersionFromContext (&ImageContext, DriverSize, DriverVersionPtr);
+}
+
+EFI_STATUS
 OcPatchLegacyEfi (
   IN  VOID    *DriverBuffer,
   IN  UINT32  DriverSize
@@ -552,7 +580,7 @@ OcPatchLegacyEfi (
   EFI_STATUS                    ImageStatus;
   PE_COFF_LOADER_IMAGE_CONTEXT  ImageContext;
 
-  ImageStatus = InternalPeCoffFixup (
+  ImageStatus = OcPeCoffFixupInitializeContext (
                   &ImageContext,
                   DriverBuffer,
                   DriverSize
