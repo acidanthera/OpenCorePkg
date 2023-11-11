@@ -1,7 +1,7 @@
 BIOSVendor: "Apple Inc."
-BIOSVersion: "2020.0.1.0.0"
-BIOSLegacyVersion: "MP71.88Z.F000.B00.2308162009"
-BIOSReleaseDate: "08/16/2023"
+BIOSVersion: "2020.41.1.0.0"
+BIOSLegacyVersion: "MP71.88Z.F000.B00.2310052024"
+BIOSReleaseDate: "10/05/2023"
 SystemManufacturer: "Apple Inc."
 SystemProductName: "MacPro7,1"
 SystemVersion: "1.0"
@@ -50,12 +50,12 @@ SmcPlatform:
   - 0x00
 OEMStrings: |-
   Apple ROM Version
-    BIOS ID:      MP71.88Z.F000.B00.2308162009
+    BIOS ID:      MP71.88Z.F000.B00.2310052024
     Model:        MP71
-    EFI Version:  2020.0.1.0.0
-    Built by:     root@8kt9l
-    Date:         Wed Aug 16 20:09:29 2023
-    Revision:     2020.0.1 (B&I)
+    EFI Version:  2020.41.1.0.0
+    Built by:     root@jgkh6
+    Date:         Thu Oct  5 20:24:08 2023
+    Revision:     2020.41.1 (B&I)
     ROM Version:  F000_B00
     Build Type:   Official Build, RELEASE
     Compiler:     clang-1500.0.37.1

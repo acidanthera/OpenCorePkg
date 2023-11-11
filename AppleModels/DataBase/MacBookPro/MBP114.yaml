@@ -1,7 +1,7 @@
 BIOSVendor: "Apple Inc."
-BIOSVersion: "481.0.0.0.0"
-BIOSLegacyVersion: "MBP114.88Z.F000.B00.2301122010"
-BIOSReleaseDate: "01/12/2023"
+BIOSVersion: "486.0.0.0.0"
+BIOSLegacyVersion: "MBP114.88Z.F000.B00.2308031729"
+BIOSReleaseDate: "08/03/2023"
 SystemManufacturer: "Apple Inc."
 SystemProductName: "MacBookPro11,4"
 SystemVersion: "1.0"
@@ -72,13 +72,13 @@ SmcEPCI: 0xF0B007
 OEMStrings: |-
   Apple ROM Version
     Model:        MBP114
-    EFI Version:  481.0.0.0.0
-    Built by:     root@45lb6
-    Date:         Thu Jan 12 20:10:13 PST 2023
-    Revision:     481 (B&I)
+    EFI Version:  486.0.0.0.0
+    Built by:     root@t9crn
+    Date:         Thu Aug  3 17:29:02 PDT 2023
+    Revision:     486 (B&I)
     ROM Version:  F000_B00
     Build Type:   Official Build, Release
-    Compiler:     clang-1403.0.22.8
+    Compiler:     clang-1500.0.37.1
 Specifications:
   CPUCodename:
     - "Crystal Well"

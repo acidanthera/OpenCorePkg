@@ -1,7 +1,7 @@
 BIOSVendor: "Apple Inc."
-BIOSVersion: "474.0.0.0.0"
-BIOSLegacyVersion: "MP61.88Z.F000.B00.2301131741"
-BIOSReleaseDate: "01/13/2023"
+BIOSVersion: "478.0.0.0.0"
+BIOSLegacyVersion: "MP61.88Z.F000.B00.2308031727"
+BIOSReleaseDate: "08/03/2023"
 SystemManufacturer: "Apple Inc."
 SystemProductName: "MacPro6,1"
 SystemVersion: "1.0"
@@ -65,13 +65,13 @@ SmcEPCI: 0xF0F006
 OEMStrings: |-
   Apple ROM Version
     Model:        MP61
-    EFI Version:  474.0.0.0.0
-    Built by:     root@k7g9q
-    Date:         Fri Jan 13 17:41:45 PST 2023
-    Revision:     474 (B&I)
+    EFI Version:  478.0.0.0.0
+    Built by:     root@lsfgq
+    Date:         Thu Aug  3 17:27:27 PDT 2023
+    Revision:     478 (B&I)
     ROM Version:  F000_B00
     Build Type:   Official Build, Release
-    Compiler:     clang-1403.0.22.8
+    Compiler:     clang-1500.0.37.1
 Specifications:
   CPUCodename:
     - "Ivy Bridge EP"
