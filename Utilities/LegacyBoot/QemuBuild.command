@@ -6,10 +6,30 @@
 
 cd "$(dirname "$0")" || exit 1
 
-if [ ! -f boot ] || [ ! -f boot0 ] || [ ! -f boot1f32 ]; then
+usage () {
+  echo "Usage: $(basename "$0") [X64|IA32]"
+  exit 1
+}
+
+missing_files () {
   echo "Boot files are missing from this package!"
   echo "You probably forgot to build DuetPkg first."
   exit 1
+}
+
+if [ $# -gt 1 ]; then
+  usage
+elif [ $# -eq 1 ]; then
+  if [ "$1" != "X64" ] && [ "$1" != "IA32" ]; then
+    usage
+  fi
+  ARCHS=$1
+elif [ "${ARCHS}" = "" ]; then
+  usage
+fi
+
+if [ ! -f "boot${ARCHS}" ] || [ ! -f boot0 ] || [ ! -f boot1f32 ]; then
+  missing_files
 fi
 
 if [ "$(which qemu-img)" = "" ]; then
@@ -77,7 +97,7 @@ END
   # Copy boot file and ESP contents into FAT32 file system
   mount -t vfat ${NBD}p1 "$DIR" -o rw,noatime,uid="$(id -u)",gid="$(id -g)"
   sleep 2
-  cp -v boot "$DIR"
+  cp -v "boot${ARCHS}" "$DIR/boot"
   cp -rv ROOT/* "$DIR"
 
   # Remove temporary files
@@ -130,7 +150,7 @@ elif [ "$(uname)" = "Darwin" ]; then
   sudo dd if=newbs of=/dev/rdisk"${N}"s1
   diskutil mount disk"${N}"s1
 
-  cp -v boot "$(diskutil info  disk"${N}"s1 |  sed -n 's/.*Mount Point: *//p')"
+  cp -v "boot${ARCHS}" "$(diskutil info  disk"${N}"s1 |  sed -n 's/.*Mount Point: *//p')/boot"
   cp -rv ROOT/* "$(diskutil info  disk"${N}"s1 |  sed -n 's/.*Mount Point: *//p')"
 
   if [ "$(diskutil info  disk"${N}" |  sed -n 's/.*Content (IOContent): *//p')" == "FDisk_partition_scheme" ]
