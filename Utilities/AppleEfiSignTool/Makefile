@@ -14,7 +14,7 @@ OBJS    = $(PROJECT).o \
 	PeCoffLoad.o \
 	PeCoffRelocate.o \
 	OcPeCoffExtLib.o \
-	OcPeCoffFixup.o
+	OcPeCoffFixupInit.o
 VPATH   = $(UDK_PATH)/MdePkg/Library/BasePeCoffLib2:$\
           ../../Library/OcPeCoffExtLib:$\
 

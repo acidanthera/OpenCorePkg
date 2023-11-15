@@ -5,6 +5,7 @@ OpenCore Changelog
 - Changed OpenDuet to enforce `W^X` settings rather than fixing them in loaded images
 - Updated `FixupAppleEfiImages` quirk to fix `W^X` errors in all non-Secure Boot Apple signed binaries
 - Updated builtin firmware versions for SMBIOS and the rest
+- Updated `AppleEfiSignTool` to work with new PE COFF loader
 
 #### v0.9.6
 - Updated builtin firmware versions for SMBIOS and the rest

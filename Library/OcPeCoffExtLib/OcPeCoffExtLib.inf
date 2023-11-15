@@ -31,7 +31,7 @@
 [Sources]
   OcPeCoffExtInternal.h
   OcPeCoffExtLib.c
-  OcPeCoffFixup.c
+  OcPeCoffFixupInit.c
 
 [Packages]
   MdePkg/MdePkg.dec
