@@ -6,6 +6,7 @@ OpenCore Changelog
 - Updated `FixupAppleEfiImages` quirk to fix `W^X` errors in all non-Secure Boot Apple signed binaries
 - Updated builtin firmware versions for SMBIOS and the rest
 - Updated `AppleEfiSignTool` to work with new PE COFF loader
+- Fixed recovery failing to boot on some systems
 
 #### v0.9.6
 - Updated builtin firmware versions for SMBIOS and the rest
