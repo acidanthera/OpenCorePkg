@@ -23,6 +23,8 @@
 #include <Guid/GlobalVariable.h>
 #include <Guid/OcVariable.h>
 
+#include <AppleMacEfi/AppleMacEfiSpec.h>
+
 #include <Library/BaseLib.h>
 #include <Library/BaseMemoryLib.h>
 #include <Library/OcDebugLogLib.h>
@@ -785,6 +787,9 @@ InternalEfiLoadImage (
   UINT32                         RealSize;
   UINT32                         SignedFileSize;
   BOOLEAN                        IsFatSlice;
+  CHAR16                         *FilePath;
+  BOOLEAN                        FixupRequired;
+  BOOLEAN                        AppleBootPath;
 
   if ((ParentImageHandle == NULL) || (ImageHandle == NULL)) {
     return EFI_INVALID_PARAMETER;
@@ -871,42 +876,62 @@ InternalEfiLoadImage (
     if (mFixupAppleEfiImages && (mImageLoaderConfigure != NULL)) {
       if (SecureBootStatus == EFI_SUCCESS) {
         DEBUG ((DEBUG_INFO, "OCB: Secure boot, fixup efi ignored\n"));
-        Status = EFI_SUCCESS;
+        FixupRequired = FALSE;
       } else if (IsFatSlice) {
         DEBUG ((DEBUG_INFO, "OCB: Fat binary, fixup efi...\n"));
-        Status = OcPatchLegacyEfi (SourceBuffer, RealSize);
+        FixupRequired = TRUE;
       } else {
-        //
-        // Overlapping sections not expected outside of fat binaries (and even then
-        // only in 32-bit slices), so verify signature allowing for W^X errors only.
-        //
-        SignedFileSize = RealSize;
-        Status         = PeCoffVerifyAppleSignature (SourceBuffer, &SignedFileSize);
-        if (!EFI_ERROR (Status)) {
-          DEBUG ((
-            DEBUG_INFO,
-            "OCB: Apple signed binary %u->%u, fixup efi...\n",
-            RealSize,
-            SignedFileSize
-            ));
-          RealSize = SignedFileSize;
-          Status   = OcPatchLegacyEfi (SourceBuffer, RealSize);
+        Status = OcBootPolicyDevicePathToFilePath (
+                   DevicePath,
+                   &FilePath
+                   );
+        if (EFI_ERROR (Status)) {
+          AppleBootPath = FALSE;
         } else {
-          DEBUG ((DEBUG_INFO, "OCB: Not Apple signed binary, fixup efi ignored\n"));
-          Status = EFI_SUCCESS;
+          AppleBootPath = (StrCmp (FilePath, APPLE_BOOTER_DEFAULT_FILE_NAME) == 0);
+          FreePool (FilePath);
+        }
+
+        if (AppleBootPath) {
+          DEBUG ((DEBUG_INFO, "OCB: Apple booter path, fixup efi...\n"));
+          FixupRequired = TRUE;
+        } else {
+          //
+          // Overlapping sections not expected outside of fat binaries (and even then
+          // only in 32-bit slices), so verify signature allowing for W^X errors only.
+          //
+          SignedFileSize = RealSize;
+          Status         = PeCoffVerifyAppleSignature (SourceBuffer, &SignedFileSize);
+          if (!EFI_ERROR (Status)) {
+            DEBUG ((
+              DEBUG_INFO,
+              "OCB: Apple signed binary %u->%u, fixup efi...\n",
+              RealSize,
+              SignedFileSize
+              ));
+            RealSize      = SignedFileSize;
+            FixupRequired = TRUE;
+          } else {
+            DEBUG ((DEBUG_INFO, "OCB: Not Apple signed binary, fixup efi ignored\n"));
+            FixupRequired = FALSE;
+          }
         }
       }
 
-      //
-      // Error can mean incompletely patched image, so we should fail.
-      // Any error not the result of incomplete patching would in general not load anyway.
-      //
-      if (EFI_ERROR (Status)) {
-        if (AllocatedBuffer != NULL) {
-          FreePool (AllocatedBuffer);
-        }
+      if (FixupRequired) {
+        Status = OcPatchLegacyEfi (SourceBuffer, RealSize);
 
-        return Status;
+        //
+        // Error can mean incompletely patched image, so we should fail.
+        // Any error not the result of incomplete patching would in general not load anyway.
+        //
+        if (EFI_ERROR (Status)) {
+          if (AllocatedBuffer != NULL) {
+            FreePool (AllocatedBuffer);
+          }
+
+          return Status;
+        }
       }
     }
 

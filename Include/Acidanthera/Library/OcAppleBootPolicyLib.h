@@ -122,6 +122,24 @@ OcBootPolicyDevicePathToDirPath (
   );
 
 /**
+  Retrieves file path associated with DevicePath.
+
+  @param[in]  DevicePath          The device path to describe.
+  @param[out] BootPathName        A pointer into which the file path for
+                                  DevicePath is returned. When EFI_SUCCESS is
+                                  returned, caller is responsible for freeing
+                                  this pool memory.
+
+  @retval EFI_SUCCESS  The operation has been completed successfully.
+  @retval other        DevicePath is not a valid file path.
+**/
+EFI_STATUS
+OcBootPolicyDevicePathToFilePath (
+  IN  EFI_DEVICE_PATH_PROTOCOL  *DevicePath,
+  OUT CHAR16                    **BootPathName
+  );
+
+/**
   Retrieves path info for the APFS Recovery volume associated with the APFS
   volume given by DevicePath.
 

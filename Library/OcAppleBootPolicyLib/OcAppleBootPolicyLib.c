@@ -750,7 +750,8 @@ STATIC
 EFI_STATUS
 InternalGetBootPathName (
   IN  EFI_DEVICE_PATH_PROTOCOL  *DevicePath,
-  OUT CHAR16                    **BootPathName
+  OUT CHAR16                    **BootPathName,
+  IN  BOOLEAN                   DirectoryOnly
   )
 {
   CHAR16  *PathName;
@@ -775,19 +776,21 @@ InternalGetBootPathName (
       PathNameSize
       );
 
-    Slash = StrStr (PathName, L"\\");
+    if (DirectoryOnly) {
+      Slash = StrStr (PathName, L"\\");
 
-    if (Slash != NULL) {
-      Len = StrLen (PathName);
+      if (Slash != NULL) {
+        Len = StrLen (PathName);
 
-      FilePathName = &PathName[Len - 1];
+        FilePathName = &PathName[Len - 1];
 
-      while (*FilePathName != L'\\') {
-        *FilePathName = L'\0';
-        --FilePathName;
+        while (*FilePathName != L'\\') {
+          *FilePathName = L'\0';
+          --FilePathName;
+        }
+      } else {
+        StrCpyS (PathName, PathNameSize, L"\\");
       }
-    } else {
-      StrCpyS (PathName, PathNameSize, L"\\");
     }
   } else {
     PathName = AllocateZeroPool (sizeof (L"\\"));
@@ -1056,7 +1059,8 @@ EFI_STATUS
 InternalBootPolicyDevicePathToDirPath (
   IN  EFI_DEVICE_PATH_PROTOCOL  *DevicePath,
   OUT CHAR16                    **BootPathName,
-  OUT EFI_HANDLE                *Device
+  OUT EFI_HANDLE                *Device,
+  IN  BOOLEAN                   DirectoryOnly
   )
 {
   EFI_STATUS  Status;
@@ -1077,7 +1081,7 @@ InternalBootPolicyDevicePathToDirPath (
     return Status;
   }
 
-  return InternalGetBootPathName (DevicePath, BootPathName);
+  return InternalGetBootPathName (DevicePath, BootPathName, DirectoryOnly);
 }
 
 EFI_STATUS
@@ -1097,7 +1101,8 @@ OcBootPolicyDevicePathToDirPath (
   Status = InternalBootPolicyDevicePathToDirPath (
              DevicePath,
              BootPathName,
-             &Device
+             &Device,
+             TRUE
              );
 
   if (EFI_ERROR (Status)) {
@@ -1116,6 +1121,25 @@ OcBootPolicyDevicePathToDirPath (
   }
 
   return Status;
+}
+
+EFI_STATUS
+OcBootPolicyDevicePathToFilePath (
+  IN  EFI_DEVICE_PATH_PROTOCOL  *DevicePath,
+  OUT CHAR16                    **BootPathName
+  )
+{
+  EFI_HANDLE  Device;
+
+  ASSERT (DevicePath != NULL);
+  ASSERT (BootPathName != NULL);
+
+  return InternalBootPolicyDevicePathToDirPath (
+           DevicePath,
+           BootPathName,
+           &Device,
+           FALSE
+           );
 }
 
 STATIC
@@ -1139,7 +1163,8 @@ OcBootPolicyDevicePathToDirPathAndApfsHandle (
   Status = InternalBootPolicyDevicePathToDirPath (
              DevicePath,
              BootPathName,
-             Device
+             Device,
+             TRUE
              );
   if (EFI_ERROR (Status)) {
     return Status;
