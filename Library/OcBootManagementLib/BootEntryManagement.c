@@ -2548,6 +2548,10 @@ OcLoadBootEntry (
       // Unload dmg if any.
       //
       InternalUnloadDmg (&DmgLoadContext);
+      //
+      // Unload image.
+      //
+      gBS->UnloadImage (EntryHandle);
     }
   } else {
     DEBUG ((DEBUG_WARN, "OCB: LoadImage failed - %r\n", Status));
