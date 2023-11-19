@@ -154,7 +154,7 @@ VerifySignatureAndApfs (
       // This would be an image with PE COFF section overlaps but also signed
       // or an incorrectly signed image, neither of which are expected.
       //
-      DEBUG ((DEBUG_ERROR, "SIGN: *** Unexpected result! If this is an Apple binary please file an issue! ***\n"));
+      DEBUG ((DEBUG_ERROR, "SIGN: *** Unexpected result! If this is a genuine Apple binary and you wish to verify the signature, please use a version of AppleEfiSignTool from OpenCore 0.8.7 or earlier. ***\n"));
     }
   }
 
