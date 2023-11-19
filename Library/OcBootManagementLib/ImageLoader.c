@@ -870,10 +870,11 @@ InternalEfiLoadImage (
     }
 
     //
-    // Use mImageLoaderConfigure != NULL as a proxy for loaded kernel support,
-    // and only apply FixupAppleEfiImages while this is set.
+    // We apply to all images (not just boot images which can be detected
+    // by using mImageLoaderConfigure != NULL as a proxy for loaded kernel
+    // support) because we need to fix up other Apple files such as apfs.efi.
     //
-    if (mFixupAppleEfiImages && (mImageLoaderConfigure != NULL)) {
+    if (mFixupAppleEfiImages) {
       if (SecureBootStatus == EFI_SUCCESS) {
         DEBUG ((DEBUG_INFO, "OCB: Secure boot, fixup efi ignored\n"));
         FixupRequired = FALSE;
@@ -881,15 +882,16 @@ InternalEfiLoadImage (
         DEBUG ((DEBUG_INFO, "OCB: Fat binary, fixup efi...\n"));
         FixupRequired = TRUE;
       } else {
-        Status = OcBootPolicyDevicePathToFilePath (
-                   DevicePath,
-                   &FilePath
-                   );
-        if (EFI_ERROR (Status)) {
-          AppleBootPath = FALSE;
-        } else {
-          AppleBootPath = (StrCmp (FilePath, APPLE_BOOTER_DEFAULT_FILE_NAME) == 0);
-          FreePool (FilePath);
+        AppleBootPath = FALSE;
+        if (DevicePath != NULL) {
+          Status = OcBootPolicyDevicePathToFilePath (
+                     DevicePath,
+                     &FilePath
+                     );
+          if (!EFI_ERROR (Status)) {
+            AppleBootPath = (StrCmp (FilePath, APPLE_BOOTER_DEFAULT_FILE_NAME) == 0);
+            FreePool (FilePath);
+          }
         }
 
         if (AppleBootPath) {
