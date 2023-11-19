@@ -2202,12 +2202,12 @@ PatchProvideCurrentCpuInfo (
         &CacheSizes[L3U],
         sizeof (UINT32)
         );
+      Status |= PatcherApplyGenericPatch (
+            Patcher,
+            &mProvideCurrentCpuInfoSnowLeopardSysctlMibInitPatch
+            );
     }
 
-    Status |= PatcherApplyGenericPatch (
-                Patcher,
-                &mProvideCurrentCpuInfoSnowLeopardSysctlMibInitPatch
-                );
     if (EFI_ERROR (Status)) {
       DEBUG ((DEBUG_WARN, "OCAK: [FAIL] Failed to patch or more areas in _sysctl_mib_init - %r\n", Status));
       return EFI_NOT_FOUND;
