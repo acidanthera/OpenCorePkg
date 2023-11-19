@@ -2203,9 +2203,9 @@ PatchProvideCurrentCpuInfo (
         sizeof (UINT32)
         );
       Status |= PatcherApplyGenericPatch (
-            Patcher,
-            &mProvideCurrentCpuInfoSnowLeopardSysctlMibInitPatch
-            );
+                  Patcher,
+                  &mProvideCurrentCpuInfoSnowLeopardSysctlMibInitPatch
+                  );
     }
 
     if (EFI_ERROR (Status)) {
