@@ -7,6 +7,7 @@ OpenCore Changelog
 - Updated builtin firmware versions for SMBIOS and the rest
 - Updated `AppleEfiSignTool` to work with new PE COFF loader
 - Fixed recovery failing to boot on some systems
+- Updated `ProvideCurrentCpuInfo` quirk to support CPUID leaf 0x2 cache size reporting on Mac OS X 10.5 and 10.6
 
 #### v0.9.6
 - Updated builtin firmware versions for SMBIOS and the rest

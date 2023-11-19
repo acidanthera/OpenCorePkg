@@ -23,6 +23,78 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 #include <Library/OcStringLib.h>
 #include <Library/UefiLib.h>
 
+//
+// CPUID EAX=0x2 Cache descriptor values
+//
+STATIC
+CONST struct {
+  UINT8           value;
+  cache_type_t    type;
+  UINT32          size;
+  UINT8           associativity;
+  UINT8           linesize;
+  UINT8           partitions;
+} mCpuCacheDescriptorValues[] = {
+  { 0x06, L1I, SIZE_8KB,     4,  32, 1 },
+  { 0x08, L1I, SIZE_16KB,    4,  32, 1 },
+  { 0x0A, L1D, SIZE_8KB,     2,  32, 1 },
+  { 0x0C, L1D, SIZE_16KB,    4,  32, 1 },
+  { 0x0E, L1D, 24*SIZE_1KB,  6,  64, 1 },
+  { 0x22, L3U, SIZE_512KB,   4,  64, 2 },
+  { 0x23, L3U, SIZE_1MB,     8,  64, 2 },
+  { 0x25, L3U, SIZE_2MB,     8,  64, 2 },
+  { 0x29, L3U, SIZE_4MB,     8,  64, 2 },
+  { 0x2C, L1D, SIZE_32KB,    8,  64, 2 },
+  { 0x30, L1I, SIZE_32KB,    8,  64, 1 },
+  { 0x41, L2U, SIZE_128KB,   4,  32, 1 },
+  { 0x42, L2U, SIZE_256KB,   4,  32, 1 },
+  { 0x43, L2U, SIZE_512KB,   4,  32, 1 },
+  { 0x44, L2U, SIZE_1MB,     4,  32, 1 },
+  { 0x45, L2U, SIZE_2MB,     4,  32, 1 },
+  { 0x46, L3U, SIZE_4MB,     4,  64, 1 },
+  { 0x47, L3U, SIZE_8MB,     8,  64, 1 },
+  { 0x48, L2U, 3*SIZE_1MB,   12, 64, 1 },
+  { 0x49, L2U, SIZE_4MB,     16, 64, 1 }, // for Xeons family Fh model 6h it's L3U instead
+  { 0x4A, L3U, 6*SIZE_1MB,   12, 64, 1 },
+  { 0x4B, L3U, SIZE_8MB,     16, 64, 1 },
+  { 0x4C, L3U, 12*SIZE_1MB,  12, 64, 1 },
+  { 0x4D, L3U, SIZE_16MB,    16, 64, 1 },
+  { 0x4E, L2U, 6*SIZE_1MB,   24, 64, 1 },
+  { 0x60, L1D, SIZE_16KB,    8,  64, 1 },
+  { 0x66, L1D, SIZE_8KB,     4,  64, 1 },
+  { 0x67, L1D, SIZE_16KB,    4,  64, 1 },
+  { 0x68, L1D, SIZE_32KB,    4,  64, 1 },
+  { 0x78, L2U, SIZE_1MB,     4,  64, 1 },
+  { 0x79, L2U, SIZE_128KB,   8,  64, 2 },
+  { 0x7A, L2U, SIZE_256KB,   8,  64, 2 },
+  { 0x7B, L2U, SIZE_512KB,   8,  64, 2 },
+  { 0x7C, L2U, SIZE_1MB,     8,  64, 2 },
+  { 0x7D, L2U, SIZE_2MB,     8,  64, 1 },
+  { 0x7F, L2U, SIZE_512KB,   2,  64, 1 },
+  { 0x80, L2U, SIZE_512KB,   8,  64, 1 },
+  { 0x82, L2U, SIZE_256KB,   8,  32, 1 },
+  { 0x83, L2U, SIZE_512KB,   8,  32, 1 },
+  { 0x84, L2U, SIZE_1MB,     8,  32, 1 },
+  { 0x85, L2U, SIZE_2MB,     8,  32, 1 },
+  { 0x86, L2U, SIZE_512KB,   4,  64, 1 },
+  { 0x87, L2U, SIZE_1MB,     8,  64, 1 },
+  { 0xD0, L3U, SIZE_512KB,   4,  64, 1 },
+  { 0xD1, L3U, SIZE_1MB,     4,  64, 1 },
+  { 0xD2, L3U, SIZE_2MB,     4,  64, 1 },
+  { 0xD6, L3U, SIZE_1MB,     8,  64, 1 },
+  { 0xD7, L3U, SIZE_2MB,     8,  64, 1 },
+  { 0xD8, L3U, SIZE_4MB,     8,  64, 1 },
+  { 0xDC, L3U, 1.5*SIZE_1MB, 12, 64, 1 },
+  { 0xDD, L3U, 3*SIZE_1MB,   12, 64, 1 },
+  { 0xDE, L3U, 6*SIZE_1MB,   12, 64, 1 },
+  { 0xE2, L3U, SIZE_2MB,     16, 64, 1 },
+  { 0xE3, L3U, SIZE_4MB,     16, 64, 1 },
+  { 0xE4, L3U, SIZE_8MB,     16, 64, 1 },
+  { 0xEA, L3U, 12*SIZE_1MB,  24, 64, 1 },
+  { 0xEB, L3U, 18*SIZE_1MB,  24, 64, 1 },
+  { 0xEC, L3U, 24*SIZE_1MB,  24, 64, 1 }
+};
+
 STATIC
 CONST UINT8
   mKernelCpuIdFindRelNew[] = {
@@ -1315,6 +1387,144 @@ PatchProvideCurrentCpuInfoMSR35h (
   return Status;
 }
 
+STATIC
+CONST UINT8
+  mProvideCurrentCpuInfoLeopardSysctlMibInitFind1[] = {
+  0xE8, 0x00, 0x00, 0x00, 0x00,            // call _ml_cpu_cache_sharing / _ml_cpu_cache_size
+  0xC7, 0x04, 0x24, 0x02, 0x00, 0x00, 0x00 // mov dword ptr [esp], 0x2/0x3
+};
+
+STATIC
+CONST UINT8
+  mProvideCurrentCpuInfoLeopardSysctlMibInitMask1[] = {
+  0xFF, 0x00, 0x00, 0x00, 0x00,
+  0xFF, 0xFF, 0xFF, 0xFE, 0xFF,0xFF, 0xFF
+};
+
+STATIC
+UINT8
+  mProvideCurrentCpuInfoLeopardSysctlMibInitReplace1[] = {
+  0xB8, 0x00, 0x00, 0x00, 0x00, // mov eax, (UINT32 value for func param 1 or 2)
+  0x31, 0xD2,                   // xor edx, edx
+  0x90,                         // nop
+  0x90,                         // nop
+  0x90,                         // nop
+  0x90,                         // nop
+  0x90                          // nop
+};
+
+STATIC
+PATCHER_GENERIC_PATCH
+  mProvideCurrentCpuInfoLeopardSysctlMibInitPatch1 = {
+  .Comment     = DEBUG_POINTER ("_sysctl_mib_init Leopard patch 1"),
+  .Base        = "_sysctl_mib_init",
+  .Find        = mProvideCurrentCpuInfoLeopardSysctlMibInitFind1,
+  .Mask        = mProvideCurrentCpuInfoLeopardSysctlMibInitMask1,
+  .Replace     = mProvideCurrentCpuInfoLeopardSysctlMibInitReplace1,
+  .ReplaceMask = NULL,
+  .Size        = sizeof (mProvideCurrentCpuInfoLeopardSysctlMibInitReplace1),
+  .Count       = 1,
+  .Skip        = 0,
+  .Limit       = 0
+};
+
+STATIC
+CONST UINT8
+  mProvideCurrentCpuInfoLeopardSysctlMibInitFind2[] = {
+  0xE8, 0x00, 0x00, 0x00, 0x00,            // call _ml_cpu_cache_sharing / _ml_cpu_cache_size
+  0xC7, 0x04, 0x24, 0x00, 0x00, 0x00, 0x00 // mov dword ptr [esp], 0x0
+};
+
+STATIC
+CONST UINT8
+  mProvideCurrentCpuInfoLeopardSysctlMibInitMask2[] = {
+  0xFF, 0x00, 0x00, 0x00, 0x00,
+  0xFF, 0xFF, 0xFF, 0xFF, 0xFF,0xFF, 0xFF
+};
+
+STATIC
+UINT8
+  mProvideCurrentCpuInfoLeopardSysctlMibInitReplace2[] = {
+  0xB8, 0x00, 0x00, 0x00, 0x00,            // mov eax, (UINT32 value for func param = 3)
+  0xC7, 0x04, 0x24, 0x00, 0x00, 0x00, 0x00 // mov dword ptr [esp], 0x0
+};
+
+STATIC
+PATCHER_GENERIC_PATCH
+  mProvideCurrentCpuInfoLeopardSysctlMibInitPatch2 = {
+  .Comment     = DEBUG_POINTER ("_sysctl_mib_init Leopard patch 2"),
+  .Base        = "_sysctl_mib_init",
+  .Find        = mProvideCurrentCpuInfoLeopardSysctlMibInitFind2,
+  .Mask        = mProvideCurrentCpuInfoLeopardSysctlMibInitMask2,
+  .Replace     = mProvideCurrentCpuInfoLeopardSysctlMibInitReplace2,
+  .ReplaceMask = NULL,
+  .Size        = sizeof (mProvideCurrentCpuInfoLeopardSysctlMibInitReplace2),
+  .Count       = 1,
+  .Skip        = 0,
+  .Limit       = 0
+};
+
+STATIC
+CONST UINT8
+  mProvideCurrentCpuInfoSnowLeopardSysctlMibInitFind[] = {
+  0xA3, 0x00, 0x00, 0x00, 0x00,             // mov dword [...], eax
+  0x89, 0x15, 0x00, 0x00, 0x00, 0x00,       // mov dword [...], edx
+  0xC7, 0x04, 0x24, 0x00, 0x00, 0x00, 0x00, // mov dword ptr [esp], 0x2/0x3
+  0xE8, 0x00, 0x00, 0x00, 0x00              // call _ml_cpu_cache_sharing / _ml_cpu_cache_size
+};
+
+STATIC
+CONST UINT8
+  mProvideCurrentCpuInfoSnowLeopardSysctlMibInitFindMask[] = {
+  0xFF, 0x00, 0x00, 0x00, 0x00,
+  0xFF, 0xFF, 0x00, 0x00, 0x00,0x00,
+  0xFF, 0xFF, 0xFF, 0x00, 0x00,0x00, 0x00,
+  0xFF, 0x00, 0x00, 0x00, 0x00
+};
+
+STATIC
+UINT8
+  mProvideCurrentCpuInfoSnowLeopardSysctlMibInitReplace[] = {
+  0xA3, 0x00, 0x00, 0x00, 0x00,       // mov dword [...], eax
+  0x89, 0x15, 0x00, 0x00, 0x00, 0x00, // mov dword [...], edx
+  0xB8, 0x00, 0x00, 0x00, 0x00,       // mov eax, (UINT32 value for func param 1 or 2)
+  0x31, 0xD2,                         // xor edx, edx
+  0x90,                               // nop
+  0x90,                               // nop
+  0x90,                               // nop
+  0x90,                               // nop
+  0x90                                // nop
+};
+
+STATIC
+CONST UINT8
+  mProvideCurrentCpuInfoSnowLeopardSysctlMibInitReplaceMask[] = {
+  0x00, 0x00, 0x00, 0x00, 0x00,
+  0x00, 0x00, 0x00, 0x00, 0x00,0x00,
+  0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
+  0xFF, 0xFF,
+  0xFF,
+  0xFF,
+  0xFF,
+  0xFF,
+  0xFF
+};
+
+STATIC
+PATCHER_GENERIC_PATCH
+  mProvideCurrentCpuInfoSnowLeopardSysctlMibInitPatch = {
+  .Comment     = DEBUG_POINTER ("_sysctl_mib_init Snow Leopard patch"),
+  .Base        = "_sysctl_mib_init",
+  .Find        = mProvideCurrentCpuInfoSnowLeopardSysctlMibInitFind,
+  .Mask        = mProvideCurrentCpuInfoSnowLeopardSysctlMibInitFindMask,
+  .Replace     = mProvideCurrentCpuInfoSnowLeopardSysctlMibInitReplace,
+  .ReplaceMask = mProvideCurrentCpuInfoSnowLeopardSysctlMibInitReplaceMask,
+  .Size        = sizeof (mProvideCurrentCpuInfoSnowLeopardSysctlMibInitReplace),
+  .Count       = 1,
+  .Skip        = 0,
+  .Limit       = 0
+};
+
 EFI_STATUS
 PatchProvideCurrentCpuInfo (
   IN OUT PATCHER_CONTEXT  *Patcher,
@@ -1332,6 +1542,7 @@ PatchProvideCurrentCpuInfo (
   UINT8   *Start;
   UINT8   *Last;
   UINT32  Index;
+  UINT32  Index2;
 
   UINT8  *TscInitFunc;
   UINT8  *TmrCvtFunc;
@@ -1356,18 +1567,29 @@ PatchProvideCurrentCpuInfo (
   UINT64  tscFCvtn2tValue;
   UINT64  tscGranularityValue;
 
+  BOOLEAN  IsLeaf4CacheSupported;
+
   BOOLEAN  IsTiger;
+  BOOLEAN  IsLeopard;
+  BOOLEAN  IsSnowLeopard;
   BOOLEAN  IsTigerCacheUnsupported;
   UINT8    *LocationTigerCache;
   UINT8    *LocationTigerCacheEnd;
 
   APPLE_INTEL_CPU_CACHE_TYPE  CacheType;
-  CPUID_CACHE_PARAMS_EAX      CpuidCacheEax;
-  CPUID_CACHE_PARAMS_EBX      CpuidCacheEbx;
+  CPUID_CACHE_PARAMS_EAX      CpuidCacheParamsEax;
+  CPUID_CACHE_PARAMS_EBX      CpuidCacheParamsEbx;
+  CPUID_CACHE_INFO_CACHE_TLB  CpuidCacheInfo[4];
+  UINT8                       CpuidCacheDescriptors[64];
   UINT32                      CacheSets;
   UINT32                      CacheSizes[LCACHE_MAX];
+  UINT32                      CacheSize;
   UINT32                      CacheLineSizes[LCACHE_MAX];
   UINT32                      CacheLineSize;
+  UINT32                      CacheSharings[LCACHE_MAX];
+  BOOLEAN                     CacheDescriptorFound;
+  cache_type_t                CacheDescriptorType;
+  UINT32                      CacheDescriptorSize;
 
   UINT32  msrCoreThreadCount;
 
@@ -1379,13 +1601,17 @@ PatchProvideCurrentCpuInfo (
   Start = ((UINT8 *)MachoGetMachHeader (&Patcher->MachContext));
   Last  = Start + MachoGetInnerSize (&Patcher->MachContext) - EFI_PAGE_SIZE * 2;
 
-  IsTiger = OcMatchDarwinVersion (KernelVersion, KERNEL_VERSION_TIGER_MIN, KERNEL_VERSION_TIGER_MAX);
+  IsLeaf4CacheSupported = CpuInfo->MaxId >= CPUID_CACHE_PARAMS;
+
+  IsTiger       = OcMatchDarwinVersion (KernelVersion, KERNEL_VERSION_TIGER_MIN, KERNEL_VERSION_TIGER_MAX);
+  IsLeopard     = OcMatchDarwinVersion (KernelVersion, KERNEL_VERSION_LEOPARD_MIN, KERNEL_VERSION_LEOPARD_MAX);
+  IsSnowLeopard = OcMatchDarwinVersion (KernelVersion, KERNEL_VERSION_SNOW_LEOPARD_MIN, KERNEL_VERSION_SNOW_LEOPARD_MAX);
 
   //
   // 10.4 does not support pulling CPUID leaf 4 that may contain cache info instead of leaf 2.
   // On processors that support leaf 4, use that instead.
   //
-  IsTigerCacheUnsupported = IsTiger && (CpuInfo->MaxId >= CPUID_CACHE_PARAMS);
+  IsTigerCacheUnsupported = IsTiger && IsLeaf4CacheSupported;
 
   Status  = EFI_SUCCESS;
   Status |= PatchProvideCurrentCpuInfoMSR35h (Patcher, CpuInfo, KernelVersion);
@@ -1687,25 +1913,25 @@ PatchProvideCurrentCpuInfo (
     //
     Index = 0;
     do {
-      AsmCpuidEx (CPUID_CACHE_PARAMS, Index, &CpuidCacheEax.Uint32, &CpuidCacheEbx.Uint32, &CacheSets, NULL);
-      if (CpuidCacheEax.Bits.CacheType == 0) {
+      AsmCpuidEx (CPUID_CACHE_PARAMS, Index, &CpuidCacheParamsEax.Uint32, &CpuidCacheParamsEbx.Uint32, &CacheSets, NULL);
+      if (CpuidCacheParamsEax.Bits.CacheType == 0) {
         break;
       }
 
-      switch (CpuidCacheEax.Bits.CacheLevel) {
+      switch (CpuidCacheParamsEax.Bits.CacheLevel) {
         case 1:
-          CacheType = (CpuidCacheEax.Bits.CacheType == 1) ? L1D :
-                      (CpuidCacheEax.Bits.CacheType == 2) ? L1I :
+          CacheType = (CpuidCacheParamsEax.Bits.CacheType == 1) ? L1D :
+                      (CpuidCacheParamsEax.Bits.CacheType == 2) ? L1I :
                       Lnone;
           break;
 
         case 2:
-          CacheType = (CpuidCacheEax.Bits.CacheType == 3) ? L2U :
+          CacheType = (CpuidCacheParamsEax.Bits.CacheType == 3) ? L2U :
                       Lnone;
           break;
 
         case 3:
-          CacheType = (CpuidCacheEax.Bits.CacheType == 3) ? L3U :
+          CacheType = (CpuidCacheParamsEax.Bits.CacheType == 3) ? L3U :
                       Lnone;
           break;
 
@@ -1714,8 +1940,8 @@ PatchProvideCurrentCpuInfo (
       }
 
       if (CacheType != Lnone) {
-        CacheSizes[CacheType]     = (CpuidCacheEbx.Bits.LineSize + 1) * (CacheSets + 1) * (CpuidCacheEbx.Bits.Ways + 1);
-        CacheLineSizes[CacheType] = CpuidCacheEbx.Bits.LineSize + 1;
+        CacheSizes[CacheType]     = (CpuidCacheParamsEbx.Bits.LineSize + 1) * (CacheSets + 1) * (CpuidCacheParamsEbx.Bits.Ways + 1);
+        CacheLineSizes[CacheType] = CpuidCacheParamsEbx.Bits.LineSize + 1;
       }
 
       Index++;
@@ -1759,6 +1985,232 @@ PatchProvideCurrentCpuInfo (
 
     while (LocationTigerCache < LocationTigerCacheEnd) {
       *LocationTigerCache++ = 0x90;
+    }
+  }
+
+  //
+  // Patch sysctl reporting if leaf 0x4 is unsupported on 10.5 and 10.6.
+  // This applies only to processors that are older than Prescott, and only on IA32.
+  //
+  if (Patcher->Is32Bit && !IsLeaf4CacheSupported && (IsLeopard || IsSnowLeopard)) {
+    ZeroMem (CpuidCacheDescriptors, sizeof (CpuidCacheDescriptors));
+    ZeroMem (CacheSizes, sizeof (CacheSizes));
+    ZeroMem (CacheSharings, sizeof (CacheSharings));
+    AsmCpuid (CPUID_CACHE_INFO, &CpuidCacheInfo[0].Uint32, &CpuidCacheInfo[1].Uint32, &CpuidCacheInfo[2].Uint32, &CpuidCacheInfo[3].Uint32);
+
+    for (Index = 0; Index < 4; Index++) {
+      if (CpuidCacheInfo[Index].Bits.NotValid) {
+        continue;
+      }
+
+      ((UINT32 *)CpuidCacheDescriptors)[Index] = CpuidCacheInfo[Index].Uint32;
+    }
+
+    for (Index = 1; Index < CpuidCacheDescriptors[0]; Index++) {
+      if ((Index * 16) > sizeof (CpuidCacheDescriptors)) {
+        break;
+      }
+
+      AsmCpuid (CPUID_CACHE_INFO, &CpuidCacheInfo[0].Uint32, &CpuidCacheInfo[1].Uint32, &CpuidCacheInfo[2].Uint32, &CpuidCacheInfo[3].Uint32);
+
+      for (Index2 = 0; Index2 < 4; Index2++) {
+        if (CpuidCacheInfo[Index2].Bits.NotValid) {
+          continue;
+        }
+
+        ((UINT32 *)CpuidCacheDescriptors)[sizeof (UINT32) * Index * Index2] = CpuidCacheInfo[Index2].Uint32;
+      }
+    }
+
+    //
+    // Get cache sizes.
+    //
+    for (Index = 0; Index < sizeof (CpuidCacheDescriptors); Index++) {
+      CacheDescriptorFound = FALSE;
+      for (Index2 = 0; Index2 < (sizeof (mCpuCacheDescriptorValues) / sizeof (mCpuCacheDescriptorValues[0])); Index2++) {
+        if (mCpuCacheDescriptorValues[Index2].value == CpuidCacheDescriptors[Index]) {
+          CacheDescriptorType  = mCpuCacheDescriptorValues[Index2].type;
+          CacheDescriptorSize  = mCpuCacheDescriptorValues[Index2].size;
+          CacheDescriptorFound = TRUE;
+          break;
+        }
+      }
+
+      if (!CacheDescriptorFound) {
+        continue;
+      }
+
+      CacheSizes[CacheDescriptorType]    = CacheDescriptorSize;
+      CacheSharings[CacheDescriptorType] = 1;
+    }
+
+    DEBUG ((DEBUG_INFO, "OCAK: Caches L1I: %u, L1D: %u, L2: %u, L3: %u\n", CacheSizes[L1I], CacheSizes[L1D], CacheSizes[L2U], CacheSizes[L3U]));
+
+    if (IsLeopard) {
+      //
+      // Patch _ml_cpu_cache_sharing (0x1)
+      //
+      CacheSize = MAX (CacheSharings[L1I], CacheSharings[L1D]);
+      CopyMem (
+        &mProvideCurrentCpuInfoLeopardSysctlMibInitReplace1[1],
+        &CacheSize,
+        sizeof (UINT32)
+        );
+      Status |= PatcherApplyGenericPatch (
+                  Patcher,
+                  &mProvideCurrentCpuInfoLeopardSysctlMibInitPatch1
+                  );
+
+      //
+      // Patch _ml_cpu_cache_sharing (0x2)
+      //
+      CopyMem (
+        &mProvideCurrentCpuInfoLeopardSysctlMibInitReplace1[1],
+        &CacheSharings[L2U],
+        sizeof (UINT32)
+        );
+      Status |= PatcherApplyGenericPatch (
+                  Patcher,
+                  &mProvideCurrentCpuInfoLeopardSysctlMibInitPatch1
+                  );
+
+      //
+      // Patch _ml_cpu_cache_sharing (0x3)
+      //
+      CopyMem (
+        &mProvideCurrentCpuInfoLeopardSysctlMibInitReplace2[1],
+        &CacheSharings[L3U],
+        sizeof (UINT32)
+        );
+      Status |= PatcherApplyGenericPatch (
+                  Patcher,
+                  &mProvideCurrentCpuInfoLeopardSysctlMibInitPatch2
+                  );
+
+      //
+      // Patch _ml_cpu_cache_size (0x1) - L1
+      //
+      CacheSize = MAX (CacheSizes[L1I], CacheSizes[L1D]);
+      CopyMem (
+        &mProvideCurrentCpuInfoLeopardSysctlMibInitReplace1[1],
+        &CacheSize,
+        sizeof (UINT32)
+        );
+      Status |= PatcherApplyGenericPatch (
+                  Patcher,
+                  &mProvideCurrentCpuInfoLeopardSysctlMibInitPatch1
+                  );
+
+      //
+      // Patch _ml_cpu_cache_size (0x2) - L2
+      //
+      CopyMem (
+        &mProvideCurrentCpuInfoLeopardSysctlMibInitReplace1[1],
+        &CacheSizes[L2U],
+        sizeof (UINT32)
+        );
+      Status |= PatcherApplyGenericPatch (
+                  Patcher,
+                  &mProvideCurrentCpuInfoLeopardSysctlMibInitPatch1
+                  );
+
+      //
+      // Patch _ml_cpu_cache_size (0x3) - L3
+      //
+      CopyMem (
+        &mProvideCurrentCpuInfoLeopardSysctlMibInitReplace2[1],
+        &CacheSizes[L3U],
+        sizeof (UINT32)
+        );
+      Status |= PatcherApplyGenericPatch (
+                  Patcher,
+                  &mProvideCurrentCpuInfoLeopardSysctlMibInitPatch2
+                  );
+    } else {
+      //
+      // Patch _ml_cpu_cache_sharing (0x1)
+      //
+      CacheSize = MAX (CacheSharings[L1I], CacheSharings[L1D]);
+      CopyMem (
+        &mProvideCurrentCpuInfoSnowLeopardSysctlMibInitReplace[12],
+        &CacheSize,
+        sizeof (UINT32)
+        );
+      Status |= PatcherApplyGenericPatch (
+                  Patcher,
+                  &mProvideCurrentCpuInfoSnowLeopardSysctlMibInitPatch
+                  );
+
+      //
+      // Patch _ml_cpu_cache_sharing (0x2)
+      //
+      CopyMem (
+        &mProvideCurrentCpuInfoSnowLeopardSysctlMibInitReplace[12],
+        &CacheSharings[L2U],
+        sizeof (UINT32)
+        );
+      Status |= PatcherApplyGenericPatch (
+                  Patcher,
+                  &mProvideCurrentCpuInfoSnowLeopardSysctlMibInitPatch
+                  );
+
+      //
+      // Patch _ml_cpu_cache_sharing (0x3)
+      //
+      CopyMem (
+        &mProvideCurrentCpuInfoSnowLeopardSysctlMibInitReplace[12],
+        &CacheSharings[L3U],
+        sizeof (UINT32)
+        );
+      Status |= PatcherApplyGenericPatch (
+                  Patcher,
+                  &mProvideCurrentCpuInfoSnowLeopardSysctlMibInitPatch
+                  );
+
+      //
+      // Patch _ml_cpu_cache_size (0x1) - L1
+      //
+      CacheSize = MAX (CacheSizes[L1I], CacheSizes[L1D]);
+      CopyMem (
+        &mProvideCurrentCpuInfoSnowLeopardSysctlMibInitReplace[12],
+        &CacheSize,
+        sizeof (UINT32)
+        );
+      Status |= PatcherApplyGenericPatch (
+                  Patcher,
+                  &mProvideCurrentCpuInfoSnowLeopardSysctlMibInitPatch
+                  );
+
+      //
+      // Patch _ml_cpu_cache_size (0x2) - L2
+      //
+      CopyMem (
+        &mProvideCurrentCpuInfoSnowLeopardSysctlMibInitReplace[12],
+        &CacheSizes[L2U],
+        sizeof (UINT32)
+        );
+      Status |= PatcherApplyGenericPatch (
+                  Patcher,
+                  &mProvideCurrentCpuInfoSnowLeopardSysctlMibInitPatch
+                  );
+
+      //
+      // Patch _ml_cpu_cache_size (0x3) - L3
+      //
+      CopyMem (
+        &mProvideCurrentCpuInfoSnowLeopardSysctlMibInitReplace[12],
+        &CacheSizes[L3U],
+        sizeof (UINT32)
+        );
+    }
+
+    Status |= PatcherApplyGenericPatch (
+                Patcher,
+                &mProvideCurrentCpuInfoSnowLeopardSysctlMibInitPatch
+                );
+    if (EFI_ERROR (Status)) {
+      DEBUG ((DEBUG_WARN, "OCAK: [FAIL] Failed to patch or more areas in _sysctl_mib_init - %r\n", Status));
+      return EFI_NOT_FOUND;
     }
   }
 
