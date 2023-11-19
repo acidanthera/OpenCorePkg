@@ -84,7 +84,7 @@ CONST struct {
   { 0xD6, L3U, SIZE_1MB,     8,  64, 1 },
   { 0xD7, L3U, SIZE_2MB,     8,  64, 1 },
   { 0xD8, L3U, SIZE_4MB,     8,  64, 1 },
-  { 0xDC, L3U, 1.5*SIZE_1MB, 12, 64, 1 },
+  { 0xDC, L3U, (UINT32)(1.5*SIZE_1MB), 12, 64, 1 },
   { 0xDD, L3U, 3*SIZE_1MB,   12, 64, 1 },
   { 0xDE, L3U, 6*SIZE_1MB,   12, 64, 1 },
   { 0xE2, L3U, SIZE_2MB,     16, 64, 1 },
