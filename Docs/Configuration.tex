@@ -1631,13 +1631,20 @@ To view their current state, use the \texttt{pmset -g} command in Terminal.
   still work. On the other hand, it is not particularly realistic to want to
   start these early, insecure images with secure boot anyway.
 
-  \emph{Note 1}: When enabled, this quirk is applied to all Apple-specific Fat
-  binaries (32-bit and 64-bit versions in one image), and to any other
-  Apple-signed boot images that are not being processed for Apple secure boot.
-
-  \emph{Note 2}: The quirk is never applied during the Apple secure boot path for
+  \emph{Note 1}: The quirk is never applied during the Apple secure boot path for
   newer macOS. The Apple secure boot path includes its own separate mitigations
   for \texttt{boot.efi} \texttt{W\^{}X} issues.
+
+  \emph{Note 2}: When enabled, and when not processing for Apple seucre boot, this quirk
+  is applied to:
+    \begin{itemize}
+      \tightlist
+      \item All images from Apple Fat binaries (32-bit and 64-bit versions in one image).
+      \item All Apple-signed images.
+      \item All images at
+      \texttt{\textbackslash System\textbackslash Library\textbackslash CoreServices\textbackslash boot.efi}
+      within their filesystem.
+    \end{itemize}
 
   \emph{Note 3}: This quirk is needed for macOS 10.4 to 10.12 (and
   higher, if Apple secure boot is not enabled), but only when the firmware

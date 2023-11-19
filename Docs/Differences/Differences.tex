@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
-%DIF DEL PreviousConfiguration.tex   Mon Nov  6 21:35:43 2023
-%DIF ADD ../Configuration.tex        Tue Nov  7 22:04:03 2023
+%DIF DEL PreviousConfiguration.tex   Sun Nov 12 17:46:03 2023
+%DIF ADD ../Configuration.tex        Sun Nov 19 18:35:36 2023
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -1691,19 +1691,27 @@ To view their current state, use the \texttt{pmset -g} command in Terminal.
   still work. On the other hand, it is not particularly realistic to want to
   start \DIFdelbegin \DIFdel{such }\DIFdelend \DIFaddbegin \DIFadd{these }\DIFaddend early, insecure images with secure boot anyway.
 
-  \emph{Note 1}: \DIFdelbegin \DIFdel{The quirk is only applied to }\DIFdelend \DIFaddbegin \DIFadd{When enabled, this quirk is applied to all }\DIFaddend Apple-specific \DIFdelbegin \DIFdel{`fat' (both }\DIFdelend \DIFaddbegin \DIFadd{Fat
-  binaries (}\DIFaddend 32-bit and 64-bit versions in one image)\DIFdelbegin \texttt{\DIFdel{.efi}} %DIFAUXCMD
-\DIFdel{files, and }\DIFdelend \DIFaddbegin \DIFadd{, and to any other
-  Apple-signed boot images that are not being processed for Apple secure boot.
-}
-
-  \emph{\DIFadd{Note 2}}\DIFadd{: The quirk }\DIFaddend is never applied during the Apple secure boot path for
+  \emph{Note 1}: The quirk is \DIFdelbegin \DIFdel{only applied to Apple-specific `fat' (both 32-bit and 64-bit
+  versions in one image) }\texttt{\DIFdel{.efi}} %DIFAUXCMD
+\DIFdel{files, and is }\DIFdelend never applied during the Apple secure boot path for
   newer macOS. \DIFaddbegin \DIFadd{The Apple secure boot path includes its own separate mitigations
   for }\texttt{\DIFadd{boot.efi}} \texttt{\DIFadd{W\^{}X}} \DIFadd{issues.
 }\DIFaddend 
 
-  \emph{Note \DIFdelbegin \DIFdel{2}\DIFdelend \DIFaddbegin \DIFadd{3}\DIFaddend }: \DIFdelbegin \DIFdel{The quirk is only needed for loading Mac OS X }\DIFdelend \DIFaddbegin \DIFadd{This quirk is needed for macOS }\DIFaddend 10.4 \DIFdelbegin \DIFdel{and 10.5, and even then
-  only if }\DIFdelend \DIFaddbegin \DIFadd{to 10.12 (and
+  \emph{Note 2}: \DIFdelbegin \DIFdel{The quirk
+  is only needed for loading Mac OS X 10.4 }\DIFdelend \DIFaddbegin \DIFadd{When enabled, and when not processing for Apple seucre boot, this quirk
+  is applied to:
+    }\begin{itemize}
+      \tightlist
+      \item \DIFadd{All images from Apple Fat binaries (32-bit }\DIFaddend and \DIFdelbegin \DIFdel{10.5, and even then
+  only if }\DIFdelend \DIFaddbegin \DIFadd{64-bit versions in one image).
+      }\item \DIFadd{All Apple-signed images.
+      }\item \DIFadd{All images at
+      }\texttt{\DIFadd{\textbackslash System\textbackslash Library\textbackslash CoreServices\textbackslash boot.efi}}
+      \DIFadd{within their filesystem.
+    }\end{itemize}
+
+  \emph{\DIFadd{Note 3}}\DIFadd{: This quirk is needed for macOS 10.4 to 10.12 (and
   higher, if Apple secure boot is not enabled), but only when }\DIFaddend the firmware
   itself includes a modern, more secure PE COFF image loader. This \DIFdelbegin \DIFdel{includes
   }\DIFdelend \DIFaddbegin \DIFadd{applies to
