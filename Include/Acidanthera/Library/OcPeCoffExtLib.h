@@ -107,15 +107,18 @@ OcPatchLegacyEfi (
   Closely based on PeCoffInitializeContext from PeCoffLib2.
 
   The approach of modifying the image in memory is basically incompatible
-  with secure boot, athough:
+  with secure boot, although:
     a) Certain firmware may allow optionally registering the hash of any
        image which does not load, which would still work.
     b) It is fairly crazy anyway to want to apply secure boot to the old,
        insecure .efi files which need these fixups.
 
-  @param[out] Context     The context describing the Image.
-  @param[in]  FileBuffer  The file data to parse as PE Image.
-  @param[in]  FileSize    The size, in Bytes, of FileBuffer.
+  @param[out] Context        The context describing the Image.
+  @param[in]  FileBuffer     The file data to parse as PE Image.
+  @param[in]  FileSize       The size, in Bytes, of FileBuffer.
+  @param[in]  InMemoryFixup  If TRUE, fixes are made to image in memory.
+                             If FALSE, Context is initialised as if fixes were
+                             made, but no changes are made to loaded image.
 
   @retval RETURN_SUCCESS  The Image context has been initialised successfully.
   @retval other           The file data is malformed.
@@ -124,7 +127,8 @@ RETURN_STATUS
 OcPeCoffFixupInitializeContext (
   OUT PE_COFF_LOADER_IMAGE_CONTEXT  *Context,
   IN  CONST VOID                    *FileBuffer,
-  IN  UINT32                        FileSize
+  IN  UINT32                        FileSize,
+  IN  BOOLEAN                       InMemoryFixup
   );
 
 #endif // OC_PE_COFF_EXT_LIB_H

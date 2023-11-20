@@ -126,7 +126,8 @@ VerifySignatureAndApfs (
     ContextStatus = OcPeCoffFixupInitializeContext (
                       &Context,
                       Image,
-                      ImageSize
+                      ImageSize,
+                      FALSE
                       );
   }
 
@@ -146,17 +147,6 @@ VerifySignatureAndApfs (
     ImageSize,
     Status
     ));
-  if (Status == EFI_SECURITY_VIOLATION) {
-    if (ForceFixup) {
-      DEBUG ((DEBUG_ERROR, "SIGN: Expected security violation due to -f\n"));
-    } else {
-      //
-      // This would be an image with PE COFF section overlaps but also signed
-      // or an incorrectly signed image, neither of which are expected.
-      //
-      DEBUG ((DEBUG_ERROR, "SIGN: *** Unexpected result! If this is a genuine Apple binary and you wish to verify the signature, please use a version of AppleEfiSignTool from OpenCore 0.8.7 or earlier. ***\n"));
-    }
-  }
 
   if (!EFI_ERROR (ContextStatus)) {
     ApfsStatus = InternalPeCoffGetApfsDriverVersionFromContext (&Context, ImageSize, &DriverVersion);

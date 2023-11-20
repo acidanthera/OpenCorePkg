@@ -583,7 +583,8 @@ OcPatchLegacyEfi (
   ImageStatus = OcPeCoffFixupInitializeContext (
                   &ImageContext,
                   DriverBuffer,
-                  DriverSize
+                  DriverSize,
+                  TRUE
                   );
   if (EFI_ERROR (ImageStatus)) {
     DEBUG ((DEBUG_WARN, "OCPE: PeCoff legacy patch failure - %r\n", ImageStatus));
