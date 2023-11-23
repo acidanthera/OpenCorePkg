@@ -67,6 +67,7 @@ extern BOOLEAN  _gPcd_FeatureFlag_PcdFatReadOnlyMode;
 extern UINT32   _gPcd_BinaryPatch_PcdSerialRegisterStride;
 extern UINT8    _gPcd_FixedAtBuild_PcdUefiImageFormatSupportNonFv;
 extern UINT8    _gPcd_FixedAtBuild_PcdUefiImageFormatSupportFv;
+extern UINT32   _gPcd_FixedAtBuild_PcdImageProtectionPolicy;
 
 #define _PCD_GET_MODE_32_PcdUefiLibMaxPrintBufferSize   _gPcd_FixedAtBuild_PcdUefiLibMaxPrintBufferSize
 #define _PCD_GET_MODE_BOOL_PcdUgaConsumeSupport         _gPcd_FixedAtBuild_PcdUgaConsumeSupport
@@ -105,5 +106,6 @@ extern UINT8    _gPcd_FixedAtBuild_PcdUefiImageFormatSupportFv;
 #define _PCD_GET_MODE_32_PcdImageLoaderRelocTypePolicy               _gPcd_FixedAtBuild_PcdImageLoaderRelocTypePolicy
 #define _PCD_GET_MODE_8_PcdUefiImageFormatSupportNonFv               _gPcd_FixedAtBuild_PcdUefiImageFormatSupportNonFv
 #define _PCD_GET_MODE_8_PcdUefiImageFormatSupportFv                  _gPcd_FixedAtBuild_PcdUefiImageFormatSupportFv
+#define _PCD_GET_MODE_32_PcdImageProtectionPolicy                    _gPcd_FixedAtBuild_PcdImageProtectionPolicy
 
 #endif // OC_USER_PCD_H

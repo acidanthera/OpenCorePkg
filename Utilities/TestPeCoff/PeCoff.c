@@ -200,7 +200,7 @@ PeCoffTestLoadFull (
   UINT32                        DestinationAlignment;
   UINT8                         HashContext;
 
-  Status = PeCoffInitializeContext (&Context, FileBuffer, FileSize);
+  Status = PeCoffInitializeContext (&Context, FileBuffer, FileSize, UefiImageOriginFv);
   if (EFI_ERROR (Status)) {
     return EFI_UNSUPPORTED;
   }

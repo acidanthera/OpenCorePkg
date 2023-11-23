@@ -50,3 +50,4 @@ BOOLEAN  _gPcd_FeatureFlag_PcdFatReadOnlyMode                        = _PCD_VALU
 UINT32   _gPcd_BinaryPatch_PcdSerialRegisterStride                   = 0;
 UINT8    _gPcd_FixedAtBuild_PcdUefiImageFormatSupportNonFv           = 0x00;
 UINT8    _gPcd_FixedAtBuild_PcdUefiImageFormatSupportFv              = 0x03;
+UINT32   _gPcd_FixedAtBuild_PcdImageProtectionPolicy                 = 0x00;
