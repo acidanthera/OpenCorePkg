@@ -117,7 +117,8 @@ VerifySignatureAndApfs (
     ContextStatus = PeCoffInitializeContext (
                       &Context,
                       Image,
-                      ImageSize
+                      ImageSize,
+                      UefiImageOriginFv
                       );
   }
 
