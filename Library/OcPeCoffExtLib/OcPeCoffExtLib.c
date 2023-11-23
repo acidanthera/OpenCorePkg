@@ -467,7 +467,7 @@ PeCoffVerifyAppleSignature (
                   &ImageContext,
                   PeImage,
                   *ImageSize,
-                  UefiImageOriginFv
+                  UefiImageOriginUserImage
                   );
   if (EFI_ERROR (ImageStatus)) {
     DEBUG ((DEBUG_INFO, "OCPE: PeCoff verify init failure - %r\n", ImageStatus));
@@ -563,7 +563,7 @@ PeCoffGetApfsDriverVersion (
                   &ImageContext,
                   DriverBuffer,
                   DriverSize,
-                  UefiImageOriginFv
+                  UefiImageOriginUserImage
                   );
   if (EFI_ERROR (ImageStatus)) {
     DEBUG ((DEBUG_INFO, "OCPE: PeCoff apfs init failure - %r\n", ImageStatus));
