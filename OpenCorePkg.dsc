@@ -404,7 +404,8 @@
   gEfiMdePkgTokenSpaceGuid.PcdImageLoaderWXorX|TRUE
   gEfiMdePkgTokenSpaceGuid.PcdImageLoaderAlignmentPolicy|0xFFFFFFFF
   gEfiMdePkgTokenSpaceGuid.PcdImageLoaderRelocTypePolicy|0xFFFFFFFF
-
+  gEfiMdePkgTokenSpaceGuid.PcdImageProtectionPolicy|0x00000003
+  
 [PcdsPatchableInModule]
   gEfiMdeModulePkgTokenSpaceGuid.PcdSerialRegisterAccessWidth|8
   gEfiMdeModulePkgTokenSpaceGuid.PcdSerialUseMmio|FALSE
