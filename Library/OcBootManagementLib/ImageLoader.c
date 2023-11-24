@@ -297,7 +297,7 @@ OcImageLoaderLoad (
                   SourceBuffer,
                   (UINT32)SourceSize,
                   UEFI_IMAGE_SOURCE_FV,
-                  UefiImageOriginFv
+                  UefiImageOriginUserImage
                   );
   if (EFI_ERROR (ImageStatus)) {
     DEBUG ((DEBUG_INFO, "OCB: PeCoff init failure - %r\n", ImageStatus));

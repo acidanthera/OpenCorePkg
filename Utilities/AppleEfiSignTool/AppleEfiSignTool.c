@@ -118,7 +118,7 @@ VerifySignatureAndApfs (
                       &Context,
                       Image,
                       ImageSize,
-                      UefiImageOriginFv
+                      UefiImageOriginUserImage
                       );
   }
 
