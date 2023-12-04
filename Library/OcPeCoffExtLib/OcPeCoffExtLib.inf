@@ -38,7 +38,7 @@
   OpenCorePkg/OpenCorePkg.dec
 
 [LibraryClasses]
-  UefiImageLib
+  PeCoffLib2
   UefiRuntimeServicesTableLib
   UefiBootServicesTableLib
   MemoryAllocationLib

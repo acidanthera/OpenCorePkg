@@ -296,7 +296,7 @@ OcImageLoaderLoad (
                   &ImageContext,
                   SourceBuffer,
                   (UINT32)SourceSize,
-                  UEFI_IMAGE_SOURCE_FV,
+                  UEFI_IMAGE_SOURCE_NON_FV,
                   UefiImageOriginUserImage
                   );
   if (EFI_ERROR (ImageStatus)) {

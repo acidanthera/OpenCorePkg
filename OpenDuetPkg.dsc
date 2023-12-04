@@ -139,6 +139,8 @@
       DxeServicesTableLib|MdeModulePkg/Library/DxeCoreDxeServicesTableLib/DxeCoreDxeServicesTableLib.inf
       UefiBootServicesTableLib|MdeModulePkg/Library/DxeCoreUefiBootServicesTableLib/DxeCoreUefiBootServicesTableLib.inf
       UefiRuntimeServicesTableLib|MdeModulePkg/Library/DxeCoreUefiRuntimeServicesTableLib/DxeCoreUefiRuntimeServicesTableLib.inf
+    <PcdsFixedAtBuild>
+      gEfiMdePkgTokenSpaceGuid.PcdUefiImageFormatSupportFv|0x03
   }
 
   MdeModulePkg/Universal/PCD/Dxe/Pcd.inf
@@ -259,6 +261,7 @@
   gEfiMdePkgTokenSpaceGuid.PcdFixedDebugPrintErrorLevel|0x0
   gEfiMdePkgTokenSpaceGuid.PcdReportStatusCodePropertyMask|0x0
   gOpenCorePkgTokenSpaceGuid.PcdCanaryAllowRdtscFallback|TRUE
+  gEfiMdePkgTokenSpaceGuid.PcdUefiImageFormatSupportFv|0x02
 
 [BuildOptions]
   MSFT:NOOPT_*_*_CC_FLAGS    = -D OC_TARGET_RELEASE=1 /FAcs -Dinline=__inline  /GS /kernel

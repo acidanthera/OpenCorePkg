@@ -94,7 +94,7 @@
   MemoryAllocationLib
   PrintLib
   UefiBootServicesTableLib
-  UefiImageLib
+  UefiImageOnlyNonFvLib
   OcApfsLib
   OcAppleBootPolicyLib
   OcAppleChunklistLib
