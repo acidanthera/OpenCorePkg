@@ -234,9 +234,10 @@ class ReloadUefi:
     # Returns a dictionary with PE sections.
     #
 
-    def pe_sections(self, opt, file, _):
+    def pe_sections(self, combined, file, _):
         sect_t = self.ptype('EFI_IMAGE_SECTION_HEADER')
-        sections_addr = opt.GetLoadAddress() + opt.GetByteSize()
+        common = self.get_child_member_with_name(combined, 'CommonHeader')
+        sections_addr = common.GetLoadAddress() + common.GetByteSize() + self.get_field(file, 'SizeOfOptionalHeader')
         sections = self.typed_ptr(sect_t, sections_addr)
         sects = OrderedDict()
         for i in range(self.get_field(file, 'NumberOfSections')):
@@ -253,7 +254,7 @@ class ReloadUefi:
     #
 
     def pe_is_64(self, pe_headers):
-        magic = pe_headers.GetValueForExpressionPath('.Pe32.OptionalHeader.Magic').GetValueAsUnsigned()
+        magic = pe_headers.GetValueForExpressionPath('.Pe32.Magic').GetValueAsUnsigned()
         return magic == self.PE32PLUS_MAGIC
 
     #
@@ -271,12 +272,11 @@ class ReloadUefi:
     # Returns the PE (not so) optional header.
     #
 
-    def pe_optional(self, pe):
+    def pe_combined(self, pe):
         if self.pe_is_64(pe):
-            obj = self.get_child_member_with_name(pe, 'Pe32Plus')
+            return self.get_child_member_with_name(pe, 'Pe32Plus')
         else:
-            obj = self.get_child_member_with_name(pe, 'Pe32')
-        return self.get_child_member_with_name(obj, 'OptionalHeader')
+            return self.get_child_member_with_name(pe, 'Pe32')
 
     #
     # Returns the symbol file name for a PE image.
@@ -284,8 +284,8 @@ class ReloadUefi:
 
     def pe_parse_debug(self, base):
         pe = self.pe_headers(base)
-        opt = self.pe_optional(pe)
-        debug_dir_entry = opt.GetValueForExpressionPath('.DataDirectory[6]')
+        combined = self.pe_combined(pe)
+        debug_dir_entry = combined.GetValueForExpressionPath('.DataDirectory[6]')
         dep = self.get_field(debug_dir_entry, 'VirtualAddress') + base
         dep = self.typed_ptr(self.ptype('EFI_IMAGE_DEBUG_DIRECTORY_ENTRY'), dep)
         cvp = self.get_field(dep, 'RVA') + base
@@ -303,10 +303,10 @@ class ReloadUefi:
         return self.EINVAL
 
     #
-    # Prepares symbol load command with proper section information.
+    # Prepares lldb symbol load command.
     # Currently supports Mach-O and single-section files.
     #
-    def get_sym_cmd(self, filename, orgbase, *_):
+    def get_sym_cmd(self, filename, orgbase):
         if filename.endswith('.pdb'):
             dll_file = filename.replace('.pdb', '.dll')
             module_cmd = f'target modules add -s {filename} {dll_file}'
@@ -324,12 +324,10 @@ class ReloadUefi:
     #
 
     def parse_image(self, image, syms):
-        orgbase = base = self.get_field(image, 'ImageBase')
+        base = self.get_field(image, 'ImageBase')
         pe = self.pe_headers(base)
-        opt = self.pe_optional(pe)
-        file = self.pe_file(pe)
+        combined = self.pe_combined(pe)
         sym_address = self.pe_parse_debug(base)
-        sections = self.pe_sections(opt, file, base)
 
         if sym_address == 0:
             # llvm-objcopy --add-gnu-debuglink=a/x.debug a/x.dll does not update
@@ -337,6 +335,8 @@ class ReloadUefi:
             # with a /\d+ name containing:
             # - ASCII debug file name (x.debug) padded by 4 bytes
             # - CRC32
+            file = self.pe_file(pe)
+            sections = self.pe_sections(combined, file, base)
             last_section = next(reversed(sections))
             if re.match(r'^/\d+$', last_section):
                 sym_address = sections[last_section]
@@ -352,8 +352,15 @@ class ReloadUefi:
 
         # For ELF and Mach-O-derived images...
         if self.offset_by_headers:
-            base = base + self.get_field(opt, 'SizeOfHeaders')
+            base = base + self.get_field(combined, 'SizeOfHeaders')
         if sym_name != self.EINVAL:
+            self.add_sym(sym_name, base, syms)
+
+    #
+    # Add symbol load command with additional processing for correct file location.
+    #
+   
+    def add_sym(self, sym_name, base, syms):
             macho = os.path.isdir(sym_name + '.dSYM')
             if macho:
                 real_sym = sym_name
@@ -370,9 +377,23 @@ class ReloadUefi:
                             break
 
             if real_sym:
-                syms.append(self.get_sym_cmd(real_sym, orgbase, sections, macho, base))
+                syms.append(self.get_sym_cmd(real_sym, base))
             else:
                 print(f'No symbol file {sym_name}')
+
+    #
+    # Use debug info from new image loader.
+    #
+
+    def use_new_debug_info(self, entry, syms):
+        sym_address = self.get_child_member_with_name(entry, 'PdbPath')
+        if sym_address:
+            sym_ptr = self.cast_ptr(self.ptype('char'), sym_address)
+            sym_name = UefiMisc.parse_utf8(self.get_field(sym_ptr))
+            debug_base = self.get_field(entry, 'DebugBase')
+            self.add_sym(sym_name, debug_base, syms)
+        else:
+            print('No symbol file')
 
     #
     # Parses table EFI_DEBUG_IMAGE_INFO structures, builds
@@ -390,6 +411,9 @@ class ReloadUefi:
             if image_type == 1:
                 entry = self.get_child_member_with_name(entry, 'NormalImage')
                 self.parse_image(self.get_child_member_with_name(entry, 'LoadedImageProtocolInstance'), syms)
+            elif image_type == 2:
+                entry = self.get_child_member_with_name(entry, 'NormalImage2')
+                self.use_new_debug_info(entry, syms)
             else:
                 print(f'Skipping unknown EFI_DEBUG_IMAGE_INFO (ImageInfoType {image_type})')
             index = index + 1
@@ -399,6 +423,7 @@ class ReloadUefi:
             self.debugger.HandleCommand(sym[0])
             print(sym[1])
             self.debugger.HandleCommand(sym[1])
+
     #
     # Parses EFI_DEBUG_IMAGE_INFO_TABLE_HEADER, in order to load
     # image symbols.
@@ -420,7 +445,7 @@ class ReloadUefi:
     def parse_est(self, est):
         est_t = self.ptype('EFI_SYSTEM_TABLE')
         est = self.cast_ptr(est_t, est)
-        print(f"Connected to {UefiMisc.parse_utf16(self.get_field(est, 'FirmwareVendor'))}(Rev. 0x{self.get_field(est, 'FirmwareRevision'):x}")
+        print(f"Connected to {UefiMisc.parse_utf16(self.get_field(est, 'FirmwareVendor'))}(Rev. 0x{self.get_field(est, 'FirmwareRevision'):x})")
         print(f"ConfigurationTable @ 0x{self.get_field(est, 'ConfigurationTable'):x}, 0x{self.get_field(est, 'NumberOfTableEntries'):x} entries")
         dh = self.search_config(self.get_child_member_with_name(est, 'ConfigurationTable'), self.get_field(est, 'NumberOfTableEntries'), self.DEBUG_GUID)
         if dh == self.EINVAL:

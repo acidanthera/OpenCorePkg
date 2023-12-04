@@ -194,40 +194,18 @@ class ReloadUefi(gdb.Command):
         return gdb.Value(h_addr).cast(head_t)
 
     #
-    # Returns a dictionary with PE sections.
-    #
-
-    def pe_sections(self, opt, file, _):
-        sect_t = self.ptype('EFI_IMAGE_SECTION_HEADER')
-        sections = (opt.address + 1).cast(sect_t)
-        sects = {}
-        for i in range(file['NumberOfSections']):
-            name = UefiMisc.parse_utf8(sections[i]['Name'])
-            addr = int(sections[i]['VirtualAddress'])
-            if name != '':
-                sects[name] = addr
-        return sects
-
-    #
     # Returns True if pe_headers refer to a PE32+ image.
     #
 
     def pe_is_64(self, pe_headers):
-        return pe_headers['Pe32']['OptionalHeader']['Magic'] == self.PE32PLUS_MAGIC
+        return pe_headers['Pe32']['Magic'] == self.PE32PLUS_MAGIC
 
     #
-    # Returns the PE fileheader.
+    # Returns the PE combined common and (not so) optional header.
     #
 
-    def pe_file(self, pe):
-        return pe['Pe32Plus']['FileHeader'] if self.pe_is_64(pe) else pe['Pe32']['FileHeader']
-
-    #
-    # Returns the PE(not so) optional header.
-    #
-
-    def pe_optional(self, pe):
-        return pe['Pe32Plus']['OptionalHeader'] if self.pe_is_64(pe) else pe['Pe32']['OptionalHeader']
+    def pe_combined(self, pe):
+        return pe['Pe32Plus'] if self.pe_is_64(pe) else pe['Pe32']
 
     #
     # Returns the symbol file name for a PE image.
@@ -235,8 +213,8 @@ class ReloadUefi(gdb.Command):
 
     def pe_parse_debug(self, base):
         pe = self.pe_headers(base)
-        opt = self.pe_optional(pe)
-        debug_dir_entry = opt['DataDirectory'][6]
+        combined = self.pe_combined(pe)
+        debug_dir_entry = combined['DataDirectory'][6]
         dep = debug_dir_entry['VirtualAddress'] + int(base)
         dep = dep.cast(self.ptype('EFI_IMAGE_DEBUG_DIRECTORY_ENTRY'))
         cvp = dep.dereference()['RVA'] + int(base)
@@ -250,9 +228,9 @@ class ReloadUefi(gdb.Command):
         return gdb.Value(self.EINVAL)
 
     #
-    # Prepares gdb symbol load command with proper section information.
+    # Prepares gdb symbol load command.
     #
-    def get_sym_cmd(self, file, base, sections, macho):
+    def get_sym_cmd(self, file, base):
         return f'add-symbol-file {file} -o 0x{base:x}'
 
     #
@@ -265,25 +243,42 @@ class ReloadUefi(gdb.Command):
     def parse_image(self, image, syms):
         base = image['ImageBase']
         pe = self.pe_headers(base)
-        opt = self.pe_optional(pe)
-        file = self.pe_file(pe)
+        combined = self.pe_combined(pe)
         sym_name = self.pe_parse_debug(base)
-        sections = self.pe_sections(opt, file, base)
 
         # For ELF and Mach-O-derived images...
         if self.offset_by_headers:
-            base = base + opt['SizeOfHeaders']
+            base = base + combined['SizeOfHeaders']
         if sym_name != self.EINVAL:
-            sym_name = sym_name.cast(self.ptype('CHAR8')).string()
-            sym_name_dbg = re.sub(r'\.dll$', '.debug', sym_name)
-            macho = False
-            if os.path.isdir(sym_name + '.dSYM'):
-                sym_name += '.dSYM/Contents/Resources/DWARF/' + os.path.basename(sym_name)
-                macho = True
-            elif sym_name_dbg != sym_name and os.path.exists(sym_name_dbg):
-                # TODO: implement .elf handling.
-                sym_name = sym_name_dbg
-            syms.append(self.get_sym_cmd(sym_name, int(base), sections, macho))
+            self.add_sym(sym_name, base, syms)
+
+    #
+    # Add symbol load command with additional processing for correct file location.
+    #
+    
+    def add_sym(self, sym_name, base, syms):
+        sym_name = sym_name.cast(self.ptype('CHAR8')).string()
+        sym_name_dbg = re.sub(r'\.dll$', '.debug', sym_name)
+        # macho = False
+        if os.path.isdir(sym_name + '.dSYM'):
+            sym_name += '.dSYM/Contents/Resources/DWARF/' + os.path.basename(sym_name)
+            # macho = True
+        elif sym_name_dbg != sym_name and os.path.exists(sym_name_dbg):
+            # TODO: implement .elf handling.
+            sym_name = sym_name_dbg
+        syms.append(self.get_sym_cmd(sym_name, int(base)))
+
+    #
+    # Use debug info from new image loader.
+    #
+
+    def use_new_debug_info(self, entry, syms):
+        pdb_path = entry['PdbPath']
+        if pdb_path:
+            debug_base = entry['DebugBase']
+            self.add_sym(pdb_path, debug_base, syms)
+        else:
+            print('No symbol file')
 
     #
     # Parses table EFI_DEBUG_IMAGE_INFO structures, builds
@@ -297,9 +292,13 @@ class ReloadUefi(gdb.Command):
         print(f'Found {count} images...')
         while index != count:
             entry = edii[index]
-            if entry['ImageInfoType'].dereference() == 1:
+            image_type = entry['ImageInfoType'].dereference()
+            if image_type == 1:
                 entry = entry['NormalImage']
                 self.parse_image(entry['LoadedImageProtocolInstance'], syms)
+            elif image_type == 2:
+                entry = entry['NormalImage2']
+                self.use_new_debug_info(entry, syms)
             else:
                 print(f"Skipping unknown EFI_DEBUG_IMAGE_INFO(Type {str(entry['ImageInfoType'].dereference())})")
             index += 1
