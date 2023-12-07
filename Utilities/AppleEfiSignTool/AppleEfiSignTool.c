@@ -190,6 +190,12 @@ ENTRY_POINT (
   PcdGet32 (PcdDebugPrintErrorLevel)      |= DEBUG_INFO;
 
   //
+  // Match PcdImageProtectionPolicy defined in OpenCore.dsc.
+  // Apple images (supplied by user) may be not 4KBi aligned.
+  //
+  PcdGet32 (PcdImageProtectionPolicy) = 0x03;
+
+  //
   // Process args or print usage.
   //
   if (argc == 2) {
