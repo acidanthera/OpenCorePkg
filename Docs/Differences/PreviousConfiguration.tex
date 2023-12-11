@@ -94,7 +94,7 @@
 
        \vspace{0.2in}
 
-       Reference Manual (0.9.6)
+       Reference Manual (0.9.7)
 
        \vspace{0.2in}
 
@@ -1617,26 +1617,39 @@ To view their current state, use the \texttt{pmset -g} command in Terminal.
   \textbf{Description}: Fix errors in early Mac OS X boot.efi images.
 
   Modern secure PE loaders will refuse to load \texttt{boot.efi} images from
-  Mac OS X 10.4 and 10.5 due to these files containing \texttt{W\^{}X} errors
-  and illegal overlapping sections.
+  macOS 10.4 to 10.12 due to these files containing \texttt{W\^{}X} errors
+  (in all versions) and illegal overlapping sections (in 10.4 and 10.5 32-bit
+  versions only).
 
   This quirk detects these issues and pre-processes such images in memory,
-  so that a modern loader can accept them.
+  so that a modern loader will accept them.
 
   Pre-processing in memory is incompatible with secure boot, as the image loaded
   is not the image on disk, so you cannot sign files which are loaded in this way
   based on their original disk image contents.
   Certain firmware will offer to register the hash of new, unknown images - this would
   still work. On the other hand, it is not particularly realistic to want to
-  start such early, insecure images with secure boot anyway.
+  start these early, insecure images with secure boot anyway.
 
-  \emph{Note 1}: The quirk is only applied to Apple-specific `fat' (both 32-bit and 64-bit
-  versions in one image) \texttt{.efi} files, and is never applied during the Apple secure
-  boot path for newer macOS.
+  \emph{Note 1}: The quirk is never applied during the Apple secure boot path for
+  newer macOS. The Apple secure boot path includes its own separate mitigations
+  for \texttt{boot.efi} \texttt{W\^{}X} issues.
 
-  \emph{Note 2}: The quirk is only needed for loading Mac OS X 10.4 and 10.5, and even then
-  only if the firmware itself includes a modern, more secure PE COFF image loader. This includes
-  current builds of OpenDuet.
+  \emph{Note 2}: When enabled, and when not processing for Apple secure boot, this quirk
+  is applied to:
+    \begin{itemize}
+      \tightlist
+      \item All images from Apple Fat binaries (32-bit and 64-bit versions in one image).
+      \item All Apple-signed images.
+      \item All images at
+      \texttt{\textbackslash System\textbackslash Library\textbackslash CoreServices\textbackslash boot.efi}
+      within their filesystem.
+    \end{itemize}
+
+  \emph{Note 3}: This quirk is needed for macOS 10.4 to 10.12 (and
+  higher, if Apple secure boot is not enabled), but only when the firmware
+  itself includes a modern, more secure PE COFF image loader. This applies to
+  current builds of OpenDuet, and to OVMF if built from audk source code.
 
 \item
   \texttt{ForceBooterSignature}\\

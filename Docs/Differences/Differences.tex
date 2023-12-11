@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
-%DIF DEL PreviousConfiguration.tex   Sun Nov 12 17:46:03 2023
-%DIF ADD ../Configuration.tex        Sun Nov 19 19:16:39 2023
+%DIF DEL PreviousConfiguration.tex   Mon Dec 11 23:40:25 2023
+%DIF ADD ../Configuration.tex        Mon Dec 11 23:40:25 2023
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -154,7 +154,7 @@
 
        \vspace{0.2in}
 
-       Reference Manual (0.9\DIFdelbegin \DIFdel{.6}\DIFdelend \DIFaddbegin \DIFadd{.7}\DIFaddend )
+       Reference Manual (0.9\DIFdelbegin \DIFdel{.7}\DIFdelend \DIFaddbegin \DIFadd{.8}\DIFaddend )
 
        \vspace{0.2in}
 
@@ -1677,45 +1677,39 @@ To view their current state, use the \texttt{pmset -g} command in Terminal.
   \textbf{Description}: Fix errors in early Mac OS X boot.efi images.
 
   Modern secure PE loaders will refuse to load \texttt{boot.efi} images from
-  \DIFdelbegin \DIFdel{Mac OS X }\DIFdelend \DIFaddbegin \DIFadd{macOS }\DIFaddend 10.4 \DIFdelbegin \DIFdel{and 10.5 }\DIFdelend \DIFaddbegin \DIFadd{to 10.12 }\DIFaddend due to these files containing \texttt{W\^{}X} errors
-  \DIFaddbegin \DIFadd{(in all versions) }\DIFaddend and illegal overlapping sections \DIFaddbegin \DIFadd{(in 10.4 and 10.5 32-bit
-  versions only)}\DIFaddend .
+  macOS 10.4 to 10.12 due to these files containing \texttt{W\^{}X} errors
+  (in all versions) and illegal overlapping sections (in 10.4 and 10.5 32-bit
+  versions only).
 
   This quirk detects these issues and pre-processes such images in memory,
-  so that a modern loader \DIFdelbegin \DIFdel{can }\DIFdelend \DIFaddbegin \DIFadd{will }\DIFaddend accept them.
+  so that a modern loader will accept them.
 
   Pre-processing in memory is incompatible with secure boot, as the image loaded
   is not the image on disk, so you cannot sign files which are loaded in this way
   based on their original disk image contents.
   Certain firmware will offer to register the hash of new, unknown images - this would
   still work. On the other hand, it is not particularly realistic to want to
-  start \DIFdelbegin \DIFdel{such }\DIFdelend \DIFaddbegin \DIFadd{these }\DIFaddend early, insecure images with secure boot anyway.
+  start these early, insecure images with secure boot anyway.
 
-  \emph{Note 1}: The quirk is \DIFdelbegin \DIFdel{only applied to Apple-specific `fat' (both 32-bit and 64-bit
-  versions in one image) }\texttt{\DIFdel{.efi}} %DIFAUXCMD
-\DIFdel{files, and is }\DIFdelend never applied during the Apple secure boot path for
-  newer macOS. \DIFaddbegin \DIFadd{The Apple secure boot path includes its own separate mitigations
-  for }\texttt{\DIFadd{boot.efi}} \texttt{\DIFadd{W\^{}X}} \DIFadd{issues.
-}\DIFaddend 
+  \emph{Note 1}: The quirk is never applied during the Apple secure boot path for
+  newer macOS. The Apple secure boot path includes its own separate mitigations
+  for \texttt{boot.efi} \texttt{W\^{}X} issues.
 
-  \emph{Note 2}: \DIFdelbegin \DIFdel{The quirk
-  is only needed for loading Mac OS X 10.4 }\DIFdelend \DIFaddbegin \DIFadd{When enabled, and when not processing for Apple secure boot, this quirk
+  \emph{Note 2}: When enabled, and when not processing for Apple secure boot, this quirk
   is applied to:
-    }\begin{itemize}
+    \begin{itemize}
       \tightlist
-      \item \DIFadd{All images from Apple Fat binaries (32-bit }\DIFaddend and \DIFdelbegin \DIFdel{10.5, and even then
-  only if }\DIFdelend \DIFaddbegin \DIFadd{64-bit versions in one image).
-      }\item \DIFadd{All Apple-signed images.
-      }\item \DIFadd{All images at
-      }\texttt{\DIFadd{\textbackslash System\textbackslash Library\textbackslash CoreServices\textbackslash boot.efi}}
-      \DIFadd{within their filesystem.
-    }\end{itemize}
+      \item All images from Apple Fat binaries (32-bit and 64-bit versions in one image).
+      \item All Apple-signed images.
+      \item All images at
+      \texttt{\textbackslash System\textbackslash Library\textbackslash CoreServices\textbackslash boot.efi}
+      within their filesystem.
+    \end{itemize}
 
-  \emph{\DIFadd{Note 3}}\DIFadd{: This quirk is needed for macOS 10.4 to 10.12 (and
-  higher, if Apple secure boot is not enabled), but only when }\DIFaddend the firmware
-  itself includes a modern, more secure PE COFF image loader. This \DIFdelbegin \DIFdel{includes
-  }\DIFdelend \DIFaddbegin \DIFadd{applies to
-  }\DIFaddend current builds of OpenDuet\DIFaddbegin \DIFadd{, and to OVMF if built from audk source code}\DIFaddend .
+  \emph{Note 3}: This quirk is needed for macOS 10.4 to 10.12 (and
+  higher, if Apple secure boot is not enabled), but only when the firmware
+  itself includes a modern, more secure PE COFF image loader. This applies to
+  current builds of OpenDuet, and to OVMF if built from audk source code.
 
 \item
   \texttt{ForceBooterSignature}\\
