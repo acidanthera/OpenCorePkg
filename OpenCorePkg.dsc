@@ -184,7 +184,7 @@
   MdeModulePkg/Bus/Pci/XhciDxe/XhciDxe.inf {
     <LibraryClasses>
       !if $(TARGET) == RELEASE
-        DebugLib|MdePkg/Library/BaseDebugLibNull/BaseDebugLibNull.inf
+        DebugLib|OpenCorePkg/Library/OcDebugLibNull/OcDebugLibNull.inf
       !endif
   }
   MdeModulePkg/Bus/Isa/Ps2MouseDxe/Ps2MouseDxe.inf
