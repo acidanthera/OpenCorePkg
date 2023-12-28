@@ -262,6 +262,11 @@
   gEfiMdePkgTokenSpaceGuid.PcdReportStatusCodePropertyMask|0x0
   gOpenCorePkgTokenSpaceGuid.PcdCanaryAllowRdtscFallback|TRUE
   gEfiMdePkgTokenSpaceGuid.PcdUefiImageFormatSupportFv|0x02
+  #
+  # Policy required to allow legacy, non-aligned, non-signed Apple images
+  # such as HfsPlusLegacy.efi.
+  #
+  gEfiMdePkgTokenSpaceGuid.PcdImageProtectionPolicy|0x00000003
 
 [BuildOptions]
   MSFT:NOOPT_*_*_CC_FLAGS    = -D OC_TARGET_RELEASE=1 /FAcs -Dinline=__inline  /GS /kernel

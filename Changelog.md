@@ -1,5 +1,8 @@
 OpenCore Changelog
 ==================
+#### v0.9.8
+- Updated OpenDuet to allow loading unsigned, unaligned legacy Apple images such as HfsPlusLegacy.efi
+
 #### v0.9.7
 - Updated recovery_urls.txt
 - Changed OpenDuet to enforce `W^X` settings rather than fixing them in loaded images
