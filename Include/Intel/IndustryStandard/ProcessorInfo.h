@@ -241,13 +241,15 @@ typedef enum {
 #define CPU_MODEL_COFFEELAKE_DT   0x9E
 #define CPU_MODEL_ICELAKE_Y       0x7D
 #define CPU_MODEL_ICELAKE_U       0x7E
-#define CPU_MODEL_ICELAKE_SP      0x9F /* Some variation of Ice Lake */
-#define CPU_MODEL_COMETLAKE_S     0xA5 /* desktop CometLake */
-#define CPU_MODEL_COMETLAKE_Y     0xA5 /* aka 10th generation Amber Lake Y */
+#define CPU_MODEL_ICELAKE_SP      0x9F ///< Some variation of Ice Lake
+#define CPU_MODEL_COMETLAKE_S     0xA5 ///< desktop CometLake
+#define CPU_MODEL_COMETLAKE_Y     0xA5 ///< aka 10th generation Amber Lake Y
 #define CPU_MODEL_COMETLAKE_U     0xA6
-#define CPU_MODEL_ROCKETLAKE_S    0xA7/* desktop RocketLake */
+#define CPU_MODEL_ROCKETLAKE_S    0xA7 ///< desktop RocketLake
 #define CPU_MODEL_TIGERLAKE_U     0x8C
 #define CPU_MODEL_ALDERLAKE_S     0x97
+#define CPU_MODEL_RAPTORLAKE_S    0xB7 ///< Raptor Lake B0 stepping
+#define CPU_MODEL_RAPTORLAKE_HX   0xBF ///< Raptor Lake C0 stepping
 
 #define AMD_CPU_FAMILY          0xF
 #define AMD_CPU_EXT_FAMILY_10H  0x1

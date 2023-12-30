@@ -611,6 +611,8 @@ InternalDetectAppleProcessorType (
     case CPU_MODEL_ICELAKE_SP:     // 0x9F FIXME - unknown, for now
     case CPU_MODEL_TIGERLAKE_U:    // 0x8C FIXME - unknown, for now
     case CPU_MODEL_ALDERLAKE_S:    // 0x97 FIXME - unknown, for now
+    case CPU_MODEL_RAPTORLAKE_S:   // 0xB7 FIXME - unknown, for now
+    case CPU_MODEL_RAPTORLAKE_HX:  // 0xBF FIXME - unknown, for now
       if (AppleMajorType == AppleProcessorMajorM3) {
         // MB101 (m3 7Y32)
         return AppleProcessorTypeCoreM3Type7; // 0x0C07
@@ -648,6 +650,7 @@ InternalDetectAppleProcessorType (
       if (AppleMajorType == AppleProcessorMajorI9) {
         // FIXME: find a dump from MBP151 with i9-8950HK,
         // for now using an ideal value (0x1009), comparing to 0x0709 (used on MBP151, i7-8850H and MM81, i7-8700B)
+        // MBP161 (i9-9980HK)
         return AppleProcessorTypeCorei9Type9; // 0x1009
       }
 

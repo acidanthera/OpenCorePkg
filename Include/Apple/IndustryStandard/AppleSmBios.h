@@ -216,7 +216,7 @@ enum {
 
   AppleProcessorTypeCorei9Type1 = 0x1001,     // may not be used
   AppleProcessorTypeCorei9Type5 = 0x1005,     // SKL-X i9, most likely to be invalid!
-  AppleProcessorTypeCorei9Type9 = 0x1009      // ideal value for Coffee Lake i9, need confirmation
+  AppleProcessorTypeCorei9Type9 = 0x1009      // i9 9980HK (MacBookPro16,1)
 };
 
 // APPLE_PROCESSOR_TYPE_CLASS
