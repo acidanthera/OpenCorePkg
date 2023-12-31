@@ -250,6 +250,7 @@ typedef enum {
 #define CPU_MODEL_ALDERLAKE_S     0x97
 
 #define AMD_CPU_FAMILY          0xF
+#define AMD_CPU_EXT_FAMILY_10H  0x1
 #define AMD_CPU_EXT_FAMILY_15H  0x6
 #define AMD_CPU_EXT_FAMILY_16H  0x7
 #define AMD_CPU_EXT_FAMILY_17H  0x8
