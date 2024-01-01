@@ -63,6 +63,12 @@ STATIC GUI_INTERPOLATION  mPasswordIncorrectInterpol = {
 
 STATIC GUI_OBJ  *mPasswordFocusList[] = {
   &mPasswordBoxContainer.Obj,
+  &mCommonShutDown.Hdr.Obj,
+  &mCommonRestart.Hdr.Obj
+};
+
+STATIC GUI_OBJ  *mPasswordFocusListReversed[] = {
+  &mPasswordBoxContainer.Obj,
   &mCommonRestart.Hdr.Obj,
   &mCommonShutDown.Hdr.Obj
 };
@@ -608,6 +614,18 @@ STATIC GUI_VIEW_CONTEXT  mPasswordViewContext = {
   ARRAY_SIZE (mPasswordFocusList)
 };
 
+STATIC GUI_VIEW_CONTEXT  mPasswordViewContextReversed = {
+  InternalCommonViewDraw,
+  InternalPasswordViewPtrEvent,
+  ARRAY_SIZE (mPasswordViewChildren),
+  mPasswordViewChildren,
+  InternalPasswordViewKeyEvent,
+  InternalGetCursorImage,
+  InternalPasswordExitLoop,
+  mPasswordFocusListReversed,
+  ARRAY_SIZE (mPasswordFocusListReversed)
+};
+
 STATIC GUI_VIEW_CONTEXT  mPasswordViewContextMinimal = {
   InternalCommonViewDraw,
   InternalPasswordViewPtrEvent,
@@ -753,7 +771,10 @@ PasswordViewInitialize (
     DrawContext,
     GuiContext,
     (GuiContext->PickerContext->PickerAttributes & OC_ATTR_USE_MINIMAL_UI) == 0
-      ? &mPasswordViewContext
+      ? ((GuiContext->PickerContext->PickerAttributes & OC_ATTR_USE_REVERSED_UI) == 0
+        ? &mPasswordViewContext
+        : &mPasswordViewContextReversed
+         )
       : &mPasswordViewContextMinimal
     );
 

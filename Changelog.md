@@ -3,6 +3,8 @@ OpenCore Changelog
 #### v0.9.8
 - Updated OpenDuet to allow loading unsigned, unaligned legacy Apple images such as HfsPlusLegacy.efi
 - Fixed CPU frequency calculation on AMD 10h family
+- Swapped the position of Shutdown and Restart buttons to better match recent macOS
+- Added `OC_ATTR_USE_REVERSED_UI` to allow access to previous default Shutdown and Restart button arrangement
 
 #### v0.9.7
 - Updated recovery_urls.txt

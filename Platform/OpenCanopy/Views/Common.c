@@ -701,14 +701,24 @@ CommonViewInitialize (
   ShutDownWidth  = MAX (ShutDownImage->Width, FocusImage->Width);
   ShutDownHeight = MAX (ShutDownImage->Height, FocusImage->Height);
 
-  mCommonRestart.Hdr.Obj.OffsetX = (RestartWidth - RestartImage->Width) / 2;
+  if ((GuiContext->PickerContext->PickerAttributes & OC_ATTR_USE_REVERSED_UI) == 0) {
+    mCommonRestart.Hdr.Obj.OffsetX = ShutDownWidth + BOOT_ACTION_BUTTON_SPACE * GuiContext->Scale + (RestartWidth - RestartImage->Width) / 2;
+  } else {
+    mCommonRestart.Hdr.Obj.OffsetX = (RestartWidth - RestartImage->Width) / 2;
+  }
+
   mCommonRestart.Hdr.Obj.OffsetY = (RestartHeight - RestartImage->Height) / 2;
   mCommonRestart.Hdr.Obj.Width   = RestartImage->Width;
   mCommonRestart.Hdr.Obj.Height  = RestartImage->Height;
   mCommonRestart.ImageId         = ICON_RESTART;
   mCommonRestart.ImageState      = ICON_TYPE_BASE;
 
-  mCommonShutDown.Hdr.Obj.OffsetX = RestartWidth + BOOT_ACTION_BUTTON_SPACE * GuiContext->Scale + (ShutDownWidth - ShutDownImage->Width) / 2;
+  if ((GuiContext->PickerContext->PickerAttributes & OC_ATTR_USE_REVERSED_UI) == 0) {
+    mCommonShutDown.Hdr.Obj.OffsetX = (ShutDownWidth - ShutDownImage->Width) / 2;
+  } else {
+    mCommonShutDown.Hdr.Obj.OffsetX = RestartWidth + BOOT_ACTION_BUTTON_SPACE * GuiContext->Scale + (ShutDownWidth - ShutDownImage->Width) / 2;
+  }
+
   mCommonShutDown.Hdr.Obj.OffsetY = (ShutDownHeight - ShutDownImage->Height) / 2;
   mCommonShutDown.Hdr.Obj.Width   = ShutDownImage->Width;
   mCommonShutDown.Hdr.Obj.Height  = ShutDownImage->Height;

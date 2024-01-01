@@ -56,6 +56,12 @@ STATIC UINT32  mBootPickerLabelScrollHoldTime = 0;
 
 STATIC GUI_OBJ  *mBootPickerFocusList[] = {
   &mBootPicker.Hdr.Obj,
+  &mCommonShutDown.Hdr.Obj,
+  &mCommonRestart.Hdr.Obj
+};
+
+STATIC GUI_OBJ  *mBootPickerFocusListReversed[] = {
+  &mBootPicker.Hdr.Obj,
   &mCommonRestart.Hdr.Obj,
   &mCommonShutDown.Hdr.Obj
 };
@@ -1318,6 +1324,18 @@ GLOBAL_REMOVE_IF_UNREFERENCED GUI_VIEW_CONTEXT  mBootPickerViewContext = {
   ARRAY_SIZE (mBootPickerFocusList)
 };
 
+GLOBAL_REMOVE_IF_UNREFERENCED GUI_VIEW_CONTEXT  mBootPickerViewContextReversed = {
+  InternalCommonViewDraw,
+  InternalCommonViewPtrEvent,
+  ARRAY_SIZE (mBootPickerViewChildren),
+  mBootPickerViewChildren,
+  InternalBootPickerViewKeyEvent,
+  InternalGetCursorImage,
+  InternalBootPickerExitLoop,
+  mBootPickerFocusListReversed,
+  ARRAY_SIZE (mBootPickerFocusListReversed)
+};
+
 GLOBAL_REMOVE_IF_UNREFERENCED GUI_VIEW_CONTEXT  mBootPickerViewContextMinimal = {
   InternalCommonViewDraw,
   InternalCommonViewPtrEvent,
@@ -1870,7 +1888,10 @@ BootPickerViewInitialize (
     DrawContext,
     GuiContext,
     (GuiContext->PickerContext->PickerAttributes & OC_ATTR_USE_MINIMAL_UI) == 0
-      ? &mBootPickerViewContext
+      ? ((GuiContext->PickerContext->PickerAttributes & OC_ATTR_USE_REVERSED_UI) == 0
+        ? &mBootPickerViewContext
+        : &mBootPickerViewContextReversed
+         )
       : &mBootPickerViewContextMinimal
     );
 

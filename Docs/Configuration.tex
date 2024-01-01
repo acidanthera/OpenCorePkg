@@ -3693,6 +3693,10 @@ the default boot entry choice will remain changed until the next manual reconfig
       \item A list of recommended flavours is provided in \texttt{Docs/Flavours.md}.
     \end{itemize}
     \medskip
+  \item \texttt{0x0100} --- \texttt{OC\_ATTR\_USE\_REVERSED\_UI}, reverse position of Shutdown and
+  Restart buttons, affects OpenCanopy and builtin picker. The reversed setting matches older macOS,
+  and since it was the previous default in OpenCore it may better match some custom backgrounds.
+  Only applicable when \texttt{OC\_ATTR\_USE\_MINIMAL\_UI} is not set.
   \end{itemize}
 
 \item

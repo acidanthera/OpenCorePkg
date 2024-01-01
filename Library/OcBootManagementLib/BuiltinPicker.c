@@ -68,6 +68,15 @@ typedef _TAB_FOCUS TAB_FOCUS;
 
 STATIC TAB_FOCUS  mFocusList[] = {
   TAB_PICKER,
+  TAB_SHUTDOWN,
+  TAB_RESTART,
+ #if defined (BUILTIN_DEMONSTRATE_TYPING)
+  TAB_TYPING_DEMO
+ #endif
+};
+
+STATIC TAB_FOCUS  mFocusListReversed[] = {
+  TAB_PICKER,
   TAB_RESTART,
   TAB_SHUTDOWN,
  #if defined (BUILTIN_DEMONSTRATE_TYPING)
@@ -376,7 +385,10 @@ OcShowSimpleBootMenu (
 
   FocusState = 0;
   if ((BootContext->PickerContext->PickerAttributes & OC_ATTR_USE_MINIMAL_UI) == 0) {
-    FocusList    = mFocusList;
+    STATIC_ASSERT (ARRAY_SIZE (mFocusList) == ARRAY_SIZE (mFocusListReversed), "Mismatched focus list sizes");
+    FocusList = ((BootContext->PickerContext->PickerAttributes & OC_ATTR_USE_REVERSED_UI) == 0)
+      ? mFocusList
+      : mFocusListReversed;
     NumFocusList = ARRAY_SIZE (mFocusList);
   } else {
     FocusList    = mFocusListMinimal;
@@ -557,11 +569,20 @@ OcShowSimpleBootMenu (
 
         ShutdownRestartRow = gST->ConOut->Mode->CursorRow;
         gST->ConOut->OutputString (gST->ConOut, L" ");
-        RestartColumn = gST->ConOut->Mode->CursorColumn;
-        gST->ConOut->OutputString (gST->ConOut, L"|Restart|");
-        gST->ConOut->OutputString (gST->ConOut, L"  ");
-        ShutdownColumn = gST->ConOut->Mode->CursorColumn;
-        gST->ConOut->OutputString (gST->ConOut, L"|Shutdown|");
+
+        if ((BootContext->PickerContext->PickerAttributes & OC_ATTR_USE_REVERSED_UI) == 0) {
+          ShutdownColumn = gST->ConOut->Mode->CursorColumn;
+          gST->ConOut->OutputString (gST->ConOut, L"|Shutdown|");
+          gST->ConOut->OutputString (gST->ConOut, L"  ");
+          RestartColumn = gST->ConOut->Mode->CursorColumn;
+          gST->ConOut->OutputString (gST->ConOut, L"|Restart|");
+        } else {
+          RestartColumn = gST->ConOut->Mode->CursorColumn;
+          gST->ConOut->OutputString (gST->ConOut, L"|Restart|");
+          gST->ConOut->OutputString (gST->ConOut, L"  ");
+          ShutdownColumn = gST->ConOut->Mode->CursorColumn;
+          gST->ConOut->OutputString (gST->ConOut, L"|Shutdown|");
+        }
 
         gST->ConOut->OutputString (gST->ConOut, L"\r\n");
       } else {
