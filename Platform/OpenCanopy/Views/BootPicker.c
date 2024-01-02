@@ -1355,6 +1355,11 @@ CopyLabel (
   IN  CONST GUI_IMAGE  *Source
   )
 {
+  if (Source->Buffer == NULL) {
+    ASSERT (FALSE);
+    return EFI_UNSUPPORTED;
+  }
+
   Destination->Width  = Source->Width;
   Destination->Height = Source->Height;
   Destination->Buffer = (EFI_GRAPHICS_OUTPUT_BLT_PIXEL *)AllocateCopyPool (
