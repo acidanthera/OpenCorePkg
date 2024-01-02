@@ -1698,6 +1698,8 @@ InternalBootPickerAnimateImageList (
   return FALSE;
 }
 
+STATIC UINT32  mPrevSine;
+
 STATIC GUI_INTERPOLATION  mBpAnimInfoSinMove = {
   GuiInterpolTypeSmooth,
   0,
@@ -1718,6 +1720,8 @@ InitBpAnimIntro (
   //        mBootPickerContainer between animation initialisation and start.
   //
   mBootPickerContainer.Obj.OffsetX += 35 * DrawContext->Scale;
+
+  mPrevSine = 0;
 }
 
 BOOLEAN
@@ -1727,8 +1731,6 @@ InternalBootPickerAnimateIntro (
   IN     UINT64                   CurrentTime
   )
 {
-  STATIC UINT32  PrevSine = 0;
-
   UINT8   Opacity;
   UINT32  InterpolVal;
   UINT32  DeltaSine;
@@ -1773,9 +1775,9 @@ InternalBootPickerAnimateIntro (
   }
 
   InterpolVal                       = GuiGetInterpolatedValue (&mBpAnimInfoSinMove, CurrentTime);
-  DeltaSine                         = InterpolVal - PrevSine;
+  DeltaSine                         = InterpolVal - mPrevSine;
   mBootPickerContainer.Obj.OffsetX -= DeltaSine;
-  PrevSine                          = InterpolVal;
+  mPrevSine                         = InterpolVal;
   //
   // Draw the full dimension of the inner container to implicitly cover the
   // scroll buttons with the off-screen entries.

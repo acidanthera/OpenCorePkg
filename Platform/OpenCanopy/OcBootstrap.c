@@ -102,8 +102,14 @@ OcShowMenuByOc (
 
   *ChosenBootEntry = NULL;
   OcSetInitialCursorOffset ();
-  mGuiContext.BootEntry            = NULL;
-  mGuiContext.ReadyToBoot          = FALSE;
+  mGuiContext.BootEntry   = NULL;
+  mGuiContext.ReadyToBoot = FALSE;
+  //
+  // Re-run intro animation on each entry into menu, to avoid stuck animation
+  // which happens otherwise, if a menu item which returns to the menu is
+  // selected before the animation ends.
+  //
+  mGuiContext.DoneIntroAnimation   = FALSE;
   mGuiContext.HideAuxiliary        = BootContext->PickerContext->HideAuxiliary;
   mGuiContext.Refresh              = FALSE;
   mGuiContext.PickerContext        = BootContext->PickerContext;
@@ -116,7 +122,7 @@ OcShowMenuByOc (
 
   mDrawContext.TimeOutSeconds = BootContext->PickerContext->TimeoutSeconds;
   //
-  // Do not play intro animation for blind.
+  // Do not play intro animation for visually impaired users.
   //
   if (BootContext->PickerContext->PickerAudioAssist) {
     mGuiContext.DoneIntroAnimation = TRUE;
@@ -249,11 +255,11 @@ OcShowPasswordByOc (
   mDrawContext.TimeOutSeconds = 0;
 
   //
-  // Do not play intro animation for blind.
+  // FIXME: Ideally we disable password fade-in animation here for visually
+  // impaired users, i.e. when Context->PickerAudioAssist is TRUE, as we
+  // already do for menu ease-in animation. Probably needs separate bool in
+  // addition to mGuiContext.DoneIntroAnimation.
   //
-  if (Context->PickerAudioAssist) {
-    mGuiContext.DoneIntroAnimation = TRUE;
-  }
 
   Status = PasswordViewInitialize (
              &mDrawContext,
