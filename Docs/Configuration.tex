@@ -6513,6 +6513,10 @@ even cause permanent firmware damage. Some of the known drivers are listed below
 \href{https://github.com/acidanthera/OcBinaryData}{\texttt{ext4\_x64}}
 & Open source EXT4 file system driver, required for booting with \hyperref[uefilinux]{OpenLinuxBoot}
   from the file system most commonly used with Linux. \\
+\href{https://github.com/acidanthera/OpenCorePkg}{\texttt{FirmwareSettings}}\textbf{*}
+& \hyperref[firmwaresettings]{OpenCore plugin} implementing \texttt{OC\_BOOT\_ENTRY\_PROTOCOL}
+  to add an entry to the boot picker menu which reboots into UEFI firmware settings,
+  when this is supported by the firmware. \\
 \href{https://github.com/acidanthera/OcBinaryData}{\texttt{HfsPlus}}
 & Recommended. Proprietary HFS file system driver with bless support commonly found in Apple
   firmware. For Sandy Bridge and earlier CPUs, the \texttt{HfsPlusLegacy} driver should be
@@ -6733,6 +6737,7 @@ Full list of labels is provided below. All labels are mandatory.
   \item \texttt{SIPDisabled} --- Toggle SIP tool with SIP disabled.
   \item \texttt{SIPEnabled} --- Toggle SIP tool with SIP enabled.
   \item \texttt{Shell} --- Entry with UEFI Shell name (e.g. \texttt{OpenShell}).
+  \item \texttt{FirmwareSettings} --- Firmware settings menu entry.
   \item \texttt{Tool} --- Any other tool.
 \end{itemize}
 
@@ -7144,6 +7149,11 @@ value, as it is very easy when using it to inadvertently break OS seal and preve
 (e.g. specifying \texttt{0x7F} on Catalina) then \texttt{csrutil status}
 will report that SIP has a non-standard value, however protection will be functionally the same.
 \end{itemize}
+
+\subsubsection{FirmwareSettings}\label{firmwaresettings}
+
+Adds a menu entry which will reboot into UEFI firmware settings, when supported.
+No menu entry added and logs a warning when not supported.
 
 \subsection{AudioDxe}\label{uefiaudio}
 

@@ -147,7 +147,7 @@ If providing just one file, name it `Shell.icns` if the theming of the icon is g
 
 ### NVRAM Tools
 
-It is recommended to either i) only provide `NVRAMTool.icns`, as this will be applied to the Reset NVRAM tool and the Toogle SIP tool, or else ii) provide `ResetNVRAM.icns` and `ToggleSip.icns` separately (in which case `NVRAMTools.icns` is not normally required).
+It is recommended to either i) only provide `NVRAMTool.icns`, as this will be applied to the Reset NVRAM tool and the Toogle SIP tool, or else ii) provide `ResetNVRAM.icns` and `ToggleSip.icns` separately (in which case `NVRAMTool.icns` is not normally required).
 
 If providing `NVRAMTool.icns`, it should be themed so that it could be applied to any generic NVRAM tool.
 
@@ -165,6 +165,8 @@ If providing `NVRAMTool.icns`, it should be themed so that it could be applied t
 
 A list of other known tools which are common enough that some icon pack artists may wish to provide a standard icon for them:
 
+ - **FirmwareSettings** - A boot menu entry for accessing firmware settings (`FirmwareSettings.icns`)
+   - **Note**: Including **FirmwareSettings** anywhere in a user flavour triggers picker audio-assist and builtin label support for "Firmware Settings"
  - **MemTest** - A system memory testing tool such as that available from [memtest86.com](https://www.memtest86.com/) (`MemTest.icns`)
 
 ## Bootloaders

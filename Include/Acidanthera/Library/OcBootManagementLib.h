@@ -77,6 +77,7 @@ typedef struct OC_HOTKEY_CONTEXT_ OC_HOTKEY_CONTEXT;
 #define OC_FLAVOUR_TOGGLE_SIP           "ToggleSIP:NVRAMTool"
 #define OC_FLAVOUR_TOGGLE_SIP_ENABLED   "ToggleSIP_Enabled:ToggleSIP:NVRAMTool"
 #define OC_FLAVOUR_TOGGLE_SIP_DISABLED  "ToggleSIP_Disabled:ToggleSIP:NVRAMTool"
+#define OC_FLAVOUR_FIRMWARE_SETTINGS    "FirmwareSettings"
 #define OC_FLAVOUR_APPLE_OS             "Apple"
 #define OC_FLAVOUR_APPLE_RECOVERY       "AppleRecv:Apple"
 #define OC_FLAVOUR_APPLE_FW             "AppleRecv:Apple"
@@ -90,6 +91,7 @@ typedef struct OC_HOTKEY_CONTEXT_ OC_HOTKEY_CONTEXT;
 #define OC_FLAVOUR_ID_UEFI_SHELL           "UEFIShell"
 #define OC_FLAVOUR_ID_TOGGLE_SIP_ENABLED   "ToggleSIP_Enabled"
 #define OC_FLAVOUR_ID_TOGGLE_SIP_DISABLED  "ToggleSIP_Disabled"
+#define OC_FLAVOUR_ID_FIRMWARE_SETTINGS    "FirmwareSettings"
 
 /**
   Paths allowed to be accessible by the interfaces.
@@ -2225,6 +2227,37 @@ OcGetBootEntryFile (
   OUT UINT32         *DataLength OPTIONAL,
   IN  BOOLEAN        SearchAtLeaf,
   IN  BOOLEAN        SearchAtRoot
+  );
+
+/**
+  Tests whether reset to firmware settings is supported.
+
+  @retval EFI_SUCCESS   Reset to firmware settings is supported.
+  @retval other         Reset to firmware settings is not supported.
+**/
+EFI_STATUS
+EFIAPI
+OcResetToFirmwareSettingsSupported (
+  VOID
+  );
+
+/**
+  Reset the system. Fails to reset if firmware mode is requested but not supported.
+  Defaults to cold reset when other reset fails, or unknown reset mode is requested.
+
+  @param[in]  Mode      Reset mode. Supported modes are:
+                         - "firmware"  - reboot to UEFI firmware settings, if supported
+                         - "warmreset" - warm reset
+                         - "coldreset" - cold reset
+                         - "shutdown"  - shut down
+
+  @retval EFI_SUCCESS   System was reset.
+  @retval other         System could not be reset.
+**/
+EFI_STATUS
+EFIAPI
+OcResetSystem (
+  IN CHAR16  *Mode
   );
 
 #endif // OC_BOOT_MANAGEMENT_LIB_H

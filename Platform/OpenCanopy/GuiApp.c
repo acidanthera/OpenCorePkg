@@ -46,7 +46,8 @@ CONST CHAR8 *
   [LABEL_RESET_NVRAM]        = "ResetNVRAM",
   [LABEL_SHELL]              = "Shell",
   [LABEL_SIP_IS_ENABLED]     = "SIPEnabled",
-  [LABEL_SIP_IS_DISABLED]    = "SIPDisabled"
+  [LABEL_SIP_IS_DISABLED]    = "SIPDisabled",
+  [LABEL_FIRMWARE_SETTINGS]  = "FirmwareSettings"
 };
 
 STATIC

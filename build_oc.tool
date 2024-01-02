@@ -189,6 +189,7 @@ package() {
       "DnsDxe.efi"
       "DpcDxe.efi"
       "Ext4Dxe.efi"
+      "FirmwareSettingsEntry.efi"
       "HiiDatabase.efi"
       "HttpBootDxe.efi"
       "HttpDxe.efi"

@@ -1469,6 +1469,8 @@ BootPickerEntriesSet (
           Status = CopyLabel (&VolumeEntry->Label, &GuiContext->Labels[LABEL_SIP_IS_DISABLED]);
         } else if (OcAsciiStriStr (Entry->Flavour, OC_FLAVOUR_ID_UEFI_SHELL) != NULL) {
           Status = CopyLabel (&VolumeEntry->Label, &GuiContext->Labels[LABEL_SHELL]);
+        } else if (OcAsciiStriStr (Entry->Flavour, OC_FLAVOUR_ID_FIRMWARE_SETTINGS) != NULL) {
+          Status = CopyLabel (&VolumeEntry->Label, &GuiContext->Labels[LABEL_FIRMWARE_SETTINGS]);
         } else if (Entry->Type == OC_BOOT_EXTERNAL_TOOL) {
           Status = CopyLabel (&VolumeEntry->Label, &GuiContext->Labels[LABEL_TOOL]);
         } else {

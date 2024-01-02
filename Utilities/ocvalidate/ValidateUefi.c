@@ -316,6 +316,7 @@ CheckUefiDrivers (
   BOOLEAN               IsConnectDriversEnabled;
   BOOLEAN               HasOpenVariableRuntimeDxeEfiDriver;
   UINT32                IndexOpenVariableRuntimeDxeEfiDriver;
+  BOOLEAN               HasFirmwareSettingsEntryEfiDriver;
 
   ErrorCount = 0;
 
@@ -416,6 +417,10 @@ CheckUefiDrivers (
       HasAudioDxeEfiDriver   = TRUE;
       IndexAudioDxeEfiDriver = Index;
     }
+
+    if (AsciiStrCmp (Driver, "FirmwareSettingsEntry.efi") == 0) {
+      HasFirmwareSettingsEntryEfiDriver = TRUE;
+    }
   }
 
   //
@@ -459,6 +464,11 @@ CheckUefiDrivers (
         ++ErrorCount;
       }
     }
+  }
+
+  if (HasFirmwareSettingsEntryEfiDriver && HasOpenVariableRuntimeDxeEfiDriver) {
+    DEBUG ((DEBUG_WARN, "OpenVariableRuntimeDxe.efi is incompatible with FirmwareSettingsEntry.efi!\n"));
+    ++ErrorCount;
   }
 
   IsRequestBootVarRoutingEnabled = Config->Uefi.Quirks.RequestBootVarRouting;

@@ -50,6 +50,7 @@ typedef struct OC_AUDIO_PROTOCOL_ OC_AUDIO_PROTOCOL;
 #define  OC_VOICE_OVER_AUDIO_FILE_EXTERNAL              "External"
 #define  OC_VOICE_OVER_AUDIO_FILE_EXTERNAL_OS           "ExternalOS"
 #define  OC_VOICE_OVER_AUDIO_FILE_EXTERNAL_TOOL         "ExternalTool"
+#define  OC_VOICE_OVER_AUDIO_FILE_FIRMWARE_SETTINGS     "FirmwareSettings"
 #define  OC_VOICE_OVER_AUDIO_FILE_LOADING               "Loading"
 #define  OC_VOICE_OVER_AUDIO_FILE_MAC_OS                "macOS"
 #define  OC_VOICE_OVER_AUDIO_FILE_MAC_OS_RECOVERY       "macOS_Recovery"

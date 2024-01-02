@@ -1,0 +1,32 @@
+## @file
+#  Boot entry protocol implementation of firmware settings boot picker entry.
+#
+#  Copyright (C) 2024, Mike Beaton. All rights reserved.<BR>
+#  SPDX-License-Identifier: BSD-3-Clause
+##
+
+
+[Defines]
+  INF_VERSION    = 0x00010005
+  BASE_NAME      = FirmwareSettingsEntry
+  ENTRY_POINT    = UefiMain
+  FILE_GUID      = 81DA83B8-15F6-4EA5-B067-C2B3AC7BAE49
+  MODULE_TYPE    = UEFI_DRIVER
+  VERSION_STRING = 1.0
+
+[Packages]
+  OpenCorePkg/OpenCorePkg.dec
+  MdePkg/MdePkg.dec
+
+[LibraryClasses]
+  BaseLib
+  OcBootManagementLib
+  UefiBootServicesTableLib
+  UefiDriverEntryPoint
+  UefiLib
+
+[Protocols]
+  gOcBootEntryProtocolGuid            # PRODUCES
+ 
+[Sources]
+  FirmwareSettingsEntry.c

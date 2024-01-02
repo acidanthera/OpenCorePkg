@@ -12,6 +12,7 @@ OpenCore Changelog
 - Fixed CPU frequency calculation on AMD 0Fh family
 - Added kext blocker `Exclude` strategy for mkext
 - Re-enabled AudioDxe failover to protocol GET mode for systems such as Acer E5 where it works when DisconnectHda doesn't
+- Added `FirmwareSettingsEntry.efi` driver which adds menu entry to reboot into UEFI firmware settings
 
 #### v0.9.7
 - Updated recovery_urls.txt

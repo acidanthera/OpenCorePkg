@@ -47,6 +47,7 @@
   ImageLoader.c
   PolicyManagement.c
   OcBootManagementLib.c
+  OcResetSystem.c
 
 [Packages]
   OpenCorePkg/OpenCorePkg.dec
