@@ -455,6 +455,22 @@ InternalBootPickerKeyEvent (
       GuiContext->ReadyToBoot            = TRUE;
       ASSERT (GuiContext->BootEntry == SelectedEntry->Context);
     }
+  } else if (  GuiContext->PickerContext->PickerAudioAssist
+            && (KeyEvent->OcKeyCode >= 0)
+            && ((UINTN)KeyEvent->OcKeyCode < mBootPicker.Hdr.Obj.NumChildren)
+               )
+  {
+    InternalBootPickerChangeEntry (
+      Picker,
+      DrawContext,
+      BaseX,
+      BaseY,
+      (UINT32)KeyEvent->OcKeyCode
+      );
+    SelectedEntry                      = InternalGetVolumeEntry (mBootPicker.SelectedIndex);
+    SelectedEntry->Context->SetDefault = (KeyEvent->OcModifiers & OC_MODIFIERS_SET_DEFAULT) != 0;
+    GuiContext->ReadyToBoot            = TRUE;
+    ASSERT (GuiContext->BootEntry == SelectedEntry->Context);
   } else if (mBootPickerContainer.Obj.Opacity != 0xFF) {
     //
     // FIXME: Other keys are not allowed when boot picker is partially transparent.
