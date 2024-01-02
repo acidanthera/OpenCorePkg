@@ -641,6 +641,11 @@ OcShowSimpleBootMenu (
         OC_VOICE_OVER_SILENCE_NORMAL_MS
         );
       PlayedOnce = TRUE;
+
+      //
+      // Avoid responding to possibly multiple keys pressed before menu is fully read out.
+      //
+      BootContext->PickerContext->HotKeyContext->FlushTypingBuffer (BootContext->PickerContext);
     }
 
     while (TRUE) {
