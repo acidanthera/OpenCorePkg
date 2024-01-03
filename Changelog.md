@@ -7,6 +7,7 @@ OpenCore Changelog
 - Added `OC_ATTR_USE_REVERSED_UI` to allow access to previous default Shutdown and Restart button arrangement
 - Fixed intro animation getting stuck in OpenCanopy if an entry which returns to menu is selected before animation ends
 - Modified OpenCanopy to require presence of label images only when used due to `OC_ATTR_USE_GENERIC_LABEL_IMAGE`
+- Provided `OC_ATTR_REDUCE_MOTION` to optionally disable non-required OpenCanopy menu animations
 
 #### v0.9.7
 - Updated recovery_urls.txt

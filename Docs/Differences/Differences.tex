@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
 %DIF DEL PreviousConfiguration.tex   Thu Dec 28 17:20:22 2023
-%DIF ADD ../Configuration.tex        Mon Jan  1 15:56:40 2024
+%DIF ADD ../Configuration.tex        Wed Jan  3 22:50:02 2024
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -3757,6 +3757,13 @@ the default boot entry choice will remain changed until the next manual reconfig
   Restart buttons, affects OpenCanopy and builtin picker. The reversed setting matches older macOS,
   and since it was the previous default in OpenCore it may better match some custom backgrounds.
   Only applicable when }\texttt{\DIFadd{OC\_ATTR\_USE\_MINIMAL\_UI}} \DIFadd{is not set.
+  }\item \texttt{\DIFadd{0x0200}} \DIFadd{--- }\texttt{\DIFadd{OC\_ATTR\_REDUCE\_MOTION}}\DIFadd{, reduce password and menu animation
+  in }\texttt{\DIFadd{OpenCanopy}}\DIFadd{, leaving only animations which communicate information not otherwise
+  provided.
+}
+
+  \emph{\DIFadd{Note}}\DIFadd{: These same animations, plus additional animations whose information is provided
+  by voice-over, are automatically disabled when }\texttt{\DIFadd{PickerAudioAssist}} \DIFadd{is enabled.
   }\DIFaddend \end{itemize}
 
 \item

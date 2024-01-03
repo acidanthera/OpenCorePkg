@@ -123,7 +123,8 @@ typedef struct _BOOT_PICKER_GUI_CONTEXT {
   BOOLEAN                                HideAuxiliary;
   BOOLEAN                                Refresh;
   BOOLEAN                                LightBackground;
-  BOOLEAN                                DoneIntroAnimation;
+  BOOLEAN                                UsePasswordEaseIn;
+  BOOLEAN                                UseMenuEaseIn;
   BOOLEAN                                ReadyToBoot;
   UINT8                                  Scale;
   UINT8                                  VoAction;

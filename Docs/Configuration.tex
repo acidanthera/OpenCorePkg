@@ -3697,6 +3697,12 @@ the default boot entry choice will remain changed until the next manual reconfig
   Restart buttons, affects OpenCanopy and builtin picker. The reversed setting matches older macOS,
   and since it was the previous default in OpenCore it may better match some custom backgrounds.
   Only applicable when \texttt{OC\_ATTR\_USE\_MINIMAL\_UI} is not set.
+  \item \texttt{0x0200} --- \texttt{OC\_ATTR\_REDUCE\_MOTION}, reduce password and menu animation
+  in \texttt{OpenCanopy}, leaving only animations which communicate information not otherwise
+  provided.
+
+  \emph{Note}: These same animations, plus additional animations whose information is provided
+  by voice-over, are automatically disabled when \texttt{PickerAudioAssist} is enabled.
   \end{itemize}
 
 \item

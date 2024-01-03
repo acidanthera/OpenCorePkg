@@ -834,7 +834,7 @@ PasswordViewInitialize (
   mPasswordBoxContainer.Obj.OffsetX = (DrawContext->Screen.Width - mPasswordBox.Hdr.Obj.Width) / 2;
   mPasswordBoxContainer.Obj.OffsetY = mPasswordLock.Obj.OffsetY + mPasswordLock.Obj.Height + PASSWORD_BOX_SPACE * DrawContext->Scale - BoxOffset;
 
-  if (!GuiContext->PickerContext->PickerAudioAssist) {
+  if (GuiContext->UsePasswordEaseIn) {
     //
     // Fade-in the entire screen.
     //
