@@ -40,8 +40,29 @@ static kern_return_t GetOFVariable(char *name, CFStringRef *nameRef,
     *valueRef = IORegistryEntryCreateCFProperty(gOptionsRef, *nameRef, 0, 0);
     if (*valueRef == 0) return kIOReturnNotFound;
 
+    if (CFGetTypeID(*valueRef) == CFStringGetTypeID()) {
+        CFTypeRef oldValue = *valueRef;
+        *valueRef = CFStringCreateExternalRepresentation(kCFAllocatorDefault, *valueRef, kCFStringEncodingUTF8, 0);
+        CFRelease(oldValue);
+        if (*valueRef == 0) return kIOReturnNotFound;
+    }
+
     return KERN_SUCCESS;
 }
+
+static CFMutableDictionaryRef dict4;
+
+static void ConvertStringValues (const void* key, const void* value, void* context) {
+    if (CFGetTypeID(value) == CFStringGetTypeID()) {
+        CFDataRef dataValue = CFStringCreateExternalRepresentation(kCFAllocatorDefault, value, kCFStringEncodingUTF8, 0);
+        if (dataValue != NULL) {
+            CFDictionaryAddValue(dict4, key, dataValue);
+        }
+    } else {
+        CFDictionaryAddValue(dict4, key, value);
+    }
+}
+
 
 CFDictionaryRef CreateMyDictionary(void) {
     char *guid;
@@ -69,8 +90,17 @@ CFDictionaryRef CreateMyDictionary(void) {
     if (result != KERN_SUCCESS) {
         errx(1, "Error getting the firmware variables: %s", mach_error_string(result));
     }
-    CFDictionarySetValue(dict0, CFSTR("7C436110-AB2A-4BBB-A880-FE41995C9F82"), dict1);
+
+    // To work round limitations of OpenCore XML parser (i.e. XML entities not
+    // automatically processed), force all string values to save as data.
+    dict4 = CFDictionaryCreateMutable(kCFAllocatorDefault, 0,
+                                      &kCFTypeDictionaryKeyCallBacks,
+                                      &kCFTypeDictionaryValueCallBacks);
+    CFDictionaryApplyFunction(dict1, ConvertStringValues, NULL);
+
+    CFDictionarySetValue(dict0, CFSTR("7C436110-AB2A-4BBB-A880-FE41995C9F82"), dict4);
     CFRelease(dict1);
+    CFRelease(dict4);
 
     CFMutableDictionaryRef dict2 = CFDictionaryCreateMutable(NULL, 0, &kCFTypeDictionaryKeyCallBacks,
                                                              &kCFTypeDictionaryValueCallBacks);
