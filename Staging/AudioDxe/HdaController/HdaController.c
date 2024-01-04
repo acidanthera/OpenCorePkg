@@ -1104,7 +1104,8 @@ HdaControllerDriverBindingStart (
         //
         // No longer applied just if protocol gVMwareHdaProtocolGuid is found, since it also
         // allows sound on other devices where HDA controller is already connected, e.g. Macs.
-        // Now on Pcd because it appears never to be needed if DisconnectHda is applied.
+        // On many systems DisconnectHda can be used to avoid the need for this fallback, but
+        // on some - such as Acer E5 - DisconnectHda does not work but this method does.
         //
         DEBUG ((DEBUG_INFO, "HDA: %r using DRIVER mode, trying GET mode\n", Status));
         OpenMode = EFI_OPEN_PROTOCOL_GET_PROTOCOL;

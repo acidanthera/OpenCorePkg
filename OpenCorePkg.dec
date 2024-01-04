@@ -740,7 +740,7 @@
   ##   TRUE  - Use EFI_OPEN_PROTOCOL_GET_PROTOCOL if EFI_OPEN_PROTOCOL_BY_DRIVER fails.<BR>
   ##   FALSE - Do not use EFI_OPEN_PROTOCOL_GET_PROTOCOL.<BR>
   ## @Prompt Try EFI_OPEN_PROTOCOL_GET_PROTOCOL if EFI_OPEN_PROTOCOL_BY_DRIVER fails.
-  gOpenCorePkgTokenSpaceGuid.PcdAudioControllerTryProtocolGetMode|FALSE|BOOLEAN|0x00000007
+  gOpenCorePkgTokenSpaceGuid.PcdAudioControllerTryProtocolGetMode|TRUE|BOOLEAN|0x00000007
 
   ## Indicates if AudioDxe will use Pin Capabilities to identify outputs.<BR><BR>
   ##   TRUE  - Use Pin Capabilities to identify outputs.<BR>
