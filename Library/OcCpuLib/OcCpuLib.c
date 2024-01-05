@@ -746,6 +746,23 @@ ScanAmdProcessor (
         //
         Cpu->CoreCount = Cpu->ThreadCount;
         break;
+      case AMD_CPU_EXT_FAMILY_0FH:
+        if (Cpu->CPUFrequencyFromVMT == 0) {
+          // FIXME: Please refer to FIXME(1) for the MSR used here.
+          CofVid          = AsmReadMsr64 (K8_FIDVID_STATUS);
+          CoreFrequencyID = (UINT8)BitFieldRead64 (CofVid, 0, 5);
+
+          // Frequency ID directly specifies the clock multiplier as a 6-bit coding.
+          // Coding starts at x4.
+          MaxBusRatio = (CoreFrequencyID / 2) + 4;
+        }
+
+        //
+        // AMD 0Fh CPUs don't support hyperthreading,
+        // so the core count is equal to the thread count.
+        //
+        Cpu->CoreCount = Cpu->ThreadCount;
+        break;
       default:
         return;
     }
