@@ -10,6 +10,7 @@ OpenCore Changelog
 - Provided `OC_ATTR_REDUCE_MOTION` to optionally disable non-required OpenCanopy menu animations
 - Modified NVRAM logout hook to handle XML entities in string vars
 - Fixed CPU frequency calculation on AMD 0Fh family
+- Added kext blocker `Exclude` strategy for mkext
 
 #### v0.9.7
 - Updated recovery_urls.txt
