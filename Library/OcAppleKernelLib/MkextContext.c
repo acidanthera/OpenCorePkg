@@ -328,6 +328,11 @@ InternalGetMkextV1KextOffsets (
   ASSERT (Context->MkextVersion == MKEXT_VERSION_V1);
 
   MkextHeader = Context->MkextHeader;
+  IsKextMatch = FALSE;
+  PlistOffset = 0;
+  PlistSize   = 0;
+  BinOffset   = 0;
+  BinSize     = 0;
 
   for (Index = 0; Index < Context->NumKexts; Index++) {
     //
