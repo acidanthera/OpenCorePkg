@@ -1174,6 +1174,20 @@ PatcherExcludePrelinkedKext (
   );
 
 /**
+  Exclude kext from mkext.
+
+  @param[in,out]  MkextContext  Mkext context.
+  @param[in]      Identifier    Kext identifier to be excluded.
+
+  @return  EFI_SUCCESS on success.
+**/
+EFI_STATUS
+PatcherExcludeMkextKext (
+  IN OUT MKEXT_CONTEXT  *MkextContext,
+  IN     CONST CHAR8    *Identifier
+  );
+
+/**
   Block kext from loading.
 
   @param[in,out] Context         Patcher context.

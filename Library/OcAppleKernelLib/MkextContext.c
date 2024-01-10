@@ -259,27 +259,177 @@ InsertCachedMkextKext (
   return MkextKext;
 }
 
-MKEXT_KEXT *
-InternalCachedMkextKext (
+VOID
+InternalDropCachedMkextKext (
   IN OUT MKEXT_CONTEXT  *Context,
   IN     CONST CHAR8    *Identifier
   )
 {
-  MKEXT_HEADER_ANY     *MkextHeader;
-  MKEXT_V2_FILE_ENTRY  *MkextV2FileEntry;
-
   MKEXT_KEXT  *MkextKext;
   LIST_ENTRY  *KextLink;
-  UINT32      Index;
-  UINT32      PlistOffsetSize;
-  UINT32      BinOffsetSize;
-  BOOLEAN     IsKextMatch;
+
+  //
+  // Try to get cached kext.
+  //
+  MkextKext = NULL;
+  KextLink  = GetFirstNode (&Context->CachedKexts);
+  while (!IsNull (&Context->CachedKexts, KextLink)) {
+    MkextKext = GET_MKEXT_KEXT_FROM_LINK (KextLink);
+
+    if (AsciiStrCmp (Identifier, MkextKext->Identifier) == 0) {
+      break;
+    }
+
+    KextLink = GetNextNode (&Context->CachedKexts, KextLink);
+  }
+
+  //
+  // Remove from cache linked list if found.
+  //
+  if (MkextKext != NULL) {
+    RemoveEntryList (&MkextKext->Link);
+    DEBUG ((DEBUG_VERBOSE, "OCAK: Removed %a from mkext cache\n", Identifier));
+  }
+}
+
+EFI_STATUS
+InternalGetMkextV1KextOffsets (
+  IN OUT MKEXT_CONTEXT  *Context,
+  IN     CONST CHAR8    *Identifier,
+  OUT UINT32            *KextIndex,
+  OUT UINT32            *KextPlistOffset,
+  OUT UINT32            *KextPlistSize,
+  OUT UINT32            *KextBinOffset,
+  OUT UINT32            *KextBinSize
+  )
+{
+  MKEXT_HEADER_ANY  *MkextHeader;
+
+  UINT32   Index;
+  UINT32   PlistOffsetSize;
+  UINT32   BinOffsetSize;
+  BOOLEAN  IsKextMatch;
 
   UINT32        PlistOffset;
   UINT32        PlistSize;
   CHAR8         *PlistBuffer;
   XML_DOCUMENT  *PlistXml;
   XML_NODE      *PlistRoot;
+
+  UINT32       PlistBundleIndex;
+  UINT32       PlistBundleCount;
+  CONST CHAR8  *PlistBundleKey;
+  XML_NODE     *PlistBundleKeyValue;
+
+  CONST CHAR8  *KextIdentifier;
+  UINT32       BinOffset;
+  UINT32       BinSize;
+
+  ASSERT (Context->MkextVersion == MKEXT_VERSION_V1);
+
+  MkextHeader = Context->MkextHeader;
+
+  for (Index = 0; Index < Context->NumKexts; Index++) {
+    //
+    // Binaryless and compressed kexts are not supported.
+    //
+    if (  (MkextHeader->V1.Kexts[Index].Plist.CompressedSize != 0)
+       || (MkextHeader->V1.Kexts[Index].Binary.CompressedSize != 0)
+       || (MkextHeader->V1.Kexts[Index].Binary.Offset == 0))
+    {
+      continue;
+    }
+
+    PlistOffset = SwapBytes32 (MkextHeader->V1.Kexts[Index].Plist.Offset);
+    PlistSize   = SwapBytes32 (MkextHeader->V1.Kexts[Index].Plist.FullSize);
+    BinOffset   = SwapBytes32 (MkextHeader->V1.Kexts[Index].Binary.Offset);
+    BinSize     = SwapBytes32 (MkextHeader->V1.Kexts[Index].Binary.FullSize);
+
+    //
+    // Verify plist and binary are within bounds.
+    //
+    if (  BaseOverflowAddU32 (PlistOffset, PlistSize, &PlistOffsetSize)
+       || (PlistOffsetSize > Context->MkextSize)
+       || BaseOverflowAddU32 (BinOffset, BinSize, &BinOffsetSize)
+       || (BinOffsetSize > Context->MkextSize))
+    {
+      return EFI_INVALID_PARAMETER;
+    }
+
+    PlistBuffer = AllocateCopyPool (PlistSize, &Context->Mkext[PlistOffset]);
+    if (PlistBuffer == NULL) {
+      return EFI_OUT_OF_RESOURCES;
+    }
+
+    PlistXml = XmlDocumentParse (PlistBuffer, PlistSize, FALSE);
+    if (PlistXml == NULL) {
+      FreePool (PlistBuffer);
+      return EFI_OUT_OF_RESOURCES;
+    }
+
+    PlistRoot = PlistNodeCast (PlistDocumentRoot (PlistXml), PLIST_NODE_TYPE_DICT);
+    if (PlistRoot == NULL) {
+      XmlDocumentFree (PlistXml);
+      FreePool (PlistBuffer);
+      return EFI_OUT_OF_RESOURCES;
+    }
+
+    KextIdentifier   = NULL;
+    PlistBundleCount = PlistDictChildren (PlistRoot);
+    for (PlistBundleIndex = 0; PlistBundleIndex < PlistBundleCount; PlistBundleIndex++) {
+      PlistBundleKey = PlistKeyValue (PlistDictChild (PlistRoot, PlistBundleIndex, &PlistBundleKeyValue));
+      if ((PlistBundleKey == NULL) || (PlistBundleKeyValue == NULL)) {
+        continue;
+      }
+
+      if (AsciiStrCmp (PlistBundleKey, INFO_BUNDLE_IDENTIFIER_KEY) == 0) {
+        KextIdentifier = XmlNodeContent (PlistBundleKeyValue);
+        break;
+      }
+    }
+
+    IsKextMatch = KextIdentifier != NULL && AsciiStrCmp (KextIdentifier, Identifier) == 0;
+    XmlDocumentFree (PlistXml);
+    FreePool (PlistBuffer);
+
+    if (IsKextMatch && (BinOffset > 0) && (BinSize > 0)) {
+      break;
+    }
+  }
+
+  //
+  // Bundle was not found, or invalid.
+  //
+  if (!IsKextMatch) {
+    return EFI_NOT_FOUND;
+  }
+
+  *KextIndex       = Index;
+  *KextPlistOffset = PlistOffset;
+  *KextPlistSize   = PlistSize;
+  *KextBinOffset   = BinOffset;
+  *KextBinSize     = BinSize;
+
+  return EFI_SUCCESS;
+}
+
+MKEXT_KEXT *
+InternalCachedMkextKext (
+  IN OUT MKEXT_CONTEXT  *Context,
+  IN     CONST CHAR8    *Identifier
+  )
+{
+  EFI_STATUS           Status;
+  MKEXT_V2_FILE_ENTRY  *MkextV2FileEntry;
+
+  MKEXT_KEXT  *MkextKext;
+  LIST_ENTRY  *KextLink;
+  UINT32      Index;
+  UINT32      BinOffsetSize;
+  BOOLEAN     IsKextMatch;
+
+  UINT32  PlistOffset;
+  UINT32  PlistSize;
 
   UINT32       PlistBundlesCount;
   XML_NODE     *PlistBundle;
@@ -291,8 +441,6 @@ InternalCachedMkextKext (
   CONST CHAR8  *KextIdentifier;
   UINT32       KextBinOffset;
   UINT32       KextBinSize;
-
-  MkextHeader = Context->MkextHeader;
 
   //
   // Try to get cached kext.
@@ -317,78 +465,8 @@ InternalCachedMkextKext (
   // Mkext v1.
   //
   if (Context->MkextVersion == MKEXT_VERSION_V1) {
-    for (Index = 0; Index < Context->NumKexts; Index++) {
-      //
-      // Do not cache binaryless or compressed kexts.
-      //
-      if (  (MkextHeader->V1.Kexts[Index].Plist.CompressedSize != 0)
-         || (MkextHeader->V1.Kexts[Index].Binary.CompressedSize != 0)
-         || (MkextHeader->V1.Kexts[Index].Binary.Offset == 0))
-      {
-        continue;
-      }
-
-      PlistOffset   = SwapBytes32 (MkextHeader->V1.Kexts[Index].Plist.Offset);
-      PlistSize     = SwapBytes32 (MkextHeader->V1.Kexts[Index].Plist.FullSize);
-      KextBinOffset = SwapBytes32 (MkextHeader->V1.Kexts[Index].Binary.Offset);
-      KextBinSize   = SwapBytes32 (MkextHeader->V1.Kexts[Index].Binary.FullSize);
-
-      //
-      // Verify plist and binary are within bounds.
-      //
-      if (  BaseOverflowAddU32 (PlistOffset, PlistSize, &PlistOffsetSize)
-         || (PlistOffsetSize > Context->MkextSize)
-         || BaseOverflowAddU32 (KextBinOffset, KextBinSize, &BinOffsetSize)
-         || (BinOffsetSize > Context->MkextSize))
-      {
-        return NULL;
-      }
-
-      PlistBuffer = AllocateCopyPool (PlistSize, &Context->Mkext[PlistOffset]);
-      if (PlistBuffer == NULL) {
-        return NULL;
-      }
-
-      PlistXml = XmlDocumentParse (PlistBuffer, PlistSize, FALSE);
-      if (PlistXml == NULL) {
-        FreePool (PlistBuffer);
-        return NULL;
-      }
-
-      PlistRoot = PlistNodeCast (PlistDocumentRoot (PlistXml), PLIST_NODE_TYPE_DICT);
-      if (PlistRoot == NULL) {
-        XmlDocumentFree (PlistXml);
-        FreePool (PlistBuffer);
-        return NULL;
-      }
-
-      KextIdentifier   = NULL;
-      PlistBundleCount = PlistDictChildren (PlistRoot);
-      for (PlistBundleIndex = 0; PlistBundleIndex < PlistBundleCount; PlistBundleIndex++) {
-        PlistBundleKey = PlistKeyValue (PlistDictChild (PlistRoot, PlistBundleIndex, &PlistBundleKeyValue));
-        if ((PlistBundleKey == NULL) || (PlistBundleKeyValue == NULL)) {
-          continue;
-        }
-
-        if (AsciiStrCmp (PlistBundleKey, INFO_BUNDLE_IDENTIFIER_KEY) == 0) {
-          KextIdentifier = XmlNodeContent (PlistBundleKeyValue);
-          break;
-        }
-      }
-
-      IsKextMatch = KextIdentifier != NULL && AsciiStrCmp (KextIdentifier, Identifier) == 0;
-      XmlDocumentFree (PlistXml);
-      FreePool (PlistBuffer);
-
-      if (IsKextMatch && (KextBinOffset > 0) && (KextBinSize > 0)) {
-        break;
-      }
-    }
-
-    //
-    // Bundle was not found, or invalid.
-    //
-    if (!IsKextMatch) {
+    Status = InternalGetMkextV1KextOffsets (Context, Identifier, &Index, &PlistOffset, &PlistSize, &KextBinOffset, &KextBinSize);
+    if (Status != EFI_SUCCESS) {
       return NULL;
     }
 
@@ -1551,13 +1629,19 @@ MkextContextBlock (
   ASSERT (Context != NULL);
   ASSERT (Identifier != NULL);
 
-  Status = PatcherInitContextFromMkext (&Patcher, Context, Identifier);
-  if (EFI_ERROR (Status)) {
-    DEBUG ((DEBUG_INFO, "OCAK: Failed to mkext find %a - %r\n", Identifier, Status));
-    return Status;
+  if (Exclude) {
+    Status = PatcherExcludeMkextKext (Context, Identifier);
+  } else {
+    Status = PatcherInitContextFromMkext (&Patcher, Context, Identifier);
+    if (EFI_ERROR (Status)) {
+      DEBUG ((DEBUG_INFO, "OCAK: Failed to mkext find %a - %r\n", Identifier, Status));
+      return Status;
+    }
+
+    Status = PatcherBlockKext (&Patcher);
   }
 
-  return PatcherBlockKext (&Patcher);
+  return Status;
 }
 
 EFI_STATUS
