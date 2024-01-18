@@ -239,13 +239,10 @@ ApfsStartDriver (
   IN UINT32             DriverSize
   )
 {
-  EFI_STATUS                  Status;
-  EFI_DEVICE_PATH_PROTOCOL    *DevicePath;
-  EFI_HANDLE                  ImageHandle;
-  EFI_LOADED_IMAGE_PROTOCOL   *LoadedImage;
-  EFI_IMAGE_LOAD              LoadImage;
-  APPLE_SECURE_BOOT_PROTOCOL  *SecureBoot;
-  UINT8                       Policy;
+  EFI_STATUS                 Status;
+  EFI_DEVICE_PATH_PROTOCOL   *DevicePath;
+  EFI_HANDLE                 ImageHandle;
+  EFI_LOADED_IMAGE_PROTOCOL  *LoadedImage;
 
   Status = PeCoffVerifyAppleSignature (
              DriverBuffer,
@@ -279,27 +276,16 @@ ApfsStartDriver (
     DevicePath = NULL;
   }
 
-  SecureBoot = OcAppleSecureBootGetProtocol ();
-  ASSERT (SecureBoot != NULL);
-  Status = SecureBoot->GetPolicy (
-                         SecureBoot,
-                         &Policy
-                         );
   //
-  // Load directly when we have Apple Secure Boot.
-  // - Either normal.
-  // - Or during DMG loading.
+  // Always load jump started APFS directly - we cannot always successfully
+  // pass the sanitized image to OC-wrapped platform loader, because apfs.efi
+  // has W^X errors which require fixup for strict loaders, however the fact
+  // that apfs.efi instances are Apple signed images cannot be detected again
+  // after sanitisation (i.e. in ImageLoader.c in order to apply fixup before
+  // a strict - e.g. Duet - platform loader sees it).
   //
-  if (  (!EFI_ERROR (Status) && (Policy != AppleImg4SbModeDisabled))
-     || (OcAppleSecureBootGetDmgLoading (&Policy) && (Policy != AppleImg4SbModeDisabled)))
-  {
-    LoadImage = OcImageLoaderLoad;
-  } else {
-    LoadImage = gBS->LoadImage;
-  }
-
   ImageHandle = NULL;
-  Status      = LoadImage (
+  Status      = OcImageLoaderLoad (
                   FALSE,
                   gImageHandle,
                   DevicePath,

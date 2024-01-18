@@ -16,6 +16,7 @@ OpenCore Changelog
 - Enabled use of picker shortcut keys which are read out in OpenCanopy when using `PickerAudioAssist`
 - Modified builtin picker so as not to respond to keys queued while audio assist menu is being read out
 - Fixed Linux EFI stub loading error when using OpenDuet since 0.8.8
+- Fixed APFS JumpStart with OpenDuet and `SecureBootModel` `Disabled`
 
 #### v0.9.7
 - Updated recovery_urls.txt
