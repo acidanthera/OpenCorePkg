@@ -703,6 +703,17 @@ InternalCalculateVMTFrequency (
     return Msr;
   }
 
+  if (AsciiStrCmp (HvVendor, "XenVMMXenVMM") == 0) {
+    // Xen implement TSC frequency as CPUID leaf (0x40000003/0/ecx).
+    // Hardcoded FSB frequency to 100 MHz, as it's not exposed currently.
+    AsmCpuidEx (0x40000003, 0, NULL, NULL, &CpuidEcx, NULL);
+    if (FSBFrequency != NULL) {
+      *FSBFrequency = 100000000;
+    }
+
+    return CpuidEcx * 1000ULL;
+  }
+
   //
   // Other hypervisors implement TSC/FSB frequency as an additional CPUID leaf.
   //
