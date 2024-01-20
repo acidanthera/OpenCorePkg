@@ -14,7 +14,7 @@ OpenCore Changelog
 - Re-enabled AudioDxe failover to protocol GET mode for systems such as Acer E5 where it works when DisconnectHda doesn't
 - Added `FirmwareSettingsEntry.efi` driver which adds menu entry to reboot into UEFI firmware settings
 - Enabled use of picker shortcut keys which are read out in OpenCanopy when using `PickerAudioAssist`
-- Modified builtin picker to avoid responding after audio assist menu to keys pressed while menu is read out
+- Modified builtin picker so as not to respond to keys queued while audio assist menu is being read out
 
 #### v0.9.7
 - Updated recovery_urls.txt
