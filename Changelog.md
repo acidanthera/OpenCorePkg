@@ -15,6 +15,7 @@ OpenCore Changelog
 - Added `FirmwareSettingsEntry.efi` driver which adds menu entry to reboot into UEFI firmware settings
 - Enabled use of picker shortcut keys which are read out in OpenCanopy when using `PickerAudioAssist`
 - Modified builtin picker so as not to respond to keys queued while audio assist menu is being read out
+- Fixed Linux EFI stub loading error when using OpenDuet since 0.8.8
 
 #### v0.9.7
 - Updated recovery_urls.txt

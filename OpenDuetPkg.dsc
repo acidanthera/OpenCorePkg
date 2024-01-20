@@ -267,6 +267,12 @@
   # such as HfsPlusLegacy.efi.
   #
   gEfiMdePkgTokenSpaceGuid.PcdImageProtectionPolicy|0x00000003
+  #
+  # PcdDxeNxMemoryProtectionPolicy and PcdImageLoaderAllowMisalignedOffset
+  # settings for Linux EFI stub (same as OvmfPkg LINUX_LOADER settings).
+  #
+  gEfiMdeModulePkgTokenSpaceGuid.PcdDxeNxMemoryProtectionPolicy|0xFFFFFFFFFFFFFF40
+  gEfiMdePkgTokenSpaceGuid.PcdImageLoaderAllowMisalignedOffset|TRUE
 
 [BuildOptions]
   MSFT:NOOPT_*_*_CC_FLAGS    = -D OC_TARGET_RELEASE=1 /FAcs -Dinline=__inline  /GS /kernel
