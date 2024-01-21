@@ -17,6 +17,7 @@ OpenCore Changelog
 - Modified builtin picker so as not to respond to keys queued while audio assist menu is being read out
 - Fixed Linux EFI stub loading error when using OpenDuet since 0.8.8
 - Fixed APFS JumpStart with OpenDuet and `SecureBootModel` `Disabled`
+- Added TSC frequency calculation for xen hypervisor, thx @netanelc305
 
 #### v0.9.7
 - Updated recovery_urls.txt
