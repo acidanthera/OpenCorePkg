@@ -18,6 +18,7 @@ OpenCore Changelog
 - Fixed Linux EFI stub loading error when using OpenDuet since 0.8.8
 - Fixed APFS JumpStart with OpenDuet and `SecureBootModel` `Disabled`
 - Added TSC frequency calculation for xen hypervisor, thx @netanelc305
+- Supported additional early Nvidia UEFI VBIOS in `EnableGop` `vBiosInsert.sh`
 
 #### v0.9.7
 - Updated recovery_urls.txt

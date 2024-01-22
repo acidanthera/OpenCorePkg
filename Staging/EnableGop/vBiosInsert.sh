@@ -172,20 +172,36 @@ else
 fi
 
 if [ "$NVIDIA" -eq 1 ] ; then
-  echo "Adding Nvidia header..."
   dd bs=1 if="$tmpdir/insert.rom" of="$tmpdir/insert_first_part" count=$((0x38)) 2>/dev/null || exit 1
   dd bs=1 if="$tmpdir/insert.rom" of="$tmpdir/insert_last_part" skip=$((0x38)) 2>/dev/null || exit 1
 
   # TODO: truncation logic must be fixed for when there is not enough spare padding in output of EfiRom
   INSERT_SIZE=$(stat -f%z "$tmpdir/insert.rom") || exit 1
 
-  # add NPDE from original GOP
-  dd bs=1 if="$tmpdir/original_last_part.rom" of="$tmpdir/insert_first_part" skip=$((0x38)) seek=$((0x38)) count=$((0x18)) 2>/dev/null || exit 1
+  # Calculate NPDE size from original GOP and add to new image
+  EfiImageOffset=$(dd if="$tmpdir/original_last_part.rom" ibs=1 skip=$((0x16)) count=2 2>/dev/null | od -t u4 -An | xargs)
+  if [ "$EfiImageOffset" -eq $((0x50)) ] ; then
+    NpdeSize=$((0x18))
+  elif [ "$EfiImageOffset" -eq $((0x4C)) ] ; then
+    NpdeSize=$((0x14))
+  elif [ "$EfiImageOffset" -eq $((0x38)) ] ; then
+    NpdeSize=0
+  else
+    # Note: We need at least 0x14 NPDE size for the patch-ups we do below for size and end-marker to make sense
+    printf "Unsupported EFI Image Offset 0x%x, cannot calculate NPDE Size!\n" "$EfiImageOffset"
+    exit 1
+  fi
+fi
+
+if [ "$NVIDIA" -eq 1 ] && [ "$NpdeSize" -ne 0 ] ; then
+  echo "Adding Nvidia header..."
+
+  dd bs=1 if="$tmpdir/original_last_part.rom" of="$tmpdir/insert_first_part" skip=$((0x38)) seek=$((0x38)) count="$NpdeSize" 2>/dev/null || exit 1
   cat "$tmpdir/insert_first_part" "$tmpdir/insert_last_part" > "$tmpdir/insert_oversize.rom" || exit 1
   # Note: `truncate` command is not present by default on macOS
   dd bs=1 if="$tmpdir/insert_oversize.rom" of="$tmpdir/insert_fixed.rom" count="$INSERT_SIZE" 2>/dev/null || exit 1
 
-  # patch size in NPDE
+  # Patch size in NPDE
   dd bs=1 if="$tmpdir/insert.rom" of="$tmpdir/insert_fixed.rom" skip=$((0x2)) seek=$((0x48)) count=1 conv=notrunc 2>/dev/null || exit 1
 else
   cp "$tmpdir/insert.rom" "$tmpdir/insert_fixed.rom" || exit 1
@@ -194,11 +210,11 @@ fi
 # patch with vendor and device id from original GOP
 dd bs=1 if="$tmpdir/original_last_part.rom" of="$tmpdir/insert_fixed.rom" skip=$((0x20)) seek=$((0x20)) count=4 conv=notrunc 2>/dev/null || exit 1
 
-if [ "$NVIDIA" -eq 1 ] ; then
-  # patch size in PCIR
+if [ "$NVIDIA" -eq 1 ] && [ "$NpdeSize" -ne 0 ] ; then
+  # Patch EFI image offset in PCIR
   dd bs=1 if="$tmpdir/original_last_part.rom" of="$tmpdir/insert_fixed.rom" skip=$((0x16)) seek=$((0x16)) count=1 conv=notrunc 2>/dev/null || exit 1
 
-  # patch end marker in NPDE in fixed ROM (leave PCIR correct and EFI extractable from fixed ROM)
+  # Patch end marker in NPDE in fixed ROM (leave PCIR correct and EFI extractable from fixed ROM)
   echo -n -e '\x00' | dd bs=1 of="$tmpdir/insert_fixed.rom" seek=$((0x4A)) conv=notrunc 2>/dev/null || exit 1
 fi
 
