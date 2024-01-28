@@ -16,6 +16,8 @@ usage() {
   echo "  -o {GOP offset} : GOP offset (auto-detected if Homebrew grep is installed)"
   echo "                    Can specify 0x{hex} or {decimal}"
   echo "  -t {temp dir}   : Specify temporary directory, and keep temp files"
+  echo "  -m {max size}   : Specify VBIOS max size (Nvidia only)"
+  echo "                    (For AMD first 128KB is modified, any remainder is kept)"
   echo "Examples:"
   echo "  ./${SELFNAME} -n -o 0xFC00 nv.rom EnableGop.efi nv_mod.rom"
   echo "  ./${SELFNAME} -n nv.rom EnableGop.efi nv_mod.rom"
@@ -46,9 +48,11 @@ fi
 
 AMD=0
 AMD_SAFE_SIZE="0x20000"
+NVIDIA_SAFE_SIZE="0x40000"
 GOP_OFFSET="-"
 NVIDIA=0
 POS=0
+TRUNCATE=0
 
 while true; do
   if [ "$1" = "-a" ] ; then
@@ -74,6 +78,16 @@ while true; do
       shift
     else
       echo "No AMD safe size specified" && exit 1
+    fi
+  elif [ "$1" = "-m" ] ; then
+    shift
+    if [ "$1" != "" ] && ! [ "${1:0:1}" = "-" ] ; then
+      TRUNCATE=1
+      TRUNCATE_SIZE=$1
+      NVIDIA_SAFE_SIZE=$TRUNCATE_SIZE
+      shift
+    else
+      echo "No max size specified" && exit 1
     fi
   elif [ "$1" = "-t" ] ; then
     shift
@@ -118,6 +132,10 @@ if [ "$AMD" -eq 0 ] && [ "$NVIDIA" -eq 0 ] ; then
   echo "Must specify -a or -n" && exit 1
 fi
 
+if [ "$AMD" -eq 1 ] && [ "$TRUNCATE" -eq 1 ] ; then
+  echo "-m is not valid with -a" && exit 1
+fi
+
 if [ "$TEMP_DIR" != "" ] ; then
   mkdir -p "$TEMP_DIR" || exit 1
   tmpdir="$TEMP_DIR"
@@ -136,6 +154,9 @@ if [ "$AMD" -eq 1 ] ; then
   dd bs=1 if="$ROM_FILE" of="$tmpdir/modify_part.rom" count=$(($AMD_SAFE_SIZE)) 2>/dev/null || exit 1
   dd bs=1 if="$ROM_FILE" of="$tmpdir/keep_part.rom" skip=$(($AMD_SAFE_SIZE)) 2>/dev/null || exit 1
 else
+  if [ "$ORIGINAL_SIZE" -gt "$((NVIDIA_SAFE_SIZE))" ] ; then
+    echo " - File size of ${ORIGINAL_SIZE} bytes must be no more than $((NVIDIA_SAFE_SIZE)) bytes; use -m or check file" && exit 1
+  fi
   cp "$ROM_FILE" "$tmpdir/modify_part.rom" || exit 1
   echo -n > "$tmpdir/keep_part.rom" || exit 1
 fi
@@ -175,7 +196,9 @@ if [ "$NVIDIA" -eq 1 ] ; then
   dd bs=1 if="$tmpdir/insert.rom" of="$tmpdir/insert_first_part" count=$((0x38)) 2>/dev/null || exit 1
   dd bs=1 if="$tmpdir/insert.rom" of="$tmpdir/insert_last_part" skip=$((0x38)) 2>/dev/null || exit 1
 
-  # TODO: truncation logic must be fixed for when there is not enough spare padding in output of EfiRom
+  # TODO: truncation logic should be fixed for when there is not enough spare padding in output of EfiRom;
+  # we currently assume without checking that there is enough space to fit in the NPDE header (if not,
+  # script will report failure to verify with UEFIRomExtract below).
   INSERT_SIZE=$(stat -f%z "$tmpdir/insert.rom") || exit 1
 
   # Calculate NPDE size from original GOP and add to new image
@@ -221,13 +244,40 @@ fi
 echo "Combining..."
 cat "$tmpdir/original_first_part.rom" "$tmpdir/insert_fixed.rom" "$tmpdir/original_last_part.rom" > "$tmpdir/combined.rom" || exit 1
 
-if [ "$AMD" -eq 1 ] ; then
-  TRUNCATE=1
-  TRUNCATE_SIZE="$AMD_SAFE_SIZE"
-else
-  TRUNCATE=0
+if [ "$TRUNCATE" -eq 0 ] ; then
+  if [ "$AMD" -eq 1 ] ; then
+    # For AMD we can only modify the first 128KB, anything above 128KB
+    # should not be moved, and is not mapped to memory visible by the CPU
+    # for loading EFI drivers.
+    TRUNCATE=1
+    TRUNCATE_SIZE="$AMD_SAFE_SIZE"
+  else
+    # If size is a multiple of 64KB assume it is the full available size
+    # of the VBIOS chip, unless overridden with -m.
+    printf '%x' "$ORIGINAL_SIZE" | grep -q "0000$" && TRUNCATE=1
+    if [ "$TRUNCATE" -eq 1 ] ; then
+      echo "Detected standard ROM size, truncating to original size..."
+      TRUNCATE_SIZE="$ORIGINAL_SIZE"
+    else
+      TRUNCATE=1
+      TRUNCATE_SIZE="$NVIDIA_SAFE_SIZE"
+    fi
+  fi
 fi
 
+# If new ROM is larger than truncate size, determine overflow by seeing
+# whether truncated ROM still has padding.
+# For Nvidia we would need to parse and navigate NVGI and NPDE headers
+# to calculate true occupied VBIOS space. To calcuate AMD occupation below
+# 128KB limit, we could navigate normal PCI expansion ROM headers.
+COMBINED_SIZE=$(stat -f%z "$tmpdir/combined.rom") || exit 1
+if [ "$COMBINED_SIZE" -le "$TRUNCATE_SIZE" ] ; then
+  if [ "$AMD" -eq 1 ] ; then
+    echo "Internal error - aborting!"
+    exit 1
+  fi
+  TRUNCATE=0
+fi
 if [ "$TRUNCATE" -eq 1 ] ; then
   dd bs=1 if="$tmpdir/combined.rom" of="$tmpdir/truncated.rom" count="$TRUNCATE_SIZE" 2>/dev/null || exit 1
 
