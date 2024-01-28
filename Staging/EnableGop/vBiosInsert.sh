@@ -221,17 +221,13 @@ fi
 echo "Combining..."
 cat "$tmpdir/original_first_part.rom" "$tmpdir/insert_fixed.rom" "$tmpdir/original_last_part.rom" > "$tmpdir/combined.rom" || exit 1
 
-TRUNCATE=0
 if [ "$AMD" -eq 1 ] ; then
   TRUNCATE=1
   TRUNCATE_SIZE="$AMD_SAFE_SIZE"
 else
-  printf '%x' "$ORIGINAL_SIZE" | grep -q "000$" && TRUNCATE=1
-  if [ "$TRUNCATE" -eq 1 ] ; then
-    echo "Detected standard ROM size, truncating to original size..."
-    TRUNCATE_SIZE="$ORIGINAL_SIZE"
-  fi
+  TRUNCATE=0
 fi
+
 if [ "$TRUNCATE" -eq 1 ] ; then
   dd bs=1 if="$tmpdir/combined.rom" of="$tmpdir/truncated.rom" count="$TRUNCATE_SIZE" 2>/dev/null || exit 1
 
