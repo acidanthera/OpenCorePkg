@@ -252,9 +252,10 @@ if [ "$TRUNCATE" -eq 0 ] ; then
     TRUNCATE=1
     TRUNCATE_SIZE="$AMD_SAFE_SIZE"
   else
-    # If size is a multiple of 64KB assume it is the full available size
-    # of the VBIOS chip, unless overridden with -m.
-    printf '%x' "$ORIGINAL_SIZE" | grep -q "0000$" && TRUNCATE=1
+    # If original size is a plausible ROM size (exact power of two, 64KB or
+    # larger) treat it as the full available size of the VBIOS chip unless
+    # overridden with -m.
+    printf '%x' "$ORIGINAL_SIZE" | grep -Eq "^(1|2|4|8)0000+$" && TRUNCATE=1
     if [ "$TRUNCATE" -eq 1 ] ; then
       echo "Detected standard ROM size, truncating to original size..."
       TRUNCATE_SIZE="$ORIGINAL_SIZE"
