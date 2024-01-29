@@ -147,18 +147,35 @@ fi
 ORIGINAL_SIZE=$(stat -f%z "$ROM_FILE") || exit 1
 
 if [ "$AMD" -eq 1 ] ; then
-  if [ "$ORIGINAL_SIZE" -lt "$((AMD_SAFE_SIZE))" ] ; then
-    echo " - File size of ${ORIGINAL_SIZE} bytes must be at least safe size of $((AMD_SAFE_SIZE)) bytes; use -s or check file" && exit 1
+  # For AMD we can only modify the first 128KB, anything above 128KB
+  # should not be moved, and is not mapped to memory visible by the CPU
+  # for loading EFI drivers.
+  TRUNCATE=1
+  TRUNCATE_SIZE="$AMD_SAFE_SIZE"
+
+  # Also works, with empty keep_part.rom, in the atypical case where we
+  # are provided with only the used part of the ROM below 128KB.
+  dd bs=1 if="$ROM_FILE" of="$tmpdir/modify_part.rom" count="$AMD_SAFE_SIZE" 2>/dev/null || exit 1
+  dd bs=1 if="$ROM_FILE" of="$tmpdir/keep_part.rom" skip="$AMD_SAFE_SIZE" 2>/dev/null || exit 1
+else
+  if [ "$TRUNCATE" -eq 0 ] ; then
+    # If original size is a plausible ROM size (exact power of two, 64KB or
+    # larger; 64KB chosen partly for neat regexp) treat it as the full available
+    # size of the VBIOS chip unless overridden with -m.
+    printf '%x' "$ORIGINAL_SIZE" | grep -Eq "^(1|2|4|8)0000+$" && TRUNCATE=1
+    if [ "$TRUNCATE" -eq 1 ] ; then
+      echo "Detected standard ROM size."
+      TRUNCATE_SIZE="$ORIGINAL_SIZE"
+    else
+      if [ "$ORIGINAL_SIZE" -gt "$((NVIDIA_SAFE_SIZE))" ] ; then
+        echo " - File size of ${ORIGINAL_SIZE} bytes must be no more than $((NVIDIA_SAFE_SIZE)) bytes; use -m or check file" && exit 1
+      fi
+      TRUNCATE=1
+      TRUNCATE_SIZE="$NVIDIA_SAFE_SIZE"
+    fi
   fi
 
-  dd bs=1 if="$ROM_FILE" of="$tmpdir/modify_part.rom" count=$(($AMD_SAFE_SIZE)) 2>/dev/null || exit 1
-  dd bs=1 if="$ROM_FILE" of="$tmpdir/keep_part.rom" skip=$(($AMD_SAFE_SIZE)) 2>/dev/null || exit 1
-else
-  if [ "$ORIGINAL_SIZE" -gt "$((NVIDIA_SAFE_SIZE))" ] ; then
-    echo " - File size of ${ORIGINAL_SIZE} bytes must be no more than $((NVIDIA_SAFE_SIZE)) bytes; use -m or check file" && exit 1
-  fi
   cp "$ROM_FILE" "$tmpdir/modify_part.rom" || exit 1
-  echo -n > "$tmpdir/keep_part.rom" || exit 1
 fi
 
 if [ "$GOP_OFFSET" = "-" ] ; then
@@ -244,42 +261,18 @@ fi
 echo "Combining..."
 cat "$tmpdir/original_first_part.rom" "$tmpdir/insert_fixed.rom" "$tmpdir/original_last_part.rom" > "$tmpdir/combined.rom" || exit 1
 
-if [ "$TRUNCATE" -eq 0 ] ; then
-  if [ "$AMD" -eq 1 ] ; then
-    # For AMD we can only modify the first 128KB, anything above 128KB
-    # should not be moved, and is not mapped to memory visible by the CPU
-    # for loading EFI drivers.
-    TRUNCATE=1
-    TRUNCATE_SIZE="$AMD_SAFE_SIZE"
-  else
-    # If original size is a plausible ROM size (exact power of two, 64KB or
-    # larger) treat it as the full available size of the VBIOS chip unless
-    # overridden with -m.
-    printf '%x' "$ORIGINAL_SIZE" | grep -Eq "^(1|2|4|8)0000+$" && TRUNCATE=1
-    if [ "$TRUNCATE" -eq 1 ] ; then
-      echo "Detected standard ROM size, truncating to original size..."
-      TRUNCATE_SIZE="$ORIGINAL_SIZE"
-    else
-      TRUNCATE=1
-      TRUNCATE_SIZE="$NVIDIA_SAFE_SIZE"
-    fi
-  fi
-fi
-
 # If new ROM is larger than truncate size, determine overflow by seeing
 # whether truncated ROM still has padding.
 # For Nvidia we would need to parse and navigate NVGI and NPDE headers
 # to calculate true occupied VBIOS space. To calcuate AMD occupation below
 # 128KB limit, we could navigate normal PCI expansion ROM headers.
 COMBINED_SIZE=$(stat -f%z "$tmpdir/combined.rom") || exit 1
-if [ "$COMBINED_SIZE" -le "$TRUNCATE_SIZE" ] ; then
-  if [ "$AMD" -eq 1 ] ; then
-    echo "Internal error - aborting!"
-    exit 1
-  fi
+if [ "$COMBINED_SIZE" -le "$(($TRUNCATE_SIZE))" ] ; then
   TRUNCATE=0
 fi
 if [ "$TRUNCATE" -eq 1 ] ; then
+  echo "Truncating to original size..."
+
   dd bs=1 if="$tmpdir/combined.rom" of="$tmpdir/truncated.rom" count="$TRUNCATE_SIZE" 2>/dev/null || exit 1
 
   COUNT=$(hexdump -v -e '1/8 " %016X\n"' "$tmpdir/truncated.rom" | tail -n 8 | grep "FFFFFFFFFFFFFFFF" | wc -l)
@@ -294,7 +287,11 @@ if [ "$TRUNCATE" -eq 1 ] ; then
     echo " - Not enough space within $((TRUNCATE_SIZE / 1024))k limit - aborting!" && exit 1
   fi
 
-  cat "$tmpdir/truncated.rom" "$tmpdir/keep_part.rom" > "$OUT_FILE" || exit 1
+  if [ "$AMD" -eq 1 ] ; then
+    cat "$tmpdir/truncated.rom" "$tmpdir/keep_part.rom" > "$OUT_FILE" || exit 1
+  else
+    cp "$tmpdir/truncated.rom" "$OUT_FILE" || exit 1
+  fi
 else
   cp "$tmpdir/combined.rom" "$OUT_FILE" || exit 1
 fi
