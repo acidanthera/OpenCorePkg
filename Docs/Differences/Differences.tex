@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
-%DIF DEL PreviousConfiguration.tex   Fri Jan 12 10:03:09 2024
-%DIF ADD ../Configuration.tex        Wed Jan 17 09:50:19 2024
+%DIF DEL PreviousConfiguration.tex   Mon Feb  5 21:21:58 2024
+%DIF ADD ../Configuration.tex        Mon Feb  5 21:24:33 2024
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -154,7 +154,7 @@
 
        \vspace{0.2in}
 
-       Reference Manual (0.9\DIFdelbegin \DIFdel{.7}\DIFdelend \DIFaddbegin \DIFadd{.8}\DIFaddend )
+       Reference Manual (0.9\DIFdelbegin \DIFdel{.8}\DIFdelend \DIFaddbegin \DIFadd{.9}\DIFaddend )
 
        \vspace{0.2in}
 
@@ -166,7 +166,7 @@
 
        \rmfamily
 
-       Copyright \textcopyright 2018-2023 vit9696
+       Copyright \textcopyright \DIFdelbegin \DIFdel{2018-2023 }\DIFdelend \DIFaddbegin \DIFadd{2018-2024 }\DIFaddend vit9696
 
    \end{center}
 \end{titlepage}
@@ -3753,18 +3753,17 @@ the default boot entry choice will remain changed until the next manual reconfig
       \item A list of recommended flavours is provided in \texttt{Docs/Flavours.md}.
     \end{itemize}
     \medskip
-  \DIFaddbegin \item \texttt{\DIFadd{0x0100}} \DIFadd{--- }\texttt{\DIFadd{OC\_ATTR\_USE\_REVERSED\_UI}}\DIFadd{, reverse position of Shutdown and
+  \item \texttt{0x0100} --- \texttt{OC\_ATTR\_USE\_REVERSED\_UI}, reverse position of Shutdown and
   Restart buttons, affects OpenCanopy and builtin picker. The reversed setting matches older macOS,
   and since it was the previous default in OpenCore it may better match some custom backgrounds.
-  Only applicable when }\texttt{\DIFadd{OC\_ATTR\_USE\_MINIMAL\_UI}} \DIFadd{is not set.
-  }\item \texttt{\DIFadd{0x0200}} \DIFadd{--- }\texttt{\DIFadd{OC\_ATTR\_REDUCE\_MOTION}}\DIFadd{, reduce password and menu animation
-  in }\texttt{\DIFadd{OpenCanopy}}\DIFadd{, leaving only animations which communicate information not otherwise
+  Only applicable when \texttt{OC\_ATTR\_USE\_MINIMAL\_UI} is not set.
+  \item \texttt{0x0200} --- \texttt{OC\_ATTR\_REDUCE\_MOTION}, reduce password and menu animation
+  in \texttt{OpenCanopy}, leaving only animations which communicate information not otherwise
   provided.
-}
 
-  \emph{\DIFadd{Note}}\DIFadd{: These same animations, plus additional animations whose information is provided
-  by voice-over, are automatically disabled when }\texttt{\DIFadd{PickerAudioAssist}} \DIFadd{is enabled.
-  }\DIFaddend \end{itemize}
+  \emph{Note}: These same animations, plus additional animations whose information is provided
+  by voice-over, are automatically disabled when \texttt{PickerAudioAssist} is enabled.
+  \end{itemize}
 
 \item
   \texttt{PickerAudioAssist}\\
@@ -6574,11 +6573,11 @@ even cause permanent firmware damage. Some of the known drivers are listed below
 \href{https://github.com/acidanthera/OcBinaryData}{\texttt{ext4\_x64}}
 & Open source EXT4 file system driver, required for booting with \hyperref[uefilinux]{OpenLinuxBoot}
   from the file system most commonly used with Linux. \\
-\DIFaddbegin \href{https://github.com/acidanthera/OpenCorePkg}{\texttt{\DIFadd{FirmwareSettings}}}\textbf{\DIFadd{*}}
-& \hyperref[firmwaresettings]{OpenCore plugin} \DIFadd{implementing }\texttt{\DIFadd{OC\_BOOT\_ENTRY\_PROTOCOL}}
-  \DIFadd{to add an entry to the boot picker menu which reboots into UEFI firmware settings,
-  when this is supported by the firmware. }\\
-\DIFaddend \href{https://github.com/acidanthera/OcBinaryData}{\texttt{HfsPlus}}
+\href{https://github.com/acidanthera/OpenCorePkg}{\texttt{FirmwareSettings}}\textbf{*}
+& \hyperref[firmwaresettings]{OpenCore plugin} implementing \texttt{OC\_BOOT\_ENTRY\_PROTOCOL}
+  to add an entry to the boot picker menu which reboots into UEFI firmware settings,
+  when this is supported by the firmware. \\
+\href{https://github.com/acidanthera/OcBinaryData}{\texttt{HfsPlus}}
 & Recommended. Proprietary HFS file system driver with bless support commonly found in Apple
   firmware. For Sandy Bridge and earlier CPUs, the \texttt{HfsPlusLegacy} driver should be
   used due to the lack of \texttt{RDRAND} instruction support. \\
@@ -6798,8 +6797,8 @@ Full list of labels is provided below. All labels are mandatory.
   \item \texttt{SIPDisabled} --- Toggle SIP tool with SIP disabled.
   \item \texttt{SIPEnabled} --- Toggle SIP tool with SIP enabled.
   \item \texttt{Shell} --- Entry with UEFI Shell name (e.g. \texttt{OpenShell}).
-  \item \DIFaddbegin \texttt{\DIFadd{FirmwareSettings}} \DIFadd{--- Firmware settings menu entry.
-  }\item \DIFaddend \texttt{Tool} --- Any other tool.
+  \item \texttt{FirmwareSettings} --- Firmware settings menu entry.
+  \item \texttt{Tool} --- Any other tool.
 \end{itemize}
 
 \emph{Note}: All labels must have a height of exactly 12 px. There is no limit for their width.
@@ -7210,13 +7209,11 @@ value, as it is very easy when using it to inadvertently break OS seal and preve
 (e.g. specifying \texttt{0x7F} on Catalina) then \texttt{csrutil status}
 will report that SIP has a non-standard value, however protection will be functionally the same.
 \end{itemize}
-\DIFaddbegin 
 
-\subsubsection{\DIFadd{FirmwareSettings}}\label{firmwaresettings}
+\subsubsection{FirmwareSettings}\label{firmwaresettings}
 
-\DIFadd{Adds a menu entry which will reboot into UEFI firmware settings, when supported.
+Adds a menu entry which will reboot into UEFI firmware settings, when supported.
 No menu entry added and logs a warning when not supported.
-}\DIFaddend 
 
 \subsection{AudioDxe}\label{uefiaudio}
 
