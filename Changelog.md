@@ -1,5 +1,8 @@
 OpenCore Changelog
 ==================
+#### v0.9.9
+- Fixed incorrect warning in ocvalidate
+
 #### v0.9.8
 - Updated OpenDuet to allow loading unsigned, unaligned legacy Apple images such as HfsPlusLegacy.efi
 - Fixed CPU frequency calculation on AMD 10h family
