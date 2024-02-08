@@ -334,6 +334,53 @@ can be found at \href{https://github.com/acidanthera/bugtracker}{Acidanthera Bug
 
   \end{itemize}
 
+\item
+  \textbf{Identifier}: \texttt{ERR088-2} \\
+  \textbf{Published}: 2024-02-06 13:36 GMT \\
+  \textbf{Updated}: 2024-02-06 13:36 GMT \\
+  \textbf{Affected versions}: 0.8.8+ \\
+  \textbf{Resolved in}: Won't fix \\
+  \textbf{Description}:
+
+  Some released versions of Linux kernel 6.7 and release candidates of 6.8 may
+  fail to load when using OpenDuet. This has been acccepted as a bug in the
+  Linux kernel, for which a fix will be releasd in 6.8 and backported to 6.7.
+  Reference:
+  \href{https://github.com/acidanthera/bugtracker/issues/2371#issuecomment-1929638701}{acidanthera/bugtracker\#2371}.
+
+  \textbf{Possible workarounds}:
+  \begin{itemize}
+    \tightlist
+
+    \item Use OpenDuet to 0.8.7 or earlier, or wait for fixed Linux kernels to
+    be released.
+
+  \end{itemize}
+
+\item
+  \textbf{Identifier}: \texttt{ERR098-1} \\
+  \textbf{Published}: 2024-02-08 09:28 GMT \\
+  \textbf{Updated}: 2024-02-08 09:28 GMT \\
+  \textbf{Affected versions}: 0.9.8 \\
+  \textbf{Resolved in}: 0.9.9 (\href{https://github.com/acidanthera/OpenCorePkg/commit/4314fb31ecb974c30f99ac17db1f2b67ce1bb765}{4314fb31}) \\
+  \textbf{Description}:
+
+  \texttt{ocvalidate} may report that \texttt{OpenVariableRuntimeDxe.efi} is
+  incompatible with \texttt{FirmwareSettingsEntry.efi} even when
+  \texttt{FirmwareSettingsEntry.efi} is not included and active in \texttt{config.plist}
+  \texttt{Drivers} section. Reference:
+  \href{https://github.com/acidanthera/bugtracker/issues/2379}{acidanthera/bugtracker\#2379}.
+
+  \textbf{Possible workarounds}:
+  \begin{itemize}
+    \tightlist
+
+    \item For 0.9.8 use version of \texttt{ocvalidate} provided in a
+    \href{https://github.com/acidanthera/bugtracker/issues/2379#issuecomment-1933674398}{comment}
+    on the above issue.
+
+  \end{itemize}
+
 \end{itemize}
 
 \end{document}
