@@ -333,6 +333,7 @@ CheckUefiDrivers (
   HasOpenVariableRuntimeDxeEfiDriver   = FALSE;
   IndexOpenVariableRuntimeDxeEfiDriver = 0;
   IsOpenRuntimeLoadEarly               = FALSE;
+  HasFirmwareSettingsEntryEfiDriver    = FALSE;
   for (Index = 0; Index < Config->Uefi.Drivers.Count; ++Index) {
     DriverEntry = Config->Uefi.Drivers.Values[Index];
     Comment     = OC_BLOB_GET (&DriverEntry->Comment);
