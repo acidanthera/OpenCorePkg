@@ -35,6 +35,11 @@ usage() {
 }
 
 doLog() {
+  # macOS recreats this for daemon at reboot, but preferable
+  # to continue logging immediately after any log cleardown,
+  # also never recreated except for this with logout hook
+  sudo mkdir -p "${LOGDIR}"
+
   # 'sudo tee' to write to log file as root (could also 'sh -c') for installation steps;
   # will be root anyway when running installed as daemon or logout hook
   if [ ! "${LOG_PREFIX}" = "" ] ; then
@@ -74,6 +79,8 @@ getDarwinMajorVersion() {
 installLog() {
   FAIL="Failed to install log!"
   if [ ! -d "${LOGDIR}" ] ; then
+    # We intentionally don't use -p as something is probably
+    # weird if parent dirs don't exist here
     sudo mkdir "${LOGDIR}" || abort "${FAIL}"
   fi
 
