@@ -11,13 +11,10 @@
 # shutdown reads NVRAM after macOS installer vars are set, in more recent macOS
 # installers (e.g. Monterey).
 #
-# Non-installed script can be run directly as 'daemon' or 'logout' hook by
+# Non-installed script can be run directly as 'daemon', 'agent' or 'logout' hook by
 # specifying one of those options on the command line. For 'logout' this saves NVRAM
-# immediately, for 'daemon' this waits to be terminated e.g. CTRL+C before saving.
-#
-# TO DO: rc.shutdown.d approach discussed in
-# https://github.com/acidanthera/bugtracker/issues/2106
-# might be a viable alternative (needs testing re timing of picking up NVRAM changes).
+# immediately, for 'daemon' or 'agent' this waits to be terminated e.g. CTRL+C before
+# saving.
 #
 # Credits:
 #  - Rodion Shingarev (with additional contributions by vit9696 and PMheart) for
@@ -27,29 +24,45 @@
 #
 
 usage() {
-  echo "Usage: ${SELFNAME} [install|uninstall|status] [logout|daemon]"
+  echo "Usage: ${SELFNAME} [install|uninstall|status] [logout|daemon|agent|both]"
   echo "  - [install|uninstall] without type uses recommended type for macOS version"
-  echo "  - 'status' shows status of daemon and logout hook"
-  echo "  - 'status daemon' gives additional detail on daemon"
+  echo "  - 'status' shows status of agent, daemon and logout hook"
+  echo "  - 'status daemon' or 'status agent' give additional detail"
   echo ""
 }
 
+# Non-sudo log only if agent will use it, so logfile has been chmod-ed at install.
+# If only daemon or logout hook will use it, explicit sudo required at install
+# time, but harmless when running.
 doLog() {
-  # macOS recreats this for daemon at reboot, but preferable
-  # to continue logging immediately after any log cleardown,
-  # also never recreated except for this with logout hook
-  sudo mkdir -p "${LOGDIR}"
+  if [ ! "$AGENT" = "1" ] ; then
+    # macOS recreates this for daemon at reboot, but preferable
+    # to continue logging immediately after any log cleardown,
+    # also never recreated except for this with logout hook
+    sudo mkdir -p "${LOGDIR}"
 
-  # 'sudo tee' to write to log file as root (could also 'sh -c') for installation steps;
-  # will be root anyway when running installed as daemon or logout hook
-  if [ ! "${LOG_PREFIX}" = "" ] ; then
-    sudo tee -a "${LOGFILE}" > /dev/null << EOF
+    # 'sudo tee' to write to log file as root (could also 'sh -c') for installation steps;
+    # will be root anyway when running installed as daemon or logout hook
+    if [ ! "${LOG_PREFIX}" = "" ] ; then
+      sudo tee -a "${LOGFILE}" > /dev/null << EOF
 $(date +"${DATEFORMAT}") (${LOG_PREFIX}) ${1}
 EOF
-  else
-    sudo tee -a "${LOGFILE}" > /dev/null << EOF
+    else
+      sudo tee -a "${LOGFILE}" > /dev/null << EOF
 ${1}
 EOF
+    fi
+  else
+    # non-sudo copy, could simplify
+    if [ ! "${LOG_PREFIX}" = "" ] ; then
+      tee -a "${LOGFILE}" > /dev/null << EOF
+$(date +"${DATEFORMAT}") (${LOG_PREFIX}) ${1}
+EOF
+    else
+      tee -a "${LOGFILE}" > /dev/null << EOF
+${1}
+EOF
+    fi
   fi
 
   if [ ! "$INSTALLED" = "1" ] ; then
@@ -77,15 +90,18 @@ getDarwinMajorVersion() {
 }
 
 installLog() {
-  FAIL="Failed to install log!"
   if [ ! -d "${LOGDIR}" ] ; then
     # We intentionally don't use -p as something is probably
     # weird if parent dirs don't exist here
-    sudo mkdir "${LOGDIR}" || abort "${FAIL}"
+    sudo mkdir "${LOGDIR}" || abort "Failed to mkdir for logfile!"
   fi
 
   if [ ! -f "${LOGFILE}" ] ; then
-    sudo touch "${LOGFILE}" || abort "${FAIL}"
+    sudo touch "${LOGFILE}" || abort "Failed to touch logfile!"
+  fi
+
+  if [ "$AGENT" = "1" ] ; then
+    sudo chmod 666 "${LOGFILE}" || abort "Failed to chmod logfile!"
   fi
 }
 
@@ -105,46 +121,52 @@ install() {
     sudo defaults write com.apple.loginwindow LogoutHook "${HELPER}" || abort "${FAIL}"
   fi
 
-  # Make customised Launchd.command.plist for daemon.
   if [ "$DAEMON" = "1" ] ; then
-    sed "s/\$LABEL/${ORG}.daemon/g;s/\$HELPER/$(sed 's/\//\\\//g' <<< "$HELPER")/g;s/\$PARAM/daemon/g;s/\$LOGFILE/$(sed 's/\//\\\//g' <<< "$LOGFILE")/g" "Launchd.command.plist" > "/tmp/Launchd.command.plist" || abort "${FAIL}"
+    # Make customised Launchd.command.plist for daemon.
+    if [ "$BOTH" = "1" ] ; then
+      LAUNCHFILE_DAEMON="${LAUNCHFILE_DAEMON} (1 of 2)"
+    fi
+    if [ -f "$LAUNCHFILE_DAEMON" ] ; then
+      sudo rm "$LAUNCHFILE_DAEMON" || abort "${FAIL}"
+    fi
+    sudo ln -s "$(which sh)" "$LAUNCHFILE_DAEMON" || abort "${FAIL}"
+    sed "s/\$LABEL/${ORG}.daemon/g;s/\$HELPER/$(sed 's/\//\\\//g' <<< "$HELPER")/g;s/\$PARAM/${DAEMON_PARAMS}/g;s/\$LOGFILE/$(sed 's/\//\\\//g' <<< "$LOGFILE")/g;s/\$LAUNCHFILE/$(sed 's/\//\\\//g' <<< "$LAUNCHFILE_DAEMON")/g" "Launchd.command.plist" > "/tmp/Launchd.command.plist" || abort "${FAIL}"
     sudo cp "/tmp/Launchd.command.plist" "${DAEMON_PLIST}" || abort "${FAIL}"
     rm -f /tmp/Launchd.command.plist
+
+    # Launch already installed daemon.
+    sudo launchctl load "${DAEMON_PLIST}" || abort "${FAIL}"
   fi
 
-  # Launch already installed daemon.
-  if [ "$DAEMON" = "1" ] ; then
-    sudo launchctl load "${DAEMON_PLIST}" || abort "${FAIL}"
+  if [ "$AGENT" = "1" ] ; then
+    # Make customised Launchd.command.plist for agent.
+    if [ "$BOTH" = "1" ] ; then
+      LAUNCHFILE_AGENT="${LAUNCHFILE_AGENT} (2 of 2)"
+    fi
+    if [ -f "$LAUNCHFILE_AGENT" ] ; then
+      sudo rm "$LAUNCHFILE_AGENT" || abort "${FAIL}"
+    fi
+    sudo ln -s "$(which sh)" "$LAUNCHFILE_AGENT" || abort "${FAIL}"
+    sed "s/\$LABEL/${ORG}.agent/g;s/\$HELPER/$(sed 's/\//\\\//g' <<< "$HELPER")/g;s/\$PARAM/${AGENT_PARAMS}/g;s/\$LOGFILE/$(sed 's/\//\\\//g' <<< "$LOGFILE")/g;s/\$LAUNCHFILE/$(sed 's/\//\\\//g' <<< "$LAUNCHFILE_AGENT")/g" "Launchd.command.plist" > "/tmp/Launchd.command.plist" || abort "${FAIL}"
+    sudo cp "/tmp/Launchd.command.plist" "${AGENT_PLIST}" || abort "${FAIL}"
+    rm -f /tmp/Launchd.command.plist
+
+    # Launch already installed agent.
+    sudo launchctl bootstrap gui/501 "${AGENT_PLIST}" || abort "${FAIL}"
   fi
 
   echo "Installed."
 }
 
-# On older macOS, previous version of this script would install and uninstall
-# harmless (i.e. takes no actions) agent script if requested, but fail to report
-# it as installed, and fail to start it immediately, so clean up.
-#
-# Working agent (probably never much use) requires:
-#  - chmod for logfile access
-#  - non-sudo log writer (agent is not sudo and cannot gain it)
-#  - customised agent.plist
-#  - load with launchctl load (earlier macOS) or sudo launchctl bootstrap
-#  - unload with launchctl unload (earlier macOS) or sudo launchctl bootout
-#
-uninstallAgent() {
-  if [ -f "${AGENT_PLIST}" ] ; then
-    sudo rm -f "${AGENT_PLIST}"
-    echo "Uninstalled agent."
-  fi
-}
-
 uninstall() {
   UNINSTALLED=1
 
-  if [ "$DAEMON" = "1" ] ; then
+  if [ "$DAEMON" = "1" ] || [ "$AGENT" = "1" ] ; then
     if [ "$DAEMON_PID" = "" ] ; then
       UNINSTALLED=2
-      echo "Daemon was not installed!" > /dev/stderr
+      if [ ! "$INSTALL" = "1" ] && [ "$DAEMON" = "1" ] ; then
+        echo "Daemon was not installed!" > /dev/stderr
+      fi
     else
       # Place special value in saved device node so that nvram.plist is not updated at uninstall
       sudo /usr/sbin/nvram "${BOOT_NODE}=null" || abort "Failed to save null boot device!"
@@ -152,7 +174,26 @@ uninstall() {
       DAEMON_PID=
     fi
     sudo rm -f "${DAEMON_PLIST}"
-  elif [ "$LOGOUT" = "1" ] ; then
+    sudo rm -f "${LAUNCHFILE_DAEMON}"*
+  fi
+
+  if [ "$AGENT" = "1" ] || [ "$DAEMON" = "1" ] ; then
+    if [ "$AGENT_PID" = "" ] ; then
+      UNINSTALLED=2
+      if [ ! "$INSTALL" = "1" ] && [ "$AGENT" = "1" ] ; then
+        echo "Agent was not installed!" > /dev/stderr
+      fi
+    else
+      # Place special value in saved device node so that nvram.plist is not updated at uninstall
+      sudo /usr/sbin/nvram "${BOOT_NODE}=null" || abort "Failed to save null boot device!"
+      sudo launchctl bootout "${AGENT_ID}" || UNINSTALLED=0
+      AGENT_PID=
+    fi
+    sudo rm -f "${AGENT_PLIST}"
+    sudo rm -f "${LAUNCHFILE_AGENT}"*
+  fi
+
+  if [ "$LOGOUT" = "1" ] ; then
     if [ "$LOGOUT_HOOK" = "" ] ; then
       UNINSTALLED=2
       echo "Logout hook was not installed!" > /dev/stderr
@@ -163,27 +204,72 @@ uninstall() {
   fi
 
   if [ "$DAEMON_PID"  = "" ] &&
+     [ "$AGENT_PID"   = "" ] &&
      [ "$LOGOUT_HOOK" = "" ] ; then
     sudo rm -f "${HELPER}"
     sudo rm -f "${NVRAMDUMP}"
   fi
 
-  if [ "$UNINSTALLED" = "0" ] ; then
-    echo "Could not uninstall!"
-  elif [ "$UNINSTALLED" = "1" ] ; then
-    echo "Uninstalled."
+  if [ ! "$INSTALL" = "1" ] ; then
+    if [ "$UNINSTALLED" = "0" ] ; then
+      echo "Could not uninstall!"
+    elif [ "$UNINSTALLED" = "1" ] ; then
+      echo "Uninstalled."
+    fi
   fi
 }
 
 status() {
-  if [ ! "$DAEMON" = "1" ] ; then
-    echo "Daemon pid = ${DAEMON_PID}"
-    echo "LogoutHook = ${LOGOUT_HOOK}"
-  else
+  if [ "$DAEMON" = "1" ] ; then
     # Detailed info on daemon.
-    if [ "$DAEMON" = "1" ] ; then
-      sudo launchctl print "system/${ORG}.daemon"
+    sudo launchctl print "$DAEMON_ID"
+  elif [ "$AGENT" = "1" ] ; then
+    # Detailed info on agent.
+    sudo launchctl print "$AGENT_ID"
+  else
+    echo "Daemon pid = ${DAEMON_PID}"
+    echo "Agent pid = ${AGENT_PID}"
+    if [ ! "$BOTH" = "1" ] ; then
+      echo "LogoutHook = ${LOGOUT_HOOK}"
     fi
+  fi
+}
+
+# On earlier macOS (at least Mojave in VMWare) there is an intermittent
+# problem where msdos/FAT kext is occasionally not available when we try
+# to mount the drive on daemon exit; mounting and unmounting on daemon
+# start here fixes this.
+# Doing this introduces a different problem, since this early mount sometimes
+# fails initially, however (as with 'diskutil info' above) in that case the
+# script gets restarted by launchd after ~5s, and eventually either succeeds or
+# finds the drive already mounted (when applicable, i.e. not marked as ESP).
+#
+# On later macOS (Sonoma) this problem recurs, and the strategy of co-ordinated
+# daemon and user agent was introduced to handle this (see saveNvram()):
+#
+# At startup:
+#  - daemon waits to see agent
+#  - daemon mounts ESP
+#  - daemon kills agent, then waits 1s
+#  - agent:
+#   o traps kill
+#   o touches nvram.plist (which forces kext to be loaded)
+#   o exits
+#  - after 1s wait daemon unmounts ESP
+#
+# At shutdown:
+#  - daemon mounts ESP and writes nvram.plist
+#   o this only works if the above palaver at startup has happened recently
+#
+earlyMount() {
+  mount_path=$(mount | sed -n "s:${node} on \(.*\) (.*$:\1:p")
+  if [ ! "${mount_path}" = "" ] ; then
+    doLog "Early mount not needed, already mounted at ${mount_path}"
+  else
+    sudo /usr/sbin/diskutil mount "${node}" 1>/dev/null || abort "Early mount failed!"
+    sleep 1 & wait
+    sudo /usr/sbin/diskutil unmount "${node}" 1>/dev/null || abort "Early unmount failed!"
+    doLog "Early mount/unmount succeeded"
   fi
 }
 
@@ -197,6 +283,10 @@ status() {
 #    immediately, but macOS restarts us quickly (~5s) and then we can run.
 # Note that saving any info for use at process shutdown if not running as
 # daemon (sudo) would have to go into e.g. a file not nvram.
+#
+# $1 = 0 - Set node var, but do not save in emulated NVRAM
+# $1 = 1 - Set node var and save in emulated NVRAM
+#
 saveMount() {
   UUID="$(/usr/sbin/nvram "${BOOT_PATH}" | sed 's/.*GPT,\([^,]*\),.*/\1/')"
   if [ "$(printf '%s' "${UUID}" | /usr/bin/wc -c)" -eq 36 ] && [ -z "$(echo "${UUID}" | sed 's/[-0-9A-F]//g')" ] ; then
@@ -211,21 +301,11 @@ saveMount() {
     doLog "Found boot device at ${node}"
 
     if [ "${1}" = "1" ] ; then
-      # On earlier macOS (at least Mojave in VMWare) there is an intermittent
-      # problem where msdos/FAT kext is occasionally not available when we try
-      # to mount the drive on daemon exit; mounting and unmounting on daemon
-      # start here fixes this.
-      # Doing this introduces a different problem, since this early mount sometimes
-      # fails initially, however (as with 'diskutil info' above) in that case the
-      # script gets restarted by launchd after ~5s, and eventually either succeeds or
-      # finds the drive already mounted (when applicable, i.e. not marked as ESP).
-      mount_path=$(mount | sed -n "s:${node} on \(.*\) (.*$:\1:p")
-      if [ ! "${mount_path}" = "" ] ; then
-        doLog "Early mount not needed, already mounted at ${mount_path}"
+      if [ "$BOTH" = "1" ] &&
+         [ "$DAEMON" = "1" ]; then
+        doLog "Using both agent and daemon, delaying early mount"
       else
-        sudo /usr/sbin/diskutil mount "${node}" 1>/dev/null || abort "Early mount failed!"
-        sudo /usr/sbin/diskutil unmount "${node}" 1>/dev/null || abort "Early unmount failed!"
-        doLog "Early mount/unmount succeeded"
+        earlyMount
       fi
 
       # Use hopefully emulated NVRAM as temporary storage for the boot
@@ -239,30 +319,64 @@ saveMount() {
   fi
 }
 
+# $1 = 0 - Use existing node var, do not fetch from emulated NVRAM
+# $1 = 1 - Use node var saved in emulated NVRAM
+#
+# $2 = 0 - Just touch nvram.plist
+# $2 = 1 - Really save NVRAM state to nvram.plist
+# $2 = 2 - Just pre-mount
+#
 saveNvram() {
   if [ "${1}" = "1" ] ; then
     # . matches tab, note that \t for tab cannot be used in earlier macOS (e.g Mojave)
     node=$(/usr/sbin/nvram "$BOOT_NODE" | sed -n "s/${BOOT_NODE}.//p")
-    if [ ! "$INSTALLED" = "1" ] ; then
-      # don't trash saved value if daemon is live
-      launchctl print "system/${ORG}.daemon" 2>/dev/null 1>/dev/null || sudo /usr/sbin/nvram -d "$BOOT_NODE"
-    else
-      sudo /usr/sbin/nvram -d "$BOOT_NODE"
+    if [ "$2" = "1" ]; then
+      if [ ! "$INSTALLED" = "1" ] ; then
+        # don't trash saved value if daemon or agent is live
+        launchctl print "$DAEMON_ID" 2>/dev/null 1>/dev/null || \
+        launchctl print "$AGENT_ID" 2>/dev/null 1>/dev/null || \
+        sudo /usr/sbin/nvram -d "$BOOT_NODE"
+      else
+        sudo /usr/sbin/nvram -d "$BOOT_NODE"
+      fi
     fi
   fi
 
   if [ "${node}" = "" ] ; then
     abort "Cannot access saved device node!"
   elif [ "${node}" = "null" ] ; then
-    sudo /usr/sbin/nvram "${BOOT_NODE}=" || abort "Failed to remove boot node variable!"
+    if [ ! "$AGENT" = "1" ] ; then
+      sudo /usr/sbin/nvram "${BOOT_NODE}=" || abort "Failed to remove boot node variable!"
+    fi
     doLog "Uninstalling…"
     return
   fi
 
+  if [ "$INSTALLED" = "1" ] &&
+     [ "$AGENT"     = "1" ] ; then
+    if /usr/sbin/nvram "${DAEMON_WAITING}" 1>/dev/null 2>/dev/null ; then
+      echo -n
+    else
+      doLog "Daemon is not waiting, stopping..."
+      return
+    fi
+  fi
+
   mount_path=$(mount | sed -n "s:${node} on \(.*\) (.*$:\1:p")
   if [ ! "${mount_path}" = "" ] ; then
-    doLog "Already mounted at ${mount_path}"
+    doLog "Found mounted at ${mount_path}"
+    if [ "$DAEMON" = "1" ] &&
+       [ "$BOTH" = "1" ] &&
+       [ ! "$2"  = "2" ] &&
+       [ "$(getDarwinMajorVersion)" -ge ${LAUNCHD_BOTH} ] ; then
+       doLog "WARNING: User-mounted ESP may not save NVRAM successfully"
+    fi
   else
+    if [ "$INSTALLED" = "1" ] &&
+       [ "$AGENT"     = "1" ] ; then
+      # This should have been pre-mounted for us by daemon
+      abort "Agent cannot mount ESP!"
+    fi
     # use reasonably assumed unique path
     mount_path="/Volumes/${UNIQUE_DIR}"
     sudo mkdir -p "${mount_path}" || abort "Failed to make directory!"
@@ -276,26 +390,41 @@ saveNvram() {
   else
     nvram_dir="${mount_path}/${NVRAM_DIR}"
     if [ ! -d "${nvram_dir}" ] ; then
-      sudo mkdir "${nvram_dir}" || abort "Failed to make directory ${nvram_dir}"
+      mkdir "${nvram_dir}" || abort "Failed to make directory ${nvram_dir}"
     fi
   fi
 
-  rm -f /tmp/nvram.plist
-  ${USE_NVRAMDUMP} || abort "failed to save nvram.plist!"
+  if [ "${2}" = "2" ] ; then
+    doLog "Killing agent…"
+    sudo /usr/sbin/nvram "${DAEMON_WAITING}=1" || abort "Failed to set daemon-waiting variable!"
+    kill "$3" || abort "Cannot kill agent!"
+    if [ "$BOTH" = "1" ] ; then
+      sleep 1 & wait
+      sudo /usr/sbin/nvram "${DAEMON_WAITING}=" || abort "Failed to remove daemon-waiting variable!"
+    fi
+  elif [ ! "${2}" = "1" ] ; then
+    # Just touch nvram.plist
+    touch "${nvram_dir}/nvram.plist" || abort "Failed to touch nvram.plist!"
+    doLog "Touched nvram.plist"
+  else
+    # Really save NVRAM
+    rm -f /tmp/nvram.plist
+    ${USE_NVRAMDUMP} || abort "failed to save nvram.plist!"
 
-  if [ -f "${nvram_dir}/nvram.plist" ] ; then
-    cp "${nvram_dir}/nvram.plist" "${nvram_dir}/nvram.fallback" || abort "Failed to create nvram.fallback!"
-    doLog "Copied nvram.fallback"
-  fi
+    if [ -f "${nvram_dir}/nvram.plist" ] ; then
+      cp "${nvram_dir}/nvram.plist" "${nvram_dir}/nvram.fallback" || abort "Failed to create nvram.fallback!"
+      doLog "Copied nvram.fallback"
+    fi
 
-  cp /tmp/nvram.plist "${nvram_dir}/nvram.plist" || abort "Failed to copy nvram.plist!"
-  doLog "Saved nvram.plist"
+    cp /tmp/nvram.plist "${nvram_dir}/nvram.plist" || abort "Failed to copy nvram.plist!"
+    doLog "Saved nvram.plist"
 
-  rm -f /tmp/nvram.plist
+    rm -f /tmp/nvram.plist
 
-  if [ -f "${nvram_dir}/nvram.used" ] ; then
-    rm "${nvram_dir}/nvram.used" || abort "Failed to delete nvram.used!"
-    doLog "Deleted nvram.used"
+    if [ -f "${nvram_dir}/nvram.used" ] ; then
+      rm "${nvram_dir}/nvram.used" || abort "Failed to delete nvram.used!"
+      doLog "Deleted nvram.used"
+    fi
   fi
 
   # We would like to always unmount here if we made the mount point, but at exit of
@@ -303,10 +432,17 @@ saveNvram() {
   # This should not cause any problem except that the boot drive will be left mounted
   # at the unique path if the daemon process gets killed (the process would then be
   # restarted by macOS and NVRAM should still be saved at exit).
-  if [ "$MOUNTED" = "1" ] ; then
+  while [ "$MOUNTED" = "1" ] ;
+  do
     # For logout hook or if running in immediate mode, we can clean up.
     if [   "$LOGOUT"    = "1" ] ||
-       [ ! "$INSTALLED" = "1" ] ; then
+       [ ! "$INSTALLED" = "1" ] ||
+       [ "$2" = "2" ] ; then
+      # Sometimes needed after directory access...
+      # # if [ ! "$2" = "2" ] ; then
+      # #   sleep 1 & wait
+      # # fi
+
       # Depending on how installed and macOS version, either unmount may be needed.
       # (On Lion failure of 'diskutil unmount' may be to say volume is already unmounted when it is not.)
       MOUNTED=0
@@ -315,19 +451,29 @@ saveNvram() {
       if [ "$MOUNTED" = "0" ] ; then
         doLog "Unmounted with diskutil"
       else
-        sudo umount "${node}" || abort "Failed to unmount!"
-        sudo rmdir "${mount_path}" || abort "Failed to remove directory!"
-        doLog "Unmounted with umount"
+        sudo umount "${node}" && MOUNTED=0
+        if [ "$MOUNTED" = "0" ] ; then
+          sudo rmdir "${mount_path}" || abort "Failed to remove directory!"
+          doLog "Unmounted with umount"
+        else
+          if [ "$INSTALLED" = "1" ] ; then
+            abort "Failed to unmount!"
+          else
+            doLog "Retrying…"
+          fi
+        fi
       fi
     fi
-  fi
+  done
 }
 
 onComplete() {
   doLog "Trap ${1}"
 
   if [ "$DAEMON" = "1" ] ; then
-    saveNvram 1 "daemon"
+    saveNvram 1 1
+  elif [ "$AGENT" = "1" ] ; then
+    saveNvram 1 0
   fi
 
   doLog "Ended."
@@ -355,11 +501,15 @@ OCNVRAMGUID="4D1FDA02-38C7-4A6A-9CC6-4BCCA8B30102"
 # Darwin version from which we can wake a sleeping daemon, corresponds to Yosemite and upwards.
 LAUNCHD_DARWIN=14
 
+# Darwin version for which we need both agent and daemon, corresponds to Sonoma and upwards.
+LAUNCHD_BOTH=23
+
 # OC generated NVRAM var
 BOOT_PATH="${OCNVRAMGUID}:boot-path"
 
-# temp storage var for this script
+# temp storage vars for this script
 BOOT_NODE="${OCNVRAMGUID}:boot-node"
+DAEMON_WAITING="${OCNVRAMGUID}:daemon-waiting"
 
 # re-use as unique directory name for mount point when needed
 UNIQUE_DIR="${BOOT_NODE}"
@@ -369,10 +519,17 @@ PRIVILEGED_HELPER_TOOLS="/Library/PrivilegedHelperTools"
 ORG="org.acidanthera.nvramhook"
 NVRAMDUMP="${PRIVILEGED_HELPER_TOOLS}/${ORG}.nvramdump.helper"
 
+DAEMON_ID="system/${ORG}.daemon"
 DAEMON_PLIST="/Library/LaunchDaemons/${ORG}.daemon.plist"
+DAEMON_PARAMS="daemon"
+
+AGENT_ID="gui/501/${ORG}.agent"
 AGENT_PLIST="/Library/LaunchAgents/${ORG}.agent.plist"
+AGENT_PARAMS="agent"
 
 HELPER="${PRIVILEGED_HELPER_TOOLS}/${ORG}.helper"
+LAUNCHFILE_DAEMON="${PRIVILEGED_HELPER_TOOLS}/${ORG} System Daemon"
+LAUNCHFILE_AGENT="${PRIVILEGED_HELPER_TOOLS}/${ORG} User Agent"
 
 LOGDIR="/var/log/${ORG}.launchd"
 # launchd .plist configuration is set in install() to redirect stdout and stderr (useful) to LOGFILE anyway.
@@ -411,6 +568,20 @@ do
     daemon )
       DAEMON=1
       ;;
+    "daemon both" )
+      DAEMON=1
+      BOTH=1
+      ;;
+    agent )
+      AGENT=1
+      ;;
+    "agent both" )
+      AGENT=1
+      BOTH=1
+      ;;
+    both )
+      BOTH=1
+      ;;
     logout )
       LOGOUT=1
       ;;
@@ -428,14 +599,44 @@ do
   esac
 done
 
+# Get root permissions early if immediate mode.
+if [ "$INSTALL"   = "1" ] ||
+   [ "$UNINSTALL" = "1" ] ||
+   [ "$STATUS"    = "1" ] ; then
+  if [ "$(whoami)" = "root" ] ; then
+    earlyAbort "Do not run this script as root!"
+  fi
+
+  sudo echo -n || earlyAbort "Could not obtain sudo!"
+
+  if [ "$INSTALL" = "1" ] ; then
+    UNINSTALL=1
+  fi
+
+  if [ "$UNINSTALL" = "1" ] ||
+     [ "$STATUS"    = "1" ] ; then
+    # For agent/daemon pid prefer 'launchctl list' as it works on older macOS where 'launchtl print' does not.
+    DAEMON_PID="$(sudo launchctl list | sed -n "s/\([0-9\-]*\).*${ORG}.daemon/\1/p" | sed 's/-/Failed to start!/')"
+    AGENT_PID="$(launchctl list | sed -n "s/\([0-9\-]*\).*${ORG}.agent/\1/p" | sed 's/-/Failed to start!/')"
+    LOGOUT_HOOK="$(sudo defaults read com.apple.loginwindow LogoutHook 2>/dev/null)"
+  fi
+fi
+
 # If not told what to do, work it out.
 # When running as daemon, 'daemon' is specified as a param.
 if [ ! "$DAEMON" = "1" ] &&
+   [ ! "$AGENT"  = "1" ] &&
+   [ ! "$BOTH"   = "1" ] &&
    [ ! "$LOGOUT" = "1" ] ; then
   if [ "$INSTALL"   = "1" ] ||
      [ "$UNINSTALL" = "1" ] ; then
     # When not specified, choose to (un)install daemon or logout hook depending on macOS version.
-    if [ "$(getDarwinMajorVersion)" -ge ${LAUNCHD_DARWIN} ] ; then
+    if [ "$(getDarwinMajorVersion)" -ge ${LAUNCHD_BOTH} ] ; then
+      echo "Darwin $(uname -r) >= ${LAUNCHD_BOTH}, using both agent and daemon"
+      BOTH=1
+      AGENT=1
+      DAEMON=1
+    elif [ "$(getDarwinMajorVersion)" -ge ${LAUNCHD_DARWIN} ] ; then
       echo "Darwin $(uname -r) >= ${LAUNCHD_DARWIN}, using daemon"
       DAEMON=1
     else
@@ -446,7 +647,7 @@ if [ ! "$DAEMON" = "1" ] &&
     if [ "$INSTALLED" = "1" ] ; then
       # If installed with no type as a param, we are installed as logout hook.
       LOGOUT=1
-    elif [ ! "$STATUS"    = "1" ] ; then
+    elif [ ! "$STATUS" = "1" ] ; then
       # Usage for no params.
       usage
       exit 0
@@ -454,8 +655,17 @@ if [ ! "$DAEMON" = "1" ] &&
   fi
 fi
 
-if [ "$DAEMON" = "1" ] ; then
+if [ ! "$INSTALLED" = "1" ] &&
+   [ "$BOTH" = "1" ] ; then
+  LOG_PREFIX="Both"
+  AGENT=1
+  DAEMON=1
+  AGENT_PARAMS="${AGENT_PARAMS} both"
+  DAEMON_PARAMS="${DAEMON_PARAMS} both"
+elif [ "$DAEMON" = "1" ] ; then
   LOG_PREFIX="Daemon"
+elif [ "$AGENT" = "1" ] ; then
+  LOG_PREFIX="Agent"
 elif [ "$LOGOUT" = "1" ] ; then
   LOG_PREFIX="Logout"
 fi
@@ -464,23 +674,20 @@ if [ ! "$INSTALLED" = "1" ] ; then
   LOG_PREFIX="${LOG_PREFIX}-Immediate"
 fi
 
-if [ "$INSTALL"   = "1" ] ||
-   [ "$UNINSTALL" = "1" ] ||
-   [ "$STATUS"    = "1" ] ; then
-  # Get root immediately
-  sudo echo -n || earlyAbort "Could not obtain sudo!"
-
-  if [ "$UNINSTALL" = "1" ] ||
-     [ "$STATUS"    = "1" ] ; then
-    # For agent/daemon pid prefer 'launchctl list' as it works on older macOS where 'launchtl print' does not.
-    DAEMON_PID="$(sudo launchctl list | sed -n "s/\([0-9\-]*\).*${ORG}.daemon/\1/p" | sed 's/-/Failed to start!/')"
-    LOGOUT_HOOK="$(sudo defaults read com.apple.loginwindow LogoutHook 2>/dev/null)"
-  fi
+if [   "$INSTALL" = "1" ] &&
+   [   "$AGENT"   = "1" ] &&
+   [ ! "$DAEMON"  = "1" ] ; then
+  earlyAbort "Standalone agent install is not supported!"
 fi
 
-if [ "$INSTALL"   = "1" ] ||
-   [ "$UNINSTALL" = "1" ] ; then
-  uninstallAgent
+if [ "$UNINSTALL" = "1" ] ; then
+  msg="$(uninstall)"
+  if [ ! "${msg}" = "" ] ; then
+    doLog "${msg}"
+  fi
+  if [ ! "$INSTALL" = "1" ] ; then
+    exit 0
+  fi
 fi
 
 if [ "$INSTALL" = "1" ] ; then
@@ -495,22 +702,16 @@ if [ "$INSTALL" = "1" ] ; then
     doLog "Saving initial nvram.plist…"
     saveMount 0
     if [ "$DAEMON" = "1" ] ; then
-      saveNvram 0 "daemon"
+      # daemon
+      saveNvram 0 1
     else
-      saveNvram 0 "logout"
+      # logout hook
+      saveNvram 0 1
     fi
   fi
 
   install
 
-  exit 0
-fi
-
-if [ "$UNINSTALL" = "1" ] ; then
-  msg="$(uninstall)"
-  if [ ! "${msg}" = "" ] ; then
-    doLog "${msg}"
-  fi
   exit 0
 fi
 
@@ -521,7 +722,7 @@ fi
 
 if [ "${LOGOUT}" = "1" ] ; then
   saveMount 0
-  saveNvram 0 "logout"
+  saveNvram 0 1
   exit 0
 fi
 
@@ -539,11 +740,28 @@ if [ "$DAEMON" = "1" ] ; then
   saveMount 1
 fi
 
+if [ "$DAEMON" = "1" ] &&
+   [ "$BOTH"   = "1" ] ; then
+  agent_pid=""
+  doLog "Waiting for agent…"
+  while [ "$agent_pid" = "" ] ;
+  do
+    agent_pid="$(pgrep -f "$(echo "${HELPER} agent" | sed "s/\./\\\./g")")"
+    if [ "$agent_pid" = "" ] ; then
+     # https://apple.stackexchange.com/a/126066/113758
+     # Only works from Yosemite upwards.
+     sleep 5 & wait
+    fi
+  done
+  doLog "Found agent…"
+  saveNvram 1 2 "$agent_pid"
+fi
+
 while true
 do
-    doLog "Running…"
+  doLog "Running…"
 
-    # https://apple.stackexchange.com/a/126066/113758
-    # Only works from Yosemite upwards.
-    sleep $RANDOM & wait
+  # https://apple.stackexchange.com/a/126066/113758
+  # Only works from Yosemite upwards.
+  sleep $RANDOM & wait
 done

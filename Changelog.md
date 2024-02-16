@@ -2,7 +2,8 @@ OpenCore Changelog
 ==================
 #### v0.9.9
 - Fixed incorrect warning in ocvalidate
-- Improved NVRAM `Launchd.command` logging resilience for logout hook and daemon
+- Modified `Launchd.command` to recreate its log file if deleted
+- Updated `Launchd.command` to work with macOS Sonoma (re-run `./Launchd.command install` after upgrading to Sonoma)
 
 #### v0.9.8
 - Updated OpenDuet to allow loading unsigned, unaligned legacy Apple images such as HfsPlusLegacy.efi

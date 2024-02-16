@@ -6,7 +6,7 @@
     <string>$LABEL</string>
     <key>ProgramArguments</key>
     <array>
-        <string>sh</string>
+        <string>$LAUNCHFILE</string>
         <string>$HELPER</string>
         <string>$PARAM</string>
     </array>
@@ -21,6 +21,8 @@
     <key>EnableGlobbing</key>
     <false/>
     <key>EnableTransactions</key>
+    <false/>
+    <key>LowPriorityIO</key>
     <false/>
 </dict>
 </plist>

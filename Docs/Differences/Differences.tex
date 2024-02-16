@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
-%DIF DEL PreviousConfiguration.tex   Mon Feb  5 21:21:58 2024
-%DIF ADD ../Configuration.tex        Mon Feb  5 21:24:33 2024
+%DIF DEL PreviousConfiguration.tex   Thu Feb  8 09:16:34 2024
+%DIF ADD ../Configuration.tex        Tue Feb 27 22:48:30 2024
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -7453,10 +7453,26 @@ entry is no longer present, the entry for the new OS will still be automatically
 If not, it should be manually selected (at this point, \texttt{CTRL+Enter} is a good idea as any final remaining installion restarts
 will be to this entry).
 
-\emph{Note}: When using emulated NVRAM but not installing from within an existing installed macOS (i.e. when installing from
+\emph{Note \DIFaddbegin \DIFadd{1}\DIFaddend }: When using emulated NVRAM but not installing from within an existing installed macOS (i.e. when installing from
 within macOS Recovery, or from an installation USB), please refer to this
 \href{https://applelife.ru/posts/916248}{forum post} (in Russian)
 for additional options.
+\DIFaddbegin 
+
+\emph{\DIFadd{Note 2}}\DIFadd{: After upgrading from an ealier macOS version to macOS Sonoma, the }\texttt{\DIFadd{Launchd.command}} \DIFadd{script should be
+reinstalled, as a different strategy is required in order for NVRAM to be saved successfully.
+}
+
+\emph{\DIFadd{Note 3}}\DIFadd{: In macOS Sonoma the following additional constraints apply to the ESP paritition on which
+OpenCore is installed, in order for the }\texttt{\DIFadd{Launchd.command}} \DIFadd{script to work successfully:
+}
+
+\begin{itemize}
+\tightlist
+ \item \DIFadd{It must not be set to automount.
+ }\item \DIFadd{It must be unmounted again before shutdown or restart if it was manually mounted.
+}\end{itemize}
+\DIFaddend 
 
 \subsection{Properties}\label{uefiprops}
 
