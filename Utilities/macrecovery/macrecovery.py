@@ -58,7 +58,7 @@ def run_query(url, headers, post=None, raw=False):
             return response
         return dict(response.info()), response.read()
     except HTTPError as e:
-        print(f'ERROR: "{e}" when connecting to {url}')
+        print('ERROR: "{}" when connecting to {}'.format(e,url))
         sys.exit(1)
 
 
@@ -76,7 +76,7 @@ def mlb_from_eeee(eeee):
         print('ERROR: Invalid EEEE code length!')
         sys.exit(1)
 
-    return f'00000000000{eeee}00'
+    return '00000000000{}00'.format(eeee)
 
 
 def int_from_unsigned_bytes(byte_list, byteorder):
@@ -143,13 +143,14 @@ def get_session(args):
     if args.verbose:
         print('Session headers:')
         for header in headers:
-            print(f'{header}: {headers[header]}')
+            print('{}: {}'.format(header,headers[header]))
 
     for header in headers:
         if header.lower() == 'set-cookie':
             cookies = headers[header].split('; ')
             for cookie in cookies:
-                return cookie if cookie.startswith('session=') else ...
+                if cookie.startswith('session='):
+                    return cookie
 
     raise RuntimeError('No session in headers ' + str(headers))
 
@@ -190,7 +191,7 @@ def get_image_info(session, bid, mlb=MLB_ZERO, diag=False, os_type='default', ci
 
     for k in INFO_REQURED:
         if k not in info:
-            raise RuntimeError(f'Missing key {k}')
+            raise RuntimeError('Missing key {}'.format(k))
 
     return info
 
@@ -212,7 +213,7 @@ def save_image(url, sess, filename='', directory=''):
     if filename.find('/') >= 0 or filename == '':
         raise RuntimeError('Invalid save path ' + filename)
 
-    print(f'Saving {url} to {directory}/{filename}...')
+    print('Saving {} to {}/{}...'.format(url,directory,filename))
 
     with open(os.path.join(directory, filename), 'wb') as fh:
         response = run_query(url, headers, raw=True)
@@ -223,7 +224,7 @@ def save_image(url, sess, filename='', directory=''):
                 break
             fh.write(chunk)
             size += len(chunk)
-            print(f'\r{size / (2**20)} MBs downloaded...', end='')
+            sys.stdout.write('\r{} MBs downloaded...'.format(size/(2**20)))
             sys.stdout.flush()
         print('\rDownload complete!\t\t\t\t\t')
 
@@ -237,13 +238,13 @@ def verify_image(dmgpath, cnkpath):
         cnkcount = 0
         for cnksize, cnkhash in verify_chunklist(cnkpath):
             cnkcount += 1
-            print(f'\rChunk {cnkcount} ({cnksize} bytes)', end='')
+            sys.stdout.write('\rChunk {} ({} bytes)'.format(cnkcount,cnksize))
             sys.stdout.flush()
             cnk = dmgf.read(cnksize)
             if len(cnk) != cnksize:
-                raise RuntimeError(f'Invalid chunk {cnkcount} size: expected {cnksize}, read {len(cnk)}')
+                raise RuntimeError('Invalid chunk {} size: expected {}, read {}'.format(cnkcount,cnksize,len(cnk)))
             if hashlib.sha256(cnk).digest() != cnkhash:
-                raise RuntimeError(f'Invalid chunk {cnkcount}: hash mismatch')
+                raise RuntimeError('Invalid chunk {}: hash mismatch'.format(cnkcount))
         if dmgf.read(1) != b'':
             raise RuntimeError('Invalid image: larger than chunklist')
         print('\rImage verification complete!\t\t\t\t\t')
@@ -281,11 +282,11 @@ def action_download(args):
     info = get_image_info(session, bid=args.board_id, mlb=args.mlb, diag=args.diagnostics, os_type=args.os_type)
     if args.verbose:
         print(info)
-    print(f'Downloading {info[INFO_PRODUCT]}...')
-    dmgname = '' if args.basename == '' else args.basename + '.dmg'
-    dmgpath = save_image(info[INFO_IMAGE_LINK], info[INFO_IMAGE_SESS], dmgname, args.outdir)
+    print('Downloading {}...'.format(info[INFO_PRODUCT]))
     cnkname = '' if args.basename == '' else args.basename + '.chunklist'
     cnkpath = save_image(info[INFO_SIGN_LINK], info[INFO_SIGN_SESS], cnkname, args.outdir)
+    dmgname = '' if args.basename == '' else args.basename + '.dmg'
+    dmgpath = save_image(info[INFO_IMAGE_LINK], info[INFO_IMAGE_SESS], dmgname, args.outdir)
     try:
         verify_image(dmgpath, cnkpath)
         return 0
@@ -298,7 +299,7 @@ def action_download(args):
                 err = linecache.getline(tb.tb_frame.f_code.co_filename, tb.tb_lineno, tb.tb_frame.f_globals).strip()
             except Exception:
                 err = "Invalid chunklist"
-        print(f'\rImage verification failed. ({err})')
+        print('\rImage verification failed. ({})'.format(err))
         return 1
 
 
@@ -337,28 +338,42 @@ def action_selfcheck(args):
 
     if valid_default[INFO_PRODUCT] == valid_latest[INFO_PRODUCT]:
         # Valid MLB must give different default and latest if this is not a too new product.
-        print(f'ERROR: Cannot determine any previous product, got {valid_default[INFO_PRODUCT]}')
+        print('ERROR: Cannot determine any previous product, got {}'.format(
+            valid_default[INFO_PRODUCT]
+        ))
         return 1
 
     if product_default[INFO_PRODUCT] != product_latest[INFO_PRODUCT]:
         # Product-only MLB must give the same value for default and latest.
-        print(f'ERROR: Latest and default do not match for product MLB, got {product_default[INFO_PRODUCT]} and {product_latest[INFO_PRODUCT]}')
+        print('ERROR: Latest and default do not match for product MLB, got {} and {}'.format(
+            product_default[INFO_PRODUCT],
+            product_latest[INFO_PRODUCT]
+        ))
         return 1
 
     if generic_default[INFO_PRODUCT] != generic_latest[INFO_PRODUCT]:
         # Zero MLB always give the same value for default and latest.
-        print(f'ERROR: Generic MLB gives different product, got {generic_default[INFO_PRODUCT]} and {generic_latest[INFO_PRODUCT]}')
+        print('ERROR: Generic MLB gives different product, got {} and {}'.format(
+            generic_default[INFO_PRODUCT],
+            generic_latest[INFO_PRODUCT]
+        ))
         return 1
 
     if valid_latest[INFO_PRODUCT] != generic_latest[INFO_PRODUCT]:
         # Valid MLB must always equal generic MLB.
-        print(f'ERROR: Cannot determine unified latest product, got {valid_latest[INFO_PRODUCT]} and {generic_latest[INFO_PRODUCT]}')
+        print('ERROR: Cannot determine unified latest product, got {} and {}'.format(
+            valid_latest[INFO_PRODUCT],
+            generic_latest[INFO_PRODUCT]
+        ))
         return 1
 
     if product_default[INFO_PRODUCT] != valid_default[INFO_PRODUCT]:
         # Product-only MLB can give the same value with valid default MLB.
         # This is not an error for all models, but for our chosen code it is.
-        print('ERROR: Valid and product MLB give mismatch, got {product_default[INFO_PRODUCT]} and {valid_default[INFO_PRODUCT]}')
+        print('ERROR: Valid and product MLB give mismatch, got {} and {}'.format(
+            product_default[INFO_PRODUCT],
+            valid_default[INFO_PRODUCT]
+        ))
         return 1
 
     print('SUCCESS: Found no discrepancies with MLB validation algorithm!')
@@ -383,7 +398,7 @@ def action_verify(args):
 
     # Verify our MLB number.
     if uvalid_default[INFO_PRODUCT] != uvalid_latest[INFO_PRODUCT]:
-        print(f'SUCCESS: {args.mlb} MLB looks valid and supported!' if uvalid_latest[INFO_PRODUCT] == generic_latest[INFO_PRODUCT] else f'SUCCESS: {args.mlb} MLB looks valid, but probably unsupported!')
+        print('SUCCESS: {} MLB looks valid and supported!'.format(args.mlb) if uvalid_latest[INFO_PRODUCT] == generic_latest[INFO_PRODUCT] else 'SUCCESS: {} MLB looks valid, but probably unsupported!'.format(args.mlb))
         return 0
 
     print('UNKNOWN: Run selfcheck, check your board-id, or try again later!')
@@ -391,12 +406,16 @@ def action_verify(args):
     # Here we have matching default and latest products. This can only be true for very
     # new models. These models get either latest or special builds.
     if uvalid_default[INFO_PRODUCT] == generic_latest[INFO_PRODUCT]:
-        print(f'UNKNOWN: {args.mlb} MLB can be valid if very new!')
+        print('UNKNOWN: {} MLB can be valid if very new!'.format(args.mlb))
         return 0
     if uproduct_default[INFO_PRODUCT] != uvalid_default[INFO_PRODUCT]:
-        print(f'UNKNOWN: {args.mlb} MLB looks invalid, other models use product {uproduct_default[INFO_PRODUCT]} instead of {uvalid_default[INFO_PRODUCT]}!')
+        print('UNKNOWN: {} MLB looks invalid, other models use product {} instead of {}!'.format(
+            args.mlb,
+            uproduct_default[INFO_PRODUCT],
+            uvalid_default[INFO_PRODUCT]
+        ))
         return 0
-    print(f'UNKNOWN: {args.mlb} MLB can be valid if very new and using special builds!')
+    print('UNKNOWN: {} MLB can be valid if very new and using special builds!'.format(args.mlb))
     return 0
 
 
@@ -425,7 +444,11 @@ def action_guess(args):
 
                 if model_latest[INFO_PRODUCT] != generic_latest[INFO_PRODUCT]:
                     if db[model] == 'current':
-                        print(f'WARN: Skipped {model} due to using latest product {model_latest[INFO_PRODUCT]} instead of {generic_latest[INFO_PRODUCT]}')
+                        print('WARN: Skipped {} due to using latest product {} instead of {}'.format(
+                            model,
+                            model_latest[INFO_PRODUCT],
+                            generic_latest[INFO_PRODUCT]
+                        ))
                     continue
 
                 user_default = get_image_info(session, bid=model, mlb=mlb, diag=False, os_type='default')
@@ -442,15 +465,20 @@ def action_guess(args):
                     supported[model] = [db[model], user_default[INFO_PRODUCT], user_latest[INFO_PRODUCT]]
 
         except Exception as e:
-            print(f'WARN: Failed to check {model}, exception: {e}')
+            print('WARN: Failed to check {}, exception: {}'.format(model,e))
 
     if len(supported) > 0:
-        print(f'SUCCESS: MLB {mlb} looks supported for:')
+        print('SUCCESS: MLB {} looks supported for:'.format(mlb))
         for model in supported.items():
-            print(f'- {model}, up to {supported[model][0]}, default: {supported[model][1]}, latest: {supported[model][2]}')
+            print('- {}, up to {}, default: {}, latest: {}'.format(
+                model,
+                supported[model][0],
+                supported[model][1],
+                supported[model][2]
+            ))
         return 0
 
-    print(f'UNKNOWN: Failed to determine supported models for MLB {mlb}!')
+    print('UNKNOWN: Failed to determine supported models for MLB {}!'.format(mlb))
     return None
 
 
@@ -465,13 +493,13 @@ def main():
     parser.add_argument('-n', '--basename', type=str, default='',
                         help='customise base name for downloading, defaults to remote name')
     parser.add_argument('-b', '--board-id', type=str, default=RECENT_MAC,
-                        help=f'use specified board identifier for downloading, defaults to {RECENT_MAC}')
+                        help='use specified board identifier for downloading, defaults to {}'.format(RECENT_MAC))
     parser.add_argument('-m', '--mlb', type=str, default=MLB_ZERO,
-                        help=f'use specified logic board serial for downloading, defaults to {MLB_ZERO}')
+                        help='use specified logic board serial for downloading, defaults to {}'.format(MLB_ZERO))
     parser.add_argument('-e', '--code', type=str, default='',
                         help='generate product logic board serial with specified product EEEE code')
     parser.add_argument('-os', '--os-type', type=str, default='default', choices=['default', 'latest'],
-                        help=f'use specified os type, defaults to default {MLB_ZERO}')
+                        help='use specified os type, defaults to default {}'.format(MLB_ZERO))
     parser.add_argument('-diag', '--diagnostics', action='store_true', help='download diagnostics image')
     parser.add_argument('-v', '--verbose', action='store_true', help='print debug information')
     parser.add_argument('-db', '--board-db', type=str, default=os.path.join(SELF_DIR, 'boards.json'),
