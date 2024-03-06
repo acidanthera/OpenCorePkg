@@ -5,7 +5,7 @@
   <img alt="Scan Status" src="https://scan.coverity.com/projects/18169/badge.svg?flat=1)](https://scan.coverity.com/projects/18169">
 </div>
 
-## Libraries
+## :books: Libraries
 
 This repository also contains additional UEFI support common libraries shared by other projects in [Acidanthera](https://github.com/acidanthera). The primary purpose of the library set is to provide supplemental functionality for Apple-specific UEFI drivers. Key features:
 
@@ -29,7 +29,7 @@ This repository also contains additional UEFI support common libraries shared by
 
 Early history of the codebase could be found in [AppleSupportPkg](https://github.com/acidanthera/AppleSupportPkg) and PicoLib library set by The HermitCrabs Lab.
 
-#### OcGuardLib
+#### :lock: OcGuardLib
 
 This library implements basic safety features recommended for the use within the project. It implements fast
 safe integral arithmetics mapping on compiler builtins, type alignment checking, and UBSan runtime,
@@ -39,7 +39,7 @@ The use of UBSan runtime requires the use of Clang compiler and `-fsanitize=unde
 [Clang documentation](https://releases.llvm.org/7.0.0/tools/clang/docs/UndefinedBehaviorSanitizer.html) for more
 details.
 
-#### Credits
+#### :star2: Credits
 
 - The HermitCrabs Lab
 - All projects providing third-party code (refer to file headers)
@@ -56,6 +56,6 @@ details.
 - [usr-sse2](https://github.com/usr-sse2)
 - [vit9696](https://github.com/vit9696)
 
-#### Discussion
+#### :speech_balloon: Discussion
 
 Please refer to the following [list of OpenCore discussion forums](/Docs/FORUMS.md).
