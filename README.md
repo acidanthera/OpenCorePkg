@@ -38,8 +38,7 @@ This repository includes common UEFI support libraries from [Acidanthera](https:
 
 Early history of the codebase could be found in [AppleSupportPkg](https://github.com/acidanthera/AppleSupportPkg) and PicoLib library set by The HermitCrabs Lab.
 
-#### :lock: OcGuardLib
-
+### :lock: OcGuardLib
 This library implements basic safety features recommended for the use within the project. It implements fast
 safe integral arithmetics mapping on compiler builtins, type alignment checking, and UBSan runtime,
 based on [NetBSD implementation](https://blog.netbsd.org/tnf/entry/introduction_to_µubsan_a_clean).
@@ -48,7 +47,11 @@ The use of UBSan runtime requires the use of Clang compiler and `-fsanitize=unde
 [Clang documentation](https://releases.llvm.org/7.0.0/tools/clang/docs/UndefinedBehaviorSanitizer.html) for more
 details.
 
-#### :star2: Credits
+## :star2: Credits
+Thank you to everyone who contributed to OpenCore! Your efforts mean a lot. :blue_heart:
+
+<details>
+<summary>Special thanks to:</summary>
 
 - The HermitCrabs Lab
 - All projects providing third-party code (refer to file headers)
@@ -64,7 +67,7 @@ details.
 - [savvamitrofanov](https://github.com/savvamitrofanov)
 - [usr-sse2](https://github.com/usr-sse2)
 - [vit9696](https://github.com/vit9696)
+</details>
 
-#### :speech_balloon: Discussion
-
+## :speech_balloon: Discussion
 Please refer to the following [list of OpenCore discussion forums](/Docs/FORUMS.md).
