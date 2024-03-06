@@ -8,30 +8,33 @@
 -----
 
 ## :inbox_tray: Downloads
-
 All releases of OpenCore can be found in the [releases page](https://github.com/acidanthera/OpenCorePkg/releases).
 
 ## :books: Libraries
+This repository includes common UEFI support libraries from [Acidanthera](https://github.com/acidanthera), providing extra features for Apple-specific UEFI drivers. Key features include:
 
-This repository also contains additional UEFI support common libraries shared by other projects in [Acidanthera](https://github.com/acidanthera). The primary purpose of the library set is to provide supplemental functionality for Apple-specific UEFI drivers. Key features:
+- **Apple Software Support**
+  - XNU kernel driver injection and patch engine
+  - Plist configuration format parsing
+  - Apple keyboard input aggregation
+  - Apple disk image loading support
+  - Apple PE image signature verification
+  - Apple UEFI secure boot supplemental code
+  - PE image loading with no UEFI Secure Boot conflict
 
-- Apple disk image loading support
-- Apple keyboard input aggregation
-- Apple PE image signature verification
-- Apple UEFI secure boot supplemental code
-- Audio management with screen reading support
-- Basic ACPI and SMBIOS manipulation
-- CPU information gathering with timer support
-- Cryptographic primitives (SHA-256, RSA, etc.)
-- Decompression primitives (zlib, lzss, lzvn, etc.)
-- Helper code for ACPI reads and modifications
-- Higher level abstractions for files, strings, UEFI variables
-- Overflow checking arithmetics
-- PE image loading with no UEFI Secure Boot conflict
-- Plist configuration format parsing
-- PNG image manipulation
-- Text output and graphics output implementations
-- XNU kernel driver injection and patch engine
+- **UEFI Support**
+  - Basic ACPI and SMBIOS manipulation
+  - CPU information gathering with timer support
+  - Helper code for ACPI reads and modifications
+  - Higher level abstractions for files, strings, UEFI variables
+  - Overflow checking arithmetics
+
+- **Media Support**
+  - Cryptographic primitives (SHA-256, RSA, etc.)
+  - Decompression primitives (zlib, lzss, lzvn, etc.)
+  - Audio management with screen reading support
+  - PNG image manipulation
+  - Text output and graphics output implementations
 
 Early history of the codebase could be found in [AppleSupportPkg](https://github.com/acidanthera/AppleSupportPkg) and PicoLib library set by The HermitCrabs Lab.
 
