@@ -17,6 +17,7 @@ jobs:
     runs-on: macos-14
     env:
       JOB_TYPE: ANALYZE
+      HOMEBREW_NO_INSTALL_CLEANUP: 1
     steps:
       - uses: actions/checkout@v4
 
@@ -24,8 +25,6 @@ jobs:
         run: |
           brew install shellcheck
           python3 -m pip install pyyaml
-        env:
-          HOMEBREW_NO_INSTALL_CLEANUP: 1
 
       - name: CI Bootstrap
         run: |

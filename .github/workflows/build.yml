@@ -21,13 +21,12 @@ jobs:
     runs-on: macos-14
     env:
       JOB_TYPE: BUILD
+      HOMEBREW_NO_INSTALL_CLEANUP: 1
+      HOMEBREW_NO_AUTO_UPDATE: 1
     steps:
       - uses: actions/checkout@v4
 
       - name: Install Linux Toolchain
-        env:
-          HOMEBREW_NO_INSTALL_CLEANUP: 1
-          HOMEBREW_NO_AUTO_UPDATE: 1
         run: |
           brew tap FiloSottile/homebrew-musl-cross
           brew install musl-cross
@@ -59,6 +58,8 @@ jobs:
   build-linux-clangpdb:
     name: Linux CLANGPDB
     runs-on: ubuntu-22.04
+    env:
+      TOOLCHAINS: CLANGPDB
     steps:
       - uses: actions/checkout@v4
 
@@ -67,13 +68,9 @@ jobs:
 
       - name: ./build_duet.tool
         run: docker compose run build-duet
-        env:
-          TOOLCHAINS: CLANGPDB
 
       - name: ./build_oc.tool
         run: docker compose run build-oc
-        env:
-          TOOLCHAINS: CLANGPDB
 
       - name: Upload to Artifacts
         uses: actions/upload-artifact@v4
@@ -84,6 +81,8 @@ jobs:
   build-linux-gcc5:
     name: Linux GCC
     runs-on: ubuntu-22.04
+    env:
+      TOOLCHAINS: GCC
     steps:
       - uses: actions/checkout@v4
 
@@ -92,13 +91,9 @@ jobs:
 
       - name: ./build_duet.tool
         run: docker compose run build-duet
-        env:
-          TOOLCHAINS: GCC
 
       - name: ./build_oc.tool
         run: docker compose run build-oc
-        env:
-          TOOLCHAINS: GCC
 
       - name: Upload to Artifacts
         uses: actions/upload-artifact@v4
@@ -109,6 +104,8 @@ jobs:
   build-linux-clangdwarf:
     name: Linux CLANGDWARF
     runs-on: ubuntu-22.04
+    env:
+      TOOLCHAINS: CLANGDWARF
     steps:
       - uses: actions/checkout@v4
 
@@ -117,13 +114,9 @@ jobs:
 
       - name: ./build_duet.tool
         run: docker compose run build-duet
-        env:
-          TOOLCHAINS: CLANGDWARF
 
       - name: ./build_oc.tool
         run: docker compose run build-oc
-        env:
-          TOOLCHAINS: CLANGDWARF
 
       - name: Upload to Artifacts
         uses: actions/upload-artifact@v4
