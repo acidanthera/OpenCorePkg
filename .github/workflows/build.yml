@@ -21,7 +21,7 @@ jobs:
     env:
       JOB_TYPE: BUILD
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Add Linux Toolchain
         run: brew tap FiloSottile/homebrew-musl-cross
@@ -46,13 +46,13 @@ jobs:
       - run: ./build_oc.tool
 
       - name: Upload to Artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: macOS XCODE5 Artifacts
           path: Binaries/*.zip
       - name: Upload to Release
         if: github.event_name == 'release'
-        uses: svenstaro/upload-release-action@e74ff71f7d8a4c4745b560a485cc5fdb9b5b999d
+        uses: svenstaro/upload-release-action@v2
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
           file: Binaries/*.zip
@@ -63,7 +63,7 @@ jobs:
     name: Linux CLANGPDB
     runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Use Docker in rootless mode.
         uses: ScribeMD/rootless-docker@0.2.2
@@ -79,7 +79,7 @@ jobs:
           TOOLCHAINS: CLANGPDB
 
       - name: Upload to Artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: Linux CLANGPDB Artifacts
           path: Binaries/*.zip
@@ -88,7 +88,7 @@ jobs:
     name: Linux GCC
     runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Use Docker in rootless mode.
         uses: ScribeMD/rootless-docker@0.2.2
@@ -104,7 +104,7 @@ jobs:
           TOOLCHAINS: GCC
 
       - name: Upload to Artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: Linux GCC Artifacts
           path: Binaries/*.zip
@@ -113,7 +113,7 @@ jobs:
     name: Linux CLANGDWARF
     runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Use Docker in rootless mode.
         uses: ScribeMD/rootless-docker@0.2.2
@@ -129,7 +129,7 @@ jobs:
           TOOLCHAINS: CLANGDWARF
 
       - name: Upload to Artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: Linux CLANGDWARF Artifacts
           path: Binaries/*.zip
@@ -138,7 +138,7 @@ jobs:
     name: Linux Docs
     runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Use Docker in rootless mode.
         uses: ScribeMD/rootless-docker@0.2.2
@@ -156,7 +156,7 @@ jobs:
       run:
         shell: bash
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Install Dependencies
         run: |
@@ -170,7 +170,7 @@ jobs:
       - run: ./build_oc.tool
 
       - name: Upload to Artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: Windows Artifacts
           path: Binaries/*.zip

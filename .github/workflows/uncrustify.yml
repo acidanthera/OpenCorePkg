@@ -15,7 +15,7 @@ jobs:
     name: Check Codestyle
     runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Install Dependencies
         run: |
@@ -32,7 +32,7 @@ jobs:
           python3 -c "$(/usr/bin/curl https://raw.githubusercontent.com/acidanthera/ocbuild/master/uncstrap/uncstrap.py)" ./Uncrustify.yml || exit 1
 
       - name: Upload to Artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         if: failure()
         with:
           name: Uncrustify Artifacts
