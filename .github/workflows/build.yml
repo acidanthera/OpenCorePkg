@@ -62,7 +62,7 @@ jobs:
 
   build-linux-clangpdb:
     name: Linux CLANGPDB
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
 
@@ -87,7 +87,7 @@ jobs:
 
   build-linux-gcc5:
     name: Linux GCC
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
 
@@ -112,7 +112,7 @@ jobs:
 
   build-linux-clangdwarf:
     name: Linux CLANGDWARF
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
 
@@ -137,7 +137,7 @@ jobs:
 
   build-linux-docs:
     name: Linux Docs
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
 
