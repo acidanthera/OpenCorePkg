@@ -5,6 +5,12 @@
   <img alt="Scan Status" src="https://scan.coverity.com/projects/18169/badge.svg?flat=1)](https://scan.coverity.com/projects/18169">
 </div>
 
+-----
+
+## :inbox_tray: Downloads
+
+All releases of OpenCore can be found in the [releases page](https://github.com/acidanthera/OpenCorePkg/releases).
+
 ## :books: Libraries
 
 This repository also contains additional UEFI support common libraries shared by other projects in [Acidanthera](https://github.com/acidanthera). The primary purpose of the library set is to provide supplemental functionality for Apple-specific UEFI drivers. Key features:
