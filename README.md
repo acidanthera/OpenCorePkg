@@ -1,9 +1,9 @@
-<img src="/Docs/Logos/OpenCore_with_text_Small.png" width="200" height="48"/>
-
-[![Build Status](https://github.com/acidanthera/OpenCorePkg/actions/workflows/build.yml/badge.svg?branch=master)](https://github.com/acidanthera/OpenCorePkg/actions) [![Scan Status](https://scan.coverity.com/projects/18169/badge.svg?flat=1)](https://scan.coverity.com/projects/18169)
------
-
-OpenCore bootloader with development SDK.
+<div align=center>
+  <img src="/Docs/Logos/Logo.png" width="200" height="200"/>
+  <h1>OpenCore Bootloader</h1><p><i>Development SDK included</i></p>
+  <img alt="Build Status" src="https://github.com/acidanthera/OpenCorePkg/actions/workflows/build.yml/badge.svg?branch=master">
+  <img alt="Scan Status" src="https://scan.coverity.com/projects/18169/badge.svg?flat=1)](https://scan.coverity.com/projects/18169">
+</div>
 
 ## Libraries
 
