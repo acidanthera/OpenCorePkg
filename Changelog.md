@@ -5,6 +5,7 @@ OpenCore Changelog
 - Modified `Launchd.command` to recreate its log file if deleted
 - Updated `Launchd.command` to work with macOS Sonoma (re-run `./Launchd.command install` after upgrading to Sonoma)
 - Fixed an incorrectly labelled MacBookPro11,3 model code in `macserial`, thx @Macschrauber
+- Improved macrecovery download logic for slow connections to get chinklist first, thx @scriptod911
 
 #### v0.9.8
 - Updated OpenDuet to allow loading unsigned, unaligned legacy Apple images such as HfsPlusLegacy.efi
