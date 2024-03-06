@@ -13,7 +13,8 @@ env:
 jobs:
   analyze-shell-scripts:
     name: Shell Scripts
-    runs-on: macos-latest
+    # See https://github.blog/changelog/2024-01-30-github-actions-introducing-the-new-m1-macos-runner-available-to-open-source
+    runs-on: macos-14
     env:
       JOB_TYPE: ANALYZE
     steps:

@@ -17,7 +17,8 @@ env:
 jobs:
   build-macos:
     name: macOS XCODE5
-    runs-on: macos-13
+    # See https://github.blog/changelog/2024-01-30-github-actions-introducing-the-new-m1-macos-runner-available-to-open-source
+    runs-on: macos-14
     env:
       JOB_TYPE: BUILD
     steps:
