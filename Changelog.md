@@ -1,5 +1,8 @@
 OpenCore Changelog
 ==================
+#### v1.0.0
+- Updated builtin firmware versions for SMBIOS and the rest
+
 #### v0.9.9
 - Fixed incorrect warning in ocvalidate
 - Modified `Launchd.command` to recreate its log file if deleted

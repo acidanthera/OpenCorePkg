@@ -1,7 +1,7 @@
 BIOSVendor: "Apple Inc."
-BIOSVersion: "486.0.0.0.0"
-BIOSLegacyVersion: "MBP121.88Z.F000.B00.2308031729"
-BIOSReleaseDate: "08/03/2023"
+BIOSVersion: "489.0.0.0.0"
+BIOSLegacyVersion: "MBP121.88Z.F000.B00.2310070443"
+BIOSReleaseDate: "10/07/2023"
 SystemManufacturer: "Apple Inc."
 SystemProductName: "MacBookPro12,1"
 SystemVersion: "1.0"
@@ -67,13 +67,13 @@ SmcEPCI: 0x00F01008
 OEMStrings: |-
   Apple ROM Version
     Model:        MBP121
-    EFI Version:  486.0.0.0.0
-    Built by:     root@qnq78
-    Date:         Thu Aug  3 17:29:13 PDT 2023
-    Revision:     486 (B&I)
+    EFI Version:  489.0.0.0.0
+    Built by:     root@vmm5d
+    Date:         Sat Oct  7 04:43:12 PDT 2023
+    Revision:     489 (B&I)
     ROM Version:  F000_B00
     Build Type:   Official Build, Release
-    Compiler:     clang-1500.0.37.1
+    Compiler:     clang-1500.1.0.2.2
 Specifications:
   CPUCodename:
     - "Broadwell"
