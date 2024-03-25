@@ -123,7 +123,7 @@ VerifySignatureAndApfs (
   }
 
   if (ContextStatus == RETURN_VOLUME_CORRUPTED) {
-    DEBUG ((DEBUG_ERROR, "SIGN: Trying legacy fixup...\n", ContextStatus));
+    DEBUG ((DEBUG_ERROR, "SIGN: %r - Trying again using FixupAppleEfiImages quirk\n", ContextStatus));
     ContextStatus = OcPeCoffFixupInitializeContext (
                       &Context,
                       Image,
