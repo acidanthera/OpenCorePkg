@@ -19,9 +19,12 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
+      # Due to brew adopting PEP 668 https://github.com/orgs/Homebrew/discussions/3404 pip installs should be in a Python venv
       - name: Install Dependencies
         run: |
           brew install shellcheck
+          python3 -m venv ~/pyenv
+          source ~/pyenv/bin/activate
           python3 -m pip install pyyaml
         env:
           HOMEBREW_NO_INSTALL_CLEANUP: 1
@@ -36,6 +39,7 @@ jobs:
       - name: Check AppleModels
         working-directory: AppleModels
         run: |
+          source ~/pyenv/bin/activate
           python3 ./update_generated.py  || exit 1
           if [ "$(git status --porcelain)" != "" ]; then echo "DataBase desync"; exit 1 ; fi
 
