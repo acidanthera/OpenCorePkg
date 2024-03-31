@@ -13,11 +13,13 @@ env:
 jobs:
   analyze-shell-scripts:
     name: Shell Scripts
-    runs-on: macos-latest
+    # See https://github.blog/changelog/2024-01-30-github-actions-introducing-the-new-m1-macos-runner-available-to-open-source
+    runs-on: macos-14
     env:
       JOB_TYPE: ANALYZE
+      HOMEBREW_NO_INSTALL_CLEANUP: 1
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       # Due to brew adopting PEP 668 https://github.com/orgs/Homebrew/discussions/3404 pip installs should be in a Python venv
       - name: Install Dependencies
@@ -26,8 +28,6 @@ jobs:
           python3 -m venv ~/pyenv
           source ~/pyenv/bin/activate
           python3 -m pip install pyyaml
-        env:
-          HOMEBREW_NO_INSTALL_CLEANUP: 1
 
       - name: CI Bootstrap
         run: |
@@ -69,7 +69,7 @@ jobs:
     env:
       JOB_TYPE: ANALYZE
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Install Dependencies
         run: |
@@ -81,7 +81,7 @@ jobs:
           python3 -m prospector . -P ./profile.yml | tee prospector_result.txt || exit 1
 
       - name: Upload prospector result to Artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         if: failure()
         with:
           name: Prospector Artifacts
@@ -92,7 +92,7 @@ jobs:
     runs-on: ubuntu-22.04
     if: github.repository_owner == 'acidanthera' && github.ref_name == 'master'
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Install Dependencies
         run: |
@@ -110,7 +110,7 @@ jobs:
       TOOLCHAINS: GCC
     if: github.repository_owner == 'acidanthera' && github.event_name != 'pull_request'
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Install Dependencies
         run: |
