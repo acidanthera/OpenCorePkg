@@ -16,6 +16,14 @@ libressl/lib/libcrypto.a:
 $(OUT_DIR)/$(PROJECT).o: libressl/lib/libcrypto.a
 endif
 
-CFLAGS  += -Ilibressl/include -I/usr/local/opt/openssl/include -I/opt/local/include -Wno-deprecated-declarations
-LDFLAGS += -Llibressl/lib -L/usr/local/opt/openssl/lib -L/opt/local/lib
+ifeq ($(DIST),Darwin)
+ifeq ($(shell uname -p),arm)
+OPENSSL_PATH = /opt/homebrew/opt/openssl
+else
+OPENSSL_PATH = /usr/local/opt/openssl
+endif
+endif
+
+CFLAGS  += -Ilibressl/include -I$(OPENSSL_PATH)/include -I/opt/local/include -Wno-deprecated-declarations
+LDFLAGS += -Llibressl/lib -L$(OPENSSL_PATH)/lib -L/opt/local/lib
 LDLIBS  += -lcrypto

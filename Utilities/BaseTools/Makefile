@@ -5,7 +5,7 @@ RM ?= /bin/rm
 DIST ?= $(shell uname)
 
 ifeq ($(DIST),Darwin)
-	CFLAGS+=-mmacosx-version-min=10.6
+	CFLAGS += -arch x86_64 -arch arm64 -mmacosx-version-min=10.9
 endif
 
 BINDIR=bin.$(DIST)

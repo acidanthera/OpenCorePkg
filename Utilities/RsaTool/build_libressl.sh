@@ -11,8 +11,8 @@ cd "$SRC_DIR" || exit 1
 OUTPUT_PATH="$(pwd)/libressl"
 BUILD_DIR="$(pwd)/tmp/${LIBRESSL_NAME}/build"
 
-export CFLAGS="-mmacosx-version-min=10.6 -Wno-unguarded-availability-new"
-export LDFLAGS="-mmacosx-version-min=10.6"
+export CFLAGS="-arch x86_64 -arch arm64 -mmacosx-version-min=10.9 -Wno-unguarded-availability-new"
+export LDFLAGS="-arch x86_64 -arch arm64 -mmacosx-version-min=10.9"
 
 abort() {
   echo "ERROR: $1!"
@@ -69,14 +69,7 @@ echo "Downloading LibreSSL ${LIBRESSL_VERSION}..."
 
 cd "${LIBRESSL_NAME}" || abort "Failed to cd to ${LIBRESSL_NAME} with code $?"
 
-if [ "$(${ARCH})" = "arm64" ]; then
-  # If we are building on arm64 (Apple Silicon), these extra options are required to ensure x86_64 builds.
-  EXTRA_OPTS=(--host=arm-apple-darwin --build=x86_64-apple-darwin)
-  CFLAGS+=" --target=x86_64-apple-darwin"
-  LDFLAGS+=" --target=x86_64-apple-darwin"
-else
-  EXTRA_OPTS=()
-fi
+EXTRA_OPTS=()
 
 # Monkeypatch to disable strtonum for <11.0 support
 "${SED}" -i '' -E 's/strsep strtonum/strsep/g' configure || abort "Failed to monkeypatch strtonum in LibreSSL with code $?"
