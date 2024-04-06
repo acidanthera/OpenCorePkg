@@ -2,7 +2,8 @@ OpenCore Changelog
 ==================
 #### v1.0.0
 - Updated builtin firmware versions for SMBIOS and the rest
-- Use Apple silicon GitHub runner for CI, thx @Goooler
+- Switched to Apple silicon GitHub runner for CI, thx @Goooler
+- Upgraded bundled EDK-II BaseTools `EfiRom` & `GenFfs` to fat binary, dual ARM and x64 support
 
 #### v0.9.9
 - Fixed incorrect warning in ocvalidate
