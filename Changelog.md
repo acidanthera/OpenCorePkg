@@ -5,6 +5,7 @@ OpenCore Changelog
 - Switched to Apple silicon GitHub runner for CI, thx @Goooler
 - Added Apple Silicon support in all provided utilities
 - Utilities now require macOS 10.9+ (OpenCore itself still supports macOS 10.4+)
+- Added `AllowRelocationBlock` support for 32-bit version
 
 #### v0.9.9
 - Fixed incorrect warning in ocvalidate

@@ -1487,8 +1487,8 @@ To view their current state, use the \texttt{pmset -g} command in Terminal.
     \item KASLR (slide) is unsupported (this is Mac OS X 10.7 or older)
   \end{itemize}
 
-  This quirk requires \texttt{ProvideCustomSlide} to be enabled and
-  typically also requires enabling \texttt{AvoidRuntimeDefrag} to function
+  This quirk typically requires \texttt{ProvideCustomSlide} and
+  \texttt{AvoidRuntimeDefrag} to be enabled to function
   correctly. Hibernation is not supported when booting with a relocation
   block, which will only be used if required when the quirk is enabled.
 
