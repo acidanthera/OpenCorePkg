@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
-%DIF DEL PreviousConfiguration.tex   Tue Mar 12 23:19:24 2024
-%DIF ADD ../Configuration.tex        Wed Mar 13 00:03:04 2024
+%DIF DEL PreviousConfiguration.tex   Sun Apr  7 20:10:19 2024
+%DIF ADD ../Configuration.tex        Mon Apr  8 11:31:07 2024
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -1547,8 +1547,10 @@ To view their current state, use the \texttt{pmset -g} command in Terminal.
     \item KASLR (slide) is unsupported (this is \DIFdelbegin \DIFdel{macOS }\DIFdelend \DIFaddbegin \DIFadd{Mac OS X }\DIFaddend 10.7 or older)
   \end{itemize}
 
-  This quirk requires \texttt{ProvideCustomSlide} to be enabled and
-  typically also requires enabling \texttt{AvoidRuntimeDefrag} to function
+  This quirk \DIFaddbegin \DIFadd{typically }\DIFaddend requires \texttt{ProvideCustomSlide} \DIFaddbegin \DIFadd{and
+  }\texttt{\DIFadd{AvoidRuntimeDefrag}} \DIFaddend to be enabled \DIFdelbegin \DIFdel{and
+  typically also requires enabling }\texttt{\DIFdel{AvoidRuntimeDefrag}} %DIFAUXCMD
+\DIFdelend to function
   correctly. Hibernation is not supported when booting with a relocation
   block, which will only be used if required when the quirk is enabled.
 

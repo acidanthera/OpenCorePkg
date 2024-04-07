@@ -906,6 +906,8 @@ InternalIsEfiBootRt (
   return TRUE;
 }
 
+#ifdef MDE_CPU_X64
+
 /*
   Retrieves the offset of the kernel call gate in EfiBootRt.
 
@@ -1016,6 +1018,8 @@ InternalEfiBootRtGetKcgOffset (
   return KcgOffset;
 }
 
+#endif
+
 /**
   UEFI Boot Services LoadImage override. Called to load an efi image.
   If this is bootrt.efi, then we patch its kernel call gate.
@@ -1032,13 +1036,8 @@ OcLoadImage (
   OUT EFI_HANDLE                *ImageHandle
   )
 {
-  EFI_STATUS                 LoadImageStatus;
-  EFI_STATUS                 Status;
-  BOOLEAN                    IsEfiBootRt;
-  BOOT_COMPAT_CONTEXT        *BootCompat;
-  EFI_LOADED_IMAGE_PROTOCOL  *LoadedImage;
-  UINTN                      KcgOffset;
-  UINTN                      KcgSize;
+  BOOLEAN              IsEfiBootRt;
+  BOOT_COMPAT_CONTEXT  *BootCompat;
 
   BootCompat = GetBootCompatContext ();
 
@@ -1083,6 +1082,13 @@ OcLoadImage (
                                      ImageHandle
                                      );
   }
+
+ #if defined (MDE_CPU_X64)
+  EFI_STATUS                 LoadImageStatus;
+  EFI_STATUS                 Status;
+  EFI_LOADED_IMAGE_PROTOCOL  *LoadedImage;
+  UINTN                      KcgOffset;
+  UINTN                      KcgSize;
 
   LoadImageStatus = OcImageLoaderLoad (
                       BootPolicy,
@@ -1130,10 +1136,10 @@ OcLoadImage (
   //
   // Patch the EfiBootRt kernel call gate.
   //
-  AppleMapPrepareKernelJump (
+  AppleMapPrepareKernelJump64 (
     BootCompat,
     (UINTN)LoadedImage->ImageBase + KcgOffset,
-    (UINTN)AppleMapPrepareKernelStateNew
+    (UINTN)AppleMapPrepareKernelStateNew64
     );
 
   DEBUG ((
@@ -1143,6 +1149,12 @@ OcLoadImage (
     ));
 
   return LoadImageStatus;
+ #elif defined (MDE_CPU_IA32)
+  //
+  // Something is completely borked if we are here in 32-bit mode.
+  //
+  return EFI_INVALID_PARAMETER;
+ #endif
 }
 
 /**
@@ -1430,11 +1442,15 @@ OcExitBootServices (
     return Status;
   }
 
-  AppleMapPrepareKernelJump (
+ #ifdef MDE_CPU_IA32
+  AppleMapPrepareKernelJump32 (BootCompat);
+ #elif defined (MDE_CPU_X64)
+  AppleMapPrepareKernelJump64 (
     BootCompat,
     (UINTN)BootCompat->ServiceState.OldKernelCallGate,
-    (UINTN)AppleMapPrepareKernelStateOld
+    (UINTN)AppleMapPrepareKernelStateOld64
     );
+ #endif
 
   return Status;
 }

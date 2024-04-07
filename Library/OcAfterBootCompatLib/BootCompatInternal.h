@@ -506,15 +506,49 @@ AppleMapPrepareBooterState (
   Patch kernel entry point with KernelJump to later land in AppleMapPrepareKernelState.
 
   @param[in,out]  BootCompat          Boot compatibility context.
+**/
+VOID
+AppleMapPrepareKernelJump32 (
+  IN OUT BOOT_COMPAT_CONTEXT  *BootCompat
+  );
+
+/**
+  Patch kernel entry point with KernelJump to later land in AppleMapPrepareKernelState.
+
+  @param[in,out]  BootCompat          Boot compatibility context.
   @param[in]      CallGate            Kernel call gate address.
   @param[in]      HookAddress         The function address to jump to when
                                       entering the kernel call gate.
 **/
 VOID
-AppleMapPrepareKernelJump (
+AppleMapPrepareKernelJump64 (
   IN OUT BOOT_COMPAT_CONTEXT   *BootCompat,
   IN     EFI_PHYSICAL_ADDRESS  CallGate,
   IN     UINTN                 HookAddress
+  );
+
+/**
+  Prepare environment for normal booting. Called when boot.efi jumps to kernel.
+
+  @param[in,out]  BootCompat    Boot compatibility context.
+  @param[in,out]  BootArgs      Apple kernel boot arguments.
+**/
+VOID
+AppleMapPrepareForBooting (
+  IN OUT BOOT_COMPAT_CONTEXT  *BootCompat,
+  IN OUT VOID                 *BootArgs
+  );
+
+/**
+  Prepare environment for hibernate wake. Called when boot.efi jumps to kernel.
+
+  @param[in,out]  BootCompat       Boot compatibility context.
+  @param[in,out]  ImageHeaderPage  Apple hibernate image page number.
+**/
+VOID
+AppleMapPrepareForHibernateWake (
+  IN OUT BOOT_COMPAT_CONTEXT  *BootCompat,
+  IN     UINTN                ImageHeaderPage
   );
 
 /**
@@ -536,6 +570,30 @@ AppleMapPrepareMemState (
   );
 
 /**
+  Assembly wrapper for AppleMapPrepareKernelState32.
+  Used to convert calling conventions and fixup registers.
+**/
+VOID
+AsmAppleMapPrepareKernelState32 (
+  VOID
+  );
+
+/**
+  Prepare environment for Apple kernel bootloader in boot or wake cases.
+  This callback arrives when boot.efi jumps to kernel entry point.
+  Should transfer control to restored kernel entry point with the same arguments.
+
+  @param[in]  Args         Case-specific kernel argument handle.
+
+  @returns Case-specific value if any.
+**/
+UINTN
+EFIAPI
+AppleMapPrepareKernelState32 (
+  IN UINTN  Args
+  );
+
+/**
   Prepare environment for Apple kernel bootloader in boot or wake cases.
   This callback arrives when boot.efi jumps to kernel call gate.
   Should transfer control to kernel call gate + CALL_GATE_JUMP_SIZE
@@ -553,7 +611,7 @@ AppleMapPrepareMemState (
 **/
 EFI_STATUS
 EFIAPI
-AppleMapPrepareKernelStateNew (
+AppleMapPrepareKernelStateNew64 (
   IN     UINTN                       SystemTable,
   IN OUT APPLE_EFI_BOOT_RT_KCG_ARGS  *KcgArguments,
   IN     KERNEL_CALL_GATE            CallGate
@@ -575,7 +633,7 @@ AppleMapPrepareKernelStateNew (
 **/
 UINTN
 EFIAPI
-AppleMapPrepareKernelStateOld (
+AppleMapPrepareKernelStateOld64 (
   IN UINTN             Args,
   IN UINTN             EntryPoint,
   IN KERNEL_CALL_GATE  CallGate
@@ -724,7 +782,7 @@ AppleRelocationRebase (
   @param[in]     KcgArg2     Second kernel call gate argument.
 **/
 VOID
-AppleRelocationCallGate (
+AppleRelocationCallGate64 (
   IN OUT UINTN                *Args,
   IN     BOOT_COMPAT_CONTEXT  *BootCompat,
   IN     KERNEL_CALL_GATE     CallGate,
