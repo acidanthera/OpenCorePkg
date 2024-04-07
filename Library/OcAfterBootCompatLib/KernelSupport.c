@@ -321,13 +321,6 @@ RestoreProtectedRtMemoryTypes (
   }
 }
 
-/**
-  Prepare environment for normal booting. Called when boot.efi jumps to kernel.
-
-  @param[in,out]  BootCompat    Boot compatibility context.
-  @param[in,out]  BootArgs      Apple kernel boot arguments.
-**/
-STATIC
 VOID
 AppleMapPrepareForBooting (
   IN OUT BOOT_COMPAT_CONTEXT  *BootCompat,
@@ -439,13 +432,6 @@ AppleMapPrepareForBooting (
   }
 }
 
-/**
-  Prepare environment for hibernate wake. Called when boot.efi jumps to kernel.
-
-  @param[in,out]  BootCompat       Boot compatibility context.
-  @param[in,out]  ImageHeaderPage  Apple hibernate image page number.
-**/
-STATIC
 VOID
 AppleMapPrepareForHibernateWake (
   IN OUT BOOT_COMPAT_CONTEXT  *BootCompat,
@@ -618,66 +604,6 @@ AppleMapPrepareBooterState (
   }
 }
 
-VOID
-AppleMapPrepareKernelJump (
-  IN OUT BOOT_COMPAT_CONTEXT   *BootCompat,
-  IN     EFI_PHYSICAL_ADDRESS  CallGate,
-  IN     UINTN                 HookAddress
-  )
-{
-  CALL_GATE_JUMP  *CallGateJump;
-
-  //
-  // There is no reason to patch the kernel when we do not need it.
-  //
-  if (  !BootCompat->Settings.AvoidRuntimeDefrag
-     && !BootCompat->Settings.DiscardHibernateMap
-     && !BootCompat->Settings.AllowRelocationBlock
-     && !BootCompat->Settings.DisableSingleUser
-     && !BootCompat->Settings.ForceBooterSignature)
-  {
-    return;
-  }
-
- #ifndef MDE_CPU_X64
-  RUNTIME_DEBUG ((DEBUG_ERROR, "OCABC: Kernel trampolines are unsupported for non-X64\n"));
-  CpuDeadLoop ();
- #endif
-
-  //
-  // Check whether we have address and abort if not.
-  //
-  if (CallGate == 0) {
-    RUNTIME_DEBUG ((DEBUG_ERROR, "OCABC: Failed to find call gate address\n"));
-    return;
-  }
-
-  CallGateJump = (VOID *)(UINTN)CallGate;
-
-  //
-  // Move call gate jump bytes front.
-  // Performing this on the EfiBootRt KCG may bork the binary, but right now
-  // only corrupts an unused string.
-  //
-  CopyMem (
-    CallGateJump + 1,
-    CallGateJump,
-    ESTIMATED_CALL_GATE_SIZE
-    );
-  //
-  // lea r8, [rip+XXX]
-  // Passes KCG as third argument to be relocatable. macOS 13 Developer Beta 1
-  // copies the KCG into a separately allocated buffer.
-  //
-  CallGateJump->LeaRip.Command[0] = 0x4C;
-  CallGateJump->LeaRip.Command[1] = 0x8D;
-  CallGateJump->LeaRip.Command[2] = 0x05;
-  CallGateJump->LeaRip.Argument   = sizeof (*CallGateJump) - sizeof (CallGateJump->LeaRip);
-  CallGateJump->Jmp.Command       = 0x25FF;
-  CallGateJump->Jmp.Argument      = 0x0;
-  CallGateJump->Jmp.Address       = HookAddress;
-}
-
 EFI_STATUS
 AppleMapPrepareMemState (
   IN OUT BOOT_COMPAT_CONTEXT    *BootCompat,
@@ -757,77 +683,4 @@ AppleMapPrepareMemState (
   }
 
   return Status;
-}
-
-UINTN
-EFIAPI
-AppleMapPrepareKernelStateWorker (
-  IN UINTN             *Args,
-  IN UINTN             EntryPoint,
-  IN KERNEL_CALL_GATE  CallGate,
-  IN UINTN             *Arg1,
-  IN UINTN             Arg2
-  )
-{
-  BOOT_COMPAT_CONTEXT  *BootCompatContext;
-
-  BootCompatContext = GetBootCompatContext ();
-
-  if (BootCompatContext->ServiceState.AppleHibernateWake) {
-    AppleMapPrepareForHibernateWake (
-      BootCompatContext,
-      *Args
-      );
-  } else {
-    AppleMapPrepareForBooting (
-      BootCompatContext,
-      (VOID *)*Args
-      );
-  }
-
-  if (BootCompatContext->KernelState.RelocationBlock != 0) {
-    AppleRelocationCallGate (
-      Args,
-      BootCompatContext,
-      CallGate,
-      Arg1,
-      Arg2
-      );
-  }
-
-  return CallGate (*Arg1, Arg2);
-}
-
-EFI_STATUS
-EFIAPI
-AppleMapPrepareKernelStateNew (
-  IN     UINTN                       SystemTable,
-  IN OUT APPLE_EFI_BOOT_RT_KCG_ARGS  *KcgArguments,
-  IN     KERNEL_CALL_GATE            CallGate
-  )
-{
-  return AppleMapPrepareKernelStateWorker (
-           &KcgArguments->Args,
-           KcgArguments->EntryPoint,
-           CallGate,
-           &SystemTable,
-           (UINTN)KcgArguments
-           );
-}
-
-UINTN
-EFIAPI
-AppleMapPrepareKernelStateOld (
-  IN UINTN             Args,
-  IN UINTN             EntryPoint,
-  IN KERNEL_CALL_GATE  CallGate
-  )
-{
-  return AppleMapPrepareKernelStateWorker (
-           &Args,
-           EntryPoint,
-           CallGate,
-           &Args,
-           EntryPoint
-           );
 }
