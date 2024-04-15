@@ -14,7 +14,11 @@
 ##
 
   BlockSize          = 0x10000
-  NumBlocks          = 22
+!if ($(TARGET) == NOOPT)
+  NumBlocks          = 0x24       #GenFv image size 0x240000
+!else
+  NumBlocks          = 0xd        #GenFv image size 0xd0000
+!endif
   FvAlignment        = 16         #FV alignment and FV attributes setting.
   ERASE_POLARITY     = 1
   MEMORY_MAPPED      = TRUE

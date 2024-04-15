@@ -176,7 +176,7 @@ if [ "${INTREE}" != "" ]; then
   imgbuild "${TARGETARCH}"
 else
   if [ "$TARGETS" = "" ]; then
-    TARGETS=(DEBUG RELEASE)
+    TARGETS=(DEBUG RELEASE NOOPT)
     export TARGETS
   fi
   if [ "$ARCHS" = "" ]; then
