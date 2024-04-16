@@ -37,6 +37,7 @@
   READ_LOCK_STATUS   = TRUE
 
   APRIORI DXE {
+    INF  MdeModulePkg/Universal/DevicePathDxe/DevicePathDxe.inf
     INF  MdeModulePkg/Universal/PCD/Dxe/Pcd.inf
     INF  OvmfPkg/8259InterruptControllerDxe/8259.inf
   }
