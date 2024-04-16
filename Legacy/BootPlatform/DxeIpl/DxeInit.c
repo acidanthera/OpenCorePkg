@@ -180,7 +180,8 @@ Returns:
   PrepareHobDxeCore (
     Handoff->DxeCoreEntryPoint,
     (EFI_PHYSICAL_ADDRESS)(UINTN)Handoff->DxeCoreImageBase,
-    (UINTN)Handoff->DxeIplImageBase + (UINTN)Handoff->DxeIplImageSize - (UINTN)Handoff->DxeCoreImageBase
+    (UINTN)Handoff->DxeIplImageBase + (UINTN)Handoff->DxeIplImageSize - (UINTN)Handoff->DxeCoreImageBase,
+    &Handoff->DxeCoreImageContext
     );
 
   PrepareHobLegacyTable (gHob);
