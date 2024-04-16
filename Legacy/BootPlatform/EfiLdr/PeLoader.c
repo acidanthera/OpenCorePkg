@@ -26,18 +26,23 @@ Revision History:
 
 EFI_STATUS
 EfiLdrLoadImage (
-  IN VOID                   *FHand,
-  IN UINT32                 BufferSize,
-  IN EFILDR_LOADED_IMAGE    *Image,
-  IN UINTN                  *NumberOfMemoryMapEntries,
-  IN EFI_MEMORY_DESCRIPTOR  *EfiMemoryDescriptor
+  IN  VOID                             *FHand,
+  IN  UINT32                           BufferSize,
+  IN  EFILDR_LOADED_IMAGE              *Image,
+  IN  UINTN                            *NumberOfMemoryMapEntries,
+  IN  EFI_MEMORY_DESCRIPTOR            *EfiMemoryDescriptor,
+  OUT UEFI_IMAGE_LOADER_IMAGE_CONTEXT  *ImageContext
   )
 {
   EFI_STATUS                       Status;
-  UEFI_IMAGE_LOADER_IMAGE_CONTEXT  ImageContext;
+  UEFI_IMAGE_LOADER_IMAGE_CONTEXT  TempImageContext;
+
+  if (ImageContext == NULL) {
+    ImageContext = &TempImageContext;
+  }
 
   Status = UefiImageInitializeContext (
-             &ImageContext,
+             ImageContext,
              FHand,
              BufferSize,
              UEFI_IMAGE_SOURCE_FV,
@@ -50,7 +55,7 @@ EfiLdrLoadImage (
   //
   // Set the image subsystem type
   //
-  Image->Type = UefiImageGetSubsystem (&ImageContext);
+  Image->Type = UefiImageGetSubsystem (ImageContext);
 
   switch (Image->Type) {
     case EFI_IMAGE_SUBSYSTEM_EFI_APPLICATION:
@@ -72,7 +77,7 @@ EfiLdrLoadImage (
       return EFI_INVALID_PARAMETER;
   }
 
-  Image->NoPages = EFI_SIZE_TO_PAGES (UefiImageGetImageSize (&ImageContext));
+  Image->NoPages = EFI_SIZE_TO_PAGES (UefiImageGetImageSize (ImageContext));
 
   //
   // Compute the amount of memory needed to load the image and
@@ -99,7 +104,7 @@ EfiLdrLoadImage (
   // Load and relocate image
   //
   Status = UefiImageLoadImageForExecution (
-             &ImageContext,
+             ImageContext,
              Image->ImageBase,
              (UINT32)EFI_PAGES_TO_SIZE (Image->NoPages),
              NULL,
@@ -109,7 +114,7 @@ EfiLdrLoadImage (
     return Status;
   }
 
-  Image->EntryPoint = (EFI_IMAGE_ENTRY_POINT)UefiImageLoaderGetImageEntryPoint (&ImageContext);
+  Image->EntryPoint = (EFI_IMAGE_ENTRY_POINT)UefiImageLoaderGetImageEntryPoint (ImageContext);
 
   return Status;
 }

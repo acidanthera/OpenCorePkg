@@ -142,7 +142,8 @@ EfiLoader (
              DestinationSize,
              &DxeIplImage,
              &NumberOfMemoryMapEntries,
-             EfiMemoryDescriptor
+             EfiMemoryDescriptor,
+             NULL
              );
   if (EFI_ERROR (Status)) {
     SystemHang ("Failed to load and relocate DxeIpl PE image!\n");
@@ -184,7 +185,8 @@ EfiLoader (
              DestinationSize,
              &DxeCoreImage,
              &NumberOfMemoryMapEntries,
-             EfiMemoryDescriptor
+             EfiMemoryDescriptor,
+             &Handoff.DxeCoreImageContext
              );
   if (EFI_ERROR (Status)) {
     SystemHang ("Failed to load/relocate DxeMain!\n");

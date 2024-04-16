@@ -36,6 +36,20 @@ Revision History:
 
 #pragma pack(1)
 
+// FIXME: Move to audk
+///
+/// Identifies DxeCore ImageContext HOB
+///
+#define UEFI_IMAGE_LOADER_IMAGE_CONTEXT_GUID \
+  { 0x05cc29cc, 0xfbdf, 0x4cc8, { 0x98, 0x25, 0x71, 0x76, 0x08, 0x5b, 0x05, 0x01 } }
+
+////extern EFI_GUID  gUefiImageLoaderImageContextGuid;
+
+typedef struct {
+  EFI_HOB_GUID_TYPE    Hob;
+  HOB_IMAGE_CONTEXT    ImageContext;
+} IMAGE_CONTEXT_HOB;
+
 typedef struct {
   EFI_HOB_GUID_TYPE              Hob;
   EFI_MEMORY_TYPE_INFORMATION    Info[10];
@@ -79,6 +93,7 @@ typedef struct {
   EFI_HOB_RESOURCE_DESCRIPTOR         MemoryAbove4GB;
   EFI_HOB_MEMORY_ALLOCATION_MODULE    DxeCore;
   EFI_HOB_RESOURCE_DESCRIPTOR         MemoryDxeCore;
+  IMAGE_CONTEXT_HOB                   ImageContextDxeCore;
   MEMORY_TYPE_INFORMATION_HOB         MemoryTypeInfo;
   TABLE_HOB                           Acpi;
   TABLE_HOB                           Acpi20;
@@ -133,9 +148,10 @@ PrepareHobMemory (
 
 VOID
 PrepareHobDxeCore (
-  VOID                  *DxeCoreEntryPoint,
-  EFI_PHYSICAL_ADDRESS  DxeCoreImageBase,
-  UINT64                DxeCoreLength
+  VOID                             *DxeCoreEntryPoint,
+  EFI_PHYSICAL_ADDRESS             DxeCoreImageBase,
+  UINT64                           DxeCoreLength,
+  UEFI_IMAGE_LOADER_IMAGE_CONTEXT  *ImageContext
   );
 
 VOID *

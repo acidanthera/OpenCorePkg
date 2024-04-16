@@ -88,11 +88,12 @@ VOID
 
 EFI_STATUS
 EfiLdrLoadImage (
-  IN VOID                   *FHand,
-  IN UINT32                 BufferSize,
-  IN EFILDR_LOADED_IMAGE    *Image,
-  IN UINTN                  *NumberOfMemoryMapEntries,
-  IN EFI_MEMORY_DESCRIPTOR  *EfiMemoryDescriptor
+  IN VOID                              *FHand,
+  IN UINT32                            BufferSize,
+  IN EFILDR_LOADED_IMAGE               *Image,
+  IN UINTN                             *NumberOfMemoryMapEntries,
+  IN EFI_MEMORY_DESCRIPTOR             *EfiMemoryDescriptor,
+  OUT UEFI_IMAGE_LOADER_IMAGE_CONTEXT  *ImageContext
   );
 
 #endif //_DUET_EFI_LOADER_H_

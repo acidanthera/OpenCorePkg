@@ -207,12 +207,26 @@ HOB_TEMPLATE  gHobTemplate = {
     0x0,                                            // PhysicalStart
     0                                               // ResourceLength
   },
+  { // ImageContextDxeCore
+    {
+      {
+        EFI_HOB_TYPE_GUID_EXTENSION,                    // Hob type
+        sizeof (IMAGE_CONTEXT_HOB),                     // Hob size
+        0,                                              // Reserved
+      },
+      UEFI_IMAGE_LOADER_IMAGE_CONTEXT_GUID
+    },
+    {
+      0,                                                  // FormatIndex
+      { .Ue = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0} }  // Ctx.Ue
+    }
+  },
   { // Memory Map Hints to reduce fragmentation in the memory map
     {
       {
         EFI_HOB_TYPE_GUID_EXTENSION,                    // Hob type
         sizeof (MEMORY_TYPE_INFORMATION_HOB),           // Hob size
-        0,                                              // reserved
+        0,                                              // Reserved
       },
       EFI_MEMORY_TYPE_INFORMATION_GUID
     },
@@ -297,7 +311,7 @@ HOB_TEMPLATE  gHobTemplate = {
       {
         EFI_HOB_TYPE_GUID_EXTENSION,       // Hob type
         sizeof (TABLE_HOB),                // Hob size
-        0,                                 // reserved
+        0                                  // Reserved
       },
       EFI_MPS_TABLE_GUID
     },
@@ -308,35 +322,35 @@ HOB_TEMPLATE  gHobTemplate = {
   { // Pointer to FlushInstructionCache
     EFI_HOB_TYPE_GUID_EXTENSION,       // Hob type
     sizeof (PROTOCOL_HOB),             // Hob size
-    0,                                 // reserved
+    0,                                 // Reserved
     EFI_PEI_FLUSH_INSTRUCTION_CACHE_GUID,
     NULL
   },
   { // Pointer to TransferControl
     EFI_HOB_TYPE_GUID_EXTENSION,       // Hob type
     sizeof (PROTOCOL_HOB),             // Hob size
-    0,                                 // reserved
+    0,                                 // Reserved
     EFI_PEI_TRANSFER_CONTROL_GUID,
     NULL
   },
   { // Pointer to PeCoffLoader
     EFI_HOB_TYPE_GUID_EXTENSION,       // Hob type
     sizeof (PROTOCOL_HOB),             // Hob size
-    0,                                 // reserved
+    0,                                 // Reserved
     EFI_PEI_PE_COFF_LOADER_GUID,
     NULL
   },
   { // Pointer to EfiDecompress
     EFI_HOB_TYPE_GUID_EXTENSION,       // Hob type
     sizeof (PROTOCOL_HOB),             // Hob size
-    0,                                 // reserved
+    0,                                 // Reserved
     EFI_DECOMPRESS_PROTOCOL_GUID,
     NULL
   },
   { // Pointer to TianoDecompress
     EFI_HOB_TYPE_GUID_EXTENSION,       // Hob type
     sizeof (PROTOCOL_HOB),             // Hob size
-    0,                                 // reserved
+    0,                                 // Reserved
     EFI_TIANO_DECOMPRESS_PROTOCOL_GUID,
     NULL
   },
@@ -754,17 +768,52 @@ PrepareHobBfv (
 
 VOID
 PrepareHobDxeCore (
-  VOID                  *DxeCoreEntryPoint,
-  EFI_PHYSICAL_ADDRESS  DxeCoreImageBase,
-  UINT64                DxeCoreLength
+  VOID                             *DxeCoreEntryPoint,
+  EFI_PHYSICAL_ADDRESS             DxeCoreImageBase,
+  UINT64                           DxeCoreLength,
+  UEFI_IMAGE_LOADER_IMAGE_CONTEXT  *ImageContext
   )
 {
+  HOB_IMAGE_CONTEXT  *Hob;
+
   gHob->DxeCore.MemoryAllocationHeader.MemoryBaseAddress = DxeCoreImageBase;
   gHob->DxeCore.MemoryAllocationHeader.MemoryLength      = DxeCoreLength;
   gHob->DxeCore.EntryPoint                               = (EFI_PHYSICAL_ADDRESS)(UINTN)DxeCoreEntryPoint;
 
   gHob->MemoryDxeCore.PhysicalStart  = DxeCoreImageBase;
   gHob->MemoryDxeCore.ResourceLength = DxeCoreLength;
+
+  Hob              = &gHob->ImageContextDxeCore.ImageContext;
+  Hob->FormatIndex = ImageContext->FormatIndex;
+
+  if (Hob->FormatIndex != UefiImageFormatUe) {
+    Hob->Ctx.Pe.ImageBuffer         = (UINT32)(UINTN)ImageContext->Ctx.Pe.ImageBuffer;
+    Hob->Ctx.Pe.AddressOfEntryPoint = ImageContext->Ctx.Pe.AddressOfEntryPoint;
+    Hob->Ctx.Pe.ImageType           = ImageContext->Ctx.Pe.ImageType;
+    Hob->Ctx.Pe.FileBuffer          = (UINT32)(UINTN)ImageContext->Ctx.Pe.FileBuffer;
+    Hob->Ctx.Pe.ExeHdrOffset        = ImageContext->Ctx.Pe.ExeHdrOffset;
+    Hob->Ctx.Pe.SizeOfImage         = ImageContext->Ctx.Pe.SizeOfImage;
+    Hob->Ctx.Pe.FileSize            = ImageContext->Ctx.Pe.FileSize;
+    Hob->Ctx.Pe.Subsystem           = ImageContext->Ctx.Pe.Subsystem;
+    Hob->Ctx.Pe.SectionAlignment    = ImageContext->Ctx.Pe.SectionAlignment;
+    Hob->Ctx.Pe.SectionsOffset      = ImageContext->Ctx.Pe.SectionsOffset;
+    Hob->Ctx.Pe.NumberOfSections    = ImageContext->Ctx.Pe.NumberOfSections;
+    Hob->Ctx.Pe.SizeOfHeaders       = ImageContext->Ctx.Pe.SizeOfHeaders;
+  } else {
+    Hob->Ctx.Ue.ImageBuffer              = (UINT32)(UINTN)ImageContext->Ctx.Ue.ImageBuffer;
+    Hob->Ctx.Ue.FileBuffer               = (UINT32)(UINTN)ImageContext->Ctx.Ue.FileBuffer;
+    Hob->Ctx.Ue.EntryPointAddress        = ImageContext->Ctx.Ue.EntryPointAddress;
+    Hob->Ctx.Ue.LoadTablesFileOffset     = ImageContext->Ctx.Ue.LoadTablesFileOffset;
+    Hob->Ctx.Ue.NumLoadTables            = ImageContext->Ctx.Ue.NumLoadTables;
+    Hob->Ctx.Ue.LoadTables               = (UINT32)(UINTN)ImageContext->Ctx.Ue.LoadTables;
+    Hob->Ctx.Ue.Segments                 = (UINT32)(UINTN)ImageContext->Ctx.Ue.Segments;
+    Hob->Ctx.Ue.LastSegmentIndex         = ImageContext->Ctx.Ue.LastSegmentIndex;
+    Hob->Ctx.Ue.SegmentAlignment         = ImageContext->Ctx.Ue.SegmentAlignment;
+    Hob->Ctx.Ue.ImageSize                = ImageContext->Ctx.Ue.ImageSize;
+    Hob->Ctx.Ue.Subsystem                = ImageContext->Ctx.Ue.Subsystem;
+    Hob->Ctx.Ue.SegmentImageInfoIterSize = ImageContext->Ctx.Ue.SegmentImageInfoIterSize;
+    Hob->Ctx.Ue.SegmentsFileOffset       = ImageContext->Ctx.Ue.SegmentsFileOffset;
+  }
 }
 
 VOID *
