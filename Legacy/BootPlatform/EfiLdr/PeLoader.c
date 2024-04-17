@@ -95,10 +95,8 @@ EfiLdrLoadImage (
   }
 
   Image->Info.ImageBase = (VOID *)(UINTN)Image->ImageBasePage;
-  Image->Info.ImageSize = (Image->NoPages << EFI_PAGE_SHIFT) - 1;
+  Image->Info.ImageSize = Image->NoPages << EFI_PAGE_SHIFT;
   Image->ImageBase      = (UINT8 *)(UINTN)Image->ImageBasePage;
-  Image->ImageEof       = Image->ImageBase + Image->Info.ImageSize;
-  Image->ImageAdjust    = Image->ImageBase;
 
   //
   // Load and relocate image

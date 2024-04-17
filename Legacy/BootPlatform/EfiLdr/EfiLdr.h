@@ -55,16 +55,9 @@ typedef struct {
   EFI_IMAGE_ENTRY_POINT        EntryPoint;    // The image's entry point
   EFI_LOADED_IMAGE_PROTOCOL    Info;          // loaded image protocol
 
-  //
   EFI_PHYSICAL_ADDRESS         ImageBasePage; // Location in memory
   UINTN                        NoPages;       // Number of pages
   UINT8                        *ImageBase;    // As a char pointer
-  UINT8                        *ImageEof;     // End of memory image
-
-  // relocate info
-  UINT8                        *ImageAdjust;  // Bias for reloc calculations
-  UINTN                        StackAddress;
-  UINT8                        *FixupData;    //  Original fixup data
 } EFILDR_LOADED_IMAGE;
 
 #pragma pack(4)
