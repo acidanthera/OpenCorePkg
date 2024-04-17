@@ -7390,7 +7390,7 @@ entry is selected during the installer process:
 The first reboot should correctly select \texttt{macOS Installer}. For second and subsequent reboots, if a \texttt{macOS Installer}
 entry is still present it should be manually selected (using just Enter, not \texttt{CTRL+Enter}). Once a \texttt{macOS Installer}
 entry is no longer present, the entry for the new OS will still be automatically selected if it was the previous boot default.
-If not, it should be manually selected (at this point, \texttt{CTRL+Enter} is a good idea as any final remaining installion restarts
+If not, it should be manually selected (at this point, \texttt{CTRL+Enter} is a good idea as any final remaining installation restarts
 will be to this entry).
 
 \emph{Note 1}: When using emulated NVRAM but not installing from within an existing installed macOS (i.e. when installing from
@@ -7398,10 +7398,10 @@ within macOS Recovery, or from an installation USB), please refer to this
 \href{https://applelife.ru/posts/916248}{forum post} (in Russian)
 for additional options.
 
-\emph{Note 2}: After upgrading from an ealier macOS version to macOS Sonoma, the \texttt{Launchd.command} script should be
+\emph{Note 2}: After upgrading from an earlier macOS version to macOS Sonoma, the \texttt{Launchd.command} script should be
 reinstalled, as a different strategy is required in order for NVRAM to be saved successfully.
 
-\emph{Note 3}: In macOS Sonoma the following additional constraints apply to the ESP paritition on which
+\emph{Note 3}: In macOS Sonoma the following additional constraints apply to the ESP partition on which
 OpenCore is installed, in order for the \texttt{Launchd.command} script to work successfully:
 
 \begin{itemize}
