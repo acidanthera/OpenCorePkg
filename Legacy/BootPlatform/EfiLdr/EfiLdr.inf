@@ -39,7 +39,6 @@
 [Sources]
   PeLoader.h
   Support.h
-  EfiLdrHandoff.h
   EfiLdr.h
   EfiLoader.c
   PeLoader.c
