@@ -28,8 +28,6 @@ Revision History:
 #include <IndustryStandard/PeImage2.h>
 #include <Library/BaseLib.h>
 #include <Library/BaseMemoryLib.h>
-#include <Library/PrintLib.h>
-#include <Library/SerialPortLib.h>
 
 #define INT15_E820_AddressRangeMemory    1
 #define INT15_E820_AddressRangeReserved  2

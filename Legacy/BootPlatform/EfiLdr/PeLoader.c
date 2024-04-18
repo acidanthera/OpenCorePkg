@@ -20,6 +20,7 @@ Revision History:
 
 --*/
 #include "EfiLdr.h"
+#include "Debug.h"
 #include "Support.h"
 
 #include <Library/UefiImageLib.h>

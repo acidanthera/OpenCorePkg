@@ -38,9 +38,11 @@
   UefiImageOnlyFvLib
 
 [Sources]
+  Debug.h
   Support.h
   EfiLdr.h
   EfiLoader.c
+  Debug.c
   PeLoader.c
   Support.c
   LzmaDecompress.h

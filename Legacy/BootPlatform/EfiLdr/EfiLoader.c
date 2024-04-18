@@ -20,6 +20,7 @@ Revision History:
 
 #include "EfiLdr.h"
 #include "Support.h"
+#include "Debug.h"
 #include "LzmaDecompress.h"
 
 EFILDR_LOADED_IMAGE  DxeCoreImage;
@@ -52,7 +53,7 @@ EfiLoader (
 
  #if 0
   SerialPortInitialize ();
-  SerialPortWrite ((UINT8 *)"EfiLdr\r\n", L_STR_LEN ("EfiLdr\r\n"));
+  PrintString ("EfiLdr\n");
  #endif
 
   //
