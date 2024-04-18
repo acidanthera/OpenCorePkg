@@ -18,6 +18,7 @@ Revision History:
 
 --*/
 #include "EfiLdr.h"
+#include "Debug.h"
 #include "Support.h"
 
 EFI_STATUS

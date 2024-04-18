@@ -20,6 +20,7 @@ Revision History:
 
 #include "EfiLdr.h"
 #include "Support.h"
+#include "Debug.h"
 #include "PeLoader.h"
 #include "LzmaDecompress.h"
 
@@ -55,7 +56,7 @@ EfiLoader (
 
  #if 0
   SerialPortInitialize ();
-  SerialPortWrite ((UINT8 *)"EfiLdr\r\n", L_STR_LEN ("EfiLdr\r\n"));
+  PrintString ("EfiLdr\n");
  #endif
 
   //
