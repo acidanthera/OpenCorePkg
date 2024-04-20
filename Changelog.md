@@ -10,6 +10,7 @@ OpenCore Changelog
 - Added missing DxeCore ImageContext HOB in OpenDuet
 - Fixed assert caused by dependency ordering in OpenDuet
 - Prevented assert in normal situation when freeing memory above 4GB in OpenDuet
+- Prevented debug assert reporting that optional Hii protocols are not present in OpenDuet
 
 #### v0.9.9
 - Fixed incorrect warning in ocvalidate

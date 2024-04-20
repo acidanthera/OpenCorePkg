@@ -1,0 +1,62 @@
+## @file
+# UEFI HII Services Library implementation.
+#
+# Copyright (c) 2007 - 2018, Intel Corporation. All rights reserved.<BR>
+#
+#  SPDX-License-Identifier: BSD-2-Clause-Patent
+#
+#
+##
+
+[Defines]
+  INF_VERSION                    = 0x00010005
+  BASE_NAME                      = UefiHiiServicesLib
+  MODULE_UNI_FILE                = UefiHiiServicesLib.uni
+  FILE_GUID                      = F887190C-33C7-4B94-9217-57FD6F5A95D5
+  MODULE_TYPE                    = UEFI_DRIVER
+  VERSION_STRING                 = 1.0
+  LIBRARY_CLASS                  = UefiHiiServicesLib|DXE_DRIVER DXE_RUNTIME_DRIVER DXE_SMM_DRIVER UEFI_APPLICATION UEFI_DRIVER
+
+  CONSTRUCTOR                    = UefiHiiServicesLibConstructor
+
+#
+#  VALID_ARCHITECTURES           = IA32 X64 EBC
+#
+
+[Sources]
+  UefiHiiServicesLib.c
+
+[Packages]
+  MdePkg/MdePkg.dec
+  MdeModulePkg/MdeModulePkg.dec
+
+[LibraryClasses]
+  UefiBootServicesTableLib
+  DebugLib
+
+[Protocols]
+  gEfiHiiFontProtocolGuid             ## SOMETIMES_CONSUMES
+  gEfiHiiStringProtocolGuid           ## CONSUMES
+  gEfiHiiImageProtocolGuid            ## SOMETIMES_CONSUMES
+  gEfiHiiDatabaseProtocolGuid         ## CONSUMES
+  gEfiHiiConfigRoutingProtocolGuid    ## CONSUMES
+
+[Depex.common.DXE_DRIVER]
+  gEfiHiiStringProtocolGuid        AND
+  gEfiHiiDatabaseProtocolGuid      AND
+  gEfiHiiConfigRoutingProtocolGuid
+
+[Depex.common.DXE_RUNTIME_DRIVER]
+  gEfiHiiStringProtocolGuid        AND
+  gEfiHiiDatabaseProtocolGuid      AND
+  gEfiHiiConfigRoutingProtocolGuid
+
+[Depex.common.DXE_SAL_DRIVER]
+  gEfiHiiStringProtocolGuid        AND
+  gEfiHiiDatabaseProtocolGuid      AND
+  gEfiHiiConfigRoutingProtocolGuid
+
+[Depex.common.DXE_SMM_DRIVER]
+  gEfiHiiStringProtocolGuid        AND
+  gEfiHiiDatabaseProtocolGuid      AND
+  gEfiHiiConfigRoutingProtocolGuid
