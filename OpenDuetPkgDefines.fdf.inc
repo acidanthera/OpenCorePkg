@@ -14,11 +14,17 @@
 ##
 
   BlockSize          = 0x10000
-!if ($(TARGET) == NOOPT)
-  NumBlocks          = 0x24       #GenFv image size 0x240000
+  # Required IA32 size is ~1 block bigger than required X64 size for each
+  # build, so just use minimum IA32 sizes for both.
+!if ($(TARGET) == RELEASE)
+  NumBlocks          = 0x8        #GenFv image size 0x80000
 !else
+!if ($(TARGET) == DEBUG)
   NumBlocks          = 0xd        #GenFv image size 0xd0000
+!else
+  NumBlocks          = 0x24       #GenFv image size 0x240000
 !endif
+!endif 
   FvAlignment        = 16         #FV alignment and FV attributes setting.
   ERASE_POLARITY     = 1
   MEMORY_MAPPED      = TRUE
