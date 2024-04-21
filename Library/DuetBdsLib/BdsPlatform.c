@@ -368,8 +368,8 @@ UpdateMemoryMap (
         // (see second REF)? (If it's not mapped correctly in the first place
         // and it's associated with an image handle, it can't be remapped later
         // using gDS calls.)
-        // REF: https://github.com/acidanthera/OpenCorePkg/blob/master/Legacy/BootPlatform/DxeIpl/HobGeneration.c#L201
-        // REF: https://github.com/acidanthera/audk/blob/master/MdeModulePkg/Core/Dxe/Gcd/Gcd.c#L2577-L2587
+        // REF: https://github.com/acidanthera/OpenCorePkg/blob/2462e02d49b8b9f2562ca76850b73477cc573d47/Legacy/BootPlatform/DxeIpl/HobGeneration.c#L201
+        // REF: https://github.com/acidanthera/audk/blob/e26eb0f9c18e6672c9516dbfdebf2dd9f750207e/MdeModulePkg/Core/Dxe/Gcd/Gcd.c#L2577-L2587
         //
         DEBUG ((
           EFI_D_INFO,
