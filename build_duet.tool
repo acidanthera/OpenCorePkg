@@ -77,7 +77,7 @@ imgbuild() {
   # Build bootsectors.
   mkdir -p "${BOOTSECTORS}" || exit 1
   cd "${BOOTSECTORS}"/.. || exit 1
-  make || exit 1
+  make "${arch}" || exit 1
   cd - || exit 1
 
   # Concatenate bootsector into the resulting image.
