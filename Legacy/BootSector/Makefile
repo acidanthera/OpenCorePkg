@@ -9,6 +9,10 @@ PRODUCTS64=$(BINDIR)/StartX64_$(PAGE_TABLE).com $(BINDIR)/EfiX64.com
 
 all: $(PRODUCTS32) $(PRODUCTS64)
 
+IA32: $(PRODUCTS32)
+
+X64: $(PRODUCTS64)
+
 clean:
 	$(RM) -f $(BINDIR)/*.com
 
