@@ -152,6 +152,7 @@ with the full list available in
 \subsection{Generic Terms}\label{generic-terms}
 
 \begin{itemize}
+
 \item
   \texttt{plist} --- Subset of ASCII Property List format written in
   XML, also know as XML plist format version 1. Uniform Type Identifier
@@ -220,6 +221,7 @@ with the full list available in
 \subsection{Configuration Terms}\label{configuration-terms}
 
 \begin{itemize}
+
 \item
   \texttt{OC\ config} --- OpenCore Configuration file in \texttt{plist}
   format named \texttt{config.plist}. It provides an extensible way
@@ -891,6 +893,7 @@ Please note however, that suggested solutions from third parties may be outdated
 \subsection{Properties}\label{acpiprops}
 
 \begin{enumerate}
+
 \item
   \texttt{Add}\\
   \textbf{Type}: \texttt{plist\ array}\\
@@ -931,6 +934,7 @@ Please note however, that suggested solutions from third parties may be outdated
 \subsection{Add Properties}\label{acpipropsadd}
 
 \begin{enumerate}
+
 \item
   \texttt{Comment}\\
   \textbf{Type}: \texttt{plist\ string}\\
@@ -964,6 +968,7 @@ Please note however, that suggested solutions from third parties may be outdated
 \subsection{Delete Properties}\label{acpipropsdelete}
 
 \begin{enumerate}
+
 \item
   \texttt{All}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
@@ -1388,6 +1393,7 @@ To view their current state, use the \texttt{pmset -g} command in Terminal.
 \subsection{Patch Properties}\label{booterpropspatch}
 
 \begin{enumerate}
+
 \item
   \texttt{Arch}\\
   \textbf{Type}: \texttt{plist\ string}\\
@@ -1943,6 +1949,7 @@ as they were not constructed at the first stage. See \texttt{SSDT-IMEI.dsl} and
 \subsection{Properties}\label{devpropsprops}
 
 \begin{enumerate}
+
 \item
   \texttt{Add}\\
   \textbf{Type}: \texttt{plist\ dict}\\
@@ -2022,6 +2029,7 @@ Kernel and kext changes apply with the following effective order:
 \subsection{Properties}\label{kernelprops}
 
 \begin{enumerate}
+
 \item
   \texttt{Add}\\
   \textbf{Type}: \texttt{plist\ array}\\
@@ -2108,6 +2116,7 @@ Kernel and kext changes apply with the following effective order:
 \subsection{Add Properties}\label{kernelpropsadd}
 
 \begin{enumerate}
+
 \item
   \texttt{Arch}\\
   \textbf{Type}: \texttt{plist\ string}\\
@@ -2204,6 +2213,7 @@ Kernel and kext changes apply with the following effective order:
 \subsection{Block Properties}\label{kernelpropsblock}
 
 \begin{enumerate}
+
 \item
   \texttt{Arch}\\
   \textbf{Type}: \texttt{plist\ string}\\
@@ -2271,6 +2281,7 @@ Kernel and kext changes apply with the following effective order:
 \subsection{Emulate Properties}\label{kernelpropsemu}
 
 \begin{enumerate}
+
 \item
   \texttt{Cpuid1Data}\\
   \textbf{Type}: \texttt{plist\ data}, 16 bytes\\
@@ -2377,6 +2388,7 @@ Kernel and kext changes apply with the following effective order:
 \subsection{Force Properties}\label{kernelpropsforce}
 
 \begin{enumerate}
+
 \item
   \texttt{Arch}\\
   \textbf{Type}: \texttt{plist\ string}\\
@@ -2448,6 +2460,7 @@ Kernel and kext changes apply with the following effective order:
 \subsection{Patch Properties}\label{kernelpropspatch}
 
 \begin{enumerate}
+
 \item
   \texttt{Arch}\\
   \textbf{Type}: \texttt{plist\ string}\\
@@ -2967,6 +2980,7 @@ Refer to the \hyperref[legacyapple]{Legacy Apple OS} section for details on how
 to install and troubleshoot such macOS installations.
 
 \begin{enumerate}
+
 \item
   \texttt{CustomKernel}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
@@ -3296,11 +3310,6 @@ the default boot entry choice will remain changed until the next manual reconfig
 \subsection{Properties}\label{miscprops}
 
 \begin{enumerate}
-\item
-  \texttt{Boot}\\
-  \textbf{Type}: \texttt{plist\ dict}\\
-  \textbf{Description}: Apply the boot configuration described in the
-  \hyperref[miscbootprops]{Boot Properties} section below.
 
 \item
   \texttt{BlessOverride}\\
@@ -3316,6 +3325,12 @@ the default boot entry choice will remain changed until the next manual reconfig
   \texttt{\textbackslash System\textbackslash Library\textbackslash CoreServices\textbackslash boot.efi}
   or \texttt{\textbackslash EFI\textbackslash Microsoft\textbackslash Boot\textbackslash bootmgfw.efi},
   but unlike predefined bless paths, they have the highest priority.
+
+\item
+  \texttt{Boot}\\
+  \textbf{Type}: \texttt{plist\ dict}\\
+  \textbf{Description}: Apply the boot configuration described in the
+  \hyperref[miscbootprops]{Boot Properties} section below.
 
 \item
   \texttt{Debug}\\
@@ -3722,72 +3737,6 @@ the default boot entry choice will remain changed until the next manual reconfig
   \hyperref[uefiaudioprops]{\texttt{UEFI Audio Properties}} section for details.
 
 \item
-  \texttt{PollAppleHotKeys}\\
-  \textbf{Type}: \texttt{plist\ boolean}\\
-  \textbf{Failsafe}: \texttt{false}\\
-  \textbf{Description}: Enable \texttt{modifier hotkey} handling in the OpenCore picker.
-
-  In addition to \texttt{action hotkeys}, which are partially described in the \texttt{PickerMode}
-  section and are typically handled by Apple BDS, modifier keys handled by the operating system
-  bootloader (\texttt{boot.efi}) also exist. These keys allow changing the behaviour of the
-  operating system by providing different boot modes.
-
-  On certain firmware, using modifier keys may be problematic due to driver incompatibilities.
-  To workaround this problem, this option allows registering certain hotkeys in a more permissive
-  manner from within the OpenCore picker. Such extensions include support for tapping on key
-  combinations before selecting the boot item, and for reliable detection of the \texttt{Shift} key
-  when selecting the boot item, in order to work around the fact that hotkeys which are continuously
-  held during boot cannot be reliably detected on many PS/2 keyboards.
-
-  This list of known \texttt{modifier hotkeys} includes:
-  \begin{itemize}
-  \tightlist
-  \item \texttt{CMD+C+MINUS} --- disable board compatibility checking.
-  \item \texttt{CMD+K} --- boot release kernel, similar to \texttt{kcsuffix=release}.
-  \item \texttt{CMD+S} --- single user mode.
-  \item \texttt{CMD+S+MINUS} --- disable KASLR slide, requires disabled SIP.
-  \item \texttt{CMD+V} --- verbose mode.
-  \item \texttt{Shift+Enter}, \texttt{Shift+Index} --- safe mode, may be used in
-  combination with \texttt{CTRL+Enter}, \texttt{CTRL+Index}.
-  \end{itemize}
-
-\item
-  \texttt{ShowPicker}\\
-  \textbf{Type}: \texttt{plist\ boolean}\\
-  \textbf{Failsafe}: \texttt{false}\\
-  \textbf{Description}: Show a simple picker to allow boot entry selection.
-
-\item
-  \texttt{TakeoffDelay}\\
-  \textbf{Type}: \texttt{plist\ integer}, 32 bit\\
-  \textbf{Failsafe}: \texttt{0}\\
-  \textbf{Description}: Delay in microseconds executed before handling
-  the OpenCore picker startup and \texttt{action hotkeys}.
-
-  Introducing a delay may give extra time to hold the right \texttt{action hotkey}
-  sequence to, for instance, boot into recovery mode. On most systems, the appearance
-  of the initial boot logo is a good indication of the time from which hotkeys can be
-  held down. Earlier than this, the key press may not be registered. On some platforms,
-  setting this option to a minimum of \texttt{5000-10000} microseconds is also required
-  to access \texttt{action hotkeys} due to the nature of the keyboard driver.
-
-  If the boot chime is configured (see audio configuration options) then at the expense
-  of slower startup, an even longer delay of half to one second (\texttt{500000-1000000})
-  may be used to create behaviour similar to a real Mac, where the chime itself can be used
-  as a signal for when hotkeys can be pressed. The boot chime is inevitably later in the boot
-  sequence in OpenCore than on Apple hardware, due to the fact that non-native drivers
-  have to be loaded and connected first. Configuring the boot chime and adding this longer
-  additional delay can also be useful in systems where fast boot time and/or slow monitor signal
-  synchronisation may cause the boot logo not to be shown at all on some boots or reboots.
-
-\item
-  \texttt{Timeout}\\
-  \textbf{Type}: \texttt{plist\ integer}, 32 bit\\
-  \textbf{Failsafe}: \texttt{0}\\
-  \textbf{Description}: Timeout in seconds in the OpenCore picker before
-  automatic booting of the default boot entry. Set to \texttt{0} to disable.
-
-\item
   \texttt{PickerMode}\\
   \textbf{Type}: \texttt{plist\ string}\\
   \textbf{Failsafe}: \texttt{Builtin}\\
@@ -3892,6 +3841,72 @@ the default boot entry choice will remain changed until the next manual reconfig
       \texttt{Acidanthera\textbackslash Chardonnay} for Light Gray.
     \item \texttt{Default} --- \texttt{Acidanthera\textbackslash GoldenGate}.
   \end{itemize}
+
+\item
+  \texttt{PollAppleHotKeys}\\
+  \textbf{Type}: \texttt{plist\ boolean}\\
+  \textbf{Failsafe}: \texttt{false}\\
+  \textbf{Description}: Enable \texttt{modifier hotkey} handling in the OpenCore picker.
+
+  In addition to \texttt{action hotkeys}, which are partially described in the \texttt{PickerMode}
+  section and are typically handled by Apple BDS, modifier keys handled by the operating system
+  bootloader (\texttt{boot.efi}) also exist. These keys allow changing the behaviour of the
+  operating system by providing different boot modes.
+
+  On certain firmware, using modifier keys may be problematic due to driver incompatibilities.
+  To workaround this problem, this option allows registering certain hotkeys in a more permissive
+  manner from within the OpenCore picker. Such extensions include support for tapping on key
+  combinations before selecting the boot item, and for reliable detection of the \texttt{Shift} key
+  when selecting the boot item, in order to work around the fact that hotkeys which are continuously
+  held during boot cannot be reliably detected on many PS/2 keyboards.
+
+  This list of known \texttt{modifier hotkeys} includes:
+  \begin{itemize}
+  \tightlist
+  \item \texttt{CMD+C+MINUS} --- disable board compatibility checking.
+  \item \texttt{CMD+K} --- boot release kernel, similar to \texttt{kcsuffix=release}.
+  \item \texttt{CMD+S} --- single user mode.
+  \item \texttt{CMD+S+MINUS} --- disable KASLR slide, requires disabled SIP.
+  \item \texttt{CMD+V} --- verbose mode.
+  \item \texttt{Shift+Enter}, \texttt{Shift+Index} --- safe mode, may be used in
+  combination with \texttt{CTRL+Enter}, \texttt{CTRL+Index}.
+  \end{itemize}
+
+\item
+  \texttt{ShowPicker}\\
+  \textbf{Type}: \texttt{plist\ boolean}\\
+  \textbf{Failsafe}: \texttt{false}\\
+  \textbf{Description}: Show a simple picker to allow boot entry selection.
+
+\item
+  \texttt{TakeoffDelay}\\
+  \textbf{Type}: \texttt{plist\ integer}, 32 bit\\
+  \textbf{Failsafe}: \texttt{0}\\
+  \textbf{Description}: Delay in microseconds executed before handling
+  the OpenCore picker startup and \texttt{action hotkeys}.
+
+  Introducing a delay may give extra time to hold the right \texttt{action hotkey}
+  sequence to, for instance, boot into recovery mode. On most systems, the appearance
+  of the initial boot logo is a good indication of the time from which hotkeys can be
+  held down. Earlier than this, the key press may not be registered. On some platforms,
+  setting this option to a minimum of \texttt{5000-10000} microseconds is also required
+  to access \texttt{action hotkeys} due to the nature of the keyboard driver.
+
+  If the boot chime is configured (see audio configuration options) then at the expense
+  of slower startup, an even longer delay of half to one second (\texttt{500000-1000000})
+  may be used to create behaviour similar to a real Mac, where the chime itself can be used
+  as a signal for when hotkeys can be pressed. The boot chime is inevitably later in the boot
+  sequence in OpenCore than on Apple hardware, due to the fact that non-native drivers
+  have to be loaded and connected first. Configuring the boot chime and adding this longer
+  additional delay can also be useful in systems where fast boot time and/or slow monitor signal
+  synchronisation may cause the boot logo not to be shown at all on some boots or reboots.
+
+\item
+  \texttt{Timeout}\\
+  \textbf{Type}: \texttt{plist\ integer}, 32 bit\\
+  \textbf{Failsafe}: \texttt{0}\\
+  \textbf{Description}: Timeout in seconds in the OpenCore picker before
+  automatic booting of the default boot entry. Set to \texttt{0} to disable.
 
 \end{enumerate}
 
@@ -4161,6 +4176,110 @@ nvram 4D1FDA02-38C7-4A6A-9CC6-4BCCA8B30102:boot-log |
 
 \end{enumerate}
 
+\subsection{Entry Properties}\label{miscentryprops}
+
+\begin{enumerate}
+
+\item
+  \texttt{Arguments}\\
+  \textbf{Type}: \texttt{plist\ string}\\
+  \textbf{Failsafe}: Empty\\
+  \textbf{Description}: Arbitrary ASCII string used as boot arguments (load options)
+  of the specified entry.
+
+\item
+  \texttt{Auxiliary}\\
+  \textbf{Type}: \texttt{plist\ boolean}\\
+  \textbf{Failsafe}: \texttt{false}\\
+  \textbf{Description}: Set to \texttt{true} to hide this entry
+  when \texttt{HideAuxiliary} is also set to \texttt{true}.
+  Press the \texttt{Spacebar} key to enter ``Extended Mode'' and display the entry when hidden.
+
+\item
+  \texttt{Comment}\\
+  \textbf{Type}: \texttt{plist\ string}\\
+  \textbf{Failsafe}: Empty\\
+  \textbf{Description}: Arbitrary ASCII string used to provide a human readable
+  reference for the entry. Whether this value is used is implementation defined.
+
+\item
+  \texttt{Enabled}\\
+  \textbf{Type}: \texttt{plist\ boolean}\\
+  \textbf{Failsafe}: \texttt{false}\\
+  \textbf{Description}: Set to \texttt{true} activate this entry.
+
+\item
+  \texttt{Flavour}\\
+  \textbf{Type}: \texttt{plist\ string}\\
+  \textbf{Failsafe}: \texttt{Auto}\\
+  \textbf{Description}: Specify the content flavour for this entry.
+  See \hyperref[oc-attr-use-flavour-icon]{\texttt{OC\_ATTR\_USE\_FLAVOUR\_ICON}} flag for documentation.
+
+\item
+  \texttt{FullNvramAccess}\\
+  \textbf{Type}: \texttt{plist\ boolean}\\
+  \textbf{Failsafe}: \texttt{false}\\
+  \textbf{Description}: Disable \texttt{OpenRuntime} NVRAM protection during usage of a tool.
+
+  This disables all of the NVRAM protections provided by
+  \texttt{OpenRuntime.efi}, during the time a tool is in use. It should
+  normally be avoided, but may be required for instance if a tool needs
+  to access NVRAM directly without the redirections put in place by
+  \texttt{RequestBootVarRouting}.
+
+  \emph{Note}: This option is only valid for \texttt{Tools} and cannot be
+  specified for \texttt{Entries} (is always \texttt{false}).
+
+\item
+  \texttt{Name}\\
+  \textbf{Type}: \texttt{plist\ string}\\
+  \textbf{Failsafe}: Empty\\
+  \textbf{Description}: Human readable entry name displayed in the OpenCore picker.
+
+\item
+  \texttt{Path}\\
+  \textbf{Type}: \texttt{plist\ string}\\
+  \textbf{Failsafe}: Empty\\
+  \textbf{Description}: Entry location depending on entry type.
+
+  \begin{itemize}
+  \tightlist
+  \item \texttt{Entries} specify external boot options, and therefore take device
+  paths in the \texttt{Path} key. Care should be exercised as these values are not checked.
+  Example: \texttt{PciRoot(0x0)/Pci(0x1,0x1)/.../\textbackslash EFI\textbackslash COOL.EFI}
+  \item \texttt{Tools} specify internal boot options, which are part of the bootloader
+  vault, and therefore take file paths relative to the \texttt{OC/Tools} directory.
+  Example: \texttt{OpenShell.efi}.
+  \end{itemize}
+
+\item
+  \texttt{RealPath}\\
+  \textbf{Type}: \texttt{plist\ boolean}\\
+  \textbf{Failsafe}: \texttt{false}\\
+  \textbf{Description}: Pass full path to the tool when launching.
+
+  This should typically be disabled as passing the tool directory may be unsafe with
+  tools that accidentally attempt to access files without checking their integrity.
+  Reasons to enable this property may include cases where tools cannot work
+  without external files or may need them for enhanced functionality such as
+  \texttt{memtest86} (for logging and configuration), or \texttt{Shell} (for
+  automatic script execution).
+
+  \emph{Note}: This option is only valid for \texttt{Tools} and cannot be
+  specified for \texttt{Entries} (is always \texttt{true}).
+
+\item
+  \texttt{TextMode}\\
+  \textbf{Type}: \texttt{plist\ boolean}\\
+  \textbf{Failsafe}: \texttt{false}\\
+  \textbf{Description}: Run the entry in text mode instead of graphics mode.
+
+  This setting may be beneficial for some older tools that require text output
+  as all the tools are launched in graphics mode by default. Refer to the
+  \hyperref[uefioutputprops]{Output Properties} section below for information on text modes.
+
+\end{enumerate}
+
 \subsection{Security Properties}\label{miscsecurityprops}
 
 \begin{enumerate}
@@ -4371,85 +4490,6 @@ nvram 4D1FDA02-38C7-4A6A-9CC6-4BCCA8B30102:oem-board   # SMBIOS Type2 ProductNam
   \textbf{Failsafe}: empty\\
   \textbf{Description}: Password salt used when \texttt{EnablePassword} is set.
 
-\item \label{securevaulting}
-  \texttt{Vault}\\
-  \textbf{Type}: \texttt{plist\ string}\\
-  \textbf{Failsafe}: \texttt{Secure}\\
-  \textbf{Description}: Enables the OpenCore vaulting mechanism.
-
-  Valid values:
-
-  \begin{itemize}
-  \tightlist
-  \item \texttt{Optional} --- require nothing, no vault is enforced, insecure.
-  \item \texttt{Basic} --- require \texttt{vault.plist} file present
-  in \texttt{OC} directory. This provides basic filesystem integrity
-  verification and may protect from unintentional filesystem corruption.
-  \item \texttt{Secure} --- require \texttt{vault.sig} signature file for
-  \texttt{vault.plist} in \texttt{OC} directory. This includes \texttt{Basic}
-  integrity checking but also attempts to build a trusted bootchain.
-  \end{itemize}
-
-  The \texttt{vault.plist} file should contain SHA-256 hashes for all files used by OpenCore.
-  The presence of this file is highly recommended to ensure that unintentional file modifications
-  (including filesystem corruption) do not go unnoticed. To create this file automatically, use the
-  \href{https://github.com/acidanthera/OpenCorePkg/tree/master/Utilities/CreateVault}{\texttt{create\_vault.sh}}
-  script. Notwithstanding the underlying file system, the path names and cases between \texttt{config.plist}
-  and \texttt{vault.plist} must match.
-
-  The \texttt{vault.sig} file should contain a raw 256 byte RSA-2048 signature from a SHA-256
-  hash of \texttt{vault.plist}. The signature is verified against the public key embedded
-  into \texttt{OpenCore.efi}.
-
-  To embed the public key, either one of the following should be performed:
-
-  \begin{itemize}
-  \tightlist
-  \item Provide public key during the \texttt{OpenCore.efi} compilation in
-  \href{https://github.com/acidanthera/OpenCorePkg/blob/master/Platform/OpenCore/OpenCoreVault.c}{\texttt{OpenCoreVault.c}} file.
-  \item Binary patch \texttt{OpenCore.efi} replacing zeroes with the public key
-  between \texttt{=BEGIN OC VAULT=} and \texttt{==END OC VAULT==} ASCII markers.
-  \end{itemize}
-
-  The RSA public key 520 byte format description can be found in Chromium OS documentation.
-  To convert the public key from X.509 certificate or from PEM file use
-  \href{https://github.com/acidanthera/OpenCorePkg/tree/master/Utilities/CreateVault}{RsaTool}.
-
-
-  The complete set of commands to:
-
-  \begin{itemize}
-  \tightlist
-  \item Create \texttt{vault.plist}.
-  \item Create a new RSA key (always do this to avoid loading old configuration).
-  \item Embed RSA key into \texttt{OpenCore.efi}.
-  \item Create \texttt{vault.sig}.
-  \end{itemize}
-
-  Can look as follows:
-\begin{lstlisting}[label=createvault, style=ocbash]
-cd /Volumes/EFI/EFI/OC
-/path/to/create_vault.sh .
-/path/to/RsaTool -sign vault.plist vault.sig vault.pub
-off=$(($(strings -a -t d OpenCore.efi | grep "=BEGIN OC VAULT=" | cut -f1 -d' ')+16))
-dd of=OpenCore.efi if=vault.pub bs=1 seek=$off count=528 conv=notrunc
-rm vault.pub
-\end{lstlisting}
-
-  \emph{Note 1}: While it may appear obvious, an external
-  method is required to verify \texttt{OpenCore.efi} and \texttt{BOOTx64.efi} for
-  secure boot path. For this, it is recommended to enable UEFI SecureBoot
-  using a custom certificate and to sign \texttt{OpenCore.efi} and \texttt{BOOTx64.efi}
-  with a custom key. More details on customising secure boot on modern firmware
-  can be found in the \href{https://habr.com/post/273497/}{Taming UEFI SecureBoot}
-  paper (in Russian).
-
-  \emph{Note 2}:  Regardless of this option, \texttt{vault.plist} is always used when
-  present, and both \texttt{vault.plist} and \texttt{vault.sig} are used and required
-  when a public key is embedded into \texttt{OpenCore.efi}, and errors will abort the
-  boot process in either case. Setting this option allows OpenCore to warn the user if
-  the configuration is not as required to achieve an expected higher security level.
-
 \item
   \texttt{ScanPolicy}\\
   \textbf{Type}: \texttt{plist\ integer}, 32 bit\\
@@ -4635,11 +4675,91 @@ rm vault.pub
   For more details on how to configure Apple Secure Boot with UEFI Secure Boot,
   refer to the \hyperref[uefisecureboot]{UEFI Secure Boot} section.
 
+\item \label{securevaulting}
+  \texttt{Vault}\\
+  \textbf{Type}: \texttt{plist\ string}\\
+  \textbf{Failsafe}: \texttt{Secure}\\
+  \textbf{Description}: Enables the OpenCore vaulting mechanism.
+
+  Valid values:
+
+  \begin{itemize}
+  \tightlist
+  \item \texttt{Optional} --- require nothing, no vault is enforced, insecure.
+  \item \texttt{Basic} --- require \texttt{vault.plist} file present
+  in \texttt{OC} directory. This provides basic filesystem integrity
+  verification and may protect from unintentional filesystem corruption.
+  \item \texttt{Secure} --- require \texttt{vault.sig} signature file for
+  \texttt{vault.plist} in \texttt{OC} directory. This includes \texttt{Basic}
+  integrity checking but also attempts to build a trusted bootchain.
+  \end{itemize}
+
+  The \texttt{vault.plist} file should contain SHA-256 hashes for all files used by OpenCore.
+  The presence of this file is highly recommended to ensure that unintentional file modifications
+  (including filesystem corruption) do not go unnoticed. To create this file automatically, use the
+  \href{https://github.com/acidanthera/OpenCorePkg/tree/master/Utilities/CreateVault}{\texttt{create\_vault.sh}}
+  script. Notwithstanding the underlying file system, the path names and cases between \texttt{config.plist}
+  and \texttt{vault.plist} must match.
+
+  The \texttt{vault.sig} file should contain a raw 256 byte RSA-2048 signature from a SHA-256
+  hash of \texttt{vault.plist}. The signature is verified against the public key embedded
+  into \texttt{OpenCore.efi}.
+
+  To embed the public key, either one of the following should be performed:
+
+  \begin{itemize}
+  \tightlist
+  \item Provide public key during the \texttt{OpenCore.efi} compilation in
+  \href{https://github.com/acidanthera/OpenCorePkg/blob/master/Platform/OpenCore/OpenCoreVault.c}{\texttt{OpenCoreVault.c}} file.
+  \item Binary patch \texttt{OpenCore.efi} replacing zeroes with the public key
+  between \texttt{=BEGIN OC VAULT=} and \texttt{==END OC VAULT==} ASCII markers.
+  \end{itemize}
+
+  The RSA public key 520 byte format description can be found in Chromium OS documentation.
+  To convert the public key from X.509 certificate or from PEM file use
+  \href{https://github.com/acidanthera/OpenCorePkg/tree/master/Utilities/CreateVault}{RsaTool}.
+
+
+  The complete set of commands to:
+
+  \begin{itemize}
+  \tightlist
+  \item Create \texttt{vault.plist}.
+  \item Create a new RSA key (always do this to avoid loading old configuration).
+  \item Embed RSA key into \texttt{OpenCore.efi}.
+  \item Create \texttt{vault.sig}.
+  \end{itemize}
+
+  Can look as follows:
+\begin{lstlisting}[label=createvault, style=ocbash]
+cd /Volumes/EFI/EFI/OC
+/path/to/create_vault.sh .
+/path/to/RsaTool -sign vault.plist vault.sig vault.pub
+off=$(($(strings -a -t d OpenCore.efi | grep "=BEGIN OC VAULT=" | cut -f1 -d' ')+16))
+dd of=OpenCore.efi if=vault.pub bs=1 seek=$off count=528 conv=notrunc
+rm vault.pub
+\end{lstlisting}
+
+  \emph{Note 1}: While it may appear obvious, an external
+  method is required to verify \texttt{OpenCore.efi} and \texttt{BOOTx64.efi} for
+  secure boot path. For this, it is recommended to enable UEFI SecureBoot
+  using a custom certificate and to sign \texttt{OpenCore.efi} and \texttt{BOOTx64.efi}
+  with a custom key. More details on customising secure boot on modern firmware
+  can be found in the \href{https://habr.com/post/273497/}{Taming UEFI SecureBoot}
+  paper (in Russian).
+
+  \emph{Note 2}:  Regardless of this option, \texttt{vault.plist} is always used when
+  present, and both \texttt{vault.plist} and \texttt{vault.sig} are used and required
+  when a public key is embedded into \texttt{OpenCore.efi}, and errors will abort the
+  boot process in either case. Setting this option allows OpenCore to warn the user if
+  the configuration is not as required to achieve an expected higher security level.
+
 \end{enumerate}
 
 \subsection{Serial Properties}\label{miscserialprops}
 
 \begin{enumerate}
+
 \item
   \texttt{Custom}\\
   \textbf{Type}: \texttt{plist\ dict}\\
@@ -4674,6 +4794,7 @@ rm vault.pub
 \subsubsection{Serial Custom Properties}\label{miscserialcustprops}
 
 \begin{enumerate}
+
 \item
   \texttt{BaudRate}\\
   \textbf{Type}: \texttt{plist\ integer}\\
@@ -4791,109 +4912,6 @@ rm vault.pub
 
 \end{enumerate}
 
-\subsection{Entry Properties}\label{miscentryprops}
-
-\begin{enumerate}
-\item
-  \texttt{Arguments}\\
-  \textbf{Type}: \texttt{plist\ string}\\
-  \textbf{Failsafe}: Empty\\
-  \textbf{Description}: Arbitrary ASCII string used as boot arguments (load options)
-  of the specified entry.
-
-\item
-  \texttt{Auxiliary}\\
-  \textbf{Type}: \texttt{plist\ boolean}\\
-  \textbf{Failsafe}: \texttt{false}\\
-  \textbf{Description}: Set to \texttt{true} to hide this entry
-  when \texttt{HideAuxiliary} is also set to \texttt{true}.
-  Press the \texttt{Spacebar} key to enter ``Extended Mode'' and display the entry when hidden.
-
-\item
-  \texttt{Comment}\\
-  \textbf{Type}: \texttt{plist\ string}\\
-  \textbf{Failsafe}: Empty\\
-  \textbf{Description}: Arbitrary ASCII string used to provide a human readable
-  reference for the entry. Whether this value is used is implementation defined.
-
-\item
-  \texttt{Enabled}\\
-  \textbf{Type}: \texttt{plist\ boolean}\\
-  \textbf{Failsafe}: \texttt{false}\\
-  \textbf{Description}: Set to \texttt{true} activate this entry.
-
-\item
-  \texttt{Flavour}\\
-  \textbf{Type}: \texttt{plist\ string}\\
-  \textbf{Failsafe}: \texttt{Auto}\\
-  \textbf{Description}: Specify the content flavour for this entry.
-  See \hyperref[oc-attr-use-flavour-icon]{\texttt{OC\_ATTR\_USE\_FLAVOUR\_ICON}} flag for documentation.
-
-  \item
-  \texttt{FullNvramAccess}\\
-  \textbf{Type}: \texttt{plist\ boolean}\\
-  \textbf{Failsafe}: \texttt{false}\\
-  \textbf{Description}: Disable \texttt{OpenRuntime} NVRAM protection during usage of a tool.
-
-  This disables all of the NVRAM protections provided by
-  \texttt{OpenRuntime.efi}, during the time a tool is in use. It should
-  normally be avoided, but may be required for instance if a tool needs
-  to access NVRAM directly without the redirections put in place by
-  \texttt{RequestBootVarRouting}.
-
-  \emph{Note}: This option is only valid for \texttt{Tools} and cannot be
-  specified for \texttt{Entries} (is always \texttt{false}).
-
-\item
-  \texttt{Name}\\
-  \textbf{Type}: \texttt{plist\ string}\\
-  \textbf{Failsafe}: Empty\\
-  \textbf{Description}: Human readable entry name displayed in the OpenCore picker.
-
-\item
-  \texttt{Path}\\
-  \textbf{Type}: \texttt{plist\ string}\\
-  \textbf{Failsafe}: Empty\\
-  \textbf{Description}: Entry location depending on entry type.
-
-  \begin{itemize}
-  \tightlist
-  \item \texttt{Entries} specify external boot options, and therefore take device
-  paths in the \texttt{Path} key. Care should be exercised as these values are not checked.
-  Example: \texttt{PciRoot(0x0)/Pci(0x1,0x1)/.../\textbackslash EFI\textbackslash COOL.EFI}
-  \item \texttt{Tools} specify internal boot options, which are part of the bootloader
-  vault, and therefore take file paths relative to the \texttt{OC/Tools} directory.
-  Example: \texttt{OpenShell.efi}.
-  \end{itemize}
-
-\item
-  \texttt{RealPath}\\
-  \textbf{Type}: \texttt{plist\ boolean}\\
-  \textbf{Failsafe}: \texttt{false}\\
-  \textbf{Description}: Pass full path to the tool when launching.
-
-  This should typically be disabled as passing the tool directory may be unsafe with
-  tools that accidentally attempt to access files without checking their integrity.
-  Reasons to enable this property may include cases where tools cannot work
-  without external files or may need them for enhanced functionality such as
-  \texttt{memtest86} (for logging and configuration), or \texttt{Shell} (for
-  automatic script execution).
-
-  \emph{Note}: This option is only valid for \texttt{Tools} and cannot be
-  specified for \texttt{Entries} (is always \texttt{true}).
-
-\item
-  \texttt{TextMode}\\
-  \textbf{Type}: \texttt{plist\ boolean}\\
-  \textbf{Failsafe}: \texttt{false}\\
-  \textbf{Description}: Run the entry in text mode instead of graphics mode.
-
-  This setting may be beneficial for some older tools that require text output
-  as all the tools are launched in graphics mode by default. Refer to the
-  \hyperref[uefioutputprops]{Output Properties} section below for information on text modes.
-
-\end{enumerate}
-
 \section{NVRAM}\label{nvram}
 
 \subsection{Introduction}\label{nvramintro}
@@ -4951,6 +4969,7 @@ limitations that should be considered for certain use cases.
 \subsection{Properties}\label{nvramprops}
 
 \begin{enumerate}
+
 \item
   \texttt{Add}\\
   \textbf{Type}: \texttt{plist\ dict}\\
@@ -5110,17 +5129,17 @@ improvements:
   It is recommended not to set this variable, which may speedup system startup. Setting to
   \texttt{full} is equivalent to not setting the variable and \texttt{none} disables
   FireWire security.
- \item
+\item
   \texttt{4D1EDE05-38C7-4A6A-9CC6-4BCCA8B38C14:UIScale}
   \break
   One-byte data defining \texttt{boot.efi} user interface scaling. Should be \textbf{01} for normal
   screens and \textbf{02} for HiDPI screens.
- \item
+\item
   \texttt{7C436110-AB2A-4BBB-A880-FE41995C9F82:ForceDisplayRotationInEFI}
   \break
   32-bit integer defining display rotation. Can be \textbf{0} for no rotation
   or any of \texttt{90}, \texttt{180}, \texttt{270} for matching rotation in degrees.
- \item
+\item
   \texttt{4D1EDE05-38C7-4A6A-9CC6-4BCCA8B38C14:DefaultBackgroundColor}
   \break
   Four-byte \texttt{BGRA} data defining \texttt{boot.efi} user interface background colour.
@@ -5305,8 +5324,7 @@ troubleshooting:
   Specify sources of kexts which will be approved regardless of SIP \texttt{CSR\_ALLOW\_UNAPPROVED\_KEXTS} value.\\
   Example contents:\\
   \texttt{<dict><key>kext-allowed-teams</key><array><string>\{DEVELOPER-TEAM-ID\}</string></array></dict>\%00}
-\item
-  \texttt{7C436110-AB2A-4BBB-A880-FE41995C9F82:efiboot-perf-record}
+\item \texttt{7C436110-AB2A-4BBB-A880-FE41995C9F82:efiboot-perf-record}
   \break
   Enable performance log saving in \texttt{boot.efi}. Performance log is saved to physical
   memory and is pointed to by the \texttt{efiboot-perf-record-data} and \texttt{efiboot-perf-record-size}
@@ -5343,7 +5361,7 @@ troubleshooting:
   (and potentially on the specific amplifier within the codec). This value
   is capped by macOS to the \texttt{MaximumBootBeepVolume} AppleHDA layout
   value, to avoid over-loud audio playback in the firmware.
-  \item
+\item
   \texttt{7C436110-AB2A-4BBB-A880-FE41995C9F82:SystemAudioVolumeDB}
   \break
   Current system audio volume level in decibels (dB).  8-bit signed integer.
@@ -5424,6 +5442,7 @@ from \href{https://github.com/acidanthera/dmidecode/releases}{Acidanthera/dmidec
 \subsection{Properties}\label{platforminfoprops}
 
 \begin{enumerate}
+
 \item
   \texttt{Automatic}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
@@ -5456,6 +5475,42 @@ from \href{https://github.com/acidanthera/dmidecode/releases}{Acidanthera/dmidec
   configuration in SMBIOS, and is only active when \texttt{UpdateSMBIOS}
   is set to \texttt{true}.
 
+\item
+  \texttt{DataHub}\\
+  \textbf{Type}: \texttt{plist\ dictionary}\\
+  \textbf{Description}: Update Data Hub fields in non-\texttt{Automatic} mode.
+
+  \emph{Note}: This section is ignored and may be removed when
+  \texttt{Automatic} is \texttt{true}.
+
+\item
+  \texttt{Generic}\\
+  \textbf{Type}: \texttt{plist\ dictionary}\\
+  \textbf{Description}: Update all fields in \texttt{Automatic} mode.
+
+  \emph{Note}: This section is ignored but may not be removed when
+  \texttt{Automatic} is \texttt{false}.
+\item
+  \texttt{Memory}\\
+  \textbf{Type}: \texttt{plist\ dictionary}\\
+  \textbf{Description}: Define custom memory configuration.
+
+  \emph{Note}: This section is ignored and may be removed when
+  \texttt{CustomMemory} is \texttt{false}.
+\item
+  \texttt{PlatformNVRAM}\\
+  \textbf{Type}: \texttt{plist\ dictionary}\\
+  \textbf{Description}: Update platform NVRAM fields in non-\texttt{Automatic} mode.
+
+  \emph{Note}: This section is ignored and may be removed when
+  \texttt{Automatic} is \texttt{true}.
+\item
+  \texttt{SMBIOS}\\
+  \textbf{Type}: \texttt{plist\ dictionary}\\
+  \textbf{Description}: Update SMBIOS fields in non-\texttt{Automatic} mode.
+
+  \emph{Note}: This section is ignored and may be removed when
+  \texttt{Automatic} is \texttt{true}.
 \item
   \texttt{UpdateDataHub}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
@@ -5569,195 +5624,27 @@ from \href{https://github.com/acidanthera/dmidecode/releases}{Acidanthera/dmidec
   as they are not standardised and are added by Apple. Unlike SMBIOS, they are
   always stored in the \texttt{Big Endian} format.
 
-\item
-  \texttt{Generic}\\
-  \textbf{Type}: \texttt{plist\ dictionary}\\
-  \textbf{Description}: Update all fields in \texttt{Automatic} mode.
-
-  \emph{Note}: This section is ignored but may not be removed when
-  \texttt{Automatic} is \texttt{false}.
-\item
-  \texttt{DataHub}\\
-  \textbf{Type}: \texttt{plist\ dictionary}\\
-  \textbf{Description}: Update Data Hub fields in non-\texttt{Automatic} mode.
-
-  \emph{Note}: This section is ignored and may be removed when
-  \texttt{Automatic} is \texttt{true}.
-\item
-  \texttt{Memory}\\
-  \textbf{Type}: \texttt{plist\ dictionary}\\
-  \textbf{Description}: Define custom memory configuration.
-
-  \emph{Note}: This section is ignored and may be removed when
-  \texttt{CustomMemory} is \texttt{false}.
-\item
-  \texttt{PlatformNVRAM}\\
-  \textbf{Type}: \texttt{plist\ dictionary}\\
-  \textbf{Description}: Update platform NVRAM fields in non-\texttt{Automatic} mode.
-
-  \emph{Note}: This section is ignored and may be removed when
-  \texttt{Automatic} is \texttt{true}.
-\item
-  \texttt{SMBIOS}\\
-  \textbf{Type}: \texttt{plist\ dictionary}\\
-  \textbf{Description}: Update SMBIOS fields in non-\texttt{Automatic} mode.
-
-  \emph{Note}: This section is ignored and may be removed when
-  \texttt{Automatic} is \texttt{true}.
-\end{enumerate}
-
-\subsection{Generic Properties}\label{platforminfogeneric}
-
-\begin{enumerate}
-\item
-  \texttt{SpoofVendor}\\
-  \textbf{Type}: \texttt{plist\ boolean}\\
-  \textbf{Failsafe}: \texttt{false}\\
-  \textbf{Description}: Sets SMBIOS vendor fields to \texttt{Acidanthera}.
-
-  It can be dangerous to use ``Apple'' in SMBIOS vendor fields for reasons outlined in the
-  \texttt{SystemManufacturer} description. However, certain firmware may not provide
-  valid values otherwise, which could obstruct the operation of some software.
-
-\item
-  \texttt{AdviseFeatures}\\
-  \textbf{Type}: \texttt{plist\ boolean}\\
-  \textbf{Failsafe}: \texttt{false}\\
-  \textbf{Description}: Updates \texttt{FirmwareFeatures} with supported bits.
-
-  Added bits to \texttt{FirmwareFeatures}:
-
-  \begin{itemize}
-    \item \texttt{FW\_FEATURE\_SUPPORTS\_CSM\_LEGACY\_MODE} (\texttt{0x1})
-    - Without this bit, it is not possible to reboot to Windows installed on
-      a drive with an EFI partition that is not the first partition on the disk.
-    \item \texttt{FW\_FEATURE\_SUPPORTS\_UEFI\_WINDOWS\_BOOT} (\texttt{0x20000000})
-    - Without this bit, it is not possible to reboot to Windows installed on
-      a drive with an EFI partition that is the first partition on the disk.
-    \item \texttt{FW\_FEATURE\_SUPPORTS\_APFS} (\texttt{0x00080000})
-    - Without this bit, it is not possible to install macOS on an APFS disk.
-    \item \texttt{FW\_FEATURE\_SUPPORTS\_LARGE\_BASESYSTEM} (\texttt{0x800000000})
-    - Without this bit, it is not possible to install macOS versions with large
-      BaseSystem images, such as macOS 12.
-  \end{itemize}
-
-  \emph{Note}: On most newer firmwares these bits are already set, the option
-  may be necessary when "upgrading" the firmware with new features.
-
-\item
-  \texttt{MaxBIOSVersion}\\
-  \textbf{Type}: \texttt{plist\ boolean}\\
-  \textbf{Failsafe}: \texttt{false}\\
-  \textbf{Description}: Sets \texttt{BIOSVersion} to \texttt{9999.999.999.999.999}, recommended for legacy
-  Macs when using \texttt{Automatic} PlatformInfo, to avoid BIOS updates in unofficially supported macOS
-  versions.
-
-\item
-  \texttt{SystemMemoryStatus}\\
-  \textbf{Type}: \texttt{plist\ string}\\
-  \textbf{Failsafe}: \texttt{Auto}\\
-  \textbf{Description}: Indicates whether system memory is upgradable in \texttt{PlatformFeature}.
-  This controls the visibility of the Memory tab in ``About This Mac''.
-
-  Valid values:
-
-  \begin{itemize}
-    \tightlist
-    \item \texttt{Auto} --- use the original \texttt{PlatformFeature} value.
-    \item \texttt{Upgradable} --- explicitly unset \texttt{PT\_FEATURE\_HAS\_SOLDERED\_SYSTEM\_MEMORY}
-    (\texttt{0x2}) in \texttt{PlatformFeature}.
-    \item \texttt{Soldered} --- explicitly set \texttt{PT\_FEATURE\_HAS\_SOLDERED\_SYSTEM\_MEMORY}
-    (\texttt{0x2}) in \texttt{PlatformFeature}.
-  \end{itemize}
-
-  \emph{Note}: On certain Mac models, such as the \texttt{MacBookPro10,x} and any \texttt{MacBookAir},
-  SPMemoryReporter.spreporter will ignore \texttt{PT\_FEATURE\_HAS\_SOLDERED\_SYSTEM\_MEMORY}
-  and assume that system memory is non-upgradable.
-
-\item
-  \texttt{ProcessorType}\\
-  \textbf{Type}: \texttt{plist\ integer}\\
-  \textbf{Failsafe}: \texttt{0} (Automatic)\\
-  \textbf{Description}: Refer to SMBIOS \texttt{ProcessorType}.
-\item
-  \texttt{SystemProductName}\\
-  \textbf{Type}: \texttt{plist\ string}\\
-  \textbf{Failsafe}: Empty (OEM specified or not installed)\\
-  \textbf{Description}: Refer to SMBIOS \texttt{SystemProductName}.
-\item
-  \texttt{SystemSerialNumber}\\
-  \textbf{Type}: \texttt{plist\ string}\\
-  \textbf{Failsafe}: Empty (OEM specified or not installed)\\
-  \textbf{Description}: Refer to SMBIOS \texttt{SystemSerialNumber}.
-
-  Specify special string value \texttt{OEM} to extract current value from NVRAM
-  (\texttt{SSN} variable) or SMBIOS and use it throughout the sections.
-  This feature can only be used on Mac-compatible firmware.
-\item
-  \texttt{SystemUUID}\\
-  \textbf{Type}: \texttt{plist\ string}, GUID\\
-  \textbf{Failsafe}: Empty (OEM specified or not installed)\\
-  \textbf{Description}: Refer to SMBIOS \texttt{SystemUUID}.
-
-  Specify special string value \texttt{OEM} to extract current value from NVRAM
-  (\texttt{system-id} variable) or SMBIOS and use it throughout the sections.
-  Since not every firmware implementation has valid (and unique) values, this
-  feature is not applicable to some setups, and may provide unexpected results.
-  It is highly recommended to specify the UUID explicitly. Refer to
-  \texttt{UseRawUuidEncoding} to determine how SMBIOS value is parsed.
-\item
-  \texttt{MLB}\\
-  \textbf{Type}: \texttt{plist\ string}\\
-  \textbf{Failsafe}: Empty (OEM specified or not installed)\\
-  \textbf{Description}: Refer to SMBIOS \texttt{BoardSerialNumber}.
-
-  Specify special string value \texttt{OEM} to extract current value from NVRAM
-  (\texttt{MLB} variable) or SMBIOS and use it throughout the sections.
-  This feature can only be used on Mac-compatible firmware.
-\item
-  \texttt{ROM}\\
-  \textbf{Type}: \texttt{plist\ multidata}, 6 bytes\\
-  \textbf{Failsafe}: Empty (OEM specified or not installed)\\
-  \textbf{Description}: Refer to
-  \texttt{4D1EDE05-38C7-4A6A-9CC6-4BCCA8B38C14:ROM}.
-
-  Specify special string value \texttt{OEM} to extract current value from NVRAM
-  (\texttt{ROM} variable) and use it throughout the sections.
-  This feature can only be used on Mac-compatible firmware.
-
 \end{enumerate}
 
 \subsection{DataHub Properties}\label{platforminfodatahub}
 
 \begin{enumerate}
+
 \item
-  \texttt{PlatformName}\\
-  \textbf{Type}: \texttt{plist\ string}\\
-  \textbf{Failsafe}: Empty (Not installed)\\
-  \textbf{Description}: Sets \texttt{name} in
-  \texttt{gEfiMiscSubClassGuid}. The value found on Macs is
-  \texttt{platform} in ASCII.
-\item
-  \texttt{SystemProductName}\\
-  \textbf{Type}: \texttt{plist\ string}\\
-  \textbf{Failsafe}: Empty (Not installed)\\
-  \textbf{Description}: Sets \texttt{Model} in
-  \texttt{gEfiMiscSubClassGuid}. The value found on Macs is equal to SMBIOS
-  \texttt{SystemProductName} in Unicode.
-\item
-  \texttt{SystemSerialNumber}\\
-  \textbf{Type}: \texttt{plist\ string}\\
-  \textbf{Failsafe}: Empty (Not installed)\\
-  \textbf{Description}: Sets \texttt{SystemSerialNumber} in
-  \texttt{gEfiMiscSubClassGuid}. The value found on Macs is equal to SMBIOS
-  \texttt{SystemSerialNumber} in Unicode.
-\item
-  \texttt{SystemUUID}\\
-  \textbf{Type}: \texttt{plist\ string}, GUID\\
-  \textbf{Failsafe}: Empty (Not installed)\\
-  \textbf{Description}: Sets \texttt{system-id} in
-  \texttt{gEfiMiscSubClassGuid}. The value found on Macs is equal to SMBIOS
-  \texttt{SystemUUID} (with swapped byte order).
+  \texttt{ARTFrequency}\\
+  \textbf{Type}: \texttt{plist\ integer}, 64-bit\\
+  \textbf{Failsafe}: \texttt{0} (Automatic)\\
+  \textbf{Description}: Sets \texttt{ARTFrequency} in
+  \texttt{gEfiProcessorSubClassGuid}.
+
+  This value contains CPU ART frequency, also known as crystal clock frequency.
+  Its existence is exclusive to the Skylake generation and newer. The value is specified
+  in Hz, and is normally 24 MHz for the client Intel segment, 25 MHz for the server Intel segment,
+  and 19.2 MHz for Intel Atom CPUs. macOS till 10.15 inclusive assumes 24 MHz by default.
+
+  \emph{Note}: On Intel Skylake X ART frequency may be a little less (approx. 0.25\%) than
+  24 or 25 MHz due to special EMI-reduction circuit as described in
+  \href{https://github.com/acidanthera/bugtracker/issues/448#issuecomment-524914166}{Acidanthera Bugtracker}.
 \item
   \texttt{BoardProduct}\\
   \textbf{Type}: \texttt{plist\ string}\\
@@ -5772,6 +5659,66 @@ from \href{https://github.com/acidanthera/dmidecode/releases}{Acidanthera/dmidec
   \textbf{Description}: Sets \texttt{board-rev} in
   \texttt{gEfiMiscSubClassGuid}. The value found on Macs seems to correspond
   to internal board revision (e.g. \texttt{01}).
+\item
+  \texttt{DevicePathsSupported}\\
+  \textbf{Type}: \texttt{plist\ integer}, 32-bit\\
+  \textbf{Failsafe}: \texttt{0} (Not installed)\\
+  \textbf{Description}: Sets \texttt{DevicePathsSupported} in
+  \texttt{gEfiMiscSubClassGuid}. Must be set to \texttt{1} for
+  AppleACPIPlatform.kext to append SATA device paths to
+  \texttt{Boot\#\#\#\#} and \texttt{efi-boot-device-data} variables.
+  Set to \texttt{1} on all modern Macs.
+\item
+  \texttt{FSBFrequency}\\
+  \textbf{Type}: \texttt{plist\ integer}, 64-bit\\
+  \textbf{Failsafe}: \texttt{0} (Automatic)\\
+  \textbf{Description}: Sets \texttt{FSBFrequency} in
+  \texttt{gEfiProcessorSubClassGuid}.
+
+  Sets CPU FSB frequency. This value equals to CPU nominal frequency divided
+  by CPU maximum bus ratio and is specified in Hz. Refer to
+  \texttt{MSR\_NEHALEM\_PLATFORM\_INFO}~(\texttt{CEh}) MSR value to determine
+  maximum bus ratio on modern Intel CPUs.
+
+  \emph{Note}: This value is not used on Skylake and newer but is still provided
+  to follow suit.
+\item
+  \texttt{InitialTSC}\\
+  \textbf{Type}: \texttt{plist\ integer}, 64-bit\\
+  \textbf{Failsafe}: \texttt{0}\\
+  \textbf{Description}: Sets \texttt{InitialTSC} in
+  \texttt{gEfiProcessorSubClassGuid}. Sets initial TSC value, normally 0.
+\item
+  \texttt{PlatformName}\\
+  \textbf{Type}: \texttt{plist\ string}\\
+  \textbf{Failsafe}: Empty (Not installed)\\
+  \textbf{Description}: Sets \texttt{name} in
+  \texttt{gEfiMiscSubClassGuid}. The value found on Macs is
+  \texttt{platform} in ASCII.
+\item
+  \texttt{SmcBranch}\\
+  \textbf{Type}: \texttt{plist\ data}, 8 bytes\\
+  \textbf{Failsafe}: Empty (Not installed)\\
+  \textbf{Description}: Sets \texttt{RBr} in
+  \texttt{gEfiMiscSubClassGuid}. Custom property read by
+  \texttt{VirtualSMC} or \texttt{FakeSMC} to generate SMC \texttt{RBr}
+  key.
+\item
+  \texttt{SmcPlatform}\\
+  \textbf{Type}: \texttt{plist\ data}, 8 bytes\\
+  \textbf{Failsafe}: Empty (Not installed)\\
+  \textbf{Description}: Sets \texttt{RPlt} in
+  \texttt{gEfiMiscSubClassGuid}. Custom property read by
+  \texttt{VirtualSMC} or \texttt{FakeSMC} to generate SMC \texttt{RPlt}
+  key.
+\item
+  \texttt{SmcRevision}\\
+  \textbf{Type}: \texttt{plist\ data}, 6 bytes\\
+  \textbf{Failsafe}: Empty (Not installed)\\
+  \textbf{Description}: Sets \texttt{REV} in
+  \texttt{gEfiMiscSubClassGuid}. Custom property read by
+  \texttt{VirtualSMC} or \texttt{FakeSMC} to generate SMC \texttt{REV}
+  key.
 \item
   \texttt{StartupPowerEvents}\\
   \textbf{Type}: \texttt{plist\ integer}, 64-bit\\
@@ -5827,78 +5774,156 @@ from \href{https://github.com/acidanthera/dmidecode/releases}{Acidanthera/dmidec
     event (Same as \texttt{PRSTS} bit 15)
   \end{itemize}
 \item
-  \texttt{InitialTSC}\\
-  \textbf{Type}: \texttt{plist\ integer}, 64-bit\\
-  \textbf{Failsafe}: \texttt{0}\\
-  \textbf{Description}: Sets \texttt{InitialTSC} in
-  \texttt{gEfiProcessorSubClassGuid}. Sets initial TSC value, normally 0.
+  \texttt{SystemProductName}\\
+  \textbf{Type}: \texttt{plist\ string}\\
+  \textbf{Failsafe}: Empty (Not installed)\\
+  \textbf{Description}: Sets \texttt{Model} in
+  \texttt{gEfiMiscSubClassGuid}. The value found on Macs is equal to SMBIOS
+  \texttt{SystemProductName} in Unicode.
 \item
-  \texttt{FSBFrequency}\\
-  \textbf{Type}: \texttt{plist\ integer}, 64-bit\\
+  \texttt{SystemSerialNumber}\\
+  \textbf{Type}: \texttt{plist\ string}\\
+  \textbf{Failsafe}: Empty (Not installed)\\
+  \textbf{Description}: Sets \texttt{SystemSerialNumber} in
+  \texttt{gEfiMiscSubClassGuid}. The value found on Macs is equal to SMBIOS
+  \texttt{SystemSerialNumber} in Unicode.
+\item
+  \texttt{SystemUUID}\\
+  \textbf{Type}: \texttt{plist\ string}, GUID\\
+  \textbf{Failsafe}: Empty (Not installed)\\
+  \textbf{Description}: Sets \texttt{system-id} in
+  \texttt{gEfiMiscSubClassGuid}. The value found on Macs is equal to SMBIOS
+  \texttt{SystemUUID} (with swapped byte order).
+\end{enumerate}
+
+\subsection{Generic Properties}\label{platforminfogeneric}
+
+\begin{enumerate}
+
+\item
+  \texttt{AdviseFeatures}\\
+  \textbf{Type}: \texttt{plist\ boolean}\\
+  \textbf{Failsafe}: \texttt{false}\\
+  \textbf{Description}: Updates \texttt{FirmwareFeatures} with supported bits.
+
+  Added bits to \texttt{FirmwareFeatures}:
+
+  \begin{itemize}
+    \item \texttt{FW\_FEATURE\_SUPPORTS\_CSM\_LEGACY\_MODE} (\texttt{0x1})
+    - Without this bit, it is not possible to reboot to Windows installed on
+      a drive with an EFI partition that is not the first partition on the disk.
+    \item \texttt{FW\_FEATURE\_SUPPORTS\_UEFI\_WINDOWS\_BOOT} (\texttt{0x20000000})
+    - Without this bit, it is not possible to reboot to Windows installed on
+      a drive with an EFI partition that is the first partition on the disk.
+    \item \texttt{FW\_FEATURE\_SUPPORTS\_APFS} (\texttt{0x00080000})
+    - Without this bit, it is not possible to install macOS on an APFS disk.
+    \item \texttt{FW\_FEATURE\_SUPPORTS\_LARGE\_BASESYSTEM} (\texttt{0x800000000})
+    - Without this bit, it is not possible to install macOS versions with large
+      BaseSystem images, such as macOS 12.
+  \end{itemize}
+
+  \emph{Note}: On most newer firmwares these bits are already set, the option
+  may be necessary when "upgrading" the firmware with new features.
+
+\item
+  \texttt{MLB}\\
+  \textbf{Type}: \texttt{plist\ string}\\
+  \textbf{Failsafe}: Empty (OEM specified or not installed)\\
+  \textbf{Description}: Refer to SMBIOS \texttt{BoardSerialNumber}.
+
+  Specify special string value \texttt{OEM} to extract current value from NVRAM
+  (\texttt{MLB} variable) or SMBIOS and use it throughout the sections.
+  This feature can only be used on Mac-compatible firmware.
+
+\item
+  \texttt{MaxBIOSVersion}\\
+  \textbf{Type}: \texttt{plist\ boolean}\\
+  \textbf{Failsafe}: \texttt{false}\\
+  \textbf{Description}: Sets \texttt{BIOSVersion} to \texttt{9999.999.999.999.999}, recommended for legacy
+  Macs when using \texttt{Automatic} PlatformInfo, to avoid BIOS updates in unofficially supported macOS
+  versions.
+
+\item
+  \texttt{ProcessorType}\\
+  \textbf{Type}: \texttt{plist\ integer}\\
   \textbf{Failsafe}: \texttt{0} (Automatic)\\
-  \textbf{Description}: Sets \texttt{FSBFrequency} in
-  \texttt{gEfiProcessorSubClassGuid}.
+  \textbf{Description}: Refer to SMBIOS \texttt{ProcessorType}.
 
-  Sets CPU FSB frequency. This value equals to CPU nominal frequency divided
-  by CPU maximum bus ratio and is specified in Hz. Refer to
-  \texttt{MSR\_NEHALEM\_PLATFORM\_INFO}~(\texttt{CEh}) MSR value to determine
-  maximum bus ratio on modern Intel CPUs.
+\item
+  \texttt{ROM}\\
+  \textbf{Type}: \texttt{plist\ multidata}, 6 bytes\\
+  \textbf{Failsafe}: Empty (OEM specified or not installed)\\
+  \textbf{Description}: Refer to
+  \texttt{4D1EDE05-38C7-4A6A-9CC6-4BCCA8B38C14:ROM}.
 
-  \emph{Note}: This value is not used on Skylake and newer but is still provided
-  to follow suit.
-\item
-  \texttt{ARTFrequency}\\
-  \textbf{Type}: \texttt{plist\ integer}, 64-bit\\
-  \textbf{Failsafe}: \texttt{0} (Automatic)\\
-  \textbf{Description}: Sets \texttt{ARTFrequency} in
-  \texttt{gEfiProcessorSubClassGuid}.
+  Specify special string value \texttt{OEM} to extract current value from NVRAM
+  (\texttt{ROM} variable) and use it throughout the sections.
+  This feature can only be used on Mac-compatible firmware.
 
-  This value contains CPU ART frequency, also known as crystal clock frequency.
-  Its existence is exclusive to the Skylake generation and newer. The value is specified
-  in Hz, and is normally 24 MHz for the client Intel segment, 25 MHz for the server Intel segment,
-  and 19.2 MHz for Intel Atom CPUs. macOS till 10.15 inclusive assumes 24 MHz by default.
+\item
+  \texttt{SpoofVendor}\\
+  \textbf{Type}: \texttt{plist\ boolean}\\
+  \textbf{Failsafe}: \texttt{false}\\
+  \textbf{Description}: Sets SMBIOS vendor fields to \texttt{Acidanthera}.
 
-  \emph{Note}: On Intel Skylake X ART frequency may be a little less (approx. 0.25\%) than
-  24 or 25 MHz due to special EMI-reduction circuit as described in
-  \href{https://github.com/acidanthera/bugtracker/issues/448#issuecomment-524914166}{Acidanthera Bugtracker}.
+  It can be dangerous to use ``Apple'' in SMBIOS vendor fields for reasons outlined in the
+  \texttt{SystemManufacturer} description. However, certain firmware may not provide
+  valid values otherwise, which could obstruct the operation of some software.
+
 \item
-  \texttt{DevicePathsSupported}\\
-  \textbf{Type}: \texttt{plist\ integer}, 32-bit\\
-  \textbf{Failsafe}: \texttt{0} (Not installed)\\
-  \textbf{Description}: Sets \texttt{DevicePathsSupported} in
-  \texttt{gEfiMiscSubClassGuid}. Must be set to \texttt{1} for
-  AppleACPIPlatform.kext to append SATA device paths to
-  \texttt{Boot\#\#\#\#} and \texttt{efi-boot-device-data} variables.
-  Set to \texttt{1} on all modern Macs.
+  \texttt{SystemMemoryStatus}\\
+  \textbf{Type}: \texttt{plist\ string}\\
+  \textbf{Failsafe}: \texttt{Auto}\\
+  \textbf{Description}: Indicates whether system memory is upgradable in \texttt{PlatformFeature}.
+  This controls the visibility of the Memory tab in ``About This Mac''.
+
+  Valid values:
+
+  \begin{itemize}
+    \tightlist
+    \item \texttt{Auto} --- use the original \texttt{PlatformFeature} value.
+    \item \texttt{Upgradable} --- explicitly unset \texttt{PT\_FEATURE\_HAS\_SOLDERED\_SYSTEM\_MEMORY}
+    (\texttt{0x2}) in \texttt{PlatformFeature}.
+    \item \texttt{Soldered} --- explicitly set \texttt{PT\_FEATURE\_HAS\_SOLDERED\_SYSTEM\_MEMORY}
+    (\texttt{0x2}) in \texttt{PlatformFeature}.
+  \end{itemize}
+
+  \emph{Note}: On certain Mac models, such as the \texttt{MacBookPro10,x} and any \texttt{MacBookAir},
+  SPMemoryReporter.spreporter will ignore \texttt{PT\_FEATURE\_HAS\_SOLDERED\_SYSTEM\_MEMORY}
+  and assume that system memory is non-upgradable.
+
 \item
-  \texttt{SmcRevision}\\
-  \textbf{Type}: \texttt{plist\ data}, 6 bytes\\
-  \textbf{Failsafe}: Empty (Not installed)\\
-  \textbf{Description}: Sets \texttt{REV} in
-  \texttt{gEfiMiscSubClassGuid}. Custom property read by
-  \texttt{VirtualSMC} or \texttt{FakeSMC} to generate SMC \texttt{REV}
-  key.
+  \texttt{SystemProductName}\\
+  \textbf{Type}: \texttt{plist\ string}\\
+  \textbf{Failsafe}: Empty (OEM specified or not installed)\\
+  \textbf{Description}: Refer to SMBIOS \texttt{SystemProductName}.
 \item
-  \texttt{SmcBranch}\\
-  \textbf{Type}: \texttt{plist\ data}, 8 bytes\\
-  \textbf{Failsafe}: Empty (Not installed)\\
-  \textbf{Description}: Sets \texttt{RBr} in
-  \texttt{gEfiMiscSubClassGuid}. Custom property read by
-  \texttt{VirtualSMC} or \texttt{FakeSMC} to generate SMC \texttt{RBr}
-  key.
+  \texttt{SystemSerialNumber}\\
+  \textbf{Type}: \texttt{plist\ string}\\
+  \textbf{Failsafe}: Empty (OEM specified or not installed)\\
+  \textbf{Description}: Refer to SMBIOS \texttt{SystemSerialNumber}.
+
+  Specify special string value \texttt{OEM} to extract current value from NVRAM
+  (\texttt{SSN} variable) or SMBIOS and use it throughout the sections.
+  This feature can only be used on Mac-compatible firmware.
 \item
-  \texttt{SmcPlatform}\\
-  \textbf{Type}: \texttt{plist\ data}, 8 bytes\\
-  \textbf{Failsafe}: Empty (Not installed)\\
-  \textbf{Description}: Sets \texttt{RPlt} in
-  \texttt{gEfiMiscSubClassGuid}. Custom property read by
-  \texttt{VirtualSMC} or \texttt{FakeSMC} to generate SMC \texttt{RPlt}
-  key.
+  \texttt{SystemUUID}\\
+  \textbf{Type}: \texttt{plist\ string}, GUID\\
+  \textbf{Failsafe}: Empty (OEM specified or not installed)\\
+  \textbf{Description}: Refer to SMBIOS \texttt{SystemUUID}.
+
+  Specify special string value \texttt{OEM} to extract current value from NVRAM
+  (\texttt{system-id} variable) or SMBIOS and use it throughout the sections.
+  Since not every firmware implementation has valid (and unique) values, this
+  feature is not applicable to some setups, and may provide unexpected results.
+  It is highly recommended to specify the UUID explicitly. Refer to
+  \texttt{UseRawUuidEncoding} to determine how SMBIOS value is parsed.
 \end{enumerate}
 
 \subsection{Memory Properties}\label{platforminfomemory}
 
 \begin{enumerate}
+
 \item
   \texttt{DataWidth}\\
   \textbf{Type}: \texttt{plist\ integer}, 16-bit\\
@@ -6057,6 +6082,7 @@ from \href{https://github.com/acidanthera/dmidecode/releases}{Acidanthera/dmidec
 \subsubsection{Memory Device Properties}\label{platforminfomemorydevice}
 
 \begin{enumerate}
+
 \item
   \texttt{AssetTag}\\
   \textbf{Type}: \texttt{plist\ string}\\
@@ -6137,28 +6163,13 @@ from \href{https://github.com/acidanthera/dmidecode/releases}{Acidanthera/dmidec
 \subsection{PlatformNVRAM Properties}\label{platforminfonvram}
 
 \begin{enumerate}
+
 \item
   \texttt{BID}\\
   \textbf{Type}: \texttt{plist\ string}\\
   \textbf{Failsafe}: Empty (Not installed)\\
   \textbf{Description}: Specifies the value of NVRAM variable
   \texttt{4D1EDE05-38C7-4A6A-9CC6-4BCCA8B38C14:HW\_BID}.
-
-\item
-  \texttt{ROM}\\
-  \textbf{Type}: \texttt{plist\ data}, 6 bytes\\
-  \textbf{Failsafe}: Empty (Not installed)\\
-  \textbf{Description}: Specifies the values of NVRAM variables
-  \texttt{4D1EDE05-38C7-4A6A-9CC6-4BCCA8B38C14:HW\_ROM} and
-  \texttt{4D1EDE05-38C7-4A6A-9CC6-4BCCA8B38C14:ROM}.
-
-\item
-  \texttt{MLB}\\
-  \textbf{Type}: \texttt{plist\ string}\\
-  \textbf{Failsafe}: Empty (Not installed)\\
-  \textbf{Description}: Specifies the values of NVRAM variables
-  \texttt{4D1EDE05-38C7-4A6A-9CC6-4BCCA8B38C14:HW\_MLB} and
-  \texttt{4D1EDE05-38C7-4A6A-9CC6-4BCCA8B38C14:MLB}.
 
 \item
   \texttt{FirmwareFeatures}\\
@@ -6185,6 +6196,22 @@ from \href{https://github.com/acidanthera/dmidecode/releases}{Acidanthera/dmidec
   \end{itemize}
 
 \item
+  \texttt{MLB}\\
+  \textbf{Type}: \texttt{plist\ string}\\
+  \textbf{Failsafe}: Empty (Not installed)\\
+  \textbf{Description}: Specifies the values of NVRAM variables
+  \texttt{4D1EDE05-38C7-4A6A-9CC6-4BCCA8B38C14:HW\_MLB} and
+  \texttt{4D1EDE05-38C7-4A6A-9CC6-4BCCA8B38C14:MLB}.
+
+\item
+  \texttt{ROM}\\
+  \textbf{Type}: \texttt{plist\ data}, 6 bytes\\
+  \textbf{Failsafe}: Empty (Not installed)\\
+  \textbf{Description}: Specifies the values of NVRAM variables
+  \texttt{4D1EDE05-38C7-4A6A-9CC6-4BCCA8B38C14:HW\_ROM} and
+  \texttt{4D1EDE05-38C7-4A6A-9CC6-4BCCA8B38C14:ROM}.
+
+\item
   \texttt{SystemSerialNumber}\\
   \textbf{Type}: \texttt{plist\ string}\\
   \textbf{Failsafe}: Empty (Not installed)\\
@@ -6206,6 +6233,14 @@ from \href{https://github.com/acidanthera/dmidecode/releases}{Acidanthera/dmidec
 \subsection{SMBIOS Properties}\label{platforminfosmbios}
 
 \begin{enumerate}
+
+\item
+  \texttt{BIOSReleaseDate}\\
+  \textbf{Type}: \texttt{plist\ string}\\
+  \textbf{Failsafe}: Empty (OEM specified)\\
+  \textbf{SMBIOS}: BIOS Information (Type 0) --- BIOS Release Date\\
+  \textbf{Description}: Firmware release date. Similar to
+  \texttt{BIOSVersion}. May look like \texttt{12/08/2017}.
 \item
   \texttt{BIOSVendor}\\
   \textbf{Type}: \texttt{plist\ string}\\
@@ -6244,12 +6279,157 @@ Apple ROM Version
  UUID:         151B0907-10F9-3271-87CD-4BF5DBECACF5
 \end{verbatim}
 \item
-  \texttt{BIOSReleaseDate}\\
+  \texttt{BoardAssetTag}\\
   \textbf{Type}: \texttt{plist\ string}\\
   \textbf{Failsafe}: Empty (OEM specified)\\
-  \textbf{SMBIOS}: BIOS Information (Type 0) --- BIOS Release Date\\
-  \textbf{Description}: Firmware release date. Similar to
-  \texttt{BIOSVersion}. May look like \texttt{12/08/2017}.
+  \textbf{SMBIOS}: Baseboard (or Module) Information (Type 2) --- Asset
+  Tag\\
+  \textbf{Description}: Asset tag number. Varies, may be empty or
+  \texttt{Type2\ -\ Board\ Asset\ Tag}.
+\item
+  \texttt{BoardLocationInChassis}\\
+  \textbf{Type}: \texttt{plist\ string}\\
+  \textbf{Failsafe}: Empty (OEM specified)\\
+  \textbf{SMBIOS}: Baseboard (or Module) Information (Type 2) --- Location
+  in Chassis\\
+  \textbf{Description}: Varies, may be empty or
+  \texttt{Part\ Component}.
+\item
+  \texttt{BoardManufacturer}\\
+  \textbf{Type}: \texttt{plist\ string}\\
+  \textbf{Failsafe}: Empty (OEM specified)\\
+  \textbf{SMBIOS}: Baseboard (or Module) Information (Type 2) -
+  Manufacturer\\
+  \textbf{Description}: Board manufacturer. All rules of
+  \texttt{SystemManufacturer} do apply.
+\item
+  \texttt{BoardProduct}\\
+  \textbf{Type}: \texttt{plist\ string}\\
+  \textbf{Failsafe}: Empty (OEM specified)\\
+  \textbf{SMBIOS}: Baseboard (or Module) Information (Type 2) -
+  Product\\
+  \textbf{Description}: Mac Board ID (\texttt{board-id}). May look like
+  \texttt{Mac-7BA5B2D9E42DDD94} or \texttt{Mac-F221BEC8} in older
+  models.
+\item
+  \texttt{BoardSerialNumber}\\
+  \textbf{Type}: \texttt{plist\ string}\\
+  \textbf{Failsafe}: Empty (OEM specified)\\
+  \textbf{SMBIOS}: Baseboard (or Module) Information (Type 2) --- Serial
+  Number\\
+  \textbf{Description}: Board serial number in defined format. Known
+  formats are described in
+  \href{https://github.com/acidanthera/macserial/blob/master/FORMAT.md}{macserial}.
+\item
+  \texttt{BoardType}\\
+  \textbf{Type}: \texttt{plist\ integer}\\
+  \textbf{Failsafe}: \texttt{0} (OEM specified)\\
+  \textbf{SMBIOS}: Baseboard (or Module) Information (Type 2) --- Board
+  Type\\
+  \textbf{Description}: Either \texttt{0xA} (Motherboard (includes
+  processor, memory, and I/O) or \texttt{0xB} (Processor/Memory Module).
+  Refer to Table 15 -- Baseboard: Board Type for details.
+\item
+  \texttt{BoardVersion}\\
+  \textbf{Type}: \texttt{plist\ string}\\
+  \textbf{Failsafe}: Empty (OEM specified)\\
+  \textbf{SMBIOS}: Baseboard (or Module) Information (Type 2) -
+  Version\\
+  \textbf{Description}: Board version number. Varies, may match
+  \texttt{SystemProductName} or \texttt{SystemProductVersion}.
+\item
+  \texttt{ChassisAssetTag}\\
+  \textbf{Type}: \texttt{plist\ string}\\
+  \textbf{Failsafe}: Empty (OEM specified)\\
+  \textbf{SMBIOS}: System Enclosure or Chassis (Type 3) --- Asset Tag
+  Number\\
+  \textbf{Description}: Chassis type name. Varies, could be empty or
+  \texttt{MacBook-Aluminum}.
+\item
+  \texttt{ChassisManufacturer}\\
+  \textbf{Type}: \texttt{plist\ string}\\
+  \textbf{Failsafe}: Empty (OEM specified)\\
+  \textbf{SMBIOS}: System Enclosure or Chassis (Type 3) --- Manufacturer\\
+  \textbf{Description}: Board manufacturer. All rules of
+  \texttt{SystemManufacturer} do apply.
+\item
+  \texttt{ChassisSerialNumber}\\
+  \textbf{Type}: \texttt{plist\ string}\\
+  \textbf{Failsafe}: Empty (OEM specified)\\
+  \textbf{SMBIOS}: System Enclosure or Chassis (Type 3) --- Version\\
+  \textbf{Description}: Should match \texttt{SystemSerialNumber}.
+\item
+  \texttt{ChassisType}\\
+  \textbf{Type}: \texttt{plist\ integer}\\
+  \textbf{Failsafe}: \texttt{0} (OEM specified)\\
+  \textbf{SMBIOS}: System Enclosure or Chassis (Type 3) --- Type\\
+  \textbf{Description}: Chassis type. Refer to Table 17 --- System
+  Enclosure or Chassis Types for details.
+\item
+  \texttt{ChassisVersion}\\
+  \textbf{Type}: \texttt{plist\ string}\\
+  \textbf{Failsafe}: Empty (OEM specified)\\
+  \textbf{SMBIOS}: System Enclosure or Chassis (Type 3) --- Version\\
+  \textbf{Description}: Should match \texttt{BoardProduct}.
+\item
+  \texttt{FirmwareFeatures}\\
+  \textbf{Type}: \texttt{plist\ data}, 8 bytes\\
+  \textbf{Failsafe}: \texttt{0} (OEM specified on Apple hardware, 0 otherwise)\\
+  \textbf{SMBIOS}: \texttt{APPLE\_SMBIOS\_TABLE\_TYPE128} -
+  \texttt{FirmwareFeatures} and \texttt{ExtendedFirmwareFeatures}\\
+  \textbf{Description}: 64-bit firmware features bitmask. Refer to
+  \href{https://github.com/acidanthera/OpenCorePkg/blob/master/Include/Apple/IndustryStandard/AppleFeatures.h}{AppleFeatures.h}
+  for details. Lower 32 bits match \texttt{FirmwareFeatures}. Upper
+  64 bits match \texttt{ExtendedFirmwareFeatures}.
+\item
+  \texttt{FirmwareFeaturesMask}\\
+  \textbf{Type}: \texttt{plist\ data}, 8 bytes\\
+  \textbf{Failsafe}: \texttt{0} (OEM specified on Apple hardware, 0 otherwise)\\
+  \textbf{SMBIOS}: \texttt{APPLE\_SMBIOS\_TABLE\_TYPE128} -
+  \texttt{FirmwareFeaturesMask} and
+  \texttt{ExtendedFirmwareFeaturesMask}\\
+  \textbf{Description}: Supported bits of extended firmware features
+  bitmask. Refer to
+  \href{https://github.com/acidanthera/OpenCorePkg/blob/master/Include/Apple/IndustryStandard/AppleFeatures.h}{AppleFeatures.h}
+  for details. Lower 32 bits match \texttt{FirmwareFeaturesMask}.
+  Upper 64 bits match \texttt{ExtendedFirmwareFeaturesMask}.
+\item
+  \texttt{PlatformFeature}\\
+  \textbf{Type}: \texttt{plist\ integer}, 32-bit\\
+  \textbf{Failsafe}: \texttt{0xFFFFFFFF} (OEM specified on Apple hardware, do not provide the table otherwise)\\
+  \textbf{SMBIOS}: \texttt{APPLE\_SMBIOS\_TABLE\_TYPE133} -
+  \texttt{PlatformFeature}\\
+  \textbf{Description}: Platform features bitmask (Missing on older Macs). Refer to
+  \href{https://github.com/acidanthera/OpenCorePkg/blob/master/Include/Apple/IndustryStandard/AppleFeatures.h}{AppleFeatures.h} for details.
+\item
+  \texttt{ProcessorType}\\
+  \textbf{Type}: \texttt{plist\ integer}, 16-bit\\
+  \textbf{Failsafe}: \texttt{0} (Automatic)\\
+  \textbf{SMBIOS}: \texttt{APPLE\_SMBIOS\_TABLE\_TYPE131} -
+  \texttt{ProcessorType}\\
+  \textbf{Description}: Combined of Processor Major and Minor types.
+
+  Automatic value generation attempts to provide the most accurate value for
+  the currently installed CPU. When this fails, please raise an
+  \href{https://github.com/acidanthera/bugtracker/issues}{issue} and
+  provide \texttt{sysctl machdep.cpu} and
+  \href{https://github.com/acidanthera/dmidecode}{\texttt{dmidecode}} output.
+  For a full list of available values and their limitations (the value will
+  only apply if the CPU core count matches), refer to the Apple SMBIOS definitions header
+  \href{https://github.com/acidanthera/OpenCorePkg/blob/master/Include/Apple/IndustryStandard/AppleSmBios.h}{here}.
+\item
+  \texttt{SmcVersion}\\
+  \textbf{Type}: \texttt{plist\ data}, 16 bytes\\
+  \textbf{Failsafe}: All zero (OEM specified on Apple hardware, do not provide the table otherwise)\\
+  \textbf{SMBIOS}: \texttt{APPLE\_SMBIOS\_TABLE\_TYPE134} - \texttt{Version}\\
+  \textbf{Description}: ASCII string containing SMC version in upper case.
+  Missing on T2 based Macs.
+\item
+  \texttt{SystemFamily}\\
+  \textbf{Type}: \texttt{plist\ string}\\
+  \textbf{Failsafe}: Empty (OEM specified)\\
+  \textbf{SMBIOS}: System Information (Type 1) --- Family\\
+  \textbf{Description}: Family name. May look like \texttt{iMac\ Pro}.
 \item
   \texttt{SystemManufacturer}\\
   \textbf{Type}: \texttt{plist\ string}\\
@@ -6280,12 +6460,13 @@ Apple ROM Version
   to \texttt{MacPro6,1} data. The list of known products can be found in
   \texttt{AppleModels}.
 \item
-  \texttt{SystemVersion}\\
+  \texttt{SystemSKUNumber}\\
   \textbf{Type}: \texttt{plist\ string}\\
   \textbf{Failsafe}: Empty (OEM specified)\\
-  \textbf{SMBIOS}: System Information (Type 1) --- Version\\
-  \textbf{Description}: Product iteration version number. May look like
-  \texttt{1.1}.
+  \textbf{SMBIOS}: System Information (Type 1) --- SKU Number\\
+  \textbf{Description}: Mac Board ID (\texttt{board-id}). May look like
+  \texttt{Mac-7BA5B2D9E42DDD94} or \texttt{Mac-F221BEC8} in older
+  models. Sometimes it can be just empty.
 \item
   \texttt{SystemSerialNumber}\\
   \textbf{Type}: \texttt{plist\ string}\\
@@ -6303,165 +6484,12 @@ Apple ROM Version
   unique across both time and space. It requires no central registration
   process.
 \item
-  \texttt{SystemSKUNumber}\\
+  \texttt{SystemVersion}\\
   \textbf{Type}: \texttt{plist\ string}\\
   \textbf{Failsafe}: Empty (OEM specified)\\
-  \textbf{SMBIOS}: System Information (Type 1) --- SKU Number\\
-  \textbf{Description}: Mac Board ID (\texttt{board-id}). May look like
-  \texttt{Mac-7BA5B2D9E42DDD94} or \texttt{Mac-F221BEC8} in older
-  models. Sometimes it can be just empty.
-\item
-  \texttt{SystemFamily}\\
-  \textbf{Type}: \texttt{plist\ string}\\
-  \textbf{Failsafe}: Empty (OEM specified)\\
-  \textbf{SMBIOS}: System Information (Type 1) --- Family\\
-  \textbf{Description}: Family name. May look like \texttt{iMac\ Pro}.
-\item
-  \texttt{BoardManufacturer}\\
-  \textbf{Type}: \texttt{plist\ string}\\
-  \textbf{Failsafe}: Empty (OEM specified)\\
-  \textbf{SMBIOS}: Baseboard (or Module) Information (Type 2) -
-  Manufacturer\\
-  \textbf{Description}: Board manufacturer. All rules of
-  \texttt{SystemManufacturer} do apply.
-\item
-  \texttt{BoardProduct}\\
-  \textbf{Type}: \texttt{plist\ string}\\
-  \textbf{Failsafe}: Empty (OEM specified)\\
-  \textbf{SMBIOS}: Baseboard (or Module) Information (Type 2) -
-  Product\\
-  \textbf{Description}: Mac Board ID (\texttt{board-id}). May look like
-  \texttt{Mac-7BA5B2D9E42DDD94} or \texttt{Mac-F221BEC8} in older
-  models.
-\item
-  \texttt{BoardVersion}\\
-  \textbf{Type}: \texttt{plist\ string}\\
-  \textbf{Failsafe}: Empty (OEM specified)\\
-  \textbf{SMBIOS}: Baseboard (or Module) Information (Type 2) -
-  Version\\
-  \textbf{Description}: Board version number. Varies, may match
-  \texttt{SystemProductName} or \texttt{SystemProductVersion}.
-\item
-  \texttt{BoardSerialNumber}\\
-  \textbf{Type}: \texttt{plist\ string}\\
-  \textbf{Failsafe}: Empty (OEM specified)\\
-  \textbf{SMBIOS}: Baseboard (or Module) Information (Type 2) --- Serial
-  Number\\
-  \textbf{Description}: Board serial number in defined format. Known
-  formats are described in
-  \href{https://github.com/acidanthera/macserial/blob/master/FORMAT.md}{macserial}.
-\item
-  \texttt{BoardAssetTag}\\
-  \textbf{Type}: \texttt{plist\ string}\\
-  \textbf{Failsafe}: Empty (OEM specified)\\
-  \textbf{SMBIOS}: Baseboard (or Module) Information (Type 2) --- Asset
-  Tag\\
-  \textbf{Description}: Asset tag number. Varies, may be empty or
-  \texttt{Type2\ -\ Board\ Asset\ Tag}.
-\item
-  \texttt{BoardType}\\
-  \textbf{Type}: \texttt{plist\ integer}\\
-  \textbf{Failsafe}: \texttt{0} (OEM specified)\\
-  \textbf{SMBIOS}: Baseboard (or Module) Information (Type 2) --- Board
-  Type\\
-  \textbf{Description}: Either \texttt{0xA} (Motherboard (includes
-  processor, memory, and I/O) or \texttt{0xB} (Processor/Memory Module).
-  Refer to Table 15 -- Baseboard: Board Type for details.
-\item
-  \texttt{BoardLocationInChassis}\\
-  \textbf{Type}: \texttt{plist\ string}\\
-  \textbf{Failsafe}: Empty (OEM specified)\\
-  \textbf{SMBIOS}: Baseboard (or Module) Information (Type 2) --- Location
-  in Chassis\\
-  \textbf{Description}: Varies, may be empty or
-  \texttt{Part\ Component}.
-\item
-  \texttt{ChassisManufacturer}\\
-  \textbf{Type}: \texttt{plist\ string}\\
-  \textbf{Failsafe}: Empty (OEM specified)\\
-  \textbf{SMBIOS}: System Enclosure or Chassis (Type 3) --- Manufacturer\\
-  \textbf{Description}: Board manufacturer. All rules of
-  \texttt{SystemManufacturer} do apply.
-\item
-  \texttt{ChassisType}\\
-  \textbf{Type}: \texttt{plist\ integer}\\
-  \textbf{Failsafe}: \texttt{0} (OEM specified)\\
-  \textbf{SMBIOS}: System Enclosure or Chassis (Type 3) --- Type\\
-  \textbf{Description}: Chassis type. Refer to Table 17 --- System
-  Enclosure or Chassis Types for details.
-\item
-  \texttt{ChassisVersion}\\
-  \textbf{Type}: \texttt{plist\ string}\\
-  \textbf{Failsafe}: Empty (OEM specified)\\
-  \textbf{SMBIOS}: System Enclosure or Chassis (Type 3) --- Version\\
-  \textbf{Description}: Should match \texttt{BoardProduct}.
-\item
-  \texttt{ChassisSerialNumber}\\
-  \textbf{Type}: \texttt{plist\ string}\\
-  \textbf{Failsafe}: Empty (OEM specified)\\
-  \textbf{SMBIOS}: System Enclosure or Chassis (Type 3) --- Version\\
-  \textbf{Description}: Should match \texttt{SystemSerialNumber}.
-\item
-  \texttt{ChassisAssetTag}\\
-  \textbf{Type}: \texttt{plist\ string}\\
-  \textbf{Failsafe}: Empty (OEM specified)\\
-  \textbf{SMBIOS}: System Enclosure or Chassis (Type 3) --- Asset Tag
-  Number\\
-  \textbf{Description}: Chassis type name. Varies, could be empty or
-  \texttt{MacBook-Aluminum}.
-\item
-  \texttt{PlatformFeature}\\
-  \textbf{Type}: \texttt{plist\ integer}, 32-bit\\
-  \textbf{Failsafe}: \texttt{0xFFFFFFFF} (OEM specified on Apple hardware, do not provide the table otherwise)\\
-  \textbf{SMBIOS}: \texttt{APPLE\_SMBIOS\_TABLE\_TYPE133} -
-  \texttt{PlatformFeature}\\
-  \textbf{Description}: Platform features bitmask (Missing on older Macs). Refer to
-  \href{https://github.com/acidanthera/OpenCorePkg/blob/master/Include/Apple/IndustryStandard/AppleFeatures.h}{AppleFeatures.h} for details.
-\item
-  \texttt{SmcVersion}\\
-  \textbf{Type}: \texttt{plist\ data}, 16 bytes\\
-  \textbf{Failsafe}: All zero (OEM specified on Apple hardware, do not provide the table otherwise)\\
-  \textbf{SMBIOS}: \texttt{APPLE\_SMBIOS\_TABLE\_TYPE134} - \texttt{Version}\\
-  \textbf{Description}: ASCII string containing SMC version in upper case.
-  Missing on T2 based Macs.
-\item
-  \texttt{FirmwareFeatures}\\
-  \textbf{Type}: \texttt{plist\ data}, 8 bytes\\
-  \textbf{Failsafe}: \texttt{0} (OEM specified on Apple hardware, 0 otherwise)\\
-  \textbf{SMBIOS}: \texttt{APPLE\_SMBIOS\_TABLE\_TYPE128} -
-  \texttt{FirmwareFeatures} and \texttt{ExtendedFirmwareFeatures}\\
-  \textbf{Description}: 64-bit firmware features bitmask. Refer to
-  \href{https://github.com/acidanthera/OpenCorePkg/blob/master/Include/Apple/IndustryStandard/AppleFeatures.h}{AppleFeatures.h}
-  for details. Lower 32 bits match \texttt{FirmwareFeatures}. Upper
-  64 bits match \texttt{ExtendedFirmwareFeatures}.
-\item
-  \texttt{FirmwareFeaturesMask}\\
-  \textbf{Type}: \texttt{plist\ data}, 8 bytes\\
-  \textbf{Failsafe}: \texttt{0} (OEM specified on Apple hardware, 0 otherwise)\\
-  \textbf{SMBIOS}: \texttt{APPLE\_SMBIOS\_TABLE\_TYPE128} -
-  \texttt{FirmwareFeaturesMask} and
-  \texttt{ExtendedFirmwareFeaturesMask}\\
-  \textbf{Description}: Supported bits of extended firmware features
-  bitmask. Refer to
-  \href{https://github.com/acidanthera/OpenCorePkg/blob/master/Include/Apple/IndustryStandard/AppleFeatures.h}{AppleFeatures.h}
-  for details. Lower 32 bits match \texttt{FirmwareFeaturesMask}.
-  Upper 64 bits match \texttt{ExtendedFirmwareFeaturesMask}.
-\item
-  \texttt{ProcessorType}\\
-  \textbf{Type}: \texttt{plist\ integer}, 16-bit\\
-  \textbf{Failsafe}: \texttt{0} (Automatic)\\
-  \textbf{SMBIOS}: \texttt{APPLE\_SMBIOS\_TABLE\_TYPE131} -
-  \texttt{ProcessorType}\\
-  \textbf{Description}: Combined of Processor Major and Minor types.
-
-  Automatic value generation attempts to provide the most accurate value for
-  the currently installed CPU. When this fails, please raise an
-  \href{https://github.com/acidanthera/bugtracker/issues}{issue} and
-  provide \texttt{sysctl machdep.cpu} and
-  \href{https://github.com/acidanthera/dmidecode}{\texttt{dmidecode}} output.
-  For a full list of available values and their limitations (the value will
-  only apply if the CPU core count matches), refer to the Apple SMBIOS definitions header
-  \href{https://github.com/acidanthera/OpenCorePkg/blob/master/Include/Apple/IndustryStandard/AppleSmBios.h}{here}.
+  \textbf{SMBIOS}: System Information (Type 1) --- Version\\
+  \textbf{Description}: Product iteration version number. May look like
+  \texttt{1.1}.
 \end{enumerate}
 
 \section{UEFI}\label{uefi}
@@ -7413,6 +7441,7 @@ OpenCore is installed, in order for the \texttt{Launchd.command} script to work 
 \subsection{Properties}\label{uefiprops}
 
 \begin{enumerate}
+
 \item
   \texttt{APFS}\\
   \textbf{Type}: \texttt{plist\ dict}\\
@@ -7630,7 +7659,7 @@ OpenCore is installed, in order for the \texttt{Launchd.command} script to work 
 
 \begin{enumerate}
 
-  \item
+\item
   \texttt{AppleEvent}\\
   \textbf{Type}: \texttt{plist\ string}\\
   \textbf{Failsafe}: \texttt{Auto}\\
@@ -7675,6 +7704,30 @@ OpenCore is installed, in order for the \texttt{Launchd.command} script to work 
   \tightlist
   \item \texttt{true} --- The values of \texttt{KeyInitialDelay} and \texttt{KeySubsequentDelay} are used.
   \item \texttt{false} --- Apple default values of 500ms (\texttt{50}) and 50ms (\texttt{5}) are used.
+  \end{itemize}
+
+\item
+  \texttt{GraphicsInputMirroring}\\
+  \textbf{Type}: \texttt{plist\ boolean}\\
+  \textbf{Failsafe}: \texttt{false}\\
+  \textbf{Description}:
+  Apple’s own implementation of AppleEvent prevents keyboard input during graphics applications from appearing
+  on the basic console input stream.
+
+  With the default setting of \texttt{false}, OpenCore's builtin implementation of AppleEvent replicates this behaviour.
+
+  On non-Apple hardware this can stop keyboard input working in graphics-based applications such as Windows BitLocker
+  which use non-Apple key input methods.
+
+  The recommended setting on all hardware is \texttt{true}.
+
+  \emph{Note}: AppleEvent's default behaviour is intended to prevent unwanted queued keystrokes from appearing
+  after exiting graphics-based UEFI applications; this issue is already handled separately within OpenCore.
+
+  \begin{itemize}
+  \tightlist
+  \item \texttt{true} --- Allow keyboard input to reach graphics mode apps which are not using Apple input protocols.
+  \item \texttt{false} --- Prevent key input mirroring to non-Apple protocols when in graphics mode.
   \end{itemize}
 
 \item
@@ -7750,118 +7803,6 @@ OpenCore is installed, in order for the \texttt{Launchd.command} script to work 
     then increase \texttt{KeySubsequentDelay} by one or two more until this effect goes away.
   \end{itemize}
 
-  \item
-  \texttt{GraphicsInputMirroring}\\
-  \textbf{Type}: \texttt{plist\ boolean}\\
-  \textbf{Failsafe}: \texttt{false}\\
-  \textbf{Description}:
-  Apple’s own implementation of AppleEvent prevents keyboard input during graphics applications from appearing
-  on the basic console input stream.
-
-  With the default setting of \texttt{false}, OpenCore's builtin implementation of AppleEvent replicates this behaviour.
-
-  On non-Apple hardware this can stop keyboard input working in graphics-based applications such as Windows BitLocker
-  which use non-Apple key input methods.
-
-  The recommended setting on all hardware is \texttt{true}.
-
-  \emph{Note}: AppleEvent's default behaviour is intended to prevent unwanted queued keystrokes from appearing
-  after exiting graphics-based UEFI applications; this issue is already handled separately within OpenCore.
-
-  \begin{itemize}
-  \tightlist
-  \item \texttt{true} --- Allow keyboard input to reach graphics mode apps which are not using Apple input protocols.
-  \item \texttt{false} --- Prevent key input mirroring to non-Apple protocols when in graphics mode.
-  \end{itemize}
-
-  \item
-  \texttt{PointerPollMin}\\
-  \textbf{Type}: \texttt{plist\ integer}\\
-  \textbf{Failsafe}: \texttt{0}\\
-  \textbf{Description}: Configure minimal pointer polling period in ms.
-
-  This is the minimal period the OpenCore builtin AppleEvent driver polls
-  pointer devices (e.g. mice, trackpads) for motion events. The current
-  implementation defaults to 10 ms. Setting \texttt{0} leaves this
-  default unchanged.
-
-  \emph{Note}: The OEM Apple implementation uses a polling rate of 2 ms.
-
-  \item
-  \texttt{PointerPollMax}\\
-  \textbf{Type}: \texttt{plist\ integer}\\
-  \textbf{Failsafe}: \texttt{0}\\
-  \textbf{Description}: Configure maximum pointer polling period in ms.
-
-  This is the maximum period the OpenCore builtin AppleEvent driver polls
-  pointer devices (e.g. mice, trackpads) for motion events. The period
-  is increased up to this value as long as the devices do not respond
-  in time. The current implementation defaults to 80 ms. Setting
-  \texttt{0} leaves this default unchanged.
-
-  Certain trackpad drivers often found in Dell laptops can be very slow
-  to respond when no physical movement happens. This can affect
-  OpenCanopy and FileVault 2 user interface responsiveness and loading times.
-  Increasing the polling periods can reduce the impact.
-
-  \emph{Note}: The OEM Apple implementation uses a polling rate of 2 ms.
-
-  \item
-  \texttt{PointerPollMask}\\
-  \textbf{Type}: \texttt{plist\ integer, 32 bit}\\
-  \textbf{Failsafe}: \texttt{-1}\\
-  \textbf{Description}: Configure indices of polled pointers.
-
-  Selects pointer devices to poll for AppleEvent motion events.
-  \texttt{-1} implies all devices. A bit sum is used to determine
-  particular devices. E.g. to enable devices 0, 2, 3 the value
-  will be \texttt{1+4+8} (corresponding powers of two). A total
-  of 32 configurable devices is supported.
-
-  Certain pointer devices can be present in the firmware even when
-  no corresponding physical devices are available. These devices
-  usually are placeholders, aggregate devices, or proxies.
-  Gathering information from these devices may result in inaccurate
-  motion activity in the user interfaces and even cause performance
-  issues. Disabling such pointer devices is recommended for laptop
-  setups having issues of this kind.
-
-  The amount of pointer devices available in the system can be
-  found in the log. Refer to \texttt{Found N pointer devices} message
-  for more details.
-
-  \emph{Note}: Has no effect when using the OEM Apple implementation
-  (see \texttt{AppleEvent} setting).
-
-  \item
-  \texttt{PointerSpeedDiv}\\
-  \textbf{Type}: \texttt{plist\ integer}\\
-  \textbf{Failsafe}: \texttt{1}\\
-  \textbf{Description}: Configure pointer speed divisor in the OpenCore re-implementation
-  of the Apple Event protocol.
-  Has no effect when using the OEM Apple implementation (see \texttt{AppleEvent} setting).
-
-  Configures the divisor for pointer movements. The Apple OEM default value is \texttt{1}.
-  \texttt{0} is an invalid value for this option.
-
-  \emph{Note}: The recommended value for this option is \texttt{1}. This value may
-  optionally be modified in combination with \texttt{PointerSpeedMul}, according to user
-  preference, to achieve customised mouse movement scaling.
-
-\item
-  \texttt{PointerSpeedMul}\\
-  \textbf{Type}: \texttt{plist\ integer}\\
-  \textbf{Failsafe}: \texttt{1}\\
-  \textbf{Description}: Configure pointer speed multiplier in the OpenCore re-implementation
-  of the Apple Event protocol.
-  Has no effect when using the OEM Apple implementation (see \texttt{AppleEvent} setting).
-
-  Configures the multiplier for pointer movements. The Apple OEM default value is \texttt{1}.
-
-  \emph{Note}: The recommended value for this option is \texttt{1}. This value may
-  optionally be modified in combination with \texttt{PointerSpeedDiv}, according to user
-  preference, to achieve customised mouse movement scaling.
-
 \item
   \texttt{PointerDwellClickTimeout}\\
   \textbf{Type}: \texttt{plist\ integer}\\
@@ -7895,6 +7836,94 @@ OpenCore is installed, in order for the \texttt{Launchd.command} script to work 
   The radius is scaled by \texttt{UIScale}. When the pointer leaves this radius, the timeouts for \texttt{PointerDwellClickTimeout}
   and \texttt{PointerDwellDoubleClickTimeout} are reset and the new position is the centre
   for the new dwell-clicking tolerance radius.
+
+\item
+  \texttt{PointerPollMask}\\
+  \textbf{Type}: \texttt{plist\ integer, 32 bit}\\
+  \textbf{Failsafe}: \texttt{-1}\\
+  \textbf{Description}: Configure indices of polled pointers.
+
+  Selects pointer devices to poll for AppleEvent motion events.
+  \texttt{-1} implies all devices. A bit sum is used to determine
+  particular devices. E.g. to enable devices 0, 2, 3 the value
+  will be \texttt{1+4+8} (corresponding powers of two). A total
+  of 32 configurable devices is supported.
+
+  Certain pointer devices can be present in the firmware even when
+  no corresponding physical devices are available. These devices
+  usually are placeholders, aggregate devices, or proxies.
+  Gathering information from these devices may result in inaccurate
+  motion activity in the user interfaces and even cause performance
+  issues. Disabling such pointer devices is recommended for laptop
+  setups having issues of this kind.
+
+  The amount of pointer devices available in the system can be
+  found in the log. Refer to \texttt{Found N pointer devices} message
+  for more details.
+
+  \emph{Note}: Has no effect when using the OEM Apple implementation
+  (see \texttt{AppleEvent} setting).
+
+\item
+  \texttt{PointerPollMax}\\
+  \textbf{Type}: \texttt{plist\ integer}\\
+  \textbf{Failsafe}: \texttt{0}\\
+  \textbf{Description}: Configure maximum pointer polling period in ms.
+
+  This is the maximum period the OpenCore builtin AppleEvent driver polls
+  pointer devices (e.g. mice, trackpads) for motion events. The period
+  is increased up to this value as long as the devices do not respond
+  in time. The current implementation defaults to 80 ms. Setting
+  \texttt{0} leaves this default unchanged.
+
+  Certain trackpad drivers often found in Dell laptops can be very slow
+  to respond when no physical movement happens. This can affect
+  OpenCanopy and FileVault 2 user interface responsiveness and loading times.
+  Increasing the polling periods can reduce the impact.
+
+  \emph{Note}: The OEM Apple implementation uses a polling rate of 2 ms.
+
+\item
+  \texttt{PointerPollMin}\\
+  \textbf{Type}: \texttt{plist\ integer}\\
+  \textbf{Failsafe}: \texttt{0}\\
+  \textbf{Description}: Configure minimal pointer polling period in ms.
+
+  This is the minimal period the OpenCore builtin AppleEvent driver polls
+  pointer devices (e.g. mice, trackpads) for motion events. The current
+  implementation defaults to 10 ms. Setting \texttt{0} leaves this
+  default unchanged.
+
+  \emph{Note}: The OEM Apple implementation uses a polling rate of 2 ms.
+
+\item
+  \texttt{PointerSpeedDiv}\\
+  \textbf{Type}: \texttt{plist\ integer}\\
+  \textbf{Failsafe}: \texttt{1}\\
+  \textbf{Description}: Configure pointer speed divisor in the OpenCore re-implementation
+  of the Apple Event protocol.
+  Has no effect when using the OEM Apple implementation (see \texttt{AppleEvent} setting).
+
+  Configures the divisor for pointer movements. The Apple OEM default value is \texttt{1}.
+  \texttt{0} is an invalid value for this option.
+
+  \emph{Note}: The recommended value for this option is \texttt{1}. This value may
+  optionally be modified in combination with \texttt{PointerSpeedMul}, according to user
+  preference, to achieve customised mouse movement scaling.
+
+\item
+  \texttt{PointerSpeedMul}\\
+  \textbf{Type}: \texttt{plist\ integer}\\
+  \textbf{Failsafe}: \texttt{1}\\
+  \textbf{Description}: Configure pointer speed multiplier in the OpenCore re-implementation
+  of the Apple Event protocol.
+  Has no effect when using the OEM Apple implementation (see \texttt{AppleEvent} setting).
+
+  Configures the multiplier for pointer movements. The Apple OEM default value is \texttt{1}.
+
+  \emph{Note}: The recommended value for this option is \texttt{1}. This value may
+  optionally be modified in combination with \texttt{PointerSpeedDiv}, according to user
+  preference, to achieve customised mouse movement scaling.
 
 \end{enumerate}
 
@@ -7980,7 +8009,7 @@ OpenCore is installed, in order for the \texttt{Launchd.command} script to work 
   to try each available output channel one by one, by setting \texttt{AudioOutMask} to \texttt{1}, \texttt{2},
   \texttt{4}, etc., up to 2 \texttt{\^{}} \texttt{N - 1}, in order to work out which channel(s) produce sound.
 
-  \item
+\item
   \texttt{AudioSupport}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
@@ -7990,7 +8019,7 @@ OpenCore is installed, in order for the \texttt{Launchd.command} script to work 
   (\texttt{AudioOutMask}) dedicated audio ports of the specified codec (\texttt{AudioCodec}),
   located on the specified audio controller (\texttt{AudioDevice}).
 
-  \item
+\item
   \texttt{DisconnectHda}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
@@ -8003,7 +8032,7 @@ OpenCore is installed, in order for the \texttt{Launchd.command} script to work 
   \texttt{-{}-gpio-setup} driver argument which is dealt with in the
   \hyperref[uefiaudio]{AudioDxe} section.
 
-  \item
+\item
   \texttt{MaximumGain}\\
   \textbf{Type}: \texttt{plist\ integer}\\
   \textbf{Failsafe}: \texttt{-15}\\
@@ -8028,7 +8057,7 @@ OpenCore is installed, in order for the \texttt{Launchd.command} script to work 
   \emph{Note 3}: Digital audio output -- which does not have a volume slider in-OS -- ignores this and all other gain settings,
   only mute settings are relevant.
 
-  \item
+\item
   \texttt{MinimumAssistGain}\\
   \textbf{Type}: \texttt{plist\ integer}\\
   \textbf{Failsafe}: \texttt{-30}\\
@@ -8042,7 +8071,7 @@ OpenCore is installed, in order for the \texttt{Launchd.command} script to work 
 
   \emph{Note 2}: See \texttt{MaximumGain} for an explanation of decibel volume levels.
 
-  \item
+\item
   \texttt{MinimumAudibleGain}\\
   \textbf{Type}: \texttt{plist\ integer}\\
   \textbf{Failsafe}: \texttt{-128}\\
@@ -8112,6 +8141,13 @@ OpenCore is installed, in order for the \texttt{Launchd.command} script to work 
 \begin{enumerate}
 
 \item
+  \texttt{Arguments}\\
+  \textbf{Type}: \texttt{plist\ string}\\
+  \textbf{Failsafe}: Empty\\
+  \textbf{Description}: Some OpenCore plugins accept optional additional arguments
+  which may be specified as a string here.
+
+\item
   \texttt{Comment}\\
   \textbf{Type}: \texttt{plist\ string}\\
   \textbf{Failsafe}: Empty\\
@@ -8125,13 +8161,6 @@ OpenCore is installed, in order for the \texttt{Launchd.command} script to work 
   \textbf{Description}: If \texttt{false} this driver entry will be ignored.
 
 \item
-  \texttt{Path}\\
-  \textbf{Type}: \texttt{plist\ string}\\
-  \textbf{Failsafe}: Empty\\
-  \textbf{Description}: Path of file to be loaded as a UEFI driver
-  from \texttt{OC/Drivers} directory.
-
-\item
   \texttt{LoadEarly}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
@@ -8141,11 +8170,11 @@ OpenCore is installed, in order for the \texttt{Launchd.command} script to work 
   given driver and purpose.
 
 \item
-  \texttt{Arguments}\\
+  \texttt{Path}\\
   \textbf{Type}: \texttt{plist\ string}\\
   \textbf{Failsafe}: Empty\\
-  \textbf{Description}: Some OpenCore plugins accept optional additional arguments
-  which may be specified as a string here.
+  \textbf{Description}: Path of file to be loaded as a UEFI driver
+  from \texttt{OC/Drivers} directory.
 
 \end{enumerate}
 
@@ -8307,6 +8336,147 @@ OpenCore is installed, in order for the \texttt{Launchd.command} script to work 
 \begin{enumerate}
 
 \item
+  \texttt{ClearScreenOnModeSwitch}\\
+  \textbf{Type}: \texttt{plist\ boolean}\\
+  \textbf{Failsafe}: \texttt{false}\\
+  \textbf{Description}: Some types of firmware only clear part of the screen when switching
+  from graphics to text mode, leaving a fragment of previously drawn images visible.
+  This option fills the entire graphics screen with black colour before switching to
+  text mode.
+
+  \emph{Note}: This option only applies to \texttt{System} renderer.
+
+\item
+  \texttt{ConsoleFont}\\
+  \textbf{Type}: \texttt{plist\ string}\\
+  \textbf{Failsafe}: Empty (use OpenCore builtin console font)\\
+  \textbf{Description}: Specify the console font to use for OpenCore \texttt{Builtin} text renderer.
+
+  The font file must be located in \texttt{EFI/OC/Resources/Font/\{font-name\}.hex} and must
+  be 8x16 resolution. Various console fonts can be found online in either \texttt{.bdf} or
+  \texttt{.hex} format. \texttt{.bdf} can be converted to \texttt{.hex} format using \texttt{gbdfed}
+  (available for Linux or macOS).
+
+  There is often no need to change console font, the main use-case being to
+  provide an extended character set for those relatively rare EFI applications which
+  have multi-lingual support (e.g. \texttt{memtest86}).
+
+  The \href{https://github.com/acidanthera/OcBinaryData}{OcBinaryData repository} includes:
+  \begin{itemize}
+    \tightlist
+    \item \href{https://terminus-font.sourceforge.net/}{Terminus} --- A font with extensive character
+    support suitable for applications such as the above.
+    \item TerminusCore --- A lightly modified version of the Terminus font, making some glyphs
+    (\texttt{@KMRSTVWimrsw}) more similar to the free ISO Latin font used in XNU and OpenCore.
+  \end{itemize}
+
+  \texttt{Terminus} and \texttt{TerminusCore} are provided under the SIL Open Font License, Version 1.1.
+  Some additional GPL licensed fonts from the EPTO Fonts library, converted
+  to the required \texttt{.hex} format, can be found \href{https://github.com/mikebeaton/epto-fonts}{here}.
+
+  \emph{Note 1}: On many newer systems the \texttt{System} text renderer already provides a full
+  set of international characters, in which case this can be used without requiring the \texttt{Builtin}
+  renderer and a custom font.
+
+  \emph{Note 2}: This option only affects the \texttt{Builtin} text renderer and only takes effect from
+  the point at which the \texttt{Builtin} renderer is configured. When console output is visible before
+  this point, it is using the system console font.
+
+\item
+  \texttt{ConsoleMode}\\
+  \textbf{Type}: \texttt{plist\ string}\\
+  \textbf{Failsafe}: Empty (Maintain current console mode)\\
+  \textbf{Description}: Sets console output mode as specified
+  with the \texttt{WxH} (e.g. \texttt{80x24}) formatted string.
+
+  Set to \texttt{Max} to attempt using the largest available console mode.
+
+  \emph{Note}: This field is best left empty on most types of firmware.
+
+\item
+  \texttt{DirectGopRendering}\\
+  \textbf{Type}: \texttt{plist\ boolean}\\
+  \textbf{Failsafe}: \texttt{false}\\
+  \textbf{Description}: Use builtin graphics output protocol renderer for console.
+
+  On certain firmware, such as on the \texttt{MacPro5,1}, this may provide better
+  performance or fix rendering issues. However, this option is not recommended unless
+  there is an obvious benefit as it may result in issues such as slower scrolling.
+
+  This renderer fully supports \texttt{AppleEg2Info} protocol and will provide
+  screen rotation for all EFI applications. In order to provide seamless rotation
+  compatibility with \texttt{EfiBoot}, builtin \texttt{AppleFramebufferInfo} should
+  also be used, i.e. it may need to be overridden on Mac EFI.
+
+\item
+  \texttt{ForceResolution}\\
+  \textbf{Type}: \texttt{plist\ boolean}\\
+  \textbf{Failsafe}: \texttt{false}\\
+  \textbf{Description}: Forces \texttt{Resolution} to be set in cases where the desired
+  resolution is not available by default, such as on legacy Intel GMA and first
+  generation Intel HD Graphics (Ironlake/Arrandale). Setting \texttt{Resolution} to
+  \texttt{Max} will try to pull the largest available resolution from the connected
+  display's EDID.
+
+  \emph{Note}: This option depends on the \href{https://github.com/acidanthera/OpenCorePkg/blob/master/Include/Acidanthera/Protocol/OcForceResolution.h}{\texttt{OC\_FORCE\_RESOLUTION\_PROTOCOL}}
+  protocol being present. This protocol is currently only supported by \texttt{OpenDuetPkg}. The
+  \texttt{OpenDuetPkg} implementation currently only supports Intel iGPUs and certain ATI GPUs.
+
+\item
+  \texttt{GopBurstMode}\\
+  \textbf{Type}: \texttt{plist\ boolean}\\
+  \textbf{Failsafe}: \texttt{false}\\
+  \textbf{Description}: Enable write-combining (WC) caching for GOP memory, if system firmware has not
+  already enabled it.
+
+  Some older firmware (e.g. EFI-era Macs) fails to set write-combining caching (aka burst mode)
+  for GOP memory, even though the CPU supports it. Setting this can give a considerable
+  speed-up for GOP operations, especially on systems which require \texttt{DirectGopRendering}.
+
+  \emph{Note 1}: This quirk takes effect whether or not \texttt{DirectGopRendering} is set, and
+  in some cases may give a noticeable speed-up to GOP operations even when \texttt{DirectGopRendering}
+  is \texttt{false}.
+
+  \emph{Note 2}: On most systems from circa 2013 onwards, write-combining
+  caching is already applied by the firmware to GOP memory, in which case \texttt{GopBurstMode}
+  is unnecessary. On such systems enabling the quirk should normally be harmless, producing an
+  \texttt{OCC:} debug log entry indicating that burst mode is already started.
+
+  \emph{Note 3}: Some caution should be taken when enabling this quirk, as it has been observed
+  to cause hangs on a few systems. Since additional guards have been added to try to prevent this,
+  please log a bugtracker issue if such a system is found.
+
+\item
+  \texttt{GopPassThrough}\\
+  \textbf{Type}: \texttt{plist\ string}\\
+  \textbf{Failsafe}: \texttt{Disabled}\\
+  \textbf{Description}: Provide GOP protocol instances on top of UGA protocol instances.
+
+  This option provides the GOP protocol via a UGA-based proxy
+  for firmware that do not implement the protocol. The supported values
+  for the option are as follows:
+
+  \begin{itemize}
+    \tightlist
+    \item \texttt{Enabled} --- provide GOP for all UGA protocols.
+    \item \texttt{Apple} --- provide GOP for \texttt{AppleFramebufferInfo}-enabled protocols.
+    \item \texttt{Disabled} --- do not provide GOP.
+  \end{itemize}
+
+  \emph{Note}: This option requires \texttt{ProvideConsoleGop} to be enabled.
+
+\item
+  \texttt{IgnoreTextInGraphics}\\
+  \textbf{Type}: \texttt{plist\ boolean}\\
+  \textbf{Failsafe}: \texttt{false}\\
+  \textbf{Description}: Some types of firmware output text onscreen in both graphics and
+  text mode. This is typically unexpected as random text may appear over
+  graphical images and cause UI corruption. Setting this option to \texttt{true} will
+  discard all text output if console control is not in \texttt{Text} mode.
+
+  \emph{Note}: This option only applies to the \texttt{System} renderer.
+
+\item
   \texttt{InitialMode}\\
   \textbf{Type}: \texttt{plist\ string}\\
   \textbf{Failsafe}: \texttt{Auto}\\
@@ -8325,6 +8495,97 @@ OpenCore is installed, in order for the \texttt{Launchd.command} script to work 
   graphics to be drawn in any mode, and this is how the OpenCore \texttt{Builtin}
   renderer behaves. Since this is not required by the UEFI specification, behaviour
   of the system \texttt{ConsoleControl} protocol, when it exists, may vary.
+
+\item
+  \texttt{ProvideConsoleGop}\\
+  \textbf{Type}: \texttt{plist\ boolean}\\
+  \textbf{Failsafe}: \texttt{false}\\
+  \textbf{Description}: Ensure GOP (Graphics Output Protocol) on console handle.
+
+  macOS bootloader requires GOP or UGA (for 10.4 EfiBoot) to be present on console
+  handle, yet the exact location of the graphics protocol is not covered by the
+  UEFI specification. This option will ensure GOP and UGA, if present, are available
+  on the console handle.
+
+  \emph{Note}: This option will also replace incompatible implementations of GOP on the
+  console handle, as may be the case on the \texttt{MacPro5,1} when using modern GPUs.
+
+\item
+  \texttt{ReconnectGraphicsOnConnect}\\
+  \textbf{Type}: \texttt{plist\ boolean}\\
+  \textbf{Failsafe}: \texttt{false}\\
+  \textbf{Description}: Reconnect all graphics drivers during driver connection.
+
+  On certain firmware, it may be desireable to use an alternative graphics driver,
+  for example BiosVideo.efi, providing better screen resolution options on legacy
+  machines, or a driver supporting \texttt{ForceResolution}. This option attempts
+  to disconnect all currently connected graphics drivers before connecting newly
+  loaded drivers.
+
+  \emph{Note}: This option requires \texttt{ConnectDrivers} to be enabled.
+
+\item
+  \texttt{ReconnectOnResChange}\\
+  \textbf{Type}: \texttt{plist\ boolean}\\
+  \textbf{Failsafe}: \texttt{false}\\
+  \textbf{Description}: Reconnect console controllers after changing screen resolution.
+
+  On certain firmware, the controllers that produce the console protocols (simple text out)
+  must be reconnected when the screen resolution is changed via GOP. Otherwise, they will
+  not produce text based on the new resolution.
+
+  \emph{Note}: On several boards this logic may result in black screen when launching
+  OpenCore from Shell and thus it is optional. In versions prior to 0.5.2 this option
+  was mandatory and not configurable. Please do not use this unless required.
+
+\item
+  \texttt{ReplaceTabWithSpace}\\
+  \textbf{Type}: \texttt{plist\ boolean}\\
+  \textbf{Failsafe}: \texttt{false}\\
+  \textbf{Description}: Some types of firmware do not print tab characters or everything
+  that follows them, causing difficulties in using the UEFI Shell's builtin
+  text editor to edit property lists and other documents. This option makes the console
+  output spaces instead of tabs.
+
+  \emph{Note}: This option only applies to \texttt{System} renderer.
+
+\item
+  \texttt{Resolution}\\
+  \textbf{Type}: \texttt{plist\ string}\\
+  \textbf{Failsafe}: Empty (Maintain current screen resolution)\\
+  \textbf{Description}: Sets console output screen resolution.
+
+  \begin{itemize}
+  \tightlist
+  \item Set to \texttt{WxH@Bpp} (e.g. \texttt{1920x1080@32}) or \texttt{WxH}
+  (e.g. \texttt{1920x1080}) formatted string to request custom resolution
+  from GOP if available.
+  \item Set to \texttt{Max} to attempt using the largest
+  available screen resolution.
+  \end{itemize}
+
+  On HiDPI screens \texttt{APPLE\_VENDOR\_VARIABLE\_GUID} \texttt{UIScale}
+  NVRAM variable may need to be set to \texttt{02} to enable HiDPI scaling
+  in \texttt{Builtin} text renderer, FileVault 2 UEFI password interface,
+  and boot screen logo. Refer to the \hyperref[nvramvarsrec]{Recommended Variables}
+  section for details.
+
+  \emph{Note}: This will fail when console handle has no GOP protocol. When
+  the firmware does not provide it, it can be added with \texttt{ProvideConsoleGop}
+  set to \texttt{true}.
+
+\item
+  \texttt{SanitiseClearScreen}\\
+  \textbf{Type}: \texttt{plist\ boolean}\\
+  \textbf{Failsafe}: \texttt{false}\\
+  \textbf{Description}: Some types of firmware reset screen resolutions to a failsafe
+  value (such as \texttt{1024x768}) on the attempts to clear screen contents
+  when large display (e.g. 2K or 4K) is used. This option attempts to apply
+  a workaround.
+
+  \emph{Note}: This option only applies to the \texttt{System} renderer.
+   On all known affected systems, \texttt{ConsoleMode} must be set to
+   an empty string for this option to work.
 
 \item
   \texttt{TextRenderer}\\
@@ -8390,238 +8651,6 @@ OpenCore is installed, in order for the \texttt{Launchd.command} script to work 
   console output when using modern GPUs, and thus only \texttt{BuiltinGraphics}
   may work for them in such cases. NVIDIA GPUs may require additional
   \href{https://github.com/acidanthera/bugtracker/issues/1280}{firmware upgrades}.
-
-\item
-  \texttt{ConsoleFont}\\
-  \textbf{Type}: \texttt{plist\ string}\\
-  \textbf{Failsafe}: Empty (use OpenCore builtin console font)\\
-  \textbf{Description}: Specify the console font to use for OpenCore \texttt{Builtin} text renderer.
-
-  The font file must be located in \texttt{EFI/OC/Resources/Font/\{font-name\}.hex} and must
-  be 8x16 resolution. Various console fonts can be found online in either \texttt{.bdf} or
-  \texttt{.hex} format. \texttt{.bdf} can be converted to \texttt{.hex} format using \texttt{gbdfed}
-  (available for Linux or macOS).
-
-  There is often no need to change console font, the main use-case being to
-  provide an extended character set for those relatively rare EFI applications which
-  have multi-lingual support (e.g. \texttt{memtest86}).
-
-  The \href{https://github.com/acidanthera/OcBinaryData}{OcBinaryData repository} includes:
-  \begin{itemize}
-    \tightlist
-    \item \href{https://terminus-font.sourceforge.net/}{Terminus} --- A font with extensive character
-    support suitable for applications such as the above.
-    \item TerminusCore --- A lightly modified version of the Terminus font, making some glyphs
-    (\texttt{@KMRSTVWimrsw}) more similar to the free ISO Latin font used in XNU and OpenCore.
-  \end{itemize}
-
-  \texttt{Terminus} and \texttt{TerminusCore} are provided under the SIL Open Font License, Version 1.1.
-  Some additional GPL licensed fonts from the EPTO Fonts library, converted
-  to the required \texttt{.hex} format, can be found \href{https://github.com/mikebeaton/epto-fonts}{here}.
-
-  \emph{Note 1}: On many newer systems the \texttt{System} text renderer already provides a full
-  set of international characters, in which case this can be used without requiring the \texttt{Builtin}
-  renderer and a custom font.
-
-  \emph{Note 2}: This option only affects the \texttt{Builtin} text renderer and only takes effect from
-  the point at which the \texttt{Builtin} renderer is configured. When console output is visible before
-  this point, it is using the system console font.
-
-\item
-  \texttt{ConsoleMode}\\
-  \textbf{Type}: \texttt{plist\ string}\\
-  \textbf{Failsafe}: Empty (Maintain current console mode)\\
-  \textbf{Description}: Sets console output mode as specified
-  with the \texttt{WxH} (e.g. \texttt{80x24}) formatted string.
-
-  Set to \texttt{Max} to attempt using the largest available console mode.
-
-  \emph{Note}: This field is best left empty on most types of firmware.
-
-\item
-  \texttt{Resolution}\\
-  \textbf{Type}: \texttt{plist\ string}\\
-  \textbf{Failsafe}: Empty (Maintain current screen resolution)\\
-  \textbf{Description}: Sets console output screen resolution.
-
-  \begin{itemize}
-  \tightlist
-  \item Set to \texttt{WxH@Bpp} (e.g. \texttt{1920x1080@32}) or \texttt{WxH}
-  (e.g. \texttt{1920x1080}) formatted string to request custom resolution
-  from GOP if available.
-  \item Set to \texttt{Max} to attempt using the largest
-  available screen resolution.
-  \end{itemize}
-
-  On HiDPI screens \texttt{APPLE\_VENDOR\_VARIABLE\_GUID} \texttt{UIScale}
-  NVRAM variable may need to be set to \texttt{02} to enable HiDPI scaling
-  in \texttt{Builtin} text renderer, FileVault 2 UEFI password interface,
-  and boot screen logo. Refer to the \hyperref[nvramvarsrec]{Recommended Variables}
-  section for details.
-
-  \emph{Note}: This will fail when console handle has no GOP protocol. When
-  the firmware does not provide it, it can be added with \texttt{ProvideConsoleGop}
-  set to \texttt{true}.
-
-\item
-  \texttt{ForceResolution}\\
-  \textbf{Type}: \texttt{plist\ boolean}\\
-  \textbf{Failsafe}: \texttt{false}\\
-  \textbf{Description}: Forces \texttt{Resolution} to be set in cases where the desired
-  resolution is not available by default, such as on legacy Intel GMA and first
-  generation Intel HD Graphics (Ironlake/Arrandale). Setting \texttt{Resolution} to
-  \texttt{Max} will try to pull the largest available resolution from the connected
-  display's EDID.
-
-  \emph{Note}: This option depends on the \href{https://github.com/acidanthera/OpenCorePkg/blob/master/Include/Acidanthera/Protocol/OcForceResolution.h}{\texttt{OC\_FORCE\_RESOLUTION\_PROTOCOL}}
-  protocol being present. This protocol is currently only supported by \texttt{OpenDuetPkg}. The
-  \texttt{OpenDuetPkg} implementation currently only supports Intel iGPUs and certain ATI GPUs.
-
-\item
-  \texttt{ClearScreenOnModeSwitch}\\
-  \textbf{Type}: \texttt{plist\ boolean}\\
-  \textbf{Failsafe}: \texttt{false}\\
-  \textbf{Description}: Some types of firmware only clear part of the screen when switching
-  from graphics to text mode, leaving a fragment of previously drawn images visible.
-  This option fills the entire graphics screen with black colour before switching to
-  text mode.
-
-  \emph{Note}: This option only applies to \texttt{System} renderer.
-
-\item
-  \texttt{DirectGopRendering}\\
-  \textbf{Type}: \texttt{plist\ boolean}\\
-  \textbf{Failsafe}: \texttt{false}\\
-  \textbf{Description}: Use builtin graphics output protocol renderer for console.
-
-  On certain firmware, such as on the \texttt{MacPro5,1}, this may provide better
-  performance or fix rendering issues. However, this option is not recommended unless
-  there is an obvious benefit as it may result in issues such as slower scrolling.
-
-  This renderer fully supports \texttt{AppleEg2Info} protocol and will provide
-  screen rotation for all EFI applications. In order to provide seamless rotation
-  compatibility with \texttt{EfiBoot}, builtin \texttt{AppleFramebufferInfo} should
-  also be used, i.e. it may need to be overridden on Mac EFI.
-
-\item
-  \texttt{GopBurstMode}\\
-  \textbf{Type}: \texttt{plist\ boolean}\\
-  \textbf{Failsafe}: \texttt{false}\\
-  \textbf{Description}: Enable write-combining (WC) caching for GOP memory, if system firmware has not
-  already enabled it.
-
-  Some older firmware (e.g. EFI-era Macs) fails to set write-combining caching (aka burst mode)
-  for GOP memory, even though the CPU supports it. Setting this can give a considerable
-  speed-up for GOP operations, especially on systems which require \texttt{DirectGopRendering}.
-
-  \emph{Note 1}: This quirk takes effect whether or not \texttt{DirectGopRendering} is set, and
-  in some cases may give a noticeable speed-up to GOP operations even when \texttt{DirectGopRendering}
-  is \texttt{false}.
-
-  \emph{Note 2}: On most systems from circa 2013 onwards, write-combining
-  caching is already applied by the firmware to GOP memory, in which case \texttt{GopBurstMode}
-  is unnecessary. On such systems enabling the quirk should normally be harmless, producing an
-  \texttt{OCC:} debug log entry indicating that burst mode is already started.
-
-  \emph{Note 3}: Some caution should be taken when enabling this quirk, as it has been observed
-  to cause hangs on a few systems. Since additional guards have been added to try to prevent this,
-  please log a bugtracker issue if such a system is found.
-
-\item
-  \texttt{GopPassThrough}\\
-  \textbf{Type}: \texttt{plist\ string}\\
-  \textbf{Failsafe}: \texttt{Disabled}\\
-  \textbf{Description}: Provide GOP protocol instances on top of UGA protocol instances.
-
-  This option provides the GOP protocol via a UGA-based proxy
-  for firmware that do not implement the protocol. The supported values
-  for the option are as follows:
-
-  \begin{itemize}
-    \tightlist
-    \item \texttt{Enabled} --- provide GOP for all UGA protocols.
-    \item \texttt{Apple} --- provide GOP for \texttt{AppleFramebufferInfo}-enabled protocols.
-    \item \texttt{Disabled} --- do not provide GOP.
-  \end{itemize}
-
-  \emph{Note}: This option requires \texttt{ProvideConsoleGop} to be enabled.
-
-\item
-  \texttt{IgnoreTextInGraphics}\\
-  \textbf{Type}: \texttt{plist\ boolean}\\
-  \textbf{Failsafe}: \texttt{false}\\
-  \textbf{Description}: Some types of firmware output text onscreen in both graphics and
-  text mode. This is typically unexpected as random text may appear over
-  graphical images and cause UI corruption. Setting this option to \texttt{true} will
-  discard all text output if console control is not in \texttt{Text} mode.
-
-  \emph{Note}: This option only applies to the \texttt{System} renderer.
-
-\item
-  \texttt{ReplaceTabWithSpace}\\
-  \textbf{Type}: \texttt{plist\ boolean}\\
-  \textbf{Failsafe}: \texttt{false}\\
-  \textbf{Description}: Some types of firmware do not print tab characters or everything
-  that follows them, causing difficulties in using the UEFI Shell's builtin
-  text editor to edit property lists and other documents. This option makes the console
-  output spaces instead of tabs.
-
-  \emph{Note}: This option only applies to \texttt{System} renderer.
-
-\item
-  \texttt{ProvideConsoleGop}\\
-  \textbf{Type}: \texttt{plist\ boolean}\\
-  \textbf{Failsafe}: \texttt{false}\\
-  \textbf{Description}: Ensure GOP (Graphics Output Protocol) on console handle.
-
-  macOS bootloader requires GOP or UGA (for 10.4 EfiBoot) to be present on console
-  handle, yet the exact location of the graphics protocol is not covered by the
-  UEFI specification. This option will ensure GOP and UGA, if present, are available
-  on the console handle.
-
-  \emph{Note}: This option will also replace incompatible implementations of GOP on the
-  console handle, as may be the case on the \texttt{MacPro5,1} when using modern GPUs.
-
-\item
-  \texttt{ReconnectGraphicsOnConnect}\\
-  \textbf{Type}: \texttt{plist\ boolean}\\
-  \textbf{Failsafe}: \texttt{false}\\
-  \textbf{Description}: Reconnect all graphics drivers during driver connection.
-
-  On certain firmware, it may be desireable to use an alternative graphics driver,
-  for example BiosVideo.efi, providing better screen resolution options on legacy
-  machines, or a driver supporting \texttt{ForceResolution}. This option attempts
-  to disconnect all currently connected graphics drivers before connecting newly
-  loaded drivers.
-
-  \emph{Note}: This option requires \texttt{ConnectDrivers} to be enabled.
-
-\item
-  \texttt{ReconnectOnResChange}\\
-  \textbf{Type}: \texttt{plist\ boolean}\\
-  \textbf{Failsafe}: \texttt{false}\\
-  \textbf{Description}: Reconnect console controllers after changing screen resolution.
-
-  On certain firmware, the controllers that produce the console protocols (simple text out)
-  must be reconnected when the screen resolution is changed via GOP. Otherwise, they will
-  not produce text based on the new resolution.
-
-  \emph{Note}: On several boards this logic may result in black screen when launching
-  OpenCore from Shell and thus it is optional. In versions prior to 0.5.2 this option
-  was mandatory and not configurable. Please do not use this unless required.
-
-\item
-  \texttt{SanitiseClearScreen}\\
-  \textbf{Type}: \texttt{plist\ boolean}\\
-  \textbf{Failsafe}: \texttt{false}\\
-  \textbf{Description}: Some types of firmware reset screen resolutions to a failsafe
-  value (such as \texttt{1024x768}) on the attempts to clear screen contents
-  when large display (e.g. 2K or 4K) is used. This option attempts to apply
-  a workaround.
-
-  \emph{Note}: This option only applies to the \texttt{System} renderer.
-   On all known affected systems, \texttt{ConsoleMode} must be set to
-   an empty string for this option to work.
 
 \item
   \texttt{UIScale}\\
@@ -8868,25 +8897,7 @@ OpenCore is installed, in order for the \texttt{Launchd.command} script to work 
   Older boards like ICH6 may not always have HPET setting in the firmware preferences,
   this option tries to force enable it.
 
-  \item
-  \texttt{EnableVectorAcceleration}\\
-  \textbf{Type}: \texttt{plist\ boolean}\\
-  \textbf{Failsafe}: \texttt{false}\\
-  \textbf{Description}: Enable AVX vector acceleration of SHA-512 and SHA-384 hashing algorithms.
-
-  \emph{Note}: This option may cause issues on certain laptop firmwares, including Lenovo.
-
-  \item
-  \texttt{EnableVmx}\\
-  \textbf{Type}: \texttt{plist\ boolean}\\
-  \textbf{Failsafe}: \texttt{false}\\
-  \textbf{Description}: Enable Intel virtual machine extensions.
-
-  \emph{Note}: Required to allow virtualization in Windows on some Mac hardware. VMX
-  is enabled or disabled and locked by BIOS before OpenCore starts on most
-  firmware. Use BIOS to enable virtualization where possible.
-
-  \item
+\item
   \texttt{DisableSecurityPolicy}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
@@ -8895,6 +8906,24 @@ OpenCore is installed, in order for the \texttt{Launchd.command} script to work 
   \emph{Note}: This setting disables various security features of the firmware,
   defeating the purpose of any kind of Secure Boot. Do NOT enable if using
   UEFI Secure Boot.
+
+\item
+  \texttt{EnableVectorAcceleration}\\
+  \textbf{Type}: \texttt{plist\ boolean}\\
+  \textbf{Failsafe}: \texttt{false}\\
+  \textbf{Description}: Enable AVX vector acceleration of SHA-512 and SHA-384 hashing algorithms.
+
+  \emph{Note}: This option may cause issues on certain laptop firmwares, including Lenovo.
+
+\item
+  \texttt{EnableVmx}\\
+  \textbf{Type}: \texttt{plist\ boolean}\\
+  \textbf{Failsafe}: \texttt{false}\\
+  \textbf{Description}: Enable Intel virtual machine extensions.
+
+  \emph{Note}: Required to allow virtualization in Windows on some Mac hardware. VMX
+  is enabled or disabled and locked by BIOS before OpenCore starts on most
+  firmware. Use BIOS to enable virtualization where possible.
 
 \item
   \texttt{ExitBootServicesDelay}\\
@@ -8990,27 +9019,6 @@ OpenCore is installed, in order for the \texttt{Launchd.command} script to work 
   or corrupted in any way.
   \end{itemize}
 
-  \item
-  \texttt{ResizeUsePciRbIo}\\
-  \textbf{Type}: \texttt{plist\ boolean}\\
-  \textbf{Failsafe}: \texttt{false}\\
-  \textbf{Description}: Use PciRootBridgeIo for \texttt{ResizeGpuBars} and \texttt{ResizeAppleGpuBars}
-
-  The quirk makes \texttt{ResizeGpuBars} and \texttt{ResizeAppleGpuBars} use \texttt{PciRootBridgeIo} instead of PciIo.
-  This is needed on systems with a buggy \texttt{PciIo} implementation where trying to configure
-  Resizable BAR results in \texttt{Capability I/O Error}. Typically this is required on
-  older systems which have been modified with \href{https://github.com/xCuri0/ReBarUEFI}{ReBarUEFI}.
-
-  \item
-  \texttt{ShimRetainProtocol}\\
-  \textbf{Type}: \texttt{plist\ boolean}\\
-  \textbf{Failsafe}: \texttt{false}\\
-  \textbf{Description}: Request Linux Shim to keep protocol installed for subsequent image loads.
-
-  This option is only required if chaining OpenCore from Shim. It must be set in order to allow
-  OpenCore to launch items which are verified by certificates present in Shim, but not in the
-  system Secure Boot database.
-
 \item
   \texttt{ResizeGpuBars}\\
   \textbf{Type}: \texttt{plist\ integer}\\
@@ -9066,6 +9074,27 @@ OpenCore is installed, in order for the \texttt{Launchd.command} script to work 
   and they will likely overlap. In most cases it is best to either update the
   firmware to the latest version or customise it with a specialised driver
   like \href{https://github.com/xCuri0/ReBarUEFI}{ReBarUEFI}.
+
+\item
+  \texttt{ResizeUsePciRbIo}\\
+  \textbf{Type}: \texttt{plist\ boolean}\\
+  \textbf{Failsafe}: \texttt{false}\\
+  \textbf{Description}: Use PciRootBridgeIo for \texttt{ResizeGpuBars} and \texttt{ResizeAppleGpuBars}
+
+  The quirk makes \texttt{ResizeGpuBars} and \texttt{ResizeAppleGpuBars} use \texttt{PciRootBridgeIo} instead of PciIo.
+  This is needed on systems with a buggy \texttt{PciIo} implementation where trying to configure
+  Resizable BAR results in \texttt{Capability I/O Error}. Typically this is required on
+  older systems which have been modified with \href{https://github.com/xCuri0/ReBarUEFI}{ReBarUEFI}.
+
+\item
+  \texttt{ShimRetainProtocol}\\
+  \textbf{Type}: \texttt{plist\ boolean}\\
+  \textbf{Failsafe}: \texttt{false}\\
+  \textbf{Description}: Request Linux Shim to keep protocol installed for subsequent image loads.
+
+  This option is only required if chaining OpenCore from Shim. It must be set in order to allow
+  OpenCore to launch items which are verified by certificates present in Shim, but not in the
+  system Secure Boot database.
 
 \item
   \texttt{TscSyncTimeout}\\
@@ -9130,6 +9159,12 @@ OpenCore is installed, in order for the \texttt{Launchd.command} script to work 
   reference for the entry. Whether this value is used is implementation defined.
 
 \item
+  \texttt{Enabled}\\
+  \textbf{Type}: \texttt{plist\ boolean}\\
+  \textbf{Failsafe}: \texttt{false}\\
+  \textbf{Description}: This region will not be reserved unless set to \texttt{true}.
+
+\item
   \texttt{Size}\\
   \textbf{Type}: \texttt{plist\ integer}\\
   \textbf{Failsafe}: \texttt{0}\\
@@ -9160,12 +9195,6 @@ OpenCore is installed, in order for the \texttt{Launchd.command} script to work 
     \item \texttt{MemoryMappedIOPortSpace} --- \texttt{EfiMemoryMappedIOPortSpace}
     \item \texttt{PalCode} --- \texttt{EfiPalCode}
   \end{itemize}
-
-\item
-  \texttt{Enabled}\\
-  \textbf{Type}: \texttt{plist\ boolean}\\
-  \textbf{Failsafe}: \texttt{false}\\
-  \textbf{Description}: This region will not be reserved unless set to \texttt{true}.
 
 \end{enumerate}
 
