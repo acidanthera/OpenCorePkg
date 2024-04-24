@@ -36,8 +36,12 @@ imgbuild() {
     "${BUILD_DIR_ARCH}/DxeIplUe.raw" || exit 1
 
   echo "Generating Loader Image..."
-
-  ImageTool GenImage -c PE -x -b 0x10000 -o "${BUILD_DIR_ARCH}/EfiLoaderRebased.efi" "${BUILD_DIR_ARCH}/EfiLoader.efi" || exit 1
+  # Reuse DEBUG EfiLdr in NOOPT build to keep within allotted 0x10000-0x20000 space.
+  # With this approach, everything after EfiLdr is fully NOOPT, but EfiLdr starts.
+  # TODO: Look at moving EFILDR_BASE_SEGMENT (see also kBoot2Segment, BASE_ADDR_32)
+  # to make space for NOOPT loader.
+  SAFE_LOADER=$(echo "${BUILD_DIR_ARCH}/EfiLoader.efi" | sed -e 's/NOOPT/DEBUG/')
+  ImageTool GenImage -c PE -x -b 0x10000 -o "${BUILD_DIR_ARCH}/EfiLoaderRebased.efi" "${SAFE_LOADER}" || exit 1
 
   "${FV_TOOLS}/EfiLdrImage" -o "${BUILD_DIR}/FV/Efildr${arch}" \
     "${BUILD_DIR_ARCH}/EfiLoaderRebased.efi" "${BUILD_DIR}/FV/DxeIpl${arch}.z" \

@@ -180,7 +180,10 @@
   MdeModulePkg/Universal/SmbiosDxe/SmbiosDxe.inf
   OpenCorePkg/Legacy/BootPlatform/SmbiosGenDxe/SmbiosGen.inf
 
+!if $(TARGET) != NOOPT
+  # We will reuse DEBUG EfiLdr in NOOPT build to keep within allotted 0x10000-0x20000 space.
   OpenCorePkg/Legacy/BootPlatform/EfiLdr/EfiLdr.inf
+!endif
   OpenCorePkg/Legacy/BootPlatform/BdsDxe/BdsDxe.inf {
     <LibraryClasses>
       PcdLib|MdePkg/Library/DxePcdLib/DxePcdLib.inf
