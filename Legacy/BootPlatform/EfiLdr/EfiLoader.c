@@ -161,7 +161,6 @@ EfiLoader (
   // Decompress the image
   //
   Status = LzmaUefiDecompressGetInfo (
-
              (VOID *)(UINTN)(EFILDR_HEADER_ADDRESS + EFILDRImage->Offset),
              EFILDRImage->Length,
              &DestinationSize,
