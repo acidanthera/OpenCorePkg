@@ -13,7 +13,7 @@ env:
 jobs:
   analyze-shell-scripts:
     name: Shell Scripts
-    runs-on: macos-latest
+    runs-on: macos-12
     env:
       JOB_TYPE: ANALYZE
     steps:
