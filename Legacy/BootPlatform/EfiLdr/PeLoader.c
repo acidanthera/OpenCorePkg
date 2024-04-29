@@ -226,7 +226,7 @@ EfiLdrPeCoffLoadPeImage (
   }
 
   Image->Info.ImageBase = (VOID *)(UINTN)Image->ImageBasePage;
-  Image->Info.ImageSize = (Image->NoPages << EFI_PAGE_SHIFT) - 1;
+  Image->Info.ImageSize = (Image->NoPages << EFI_PAGE_SHIFT);
   Image->ImageBase      = (UINT8 *)(UINTN)Image->ImageBasePage;
   Image->ImageEof       = Image->ImageBase + Image->Info.ImageSize;
   Image->ImageAdjust    = Image->ImageBase;
@@ -500,13 +500,6 @@ EfiLdrPeCoffLoadPeRelocate (
     // next reloc block
     RelocBase = (EFI_IMAGE_BASE_RELOCATION *)RelocEnd;
   }
-
-  //
-  // Add Fixup data to whole Image (assume Fixup data just below the image), so that there is no hole in the descriptor.
-  // Because only NoPages or ImageBasePage will be used in EfiLoader(), we update these 2 fields.
-  //
-  Image->NoPages       += NoFixupPages;
-  Image->ImageBasePage -= (NoFixupPages << EFI_PAGE_SHIFT);
 
   return EFI_SUCCESS;
 }
