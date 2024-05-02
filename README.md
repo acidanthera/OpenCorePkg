@@ -5,6 +5,43 @@
 
 OpenCore bootloader with development SDK.
 
+## Branch build-0.8.7
+
+This branch contains a buildable version of OpenCore prior to integration
+of the new, secure PE/COFF loader. The purpose is to enable source-level
+debugging, when needed, of the operation of the code prior to this
+integration.
+
+This build (particularly the version of [audk](https://github.com/acidanthera/audk/tree/build-0.8.7) which it links to)
+has been reconstructed, i.e. it is not exactly the same as was used in any
+particular version of OpenCore, but is intended to be the same in all or most
+important respects as was used to build OpenCore 0.8.7 (see [issue](https://github.com/acidanthera/bugtracker/issues/2195)).
+
+In addition to the exact commits up to OpenCore `0.8.7` tag, this version
+adds:
+
+ - All the more recent updates to OpenDuet made in versions 0.9.9 and 1.0.0,
+   which are required to enable source-level debugging in OpenDuet.
+ - A new fix to the OpenDuet 0.8.7 and earlier EfiLdr HOB (also required for
+   source-level debugging, in these versions).
+ - Some minor changes early in this branch, required to get the build
+   working locally with the reconstructed audk version.
+ - Various more recent commits with minor fixes, taken from the OpenCore
+   master branch since the 0.8.7 version, as required to get CI fully
+   working.
+ - The current `Debug` folder, since this works with both old (this
+   branch) and new (master branch) executable formats, but has
+   various useful updates compared to the debug code from the 0.8.7 branch.
+
+Commits from the master branch have been cherry-picked, with the same commit
+date, author and commit message as the original, in their original order,
+to try to make it easy to see where they are from.
+
+*Unlike the OpenCore master branch, there is no particular intention to
+avoid force-pushes to this branch. Of course you should still be able
+to rebase any changes you might make on top of this branch, just be aware
+that you may well need to do so.*
+
 ## Libraries
 
 This repository also contains additional UEFI support common libraries shared by other projects in [Acidanthera](https://github.com/acidanthera). The primary purpose of the library set is to provide supplemental functionality for Apple-specific UEFI drivers. Key features:
