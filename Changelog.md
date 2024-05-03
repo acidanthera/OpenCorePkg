@@ -13,6 +13,7 @@ OpenCore Changelog
 - Prevented debug assert reporting that optional Hii protocols are not present in OpenDuet
 - Fixed problem loading non-firmware runtime drivers (e.g. OpenRuntime.efi) in OpenDuet
 - Resolved issue using NOOPT debugging in OpenDuet
+- Fixed alphabetical ordering in Configuration.pdf, thx @leon9078
 
 #### v0.9.9
 - Fixed incorrect warning in ocvalidate
