@@ -90,7 +90,7 @@ jobs:
   analyze-docs-linux:
     name: Documentation
     runs-on: ubuntu-22.04
-    if: github.repository_owner == 'acidanthera' && github.ref_name == 'master'
+    if: github.ref_name == 'master'
     steps:
       - uses: actions/checkout@v4
 
