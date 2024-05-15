@@ -112,33 +112,34 @@ OcAbcInitialize (
 
   DEBUG ((
     DEBUG_INFO,
-    "OCABC: ALRBL %d RTDFRG %d DEVMMIO %d NOSU %d NOVRWR %d NOSB %d FBSIG %d NOHBMAP %d SMSLIDE %d WRUNPROT %d\n",
+    "OCABC: ALRBL %d RTDFRG %d DEVMMIO %d NOSU %d NOVRWR %d NOHBMAP %d SMSLIDE %d WRUNPROT %d FXAPPLIMG %d FBSIG %d FEXITBS %d\n",
     Settings->AllowRelocationBlock,
     Settings->AvoidRuntimeDefrag,
     Settings->DevirtualiseMmio,
     Settings->DisableSingleUser,
     Settings->DisableVariableWrite,
-    Settings->ProtectSecureBoot,
-    Settings->ForceBooterSignature,
     Settings->DiscardHibernateMap,
     Settings->EnableSafeModeSlide,
-    Settings->EnableWriteUnprotector
+    Settings->EnableWriteUnprotector,
+    Settings->FixupAppleEfiImages,
+    Settings->ForceBooterSignature,
+    Settings->ForceExitBootServices
     ));
 
   DEBUG ((
     DEBUG_INFO,
-    "OCABC: FEXITBS %d PRMRG %d CSLIDE %d MSLIDE %d PRSRV %d RBMAP %d VMAP %d APPLOS %d RTPERMS %d ARBAR %d RBIO %d\n",
-    Settings->ForceExitBootServices,
+    "OCABC: PRMRG %d NOSB %d PRSRV %d CSLIDE %d MSLIDE %d RBMAP %d ARBAR %d RBIO %d VMAP %d APPLOS %d RTPERMS %d\n",
     Settings->ProtectMemoryRegions,
+    Settings->ProtectSecureBoot,
+    Settings->ProtectUefiServices,
     Settings->ProvideCustomSlide,
     Settings->ProvideMaxSlide,
-    Settings->ProtectUefiServices,
     Settings->RebuildAppleMemoryMap,
+    Settings->ResizeAppleGpuBars,
+    Settings->ResizeUsePciRbIo,
     Settings->SetupVirtualMap,
     Settings->SignalAppleOS,
-    Settings->SyncRuntimePermissions,
-    Settings->ResizeAppleGpuBars,
-    Settings->ResizeUsePciRbIo
+    Settings->SyncRuntimePermissions
     ));
 
   DEBUG_CODE_BEGIN ();
