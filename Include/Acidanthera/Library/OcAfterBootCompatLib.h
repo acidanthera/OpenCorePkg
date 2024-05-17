@@ -184,6 +184,10 @@ typedef struct OC_ABC_SETTINGS_ {
   ///
   BOOLEAN                 ResizeUsePciRbIo;
   ///
+  /// Fix errors in early Mac OS X boot.efi images.
+  ///
+  BOOLEAN                 FixupAppleEfiImages;
+  ///
   /// Reduce GPU BARs for macOS to maximum supported version.
   ///
   INT8                    ResizeAppleGpuBars;

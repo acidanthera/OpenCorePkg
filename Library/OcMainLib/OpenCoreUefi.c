@@ -697,6 +697,7 @@ OcLoadBooterUefiSupport (
   AbcSettings.AllowRelocationBlock   = Config->Booter.Quirks.AllowRelocationBlock;
   AbcSettings.EnableSafeModeSlide    = Config->Booter.Quirks.EnableSafeModeSlide;
   AbcSettings.EnableWriteUnprotector = Config->Booter.Quirks.EnableWriteUnprotector;
+  AbcSettings.FixupAppleEfiImages    = Config->Booter.Quirks.FixupAppleEfiImages;
   AbcSettings.ForceExitBootServices  = Config->Booter.Quirks.ForceExitBootServices;
   AbcSettings.ForceBooterSignature   = Config->Booter.Quirks.ForceBooterSignature;
   CopyMem (AbcSettings.BooterSignature, Signature, sizeof (AbcSettings.BooterSignature));
