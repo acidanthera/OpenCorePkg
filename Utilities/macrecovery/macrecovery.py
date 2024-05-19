@@ -25,6 +25,7 @@ except ImportError:
     sys.exit(1)
 
 SELF_DIR = os.path.dirname(os.path.realpath(__file__))
+TERMINAL_SIZE = os.get_terminal_size().columns
 
 RECENT_MAC = 'Mac-7BA5B2D9E42DDD94'
 MLB_ZERO = '00000000000000000'
@@ -221,7 +222,7 @@ def save_image(url, sess, filename='', directory=''):
             size += len(chunk)
             print(f'\r{size / (2**20)} MBs downloaded...', end='')
             sys.stdout.flush()
-        print('\rDownload complete!\t\t\t\t\t')
+        print(f'\r{"Download complete!":<{TERMINAL_SIZE}}')
 
     return os.path.join(directory, os.path.basename(filename))
 
@@ -242,7 +243,7 @@ def verify_image(dmgpath, cnkpath):
                 raise RuntimeError(f'Invalid chunk {cnkcount}: hash mismatch')
         if dmgf.read(1) != b'':
             raise RuntimeError('Invalid image: larger than chunklist')
-        print('\rImage verification complete!\t\t\t\t\t')
+        print(f'\r{"Image verification complete!":<{TERMINAL_SIZE}}')
 
 
 def action_download(args):
