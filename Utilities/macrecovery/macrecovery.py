@@ -213,6 +213,8 @@ def save_image(url, sess, filename='', directory=''):
 
     with open(os.path.join(directory, filename), 'wb') as fh:
         response = run_query(url, headers, raw=True)
+        headers = dict(response.headers)
+        totalsize = int(headers['Content-Length']) if 'Content-Length' in headers else -1
         size = 0
         while True:
             chunk = response.read(2**20)
@@ -220,7 +222,15 @@ def save_image(url, sess, filename='', directory=''):
                 break
             fh.write(chunk)
             size += len(chunk)
-            print(f'\r{size / (2**20)} MBs downloaded...', end='')
+            if totalsize + 1:
+                progress = size / totalsize
+                barwidth = TERMINAL_SIZE / 3
+                print(f'\r{size / (2**20)}/{totalsize / (2**20):.1f} MBs |', end='')
+                print(f'{"=" * int(barwidth * progress):<{barwidth}}| ', end='')
+                print(f'{progress*100:.1f}% downloaded', end='')
+            else:
+                # Fallback if Content-Length isn't available
+                print(f'\r{size / (2**20)} MBs downloaded...', end='')
             sys.stdout.flush()
         print(f'\r{"Download complete!":<{TERMINAL_SIZE}}')
 
