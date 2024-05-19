@@ -20,8 +20,8 @@ try:
     from urllib.request import Request, HTTPError, urlopen
     from urllib.parse import urlparse
 except ImportError:
-    from urllib2 import Request, HTTPError, urlopen
-    from urlparse import urlparse
+    print('ERROR: Python 2 is not supported, please use Python 3')
+    sys.exit(1)
 
 SELF_DIR = os.path.dirname(os.path.realpath(__file__))
 
