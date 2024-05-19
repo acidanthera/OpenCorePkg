@@ -202,7 +202,7 @@ def save_image(url, sess, filename='', directory=''):
     }
 
     if not os.path.exists(directory):
-        os.mkdir(directory)
+        os.makedirs(directory)
 
     if filename == '':
         filename = os.path.basename(purl.path)
