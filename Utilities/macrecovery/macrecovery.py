@@ -206,10 +206,10 @@ def save_image(url, sess, filename='', directory=''):
 
     if filename == '':
         filename = os.path.basename(purl.path)
-    if filename.find('/') >= 0 or filename == '':
+    if filename.find(os.sep) >= 0 or filename == '':
         raise RuntimeError('Invalid save path ' + filename)
 
-    print(f'Saving {url} to {directory}/{filename}...')
+    print(f'Saving {url} to {directory}{os.sep}{filename}...')
 
     with open(os.path.join(directory, filename), 'wb') as fh:
         response = run_query(url, headers, raw=True)
