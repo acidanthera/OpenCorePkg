@@ -48,9 +48,7 @@ INFO_REQURED = [INFO_PRODUCT, INFO_IMAGE_LINK, INFO_IMAGE_HASH, INFO_IMAGE_SESS,
 
 def run_query(url, headers, post=None, raw=False):
     if post is not None:
-        data = '\n'.join([entry + '=' + post[entry] for entry in post])
-        if sys.version_info[0] >= 3:
-            data = data.encode('utf-8')
+        data = '\n'.join(entry + '=' + post[entry] for entry in post).encode()
     else:
         data = None
     req = Request(url=url, headers=headers, data=data)
@@ -182,7 +180,7 @@ def get_image_info(session, bid, mlb=MLB_ZERO, diag=False, os_type='default', ci
         try:
             key, value = line.split(': ')
             info[key] = value
-        except Exception:
+        except KeyError:
             continue
 
     for k in INFO_REQURED:
