@@ -7,7 +7,6 @@ Copyright (c) 2019, vit9696
 """
 
 import argparse
-import binascii
 import hashlib
 import json
 import linecache
@@ -27,10 +26,10 @@ except ImportError:
 SELF_DIR = os.path.dirname(os.path.realpath(__file__))
 TERMINAL_SIZE = os.get_terminal_size().columns
 
-RECENT_MAC = 'Mac-7BA5B2D9E42DDD94'
+RECENT_MAC = 'Mac-27AD2F918AE68F61'
 MLB_ZERO = '00000000000000000'
-MLB_VALID = 'C02749200YGJ803AX'
-MLB_PRODUCT = '00000000000J80300'
+MLB_VALID = 'F5K105303J9K3F71M'
+MLB_PRODUCT = 'F5K00000000K3F700'
 
 TYPE_SID = 16
 TYPE_K = 64
