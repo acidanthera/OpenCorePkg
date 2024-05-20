@@ -224,7 +224,7 @@ def save_image(url, sess, filename='', directory=''):
             size += len(chunk)
             if totalsize + 1:
                 progress = size / totalsize
-                barwidth = TERMINAL_SIZE / 3
+                barwidth = TERMINAL_SIZE // 3
                 print(f'\r{size / (2**20)}/{totalsize / (2**20):.1f} MBs |', end='')
                 print(f'{"=" * int(barwidth * progress):<{barwidth}}| ', end='')
                 print(f'{progress*100:.1f}% downloaded', end='')
