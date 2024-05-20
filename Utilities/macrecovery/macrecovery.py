@@ -211,7 +211,11 @@ def save_image(url, sess, filename='', directory=''):
     with open(os.path.join(directory, filename), 'wb') as fh:
         response = run_query(url, headers, raw=True)
         headers = dict(response.headers)
-        totalsize = int(headers['Content-Length']) if 'Content-Length' in headers else -1
+        totalsize = -1
+        for header in headers:
+            if header.lower() == 'content-length':
+                totalsize = int(headers[header])
+                break
         size = 0
         while True:
             chunk = response.read(2**20)
