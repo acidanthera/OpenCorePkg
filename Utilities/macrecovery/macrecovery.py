@@ -181,6 +181,8 @@ def get_image_info(session, bid, mlb=MLB_ZERO, diag=False, os_type='default', ci
             info[key] = value
         except KeyError:
             continue
+        except ValueError:
+            continue
 
     for k in INFO_REQURED:
         if k not in info:
