@@ -78,9 +78,6 @@ def mlb_from_eeee(eeee):
     return f'00000000000{eeee}00'
 
 
-int_from_unsigned_bytes = lambda byte_list, byteorder: int.from_bytes(byte_list, byteorder)
-
-
 # zhangyoufu https://gist.github.com/MCJack123/943eaca762730ca4b7ae460b731b68e7#gistcomment-3061078 2021-10-08
 Apple_EFI_ROM_public_key_1 = 0xC3E748CAD9CD384329E10E25A91E43E1A762FF529ADE578C935BDDF9B13F2179D4855E6FC89E9E29CA12517D17DFA1EDCE0BEBF0EA7B461FFE61D94E2BDF72C196F89ACD3536B644064014DAE25A15DB6BB0852ECBD120916318D1CCDEA3C84C92ED743FC176D0BACA920D3FCF3158AFF731F88CE0623182A8ED67E650515F75745909F07D415F55FC15A35654D118C55A462D37A3ACDA08612F3F3F6571761EFCCBCC299AEE99B3A4FD6212CCFFF5EF37A2C334E871191F7E1C31960E010A54E86FA3F62E6D6905E1CD57732410A3EB0C6B4DEFDABE9F59BF1618758C751CD56CEF851D1C0EAA1C558E37AC108DA9089863D20E2E7E4BF475EC66FE6B3EFDCF
 
@@ -114,8 +111,8 @@ def verify_chunklist(cnkpath):
         if signature_method == 1:
             data = f.read(256)
             assert len(data) == 256
-            signature = int_from_unsigned_bytes(data, 'little')
-            plaintext = int(f'0x1{"f"*404}003031300d060960864801650304020105000420{"0"*64}', 16) | int_from_unsigned_bytes(digest, 'big')
+            signature = int.from_bytes(data, 'little')
+            plaintext = int(f'0x1{"f"*404}003031300d060960864801650304020105000420{"0"*64}', 16) | int.from_bytes(digest, 'big')
             assert pow(signature, 0x10001, Apple_EFI_ROM_public_key_1) == plaintext
         elif signature_method == 2:
             data = f.read(32)
