@@ -7,21 +7,21 @@ Copyright (c) 2019, vit9696
 """
 
 import argparse
-import binascii
 import hashlib
 import json
 import linecache
 import os
 import random
 import struct
+import string
 import sys
 
 try:
     from urllib.request import Request, HTTPError, urlopen
     from urllib.parse import urlparse
 except ImportError:
-    from urllib2 import Request, HTTPError, urlopen
-    from urlparse import urlparse
+    print('ERROR: Python 2 is not supported, please use Python 3')
+    sys.exit(1)
 
 SELF_DIR = os.path.dirname(os.path.realpath(__file__))
 
@@ -46,9 +46,7 @@ INFO_REQURED = [INFO_PRODUCT, INFO_IMAGE_LINK, INFO_IMAGE_HASH, INFO_IMAGE_SESS,
 
 def run_query(url, headers, post=None, raw=False):
     if post is not None:
-        data = '\n'.join([entry + '=' + post[entry] for entry in post])
-        if sys.version_info[0] >= 3:
-            data = data.encode('utf-8')
+        data = '\n'.join(entry + '=' + post[entry] for entry in post).encode()
     else:
         data = None
     req = Request(url=url, headers=headers, data=data)
@@ -63,12 +61,11 @@ def run_query(url, headers, post=None, raw=False):
 
 
 def generate_id(id_type, id_value=None):
-    valid_chars = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F']
-    return ''.join(random.choice(valid_chars) for i in range(id_type)) if not id_value else id_value
+    return id_value or ''.join(random.choices(string.hexdigits[:16].upper(), k=id_type))
 
 
 def product_mlb(mlb):
-    return '00000000000' + mlb[11] + mlb[12] + mlb[13] + mlb[14] + '00'
+    return '00000000000' + mlb[11:15] + '00'
 
 
 def mlb_from_eeee(eeee):
@@ -79,11 +76,7 @@ def mlb_from_eeee(eeee):
     return f'00000000000{eeee}00'
 
 
-def int_from_unsigned_bytes(byte_list, byteorder):
-    if byteorder == 'little':
-        byte_list = byte_list[::-1]
-    encoded = binascii.hexlify(byte_list)
-    return int(encoded, 16)
+int_from_unsigned_bytes = lambda byte_list, byteorder: int.from_bytes(byte_list, byteorder)
 
 
 # zhangyoufu https://gist.github.com/MCJack123/943eaca762730ca4b7ae460b731b68e7#gistcomment-3061078 2021-10-08
@@ -120,7 +113,7 @@ def verify_chunklist(cnkpath):
             data = f.read(256)
             assert len(data) == 256
             signature = int_from_unsigned_bytes(data, 'little')
-            plaintext = 0x1ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff003031300d0609608648016503040201050004200000000000000000000000000000000000000000000000000000000000000000 | int_from_unsigned_bytes(digest, 'big')
+            plaintext = int(f'0x1{"f"*404}003031300d060960864801650304020105000420{"0"*64}', 16) | int_from_unsigned_bytes(digest, 'big')
             assert pow(signature, 0x10001, Apple_EFI_ROM_public_key_1) == plaintext
         elif signature_method == 2:
             data = f.read(32)
@@ -185,7 +178,9 @@ def get_image_info(session, bid, mlb=MLB_ZERO, diag=False, os_type='default', ci
         try:
             key, value = line.split(': ')
             info[key] = value
-        except Exception:
+        except KeyError:
+            continue
+        except ValueError:
             continue
 
     for k in INFO_REQURED:
@@ -234,9 +229,7 @@ def verify_image(dmgpath, cnkpath):
     print('Verifying image with chunklist...')
 
     with open(dmgpath, 'rb') as dmgf:
-        cnkcount = 0
-        for cnksize, cnkhash in verify_chunklist(cnkpath):
-            cnkcount += 1
+        for cnkcount, (cnksize, cnkhash) in enumerate(verify_chunklist(cnkpath), 1):
             print(f'\rChunk {cnkcount} ({cnksize} bytes)', end='')
             sys.stdout.flush()
             cnk = dmgf.read(cnksize)
