@@ -2,6 +2,7 @@ OpenCore Changelog
 ==================
 #### v1.0.1
 - Updated code and added progress bar to macrecovery, thx @soyeonswife63
+- Bundled fat binary i386/x64 10.6+ compatible `nvramdump` with LogoutHook release
 
 #### v1.0.0
 - Updated builtin firmware versions for SMBIOS and the rest

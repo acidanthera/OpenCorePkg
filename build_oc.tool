@@ -261,7 +261,7 @@ package() {
     "Launchd.command"
     "Launchd.command.plist"
     "README.md"
-    "nvramdump"
+    "Legacy/nvramdump"
     )
   for file in "${logoutFiles[@]}"; do
     cp "${selfdir}/Utilities/LogoutHook/${file}" "${dstdir}/Utilities/LogoutHook"/ || exit 1
