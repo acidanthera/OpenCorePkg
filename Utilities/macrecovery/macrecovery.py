@@ -24,7 +24,6 @@ except ImportError:
     sys.exit(1)
 
 SELF_DIR = os.path.dirname(os.path.realpath(__file__))
-TERMINAL_SIZE = os.get_terminal_size().columns
 
 # MacPro7,1
 RECENT_MAC = 'Mac-27AD2F918AE68F61'
@@ -217,23 +216,30 @@ def save_image(url, sess, filename='', directory=''):
                 totalsize = int(headers[header])
                 break
         size = 0
+        oldterminalsize = 0
         while True:
             chunk = response.read(2**20)
             if not chunk:
                 break
             fh.write(chunk)
             size += len(chunk)
-            if totalsize + 1:
+            terminalsize = os.get_terminal_size().columns
+            if oldterminalsize != terminalsize:
+                # Use -2 for better resize stability on Windows
+                print(f'\r{"":<{terminalsize - 2}}', end='')
+                oldterminalsize = terminalsize
+            if totalsize > 0:
                 progress = size / totalsize
-                barwidth = TERMINAL_SIZE // 3
-                print(f'\r{size / (2**20)}/{totalsize / (2**20):.1f} MBs |', end='')
-                print(f'{"=" * int(barwidth * progress):<{barwidth}}| ', end='')
-                print(f'{progress*100:.1f}% downloaded', end='')
+                barwidth = terminalsize // 3
+                print(f'\r{size / (2**20):.1f}/{totalsize / (2**20):.1f} MB ', end='')
+                if terminalsize > 55:
+                    print(f'|{"=" * int(barwidth * progress):<{barwidth}}|', end='')
+                print(f' {progress*100:.1f}% downloaded', end='')
             else:
                 # Fallback if Content-Length isn't available
-                print(f'\r{size / (2**20)} MBs downloaded...', end='')
+                print(f'\r{size / (2**20)} MB downloaded...', end='')
             sys.stdout.flush()
-        print(f'\r{"Download complete!":<{TERMINAL_SIZE}}')
+        print('\nDownload complete!')
 
     return os.path.join(directory, os.path.basename(filename))
 
@@ -243,7 +249,7 @@ def verify_image(dmgpath, cnkpath):
 
     with open(dmgpath, 'rb') as dmgf:
         for cnkcount, (cnksize, cnkhash) in enumerate(verify_chunklist(cnkpath), 1):
-            print(f'\rChunk {cnkcount} ({cnksize} bytes)', end='')
+            print(f'\r{f"Chunk {cnkcount} ({cnksize} bytes)":<{os.get_terminal_size().columns - 2}}', end='')
             sys.stdout.flush()
             cnk = dmgf.read(cnksize)
             if len(cnk) != cnksize:
@@ -252,7 +258,7 @@ def verify_image(dmgpath, cnkpath):
                 raise RuntimeError(f'Invalid chunk {cnkcount}: hash mismatch')
         if dmgf.read(1) != b'':
             raise RuntimeError('Invalid image: larger than chunklist')
-        print(f'\r{"Image verification complete!":<{TERMINAL_SIZE}}')
+        print('\nImage verification complete!')
 
 
 def action_download(args):
