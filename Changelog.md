@@ -1,5 +1,8 @@
 OpenCore Changelog
 ==================
+#### v1.0.1
+- Updated code and added progress bar to macrecovery, thx @soyeonswife63
+
 #### v1.0.0
 - Updated builtin firmware versions for SMBIOS and the rest
 - Switched to Apple silicon GitHub runner for CI, thx @Goooler
