@@ -245,7 +245,7 @@ def save_image(url, sess, filename='', directory=''):
 
 
 def verify_image(dmgpath, cnkpath):
-    print('Verifying image with chunklist...')
+    print('\nVerifying image with chunklist...')
 
     with open(dmgpath, 'rb') as dmgf:
         for cnkcount, (cnksize, cnkhash) in enumerate(verify_chunklist(cnkpath), 1):
