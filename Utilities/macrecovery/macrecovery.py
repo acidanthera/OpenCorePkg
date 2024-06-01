@@ -205,7 +205,7 @@ def save_image(url, sess, filename='', directory=''):
     if filename.find(os.sep) >= 0 or filename == '':
         raise RuntimeError('Invalid save path ' + filename)
 
-    print(f'\nSaving {url} to {directory}{os.sep}{filename}...')
+    print(f'Saving {url} to {directory}{os.sep}{filename}...')
 
     with open(os.path.join(directory, filename), 'wb') as fh:
         response = run_query(url, headers, raw=True)
@@ -293,7 +293,7 @@ def action_download(args):
     info = get_image_info(session, bid=args.board_id, mlb=args.mlb, diag=args.diagnostics, os_type=args.os_type)
     if args.verbose:
         print(info)
-    print(f'Downloading {info[INFO_PRODUCT]}...')
+    print(f'\nDownloading {info[INFO_PRODUCT]}...')
     cnkname = '' if args.basename == '' else args.basename + '.chunklist'
     cnkpath = save_image(info[INFO_SIGN_LINK], info[INFO_SIGN_SESS], cnkname, args.outdir)
     dmgname = '' if args.basename == '' else args.basename + '.dmg'
