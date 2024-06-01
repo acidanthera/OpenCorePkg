@@ -205,7 +205,7 @@ def save_image(url, sess, filename='', directory=''):
     if filename.find(os.sep) >= 0 or filename == '':
         raise RuntimeError('Invalid save path ' + filename)
 
-    print(f'Saving {url} to {directory}{os.sep}{filename}...')
+    print(f'\nSaving {url} to {directory}{os.sep}{filename}...')
 
     with open(os.path.join(directory, filename), 'wb') as fh:
         response = run_query(url, headers, raw=True)
