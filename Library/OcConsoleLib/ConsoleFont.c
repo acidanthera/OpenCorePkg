@@ -238,7 +238,7 @@ STATIC UINT8  mIsoFontDataPage1[(PAGE1_CHAR_MAX - PAGE1_CHAR_MIN) * (ISO_CHAR_HE
 #endif
 
 /*
- * EFI mandated https://github.com/tianocore/edk2/blob/master/MdePkg/Include/Protocol/SimpleTextOut.h#L34-L98
+ * EFI mandated https://github.com/tianocore/edk2/blob/2f88bd3a1296c522317f1c21377876de63de5be7/MdePkg/Include/Protocol/SimpleTextOut.h#L34-L98
  * unicode box drawing, block element and arrow characters (which are used e.g. by memtest86).
  * Unicode font pages derived from https://github.com/farsil/ibmfonts
  * SPDX-License-Identifier: CC-BY-SA-4.0
