@@ -47,7 +47,8 @@ CONST CHAR8 *
   [LABEL_SHELL]              = "Shell",
   [LABEL_SIP_IS_ENABLED]     = "SIPEnabled",
   [LABEL_SIP_IS_DISABLED]    = "SIPDisabled",
-  [LABEL_FIRMWARE_SETTINGS]  = "FirmwareSettings"
+  [LABEL_FIRMWARE_SETTINGS]  = "FirmwareSettings",
+  [LABEL_NETWORK_BOOT]       = "NetworkBoot"
 };
 
 STATIC

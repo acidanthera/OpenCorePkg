@@ -428,4 +428,26 @@ OcPlatformIs64BitSupported (
   IN UINT32  KernelVersion
   );
 
+/**
+  Unload loaded images by name.
+
+  @param[in]  Config     OpenCore configuration.
+**/
+VOID
+OcUnloadDrivers (
+  IN  OC_GLOBAL_CONFIG  *Config
+  );
+
+/**
+  Dump loaded image driver info to the specified directory.
+
+  @param[in]  Root     Directory to write CPU data.
+
+  @retval EFI_SUCCESS on success.
+**/
+EFI_STATUS
+OcDriverInfoDump (
+  IN EFI_FILE_PROTOCOL  *Root
+  );
+
 #endif // OC_MAIN_LIB

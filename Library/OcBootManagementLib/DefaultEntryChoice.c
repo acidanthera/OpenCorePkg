@@ -795,7 +795,7 @@ OcSetDefaultBootEntry (
   UINTN            BootChosenIndex;
   UINTN            Index;
   UINTN            DevicePathSize;
-  UINTN            ExtSystemDevPathSize;
+  UINTN            UnmanagedBootDevPathSize;
   UINTN            LoadOptionSize;
   UINTN            LoadOptionIdSize;
   UINTN            LoadOptionNameSize;
@@ -805,7 +805,7 @@ OcSetDefaultBootEntry (
 
   CONST OC_CUSTOM_BOOT_DEVICE_PATH     *CustomDevPath;
   CONST OC_ENTRY_PROTOCOL_DEVICE_PATH  *EntryProtocolDevPath;
-  EFI_DEVICE_PATH_PROTOCOL             *ExtSystemDevPath;
+  EFI_DEVICE_PATH_PROTOCOL             *UnmanagedBootDevPath;
   VENDOR_DEVICE_PATH                   *DestCustomDevPath;
   FILEPATH_DEVICE_PATH                 *DestCustomEntryName;
   EFI_DEVICE_PATH_PROTOCOL             *DestCustomEndNode;
@@ -825,16 +825,16 @@ OcSetDefaultBootEntry (
   }
 
   //
-  // Get final device path for external boot system entries.
+  // Get final device path for unmanaged boot entries.
   //
-  ExtSystemDevPath = NULL;
-  if ((Entry->Type == OC_BOOT_EXTERNAL_SYSTEM) && (Entry->ExternalSystemGetDevicePath != NULL)) {
-    ExtSystemDevPath = Entry->DevicePath;
-    Status           = Entry->ExternalSystemGetDevicePath (Context, &ExtSystemDevPath);
+  UnmanagedBootDevPath = NULL;
+  if ((Entry->Type == OC_BOOT_UNMANAGED) && (Entry->UnmanagedBootGetDevicePath != NULL)) {
+    UnmanagedBootDevPath = Entry->DevicePath;
+    Status               = Entry->UnmanagedBootGetDevicePath (Context, &UnmanagedBootDevPath);
     if (EFI_ERROR (Status)) {
-      ExtSystemDevPath = NULL;
+      UnmanagedBootDevPath = NULL;
     } else {
-      ExtSystemDevPathSize = GetDevicePathSize (ExtSystemDevPath);
+      UnmanagedBootDevPathSize = GetDevicePathSize (UnmanagedBootDevPath);
     }
   }
 
@@ -890,10 +890,10 @@ OcSetDefaultBootEntry (
       continue;
     }
 
-    if (ExtSystemDevPath != NULL) {
+    if (UnmanagedBootDevPath != NULL) {
       DevicePathSize = GetDevicePathSize (BootOptionDevicePath);
-      if (DevicePathSize >= ExtSystemDevPathSize) {
-        MatchedEntry = CompareMem (BootOptionDevicePath, ExtSystemDevPath, ExtSystemDevPathSize) == 0;
+      if (DevicePathSize >= UnmanagedBootDevPathSize) {
+        MatchedEntry = CompareMem (BootOptionDevicePath, UnmanagedBootDevPath, UnmanagedBootDevPathSize) == 0;
       }
     } else {
       BootOptionRemainingDevicePath = BootOptionDevicePath;
@@ -973,8 +973,8 @@ OcSetDefaultBootEntry (
       }
     }
 
-    if (ExtSystemDevPath != NULL) {
-      DevicePathSize = ExtSystemDevPathSize;
+    if (UnmanagedBootDevPath != NULL) {
+      DevicePathSize = UnmanagedBootDevPathSize;
     } else if (!Entry->IsCustom) {
       DevicePathSize = GetDevicePathSize (Entry->DevicePath);
     } else {
@@ -1021,8 +1021,8 @@ OcSetDefaultBootEntry (
       CopyMem (LoadOption + 1, LoadOptionName, LoadOptionNameSize);
     }
 
-    if (ExtSystemDevPath != NULL) {
-      CopyMem ((UINT8 *)(LoadOption + 1) + LoadOptionNameSize, ExtSystemDevPath, DevicePathSize);
+    if (UnmanagedBootDevPath != NULL) {
+      CopyMem ((UINT8 *)(LoadOption + 1) + LoadOptionNameSize, UnmanagedBootDevPath, DevicePathSize);
     } else if (!Entry->IsCustom) {
       CopyMem ((UINT8 *)(LoadOption + 1) + LoadOptionNameSize, Entry->DevicePath, DevicePathSize);
     } else {
@@ -1084,9 +1084,9 @@ OcSetDefaultBootEntry (
 
     FreePool (LoadOption);
 
-    if (ExtSystemDevPath != NULL) {
-      FreePool (ExtSystemDevPath);
-      ExtSystemDevPath = NULL;
+    if (UnmanagedBootDevPath != NULL) {
+      FreePool (UnmanagedBootDevPath);
+      UnmanagedBootDevPath = NULL;
     }
 
     if (EFI_ERROR (Status)) {
@@ -1529,25 +1529,27 @@ InternalLoadBootEntry (
   IN  OC_BOOT_ENTRY              *BootEntry,
   IN  EFI_HANDLE                 ParentHandle,
   OUT EFI_HANDLE                 *EntryHandle,
-  OUT INTERNAL_DMG_LOAD_CONTEXT  *DmgLoadContext
+  OUT INTERNAL_DMG_LOAD_CONTEXT  *DmgLoadContext,
+  OUT VOID                       **CustomFreeContext
   )
 {
-  EFI_STATUS                 Status;
-  EFI_STATUS                 OptionalStatus;
-  EFI_DEVICE_PATH_PROTOCOL   *DevicePath;
-  EFI_HANDLE                 StorageHandle;
-  EFI_DEVICE_PATH_PROTOCOL   *StoragePath;
-  CHAR16                     *UnicodeDevicePath;
-  EFI_LOADED_IMAGE_PROTOCOL  *LoadedImage;
-  VOID                       *EntryData;
-  UINT32                     EntryDataSize;
-  CONST CHAR8                *Args;
+  EFI_STATUS                           Status;
+  EFI_STATUS                           OptionalStatus;
+  EFI_DEVICE_PATH_PROTOCOL             *DevicePath;
+  EFI_HANDLE                           StorageHandle;
+  EFI_DEVICE_PATH_PROTOCOL             *StoragePath;
+  CHAR16                               *UnicodeDevicePath;
+  EFI_LOADED_IMAGE_PROTOCOL            *LoadedImage;
+  VOID                                 *EntryData;
+  UINT32                               EntryDataSize;
+  CONST CHAR8                          *Args;
+  OC_APPLE_DISK_IMAGE_PRELOAD_CONTEXT  DmgPreloadContext;
 
   ASSERT (BootEntry != NULL);
   //
   // System entries are not loaded but called directly.
   //
-  ASSERT ((BootEntry->Type & OC_BOOT_EXTERNAL_SYSTEM) == 0);
+  ASSERT ((BootEntry->Type & OC_BOOT_UNMANAGED) == 0);
   ASSERT ((BootEntry->Type & OC_BOOT_SYSTEM) == 0);
   ASSERT (Context != NULL);
   ASSERT (DmgLoadContext != NULL);
@@ -1558,38 +1560,57 @@ InternalLoadBootEntry (
 
   ZeroMem (DmgLoadContext, sizeof (*DmgLoadContext));
 
-  EntryData     = NULL;
-  EntryDataSize = 0;
-  StorageHandle = NULL;
-  StoragePath   = NULL;
+  EntryData          = NULL;
+  EntryDataSize      = 0;
+  StorageHandle      = NULL;
+  StoragePath        = NULL;
+  *CustomFreeContext = NULL;
+  ZeroMem (&DmgPreloadContext, sizeof (DmgPreloadContext));
 
-  if (BootEntry->IsFolder) {
+  //
+  // CustomRead must be set for external tools, but may also be set for boot
+  // entry protocol entries.
+  //
+  ASSERT (BootEntry->Type != OC_BOOT_EXTERNAL_TOOL || BootEntry->CustomRead != NULL);
+
+  if (BootEntry->CustomRead != NULL) {
+    Status = BootEntry->CustomRead (
+                          Context->StorageContext,
+                          BootEntry,
+                          &EntryData,
+                          &EntryDataSize,
+                          &DevicePath,
+                          &StorageHandle,
+                          &StoragePath,
+                          Context->DmgLoading,
+                          &DmgPreloadContext,
+                          CustomFreeContext
+                          );
+
+    if (EFI_ERROR (Status)) {
+      DEBUG ((DEBUG_WARN, "OCB: Custom read failed - %r\n", Status));
+      return Status;
+    }
+  }
+
+  if (  (DmgPreloadContext.DmgFile != NULL)
+     || (DmgPreloadContext.DmgContext != NULL)
+     || BootEntry->IsFolder)
+  {
     if (Context->DmgLoading == OcDmgLoadingDisabled) {
       return EFI_SECURITY_VIOLATION;
     }
 
     DmgLoadContext->DevicePath = BootEntry->DevicePath;
-    DevicePath                 = InternalLoadDmg (DmgLoadContext, Context->DmgLoading);
+    DevicePath                 = InternalLoadDmg (
+                                   DmgLoadContext,
+                                   Context->DmgLoading,
+                                   &DmgPreloadContext
+                                   );
     if (DevicePath == NULL) {
       return EFI_UNSUPPORTED;
     }
-  } else if (BootEntry->Type == OC_BOOT_EXTERNAL_TOOL) {
-    ASSERT (Context->CustomRead != NULL);
-
-    Status = Context->CustomRead (
-                        Context->StorageContext,
-                        BootEntry,
-                        &EntryData,
-                        &EntryDataSize,
-                        &DevicePath,
-                        &StorageHandle,
-                        &StoragePath
-                        );
-
-    if (EFI_ERROR (Status)) {
-      return Status;
-    }
-  } else {
+  } else if (BootEntry->CustomRead == NULL) {
     DevicePath = BootEntry->DevicePath;
   }
 
@@ -1691,6 +1712,9 @@ InternalLoadBootEntry (
     }
   } else {
     InternalUnloadDmg (DmgLoadContext);
+    if (BootEntry->CustomFree != NULL) {
+      BootEntry->CustomFree (*CustomFreeContext);
+    }
   }
 
   return Status;
