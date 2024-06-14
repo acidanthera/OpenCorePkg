@@ -446,9 +446,9 @@ PatchAppleXcpmExtraMsrs (
 
   //
   // Now patch writes to MSR_MISC_PWR_MGMT.
-  // On macOS Sequoia (15) and above, this no longer exists.
+  // On macOS Monterey (12) and above, this no longer exists.
   //
-  if (OcMatchDarwinVersion (KernelVersion, KERNEL_VERSION_SEQUOIA_MIN, 0)) {
+  if (OcMatchDarwinVersion (KernelVersion, KERNEL_VERSION_MONTEREY_MIN, 0)) {
     DEBUG ((DEBUG_INFO, "OCAK: Skipping XcpmExtraMsrs MSR_MISC_PWR_MGMT patch on %u\n", KernelVersion));
   } else {
     Status = PatcherApplyGenericPatch (Patcher, &mMiscPwrMgmtRelPatch);
