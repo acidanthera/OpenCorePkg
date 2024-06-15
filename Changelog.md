@@ -4,6 +4,8 @@ OpenCore Changelog
 - Updated code and added progress bar to macrecovery, thx @soyeonswife63
 - Bundled fat binary i386/x64 10.6+ compatible `nvramdump` with LogoutHook release
 - Added support for manual build of i386/x64 10.6+ versions of userspace tools via `FATBIN32=1 make`
+- Disabled `XcpmExtraMsrs MSR_MISC_PWR_MGMT` patch on macOS 12+ due to non-existence
+- Fixed `ThirdPartyDrives` quirk on macOS 14.4 and above
 
 #### v1.0.0
 - Updated builtin firmware versions for SMBIOS and the rest
