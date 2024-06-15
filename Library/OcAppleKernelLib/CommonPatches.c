@@ -446,13 +446,18 @@ PatchAppleXcpmExtraMsrs (
 
   //
   // Now patch writes to MSR_MISC_PWR_MGMT.
+  // On macOS Monterey (12) and above, this no longer exists.
   //
-  Status = PatcherApplyGenericPatch (Patcher, &mMiscPwrMgmtRelPatch);
-  if (EFI_ERROR (Status)) {
-    DEBUG ((DEBUG_INFO, "OCAK: Failed to patch writes to MSR_MISC_PWR_MGMT - %r, trying dbg\n", Status));
-    Status = PatcherApplyGenericPatch (Patcher, &mMiscPwrMgmtDbgPatch);
+  if (OcMatchDarwinVersion (KernelVersion, KERNEL_VERSION_MONTEREY_MIN, 0)) {
+    DEBUG ((DEBUG_INFO, "OCAK: Skipping XcpmExtraMsrs MSR_MISC_PWR_MGMT patch on %u\n", KernelVersion));
+  } else {
+    Status = PatcherApplyGenericPatch (Patcher, &mMiscPwrMgmtRelPatch);
     if (EFI_ERROR (Status)) {
-      DEBUG ((DEBUG_WARN, "OCAK: Failed to patch writes to MSR_MISC_PWR_MGMT - %r\n", Status));
+      DEBUG ((DEBUG_INFO, "OCAK: Failed to patch writes to XcpmExtraMsrs MSR_MISC_PWR_MGMT - %r, trying dbg\n", Status));
+      Status = PatcherApplyGenericPatch (Patcher, &mMiscPwrMgmtDbgPatch);
+      if (EFI_ERROR (Status)) {
+        DEBUG ((DEBUG_WARN, "OCAK: Failed to patch writes to XcpmExtraMsrs MSR_MISC_PWR_MGMT - %r\n", Status));
+      }
     }
   }
 
@@ -989,6 +994,57 @@ PATCHER_GENERIC_PATCH
 };
 
 STATIC
+CONST UINT8
+  mIOAHCIBlockStoragePatch144Find[] = {
+  0x4C, 0x8D, 0x2D, 0x00, 0x00, 0x00, 0x00, ///< lea r13, qword ("APPLE" and "APPLE SSD")
+  0x4C, 0x89, 0xEF,                         ///< mov rdi, r13
+  0xE8, 0x00, 0x00, 0x00, 0x00,             ///< call strlen
+  0x4C, 0x89, 0xEF                          ///< mov rdi, r13
+};
+
+STATIC
+CONST UINT8
+  mIOAHCIBlockStoragePatch144FindMask[] = {
+  0xFF, 0xFF, 0xFF, 0x00, 0x00, 0x00, 0x00,
+  0xFF, 0xFF, 0xFF,
+  0xFF, 0x00, 0x00, 0x00, 0x00,
+  0xFF, 0xFF, 0xFF
+};
+
+STATIC
+CONST UINT8
+  mIOAHCIBlockStoragePatch144Replace[] = {
+  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+  0x00, 0x00, 0x00,
+  0x31, 0xC0, 0x90, 0x90, 0x90, ///< xor eax, eax ; nop
+  0x00, 0x00, 0x00
+};
+
+STATIC
+CONST UINT8
+  mIOAHCIBlockStoragePatch144ReplaceMask[] = {
+  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+  0x00, 0x00, 0x00,
+  0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
+  0x00, 0x00, 0x00
+};
+
+STATIC
+PATCHER_GENERIC_PATCH
+  mIOAHCIBlockStoragePatch144 = {
+  .Comment     = DEBUG_POINTER ("IOAHCIBlockStorage trim 14.4+"),
+  .Base        = "__ZN24IOAHCIBlockStorageDriver23DetermineDeviceFeaturesEPt",
+  .Find        = mIOAHCIBlockStoragePatch144Find,
+  .Mask        = mIOAHCIBlockStoragePatch144FindMask,
+  .Replace     = mIOAHCIBlockStoragePatch144Replace,
+  .ReplaceMask = mIOAHCIBlockStoragePatch144ReplaceMask,
+  .Size        = sizeof (mIOAHCIBlockStoragePatch144Find),
+  .Count       = 2,
+  .Skip        = 0,
+  .Limit       = 4096
+};
+
+STATIC
 EFI_STATUS
 PatchThirdPartyDriveSupport (
   IN OUT PATCHER_CONTEXT  *Patcher OPTIONAL,
@@ -1000,6 +1056,20 @@ PatchThirdPartyDriveSupport (
   if (Patcher == NULL) {
     DEBUG ((DEBUG_INFO, "OCAK: [OK] Skipping %a on NULL Patcher on %u\n", __func__, KernelVersion));
     return EFI_NOT_FOUND;
+  }
+
+  //
+  // macOS 14.4+ (Darwin 23.4.0) adopted different patch patterns similar to 13.3+, as below.
+  //
+  if (OcMatchDarwinVersion (KernelVersion, KERNEL_VERSION (KERNEL_VERSION_SONOMA, 4, 0), 0)) {
+    Status = PatcherApplyGenericPatch (Patcher, &mIOAHCIBlockStoragePatch144);
+    if (EFI_ERROR (Status)) {
+      DEBUG ((DEBUG_INFO, "OCAK: [FAIL] Failed to apply patch 14.4+ com.apple.iokit.IOAHCIBlockStorage - %r\n", Status));
+    } else {
+      DEBUG ((DEBUG_INFO, "OCAK: [OK] Patch success 14.4+ com.apple.iokit.IOAHCIBlockStorage\n"));
+    }
+
+    return Status;
   }
 
   //
