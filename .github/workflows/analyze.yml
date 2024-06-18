@@ -13,8 +13,7 @@ env:
 jobs:
   analyze-shell-scripts:
     name: Shell Scripts
-    # See https://github.blog/changelog/2024-01-30-github-actions-introducing-the-new-m1-macos-runner-available-to-open-source
-    runs-on: macos-14
+    runs-on: macos-latest
     env:
       JOB_TYPE: ANALYZE
       HOMEBREW_NO_INSTALL_CLEANUP: 1
