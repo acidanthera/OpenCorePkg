@@ -79,6 +79,7 @@
   VariableFlashInfoLib|MdeModulePkg/Library/BaseVariableFlashInfoLib/BaseVariableFlashInfoLib.inf
   UefiImageExtraActionLib|MdePkg/Library/BaseUefiImageExtraActionLibNull/BaseUefiImageExtraActionLibNull.inf
   PeCoffLib2|MdePkg/Library/BasePeCoffLib2/BasePeCoffLib2.inf
+  ImagePropertiesRecordLib|MdeModulePkg/Library/ImagePropertiesRecordLib/ImagePropertiesRecordLib.inf
   #
   # Generic Modules
   #
@@ -190,16 +191,16 @@
   }
   UefiCpuPkg/CpuIo2Dxe/CpuIo2Dxe.inf
   OpenCorePkg/Legacy/BootPlatform/CpuDxe/CpuDxe.inf
-  OvmfPkg/8259InterruptControllerDxe/8259.inf {
+  OpenCorePkg/Legacy/BootPlatform/8259InterruptControllerDxe/8259.inf {
     <PcdsFixedAtBuild>
-      gUefiOvmfPkgTokenSpaceGuid.Pcd8259LegacyModeMask|0xFFFC
+      gOpenCorePkgTokenSpaceGuid.Pcd8259LegacyModeMask|0xFFFC
   }
   OpenCorePkg/Legacy/BootPlatform/AcpiResetDxe/Reset.inf
   MdeModulePkg/Universal/Metronome/Metronome.inf
 
   # Chipset
   PcAtChipsetPkg/PcatRealTimeClockRuntimeDxe/PcatRealTimeClockRuntimeDxe.inf
-  OvmfPkg/8254TimerDxe/8254Timer.inf
+  OpenCorePkg/Legacy/BootPlatform/8254TimerDxe/8254Timer.inf
   OpenCorePkg/Legacy/BootPlatform/PciRootBridgeDxe/PciRootBridgeNoEnumeration.inf
   OpenCorePkg/Legacy/BootPlatform/PciBusNoEnumerationDxe/PciBusNoEnumeration.inf
   MdeModulePkg/Bus/Pci/NvmExpressDxe/NvmExpressDxe.inf

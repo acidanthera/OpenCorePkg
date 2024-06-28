@@ -1,0 +1,46 @@
+## @file
+# 8259 Interrupt Controller driver that provides Legacy 8259 protocol.
+#
+# Copyright (c) 2005 - 2019, Intel Corporation. All rights reserved.<BR>
+# SPDX-License-Identifier: BSD-2-Clause-Patent
+#
+##
+
+[Defines]
+  INF_VERSION                    = 0x00010005
+  BASE_NAME                      = Legacy8259
+  MODULE_UNI_FILE                = Legacy8259.uni
+  FILE_GUID                      = 245CB4DA-8E15-4A1B-87E3-9878FFA07520
+  MODULE_TYPE                    = DXE_DRIVER
+  VERSION_STRING                 = 1.0
+  ENTRY_POINT                    = Install8259
+
+[Sources]
+  8259.c
+  8259.h
+
+[Packages]
+  MdePkg/MdePkg.dec
+  OvmfPkg/OvmfPkg.dec
+  OpenCorePkg/OpenCorePkg.dec
+
+[LibraryClasses]
+  UefiBootServicesTableLib
+  DebugLib
+  UefiDriverEntryPoint
+  IoLib
+  PcdLib
+
+[Protocols]
+  gEfiLegacy8259ProtocolGuid                    ## PRODUCES
+  gEfiPciIoProtocolGuid                         ## SOMETIMES_CONSUMES
+
+[Pcd]
+  gOpenCorePkgTokenSpaceGuid.Pcd8259LegacyModeMask      ## CONSUMES
+  gOpenCorePkgTokenSpaceGuid.Pcd8259LegacyModeEdgeLevel ## CONSUMES
+
+[Depex]
+  TRUE
+
+[UserExtensions.TianoCore."ExtraFiles"]
+  Legacy8259Extra.uni

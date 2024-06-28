@@ -1,0 +1,44 @@
+## @file
+# 8254 timer driver that provides Timer Arch protocol.
+#
+# Copyright (c) 2005 - 2019, Intel Corporation. All rights reserved.<BR>
+# SPDX-License-Identifier: BSD-2-Clause-Patent
+#
+##
+
+[Defines]
+  INF_VERSION                    = 0x00010005
+  BASE_NAME                      = Timer
+  MODULE_UNI_FILE                = Timer.uni
+  FILE_GUID                      = C190FE35-44AA-41A1-8AEA-4947BC60E09D
+  MODULE_TYPE                    = DXE_DRIVER
+  VERSION_STRING                 = 1.0
+
+  ENTRY_POINT                    = TimerDriverInitialize
+
+[Packages]
+  MdePkg/MdePkg.dec
+  OvmfPkg/OvmfPkg.dec
+  OpenCorePkg/OpenCorePkg.dec
+
+[LibraryClasses]
+  UefiBootServicesTableLib
+  BaseLib
+  DebugLib
+  NestedInterruptTplLib
+  UefiDriverEntryPoint
+  IoLib
+
+[Sources]
+  Timer.h
+  Timer.c
+
+[Protocols]
+  gEfiCpuArchProtocolGuid       ## CONSUMES
+  gEfiLegacy8259ProtocolGuid    ## CONSUMES
+  gEfiTimerArchProtocolGuid     ## PRODUCES
+
+[Depex]
+  gEfiCpuArchProtocolGuid AND gEfiLegacy8259ProtocolGuid
+[UserExtensions.TianoCore."ExtraFiles"]
+  TimerExtra.uni

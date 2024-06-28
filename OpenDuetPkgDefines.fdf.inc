@@ -45,7 +45,7 @@
   APRIORI DXE {
     INF  MdeModulePkg/Universal/DevicePathDxe/DevicePathDxe.inf
     INF  MdeModulePkg/Universal/PCD/Dxe/Pcd.inf
-    INF  OvmfPkg/8259InterruptControllerDxe/8259.inf
+    INF  OpenCorePkg/Legacy/BootPlatform/8259InterruptControllerDxe/8259.inf
   }
 
   # Core code
@@ -63,14 +63,14 @@
   # CPU and interrupts
   INF  UefiCpuPkg/CpuIo2Dxe/CpuIo2Dxe.inf
   INF  OpenCorePkg/Legacy/BootPlatform/CpuDxe/CpuDxe.inf
-  INF  OvmfPkg/8259InterruptControllerDxe/8259.inf
+  INF  OpenCorePkg/Legacy/BootPlatform/8259InterruptControllerDxe/8259.inf
   INF  OpenCorePkg/Legacy/BootPlatform/AcpiResetDxe/Reset.inf
 
   # Timer
   INF  MdeModulePkg/Universal/Metronome/Metronome.inf
   INF  MdeModulePkg/Universal/WatchdogTimerDxe/WatchdogTimer.inf
   INF  MdeModulePkg/Universal/MonotonicCounterRuntimeDxe/MonotonicCounterRuntimeDxe.inf
-  INF  OvmfPkg/8254TimerDxe/8254Timer.inf
+  INF  OpenCorePkg/Legacy/BootPlatform/8254TimerDxe/8254Timer.inf
   INF  PcAtChipsetPkg/PcatRealTimeClockRuntimeDxe/PcatRealTimeClockRuntimeDxe.inf
 
   # PCI

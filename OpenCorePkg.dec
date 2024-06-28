@@ -102,6 +102,9 @@
   ## Include/Acidanthera/Protocol/HdaIo.h
   gEfiHdaIoDevicePathGuid                    = { 0xA9003FEB, 0xD806, 0x41DB, { 0xA4, 0x91, 0x54, 0x05, 0xFE, 0xEF, 0x46, 0xC3 }}
 
+  ## Include/Acidanthera/Guid/LegacyBios.h
+  gEfiLegacyBiosGuid                         = { 0x2E3044AC, 0x879F, 0x490F, { 0x97, 0x60, 0xBB, 0xDF, 0xAF, 0x69, 0x5F, 0x50 }}
+
   ## Include/Apple/Guid/AppleApfsInfo.h
   gAppleApfsPartitionTypeGuid                = { 0x7C3457EF, 0x0000, 0x11AA, { 0xAA, 0x11, 0x00, 0x30, 0x65, 0x43, 0xEC, 0xAC }}
 
@@ -490,6 +493,9 @@
   ## Include/Acidanthera/Protocol/HdaIo.h
   gEfiHdaIoProtocolGuid                      = { 0xA090D7F9, 0xB50A, 0x4EA1, { 0xBD, 0xE9, 0x1A, 0xA5, 0xE9, 0x81, 0x2F, 0x45 }}
 
+  ## Include/Acidanthera/Protocol/Legacy8259.h
+  gEfiLegacy8259ProtocolGuid                 = { 0x38321dba, 0x4fe0, 0x4e17, { 0x8a, 0xec, 0x41, 0x30, 0x55, 0xea, 0xed, 0xc1 }}
+
   ## Include/Acidanthera/Protocol/OcAudio.h
   gOcAudioProtocolGuid                       = { 0x4B228577, 0x6274, 0x4A48, { 0x82, 0xAE, 0x07, 0x13, 0xA1, 0x17, 0x19, 0x87 }}
 
@@ -785,6 +791,32 @@
   ##   FALSE - Do not save early logs.<BR>
   ## @Prompt Allow saving early logs when log protocol has not yet arrived.
   gOpenCorePkgTokenSpaceGuid.PcdDebugLibProtocolBufferEarlyLog|TRUE|BOOLEAN|0x00000608
+
+  ## Pcd8259LegacyModeMask defines the default mask value for platform. This
+  #  value is determined.
+  #  1) If platform only support pure UEFI, value should be set to 0xFFFF or
+  #     0xFFFE; Because only clock interrupt is allowed in legacy mode in pure
+  #     UEFI platform.
+  #  2) If platform install CSM and use thunk module:
+  #     a) If thunk call provided by CSM binary requires some legacy interrupt
+  #        support, the corresponding bit should be opened as 0.
+  #        For example, if keyboard interfaces provided CSM binary use legacy
+  #        keyboard interrupt in 8259 bit 1, then the value should be set to
+  #        0xFFFC.
+  #     b) If all thunk call provied by CSM binary do not require legacy
+  #        interrupt support, value should be set to 0xFFFF or 0xFFFE.
+  #
+  #  The default value of legacy mode mask could be changed by
+  #  EFI_LEGACY_8259_PROTOCOL->SetMask(). But it is rarely need change it
+  #  except some special cases such as when initializing the CSM binary, it
+  #  should be set to 0xFFFF to mask all legacy interrupt. Please restore the
+  #  original legacy mask value if changing is made for these special case.
+  gOpenCorePkgTokenSpaceGuid.Pcd8259LegacyModeMask|0xFFFF|UINT16|0x00000609
+
+  ## Pcd8259LegacyModeEdgeLevel defines the default edge level for legacy
+  #  mode's interrrupt controller.
+  #  For the corresponding bits, 0 = Edge triggered and 1 = Level triggered.
+  gOpenCorePkgTokenSpaceGuid.Pcd8259LegacyModeEdgeLevel|0x0000|UINT16|0x0000060a
 
 [LibraryClasses]
   ##  @libraryclass
