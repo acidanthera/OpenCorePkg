@@ -969,7 +969,7 @@ InternalEfiLoadImage (
   // Load the image ourselves in secure boot mode.
   //
   if (SecureBootStatus == EFI_SUCCESS) {
-    if ((SourceBuffer != NULL) && (OcImageLoaderCaps == NULL)) {
+    if (SourceBuffer != NULL) {
       Status = OcImageLoaderLoad (
                  FALSE,
                  ParentImageHandle,
@@ -980,10 +980,16 @@ InternalEfiLoadImage (
                  );
     } else {
       //
-      // We verified the image, but contained garbage, or we are trying to secure boot a Fat slice.
-      // This should not happen.
+      // SecureBootStatus can be EFI_SUCCESS without a signature being
+      // verified, if SecureBootModel is Disabled and the boot file is from
+      // a DMG. This effectively just means: no more SB checks required, use
+      // our loader.
+      // SourceBuffer will be NULL if filtering for supported architecture
+      // failed.
+      // All this can't happen in a secure boot chain, and should not happen
+      // (with valid boot files) in a non-secure boot chain. But if it does,
+      // just abort.
       //
-      ASSERT (FALSE);
       Status = EFI_UNSUPPORTED;
     }
   } else {

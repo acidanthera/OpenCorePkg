@@ -6,6 +6,7 @@ OpenCore Changelog
 - Added support for manual build of i386/x64 10.6+ versions of userspace tools via `FATBIN32=1 make`
 - Disabled `XcpmExtraMsrs MSR_MISC_PWR_MGMT` patch on macOS 12+ due to non-existence
 - Fixed `ThirdPartyDrives` quirk on macOS 14.4 and above
+- Resolved issue booting recovery for OS X 10.8 and earlier since 0.9.7
 
 #### v1.0.0
 - Updated builtin firmware versions for SMBIOS and the rest
