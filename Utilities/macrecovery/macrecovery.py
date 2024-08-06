@@ -249,7 +249,10 @@ def verify_image(dmgpath, cnkpath):
 
     with open(dmgpath, 'rb') as dmgf:
         for cnkcount, (cnksize, cnkhash) in enumerate(verify_chunklist(cnkpath), 1):
-            print(f'\r{f"Chunk {cnkcount} ({cnksize} bytes)":<{os.get_terminal_size().columns - 2}}', end='')
+            terminalsize = os.get_terminal_size().columns
+            if terminalsize >= 2:
+                terminalsize -= 2
+            print(f'\r{f"Chunk {cnkcount} ({cnksize} bytes)":<{terminalsize}}', end='')
             sys.stdout.flush()
             cnk = dmgf.read(cnksize)
             if len(cnk) != cnksize:
