@@ -31,6 +31,7 @@
   OpenCoreUefi.c
   OpenCoreUefiAudio.c
   OpenCoreUefiInOut.c
+  OpenCoreUefiUnloadDrivers.c
   OpenCoreVault.c
 
 [Packages]
@@ -47,6 +48,7 @@
   gEfiAudioDecodeProtocolGuid         ## SOMETIMES_CONSUMES
   gEfiDevicePathProtocolGuid          ## CONSUMES
   gEfiDevicePathProtocolGuid          ## CONSUMES
+  gEfiDriverBindingProtocolGuid       ## CONSUMES
   gEfiSimplePointerProtocolGuid       ## SOMETIMES_CONSUMES
   gEfiLoadedImageProtocolGuid         ## CONSUMES
   gEfiSimpleFileSystemProtocolGuid    ## CONSUMES

@@ -30,8 +30,8 @@
   DEFINE NETWORK_ENABLE                 = TRUE
   DEFINE NETWORK_SNP_ENABLE             = TRUE
   DEFINE NETWORK_IP4_ENABLE             = TRUE
-  DEFINE NETWORK_IP6_ENABLE             = FALSE
-  DEFINE NETWORK_TLS_ENABLE             = FALSE
+  DEFINE NETWORK_IP6_ENABLE             = TRUE
+  DEFINE NETWORK_TLS_ENABLE             = TRUE
   DEFINE NETWORK_HTTP_ENABLE            = TRUE
   DEFINE NETWORK_HTTP_BOOT_ENABLE       = TRUE
   DEFINE NETWORK_ALLOW_HTTP_CONNECTIONS = TRUE
@@ -169,6 +169,17 @@
   VariableFlashInfoLib|MdeModulePkg/Library/BaseVariableFlashInfoLib/BaseVariableFlashInfoLib.inf
   ResetSystemLib|OpenCorePkg/Library/OcResetSystemLib/OcResetSystemLib.inf
 
+  !if $(NETWORK_TLS_ENABLE) == TRUE
+    BaseCryptLib|CryptoPkg/Library/BaseCryptLib/BaseCryptLib.inf
+    # FileExplorerLib is for TlsAuthConfigDxe only (not used by us, but enabled by NETWORK_TLS_ENABLE)
+    FileExplorerLib|MdeModulePkg/Library/FileExplorerLib/FileExplorerLib.inf
+    IntrinsicLib|CryptoPkg/Library/IntrinsicLib/IntrinsicLib.inf
+    OpensslLib|CryptoPkg/Library/OpensslLib/OpensslLib.inf
+    RngLib|MdeModulePkg/Library/BaseRngLibTimerLib/BaseRngLibTimerLib.inf
+    SafeIntLib|MdePkg/Library/BaseSafeIntLib/BaseSafeIntLib.inf
+    TlsLib|CryptoPkg/Library/TlsLib/TlsLib.inf
+  !endif
+
   !include NetworkPkg/NetworkLibs.dsc.inc
 
   !include Ext4Pkg/Ext4Defines.dsc.inc
@@ -244,7 +255,6 @@
   OpenCorePkg/Library/OcBlitLib/OcBlitLib.inf
   OpenCorePkg/Library/OcBootManagementLib/OcBootManagementLib.inf
   OpenCorePkg/Library/OcBootServicesTableLib/OcBootServicesTableLib.inf
-  OpenCorePkg/Library/OcCompilerIntrinsicsLib/OcCompilerIntrinsicsLib.inf
   OpenCorePkg/Library/OcCompressionLib/OcCompressionLib.inf
   OpenCorePkg/Library/OcConfigurationLib/OcConfigurationLib.inf
   OpenCorePkg/Library/OcConsoleControlEntryModeLib/OcConsoleControlEntryModeGenericLib.inf
@@ -301,6 +311,7 @@
   OpenCorePkg/Platform/OpenCanopy/OpenCanopy.inf
   OpenCorePkg/Platform/OpenLegacyBoot/OpenLegacyBoot.inf
   OpenCorePkg/Platform/OpenLinuxBoot/OpenLinuxBoot.inf
+  OpenCorePkg/Platform/OpenNetworkBoot/OpenNetworkBoot.inf
   OpenCorePkg/Platform/OpenNtfsDxe/OpenNtfsDxe.inf
   OpenCorePkg/Platform/OpenPartitionDxe/PartitionDxe.inf
   OpenCorePkg/Platform/OpenRuntime/OpenRuntime.inf
@@ -375,8 +386,10 @@
   #
   !include NetworkPkg/NetworkComponents.dsc.inc
 
+  CryptoPkg/Library/IntrinsicLib/IntrinsicLib.inf
+
 [LibraryClasses]
-  NULL|OpenCorePkg/Library/OcCompilerIntrinsicsLib/OcCompilerIntrinsicsLib.inf
+  NULL|CryptoPkg/Library/IntrinsicLib/IntrinsicLib.inf
 
 [PcdsFixedAtBuild]
   gEfiMdePkgTokenSpaceGuid.PcdMaximumAsciiStringLength|0

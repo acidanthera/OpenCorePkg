@@ -897,6 +897,8 @@ OcLoadUefiSupport (
   EFI_EVENT   Event;
   BOOLEAN     AccelEnabled;
 
+  OcUnloadDrivers (Config);
+
   OcReinstallProtocols (Config);
 
   OcImageLoaderInit (Config->Booter.Quirks.ProtectUefiServices, Config->Booter.Quirks.FixupAppleEfiImages);

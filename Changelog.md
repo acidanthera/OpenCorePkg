@@ -1,5 +1,10 @@
 OpenCore Changelog
 ==================
+#### v1.0.2
+- Added OpenNetworkBoot driver to support HTTP(S) and PXE boot
+- Supported DMG loading and verification (e.g. macOS Recovery) over HTTP(S) boot
+- Added `UEFI` `Unload` option to unload existing firmware drivers
+
 #### v1.0.1
 - Updated code and added progress bar to macrecovery, thx @soyeonswife63
 - Bundled fat binary i386/x64 10.6+ compatible `nvramdump` with LogoutHook release
