@@ -1,5 +1,8 @@
 OpenCore Changelog
 ==================
+#### v1.0.2
+- Fixed error in macrecovery when running headless, thx @mkorje
+
 #### v1.0.1
 - Updated code and added progress bar to macrecovery, thx @soyeonswife63
 - Bundled fat binary i386/x64 10.6+ compatible `nvramdump` with LogoutHook release
