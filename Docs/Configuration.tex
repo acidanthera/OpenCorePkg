@@ -7560,6 +7560,40 @@ OpenCore is installed, in order for the \texttt{Launchd.command} script to work 
   could be the second 256 MB corrupted by the Intel HD 3000 or an area with faulty RAM.
   Refer to the \hyperref[uefirsvdprops]{ReservedMemory Properties} section below for details.
 
+\item
+  \texttt{Unload}\\
+  \textbf{Type}: \texttt{plist\ array}\\
+  \textbf{Failsafe}: Empty\\
+  \textbf{Description}: Unload specified firmware drivers.
+
+  To be filled with \texttt{plist\ string} entries containing
+  the names of firmware drivers to unload before loading the
+  \texttt{Drivers} section.
+  This setting is typically only required if a user-provided driver is a variant of
+  an existing system firmware driver, and if the new driver would detect itself
+  as partially loaded, or otherwise fail to operate correctly, if the old
+  driver is not unloaded first.
+
+  \textbf{Warning}: Unloading system firmware drivers is usually not required
+  and not recommended. Poorly written drivers may crash when
+  unloaded, or cause subsequent crashes (e.g by allowing themselves to be
+  unloaded even though they have active dependencies). However standard UEFI
+  network stack drivers should unload cleanly.
+
+  \emph{Note 1}: See \texttt{SysReport/Drivers/DriverImageNames.txt} for the
+  list of drivers which this option can attempt to unload.
+  The relevant name is the driver component name. Drivers are only listed if they
+  implement \texttt{DriverBindingProtocol} and \texttt{LoadedImageProtocol},
+  and have an available component name.
+
+  \emph{Note 2}: The NVRAM \texttt{Lang} and \texttt{PlatformLang} variables
+  are ignored when determining the driver component names recognised by this
+  option, and listed in the \texttt{SysReport} file. This is in order to make
+  unloading images stable across changes in these variables.
+  The UEFI Shell \texttt{dh} command takes account of these variables,
+  so in some circumstances may display different driver component names from
+  those listed for this option, unless these variables are cleared.
+
 \end{enumerate}
 
 \subsection{APFS Properties}\label{uefiapfsprops}

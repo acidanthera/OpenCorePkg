@@ -73,6 +73,7 @@ OC_STRUCTORS (OC_PLATFORM_NVRAM_CONFIG, ())
 OC_STRUCTORS (OC_PLATFORM_SMBIOS_CONFIG, ())
 OC_STRUCTORS (OC_PLATFORM_CONFIG, ())
 
+OC_ARRAY_STRUCTORS (OC_UEFI_UNLOAD_ARRAY)
 OC_STRUCTORS (OC_UEFI_DRIVER_ENTRY, ())
 OC_ARRAY_STRUCTORS (OC_UEFI_DRIVER_ARRAY)
 OC_STRUCTORS (OC_UEFI_APFS, ())
@@ -854,6 +855,10 @@ OC_SCHEMA
 
 STATIC
 OC_SCHEMA
+  mMiscUnloadImagesSchema = OC_SCHEMA_STRING (NULL);
+
+STATIC
+OC_SCHEMA
   mUefiConfigurationSchema[] = {
   OC_SCHEMA_DICT ("APFS",                 mUefiApfsSchema),
   OC_SCHEMA_DICT ("AppleInput",           mUefiAppleInputSchema),
@@ -865,6 +870,7 @@ OC_SCHEMA
   OC_SCHEMA_DICT ("ProtocolOverrides",    mUefiProtocolOverridesSchema),
   OC_SCHEMA_DICT ("Quirks",               mUefiQuirksSchema),
   OC_SCHEMA_ARRAY_IN ("ReservedMemory",   OC_GLOBAL_CONFIG,             Uefi.ReservedMemory, &mUefiReservedMemorySchema),
+  OC_SCHEMA_ARRAY_IN ("Unload",           OC_GLOBAL_CONFIG,             Uefi.Unload,         &mMiscUnloadImagesSchema),
 };
 
 //
