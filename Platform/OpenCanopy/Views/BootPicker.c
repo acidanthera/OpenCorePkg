@@ -1495,7 +1495,7 @@ BootPickerEntriesSet (
         }
 
         break;
-      case OC_BOOT_EXTERNAL_SYSTEM:
+      case OC_BOOT_UNMANAGED:
         if (OcAsciiStriStr (Entry->Flavour, OC_FLAVOUR_WINDOWS) != NULL) {
           Status = CopyLabel (&VolumeEntry->Label, &GuiContext->Labels[LABEL_WINDOWS]);
         } else {

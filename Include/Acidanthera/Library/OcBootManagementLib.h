@@ -157,7 +157,7 @@ typedef UINT32 OC_BOOT_ENTRY_TYPE;
 #define OC_BOOT_EXTERNAL_OS         BIT6
 #define OC_BOOT_EXTERNAL_TOOL       BIT7
 #define OC_BOOT_SYSTEM              BIT8
-#define OC_BOOT_EXTERNAL_SYSTEM     BIT9
+#define OC_BOOT_UNMANAGED           BIT9
 
 /**
   Picker mode.
@@ -200,21 +200,21 @@ EFI_STATUS
   );
 
 /**
-  Action to perform as part of executing an external boot system boot entry.
+  Action to perform as part of executing an unmanaged boot entry.
 **/
 typedef
 EFI_STATUS
-(*OC_BOOT_EXTERNAL_SYSTEM_ACTION) (
+(*OC_BOOT_UNMANAGED_ACTION) (
   IN OUT  OC_PICKER_CONTEXT         *PickerContext,
   IN      EFI_DEVICE_PATH_PROTOCOL  *DevicePath
   );
 
 /**
-  Gets Device Path for external boot system boot entry.
+  Get Device Path for unmanaged boot entry.
 **/
 typedef
 EFI_STATUS
-(*OC_BOOT_EXTERNAL_SYSTEM_GET_DP) (
+(*OC_BOOT_UNMANAGED_GET_FINAL_DP) (
   IN OUT  OC_PICKER_CONTEXT         *PickerContext,
   IN OUT  EFI_DEVICE_PATH_PROTOCOL  **DevicePath
   );
@@ -238,13 +238,13 @@ typedef struct OC_BOOT_ENTRY_ {
   //
   OC_BOOT_SYSTEM_ACTION             SystemAction;
   //
-  // Action to perform on execution. Only valid for external boot system entries.
+  // Action to perform on execution. Only valid for unmanaged boot entries.
   //
-  OC_BOOT_EXTERNAL_SYSTEM_ACTION    ExternalSystemAction;
+  OC_BOOT_UNMANAGED_ACTION          UnmanagedBootAction;
   //
-  // Gets Device Path for external boot system boot entry. Only valid for external boot system entries.
+  // Get final Device Path for boot entry. Only valid for unmanaged boot entries.
   //
-  OC_BOOT_EXTERNAL_SYSTEM_GET_DP    ExternalSystemGetDevicePath;
+  OC_BOOT_UNMANAGED_GET_FINAL_DP    UnmanagedBootGetFinalDevicePath;
   //
   // Id under which to save entry as default.
   //
@@ -642,17 +642,17 @@ typedef struct {
   //
   CHAR8                             *AudioBaseType;
   //
-  // External boot system action. Boot Entry Protocol only. Optional.
+  // Unmanaged boot action. Boot Entry Protocol unmanaged boot entries only.
   //
-  OC_BOOT_EXTERNAL_SYSTEM_ACTION    ExternalSystemAction;
+  OC_BOOT_UNMANAGED_ACTION          UnmanagedBootAction;
   //
-  // Gets Device Path for external boot system boot entry. Boot Entry Protocol only. Optional.
+  // Get final Device Path for unmanaged boot entry. Boot Entry Protocol unmanaged boot entries only.
   //
-  OC_BOOT_EXTERNAL_SYSTEM_GET_DP    ExternalSystemGetDevicePath;
+  OC_BOOT_UNMANAGED_GET_FINAL_DP    UnmanagedBootGetFinalDevicePath;
   //
-  // External boot system Device Path. Boot Entry Protocol only. Optional.
+  // Unmanaged boot Device Path. Boot Entry Protocol unmanaged boot entries only.
   //
-  EFI_DEVICE_PATH_PROTOCOL          *ExternalSystemDevicePath;
+  EFI_DEVICE_PATH_PROTOCOL          *UnmanagedBootDevicePath;
   //
   // Whether this entry should be labeled as external to the system. Boot Entry Protocol only. Optional.
   //

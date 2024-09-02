@@ -110,7 +110,7 @@ FreePickerEntry (
 
 STATIC
 EFI_STATUS
-ExternalSystemActionDoLegacyBoot (
+UnmanagedBootActionDoLegacyBoot (
   IN OUT  OC_PICKER_CONTEXT         *PickerContext,
   IN      EFI_DEVICE_PATH_PROTOCOL  *DevicePath
   )
@@ -211,7 +211,7 @@ ExternalSystemActionDoLegacyBoot (
 
 STATIC
 EFI_STATUS
-ExternalSystemGetDevicePath (
+UnmanagedBootGetFinalDevicePath (
   IN OUT  OC_PICKER_CONTEXT         *PickerContext,
   IN OUT  EFI_DEVICE_PATH_PROTOCOL  **DevicePath
   )
@@ -416,17 +416,17 @@ OcGetLegacyBootEntries (
       PickerEntry->Name = GetLegacyEntryName (LegacyOsType);
     }
 
-    PickerEntry->Id                          = AsciiDevicePath;
-    PickerEntry->Path                        = NULL;
-    PickerEntry->Arguments                   = NULL;
-    PickerEntry->Flavour                     = GetLegacyEntryFlavour (LegacyOsType);
-    PickerEntry->Tool                        = FALSE;
-    PickerEntry->TextMode                    = FALSE;
-    PickerEntry->RealPath                    = FALSE;
-    PickerEntry->External                    = IsExternal;
-    PickerEntry->ExternalSystemAction        = ExternalSystemActionDoLegacyBoot;
-    PickerEntry->ExternalSystemGetDevicePath = ExternalSystemGetDevicePath;
-    PickerEntry->ExternalSystemDevicePath    = BlockDevicePath;
+    PickerEntry->Id                              = AsciiDevicePath;
+    PickerEntry->Path                            = NULL;
+    PickerEntry->Arguments                       = NULL;
+    PickerEntry->Flavour                         = GetLegacyEntryFlavour (LegacyOsType);
+    PickerEntry->Tool                            = FALSE;
+    PickerEntry->TextMode                        = FALSE;
+    PickerEntry->RealPath                        = FALSE;
+    PickerEntry->External                        = IsExternal;
+    PickerEntry->UnmanagedBootAction             = UnmanagedBootActionDoLegacyBoot;
+    PickerEntry->UnmanagedBootGetFinalDevicePath = UnmanagedBootGetFinalDevicePath;
+    PickerEntry->UnmanagedBootDevicePath         = BlockDevicePath;
 
     if ((PickerEntry->Name == NULL) || (PickerEntry->Flavour == NULL)) {
       OcFlexArrayFree (&FlexPickerEntries);
