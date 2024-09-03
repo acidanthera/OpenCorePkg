@@ -426,7 +426,7 @@ OcGetLegacyBootEntries (
     PickerEntry->External                        = IsExternal;
     PickerEntry->UnmanagedBootAction             = UnmanagedBootActionDoLegacyBoot;
     PickerEntry->UnmanagedBootGetFinalDevicePath = UnmanagedBootGetFinalDevicePath;
-    PickerEntry->UnmanagedBootDevicePath         = BlockDevicePath;
+    PickerEntry->UnmanagedDevicePath             = BlockDevicePath;
 
     if ((PickerEntry->Name == NULL) || (PickerEntry->Flavour == NULL)) {
       OcFlexArrayFree (&FlexPickerEntries);

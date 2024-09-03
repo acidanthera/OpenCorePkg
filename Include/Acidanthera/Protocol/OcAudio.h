@@ -56,6 +56,7 @@ typedef struct OC_AUDIO_PROTOCOL_ OC_AUDIO_PROTOCOL;
 #define  OC_VOICE_OVER_AUDIO_FILE_MAC_OS_RECOVERY       "macOS_Recovery"
 #define  OC_VOICE_OVER_AUDIO_FILE_MAC_OS_TIME_MACHINE   "macOS_TimeMachine"
 #define  OC_VOICE_OVER_AUDIO_FILE_MAC_OS_UPDATE_FW      "macOS_UpdateFw"
+#define  OC_VOICE_OVER_AUDIO_FILE_NETWORK_BOOT          "NetworkBoot"
 #define  OC_VOICE_OVER_AUDIO_FILE_OTHER_OS              "OtherOS"
 #define  OC_VOICE_OVER_AUDIO_FILE_PASSWORD_ACCEPTED     "PasswordAccepted"
 #define  OC_VOICE_OVER_AUDIO_FILE_PASSWORD_INCORRECT    "PasswordIncorrect"

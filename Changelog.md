@@ -3,6 +3,8 @@ OpenCore Changelog
 #### v1.0.2
 - Fixed error in macrecovery when running headless, thx @mkorje
 - Added `UEFI` `Unload` option to unload existing firmware drivers
+- Added OpenNetworkBoot driver to support HTTP(S) and PXE boot
+- Supported DMG loading and verification (e.g. macOS Recovery) over HTTP(S) boot
 
 #### v1.0.1
 - Updated code and added progress bar to macrecovery, thx @soyeonswife63
