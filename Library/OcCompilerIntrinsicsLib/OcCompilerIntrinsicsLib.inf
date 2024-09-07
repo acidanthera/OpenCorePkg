@@ -21,7 +21,12 @@
   OcCompilerIntrinsicsLib.c
 
 [Sources.Ia32]
-  MsvcMath32.c | MSFT
+  Ia32/MsvcMath32.c         | MSFT
+
+  Ia32/MathLShiftS64.nasm   | GCC
+  Ia32/MathRShiftU64.nasm   | GCC
+  Ia32/MathDivS64x64.c      | GCC
+  Ia32/MathModU64x64.c      | GCC
 
 [Packages]
   MdePkg/MdePkg.dec

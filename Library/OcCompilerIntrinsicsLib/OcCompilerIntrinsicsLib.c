@@ -6,10 +6,11 @@
 **/
 
 #include <Library/BaseLib.h>
+#include <Library/BaseMemoryLib.h>
 
 GLOBAL_REMOVE_IF_UNREFERENCED BOOLEAN  gOcCompilerIntrinsicsLib;
 
-#if defined (MDE_CPU_IA32) && defined (__clang__) && defined (__apple_build_version__) && __apple_build_version__ < 11000000
+#if defined (MDE_CPU_IA32) && defined (__clang__) && defined (__APPLE__)
 
 /**
   Divides a 64-bit unsigned integer by a 64-bit unsigned integer and generates
@@ -30,6 +31,15 @@ __udivdi3 (
   )
 {
   return DivU64x64Remainder (Dividend, Divisor, NULL);
+}
+
+void
+__bzero (
+  void          *src,
+  unsigned int  count
+  )
+{
+  ZeroMem (src, count);
 }
 
 #endif

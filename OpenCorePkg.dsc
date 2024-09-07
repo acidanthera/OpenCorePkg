@@ -173,7 +173,7 @@
     BaseCryptLib|CryptoPkg/Library/BaseCryptLib/BaseCryptLib.inf
     # FileExplorerLib is for TlsAuthConfigDxe only (not used by us, but enabled by NETWORK_TLS_ENABLE)
     FileExplorerLib|MdeModulePkg/Library/FileExplorerLib/FileExplorerLib.inf
-    IntrinsicLib|CryptoPkg/Library/IntrinsicLib/IntrinsicLib.inf
+    IntrinsicLib|OpenCorePkg/Library/OcCompilerIntrinsicsLib/OcCompilerIntrinsicsLib.inf
     OpensslLib|CryptoPkg/Library/OpensslLib/OpensslLib.inf
     RngLib|MdeModulePkg/Library/BaseRngLibTimerLib/BaseRngLibTimerLib.inf
     SafeIntLib|MdePkg/Library/BaseSafeIntLib/BaseSafeIntLib.inf
@@ -398,10 +398,8 @@
   #
   MdeModulePkg/Universal/Disk/RamDiskDxe/RamDiskDxe.inf
 
-  CryptoPkg/Library/IntrinsicLib/IntrinsicLib.inf
-
 [LibraryClasses]
-  NULL|CryptoPkg/Library/IntrinsicLib/IntrinsicLib.inf
+  NULL|OpenCorePkg/Library/OcCompilerIntrinsicsLib/OcCompilerIntrinsicsLib.inf
 
 [PcdsFixedAtBuild]
   gEfiMdePkgTokenSpaceGuid.PcdMaximumAsciiStringLength|0

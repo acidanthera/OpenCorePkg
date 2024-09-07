@@ -245,10 +245,8 @@
   OpenCorePkg/Legacy/BootPlatform/LegacyRegion2Dxe/LegacyRegion2Dxe.inf
   OpenCorePkg/Legacy/BootPlatform/BiosVideo/BiosVideo.inf
 
-  CryptoPkg/Library/IntrinsicLib/IntrinsicLib.inf
-
 [LibraryClasses]
-  NULL|CryptoPkg/Library/IntrinsicLib/IntrinsicLib.inf
+  NULL|OpenCorePkg/Library/OcCompilerIntrinsicsLib/OcCompilerIntrinsicsLib.inf
 
 [PcdsFeatureFlag]
   gEfiMdeModulePkgTokenSpaceGuid.PcdSupportHiiImageProtocol|FALSE
