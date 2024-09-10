@@ -1651,8 +1651,7 @@ PatchProvideCurrentCpuInfo (
     busFreqValue = CpuInfo->FSBFrequency;
 
     // Handle case where FSBFrequency is zero, providing a fallback
-    if (busFreqValue == 0)
-    {
+    if (busFreqValue == 0) {
       busFreqValue = 100000000; // Assume 100 MHz FSB as fallback
       DEBUG ((DEBUG_WARN, "OCAK: FSBFrequency is zero, using fallback value: 100 MHz\n"));
     }
@@ -1660,7 +1659,7 @@ PatchProvideCurrentCpuInfo (
     busFCvtt2nValue = DivU64x64Remainder ((1000000000ULL << 32), busFreqValue, NULL);
     busFCvtn2tValue = DivU64x64Remainder ((1000000000ULL << 32), busFCvtt2nValue, NULL);
 
-    tscFreqValue = CpuInfo->CPUFrequency;
+    tscFreqValue    = CpuInfo->CPUFrequency;
     tscFCvtt2nValue = DivU64x64Remainder ((1000000000ULL << 32), tscFreqValue, NULL);
     tscFCvtn2tValue = DivU64x64Remainder ((1000000000ULL << 32), tscFCvtt2nValue, NULL);
   }

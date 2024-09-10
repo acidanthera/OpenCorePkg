@@ -692,9 +692,9 @@ ScanAmdProcessor (
     switch (Cpu->ExtFamily) {
       case AMD_CPU_EXT_FAMILY_1AH:
         if (Cpu->CPUFrequencyFromVMT == 0) {
-          CofVid          = AsmReadMsr64(K10_PSTATE_STATUS);
-          CoreFrequencyID = (UINT16)BitFieldRead64(CofVid, 0, 11); // 12-bit field for FID
-          
+          CofVid          = AsmReadMsr64 (K10_PSTATE_STATUS);
+          CoreFrequencyID = (UINT16)BitFieldRead64 (CofVid, 0, 11); // 12-bit field for FID
+
           // On AMD Family 1Ah and later, if the Frequency ID (FID) exceeds 0x0f,
           // the core frequency is scaled by a factor of 5. This scaling behavior
           // is based on Linux kernel logic for handling higher frequency multipliers
@@ -703,19 +703,21 @@ ScanAmdProcessor (
           if (CoreFrequencyID > 0x0f) {
             CoreFrequencyID *= 5;
           }
+
           MaxBusRatio = (UINT8)(CoreFrequencyID);
         }
-        
+
         //
         // Get core count from CPUID
         //
         if (Cpu->MaxExtId >= 0x8000001E) {
-          AsmCpuid(0x8000001E, NULL, &CpuidEbx, NULL, NULL);
-          Cpu->CoreCount = (UINT16)DivU64x32(
-                                 Cpu->ThreadCount,
-                                 (BitFieldRead32(CpuidEbx, 8, 15) + 1)
-                               );
+          AsmCpuid (0x8000001E, NULL, &CpuidEbx, NULL, NULL);
+          Cpu->CoreCount = (UINT16)DivU64x32 (
+                                     Cpu->ThreadCount,
+                                     (BitFieldRead32 (CpuidEbx, 8, 15) + 1)
+                                     );
         }
+
         break;
       case AMD_CPU_EXT_FAMILY_17H:
       case AMD_CPU_EXT_FAMILY_19H:
@@ -815,9 +817,9 @@ ScanAmdProcessor (
       } else {
         // Special handling for Family 1Ah
         if (Cpu->ExtFamily == AMD_CPU_EXT_FAMILY_1AH) {
-          Cpu->FSBFrequency = DivU64x32(Cpu->CPUFrequency, CoreFrequencyID);  // No divisor for Family 1Ah
+          Cpu->FSBFrequency = DivU64x32 (Cpu->CPUFrequency, CoreFrequencyID);  // No divisor for Family 1Ah
         } else {
-          Cpu->FSBFrequency = DivU64x32(Cpu->CPUFrequency, MaxBusRatio);
+          Cpu->FSBFrequency = DivU64x32 (Cpu->CPUFrequency, MaxBusRatio);
         }
       }
     }
