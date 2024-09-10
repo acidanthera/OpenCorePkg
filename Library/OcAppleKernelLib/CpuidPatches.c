@@ -1654,7 +1654,28 @@ PatchProvideCurrentCpuInfo (
 
     tscFreqValue    = CpuInfo->CPUFrequency;
     tscFCvtt2nValue = DivU64x64Remainder ((1000000000ULL << 32), tscFreqValue, NULL);
-    tscFCvtn2tValue = DivU64x64Remainder ((1000000000ULL  << 32), tscFCvtt2nValue, NULL);
+    tscFCvtn2tValue = DivU64x64Remainder ((1000000000ULL << 32), tscFCvtt2nValue, NULL);
+
+  } else if (CpuInfo->ExtFamily == 0xB) {
+
+    // Family 1Ah has different handling: no divisor (DID)
+    busFreqValue = CpuInfo->FSBFrequency;
+
+    // Handle case where FSBFrequency is zero, providing a fallback
+    if (busFreqValue == 0) {
+      busFreqValue = 100000000; // Assume 100 MHz FSB as fallback
+      DEBUG ((DEBUG_WARN, "OCAK: FSBFrequency is zero, using fallback value: 100 MHz\n"));
+    }
+
+    // Calculate bus FCvtt2n and FCvtn2t values
+    busFCvtt2nValue = DivU64x64Remainder ((1000000000ULL << 32), busFreqValue, NULL);
+    busFCvtn2tValue = DivU64x64Remainder ((1000000000ULL << 32), busFCvtt2nValue, NULL);
+
+    // Get TSC frequency and calculate TSC FCvtt2n and FCvtn2t values
+    tscFreqValue = CpuInfo->CPUFrequency;
+
+    tscFCvtt2nValue = DivU64x64Remainder ((1000000000ULL << 32), tscFreqValue, NULL);
+    tscFCvtn2tValue = DivU64x64Remainder ((1000000000ULL << 32), tscFCvtt2nValue, NULL);
   }
   // For all other processors
   else {
