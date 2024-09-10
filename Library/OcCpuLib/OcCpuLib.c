@@ -692,8 +692,9 @@ ScanAmdProcessor (
     switch (Cpu->ExtFamily) {
       case AMD_CPU_EXT_FAMILY_1AH:
         if (Cpu->CPUFrequencyFromVMT == 0) {
-          CofVid = AsmReadMsr64(K10_PSTATE_STATUS);
-          CoreFrequencyID = (UINT16)BitFieldRead64(CofVid, 0, 11);  // 12-bit field for FID
+          CofVid          = AsmReadMsr64(K10_PSTATE_STATUS);
+          CoreFrequencyID = (UINT16)BitFieldRead64(CofVid, 0, 11); // 12-bit field for FID
+          
           // On AMD Family 1Ah and later, if the Frequency ID (FID) exceeds 0x0f,
           // the core frequency is scaled by a factor of 5. This scaling behavior
           // is based on Linux kernel logic for handling higher frequency multipliers
@@ -810,7 +811,7 @@ ScanAmdProcessor (
       // Sometimes incorrect hypervisor configuration will lead to dividing by zero.
       //
       if (MaxBusRatio == 0) {
-        Cpu->FSBFrequency = 100000000; // Default to 100 MHz like Intel part.
+        Cpu->FSBFrequency = 100000000; // 100 MHz like Intel part.
       } else {
         // Special handling for Family 1Ah
         if (Cpu->ExtFamily == AMD_CPU_EXT_FAMILY_1AH) {
