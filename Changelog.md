@@ -2,6 +2,7 @@ OpenCore Changelog
 ==================
 #### v1.0.2
 - Fixed error in macrecovery when running headless, thx @mkorje
+- Added support for `AMD_CPU_EXT_FAMILY_1AH`, thx @Shaneee
 
 #### v1.0.1
 - Updated code and added progress bar to macrecovery, thx @soyeonswife63
