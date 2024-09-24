@@ -4,6 +4,7 @@ OpenCore Changelog
 - Fixed error in macrecovery when running headless, thx @mkorje
 - Added support for `AMD_CPU_EXT_FAMILY_1AH`, thx @Shaneee
 - Updated builtin firmware versions for SMBIOS and the rest
+- Enabled `XcpmExtraMsrs MSR_MISC_PWR_MGMT` patch back on macOS 12+
 
 #### v1.0.1
 - Updated code and added progress bar to macrecovery, thx @soyeonswife63

@@ -446,18 +446,17 @@ PatchAppleXcpmExtraMsrs (
 
   //
   // Now patch writes to MSR_MISC_PWR_MGMT.
-  // On macOS Monterey (12) and above, this no longer exists.
+  // On macOS Monterey (12) and above, in theory this no longer exists in XNU,
+  // yet without it macOS will not boot correctly on certain X299 builds.
   //
-  if (OcMatchDarwinVersion (KernelVersion, KERNEL_VERSION_MONTEREY_MIN, 0)) {
-    DEBUG ((DEBUG_INFO, "OCAK: Skipping XcpmExtraMsrs MSR_MISC_PWR_MGMT patch on %u\n", KernelVersion));
-  } else {
-    Status = PatcherApplyGenericPatch (Patcher, &mMiscPwrMgmtRelPatch);
+  // Ref: https://github.com/acidanthera/bugtracker/issues/2410#issuecomment-2368925597
+  //
+  Status = PatcherApplyGenericPatch (Patcher, &mMiscPwrMgmtRelPatch);
+  if (EFI_ERROR (Status)) {
+    DEBUG ((DEBUG_INFO, "OCAK: Failed to patch writes to XcpmExtraMsrs MSR_MISC_PWR_MGMT - %r, trying dbg\n", Status));
+    Status = PatcherApplyGenericPatch (Patcher, &mMiscPwrMgmtDbgPatch);
     if (EFI_ERROR (Status)) {
-      DEBUG ((DEBUG_INFO, "OCAK: Failed to patch writes to XcpmExtraMsrs MSR_MISC_PWR_MGMT - %r, trying dbg\n", Status));
-      Status = PatcherApplyGenericPatch (Patcher, &mMiscPwrMgmtDbgPatch);
-      if (EFI_ERROR (Status)) {
-        DEBUG ((DEBUG_WARN, "OCAK: Failed to patch writes to XcpmExtraMsrs MSR_MISC_PWR_MGMT - %r\n", Status));
-      }
+      DEBUG ((DEBUG_WARN, "OCAK: Failed to patch writes to XcpmExtraMsrs MSR_MISC_PWR_MGMT - %r\n", Status));
     }
   }
 
