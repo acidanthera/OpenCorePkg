@@ -1623,21 +1623,25 @@ To view their current state, use the \texttt{pmset -g} command in Terminal.
   \textbf{Description}: Fix permissions and section errors in macOS \texttt{boot.efi} images.
 
   Mac OS X \texttt{boot.efi} images contain \texttt{W\^{}X} permissions errors
-  (in all versions) and in very old versions additionally contain illegal overlapping sections
-  (affects 10.4 and 10.5 32-bit versions only). Modern secure PE loaders (including the OpenCore
-  loader in current releases of OpenDuet) will refuse to load these images
-  unless additional mitigations are applied.
+  in all versions, and 10.4 and 10.5 32-bit versions also contain illegal overlapping
+  sections. Modern, strict PE loaders will refuse to load such images unless additional
+  mitigations are applied. The image loader which matters here is the one provided by
+  the system firmware, or by OpenDuet if OpenDuet is providing
+  the UEFI compatibility layer. Image loaders which enforce these stricter
+  rules include the loader provided with current versions of OpenDuet,
+  the loader in OVMF if compiled from \href{https://github.com/acidanthera/audk}{audk},
+  and possibly the image loaders of some very recent 3rd party firmware (e.g. Microsoft).
 
   This quirk detects these issues and pre-processes such images in memory
-  so that a modern loader will accept them.
+  so that a stricter loader will accept them.
 
-  If on a system with such a secure loader, this quirk is required to load
+  On a system with such a modern, stricter loader this quirk is required to load
   Mac OS X 10.4 to macOS 10.12, and is required for all newer
   macOS when \texttt{SecureBootModel} is set to \texttt{Disabled}.
 
   \emph{Note 1}: The quirk is never applied during the Apple secure boot path for
-  newer macOS. The Apple secure boot path includes its own separate mitigations
-  for \texttt{boot.efi} \texttt{W\^{}X} issues.
+  newer macOS. The Apple secure boot path in OpenCore includes its own separate
+  mitigations for \texttt{boot.efi} \texttt{W\^{}X} issues.
 
   \emph{Note 2}: When enabled, and when not processing for Apple secure boot, this quirk
   is applied to:
@@ -1650,12 +1654,12 @@ To view their current state, use the \texttt{pmset -g} command in Terminal.
       within their filesystem.
     \end{itemize}
 
-  \emph{Note 3}: Pre-processing in memory is incompatible with secure boot, as the image loaded
-  is not the image on disk, so you cannot sign files which are loaded in this way
+  \emph{Note 3}: Pre-processing in memory is incompatible with UEFI secure boot, as the image
+  loaded is not the image on disk, so you cannot sign files which are loaded in this way
   based on their original disk image contents.
-  Certain firmware will offer to register the hash of new, unknown images - this would
-  still work. On the other hand, it is not particularly realistic to want to
-  start these early, insecure images with secure boot anyway.
+  Certain firmware will offer to register the hash of new, unknown images for future
+  secure boot - this would still work. On the other hand, it is not particularly realistic
+  to want to start these early, insecure images with secure boot anyway.
   
 \item
   \texttt{ForceBooterSignature}\\
