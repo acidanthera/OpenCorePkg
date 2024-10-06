@@ -1646,15 +1646,22 @@ PatchProvideCurrentCpuInfo (
   // Perform TSC and FSB calculations. This is traditionally done in tsc.c in XNU.
   //
   // For AMD Processors
-  if ((CpuInfo->Family == 0xF) && ((CpuInfo->ExtFamily == 0x8) || (CpuInfo->ExtFamily == 0xA))) {
+  if ((CpuInfo->Family == 0xF) && ((CpuInfo->ExtFamily == 0x8) || (CpuInfo->ExtFamily == 0xA) || (CpuInfo->ExtFamily == 0xB))) {
     DEBUG ((DEBUG_INFO, "OCAK: Setting FSB and TSC for Family 0x%x and ExtFamily 0x%x\n", (UINT16)CpuInfo->Family, (UINT16)CpuInfo->ExtFamily));
-    busFreqValue    = CpuInfo->FSBFrequency;
+    busFreqValue = CpuInfo->FSBFrequency;
+
+    // Handle case where FSBFrequency is zero, providing a fallback
+    if (busFreqValue == 0) {
+      busFreqValue = 100000000; // Assume 100 MHz FSB as fallback
+      DEBUG ((DEBUG_WARN, "OCAK: FSBFrequency is zero, using fallback value: 100 MHz\n"));
+    }
+
     busFCvtt2nValue = DivU64x64Remainder ((1000000000ULL << 32), busFreqValue, NULL);
     busFCvtn2tValue = DivU64x64Remainder ((1000000000ULL << 32), busFCvtt2nValue, NULL);
 
     tscFreqValue    = CpuInfo->CPUFrequency;
     tscFCvtt2nValue = DivU64x64Remainder ((1000000000ULL << 32), tscFreqValue, NULL);
-    tscFCvtn2tValue = DivU64x64Remainder ((1000000000ULL  << 32), tscFCvtt2nValue, NULL);
+    tscFCvtn2tValue = DivU64x64Remainder ((1000000000ULL << 32), tscFCvtt2nValue, NULL);
   }
   // For all other processors
   else {

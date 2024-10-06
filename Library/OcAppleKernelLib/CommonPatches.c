@@ -335,6 +335,61 @@ PATCHER_GENERIC_PATCH
 
 STATIC
 CONST UINT8
+  mMiscPwrMgmtRelFind15[] = {
+  0xB9, 0xAA, 0x01, 0x00, 0x00, ///< mov ecx, 0x1AA
+  0x0F, 0x32,                   ///< rdmsr
+  0x89, 0xD2,                   ///< mov edx, edx
+  0x83, 0x00, 0x00,             ///< and/or, whatever
+  0x0F, 0x30                    ///< wrmsr
+};
+
+STATIC
+CONST UINT8
+  mMiscPwrMgmtRelMask15[] = {
+  0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
+  0xFF, 0xFF,
+  0xFF, 0xFF,
+  0xFF, 0x00, 0x00,
+  0xFF, 0xFF
+};
+
+STATIC
+CONST UINT8
+  mMiscPwrMgmtRelReplace15[] = {
+  0x00, 0x00, 0x00, 0x00, 0x00,
+  0x00, 0x00,
+  0x00, 0x00,
+  0x00, 0x00, 0x00,
+  0x90, 0x90                     ///< nop
+};
+
+STATIC
+CONST UINT8
+  mMiscPwrMgmtRelReplaceMask15[] = {
+  0x00, 0x00, 0x00, 0x00, 0x00,
+  0x00, 0x00,
+  0x00, 0x00,
+  0x00, 0x00, 0x00,
+  0xFF, 0xFF
+};
+
+STATIC
+PATCHER_GENERIC_PATCH
+  mMiscPwrMgmtRel15Patch = {
+  .Comment     = DEBUG_POINTER ("MiscPwrMgmtRel Sequoia"),
+  .Base        = NULL,
+  .Find        = mMiscPwrMgmtRelFind15,
+  .Mask        = mMiscPwrMgmtRelMask15,
+  .Replace     = mMiscPwrMgmtRelReplace15,
+  .ReplaceMask = mMiscPwrMgmtRelReplaceMask15,
+  .Size        = sizeof (mMiscPwrMgmtRelFind15),
+  .Count       = 0,
+  .Skip        = 0,
+  .Limit       = 0
+};
+
+STATIC
+CONST UINT8
   mMiscPwrMgmtDbgFind[] = {
   0xBF, 0xAA, 0x01, 0x00, 0x00,  ///< mov edi, 0x1AA
   0xE8                           ///< call (wrmsr64)
@@ -446,17 +501,22 @@ PatchAppleXcpmExtraMsrs (
 
   //
   // Now patch writes to MSR_MISC_PWR_MGMT.
-  // On macOS Monterey (12) and above, this no longer exists.
   //
-  if (OcMatchDarwinVersion (KernelVersion, KERNEL_VERSION_MONTEREY_MIN, 0)) {
-    DEBUG ((DEBUG_INFO, "OCAK: Skipping XcpmExtraMsrs MSR_MISC_PWR_MGMT patch on %u\n", KernelVersion));
+  if (OcMatchDarwinVersion (KernelVersion, KERNEL_VERSION_SEQUOIA_MIN, 0)) {
+    //
+    // TODO: Find dbg patch on macOS 15+.
+    //
+    Status = PatcherApplyGenericPatch (Patcher, &mMiscPwrMgmtRel15Patch);
+    if (EFI_ERROR (Status)) {
+      DEBUG ((DEBUG_WARN, "OCAK: Failed to patch writes to XcpmExtraMsrs MSR_MISC_PWR_MGMT macOS 15+ - %r\n", Status));
+    }
   } else {
     Status = PatcherApplyGenericPatch (Patcher, &mMiscPwrMgmtRelPatch);
     if (EFI_ERROR (Status)) {
-      DEBUG ((DEBUG_INFO, "OCAK: Failed to patch writes to XcpmExtraMsrs MSR_MISC_PWR_MGMT - %r, trying dbg\n", Status));
+      DEBUG ((DEBUG_INFO, "OCAK: Failed to patch writes to XcpmExtraMsrs MSR_MISC_PWR_MGMT old - %r, trying dbg\n", Status));
       Status = PatcherApplyGenericPatch (Patcher, &mMiscPwrMgmtDbgPatch);
       if (EFI_ERROR (Status)) {
-        DEBUG ((DEBUG_WARN, "OCAK: Failed to patch writes to XcpmExtraMsrs MSR_MISC_PWR_MGMT - %r\n", Status));
+        DEBUG ((DEBUG_WARN, "OCAK: Failed to patch writes to XcpmExtraMsrs MSR_MISC_PWR_MGMT old - %r\n", Status));
       }
     }
   }

@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
-%DIF DEL PreviousConfiguration.tex   Fri Aug 16 15:32:06 2024
-%DIF ADD ../Configuration.tex        Fri Aug 16 15:32:06 2024
+%DIF DEL PreviousConfiguration.tex   Tue Sep  3 09:18:54 2024
+%DIF ADD ../Configuration.tex        Wed Oct  2 22:40:01 2024
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -118,7 +118,7 @@
 %DIF HYPERREF PREAMBLE %DIF PREAMBLE
 \providecommand{\DIFadd}[1]{\texorpdfstring{\DIFaddtex{#1}}{#1}} %DIF PREAMBLE
 \providecommand{\DIFdel}[1]{\texorpdfstring{\DIFdeltex{#1}}{}} %DIF PREAMBLE
-%DIF LISTINGS PREAMBLE %DIF PREAMBLE
+%DIF COLORLISTINGS PREAMBLE %DIF PREAMBLE
 \RequirePackage{listings} %DIF PREAMBLE
 \RequirePackage{color} %DIF PREAMBLE
 \lstdefinelanguage{DIFcode}{ %DIF PREAMBLE
@@ -1680,26 +1680,36 @@ To view their current state, use the \texttt{pmset -g} command in Terminal.
   \texttt{FixupAppleEfiImages}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
-  \textbf{Description}: Fix errors in early Mac OS X boot.efi images.
+  \textbf{Description}: Fix \DIFdelbegin \DIFdel{errors in early Mac OS X boot.efi }\DIFdelend \DIFaddbegin \DIFadd{permissions and section errors in macOS }\texttt{\DIFadd{boot.efi}} \DIFaddend images.
 
-  Modern secure PE loaders will refuse to load \texttt{boot.efi} images from
-  Mac OS X 10.4 to macOS 10.12 due to these files containing \texttt{W\^{}X} errors
-  (in all versions) and illegal overlapping sections (in 10.4 and 10.5 32-bit
-  versions only).
+  \DIFdelbegin \DIFdel{Modern secure PE loaders will refuse to load }\texttt{\DIFdel{boot.efi}} %DIFAUXCMD
+\DIFdel{images from
+  }\DIFdelend Mac OS X \DIFdelbegin \DIFdel{10.4 to macOS 10.12 due to these files containing }\DIFdelend \DIFaddbegin \texttt{\DIFadd{boot.efi}} \DIFadd{images contain }\DIFaddend \texttt{W\^{}X} \DIFdelbegin \DIFdel{errors
+  (}\DIFdelend \DIFaddbegin \DIFadd{permissions errors
+  }\DIFaddend in all versions\DIFdelbegin \DIFdel{) and illegal overlapping sections (in }\DIFdelend \DIFaddbegin \DIFadd{, and }\DIFaddend 10.4 and 10.5 32-bit versions \DIFdelbegin \DIFdel{only}\DIFdelend \DIFaddbegin \DIFadd{also contain illegal overlapping
+  sections. Modern, strict PE loaders will refuse to load such images unless additional
+  mitigations are applied. The image loader which matters here is the one provided by
+  the system firmware, or by OpenDuet if OpenDuet is providing
+  the UEFI compatibility layer. Image loaders which enforce these stricter
+  rules include the loader provided with current versions of OpenDuet,
+  the loader in OVMF if compiled from }\href{https://github.com/acidanthera/audk}{\DIFadd{audk}}\DIFadd{,
+  and possibly the image loaders of some very recent 3rd party firmware (e.g. Microsoft}\DIFaddend ).
 
-  This quirk detects these issues and pre-processes such images in memory,
-  so that a modern loader will accept them.
+  This quirk detects these issues and pre-processes such images in memory
+  \DIFdelbegin \DIFdel{,
+  }\DIFdelend so that a \DIFdelbegin \DIFdel{modern }\DIFdelend \DIFaddbegin \DIFadd{stricter }\DIFaddend loader will accept them.
 
-  Pre-processing in memory is incompatible with secure boot, as the image loaded
+  \DIFdelbegin \DIFdel{Pre-processing in memory is incompatible with secure boot, as the image loaded
   is not the image on disk, so you cannot sign files which are loaded in this way
   based on their original disk image contents.
   Certain firmware will offer to register the hash of new, unknown images - this would
-  still work. On the other hand, it is not particularly realistic to want to
-  start these early, insecure images with secure boot anyway.
+  still work. On the other hand, it is not particularly realistic to want to start these early, insecure images with secure boot anyway}\DIFdelend \DIFaddbegin \DIFadd{On a system with such a modern, stricter loader this quirk is required to load
+  Mac OS X 10.4 to macOS 10.12, and is required for all newer
+  macOS when }\texttt{\DIFadd{SecureBootModel}} \DIFadd{is set to }\texttt{\DIFadd{Disabled}}\DIFaddend .
 
   \emph{Note 1}: The quirk is never applied during the Apple secure boot path for
-  newer macOS. The Apple secure boot path includes its own separate mitigations
-  for \texttt{boot.efi} \texttt{W\^{}X} issues.
+  newer macOS. The Apple secure boot path \DIFaddbegin \DIFadd{in OpenCore }\DIFaddend includes its own separate
+  mitigations for \texttt{boot.efi} \texttt{W\^{}X} issues.
 
   \emph{Note 2}: When enabled, and when not processing for Apple secure boot, this quirk
   is applied to:
@@ -1712,10 +1722,15 @@ To view their current state, use the \texttt{pmset -g} command in Terminal.
       within their filesystem.
     \end{itemize}
 
-  \emph{Note 3}: This quirk is needed for Mac OS X 10.4 to macOS 10.12 (and
-  higher, if Apple secure boot is not enabled), but only when the firmware
-  itself includes a modern, more secure PE COFF image loader. This applies to
-  current builds of OpenDuet, and to OVMF if built from audk source code.
+  \emph{Note 3}: \DIFdelbegin \DIFdel{This quirk is needed for Mac OS X 10.4 to macOS 10.12 (and
+  higher, if Apple secure bootis not enabled), but only when the firmware
+  itself includes a modern, more secure PE COFF image loader.
+  This applies to current builds of OpenDuet, and to OVMF if built from audk source code}\DIFdelend \DIFaddbegin \DIFadd{Pre-processing in memory is incompatible with UEFI secure boot, as the image
+  loaded is not the image on disk, so you cannot sign files which are loaded in this way
+  based on their original disk image contents.
+  Certain firmware will offer to register the hash of new, unknown images for future
+  secure boot - this would still work. On the other hand, it is not particularly realistic
+  to want to start these early, insecure images with secure boot anyway}\DIFaddend .
 
 \item
   \texttt{ForceBooterSignature}\\

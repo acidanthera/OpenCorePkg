@@ -2,6 +2,10 @@ OpenCore Changelog
 ==================
 #### v1.0.2
 - Fixed error in macrecovery when running headless, thx @mkorje
+- Added support for `AMD_CPU_EXT_FAMILY_1AH`, thx @Shaneee
+- Updated builtin firmware versions for SMBIOS and the rest
+- Enabled `XcpmExtraMsrs MSR_MISC_PWR_MGMT` patch back on macOS 12+
+- Fixed `XcpmExtraMsrs MSR_MISC_PWR_MGMT` patch on macOS 15
 - Added `UEFI` `Unload` option to unload existing firmware drivers
 
 #### v1.0.1
