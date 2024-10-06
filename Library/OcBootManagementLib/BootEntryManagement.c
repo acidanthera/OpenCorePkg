@@ -692,7 +692,7 @@ InternalAddBootEntryFromCustomEntry (
     return EFI_OUT_OF_RESOURCES;
   }
 
-  if (!CustomEntry->ExternalSystemAction && !CustomEntry->SystemAction) {
+  if (!CustomEntry->UnmanagedBootAction && !CustomEntry->SystemAction) {
     ASSERT (CustomEntry->Path != NULL);
     PathName = AsciiStrCopyToUnicode (CustomEntry->Path, 0);
     if (PathName == NULL) {
@@ -715,19 +715,19 @@ InternalAddBootEntryFromCustomEntry (
     DEBUG_INFO,
     "OCB: Adding custom entry %s (%a|B:%d) -> %a\n",
     BootEntry->Name,
-    CustomEntry->ExternalSystemAction != NULL ? "ext-action" : (CustomEntry->SystemAction != NULL ? "action" : (CustomEntry->Tool ? "tool" : "os")),
+    CustomEntry->UnmanagedBootAction != NULL ? "unmanaged" : (CustomEntry->SystemAction != NULL ? "action" : (CustomEntry->Tool ? "tool" : "os")),
     IsBootEntryProtocol,
     CustomEntry->Path
     ));
 
-  if (CustomEntry->ExternalSystemAction) {
-    BootEntry->Type                        = OC_BOOT_EXTERNAL_SYSTEM;
-    BootEntry->ExternalSystemAction        = CustomEntry->ExternalSystemAction;
-    BootEntry->ExternalSystemGetDevicePath = CustomEntry->ExternalSystemGetDevicePath;
-    BootEntry->AudioBasePath               = CustomEntry->AudioBasePath;
-    BootEntry->AudioBaseType               = CustomEntry->AudioBaseType;
-    BootEntry->IsExternal                  = CustomEntry->External;
-    BootEntry->DevicePath                  = DuplicateDevicePath (CustomEntry->ExternalSystemDevicePath);
+  if (CustomEntry->UnmanagedBootAction) {
+    BootEntry->Type                            = OC_BOOT_UNMANAGED;
+    BootEntry->UnmanagedBootAction             = CustomEntry->UnmanagedBootAction;
+    BootEntry->UnmanagedBootGetFinalDevicePath = CustomEntry->UnmanagedBootGetFinalDevicePath;
+    BootEntry->AudioBasePath                   = CustomEntry->AudioBasePath;
+    BootEntry->AudioBaseType                   = CustomEntry->AudioBaseType;
+    BootEntry->IsExternal                      = CustomEntry->External;
+    BootEntry->DevicePath                      = DuplicateDevicePath (CustomEntry->UnmanagedBootDevicePath);
 
     if (BootEntry->DevicePath == NULL) {
       FreeBootEntry (BootEntry);
@@ -843,7 +843,7 @@ InternalAddBootEntryFromCustomEntry (
   BootEntry->ExposeDevicePath = CustomEntry->RealPath;
   BootEntry->FullNvramAccess  = CustomEntry->FullNvramAccess;
 
-  if ((BootEntry->ExternalSystemAction != NULL) || (BootEntry->SystemAction != NULL)) {
+  if ((BootEntry->UnmanagedBootAction != NULL) || (BootEntry->SystemAction != NULL)) {
     ASSERT (CustomEntry->Arguments == NULL);
   } else {
     ASSERT (CustomEntry->Arguments != NULL);
@@ -861,7 +861,7 @@ InternalAddBootEntryFromCustomEntry (
 
   BootEntry->IsCustom            = TRUE;
   BootEntry->IsBootEntryProtocol = IsBootEntryProtocol;
-  if (IsBootEntryProtocol && (BootEntry->ExternalSystemAction == NULL) && (BootEntry->SystemAction == NULL)) {
+  if (IsBootEntryProtocol && (BootEntry->UnmanagedBootAction == NULL) && (BootEntry->SystemAction == NULL)) {
     PartitionEntry = OcGetGptPartitionEntry (FileSystem->Handle);
     if (PartitionEntry == NULL) {
       CopyGuid (&BootEntry->UniquePartitionGUID, &gEfiPartTypeUnusedGuid);
@@ -2511,9 +2511,9 @@ OcLoadBootEntry (
   EFI_HANDLE                 EntryHandle;
   INTERNAL_DMG_LOAD_CONTEXT  DmgLoadContext;
 
-  if ((BootEntry->Type & OC_BOOT_EXTERNAL_SYSTEM) != 0) {
-    ASSERT (BootEntry->ExternalSystemAction != NULL);
-    return BootEntry->ExternalSystemAction (Context, BootEntry->DevicePath);
+  if ((BootEntry->Type & OC_BOOT_UNMANAGED) != 0) {
+    ASSERT (BootEntry->UnmanagedBootAction != NULL);
+    return BootEntry->UnmanagedBootAction (Context, BootEntry->DevicePath);
   }
 
   if ((BootEntry->Type & OC_BOOT_SYSTEM) != 0) {
