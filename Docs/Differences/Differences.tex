@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
 %DIF DEL PreviousConfiguration.tex   Tue Sep  3 09:18:54 2024
-%DIF ADD ../Configuration.tex        Wed Oct  2 22:40:01 2024
+%DIF ADD ../Configuration.tex        Sun Oct  6 08:32:59 2024
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -7633,7 +7633,46 @@ OpenCore is installed, in order for the \texttt{Launchd.command} script to work 
   describing memory areas exclusive to specific firmware and hardware functioning,
   which should not be used by the operating system. Examples of such memory regions
   could be the second 256 MB corrupted by the Intel HD 3000 or an area with faulty RAM.
-  Refer to the \hyperref[uefirsvdprops]{ReservedMemory Properties} section below for details.
+  Refer to the \hyperref[uefirsvdprops]{ReservedMemory Properties} section below for details\DIFaddbegin \DIFadd{.
+}
+
+\item
+  \texttt{\DIFadd{Unload}}\\
+  \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ array}}\\
+  \textbf{\DIFadd{Failsafe}}\DIFadd{: Empty}\\
+  \textbf{\DIFadd{Description}}\DIFadd{: Unload specified firmware drivers.
+}
+
+  \DIFadd{To be filled with }\texttt{\DIFadd{plist\ string}} \DIFadd{entries containing
+  the names of firmware drivers to unload before loading the
+  }\texttt{\DIFadd{Drivers}} \DIFadd{section.
+  This setting is typically only required if a user-provided driver is a variant of
+  an existing system firmware driver, and if the new driver would detect itself
+  as partially loaded, or otherwise fail to operate correctly, if the old
+  driver is not unloaded first.
+}
+
+  \textbf{\DIFadd{Warning}}\DIFadd{: Unloading system firmware drivers is usually not required
+  and not recommended. Poorly written drivers may crash when
+  unloaded, or cause subsequent crashes (e.g by allowing themselves to be
+  unloaded even though they have active dependencies). However standard UEFI
+  network stack drivers should unload cleanly.
+}
+
+  \emph{\DIFadd{Note 1}}\DIFadd{: See }\texttt{\DIFadd{SysReport/Drivers/DriverImageNames.txt}} \DIFadd{for the
+  list of drivers which this option can attempt to unload.
+  The relevant name is the driver component name. Drivers are only listed if they
+  implement }\texttt{\DIFadd{DriverBindingProtocol}} \DIFadd{and }\texttt{\DIFadd{LoadedImageProtocol}}\DIFadd{,
+  and have an available component name.
+}
+
+  \emph{\DIFadd{Note 2}}\DIFadd{: The NVRAM }\texttt{\DIFadd{Lang}} \DIFadd{and }\texttt{\DIFadd{PlatformLang}} \DIFadd{variables
+  are ignored when determining the driver component names recognised by this
+  option, and listed in the }\texttt{\DIFadd{SysReport}} \DIFadd{file. This is in order to make
+  unloading images stable across changes in these variables.
+  The UEFI Shell }\texttt{\DIFadd{dh}} \DIFadd{command takes account of these variables,
+  so in some circumstances may display different driver component names from
+  those listed for this option, unless these variables are cleared}\DIFaddend .
 
 \end{enumerate}
 
