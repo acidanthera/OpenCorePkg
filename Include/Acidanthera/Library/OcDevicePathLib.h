@@ -303,6 +303,8 @@ typedef struct {
                                  restore DevicePathNode's original content in
                                  the case of failure.
                                  On success, data may need to be freed.
+  @param[in]     ValidDevice     A device handle pointing to previous valid
+                                 device path if any.
 
   @retval -1  DevicePathNode could not be fixed.
   @retval 0   DevicePathNode was not modified and may be valid.
@@ -313,7 +315,8 @@ INTN
 OcFixAppleBootDevicePathNode (
   IN OUT EFI_DEVICE_PATH_PROTOCOL     **DevicePath,
   IN OUT EFI_DEVICE_PATH_PROTOCOL     **DevicePathNode,
-  OUT    APPLE_BOOT_DP_PATCH_CONTEXT  *RestoreContext OPTIONAL
+  OUT    APPLE_BOOT_DP_PATCH_CONTEXT  *RestoreContext OPTIONAL,
+  IN     EFI_HANDLE                   ValidDevice OPTIONAL
   );
 
 /**
