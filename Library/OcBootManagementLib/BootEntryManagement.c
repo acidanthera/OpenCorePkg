@@ -1459,6 +1459,7 @@ AddBootEntryFromBootOption (
       NumPatchedNodes = OcFixAppleBootDevicePathNode (
                           &DevicePath,
                           &RemainingDevicePath,
+                          NULL,
                           NULL
                           );
     } while (NumPatchedNodes > 0);

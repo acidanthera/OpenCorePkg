@@ -7,6 +7,7 @@ OpenCore Changelog
 - Enabled `XcpmExtraMsrs MSR_MISC_PWR_MGMT` patch back on macOS 12+
 - Fixed `XcpmExtraMsrs MSR_MISC_PWR_MGMT` patch on macOS 15
 - Added `UEFI` `Unload` option to unload existing firmware drivers
+- Fixed boot device selection with VirtIO disk drives used for macOS installations
 
 #### v1.0.1
 - Updated code and added progress bar to macrecovery, thx @soyeonswife63
