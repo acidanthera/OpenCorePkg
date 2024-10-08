@@ -22,7 +22,7 @@
 !if ($(TARGET) == DEBUG)
   NumBlocks          = 0xe        #GenFv image size 0xe0000
 !else
-  NumBlocks          = 0x24       #GenFv image size 0x240000
+  NumBlocks          = 0x25       #GenFv image size 0x250000
 !endif
 !endif 
   FvAlignment        = 16         #FV alignment and FV attributes setting.

@@ -508,7 +508,6 @@ OcRunBootPicker (
                  );
 
       OcRestoreNvramProtection (FwRuntime);
-      RestoreMode ();
 
       //
       // Do not wait on successful return code.
@@ -523,6 +522,11 @@ OcRunBootPicker (
       } else {
         OcPlayAudioFile (Context, OC_VOICE_OVER_AUDIO_FILE_EXECUTION_SUCCESSFUL, OC_VOICE_OVER_AUDIO_BASE_TYPE_OPEN_CORE, FALSE);
       }
+
+      //
+      // Restore mode after any delay.
+      //
+      RestoreMode ();
 
       //
       // Ensure that we flush all pressed keys after the application.

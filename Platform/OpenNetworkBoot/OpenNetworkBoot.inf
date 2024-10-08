@@ -1,0 +1,54 @@
+## @file
+#  Boot entry protocol handler for PXE and HTTP Boot.
+#
+#  Copyright (C) 2024, Mike Beaton. All rights reserved.<BR>
+#  SPDX-License-Identifier: BSD-3-Clause
+##
+
+[Defines]
+  INF_VERSION    = 0x00010005
+  BASE_NAME      = OpenNetworkBoot
+  ENTRY_POINT    = UefiMain
+  FILE_GUID      = CA2BA189-98E8-4126-ABA5-2CE5C9B4C2D8
+  MODULE_TYPE    = UEFI_DRIVER
+  VERSION_STRING = 1.0
+
+[Packages]
+  OpenCorePkg/OpenCorePkg.dec
+  MdePkg/MdePkg.dec
+  NetworkPkg/NetworkPkg.dec
+
+[LibraryClasses]
+  DebugLib
+  DevicePathLib
+  HttpLib
+  OcConsoleLib
+  OcBootManagementLib
+  OcFlexArrayLib
+  OcVirtualFsLib
+  PrintLib
+  UefiBootServicesTableLib
+  UefiRuntimeServicesTableLib
+  UefiDriverEntryPoint
+  UefiLib
+
+[Protocols]
+  gEfiHttpBootCallbackProtocolGuid              ## CONSUMES
+  gEfiLoadFileProtocolGuid                      ## CONSUMES
+  gEfiRamDiskProtocolGuid                       ## SOMETIMES_CONSUMES
+  gOcBootEntryProtocolGuid                      ## PRODUCES
+
+[Guids]
+  gEfiTlsCaCertificateGuid                      ## SOMETIMES_CONSUMES  ## Variable:L"TlsCaCertificate"
+  gEdkiiHttpTlsCipherListGuid                   ## SOMETIMES_CONSUMES  ## Variable:L"HttpTlsCipherList"
+  gEfiCertX509Guid                              ## SOMETIMES_CONSUMES  ## GUID  # Check the cert type
+
+[Sources]
+  BmBoot.c
+  BmBootDescription.c
+  HttpBootCallback.c
+  HttpBootCustomRead.c
+  NetworkBootInternal.h
+  OpenNetworkBoot.c
+  TlsAuthConfigImpl.c
+  Uri.c

@@ -1529,19 +1529,21 @@ InternalLoadBootEntry (
   IN  OC_BOOT_ENTRY              *BootEntry,
   IN  EFI_HANDLE                 ParentHandle,
   OUT EFI_HANDLE                 *EntryHandle,
-  OUT INTERNAL_DMG_LOAD_CONTEXT  *DmgLoadContext
+  OUT INTERNAL_DMG_LOAD_CONTEXT  *DmgLoadContext,
+  OUT VOID                       **CustomFreeContext
   )
 {
-  EFI_STATUS                 Status;
-  EFI_STATUS                 OptionalStatus;
-  EFI_DEVICE_PATH_PROTOCOL   *DevicePath;
-  EFI_HANDLE                 StorageHandle;
-  EFI_DEVICE_PATH_PROTOCOL   *StoragePath;
-  CHAR16                     *UnicodeDevicePath;
-  EFI_LOADED_IMAGE_PROTOCOL  *LoadedImage;
-  VOID                       *EntryData;
-  UINT32                     EntryDataSize;
-  CONST CHAR8                *Args;
+  EFI_STATUS                           Status;
+  EFI_STATUS                           OptionalStatus;
+  EFI_DEVICE_PATH_PROTOCOL             *DevicePath;
+  EFI_HANDLE                           StorageHandle;
+  EFI_DEVICE_PATH_PROTOCOL             *StoragePath;
+  CHAR16                               *UnicodeDevicePath;
+  EFI_LOADED_IMAGE_PROTOCOL            *LoadedImage;
+  VOID                                 *EntryData;
+  UINT32                               EntryDataSize;
+  CONST CHAR8                          *Args;
+  OC_APPLE_DISK_IMAGE_PRELOAD_CONTEXT  DmgPreloadContext;
 
   ASSERT (BootEntry != NULL);
   //
@@ -1558,38 +1560,57 @@ InternalLoadBootEntry (
 
   ZeroMem (DmgLoadContext, sizeof (*DmgLoadContext));
 
-  EntryData     = NULL;
-  EntryDataSize = 0;
-  StorageHandle = NULL;
-  StoragePath   = NULL;
+  EntryData          = NULL;
+  EntryDataSize      = 0;
+  StorageHandle      = NULL;
+  StoragePath        = NULL;
+  *CustomFreeContext = NULL;
+  ZeroMem (&DmgPreloadContext, sizeof (DmgPreloadContext));
 
-  if (BootEntry->IsFolder) {
+  //
+  // CustomRead must be set for external tools, but may also be set for boot
+  // entry protocol entries.
+  //
+  ASSERT (BootEntry->Type != OC_BOOT_EXTERNAL_TOOL || BootEntry->CustomRead != NULL);
+
+  if (BootEntry->CustomRead != NULL) {
+    Status = BootEntry->CustomRead (
+                          Context->StorageContext,
+                          BootEntry,
+                          &EntryData,
+                          &EntryDataSize,
+                          &DevicePath,
+                          &StorageHandle,
+                          &StoragePath,
+                          Context->DmgLoading,
+                          &DmgPreloadContext,
+                          CustomFreeContext
+                          );
+
+    if (EFI_ERROR (Status)) {
+      DEBUG ((DEBUG_WARN, "OCB: Custom read failed - %r\n", Status));
+      return Status;
+    }
+  }
+
+  if (  (DmgPreloadContext.DmgFile != NULL)
+     || (DmgPreloadContext.DmgContext != NULL)
+     || BootEntry->IsFolder)
+  {
     if (Context->DmgLoading == OcDmgLoadingDisabled) {
       return EFI_SECURITY_VIOLATION;
     }
 
     DmgLoadContext->DevicePath = BootEntry->DevicePath;
-    DevicePath                 = InternalLoadDmg (DmgLoadContext, Context->DmgLoading);
+    DevicePath                 = InternalLoadDmg (
+                                   DmgLoadContext,
+                                   Context->DmgLoading,
+                                   &DmgPreloadContext
+                                   );
     if (DevicePath == NULL) {
       return EFI_UNSUPPORTED;
     }
-  } else if (BootEntry->Type == OC_BOOT_EXTERNAL_TOOL) {
-    ASSERT (Context->CustomRead != NULL);
-
-    Status = Context->CustomRead (
-                        Context->StorageContext,
-                        BootEntry,
-                        &EntryData,
-                        &EntryDataSize,
-                        &DevicePath,
-                        &StorageHandle,
-                        &StoragePath
-                        );
-
-    if (EFI_ERROR (Status)) {
-      return Status;
-    }
-  } else {
+  } else if (BootEntry->CustomRead == NULL) {
     DevicePath = BootEntry->DevicePath;
   }
 
@@ -1691,6 +1712,9 @@ InternalLoadBootEntry (
     }
   } else {
     InternalUnloadDmg (DmgLoadContext);
+    if (BootEntry->CustomFree != NULL) {
+      BootEntry->CustomFree (*CustomFreeContext);
+    }
   }
 
   return Status;

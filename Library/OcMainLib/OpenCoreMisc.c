@@ -25,6 +25,7 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 #include <Library/MemoryAllocationLib.h>
 #include <Library/OcAcpiLib.h>
 #include <Library/OcAppleBootPolicyLib.h>
+#include <Library/OcAppleDiskImageLib.h>
 #include <Library/OcAudioLib.h>
 #include <Library/OcBootManagementLib.h>
 #include <Library/OcConsoleLib.h>
@@ -232,6 +233,21 @@ ProduceDebugReport (
 
   DEBUG ((DEBUG_INFO, "OC: GOPInfo dumping - %r\n", Status));
 
+  Status = OcSafeFileOpen (
+             SysReport,
+             &SubReport,
+             L"Drivers",
+             EFI_FILE_MODE_READ | EFI_FILE_MODE_WRITE | EFI_FILE_MODE_CREATE,
+             EFI_FILE_DIRECTORY
+             );
+  if (!EFI_ERROR (Status)) {
+    DEBUG ((DEBUG_INFO, "OC: Dumping DriverImageNames for report...\n"));
+    Status = OcDriverInfoDump (SubReport);
+    SubReport->Close (SubReport);
+  }
+
+  DEBUG ((DEBUG_INFO, "OC: DriverImageNames dumping - %r\n", Status));
+
   SysReport->Close (SysReport);
   Fs->Close (Fs);
 
@@ -242,13 +258,16 @@ STATIC
 EFI_STATUS
 EFIAPI
 OcToolLoadEntry (
-  IN  OC_STORAGE_CONTEXT        *Storage,
-  IN  OC_BOOT_ENTRY             *ChosenEntry,
-  OUT VOID                      **Data,
-  OUT UINT32                    *DataSize,
-  OUT EFI_DEVICE_PATH_PROTOCOL  **DevicePath,
-  OUT EFI_HANDLE                *StorageHandle,
-  OUT EFI_DEVICE_PATH_PROTOCOL  **StoragePath
+  IN  OC_STORAGE_CONTEXT                   *Storage,
+  IN  OC_BOOT_ENTRY                        *ChosenEntry,
+  OUT VOID                                 **Data,
+  OUT UINT32                               *DataSize,
+  OUT EFI_DEVICE_PATH_PROTOCOL             **DevicePath,
+  OUT EFI_HANDLE                           *StorageHandle,
+  OUT EFI_DEVICE_PATH_PROTOCOL             **StoragePath,
+  IN  OC_DMG_LOADING_SUPPORT               DmgLoading,
+  OUT OC_APPLE_DISK_IMAGE_PRELOAD_CONTEXT  *DmgPreloadContext,
+  OUT VOID                                 **CustomFreeContext
   )
 {
   EFI_STATUS  Status;

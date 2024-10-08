@@ -32,6 +32,17 @@ typedef struct {
   APPLE_DISK_IMAGE_BLOCK_DATA          **Blocks;
 } OC_APPLE_DISK_IMAGE_CONTEXT;
 
+//
+// Disk image preload context, for network boot.
+//
+typedef struct {
+  OC_APPLE_DISK_IMAGE_CONTEXT    *DmgContext;
+  EFI_FILE_PROTOCOL              *DmgFile;
+  UINT32                         DmgFileSize;
+  VOID                           *ChunklistBuffer;
+  UINT32                         ChunklistFileSize;
+} OC_APPLE_DISK_IMAGE_PRELOAD_CONTEXT;
+
 BOOLEAN
 OcAppleDiskImageInitializeContext (
   OUT OC_APPLE_DISK_IMAGE_CONTEXT        *Context,

@@ -1,13 +1,14 @@
 /** @file
-  Library functions which relate with boot option description.
+  Library functions which relate to boot option description.
 
 Copyright (c) 2011 - 2018, Intel Corporation. All rights reserved.<BR>
 (C) Copyright 2015 Hewlett Packard Enterprise Development LP<BR>
+Copyright (C) 2024, Mike Beaton. All rights reserved.<BR>
 SPDX-License-Identifier: BSD-2-Clause-Patent
 
 **/
 
-#include "InternalBm.h"
+#include "NetworkBootInternal.h"
 
 /**
   Return the description for network boot device.
@@ -141,18 +142,18 @@ BmGetNetworkDescription (
 
   //
   // Build description like below:
-  //   "PXEv6 (MAC:112233445566 VLAN1)"
-  //   "HTTPv4 (MAC:112233445566)"
+  //   "PXE Boot IPv6 (MAC:11-22-33-44-55-66 VLAN1)"
+  //   "HTTP Boot IPv4 (MAC:11-22-33-44-55-66)"
   //
-  DescriptionSize = sizeof (L"HTTPv6 (MAC:112233445566 VLAN65535)");
+  DescriptionSize = sizeof (L"HTTP Boot IPv6 (MAC:11-22-33-44-55-66 VLAN65535)");
   Description     = AllocatePool (DescriptionSize);
   ASSERT (Description != NULL);
   UnicodeSPrint (
     Description,
     DescriptionSize,
     (Vlan == NULL) ?
-    L"%sv%d (MAC:%02x%02x%02x%02x%02x%02x)" :
-    L"%sv%d (MAC:%02x%02x%02x%02x%02x%02x VLAN%d)",
+    L"%s Boot IPv%d (MAC:%02x-%02x-%02x-%02x-%02x-%02x)" :
+    L"%s Boot IPv%d (MAC:%02x-%02x-%02x-%02x-%02x-%02x VLAN%d)",
     (Uri == NULL) ? L"PXE" : L"HTTP",
     ((Ip == NULL) || (DevicePathSubType (Ip) == MSG_IPv4_DP)) ? 4 : 6,
     Mac->MacAddress.Addr[0],
