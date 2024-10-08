@@ -7,6 +7,8 @@ OpenCore Changelog
 - Fixed Raptor Lake CPU detection
 - Supported booting with TuneD in Fedora 41 in OpenLinuxBoot
 - Fixed failure of vault `sign.command` to insert signature in correct location in some circumstances
+- Added OpenNetworkBoot driver to support HTTP(S) and PXE boot
+- Supported DMG loading and verification (e.g. macOS Recovery) over HTTP(S) boot
 
 #### v1.0.2
 - Fixed error in macrecovery when running headless, thx @mkorje

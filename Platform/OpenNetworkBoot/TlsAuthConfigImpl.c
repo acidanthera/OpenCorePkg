@@ -1,98 +1,67 @@
 /** @file
-  The Miscellaneous Routines for TlsAuthConfigDxe driver.
+  Miscellaneous routines for TLS auth config.
 
-Copyright (c) 2016 - 2018, Intel Corporation. All rights reserved.<BR>
-
-SPDX-License-Identifier: BSD-2-Clause-Patent
-
+  Copyright (c) 2016 - 2018, Intel Corporation. All rights reserved.<BR>
+  Copyright (c) 2024, Mike Beaton. All rights reserved.<BR>
+  SPDX-License-Identifier: BSD-2-Clause-Patent
 **/
 
-#include "TlsAuthConfigImpl.h"
+#include "NetworkBootInternal.h"
+
+#define TLS_AUTH_CONFIG_VAR_BASE_ATTR  (EFI_VARIABLE_NON_VOLATILE | EFI_VARIABLE_BOOTSERVICE_ACCESS)
+
+typedef
+EFI_STATUS
+(*PROCESS_CERT)(
+  IN VOID                *Context,
+  IN UINTN               CertIndex,
+  IN UINTN               CertSize,
+  IN EFI_SIGNATURE_DATA  *Cert
+  );
+
+typedef struct {
+  EFI_GUID    *OwnerGuid;
+  UINTN       X509DataSize;
+  VOID        *X509Data;
+} CERT_IS_PRESENT_CONTEXT;
 
 /**
-  List all cert in specified database by GUID in the page
-  for user to select and delete as needed.
+  Perform action for all signatures in specified database, with
+  possibility of aborting early.
 
-  @param[in]    PrivateData         Module's private data.
   @param[in]    VariableName        The variable name of the vendor's signature database.
-  @param[in]    VendorGuid          A unique identifier for the vendor.
-  @param[in]    LabelNumber         Label number to insert opcodes.
-  @param[in]    FormId              Form ID of current page.
-  @param[in]    QuestionIdBase      Base question id of the signature list.
+  @param[in]    VendorGuid          A unique identifier for the signature database vendor.
+  @param[in]    ProcessCert         The method to call for each certificate.
+  @param[in]    Context             Context for ProcessCert, if required.
 
-  @retval   EFI_SUCCESS             Success to update the signature list page
-  @retval   EFI_OUT_OF_RESOURCES    Unable to allocate required resources.
-
+  @retval   EFI_SUCCESS            Looped over all signatures.
+  @retval   EFI_OUT_OF_RESOURCES   Could not allocate needed resources.
+  @retval   Other                  Other error or return code from from ProcessCert.
 **/
+STATIC
 EFI_STATUS
-UpdateDeletePage (
-  IN TLS_AUTH_CONFIG_PRIVATE_DATA  *Private,
-  IN CHAR16                        *VariableName,
-  IN EFI_GUID                      *VendorGuid,
-  IN UINT16                        LabelNumber,
-  IN EFI_FORM_ID                   FormId,
-  IN EFI_QUESTION_ID               QuestionIdBase
+ProcessAllCerts (
+  IN CHAR16        *VariableName,
+  IN EFI_GUID      *VendorGuid,
+  IN PROCESS_CERT  ProcessCert,
+  IN VOID          *Context OPTIONAL
   )
 {
   EFI_STATUS          Status;
   UINT32              Index;
   UINTN               CertCount;
   UINTN               GuidIndex;
-  VOID                *StartOpCodeHandle;
-  VOID                *EndOpCodeHandle;
-  EFI_IFR_GUID_LABEL  *StartLabel;
-  EFI_IFR_GUID_LABEL  *EndLabel;
   UINTN               DataSize;
   UINT8               *Data;
   EFI_SIGNATURE_LIST  *CertList;
   EFI_SIGNATURE_DATA  *Cert;
   UINT32              ItemDataSize;
-  CHAR16              *GuidStr;
-  EFI_STRING_ID       GuidID;
-  EFI_STRING_ID       Help;
 
-  Data              = NULL;
-  CertList          = NULL;
-  Cert              = NULL;
-  GuidStr           = NULL;
-  StartOpCodeHandle = NULL;
-  EndOpCodeHandle   = NULL;
+  ASSERT (ProcessCert != NULL);
 
-  //
-  // Initialize the container for dynamic opcodes.
-  //
-  StartOpCodeHandle = HiiAllocateOpCodeHandle ();
-  if (StartOpCodeHandle == NULL) {
-    Status = EFI_OUT_OF_RESOURCES;
-    goto ON_EXIT;
-  }
-
-  EndOpCodeHandle = HiiAllocateOpCodeHandle ();
-  if (EndOpCodeHandle == NULL) {
-    Status = EFI_OUT_OF_RESOURCES;
-    goto ON_EXIT;
-  }
-
-  //
-  // Create Hii Extend Label OpCode.
-  //
-  StartLabel = (EFI_IFR_GUID_LABEL *)HiiCreateGuidOpCode (
-                                       StartOpCodeHandle,
-                                       &gEfiIfrTianoGuid,
-                                       NULL,
-                                       sizeof (EFI_IFR_GUID_LABEL)
-                                       );
-  StartLabel->ExtendOpCode = EFI_IFR_EXTEND_OP_LABEL;
-  StartLabel->Number       = LabelNumber;
-
-  EndLabel = (EFI_IFR_GUID_LABEL *)HiiCreateGuidOpCode (
-                                     EndOpCodeHandle,
-                                     &gEfiIfrTianoGuid,
-                                     NULL,
-                                     sizeof (EFI_IFR_GUID_LABEL)
-                                     );
-  EndLabel->ExtendOpCode = EFI_IFR_EXTEND_OP_LABEL;
-  EndLabel->Number       = LABEL_END;
+  Data     = NULL;
+  CertList = NULL;
+  Cert     = NULL;
 
   //
   // Read Variable.
@@ -100,24 +69,22 @@ UpdateDeletePage (
   DataSize = 0;
   Status   = gRT->GetVariable (VariableName, VendorGuid, NULL, &DataSize, Data);
   if (EFI_ERROR (Status) && (Status != EFI_BUFFER_TOO_SMALL)) {
-    goto ON_EXIT;
+    if (Status == EFI_NOT_FOUND) {
+      Status = EFI_SUCCESS;
+    }
+
+    return Status;
   }
 
   Data = (UINT8 *)AllocateZeroPool (DataSize);
   if (Data == NULL) {
-    Status = EFI_OUT_OF_RESOURCES;
-    goto ON_EXIT;
+    return EFI_OUT_OF_RESOURCES;
   }
 
   Status = gRT->GetVariable (VariableName, VendorGuid, NULL, &DataSize, Data);
   if (EFI_ERROR (Status)) {
-    goto ON_EXIT;
-  }
-
-  GuidStr = AllocateZeroPool (100);
-  if (GuidStr == NULL) {
-    Status = EFI_OUT_OF_RESOURCES;
-    goto ON_EXIT;
+    FreePool (Data);
+    return Status;
   }
 
   //
@@ -128,9 +95,7 @@ UpdateDeletePage (
   GuidIndex    = 0;
 
   while ((ItemDataSize > 0) && (ItemDataSize >= CertList->SignatureListSize)) {
-    if (CompareGuid (&CertList->SignatureType, &gEfiCertX509Guid)) {
-      Help = STRING_TOKEN (STR_CERT_TYPE_PCKS_GUID);
-    } else {
+    if (!CompareGuid (&CertList->SignatureType, &gEfiCertX509Guid)) {
       //
       // The signature type is not supported in current implementation.
       //
@@ -139,86 +104,165 @@ UpdateDeletePage (
       continue;
     }
 
+    Status    = EFI_SUCCESS;
     CertCount = (CertList->SignatureListSize - sizeof (EFI_SIGNATURE_LIST) - CertList->SignatureHeaderSize) / CertList->SignatureSize;
     for (Index = 0; Index < CertCount; Index++) {
       Cert = (EFI_SIGNATURE_DATA *)((UINT8 *)CertList
                                     + sizeof (EFI_SIGNATURE_LIST)
                                     + CertList->SignatureHeaderSize
                                     + Index * CertList->SignatureSize);
-      //
-      // Display GUID and help
-      //
-      GuidToString (&Cert->SignatureOwner, GuidStr, 100);
-      GuidID = HiiSetString (Private->RegisteredHandle, 0, GuidStr, NULL);
-      HiiCreateCheckBoxOpCode (
-        StartOpCodeHandle,
-        (EFI_QUESTION_ID)(QuestionIdBase + GuidIndex++),
-        0,
-        0,
-        GuidID,
-        Help,
-        EFI_IFR_FLAG_CALLBACK,
-        0,
-        NULL
-        );
+
+      Status = ProcessCert (Context, GuidIndex, CertList->SignatureSize, Cert);
+      if (EFI_ERROR (Status)) {
+        break;
+      }
+
+      ++GuidIndex;
+    }
+
+    if (EFI_ERROR (Status)) {
+      break;
     }
 
     ItemDataSize -= CertList->SignatureListSize;
     CertList      = (EFI_SIGNATURE_LIST *)((UINT8 *)CertList + CertList->SignatureListSize);
   }
 
-ON_EXIT:
-  HiiUpdateForm (
-    Private->RegisteredHandle,
-    &gTlsAuthConfigGuid,
-    FormId,
-    StartOpCodeHandle,
-    EndOpCodeHandle
-    );
+  FreePool (Data);
 
-  if (StartOpCodeHandle != NULL) {
-    HiiFreeOpCodeHandle (StartOpCodeHandle);
+  return Status;
+}
+
+/**
+  @retval   EFI_SUCCESS             Continue processing.
+**/
+STATIC
+EFI_STATUS
+LogCert (
+  IN VOID                *Context,
+  IN UINTN               CertIndex,
+  IN UINTN               CertSize,
+  IN EFI_SIGNATURE_DATA  *Cert
+  )
+{
+  DEBUG ((DEBUG_INFO, "NTBT: Cert %u owner %g\n", CertIndex, &Cert->SignatureOwner));
+  return EFI_SUCCESS;
+}
+
+/**
+  Log owner GUID of each installed certificate in signature database.
+
+  @param[in]    VariableName        The variable name of the signature database.
+  @param[in]    VendorGuid          A unique identifier for the signature database vendor.
+
+  @retval   EFI_SUCCESS             Success.
+**/
+EFI_STATUS
+LogInstalledCerts (
+  IN CHAR16    *VariableName,
+  IN EFI_GUID  *VendorGuid
+  )
+{
+  DEBUG ((DEBUG_INFO, "NTBT: Listing installed certs...\n"));
+  return ProcessAllCerts (
+           VariableName,
+           VendorGuid,
+           LogCert,
+           NULL
+           );
+}
+
+/**
+  @retval   EFI_SUCCESS             Certificate not found; continue processing.
+  @retval   EFI_ALREADY_STARTED     Certificate found; stop processing.
+**/
+STATIC
+EFI_STATUS
+CheckCertPresent (
+  IN VOID                *VoidContext,
+  IN UINTN               CertIndex,
+  IN UINTN               CertSize,
+  IN EFI_SIGNATURE_DATA  *Cert
+  )
+{
+  CERT_IS_PRESENT_CONTEXT  *Context;
+
+  Context = VoidContext;
+
+  if (!CompareGuid (&Cert->SignatureOwner, Context->OwnerGuid)) {
+    return EFI_SUCCESS;
   }
 
-  if (EndOpCodeHandle != NULL) {
-    HiiFreeOpCodeHandle (EndOpCodeHandle);
-  }
-
-  if (Data != NULL) {
-    FreePool (Data);
-  }
-
-  if (GuidStr != NULL) {
-    FreePool (GuidStr);
+  if (  (CertSize == sizeof (EFI_SIGNATURE_DATA) - 1 + Context->X509DataSize)
+     && (CompareMem (Cert->SignatureData, Context->X509Data, Context->X509DataSize) == 0)
+        )
+  {
+    return EFI_ALREADY_STARTED;
   }
 
   return EFI_SUCCESS;
 }
 
 /**
-  Delete one entry from cert database.
+  Report whether specified signature is already enrolled for given owner.
 
-  @param[in]    Private             Module's private data.
-  @param[in]    VariableName        The variable name of the database.
-  @param[in]    VendorGuid          A unique identifier for the vendor.
-  @param[in]    LabelNumber         Label number to insert opcodes.
-  @param[in]    FormId              Form ID of current page.
-  @param[in]    QuestionIdBase      Base question id of the cert list.
-  @param[in]    DeleteIndex         Cert index to delete.
+  @param[in] VariableName    Variable name of CA database.
+  @param[in] VendorGuid      Unique identifier for the CA database vendor.
+  @param[in] OwnerGuid       Unique identifier for owner of the certificate to be searched for.
+  @param[in] X509DataSize    Certificate data size.
+  @param[in] X509Data        Certificate data.
+
+  @retval   EFI_SUCCESS            Certificate is already enrolled.
+  @retval   EFI_OUT_OF_RESOURCES   Could not allocate needed resources.
+**/
+EFI_STATUS
+CertIsPresent (
+  IN CHAR16    *VariableName,
+  IN EFI_GUID  *VendorGuid,
+  IN EFI_GUID  *OwnerGuid,
+  IN UINTN     X509DataSize,
+  IN VOID      *X509Data
+  )
+{
+  CERT_IS_PRESENT_CONTEXT  Context;
+
+  ASSERT (X509Data != NULL);
+
+  Context.OwnerGuid    = OwnerGuid;
+  Context.X509DataSize = X509DataSize;
+  Context.X509Data     = X509Data;
+
+  return ProcessAllCerts (
+           VariableName,
+           VendorGuid,
+           CheckCertPresent,
+           &Context
+           );
+}
+
+/**
+  Delete specific entry or all entries with owner guid from signature database.
+  (Based on original EDK 2 DeleteCert which removes one cert, identified by index.)
+
+  @param[in]    VariableName        The variable name of the signature database.
+  @param[in]    VendorGuid          A unique identifier for the signature database vendor.
+  @param[in]    OwnerGuid           A unique identifier for owner of the certificate(s) to be deleted.
+  @param[in]    X509DataSize        Optional certificate data size.
+  @param[in]    X509Data            Optional certificate data. If non-NULL, delete only specific certificate
+                                    for owner, if present. If NULL, delete all certificates for owner.
+  @param[in]    DeletedCount        Optional return count of deleted certificates.
 
   @retval   EFI_SUCCESS             Delete signature successfully.
-  @retval   EFI_NOT_FOUND           Can't find the signature item,
   @retval   EFI_OUT_OF_RESOURCES    Could not allocate needed resources.
 **/
 EFI_STATUS
-DeleteCert (
-  IN TLS_AUTH_CONFIG_PRIVATE_DATA  *Private,
-  IN CHAR16                        *VariableName,
-  IN EFI_GUID                      *VendorGuid,
-  IN UINT16                        LabelNumber,
-  IN EFI_FORM_ID                   FormId,
-  IN EFI_QUESTION_ID               QuestionIdBase,
-  IN UINTN                         DeleteIndex
+DeleteCertsForOwner (
+  IN CHAR16    *VariableName,
+  IN EFI_GUID  *VendorGuid,
+  IN EFI_GUID  *OwnerGuid,
+  IN UINTN     X509DataSize,
+  IN VOID      *X509Data,
+  OUT UINTN    *DeletedCount
   )
 {
   EFI_STATUS          Status;
@@ -232,9 +276,16 @@ DeleteCert (
   EFI_SIGNATURE_DATA  *Cert;
   UINTN               CertCount;
   UINT32              Offset;
-  BOOLEAN             IsItemFound;
+  UINTN               LocalDeleteCount;
   UINT32              ItemDataSize;
-  UINTN               GuidIndex;
+
+  ASSERT ((X509Data == NULL) || (X509DataSize != 0));
+
+  if (DeletedCount == NULL) {
+    DeletedCount = &LocalDeleteCount;
+  }
+
+  *DeletedCount = 0;
 
   Data     = NULL;
   OldData  = NULL;
@@ -248,37 +299,39 @@ DeleteCert (
   DataSize = 0;
   Status   = gRT->GetVariable (VariableName, VendorGuid, NULL, &DataSize, NULL);
   if (EFI_ERROR (Status) && (Status != EFI_BUFFER_TOO_SMALL)) {
-    goto ON_EXIT;
+    if (Status == EFI_NOT_FOUND) {
+      Status = EFI_SUCCESS;
+    }
+
+    return Status;
   }
 
-  OldData = (UINT8 *)AllocateZeroPool (DataSize);
+  OldData = AllocateZeroPool (DataSize);
   if (OldData == NULL) {
-    Status = EFI_OUT_OF_RESOURCES;
-    goto ON_EXIT;
+    return EFI_OUT_OF_RESOURCES;
   }
 
   Status = gRT->GetVariable (VariableName, VendorGuid, &Attr, &DataSize, OldData);
   if (EFI_ERROR (Status)) {
-    goto ON_EXIT;
+    FreePool (OldData);
+    return Status;
   }
 
   //
   // Allocate space for new variable.
   //
-  Data = (UINT8 *)AllocateZeroPool (DataSize);
+  Data = AllocateZeroPool (DataSize);
   if (Data == NULL) {
-    Status =  EFI_OUT_OF_RESOURCES;
-    goto ON_EXIT;
+    FreePool (OldData);
+    return EFI_OUT_OF_RESOURCES;
   }
 
   //
-  // Enumerate all data and erasing the target item.
+  // Enumerate all data, erasing target items.
   //
-  IsItemFound  = FALSE;
   ItemDataSize = (UINT32)DataSize;
   CertList     = (EFI_SIGNATURE_LIST *)OldData;
   Offset       = 0;
-  GuidIndex    = 0;
   while ((ItemDataSize > 0) && (ItemDataSize >= CertList->SignatureListSize)) {
     if (CompareGuid (&CertList->SignatureType, &gEfiCertX509Guid)) {
       //
@@ -290,12 +343,19 @@ DeleteCert (
       Cert        = (EFI_SIGNATURE_DATA *)((UINT8 *)CertList + sizeof (EFI_SIGNATURE_LIST) + CertList->SignatureHeaderSize);
       CertCount   = (CertList->SignatureListSize - sizeof (EFI_SIGNATURE_LIST) - CertList->SignatureHeaderSize) / CertList->SignatureSize;
       for (Index = 0; Index < CertCount; Index++) {
-        if (GuidIndex == DeleteIndex) {
+        if (  CompareGuid (&Cert->SignatureOwner, OwnerGuid)
+           && (  (X509Data == NULL)
+              || (  (CertList->SignatureSize == (UINT32)(sizeof (EFI_SIGNATURE_DATA) - 1 + X509DataSize))
+                 && (CompareMem ((UINT8 *)(Cert->SignatureData), X509Data, X509DataSize) == 0)
+                    )
+                 )
+              )
+        {
           //
           // Find it! Skip it!
           //
           NewCertList->SignatureListSize -= CertList->SignatureSize;
-          IsItemFound                     = TRUE;
+          ++(*DeletedCount);
         } else {
           //
           // This item doesn't match. Copy it to the Data buffer.
@@ -304,7 +364,6 @@ DeleteCert (
           Offset += CertList->SignatureSize;
         }
 
-        GuidIndex++;
         Cert = (EFI_SIGNATURE_DATA *)((UINT8 *)Cert + CertList->SignatureSize);
       }
     } else {
@@ -319,85 +378,67 @@ DeleteCert (
     CertList      = (EFI_SIGNATURE_LIST *)((UINT8 *)CertList + CertList->SignatureListSize);
   }
 
-  if (!IsItemFound) {
+  if (*DeletedCount != 0) {
     //
-    // Doesn't find the signature Item!
+    // Delete the EFI_SIGNATURE_LIST header if there is no signature remaining in any list.
     //
-    Status = EFI_NOT_FOUND;
-    goto ON_EXIT;
-  }
+    ItemDataSize = Offset;
+    CertList     = (EFI_SIGNATURE_LIST *)Data;
+    Offset       = 0;
+    ZeroMem (OldData, ItemDataSize);
+    while ((ItemDataSize > 0) && (ItemDataSize >= CertList->SignatureListSize)) {
+      CertCount = (CertList->SignatureListSize - sizeof (EFI_SIGNATURE_LIST) - CertList->SignatureHeaderSize) / CertList->SignatureSize;
+      if (CertCount != 0) {
+        CopyMem (OldData + Offset, (UINT8 *)(CertList), CertList->SignatureListSize);
+        Offset += CertList->SignatureListSize;
+      }
 
-  //
-  // Delete the EFI_SIGNATURE_LIST header if there is no signature in the list.
-  //
-  ItemDataSize = Offset;
-  CertList     = (EFI_SIGNATURE_LIST *)Data;
-  Offset       = 0;
-  ZeroMem (OldData, ItemDataSize);
-  while ((ItemDataSize > 0) && (ItemDataSize >= CertList->SignatureListSize)) {
-    CertCount = (CertList->SignatureListSize - sizeof (EFI_SIGNATURE_LIST) - CertList->SignatureHeaderSize) / CertList->SignatureSize;
-    DEBUG ((DEBUG_INFO, "       CertCount = %x\n", CertCount));
-    if (CertCount != 0) {
-      CopyMem (OldData + Offset, (UINT8 *)(CertList), CertList->SignatureListSize);
-      Offset += CertList->SignatureListSize;
+      ItemDataSize -= CertList->SignatureListSize;
+      CertList      = (EFI_SIGNATURE_LIST *)((UINT8 *)CertList + CertList->SignatureListSize);
     }
 
-    ItemDataSize -= CertList->SignatureListSize;
-    CertList      = (EFI_SIGNATURE_LIST *)((UINT8 *)CertList + CertList->SignatureListSize);
+    DataSize = Offset;
+
+    //
+    // Set (or delete if everything was removed) the Variable.
+    //
+    Status = gRT->SetVariable (
+                    VariableName,
+                    VendorGuid,
+                    Attr,
+                    DataSize,
+                    OldData
+                    );
   }
 
-  DataSize = Offset;
+  FreePool (Data);
+  FreePool (OldData);
 
-  Status = gRT->SetVariable (
-                  VariableName,
-                  VendorGuid,
-                  Attr,
-                  DataSize,
-                  OldData
-                  );
-  if (EFI_ERROR (Status)) {
-    DEBUG ((DEBUG_ERROR, "Failed to set variable, Status = %r\n", Status));
-    goto ON_EXIT;
-  }
-
-ON_EXIT:
-  if (Data != NULL) {
-    FreePool (Data);
-  }
-
-  if (OldData != NULL) {
-    FreePool (OldData);
-  }
-
-  return UpdateDeletePage (
-           Private,
-           VariableName,
-           VendorGuid,
-           LabelNumber,
-           FormId,
-           QuestionIdBase
-           );
+  return Status;
 }
 
 /**
   Enroll a new X509 certificate into Variable.
 
-  @param[in] PrivateData     The module's private data.
   @param[in] VariableName    Variable name of CA database.
+  @param[in] VendorGuid      Unique identifier for the CA database vendor.
+  @param[in] OwnerGuid       Unique identifier for owner of the certificate to be installed.
+  @param[in] X509DataSize    Certificate data size.
+  @param[in] X509Data        Certificate data.
 
   @retval   EFI_SUCCESS            New X509 is enrolled successfully.
   @retval   EFI_OUT_OF_RESOURCES   Could not allocate needed resources.
-
 **/
 EFI_STATUS
 EnrollX509toVariable (
-  IN TLS_AUTH_CONFIG_PRIVATE_DATA  *Private,
-  IN CHAR16                        *VariableName
+  IN CHAR16    *VariableName,
+  IN EFI_GUID  *VendorGuid,
+  IN EFI_GUID  *OwnerGuid,
+  IN UINTN     X509DataSize,
+  IN VOID      *X509Data
   )
 {
   EFI_STATUS          Status;
-  UINTN               X509DataSize;
-  VOID                *X509Data;
   EFI_SIGNATURE_LIST  *CACert;
   EFI_SIGNATURE_DATA  *CACertData;
   VOID                *Data;
@@ -405,33 +446,29 @@ EnrollX509toVariable (
   UINTN               SigDataSize;
   UINT32              Attr;
 
-  X509DataSize = 0;
-  SigDataSize  = 0;
-  DataSize     = 0;
-  X509Data     = NULL;
-  CACert       = NULL;
-  CACertData   = NULL;
-  Data         = NULL;
-  Attr         = 0;
-
-  Status = ReadFileContent (
-             Private->FileContext->FHandle,
-             &X509Data,
-             &X509DataSize,
-             0
-             );
-  if (EFI_ERROR (Status)) {
-    goto ON_EXIT;
-  }
+  SigDataSize = 0;
+  DataSize    = 0;
+  CACert      = NULL;
+  CACertData  = NULL;
+  Data        = NULL;
+  Attr        = 0;
 
   ASSERT (X509Data != NULL);
 
+  //
+  // Note: As implemented in EDK 2, each signature list can have multiple
+  // instances of signature data (owner guid followed by raw signature data),
+  // but every instance in one list must have the same size.
+  // The signature data is the unprocessed contents of a .pem or .der file.
+  // It is not immediately obvious how the multiple signature feature would
+  // be useful as signature file data does not in general have a fixed size
+  // (not even for .pem files: https://security.stackexchange.com/q/152584).
+  //
   SigDataSize = sizeof (EFI_SIGNATURE_LIST) + sizeof (EFI_SIGNATURE_DATA) - 1 + X509DataSize;
 
   Data = AllocateZeroPool (SigDataSize);
   if (Data == NULL) {
-    Status = EFI_OUT_OF_RESOURCES;
-    goto ON_EXIT;
+    return EFI_OUT_OF_RESOURCES;
   }
 
   //
@@ -444,7 +481,7 @@ EnrollX509toVariable (
   CopyGuid (&CACert->SignatureType, &gEfiCertX509Guid);
 
   CACertData = (EFI_SIGNATURE_DATA *)((UINT8 *)CACert + sizeof (EFI_SIGNATURE_LIST));
-  CopyGuid (&CACertData->SignatureOwner, Private->CertGuid);
+  CopyGuid (&CACertData->SignatureOwner, OwnerGuid);
   CopyMem ((UINT8 *)(CACertData->SignatureData), X509Data, X509DataSize);
 
   //
@@ -454,7 +491,7 @@ EnrollX509toVariable (
   //
   Status = gRT->GetVariable (
                   VariableName,
-                  &gEfiTlsCaCertificateGuid,
+                  VendorGuid,
                   &Attr,
                   &DataSize,
                   NULL
@@ -464,35 +501,19 @@ EnrollX509toVariable (
   } else if (Status == EFI_NOT_FOUND) {
     Attr = TLS_AUTH_CONFIG_VAR_BASE_ATTR;
   } else {
-    goto ON_EXIT;
+    FreePool (Data);
+    return Status;
   }
 
   Status = gRT->SetVariable (
                   VariableName,
-                  &gEfiTlsCaCertificateGuid,
+                  VendorGuid,
                   Attr,
                   SigDataSize,
                   Data
                   );
-  if (EFI_ERROR (Status)) {
-    goto ON_EXIT;
-  }
 
-ON_EXIT:
-  CleanFileContext (Private);
-
-  if (Private->CertGuid != NULL) {
-    FreePool (Private->CertGuid);
-    Private->CertGuid = NULL;
-  }
-
-  if (Data != NULL) {
-    FreePool (Data);
-  }
-
-  if (X509Data != NULL) {
-    FreePool (X509Data);
-  }
+  FreePool (Data);
 
   return Status;
 }

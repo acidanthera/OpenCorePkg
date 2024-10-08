@@ -1,14 +1,15 @@
 /** @file
-  Library functions which relates with booting.
+  Library functions which relate to booting.
 
 Copyright (c) 2019, NVIDIA CORPORATION. All rights reserved.
 Copyright (c) 2011 - 2021, Intel Corporation. All rights reserved.<BR>
 (C) Copyright 2015-2021 Hewlett Packard Enterprise Development LP<BR>
+Copyright (C) 2024, Mike Beaton. All rights reserved.<BR>
 SPDX-License-Identifier: BSD-2-Clause-Patent
 
 **/
 
-#include "InternalBm.h"
+#include "NetworkBootInternal.h"
 
 EFI_RAM_DISK_PROTOCOL  *mRamDisk = NULL;
 
@@ -23,6 +24,7 @@ EFI_RAM_DISK_PROTOCOL  *mRamDisk = NULL;
   @return The next possible full path pointing to the load option.
           Caller is responsible to free the memory.
 **/
+STATIC
 EFI_DEVICE_PATH_PROTOCOL *
 BmExpandMediaDevicePath (
   IN  EFI_DEVICE_PATH_PROTOCOL  *DevicePath,
@@ -145,6 +147,7 @@ BmExpandMediaDevicePath (
   @retval TRUE  Left and Right are the same.
   @retval FALSE Left and Right are the different.
 **/
+STATIC
 BOOLEAN
 BmMatchHttpBootDevicePath (
   IN EFI_DEVICE_PATH_PROTOCOL  *Left,
@@ -190,6 +193,7 @@ BmMatchHttpBootDevicePath (
   @return The next possible full path pointing to the load option.
           Caller is responsible to free the memory.
 **/
+STATIC
 EFI_DEVICE_PATH_PROTOCOL *
 BmExpandNetworkFileSystem (
   IN  EFI_HANDLE  LoadFileHandle,
@@ -297,6 +301,7 @@ BmGetRamDiskDevicePath (
 
   @retval RAM Disk buffer.
 **/
+STATIC
 VOID *
 BmGetRamDiskMemoryInfo (
   IN EFI_DEVICE_PATH_PROTOCOL  *RamDiskDevicePath,
@@ -370,10 +375,13 @@ BmDestroyRamDisk (
 
   @return  The full device path pointing to the load option buffer.
 **/
+STATIC
 EFI_DEVICE_PATH_PROTOCOL *
 BmExpandLoadFile (
   IN  EFI_HANDLE                LoadFileHandle,
-  IN  EFI_DEVICE_PATH_PROTOCOL  *FilePath
+  IN  EFI_DEVICE_PATH_PROTOCOL  *FilePath,
+  OUT VOID                      **Data,
+  OUT UINT32                    *DataSize
   )
 {
   EFI_STATUS                Status;
@@ -382,6 +390,12 @@ BmExpandLoadFile (
   EFI_HANDLE                RamDiskHandle;
   UINTN                     BufferSize;
   EFI_DEVICE_PATH_PROTOCOL  *FullPath;
+
+  ASSERT (Data != NULL);
+  ASSERT (DataSize != NULL);
+
+  *Data     = NULL;
+  *DataSize = 0;
 
   Status = gBS->OpenProtocol (
                   LoadFileHandle,
@@ -400,11 +414,38 @@ BmExpandLoadFile (
     return NULL;
   }
 
+  //
+  // In call tree of original BmGetLoadOptionBuffer, handling this case
+  // is deferred to subsequent call to GetFileBufferByFilePath.
+  //
   if (Status == EFI_BUFFER_TOO_SMALL) {
     //
-    // The load option buffer is directly returned by LoadFile.
+    // Limited to UINT32 by DataSize in OC_CUSTOM_READ, which is limited
+    // by Size in OcGetFileSize.
     //
-    return DuplicateDevicePath (DevicePathFromHandle (LoadFileHandle));
+    if (BufferSize > MAX_UINT32) {
+      return NULL;
+    }
+
+    FileBuffer = AllocatePool (BufferSize);
+    if (FileBuffer == NULL) {
+      return NULL;
+    }
+
+    //
+    // Call LoadFile with the correct buffer size.
+    //
+    FullPath = DevicePathFromHandle (LoadFileHandle);
+    Status   = LoadFile->LoadFile (LoadFile, FilePath, TRUE, &BufferSize, FileBuffer);
+    if (EFI_ERROR (Status)) {
+      FreePool (FileBuffer);
+      return NULL;
+    }
+
+    *DataSize = (UINT32)BufferSize;
+    *Data     = FileBuffer;
+
+    return DuplicateDevicePath (FullPath);
   }
 
   //
@@ -487,7 +528,10 @@ BmExpandLoadFile (
 **/
 EFI_DEVICE_PATH_PROTOCOL *
 BmExpandLoadFiles (
-  IN  EFI_DEVICE_PATH_PROTOCOL  *FilePath
+  IN  EFI_DEVICE_PATH_PROTOCOL  *FilePath,
+  OUT VOID                      **Data,
+  OUT UINT32                    *DataSize,
+  IN BOOLEAN                    ValidateHttp
   )
 {
   EFI_STATUS                Status;
@@ -496,6 +540,7 @@ BmExpandLoadFiles (
   UINTN                     HandleCount;
   UINTN                     Index;
   EFI_DEVICE_PATH_PROTOCOL  *Node;
+  EFI_EVENT                 NotifyEvent;
 
   //
   // Get file buffer from load file instance.
@@ -542,5 +587,25 @@ BmExpandLoadFiles (
     return NULL;
   }
 
-  return BmExpandLoadFile (Handle, FilePath);
+  if (ValidateHttp) {
+    NotifyEvent = MonitorHttpBootCallback (Handle);
+    if (NotifyEvent == NULL) {
+      return NULL;
+    }
+  }
+
+  Node = BmExpandLoadFile (Handle, FilePath, Data, DataSize);
+
+  if (ValidateHttp) {
+    gBS->CloseEvent (NotifyEvent);
+
+    if ((Node != NULL) && !UriWasValidated ()) {
+      Print (L"\n"); ///< Sort out cramped spacing
+      DEBUG ((DEBUG_ERROR, "NTBT: LoadFile returned value but URI was never validated\n"));
+      FreePool (Node);
+      return NULL;
+    }
+  }
+
+  return Node;
 }

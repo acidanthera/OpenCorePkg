@@ -121,9 +121,6 @@ to something as fast. */
 
 #ifdef EFIAPI
 
-// Floating point operations are used here, this must be defined to prevent linker error
-const int32_t _fltused = 0;
-
 #define LODEPNG_MAX_ALLOC ((size_t)256*1024*1024)
 
 void* lodepng_malloc(size_t size) {
