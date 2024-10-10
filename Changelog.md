@@ -1,5 +1,9 @@
 OpenCore Changelog
 ==================
+#### v1.0.3
+- Added OpenNetworkBoot driver to support HTTP(S) and PXE boot
+- Supported DMG loading and verification (e.g. macOS Recovery) over HTTP(S) boot
+
 #### v1.0.2
 - Fixed error in macrecovery when running headless, thx @mkorje
 - Added support for `AMD_CPU_EXT_FAMILY_1AH`, thx @Shaneee

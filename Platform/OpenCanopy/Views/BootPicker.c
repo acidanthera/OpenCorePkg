@@ -1470,7 +1470,12 @@ BootPickerEntriesSet (
         Status = CopyLabel (&VolumeEntry->Label, &GuiContext->Labels[LABEL_WINDOWS]);
         break;
       case OC_BOOT_EXTERNAL_OS:
-        Status = CopyLabel (&VolumeEntry->Label, &GuiContext->Labels[LABEL_OTHER]);
+        if (OcAsciiStriStr (Entry->Flavour, OC_FLAVOUR_ID_NETWORK_BOOT) != NULL) {
+          Status = CopyLabel (&VolumeEntry->Label, &GuiContext->Labels[LABEL_NETWORK_BOOT]);
+        } else {
+          Status = CopyLabel (&VolumeEntry->Label, &GuiContext->Labels[LABEL_OTHER]);
+        }
+
         break;
       //
       // Use flavour-based labels for system entries (e.g. from boot entry protocol).
