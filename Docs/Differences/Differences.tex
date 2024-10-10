@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
-%DIF DEL PreviousConfiguration.tex   Tue Sep  3 09:18:54 2024
-%DIF ADD ../Configuration.tex        Sun Oct  6 08:32:59 2024
+%DIF DEL PreviousConfiguration.tex   Thu Oct 10 12:37:13 2024
+%DIF ADD ../Configuration.tex        Thu Oct 10 12:37:13 2024
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -118,7 +118,7 @@
 %DIF HYPERREF PREAMBLE %DIF PREAMBLE
 \providecommand{\DIFadd}[1]{\texorpdfstring{\DIFaddtex{#1}}{#1}} %DIF PREAMBLE
 \providecommand{\DIFdel}[1]{\texorpdfstring{\DIFdeltex{#1}}{}} %DIF PREAMBLE
-%DIF COLORLISTINGS PREAMBLE %DIF PREAMBLE
+%DIF LISTINGS PREAMBLE %DIF PREAMBLE
 \RequirePackage{listings} %DIF PREAMBLE
 \RequirePackage{color} %DIF PREAMBLE
 \lstdefinelanguage{DIFcode}{ %DIF PREAMBLE
@@ -154,7 +154,7 @@
 
        \vspace{0.2in}
 
-       Reference Manual (1.0\DIFdelbegin \DIFdel{.1}\DIFdelend \DIFaddbegin \DIFadd{.2}\DIFaddend )
+       Reference Manual (1.0\DIFdelbegin \DIFdel{.2}\DIFdelend \DIFaddbegin \DIFadd{.3}\DIFaddend )
 
        \vspace{0.2in}
 
@@ -1680,35 +1680,27 @@ To view their current state, use the \texttt{pmset -g} command in Terminal.
   \texttt{FixupAppleEfiImages}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
-  \textbf{Description}: Fix \DIFdelbegin \DIFdel{errors in early Mac OS X boot.efi }\DIFdelend \DIFaddbegin \DIFadd{permissions and section errors in macOS }\texttt{\DIFadd{boot.efi}} \DIFaddend images.
+  \textbf{Description}: Fix permissions and section errors in macOS \texttt{boot.efi} images.
 
-  \DIFdelbegin \DIFdel{Modern secure PE loaders will refuse to load }\texttt{\DIFdel{boot.efi}} %DIFAUXCMD
-\DIFdel{images from
-  }\DIFdelend Mac OS X \DIFdelbegin \DIFdel{10.4 to macOS 10.12 due to these files containing }\DIFdelend \DIFaddbegin \texttt{\DIFadd{boot.efi}} \DIFadd{images contain }\DIFaddend \texttt{W\^{}X} \DIFdelbegin \DIFdel{errors
-  (}\DIFdelend \DIFaddbegin \DIFadd{permissions errors
-  }\DIFaddend in all versions\DIFdelbegin \DIFdel{) and illegal overlapping sections (in }\DIFdelend \DIFaddbegin \DIFadd{, and }\DIFaddend 10.4 and 10.5 32-bit versions \DIFdelbegin \DIFdel{only}\DIFdelend \DIFaddbegin \DIFadd{also contain illegal overlapping
+  Mac OS X \texttt{boot.efi} images contain \texttt{W\^{}X} permissions errors
+  in all versions, and 10.4 and 10.5 32-bit versions also contain illegal overlapping
   sections. Modern, strict PE loaders will refuse to load such images unless additional
   mitigations are applied. The image loader which matters here is the one provided by
   the system firmware, or by OpenDuet if OpenDuet is providing
   the UEFI compatibility layer. Image loaders which enforce these stricter
   rules include the loader provided with current versions of OpenDuet,
-  the loader in OVMF if compiled from }\href{https://github.com/acidanthera/audk}{\DIFadd{audk}}\DIFadd{,
-  and possibly the image loaders of some very recent 3rd party firmware (e.g. Microsoft}\DIFaddend ).
+  the loader in OVMF if compiled from \href{https://github.com/acidanthera/audk}{audk},
+  and possibly the image loaders of some very recent 3rd party firmware (e.g. Microsoft).
 
   This quirk detects these issues and pre-processes such images in memory
-  \DIFdelbegin \DIFdel{,
-  }\DIFdelend so that a \DIFdelbegin \DIFdel{modern }\DIFdelend \DIFaddbegin \DIFadd{stricter }\DIFaddend loader will accept them.
+  so that a stricter loader will accept them.
 
-  \DIFdelbegin \DIFdel{Pre-processing in memory is incompatible with secure boot, as the image loaded
-  is not the image on disk, so you cannot sign files which are loaded in this way
-  based on their original disk image contents.
-  Certain firmware will offer to register the hash of new, unknown images - this would
-  still work. On the other hand, it is not particularly realistic to want to start these early, insecure images with secure boot anyway}\DIFdelend \DIFaddbegin \DIFadd{On a system with such a modern, stricter loader this quirk is required to load
+  On a system with such a modern, stricter loader this quirk is required to load
   Mac OS X 10.4 to macOS 10.12, and is required for all newer
-  macOS when }\texttt{\DIFadd{SecureBootModel}} \DIFadd{is set to }\texttt{\DIFadd{Disabled}}\DIFaddend .
+  macOS when \texttt{SecureBootModel} is set to \texttt{Disabled}.
 
   \emph{Note 1}: The quirk is never applied during the Apple secure boot path for
-  newer macOS. The Apple secure boot path \DIFaddbegin \DIFadd{in OpenCore }\DIFaddend includes its own separate
+  newer macOS. The Apple secure boot path in OpenCore includes its own separate
   mitigations for \texttt{boot.efi} \texttt{W\^{}X} issues.
 
   \emph{Note 2}: When enabled, and when not processing for Apple secure boot, this quirk
@@ -1722,15 +1714,12 @@ To view their current state, use the \texttt{pmset -g} command in Terminal.
       within their filesystem.
     \end{itemize}
 
-  \emph{Note 3}: \DIFdelbegin \DIFdel{This quirk is needed for Mac OS X 10.4 to macOS 10.12 (and
-  higher, if Apple secure bootis not enabled), but only when the firmware
-  itself includes a modern, more secure PE COFF image loader.
-  This applies to current builds of OpenDuet, and to OVMF if built from audk source code}\DIFdelend \DIFaddbegin \DIFadd{Pre-processing in memory is incompatible with UEFI secure boot, as the image
+  \emph{Note 3}: Pre-processing in memory is incompatible with UEFI secure boot, as the image
   loaded is not the image on disk, so you cannot sign files which are loaded in this way
   based on their original disk image contents.
   Certain firmware will offer to register the hash of new, unknown images for future
   secure boot - this would still work. On the other hand, it is not particularly realistic
-  to want to start these early, insecure images with secure boot anyway}\DIFaddend .
+  to want to start these early, insecure images with secure boot anyway.
 
 \item
   \texttt{ForceBooterSignature}\\
@@ -7633,46 +7622,41 @@ OpenCore is installed, in order for the \texttt{Launchd.command} script to work 
   describing memory areas exclusive to specific firmware and hardware functioning,
   which should not be used by the operating system. Examples of such memory regions
   could be the second 256 MB corrupted by the Intel HD 3000 or an area with faulty RAM.
-  Refer to the \hyperref[uefirsvdprops]{ReservedMemory Properties} section below for details\DIFaddbegin \DIFadd{.
-}
+  Refer to the \hyperref[uefirsvdprops]{ReservedMemory Properties} section below for details.
 
 \item
-  \texttt{\DIFadd{Unload}}\\
-  \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ array}}\\
-  \textbf{\DIFadd{Failsafe}}\DIFadd{: Empty}\\
-  \textbf{\DIFadd{Description}}\DIFadd{: Unload specified firmware drivers.
-}
+  \texttt{Unload}\\
+  \textbf{Type}: \texttt{plist\ array}\\
+  \textbf{Failsafe}: Empty\\
+  \textbf{Description}: Unload specified firmware drivers.
 
-  \DIFadd{To be filled with }\texttt{\DIFadd{plist\ string}} \DIFadd{entries containing
+  To be filled with \texttt{plist\ string} entries containing
   the names of firmware drivers to unload before loading the
-  }\texttt{\DIFadd{Drivers}} \DIFadd{section.
+  \texttt{Drivers} section.
   This setting is typically only required if a user-provided driver is a variant of
   an existing system firmware driver, and if the new driver would detect itself
   as partially loaded, or otherwise fail to operate correctly, if the old
   driver is not unloaded first.
-}
 
-  \textbf{\DIFadd{Warning}}\DIFadd{: Unloading system firmware drivers is usually not required
+  \textbf{Warning}: Unloading system firmware drivers is usually not required
   and not recommended. Poorly written drivers may crash when
   unloaded, or cause subsequent crashes (e.g by allowing themselves to be
   unloaded even though they have active dependencies). However standard UEFI
   network stack drivers should unload cleanly.
-}
 
-  \emph{\DIFadd{Note 1}}\DIFadd{: See }\texttt{\DIFadd{SysReport/Drivers/DriverImageNames.txt}} \DIFadd{for the
+  \emph{Note 1}: See \texttt{SysReport/Drivers/DriverImageNames.txt} for the
   list of drivers which this option can attempt to unload.
   The relevant name is the driver component name. Drivers are only listed if they
-  implement }\texttt{\DIFadd{DriverBindingProtocol}} \DIFadd{and }\texttt{\DIFadd{LoadedImageProtocol}}\DIFadd{,
+  implement \texttt{DriverBindingProtocol} and \texttt{LoadedImageProtocol},
   and have an available component name.
-}
 
-  \emph{\DIFadd{Note 2}}\DIFadd{: The NVRAM }\texttt{\DIFadd{Lang}} \DIFadd{and }\texttt{\DIFadd{PlatformLang}} \DIFadd{variables
+  \emph{Note 2}: The NVRAM \texttt{Lang} and \texttt{PlatformLang} variables
   are ignored when determining the driver component names recognised by this
-  option, and listed in the }\texttt{\DIFadd{SysReport}} \DIFadd{file. This is in order to make
+  option, and listed in the \texttt{SysReport} file. This is in order to make
   unloading images stable across changes in these variables.
-  The UEFI Shell }\texttt{\DIFadd{dh}} \DIFadd{command takes account of these variables,
+  The UEFI Shell \texttt{dh} command takes account of these variables,
   so in some circumstances may display different driver component names from
-  those listed for this option, unless these variables are cleared}\DIFaddend .
+  those listed for this option, unless these variables are cleared.
 
 \end{enumerate}
 
