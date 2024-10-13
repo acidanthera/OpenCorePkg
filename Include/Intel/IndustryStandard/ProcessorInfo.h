@@ -258,7 +258,7 @@ typedef enum {
 #define AMD_CPU_EXT_FAMILY_16H  0x7
 #define AMD_CPU_EXT_FAMILY_17H  0x8
 #define AMD_CPU_EXT_FAMILY_19H  0xA
-#define AMD_CPU_EXT_FAMILY_1AH  0x1A
+#define AMD_CPU_EXT_FAMILY_1AH  0xB
 
 // CPU_P_STATE_COORDINATION
 /// P-State Coordination
