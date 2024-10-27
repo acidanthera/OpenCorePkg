@@ -2,6 +2,7 @@ OpenCore Changelog
 ==================
 #### v1.0.3
 - Fixed support for `AMD_CPU_EXT_FAMILY_1AH`, thx @Shaneee
+- Fixed EHCI handoff logic in OpenDuet, causing older machines to hang at start
 
 #### v1.0.2
 - Fixed error in macrecovery when running headless, thx @mkorje
