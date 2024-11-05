@@ -82,7 +82,7 @@ InternalSetGrubVar (
     Var->Errors |= Errors;
 
     DEBUG ((
-      OC_TRACE_GRUB_VARS,
+      (gLinuxBootFlags & LINUX_BOOT_LOG_GRUB_VARS) == 0 ? DEBUG_VERBOSE : DEBUG_INFO,
       "LNX: Repeated %a=%a (0x%x->0x%x)\n",
       Key,
       Value,
@@ -100,7 +100,7 @@ InternalSetGrubVar (
     Var->Errors = Errors;
 
     DEBUG ((
-      OC_TRACE_GRUB_VARS,
+      (gLinuxBootFlags & LINUX_BOOT_LOG_GRUB_VARS) == 0 ? DEBUG_VERBOSE : DEBUG_INFO,
       "LNX: Added %a=%a (0x%x)\n",
       Key,
       Value,
@@ -273,7 +273,13 @@ InternalExpandGrubVars (
     }
   }
 
-  DEBUG ((OC_TRACE_GRUB_VARS, "LNX: Expanding '%a' => '%a' - %r\n", Value, *Result, Status));
+  DEBUG ((
+    (gLinuxBootFlags & LINUX_BOOT_LOG_GRUB_VARS) == 0 ? DEBUG_VERBOSE : DEBUG_INFO,
+    "LNX: Expanding '%a' => '%a' - %r\n",
+    Value,
+    *Result,
+    Status
+    ));
 
   return Status;
 }

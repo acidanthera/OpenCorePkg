@@ -1926,7 +1926,7 @@ OcParseLoadOptions (
 
 /**
   Parse Unix-style var file or string. Parses a couple of useful ASCII
-  GRUB config files (multi-line, name=var, with optinal comments) and
+  GRUB config files (multi-line, name=var, with optional comments) and
   defines a standard format for Unicode UEFI LoadOptions.
 
   Assumes CHAR_NULL terminated Unicode string of space separated options,
@@ -1940,9 +1940,10 @@ OcParseLoadOptions (
 
   @param[in]   StrVars            Raw var string.
   @param[out]  ParsedVars         Parsed variables if successful, NULL otherwise.
-                                  Caller may free after use with OcFlexArrayFree
-                                  if required.
+                                  Caller may free after use with OcFlexArrayFree.
   @param[in]   StringFormat       Are option names and values Unicode or ASCII?
+  @param[in]   TokensOnly         If TRUE parse as a sequence of token values only,
+                                  rather than as a sequence of name[=[value]] pairs.
 
   @retval EFI_SUCCESS             Success.
   @retval EFI_NOT_FOUND           Missing or empty load options.
@@ -1953,7 +1954,8 @@ EFI_STATUS
 OcParseVars (
   IN           VOID              *StrVars,
   OUT       OC_FLEX_ARRAY        **ParsedVars,
-  IN     CONST OC_STRING_FORMAT  StringFormat
+  IN     CONST OC_STRING_FORMAT  StringFormat,
+  IN     CONST BOOLEAN           TokensOnly
   );
 
 /**

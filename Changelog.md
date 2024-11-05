@@ -5,6 +5,7 @@ OpenCore Changelog
 - Fixed EHCI handoff logic in OpenDuet, causing older machines to hang at start
 - Added Arrow Lake CPU detection
 - Fixed Raptor Lake CPU detection
+- Supported booting with TuneD in Fedora 41 in OpenLinuxBoot
 
 #### v1.0.2
 - Fixed error in macrecovery when running headless, thx @mkorje

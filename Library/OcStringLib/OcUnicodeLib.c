@@ -530,3 +530,11 @@ OcIsSpace (
 {
   return (Ch == L' ') || (Ch == L'\t') || (Ch == L'\r') || (Ch == L'\n') || (Ch == L'\v')  || (Ch == L'\f');
 }
+
+BOOLEAN
+OcIsSpaceOrNull (
+  CHAR16  Ch
+  )
+{
+  return (Ch == CHAR_NULL) || OcIsSpace (Ch);
+}

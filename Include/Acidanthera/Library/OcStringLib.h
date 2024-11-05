@@ -742,4 +742,16 @@ OcIsSpace (
   CHAR16  Ch
   );
 
+/**
+  Determine if a particular character is whitespace or CHAR_NULL.
+
+  @param[in] Ch               The character to check.
+
+  @return  Returns TRUE if Ch is a whitespace character or CHAR_NULL.
+**/
+BOOLEAN
+OcIsSpaceOrNull (
+  CHAR16  Ch
+  );
+
 #endif // OC_STRING_LIB_H

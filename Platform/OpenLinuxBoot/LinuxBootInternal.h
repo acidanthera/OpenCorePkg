@@ -6,10 +6,6 @@
 #ifndef LINUX_BOOT_INTERNAL_H
 #define LINUX_BOOT_INTERNAL_H
 
-#if !defined (OC_TRACE_GRUB_VARS)
-#define OC_TRACE_GRUB_VARS  DEBUG_VERBOSE
-#endif
-
 /*
   Standard attached drives on OVMF appear as MBR, so it can be convenient when
   debugging to allow entries with incorrect (i.e. specifies no/every drive)
@@ -80,7 +76,8 @@
 #define LINUX_BOOT_ADD_RW  BIT11
 
 /*
-  TODO: Both blspec-style and autodetect can make use of grub.cfg info if this flag is set.
+  TODO: (?) Both blspec-style and autodetect can make use of grub.cfg info if this flag is set.
+  These are currently parsed when needed for GRUB2+blscfg, i.e. if we find /loader/entries and /grub2/grub.cfg.
 */
 // #define LINUX_BOOT_ALLOW_PARSE_GRUB     BIT12
 
@@ -100,6 +97,16 @@
 */
 #define LINUX_BOOT_ADD_DEBUG_INFO  BIT15
 
+/*
+  Trace grub var processing.
+*/
+#define LINUX_BOOT_LOG_GRUB_VARS  BIT16
+
+/*
+  Fix TuneD processing by initialising its grub variables if they are not present.
+*/
+#define LINUX_BOOT_FIX_TUNED  BIT17
+
 #define LINUX_BOOT_ALL  (           \
   LINUX_BOOT_SCAN_ESP             | \
   LINUX_BOOT_SCAN_XBOOTLDR        | \
@@ -112,7 +119,9 @@
   LINUX_BOOT_ADD_RW               | \
   LINUX_BOOT_ALLOW_CONF_AUTO_ROOT | \
   LINUX_BOOT_LOG_VERBOSE          | \
-  LINUX_BOOT_ADD_DEBUG_INFO       \
+  LINUX_BOOT_ADD_DEBUG_INFO       | \
+  LINUX_BOOT_LOG_GRUB_VARS        | \
+  LINUX_BOOT_FIX_TUNED            \
   )
 
 /*
