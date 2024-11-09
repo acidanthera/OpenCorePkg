@@ -1491,6 +1491,15 @@ InternalDetectIntelProcessorGeneration (
       case CPU_MODEL_ALDERLAKE_S:
         CpuGeneration = OcCpuGenerationAlderLake;
         break;
+      case CPU_MODEL_RAPTORLAKE_S:
+      case CPU_MODEL_RAPTORLAKE_HX:
+        CpuGeneration = OcCpuGenerationRaptorLake;
+        break;
+      case CPU_MODEL_ARROWLAKE_S:
+      case CPU_MODEL_ARROWLAKE_HX:
+      case CPU_MODEL_ARROWLAKE_U:
+        CpuGeneration = OcCpuGenerationArrowLake;
+        break;
       default:
         if (CpuInfo->Model < CPU_MODEL_PENRYN) {
           CpuGeneration = OcCpuGenerationPreYonah;
