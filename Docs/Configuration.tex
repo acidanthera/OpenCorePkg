@@ -3388,7 +3388,7 @@ the default boot entry choice will remain changed until the next manual reconfig
   Refer to the \hyperref[miscentryprops]{Entry Properties} section below for details.
 
   \emph{Note}: Certain UEFI tools, such as UEFI Shell, can be very dangerous and
-  \textbf{MUST NOT} appear in production configurations, paticularly in vaulted
+  \textbf{MUST NOT} appear in production configurations, particularly in vaulted
   configurations as well as those protected by secure boot, as such tools can be
   used to bypass the secure boot chain.
   Refer to the \hyperref[uefitools]{UEFI} section for examples of UEFI tools.
@@ -3702,7 +3702,7 @@ the default boot entry choice will remain changed until the next manual reconfig
       \item For security reasons \texttt{Ext<Flavour>.icns} and \texttt{<Flavour>.icns} are both
       supported, and only \texttt{Ext<Flavour>.icns} will be used if the entry is on an external drive
       (followed by default fallback \texttt{ExtHardDrive.icns}).
-      \item Where both apply \texttt{.VolumeIcon.icns} takes precence over \texttt{.contentFlavour}.
+      \item Where both apply \texttt{.VolumeIcon.icns} takes presence over \texttt{.contentFlavour}.
       \item In order to allow icons and audio assist to work correctly for tools (e.g. for UEFI Shell),
       system default boot entry icons (see \texttt{Docs/Flavours.md}) specified in the \texttt{Flavour}
       setting for \texttt{Tools} or \texttt{Entries} will continue to apply even when flavour is disabled.
@@ -3812,7 +3812,7 @@ the default boot entry choice will remain changed until the next manual reconfig
   \emph{will reboot} before the chosen entry is booted. While this behaviour might seem surprising,
   it can be used both to switch which OpenCore installation is blessed, with \texttt{CTRL+Enter},
   e.g. from a recovery OpenCore installation on CD (selected with the \texttt{C} key on boot) back
-  to the main installion of OpenCore on the hard drive, if this is lost after an NVRAM reset. It can
+  to the main installation of OpenCore on the hard drive, if this is lost after an NVRAM reset. It can
   also be used, even when the native picker cannot be shown normally (unsupported GPU), to do a one-shot
   boot without OpenCore, e.g. to another OS or tool, or to an earlier version of macOS.
 
@@ -4714,7 +4714,7 @@ nvram 4D1FDA02-38C7-4A6A-9CC6-4BCCA8B30102:oem-board   # SMBIOS Type2 ProductNam
   \begin{itemize}
   \tightlist
   \item Provide public key during the \texttt{OpenCore.efi} compilation in
-  \href{https://github.com/acidanthera/OpenCorePkg/blob/master/Platform/OpenCore/OpenCoreVault.c}{\texttt{OpenCoreVault.c}} file.
+  \href{https://github.com/acidanthera/OpenCorePkg/blob/master/Library/OcMainLib/OpenCoreVault.c}{\texttt{OpenCoreVault.c}} file.
   \item Binary patch \texttt{OpenCore.efi} replacing zeroes with the public key
   between \texttt{=BEGIN OC VAULT=} and \texttt{==END OC VAULT==} ASCII markers.
   \end{itemize}
@@ -6868,7 +6868,7 @@ specified before OpenLinuxBoot will attempt to start the distro.
 OpenLinuxBoot typically requires filesystem drivers that are not available in
 firmware, such as EXT4 and BTRFS drivers. These drivers can be obtained from external sources.
 Drivers tested in basic scenarios can be downloaded from \href{https://github.com/acidanthera/OcBinaryData}{OcBinaryData}.
-Be aware that these drivers are not tested for reliability in all scenarious, nor did they undergo
+Be aware that these drivers are not tested for reliability in all scenarios, nor did they undergo
 tamper-resistance testing, therefore they may carry potential security or data-loss risks.
 
 Most Linux distros require the \href{https://github.com/acidanthera/OcBinaryData}{\texttt{ext4\_x64}} driver,
@@ -6975,7 +6975,7 @@ options for the driver may be specified in \texttt{UEFI/Drivers/Arguments}:
     Some distributions run a filesystem check on loading which requires the root
     filesystem to initially be mounted read-only via the \texttt{ro} kernel option, which requires this
     option to be added to the autodetected options. Set this bit to add this
-    option on autodetected distros; should be harmless but very slightly slow down boot time (due to requried
+    option on autodetected distros; should be harmless but very slightly slow down boot time (due to required
     remount as read-write) on distros which do not require it.
     When there are multiple distros and it is required to specify this option for specific distros only, use
     \texttt{autoopts:\{PARTUUID\}+=ro} to manually add the option where required, instead of using this flag.
@@ -7226,7 +7226,7 @@ the driver within the \texttt{UEFI/Drivers} section:
   \item \texttt{-{}-force-codec} - Integer value, no default. \medskip
 
   Force use of an audio codec, this value should be equal to \texttt{Audio} section \texttt{AudioCodec}.
-  Can result in faster boot especially when used in conjuction with \texttt{-{}-force-device}. \medskip
+  Can result in faster boot especially when used in conjunction with \texttt{-{}-force-device}. \medskip
 
   \item \texttt{-{}-force-device} - String value, no default. \medskip
 
@@ -7730,7 +7730,7 @@ OpenCore is installed, in order for the \texttt{Launchd.command} script to work 
   On older Macs, this is because the implementation available is too old to be used while on newer Macs,
   it is because of optimisations added by Apple which do not connect the Apple Event protocol
   except when needed -- e.g. except when the Apple boot picker is explicitly started.
-  Due to its somewhat unpredicatable results, this option is not typically recommended.
+  Due to its somewhat unpredictable results, this option is not typically recommended.
   \item \texttt{Builtin} ---  Always use OpenCore's updated re-implementation of the Apple Event protocol.
   Use of this setting is recommended even on Apple hardware, due to
   improvements (better fine mouse control, configurable key delays) made in the OpenCore re-implementation
@@ -8093,7 +8093,7 @@ OpenCore is installed, in order for the \texttt{Launchd.command} script to work 
   NVRAM variable is higher than this. This is to avoid over-loud UEFI audio when the system volume is set very high,
   or the \texttt{SystemAudioVolumeDB} NVRAM value has been misconfigured.
 
-  \emph{Note 1}: Decibels (dB) specify gain (postive values; increase in volume) or attenuation (negative values; decrease
+  \emph{Note 1}: Decibels (dB) specify gain (positive values; increase in volume) or attenuation (negative values; decrease
   in volume) compared to some reference level. When you hear the sound level of a jet plane expressed as 120 decibels, say,
   the reference level is the sound level just audible to an average human. However generally
   in acoustic science and computer audio any reference level can be specified. Intel HDA and macOS natively use
@@ -8130,7 +8130,7 @@ OpenCore is installed, in order for the \texttt{Launchd.command} script to work 
   The boot chime will not play if the system amplifier gain level in the
   \texttt{SystemAudioVolumeDB} NVRAM variable is lower than this.
 
-  \emph{Note 1}: This setting is designed to save unecessary pauses due to audio setup at inaudible volume
+  \emph{Note 1}: This setting is designed to save unnecessary pauses due to audio setup at inaudible volume
   levels, when no sound will be heard anyway. Whether there are inaudible volume levels depends on the
   hardware. On some hardware (including Apple) the audio values are well enough matched to the hardware
   that the lowest volume levels available are very quiet but audible, whereas on some other hardware combinations,
@@ -8566,7 +8566,7 @@ OpenCore is installed, in order for the \texttt{Launchd.command} script to work 
   \textbf{Failsafe}: \texttt{false}\\
   \textbf{Description}: Reconnect all graphics drivers during driver connection.
 
-  On certain firmware, it may be desireable to use an alternative graphics driver,
+  On certain firmware, it may be desirable to use an alternative graphics driver,
   for example BiosVideo.efi, providing better screen resolution options on legacy
   machines, or a driver supporting \texttt{ForceResolution}. This option attempts
   to disconnect all currently connected graphics drivers before connecting newly
