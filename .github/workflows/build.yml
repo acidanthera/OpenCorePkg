@@ -56,11 +56,15 @@ jobs:
 
   build-linux-clangpdb:
     name: Linux CLANGPDB
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     env:
       TOOLCHAINS: CLANGPDB
     steps:
       - uses: actions/checkout@v4
+
+      - name: Apply Docker AppArmor settings
+        run: |
+          src=$(/usr/bin/curl -LfsS https://raw.githubusercontent.com/acidanthera/ocbuild/master/docker-apparmor.sh) && eval "$src" || exit 1
 
       - name: Use Docker in rootless mode.
         uses: ScribeMD/rootless-docker@0.2.2
@@ -79,11 +83,15 @@ jobs:
 
   build-linux-gcc5:
     name: Linux GCC
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     env:
       TOOLCHAINS: GCC
     steps:
       - uses: actions/checkout@v4
+
+      - name: Apply Docker AppArmor settings
+        run: |
+          src=$(/usr/bin/curl -LfsS https://raw.githubusercontent.com/acidanthera/ocbuild/master/docker-apparmor.sh) && eval "$src" || exit 1
 
       - name: Use Docker in rootless mode.
         uses: ScribeMD/rootless-docker@0.2.2
@@ -102,11 +110,15 @@ jobs:
 
   build-linux-clangdwarf:
     name: Linux CLANGDWARF
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     env:
       TOOLCHAINS: CLANGDWARF
     steps:
       - uses: actions/checkout@v4
+
+      - name: Apply Docker AppArmor settings
+        run: |
+          src=$(/usr/bin/curl -LfsS https://raw.githubusercontent.com/acidanthera/ocbuild/master/docker-apparmor.sh) && eval "$src" || exit 1
 
       - name: Use Docker in rootless mode.
         uses: ScribeMD/rootless-docker@0.2.2
@@ -125,9 +137,13 @@ jobs:
 
   build-linux-docs:
     name: Linux Docs
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
+
+      - name: Apply Docker AppArmor settings
+        run: |
+          src=$(/usr/bin/curl -LfsS https://raw.githubusercontent.com/acidanthera/ocbuild/master/docker-apparmor.sh) && eval "$src" || exit 1
 
       - name: Use Docker in rootless mode.
         uses: ScribeMD/rootless-docker@0.2.2
