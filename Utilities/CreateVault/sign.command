@@ -61,7 +61,7 @@ echo "Signing ${OCBin}..."
 ./RsaTool -sign "${OCPath}/vault.plist" "${OCPath}/vault.sig" "${PubKey}" || abort "Failed to patch ${PubKey}"
 
 echo "Bin-patching ${OCBin}..."
-off=$(($(/usr/bin/strings -a -t d "${OCBin}" | /usr/bin/grep "=BEGIN OC VAULT=" | /usr/bin/awk '{print $1}') + 16))
+off=$((0x$(/usr/bin/hexdump -C "${OCBin}" | /usr/bin/grep "=BEGIN OC VAULT=" | /usr/bin/awk '{print $1}') + 16))
 if [ "${off}" -le 16 ]; then
   abort "${OCBin} is borked"
 fi

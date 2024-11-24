@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
-%DIF DEL PreviousConfiguration.tex   Sat Nov  9 05:47:31 2024
-%DIF ADD ../Configuration.tex        Wed Nov 20 08:35:03 2024
+%DIF DEL PreviousConfiguration.tex   Tue Nov 26 03:15:30 2024
+%DIF ADD ../Configuration.tex        Tue Nov 26 03:15:30 2024
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -4785,7 +4785,7 @@ nvram 4D1FDA02-38C7-4A6A-9CC6-4BCCA8B30102:oem-board   # SMBIOS Type2 ProductNam
   \href{https://github.com/acidanthera/OpenCorePkg/tree/master/Utilities/CreateVault}{RsaTool}.
 
 
-  The complete set of commands to:
+  The \DIFdelbegin \DIFdel{complete set of commands to }\DIFdelend \DIFaddbegin \DIFadd{steps to binary patch }\texttt{\DIFadd{OpenCore.efi}} \DIFadd{are}\DIFaddend :
 
   \begin{itemize}
   \tightlist
@@ -4795,15 +4795,18 @@ nvram 4D1FDA02-38C7-4A6A-9CC6-4BCCA8B30102:oem-board   # SMBIOS Type2 ProductNam
   \item Create \texttt{vault.sig}.
   \end{itemize}
 
-  Can look as follows:
-\begin{lstlisting}[label=createvault, style=ocbash]
-cd /Volumes/EFI/EFI/OC
-/path/to/create_vault.sh .
-/path/to/RsaTool -sign vault.plist vault.sig vault.pub
-off=$(($(strings -a -t d OpenCore.efi | grep "=BEGIN OC VAULT=" | cut -f1 -d' ')+16))
-dd of=OpenCore.efi if=vault.pub bs=1 seek=$off count=528 conv=notrunc
-rm vault.pub
+  \DIFdelbegin \DIFdel{Can look as follows}\DIFdelend \DIFaddbegin \DIFadd{A script to do this is privided in OpenCore releases}\DIFaddend :
+\DIFmodbegin
+\begin{lstlisting}[label=createvault, style=ocbash,alsolanguage=DIFcode]
+%DIF < cd /Volumes/EFI/EFI/OC
+%DIF < /path/to/create_vault.sh .
+%DIF < /path/to/RsaTool -sign vault.plist vault.sig vault.pub
+%DIF < off=$(($(strings -a -t d OpenCore.efi | grep "=BEGIN OC VAULT=" | cut -f1 -d' ')+16))
+%DIF < dd of=OpenCore.efi if=vault.pub bs=1 seek=$off count=528 conv=notrunc
+%DIF < rm vault.pub
+%DIF > /Utilities/CreateVault/sign.command /Volumes/EFI/EFI/OC
 \end{lstlisting}
+\DIFmodend
 
   \emph{Note 1}: While it may appear obvious, an external
   method is required to verify \texttt{OpenCore.efi} and \texttt{BOOTx64.efi} for

@@ -4724,7 +4724,7 @@ nvram 4D1FDA02-38C7-4A6A-9CC6-4BCCA8B30102:oem-board   # SMBIOS Type2 ProductNam
   \href{https://github.com/acidanthera/OpenCorePkg/tree/master/Utilities/CreateVault}{RsaTool}.
 
 
-  The complete set of commands to:
+  The steps to binary patch \texttt{OpenCore.efi} are:
 
   \begin{itemize}
   \tightlist
@@ -4734,14 +4734,9 @@ nvram 4D1FDA02-38C7-4A6A-9CC6-4BCCA8B30102:oem-board   # SMBIOS Type2 ProductNam
   \item Create \texttt{vault.sig}.
   \end{itemize}
 
-  Can look as follows:
+  A script to do this is privided in OpenCore releases:
 \begin{lstlisting}[label=createvault, style=ocbash]
-cd /Volumes/EFI/EFI/OC
-/path/to/create_vault.sh .
-/path/to/RsaTool -sign vault.plist vault.sig vault.pub
-off=$(($(strings -a -t d OpenCore.efi | grep "=BEGIN OC VAULT=" | cut -f1 -d' ')+16))
-dd of=OpenCore.efi if=vault.pub bs=1 seek=$off count=528 conv=notrunc
-rm vault.pub
+/Utilities/CreateVault/sign.command /Volumes/EFI/EFI/OC
 \end{lstlisting}
 
   \emph{Note 1}: While it may appear obvious, an external
