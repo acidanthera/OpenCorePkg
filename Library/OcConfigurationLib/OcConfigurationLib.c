@@ -855,7 +855,7 @@ OC_SCHEMA
 
 STATIC
 OC_SCHEMA
-  mMiscUnloadImagesSchema = OC_SCHEMA_STRING (NULL);
+  mUefiUnloadSchema = OC_SCHEMA_STRING (NULL);
 
 STATIC
 OC_SCHEMA
@@ -870,7 +870,7 @@ OC_SCHEMA
   OC_SCHEMA_DICT ("ProtocolOverrides",    mUefiProtocolOverridesSchema),
   OC_SCHEMA_DICT ("Quirks",               mUefiQuirksSchema),
   OC_SCHEMA_ARRAY_IN ("ReservedMemory",   OC_GLOBAL_CONFIG,             Uefi.ReservedMemory, &mUefiReservedMemorySchema),
-  OC_SCHEMA_ARRAY_IN ("Unload",           OC_GLOBAL_CONFIG,             Uefi.Unload,         &mMiscUnloadImagesSchema),
+  OC_SCHEMA_ARRAY_IN ("Unload",           OC_GLOBAL_CONFIG,             Uefi.Unload,         &mUefiUnloadSchema),
 };
 
 //
