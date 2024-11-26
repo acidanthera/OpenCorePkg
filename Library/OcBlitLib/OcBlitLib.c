@@ -612,6 +612,8 @@ OcBlitConfigure (
   INT8                     PixelShl[4];
   INT8                     PixelShr[4];
 
+  STATIC_ASSERT (sizeof (OC_BLIT_CONFIGURE) % 64 == 0, "Incorrect alignment of OC_BLIT_CONFIGURE");
+
   if (ConfigureSize == NULL) {
     return RETURN_INVALID_PARAMETER;
   }
