@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
 %DIF DEL PreviousConfiguration.tex   Tue Nov 26 03:15:30 2024
-%DIF ADD ../Configuration.tex        Tue Nov 26 03:15:30 2024
+%DIF ADD ../Configuration.tex        Sat Nov 30 18:40:01 2024
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -4179,7 +4179,8 @@ nvram 4D1FDA02-38C7-4A6A-9CC6-4BCCA8B30102:boot-log |
   \item \texttt{HDA} --- AudioDxe
   \item \texttt{KKT} --- KeyTester
   \item \texttt{LNX} --- OpenLinuxBoot
-  \item \texttt{MMDD} --- MmapDump
+  \item \DIFaddbegin \texttt{\DIFadd{NTBT}} \DIFadd{--- OpenNetworkBoot
+  }\item \DIFaddend \texttt{MMDD} --- MmapDump
   \item \texttt{OCPAVP} --- PavpProvision
   \item \texttt{OCRST} --- ResetSystem
   \item \texttt{OCUI} --- OpenCanopy
@@ -6643,7 +6644,10 @@ even cause permanent firmware damage. Some of the known drivers are listed below
 & \hyperref[uefilinux]{OpenCore plugin} implementing \texttt{OC\_BOOT\_ENTRY\_PROTOCOL}
   to allow direct detection and booting of Linux distributions from OpenCore, without
   chainloading via GRUB. \\
-\href{https://github.com/acidanthera/OpenCorePkg}{\texttt{OpenNtfsDxe}}\textbf{*}
+\DIFaddbegin \href{https://github.com/acidanthera/OpenCorePkg}{\texttt{\DIFadd{OpenNetworkBoot}}}\textbf{\DIFadd{*}}
+& \hyperref[uefipxe]{OpenCore plugin} \DIFadd{implementing }\texttt{\DIFadd{OC\_BOOT\_ENTRY\_PROTOCOL}}
+  \DIFadd{to show available PXE and HTTP(S) boot options on the OpenCore boot menu. }\\
+\DIFaddend \href{https://github.com/acidanthera/OpenCorePkg}{\texttt{OpenNtfsDxe}}\textbf{*}
 & New Technologies File System (NTFS) read-only driver.
   NTFS is the primary file system for Microsoft Windows versions that are based on Windows NT. \\
 \href{https://github.com/acidanthera/OpenCorePkg}{\texttt{OpenUsbKbDxe}}\textbf{*}
@@ -7157,9 +7161,152 @@ does not support the systemd-boot--specific \href{https://systemd.io/BOOT\_LOADE
 therefore \texttt{efibootmgr} rather than \texttt{bootctl} must be used for any low-level Linux command line interaction
 with the boot menu.
 
-\subsection{Other Boot Entry Protocol drivers}
+\DIFaddbegin \subsection{\DIFadd{OpenNetworkBoot}}\label{uefipxe}
 
-In addition to the \hyperref[uefilinux]{OpenLinuxBoot} plugin, the following \texttt{OC\_BOOT\_ENTRY\_PROTOCOL}
+\DIFadd{OpenNetworkBoot is an OpenCore plugin implementing }\texttt{\DIFadd{OC\_BOOT\_ENTRY\_PROTOCOL}}\DIFadd{.
+It enables PXE and HTTP(S) Boot options in the OpenCore menu if these
+are supported by the underlying firmware, or if the required network boot drivers
+have been loaded using OpenCore.
+}
+
+\DIFadd{It has additional support for loading }\texttt{\DIFadd{.dmg}} \DIFadd{files and their associated
+}\texttt{\DIFadd{.chunklist}} \DIFadd{file over HTTP(S) Boot, allowing macOS recovery to be
+started over HTTP(S) Boot: if either extension is seen in the HTTP(S) Boot URI
+then the other file of the pair is automatically loaded as well, and both are
+passed to OpenCore to verify and boot from the DMG file.
+}
+
+\DIFadd{PXE Boot is already supported on most firmware, so in most cases PXE Boot entries
+should appear as soon as the driver is loaded. Using the additional network boot
+drivers provided with OpenCore, when needed, HTTP(S) Boot should be available on
+most firmware even if not natively supported.
+}
+
+\DIFadd{Detailed information about the available network boot drivers and how to configure
+PXE and HTTP(S) Boot is provided on
+}\href{https://github.com/acidanthera/OpenCorePkg/blob/master/Platform/OpenNetworkBoot/README.md}{\DIFadd{this page}}\DIFadd{.
+}
+
+\DIFadd{The following configuration options may be specified in the }\texttt{\DIFadd{Arguments}} \DIFadd{section for this driver:
+}
+
+\begin{itemize}
+  \item \texttt{\DIFadd{-4}} \DIFadd{- Boolean flag, enabled if present. }\medskip
+
+  \DIFadd{If specified enable IPv4 for PXE and HTTP(S) Boot. Disable IPV6
+  unless the }\texttt{\DIFadd{-6}} \DIFadd{flag is also present. If neither flag is
+  present, both are enabled by default. }\medskip
+
+  \item \texttt{\DIFadd{-6}} \DIFadd{- Boolean flag, enabled if present. }\medskip
+
+  \DIFadd{If specified enable IPv6 for PXE and HTTP(S) Boot. Disable IPV4
+  unless the }\texttt{\DIFadd{-4}} \DIFadd{flag is also present. If neither flag is
+  present, both are enabled by default. }\medskip
+
+  \item \texttt{\DIFadd{-}{}\DIFadd{-aux}} \DIFadd{- Boolean flag, enabled if present. }\medskip
+
+  \DIFadd{If specified the driver will generate auxiliary boot entries. }\medskip
+
+  \item \texttt{\DIFadd{-}{}\DIFadd{-delete-all-certs}[\DIFadd{:\{OWNER\_GUID\}}]} \DIFadd{- Default: not set. }\medskip
+
+  \DIFadd{If specified, delete all certificates present for }\texttt{\DIFadd{OWNER\_GUID}}\DIFadd{.
+  }\texttt{\DIFadd{OWNER\_GUID}} \DIFadd{is optional, and will default to all zeros if not specified. }\medskip
+
+  \item \texttt{\DIFadd{-}{}\DIFadd{-delete-cert}[\DIFadd{:\{OWNER\_GUID\}}]\DIFadd{="\{cert-text\}"}} \DIFadd{- Default: not set. }\medskip
+
+  \DIFadd{If specified, delete the given certificate(s) for HTTPS Boot. The certificate(s) can be specified
+  as a multi-line PEM value between double quotes.
+  }\texttt{\DIFadd{OWNER\_GUID}} \DIFadd{is optional, and will default to all zeros if not specified.
+  A single PEM file can contain one or more certicates.
+  Multiple instances of this option can be used to delete multiple different
+  PEM files, if required.
+}
+
+  \item \texttt{\DIFadd{-}{}\DIFadd{-enroll-cert}[\DIFadd{:\{OWNER\_GUID\}}]\DIFadd{="\{cert-text\}"}} \DIFadd{- Default: not set. }\medskip
+
+  \DIFadd{If specified, enroll the given certificate(s) for HTTPS Boot. The certificate(s) can be specified
+  as a multi-line PEM value between double quotes.
+  }\texttt{\DIFadd{OWNER\_GUID}} \DIFadd{is optional, and will default to all zeros if not specified.
+  A single PEM file can contain one or more certicates.
+  Multiple instances of this option can be used to enroll multiple different
+  PEM files, if required. }\medskip
+
+  \item \texttt{\DIFadd{-}{}\DIFadd{-http}} \DIFadd{- Boolean flag, enabled if present. }\medskip
+
+  \DIFadd{If specified enable HTTP(S) Boot. Disable PXE Boot unless
+  the }\texttt{\DIFadd{-}{}\DIFadd{-pxe}} \DIFadd{flag is also present. If neither flag is
+  present, both are enabled by default. }\medskip
+
+  \item \texttt{\DIFadd{-}{}\DIFadd{-https}} \DIFadd{- Boolean flag, enabled if present. }\medskip
+
+  \DIFadd{If enabled, allow only }\texttt{\DIFadd{https://}} \DIFadd{URIs for HTTP(S) Boot.
+  Additionally has the same behaviour as the }\texttt{\DIFadd{-}{}\DIFadd{-http}} \DIFadd{flag. }\medskip
+
+  \item \texttt{\DIFadd{-}{}\DIFadd{-pxe}} \DIFadd{- Boolean flag, enabled if present. }\medskip
+
+  \DIFadd{If specified enable PXE Boot, and disable HTTP(S) Boot unless
+  the }\texttt{\DIFadd{-}{}\DIFadd{-http}} \DIFadd{or }\texttt{\DIFadd{-}{}\DIFadd{-https}} \DIFadd{flags are present.
+  If none of these flags are present, both PXE and HTTP(S) Boot are
+  enabled by default. }\medskip
+
+  \item \texttt{\DIFadd{-}{}\DIFadd{-uri}} \DIFadd{- String value, no default. }\medskip
+
+  \DIFadd{If present, specify the URI to use for HTTP(S) Boot. If not present then
+  DHCP boot options must be enabled on the network in order for HTTP(S)
+  Boot to know what to boot.
+}
+
+\end{itemize} \medskip
+
+\subsubsection{\DIFadd{OpenNetworkBoot Certificate Management}}
+
+\DIFadd{Certificates are enrolled to NVRAM storage, therefore once
+a certificate has been enrolled, it will remain enrolled even if the }\texttt{\DIFadd{-}{}\DIFadd{-enroll-cert}} \DIFadd{config
+option is removed. }\texttt{\DIFadd{-}{}\DIFadd{-delete-cert}} \DIFadd{or }\texttt{\DIFadd{-}{}\DIFadd{-delete-all-certs}}
+\DIFadd{should be used to remove enrolled certificates.
+}
+
+\DIFadd{Checking for certificate presence by the }\texttt{\DIFadd{-}{}\DIFadd{-enroll-cert}}
+\DIFadd{and }\texttt{\DIFadd{-}{}\DIFadd{-delete-cert}} \DIFadd{options uses the simple algorithm
+of matching by exact file contents, not by file meaning. The intended
+usage is to leave an }\texttt{\DIFadd{-}{}\DIFadd{-enroll-cert}} \DIFadd{option present in the config
+file until it is time to delete it, e.g. after another more up-to-date
+}\texttt{\DIFadd{-}{}\DIFadd{-enroll-cert}} \DIFadd{option has been added and tested. At this point
+the user can change }\texttt{\DIFadd{-}{}\DIFadd{-enroll-cert}} \DIFadd{to }\texttt{\DIFadd{-}{}\DIFadd{-delete-cert}}
+\DIFadd{for the old certificate. }\medskip
+
+\DIFadd{Certificate options are processed one at a time, in
+order, and each will potentially make changes to the certificate NVRAM storage.
+However each option will not change the NVRAM store if it is already correct
+for the option at that point in time (e.g. will not enroll a certificate if it is
+already enrolled).
+Avoid combinations such as }\texttt{\DIFadd{-}{}\DIFadd{-delete-all-certs}} \DIFadd{followed by
+}\texttt{\DIFadd{-}{}\DIFadd{-enroll-cert}}\DIFadd{, as this will modify the NVRAM certificate
+storage twice on every boot. However a combination such as
+}\texttt{\DIFadd{-}{}\DIFadd{-delete-cert="\{certA-text\}"}} \DIFadd{followed by }\texttt{\DIFadd{-}{}\DIFadd{-enroll-cert="\{certB-text\}"}}
+\DIFadd{(with }\texttt{\DIFadd{certA-text}} \DIFadd{and }\texttt{\DIFadd{certB-text}} \DIFadd{different) is safe,
+because certA will only be deleted if it is present
+and certB will only be added if it is not present, therefore no
+NVRAM changes will be made on the second and subsequent boots
+with these options.
+}
+
+\DIFadd{In some cases (such as OVMF with https:// boot support) the
+}\texttt{\DIFadd{OpenNetworkBoot}} \DIFadd{certificate configuration options manage the same
+certificates as those seen in the firmware UI. In other cases of vendor customised
+HTTPS Boot firmware, the certificates managed by this driver will be
+separate from those managed by firmware.
+}
+
+\DIFadd{When using the debug version of this driver, the OpenCore debug log includes }\texttt{\DIFadd{NTBT:}} \DIFadd{entries
+that show which certificates are enrolled and removed by these options, and which
+certificates are present after all certificate configuration options have been processed.
+}
+
+\DIFaddend \subsection{Other Boot Entry Protocol drivers}
+
+In addition to the \hyperref[uefilinux]{OpenLinuxBoot} \DIFdelbegin \DIFdel{plugin}\DIFdelend \DIFaddbegin \DIFadd{and }\hyperref[uefipxe]{OpenNetworkBoot} \DIFadd{plugins}\DIFaddend ,
+the following \texttt{OC\_BOOT\_ENTRY\_PROTOCOL}
 plugins are made available to add optional, configurable boot entries to the OpenCore boot picker.
 
 \subsubsection{ResetNvramEntry}\label{uefiresetnvram}
