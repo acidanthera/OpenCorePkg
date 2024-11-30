@@ -381,6 +381,25 @@ can be found at \href{https://github.com/acidanthera/bugtracker}{Acidanthera Bug
 
   \end{itemize}
 
+  \item
+  \textbf{Identifier}: \texttt{ERR102-1} \\
+  \textbf{Published}: 2024-11-30 18:46 GMT \\
+  \textbf{Updated}: 2024-11-30 18:46 GMT \\
+  \textbf{Affected versions}: 1.0.2 \\
+  \textbf{Resolved in}: 1.0.3 (\href{https://github.com/acidanthera/OpenCorePkg/commit/35bcb134f19df7c04275142e22c9fec68b72ff2d}{35bcb134}) \\
+  \textbf{Description}:
+
+  Vault \texttt{sign.command} from 1.0.2 cannot correctly sign 1.0.2 \texttt{RELEASE} build. Reference:
+  \href{https://github.com/acidanthera/bugtracker/issues/2443}{acidanthera/bugtracker\#2443}.
+
+  \textbf{Possible workarounds}:
+  \begin{itemize}
+    \tightlist
+
+    \item If it is required to sign 1.0.2 releases, the updated
+    \texttt{sign.command} provided with 1.0.3 may be used.
+  \end{itemize}
+
 \end{itemize}
 
 \end{document}
