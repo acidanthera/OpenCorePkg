@@ -232,7 +232,7 @@ HttpBootCustomRead (
         OtherDevicePath = BmExpandLoadFiles (OtherLoadFile, Data, DataSize, TRUE);
         FreePool (OtherLoadFile);
         if (OtherDevicePath == NULL) {
-          DEBUG ((DEBUG_INFO, "NTBT: Failed to fetch required matching file %a\r", OtherUri));
+          DEBUG ((DEBUG_INFO, "NETB: Failed to fetch required matching file %a\r", OtherUri));
           Status = EFI_NOT_FOUND;
         } else {
           if (GotDmgFirst) {

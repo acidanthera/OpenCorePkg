@@ -7,9 +7,9 @@
 
 #include "NetworkBootInternal.h"
 
-#define ENROLL_CERT       L"--enroll-cert"
-#define DELETE_CERT       L"--delete-cert"
-#define DELETE_ALL_CERTS  L"--delete-all-certs"
+#define ENROLL_CERT       L"enroll-cert"
+#define DELETE_CERT       L"delete-cert"
+#define DELETE_ALL_CERTS  L"delete-all-certs"
 
 BOOLEAN  gRequireHttpsUri;
 
@@ -23,6 +23,7 @@ STATIC CHAR16   *mHttpBootUri;
 STATIC CHAR16  PxeBootId[]  = L"PXE Boot IPv";
 STATIC CHAR16  HttpBootId[] = L"HTTP Boot IPv";
 
+STATIC
 VOID
 InternalFreePickerEntry (
   IN   OC_PICKER_ENTRY  *Entry
@@ -104,7 +105,7 @@ InternalAddEntry (
   if (EFI_ERROR (Status)) {
     DEBUG ((
       DEBUG_INFO,
-      "NTBT: Missing device path - %r\n",
+      "NETB: Missing device path - %r\n",
       Status
       ));
     return Status;
@@ -193,7 +194,7 @@ GetNetworkBootEntries (
                   );
 
   if (EFI_ERROR (Status)) {
-    DEBUG ((DEBUG_INFO, "NTBT: Load file protocol - %r\n", Status));
+    DEBUG ((DEBUG_INFO, "NETB: Load file protocol - %r\n", Status));
     return Status;
   }
 
@@ -205,7 +206,7 @@ GetNetworkBootEntries (
   for (Index = 0; Index < HandleCount; ++Index) {
     NetworkDescription = BmGetNetworkDescription (HandleBuffer[Index]);
     if (NetworkDescription == NULL) {
-      DebugPrintDevicePathForHandle (DEBUG_INFO, "NTBT: LoadFile handle not PXE/HTTP boot DP", HandleBuffer[Index]);
+      DebugPrintDevicePathForHandle (DEBUG_INFO, "NETB: LoadFile handle not PXE/HTTP boot DP", HandleBuffer[Index]);
     } else {
       //
       // Use fixed format network description which we control as shortcut
@@ -226,7 +227,7 @@ GetNetworkBootEntries (
          && ((IsHttpBoot && mAllowHttpBoot) || (!IsHttpBoot && mAllowPxeBoot))
             )
       {
-        DEBUG ((DEBUG_INFO, "NTBT: Adding %s\n", NetworkDescription));
+        DEBUG ((DEBUG_INFO, "NETB: Adding %s\n", NetworkDescription));
         Status = InternalAddEntry (
                    FlexPickerEntries,
                    NetworkDescription,
@@ -236,7 +237,7 @@ GetNetworkBootEntries (
                    IsHttpBoot
                    );
       } else {
-        DEBUG ((DEBUG_INFO, "NTBT: Ignoring %s\n", NetworkDescription));
+        DEBUG ((DEBUG_INFO, "NETB: Ignoring %s\n", NetworkDescription));
       }
 
       FreePool (NetworkDescription);
@@ -263,6 +264,7 @@ GetNetworkBootEntries (
   return EFI_SUCCESS;
 }
 
+STATIC
 EFI_STATUS
 EnrollCerts (
   OC_FLEX_ARRAY  *ParsedLoadOptions
@@ -314,7 +316,7 @@ EnrollCerts (
     }
 
     if ((EnrollCert || DeleteCert) && (Option->Unicode.Value == NULL)) {
-      DEBUG ((DEBUG_INFO, "NTBT: Ignoring %s option with no cert value\n", Option->Unicode.Name));
+      DEBUG ((DEBUG_INFO, "NETB: Ignoring %s option with no cert value\n", Option->Unicode.Name));
       EnrollCert = FALSE;
       DeleteCert = FALSE;
     }
@@ -332,7 +334,7 @@ EnrollCerts (
       if (Option->Unicode.Name[OptionLen] == L':') {
         Status = StrToGuid (&Option->Unicode.Name[OptionLen + 1], OwnerGuid);
         if (EFI_ERROR (Status)) {
-          DEBUG ((DEBUG_WARN, "NTBT: Cannot parse cert owner GUID from %s - %r\n", Option->Unicode.Name, Status));
+          DEBUG ((DEBUG_WARN, "NETB: Cannot parse cert owner GUID from %s - %r\n", Option->Unicode.Name, Status));
           break;
         }
       }
@@ -346,7 +348,7 @@ EnrollCerts (
                    NULL,
                    &DeletedCount
                    );
-        DEBUG ((DEBUG_INFO, "NTBT: %s %u deleted - %r\n", Option->Unicode.Name, DeletedCount, Status));
+        DEBUG ((DEBUG_INFO, "NETB: %s %u deleted - %r\n", Option->Unicode.Name, DeletedCount, Status));
       } else {
         //
         // We do not include the terminating '\0' in the stored certificate,
@@ -371,7 +373,7 @@ EnrollCerts (
                      CertData,
                      &DeletedCount
                      );
-          DEBUG ((DEBUG_INFO, "NTBT: %s %u deleted - %r\n", Option->Unicode.Name, DeletedCount, Status));
+          DEBUG ((DEBUG_INFO, "NETB: %s %u deleted - %r\n", Option->Unicode.Name, DeletedCount, Status));
         } else {
           Status = CertIsPresent (
                      EFI_TLS_CA_CERTIFICATE_VARIABLE,
@@ -382,10 +384,10 @@ EnrollCerts (
                      );
           if (EFI_ERROR (Status)) {
             if (Status == EFI_ALREADY_STARTED) {
-              DEBUG ((DEBUG_INFO, "NTBT: %s already present\n", Option->Unicode.Name));
+              DEBUG ((DEBUG_INFO, "NETB: %s already present\n", Option->Unicode.Name));
               Status = EFI_SUCCESS;
             } else {
-              DEBUG ((DEBUG_INFO, "NTBT: Error checking for cert presence - %r\n", Status));
+              DEBUG ((DEBUG_INFO, "NETB: Error checking for cert presence - %r\n", Status));
             }
           } else {
             Status = EnrollX509toVariable (
@@ -395,7 +397,7 @@ EnrollCerts (
                        CertSize,
                        CertData
                        );
-            DEBUG ((DEBUG_INFO, "NTBT: %s - %r\n", Option->Unicode.Name, Status));
+            DEBUG ((DEBUG_INFO, "NETB: %s - %r\n", Option->Unicode.Name, Status));
           }
         }
 
@@ -461,15 +463,15 @@ UefiMain (
     //
     // e.g. --https --uri=https://imageserver.org/OpenShell.efi
     //
-    mAllowIpv4       = OcHasParsedVar (ParsedLoadOptions, L"-4", OcStringFormatUnicode);
-    mAllowIpv6       = OcHasParsedVar (ParsedLoadOptions, L"-6", OcStringFormatUnicode);
-    mAllowPxeBoot    = OcHasParsedVar (ParsedLoadOptions, L"--pxe", OcStringFormatUnicode);
-    mAllowHttpBoot   = OcHasParsedVar (ParsedLoadOptions, L"--http", OcStringFormatUnicode);
-    mAuxEntries      = OcHasParsedVar (ParsedLoadOptions, L"--aux", OcStringFormatUnicode);
-    gRequireHttpsUri = OcHasParsedVar (ParsedLoadOptions, L"--https", OcStringFormatUnicode);
+    mAllowIpv4       = OcHasParsedVar (ParsedLoadOptions, L"ipv4", OcStringFormatUnicode);
+    mAllowIpv6       = OcHasParsedVar (ParsedLoadOptions, L"ipv6", OcStringFormatUnicode);
+    mAllowPxeBoot    = OcHasParsedVar (ParsedLoadOptions, L"pxe", OcStringFormatUnicode);
+    mAllowHttpBoot   = OcHasParsedVar (ParsedLoadOptions, L"http", OcStringFormatUnicode);
+    mAuxEntries      = OcHasParsedVar (ParsedLoadOptions, L"aux", OcStringFormatUnicode);
+    gRequireHttpsUri = OcHasParsedVar (ParsedLoadOptions, L"https", OcStringFormatUnicode);
 
     TempUri = NULL;
-    OcParsedVarsGetUnicodeStr (ParsedLoadOptions, L"--uri", &TempUri);
+    OcParsedVarsGetUnicodeStr (ParsedLoadOptions, L"uri", &TempUri);
     if (TempUri != NULL) {
       mHttpBootUri = AllocateCopyPool (StrSize (TempUri), TempUri);
       if (mHttpBootUri == NULL) {
@@ -480,12 +482,19 @@ UefiMain (
     if (!EFI_ERROR (Status)) {
       Status = EnrollCerts (ParsedLoadOptions);
       if (EFI_ERROR (Status)) {
-        DEBUG ((DEBUG_WARN, "NTBT: Failed to enroll certs - %r\n", Status));
+        DEBUG ((DEBUG_WARN, "NETB: Failed to enroll certs - %r\n", Status));
       }
 
       DEBUG_CODE_BEGIN ();
       LogInstalledCerts (EFI_TLS_CA_CERTIFICATE_VARIABLE, &gEfiTlsCaCertificateGuid);
       DEBUG_CODE_END ();
+    }
+
+    if (!EFI_ERROR (Status)) {
+      Status = AddRemoveStaticIPs (ParsedLoadOptions);
+      if (EFI_ERROR (Status)) {
+        DEBUG ((DEBUG_WARN, "NETB: Failed to update static IPs - %r\n", Status));
+      }
     }
   }
 
@@ -506,10 +515,10 @@ UefiMain (
 
     if (mHttpBootUri != NULL) {
       if (!mAllowHttpBoot) {
-        DEBUG ((DEBUG_INFO, "NTBT: URI specified but HTTP boot is disabled\n"));
+        DEBUG ((DEBUG_INFO, "NETB: URI specified but HTTP boot is disabled\n"));
       } else {
         if (gRequireHttpsUri && !HasHttpsUri (mHttpBootUri)) {
-          DEBUG ((DEBUG_WARN, "NTBT: Invalid URI https:// is required\n"));
+          DEBUG ((DEBUG_WARN, "NETB: Invalid URI https:// is required\n"));
           mAllowHttpBoot = FALSE;
         }
       }
