@@ -48,7 +48,10 @@
   BmBootDescription.c
   HttpBootCallback.c
   HttpBootCustomRead.c
+  Ip4Config2Nv.c
+  Ip4Utils.c
   NetworkBootInternal.h
   OpenNetworkBoot.c
+  StaticIp4.c
   TlsAuthConfigImpl.c
   Uri.c

@@ -4119,7 +4119,7 @@ nvram 4D1FDA02-38C7-4A6A-9CC6-4BCCA8B30102:boot-log |
   \item \texttt{HDA} --- AudioDxe
   \item \texttt{KKT} --- KeyTester
   \item \texttt{LNX} --- OpenLinuxBoot
-  \item \texttt{NTBT} --- OpenNetworkBoot
+  \item \texttt{NETB} --- OpenNetworkBoot
   \item \texttt{MMDD} --- MmapDump
   \item \texttt{OCPAVP} --- PavpProvision
   \item \texttt{OCRST} --- ResetSystem
@@ -6576,7 +6576,7 @@ even cause permanent firmware damage. Some of the known drivers are listed below
   to allow direct detection and booting of Linux distributions from OpenCore, without
   chainloading via GRUB. \\
 \href{https://github.com/acidanthera/OpenCorePkg}{\texttt{OpenNetworkBoot}}\textbf{*}
-& \hyperref[uefipxe]{OpenCore plugin} implementing \texttt{OC\_BOOT\_ENTRY\_PROTOCOL}
+& \hyperref[uefinetboot]{OpenCore plugin} implementing \texttt{OC\_BOOT\_ENTRY\_PROTOCOL}
   to show available PXE and HTTP(S) boot options on the OpenCore boot menu. \\
 \href{https://github.com/acidanthera/OpenCorePkg}{\texttt{OpenNtfsDxe}}\textbf{*}
 & New Technologies File System (NTFS) read-only driver.
@@ -7091,7 +7091,7 @@ does not support the systemd-boot--specific \href{https://systemd.io/BOOT\_LOADE
 therefore \texttt{efibootmgr} rather than \texttt{bootctl} must be used for any low-level Linux command line interaction
 with the boot menu.
 
-\subsection{OpenNetworkBoot}\label{uefipxe}
+\subsection{OpenNetworkBoot}\label{uefinetboot}
 
 OpenNetworkBoot is an OpenCore plugin implementing \texttt{OC\_BOOT\_ENTRY\_PROTOCOL}.
 It enables PXE and HTTP(S) Boot options in the OpenCore menu if these
@@ -7113,67 +7113,121 @@ Detailed information about the available network boot drivers and how to configu
 PXE and HTTP(S) Boot is provided on
 \href{https://github.com/acidanthera/OpenCorePkg/blob/master/Platform/OpenNetworkBoot/README.md}{this page}.
 
-The following configuration options may be specified in the \texttt{Arguments} section for this driver:
+The below configuration options may be specified in the \texttt{Arguments} section for this driver.
+
+\emph{Note}: There is no problem if configuration options within \texttt{<Arguments>...</Arguments>} are given on
+multiple lines, and option values enclosed within quotes can also span multiple lines. This applies to all drivers
+which use OpenCore argument parsing, and can be particularly convenient when multiple long options such as \texttt{uri},
+\texttt{static4} and particularly \texttt{enroll-cert} may be needed.  
 
 \begin{itemize}
-  \item \texttt{-4} - Boolean flag, enabled if present. \medskip
-
-  If specified enable IPv4 for PXE and HTTP(S) Boot. Disable IPV6
-  unless the \texttt{-6} flag is also present. If neither flag is
-  present, both are enabled by default. \medskip
-
-  \item \texttt{-6} - Boolean flag, enabled if present. \medskip
-
-  If specified enable IPv6 for PXE and HTTP(S) Boot. Disable IPV4
-  unless the \texttt{-4} flag is also present. If neither flag is
-  present, both are enabled by default. \medskip
-
-  \item \texttt{-{}-aux} - Boolean flag, enabled if present. \medskip
+  \item \texttt{aux} - Boolean flag, enabled if present. \medskip
 
   If specified the driver will generate auxiliary boot entries. \medskip
 
-  \item \texttt{-{}-delete-all-certs[:\{OWNER\_GUID\}]} - Default: not set. \medskip
+  \item \texttt{delete-all-certs[:\{OWNER\_GUID\}]} - Default: not set. \medskip
 
   If specified, delete all certificates present for \texttt{OWNER\_GUID}.
-  \texttt{OWNER\_GUID} is optional, and will default to all zeros if not specified. \medskip
+  \texttt{OWNER\_GUID} is optional, and will default to all zeros if not specified.
+  \medskip
 
-  \item \texttt{-{}-delete-cert[:\{OWNER\_GUID\}]="\{cert-text\}"} - Default: not set. \medskip
+  \item \texttt{delete-cert[:\{OWNER\_GUID\}]="\{cert-text\}"} - Default: not set. \medskip
 
   If specified, delete the given certificate(s) for HTTPS Boot. The certificate(s) can be specified
   as a multi-line PEM value between double quotes.
-  \texttt{OWNER\_GUID} is optional, and will default to all zeros if not specified.
   A single PEM file can contain one or more certicates.
   Multiple instances of this option can be used to delete multiple different
   PEM files, if required.
+  \texttt{OWNER\_GUID} is optional, and will default to all zeros if not specified.
+  \medskip
 
-  \item \texttt{-{}-enroll-cert[:\{OWNER\_GUID\}]="\{cert-text\}"} - Default: not set. \medskip
+  \item \texttt{enroll-cert[:\{OWNER\_GUID\}]="\{cert-text\}"} - Default: not set. \medskip
 
   If specified, enroll the given certificate(s) for HTTPS Boot. The certificate(s) can be specified
   as a multi-line PEM value between double quotes.
-  \texttt{OWNER\_GUID} is optional, and will default to all zeros if not specified.
   A single PEM file can contain one or more certicates.
   Multiple instances of this option can be used to enroll multiple different
-  PEM files, if required. \medskip
+  PEM files, if required.
+  \texttt{OWNER\_GUID} is optional, and will default to all zeros if not specified.
+  \medskip
 
-  \item \texttt{-{}-http} - Boolean flag, enabled if present. \medskip
+  \item \texttt{http} - Boolean flag, enabled if present. \medskip
 
   If specified enable HTTP(S) Boot. Disable PXE Boot unless
-  the \texttt{-{}-pxe} flag is also present. If neither flag is
+  the \texttt{pxe} flag is also present. If neither flag is
   present, both are enabled by default. \medskip
 
-  \item \texttt{-{}-https} - Boolean flag, enabled if present. \medskip
+  \item \texttt{https} - Boolean flag, enabled if present. \medskip
 
   If enabled, allow only \texttt{https://} URIs for HTTP(S) Boot.
-  Additionally has the same behaviour as the \texttt{-{}-http} flag. \medskip
+  Additionally has the same behaviour as the \texttt{http} flag. \medskip
 
-  \item \texttt{-{}-pxe} - Boolean flag, enabled if present. \medskip
+  \item \texttt{ipv4} - Boolean flag, enabled if present. \medskip
+
+  If specified enable IPv4 for PXE and HTTP(S) Boot. Disable IPV6
+  unless the \texttt{ipv6} flag is also present. If neither flag is
+  present, both are enabled by default. \medskip
+
+  \item \texttt{ipv6} - Boolean flag, enabled if present. \medskip
+
+  If specified enable IPv6 for PXE and HTTP(S) Boot. Disable IPV4
+  unless the \texttt{ipv4} flag is also present. If neither flag is
+  present, both are enabled by default. \medskip
+
+  \item \texttt{pxe} - Boolean flag, enabled if present. \medskip
 
   If specified enable PXE Boot, and disable HTTP(S) Boot unless
-  the \texttt{-{}-http} or \texttt{-{}-https} flags are present.
+  the \texttt{http} or \texttt{https} flags are present.
   If none of these flags are present, both PXE and HTTP(S) Boot are
   enabled by default. \medskip
 
-  \item \texttt{-{}-uri} - String value, no default. \medskip
+  \item \texttt{static4:\{MAC\_ADDR\}[\textbackslash VLAN\_ID][="\{IP\},\{MASK\},\{GATEWAY\}[,\{DNS\}]"]} - String value. \medskip
+
+  Specify static IPv4 address for the network interface with the MAC address given by \texttt{MAC\_ADDR}. \texttt{MAC\_ADDR}
+  must be specified as 12 consecutive hex digits, with no spaces, colons or hyphens separating digit pairs. In some advanced
+  use-cases such as iSCSI, the MAC address length may be some other even number length of hex digits. The required
+  MAC address can be found in the names of the boot options produced by this driver. Note that
+  hyphens separating digit pairs must be removed, as compared to the format displayed in boot option names.
+  It is also possible to specify a VLAN ID to use on the interface, by adding a backslash
+  followed by a 4 digit hex representation of the VLAN ID following the MAC address. The VLAN ID will also be
+  shown in the boot entry name, but note that it must be converted from decimal in the boot entry name to a
+  4 digit hex number in this option.
+
+  Required elements in value are IP address in \texttt{IP}, network mask in \texttt{MASK}
+  and gateway in \texttt{GATEWAY}. Optional is an additional space separated list of one or more DNS servers
+  in \texttt{DNS}. \texttt{DNS} will be needed if the boot file URI includes a domain name rather than an IP address.
+  
+  \texttt{MAC\_ADDR} is not optional.
+
+  If value is omitted, then any static IP for this MAC address (and VLAN ID when present) will be deleted.
+
+  \begin{itemize}
+  \item Example 1: \texttt{static4:112233445566="192.168.1.20,255.255.255.0,192.168.1.1,8.8.8.8 4.4.4.4"}.
+  \item Example 2: \texttt{static4:112233445566\textbackslash 0001="10.0.0.2,255.255.255.0,10.0.0.1"}.
+  \end{itemize}
+
+  \emph{Note 1}: This option is written to NVRAM and will remain present even if the option is removed from the driver
+  \texttt{Arguments}, unless NVRAM is cleared or an alternative value is written or the value deleted, using this option.
+  
+  \emph{Note 2}: This setting will normally cause a static IP to be assigned during pre-boot, even in vendor-provided
+  network stacks. However, due to a quirk of the design of PXE and HTTP boot, any such static assignment will then be
+  ignored and DHCP used instead, during network boot. The OpenCore network stack (specifically \texttt{HttpBootDxe.efi})
+  is unusual in that it will allow HTTP boot from a static IP address, as long as an HTTP boot URI has also been specified,
+  using the \texttt{uri} option for this driver (or e.g. in the OVMF admin screens if using OVMF, or similar options
+  where present in other firmeare). If HTTP boot from static
+  IP is required, then any pre-existing vendor-specific version of \texttt{HttpBootDxe.efi} will need to be unloaded
+  (see \texttt{UEFI} \texttt{Unload} option) and the OpenCore version used instead.
+
+  \emph{Note 3}: If \texttt{Ip4Dxe} is loaded before OpenCore then any setting here will only take effect after one
+  reboot. If \texttt{Ip4Dxe} is loaded after \texttt{OpenNetworkBoot} the setting will take effect immediately.
+  \medskip
+
+  \emph{Note 4}: In the majority of cases this option is not required, and the default DHCP behaviour should be
+  preferred, since IP address conflicts are automatically avoided, and any IP address assigned by DHCP during network
+  boot will normally automatically match the IP address assigned in-OS, as the same MAC address is used in both cases.
+  \medskip
+
+  \item \texttt{uri} - String value, no default. \medskip
 
   If present, specify the URI to use for HTTP(S) Boot. If not present then
   DHCP boot options must be enabled on the network in order for HTTP(S)
@@ -7184,17 +7238,17 @@ The following configuration options may be specified in the \texttt{Arguments} s
 \subsubsection{OpenNetworkBoot Certificate Management}
 
 Certificates are enrolled to NVRAM storage, therefore once
-a certificate has been enrolled, it will remain enrolled even if the \texttt{-{}-enroll-cert} config
-option is removed. \texttt{-{}-delete-cert} or \texttt{-{}-delete-all-certs}
+a certificate has been enrolled, it will remain enrolled even if the \texttt{enroll-cert} config
+option is removed. \texttt{delete-cert} or \texttt{delete-all-certs}
 should be used to remove enrolled certificates.
 
-Checking for certificate presence by the \texttt{-{}-enroll-cert}
-and \texttt{-{}-delete-cert} options uses the simple algorithm
+Checking for certificate presence by the \texttt{enroll-cert}
+and \texttt{delete-cert} options uses the simple algorithm
 of matching by exact file contents, not by file meaning. The intended
-usage is to leave an \texttt{-{}-enroll-cert} option present in the config
+usage is to leave an \texttt{enroll-cert} option present in the config
 file until it is time to delete it, e.g. after another more up-to-date
-\texttt{-{}-enroll-cert} option has been added and tested. At this point
-the user can change \texttt{-{}-enroll-cert} to \texttt{-{}-delete-cert}
+\texttt{enroll-cert} option has been added and tested. At this point
+the user can change \texttt{enroll-cert} to \texttt{delete-cert}
 for the old certificate. \medskip
 
 Certificate options are processed one at a time, in
@@ -7202,10 +7256,10 @@ order, and each will potentially make changes to the certificate NVRAM storage.
 However each option will not change the NVRAM store if it is already correct
 for the option at that point in time (e.g. will not enroll a certificate if it is
 already enrolled).
-Avoid combinations such as \texttt{-{}-delete-all-certs} followed by
-\texttt{-{}-enroll-cert}, as this will modify the NVRAM certificate
+Avoid combinations such as \texttt{delete-all-certs} followed by
+\texttt{enroll-cert}, as this will modify the NVRAM certificate
 storage twice on every boot. However a combination such as
-\texttt{-{}-delete-cert="\{certA-text\}"} followed by \texttt{-{}-enroll-cert="\{certB-text\}"}
+\texttt{delete-cert="\{certA-text\}"} followed by \texttt{enroll-cert="\{certB-text\}"}
 (with \texttt{certA-text} and \texttt{certB-text} different) is safe,
 because certA will only be deleted if it is present
 and certB will only be added if it is not present, therefore no
@@ -7218,13 +7272,13 @@ certificates as those seen in the firmware UI. In other cases of vendor customis
 HTTPS Boot firmware, the certificates managed by this driver will be
 separate from those managed by firmware.
 
-When using the debug version of this driver, the OpenCore debug log includes \texttt{NTBT:} entries
+When using the debug version of this driver, the OpenCore debug log includes \texttt{NETB:} entries
 that show which certificates are enrolled and removed by these options, and which
 certificates are present after all certificate configuration options have been processed.
 
 \subsection{Other Boot Entry Protocol drivers}
 
-In addition to the \hyperref[uefilinux]{OpenLinuxBoot} and \hyperref[uefipxe]{OpenNetworkBoot} plugins,
+In addition to the \hyperref[uefilinux]{OpenLinuxBoot} and \hyperref[uefinetboot]{OpenNetworkBoot} plugins,
 the following \texttt{OC\_BOOT\_ENTRY\_PROTOCOL}
 plugins are made available to add optional, configurable boot entries to the OpenCore boot picker.
 

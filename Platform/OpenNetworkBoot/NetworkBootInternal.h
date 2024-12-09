@@ -10,6 +10,7 @@
 #include <Uefi/UefiSpec.h>
 #include <Library/DevicePathLib.h>
 #include <Library/MemoryAllocationLib.h>
+#include <Library/NetLib.h>
 #include <Library/PrintLib.h>
 #include <Library/OcBootManagementLib.h>
 #include <Library/OcDebugLogLib.h>
@@ -20,12 +21,62 @@
 #include <Library/UefiRuntimeServicesTableLib.h>
 #include <Library/UefiLib.h>
 #include <Protocol/HttpBootCallback.h>
+#include <Protocol/Ip4Config2.h>
 #include <Protocol/LoadFile.h>
 #include <Protocol/LoadedImage.h>
 #include <Protocol/OcBootEntry.h>
 #include <Protocol/RamDisk.h>
 #include <Guid/ImageAuthentication.h>
 #include <Guid/TlsAuthentication.h>
+
+/////
+// Ip4Config2Impl.h
+//
+typedef struct {
+  UINT16                       Offset;
+  UINT32                       DataSize;
+  EFI_IP4_CONFIG2_DATA_TYPE    DataType;
+} IP4_CONFIG2_DATA_RECORD;
+
+//
+// Modified from original Ip4Config2Impl.h version to use flexible array member.
+//
+typedef struct {
+  UINT16                     Checksum;
+  UINT16                     DataRecordCount;
+  IP4_CONFIG2_DATA_RECORD    DataRecord[];
+} IP4_CONFIG2_VARIABLE;
+
+#define IP4_CONFIG2_VARIABLE_ATTRIBUTE  (EFI_VARIABLE_NON_VOLATILE | EFI_VARIABLE_BOOTSERVICE_ACCESS)
+//
+// Ip4Config2Impl.h
+/////
+
+/////
+// Ip4Common.h
+//
+#define IP4_ALLZERO_ADDRESS  0x00000000u
+//
+// Ip4Common.h
+/////
+
+typedef struct {
+  CHAR16    *StationAddress;
+  CHAR16    *SubnetMask;
+  CHAR16    *GatewayAddress;
+  CHAR16    *DnsAddress;
+} IP4_CONFIG2_OC_CONFIG_DATA;
+
+EFI_STATUS
+Ip4Config2ConvertOcConfigDataToNvData (
+  IN CHAR16                      *VarName,
+  IN IP4_CONFIG2_OC_CONFIG_DATA  *ConfigData
+  );
+
+EFI_STATUS
+Ip4Config2DeleteStaticIpNvData (
+  IN     CHAR16  *VarName
+  );
 
 /**
   Set if we should enforce https only within this driver.
@@ -212,6 +263,43 @@ EnrollX509toVariable (
   IN EFI_GUID  *OwnerGuid,
   IN UINTN     X509DataSize,
   IN VOID      *X509Data
+  );
+
+///
+/// StaticIp4.c
+///
+
+EFI_STATUS
+AddRemoveStaticIPs (
+  OC_FLEX_ARRAY  *ParsedLoadOptions
+  );
+
+///
+/// Ip4Utils.c
+///
+
+BOOLEAN
+Ip4StationAddressValid (
+  IN IP4_ADDR  Ip,
+  IN IP4_ADDR  Netmask
+  );
+
+UINT8
+GetSubnetMaskPrefixLength (
+  IN EFI_IPv4_ADDRESS  *SubnetMask
+  );
+
+EFI_STATUS
+Ip4Config2StrToIp (
+  IN  CHAR16            *Str,
+  OUT EFI_IPv4_ADDRESS  *Ip
+  );
+
+EFI_STATUS
+Ip4Config2StrToIpList (
+  IN  CHAR16            *Str,
+  OUT EFI_IPv4_ADDRESS  **PtrIpList,
+  OUT UINTN             *IpCount
   );
 
 #endif // LOAD_FILE_INTERNAL_H

@@ -601,7 +601,7 @@ BmExpandLoadFiles (
 
     if ((Node != NULL) && !UriWasValidated ()) {
       Print (L"\n"); ///< Sort out cramped spacing
-      DEBUG ((DEBUG_ERROR, "NTBT: LoadFile returned value but URI was never validated\n"));
+      DEBUG ((DEBUG_ERROR, "NETB: LoadFile returned value but URI was never validated\n"));
       FreePool (Node);
       return NULL;
     }

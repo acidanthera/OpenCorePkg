@@ -145,7 +145,7 @@ LogCert (
   IN EFI_SIGNATURE_DATA  *Cert
   )
 {
-  DEBUG ((DEBUG_INFO, "NTBT: Cert %u owner %g\n", CertIndex, &Cert->SignatureOwner));
+  DEBUG ((DEBUG_INFO, "NETB: Cert %u owner %g\n", CertIndex, &Cert->SignatureOwner));
   return EFI_SUCCESS;
 }
 
@@ -163,7 +163,7 @@ LogInstalledCerts (
   IN EFI_GUID  *VendorGuid
   )
 {
-  DEBUG ((DEBUG_INFO, "NTBT: Listing installed certs...\n"));
+  DEBUG ((DEBUG_INFO, "NETB: Listing installed certs...\n"));
   return ProcessAllCerts (
            VariableName,
            VendorGuid,
