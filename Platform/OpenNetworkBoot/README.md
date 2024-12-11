@@ -348,7 +348,7 @@ available with the qemu user mode network stack, for example using the
 following options:
 
 ```
--netdev user,id=net0,tftp=/Users/user/tftp,bootfile=/OpenShell.efi \
+-netdev user,id=net0,tftp=$HOME/tftp,bootfile=/OpenShell.efi \
 -device virtio-net-pci,netdev=net0
 ```
 
@@ -374,7 +374,7 @@ needed, to the lines generated during a failed network boot) can be very
 useful when trying to debug network boot setup.
 
 OVMF can capture packets using
-`-object filter-dump,netdev={net-id},id=filter0,file=/Users/user/ovmf.cap`
+`-object filter-dump,netdev={net-id},id=filter0,file=$HOME/ovmf.cap`
 (`{net-id}` should be replaced as appropriate with the `id` value specified in the
 corresponding `-netdev` option).
 
