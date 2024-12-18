@@ -1,5 +1,10 @@
 OpenCore Changelog
 ==================
+#### v1.0.4
+- Added support for booting from static IPv4 address to OpenCore-specific HttpBootDxe
+- Added static IPv4 configuration options to OpenNetworkBoot
+- Removed `--` prefix from OpenNetworkBoot arguments (modify driver arguments if using this driver)
+
 #### v1.0.3
 - Fixed support for `AMD_CPU_EXT_FAMILY_1AH`, thx @Shaneee
 - Fixed EHCI handoff logic in OpenDuet, causing older machines to hang at start

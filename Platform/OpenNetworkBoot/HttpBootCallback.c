@@ -40,7 +40,7 @@ ValidateDmgAndHttps (
     // Do not return ACCESS_DENIED as this will attempt to add authentication to the request.
     //
     if (ShowLog) {
-      DEBUG ((DEBUG_INFO, "NTBT: Invalid URI https:// is required\n"));
+      DEBUG ((DEBUG_INFO, "NETB: Invalid URI https:// is required\n"));
     }
 
     return EFI_UNSUPPORTED;
@@ -66,7 +66,7 @@ ValidateDmgAndHttps (
   if (gDmgLoading == OcDmgLoadingDisabled) {
     if (*HasDmgExtension) {
       if (ShowLog) {
-        DEBUG ((DEBUG_INFO, "NTBT: %a file is requested while DMG loading is disabled\n", Match));
+        DEBUG ((DEBUG_INFO, "NETB: %a file is requested while DMG loading is disabled\n", Match));
       }
 
       return EFI_UNSUPPORTED;
