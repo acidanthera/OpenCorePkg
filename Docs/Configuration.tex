@@ -7781,13 +7781,17 @@ OpenCore is installed, in order for the \texttt{Launchd.command} script to work 
   unloaded even though they have active dependencies). However standard UEFI
   network stack drivers should unload cleanly.
 
-  \emph{Note 1}: See \texttt{SysReport/Drivers/DriverImageNames.txt} for the
+  \emph{Note 1}: Drivers specified in this option will be unloaded in the reverse
+  of the order in which they were loaded, regardless of the order in which they
+  are specified here.
+
+  \emph{Note 2}: See \texttt{SysReport/Drivers/DriverImageNames.txt} for the
   list of drivers which this option can attempt to unload.
   The relevant name is the driver component name. Drivers are only listed if they
   implement \texttt{DriverBindingProtocol} and \texttt{LoadedImageProtocol},
   and have an available component name.
 
-  \emph{Note 2}: The NVRAM \texttt{Lang} and \texttt{PlatformLang} variables
+  \emph{Note 3}: The NVRAM \texttt{Lang} and \texttt{PlatformLang} variables
   are ignored when determining the driver component names recognised by this
   option, and listed in the \texttt{SysReport} file. This is in order to make
   unloading images stable across changes in these variables.

@@ -213,7 +213,8 @@ UnloadImageByName (
 VOID
 ProcessAllDrivers (
   IN VOID        *Context,
-  PROCESS_IMAGE  ProcessImage
+  PROCESS_IMAGE  ProcessImage,
+  BOOLEAN        Ascending
   )
 {
   EFI_STATUS                 Status;
@@ -234,14 +235,19 @@ ProcessAllDrivers (
     return;
   }
 
-  for (Index = 0; Index < HandleCount; Index++) {
+  for (
+       Ascending ? (Index = 0) : (Index = HandleCount - 1);
+       Index < HandleCount;  ///< UINTN: (HandleCount >= HandleCount) && ((0 - 1) >= HandleCount)
+       Ascending ? Index++ : Index--
+       )
+  {
     Status = gBS->HandleProtocol (
                     HandleBuffer[Index],
                     &gEfiLoadedImageProtocolGuid,
                     (VOID **)&LoadedImage
                     );
     if (!EFI_ERROR (Status)) {
-      Name = GetStringNameFromHandle (HandleBuffer[Index], NULL);     ///< Do not free this one.
+      Name = GetStringNameFromHandle (HandleBuffer[Index], NULL);     ///< Do not free Name.
       if (Name != NULL) {
         ProcessImage (Context, Name, HandleBuffer[Index]);
       }
@@ -303,7 +309,7 @@ OcUnloadDrivers (
 
   UnloadContext.UnloadNameCount = Config->Uefi.Unload.Count;
 
-  ProcessAllDrivers (&UnloadContext, UnloadImageByName);
+  ProcessAllDrivers (&UnloadContext, UnloadImageByName, FALSE);
 
   for (Index = 0; Index < Config->Uefi.Unload.Count; ++Index) {
     if (!UnloadContext.UnloadInfo[Index].Unloaded) {
@@ -335,7 +341,7 @@ OcDriverInfoDump (
     return EFI_OUT_OF_RESOURCES;
   }
 
-  ProcessAllDrivers (&Context, ReportImageName);
+  ProcessAllDrivers (&Context, ReportImageName, TRUE);
 
   //
   // Save dumped driver info to file.
