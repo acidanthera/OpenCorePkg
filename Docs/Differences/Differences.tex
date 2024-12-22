@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
-%DIF DEL PreviousConfiguration.tex   Tue Nov 26 03:15:30 2024
-%DIF ADD ../Configuration.tex        Sat Nov 30 18:40:01 2024
+%DIF DEL PreviousConfiguration.tex   Sun Dec 22 13:34:51 2024
+%DIF ADD ../Configuration.tex        Sun Dec 22 13:34:51 2024
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -154,7 +154,7 @@
 
        \vspace{0.2in}
 
-       Reference Manual (1.0\DIFdelbegin \DIFdel{.2}\DIFdelend \DIFaddbegin \DIFadd{.3}\DIFaddend )
+       Reference Manual (1.0\DIFdelbegin \DIFdel{.3}\DIFdelend \DIFaddbegin \DIFadd{.4}\DIFaddend )
 
        \vspace{0.2in}
 
@@ -3448,7 +3448,7 @@ the default boot entry choice will remain changed until the next manual reconfig
   Refer to the \hyperref[miscentryprops]{Entry Properties} section below for details.
 
   \emph{Note}: Certain UEFI tools, such as UEFI Shell, can be very dangerous and
-  \textbf{MUST NOT} appear in production configurations, \DIFdelbegin \DIFdel{paticularly }\DIFdelend \DIFaddbegin \DIFadd{particularly }\DIFaddend in vaulted
+  \textbf{MUST NOT} appear in production configurations, particularly in vaulted
   configurations as well as those protected by secure boot, as such tools can be
   used to bypass the secure boot chain.
   Refer to the \hyperref[uefitools]{UEFI} section for examples of UEFI tools.
@@ -3762,7 +3762,7 @@ the default boot entry choice will remain changed until the next manual reconfig
       \item For security reasons \texttt{Ext<Flavour>.icns} and \texttt{<Flavour>.icns} are both
       supported, and only \texttt{Ext<Flavour>.icns} will be used if the entry is on an external drive
       (followed by default fallback \texttt{ExtHardDrive.icns}).
-      \item Where both apply \texttt{.VolumeIcon.icns} takes \DIFdelbegin \DIFdel{precence }\DIFdelend \DIFaddbegin \DIFadd{precedence }\DIFaddend over \texttt{.contentFlavour}.
+      \item Where both apply \texttt{.VolumeIcon.icns} takes precedence over \texttt{.contentFlavour}.
       \item In order to allow icons and audio assist to work correctly for tools (e.g. for UEFI Shell),
       system default boot entry icons (see \texttt{Docs/Flavours.md}) specified in the \texttt{Flavour}
       setting for \texttt{Tools} or \texttt{Entries} will continue to apply even when flavour is disabled.
@@ -3872,7 +3872,7 @@ the default boot entry choice will remain changed until the next manual reconfig
   \emph{will reboot} before the chosen entry is booted. While this behaviour might seem surprising,
   it can be used both to switch which OpenCore installation is blessed, with \texttt{CTRL+Enter},
   e.g. from a recovery OpenCore installation on CD (selected with the \texttt{C} key on boot) back
-  to the main \DIFdelbegin \DIFdel{installion }\DIFdelend \DIFaddbegin \DIFadd{installation }\DIFaddend of OpenCore on the hard drive, if this is lost after an NVRAM reset. It can
+  to the main installation of OpenCore on the hard drive, if this is lost after an NVRAM reset. It can
   also be used, even when the native picker cannot be shown normally (unsupported GPU), to do a one-shot
   boot without OpenCore, e.g. to another OS or tool, or to an earlier version of macOS.
 
@@ -4179,8 +4179,8 @@ nvram 4D1FDA02-38C7-4A6A-9CC6-4BCCA8B30102:boot-log |
   \item \texttt{HDA} --- AudioDxe
   \item \texttt{KKT} --- KeyTester
   \item \texttt{LNX} --- OpenLinuxBoot
-  \item \DIFaddbegin \texttt{\DIFadd{NTBT}} \DIFadd{--- OpenNetworkBoot
-  }\item \DIFaddend \texttt{MMDD} --- MmapDump
+  \item \texttt{NTBT} --- OpenNetworkBoot
+  \item \texttt{MMDD} --- MmapDump
   \item \texttt{OCPAVP} --- PavpProvision
   \item \texttt{OCRST} --- ResetSystem
   \item \texttt{OCUI} --- OpenCanopy
@@ -4775,8 +4775,7 @@ nvram 4D1FDA02-38C7-4A6A-9CC6-4BCCA8B30102:oem-board   # SMBIOS Type2 ProductNam
   \begin{itemize}
   \tightlist
   \item Provide public key during the \texttt{OpenCore.efi} compilation in
-  \DIFdelbegin %DIFDELCMD < \href{https://github.com/acidanthera/OpenCorePkg/blob/master/Platform/OpenCore/OpenCoreVault.c}{%%%
-\DIFdelend \DIFaddbegin \href{https://github.com/acidanthera/OpenCorePkg/blob/master/Library/OcMainLib/OpenCoreVault.c}{\DIFaddend \texttt{OpenCoreVault.c}} file.
+  \href{https://github.com/acidanthera/OpenCorePkg/blob/master/Library/OcMainLib/OpenCoreVault.c}{\texttt{OpenCoreVault.c}} file.
   \item Binary patch \texttt{OpenCore.efi} replacing zeroes with the public key
   between \texttt{=BEGIN OC VAULT=} and \texttt{==END OC VAULT==} ASCII markers.
   \end{itemize}
@@ -4786,7 +4785,7 @@ nvram 4D1FDA02-38C7-4A6A-9CC6-4BCCA8B30102:oem-board   # SMBIOS Type2 ProductNam
   \href{https://github.com/acidanthera/OpenCorePkg/tree/master/Utilities/CreateVault}{RsaTool}.
 
 
-  The \DIFdelbegin \DIFdel{complete set of commands to }\DIFdelend \DIFaddbegin \DIFadd{steps to binary patch }\texttt{\DIFadd{OpenCore.efi}} \DIFadd{are}\DIFaddend :
+  The steps to binary patch \texttt{OpenCore.efi} are:
 
   \begin{itemize}
   \tightlist
@@ -4796,18 +4795,10 @@ nvram 4D1FDA02-38C7-4A6A-9CC6-4BCCA8B30102:oem-board   # SMBIOS Type2 ProductNam
   \item Create \texttt{vault.sig}.
   \end{itemize}
 
-  \DIFdelbegin \DIFdel{Can look as follows}\DIFdelend \DIFaddbegin \DIFadd{A script to do this is privided in OpenCore releases}\DIFaddend :
-\DIFmodbegin
-\begin{lstlisting}[label=createvault, style=ocbash,alsolanguage=DIFcode]
-%DIF < cd /Volumes/EFI/EFI/OC
-%DIF < /path/to/create_vault.sh .
-%DIF < /path/to/RsaTool -sign vault.plist vault.sig vault.pub
-%DIF < off=$(($(strings -a -t d OpenCore.efi | grep "=BEGIN OC VAULT=" | cut -f1 -d' ')+16))
-%DIF < dd of=OpenCore.efi if=vault.pub bs=1 seek=$off count=528 conv=notrunc
-%DIF < rm vault.pub
-%DIF > /Utilities/CreateVault/sign.command /Volumes/EFI/EFI/OC
+  A script to do this is privided in OpenCore releases:
+\begin{lstlisting}[label=createvault, style=ocbash]
+/Utilities/CreateVault/sign.command /Volumes/EFI/EFI/OC
 \end{lstlisting}
-\DIFmodend
 
   \emph{Note 1}: While it may appear obvious, an external
   method is required to verify \texttt{OpenCore.efi} and \texttt{BOOTx64.efi} for
@@ -6644,10 +6635,10 @@ even cause permanent firmware damage. Some of the known drivers are listed below
 & \hyperref[uefilinux]{OpenCore plugin} implementing \texttt{OC\_BOOT\_ENTRY\_PROTOCOL}
   to allow direct detection and booting of Linux distributions from OpenCore, without
   chainloading via GRUB. \\
-\DIFaddbegin \href{https://github.com/acidanthera/OpenCorePkg}{\texttt{\DIFadd{OpenNetworkBoot}}}\textbf{\DIFadd{*}}
-& \hyperref[uefipxe]{OpenCore plugin} \DIFadd{implementing }\texttt{\DIFadd{OC\_BOOT\_ENTRY\_PROTOCOL}}
-  \DIFadd{to show available PXE and HTTP(S) boot options on the OpenCore boot menu. }\\
-\DIFaddend \href{https://github.com/acidanthera/OpenCorePkg}{\texttt{OpenNtfsDxe}}\textbf{*}
+\href{https://github.com/acidanthera/OpenCorePkg}{\texttt{OpenNetworkBoot}}\textbf{*}
+& \hyperref[uefipxe]{OpenCore plugin} implementing \texttt{OC\_BOOT\_ENTRY\_PROTOCOL}
+  to show available PXE and HTTP(S) boot options on the OpenCore boot menu. \\
+\href{https://github.com/acidanthera/OpenCorePkg}{\texttt{OpenNtfsDxe}}\textbf{*}
 & New Technologies File System (NTFS) read-only driver.
   NTFS is the primary file system for Microsoft Windows versions that are based on Windows NT. \\
 \href{https://github.com/acidanthera/OpenCorePkg}{\texttt{OpenUsbKbDxe}}\textbf{*}
@@ -6936,7 +6927,7 @@ specified before OpenLinuxBoot will attempt to start the distro.
 OpenLinuxBoot typically requires filesystem drivers that are not available in
 firmware, such as EXT4 and BTRFS drivers. These drivers can be obtained from external sources.
 Drivers tested in basic scenarios can be downloaded from \href{https://github.com/acidanthera/OcBinaryData}{OcBinaryData}.
-Be aware that these drivers are not tested for reliability in all \DIFdelbegin \DIFdel{scenarious}\DIFdelend \DIFaddbegin \DIFadd{scenarios}\DIFaddend , nor did they undergo
+Be aware that these drivers are not tested for reliability in all scenarios, nor did they undergo
 tamper-resistance testing, therefore they may carry potential security or data-loss risks.
 
 Most Linux distros require the \href{https://github.com/acidanthera/OcBinaryData}{\texttt{ext4\_x64}} driver,
@@ -6988,8 +6979,8 @@ options for the driver may be specified in \texttt{UEFI/Drivers/Arguments}:
   \begin{itemize}
   \tightlist
     \item \texttt{LINUX\_BOOT\_ADD\_RW},
-    \item \texttt{LINUX\_BOOT\_LOG\_VERBOSE}\DIFaddbegin \DIFadd{,
-    }\item \texttt{\DIFadd{LINUX\_BOOT\_LOG\_GRUB\_VARS}} \DIFaddend and
+    \item \texttt{LINUX\_BOOT\_LOG\_VERBOSE},
+    \item \texttt{LINUX\_BOOT\_LOG\_GRUB\_VARS} and
     \item \texttt{LINUX\_BOOT\_ADD\_DEBUG\_INFO}.
   \end{itemize}
   \medskip
@@ -7043,9 +7034,8 @@ options for the driver may be specified in \texttt{UEFI/Drivers/Arguments}:
     Some distributions run a filesystem check on loading which requires the root
     filesystem to initially be mounted read-only via the \texttt{ro} kernel option, which requires this
     option to be added to the autodetected options. Set this bit to add this
-    option on autodetected distros; should be harmless but very slightly slow down boot time (due to \DIFdelbegin \DIFdel{requried
-    }\DIFdelend \DIFaddbegin \DIFadd{required
-    }\DIFaddend remount as read-write) on distros which do not require it.
+    option on autodetected distros; should be harmless but very slightly slow down boot time (due to required
+    remount as read-write) on distros which do not require it.
     When there are multiple distros and it is required to specify this option for specific distros only, use
     \texttt{autoopts:\{PARTUUID\}+=ro} to manually add the option where required, instead of using this flag.
 
@@ -7071,18 +7061,18 @@ options for the driver may be specified in \texttt{UEFI/Drivers/Arguments}:
     partition's unique partition uuid, to each generated entry name. Can help with debugging
     the origin of entries generated by the driver when there are multiple Linux installs on
     one system.
-    \DIFaddbegin \item \texttt{\DIFadd{0x00010000}} \DIFadd{(bit }\texttt{\DIFadd{16}}\DIFadd{) --- }\texttt{\DIFadd{LINUX\_BOOT\_LOG\_GRUB\_VARS}}\DIFadd{,
-    When a }\texttt{\DIFadd{BootLoaderSpecByDefault}} \DIFadd{setup is detected, log available GRUB variables
-    found in }\texttt{\DIFadd{grub2/grubenv}} \DIFadd{and }\texttt{\DIFadd{grub2/grub.cfg}}\DIFadd{.
-    }\item \texttt{\DIFadd{0x00020000}} \DIFadd{(bit }\texttt{\DIFadd{17}}\DIFadd{) --- }\texttt{\DIFadd{LINUX\_BOOT\_FIX\_TUNED}}\DIFadd{,
+    \item \texttt{0x00010000} (bit \texttt{16}) --- \texttt{LINUX\_BOOT\_LOG\_GRUB\_VARS},
+    When a \texttt{BootLoaderSpecByDefault} setup is detected, log available GRUB variables
+    found in \texttt{grub2/grubenv} and \texttt{grub2/grub.cfg}.
+    \item \texttt{0x00020000} (bit \texttt{17}) --- \texttt{LINUX\_BOOT\_FIX\_TUNED},
     In some circumstances, such as after upgrades which add TuneD to existing systems, the TuneD
-    system tuning plugin may add its GRUB variables to }\texttt{\DIFadd{loader/entries/*.conf}} \DIFadd{files but not
-    initialise them in }\texttt{\DIFadd{grub2/grub.cfg}}\DIFadd{. In order to avoid incorrect boots, OpenLinuxBoot
+    system tuning plugin may add its GRUB variables to \texttt{loader/entries/*.conf} files but not
+    initialise them in \texttt{grub2/grub.cfg}. In order to avoid incorrect boots, OpenLinuxBoot
     treats used, non-initialised GRUB variables as an error. When this flag is set, empty values
-    are added for the TuneD variables }\texttt{\DIFadd{tuned\_params}} \DIFadd{and }\texttt{\DIFadd{tuned\_initrd}} \DIFadd{if they
+    are added for the TuneD variables \texttt{tuned\_params} and \texttt{tuned\_initrd} if they
     are not present. This is required for OpenLinuxBoot on TuneD systems with this problem, and
     harmless otherwise.
-  }\DIFaddend \end{itemize} \medskip
+  \end{itemize} \medskip
 
   Flag values can be specified in hexadecimal beginning with \texttt{0x} or in decimal,
   e.g. \texttt{flags=0x80} or \texttt{flags=128}. It is also possible to specify flags to
@@ -7129,7 +7119,7 @@ options for the driver may be specified in \texttt{UEFI/Drivers/Arguments}:
 
 OpenLinuxBoot can detect the \texttt{loader/entries/*.conf} files created according to the
 \href{https://systemd.io/BOOT_LOADER_SPECIFICATION/}{Boot Loader Specification} or the closely related
-\href{https://fedoraproject.org/wiki/Changes/BootLoaderSpecByDefault}{\DIFdelbegin \DIFdel{systemd }\DIFdelend \DIFaddbegin \DIFadd{Fedora }\DIFaddend BootLoaderSpecByDefault}. The
+\href{https://fedoraproject.org/wiki/Changes/BootLoaderSpecByDefault}{Fedora BootLoaderSpecByDefault}. The
 former is specific to systemd-boot and is used by Arch Linux, the latter applies to most Fedora-related distros
 including Fedora itself, RHEL and variants.
 
@@ -7145,13 +7135,13 @@ all kernel arguments except \texttt{initrd=...} must be fully specified by hand 
 \texttt{autoopts:\{partuuid\}=...} (\texttt{+=} variants of these options will not work, as these only add additional
 arguments).
 
-\DIFdelbegin \DIFdel{BootLoaderSpecByDefault }\DIFdelend \DIFaddbegin \DIFadd{Fedora }\texttt{\DIFadd{BootLoaderSpecByDefault}} \DIFaddend (but not pure Boot Loader Specification) can expand GRUB variables
+Fedora \texttt{BootLoaderSpecByDefault} (but not pure Boot Loader Specification) can expand GRUB variables
 in the \texttt{*.conf} files -- and this is used in practice in certain distros such as CentOS.
 In order to handle this correctly, when this situation is detected OpenLinuxBoot extracts all variables from
 \texttt{\{boot\}/grub2/grubenv} and also any unconditionally set variables from
 \texttt{\{boot\}/grub2/grub.cfg}, and then expands these where required in \texttt{*.conf} file entries.
 
-The only currently supported method of starting Linux kernels \DIFaddbegin \DIFadd{from OpenLinuxBoot }\DIFaddend relies on their being compiled with EFISTUB.
+The only currently supported method of starting Linux kernels from OpenLinuxBoot relies on their being compiled with EFISTUB.
 This applies to almost all modern distros, particularly those which use systemd. Note that most modern
 distros use systemd as their system manager, even though most do not use systemd-boot as
 their bootloader.
@@ -7161,151 +7151,140 @@ does not support the systemd-boot--specific \href{https://systemd.io/BOOT\_LOADE
 therefore \texttt{efibootmgr} rather than \texttt{bootctl} must be used for any low-level Linux command line interaction
 with the boot menu.
 
-\DIFaddbegin \subsection{\DIFadd{OpenNetworkBoot}}\label{uefipxe}
+\subsection{OpenNetworkBoot}\label{uefipxe}
 
-\DIFadd{OpenNetworkBoot is an OpenCore plugin implementing }\texttt{\DIFadd{OC\_BOOT\_ENTRY\_PROTOCOL}}\DIFadd{.
+OpenNetworkBoot is an OpenCore plugin implementing \texttt{OC\_BOOT\_ENTRY\_PROTOCOL}.
 It enables PXE and HTTP(S) Boot options in the OpenCore menu if these
 are supported by the underlying firmware, or if the required network boot drivers
 have been loaded using OpenCore.
-}
 
-\DIFadd{It has additional support for loading }\texttt{\DIFadd{.dmg}} \DIFadd{files and their associated
-}\texttt{\DIFadd{.chunklist}} \DIFadd{file over HTTP(S) Boot, allowing macOS recovery to be
+It has additional support for loading \texttt{.dmg} files and their associated
+\texttt{.chunklist} file over HTTP(S) Boot, allowing macOS recovery to be
 started over HTTP(S) Boot: if either extension is seen in the HTTP(S) Boot URI
 then the other file of the pair is automatically loaded as well, and both are
 passed to OpenCore to verify and boot from the DMG file.
-}
 
-\DIFadd{PXE Boot is already supported on most firmware, so in most cases PXE Boot entries
+PXE Boot is already supported on most firmware, so in most cases PXE Boot entries
 should appear as soon as the driver is loaded. Using the additional network boot
 drivers provided with OpenCore, when needed, HTTP(S) Boot should be available on
 most firmware even if not natively supported.
-}
 
-\DIFadd{Detailed information about the available network boot drivers and how to configure
+Detailed information about the available network boot drivers and how to configure
 PXE and HTTP(S) Boot is provided on
-}\href{https://github.com/acidanthera/OpenCorePkg/blob/master/Platform/OpenNetworkBoot/README.md}{\DIFadd{this page}}\DIFadd{.
-}
+\href{https://github.com/acidanthera/OpenCorePkg/blob/master/Platform/OpenNetworkBoot/README.md}{this page}.
 
-\DIFadd{The following configuration options may be specified in the }\texttt{\DIFadd{Arguments}} \DIFadd{section for this driver:
-}
+The following configuration options may be specified in the \texttt{Arguments} section for this driver:
 
 \begin{itemize}
-  \item \texttt{\DIFadd{-4}} \DIFadd{- Boolean flag, enabled if present. }\medskip
+  \item \texttt{-4} - Boolean flag, enabled if present. \medskip
 
-  \DIFadd{If specified enable IPv4 for PXE and HTTP(S) Boot. Disable IPV6
-  unless the }\texttt{\DIFadd{-6}} \DIFadd{flag is also present. If neither flag is
-  present, both are enabled by default. }\medskip
+  If specified enable IPv4 for PXE and HTTP(S) Boot. Disable IPV6
+  unless the \texttt{-6} flag is also present. If neither flag is
+  present, both are enabled by default. \medskip
 
-  \item \texttt{\DIFadd{-6}} \DIFadd{- Boolean flag, enabled if present. }\medskip
+  \item \texttt{-6} - Boolean flag, enabled if present. \medskip
 
-  \DIFadd{If specified enable IPv6 for PXE and HTTP(S) Boot. Disable IPV4
-  unless the }\texttt{\DIFadd{-4}} \DIFadd{flag is also present. If neither flag is
-  present, both are enabled by default. }\medskip
+  If specified enable IPv6 for PXE and HTTP(S) Boot. Disable IPV4
+  unless the \texttt{-4} flag is also present. If neither flag is
+  present, both are enabled by default. \medskip
 
-  \item \texttt{\DIFadd{-}{}\DIFadd{-aux}} \DIFadd{- Boolean flag, enabled if present. }\medskip
+  \item \texttt{-{}-aux} - Boolean flag, enabled if present. \medskip
 
-  \DIFadd{If specified the driver will generate auxiliary boot entries. }\medskip
+  If specified the driver will generate auxiliary boot entries. \medskip
 
-  \item \texttt{\DIFadd{-}{}\DIFadd{-delete-all-certs}[\DIFadd{:\{OWNER\_GUID\}}]} \DIFadd{- Default: not set. }\medskip
+  \item \texttt{-{}-delete-all-certs[:\{OWNER\_GUID\}]} - Default: not set. \medskip
 
-  \DIFadd{If specified, delete all certificates present for }\texttt{\DIFadd{OWNER\_GUID}}\DIFadd{.
-  }\texttt{\DIFadd{OWNER\_GUID}} \DIFadd{is optional, and will default to all zeros if not specified. }\medskip
+  If specified, delete all certificates present for \texttt{OWNER\_GUID}.
+  \texttt{OWNER\_GUID} is optional, and will default to all zeros if not specified. \medskip
 
-  \item \texttt{\DIFadd{-}{}\DIFadd{-delete-cert}[\DIFadd{:\{OWNER\_GUID\}}]\DIFadd{="\{cert-text\}"}} \DIFadd{- Default: not set. }\medskip
+  \item \texttt{-{}-delete-cert[:\{OWNER\_GUID\}]="\{cert-text\}"} - Default: not set. \medskip
 
-  \DIFadd{If specified, delete the given certificate(s) for HTTPS Boot. The certificate(s) can be specified
+  If specified, delete the given certificate(s) for HTTPS Boot. The certificate(s) can be specified
   as a multi-line PEM value between double quotes.
-  }\texttt{\DIFadd{OWNER\_GUID}} \DIFadd{is optional, and will default to all zeros if not specified.
+  \texttt{OWNER\_GUID} is optional, and will default to all zeros if not specified.
   A single PEM file can contain one or more certicates.
   Multiple instances of this option can be used to delete multiple different
   PEM files, if required.
-}
 
-  \item \texttt{\DIFadd{-}{}\DIFadd{-enroll-cert}[\DIFadd{:\{OWNER\_GUID\}}]\DIFadd{="\{cert-text\}"}} \DIFadd{- Default: not set. }\medskip
+  \item \texttt{-{}-enroll-cert[:\{OWNER\_GUID\}]="\{cert-text\}"} - Default: not set. \medskip
 
-  \DIFadd{If specified, enroll the given certificate(s) for HTTPS Boot. The certificate(s) can be specified
+  If specified, enroll the given certificate(s) for HTTPS Boot. The certificate(s) can be specified
   as a multi-line PEM value between double quotes.
-  }\texttt{\DIFadd{OWNER\_GUID}} \DIFadd{is optional, and will default to all zeros if not specified.
+  \texttt{OWNER\_GUID} is optional, and will default to all zeros if not specified.
   A single PEM file can contain one or more certicates.
   Multiple instances of this option can be used to enroll multiple different
-  PEM files, if required. }\medskip
+  PEM files, if required. \medskip
 
-  \item \texttt{\DIFadd{-}{}\DIFadd{-http}} \DIFadd{- Boolean flag, enabled if present. }\medskip
+  \item \texttt{-{}-http} - Boolean flag, enabled if present. \medskip
 
-  \DIFadd{If specified enable HTTP(S) Boot. Disable PXE Boot unless
-  the }\texttt{\DIFadd{-}{}\DIFadd{-pxe}} \DIFadd{flag is also present. If neither flag is
-  present, both are enabled by default. }\medskip
+  If specified enable HTTP(S) Boot. Disable PXE Boot unless
+  the \texttt{-{}-pxe} flag is also present. If neither flag is
+  present, both are enabled by default. \medskip
 
-  \item \texttt{\DIFadd{-}{}\DIFadd{-https}} \DIFadd{- Boolean flag, enabled if present. }\medskip
+  \item \texttt{-{}-https} - Boolean flag, enabled if present. \medskip
 
-  \DIFadd{If enabled, allow only }\texttt{\DIFadd{https://}} \DIFadd{URIs for HTTP(S) Boot.
-  Additionally has the same behaviour as the }\texttt{\DIFadd{-}{}\DIFadd{-http}} \DIFadd{flag. }\medskip
+  If enabled, allow only \texttt{https://} URIs for HTTP(S) Boot.
+  Additionally has the same behaviour as the \texttt{-{}-http} flag. \medskip
 
-  \item \texttt{\DIFadd{-}{}\DIFadd{-pxe}} \DIFadd{- Boolean flag, enabled if present. }\medskip
+  \item \texttt{-{}-pxe} - Boolean flag, enabled if present. \medskip
 
-  \DIFadd{If specified enable PXE Boot, and disable HTTP(S) Boot unless
-  the }\texttt{\DIFadd{-}{}\DIFadd{-http}} \DIFadd{or }\texttt{\DIFadd{-}{}\DIFadd{-https}} \DIFadd{flags are present.
+  If specified enable PXE Boot, and disable HTTP(S) Boot unless
+  the \texttt{-{}-http} or \texttt{-{}-https} flags are present.
   If none of these flags are present, both PXE and HTTP(S) Boot are
-  enabled by default. }\medskip
+  enabled by default. \medskip
 
-  \item \texttt{\DIFadd{-}{}\DIFadd{-uri}} \DIFadd{- String value, no default. }\medskip
+  \item \texttt{-{}-uri} - String value, no default. \medskip
 
-  \DIFadd{If present, specify the URI to use for HTTP(S) Boot. If not present then
+  If present, specify the URI to use for HTTP(S) Boot. If not present then
   DHCP boot options must be enabled on the network in order for HTTP(S)
   Boot to know what to boot.
-}
 
 \end{itemize} \medskip
 
-\subsubsection{\DIFadd{OpenNetworkBoot Certificate Management}}
+\subsubsection{OpenNetworkBoot Certificate Management}
 
-\DIFadd{Certificates are enrolled to NVRAM storage, therefore once
-a certificate has been enrolled, it will remain enrolled even if the }\texttt{\DIFadd{-}{}\DIFadd{-enroll-cert}} \DIFadd{config
-option is removed. }\texttt{\DIFadd{-}{}\DIFadd{-delete-cert}} \DIFadd{or }\texttt{\DIFadd{-}{}\DIFadd{-delete-all-certs}}
-\DIFadd{should be used to remove enrolled certificates.
-}
+Certificates are enrolled to NVRAM storage, therefore once
+a certificate has been enrolled, it will remain enrolled even if the \texttt{-{}-enroll-cert} config
+option is removed. \texttt{-{}-delete-cert} or \texttt{-{}-delete-all-certs}
+should be used to remove enrolled certificates.
 
-\DIFadd{Checking for certificate presence by the }\texttt{\DIFadd{-}{}\DIFadd{-enroll-cert}}
-\DIFadd{and }\texttt{\DIFadd{-}{}\DIFadd{-delete-cert}} \DIFadd{options uses the simple algorithm
+Checking for certificate presence by the \texttt{-{}-enroll-cert}
+and \texttt{-{}-delete-cert} options uses the simple algorithm
 of matching by exact file contents, not by file meaning. The intended
-usage is to leave an }\texttt{\DIFadd{-}{}\DIFadd{-enroll-cert}} \DIFadd{option present in the config
+usage is to leave an \texttt{-{}-enroll-cert} option present in the config
 file until it is time to delete it, e.g. after another more up-to-date
-}\texttt{\DIFadd{-}{}\DIFadd{-enroll-cert}} \DIFadd{option has been added and tested. At this point
-the user can change }\texttt{\DIFadd{-}{}\DIFadd{-enroll-cert}} \DIFadd{to }\texttt{\DIFadd{-}{}\DIFadd{-delete-cert}}
-\DIFadd{for the old certificate. }\medskip
+\texttt{-{}-enroll-cert} option has been added and tested. At this point
+the user can change \texttt{-{}-enroll-cert} to \texttt{-{}-delete-cert}
+for the old certificate. \medskip
 
-\DIFadd{Certificate options are processed one at a time, in
+Certificate options are processed one at a time, in
 order, and each will potentially make changes to the certificate NVRAM storage.
 However each option will not change the NVRAM store if it is already correct
 for the option at that point in time (e.g. will not enroll a certificate if it is
 already enrolled).
-Avoid combinations such as }\texttt{\DIFadd{-}{}\DIFadd{-delete-all-certs}} \DIFadd{followed by
-}\texttt{\DIFadd{-}{}\DIFadd{-enroll-cert}}\DIFadd{, as this will modify the NVRAM certificate
+Avoid combinations such as \texttt{-{}-delete-all-certs} followed by
+\texttt{-{}-enroll-cert}, as this will modify the NVRAM certificate
 storage twice on every boot. However a combination such as
-}\texttt{\DIFadd{-}{}\DIFadd{-delete-cert="\{certA-text\}"}} \DIFadd{followed by }\texttt{\DIFadd{-}{}\DIFadd{-enroll-cert="\{certB-text\}"}}
-\DIFadd{(with }\texttt{\DIFadd{certA-text}} \DIFadd{and }\texttt{\DIFadd{certB-text}} \DIFadd{different) is safe,
+\texttt{-{}-delete-cert="\{certA-text\}"} followed by \texttt{-{}-enroll-cert="\{certB-text\}"}
+(with \texttt{certA-text} and \texttt{certB-text} different) is safe,
 because certA will only be deleted if it is present
 and certB will only be added if it is not present, therefore no
 NVRAM changes will be made on the second and subsequent boots
 with these options.
-}
 
-\DIFadd{In some cases (such as OVMF with https:// boot support) the
-}\texttt{\DIFadd{OpenNetworkBoot}} \DIFadd{certificate configuration options manage the same
+In some cases (such as OVMF with https:// boot support) the
+\texttt{OpenNetworkBoot} certificate configuration options manage the same
 certificates as those seen in the firmware UI. In other cases of vendor customised
 HTTPS Boot firmware, the certificates managed by this driver will be
 separate from those managed by firmware.
-}
 
-\DIFadd{When using the debug version of this driver, the OpenCore debug log includes }\texttt{\DIFadd{NTBT:}} \DIFadd{entries
+When using the debug version of this driver, the OpenCore debug log includes \texttt{NTBT:} entries
 that show which certificates are enrolled and removed by these options, and which
 certificates are present after all certificate configuration options have been processed.
-}
 
-\DIFaddend \subsection{Other Boot Entry Protocol drivers}
+\subsection{Other Boot Entry Protocol drivers}
 
-In addition to the \hyperref[uefilinux]{OpenLinuxBoot} \DIFdelbegin \DIFdel{plugin}\DIFdelend \DIFaddbegin \DIFadd{and }\hyperref[uefipxe]{OpenNetworkBoot} \DIFadd{plugins}\DIFaddend ,
+In addition to the \hyperref[uefilinux]{OpenLinuxBoot} and \hyperref[uefipxe]{OpenNetworkBoot} plugins,
 the following \texttt{OC\_BOOT\_ENTRY\_PROTOCOL}
 plugins are made available to add optional, configurable boot entries to the OpenCore boot picker.
 
@@ -7438,7 +7417,7 @@ the driver within the \texttt{UEFI/Drivers} section:
   \item \texttt{-{}-force-codec} - Integer value, no default. \medskip
 
   Force use of an audio codec, this value should be equal to \texttt{Audio} section \texttt{AudioCodec}.
-  Can result in faster boot especially when used in \DIFdelbegin \DIFdel{conjuction }\DIFdelend \DIFaddbegin \DIFadd{conjunction }\DIFaddend with \texttt{-{}-force-device}. \medskip
+  Can result in faster boot especially when used in conjunction with \texttt{-{}-force-device}. \medskip
 
   \item \texttt{-{}-force-device} - String value, no default. \medskip
 
@@ -7942,7 +7921,7 @@ OpenCore is installed, in order for the \texttt{Launchd.command} script to work 
   On older Macs, this is because the implementation available is too old to be used while on newer Macs,
   it is because of optimisations added by Apple which do not connect the Apple Event protocol
   except when needed -- e.g. except when the Apple boot picker is explicitly started.
-  Due to its somewhat \DIFdelbegin \DIFdel{unpredicatable }\DIFdelend \DIFaddbegin \DIFadd{unpredictable }\DIFaddend results, this option is not typically recommended.
+  Due to its somewhat unpredictable results, this option is not typically recommended.
   \item \texttt{Builtin} ---  Always use OpenCore's updated re-implementation of the Apple Event protocol.
   Use of this setting is recommended even on Apple hardware, due to
   improvements (better fine mouse control, configurable key delays) made in the OpenCore re-implementation
@@ -8305,7 +8284,7 @@ OpenCore is installed, in order for the \texttt{Launchd.command} script to work 
   NVRAM variable is higher than this. This is to avoid over-loud UEFI audio when the system volume is set very high,
   or the \texttt{SystemAudioVolumeDB} NVRAM value has been misconfigured.
 
-  \emph{Note 1}: Decibels (dB) specify gain (\DIFdelbegin \DIFdel{postive }\DIFdelend \DIFaddbegin \DIFadd{positive }\DIFaddend values; increase in volume) or attenuation (negative values; decrease
+  \emph{Note 1}: Decibels (dB) specify gain (positive values; increase in volume) or attenuation (negative values; decrease
   in volume) compared to some reference level. When you hear the sound level of a jet plane expressed as 120 decibels, say,
   the reference level is the sound level just audible to an average human. However generally
   in acoustic science and computer audio any reference level can be specified. Intel HDA and macOS natively use
@@ -8342,7 +8321,7 @@ OpenCore is installed, in order for the \texttt{Launchd.command} script to work 
   The boot chime will not play if the system amplifier gain level in the
   \texttt{SystemAudioVolumeDB} NVRAM variable is lower than this.
 
-  \emph{Note 1}: This setting is designed to save \DIFdelbegin \DIFdel{unecessary }\DIFdelend \DIFaddbegin \DIFadd{unnecessary }\DIFaddend pauses due to audio setup at inaudible volume
+  \emph{Note 1}: This setting is designed to save unnecessary pauses due to audio setup at inaudible volume
   levels, when no sound will be heard anyway. Whether there are inaudible volume levels depends on the
   hardware. On some hardware (including Apple) the audio values are well enough matched to the hardware
   that the lowest volume levels available are very quiet but audible, whereas on some other hardware combinations,
@@ -8778,7 +8757,7 @@ OpenCore is installed, in order for the \texttt{Launchd.command} script to work 
   \textbf{Failsafe}: \texttt{false}\\
   \textbf{Description}: Reconnect all graphics drivers during driver connection.
 
-  On certain firmware, it may be \DIFdelbegin \DIFdel{desireable }\DIFdelend \DIFaddbegin \DIFadd{desirable }\DIFaddend to use an alternative graphics driver,
+  On certain firmware, it may be desirable to use an alternative graphics driver,
   for example BiosVideo.efi, providing better screen resolution options on legacy
   machines, or a driver supporting \texttt{ForceResolution}. This option attempts
   to disconnect all currently connected graphics drivers before connecting newly
