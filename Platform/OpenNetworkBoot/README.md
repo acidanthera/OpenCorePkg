@@ -320,7 +320,7 @@ Since a May 2024 security update to the network boot stack, Random
 Number Generator (RNG) protocol support is required. If running OVMF
 with an Ivy Bridge or above CPU, then the `RngDxe` driver included in
 OVMF will provide the required support. For CPUs below Ivy Bridge
-the qemu option `-device virtio-rng-pci` must be provided, so that
+the QEMU option `-device virtio-rng-pci` must be provided, so that
 the `VirtioRngDxe` driver which is also present in OVMF can provide
 the required RNG support.
 
@@ -335,21 +335,21 @@ If any network boot clients (e.g. OVMF, VMWare) or server programs
 to set these up using bridged network support, which allows the VM to
 appear as a separate device with its own IP address on the network.
 
-To start OVMF with bridged network support the following macOS-specific
-`qemu` options (which require `sudo`) may be used:
+To start OVMF with bridged network support the macOS-specific `vmnet-bridged`
+QEMU option (which requires `sudo`) may be used:
 
 ```
--netdev vmnet-bridged,id=mynet0,ifname=en0 \
--device e1000,netdev=mynet0,id=mynic0
+-netdev vmnet-bridged,id=net0,ifname=en0 \
+-device virtio-net-pci,netdev=net0,id=nic0
 ```
 
-PXE boot may also be tested in OVMF using qemu's built-in TFTP/PXE server,
-available with the qemu user mode network stack, for example using the
+PXE boot may also be tested in OVMF using QEMU's built-in TFTP/PXE server,
+available with the QEMU user mode network stack, for example using the
 following options:
 
 ```
 -netdev user,id=net0,tftp=$HOME/tftp,bootfile=/OpenShell.efi \
--device virtio-net-pci,netdev=net0
+-device virtio-net-pci,netdev=net0,id=nic0
 ```
 
 No equivalent option is available for HTTP boot, so to experiment with this,
@@ -369,7 +369,7 @@ to be configured and managed.
 ### Debugging network boot on OVMF
 
 Building OVMF with the `-D DEBUG_ON_SERIAL_PORT` option and then passing the
-`-serial stdio` option to qemu (and then scrolling back in the output as
+`-serial stdio` option to QEMU (and then scrolling back in the output as
 needed, to the lines generated during a failed network boot) can be very
 useful when trying to debug network boot setup.
 
@@ -468,14 +468,18 @@ Mtftp6Dxe (IPv6 only)
 In many situations network card firmware will already be present, but this section covers situations where it may not be.
 
 The EDK II and AUDK versions of OVMF both include `VirtioNetDxe` by default, even if built with `NETWORK_ENABLE=0`.
-This is roughly equivalent to saying that OVMF has network card firmware present, even if the EDK II network stack
-is not included. Therefore, note that when using a cut-down or custom build of OVMF, this driver must be present in
-order for the rest of the network stack to work.
+This driver produces the base Simple Network Protocol for QEMU `virtio-net` devices. Therefore, note that if using
+a cut-down or custom build of OVMF, this driver must be present in order for the rest of the network stack to work.
+Also note that if using QEMU emulated network hardware such as `-device e1000`, then although an option ROM for this
+emulated card is present (and does not require `VirtioNetDxe`), it is not started automatically in all circumstances,
+e.g. it is not started when OpenCore is booted directly from OVMF built with no network stack, therefore using a
+`virtio-net` device with the `VirtioNetDxe` driver is a more reliable approach.
 
-Most (U)EFI machines include PXE boot which relies on the machine's network card firmware
-(e.g. option ROM) being present. However, if using a very old (e.g pre-EFI) machine, or one with very
-cut-down firmware, it may be necessary to manually load the network card's (U)EFI firmware in order for the rest
-of the network boot stack to work. This may be loaded using OpenCore's `Drivers` section. The driver should be
+Most (U)EFI machines include PXE boot, which relies on the machine's network card firmware
+(e.g. option ROM) being present already, to provide the base Simple Network Protocol for the rest of the network
+stack to build on. However, if using a very old (e.g pre-EFI) machine, or one with very
+cut-down firmware, it may be necessary to manually load the network card's (U)EFI firmware.
+This may be loaded using OpenCore's `Drivers` section. Relvant drivers can be
 found from the manufacturer's website or elsewhere online; for example:
 
  - https://winraid.level1techs.com/t/efi-lan-bios-intel-gopdriver-modules/33948
