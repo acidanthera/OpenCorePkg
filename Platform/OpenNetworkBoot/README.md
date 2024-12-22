@@ -391,7 +391,8 @@ document for deciding which drivers to add.
 Various network boot drivers depend on the presence of HiiDatabase.
 
 A recent (May 2024) security update to the EDK 2 network stack
-means that various drivers also depend on the RNG and Hash2 protocols.
+means that most network stack drivers depend on the RNG
+protocol and additionally `TcpDxe` depends on the Hash2 protocol.
 
 These protocols can be checked for in UEFI Shell with:
 
