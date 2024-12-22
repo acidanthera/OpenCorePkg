@@ -1,7 +1,7 @@
 OpenCore Changelog
 ==================
 #### v1.0.4
-- Added support for booting from static IPv4 address to OpenCore-specific HttpBootDxe
+- Added support for booting from static IPv4 address in OpenCore-specific HttpBootDxe
 - Added static IPv4 configuration options to OpenNetworkBoot
 - Removed `--` prefix from OpenNetworkBoot arguments (modify driver arguments if using this driver)
 - Updated `Unload` option to unload drivers in reverse of the order in which they were loaded
