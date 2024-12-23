@@ -7219,7 +7219,8 @@ which use OpenCore argument parsing, and can be particularly convenient when mul
   (see \texttt{UEFI} \texttt{Unload} option) and the OpenCore version used instead.
 
   \emph{Note 3}: If \texttt{Ip4Dxe} is loaded before OpenCore then any setting here will only take effect after one
-  reboot. If \texttt{Ip4Dxe} is loaded after \texttt{OpenNetworkBoot} the setting will take effect immediately.
+  reboot (during which network boot is not attempted). If \texttt{Ip4Dxe} is loaded after \texttt{OpenNetworkBoot}
+  the setting will take effect immediately.
   \medskip
 
   \emph{Note 4}: In the majority of cases this option is not required, and the default DHCP behaviour should be
