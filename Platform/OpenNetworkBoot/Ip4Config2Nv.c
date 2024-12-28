@@ -33,6 +33,96 @@ AddDataRecord (
   ++Variable->DataRecordCount;
 }
 
+//
+// Performs the same job as
+// https://github.com/tianocore/edk2/blob/e99d532fd7224e68026543834ed9c0fe3cfaf88c/NetworkPkg/Ip4Dxe/Ip4Config2Impl.c#L303
+// but in order to avoid initialising unnecessary data structures we work directly
+// from the config data which is in fact acccepted there.
+//
+STATIC
+EFI_STATUS
+Ip4Config2WriteConfigData (
+  IN CHAR16                       *VarName,
+  EFI_IP4_CONFIG2_POLICY          Policy,
+  EFI_IP4_CONFIG2_MANUAL_ADDRESS  *ManualAddress,
+  EFI_IP_ADDRESS                  *Gateway,
+  EFI_IPv4_ADDRESS                *DnsAddress,
+  UINTN                           DnsCount
+  )
+{
+  EFI_STATUS  Status;
+
+  IP4_CONFIG2_VARIABLE  *Variable;
+  UINTN                 VarSize;
+  UINT16                DataRecordCount;
+  CHAR8                 *Heap;
+
+  DataRecordCount = 0;
+  VarSize         = sizeof (*Variable);
+  {
+    ++DataRecordCount;
+    VarSize += sizeof (Policy);
+  }
+  if (ManualAddress != NULL) {
+    ++DataRecordCount;
+    VarSize += sizeof (*ManualAddress);
+  }
+
+  if (Gateway != NULL) {
+    ++DataRecordCount;
+    VarSize += sizeof (Gateway->v4);
+  }
+
+  if (DnsAddress != NULL) {
+    ASSERT (DnsCount != 0);
+    ++DataRecordCount;
+    VarSize += DnsCount * sizeof (*DnsAddress);
+  }
+
+  VarSize += sizeof (Variable->DataRecord[0]) * DataRecordCount;
+
+  Variable = AllocatePool (VarSize);
+
+  if (Variable == NULL) {
+    return EFI_OUT_OF_RESOURCES;
+  }
+
+  Heap = (CHAR8 *)Variable + VarSize;
+
+  Variable->DataRecordCount = 0;
+
+  AddDataRecord (Variable, Ip4Config2DataTypePolicy, &Policy, sizeof (Policy), &Heap);
+  if (ManualAddress != NULL) {
+    AddDataRecord (Variable, Ip4Config2DataTypeManualAddress, ManualAddress, sizeof (*ManualAddress), &Heap);
+  }
+
+  if (Gateway != NULL) {
+    AddDataRecord (Variable, Ip4Config2DataTypeGateway, &Gateway->v4, sizeof (Gateway->v4), &Heap);
+  }
+
+  if (DnsAddress != NULL) {
+    AddDataRecord (Variable, Ip4Config2DataTypeDnsServer, DnsAddress, sizeof (*DnsAddress) * DnsCount, &Heap);
+  }
+
+  ASSERT (Variable->DataRecordCount == DataRecordCount);
+  ASSERT (Heap == (CHAR8 *)&Variable->DataRecord[DataRecordCount]);
+
+  Variable->Checksum = 0;
+  Variable->Checksum = (UINT16) ~NetblockChecksum ((UINT8 *)Variable, (UINT32)VarSize);
+
+  Status = gRT->SetVariable (
+                  VarName,
+                  &gEfiIp4Config2ProtocolGuid,
+                  IP4_CONFIG2_VARIABLE_ATTRIBUTE,
+                  VarSize,
+                  Variable
+                  );
+
+  FreePool (Variable);
+
+  return Status;
+}
+
 EFI_STATUS
 Ip4Config2ConvertOcConfigDataToNvData (
   IN CHAR16                      *VarName,
@@ -50,11 +140,6 @@ Ip4Config2ConvertOcConfigDataToNvData (
   IP4_ADDR                        Ip;
   EFI_IPv4_ADDRESS                *DnsAddress;
   UINTN                           DnsCount;
-
-  IP4_CONFIG2_VARIABLE  *Variable;
-  UINTN                 VarSize;
-  UINT16                DataRecordCount;
-  CHAR8                 *Heap;
 
   //
   // cf Ip4Config2ConvertIfrNvDataToConfigNvData
@@ -115,53 +200,7 @@ Ip4Config2ConvertOcConfigDataToNvData (
   CopyMem (&ManualAddress.Address, &StationAddress.v4, sizeof (EFI_IPv4_ADDRESS));
   CopyMem (&ManualAddress.SubnetMask, &SubnetMask.v4, sizeof (EFI_IPv4_ADDRESS));
 
-  //
-  // cf Ip4Config2WriteConfigData
-  // REF: https://github.com/tianocore/edk2/blob/e99d532fd7224e68026543834ed9c0fe3cfaf88c/NetworkPkg/Ip4Dxe/Ip4Config2Impl.c#L303
-  //
-  DataRecordCount = DnsCount == 0 ? 3 : 4;
-  VarSize         = sizeof (*Variable) +
-                    sizeof (Variable->DataRecord[0]) * DataRecordCount +
-                    sizeof (Policy) +
-                    sizeof (ManualAddress) +
-                    sizeof (Gateway.v4) +
-                    DnsCount * sizeof (*DnsAddress);
-
-  Variable = AllocatePool (VarSize);
-
-  if (Variable == NULL) {
-    if (DnsAddress != NULL) {
-      FreePool (DnsAddress);
-    }
-
-    return EFI_OUT_OF_RESOURCES;
-  }
-
-  Heap = (CHAR8 *)Variable + VarSize;
-
-  Variable->DataRecordCount = 0;
-
-  AddDataRecord (Variable, Ip4Config2DataTypePolicy, &Policy, sizeof (Policy), &Heap);
-  AddDataRecord (Variable, Ip4Config2DataTypeManualAddress, &ManualAddress, sizeof (ManualAddress), &Heap);
-  AddDataRecord (Variable, Ip4Config2DataTypeGateway, &Gateway.v4, sizeof (Gateway.v4), &Heap);
-  if (DnsAddress != NULL) {
-    AddDataRecord (Variable, Ip4Config2DataTypeDnsServer, DnsAddress, sizeof (*DnsAddress) * DnsCount, &Heap);
-    FreePool (DnsAddress);
-  }
-
-  ASSERT (Variable->DataRecordCount == DataRecordCount);
-  ASSERT (Heap == (CHAR8 *)&Variable->DataRecord[DataRecordCount]);
-
-  Variable->Checksum = 0;
-  Variable->Checksum = (UINT16) ~NetblockChecksum ((UINT8 *)Variable, (UINT32)VarSize);
-
-  Status = gRT->SetVariable (
-                  VarName,
-                  &gEfiIp4Config2ProtocolGuid,
-                  IP4_CONFIG2_VARIABLE_ATTRIBUTE,
-                  VarSize,
-                  Variable
-                  );
+  Status = Ip4Config2WriteConfigData (VarName, Policy, &ManualAddress, &Gateway, DnsAddress, DnsCount);
 
   DEBUG ((
     DEBUG_INFO,
@@ -171,7 +210,9 @@ Ip4Config2ConvertOcConfigDataToNvData (
     Status
     ));
 
-  FreePool (Variable);
+  if (DnsAddress != NULL) {
+    FreePool (DnsAddress);
+  }
 
   return Status;
 }
@@ -225,7 +266,7 @@ Ip4Config2DeleteStaticIpNvData (
     FreePool (Variable);
 
     //
-    // Unlike Ip4Config2ReadConfigData it is not our job to remove problematic variable,
+    // Unlike Ip4Config2ReadConfigData it is not our job to resolve existing problematic variable,
     // just warn and return EFI_NOT_FOUND.
     //
     DEBUG ((
@@ -266,15 +307,15 @@ Ip4Config2DeleteStaticIpNvData (
 
   if (FoundStaticPolicy && FoundManualAddress) {
     //
-    // Remove the variable.
+    // We may be called after Ip4Dxe has run (e.g. OpenNetworkBoot loaded by OpenCore, with native network stack).
+    // Since this variable is boot services access only we should not just delete it, as this may leave one boot
+    // where the OS could set it. Instead reinitialise the variable to the value to which Ip4Dxe initialises it.
+    // For initial values, see:
+    // https://github.com/tianocore/edk2/blob/e99d532fd7224e68026543834ed9c0fe3cfaf88c/NetworkPkg/Ip4Dxe/Ip4Config2Impl.c#L1985-L2015
     //
-    Status = gRT->SetVariable (
-                    VarName,
-                    &gEfiIp4Config2ProtocolGuid,
-                    IP4_CONFIG2_VARIABLE_ATTRIBUTE,
-                    0,
-                    NULL
-                    );
+    Policy = Ip4Config2PolicyStatic;
+    Status = Ip4Config2WriteConfigData (VarName, Policy, NULL, NULL, NULL, 0);
+
     DEBUG ((
       DEBUG_INFO,
       "NETB: Removing %a %s - %r\n",
