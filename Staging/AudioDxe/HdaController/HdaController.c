@@ -1096,6 +1096,13 @@ HdaControllerDriverBindingStart (
                     OpenMode
                     );
 
+    if (  (OpenMode == EFI_OPEN_PROTOCOL_BY_DRIVER)
+       && (Status   == EFI_ALREADY_STARTED))
+    {
+      DEBUG ((DEBUG_INFO, "HDA: %a%a - %r\n", "Open PCI I/O protocol", "", Status));
+      return Status;
+    }
+
     if (EFI_ERROR (Status)) {
       if (  PcdGetBool (PcdAudioControllerTryProtocolGetMode)
          && (Status == EFI_ACCESS_DENIED)
@@ -1112,7 +1119,7 @@ HdaControllerDriverBindingStart (
         continue;
       }
 
-      DEBUG ((DEBUG_WARN, "HDA: Open PCI I/O protocol (try DisconnectHda quirk?) - %r\n", Status));
+      DEBUG ((DEBUG_WARN, "HDA: %a%a - %r\n", "Open PCI I/O protocol", " (try DisconnectHda quirk?)", Status));
       return Status;
     }
   } while (EFI_ERROR (Status));
