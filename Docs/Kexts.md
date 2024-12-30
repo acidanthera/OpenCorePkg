@@ -36,7 +36,7 @@ Kexts
 | [VoodooPS2Keyboard.kext](https://github.com/acidanthera/VoodooPS2) | 14.0.0 (10.10) | — | — |
 | [VoodooPS2Mouse.kext](https://github.com/acidanthera/VoodooPS2) | 14.0.0 (10.10) | — | — |
 | [VoodooPS2Trackpad.kext](https://github.com/acidanthera/VoodooPS2) | 14.0.0 (10.10) | — | — |
-| [VoodooInput.kext](https://github.com/acidanthera/VoodooInput) | 15.0.0 (10.11) | — | — |
+| [VoodooInput.kext](https://github.com/acidanthera/VoodooInput) | 14.0.0 (10.10) | — | — |
 | [VoodooSMBus.kext](https://github.com/leo-labs/VoodooSMBus) | 18.0.0 (10.14) | — | — |
 | [VoodooRMI.kext](https://github.com/VoodooSMBus/VoodooRMI) | 15.0.0 (10.11) | — | — |
 | [AlpsHID.kext](https://github.com/blankmac/AlpsHID) | — | — | — |
