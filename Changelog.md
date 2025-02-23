@@ -8,6 +8,7 @@ OpenCore Changelog
 - Fixed `MSR_IA32_TSC_ADJUST` access on unsupported CPUs (e.g. Virtualization.framework), thx @t0rr3sp3dr0
 - Downgraded WARN log level to INFO for ALREADY_STARTED in AudioDxe (restores ability to include DEBUG_WARN in HaltLevel if required when using this driver)
 - Added `ClearTaskSwitchBit` Booter quirk to fix crashes when using 32-bit versions of macOS on Hyper-V Gen2 VMs
+- Fixed `ProvideCurrentCpuInfo` and CPUID patching on older versions of macOS 10.4
 
 #### v1.0.3
 - Fixed support for `AMD_CPU_EXT_FAMILY_1AH`, thx @Shaneee

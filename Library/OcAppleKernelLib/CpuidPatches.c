@@ -231,7 +231,8 @@ PatchKernelCpuIdLegacy (
   UINT8                 *LocationTigerTscEnd;
   UINT32                Signature[3];
   BOOLEAN               IsTiger;
-  BOOLEAN               IsTigerOld;
+  BOOLEAN               IsTigerTscInit;
+  BOOLEAN               IsTigerTscInitOld;
   BOOLEAN               IsLeopard;
   BOOLEAN               IsSnow;
   BOOLEAN               IsLion;
@@ -241,14 +242,15 @@ PatchKernelCpuIdLegacy (
   INTERNAL_CPUID_PATCH  Patch;
 
   //
-  // XNU 8.10.1 and older require an additional patch to _tsc_init.
+  // XNU 8.7.2 to 8.10.1 require an additional patch to _tsc_init.
   //
-  IsTiger    = OcMatchDarwinVersion (KernelVersion, KERNEL_VERSION_TIGER_MIN, KERNEL_VERSION_TIGER_MAX);
-  IsTigerOld = OcMatchDarwinVersion (KernelVersion, KERNEL_VERSION_TIGER_MIN, KERNEL_VERSION (8, 10, 1));
-  IsLeopard  = OcMatchDarwinVersion (KernelVersion, KERNEL_VERSION_LEOPARD_MIN, KERNEL_VERSION_LEOPARD_MAX);
-  IsSnow     = OcMatchDarwinVersion (KernelVersion, KERNEL_VERSION_SNOW_LEOPARD_MIN, KERNEL_VERSION_SNOW_LEOPARD_MAX);
-  IsLion     = OcMatchDarwinVersion (KernelVersion, KERNEL_VERSION_LION_MIN, KERNEL_VERSION_LION_MAX);
-  StructAddr = 0;
+  IsTiger           = OcMatchDarwinVersion (KernelVersion, KERNEL_VERSION_TIGER_MIN, KERNEL_VERSION_TIGER_MAX);
+  IsTigerTscInit    = OcMatchDarwinVersion (KernelVersion, KERNEL_VERSION (8, 8, 0), KERNEL_VERSION (8, 10, 1));
+  IsTigerTscInitOld = OcMatchDarwinVersion (KernelVersion, KERNEL_VERSION (8, 7, 2), KERNEL_VERSION (8, 7, 2));
+  IsLeopard         = OcMatchDarwinVersion (KernelVersion, KERNEL_VERSION_LEOPARD_MIN, KERNEL_VERSION_LEOPARD_MAX);
+  IsSnow            = OcMatchDarwinVersion (KernelVersion, KERNEL_VERSION_SNOW_LEOPARD_MIN, KERNEL_VERSION_SNOW_LEOPARD_MAX);
+  IsLion            = OcMatchDarwinVersion (KernelVersion, KERNEL_VERSION_LION_MIN, KERNEL_VERSION_LION_MAX);
+  StructAddr        = 0;
 
   LocationSnow32      = NULL;
   LocationTigerTsc    = NULL;
@@ -600,40 +602,66 @@ PatchKernelCpuIdLegacy (
 
   //
   // Locate _tsc_init on 10.4, as there is a CPUID (1) call that needs to be patched.
-  // This only applies to XNU 8.10.1 and older. Some recovery versions of
+  // This only applies to XNU 8.7.2 to XNU 8.10.1. Some recovery versions of
   // 10.4.10 have a newer XNU 8.10.3 kernel with code changes to _tsc_init.
   //
   // It's possible 8.10.2 may require the patch, but there are no sources or kernels
   // available to verify.
   //
-  if (IsTigerOld) {
+  if (IsTigerTscInit || IsTigerTscInitOld) {
     Status = PatcherGetSymbolAddress (Patcher, "_tsc_init", (UINT8 **)&Record);
     if (EFI_ERROR (Status) || (Record >= Last)) {
       DEBUG ((DEBUG_WARN, "OCAK: [FAIL] Failed to locate _tsc_init (%p) - %r\n", Record, Status));
       return EFI_NOT_FOUND;
     }
 
-    //
-    // Start of _tsc_init CPUID location.
-    //
-    // We'll replace this with a call to the previous patched section to
-    // populate the CPUID (1) info.
-    //
-    STATIC CONST UINT8  mKernelCpuidFindTscLocTigerStart[7] = {
-      0xBA, 0x01, 0x00, 0x00, 0x00,       // mov edx, 1
-      0x89, 0xD0                          // mov eax, edx
-    };
+    if (IsTigerTscInit) {
+      //
+      // Start of _tsc_init CPUID location on XNU 8.8.0 to XNU 8.10.1
+      //
+      // We'll replace this with a call to the previous patched section to
+      // populate the CPUID (1) info.
+      //
+      STATIC CONST UINT8  mKernelCpuidFindTscLocTigerStart[7] = {
+        0xBA, 0x01, 0x00, 0x00, 0x00,       // mov edx, 1
+        0x89, 0xD0                          // mov eax, edx
+      };
 
-    for (Index = 0; Index < EFI_PAGE_SIZE; Index++, Record++) {
-      if (  (Record[0] == mKernelCpuidFindTscLocTigerStart[0])
-         && (Record[1] == mKernelCpuidFindTscLocTigerStart[1])
-         && (Record[2] == mKernelCpuidFindTscLocTigerStart[2])
-         && (Record[3] == mKernelCpuidFindTscLocTigerStart[3])
-         && (Record[4] == mKernelCpuidFindTscLocTigerStart[4])
-         && (Record[5] == mKernelCpuidFindTscLocTigerStart[5])
-         && (Record[6] == mKernelCpuidFindTscLocTigerStart[6]))
-      {
-        break;
+      for (Index = 0; Index < EFI_PAGE_SIZE; Index++, Record++) {
+        if (  (Record[0] == mKernelCpuidFindTscLocTigerStart[0])
+           && (Record[1] == mKernelCpuidFindTscLocTigerStart[1])
+           && (Record[2] == mKernelCpuidFindTscLocTigerStart[2])
+           && (Record[3] == mKernelCpuidFindTscLocTigerStart[3])
+           && (Record[4] == mKernelCpuidFindTscLocTigerStart[4])
+           && (Record[5] == mKernelCpuidFindTscLocTigerStart[5])
+           && (Record[6] == mKernelCpuidFindTscLocTigerStart[6]))
+        {
+          break;
+        }
+      }
+    } else {
+      //
+      // Start of _tsc_init CPUID location on XNU 8.8.0 to XNU 8.10.1
+      //
+      // We'll replace this with a call to the previous patched section to
+      // populate the CPUID (1) info.
+      //
+      STATIC CONST UINT8  mKernelCpuidFindTscLocTigerOldStart[7] = {
+        0xB8, 0x01, 0x00, 0x00, 0x00,       // mov eax, 1
+        0x0F, 0xA2                          // cpuid
+      };
+
+      for (Index = 0; Index < EFI_PAGE_SIZE; Index++, Record++) {
+        if (  (Record[0] == mKernelCpuidFindTscLocTigerOldStart[0])
+           && (Record[1] == mKernelCpuidFindTscLocTigerOldStart[1])
+           && (Record[2] == mKernelCpuidFindTscLocTigerOldStart[2])
+           && (Record[3] == mKernelCpuidFindTscLocTigerOldStart[3])
+           && (Record[4] == mKernelCpuidFindTscLocTigerOldStart[4])
+           && (Record[5] == mKernelCpuidFindTscLocTigerOldStart[5])
+           && (Record[6] == mKernelCpuidFindTscLocTigerOldStart[6]))
+        {
+          break;
+        }
       }
     }
 
@@ -669,8 +697,8 @@ PatchKernelCpuIdLegacy (
     EndPointer - Start,
     Location - Start,
     LocationEnd - Start,
-    IsTigerOld ? LocationTigerTsc - Start : 0,
-    IsTigerOld ? LocationTigerTscEnd - Start : 0,
+    (IsTigerTscInit || IsTigerTscInitOld) ? LocationTigerTsc - Start : 0,
+    (IsTigerTscInit || IsTigerTscInitOld) ? LocationTigerTscEnd - Start : 0,
     StructAddr
     ));
 
@@ -783,7 +811,7 @@ PatchKernelCpuIdLegacy (
   // In 10.4, we need to replace a call to CPUID (1) with a call to
   // the patch area like above in _tsc_init.
   //
-  if (IsTigerOld) {
+  if (IsTigerTscInit || IsTigerTscInitOld) {
     Delta               = (INT32)(StartPointer - (LocationTigerTsc + 5));
     *LocationTigerTsc++ = 0xE8;
     CopyMem (LocationTigerTsc, &Delta, sizeof (Delta));
@@ -1569,7 +1597,8 @@ PatchProvideCurrentCpuInfo (
 
   BOOLEAN  IsLeaf4CacheSupported;
 
-  BOOLEAN  IsTiger;
+  BOOLEAN  IsTigerOld;
+  BOOLEAN  IsTigerNew;
   BOOLEAN  IsLeopard;
   BOOLEAN  IsSnowLeopard;
   BOOLEAN  IsTigerCacheUnsupported;
@@ -1603,7 +1632,8 @@ PatchProvideCurrentCpuInfo (
 
   IsLeaf4CacheSupported = CpuInfo->MaxId >= CPUID_CACHE_PARAMS;
 
-  IsTiger       = OcMatchDarwinVersion (KernelVersion, KERNEL_VERSION_TIGER_MIN, KERNEL_VERSION_TIGER_MAX);
+  IsTigerOld    = OcMatchDarwinVersion (KernelVersion, KERNEL_VERSION_TIGER_MIN, KERNEL_VERSION (8, 7, 1));
+  IsTigerNew    = OcMatchDarwinVersion (KernelVersion, KERNEL_VERSION (8, 7, 2), KERNEL_VERSION_TIGER_MAX);
   IsLeopard     = OcMatchDarwinVersion (KernelVersion, KERNEL_VERSION_LEOPARD_MIN, KERNEL_VERSION_LEOPARD_MAX);
   IsSnowLeopard = OcMatchDarwinVersion (KernelVersion, KERNEL_VERSION_SNOW_LEOPARD_MIN, KERNEL_VERSION_SNOW_LEOPARD_MAX);
 
@@ -1611,7 +1641,7 @@ PatchProvideCurrentCpuInfo (
   // 10.4 does not support pulling CPUID leaf 4 that may contain cache info instead of leaf 2.
   // On processors that support leaf 4, use that instead.
   //
-  IsTigerCacheUnsupported = IsTiger && IsLeaf4CacheSupported;
+  IsTigerCacheUnsupported = (IsTigerOld || IsTigerNew) && IsLeaf4CacheSupported;
 
   Status  = EFI_SUCCESS;
   Status |= PatchProvideCurrentCpuInfoMSR35h (Patcher, CpuInfo, KernelVersion);
@@ -1619,13 +1649,20 @@ PatchProvideCurrentCpuInfo (
   //
   // Pull required symbols.
   //
-  Status |= PatcherGetSymbolAddressValue (Patcher, "_tsc_init", (UINT8 **)&TscInitFunc, &TscInitFuncSymAddr);
+  // _tsc_init only exists on XNU 8.7.2 and newer.
+  //
+  if (!IsTigerOld) {
+    Status |= PatcherGetSymbolAddressValue (Patcher, "_tsc_init", (UINT8 **)&TscInitFunc, &TscInitFuncSymAddr);
+  } else {
+    Status |= PatcherGetSymbolAddressValue (Patcher, "_power_management_init", (UINT8 **)&TscInitFunc, &TscInitFuncSymAddr);
+  }
+
   Status |= PatcherGetSymbolAddress (Patcher, "_tmrCvt", (UINT8 **)&TmrCvtFunc);
 
   //
-  // _busFreq only exists on 10.5 and higher.
+  // _busFreq only exists on older versions of 10.4 (XNU 8.7.1 or older), or 10.5 and higher.
   //
-  if (!IsTiger) {
+  if (!IsTigerNew) {
     Status |= PatcherGetSymbolValue (Patcher, "_busFreq", &BusFreqSymAddr);
   }
 
@@ -1684,7 +1721,7 @@ PatchProvideCurrentCpuInfo (
   //
   TscLocation = TscInitFunc;
 
-  if (OcMatchDarwinVersion (KernelVersion, KERNEL_VERSION_LEOPARD_MIN, 0)) {
+  if (!IsTigerNew) {
     TscLocation = PatchMovVar (TscLocation, Patcher->Is32Bit, &TscInitFuncSymAddr, BusFreqSymAddr, busFreqValue);
   }
 
