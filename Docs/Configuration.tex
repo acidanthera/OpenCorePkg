@@ -1518,6 +1518,22 @@ To view their current state, use the \texttt{pmset -g} command in Terminal.
   \emph{Note}: Most types of firmware, apart from Apple and VMware, need this quirk.
 
 \item
+  \texttt{ClearTaskSwitchBit}\\
+  \textbf{Type}: \texttt{plist\ boolean}\\
+  \textbf{Failsafe}: \texttt{false}\\
+  \textbf{Description}: Clear task switch bit during UEFI runtime services calls.
+
+  This quirk resolves FPU-related crashes in UEFI runtime services when using either the
+  32-bit kernel on a 64-bit UEFI implementation, or the 64-bit kernel on a 32-bit UEFI implementation
+  by removing the task switch (\texttt{TS}) bit from \texttt{CR0} register during their execution.
+  These crashes occur if there is any FPU/SSE instruction usage in UEFI runtime services as XNU
+  is unable to handle exceptions from mixed-mode code. This quirk requires \texttt{OC\_FIRMWARE\_RUNTIME}
+  protocol implemented in \texttt{OpenRuntime.efi}.
+
+  \emph{Note}: This quirk should only be required when running older macOS versions when the
+  32-bit kernel is used on a 64-bit UEFI implementation, such as Microsoft Hyper-V.
+
+\item
   \texttt{DevirtualiseMmio}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
