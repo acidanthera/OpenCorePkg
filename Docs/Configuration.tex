@@ -2032,7 +2032,7 @@ Some known properties include:
 \subsection{Introduction}\label{kernelintro}
 
 This section allows the application of different kinds of kernelspace modifications on
-Apple Kernel (\href{https://opensource.apple.com/source/xnu}{XNU}). The modifications
+Apple Kernel (\href{https://github.com/apple-oss-distributions/xnu}{XNU}). The modifications
 currently provide driver (kext) injection, kernel and driver patching, and driver
 blocking.
 
@@ -5099,7 +5099,7 @@ improvements:
   \texttt{7C436110-AB2A-4BBB-A880-FE41995C9F82:csr-active-config}
   \break
   32-bit System Integrity Protection bitmask. Declared in XNU source code in
-  \href{https://opensource.apple.com/source/xnu/xnu-4570.71.2/bsd/sys/csr.h.auto.html}{csr.h}.
+  \href{https://github.com/apple-oss-distributions/xnu/blob/main/bsd/sys/csr.h}{csr.h}.
 \item
   \texttt{4D1EDE05-38C7-4A6A-9CC6-4BCCA8B38C14:ExtendedFirmwareFeatures}
   \break
@@ -5141,7 +5141,7 @@ improvements:
   \break
   ASCII string defining FireWire security mode. Legacy, can be found in IOFireWireFamily
   source code in
-  \href{https://opensource.apple.com/source/IOFireWireFamily/IOFireWireFamily-473/IOFireWireFamily.kmodproj/IOFireWireController.cpp.auto.html}{IOFireWireController.cpp}.
+  \href{https://github.com/apple-oss-distributions/IOFireWireFamily/blob/main/IOFireWireFamily.kmodproj/IOFireWireController.cpp}{IOFireWireController.cpp}.
   It is recommended not to set this variable, which may speedup system startup. Setting to
   \texttt{full} is equivalent to not setting the variable and \texttt{none} disables
   FireWire security.
