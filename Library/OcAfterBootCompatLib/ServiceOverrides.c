@@ -1311,11 +1311,13 @@ OcStartImage (
     // Disable them when this is no longer Apple.
     //
     if (BootCompat->ServiceState.AppleBootNestedCount > 0) {
-      Config.WriteProtection  = BootCompat->Settings.DisableVariableWrite;
-      Config.WriteUnprotector = BootCompat->Settings.EnableWriteUnprotector;
+      Config.ClearTaskSwitchBit = BootCompat->Settings.ClearTaskSwitchBit;
+      Config.WriteProtection    = BootCompat->Settings.DisableVariableWrite;
+      Config.WriteUnprotector   = BootCompat->Settings.EnableWriteUnprotector;
     } else {
-      Config.WriteProtection  = FALSE;
-      Config.WriteUnprotector = FALSE;
+      Config.ClearTaskSwitchBit = FALSE;
+      Config.WriteProtection    = FALSE;
+      Config.WriteUnprotector   = FALSE;
     }
 
     BootCompat->ServiceState.FwRuntime->SetMain (

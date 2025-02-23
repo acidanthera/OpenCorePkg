@@ -59,6 +59,13 @@ typedef struct OC_FWRT_CONFIG_ {
   /// Secure boot variable protection.
   ///
   BOOLEAN    ProtectSecureBoot;
+  ///
+  /// Make UEFI runtime services drop CR0 TS bit on calls to prevent a 0x7 exception
+  /// from being triggered due to SSE instruction usage on some firmware configurations.
+  /// Currently this affects Hyper-V generation 2 VMs when invoking EFI runtime services
+  /// from the 32-bit macOS kernel.
+  ///
+  BOOLEAN    ClearTaskSwitchBit;
 } OC_FWRT_CONFIG;
 
 /**
