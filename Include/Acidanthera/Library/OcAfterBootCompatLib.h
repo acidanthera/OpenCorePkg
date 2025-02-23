@@ -149,6 +149,11 @@ typedef struct OC_ABC_SETTINGS_ {
   ///
   BOOLEAN    EnableWriteUnprotector;
   ///
+  /// Clear task switch bit in UEFI runtime services. Fixes crashes due to SSE instruction
+  /// usage on some firmware configurations (i.e. Hyper-V Gen2 with 32-bit macOS kernel).
+  ///
+  BOOLEAN    ClearTaskSwitchBit;
+  ///
   /// Signal OSInfo protocol that every loaded non-macOS OS is macOS.
   /// Works around disabled IGPU in Windows and Linux on Apple laptops.
   ///
