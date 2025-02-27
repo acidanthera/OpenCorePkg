@@ -460,7 +460,7 @@
   #
   # Network Pcds
   #
-  !include NetworkPkg/NetworkPcds.dsc.inc
+  !include NetworkPkg/NetworkFixedPcds.dsc.inc
 
 [BuildOptions]
   # While there are no PCDs as of now, there at least are some custom macros.
