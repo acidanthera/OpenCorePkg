@@ -10,7 +10,8 @@ OpenCore Changelog
 - Added `ClearTaskSwitchBit` Booter quirk to fix crashes when using 32-bit versions of macOS on Hyper-V Gen2 VMs
 - Fixed `ProvideCurrentCpuInfo` and CPUID patching on older versions of macOS 10.4
 - Removed ACPI0007 objects from `SSDT-HV-DEV.dsl`
-- Removed `SSDT-HV-DEV-WS2022.dsl` as it is no longer required 
+- Removed `SSDT-HV-DEV-WS2022.dsl` as it is no longer required
+- Added PCI class names to PCI device info dumping in `SysReport`
 
 #### v1.0.3
 - Fixed support for `AMD_CPU_EXT_FAMILY_1AH`, thx @Shaneee
