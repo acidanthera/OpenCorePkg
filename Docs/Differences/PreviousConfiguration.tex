@@ -106,7 +106,7 @@
 
        \rmfamily
 
-       Copyright \textcopyright 2018-2024 vit9696
+       Copyright \textcopyright 2018-2025 vit9696
 
    \end{center}
 \end{titlepage}
@@ -1518,6 +1518,22 @@ To view their current state, use the \texttt{pmset -g} command in Terminal.
   \emph{Note}: Most types of firmware, apart from Apple and VMware, need this quirk.
 
 \item
+  \texttt{ClearTaskSwitchBit}\\
+  \textbf{Type}: \texttt{plist\ boolean}\\
+  \textbf{Failsafe}: \texttt{false}\\
+  \textbf{Description}: Clear task switch bit during UEFI runtime services calls.
+
+  This quirk resolves FPU-related crashes in UEFI runtime services when using either the
+  32-bit kernel on a 64-bit UEFI implementation, or the 64-bit kernel on a 32-bit UEFI implementation
+  by removing the task switch (\texttt{TS}) bit from \texttt{CR0} register during their execution.
+  These crashes occur if there is any FPU/SSE instruction usage in UEFI runtime services as XNU
+  is unable to handle exceptions from mixed-mode code. This quirk requires \texttt{OC\_FIRMWARE\_RUNTIME}
+  protocol implemented in \texttt{OpenRuntime.efi}.
+
+  \emph{Note}: This quirk should only be required when running older macOS versions when the
+  32-bit kernel is used on a 64-bit UEFI implementation, such as Microsoft Hyper-V.
+
+\item
   \texttt{DevirtualiseMmio}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
@@ -2016,7 +2032,7 @@ Some known properties include:
 \subsection{Introduction}\label{kernelintro}
 
 This section allows the application of different kinds of kernelspace modifications on
-Apple Kernel (\href{https://opensource.apple.com/source/xnu}{XNU}). The modifications
+Apple Kernel (\href{https://github.com/apple-oss-distributions/xnu}{XNU}). The modifications
 currently provide driver (kext) injection, kernel and driver patching, and driver
 blocking.
 
@@ -5083,7 +5099,7 @@ improvements:
   \texttt{7C436110-AB2A-4BBB-A880-FE41995C9F82:csr-active-config}
   \break
   32-bit System Integrity Protection bitmask. Declared in XNU source code in
-  \href{https://opensource.apple.com/source/xnu/xnu-4570.71.2/bsd/sys/csr.h.auto.html}{csr.h}.
+  \href{https://github.com/apple-oss-distributions/xnu/blob/main/bsd/sys/csr.h}{csr.h}.
 \item
   \texttt{4D1EDE05-38C7-4A6A-9CC6-4BCCA8B38C14:ExtendedFirmwareFeatures}
   \break
@@ -5125,7 +5141,7 @@ improvements:
   \break
   ASCII string defining FireWire security mode. Legacy, can be found in IOFireWireFamily
   source code in
-  \href{https://opensource.apple.com/source/IOFireWireFamily/IOFireWireFamily-473/IOFireWireFamily.kmodproj/IOFireWireController.cpp.auto.html}{IOFireWireController.cpp}.
+  \href{https://github.com/apple-oss-distributions/IOFireWireFamily/blob/main/IOFireWireFamily.kmodproj/IOFireWireController.cpp}{IOFireWireController.cpp}.
   It is recommended not to set this variable, which may speedup system startup. Setting to
   \texttt{full} is equivalent to not setting the variable and \texttt{none} disables
   FireWire security.
@@ -7207,7 +7223,7 @@ which use OpenCore argument parsing, and can be particularly convenient when mul
   \end{itemize}
 
   \emph{Note 1}: This option is written to NVRAM and will remain present even if the option is removed from the driver
-  \texttt{Arguments}, unless NVRAM is cleared or an alternative value is written or the value deleted, using this option.
+  \texttt{Arguments}, unless an alternative value is written or the value deleted, using this option.
   
   \emph{Note 2}: This setting will normally cause a static IP to be assigned during pre-boot, even in vendor-provided
   network stacks. However, due to a quirk of the design of PXE and HTTP boot, any such static assignment will then be
@@ -7219,7 +7235,7 @@ which use OpenCore argument parsing, and can be particularly convenient when mul
   (see \texttt{UEFI} \texttt{Unload} option) and the OpenCore version used instead.
 
   \emph{Note 3}: If \texttt{Ip4Dxe} is loaded before OpenCore then any setting here will only take effect after one
-  reboot (during which network boot is not be attempted). If \texttt{Ip4Dxe} is loaded after \texttt{OpenNetworkBoot}
+  reboot (during which network boot is not attempted). If \texttt{Ip4Dxe} is loaded after \texttt{OpenNetworkBoot}
   the setting will take effect immediately.
   \medskip
 
@@ -8801,7 +8817,8 @@ OpenCore is installed, in order for the \texttt{Launchd.command} script to work 
   (e.g. \texttt{1920x1080}) formatted string to request custom resolution
   from GOP if available.
   \item Set to \texttt{Max} to attempt using the largest
-  available screen resolution.
+  available screen resolution. When set to \texttt{Max} all available resolutions
+  will be listed in lines starting \texttt{OCC: Mode} in the debug log.
   \end{itemize}
 
   On HiDPI screens \texttt{APPLE\_VENDOR\_VARIABLE\_GUID} \texttt{UIScale}
