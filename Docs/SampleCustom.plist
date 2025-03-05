@@ -2353,6 +2353,18 @@
 				<key>LoadEarly</key>
 				<false/>
 				<key>Path</key>
+				<string>OpenNetworkBoot.efi</string>
+			</dict>
+			<dict>
+				<key>Arguments</key>
+				<string></string>
+				<key>Comment</key>
+				<string></string>
+				<key>Enabled</key>
+				<false/>
+				<key>LoadEarly</key>
+				<false/>
+				<key>Path</key>
 				<string>ResetNvramEntry.efi</string>
 			</dict>
 			<dict>
