@@ -225,6 +225,13 @@ package() {
       "Udp6Dxe.efi"
       "UefiPxeBcDxe.efi"
       "UsbMouseDxe.efi"
+      "Virtio10.efi"
+      "VirtioBlkDxe.efi"
+      "VirtioGpuDxe.efi"
+      "VirtioNetDxe.efi"
+      "VirtioPciDeviceDxe.efi"
+      "VirtioScsiDxe.efi"
+      "VirtioSerialDxe.efi"
       "XhciDxe.efi"
       )
     for efiDriver in "${efiDrivers[@]}"; do
