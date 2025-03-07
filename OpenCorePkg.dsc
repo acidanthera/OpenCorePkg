@@ -64,6 +64,7 @@
   DevicePathLib|MdePkg/Library/UefiDevicePathLib/UefiDevicePathLib.inf
   DxeServicesTableLib|MdePkg/Library/DxeServicesTableLib/DxeServicesTableLib.inf
   FileHandleLib|MdePkg/Library/UefiFileHandleLib/UefiFileHandleLib.inf
+  VirtioLib|OvmfPkg/Library/VirtioLib/VirtioLib.inf
   FrameBufferBltLib|MdeModulePkg/Library/FrameBufferBltLib/FrameBufferBltLib.inf
   HandleParsingLib|ShellPkg/Library/UefiHandleParsingLib/UefiHandleParsingLib.inf
   OrderedCollectionLib|MdePkg/Library/BaseOrderedCollectionRedBlackTreeLib/BaseOrderedCollectionRedBlackTreeLib.inf
@@ -145,6 +146,8 @@
   OcVariableRuntimeLib|OpenCorePkg/Library/OcVariableRuntimeLib/OcVariableRuntimeLib.inf
   PcdLib|MdePkg/Library/BasePcdLibNull/BasePcdLibNull.inf
   PciCf8Lib|MdePkg/Library/BasePciCf8Lib/BasePciCf8Lib.inf
+  PciCapLib|OvmfPkg/Library/BasePciCapLib/BasePciCapLib.inf
+  PciCapPciIoLib|OvmfPkg/Library/UefiPciCapPciIoLib/UefiPciCapPciIoLib.inf
   PciLib|MdePkg/Library/BasePciLibCf8/BasePciLibCf8.inf
   PeCoffLib2|MdePkg/Library/BasePeCoffLib2/BasePeCoffLib2.inf
   PerformanceLib|MdePkg/Library/BasePerformanceLibNull/BasePerformanceLibNull.inf
@@ -397,6 +400,17 @@
   # Ramdisk support (driver required for network boot native .iso/.img support)
   #
   MdeModulePkg/Universal/Disk/RamDiskDxe/RamDiskDxe.inf
+
+  #
+  # QEMU Virtio devices support
+  #
+  OvmfPkg/VirtioPciDeviceDxe/VirtioPciDeviceDxe.inf
+  OvmfPkg/Virtio10Dxe/Virtio10.inf
+  OvmfPkg/VirtioBlkDxe/VirtioBlk.inf
+  OvmfPkg/VirtioScsiDxe/VirtioScsi.inf
+  OvmfPkg/VirtioSerialDxe/VirtioSerial.inf
+  OvmfPkg/VirtioGpuDxe/VirtioGpu.inf
+  OvmfPkg/VirtioNetDxe/VirtioNet.inf
 
 [LibraryClasses]
   NULL|MdePkg/Library/IntrinsicLib/IntrinsicLib.inf
