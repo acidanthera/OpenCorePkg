@@ -1531,7 +1531,6 @@ OcPciInfoDump (
       &FileBuffer,
       &FileBufferSize,
       "\n    Vendor ID: 0x%04X, Device ID: 0x%04X, RevisionID: 0x%02X, ClassCode: 0x%02X%02X%02X",
-      Index + 1,
       PciDevice.Hdr.VendorId,
       PciDevice.Hdr.DeviceId,
       PciDevice.Hdr.RevisionID,

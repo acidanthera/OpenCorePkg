@@ -1,5 +1,8 @@
 OpenCore Changelog
 ==================
+#### v1.0.5
+- Fixed incorrect print in PCI device info dumping in `SysReport`
+
 #### v1.0.4
 - Added support for booting from static IPv4 address in OpenCore-specific HttpBootDxe
 - Added static IPv4 configuration options to OpenNetworkBoot
