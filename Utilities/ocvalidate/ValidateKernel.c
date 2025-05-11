@@ -231,7 +231,7 @@ CheckKernelAdd (
         "Kernel->Add[%u]->ExecutablePath (length %u) is too long (should not exceed %u)!\n",
         Index,
         AsciiStrLen (ExecutablePath),
-        OC_STORAGE_SAFE_PATH_MAX - ExecutableFixedSize
+        ExecutableFixedSize > OC_STORAGE_SAFE_PATH_MAX ? 0 : OC_STORAGE_SAFE_PATH_MAX - ExecutableFixedSize
         ));
       ++ErrorCount;
     }
@@ -247,7 +247,7 @@ CheckKernelAdd (
         "Kernel->Add[%u]->PlistPath (length %u) is too long (should not exceed %u)!\n",
         Index,
         AsciiStrLen (PlistPath),
-        OC_STORAGE_SAFE_PATH_MAX - PlistFixedSize
+        PlistFixedSize > OC_STORAGE_SAFE_PATH_MAX ? 0 : OC_STORAGE_SAFE_PATH_MAX - PlistFixedSize
         ));
       ++ErrorCount;
     }
