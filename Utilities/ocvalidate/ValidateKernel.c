@@ -224,7 +224,7 @@ CheckKernelAdd (
       //
       // There is one missing '\\' after the concatenation of BundlePath and ExecutablePath. Append one.
       //
-      ExecutableFixedSize   = AsciiStrLen (BundlePath) + 1 + AsciiStrLen(ExecutablePath);
+      ExecutableFixedSize   = AsciiStrLen (BundlePath) + 1 + AsciiStrLen (ExecutablePath);
       ExecutablePathSumSize = L_STR_LEN (OPEN_CORE_KEXT_PATH) + ExecutableFixedSize;
       if (ExecutablePathSumSize > OC_STORAGE_SAFE_PATH_MAX) {
         DEBUG ((
@@ -240,7 +240,7 @@ CheckKernelAdd (
       //
       // There is one missing '\\' after the concatenation of BundlePath and PlistPath. Append one.
       //
-      PlistFixedSize   = AsciiStrLen(BundlePath) + 1 + AsciiStrLen(PlistPath);
+      PlistFixedSize   = AsciiStrLen (BundlePath) + 1 + AsciiStrLen (PlistPath);
       PlistPathSumSize = L_STR_LEN (OPEN_CORE_KEXT_PATH) + PlistFixedSize;
       if (PlistPathSumSize > OC_STORAGE_SAFE_PATH_MAX) {
         DEBUG ((
