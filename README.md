@@ -59,3 +59,8 @@ details.
 #### Discussion
 
 Please refer to the following [list of OpenCore discussion forums](/Docs/FORUMS.md).
+
+#### Building
+
+Instructions for setting up the build environment and using the helper scripts can
+be found in [BUILDING.md](Docs/BUILDING.md).
