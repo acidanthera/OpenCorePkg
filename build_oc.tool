@@ -7,8 +7,7 @@ abort() {
 
 unamer() {
   NAME="$(uname)"
-  if [ "$(echo "${NAME}" | grep MINGW)" != "" ] || \
-     [ "$(echo "${NAME}" | grep MSYS)" != "" ]; then
+  if echo "${NAME}" | grep -qE 'MINGW|MSYS'; then
     echo "Windows"
   else
     echo "${NAME}"
