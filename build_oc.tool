@@ -5,6 +5,15 @@ abort() {
   exit 1
 }
 
+unamer() {
+  NAME="$(uname)"
+  if echo "${NAME}" | grep -qE 'MINGW|MSYS'; then
+    echo "Windows"
+  else
+    echo "${NAME}"
+  fi
+}
+
 buildutil() {
   UTILS=(
     "AppleEfiSignTool"
