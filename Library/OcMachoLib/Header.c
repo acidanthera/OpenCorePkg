@@ -263,7 +263,6 @@ InternalInitialiseSymtabs (
   BOOLEAN  Result;
 
   MACH_NLIST_ANY        *SymbolTable;
-  MACH_NLIST_ANY        *IndirectSymtab;
   MACH_RELOCATION_INFO  *LocalRelocations;
   MACH_RELOCATION_INFO  *ExternRelocations;
 
@@ -310,7 +309,6 @@ InternalInitialiseSymtabs (
   }
 
   SymbolTable       = (MACH_NLIST_ANY *)Tmp;
-  IndirectSymtab    = NULL;
   LocalRelocations  = NULL;
   ExternRelocations = NULL;
 
@@ -340,29 +338,6 @@ InternalInitialiseSymtabs (
                );
     if (Result || (OffsetTop > Symtab->NumSymbols)) {
       return FALSE;
-    }
-
-    //
-    // We additionally check for offset validity here, as KC kexts have some garbage
-    // in their DySymtab, but it is "valid" for symbols.
-    //
-    if ((DySymtab->NumIndirectSymbols > 0) && (DySymtab->IndirectSymbolsOffset != 0)) {
-      Result = BaseOverflowMulAddU32 (
-                 DySymtab->NumIndirectSymbols,
-                 Context->Is32Bit ? sizeof (MACH_NLIST) : sizeof (MACH_NLIST_64),
-                 DySymtab->IndirectSymbolsOffset,
-                 &OffsetTop
-                 );
-      if (Result || (OffsetTop > FileSize)) {
-        return FALSE;
-      }
-
-      Tmp = (VOID *)(FileDataAddress + DySymtab->IndirectSymbolsOffset);
-      if (!(Context->Is32Bit ? BASE_TYPE_ALIGNED (MACH_NLIST, Tmp) : BASE_TYPE_ALIGNED (MACH_NLIST_64, Tmp))) {
-        return FALSE;
-      }
-
-      IndirectSymtab = (MACH_NLIST_ANY *)Tmp;
     }
 
     if ((DySymtab->NumOfLocalRelocations > 0) && (DySymtab->LocalRelocationsOffset != 0)) {
@@ -411,10 +386,9 @@ InternalInitialiseSymtabs (
   Context->StringTable = StringTable;
   Context->DySymtab    = DySymtab;
 
-  Context->LocalRelocations    = LocalRelocations;
-  Context->ExternRelocations   = ExternRelocations;
-  Context->SymbolTable         = SymbolTable;
-  Context->IndirectSymbolTable = IndirectSymtab;
+  Context->LocalRelocations  = LocalRelocations;
+  Context->ExternRelocations = ExternRelocations;
+  Context->SymbolTable       = SymbolTable;
 
   return TRUE;
 }
@@ -553,19 +527,6 @@ MachoGetSymbolTable (
            (CONST MACH_NLIST_64 **)UndefinedSymbols,
            NumUndefinedSymbols
            );
-}
-
-UINT32
-MachoGetIndirectSymbolTable (
-  IN OUT OC_MACHO_CONTEXT   *Context,
-  OUT CONST MACH_NLIST_ANY  **SymbolTable
-  )
-{
-  ASSERT (Context != NULL);
-
-  return Context->Is32Bit ?
-         MachoGetIndirectSymbolTable32 (Context, (CONST MACH_NLIST **)SymbolTable) :
-         MachoGetIndirectSymbolTable64 (Context, (CONST MACH_NLIST_64 **)SymbolTable);
 }
 
 UINT64
