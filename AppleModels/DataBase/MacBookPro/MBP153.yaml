@@ -119,5 +119,5 @@ AppleBoardCode:
 AppleModelYear:
   - 2019
 MinimumOSVersion: "10.14.5"
-MaximumOSVersion: null
+MaximumOSVersion: "15.5"
 AppleModelId: "J780"

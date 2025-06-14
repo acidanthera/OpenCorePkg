@@ -97,5 +97,5 @@ AppleBoardCode:
 AppleModelYear:
   - 2020
 MinimumOSVersion: "10.15.3"
-MaximumOSVersion: null
+MaximumOSVersion: "15.5"
 AppleModelId: "J230K"
