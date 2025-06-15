@@ -1,7 +1,7 @@
 BIOSVendor: "Apple Inc."
-BIOSVersion: "2069.0.0.0.0"
-BIOSLegacyVersion: "MBP163.88Z.F000.B00.2408072147"
-BIOSReleaseDate: "08/07/2024"
+BIOSVersion: "2087.0.0.0.0"
+BIOSLegacyVersion: "MBP163.88Z.F000.B00.2505301847"
+BIOSReleaseDate: "05/30/2025"
 SystemManufacturer: "Apple Inc."
 SystemProductName: "MacBookPro16,3"
 SystemVersion: "1.0"
@@ -45,17 +45,17 @@ SmcPlatform:
   - 0x00
 OEMStrings: |-
   Apple ROM Version
-    BIOS ID:      MBP163.88Z.F000.B00.2408072147
+    BIOS ID:      MBP163.88Z.F000.B00.2505301847
     Model:        MBP163
-    EFI Version:  2069.0.0.0.0
-    Built by:     root@bd7bc
-    Date:         Wed Aug  7 21:47:45 2024
-    Revision:     2069 (B&I)
+    EFI Version:  2087.0.0.0.0
+    Built by:     root@8shbz
+    Date:         Fri May 30 18:47:03 2025
+    Revision:     2087 (B&I)
     ROM Version:  F000_B00
     Build Type:   Official Build, RELEASE
-    Compiler:     clang-1600.0.25.3
-    UUID:         AA2DF82E-2D86-3589-96A4-5000C56360B6
-    UUID:         27B3C923-7924-35AE-8CF2-63A60225DEE0
+    Compiler:     clang-1700.3.9.4
+    UUID:         61CEA523-D2E3-3EA4-8CF4-104B91C7AD2B
+    UUID:         8D525937-D442-3729-9261-17A4E08FB10D
 Specifications:
   CPUCodename:
     - "Coffee Lake"
@@ -90,5 +90,5 @@ AppleBoardCode:
 AppleModelYear:
   - 2020
 MinimumOSVersion: "10.15.4"
-MaximumOSVersion: null
+MaximumOSVersion: "15.5"
 AppleModelId: "J223"

@@ -32,6 +32,12 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 #define DATA_SEG_PROT  (MACH_SEGMENT_VM_PROT_READ | MACH_SEGMENT_VM_PROT_WRITE)
 
 //
+// NOTE: We expect indirect symbols to only be used by KPIs. As KPIs will not be
+//       injected by OC, don't solve indirect symbols.
+//
+// #define SOLVE_INDR
+
+//
 // Symbols
 //
 
@@ -336,27 +342,32 @@ InternalSolveSymbolNonWeak (
   SymbolType = Context->Is32Bit ? Symbol->Symbol32.Type : Symbol->Symbol64.Type;
 
   if ((SymbolType & MACH_N_TYPE_TYPE) != MACH_N_TYPE_UNDF) {
+ #ifdef SOLVE_INDR
     if ((SymbolType & MACH_N_TYPE_TYPE) != MACH_N_TYPE_INDR) {
+ #endif
+    //
+    // KXLD_WEAK_TEST_SYMBOL might have been resolved by the resolving code
+    // at the end of InternalSolveSymbol.
+    //
+    Result = AsciiStrCmp (
+               MachoGetSymbolName (&Kext->Context.MachContext, Symbol),
+               KXLD_WEAK_TEST_SYMBOL
+               );
+    if (Result == 0) {
       //
-      // KXLD_WEAK_TEST_SYMBOL might have been resolved by the resolving code
-      // at the end of InternalSolveSymbol.
+      // KXLD_WEAK_TEST_SYMBOL has been solved successfully already.
       //
-      Result = AsciiStrCmp (
-                 MachoGetSymbolName (&Kext->Context.MachContext, Symbol),
-                 KXLD_WEAK_TEST_SYMBOL
-                 );
-      if (Result == 0) {
-        //
-        // KXLD_WEAK_TEST_SYMBOL has been solved successfully already.
-        //
-        return TRUE;
-      }
-
-      //
-      // Any other symbols must be undefined or indirect.
-      //
-      return FALSE;
+      return TRUE;
     }
+
+    //
+    // Any other symbols must be undefined or indirect.
+    //
+    return FALSE;
+ #ifdef SOLVE_INDR
+  }
+
+ #endif
   } else if ((Context->Is32Bit ? Symbol->Symbol32.Value : Symbol->Symbol64.Value) != 0) {
     //
     // Common symbols are not supported.
@@ -1426,7 +1437,7 @@ InternalProcessSymbolPointers (
   MachSize = MachoGetFileSize (MachoContext);
   Result   = BaseOverflowMulAddU32 (
                DySymtab->NumIndirectSymbols,
-               MachoContext->Is32Bit ? sizeof (UINT32) : sizeof (UINT64),
+               sizeof (UINT32),
                DySymtab->IndirectSymbolsOffset,
                &OffsetTop
                );
@@ -1532,8 +1543,6 @@ InternalPrelinkKext (
   CONST MACH_NLIST_ANY       *SymbolTable;
   CONST CHAR8                *StringTable;
   UINT32                     NumSymbols;
-  CONST MACH_NLIST_ANY       *IndirectSymtab;
-  UINT32                     NumIndirectSymbols;
   CONST MACH_NLIST_ANY       *LocalSymtab;
   UINT32                     NumLocalSymbols;
   CONST MACH_NLIST_ANY       *ExternalSymtab;
@@ -1685,38 +1694,39 @@ InternalPrelinkKext (
 
   SymbolTableOffset = 0;
   RelocationsOffset = (SymbolTableOffset + SymbolTableSize);
+  WeakTestValue     = 0;
 
+ #ifdef SOLVE_INDR
   //
   // Solve indirect symbols.
   // For 32-bit objects, we will solve those at the same time as undefined symbols later.
   //
   if (!IsObject32) {
-    WeakTestValue      = 0;
-    NumIndirectSymbols = MachoGetIndirectSymbolTable (
-                           MachoContext,
-                           &IndirectSymtab
-                           );
-    for (Index = 0; Index < NumIndirectSymbols; ++Index) {
-      Symbol     = (MACH_NLIST_ANY *)&IndirectSymtab[Index];
-      SymbolName = MachoGetIndirectSymbolName (MachoContext, Symbol);
-      if (SymbolName == NULL) {
-        return EFI_LOAD_ERROR;
-      }
+    for (Index = 0; Index < NumSymbols; ++Index) {
+      Symbol = (MACH_NLIST_ANY *)&(&SymbolTable->Symbol64)[Index];
+      if ((Symbol->Symbol64.Type & MACH_N_TYPE_TYPE) == MACH_N_TYPE_INDR) {
+        SymbolName = MachoGetIndirectSymbolName (MachoContext, Symbol);
+        if (SymbolName == NULL) {
+          return EFI_LOAD_ERROR;
+        }
 
-      Result = InternalSolveSymbol (
-                 Context,
-                 Kext,
-                 SymbolName,
-                 Symbol,
-                 &WeakTestValue,
-                 UndefinedSymtab,
-                 NumUndefinedSymbols
-                 );
-      if (!Result) {
-        return EFI_LOAD_ERROR;
+        Result = InternalSolveSymbol (
+                   Context,
+                   Kext,
+                   SymbolName,
+                   Symbol,
+                   &WeakTestValue,
+                   UndefinedSymtab,
+                   NumUndefinedSymbols
+                   );
+        if (!Result) {
+          return EFI_LOAD_ERROR;
+        }
       }
     }
   }
+
+ #endif
 
   //
   // Solve undefined symbols. If on 32-bit, we may not have a DYSYMTAB so fallback to checking all symbols.
@@ -1732,7 +1742,14 @@ InternalPrelinkKext (
       Symbol = (MACH_NLIST_ANY *)(!IsObject32 ? &(&UndefinedSymtab->Symbol32)[Index] : &(&SymbolTable->Symbol32)[Index]);
       if (  IsObject32
          && ((Symbol->Symbol32.Type & MACH_N_TYPE_TYPE) != MACH_N_TYPE_UNDF)
-         && ((Symbol->Symbol32.Type & MACH_N_TYPE_TYPE) != MACH_N_TYPE_INDR))
+ #ifdef SOLVE_INDR
+            //
+            // FIXME: MACH_N_TYPE_INDR needs SymbolName to be retrieved via
+            //        MachoGetIndirectSymbolName().
+            //
+         && ((Symbol->Symbol32.Type & MACH_N_TYPE_TYPE) != MACH_N_TYPE_INDR)
+ #endif
+            )
       {
         continue;
       }
