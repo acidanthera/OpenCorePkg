@@ -68,3 +68,13 @@ Please refer to the following [list of OpenCore discussion forums](/Docs/FORUMS.
 
 Instructions for setting up the build environment and using the helper scripts can
 be found in [BUILDING.md](Docs/BUILDING.md).
+
+#### Contributing
+
+Guidelines for building from source, running tests and submitting pull requests
+are available in [CONTRIBUTING.md](CONTRIBUTING.md).
+
+#### Code of Conduct
+
+This project adheres to the [Contributor Covenant](CODE_OF_CONDUCT.md). Please
+read it before participating.
