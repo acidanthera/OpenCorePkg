@@ -56,6 +56,10 @@ details.
 - [usr-sse2](https://github.com/usr-sse2)
 - [vit9696](https://github.com/vit9696)
 
+#### Documentation
+
+See the [documentation index](Docs/README.md) for a list of manuals and example files.
+
 #### Discussion
 
 Please refer to the following [list of OpenCore discussion forums](/Docs/FORUMS.md).
