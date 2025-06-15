@@ -5,6 +5,13 @@ abort() {
   exit 1
 }
 
+##
+# unamer
+#
+# Wrapper around `uname` that reports `Windows` when using MINGW or MSYS
+# environments. This helper allows build_oc.tool to work consistently on
+# Windows hosts while continuing to return the regular `uname` result for
+# other platforms.
 unamer() {
   NAME="$(uname)"
   if echo "${NAME}" | grep -qE 'MINGW|MSYS'; then
