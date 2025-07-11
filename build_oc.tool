@@ -5,22 +5,6 @@ abort() {
   exit 1
 }
 
-##
-# unamer
-#
-# Wrapper around `uname` that reports `Windows` when using MINGW or MSYS
-# environments. This helper allows build_oc.tool to work consistently on
-# Windows hosts while continuing to return the regular `uname` result for
-# other platforms.
-unamer() {
-  NAME="$(uname)"
-  if echo "${NAME}" | grep -qE 'MINGW|MSYS'; then
-    echo "Windows"
-  else
-    echo "${NAME}"
-  fi
-}
-
 buildutil() {
   UTILS=(
     "AppleEfiSignTool"
@@ -418,7 +402,7 @@ export SELFPKG
 export NO_ARCHIVES
 export DISCARD_SUBMODULES
 
-src=$(curl -LfsS https://raw.githubusercontent.com/acidanthera/ocbuild/58c7fa9038f671814effdae3d01645a7dccb1819/efibuild.sh) && eval "$src" || exit 1
+src=$(curl -LfsS https://raw.githubusercontent.com/acidanthera/ocbuild/master/efibuild.sh) && eval "$src" || exit 1
 
 cd Utilities/ocvalidate || exit 1
 ocv_tool=""
