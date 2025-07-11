@@ -198,5 +198,5 @@ else
   export SELFPKG
   export NO_ARCHIVES
 
-  src=$(curl -LfsS https://raw.githubusercontent.com/acidanthera/ocbuild/58c7fa9038f671814effdae3d01645a7dccb1819/efibuild.sh) && eval "$src" || exit 1
+  src=$(curl -LfsS https://raw.githubusercontent.com/acidanthera/ocbuild/master/efibuild.sh) && eval "$src" || exit 1
 fi
