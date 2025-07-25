@@ -4,18 +4,27 @@
 **/
 
 #include <UserBootServices.h>
+#include <UserEvent.h>
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
 
 EFI_BOOT_SERVICES  mBootServices = {
-  .RaiseTPL                  = DummyRaiseTPL,
-  .RestoreTPL                = DummyRestoreTPL,
   .LocateProtocol            = DummyLocateProtocol,
   .AllocatePages             = DummyAllocatePages,
   .InstallConfigurationTable = DummyInstallConfigurationTable,
-  .CalculateCrc32            = DummyCalculateCrc32
+  .CalculateCrc32            = DummyCalculateCrc32,
+
+  .CreateEventEx = UserCreateEventEx,
+  .CreateEvent   = UserCreateEvent,
+  .CloseEvent    = UserCloseEvent,
+  .CheckEvent    = UserCheckEvent,
+  .WaitForEvent  = UserWaitForEvent,
+  .SignalEvent   = UserSignalEvent,
+  .SetTimer      = UserSetTimer,
+  .RaiseTPL      = UserRaiseTPL,
+  .RestoreTPL    = UserRestoreTPL
 };
 
 EFI_SIMPLE_TEXT_OUTPUT_PROTOCOL  mConOut = {
