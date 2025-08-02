@@ -409,7 +409,6 @@ VariableWriteServiceInitializeDxe (
                   EFI_NATIVE_INTERFACE,
                   NULL
                   );
-
   ASSERT_EFI_ERROR (Status);
 }
 

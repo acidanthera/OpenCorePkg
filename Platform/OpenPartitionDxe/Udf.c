@@ -114,7 +114,7 @@ FindAnchorVolumeDescriptorPointer (
     DEBUG ((
       DEBUG_ERROR,
       "%a: Media block size 0x%x unable to hold an AVDP.\n",
-      __FUNCTION__,
+      __func__,
       BlockSize
       ));
     return EFI_UNSUPPORTED;
@@ -140,7 +140,7 @@ FindAnchorVolumeDescriptorPointer (
   // Check if read block is a valid AVDP descriptor
   //
   if (DescriptorTag->TagIdentifier == UdfAnchorVolumeDescriptorPointer) {
-    DEBUG ((DEBUG_INFO, "%a: found AVDP at block %d\n", __FUNCTION__, 256));
+    DEBUG ((DEBUG_INFO, "%a: found AVDP at block %d\n", __func__, 256));
     AvdpsCount++;
   }
 
@@ -167,7 +167,7 @@ FindAnchorVolumeDescriptorPointer (
     DEBUG ((
       DEBUG_INFO,
       "%a: found AVDP at block %Ld\n",
-      __FUNCTION__,
+      __func__,
       EndLBA - 256
       ));
     return EFI_SUCCESS;
@@ -251,13 +251,13 @@ FindAnchorVolumeDescriptorPointer (
       DEBUG ((
         DEBUG_WARN,
         "%a: found AVDP at block %Ld\n",
-        __FUNCTION__,
+        __func__,
         LastAvdpBlockNum
         ));
       DEBUG ((
         DEBUG_WARN,
         "%a: correcting last block from %Ld to %Ld\n",
-        __FUNCTION__,
+        __func__,
         EndLBA,
         LastAvdpBlockNum
         ));
