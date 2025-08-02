@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
-%DIF DEL PreviousConfiguration.tex   Sun Jul 13 18:39:43 2025
-%DIF ADD ../Configuration.tex        Sun Jul 13 18:39:43 2025
+%DIF DEL PreviousConfiguration.tex   Fri Jul 25 15:05:13 2025
+%DIF ADD ../Configuration.tex        Sat Aug  2 22:19:00 2025
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -118,7 +118,7 @@
 %DIF HYPERREF PREAMBLE %DIF PREAMBLE
 \providecommand{\DIFadd}[1]{\texorpdfstring{\DIFaddtex{#1}}{#1}} %DIF PREAMBLE
 \providecommand{\DIFdel}[1]{\texorpdfstring{\DIFdeltex{#1}}{}} %DIF PREAMBLE
-%DIF LISTINGS PREAMBLE %DIF PREAMBLE
+%DIF COLORLISTINGS PREAMBLE %DIF PREAMBLE
 \RequirePackage{listings} %DIF PREAMBLE
 \RequirePackage{color} %DIF PREAMBLE
 \lstdefinelanguage{DIFcode}{ %DIF PREAMBLE
@@ -7594,7 +7594,7 @@ Recommended configuration settings for this driver:
 \begin{itemize}
 \tightlist
   \item \texttt{OpenVariableRuntimeDxe.efi} loaded using \texttt{LoadEarly=true}. OpenDuet users
-  should not load this driver, as it is included in OpenDuet.
+  should not load this driver, as \DIFdelbegin \DIFdel{it }\DIFdelend \DIFaddbegin \DIFadd{a firmware driver serving the same purpose }\DIFaddend is included in OpenDuet.
   \item \texttt{OpenRuntime.efi} specified after \texttt{OpenVariableRuntimeDxe.efi} (when applicable),
   also loaded using \texttt{LoadEarly=true} for correct operation of \texttt{RequestBootVarRouting}.
   \begin{itemize}

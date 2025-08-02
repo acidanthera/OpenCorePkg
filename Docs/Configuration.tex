@@ -7534,7 +7534,7 @@ Recommended configuration settings for this driver:
 \begin{itemize}
 \tightlist
   \item \texttt{OpenVariableRuntimeDxe.efi} loaded using \texttt{LoadEarly=true}. OpenDuet users
-  should not load this driver, as it is included in OpenDuet.
+  should not load this driver, as a firmware driver serving the same purpose is included in OpenDuet.
   \item \texttt{OpenRuntime.efi} specified after \texttt{OpenVariableRuntimeDxe.efi} (when applicable),
   also loaded using \texttt{LoadEarly=true} for correct operation of \texttt{RequestBootVarRouting}.
   \begin{itemize}
