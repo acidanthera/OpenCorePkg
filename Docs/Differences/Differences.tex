@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
-%DIF DEL PreviousConfiguration.tex   Fri Jul 25 15:05:13 2025
-%DIF ADD ../Configuration.tex        Sat Aug  2 22:19:00 2025
+%DIF DEL PreviousConfiguration.tex   Sat Aug  2 20:24:53 2025
+%DIF ADD ../Configuration.tex        Thu Aug  7 01:36:34 2025
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -118,7 +118,7 @@
 %DIF HYPERREF PREAMBLE %DIF PREAMBLE
 \providecommand{\DIFadd}[1]{\texorpdfstring{\DIFaddtex{#1}}{#1}} %DIF PREAMBLE
 \providecommand{\DIFdel}[1]{\texorpdfstring{\DIFdeltex{#1}}{}} %DIF PREAMBLE
-%DIF COLORLISTINGS PREAMBLE %DIF PREAMBLE
+%DIF LISTINGS PREAMBLE %DIF PREAMBLE
 \RequirePackage{listings} %DIF PREAMBLE
 \RequirePackage{color} %DIF PREAMBLE
 \lstdefinelanguage{DIFcode}{ %DIF PREAMBLE
@@ -646,7 +646,7 @@ Available entries include:
 \end{itemize}
 
 \emph{Note}: It is not guaranteed that paths longer than
-\texttt{OC\_STORAGE\_SAFE\_PATH\_MAX} (128 characters including
+\texttt{OC\_STORAGE\_SAFE\_PATH\_MAX} (\DIFdelbegin \DIFdel{128 }\DIFdelend \DIFaddbegin \DIFadd{192 }\DIFaddend characters including
 the \texttt{\\0}-terminator) will be accessible within OpenCore.
 
 \subsection{Installation and Upgrade}\label{configuration-install}
@@ -1935,9 +1935,12 @@ To view their current state, use the \texttt{pmset -g} command in Terminal.
   performing early boot identity mapping of assigned virtual addresses to physical
   memory.
 
-  \emph{Note}: The need for this quirk is determined by early boot failures.
+  \emph{Note \DIFaddbegin \DIFadd{1}\DIFaddend }: The need for this quirk is determined by early boot failures.
 
-\item
+  \DIFaddbegin \emph{\DIFadd{Note 2}}\DIFadd{: This quirk is not compatible with 32-bit kernels.
+}
+
+\DIFaddend \item
   \texttt{SignalAppleOS}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\

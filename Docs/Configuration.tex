@@ -1875,7 +1875,9 @@ To view their current state, use the \texttt{pmset -g} command in Terminal.
   performing early boot identity mapping of assigned virtual addresses to physical
   memory.
 
-  \emph{Note}: The need for this quirk is determined by early boot failures.
+  \emph{Note 1}: The need for this quirk is determined by early boot failures.
+
+  \emph{Note 2}: This quirk is not compatible with 32-bit kernels.
 
 \item
   \texttt{SignalAppleOS}\\
