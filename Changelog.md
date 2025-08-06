@@ -3,6 +3,7 @@ OpenCore Changelog
 #### v1.0.6
 - Added workaround for not detected CPU frequency in ProvideCpuInfo quirk, thx @hg13bs
 - Updated QemuBuild.command to support `EFI` mode without Duet
+- Increased `OC_STORAGE_SAFE_PATH_MAX` to 192 to support various plugin kexts.
 
 #### v1.0.5
 - Fixed incorrect print in PCI device info dumping in `SysReport`
