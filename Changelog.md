@@ -2,6 +2,7 @@ OpenCore Changelog
 ==================
 #### v1.0.6
 - Added workaround for not detected CPU frequency in ProvideCpuInfo quirk, thx @hg13bs
+- Updated QemuBuild.command to support `EFI` mode without Duet
 
 #### v1.0.5
 - Fixed incorrect print in PCI device info dumping in `SysReport`
