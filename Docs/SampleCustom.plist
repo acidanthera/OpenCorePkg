@@ -876,6 +876,36 @@
 			</dict>
 			<dict>
 				<key>Arch</key>
+				<string>i386</string>
+				<key>Base</key>
+				<string></string>
+				<key>Comment</key>
+				<string>Fix Intel e1000 NIC link detection in QEMU</string>
+				<key>Count</key>
+				<integer>0</integer>
+				<key>Enabled</key>
+				<false/>
+				<key>Find</key>
+				<data>x0QkBBEAAAAAAADoAAAAAA==</data>
+				<key>Identifier</key>
+				<string>com.apple.driver.AppleIntel8254XEthernet</string>
+				<key>Limit</key>
+				<integer>0</integer>
+				<key>Mask</key>
+				<data>//////////8AAAD/AAAAAA==</data>
+				<key>MaxKernel</key>
+				<string>8.99.99</string>
+				<key>MinKernel</key>
+				<string>8.0.0</string>
+				<key>Replace</key>
+				<data>i0QkCMcACKwAADHAkJCQkA==</data>
+				<key>ReplaceMask</key>
+				<data></data>
+				<key>Skip</key>
+				<integer>0</integer>
+			</dict>
+			<dict>
+				<key>Arch</key>
 				<string>x86_64</string>
 				<key>Base</key>
 				<string>__ZN24IOBluetoothHCIController5startEP9IOService</string>
