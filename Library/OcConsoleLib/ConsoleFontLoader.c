@@ -167,7 +167,7 @@ OcLoadConsoleFont (
   Status = OcUnicodeSafeSPrint (
              Path,
              sizeof (Path),
-             OPEN_CORE_FONT_PATH L"\\%a.hex",
+             OPEN_CORE_FONT_PATH L"%a.hex",
              FontName
              );
   if (EFI_ERROR (Status)) {
