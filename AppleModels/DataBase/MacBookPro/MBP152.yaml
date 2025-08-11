@@ -252,5 +252,5 @@ AppleModelYear:
   - 2019
   - 2020
 MinimumOSVersion: "10.13.6"
-MaximumOSVersion: "15.5"
+MaximumOSVersion: "15.6"
 AppleModelId: "J132"
