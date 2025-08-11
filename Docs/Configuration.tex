@@ -1815,6 +1815,16 @@ To view their current state, use the \texttt{pmset -g} command in Terminal.
     variables at runtime, the Apple kernel will crash at calling UEFI runtime services
     unless the driver \texttt{.data} section has a \texttt{EfiRuntimeServicesData}
     type.
+  \item Apple kernel Memory map entry consolidation may work incorrectly for low memory descriptors,
+    which are initially marked as
+    \href{https://github.com/apple-oss-distributions/xnu/blob/rel/xnu-792/osfmk/i386/i386_vm_init.c#L282}{preallocated}
+    by Apple kernel, but then may get consolidated and lose their preallocation status due to a
+    \href{https://github.com/apple-oss-distributions/xnu/blob/rel/xnu-792/osfmk/i386/i386_vm_init.c#L339}{bug}.
+    Since Apple kernel later
+    \href{https://github.com/apple-oss-distributions/xnu/blob/rel/xnu-792/osfmk/i386/pmap.c#L1204}{frees low memory},
+    this may result in use-after-free errors and various kinds of kernel panics at boot time.
+    The issue was \href{https://github.com/apple-oss-distributions/xnu/blob/rel/xnu-1699/osfmk/i386/i386_vm_init.c#L450}{fixed}
+    in Mac OS X 10.7 kernel. 
   \end{itemize}
 
   To workaround these limitations, this quirk applies memory attribute table
@@ -1827,9 +1837,7 @@ To view their current state, use the \texttt{pmset -g} command in Terminal.
 
   \emph{Note 2}: The need for this quirk is determined by early boot failures.
   This quirk replaces \texttt{EnableWriteUnprotector} on firmware supporting
-  Memory Attribute Tables (MAT). This quirk is typically unnecessary when using
-  \texttt{OpenDuetPkg} but may be required to boot Mac OS X 10.6, and earlier, for
-  reasons that are as yet unclear.
+  Memory Attribute Tables (MAT).
 
 \item
   \texttt{ResizeAppleGpuBars}\\

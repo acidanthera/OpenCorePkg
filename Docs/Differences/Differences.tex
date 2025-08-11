@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
 %DIF DEL PreviousConfiguration.tex   Sat Aug  2 20:24:53 2025
-%DIF ADD ../Configuration.tex        Thu Aug  7 01:36:34 2025
+%DIF ADD ../Configuration.tex        Mon Aug 11 03:31:51 2025
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -1875,7 +1875,17 @@ To view their current state, use the \texttt{pmset -g} command in Terminal.
     variables at runtime, the Apple kernel will crash at calling UEFI runtime services
     unless the driver \texttt{.data} section has a \texttt{EfiRuntimeServicesData}
     type.
-  \end{itemize}
+  \DIFaddbegin \item \DIFadd{Apple kernel Memory map entry consolidation may work incorrectly for low memory descriptors,
+    which are initially marked as
+    }\href{https://github.com/apple-oss-distributions/xnu/blob/rel/xnu-792/osfmk/i386/i386_vm_init.c#L282}{\DIFadd{preallocated}}
+    \DIFadd{by Apple kernel, but then may get consolidated and lose their preallocation status due to a
+    }\href{https://github.com/apple-oss-distributions/xnu/blob/rel/xnu-792/osfmk/i386/i386_vm_init.c#L339}{\DIFadd{bug}}\DIFadd{.
+    Since Apple kernel later
+    }\href{https://github.com/apple-oss-distributions/xnu/blob/rel/xnu-792/osfmk/i386/pmap.c#L1204}{\DIFadd{frees low memory}}\DIFadd{,
+    this may result in use-after-free errors and various kinds of kernel panics at boot time.
+    The issue was }\href{https://github.com/apple-oss-distributions/xnu/blob/rel/xnu-1699/osfmk/i386/i386_vm_init.c#L450}{\DIFadd{fixed}}
+    \DIFadd{in Mac OS X 10.7 kernel. 
+  }\DIFaddend \end{itemize}
 
   To workaround these limitations, this quirk applies memory attribute table
   permissions to the memory map passed to the Apple kernel and optionally attempts
@@ -1887,9 +1897,12 @@ To view their current state, use the \texttt{pmset -g} command in Terminal.
 
   \emph{Note 2}: The need for this quirk is determined by early boot failures.
   This quirk replaces \texttt{EnableWriteUnprotector} on firmware supporting
-  Memory Attribute Tables (MAT). This quirk is typically unnecessary when using
-  \texttt{OpenDuetPkg} but may be required to boot Mac OS X 10.6, and earlier, for
+  Memory Attribute Tables (MAT).
+\DIFdelbegin \DIFdel{This quirk is typically unnecessary when using
+  }\texttt{\DIFdel{OpenDuetPkg}} %DIFAUXCMD
+\DIFdel{but may be required to boot Mac OS X 10.6, and earlier, for
   reasons that are as yet unclear.
+}\DIFdelend 
 
 \item
   \texttt{ResizeAppleGpuBars}\\
