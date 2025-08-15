@@ -1,0 +1,38 @@
+## @file
+# Copyright (c) 2025, Enhanced Shell Compatibility Layer. All rights reserved.
+# SPDX-License-Identifier: BSD-3-Clause
+#
+
+[Defines]
+  INF_VERSION                    = 0x00010005
+  BASE_NAME                      = SimpleTextInputExCompat
+  FILE_GUID                      = 3F4A2B8C-1D2E-4F5A-9B8C-7E6D5C4B3A29
+  MODULE_TYPE                    = DXE_DRIVER
+  VERSION_STRING                 = 1.0
+  ENTRY_POINT                    = SimpleTextInputExCompatEntry
+
+[Sources.common]
+  SimpleTextInputExCompat.c
+
+[Packages]
+  MdePkg/MdePkg.dec
+  MdeModulePkg/MdeModulePkg.dec
+
+[LibraryClasses]
+  UefiDriverEntryPoint
+  UefiBootServicesTableLib
+  UefiLib
+  MemoryAllocationLib
+  DebugLib
+  BaseLib
+  BaseMemoryLib
+
+[Protocols]
+  gEfiSimpleTextInProtocolGuid                  ## CONSUMES
+  gEfiSimpleTextInputExProtocolGuid             ## PRODUCES
+
+[Guids]
+  gEfiEventReadyToBootGuid                      ## CONSUMES
+
+[Depex]
+  TRUE
