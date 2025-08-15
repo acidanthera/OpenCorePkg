@@ -67,12 +67,9 @@ extern EFI_GUID gEfiSimpleTextInputExProtocolGuid;
 #endif
 
 //
-// Control character definitions matching OpenShell text editor usage
 //
-#define CTRL_A              0x01    // (Not used in OpenShell)
-#define CTRL_B              0x02    // (Not used in OpenShell)
-#define CTRL_C              0x03    // (Not used in OpenShell)
-#define CTRL_D              0x04    // (Not used in OpenShell)
+// Control character definitions - OpenShell text editor mappings
+//
 #define CTRL_E              0x05    // Display Help (MainCommandDisplayHelp)
 #define CTRL_F              0x06    // Search (MainCommandSearch)
 #define CTRL_G              0x07    // Go to Line (MainCommandGotoLine)
@@ -80,25 +77,75 @@ extern EFI_GUID gEfiSimpleTextInputExProtocolGuid;
 #define CTRL_I              0x09    // Tab
 #define CTRL_J              0x0A    // New line / Line feed
 #define CTRL_K              0x0B    // Cut Line (MainCommandCutLine)
-#define CTRL_L              0x0C    // (Not used in OpenShell)
 #define CTRL_M              0x0D    // Carriage return
-#define CTRL_N              0x0E    // (Not used in OpenShell)
 #define CTRL_O              0x0F    // Open File (MainCommandOpenFile)
-#define CTRL_P              0x10    // (Not used in OpenShell)
 #define CTRL_Q              0x11    // Exit (MainCommandExit)
 #define CTRL_R              0x12    // Search & Replace (MainCommandSearchReplace)
 #define CTRL_S              0x13    // Save File (MainCommandSaveFile)
 #define CTRL_T              0x14    // Switch File Type (MainCommandSwitchFileType)
 #define CTRL_U              0x15    // Paste Line (MainCommandPasteLine)
-#define CTRL_V              0x16    // (Not used in OpenShell)
-#define CTRL_W              0x17    // (Not used in OpenShell)
-#define CTRL_X              0x18    // (Not used in OpenShell)
 #define CTRL_Y              0x19    // Yank / Redo
 #define CTRL_Z              0x1A    // Suspend / Undo
 #define CTRL_BACKSLASH      0x1C    // Quit
 #define CTRL_BRACKET        0x1D    // Group separator / Escape
 #define CTRL_CARET          0x1E    // Record separator
 #define CTRL_UNDERSCORE     0x1F    // Unit separator / Undo
+
+//
+// Control character lookup table for debugging
+//
+typedef struct {
+  UINT8       ControlChar;
+  CHAR8       *Description;
+} CTRL_CHAR_INFO;
+
+STATIC CTRL_CHAR_INFO mCtrlCharTable[] = {
+  { CTRL_E,           "Ctrl+E (OpenShell Display Help)" },
+  { CTRL_F,           "Ctrl+F (OpenShell Search)" },
+  { CTRL_G,           "Ctrl+G (OpenShell Go to Line)" },
+  { CTRL_H,           "Ctrl+H (Backspace)" },
+  { CTRL_I,           "Ctrl+I (Tab)" },
+  { CTRL_J,           "Ctrl+J (New line/LF)" },
+  { CTRL_K,           "Ctrl+K (OpenShell Cut Line)" },
+  { CTRL_M,           "Ctrl+M (Carriage return)" },
+  { CTRL_O,           "Ctrl+O (OpenShell Open File)" },
+  { CTRL_Q,           "Ctrl+Q (OpenShell Exit)" },
+  { CTRL_R,           "Ctrl+R (OpenShell Search & Replace)" },
+  { CTRL_S,           "Ctrl+S (OpenShell Save File)" },
+  { CTRL_T,           "Ctrl+T (OpenShell Switch File Type)" },
+  { CTRL_U,           "Ctrl+U (OpenShell Paste Line)" },
+  { CTRL_Y,           "Ctrl+Y (Yank/Redo)" },
+  { CTRL_Z,           "Ctrl+Z (Suspend/Undo)" },
+  { CTRL_BACKSLASH,   "Ctrl+\\ (Quit)" },
+  { CTRL_BRACKET,     "Ctrl+] (Escape)" },
+  { CTRL_CARET,       "Ctrl+^ (Record separator)" },
+  { CTRL_UNDERSCORE,  "Ctrl+_ (Undo)" },
+  { 0,                NULL }  // End marker
+};
+
+/**
+  Get description for a control character.
+  
+  @param ControlChar  The control character to look up
+  
+  @return Description string or NULL if not found
+**/
+STATIC
+CHAR8 *
+GetControlCharDescription (
+  IN UINT8  ControlChar
+  )
+{
+  UINTN Index;
+  
+  for (Index = 0; mCtrlCharTable[Index].Description != NULL; Index++) {
+    if (mCtrlCharTable[Index].ControlChar == ControlChar) {
+      return mCtrlCharTable[Index].Description;
+    }
+  }
+  
+  return NULL;
+}
 
 //
 // Global variables for driver state
@@ -220,102 +267,13 @@ CompatReadKeyStrokeEx (
       // This is a control character - set appropriate shift state
       KeyData->KeyState.KeyShiftState = EFI_LEFT_CONTROL_PRESSED;
       
-      // Detailed logging for all control characters
-      switch (KeyData->Key.UnicodeChar) {
-        case CTRL_A:
-          DEBUG ((DEBUG_INFO, "STX: Ctrl+A (Select All/Beginning) detected\n"));
-          break;
-        case CTRL_B:
-          DEBUG ((DEBUG_INFO, "STX: Ctrl+B (Bold/Backward) detected\n"));
-          break;
-        case CTRL_C:
-          DEBUG ((DEBUG_INFO, "STX: Ctrl+C (Copy/Cancel) detected\n"));
-          break;
-        case CTRL_D:
-          DEBUG ((DEBUG_INFO, "STX: Ctrl+D (Delete/EOF) detected\n"));
-          break;
-        case CTRL_E:
-          DEBUG ((DEBUG_INFO, "STX: Ctrl+E (OpenShell Display Help) detected\n"));
-          break;
-        case CTRL_F:
-          DEBUG ((DEBUG_INFO, "STX: Ctrl+F (OpenShell Search) detected\n"));
-          break;
-        case CTRL_G:
-          DEBUG ((DEBUG_INFO, "STX: Ctrl+G (OpenShell Go to Line) detected\n"));
-          break;
-        case CTRL_H:
-          DEBUG ((DEBUG_INFO, "STX: Ctrl+H (Backspace) detected\n"));
-          break;
-        case CTRL_I:
-          DEBUG ((DEBUG_INFO, "STX: Ctrl+I (Tab) detected\n"));
-          break;
-        case CTRL_J:
-          DEBUG ((DEBUG_INFO, "STX: Ctrl+J (New line/LF) detected\n"));
-          break;
-        case CTRL_K:
-          DEBUG ((DEBUG_INFO, "STX: Ctrl+K (OpenShell Cut Line) detected\n"));
-          break;
-        case CTRL_L:
-          DEBUG ((DEBUG_INFO, "STX: Ctrl+L (Not used in OpenShell) detected\n"));
-          break;
-        case CTRL_M:
-          DEBUG ((DEBUG_INFO, "STX: Ctrl+M (Carriage return) detected\n"));
-          break;
-        case CTRL_N:
-          DEBUG ((DEBUG_INFO, "STX: Ctrl+N (Not used in OpenShell) detected\n"));
-          break;
-        case CTRL_O:
-          DEBUG ((DEBUG_INFO, "STX: Ctrl+O (OpenShell Open File) detected\n"));
-          break;
-        case CTRL_P:
-          DEBUG ((DEBUG_INFO, "STX: Ctrl+P (Not used in OpenShell) detected\n"));
-          break;
-        case CTRL_Q:
-          DEBUG ((DEBUG_INFO, "STX: Ctrl+Q (OpenShell Exit) detected\n"));
-          break;
-        case CTRL_R:
-          DEBUG ((DEBUG_INFO, "STX: Ctrl+R (OpenShell Search & Replace) detected\n"));
-          break;
-        case CTRL_S:
-          DEBUG ((DEBUG_INFO, "STX: Ctrl+S (OpenShell Save File) detected\n"));
-          break;
-        case CTRL_T:
-          DEBUG ((DEBUG_INFO, "STX: Ctrl+T (OpenShell Switch File Type) detected\n"));
-          break;
-        case CTRL_U:
-          DEBUG ((DEBUG_INFO, "STX: Ctrl+U (OpenShell Paste Line) detected\n"));
-          break;
-        case CTRL_V:
-          DEBUG ((DEBUG_INFO, "STX: Ctrl+V (Paste/Quote next) detected\n"));
-          break;
-        case CTRL_W:
-          DEBUG ((DEBUG_INFO, "STX: Ctrl+W (Kill word/Close window) detected\n"));
-          break;
-        case CTRL_X:
-          DEBUG ((DEBUG_INFO, "STX: Ctrl+X (Cut/Exit) detected\n"));
-          break;
-        case CTRL_Y:
-          DEBUG ((DEBUG_INFO, "STX: Ctrl+Y (Yank/Redo) detected\n"));
-          break;
-        case CTRL_Z:
-          DEBUG ((DEBUG_INFO, "STX: Ctrl+Z (Suspend/Undo) detected\n"));
-          break;
-        case CTRL_BACKSLASH:
-          DEBUG ((DEBUG_INFO, "STX: Ctrl+\\ (Quit) detected\n"));
-          break;
-        case CTRL_BRACKET:
-          DEBUG ((DEBUG_INFO, "STX: Ctrl+] (Escape) detected\n"));
-          break;
-        case CTRL_CARET:
-          DEBUG ((DEBUG_INFO, "STX: Ctrl+^ (Record separator) detected\n"));
-          break;
-        case CTRL_UNDERSCORE:
-          DEBUG ((DEBUG_INFO, "STX: Ctrl+_ (Undo) detected\n"));
-          break;
-        default:
-          DEBUG ((DEBUG_INFO, "STX: Control character 0x%02X (Ctrl+%c) detected\n", 
-                 KeyData->Key.UnicodeChar, KeyData->Key.UnicodeChar + 0x40));
-          break;
+      // Log control character using lookup table
+      CHAR8 *Description = GetControlCharDescription (KeyData->Key.UnicodeChar);
+      if (Description != NULL) {
+        DEBUG ((DEBUG_INFO, "STX: %a detected\n", Description));
+      } else {
+        DEBUG ((DEBUG_INFO, "STX: Control character 0x%02X (Ctrl+%c) detected\n", 
+               KeyData->Key.UnicodeChar, KeyData->Key.UnicodeChar + 0x40));
       }
     } else {
       // Handle other special cases and key combinations
@@ -450,12 +408,17 @@ CompatRegisterKeyNotify (
   OUT VOID                              **NotifyHandle
   )
 {
-  // Not supported on EFI 1.1 systems, but return success with dummy handle
+  // Not supported on EFI 1.1 systems, but return success with unique handle
   // to avoid breaking applications that expect this to work
   if (NotifyHandle != NULL) {
-    *NotifyHandle = (VOID*)0xDEADBEEF; // Dummy handle
+    // Allocate a unique dummy handle (1 byte is sufficient)
+    *NotifyHandle = AllocateZeroPool (1);
+    if (*NotifyHandle == NULL) {
+      DEBUG ((DEBUG_ERROR, "STX: Failed to allocate dummy notify handle\n"));
+      return EFI_OUT_OF_RESOURCES;
+    }
   }
-  DEBUG ((DEBUG_INFO, "STX: Returning success with dummy handle (EFI 1.1 limitation)\n"));
+  DEBUG ((DEBUG_INFO, "STX: Returning success with unique dummy handle (EFI 1.1 limitation)\n"));
   return EFI_SUCCESS;
 }
 
@@ -466,8 +429,15 @@ CompatUnregisterKeyNotify (
   IN VOID                              *NotificationHandle
   )
 {
-  // Not supported on EFI 1.1 systems, but return success to avoid breaking apps
-  DEBUG ((DEBUG_INFO, "STX: Returning success (EFI 1.1 limitation)\n"));
+  // Not supported on EFI 1.1 systems, but validate and free the handle to avoid misuse
+  if (NotificationHandle == NULL) {
+    DEBUG ((DEBUG_WARN, "STX: NULL NotificationHandle passed to UnregisterKeyNotify\n"));
+    return EFI_INVALID_PARAMETER;
+  }
+
+  // Free the dummy handle that was allocated in RegisterKeyNotify
+  FreePool (NotificationHandle);
+  DEBUG ((DEBUG_INFO, "STX: Freed dummy handle and returning success (EFI 1.1 limitation)\n"));
   return EFI_SUCCESS;
 }
 
