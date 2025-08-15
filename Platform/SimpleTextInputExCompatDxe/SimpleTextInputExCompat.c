@@ -268,15 +268,15 @@ CompatReadKeyStrokeEx (
       KeyData->KeyState.KeyShiftState = EFI_LEFT_CONTROL_PRESSED;
 
       // Log control character using lookup table
-      CHAR8  *Description = GetControlCharDescription (KeyData->Key.UnicodeChar);
+      CHAR8  *Description = GetControlCharDescription ((UINT8)KeyData->Key.UnicodeChar);
       if (Description != NULL) {
         DEBUG ((DEBUG_INFO, "STX: %a detected\n", Description));
       } else {
         DEBUG ((
           DEBUG_INFO,
           "STX: Control character 0x%02X (Ctrl+%c) detected\n",
-          KeyData->Key.UnicodeChar,
-          KeyData->Key.UnicodeChar + 0x40
+          (UINT8)KeyData->Key.UnicodeChar,
+          (UINT8)KeyData->Key.UnicodeChar + 0x40
           ));
       }
     } else {
