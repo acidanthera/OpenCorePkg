@@ -151,12 +151,12 @@ CompatReset (
   Private = COMPAT_TEXT_INPUT_EX_PRIVATE_FROM_PROTOCOL(This);
   
   if (Private == NULL || Private->Signature != COMPAT_TEXT_INPUT_EX_SIGNATURE) {
-    DEBUG((DEBUG_ERROR, "STX: Invalid private structure in CompatReset\n"));
+    DEBUG ((DEBUG_ERROR, "STX: Invalid private structure in CompatReset\n"));
     return EFI_INVALID_PARAMETER;
   }
   
   if (Private->UnderlyingTextInput == NULL) {
-    DEBUG((DEBUG_ERROR, "STX: Underlying TextInput is NULL\n"));
+    DEBUG ((DEBUG_ERROR, "STX: Underlying TextInput is NULL\n"));
     return EFI_DEVICE_ERROR;
   }
   
@@ -179,26 +179,26 @@ CompatReadKeyStrokeEx (
   EFI_STATUS                   Status;
   
   if (This == NULL || KeyData == NULL) {
-    DEBUG((DEBUG_ERROR, "STX: CompatReadKeyStrokeEx: Invalid parameters\n"));
+    DEBUG ((DEBUG_ERROR, "STX: CompatReadKeyStrokeEx: Invalid parameters\n"));
     return EFI_INVALID_PARAMETER;
   }
   
   Private = COMPAT_TEXT_INPUT_EX_PRIVATE_FROM_PROTOCOL(This);
   
   if (Private == NULL || Private->Signature != COMPAT_TEXT_INPUT_EX_SIGNATURE) {
-    DEBUG((DEBUG_ERROR, "STX: CompatReadKeyStrokeEx: Invalid private structure\n"));
+    DEBUG ((DEBUG_ERROR, "STX: CompatReadKeyStrokeEx: Invalid private structure\n"));
     return EFI_INVALID_PARAMETER;
   }
   
   if (Private->UnderlyingTextInput == NULL) {
-    DEBUG((DEBUG_ERROR, "STX: CompatReadKeyStrokeEx: Underlying TextInput is NULL\n"));
+    DEBUG ((DEBUG_ERROR, "STX: CompatReadKeyStrokeEx: Underlying TextInput is NULL\n"));
     return EFI_DEVICE_ERROR;
   }
   
-  DEBUG((DEBUG_INFO, "STX: CompatReadKeyStrokeEx: Called on handle %p\n", Private->Handle));
+  DEBUG ((DEBUG_INFO, "STX: CompatReadKeyStrokeEx: Called on handle %p\n", Private->Handle));
   
   // Initialize KeyData structure
-  ZeroMem(KeyData, sizeof(EFI_KEY_DATA));
+  ZeroMem (KeyData, sizeof(EFI_KEY_DATA));
   
   // Read from underlying protocol
   Status = Private->UnderlyingTextInput->ReadKeyStroke(
@@ -206,7 +206,7 @@ CompatReadKeyStrokeEx (
              &Key
            );
   
-  if (!EFI_ERROR(Status)) {
+  if (!EFI_ERROR (Status)) {
     // Convert EFI_INPUT_KEY to EFI_KEY_DATA
     KeyData->Key = Key;
     
@@ -223,97 +223,97 @@ CompatReadKeyStrokeEx (
       // Detailed logging for all control characters
       switch (KeyData->Key.UnicodeChar) {
         case CTRL_A:
-          DEBUG((DEBUG_INFO, "STX: Ctrl+A (Select All/Beginning) detected\n"));
+          DEBUG ((DEBUG_INFO, "STX: Ctrl+A (Select All/Beginning) detected\n"));
           break;
         case CTRL_B:
-          DEBUG((DEBUG_INFO, "STX: Ctrl+B (Bold/Backward) detected\n"));
+          DEBUG ((DEBUG_INFO, "STX: Ctrl+B (Bold/Backward) detected\n"));
           break;
         case CTRL_C:
-          DEBUG((DEBUG_INFO, "STX: Ctrl+C (Copy/Cancel) detected\n"));
+          DEBUG ((DEBUG_INFO, "STX: Ctrl+C (Copy/Cancel) detected\n"));
           break;
         case CTRL_D:
-          DEBUG((DEBUG_INFO, "STX: Ctrl+D (Delete/EOF) detected\n"));
+          DEBUG ((DEBUG_INFO, "STX: Ctrl+D (Delete/EOF) detected\n"));
           break;
         case CTRL_E:
-          DEBUG((DEBUG_INFO, "STX: Ctrl+E (OpenShell Display Help) detected\n"));
+          DEBUG ((DEBUG_INFO, "STX: Ctrl+E (OpenShell Display Help) detected\n"));
           break;
         case CTRL_F:
-          DEBUG((DEBUG_INFO, "STX: Ctrl+F (OpenShell Search) detected\n"));
+          DEBUG ((DEBUG_INFO, "STX: Ctrl+F (OpenShell Search) detected\n"));
           break;
         case CTRL_G:
-          DEBUG((DEBUG_INFO, "STX: Ctrl+G (OpenShell Go to Line) detected\n"));
+          DEBUG ((DEBUG_INFO, "STX: Ctrl+G (OpenShell Go to Line) detected\n"));
           break;
         case CTRL_H:
-          DEBUG((DEBUG_INFO, "STX: Ctrl+H (Backspace) detected\n"));
+          DEBUG ((DEBUG_INFO, "STX: Ctrl+H (Backspace) detected\n"));
           break;
         case CTRL_I:
-          DEBUG((DEBUG_INFO, "STX: Ctrl+I (Tab) detected\n"));
+          DEBUG ((DEBUG_INFO, "STX: Ctrl+I (Tab) detected\n"));
           break;
         case CTRL_J:
-          DEBUG((DEBUG_INFO, "STX: Ctrl+J (New line/LF) detected\n"));
+          DEBUG ((DEBUG_INFO, "STX: Ctrl+J (New line/LF) detected\n"));
           break;
         case CTRL_K:
-          DEBUG((DEBUG_INFO, "STX: Ctrl+K (OpenShell Cut Line) detected\n"));
+          DEBUG ((DEBUG_INFO, "STX: Ctrl+K (OpenShell Cut Line) detected\n"));
           break;
         case CTRL_L:
-          DEBUG((DEBUG_INFO, "STX: Ctrl+L (Not used in OpenShell) detected\n"));
+          DEBUG ((DEBUG_INFO, "STX: Ctrl+L (Not used in OpenShell) detected\n"));
           break;
         case CTRL_M:
-          DEBUG((DEBUG_INFO, "STX: Ctrl+M (Carriage return) detected\n"));
+          DEBUG ((DEBUG_INFO, "STX: Ctrl+M (Carriage return) detected\n"));
           break;
         case CTRL_N:
-          DEBUG((DEBUG_INFO, "STX: Ctrl+N (Not used in OpenShell) detected\n"));
+          DEBUG ((DEBUG_INFO, "STX: Ctrl+N (Not used in OpenShell) detected\n"));
           break;
         case CTRL_O:
-          DEBUG((DEBUG_INFO, "STX: Ctrl+O (OpenShell Open File) detected\n"));
+          DEBUG ((DEBUG_INFO, "STX: Ctrl+O (OpenShell Open File) detected\n"));
           break;
         case CTRL_P:
-          DEBUG((DEBUG_INFO, "STX: Ctrl+P (Not used in OpenShell) detected\n"));
+          DEBUG ((DEBUG_INFO, "STX: Ctrl+P (Not used in OpenShell) detected\n"));
           break;
         case CTRL_Q:
-          DEBUG((DEBUG_INFO, "STX: Ctrl+Q (OpenShell Exit) detected\n"));
+          DEBUG ((DEBUG_INFO, "STX: Ctrl+Q (OpenShell Exit) detected\n"));
           break;
         case CTRL_R:
-          DEBUG((DEBUG_INFO, "STX: Ctrl+R (OpenShell Search & Replace) detected\n"));
+          DEBUG ((DEBUG_INFO, "STX: Ctrl+R (OpenShell Search & Replace) detected\n"));
           break;
         case CTRL_S:
-          DEBUG((DEBUG_INFO, "STX: Ctrl+S (OpenShell Save File) detected\n"));
+          DEBUG ((DEBUG_INFO, "STX: Ctrl+S (OpenShell Save File) detected\n"));
           break;
         case CTRL_T:
-          DEBUG((DEBUG_INFO, "STX: Ctrl+T (OpenShell Switch File Type) detected\n"));
+          DEBUG ((DEBUG_INFO, "STX: Ctrl+T (OpenShell Switch File Type) detected\n"));
           break;
         case CTRL_U:
-          DEBUG((DEBUG_INFO, "STX: Ctrl+U (OpenShell Paste Line) detected\n"));
+          DEBUG ((DEBUG_INFO, "STX: Ctrl+U (OpenShell Paste Line) detected\n"));
           break;
         case CTRL_V:
-          DEBUG((DEBUG_INFO, "STX: Ctrl+V (Paste/Quote next) detected\n"));
+          DEBUG ((DEBUG_INFO, "STX: Ctrl+V (Paste/Quote next) detected\n"));
           break;
         case CTRL_W:
-          DEBUG((DEBUG_INFO, "STX: Ctrl+W (Kill word/Close window) detected\n"));
+          DEBUG ((DEBUG_INFO, "STX: Ctrl+W (Kill word/Close window) detected\n"));
           break;
         case CTRL_X:
-          DEBUG((DEBUG_INFO, "STX: Ctrl+X (Cut/Exit) detected\n"));
+          DEBUG ((DEBUG_INFO, "STX: Ctrl+X (Cut/Exit) detected\n"));
           break;
         case CTRL_Y:
-          DEBUG((DEBUG_INFO, "STX: Ctrl+Y (Yank/Redo) detected\n"));
+          DEBUG ((DEBUG_INFO, "STX: Ctrl+Y (Yank/Redo) detected\n"));
           break;
         case CTRL_Z:
-          DEBUG((DEBUG_INFO, "STX: Ctrl+Z (Suspend/Undo) detected\n"));
+          DEBUG ((DEBUG_INFO, "STX: Ctrl+Z (Suspend/Undo) detected\n"));
           break;
         case CTRL_BACKSLASH:
-          DEBUG((DEBUG_INFO, "STX: Ctrl+\\ (Quit) detected\n"));
+          DEBUG ((DEBUG_INFO, "STX: Ctrl+\\ (Quit) detected\n"));
           break;
         case CTRL_BRACKET:
-          DEBUG((DEBUG_INFO, "STX: Ctrl+] (Escape) detected\n"));
+          DEBUG ((DEBUG_INFO, "STX: Ctrl+] (Escape) detected\n"));
           break;
         case CTRL_CARET:
-          DEBUG((DEBUG_INFO, "STX: Ctrl+^ (Record separator) detected\n"));
+          DEBUG ((DEBUG_INFO, "STX: Ctrl+^ (Record separator) detected\n"));
           break;
         case CTRL_UNDERSCORE:
-          DEBUG((DEBUG_INFO, "STX: Ctrl+_ (Undo) detected\n"));
+          DEBUG ((DEBUG_INFO, "STX: Ctrl+_ (Undo) detected\n"));
           break;
         default:
-          DEBUG((DEBUG_INFO, "STX: Control character 0x%02X (Ctrl+%c) detected\n", 
+          DEBUG ((DEBUG_INFO, "STX: Control character 0x%02X (Ctrl+%c) detected\n", 
                  KeyData->Key.UnicodeChar, KeyData->Key.UnicodeChar + 0x40));
           break;
       }
@@ -321,16 +321,16 @@ CompatReadKeyStrokeEx (
       // Handle other special cases and key combinations
       switch (KeyData->Key.UnicodeChar) {
         case 0x1B: // ESC key
-          DEBUG((DEBUG_INFO, "STX: ESC key detected\n"));
+          DEBUG ((DEBUG_INFO, "STX: ESC key detected\n"));
           break;
         case 0x7F: // DEL character
-          DEBUG((DEBUG_INFO, "STX: DEL character detected\n"));
+          DEBUG ((DEBUG_INFO, "STX: DEL character detected\n"));
           break;
         default:
           // Check if this might be an Alt combination (high bit set)
           if (KeyData->Key.UnicodeChar >= 0x80 && KeyData->Key.UnicodeChar <= 0xFF) {
             KeyData->KeyState.KeyShiftState = EFI_LEFT_ALT_PRESSED;
-            DEBUG((DEBUG_INFO, "STX: Alt combination detected - Unicode=0x%04X\n", 
+            DEBUG ((DEBUG_INFO, "STX: Alt combination detected - Unicode=0x%04X\n", 
                    KeyData->Key.UnicodeChar));
           }
           break;
@@ -340,79 +340,79 @@ CompatReadKeyStrokeEx (
     // Enhanced scan code handling for special keys and function keys
     switch (KeyData->Key.ScanCode) {
       case SCAN_ESC:
-        DEBUG((DEBUG_INFO, "STX: ESC scan code detected\n"));
+        DEBUG ((DEBUG_INFO, "STX: ESC scan code detected\n"));
         break;
       
       // Function keys F1-F12 (OpenShell text editor usage)
       case SCAN_F1:
-        DEBUG((DEBUG_INFO, "STX: F1 (OpenShell Go to Line) detected\n"));
+        DEBUG ((DEBUG_INFO, "STX: F1 (OpenShell Go to Line) detected\n"));
         break;
       case SCAN_F2:
-        DEBUG((DEBUG_INFO, "STX: F2 (OpenShell Save File) detected\n"));
+        DEBUG ((DEBUG_INFO, "STX: F2 (OpenShell Save File) detected\n"));
         break;
       case SCAN_F3:
-        DEBUG((DEBUG_INFO, "STX: F3 (OpenShell Exit) detected\n"));
+        DEBUG ((DEBUG_INFO, "STX: F3 (OpenShell Exit) detected\n"));
         break;
       case SCAN_F4:
-        DEBUG((DEBUG_INFO, "STX: F4 (OpenShell Search) detected\n"));
+        DEBUG ((DEBUG_INFO, "STX: F4 (OpenShell Search) detected\n"));
         break;
       case SCAN_F5:
-        DEBUG((DEBUG_INFO, "STX: F5 (OpenShell Search & Replace) detected\n"));
+        DEBUG ((DEBUG_INFO, "STX: F5 (OpenShell Search & Replace) detected\n"));
         break;
       case SCAN_F6:
-        DEBUG((DEBUG_INFO, "STX: F6 (OpenShell Cut Line) detected\n"));
+        DEBUG ((DEBUG_INFO, "STX: F6 (OpenShell Cut Line) detected\n"));
         break;
       case SCAN_F7:
-        DEBUG((DEBUG_INFO, "STX: F7 (OpenShell Paste Line) detected\n"));
+        DEBUG ((DEBUG_INFO, "STX: F7 (OpenShell Paste Line) detected\n"));
         break;
       case SCAN_F8:
-        DEBUG((DEBUG_INFO, "STX: F8 (OpenShell Open File) detected\n"));
+        DEBUG ((DEBUG_INFO, "STX: F8 (OpenShell Open File) detected\n"));
         break;
       case SCAN_F9:
-        DEBUG((DEBUG_INFO, "STX: F9 (OpenShell File Type) detected\n"));
+        DEBUG ((DEBUG_INFO, "STX: F9 (OpenShell File Type) detected\n"));
         break;
       case SCAN_F10:
-        DEBUG((DEBUG_INFO, "STX: F10 (Not used in OpenShell) detected\n"));
+        DEBUG ((DEBUG_INFO, "STX: F10 (Not used in OpenShell) detected\n"));
         break;
       case SCAN_F11:
-        DEBUG((DEBUG_INFO, "STX: F11 (OpenShell File Type) detected\n"));
+        DEBUG ((DEBUG_INFO, "STX: F11 (OpenShell File Type) detected\n"));
         break;
       case SCAN_F12:
-        DEBUG((DEBUG_INFO, "STX: F12 (Not used in OpenShell) detected\n"));
+        DEBUG ((DEBUG_INFO, "STX: F12 (Not used in OpenShell) detected\n"));
         break;
       
       // Arrow keys
       case SCAN_UP:
-        DEBUG((DEBUG_INFO, "STX: Arrow UP detected\n"));
+        DEBUG ((DEBUG_INFO, "STX: Arrow UP detected\n"));
         break;
       case SCAN_DOWN:
-        DEBUG((DEBUG_INFO, "STX: Arrow DOWN detected\n"));
+        DEBUG ((DEBUG_INFO, "STX: Arrow DOWN detected\n"));
         break;
       case SCAN_LEFT:
-        DEBUG((DEBUG_INFO, "STX: Arrow LEFT detected\n"));
+        DEBUG ((DEBUG_INFO, "STX: Arrow LEFT detected\n"));
         break;
       case SCAN_RIGHT:
-        DEBUG((DEBUG_INFO, "STX: Arrow RIGHT detected\n"));
+        DEBUG ((DEBUG_INFO, "STX: Arrow RIGHT detected\n"));
         break;
       
       // Navigation keys
       case SCAN_HOME:
-        DEBUG((DEBUG_INFO, "STX: HOME key detected\n"));
+        DEBUG ((DEBUG_INFO, "STX: HOME key detected\n"));
         break;
       case SCAN_END:
-        DEBUG((DEBUG_INFO, "STX: END key detected\n"));
+        DEBUG ((DEBUG_INFO, "STX: END key detected\n"));
         break;
       case SCAN_PAGE_UP:
-        DEBUG((DEBUG_INFO, "STX: PAGE UP detected\n"));
+        DEBUG ((DEBUG_INFO, "STX: PAGE UP detected\n"));
         break;
       case SCAN_PAGE_DOWN:
-        DEBUG((DEBUG_INFO, "STX: PAGE DOWN detected\n"));
+        DEBUG ((DEBUG_INFO, "STX: PAGE DOWN detected\n"));
         break;
       case SCAN_INSERT:
-        DEBUG((DEBUG_INFO, "STX: INSERT key detected\n"));
+        DEBUG ((DEBUG_INFO, "STX: INSERT key detected\n"));
         break;
       case SCAN_DELETE:
-        DEBUG((DEBUG_INFO, "STX: DELETE key detected\n"));
+        DEBUG ((DEBUG_INFO, "STX: DELETE key detected\n"));
         break;
       
       default:
@@ -420,10 +420,10 @@ CompatReadKeyStrokeEx (
         break;
     }
     
-    DEBUG((DEBUG_INFO, "STX: Key processed - Unicode=0x%04X, Scan=0x%04X, ShiftState=0x%08X\n", 
+    DEBUG ((DEBUG_INFO, "STX: Key processed - Unicode=0x%04X, Scan=0x%04X, ShiftState=0x%08X\n", 
            KeyData->Key.UnicodeChar, KeyData->Key.ScanCode, KeyData->KeyState.KeyShiftState));
   } else if (Status != EFI_NOT_READY) {
-    DEBUG((DEBUG_WARN, "STX: Underlying ReadKeyStroke failed: %r\n", Status));
+    DEBUG ((DEBUG_WARN, "STX: Underlying ReadKeyStroke failed: %r\n", Status));
   }
   
   return Status;
@@ -455,7 +455,7 @@ CompatRegisterKeyNotify (
   if (NotifyHandle != NULL) {
     *NotifyHandle = (VOID*)0xDEADBEEF; // Dummy handle
   }
-  DEBUG((DEBUG_INFO, "STX: Returning success with dummy handle (EFI 1.1 limitation)\n"));
+  DEBUG ((DEBUG_INFO, "STX: Returning success with dummy handle (EFI 1.1 limitation)\n"));
   return EFI_SUCCESS;
 }
 
@@ -467,7 +467,7 @@ CompatUnregisterKeyNotify (
   )
 {
   // Not supported on EFI 1.1 systems, but return success to avoid breaking apps
-  DEBUG((DEBUG_INFO, "STX: Returning success (EFI 1.1 limitation)\n"));
+  DEBUG ((DEBUG_INFO, "STX: Returning success (EFI 1.1 limitation)\n"));
   return EFI_SUCCESS;
 }
 
@@ -485,11 +485,11 @@ InstallSimpleTextInputExCompat (
   EFI_SIMPLE_TEXT_INPUT_EX_PROTOCOL *TextInputEx;
   
   if (Handle == NULL) {
-    DEBUG((DEBUG_ERROR, "STX: Invalid handle provided\n"));
+    DEBUG ((DEBUG_ERROR, "STX: Invalid handle provided\n"));
     return EFI_INVALID_PARAMETER;
   }
   
-  DEBUG((DEBUG_INFO, "STX: Checking handle %p\n", Handle));
+  DEBUG ((DEBUG_INFO, "STX: Checking handle %p\n", Handle));
   
   // Check if SimpleTextInputEx already exists
   Status = gBS->HandleProtocol(
@@ -498,13 +498,13 @@ InstallSimpleTextInputExCompat (
                   (VOID**)&TextInputEx
                 );
   
-  if (!EFI_ERROR(Status)) {
+  if (!EFI_ERROR (Status)) {
     // Protocol already exists, no need for compatibility layer
-    DEBUG((DEBUG_INFO, "STX: SimpleTextInputEx already exists on handle %p\n", Handle));
+    DEBUG ((DEBUG_INFO, "STX: SimpleTextInputEx already exists on handle %p\n", Handle));
     return EFI_ALREADY_STARTED;
   }
   
-  DEBUG((DEBUG_INFO, "STX: SimpleTextInputEx not found, Status=%r. Installing compatibility layer...\n", Status));
+  DEBUG ((DEBUG_INFO, "STX: SimpleTextInputEx not found, Status=%r. Installing compatibility layer...\n", Status));
   
   // Get SimpleTextInput protocol
   Status = gBS->HandleProtocol(
@@ -513,26 +513,26 @@ InstallSimpleTextInputExCompat (
                   (VOID**)&TextInput
                 );
   
-  if (EFI_ERROR(Status)) {
-    DEBUG((DEBUG_ERROR, "STX: Failed to get SimpleTextInput protocol on handle %p: %r\n", Handle, Status));
+  if (EFI_ERROR (Status)) {
+    DEBUG ((DEBUG_ERROR, "STX: Failed to get SimpleTextInput protocol on handle %p: %r\n", Handle, Status));
     return Status;
   }
   
   if (TextInput == NULL) {
-    DEBUG((DEBUG_ERROR, "STX: SimpleTextInput protocol is NULL on handle %p\n", Handle));
+    DEBUG ((DEBUG_ERROR, "STX: SimpleTextInput protocol is NULL on handle %p\n", Handle));
     return EFI_NOT_FOUND;
   }
   
-  DEBUG((DEBUG_INFO, "STX: Found SimpleTextInput protocol %p on handle %p\n", TextInput, Handle));
+  DEBUG ((DEBUG_INFO, "STX: Found SimpleTextInput protocol %p on handle %p\n", TextInput, Handle));
   
   // Allocate private structure
-  Private = AllocateZeroPool(sizeof(COMPAT_TEXT_INPUT_EX_PRIVATE));
+  Private = AllocateZeroPool (sizeof(COMPAT_TEXT_INPUT_EX_PRIVATE));
   if (Private == NULL) {
-    DEBUG((DEBUG_ERROR, "STX: Failed to allocate memory for private structure\n"));
+    DEBUG ((DEBUG_ERROR, "STX: Failed to allocate memory for private structure\n"));
     return EFI_OUT_OF_RESOURCES;
   }
   
-  DEBUG((DEBUG_INFO, "STX: Allocated private structure %p\n", Private));
+  DEBUG ((DEBUG_INFO, "STX: Allocated private structure %p\n", Private));
   
   // Initialize private structure
   Private->Signature = COMPAT_TEXT_INPUT_EX_SIGNATURE;
@@ -547,7 +547,7 @@ InstallSimpleTextInputExCompat (
   Private->TextInputEx.RegisterKeyNotify = CompatRegisterKeyNotify;
   Private->TextInputEx.UnregisterKeyNotify = CompatUnregisterKeyNotify;
   
-  DEBUG((DEBUG_INFO, "STX: Initialized protocol functions for handle %p\n", Handle));
+  DEBUG ((DEBUG_INFO, "STX: Initialized protocol functions for handle %p\n", Handle));
   
   // Install the protocol using InstallMultipleProtocolInterfaces for better compatibility
   Status = gBS->InstallMultipleProtocolInterfaces(
@@ -557,13 +557,13 @@ InstallSimpleTextInputExCompat (
                   NULL
                 );
   
-  if (EFI_ERROR(Status)) {
-    DEBUG((DEBUG_ERROR, "STX: Failed to install SimpleTextInputEx protocol on handle %p: %r\n", Handle, Status));
-    FreePool(Private);
+  if (EFI_ERROR (Status)) {
+    DEBUG ((DEBUG_ERROR, "STX: Failed to install SimpleTextInputEx protocol on handle %p: %r\n", Handle, Status));
+    FreePool (Private);
     return Status;
   }
   
-  DEBUG((DEBUG_INFO, "STX: SimpleTextInputEx compatibility layer installed successfully on handle %p\n", Handle));
+  DEBUG ((DEBUG_INFO, "STX: SimpleTextInputEx compatibility layer installed successfully on handle %p\n", Handle));
   
   // Verify installation by trying to retrieve the protocol
   EFI_SIMPLE_TEXT_INPUT_EX_PROTOCOL *TestProtocol;
@@ -573,10 +573,10 @@ InstallSimpleTextInputExCompat (
                   (VOID**)&TestProtocol
                 );
   
-  if (EFI_ERROR(Status)) {
-    DEBUG((DEBUG_ERROR, "STX: Verification failed - cannot retrieve installed protocol: %r\n", Status));
+  if (EFI_ERROR (Status)) {
+    DEBUG ((DEBUG_ERROR, "STX: Verification failed - cannot retrieve installed protocol: %r\n", Status));
   } else {
-    DEBUG((DEBUG_INFO, "STX: Verification successful - protocol %p installed and accessible\n", TestProtocol));
+    DEBUG ((DEBUG_INFO, "STX: Verification successful - protocol %p installed and accessible\n", TestProtocol));
   }
   return EFI_SUCCESS;
 }
@@ -597,11 +597,11 @@ PerformCompatibilityInstallation (
   BOOLEAN    ProtocolMissing = FALSE;
   
   if (gDriverInitialized) {
-    DEBUG((DEBUG_INFO, "STX: Already initialized, skipping\n"));
+    DEBUG ((DEBUG_INFO, "STX: Already initialized, skipping\n"));
     return EFI_SUCCESS;
   }
   
-  DEBUG((DEBUG_INFO, "STX: === Performing SimpleTextInputEx Compatibility Installation ===\n"));
+  DEBUG ((DEBUG_INFO, "STX: === Performing SimpleTextInputEx Compatibility Installation ===\n"));
   
   // Check if ANY SimpleTextInputEx protocols exist in the system
   Status = gBS->LocateHandleBuffer(
@@ -612,13 +612,13 @@ PerformCompatibilityInstallation (
                   &HandleBuffer
                 );
   
-  if (EFI_ERROR(Status) || HandleCount == 0) {
-    DEBUG((DEBUG_INFO, "STX: No SimpleTextInputEx protocols found in system (Status=%r, Count=%d)\n", Status, HandleCount));
-    DEBUG((DEBUG_INFO, "STX: This indicates the system needs our compatibility layer\n"));
+  if (EFI_ERROR (Status) || HandleCount == 0) {
+    DEBUG ((DEBUG_INFO, "STX: No SimpleTextInputEx protocols found in system (Status=%r, Count=%d)\n", Status, HandleCount));
+    DEBUG ((DEBUG_INFO, "STX: This indicates the system needs our compatibility layer\n"));
     ProtocolMissing = TRUE;
   } else {
-    DEBUG((DEBUG_INFO, "STX: Found %d existing SimpleTextInputEx protocols\n", HandleCount));
-    gBS->FreePool(HandleBuffer);
+    DEBUG ((DEBUG_INFO, "STX: Found %d existing SimpleTextInputEx protocols\n", HandleCount));
+    gBS->FreePool (HandleBuffer);
   }
   
   // Install compatibility layer if protocols are missing OR on mixed EFI systems
@@ -627,22 +627,22 @@ PerformCompatibilityInstallation (
       (gST->RuntimeServices != NULL && 
        gST->RuntimeServices->Hdr.Revision < EFI_2_00_SYSTEM_TABLE_REVISION)) {
     
-    DEBUG((DEBUG_INFO, "STX: Installing compatibility layer due to missing protocols or legacy EFI components\n"));
+    DEBUG ((DEBUG_INFO, "STX: Installing compatibility layer due to missing protocols or legacy EFI components\n"));
     
     // First, try installing on console input handle (most important)
     if (gST->ConsoleInHandle != NULL) {
-      DEBUG((DEBUG_INFO, "STX: Attempting installation on console input handle %p\n", gST->ConsoleInHandle));
-      Status = InstallSimpleTextInputExCompat(gST->ConsoleInHandle);
-      if (!EFI_ERROR(Status)) {
-        DEBUG((DEBUG_INFO, "STX: *** SUCCESS: Installed on console input handle ***\n"));
+      DEBUG ((DEBUG_INFO, "STX: Attempting installation on console input handle %p\n", gST->ConsoleInHandle));
+      Status = InstallSimpleTextInputExCompat (gST->ConsoleInHandle);
+      if (!EFI_ERROR (Status)) {
+        DEBUG ((DEBUG_INFO, "STX: *** SUCCESS: Installed on console input handle ***\n"));
         SuccessCount++;
       } else if (Status != EFI_ALREADY_STARTED) {
-        DEBUG((DEBUG_WARN, "STX: Failed to install on console handle: %r\n", Status));
+        DEBUG ((DEBUG_WARN, "STX: Failed to install on console handle: %r\n", Status));
       } else {
-        DEBUG((DEBUG_INFO, "STX: Console handle already has SimpleTextInputEx\n"));
+        DEBUG ((DEBUG_INFO, "STX: Console handle already has SimpleTextInputEx\n"));
       }
     } else {
-      DEBUG((DEBUG_WARN, "STX: Console input handle is NULL!\n"));
+      DEBUG ((DEBUG_WARN, "STX: Console input handle is NULL!\n"));
     }
     
     // Try all handles with SimpleTextInput protocol
@@ -654,30 +654,30 @@ PerformCompatibilityInstallation (
                     &HandleBuffer
                   );
     
-    if (!EFI_ERROR(Status)) {
-      DEBUG((DEBUG_INFO, "STX: Found %d handles with SimpleTextInput protocol\n", HandleCount));
+    if (!EFI_ERROR (Status)) {
+      DEBUG ((DEBUG_INFO, "STX: Found %d handles with SimpleTextInput protocol\n", HandleCount));
       
       for (Index = 0; Index < HandleCount; Index++) {
-        DEBUG((DEBUG_INFO, "STX: Processing handle %d/%d: %p\n", Index + 1, HandleCount, HandleBuffer[Index]));
-        Status = InstallSimpleTextInputExCompat(HandleBuffer[Index]);
-        if (!EFI_ERROR(Status)) {
-          DEBUG((DEBUG_INFO, "STX: *** SUCCESS: Installed compatibility layer on handle %d (%p) ***\n", Index, HandleBuffer[Index]));
+        DEBUG ((DEBUG_INFO, "STX: Processing handle %d/%d: %p\n", Index + 1, HandleCount, HandleBuffer[Index]));
+        Status = InstallSimpleTextInputExCompat (HandleBuffer[Index]);
+        if (!EFI_ERROR (Status)) {
+          DEBUG ((DEBUG_INFO, "STX: *** SUCCESS: Installed compatibility layer on handle %d (%p) ***\n", Index, HandleBuffer[Index]));
           SuccessCount++;
         } else if (Status != EFI_ALREADY_STARTED) {
-          DEBUG((DEBUG_WARN, "STX: Failed to install on handle %d (%p): %r\n", Index, HandleBuffer[Index], Status));
+          DEBUG ((DEBUG_WARN, "STX: Failed to install on handle %d (%p): %r\n", Index, HandleBuffer[Index], Status));
         }
       }
       
-      gBS->FreePool(HandleBuffer);
+      gBS->FreePool (HandleBuffer);
     } else {
-      DEBUG((DEBUG_ERROR, "STX: Failed to locate SimpleTextInput handles: %r\n", Status));
+      DEBUG ((DEBUG_ERROR, "STX: Failed to locate SimpleTextInput handles: %r\n", Status));
     }
   } else {
-    DEBUG((DEBUG_INFO, "STX: System appears to have full EFI 2.0+ support, compatibility layer not needed\n"));
+    DEBUG ((DEBUG_INFO, "STX: System appears to have full EFI 2.0+ support, compatibility layer not needed\n"));
   }
   
   gDriverInitialized = TRUE;
-  DEBUG((DEBUG_INFO, "STX: === Compatibility installation completed: %d successful installations ===\n", SuccessCount));
+  DEBUG ((DEBUG_INFO, "STX: === Compatibility installation completed: %d successful installations ===\n", SuccessCount));
   return EFI_SUCCESS;
 }
 
@@ -691,8 +691,8 @@ OnReadyToBootEvent (
   IN VOID       *Context
   )
 {
-  DEBUG((DEBUG_INFO, "STX: System is ready to boot, performing late initialization\n"));
-  PerformCompatibilityInstallation();
+  DEBUG ((DEBUG_INFO, "STX: System is ready to boot, performing late initialization\n"));
+  PerformCompatibilityInstallation ();
 }
 
 EFI_STATUS
@@ -704,21 +704,21 @@ SimpleTextInputExCompatEntry (
 {
   EFI_STATUS Status;
   
-  DEBUG((DEBUG_INFO, "STX: === SimpleTextInputEx Compatibility Driver Starting ===\n"));
-  DEBUG((DEBUG_INFO, "STX: System Table Revision: 0x%08X (%d.%02d)\n", 
+  DEBUG ((DEBUG_INFO, "STX: === SimpleTextInputEx Compatibility Driver Starting ===\n"));
+  DEBUG ((DEBUG_INFO, "STX: System Table Revision: 0x%08X (%d.%02d)\n", 
          SystemTable->Hdr.Revision, 
          SystemTable->Hdr.Revision >> 16, 
          SystemTable->Hdr.Revision & 0xFFFF));
   
   if (SystemTable->RuntimeServices != NULL) {
-    DEBUG((DEBUG_INFO, "STX: Runtime Services Revision: 0x%08X (%d.%02d)\n", 
+    DEBUG ((DEBUG_INFO, "STX: Runtime Services Revision: 0x%08X (%d.%02d)\n", 
            SystemTable->RuntimeServices->Hdr.Revision,
            SystemTable->RuntimeServices->Hdr.Revision >> 16,
            SystemTable->RuntimeServices->Hdr.Revision & 0xFFFF));
   }
   
   if (SystemTable->BootServices != NULL) {
-    DEBUG((DEBUG_INFO, "STX: Boot Services Revision: 0x%08X (%d.%02d)\n", 
+    DEBUG ((DEBUG_INFO, "STX: Boot Services Revision: 0x%08X (%d.%02d)\n", 
            SystemTable->BootServices->Hdr.Revision,
            SystemTable->BootServices->Hdr.Revision >> 16,
            SystemTable->BootServices->Hdr.Revision & 0xFFFF));
@@ -726,18 +726,18 @@ SimpleTextInputExCompatEntry (
   
   // Check if console services are available for immediate installation
   if (SystemTable->ConsoleInHandle != NULL && SystemTable->ConIn != NULL) {
-    DEBUG((DEBUG_INFO, "STX: Console services are available, attempting immediate installation\n"));
-    Status = PerformCompatibilityInstallation();
-    if (!EFI_ERROR(Status)) {
-      DEBUG((DEBUG_INFO, "STX: Immediate installation successful\n"));
+    DEBUG ((DEBUG_INFO, "STX: Console services are available, attempting immediate installation\n"));
+    Status = PerformCompatibilityInstallation ();
+    if (!EFI_ERROR (Status)) {
+      DEBUG ((DEBUG_INFO, "STX: Immediate installation successful\n"));
       return EFI_SUCCESS;
     } else {
-      DEBUG((DEBUG_WARN, "STX: Immediate installation failed: %r, will try deferred installation\n", Status));
+      DEBUG ((DEBUG_WARN, "STX: Immediate installation failed: %r, will try deferred installation\n", Status));
     }
   } else {
-    DEBUG((DEBUG_INFO, "STX: Console services not ready (ConsoleInHandle=%p, ConIn=%p)\n", 
+    DEBUG ((DEBUG_INFO, "STX: Console services not ready (ConsoleInHandle=%p, ConIn=%p)\n", 
            SystemTable->ConsoleInHandle, SystemTable->ConIn));
-    DEBUG((DEBUG_INFO, "STX: Will attempt deferred installation via ReadyToBoot event\n"));
+    DEBUG ((DEBUG_INFO, "STX: Will attempt deferred installation via ReadyToBoot event\n"));
   }
   
   // Set up deferred installation via ReadyToBoot event
@@ -748,18 +748,18 @@ SimpleTextInputExCompatEntry (
                   NULL,
                   &gEfiEventReadyToBootGuid,
                   &gReadyToBootEvent
-                );
-  
-  if (EFI_ERROR(Status)) {
-    DEBUG((DEBUG_ERROR, "STX: Failed to create ReadyToBoot event: %r\n", Status));
+                  );
+
+  if (EFI_ERROR (Status)) {
+    DEBUG ((DEBUG_ERROR, "STX: Failed to create ReadyToBoot event: %r\n", Status));
     // Try immediate installation as fallback
-    DEBUG((DEBUG_INFO, "STX: Attempting immediate installation as fallback\n"));
-    PerformCompatibilityInstallation();
+    DEBUG ((DEBUG_INFO, "STX: Attempting immediate installation as fallback\n"));
+    PerformCompatibilityInstallation ();
   } else {
-    DEBUG((DEBUG_INFO, "STX: ReadyToBoot event created successfully, driver will install protocols when system is ready\n"));
+    DEBUG ((DEBUG_INFO, "STX: ReadyToBoot event created successfully, driver will install protocols when system is ready\n"));
   }
-  
+
   // Always return success - we want the driver to stay loaded
-  DEBUG((DEBUG_INFO, "STX: SimpleTextInputEx compatibility driver loaded successfully\n"));
+  DEBUG ((DEBUG_INFO, "STX: SimpleTextInputEx compatibility driver loaded successfully\n"));
   return EFI_SUCCESS;
 }
