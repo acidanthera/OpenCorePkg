@@ -1,16 +1,16 @@
 /*++
 
-Copyright (c) 2025, Enhanced Shell Compatibility Layer
-All rights reserved.
+   Copyright (c) 2025, Enhanced Shell Compatibility Layer
+   All rights reserved.
 
-Module Name:
-  SimpleTextInputExCompat.c
+   Module Name:
+   SimpleTextInputExCompat.c
 
-Abstract:
-  Compatibility layer for SimpleTextInputEx protocol on EFI 1.1 systems
-  Enables OpenShell edit command to work on legacy systems
+   Abstract:
+   Compatibility layer for SimpleTextInputEx protocol on EFI 1.1 systems
+   Enables OpenShell edit command to work on legacy systems
 
---*/
+   --*/
 
 #include <Uefi.h>
 #include <Protocol/SimpleTextIn.h>
@@ -27,131 +27,131 @@ Abstract:
 //
 // Protocol GUIDs (in case they're not properly declared)
 //
-extern EFI_GUID gEfiSimpleTextInProtocolGuid;
-extern EFI_GUID gEfiSimpleTextInputExProtocolGuid;
+extern EFI_GUID  gEfiSimpleTextInProtocolGuid;
+extern EFI_GUID  gEfiSimpleTextInputExProtocolGuid;
 
 //
 // Key state definitions for EFI 1.1 compatibility
 // These may not be properly defined in older headers
 //
 #ifndef EFI_LEFT_CONTROL_PRESSED
-#define EFI_LEFT_CONTROL_PRESSED    0x00000004
+#define EFI_LEFT_CONTROL_PRESSED  0x00000004
 #endif
 
 #ifndef EFI_RIGHT_CONTROL_PRESSED
-#define EFI_RIGHT_CONTROL_PRESSED   0x00000008
+#define EFI_RIGHT_CONTROL_PRESSED  0x00000008
 #endif
 
 #ifndef EFI_LEFT_ALT_PRESSED
-#define EFI_LEFT_ALT_PRESSED        0x00000010
+#define EFI_LEFT_ALT_PRESSED  0x00000010
 #endif
 
 #ifndef EFI_RIGHT_ALT_PRESSED
-#define EFI_RIGHT_ALT_PRESSED       0x00000020
+#define EFI_RIGHT_ALT_PRESSED  0x00000020
 #endif
 
 #ifndef EFI_LEFT_SHIFT_PRESSED
-#define EFI_LEFT_SHIFT_PRESSED      0x00000001
+#define EFI_LEFT_SHIFT_PRESSED  0x00000001
 #endif
 
 #ifndef EFI_RIGHT_SHIFT_PRESSED
-#define EFI_RIGHT_SHIFT_PRESSED     0x00000002
+#define EFI_RIGHT_SHIFT_PRESSED  0x00000002
 #endif
 
 #ifndef EFI_LEFT_LOGO_PRESSED
-#define EFI_LEFT_LOGO_PRESSED       0x00000040
+#define EFI_LEFT_LOGO_PRESSED  0x00000040
 #endif
 
 #ifndef EFI_RIGHT_LOGO_PRESSED
-#define EFI_RIGHT_LOGO_PRESSED      0x00000080
+#define EFI_RIGHT_LOGO_PRESSED  0x00000080
 #endif
 
 //
 //
 // Control character definitions - OpenShell text editor mappings
 //
-#define CTRL_E              0x05    // Display Help (MainCommandDisplayHelp)
-#define CTRL_F              0x06    // Search (MainCommandSearch)
-#define CTRL_G              0x07    // Go to Line (MainCommandGotoLine)
-#define CTRL_H              0x08    // Backspace
-#define CTRL_I              0x09    // Tab
-#define CTRL_J              0x0A    // New line / Line feed
-#define CTRL_K              0x0B    // Cut Line (MainCommandCutLine)
-#define CTRL_M              0x0D    // Carriage return
-#define CTRL_O              0x0F    // Open File (MainCommandOpenFile)
-#define CTRL_Q              0x11    // Exit (MainCommandExit)
-#define CTRL_R              0x12    // Search & Replace (MainCommandSearchReplace)
-#define CTRL_S              0x13    // Save File (MainCommandSaveFile)
-#define CTRL_T              0x14    // Switch File Type (MainCommandSwitchFileType)
-#define CTRL_U              0x15    // Paste Line (MainCommandPasteLine)
-#define CTRL_Y              0x19    // Yank / Redo
-#define CTRL_Z              0x1A    // Suspend / Undo
-#define CTRL_BACKSLASH      0x1C    // Quit
-#define CTRL_BRACKET        0x1D    // Group separator / Escape
-#define CTRL_CARET          0x1E    // Record separator
-#define CTRL_UNDERSCORE     0x1F    // Unit separator / Undo
+#define CTRL_E           0x05       // Display Help (MainCommandDisplayHelp)
+#define CTRL_F           0x06       // Search (MainCommandSearch)
+#define CTRL_G           0x07       // Go to Line (MainCommandGotoLine)
+#define CTRL_H           0x08       // Backspace
+#define CTRL_I           0x09       // Tab
+#define CTRL_J           0x0A       // New line / Line feed
+#define CTRL_K           0x0B       // Cut Line (MainCommandCutLine)
+#define CTRL_M           0x0D       // Carriage return
+#define CTRL_O           0x0F       // Open File (MainCommandOpenFile)
+#define CTRL_Q           0x11       // Exit (MainCommandExit)
+#define CTRL_R           0x12       // Search & Replace (MainCommandSearchReplace)
+#define CTRL_S           0x13       // Save File (MainCommandSaveFile)
+#define CTRL_T           0x14       // Switch File Type (MainCommandSwitchFileType)
+#define CTRL_U           0x15       // Paste Line (MainCommandPasteLine)
+#define CTRL_Y           0x19       // Yank / Redo
+#define CTRL_Z           0x1A       // Suspend / Undo
+#define CTRL_BACKSLASH   0x1C       // Quit
+#define CTRL_BRACKET     0x1D       // Group separator / Escape
+#define CTRL_CARET       0x1E       // Record separator
+#define CTRL_UNDERSCORE  0x1F       // Unit separator / Undo
 
 //
 // Control character lookup table for debugging
 //
 typedef struct {
-  UINT8       ControlChar;
-  CHAR8       *Description;
+  UINT8    ControlChar;
+  CHAR8    *Description;
 } CTRL_CHAR_INFO;
 
-STATIC CTRL_CHAR_INFO mCtrlCharTable[] = {
-  { CTRL_E,           "Ctrl+E (OpenShell Display Help)" },
-  { CTRL_F,           "Ctrl+F (OpenShell Search)" },
-  { CTRL_G,           "Ctrl+G (OpenShell Go to Line)" },
-  { CTRL_H,           "Ctrl+H (Backspace)" },
-  { CTRL_I,           "Ctrl+I (Tab)" },
-  { CTRL_J,           "Ctrl+J (New line/LF)" },
-  { CTRL_K,           "Ctrl+K (OpenShell Cut Line)" },
-  { CTRL_M,           "Ctrl+M (Carriage return)" },
-  { CTRL_O,           "Ctrl+O (OpenShell Open File)" },
-  { CTRL_Q,           "Ctrl+Q (OpenShell Exit)" },
-  { CTRL_R,           "Ctrl+R (OpenShell Search & Replace)" },
-  { CTRL_S,           "Ctrl+S (OpenShell Save File)" },
-  { CTRL_T,           "Ctrl+T (OpenShell Switch File Type)" },
-  { CTRL_U,           "Ctrl+U (OpenShell Paste Line)" },
-  { CTRL_Y,           "Ctrl+Y (Yank/Redo)" },
-  { CTRL_Z,           "Ctrl+Z (Suspend/Undo)" },
-  { CTRL_BACKSLASH,   "Ctrl+\\ (Quit)" },
-  { CTRL_BRACKET,     "Ctrl+] (Escape)" },
-  { CTRL_CARET,       "Ctrl+^ (Record separator)" },
-  { CTRL_UNDERSCORE,  "Ctrl+_ (Undo)" },
-  { 0,                NULL }  // End marker
+STATIC CTRL_CHAR_INFO  mCtrlCharTable[] = {
+  { CTRL_E,          "Ctrl+E (OpenShell Display Help)"     },
+  { CTRL_F,          "Ctrl+F (OpenShell Search)"           },
+  { CTRL_G,          "Ctrl+G (OpenShell Go to Line)"       },
+  { CTRL_H,          "Ctrl+H (Backspace)"                  },
+  { CTRL_I,          "Ctrl+I (Tab)"                        },
+  { CTRL_J,          "Ctrl+J (New line/LF)"                },
+  { CTRL_K,          "Ctrl+K (OpenShell Cut Line)"         },
+  { CTRL_M,          "Ctrl+M (Carriage return)"            },
+  { CTRL_O,          "Ctrl+O (OpenShell Open File)"        },
+  { CTRL_Q,          "Ctrl+Q (OpenShell Exit)"             },
+  { CTRL_R,          "Ctrl+R (OpenShell Search & Replace)" },
+  { CTRL_S,          "Ctrl+S (OpenShell Save File)"        },
+  { CTRL_T,          "Ctrl+T (OpenShell Switch File Type)" },
+  { CTRL_U,          "Ctrl+U (OpenShell Paste Line)"       },
+  { CTRL_Y,          "Ctrl+Y (Yank/Redo)"                  },
+  { CTRL_Z,          "Ctrl+Z (Suspend/Undo)"               },
+  { CTRL_BACKSLASH,  "Ctrl+\\ (Quit)"                      },
+  { CTRL_BRACKET,    "Ctrl+] (Escape)"                     },
+  { CTRL_CARET,      "Ctrl+^ (Record separator)"           },
+  { CTRL_UNDERSCORE, "Ctrl+_ (Undo)"                       },
+  { 0,               NULL                                  }// End marker
 };
 
 /**
-  Get description for a control character.
-  
-  @param ControlChar  The control character to look up
-  
-  @return Description string or NULL if not found
-**/
+   Get description for a control character.
+
+   @param ControlChar  The control character to look up
+
+   @return Description string or NULL if not found
+ **/
 STATIC
 CHAR8 *
 GetControlCharDescription (
   IN UINT8  ControlChar
   )
 {
-  UINTN Index;
-  
+  UINTN  Index;
+
   for (Index = 0; mCtrlCharTable[Index].Description != NULL; Index++) {
     if (mCtrlCharTable[Index].ControlChar == ControlChar) {
       return mCtrlCharTable[Index].Description;
     }
   }
-  
+
   return NULL;
 }
 
 //
 // Global variables for driver state
 //
-BOOLEAN  gDriverInitialized = FALSE;
-EFI_EVENT gReadyToBootEvent = NULL;
+BOOLEAN    gDriverInitialized = FALSE;
+EFI_EVENT  gReadyToBootEvent  = NULL;
 
 //
 // EFI revision definitions
@@ -169,14 +169,14 @@ EFI_EVENT gReadyToBootEvent = NULL;
 // Compatibility layer structure
 //
 typedef struct {
-  UINT32                              Signature;
-  EFI_SIMPLE_TEXT_INPUT_EX_PROTOCOL   TextInputEx;
-  EFI_SIMPLE_TEXT_INPUT_PROTOCOL      *UnderlyingTextInput;
-  EFI_HANDLE                          Handle;
+  UINT32                               Signature;
+  EFI_SIMPLE_TEXT_INPUT_EX_PROTOCOL    TextInputEx;
+  EFI_SIMPLE_TEXT_INPUT_PROTOCOL       *UnderlyingTextInput;
+  EFI_HANDLE                           Handle;
 } COMPAT_TEXT_INPUT_EX_PRIVATE;
 
 #define COMPAT_TEXT_INPUT_EX_PRIVATE_FROM_PROTOCOL(a) \
-  CR(a, COMPAT_TEXT_INPUT_EX_PRIVATE, TextInputEx, COMPAT_TEXT_INPUT_EX_SIGNATURE)
+        CR(a, COMPAT_TEXT_INPUT_EX_PRIVATE, TextInputEx, COMPAT_TEXT_INPUT_EX_SIGNATURE)
 
 //
 // Protocol function implementations
@@ -185,122 +185,130 @@ typedef struct {
 EFI_STATUS
 EFIAPI
 CompatReset (
-  IN EFI_SIMPLE_TEXT_INPUT_EX_PROTOCOL *This,
-  IN BOOLEAN                           ExtendedVerification
+  IN EFI_SIMPLE_TEXT_INPUT_EX_PROTOCOL  *This,
+  IN BOOLEAN                            ExtendedVerification
   )
 {
-  COMPAT_TEXT_INPUT_EX_PRIVATE *Private;
-  
+  COMPAT_TEXT_INPUT_EX_PRIVATE  *Private;
+
   if (This == NULL) {
     return EFI_INVALID_PARAMETER;
   }
-  
-  Private = COMPAT_TEXT_INPUT_EX_PRIVATE_FROM_PROTOCOL(This);
-  
-  if (Private == NULL || Private->Signature != COMPAT_TEXT_INPUT_EX_SIGNATURE) {
+
+  Private = COMPAT_TEXT_INPUT_EX_PRIVATE_FROM_PROTOCOL (This);
+
+  if ((Private == NULL) || (Private->Signature != COMPAT_TEXT_INPUT_EX_SIGNATURE)) {
     DEBUG ((DEBUG_ERROR, "STX: Invalid private structure in CompatReset\n"));
     return EFI_INVALID_PARAMETER;
   }
-  
+
   if (Private->UnderlyingTextInput == NULL) {
     DEBUG ((DEBUG_ERROR, "STX: Underlying TextInput is NULL\n"));
     return EFI_DEVICE_ERROR;
   }
-  
+
   // Reset underlying simple text input
-  return Private->UnderlyingTextInput->Reset(
-           Private->UnderlyingTextInput,
-           ExtendedVerification
-         );
+  return Private->UnderlyingTextInput->Reset (
+                                         Private->UnderlyingTextInput,
+                                         ExtendedVerification
+                                         );
 }
 
 EFI_STATUS
 EFIAPI
 CompatReadKeyStrokeEx (
-  IN  EFI_SIMPLE_TEXT_INPUT_EX_PROTOCOL *This,
+  IN EFI_SIMPLE_TEXT_INPUT_EX_PROTOCOL  *This,
   OUT EFI_KEY_DATA                      *KeyData
   )
 {
-  COMPAT_TEXT_INPUT_EX_PRIVATE *Private;
-  EFI_INPUT_KEY                Key;
-  EFI_STATUS                   Status;
-  
-  if (This == NULL || KeyData == NULL) {
+  COMPAT_TEXT_INPUT_EX_PRIVATE  *Private;
+  EFI_INPUT_KEY                 Key;
+  EFI_STATUS                    Status;
+
+  if ((This == NULL) || (KeyData == NULL)) {
     DEBUG ((DEBUG_ERROR, "STX: CompatReadKeyStrokeEx: Invalid parameters\n"));
     return EFI_INVALID_PARAMETER;
   }
-  
-  Private = COMPAT_TEXT_INPUT_EX_PRIVATE_FROM_PROTOCOL(This);
-  
-  if (Private == NULL || Private->Signature != COMPAT_TEXT_INPUT_EX_SIGNATURE) {
+
+  Private = COMPAT_TEXT_INPUT_EX_PRIVATE_FROM_PROTOCOL (This);
+
+  if ((Private == NULL) || (Private->Signature != COMPAT_TEXT_INPUT_EX_SIGNATURE)) {
     DEBUG ((DEBUG_ERROR, "STX: CompatReadKeyStrokeEx: Invalid private structure\n"));
     return EFI_INVALID_PARAMETER;
   }
-  
+
   if (Private->UnderlyingTextInput == NULL) {
     DEBUG ((DEBUG_ERROR, "STX: CompatReadKeyStrokeEx: Underlying TextInput is NULL\n"));
     return EFI_DEVICE_ERROR;
   }
-  
+
   DEBUG ((DEBUG_INFO, "STX: CompatReadKeyStrokeEx: Called on handle %p\n", Private->Handle));
-  
+
   // Initialize KeyData structure
-  ZeroMem (KeyData, sizeof(EFI_KEY_DATA));
-  
+  ZeroMem (KeyData, sizeof (EFI_KEY_DATA));
+
   // Read from underlying protocol
-  Status = Private->UnderlyingTextInput->ReadKeyStroke(
-             Private->UnderlyingTextInput,
-             &Key
-           );
-  
+  Status = Private->UnderlyingTextInput->ReadKeyStroke (
+                                           Private->UnderlyingTextInput,
+                                           &Key
+                                           );
+
   if (!EFI_ERROR (Status)) {
     // Convert EFI_INPUT_KEY to EFI_KEY_DATA
     KeyData->Key = Key;
-    
+
     // Initialize key state
-    KeyData->KeyState.KeyShiftState = 0;
+    KeyData->KeyState.KeyShiftState  = 0;
     KeyData->KeyState.KeyToggleState = 0;
-    
+
     // Enhanced control key handling for EFI 1.1 compatibility
     // Handle all possible control character combinations (0x01-0x1F)
-    if (KeyData->Key.UnicodeChar >= 0x01 && KeyData->Key.UnicodeChar <= 0x1F) {
+    if ((KeyData->Key.UnicodeChar >= 0x01) && (KeyData->Key.UnicodeChar <= 0x1F)) {
       // This is a control character - set appropriate shift state
       KeyData->KeyState.KeyShiftState = EFI_LEFT_CONTROL_PRESSED;
-      
+
       // Log control character using lookup table
-      CHAR8 *Description = GetControlCharDescription (KeyData->Key.UnicodeChar);
+      CHAR8  *Description = GetControlCharDescription (KeyData->Key.UnicodeChar);
       if (Description != NULL) {
         DEBUG ((DEBUG_INFO, "STX: %a detected\n", Description));
       } else {
-        DEBUG ((DEBUG_INFO, "STX: Control character 0x%02X (Ctrl+%c) detected\n", 
-               KeyData->Key.UnicodeChar, KeyData->Key.UnicodeChar + 0x40));
+        DEBUG ((
+          DEBUG_INFO,
+          "STX: Control character 0x%02X (Ctrl+%c) detected\n",
+          KeyData->Key.UnicodeChar,
+          KeyData->Key.UnicodeChar + 0x40
+          ));
       }
     } else {
       // Handle other special cases and key combinations
       switch (KeyData->Key.UnicodeChar) {
-        case 0x1B: // ESC key
+        case 0x1B:                 // ESC key
           DEBUG ((DEBUG_INFO, "STX: ESC key detected\n"));
           break;
-        case 0x7F: // DEL character
+        case 0x7F:                 // DEL character
           DEBUG ((DEBUG_INFO, "STX: DEL character detected\n"));
           break;
         default:
           // Check if this might be an Alt combination (high bit set)
-          if (KeyData->Key.UnicodeChar >= 0x80 && KeyData->Key.UnicodeChar <= 0xFF) {
+          if ((KeyData->Key.UnicodeChar >= 0x80) && (KeyData->Key.UnicodeChar <= 0xFF)) {
             KeyData->KeyState.KeyShiftState = EFI_LEFT_ALT_PRESSED;
-            DEBUG ((DEBUG_INFO, "STX: Alt combination detected - Unicode=0x%04X\n", 
-                   KeyData->Key.UnicodeChar));
+            DEBUG ((
+              DEBUG_INFO,
+              "STX: Alt combination detected - Unicode=0x%04X\n",
+              KeyData->Key.UnicodeChar
+              ));
           }
+
           break;
       }
     }
-    
+
     // Enhanced scan code handling for special keys and function keys
     switch (KeyData->Key.ScanCode) {
       case SCAN_ESC:
         DEBUG ((DEBUG_INFO, "STX: ESC scan code detected\n"));
         break;
-      
+
       // Function keys F1-F12 (OpenShell text editor usage)
       case SCAN_F1:
         DEBUG ((DEBUG_INFO, "STX: F1 (OpenShell Go to Line) detected\n"));
@@ -338,7 +346,7 @@ CompatReadKeyStrokeEx (
       case SCAN_F12:
         DEBUG ((DEBUG_INFO, "STX: F12 (Not used in OpenShell) detected\n"));
         break;
-      
+
       // Arrow keys
       case SCAN_UP:
         DEBUG ((DEBUG_INFO, "STX: Arrow UP detected\n"));
@@ -352,7 +360,7 @@ CompatReadKeyStrokeEx (
       case SCAN_RIGHT:
         DEBUG ((DEBUG_INFO, "STX: Arrow RIGHT detected\n"));
         break;
-      
+
       // Navigation keys
       case SCAN_HOME:
         DEBUG ((DEBUG_INFO, "STX: HOME key detected\n"));
@@ -372,26 +380,31 @@ CompatReadKeyStrokeEx (
       case SCAN_DELETE:
         DEBUG ((DEBUG_INFO, "STX: DELETE key detected\n"));
         break;
-      
+
       default:
         // No special scan code handling needed
         break;
     }
-    
-    DEBUG ((DEBUG_INFO, "STX: Key processed - Unicode=0x%04X, Scan=0x%04X, ShiftState=0x%08X\n", 
-           KeyData->Key.UnicodeChar, KeyData->Key.ScanCode, KeyData->KeyState.KeyShiftState));
+
+    DEBUG ((
+      DEBUG_INFO,
+      "STX: Key processed - Unicode=0x%04X, Scan=0x%04X, ShiftState=0x%08X\n",
+      KeyData->Key.UnicodeChar,
+      KeyData->Key.ScanCode,
+      KeyData->KeyState.KeyShiftState
+      ));
   } else if (Status != EFI_NOT_READY) {
     DEBUG ((DEBUG_WARN, "STX: Underlying ReadKeyStroke failed: %r\n", Status));
   }
-  
+
   return Status;
 }
 
 EFI_STATUS
 EFIAPI
 CompatSetState (
-  IN EFI_SIMPLE_TEXT_INPUT_EX_PROTOCOL *This,
-  IN EFI_KEY_TOGGLE_STATE              *KeyToggleState
+  IN EFI_SIMPLE_TEXT_INPUT_EX_PROTOCOL  *This,
+  IN EFI_KEY_TOGGLE_STATE               *KeyToggleState
   )
 {
   // Not supported on EFI 1.1 systems
@@ -402,9 +415,9 @@ CompatSetState (
 EFI_STATUS
 EFIAPI
 CompatRegisterKeyNotify (
-  IN  EFI_SIMPLE_TEXT_INPUT_EX_PROTOCOL *This,
-  IN  EFI_KEY_DATA                      *KeyData,
-  IN  EFI_KEY_NOTIFY_FUNCTION           KeyNotificationFunction,
+  IN EFI_SIMPLE_TEXT_INPUT_EX_PROTOCOL  *This,
+  IN EFI_KEY_DATA                       *KeyData,
+  IN EFI_KEY_NOTIFY_FUNCTION            KeyNotificationFunction,
   OUT VOID                              **NotifyHandle
   )
 {
@@ -418,6 +431,7 @@ CompatRegisterKeyNotify (
       return EFI_OUT_OF_RESOURCES;
     }
   }
+
   DEBUG ((DEBUG_INFO, "STX: Returning success with unique dummy handle (EFI 1.1 limitation)\n"));
   return EFI_SUCCESS;
 }
@@ -425,8 +439,8 @@ CompatRegisterKeyNotify (
 EFI_STATUS
 EFIAPI
 CompatUnregisterKeyNotify (
-  IN EFI_SIMPLE_TEXT_INPUT_EX_PROTOCOL *This,
-  IN VOID                              *NotificationHandle
+  IN EFI_SIMPLE_TEXT_INPUT_EX_PROTOCOL  *This,
+  IN VOID                               *NotificationHandle
   )
 {
   // Not supported on EFI 1.1 systems, but validate and free the handle to avoid misuse
@@ -446,108 +460,110 @@ CompatUnregisterKeyNotify (
 //
 EFI_STATUS
 InstallSimpleTextInputExCompat (
-  IN EFI_HANDLE Handle
+  IN EFI_HANDLE  Handle
   )
 {
-  EFI_STATUS                       Status;
-  COMPAT_TEXT_INPUT_EX_PRIVATE     *Private;
-  EFI_SIMPLE_TEXT_INPUT_PROTOCOL   *TextInput;
-  EFI_SIMPLE_TEXT_INPUT_EX_PROTOCOL *TextInputEx;
-  
+  EFI_STATUS                         Status;
+  COMPAT_TEXT_INPUT_EX_PRIVATE       *Private;
+  EFI_SIMPLE_TEXT_INPUT_PROTOCOL     *TextInput;
+  EFI_SIMPLE_TEXT_INPUT_EX_PROTOCOL  *TextInputEx;
+
   if (Handle == NULL) {
     DEBUG ((DEBUG_ERROR, "STX: Invalid handle provided\n"));
     return EFI_INVALID_PARAMETER;
   }
-  
+
   DEBUG ((DEBUG_INFO, "STX: Checking handle %p\n", Handle));
-  
+
   // Check if SimpleTextInputEx already exists
-  Status = gBS->HandleProtocol(
+  Status = gBS->HandleProtocol (
                   Handle,
                   &gEfiSimpleTextInputExProtocolGuid,
-                  (VOID**)&TextInputEx
-                );
-  
+                  (VOID **)&TextInputEx
+                  );
+
   if (!EFI_ERROR (Status)) {
     // Protocol already exists, no need for compatibility layer
     DEBUG ((DEBUG_INFO, "STX: SimpleTextInputEx already exists on handle %p\n", Handle));
     return EFI_ALREADY_STARTED;
   }
-  
+
   DEBUG ((DEBUG_INFO, "STX: SimpleTextInputEx not found, Status=%r. Installing compatibility layer...\n", Status));
-  
+
   // Get SimpleTextInput protocol
-  Status = gBS->HandleProtocol(
+  Status = gBS->HandleProtocol (
                   Handle,
                   &gEfiSimpleTextInProtocolGuid,
-                  (VOID**)&TextInput
-                );
-  
+                  (VOID **)&TextInput
+                  );
+
   if (EFI_ERROR (Status)) {
     DEBUG ((DEBUG_ERROR, "STX: Failed to get SimpleTextInput protocol on handle %p: %r\n", Handle, Status));
     return Status;
   }
-  
+
   if (TextInput == NULL) {
     DEBUG ((DEBUG_ERROR, "STX: SimpleTextInput protocol is NULL on handle %p\n", Handle));
     return EFI_NOT_FOUND;
   }
-  
+
   DEBUG ((DEBUG_INFO, "STX: Found SimpleTextInput protocol %p on handle %p\n", TextInput, Handle));
-  
+
   // Allocate private structure
-  Private = AllocateZeroPool (sizeof(COMPAT_TEXT_INPUT_EX_PRIVATE));
+  Private = AllocateZeroPool (sizeof (COMPAT_TEXT_INPUT_EX_PRIVATE));
   if (Private == NULL) {
     DEBUG ((DEBUG_ERROR, "STX: Failed to allocate memory for private structure\n"));
     return EFI_OUT_OF_RESOURCES;
   }
-  
+
   DEBUG ((DEBUG_INFO, "STX: Allocated private structure %p\n", Private));
-  
+
   // Initialize private structure
-  Private->Signature = COMPAT_TEXT_INPUT_EX_SIGNATURE;
+  Private->Signature           = COMPAT_TEXT_INPUT_EX_SIGNATURE;
   Private->UnderlyingTextInput = TextInput;
-  Private->Handle = Handle;
-  
+  Private->Handle              = Handle;
+
   // Setup protocol functions
-  Private->TextInputEx.Reset = CompatReset;
-  Private->TextInputEx.ReadKeyStrokeEx = CompatReadKeyStrokeEx;
-  Private->TextInputEx.WaitForKeyEx = TextInput->WaitForKey; // Reuse wait event
-  Private->TextInputEx.SetState = CompatSetState;
-  Private->TextInputEx.RegisterKeyNotify = CompatRegisterKeyNotify;
+  Private->TextInputEx.Reset               = CompatReset;
+  Private->TextInputEx.ReadKeyStrokeEx     = CompatReadKeyStrokeEx;
+  Private->TextInputEx.WaitForKeyEx        = TextInput->WaitForKey; // Reuse wait event
+  Private->TextInputEx.SetState            = CompatSetState;
+  Private->TextInputEx.RegisterKeyNotify   = CompatRegisterKeyNotify;
   Private->TextInputEx.UnregisterKeyNotify = CompatUnregisterKeyNotify;
-  
+
   DEBUG ((DEBUG_INFO, "STX: Initialized protocol functions for handle %p\n", Handle));
-  
+
   // Install the protocol using InstallMultipleProtocolInterfaces for better compatibility
-  Status = gBS->InstallMultipleProtocolInterfaces(
+  Status = gBS->InstallMultipleProtocolInterfaces (
                   &Handle,
                   &gEfiSimpleTextInputExProtocolGuid,
                   &Private->TextInputEx,
                   NULL
-                );
-  
+                  );
+
   if (EFI_ERROR (Status)) {
     DEBUG ((DEBUG_ERROR, "STX: Failed to install SimpleTextInputEx protocol on handle %p: %r\n", Handle, Status));
     FreePool (Private);
     return Status;
   }
-  
+
   DEBUG ((DEBUG_INFO, "STX: SimpleTextInputEx compatibility layer installed successfully on handle %p\n", Handle));
-  
+
   // Verify installation by trying to retrieve the protocol
-  EFI_SIMPLE_TEXT_INPUT_EX_PROTOCOL *TestProtocol;
-  Status = gBS->HandleProtocol(
+  EFI_SIMPLE_TEXT_INPUT_EX_PROTOCOL  *TestProtocol;
+
+  Status = gBS->HandleProtocol (
                   Handle,
                   &gEfiSimpleTextInputExProtocolGuid,
-                  (VOID**)&TestProtocol
-                );
-  
+                  (VOID **)&TestProtocol
+                  );
+
   if (EFI_ERROR (Status)) {
     DEBUG ((DEBUG_ERROR, "STX: Verification failed - cannot retrieve installed protocol: %r\n", Status));
   } else {
     DEBUG ((DEBUG_INFO, "STX: Verification successful - protocol %p installed and accessible\n", TestProtocol));
   }
+
   return EFI_SUCCESS;
 }
 
@@ -559,30 +575,30 @@ PerformCompatibilityInstallation (
   VOID
   )
 {
-  EFI_STATUS Status;
-  EFI_HANDLE *HandleBuffer;
-  UINTN      HandleCount;
-  UINTN      Index;
-  UINTN      SuccessCount = 0;
-  BOOLEAN    ProtocolMissing = FALSE;
-  
+  EFI_STATUS  Status;
+  EFI_HANDLE  *HandleBuffer;
+  UINTN       HandleCount;
+  UINTN       Index;
+  UINTN       SuccessCount    = 0;
+  BOOLEAN     ProtocolMissing = FALSE;
+
   if (gDriverInitialized) {
     DEBUG ((DEBUG_INFO, "STX: Already initialized, skipping\n"));
     return EFI_SUCCESS;
   }
-  
+
   DEBUG ((DEBUG_INFO, "STX: === Performing SimpleTextInputEx Compatibility Installation ===\n"));
-  
+
   // Check if ANY SimpleTextInputEx protocols exist in the system
-  Status = gBS->LocateHandleBuffer(
+  Status = gBS->LocateHandleBuffer (
                   ByProtocol,
                   &gEfiSimpleTextInputExProtocolGuid,
                   NULL,
                   &HandleCount,
                   &HandleBuffer
-                );
-  
-  if (EFI_ERROR (Status) || HandleCount == 0) {
+                  );
+
+  if (EFI_ERROR (Status) || (HandleCount == 0)) {
     DEBUG ((DEBUG_INFO, "STX: No SimpleTextInputEx protocols found in system (Status=%r, Count=%d)\n", Status, HandleCount));
     DEBUG ((DEBUG_INFO, "STX: This indicates the system needs our compatibility layer\n"));
     ProtocolMissing = TRUE;
@@ -590,15 +606,15 @@ PerformCompatibilityInstallation (
     DEBUG ((DEBUG_INFO, "STX: Found %d existing SimpleTextInputEx protocols\n", HandleCount));
     gBS->FreePool (HandleBuffer);
   }
-  
+
   // Install compatibility layer if protocols are missing OR on mixed EFI systems
-  if (ProtocolMissing || 
-      gST->Hdr.Revision < EFI_2_00_SYSTEM_TABLE_REVISION ||
-      (gST->RuntimeServices != NULL && 
-       gST->RuntimeServices->Hdr.Revision < EFI_2_00_SYSTEM_TABLE_REVISION)) {
-    
+  if (ProtocolMissing ||
+      (gST->Hdr.Revision < EFI_2_00_SYSTEM_TABLE_REVISION) ||
+      ((gST->RuntimeServices != NULL) &&
+       (gST->RuntimeServices->Hdr.Revision < EFI_2_00_SYSTEM_TABLE_REVISION)))
+  {
     DEBUG ((DEBUG_INFO, "STX: Installing compatibility layer due to missing protocols or legacy EFI components\n"));
-    
+
     // First, try installing on console input handle (most important)
     if (gST->ConsoleInHandle != NULL) {
       DEBUG ((DEBUG_INFO, "STX: Attempting installation on console input handle %p\n", gST->ConsoleInHandle));
@@ -614,19 +630,19 @@ PerformCompatibilityInstallation (
     } else {
       DEBUG ((DEBUG_WARN, "STX: Console input handle is NULL!\n"));
     }
-    
+
     // Try all handles with SimpleTextInput protocol
-    Status = gBS->LocateHandleBuffer(
+    Status = gBS->LocateHandleBuffer (
                     ByProtocol,
                     &gEfiSimpleTextInProtocolGuid,
                     NULL,
                     &HandleCount,
                     &HandleBuffer
-                  );
-    
+                    );
+
     if (!EFI_ERROR (Status)) {
       DEBUG ((DEBUG_INFO, "STX: Found %d handles with SimpleTextInput protocol\n", HandleCount));
-      
+
       for (Index = 0; Index < HandleCount; Index++) {
         DEBUG ((DEBUG_INFO, "STX: Processing handle %d/%d: %p\n", Index + 1, HandleCount, HandleBuffer[Index]));
         Status = InstallSimpleTextInputExCompat (HandleBuffer[Index]);
@@ -637,7 +653,7 @@ PerformCompatibilityInstallation (
           DEBUG ((DEBUG_WARN, "STX: Failed to install on handle %d (%p): %r\n", Index, HandleBuffer[Index], Status));
         }
       }
-      
+
       gBS->FreePool (HandleBuffer);
     } else {
       DEBUG ((DEBUG_ERROR, "STX: Failed to locate SimpleTextInput handles: %r\n", Status));
@@ -645,7 +661,7 @@ PerformCompatibilityInstallation (
   } else {
     DEBUG ((DEBUG_INFO, "STX: System appears to have full EFI 2.0+ support, compatibility layer not needed\n"));
   }
-  
+
   gDriverInitialized = TRUE;
   DEBUG ((DEBUG_INFO, "STX: === Compatibility installation completed: %d successful installations ===\n", SuccessCount));
   return EFI_SUCCESS;
@@ -672,30 +688,39 @@ SimpleTextInputExCompatEntry (
   IN EFI_SYSTEM_TABLE  *SystemTable
   )
 {
-  EFI_STATUS Status;
-  
+  EFI_STATUS  Status;
+
   DEBUG ((DEBUG_INFO, "STX: === SimpleTextInputEx Compatibility Driver Starting ===\n"));
-  DEBUG ((DEBUG_INFO, "STX: System Table Revision: 0x%08X (%d.%02d)\n", 
-         SystemTable->Hdr.Revision, 
-         SystemTable->Hdr.Revision >> 16, 
-         SystemTable->Hdr.Revision & 0xFFFF));
-  
+  DEBUG ((
+    DEBUG_INFO,
+    "STX: System Table Revision: 0x%08X (%d.%02d)\n",
+    SystemTable->Hdr.Revision,
+    SystemTable->Hdr.Revision >> 16,
+    SystemTable->Hdr.Revision & 0xFFFF
+    ));
+
   if (SystemTable->RuntimeServices != NULL) {
-    DEBUG ((DEBUG_INFO, "STX: Runtime Services Revision: 0x%08X (%d.%02d)\n", 
-           SystemTable->RuntimeServices->Hdr.Revision,
-           SystemTable->RuntimeServices->Hdr.Revision >> 16,
-           SystemTable->RuntimeServices->Hdr.Revision & 0xFFFF));
+    DEBUG ((
+      DEBUG_INFO,
+      "STX: Runtime Services Revision: 0x%08X (%d.%02d)\n",
+      SystemTable->RuntimeServices->Hdr.Revision,
+      SystemTable->RuntimeServices->Hdr.Revision >> 16,
+      SystemTable->RuntimeServices->Hdr.Revision & 0xFFFF
+      ));
   }
-  
+
   if (SystemTable->BootServices != NULL) {
-    DEBUG ((DEBUG_INFO, "STX: Boot Services Revision: 0x%08X (%d.%02d)\n", 
-           SystemTable->BootServices->Hdr.Revision,
-           SystemTable->BootServices->Hdr.Revision >> 16,
-           SystemTable->BootServices->Hdr.Revision & 0xFFFF));
+    DEBUG ((
+      DEBUG_INFO,
+      "STX: Boot Services Revision: 0x%08X (%d.%02d)\n",
+      SystemTable->BootServices->Hdr.Revision,
+      SystemTable->BootServices->Hdr.Revision >> 16,
+      SystemTable->BootServices->Hdr.Revision & 0xFFFF
+      ));
   }
-  
+
   // Check if console services are available for immediate installation
-  if (SystemTable->ConsoleInHandle != NULL && SystemTable->ConIn != NULL) {
+  if ((SystemTable->ConsoleInHandle != NULL) && (SystemTable->ConIn != NULL)) {
     DEBUG ((DEBUG_INFO, "STX: Console services are available, attempting immediate installation\n"));
     Status = PerformCompatibilityInstallation ();
     if (!EFI_ERROR (Status)) {
@@ -705,11 +730,15 @@ SimpleTextInputExCompatEntry (
       DEBUG ((DEBUG_WARN, "STX: Immediate installation failed: %r, will try deferred installation\n", Status));
     }
   } else {
-    DEBUG ((DEBUG_INFO, "STX: Console services not ready (ConsoleInHandle=%p, ConIn=%p)\n", 
-           SystemTable->ConsoleInHandle, SystemTable->ConIn));
+    DEBUG ((
+      DEBUG_INFO,
+      "STX: Console services not ready (ConsoleInHandle=%p, ConIn=%p)\n",
+      SystemTable->ConsoleInHandle,
+      SystemTable->ConIn
+      ));
     DEBUG ((DEBUG_INFO, "STX: Will attempt deferred installation via ReadyToBoot event\n"));
   }
-  
+
   // Set up deferred installation via ReadyToBoot event
   Status = gBS->CreateEventEx (
                   EVT_NOTIFY_SIGNAL,
