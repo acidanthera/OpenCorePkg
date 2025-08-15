@@ -310,6 +310,7 @@
   OpenCorePkg/Library/OcXmlLib/OcXmlLib.inf
   OpenCorePkg/Legacy/BootPlatform/BiosVideo/BiosVideo.inf
   OpenCorePkg/Platform/CrScreenshotDxe/CrScreenshotDxe.inf
+  OpenCorePkg/Platform/SimpleTextInputExCompatDxe/SimpleTextInputExCompat.inf
   OpenCorePkg/Platform/OpenCanopy/OpenCanopy.inf
   OpenCorePkg/Platform/OpenLegacyBoot/OpenLegacyBoot.inf
   OpenCorePkg/Platform/OpenLinuxBoot/OpenLinuxBoot.inf
