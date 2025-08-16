@@ -131,12 +131,12 @@ CheckKernelAdd (
   UINTN        BundlePathSumSize;
   CONST CHAR8  *Comment;
   CONST CHAR8  *ExecutablePath;
-  UINTN        ExecutableFixedSize;
+  UINTN        ExecutableUserLength;
   UINTN        ExecutablePathSumSize;
   CONST CHAR8  *MaxKernel;
   CONST CHAR8  *MinKernel;
   CONST CHAR8  *PlistPath;
-  UINTN        PlistFixedSize;
+  UINTN        PlistUserLength;
   UINTN        PlistPathSumSize;
   BOOLEAN      IsLiluUsed;
   BOOLEAN      IsDisableLinkeditJettisonEnabled;
@@ -215,7 +215,7 @@ CheckKernelAdd (
         "Kernel->Add[%u]->BundlePath (length %u) is too long (should not exceed %u)!\n",
         Index,
         AsciiStrLen (BundlePath),
-        OC_STORAGE_SAFE_PATH_MAX - L_STR_LEN (OPEN_CORE_KEXT_PATH)
+        OC_STORAGE_SAFE_PATH_MAX - L_STR_LEN (OPEN_CORE_KEXT_PATH) - 1
         ));
       ++ErrorCount;
     }
@@ -223,15 +223,15 @@ CheckKernelAdd (
     //
     // There is one missing '\\' after the concatenation of BundlePath and ExecutablePath. Append one.
     //
-    ExecutableFixedSize   = L_STR_LEN (OPEN_CORE_KEXT_PATH) + AsciiStrLen (BundlePath) + 1;
-    ExecutablePathSumSize = ExecutableFixedSize + AsciiStrSize (ExecutablePath);
+    ExecutableUserLength  = AsciiStrLen (BundlePath) + 1 + AsciiStrLen (ExecutablePath);
+    ExecutablePathSumSize = L_STR_LEN (OPEN_CORE_KEXT_PATH) + ExecutableUserLength + 1;
     if (ExecutablePathSumSize > OC_STORAGE_SAFE_PATH_MAX) {
       DEBUG ((
         DEBUG_WARN,
-        "Kernel->Add[%u]->ExecutablePath (length %u) is too long (should not exceed %u)!\n",
+        "Kernel->Add[%u]->BundlePath + '\\' + ExecutablePath (length %u) is too long (should not exceed %u)!\n",
         Index,
-        AsciiStrLen (ExecutablePath),
-        OC_STORAGE_SAFE_PATH_MAX - ExecutableFixedSize
+        ExecutableUserLength,
+        OC_STORAGE_SAFE_PATH_MAX - L_STR_LEN (OPEN_CORE_KEXT_PATH) - 1
         ));
       ++ErrorCount;
     }
@@ -239,15 +239,15 @@ CheckKernelAdd (
     //
     // There is one missing '\\' after the concatenation of BundlePath and PlistPath. Append one.
     //
-    PlistFixedSize   = L_STR_LEN (OPEN_CORE_KEXT_PATH) + AsciiStrLen (BundlePath) + 1;
-    PlistPathSumSize = PlistFixedSize + AsciiStrSize (PlistPath);
+    PlistUserLength  = AsciiStrLen (BundlePath) + 1 + AsciiStrLen (PlistPath);
+    PlistPathSumSize = L_STR_LEN (OPEN_CORE_KEXT_PATH) + PlistUserLength + 1;
     if (PlistPathSumSize > OC_STORAGE_SAFE_PATH_MAX) {
       DEBUG ((
         DEBUG_WARN,
-        "Kernel->Add[%u]->PlistPath (length %u) is too long (should not exceed %u)!\n",
+        "Kernel->Add[%u]->BundlePath + '\\' + PlistPath (length %u) is too long (should not exceed %u)!\n",
         Index,
-        AsciiStrLen (PlistPath),
-        OC_STORAGE_SAFE_PATH_MAX - PlistFixedSize
+        PlistUserLength,
+        OC_STORAGE_SAFE_PATH_MAX - L_STR_LEN (OPEN_CORE_KEXT_PATH) - 1
         ));
       ++ErrorCount;
     }

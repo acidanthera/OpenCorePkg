@@ -1,7 +1,7 @@
 BIOSVendor: "Apple Inc."
-BIOSVersion: "2069.0.0.0.0"
-BIOSLegacyVersion: "IMP11.88Z.F000.B00.2408072138"
-BIOSReleaseDate: "08/07/2024"
+BIOSVersion: "2087.0.0.0.0"
+BIOSLegacyVersion: "IMP11.88Z.F000.B00.2505301841"
+BIOSReleaseDate: "05/30/2025"
 SystemManufacturer: "Apple Inc."
 SystemProductName: "iMacPro1,1"
 SystemVersion: "1.0"
@@ -48,17 +48,17 @@ SmcPlatform:
   - 0x00
 OEMStrings: |-
   Apple ROM Version
-    BIOS ID:      IMP11.88Z.F000.B00.2408072138
+    BIOS ID:      IMP11.88Z.F000.B00.2505301841
     Model:        IMP11
-    EFI Version:  2069.0.0.0.0
-    Built by:     root@426pv
-    Date:         Wed Aug  7 21:38:02 2024
-    Revision:     2069 (B&I)
+    EFI Version:  2087.0.0.0.0
+    Built by:     root@wb8td
+    Date:         Fri May 30 18:41:16 2025
+    Revision:     2087 (B&I)
     ROM Version:  F000_B00
     Build Type:   Official Build, RELEASE
-    Compiler:     clang-1600.0.25.3
-    UUID:         85D74351-5C84-34A0-9ACA-74529751F290
-    UUID:         5FAC5539-034F-3E48-89C6-8951B5662506
+    Compiler:     clang-1700.3.9.4
+    UUID:         34BF3D6D-5CF0-3914-95C3-DAD810C22672
+    UUID:         8208E71F-4EE0-3A2B-968D-3C7CDD2D3138
 Specifications:
   CPUCodename:
     - "Skylake"
@@ -135,5 +135,5 @@ AppleModelYear:
   - 2020
   - 2021
 MinimumOSVersion: "10.13.2"
-MaximumOSVersion: null
+MaximumOSVersion: "15.6"
 AppleModelId: "J137"

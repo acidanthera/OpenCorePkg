@@ -40,6 +40,9 @@ Ventura
 Sonoma
 ./macrecovery.py -b Mac-827FAC58A8FDFA22 -m 00000000000000000
 
+Sequoia
+./macrecovery.py -b Mac-7BA5B2D9E42DDD94 -m 00000000000000000
+
 Diagnostics
 ./macrecovery.py -b Mac-7BA5B2D9E42DDD94 -m 00000000000000000 -diag
 ./macrecovery.py -b Mac-7BA5B2D9E42DDD94 -m 00000000000JG3600 -diag
@@ -50,5 +53,5 @@ Default version
 ./macrecovery.py -b Mac-7BA5B2D9E42DDD94 -m <real MLB> -os default  (newer)
 
 Latest version
-./macrecovery.py -b Mac-7BA5B2D9E42DDD94 -m 00000000000000000 -os latest
-./macrecovery.py -b Mac-7BA5B2D9E42DDD94 -m <real MLB> -os latest
+./macrecovery.py -b Mac-CFF7D910A743CAAF -m 00000000000000000 -os latest
+./macrecovery.py -b Mac-CFF7D910A743CAAF -m <real MLB> -os latest
