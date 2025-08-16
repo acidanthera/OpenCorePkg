@@ -217,6 +217,7 @@ package() {
       "RamDiskDxe.efi"
       "ResetNvramEntry.efi"
       "RngDxe.efi"
+      "SimpleTextInputExCompat.efi"
       "SnpDxe.efi"
       "TcpDxe.efi"
       "TlsDxe.efi"
