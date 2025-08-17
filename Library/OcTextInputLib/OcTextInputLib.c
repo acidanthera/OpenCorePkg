@@ -317,14 +317,15 @@ OcInstallSimpleTextInputExInternal (
   OcInitializeCompatibilityProtocol ();
   
   if (UseLocalRegistration) {
-    // For OpenShell - use OcRegisterBootServicesProtocol
-    // Note: This will be implemented when integrating with OpenCore
-    // For now, fall back to standard method
-    DEBUG ((DEBUG_INFO, "OcTextInputLib: Using local registration method\n"));
+    // WARNING: Local registration is not currently implemented.
+    // For OpenShell integration: should use OcRegisterBootServicesProtocol
+    // Current behavior: Falls back to standard gBS->InstallProtocolInterface method
+    DEBUG ((DEBUG_WARN, "OcTextInputLib: UseLocalRegistration=TRUE, but local registration not implemented. Falling back to standard protocol installation.\n"));
     // TODO: Call OcRegisterBootServicesProtocol when available
   }
   
   // Install the compatibility protocol on the console input handle
+  // NOTE: This always uses standard method regardless of UseLocalRegistration flag
   Status = gBS->InstallProtocolInterface (
                   &gST->ConsoleInHandle,
                   &gEfiSimpleTextInputExProtocolGuid,
