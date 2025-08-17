@@ -450,7 +450,6 @@ OcIsSimpleTextInputExAvailable (
    @retval EFI_SUCCESS          Test completed, check debug output
    @retval Others               Test failed
  **/
-
 EFI_STATUS
 EFIAPI
 OcTestCtrlKeyDetection (
