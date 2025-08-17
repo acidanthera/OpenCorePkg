@@ -32,11 +32,11 @@
 EFI_STATUS
 EFIAPI
 OcTextInputDxeEntry (
-  IN EFI_HANDLE ImageHandle,
+  IN EFI_HANDLE        ImageHandle,
   IN EFI_SYSTEM_TABLE  *SystemTable
   )
 {
-  EFI_STATUS Status;
+  EFI_STATUS  Status;
 
   DEBUG ((DEBUG_INFO, "OcTextInputDxe: Driver entry point\n"));
 

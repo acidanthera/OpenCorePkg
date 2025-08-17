@@ -30,9 +30,9 @@
  **/
 EFI_STATUS
 EFIAPI
-        OcInstallSimpleTextInputEx (
-	VOID
-	);
+OcInstallSimpleTextInputEx (
+  VOID
+  );
 
 /**
    Uninstall SimpleTextInputEx compatibility protocol.
@@ -46,9 +46,9 @@ EFIAPI
  **/
 EFI_STATUS
 EFIAPI
-        OcUninstallSimpleTextInputEx (
-	VOID
-	);
+OcUninstallSimpleTextInputEx (
+  VOID
+  );
 
 /**
    Check if SimpleTextInputEx protocol is available on console input handle.
@@ -58,9 +58,9 @@ EFIAPI
  **/
 BOOLEAN
 EFIAPI
-        OcIsSimpleTextInputExAvailable (
-	VOID
-	);
+OcIsSimpleTextInputExAvailable (
+  VOID
+  );
 
 /**
    Internal implementation for installing SimpleTextInputEx protocol.
@@ -74,8 +74,8 @@ EFIAPI
  **/
 EFI_STATUS
 OcInstallSimpleTextInputExInternal (
-	IN BOOLEAN UseLocalRegistration
-	);
+  IN BOOLEAN  UseLocalRegistration
+  );
 
 /**
    Test CTRL key detection on the current system.
@@ -89,8 +89,8 @@ OcInstallSimpleTextInputExInternal (
  **/
 EFI_STATUS
 EFIAPI
-        OcTestCtrlKeyDetection (
-	VOID
-	);
+OcTestCtrlKeyDetection (
+  VOID
+  );
 
 #endif // OC_TEXT_INPUT_LIB_H

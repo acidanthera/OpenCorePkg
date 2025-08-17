@@ -41,13 +41,13 @@
 EFI_STATUS
 EFIAPI
 OcInstallSimpleTextInputExLocal (
-	VOID
-	)
+  VOID
+  )
 {
-	// Call the internal implementation with local registration flag
-	// NOTE: Local registration is not implemented yet; falling back to standard method.
-	DEBUG ((DEBUG_WARN, "OcTextInputLib: Local registration not implemented, using standard method\n"));
-	return OcInstallSimpleTextInputExInternal (TRUE);
+  // Call the internal implementation with local registration flag
+  // NOTE: Local registration is not implemented yet; falling back to standard method.
+  DEBUG ((DEBUG_WARN, "OcTextInputLib: Local registration not implemented, using standard method\n"));
+  return OcInstallSimpleTextInputExInternal (TRUE);
 }
 
 /**
@@ -64,21 +64,21 @@ OcInstallSimpleTextInputExLocal (
 EFI_STATUS
 EFIAPI
 OcTextInputLocalLibConstructor (
-	IN EFI_HANDLE ImageHandle,
-	IN EFI_SYSTEM_TABLE  *SystemTable
-	)
+  IN EFI_HANDLE        ImageHandle,
+  IN EFI_SYSTEM_TABLE  *SystemTable
+  )
 {
-	EFI_STATUS Status;
+  EFI_STATUS  Status;
 
-	DEBUG ((DEBUG_INFO, "OcTextInputLocalLib: Constructor called\n"));
+  DEBUG ((DEBUG_INFO, "OcTextInputLocalLib: Constructor called\n"));
 
-	// Automatically install SimpleTextInputEx compatibility
-	Status = OcInstallSimpleTextInputExLocal ();
+  // Automatically install SimpleTextInputEx compatibility
+  Status = OcInstallSimpleTextInputExLocal ();
 
-	if (EFI_ERROR (Status) && (Status != EFI_ALREADY_STARTED)) {
-		DEBUG ((DEBUG_WARN, "OcTextInputLocalLib: Failed to install compatibility in constructor - %r\n", Status));
-	}
+  if (EFI_ERROR (Status) && (Status != EFI_ALREADY_STARTED)) {
+    DEBUG ((DEBUG_WARN, "OcTextInputLocalLib: Failed to install compatibility in constructor - %r\n", Status));
+  }
 
-	// Don't fail library loading even if protocol installation fails
-	return EFI_SUCCESS;
+  // Don't fail library loading even if protocol installation fails
+  return EFI_SUCCESS;
 }
