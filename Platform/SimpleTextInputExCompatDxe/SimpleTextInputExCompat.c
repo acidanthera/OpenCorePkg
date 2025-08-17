@@ -31,43 +31,6 @@ extern EFI_GUID  gEfiSimpleTextInProtocolGuid;
 extern EFI_GUID  gEfiSimpleTextInputExProtocolGuid;
 
 //
-// Key state definitions for EFI 1.1 compatibility
-// These may not be properly defined in older headers
-//
-#ifndef EFI_LEFT_CONTROL_PRESSED
-#define EFI_LEFT_CONTROL_PRESSED  0x00000004
-#endif
-
-#ifndef EFI_RIGHT_CONTROL_PRESSED
-#define EFI_RIGHT_CONTROL_PRESSED  0x00000008
-#endif
-
-#ifndef EFI_LEFT_ALT_PRESSED
-#define EFI_LEFT_ALT_PRESSED  0x00000010
-#endif
-
-#ifndef EFI_RIGHT_ALT_PRESSED
-#define EFI_RIGHT_ALT_PRESSED  0x00000020
-#endif
-
-#ifndef EFI_LEFT_SHIFT_PRESSED
-#define EFI_LEFT_SHIFT_PRESSED  0x00000001
-#endif
-
-#ifndef EFI_RIGHT_SHIFT_PRESSED
-#define EFI_RIGHT_SHIFT_PRESSED  0x00000002
-#endif
-
-#ifndef EFI_LEFT_LOGO_PRESSED
-#define EFI_LEFT_LOGO_PRESSED  0x00000040
-#endif
-
-#ifndef EFI_RIGHT_LOGO_PRESSED
-#define EFI_RIGHT_LOGO_PRESSED  0x00000080
-#endif
-
-//
-//
 // Control character definitions - OpenShell text editor mappings
 //
 #define CTRL_E           0x05       // Display Help (MainCommandDisplayHelp)
