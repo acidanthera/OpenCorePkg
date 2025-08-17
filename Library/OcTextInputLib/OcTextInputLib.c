@@ -22,6 +22,104 @@
 #include <Library/DebugLib.h>
 #include <Library/OcTextInputLib.h>
 
+//
+// Helper macros
+//
+#ifndef ARRAY_SIZE
+#define ARRAY_SIZE(Array) (sizeof(Array) / sizeof((Array)[0]))
+#endif
+
+//
+// Enhanced control character mappings (from deprecated SimpleTextInputExCompatDxe)
+//
+typedef struct {
+  UINT8   ControlChar;
+  CHAR8   *Description;
+  CHAR8   *ShellFunction;
+} CONTROL_CHAR_MAPPING;
+
+STATIC CONTROL_CHAR_MAPPING  mControlCharTable[] = {
+  { 0x01, "CTRL+A", "SelectAll" },
+  { 0x02, "CTRL+B", "MoveCursorLeft" },
+  { 0x03, "CTRL+C", "Copy" },
+  { 0x04, "CTRL+D", "Delete" },
+  { 0x05, "CTRL+E", "MainCommandDisplayHelp" },     // Help - our primary focus
+  { 0x06, "CTRL+F", "MainCommandSearch" },          // Search
+  { 0x07, "CTRL+G", "MainCommandGotoLine" },        // Go to Line
+  { 0x08, "CTRL+H", "Backspace" },
+  { 0x09, "CTRL+I", "Tab" },
+  { 0x0A, "CTRL+J", "NewLine" },
+  { 0x0B, "CTRL+K", "MainCommandCutLine" },         // Cut Line
+  { 0x0C, "CTRL+L", "Refresh" },
+  { 0x0D, "CTRL+M", "CarriageReturn" },
+  { 0x0E, "CTRL+N", "NewFile" },
+  { 0x0F, "CTRL+O", "MainCommandOpenFile" },        // Open File
+  { 0x10, "CTRL+P", "Print" },
+  { 0x11, "CTRL+Q", "MainCommandExit" },            // Exit
+  { 0x12, "CTRL+R", "MainCommandSearchReplace" },   // Search & Replace
+  { 0x13, "CTRL+S", "MainCommandSaveFile" },        // Save File
+  { 0x14, "CTRL+T", "MainCommandSwitchFileType" },  // File Type
+  { 0x15, "CTRL+U", "MainCommandPasteLine" },       // Paste Line
+  { 0x16, "CTRL+V", "Paste" },
+  { 0x17, "CTRL+W", "MainCommandExitHelp" },        // Exit Help - our secondary focus
+  { 0x18, "CTRL+X", "Cut" },
+  { 0x19, "CTRL+Y", "Redo" },
+  { 0x1A, "CTRL+Z", "Undo" },
+  { 0x1B, "ESC",    "EscapeKey" },                  // ESC - our F10 alternative
+  { 0x1C, "CTRL+\\", "FileSeparator" },
+  { 0x1D, "CTRL+]", "GroupSeparator" },
+  { 0x1E, "CTRL+^", "RecordSeparator" },
+  { 0x1F, "CTRL+_", "UnitSeparator" }
+};
+
+/**
+   Get description for a control character.
+
+   @param  ControlChar  The control character code (0x01-0x1F)
+
+   @return Pointer to description string, or NULL if not found
+ **/
+STATIC
+CHAR8 *
+GetControlCharDescription (
+  IN UINT8  ControlChar
+  )
+{
+  UINTN  Index;
+
+  for (Index = 0; Index < ARRAY_SIZE (mControlCharTable); Index++) {
+    if (mControlCharTable[Index].ControlChar == ControlChar) {
+      return mControlCharTable[Index].Description;
+    }
+  }
+
+  return NULL;
+}
+
+/**
+   Get Shell function name for a control character.
+
+   @param  ControlChar  The control character code (0x01-0x1F)
+
+   @return Pointer to Shell function name, or NULL if not found
+ **/
+STATIC
+CHAR8 *
+GetControlCharShellFunction (
+  IN UINT8  ControlChar
+  )
+{
+  UINTN  Index;
+
+  for (Index = 0; Index < ARRAY_SIZE (mControlCharTable); Index++) {
+    if (mControlCharTable[Index].ControlChar == ControlChar) {
+      return mControlCharTable[Index].ShellFunction;
+    }
+  }
+
+  return NULL;
+}
+
 // Global variables for compatibility protocol
 STATIC EFI_SIMPLE_TEXT_INPUT_EX_PROTOCOL  *mOriginalSimpleTextInputEx = NULL;
 STATIC EFI_SIMPLE_TEXT_INPUT_EX_PROTOCOL  mCompatSimpleTextInputEx;
@@ -81,24 +179,55 @@ OcCompatReadKeyStrokeEx (
     if ((KeyData->Key.UnicodeChar >= 1) && (KeyData->Key.UnicodeChar <= 26)) {
       // This looks like a CTRL+letter combination (CTRL+A = 1, CTRL+B = 2, etc.)
       // Leave KeyShiftState as 0 to use the "no shift state" code path in text editor
-      CHAR16  CtrlChar = (CHAR16)('A' + KeyData->Key.UnicodeChar - 1);
+      CHAR8  *Description   = GetControlCharDescription ((UINT8)KeyData->Key.UnicodeChar);
+      CHAR8  *ShellFunction = GetControlCharShellFunction ((UINT8)KeyData->Key.UnicodeChar);
 
       // Highlight important CTRL combinations for Shell text editor
       if (KeyData->Key.UnicodeChar == 5) {
         // CTRL+E
-        DEBUG ((DEBUG_INFO, "OcTextInputLib: *** CTRL+E detected (Help) - code %d ***\n", KeyData->Key.UnicodeChar));
+        DEBUG ((
+          DEBUG_INFO,
+          "OcTextInputLib: *** %a detected (%a) - code %d ***\n",
+          Description ? Description : "CTRL+E",
+          ShellFunction ? ShellFunction : "Help",
+          KeyData->Key.UnicodeChar
+          ));
       } else if (KeyData->Key.UnicodeChar == 23) {
         // CTRL+W
-        DEBUG ((DEBUG_INFO, "OcTextInputLib: *** CTRL+W detected (Exit Help) - code %d ***\n", KeyData->Key.UnicodeChar));
+        DEBUG ((
+          DEBUG_INFO,
+          "OcTextInputLib: *** %a detected (%a) - code %d ***\n",
+          Description ? Description : "CTRL+W",
+          ShellFunction ? ShellFunction : "Exit Help",
+          KeyData->Key.UnicodeChar
+          ));
       } else {
-        DEBUG ((DEBUG_VERBOSE, "OcTextInputLib: CTRL+%c detected (code %d)\n", CtrlChar, KeyData->Key.UnicodeChar));
+        // Other CTRL combinations
+        if (Description && ShellFunction) {
+          DEBUG ((
+            DEBUG_VERBOSE,
+            "OcTextInputLib: %a detected (%a) - code %d\n",
+            Description,
+            ShellFunction,
+            KeyData->Key.UnicodeChar
+            ));
+        } else {
+          // Fallback to basic display
+          CHAR16  CtrlChar = (CHAR16)('A' + KeyData->Key.UnicodeChar - 1);
+          DEBUG ((
+            DEBUG_VERBOSE,
+            "OcTextInputLib: CTRL+%c detected - code %d\n",
+            CtrlChar,
+            KeyData->Key.UnicodeChar
+            ));
+        }
       }
     }
     // Also handle some additional control characters
     else if (KeyData->Key.UnicodeChar == 0x1B) {
       // ESC key
       // ESC is handled as-is, no CTRL flag needed
-      DEBUG ((DEBUG_VERBOSE, "OcTextInputLib: Detected ESC key\n"));
+      DEBUG ((DEBUG_VERBOSE, "OcTextInputLib: ESC key detected (Exit Help alternative)\n"));
     }
     // Handle function keys and scan codes
     else if (KeyData->Key.ScanCode != SCAN_NULL) {
@@ -478,10 +607,32 @@ OcTestCtrlKeyDetection (
   DEBUG ((DEBUG_INFO, "OcTextInputLib: F11 (0x%02X) -> File Type\n", SCAN_F11));
 
   // Test expected CTRL codes for Shell text editor
-  DEBUG ((DEBUG_INFO, "OcTextInputLib: Expected CTRL Key Mappings:\n"));
-  DEBUG ((DEBUG_INFO, "OcTextInputLib: CTRL+E (Help) -> Unicode char 5 (0x05)\n"));
-  DEBUG ((DEBUG_INFO, "OcTextInputLib: CTRL+W (Exit Help) -> Unicode char 23 (0x17)\n"));
-  DEBUG ((DEBUG_INFO, "OcTextInputLib: ESC (Exit Help) -> Unicode char 27 (0x1B)\n"));
+  DEBUG ((DEBUG_INFO, "OcTextInputLib: Enhanced CTRL Key Detection:\n"));
+  DEBUG ((
+    DEBUG_INFO,
+    "OcTextInputLib: CTRL+E (Help) -> Unicode char 5 (0x05) -> %a\n",
+    GetControlCharShellFunction (5) ? GetControlCharShellFunction (5) : "MainCommandDisplayHelp"
+    ));
+  DEBUG ((
+    DEBUG_INFO,
+    "OcTextInputLib: CTRL+W (Exit Help) -> Unicode char 23 (0x17) -> %a\n",
+    GetControlCharShellFunction (23) ? GetControlCharShellFunction (23) : "MainCommandExitHelp"
+    ));
+  DEBUG ((DEBUG_INFO, "OcTextInputLib: ESC (Exit Help) -> Unicode char 27 (0x1B) -> EscapeKey\n"));
+
+  // Show comprehensive CTRL mapping table
+  DEBUG ((DEBUG_INFO, "OcTextInputLib: Complete Control Character Support:\n"));
+  for (UINTN Index = 0; Index < ARRAY_SIZE (mControlCharTable); Index++) {
+    if (mControlCharTable[Index].ControlChar <= 0x1A) {
+      // CTRL+A through CTRL+Z
+      DEBUG ((
+        DEBUG_VERBOSE,
+        "OcTextInputLib: %a -> %a\n",
+        mControlCharTable[Index].Description,
+        mControlCharTable[Index].ShellFunction
+        ));
+    }
+  }
 
   // Show the current protocol status
   EFI_STATUS                         Status;

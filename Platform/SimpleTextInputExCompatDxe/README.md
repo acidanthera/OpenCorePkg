@@ -1,4 +1,27 @@
 # SimpleTextInputExCompatDxe
+
+## ⚠️ **DEPRECATED** ⚠️
+
+**This driver is deprecated and will be removed in a future release.**
+
+**Migration Path**: Use the new `OcTextInputLib` library and `OcTextInputDxe` driver instead:
+- **Library**: `Library/OcTextInputLib/` - For application integration
+- **Standalone Driver**: `Platform/OcTextInputDxe/` - For firmware injection
+
+**Why the change?**
+- Better Shell text editor compatibility (no shift state flag conflicts)
+- More modular architecture (library + driver separation)  
+- Focused on cMP5,1 compatibility requirements
+- Better integration with OpenCore ecosystem
+- Reduced code duplication and maintenance burden
+
+**Migration Instructions**:
+1. Replace `SimpleTextInputExCompatDxe` with `OcTextInputDxe` in your configuration
+2. Both provide the same SimpleTextInputEx compatibility functionality
+3. OcTextInputDxe has enhanced cMP5,1 compatibility and better Shell integration
+
+---
+
 UEFI DXE driver to provide SimpleTextInputEx protocol compatibility for EFI 1.1 systems.
 
 ## Description
