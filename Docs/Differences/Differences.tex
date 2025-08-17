@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
 %DIF DEL PreviousConfiguration.tex   Sat Aug  2 20:24:53 2025
-%DIF ADD ../Configuration.tex        Mon Aug 11 03:31:51 2025
+%DIF ADD ../Configuration.tex        Sat Aug 16 23:49:25 2025
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -9642,14 +9642,23 @@ hdiutil convert ReadWrite.dmg -format UDZO -o ReadOnly.dmg
     performance drain and will be chosen automatically when
     \texttt{KernelCache} is set to \texttt{Auto}.
   \item Last released installer image for Mac OS X~10.5 is Mac OS X~10.5.7
-    build \texttt{9J3050} (for \texttt{MacBookPro5,3}). Unlike the others,
+    build \texttt{9J3050} (for \texttt{MacBookPro5,3}). \DIFdelbegin \DIFdel{Unlike the others,
     this image is not limited to the target model identifiers and can be used
-    as is. The original \texttt{9J3050} image can be found
+    as is. }\DIFdelend The original \texttt{9J3050} image can be found
     \href{https://archive.org/details/10.5.7-9-j-3050}{here}
     (\href{https://mega.nz/folder/inRBTarD#zanf7fUbviwz3WHBU5xpCg}{MEGA Mirror}),
     assuming Mac OS X~10.5 is legally owned. Refer to the \texttt{DIGEST.txt} file
-    for details. Note that this is the earliest tested
-    version of Mac OS X~10.5 with OpenCore.
+    for details. \DIFaddbegin \DIFadd{This image is limited to }\texttt{\DIFadd{MacBookPro5,2}}\DIFadd{, }\texttt{\DIFadd{MacBookPro5,3}}\DIFadd{,
+    }\texttt{\DIFadd{MacBookPro5,4}}\DIFadd{, }\texttt{\DIFadd{MacBookPro5,5}} \DIFadd{model identifiers.
+    To fix compatibility with other models one can hex-edit the raw installer image replacing
+    the logic of }\texttt{\DIFadd{/usr/libexec/cpu\_check}} \DIFadd{script. For example, it can be changed
+    to always return }\texttt{\DIFadd{0}} \DIFadd{by altering the ternary operator of the }\texttt{\DIFadd{exit}} \DIFadd{function call:
+}\DIFmodbegin
+\begin{lstlisting}[label=hex105, style=ocbash,alsolanguage=DIFcode]
+%DIF > exit ( $CPUs{$hostCPU} ? 0 : 1 );
+\end{lstlisting}
+\DIFmodend
+    \DIFaddend Note that this \DIFaddbegin \DIFadd{image }\DIFaddend is the earliest tested version of Mac OS X~10.5 with OpenCore.
 \end{itemize}
 
 \subsubsection{Mac OS X 10.4}\label{legacy104}
@@ -9669,7 +9678,29 @@ hdiutil convert ReadWrite.dmg -format UDZO -o ReadOnly.dmg
     (\href{https://mega.nz/folder/D3ASzLzA\#7sjYXE2X09f6aGjol\_C7dg}{MEGA Mirror}),
     assuming Mac OS X~10.4 is legally owned. Refer to the \texttt{DIGEST.txt} file
     for details. Note that these are the earliest tested
-    versions of Mac OS X~10.4 with OpenCore.
+    versions of Mac OS X~10.4 with OpenCore\DIFaddbegin \DIFadd{.
+  }\item \DIFadd{Due to lack of }\texttt{\DIFadd{createinstallmedia}} \DIFadd{utility and because the DMG installer
+    is a volume image, not of a disk image (with a partition table), it is necessary
+    to either restore the DMG file to a partition on a GPT-formatted media or convert
+    it to a disk image. The following commands could be used to do it:
+}
+
+\DIFmodbegin
+\begin{lstlisting}[label=convertdmg, style=ocbash,alsolanguage=DIFcode]
+%DIF > hdiutil create -o converted.dmg -size 14g -layout GPTSPUD -fs HFS+J
+%DIF > hdiutil attach -nomount converted.dmg
+%DIF > hdiutil attach -nomount /path/to/original/installer.dmg
+%DIF > dd if=/dev/disk{Y} of=/dev/disk{X}s2 bs=16m
+%DIF > hdiutil detach disk{X} && hdiutil detach disk{Y}
+%DIF > # Optionally convert to preferrable disk image:
+%DIF > qemu-img -p -O qcow2 convert /dev/disk{X} installer.qcow2
+\end{lstlisting}
+\DIFmodend
+
+    \DIFadd{It will be necessary to replace }\texttt{\DIFadd{\{X\}}} \DIFadd{and }\texttt{\DIFadd{\{Y\}}} \DIFadd{with disk
+    numbers for attached target image (converted.dmg) and original DMG installer
+    (installer.dmg). Converting the resulting dmg can be done any other preferrable
+    format with the help of }\texttt{\DIFadd{qemu-img}} \DIFadd{utility}\DIFaddend .
 \end{itemize}
 
 \subsection{UEFI Secure Boot}\label{uefisecureboot}
