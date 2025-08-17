@@ -27,6 +27,17 @@
   @retval EFI_ALREADY_STARTED  Protocol already exists, no action taken
   @retval Others               Installation failed
 **/
+/**
+  Install SimpleTextInputEx compatibility protocol using local registration.
+  
+  This function is intended to use OcRegisterBootServicesProtocol for OpenShell
+  integration, but currently falls back to standard gBS->InstallProtocolInterface
+  method since the local registration method is not yet implemented.
+  
+  @retval EFI_SUCCESS          Protocol installed successfully or already present
+  @retval EFI_ALREADY_STARTED  Protocol already exists, no action taken
+  @retval Others               Installation failed
+**/
 EFI_STATUS
 EFIAPI
 OcInstallSimpleTextInputExLocal (
@@ -34,6 +45,8 @@ OcInstallSimpleTextInputExLocal (
   )
 {
   // Call the internal implementation with local registration flag
+  // NOTE: Local registration is not implemented yet; falling back to standard method.
+  DEBUG ((DEBUG_WARN, "OcTextInputLib: Local registration not implemented, using standard method\n"));
   return OcInstallSimpleTextInputExInternal (TRUE);
 }
 
