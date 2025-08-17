@@ -20,6 +20,7 @@
   DEC_SPECIFICATION = 0x00010005
 
 [Includes]
+  Include
   Include/AMI
   Include/Acidanthera
   Include/Apple
@@ -986,6 +987,9 @@
 
   ##  @libraryclass
   OcTemplateLib|Include/Acidanthera/Library/OcTemplateLib.h
+
+  ##  @libraryclass
+  OcTextInputLib|Include/Library/OcTextInputLib.h
 
   ##  @libraryclass
   TimerLib|Include/Acidanthera/Library/OcTimerLib.h

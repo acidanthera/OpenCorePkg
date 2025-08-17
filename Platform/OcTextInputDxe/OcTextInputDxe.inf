@@ -1,0 +1,47 @@
+## @file
+#  OcTextInputDxe - Standalone SimpleTextInputEx Protocol Compatibility Driver
+#  
+#  This driver provides SimpleTextInputEx protocol compatibility for systems
+#  that only have SimpleTextInput protocol available (EFI 1.1 systems).
+#  
+#  This addresses compatibility issues with older systems (like cMP5,1) where
+#  CTRL key combinations may not work reliably in applications like the Shell
+#  text editor. The text editor has been enhanced with F10/ESC alternatives.
+#  
+#  This driver can be used for firmware injection outside of OpenCorePkg.
+#
+#  Copyright (c) 2025, OpenCore Team. All rights reserved.
+#  SPDX-License-Identifier: BSD-2-Clause-Patent
+##
+
+[Defines]
+  INF_VERSION                    = 0x00010005
+  BASE_NAME                      = OcTextInputDxe
+  MODULE_UNI_FILE                = OcTextInputDxe.uni
+  FILE_GUID                      = F7E4C105-6006-4D9C-B373-81BD9C6A8B5F
+  MODULE_TYPE                    = DXE_DRIVER
+  VERSION_STRING                 = 1.0
+  ENTRY_POINT                    = OcTextInputDxeEntry
+
+[Sources]
+  OcTextInputDxe.c
+
+[Packages]
+  MdePkg/MdePkg.dec
+  OpenCorePkg/OpenCorePkg.dec
+
+[LibraryClasses]
+  UefiDriverEntryPoint
+  UefiBootServicesTableLib
+  DebugLib
+  OcTextInputLib
+
+[Protocols]
+  gEfiSimpleTextInputExProtocolGuid   ## SOMETIMES_CONSUMES ## SOMETIMES_PRODUCES
+
+[Guids]
+
+[Pcd]
+
+[Depex]
+  TRUE

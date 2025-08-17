@@ -1,0 +1,44 @@
+## @file
+#  OcTextInputLocalLib - SimpleTextInputEx Protocol Compatibility Library (Local Variant)
+#  
+#  This library provides SimpleTextInputEx protocol compatibility for systems
+#  that only have SimpleTextInput protocol available (EFI 1.1 systems).
+#  
+#  This is the "local" variant for use by OpenShell that uses constructor-based
+#  approach and OcRegisterBootServicesProtocol instead of standard gBS methods.
+#
+#  Copyright (c) 2025, OpenCore Team. All rights reserved.
+#  SPDX-License-Identifier: BSD-2-Clause-Patent
+##
+
+[Defines]
+  INF_VERSION                    = 0x00010005
+  BASE_NAME                      = OcTextInputLocalLib
+  MODULE_UNI_FILE                = OcTextInputLocalLib.uni
+  FILE_GUID                      = B8448CF1-2B4E-4985-8556-7E5C9F6B2E3D
+  MODULE_TYPE                    = UEFI_APPLICATION
+  VERSION_STRING                 = 1.0
+  LIBRARY_CLASS                  = OcTextInputLib
+  CONSTRUCTOR                    = OcTextInputLocalLibConstructor
+
+[Sources]
+  OcTextInputLib.c
+  OcTextInputLocalLib.c
+
+[Packages]
+  MdePkg/MdePkg.dec
+  OpenCorePkg/OpenCorePkg.dec
+
+[LibraryClasses]
+  BaseLib
+  BaseMemoryLib
+  MemoryAllocationLib
+  UefiBootServicesTableLib
+  DebugLib
+
+[Protocols]
+  gEfiSimpleTextInputExProtocolGuid   ## SOMETIMES_CONSUMES ## SOMETIMES_PRODUCES
+
+[Guids]
+
+[Pcd]
