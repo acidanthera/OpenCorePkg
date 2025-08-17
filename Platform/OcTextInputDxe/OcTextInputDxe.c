@@ -32,27 +32,27 @@
 EFI_STATUS
 EFIAPI
 OcTextInputDxeEntry (
-	IN EFI_HANDLE ImageHandle,
-	IN EFI_SYSTEM_TABLE  *SystemTable
-	)
+  IN EFI_HANDLE ImageHandle,
+  IN EFI_SYSTEM_TABLE  *SystemTable
+  )
 {
-	EFI_STATUS Status;
+  EFI_STATUS Status;
 
-	DEBUG ((DEBUG_INFO, "OcTextInputDxe: Driver entry point\n"));
+  DEBUG ((DEBUG_INFO, "OcTextInputDxe: Driver entry point\n"));
 
-	// Install SimpleTextInputEx compatibility protocol
-	Status = OcInstallSimpleTextInputEx ();
+  // Install SimpleTextInputEx compatibility protocol
+  Status = OcInstallSimpleTextInputEx ();
 
-	if (EFI_ERROR (Status)) {
-		if (Status == EFI_ALREADY_STARTED) {
-			DEBUG ((DEBUG_INFO, "OcTextInputDxe: SimpleTextInputEx already available\n"));
-			Status = EFI_SUCCESS;
-		} else {
-			DEBUG ((DEBUG_ERROR, "OcTextInputDxe: Failed to install SimpleTextInputEx compatibility - %r\n", Status));
-		}
-	} else {
-		DEBUG ((DEBUG_INFO, "OcTextInputDxe: Successfully installed SimpleTextInputEx compatibility\n"));
-	}
+  if (EFI_ERROR (Status)) {
+    if (Status == EFI_ALREADY_STARTED) {
+      DEBUG ((DEBUG_INFO, "OcTextInputDxe: SimpleTextInputEx already available\n"));
+      Status = EFI_SUCCESS;
+    } else {
+      DEBUG ((DEBUG_ERROR, "OcTextInputDxe: Failed to install SimpleTextInputEx compatibility - %r\n", Status));
+    }
+  } else {
+    DEBUG ((DEBUG_INFO, "OcTextInputDxe: Successfully installed SimpleTextInputEx compatibility\n"));
+  }
 
-	return Status;
+  return Status;
 }
