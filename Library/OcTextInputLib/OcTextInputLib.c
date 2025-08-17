@@ -26,50 +26,50 @@
 // Helper macros
 //
 #ifndef ARRAY_SIZE
-#define ARRAY_SIZE(Array) (sizeof(Array) / sizeof((Array)[0]))
+#define ARRAY_SIZE(Array)  (sizeof(Array) / sizeof((Array)[0]))
 #endif
 
 //
 // Enhanced control character mappings (from deprecated SimpleTextInputExCompatDxe)
 //
 typedef struct {
-  UINT8   ControlChar;
-  CHAR8   *Description;
-  CHAR8   *ShellFunction;
+  UINT8    ControlChar;
+  CHAR8    *Description;
+  CHAR8    *ShellFunction;
 } CONTROL_CHAR_MAPPING;
 
 STATIC CONTROL_CHAR_MAPPING  mControlCharTable[] = {
-  { 0x01, "CTRL+A", "SelectAll" },
-  { 0x02, "CTRL+B", "MoveCursorLeft" },
-  { 0x03, "CTRL+C", "Copy" },
-  { 0x04, "CTRL+D", "Delete" },
-  { 0x05, "CTRL+E", "MainCommandDisplayHelp" },     // Help - our primary focus
-  { 0x06, "CTRL+F", "MainCommandSearch" },          // Search
-  { 0x07, "CTRL+G", "MainCommandGotoLine" },        // Go to Line
-  { 0x08, "CTRL+H", "Backspace" },
-  { 0x09, "CTRL+I", "Tab" },
-  { 0x0A, "CTRL+J", "NewLine" },
-  { 0x0B, "CTRL+K", "MainCommandCutLine" },         // Cut Line
-  { 0x0C, "CTRL+L", "Refresh" },
-  { 0x0D, "CTRL+M", "CarriageReturn" },
-  { 0x0E, "CTRL+N", "NewFile" },
-  { 0x0F, "CTRL+O", "MainCommandOpenFile" },        // Open File
-  { 0x10, "CTRL+P", "Print" },
-  { 0x11, "CTRL+Q", "MainCommandExit" },            // Exit
-  { 0x12, "CTRL+R", "MainCommandSearchReplace" },   // Search & Replace
-  { 0x13, "CTRL+S", "MainCommandSaveFile" },        // Save File
-  { 0x14, "CTRL+T", "MainCommandSwitchFileType" },  // File Type
-  { 0x15, "CTRL+U", "MainCommandPasteLine" },       // Paste Line
-  { 0x16, "CTRL+V", "Paste" },
-  { 0x17, "CTRL+W", "MainCommandExitHelp" },        // Exit Help - our secondary focus
-  { 0x18, "CTRL+X", "Cut" },
-  { 0x19, "CTRL+Y", "Redo" },
-  { 0x1A, "CTRL+Z", "Undo" },
-  { 0x1B, "ESC",    "EscapeKey" },                  // ESC - our F10 alternative
-  { 0x1C, "CTRL+\\", "FileSeparator" },
-  { 0x1D, "CTRL+]", "GroupSeparator" },
-  { 0x1E, "CTRL+^", "RecordSeparator" },
-  { 0x1F, "CTRL+_", "UnitSeparator" }
+  { 0x01, "CTRL+A",  "SelectAll"                 },
+  { 0x02, "CTRL+B",  "MoveCursorLeft"            },
+  { 0x03, "CTRL+C",  "Copy"                      },
+  { 0x04, "CTRL+D",  "Delete"                    },
+  { 0x05, "CTRL+E",  "MainCommandDisplayHelp"    }, // Help - our primary focus
+  { 0x06, "CTRL+F",  "MainCommandSearch"         }, // Search
+  { 0x07, "CTRL+G",  "MainCommandGotoLine"       }, // Go to Line
+  { 0x08, "CTRL+H",  "Backspace"                 },
+  { 0x09, "CTRL+I",  "Tab"                       },
+  { 0x0A, "CTRL+J",  "NewLine"                   },
+  { 0x0B, "CTRL+K",  "MainCommandCutLine"        }, // Cut Line
+  { 0x0C, "CTRL+L",  "Refresh"                   },
+  { 0x0D, "CTRL+M",  "CarriageReturn"            },
+  { 0x0E, "CTRL+N",  "NewFile"                   },
+  { 0x0F, "CTRL+O",  "MainCommandOpenFile"       }, // Open File
+  { 0x10, "CTRL+P",  "Print"                     },
+  { 0x11, "CTRL+Q",  "MainCommandExit"           }, // Exit
+  { 0x12, "CTRL+R",  "MainCommandSearchReplace"  }, // Search & Replace
+  { 0x13, "CTRL+S",  "MainCommandSaveFile"       }, // Save File
+  { 0x14, "CTRL+T",  "MainCommandSwitchFileType" }, // File Type
+  { 0x15, "CTRL+U",  "MainCommandPasteLine"      }, // Paste Line
+  { 0x16, "CTRL+V",  "Paste"                     },
+  { 0x17, "CTRL+W",  "MainCommandExitHelp"       }, // Exit Help - our secondary focus
+  { 0x18, "CTRL+X",  "Cut"                       },
+  { 0x19, "CTRL+Y",  "Redo"                      },
+  { 0x1A, "CTRL+Z",  "Undo"                      },
+  { 0x1B, "ESC",     "EscapeKey"                 }, // ESC - our F10 alternative
+  { 0x1C, "CTRL+\\", "FileSeparator"             },
+  { 0x1D, "CTRL+]",  "GroupSeparator"            },
+  { 0x1E, "CTRL+^",  "RecordSeparator"           },
+  { 0x1F, "CTRL+_",  "UnitSeparator"             }
 };
 
 /**
