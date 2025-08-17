@@ -111,6 +111,7 @@
   OcMemoryLib|OpenCorePkg/Library/OcMemoryLib/OcMemoryLib.inf
   OcMiscLib|OpenCorePkg/Library/OcMiscLib/OcMiscLib.inf
   OcStringLib|OpenCorePkg/Library/OcStringLib/OcStringLib.inf
+  OcTextInputLib|OpenCorePkg/Library/OcTextInputLib/OcTextInputLib.inf
   #
   # To save size, use NULL library for DebugLib and ReportStatusCodeLib.
   # If need status code output, do library instance override.
