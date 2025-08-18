@@ -33,13 +33,19 @@
 [LibraryClasses]
   UefiDriverEntryPoint
   UefiBootServicesTableLib
+  UefiLib
+  MemoryAllocationLib
+  BaseMemoryLib
+  BaseLib
   DebugLib
   OcTextInputLib
 
 [Protocols]
-  gEfiSimpleTextInputExProtocolGuid   ## SOMETIMES_CONSUMES ## SOMETIMES_PRODUCES
+  gEfiSimpleTextInProtocolGuid        ## CONSUMES
+  gEfiSimpleTextInputExProtocolGuid   ## SOMETIMES_CONSUMES ## PRODUCES
 
 [Guids]
+  gEfiEventReadyToBootGuid            ## CONSUMES ## Event
 
 [Pcd]
 
