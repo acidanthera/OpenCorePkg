@@ -131,13 +131,13 @@ STATIC BOOLEAN                            mProtocolInstalled = FALSE;
 
    On EFI 1.1 systems like cMP5,1, the SimpleTextInputEx protocol is not available,
    and CTRL key combinations are handled differently. This function provides:
-   
+
    1. SimpleTextInputEx protocol compatibility
    2. Key remapping for enhanced cMP5,1 compatibility:
       - F10 → CTRL+E (Help functionality for programs that use CTRL+E)
-   
+
    ESC key is left unchanged as most programs expect ESC to work normally.
-   This allows programs to work with F10 as an alternative to CTRL+E on systems 
+   This allows programs to work with F10 as an alternative to CTRL+E on systems
    where CTRL combinations may not be reliable.
 
    @param  This                 Protocol instance pointer.
