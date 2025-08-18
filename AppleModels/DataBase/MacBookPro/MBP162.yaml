@@ -1,7 +1,7 @@
 BIOSVendor: "Apple Inc."
-BIOSVersion: "2069.0.0.0.0"
-BIOSLegacyVersion: "MBP162.88Z.F000.B00.2408072147"
-BIOSReleaseDate: "08/07/2024"
+BIOSVersion: "2087.0.0.0.0"
+BIOSLegacyVersion: "MBP162.88Z.F000.B00.2505301845"
+BIOSReleaseDate: "05/30/2025"
 SystemManufacturer: "Apple Inc."
 SystemProductName: "MacBookPro16,2"
 SystemVersion: "1.0"
@@ -43,17 +43,17 @@ SmcPlatform:
   - 0x00
 OEMStrings: |-
   Apple ROM Version
-    BIOS ID:      MBP162.88Z.F000.B00.2408072147
+    BIOS ID:      MBP162.88Z.F000.B00.2505301845
     Model:        MBP162
-    EFI Version:  2069.0.0.0.0
-    Built by:     root@w8zv7
-    Date:         Wed Aug  7 21:47:32 2024
-    Revision:     2069 (B&I)
+    EFI Version:  2087.0.0.0.0
+    Built by:     root@4dcpz
+    Date:         Fri May 30 18:45:41 2025
+    Revision:     2087 (B&I)
     ROM Version:  F000_B00
     Build Type:   Official Build, RELEASE
-    Compiler:     clang-1600.0.25.3
-    UUID:         6869E587-F037-3618-8F1D-21658C69D673
-    UUID:         396FD81C-CA1F-3F23-856D-A7DDD0AE7825
+    Compiler:     clang-1700.3.9.4
+    UUID:         CBA2803F-E263-365D-A00F-07C53522BF26
+    UUID:         AD9297E9-F7FF-36C5-8E05-ACB56F4D94C8
 Specifications:
   CPUCodename:
     - "Ice Lake U"

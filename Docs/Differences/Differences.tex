@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
-%DIF DEL PreviousConfiguration.tex   Tue Dec 24 15:56:59 2024
-%DIF ADD ../Configuration.tex        Sun Feb 23 10:59:10 2025
+%DIF DEL PreviousConfiguration.tex   Sat Aug  2 20:24:53 2025
+%DIF ADD ../Configuration.tex        Sat Aug 16 23:49:25 2025
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -83,16 +83,16 @@
 \RequirePackage[normalem]{ulem} %DIF PREAMBLE
 \RequirePackage{color}\definecolor{RED}{rgb}{1,0,0}\definecolor{BLUE}{rgb}{0,0,1} %DIF PREAMBLE
 \providecommand{\DIFaddtex}[1]{{\protect\color{blue}\uwave{#1}}} %DIF PREAMBLE
-\providecommand{\DIFdeltex}[1]{{\protect\color{red}\sout{#1}}} %DIF PREAMBLE
+\providecommand{\DIFdeltex}[1]{{\protect\color{red}\sout{#1}}}                      %DIF PREAMBLE
 %DIF ONLYCHANGEDPAGE PREAMBLE %DIF PREAMBLE
 \RequirePackage{atbegshi} %DIF PREAMBLE
 \RequirePackage{etoolbox} %DIF PREAMBLE
 \RequirePackage{zref} %DIF PREAMBLE
 % redefine label command to write immediately to aux file - page references will be lost %DIF PREAMBLE
-\makeatletter \let\oldlabel\label% Store \label %DIF PREAMBLE
-\renewcommand{\label}[1]{% Update \label to write to the .aux immediately %DIF PREAMBLE
-\zref@wrapper@immediate{\oldlabel{#1}}} %DIF PREAMBLE
-\makeatother %DIF PREAMBLE
+\makeatletter \let\oldlabel\label% Store \label  %DIF PREAMBLE
+\renewcommand{\label}[1]{% Update \label to write to the .aux immediately  %DIF PREAMBLE
+\zref@wrapper@immediate{\oldlabel{#1}}}  %DIF PREAMBLE
+\makeatother  %DIF PREAMBLE
 \newbool{DIFkeeppage} %DIF PREAMBLE
 \newbool{DIFchange} %DIF PREAMBLE
 \boolfalse{DIFkeeppage} %DIF PREAMBLE
@@ -118,12 +118,7 @@
 %DIF HYPERREF PREAMBLE %DIF PREAMBLE
 \providecommand{\DIFadd}[1]{\texorpdfstring{\DIFaddtex{#1}}{#1}} %DIF PREAMBLE
 \providecommand{\DIFdel}[1]{\texorpdfstring{\DIFdeltex{#1}}{}} %DIF PREAMBLE
-%DIF AMSMATHULEM PREAMBLE %DIF PREAMBLE
-\makeatletter %DIF PREAMBLE
-\let\sout@orig\sout %DIF PREAMBLE
-\renewcommand{\sout}[1]{\ifmmode\text{\sout@orig{\ensuremath{#1}}}\else\sout@orig{#1}\fi} %DIF PREAMBLE
-\makeatother %DIF PREAMBLE
-%DIF COLORLISTINGS PREAMBLE %DIF PREAMBLE
+%DIF LISTINGS PREAMBLE %DIF PREAMBLE
 \RequirePackage{listings} %DIF PREAMBLE
 \RequirePackage{color} %DIF PREAMBLE
 \lstdefinelanguage{DIFcode}{ %DIF PREAMBLE
@@ -139,8 +134,6 @@
 } %DIF PREAMBLE
 \lstnewenvironment{DIFverbatim}{\lstset{style=DIFverbatimstyle}}{} %DIF PREAMBLE
 \lstnewenvironment{DIFverbatim*}{\lstset{style=DIFverbatimstyle,showspaces=true}}{} %DIF PREAMBLE
-\lstset{extendedchars=\true,inputencoding=utf8}
-
 %DIF END PREAMBLE EXTENSION ADDED BY LATEXDIFF
 
 \begin{document}
@@ -161,7 +154,7 @@
 
        \vspace{0.2in}
 
-       Reference Manual (1.0.4)
+       Reference Manual (1.0\DIFdelbegin \DIFdel{.5}\DIFdelend \DIFaddbegin \DIFadd{.6}\DIFaddend )
 
        \vspace{0.2in}
 
@@ -173,7 +166,7 @@
 
        \rmfamily
 
-       Copyright \textcopyright \DIFdelbegin \DIFdel{2018-2024 }\DIFdelend \DIFaddbegin \DIFadd{2018-2025 }\DIFaddend vit9696
+       Copyright \textcopyright 2018-2025 vit9696
 
    \end{center}
 \end{titlepage}
@@ -653,7 +646,7 @@ Available entries include:
 \end{itemize}
 
 \emph{Note}: It is not guaranteed that paths longer than
-\texttt{OC\_STORAGE\_SAFE\_PATH\_MAX} (128 characters including
+\texttt{OC\_STORAGE\_SAFE\_PATH\_MAX} (\DIFdelbegin \DIFdel{128 }\DIFdelend \DIFaddbegin \DIFadd{192 }\DIFaddend characters including
 the \texttt{\\0}-terminator) will be accessible within OpenCore.
 
 \subsection{Installation and Upgrade}\label{configuration-install}
@@ -1585,26 +1578,23 @@ To view their current state, use the \texttt{pmset -g} command in Terminal.
   \emph{Note}: Most types of firmware, apart from Apple and VMware, need this quirk.
 
 \item
-  \DIFaddbegin \texttt{\DIFadd{ClearTaskSwitchBit}}\\
-  \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ boolean}}\\
-  \textbf{\DIFadd{Failsafe}}\DIFadd{: }\texttt{\DIFadd{false}}\\
-  \textbf{\DIFadd{Description}}\DIFadd{: Clear task switch bit during UEFI runtime services calls.
-}
+  \texttt{ClearTaskSwitchBit}\\
+  \textbf{Type}: \texttt{plist\ boolean}\\
+  \textbf{Failsafe}: \texttt{false}\\
+  \textbf{Description}: Clear task switch bit during UEFI runtime services calls.
 
-  \DIFadd{This quirk resolves FPU-related crashes in UEFI runtime services when using either the
+  This quirk resolves FPU-related crashes in UEFI runtime services when using either the
   32-bit kernel on a 64-bit UEFI implementation, or the 64-bit kernel on a 32-bit UEFI implementation
-  by removing the task switch (}\texttt{\DIFadd{TS}}\DIFadd{) bit from }\texttt{\DIFadd{CR0}} \DIFadd{register during their execution.
+  by removing the task switch (\texttt{TS}) bit from \texttt{CR0} register during their execution.
   These crashes occur if there is any FPU/SSE instruction usage in UEFI runtime services as XNU
-  is unable to handle exceptions from mixed-mode code. This quirk requires }\texttt{\DIFadd{OC\_FIRMWARE\_RUNTIME}}
-  \DIFadd{protocol implemented in }\texttt{\DIFadd{OpenRuntime.efi}}\DIFadd{.
-}
+  is unable to handle exceptions from mixed-mode code. This quirk requires \texttt{OC\_FIRMWARE\_RUNTIME}
+  protocol implemented in \texttt{OpenRuntime.efi}.
 
-  \emph{\DIFadd{Note}}\DIFadd{: This quirk should only be required when running older macOS versions when the
+  \emph{Note}: This quirk should only be required when running older macOS versions when the
   32-bit kernel is used on a 64-bit UEFI implementation, such as Microsoft Hyper-V.
-}
 
 \item
-  \DIFaddend \texttt{DevirtualiseMmio}\\
+  \texttt{DevirtualiseMmio}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
   \textbf{Description}: Remove runtime attribute from certain MMIO regions.
@@ -1885,7 +1875,17 @@ To view their current state, use the \texttt{pmset -g} command in Terminal.
     variables at runtime, the Apple kernel will crash at calling UEFI runtime services
     unless the driver \texttt{.data} section has a \texttt{EfiRuntimeServicesData}
     type.
-  \end{itemize}
+  \DIFaddbegin \item \DIFadd{Apple kernel Memory map entry consolidation may work incorrectly for low memory descriptors,
+    which are initially marked as
+    }\href{https://github.com/apple-oss-distributions/xnu/blob/rel/xnu-792/osfmk/i386/i386_vm_init.c#L282}{\DIFadd{preallocated}}
+    \DIFadd{by Apple kernel, but then may get consolidated and lose their preallocation status due to a
+    }\href{https://github.com/apple-oss-distributions/xnu/blob/rel/xnu-792/osfmk/i386/i386_vm_init.c#L339}{\DIFadd{bug}}\DIFadd{.
+    Since Apple kernel later
+    }\href{https://github.com/apple-oss-distributions/xnu/blob/rel/xnu-792/osfmk/i386/pmap.c#L1204}{\DIFadd{frees low memory}}\DIFadd{,
+    this may result in use-after-free errors and various kinds of kernel panics at boot time.
+    The issue was }\href{https://github.com/apple-oss-distributions/xnu/blob/rel/xnu-1699/osfmk/i386/i386_vm_init.c#L450}{\DIFadd{fixed}}
+    \DIFadd{in Mac OS X 10.7 kernel. 
+  }\DIFaddend \end{itemize}
 
   To workaround these limitations, this quirk applies memory attribute table
   permissions to the memory map passed to the Apple kernel and optionally attempts
@@ -1897,9 +1897,12 @@ To view their current state, use the \texttt{pmset -g} command in Terminal.
 
   \emph{Note 2}: The need for this quirk is determined by early boot failures.
   This quirk replaces \texttt{EnableWriteUnprotector} on firmware supporting
-  Memory Attribute Tables (MAT). This quirk is typically unnecessary when using
-  \texttt{OpenDuetPkg} but may be required to boot Mac OS X 10.6, and earlier, for
+  Memory Attribute Tables (MAT).
+\DIFdelbegin \DIFdel{This quirk is typically unnecessary when using
+  }\texttt{\DIFdel{OpenDuetPkg}} %DIFAUXCMD
+\DIFdel{but may be required to boot Mac OS X 10.6, and earlier, for
   reasons that are as yet unclear.
+}\DIFdelend 
 
 \item
   \texttt{ResizeAppleGpuBars}\\
@@ -1945,9 +1948,12 @@ To view their current state, use the \texttt{pmset -g} command in Terminal.
   performing early boot identity mapping of assigned virtual addresses to physical
   memory.
 
-  \emph{Note}: The need for this quirk is determined by early boot failures.
+  \emph{Note \DIFaddbegin \DIFadd{1}\DIFaddend }: The need for this quirk is determined by early boot failures.
 
-\item
+  \DIFaddbegin \emph{\DIFadd{Note 2}}\DIFadd{: This quirk is not compatible with 32-bit kernels.
+}
+
+\DIFaddend \item
   \texttt{SignalAppleOS}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
@@ -2102,8 +2108,7 @@ Some known properties include:
 \subsection{Introduction}\label{kernelintro}
 
 This section allows the application of different kinds of kernelspace modifications on
-Apple Kernel (\DIFdelbegin %DIFDELCMD < \href{https://opensource.apple.com/source/xnu}{%%%
-\DIFdelend \DIFaddbegin \href{https://github.com/apple-oss-distributions/xnu}{\DIFaddend XNU}). The modifications
+Apple Kernel (\href{https://github.com/apple-oss-distributions/xnu}{XNU}). The modifications
 currently provide driver (kext) injection, kernel and driver patching, and driver
 blocking.
 
@@ -5170,8 +5175,7 @@ improvements:
   \texttt{7C436110-AB2A-4BBB-A880-FE41995C9F82:csr-active-config}
   \break
   32-bit System Integrity Protection bitmask. Declared in XNU source code in
-  \DIFdelbegin %DIFDELCMD < \href{https://opensource.apple.com/source/xnu/xnu-4570.71.2/bsd/sys/csr.h.auto.html}{%%%
-\DIFdelend \DIFaddbegin \href{https://github.com/apple-oss-distributions/xnu/blob/main/bsd/sys/csr.h}{\DIFaddend csr.h}.
+  \href{https://github.com/apple-oss-distributions/xnu/blob/main/bsd/sys/csr.h}{csr.h}.
 \item
   \texttt{4D1EDE05-38C7-4A6A-9CC6-4BCCA8B38C14:ExtendedFirmwareFeatures}
   \break
@@ -5213,8 +5217,7 @@ improvements:
   \break
   ASCII string defining FireWire security mode. Legacy, can be found in IOFireWireFamily
   source code in
-  \DIFdelbegin %DIFDELCMD < \href{https://opensource.apple.com/source/IOFireWireFamily/IOFireWireFamily-473/IOFireWireFamily.kmodproj/IOFireWireController.cpp.auto.html}{%%%
-\DIFdelend \DIFaddbegin \href{https://github.com/apple-oss-distributions/IOFireWireFamily/blob/main/IOFireWireFamily.kmodproj/IOFireWireController.cpp}{\DIFaddend IOFireWireController.cpp}.
+  \href{https://github.com/apple-oss-distributions/IOFireWireFamily/blob/main/IOFireWireFamily.kmodproj/IOFireWireController.cpp}{IOFireWireController.cpp}.
   It is recommended not to set this variable, which may speedup system startup. Setting to
   \texttt{full} is equivalent to not setting the variable and \texttt{none} disables
   FireWire security.
@@ -7296,7 +7299,7 @@ which use OpenCore argument parsing, and can be particularly convenient when mul
   \end{itemize}
 
   \emph{Note 1}: This option is written to NVRAM and will remain present even if the option is removed from the driver
-  \texttt{Arguments}, unless \DIFdelbegin \DIFdel{NVRAM is cleared or }\DIFdelend an alternative value is written or the value deleted, using this option.
+  \texttt{Arguments}, unless an alternative value is written or the value deleted, using this option.
 
   \emph{Note 2}: This setting will normally cause a static IP to be assigned during pre-boot, even in vendor-provided
   network stacks. However, due to a quirk of the design of PXE and HTTP boot, any such static assignment will then be
@@ -7308,7 +7311,7 @@ which use OpenCore argument parsing, and can be particularly convenient when mul
   (see \texttt{UEFI} \texttt{Unload} option) and the OpenCore version used instead.
 
   \emph{Note 3}: If \texttt{Ip4Dxe} is loaded before OpenCore then any setting here will only take effect after one
-  reboot (during which network boot is not \DIFdelbegin \DIFdel{be }\DIFdelend attempted). If \texttt{Ip4Dxe} is loaded after \texttt{OpenNetworkBoot}
+  reboot (during which network boot is not attempted). If \texttt{Ip4Dxe} is loaded after \texttt{OpenNetworkBoot}
   the setting will take effect immediately.
   \medskip
 
@@ -7607,7 +7610,7 @@ Recommended configuration settings for this driver:
 \begin{itemize}
 \tightlist
   \item \texttt{OpenVariableRuntimeDxe.efi} loaded using \texttt{LoadEarly=true}. OpenDuet users
-  should not load this driver, as it is included in OpenDuet.
+  should not load this driver, as \DIFdelbegin \DIFdel{it }\DIFdelend \DIFaddbegin \DIFadd{a firmware driver serving the same purpose }\DIFaddend is included in OpenDuet.
   \item \texttt{OpenRuntime.efi} specified after \texttt{OpenVariableRuntimeDxe.efi} (when applicable),
   also loaded using \texttt{LoadEarly=true} for correct operation of \texttt{RequestBootVarRouting}.
   \begin{itemize}
@@ -8890,8 +8893,8 @@ OpenCore is installed, in order for the \texttt{Launchd.command} script to work 
   (e.g. \texttt{1920x1080}) formatted string to request custom resolution
   from GOP if available.
   \item Set to \texttt{Max} to attempt using the largest
-  available screen resolution\DIFaddbegin \DIFadd{. When set to }\texttt{\DIFadd{Max}} \DIFadd{all available resolutions
-  will be listed in lines starting }\texttt{\DIFadd{OCC: Mode}} \DIFadd{in the debug log}\DIFaddend .
+  available screen resolution. When set to \texttt{Max} all available resolutions
+  will be listed in lines starting \texttt{OCC: Mode} in the debug log.
   \end{itemize}
 
   On HiDPI screens \texttt{APPLE\_VENDOR\_VARIABLE\_GUID} \texttt{UIScale}
@@ -9639,14 +9642,23 @@ hdiutil convert ReadWrite.dmg -format UDZO -o ReadOnly.dmg
     performance drain and will be chosen automatically when
     \texttt{KernelCache} is set to \texttt{Auto}.
   \item Last released installer image for Mac OS X~10.5 is Mac OS X~10.5.7
-    build \texttt{9J3050} (for \texttt{MacBookPro5,3}). Unlike the others,
+    build \texttt{9J3050} (for \texttt{MacBookPro5,3}). \DIFdelbegin \DIFdel{Unlike the others,
     this image is not limited to the target model identifiers and can be used
-    as is. The original \texttt{9J3050} image can be found
+    as is. }\DIFdelend The original \texttt{9J3050} image can be found
     \href{https://archive.org/details/10.5.7-9-j-3050}{here}
     (\href{https://mega.nz/folder/inRBTarD#zanf7fUbviwz3WHBU5xpCg}{MEGA Mirror}),
     assuming Mac OS X~10.5 is legally owned. Refer to the \texttt{DIGEST.txt} file
-    for details. Note that this is the earliest tested
-    version of Mac OS X~10.5 with OpenCore.
+    for details. \DIFaddbegin \DIFadd{This image is limited to }\texttt{\DIFadd{MacBookPro5,2}}\DIFadd{, }\texttt{\DIFadd{MacBookPro5,3}}\DIFadd{,
+    }\texttt{\DIFadd{MacBookPro5,4}}\DIFadd{, }\texttt{\DIFadd{MacBookPro5,5}} \DIFadd{model identifiers.
+    To fix compatibility with other models one can hex-edit the raw installer image replacing
+    the logic of }\texttt{\DIFadd{/usr/libexec/cpu\_check}} \DIFadd{script. For example, it can be changed
+    to always return }\texttt{\DIFadd{0}} \DIFadd{by altering the ternary operator of the }\texttt{\DIFadd{exit}} \DIFadd{function call:
+}\DIFmodbegin
+\begin{lstlisting}[label=hex105, style=ocbash,alsolanguage=DIFcode]
+%DIF > exit ( $CPUs{$hostCPU} ? 0 : 1 );
+\end{lstlisting}
+\DIFmodend
+    \DIFaddend Note that this \DIFaddbegin \DIFadd{image }\DIFaddend is the earliest tested version of Mac OS X~10.5 with OpenCore.
 \end{itemize}
 
 \subsubsection{Mac OS X 10.4}\label{legacy104}
@@ -9666,7 +9678,29 @@ hdiutil convert ReadWrite.dmg -format UDZO -o ReadOnly.dmg
     (\href{https://mega.nz/folder/D3ASzLzA\#7sjYXE2X09f6aGjol\_C7dg}{MEGA Mirror}),
     assuming Mac OS X~10.4 is legally owned. Refer to the \texttt{DIGEST.txt} file
     for details. Note that these are the earliest tested
-    versions of Mac OS X~10.4 with OpenCore.
+    versions of Mac OS X~10.4 with OpenCore\DIFaddbegin \DIFadd{.
+  }\item \DIFadd{Due to lack of }\texttt{\DIFadd{createinstallmedia}} \DIFadd{utility and because the DMG installer
+    is a volume image, not of a disk image (with a partition table), it is necessary
+    to either restore the DMG file to a partition on a GPT-formatted media or convert
+    it to a disk image. The following commands could be used to do it:
+}
+
+\DIFmodbegin
+\begin{lstlisting}[label=convertdmg, style=ocbash,alsolanguage=DIFcode]
+%DIF > hdiutil create -o converted.dmg -size 14g -layout GPTSPUD -fs HFS+J
+%DIF > hdiutil attach -nomount converted.dmg
+%DIF > hdiutil attach -nomount /path/to/original/installer.dmg
+%DIF > dd if=/dev/disk{Y} of=/dev/disk{X}s2 bs=16m
+%DIF > hdiutil detach disk{X} && hdiutil detach disk{Y}
+%DIF > # Optionally convert to preferrable disk image:
+%DIF > qemu-img -p -O qcow2 convert /dev/disk{X} installer.qcow2
+\end{lstlisting}
+\DIFmodend
+
+    \DIFadd{It will be necessary to replace }\texttt{\DIFadd{\{X\}}} \DIFadd{and }\texttt{\DIFadd{\{Y\}}} \DIFadd{with disk
+    numbers for attached target image (converted.dmg) and original DMG installer
+    (installer.dmg). Converting the resulting dmg can be done any other preferrable
+    format with the help of }\texttt{\DIFadd{qemu-img}} \DIFadd{utility}\DIFaddend .
 \end{itemize}
 
 \subsection{UEFI Secure Boot}\label{uefisecureboot}

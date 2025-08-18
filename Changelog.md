@@ -1,5 +1,19 @@
 OpenCore Changelog
 ==================
+#### v1.0.6
+- Added workaround for not detected CPU frequency in ProvideCpuInfo quirk, thx @hg13bs
+- Updated QemuBuild.command to support `EFI` mode without Duet
+- Increased `OC_STORAGE_SAFE_PATH_MAX` to 192 to support various plugin kexts
+- Fixed vaulting failures when custom fonts are used, thx @al3xtjames
+- Updated documentation for several Booter quirks
+
+#### v1.0.5
+- Fixed incorrect print in PCI device info dumping in `SysReport`
+- Fixed ocvalidate error messages for overlong kext paths in Kernel section, thx @corpnewt
+- Fixed kext injection compatibility issues with macOS 26
+- Updated builtin firmware versions for SMBIOS and the rest
+- Migrated to edk2-stable-202502 
+
 #### v1.0.4
 - Added support for booting from static IPv4 address in OpenCore-specific HttpBootDxe
 - Added static IPv4 configuration options to OpenNetworkBoot
@@ -9,6 +23,9 @@ OpenCore Changelog
 - Downgraded WARN log level to INFO for ALREADY_STARTED in AudioDxe (restores ability to include DEBUG_WARN in HaltLevel if required when using this driver)
 - Added `ClearTaskSwitchBit` Booter quirk to fix crashes when using 32-bit versions of macOS on Hyper-V Gen2 VMs
 - Fixed `ProvideCurrentCpuInfo` and CPUID patching on older versions of macOS 10.4
+- Removed ACPI0007 objects from `SSDT-HV-DEV.dsl`
+- Removed `SSDT-HV-DEV-WS2022.dsl` as it is no longer required
+- Added PCI class names to PCI device info dumping in `SysReport`
 
 #### v1.0.3
 - Fixed support for `AMD_CPU_EXT_FAMILY_1AH`, thx @Shaneee
