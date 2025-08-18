@@ -6,7 +6,8 @@
 
    This compatibility layer addresses issues with older systems (like cMP5,1)
    where CTRL key combinations may not work reliably. The Shell text editor
-   has been enhanced with F10 and ESC alternatives to CTRL+E and CTRL+W.
+   natively supports F10 for help and ESC/CTRL+W to exit help, providing
+   full compatibility without requiring key mapping changes.
 
    Copyright (c) 2025, OpenCore Team. All rights reserved.
    SPDX-License-Identifier: BSD-2-Clause-Patent
@@ -61,11 +62,11 @@ STATIC CONTROL_CHAR_MAPPING  mControlCharTable[] = {
   { 0x14, "CTRL+T",  "MainCommandSwitchFileType" }, // File Type
   { 0x15, "CTRL+U",  "MainCommandPasteLine"      }, // Paste Line
   { 0x16, "CTRL+V",  "Paste"                     },
-  { 0x17, "CTRL+W",  "MainCommandExitHelp"       }, // Exit Help - our secondary focus
+  { 0x17, "CTRL+W",  "ExitHelpContext"           }, // Exit Help - used within help display only
   { 0x18, "CTRL+X",  "Cut"                       },
   { 0x19, "CTRL+Y",  "Redo"                      },
   { 0x1A, "CTRL+Z",  "Undo"                      },
-  { 0x1B, "ESC",     "EscapeKey"                 }, // ESC - our F10 alternative
+  { 0x1B, "ESC",     "ExitHelpContext"           }, // ESC - F10 alternative for help exit
   { 0x1C, "CTRL+\\", "FileSeparator"             },
   { 0x1D, "CTRL+]",  "GroupSeparator"            },
   { 0x1E, "CTRL+^",  "RecordSeparator"           },
@@ -129,12 +130,15 @@ STATIC BOOLEAN                            mProtocolInstalled = FALSE;
    Compatibility implementation of ReadKeyStrokeEx that falls back to ReadKeyStroke.
 
    On EFI 1.1 systems like cMP5,1, the SimpleTextInputEx protocol is not available,
-   and CTRL key combinations are handled differently. This function attempts to
-   detect CTRL combinations by analyzing ASCII control codes and setting the
-   appropriate shift state flags.
-
-   Note: For maximum compatibility, the Shell text editor has been enhanced with
-   F10 (alternative to CTRL+E) and ESC (alternative to CTRL+W) key support.
+   and CTRL key combinations are handled differently. This function provides:
+   
+   1. SimpleTextInputEx protocol compatibility
+   2. Key remapping for enhanced cMP5,1 compatibility:
+      - F10 → CTRL+E (Help functionality for programs that use CTRL+E)
+   
+   ESC key is left unchanged as most programs expect ESC to work normally.
+   This allows programs to work with F10 as an alternative to CTRL+E on systems 
+   where CTRL combinations may not be reliable.
 
    @param  This                 Protocol instance pointer.
    @param  KeyData              A pointer to a buffer that is filled in with the keystroke
@@ -223,12 +227,6 @@ OcCompatReadKeyStrokeEx (
         }
       }
     }
-    // Also handle some additional control characters
-    else if (KeyData->Key.UnicodeChar == 0x1B) {
-      // ESC key
-      // ESC is handled as-is, no CTRL flag needed
-      DEBUG ((DEBUG_VERBOSE, "OcTextInputLib: ESC key detected (Exit Help alternative)\n"));
-    }
     // Handle function keys and scan codes
     else if (KeyData->Key.ScanCode != SCAN_NULL) {
       // Specifically handle function keys that the Shell text editor uses
@@ -261,7 +259,10 @@ OcCompatReadKeyStrokeEx (
           DEBUG ((DEBUG_VERBOSE, "OcTextInputLib: Detected F9 key\n"));
           break;
         case SCAN_F10: // Help (our new addition)
-          DEBUG ((DEBUG_VERBOSE, "OcTextInputLib: Detected F10 key (Help)\n"));
+          DEBUG ((DEBUG_INFO, "OcTextInputLib: F10 key detected - remapping to CTRL+E (Help)\n"));
+          // Remap F10 to CTRL+E for programs that expect CTRL+E for help
+          KeyData->Key.ScanCode    = SCAN_NULL;
+          KeyData->Key.UnicodeChar = 5; // CTRL+E
           break;
         case SCAN_F11: // File Type (duplicate)
           DEBUG ((DEBUG_VERBOSE, "OcTextInputLib: Detected F11 key\n"));
@@ -273,6 +274,13 @@ OcCompatReadKeyStrokeEx (
           DEBUG ((DEBUG_VERBOSE, "OcTextInputLib: Detected scan code 0x%X\n", KeyData->Key.ScanCode));
           break;
       }
+    }
+
+    // Handle ESC key - keep it as ESC since most programs expect it
+    if (KeyData->Key.UnicodeChar == 0x1B) {
+      DEBUG ((DEBUG_VERBOSE, "OcTextInputLib: ESC key detected - keeping as ESC\n"));
+      // ESC is universally expected to work as ESC in most programs
+      // We don't remap it to CTRL+W as that would break normal ESC functionality
     }
 
     DEBUG ((
@@ -592,7 +600,11 @@ OcTestCtrlKeyDetection (
     OcIsSimpleTextInputExAvailable () ? L"YES" : L"NO"
     ));
 
-  // Test Shell text editor function key assignments
+  // Test Shell text editor function key assignments and our remapping
+  DEBUG ((DEBUG_INFO, "OcTextInputLib: Key Remapping Behavior:\n"));
+  DEBUG ((DEBUG_INFO, "OcTextInputLib: F10 (0x%02X) -> REMAPPED TO -> CTRL+E (Help)\n", SCAN_F10));
+  DEBUG ((DEBUG_INFO, "OcTextInputLib: ESC (0x1B) -> KEPT AS -> ESC (Universal)\n"));
+  DEBUG ((DEBUG_INFO, "OcTextInputLib: \n"));
   DEBUG ((DEBUG_INFO, "OcTextInputLib: Shell Text Editor Key Assignments:\n"));
   DEBUG ((DEBUG_INFO, "OcTextInputLib: F1  (0x%02X) -> Go To Line\n", SCAN_F1));
   DEBUG ((DEBUG_INFO, "OcTextInputLib: F2  (0x%02X) -> Save File\n", SCAN_F2));
@@ -607,7 +619,7 @@ OcTestCtrlKeyDetection (
   DEBUG ((DEBUG_INFO, "OcTextInputLib: F11 (0x%02X) -> File Type\n", SCAN_F11));
 
   // Test expected CTRL codes for Shell text editor
-  DEBUG ((DEBUG_INFO, "OcTextInputLib: Enhanced CTRL Key Detection:\n"));
+  DEBUG ((DEBUG_INFO, "OcTextInputLib: Shell Text Editor Key Mappings:\n"));
   DEBUG ((
     DEBUG_INFO,
     "OcTextInputLib: CTRL+E (Help) -> Unicode char 5 (0x05) -> %a\n",
@@ -616,9 +628,10 @@ OcTestCtrlKeyDetection (
   DEBUG ((
     DEBUG_INFO,
     "OcTextInputLib: CTRL+W (Exit Help) -> Unicode char 23 (0x17) -> %a\n",
-    GetControlCharShellFunction (23) ? GetControlCharShellFunction (23) : "MainCommandExitHelp"
+    GetControlCharShellFunction (23) ? GetControlCharShellFunction (23) : "ExitHelpContext"
     ));
-  DEBUG ((DEBUG_INFO, "OcTextInputLib: ESC (Exit Help) -> Unicode char 27 (0x1B) -> EscapeKey\n"));
+  DEBUG ((DEBUG_INFO, "OcTextInputLib: ESC (Exit Help) -> Unicode char 27 (0x1B) -> ExitHelpContext\n"));
+  DEBUG ((DEBUG_INFO, "OcTextInputLib: F10 (Help) -> Scan code 0x%02X -> MainCommandDisplayHelp\n", SCAN_F10));
 
   // Show comprehensive CTRL mapping table
   DEBUG ((DEBUG_INFO, "OcTextInputLib: Complete Control Character Support:\n"));
