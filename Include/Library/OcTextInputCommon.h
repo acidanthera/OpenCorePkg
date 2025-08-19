@@ -123,7 +123,7 @@ OctiLogControlChar (
   IN CHAR16  ControlChar
   )
 {
-#ifdef DEBUG
+ #ifdef DEBUG
   STATIC OCTI_CONTROL_CHAR_MAPPING  mControlCharTable[] = OCTI_CONTROL_CHAR_TABLE_INIT;
   OCTI_CONTROL_CHAR_MAPPING         *Mapping;
 
@@ -141,7 +141,7 @@ OctiLogControlChar (
       );
   }
 
-#endif
+ #endif
 }
 
 #endif // OC_TEXT_INPUT_COMMON_H

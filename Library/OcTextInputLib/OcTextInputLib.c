@@ -155,9 +155,9 @@ OcCompatReadKeyStrokeEx (
 {
   EFI_STATUS  Status;
 
-#if defined (DEBUG_POINTER)
+ #if defined (DEBUG_POINTER)
   CHAR16      CtrlChar;
-#endif
+ #endif
 
   if (KeyData == NULL) {
     return EFI_INVALID_PARAMETER;
@@ -220,11 +220,11 @@ OcCompatReadKeyStrokeEx (
           DEBUG ((
             DEBUG_VERBOSE,
             "OcTextInputLib: CTRL+%c detected - code %d\n",
-#if defined (DEBUG_POINTER)
+ #if defined (DEBUG_POINTER)
             (CtrlChar = (CHAR16)('A' + KeyData->Key.UnicodeChar - 1), CtrlChar),
-#else
+ #else
             (CHAR16)('A' + KeyData->Key.UnicodeChar - 1),
-#endif
+ #endif
             KeyData->Key.UnicodeChar
             ));
         }
