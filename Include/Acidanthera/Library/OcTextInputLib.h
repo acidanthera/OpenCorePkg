@@ -49,21 +49,6 @@ OcUninstallSimpleTextInputEx (
   );
 
 /**
-   Internal implementation for installing SimpleTextInputEx protocol.
-
-   @param  UseLocalRegistration  If TRUE, use local registration method (for OpenShell)
-                                If FALSE, use standard gBS method (for drivers)
-
-   @retval EFI_SUCCESS          Protocol installed successfully or already present
-   @retval EFI_ALREADY_STARTED  Protocol already exists, no action taken
-   @retval Others               Installation failed
- **/
-EFI_STATUS
-OcInstallSimpleTextInputExInternal (
-  IN BOOLEAN  UseLocalRegistration
-  );
-
-/**
    Test CTRL key detection on the current system.
 
    This function can be used to verify that CTRL key combinations

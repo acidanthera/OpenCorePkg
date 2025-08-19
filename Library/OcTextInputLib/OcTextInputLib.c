@@ -23,6 +23,8 @@
 #include <Library/DebugLib.h>
 #include <Library/OcTextInputLib.h>
 
+#include "OcTextInputLibInternal.h"
+
 //
 // Helper macros
 //

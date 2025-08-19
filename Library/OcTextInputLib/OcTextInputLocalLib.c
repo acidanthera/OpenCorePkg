@@ -17,6 +17,8 @@
 #include <Library/DebugLib.h>
 #include <Library/OcTextInputLib.h>
 
+#include "OcTextInputLibInternal.h"
+
 /**
    Install SimpleTextInputEx compatibility protocol using local registration.
 
