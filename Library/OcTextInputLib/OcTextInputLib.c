@@ -21,6 +21,7 @@
 #include <Library/MemoryAllocationLib.h>
 #include <Library/UefiBootServicesTableLib.h>
 #include <Library/DebugLib.h>
+#include <Library/OcDebugLogLib.h>
 #include <Library/OcTextInputLib.h>
 
 #include "OcTextInputLibInternal.h"
@@ -35,37 +36,37 @@ typedef struct {
 } CONTROL_CHAR_MAPPING;
 
 STATIC CONTROL_CHAR_MAPPING  mControlCharTable[] = {
-  { 0x01, "CTRL+A",  "SelectAll"                 },
-  { 0x02, "CTRL+B",  "MoveCursorLeft"            },
-  { 0x03, "CTRL+C",  "Copy"                      },
-  { 0x04, "CTRL+D",  "Delete"                    },
-  { 0x05, "CTRL+E",  "MainCommandDisplayHelp"    }, // Help - our primary focus
-  { 0x06, "CTRL+F",  "MainCommandSearch"         }, // Search
-  { 0x07, "CTRL+G",  "MainCommandGotoLine"       }, // Go to Line
-  { 0x08, "CTRL+H",  "Backspace"                 },
-  { 0x09, "CTRL+I",  "Tab"                       },
-  { 0x0A, "CTRL+J",  "NewLine"                   },
-  { 0x0B, "CTRL+K",  "MainCommandCutLine"        }, // Cut Line
-  { 0x0C, "CTRL+L",  "Refresh"                   },
-  { 0x0D, "CTRL+M",  "CarriageReturn"            },
-  { 0x0E, "CTRL+N",  "NewFile"                   },
-  { 0x0F, "CTRL+O",  "MainCommandOpenFile"       }, // Open File
-  { 0x10, "CTRL+P",  "Print"                     },
-  { 0x11, "CTRL+Q",  "MainCommandExit"           }, // Exit
-  { 0x12, "CTRL+R",  "MainCommandSearchReplace"  }, // Search & Replace
-  { 0x13, "CTRL+S",  "MainCommandSaveFile"       }, // Save File
-  { 0x14, "CTRL+T",  "MainCommandSwitchFileType" }, // File Type
-  { 0x15, "CTRL+U",  "MainCommandPasteLine"      }, // Paste Line
-  { 0x16, "CTRL+V",  "Paste"                     },
-  { 0x17, "CTRL+W",  "ExitHelpContext"           }, // Exit Help - used within help display only
-  { 0x18, "CTRL+X",  "Cut"                       },
-  { 0x19, "CTRL+Y",  "Redo"                      },
-  { 0x1A, "CTRL+Z",  "Undo"                      },
-  { 0x1B, "ESC",     "ExitHelpContext"           }, // ESC - F10 alternative for help exit
-  { 0x1C, "CTRL+\\", "FileSeparator"             },
-  { 0x1D, "CTRL+]",  "GroupSeparator"            },
-  { 0x1E, "CTRL+^",  "RecordSeparator"           },
-  { 0x1F, "CTRL+_",  "UnitSeparator"             }
+  { 0x01, DEBUG_POINTER ("CTRL+A"),  DEBUG_POINTER ("SelectAll")                 },
+  { 0x02, DEBUG_POINTER ("CTRL+B"),  DEBUG_POINTER ("MoveCursorLeft")            },
+  { 0x03, DEBUG_POINTER ("CTRL+C"),  DEBUG_POINTER ("Copy")                      },
+  { 0x04, DEBUG_POINTER ("CTRL+D"),  DEBUG_POINTER ("Delete")                    },
+  { 0x05, DEBUG_POINTER ("CTRL+E"),  DEBUG_POINTER ("MainCommandDisplayHelp")    }, // Help - our primary focus
+  { 0x06, DEBUG_POINTER ("CTRL+F"),  DEBUG_POINTER ("MainCommandSearch")         }, // Search
+  { 0x07, DEBUG_POINTER ("CTRL+G"),  DEBUG_POINTER ("MainCommandGotoLine")       }, // Go to Line
+  { 0x08, DEBUG_POINTER ("CTRL+H"),  DEBUG_POINTER ("Backspace")                 },
+  { 0x09, DEBUG_POINTER ("CTRL+I"),  DEBUG_POINTER ("Tab")                       },
+  { 0x0A, DEBUG_POINTER ("CTRL+J"),  DEBUG_POINTER ("NewLine")                   },
+  { 0x0B, DEBUG_POINTER ("CTRL+K"),  DEBUG_POINTER ("MainCommandCutLine")        }, // Cut Line
+  { 0x0C, DEBUG_POINTER ("CTRL+L"),  DEBUG_POINTER ("Refresh")                   },
+  { 0x0D, DEBUG_POINTER ("CTRL+M"),  DEBUG_POINTER ("CarriageReturn")            },
+  { 0x0E, DEBUG_POINTER ("CTRL+N"),  DEBUG_POINTER ("NewFile")                   },
+  { 0x0F, DEBUG_POINTER ("CTRL+O"),  DEBUG_POINTER ("MainCommandOpenFile")       }, // Open File
+  { 0x10, DEBUG_POINTER ("CTRL+P"),  DEBUG_POINTER ("Print")                     },
+  { 0x11, DEBUG_POINTER ("CTRL+Q"),  DEBUG_POINTER ("MainCommandExit")           }, // Exit
+  { 0x12, DEBUG_POINTER ("CTRL+R"),  DEBUG_POINTER ("MainCommandSearchReplace")  }, // Search & Replace
+  { 0x13, DEBUG_POINTER ("CTRL+S"),  DEBUG_POINTER ("MainCommandSaveFile")       }, // Save File
+  { 0x14, DEBUG_POINTER ("CTRL+T"),  DEBUG_POINTER ("MainCommandSwitchFileType") }, // File Type
+  { 0x15, DEBUG_POINTER ("CTRL+U"),  DEBUG_POINTER ("MainCommandPasteLine")      }, // Paste Line
+  { 0x16, DEBUG_POINTER ("CTRL+V"),  DEBUG_POINTER ("Paste")                     },
+  { 0x17, DEBUG_POINTER ("CTRL+W"),  DEBUG_POINTER ("ExitHelpContext")           }, // Exit Help - used within help display only
+  { 0x18, DEBUG_POINTER ("CTRL+X"),  DEBUG_POINTER ("Cut")                       },
+  { 0x19, DEBUG_POINTER ("CTRL+Y"),  DEBUG_POINTER ("Redo")                      },
+  { 0x1A, DEBUG_POINTER ("CTRL+Z"),  DEBUG_POINTER ("Undo")                      },
+  { 0x1B, DEBUG_POINTER ("ESC"),     DEBUG_POINTER ("ExitHelpContext")           }, // ESC - F10 alternative for help exit
+  { 0x1C, DEBUG_POINTER ("CTRL+\\"), DEBUG_POINTER ("FileSeparator")             },
+  { 0x1D, DEBUG_POINTER ("CTRL+]"),  DEBUG_POINTER ("GroupSeparator")            },
+  { 0x1E, DEBUG_POINTER ("CTRL+^"),  DEBUG_POINTER ("RecordSeparator")           },
+  { 0x1F, DEBUG_POINTER ("CTRL+_"),  DEBUG_POINTER ("UnitSeparator")             }
 };
 
 /**
