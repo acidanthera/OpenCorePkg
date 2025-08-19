@@ -154,6 +154,7 @@ OcCompatReadKeyStrokeEx (
   )
 {
   EFI_STATUS  Status;
+
 #if defined (DEBUG_POINTER)
   CHAR16      CtrlChar;
 #endif

@@ -1,5 +1,15 @@
 /** @file
-  OcTextInputCommon - Common definitions for SimpleTextInputEx compatibility
+  OcTextInputCommon - Common definiti//
+// Control character lookup table - shared between library and driver
+//OctiLogControlChar (
+  IN CHAR16  ControlChar
+  )
+{
+#ifdef DEBUG
+  STATIC OCTI_CONTROL_CHAR_MAPPING  mControlCharTable[] = OCTI_CONTROL_CHAR_TABLE_INIT;
+  OCTI_CONTROL_CHAR_MAPPING         *Mapping;
+
+  Mapping = OctiGetControlCharMapping (mControlCharTable, ARRAY_SIZE (mControlCharTable), ControlChar);OCTI_CONTROL_CHAR_TABLE_INIT  { \for SimpleTextInputEx compatibility
   
   This header contains shared structures, constants, and macros used by both
   the OcTextInputLib library and the standalone OcTextInputDxe driver.
@@ -31,9 +41,9 @@
 // Conditional string inclusion for memory optimization
 //
 #if defined (DEBUG_POINTER)
-  #define OCTI_DEBUG_STRING(String)  DEBUG_POINTER (String)
+#define OCTI_DEBUG_STRING(String)  DEBUG_POINTER (String)
 #else
-  #define OCTI_DEBUG_STRING(String)  (String)
+#define OCTI_DEBUG_STRING(String)  (String)
 #endif
 
 /**
@@ -41,45 +51,45 @@
 **/
 typedef struct {
   UINT8   ControlChar;    ///< Control character code (0x01-0x1F)
-  CHAR8   *Description;   ///< Human-readable description (e.g., "CTRL+A")
-  CHAR8   *ShellFunction; ///< Shell function name (e.g., "StartOfLine")
+  CHAR16  *Description;   ///< Human-readable description (e.g., "CTRL+A")
+  CHAR16  *ShellFunction; ///< Shell function name (e.g., "StartOfLine")
 } OCTI_CONTROL_CHAR_MAPPING;
 
 //
 // Control character lookup table - shared between library and driver
 //
 #define OCTI_CONTROL_CHAR_TABLE_INIT { \
-  { 0x01, OCTI_DEBUG_STRING ("CTRL+A"),  OCTI_DEBUG_STRING ("StartOfLine")              }, \
-  { 0x02, OCTI_DEBUG_STRING ("CTRL+B"),  OCTI_DEBUG_STRING ("CursorLeft")               }, \
-  { 0x03, OCTI_DEBUG_STRING ("CTRL+C"),  OCTI_DEBUG_STRING ("Break")                    }, \
-  { 0x04, OCTI_DEBUG_STRING ("CTRL+D"),  OCTI_DEBUG_STRING ("Delete")                   }, \
-  { 0x05, OCTI_DEBUG_STRING ("CTRL+E"),  OCTI_DEBUG_STRING ("EndOfLine")                }, \
-  { 0x06, OCTI_DEBUG_STRING ("CTRL+F"),  OCTI_DEBUG_STRING ("CursorRight")              }, \
-  { 0x07, OCTI_DEBUG_STRING ("CTRL+G"),  OCTI_DEBUG_STRING ("Bell")                     }, \
-  { 0x08, OCTI_DEBUG_STRING ("CTRL+H"),  OCTI_DEBUG_STRING ("Backspace")                }, \
-  { 0x09, OCTI_DEBUG_STRING ("CTRL+I"),  OCTI_DEBUG_STRING ("Tab")                      }, \
-  { 0x0A, OCTI_DEBUG_STRING ("CTRL+J"),  OCTI_DEBUG_STRING ("LineFeed")                 }, \
-  { 0x0B, OCTI_DEBUG_STRING ("CTRL+K"),  OCTI_DEBUG_STRING ("VerticalTab")              }, \
-  { 0x0C, OCTI_DEBUG_STRING ("CTRL+L"),  OCTI_DEBUG_STRING ("FormFeed")                 }, \
-  { 0x0D, OCTI_DEBUG_STRING ("CTRL+M"),  OCTI_DEBUG_STRING ("CarriageReturn")           }, \
-  { 0x0E, OCTI_DEBUG_STRING ("CTRL+N"),  OCTI_DEBUG_STRING ("ShiftOut")                 }, \
-  { 0x0F, OCTI_DEBUG_STRING ("CTRL+O"),  OCTI_DEBUG_STRING ("ShiftIn")                  }, \
-  { 0x10, OCTI_DEBUG_STRING ("CTRL+P"),  OCTI_DEBUG_STRING ("DataLinkEscape")           }, \
-  { 0x11, OCTI_DEBUG_STRING ("CTRL+Q"),  OCTI_DEBUG_STRING ("DeviceControl1")           }, \
-  { 0x12, OCTI_DEBUG_STRING ("CTRL+R"),  OCTI_DEBUG_STRING ("DeviceControl2")           }, \
-  { 0x13, OCTI_DEBUG_STRING ("CTRL+S"),  OCTI_DEBUG_STRING ("DeviceControl3")           }, \
-  { 0x14, OCTI_DEBUG_STRING ("CTRL+T"),  OCTI_DEBUG_STRING ("DeviceControl4")           }, \
-  { 0x15, OCTI_DEBUG_STRING ("CTRL+U"),  OCTI_DEBUG_STRING ("NegativeAcknowledge")      }, \
-  { 0x16, OCTI_DEBUG_STRING ("CTRL+V"),  OCTI_DEBUG_STRING ("SynchronousIdle")          }, \
-  { 0x17, OCTI_DEBUG_STRING ("CTRL+W"),  OCTI_DEBUG_STRING ("EndOfTransmissionBlock")   }, \
-  { 0x18, OCTI_DEBUG_STRING ("CTRL+X"),  OCTI_DEBUG_STRING ("Cancel")                   }, \
-  { 0x19, OCTI_DEBUG_STRING ("CTRL+Y"),  OCTI_DEBUG_STRING ("EndOfMedium")              }, \
-  { 0x1A, OCTI_DEBUG_STRING ("CTRL+Z"),  OCTI_DEBUG_STRING ("Substitute")               }, \
-  { 0x1B, OCTI_DEBUG_STRING ("CTRL+["),  OCTI_DEBUG_STRING ("Escape")                   }, \
-  { 0x1C, OCTI_DEBUG_STRING ("CTRL+\\"), OCTI_DEBUG_STRING ("FileSeparator")            }, \
-  { 0x1D, OCTI_DEBUG_STRING ("CTRL+]"),  OCTI_DEBUG_STRING ("GroupSeparator")           }, \
-  { 0x1E, OCTI_DEBUG_STRING ("CTRL+^"),  OCTI_DEBUG_STRING ("RecordSeparator")          }, \
-  { 0x1F, OCTI_DEBUG_STRING ("CTRL+_"),  OCTI_DEBUG_STRING ("UnitSeparator")            }  \
+  { 0x01, OCTI_DEBUG_STRING (L"CTRL+A"),  OCTI_DEBUG_STRING (L"StartOfLine")              }, \
+  { 0x02, OCTI_DEBUG_STRING (L"CTRL+B"),  OCTI_DEBUG_STRING (L"CursorLeft")               }, \
+  { 0x03, OCTI_DEBUG_STRING (L"CTRL+C"),  OCTI_DEBUG_STRING (L"Break")                    }, \
+  { 0x04, OCTI_DEBUG_STRING (L"CTRL+D"),  OCTI_DEBUG_STRING (L"Delete")                   }, \
+  { 0x05, OCTI_DEBUG_STRING (L"CTRL+E"),  OCTI_DEBUG_STRING (L"EndOfLine")                }, \
+  { 0x06, OCTI_DEBUG_STRING (L"CTRL+F"),  OCTI_DEBUG_STRING (L"CursorRight")              }, \
+  { 0x07, OCTI_DEBUG_STRING (L"CTRL+G"),  OCTI_DEBUG_STRING (L"Bell")                     }, \
+  { 0x08, OCTI_DEBUG_STRING (L"CTRL+H"),  OCTI_DEBUG_STRING (L"Backspace")                }, \
+  { 0x09, OCTI_DEBUG_STRING (L"CTRL+I"),  OCTI_DEBUG_STRING (L"Tab")                      }, \
+  { 0x0A, OCTI_DEBUG_STRING (L"CTRL+J"),  OCTI_DEBUG_STRING (L"LineFeed")                 }, \
+  { 0x0B, OCTI_DEBUG_STRING (L"CTRL+K"),  OCTI_DEBUG_STRING (L"VerticalTab")              }, \
+  { 0x0C, OCTI_DEBUG_STRING (L"CTRL+L"),  OCTI_DEBUG_STRING (L"FormFeed")                 }, \
+  { 0x0D, OCTI_DEBUG_STRING (L"CTRL+M"),  OCTI_DEBUG_STRING (L"CarriageReturn")           }, \
+  { 0x0E, OCTI_DEBUG_STRING (L"CTRL+N"),  OCTI_DEBUG_STRING (L"ShiftOut")                 }, \
+  { 0x0F, OCTI_DEBUG_STRING (L"CTRL+O"),  OCTI_DEBUG_STRING (L"ShiftIn")                  }, \
+  { 0x10, OCTI_DEBUG_STRING (L"CTRL+P"),  OCTI_DEBUG_STRING (L"DataLinkEscape")           }, \
+  { 0x11, OCTI_DEBUG_STRING (L"CTRL+Q"),  OCTI_DEBUG_STRING (L"DeviceControl1")           }, \
+  { 0x12, OCTI_DEBUG_STRING (L"CTRL+R"),  OCTI_DEBUG_STRING (L"DeviceControl2")           }, \
+  { 0x13, OCTI_DEBUG_STRING (L"CTRL+S"),  OCTI_DEBUG_STRING (L"DeviceControl3")           }, \
+  { 0x14, OCTI_DEBUG_STRING (L"CTRL+T"),  OCTI_DEBUG_STRING (L"DeviceControl4")           }, \
+  { 0x15, OCTI_DEBUG_STRING (L"CTRL+U"),  OCTI_DEBUG_STRING (L"NegativeAcknowledge")      }, \
+  { 0x16, OCTI_DEBUG_STRING (L"CTRL+V"),  OCTI_DEBUG_STRING (L"SynchronousIdle")          }, \
+  { 0x17, OCTI_DEBUG_STRING (L"CTRL+W"),  OCTI_DEBUG_STRING (L"EndOfTransmissionBlock")   }, \
+  { 0x18, OCTI_DEBUG_STRING (L"CTRL+X"),  OCTI_DEBUG_STRING (L"Cancel")                   }, \
+  { 0x19, OCTI_DEBUG_STRING (L"CTRL+Y"),  OCTI_DEBUG_STRING (L"EndOfMedium")              }, \
+  { 0x1A, OCTI_DEBUG_STRING (L"CTRL+Z"),  OCTI_DEBUG_STRING (L"Substitute")               }, \
+  { 0x1B, OCTI_DEBUG_STRING (L"CTRL+["),  OCTI_DEBUG_STRING (L"Escape")                   }, \
+  { 0x1C, OCTI_DEBUG_STRING (L"CTRL+\\"), OCTI_DEBUG_STRING (L"FileSeparator")            }, \
+  { 0x1D, OCTI_DEBUG_STRING (L"CTRL+]"),  OCTI_DEBUG_STRING (L"GroupSeparator")           }, \
+  { 0x1E, OCTI_DEBUG_STRING (L"CTRL+^"),  OCTI_DEBUG_STRING (L"RecordSeparator")          }, \
+  { 0x1F, OCTI_DEBUG_STRING (L"CTRL+_"),  OCTI_DEBUG_STRING (L"UnitSeparator")            }  \
 }
 
 /**
@@ -131,14 +141,15 @@ OctiLogControlChar (
       "Control character detected: 0x%02X (%s)\n",
       (UINT8)ControlChar,
       Mapping->Description
-    );
+      );
   } else {
     OCTI_DEBUG_VERBOSE (
       "Unknown control character: 0x%02X\n",
       (UINT8)ControlChar
-    );
+      );
   }
-  #endif
+
+#endif
 }
 
 #endif // OC_TEXT_INPUT_COMMON_H
