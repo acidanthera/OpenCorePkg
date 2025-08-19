@@ -498,7 +498,6 @@ OcInstallSimpleTextInputExInternal (
    @retval Others               Installation failed
  **/
 EFI_STATUS
-EFIAPI
 OcInstallSimpleTextInputEx (
   VOID
   )
@@ -517,7 +516,6 @@ OcInstallSimpleTextInputEx (
    @retval Others               Uninstallation failed
  **/
 EFI_STATUS
-EFIAPI
 OcUninstallSimpleTextInputEx (
   VOID
   )
@@ -560,7 +558,6 @@ OcUninstallSimpleTextInputEx (
    @retval FALSE  SimpleTextInputEx is not available
  **/
 BOOLEAN
-EFIAPI
 OcIsSimpleTextInputExAvailable (
   VOID
   )
@@ -588,7 +585,6 @@ OcIsSimpleTextInputExAvailable (
    @retval Others               Test failed
  **/
 EFI_STATUS
-EFIAPI
 OcTestCtrlKeyDetection (
   VOID
   )
