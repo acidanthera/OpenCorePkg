@@ -14,7 +14,6 @@
 [Defines]
   INF_VERSION                    = 0x00010005
   BASE_NAME                      = OcTextInputLocalLib
-  MODULE_UNI_FILE                = OcTextInputLocalLib.uni
   FILE_GUID                      = B8448CF1-2B4E-4985-8556-7E5C9F6B2E3D
   MODULE_TYPE                    = UEFI_APPLICATION
   VERSION_STRING                 = 1.0
@@ -34,7 +33,6 @@
   BaseMemoryLib
   MemoryAllocationLib
   UefiBootServicesTableLib
-  DebugLib
 
 [Protocols]
   gEfiSimpleTextInputExProtocolGuid   ## SOMETIMES_CONSUMES ## SOMETIMES_PRODUCES

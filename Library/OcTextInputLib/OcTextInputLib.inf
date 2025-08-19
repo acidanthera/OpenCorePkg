@@ -14,7 +14,6 @@
 [Defines]
   INF_VERSION                    = 0x00010005
   BASE_NAME                      = OcTextInputLib
-  MODULE_UNI_FILE                = OcTextInputLib.uni
   FILE_GUID                      = A19B1FE7-C1BC-49F8-875F-54A5D542443C
   MODULE_TYPE                    = BASE
   VERSION_STRING                 = 1.0

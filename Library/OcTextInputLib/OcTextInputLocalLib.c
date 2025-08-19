@@ -14,43 +14,9 @@
 #include <Library/BaseMemoryLib.h>
 #include <Library/MemoryAllocationLib.h>
 #include <Library/UefiBootServicesTableLib.h>
-#include <Library/DebugLib.h>
 #include <Library/OcTextInputLib.h>
 
 #include "OcTextInputLibInternal.h"
-
-/**
-   Install SimpleTextInputEx compatibility protocol using local registration.
-
-   This function uses OcRegisterBootServicesProtocol instead of standard gBS
-   methods, making it suitable for use within OpenShell.
-
-   @retval EFI_SUCCESS          Protocol installed successfully or already present
-   @retval EFI_ALREADY_STARTED  Protocol already exists, no action taken
-   @retval Others               Installation failed
- **/
-/**
-   Install SimpleTextInputEx compatibility protocol using local registration.
-
-   This function is intended to use OcRegisterBootServicesProtocol for OpenShell
-   integration, but currently falls back to standard gBS->InstallProtocolInterface
-   method since the local registration method is not yet implemented.
-
-   @retval EFI_SUCCESS          Protocol installed successfully or already present
-   @retval EFI_ALREADY_STARTED  Protocol already exists, no action taken
-   @retval Others               Installation failed
- **/
-EFI_STATUS
-EFIAPI
-OcInstallSimpleTextInputExLocal (
-  VOID
-  )
-{
-  // Call the internal implementation with local registration flag
-  // NOTE: Local registration is not implemented yet; falling back to standard method.
-  DEBUG ((DEBUG_WARN, "OcTextInputLib: Local registration not implemented, using standard method\n"));
-  return OcInstallSimpleTextInputExInternal (TRUE);
-}
 
 /**
    Constructor for OcTextInputLocalLib.
@@ -70,16 +36,8 @@ OcTextInputLocalLibConstructor (
   IN EFI_SYSTEM_TABLE  *SystemTable
   )
 {
-  EFI_STATUS  Status;
-
-  DEBUG ((DEBUG_INFO, "OcTextInputLocalLib: Constructor called\n"));
-
-  // Automatically install SimpleTextInputEx compatibility
-  Status = OcInstallSimpleTextInputExLocal ();
-
-  if (EFI_ERROR (Status) && (Status != EFI_ALREADY_STARTED)) {
-    DEBUG ((DEBUG_WARN, "OcTextInputLocalLib: Failed to install compatibility in constructor - %r\n", Status));
-  }
+  // Automatically install SimpleTextInputEx compatibility using local registration
+  OcInstallSimpleTextInputExInternal (TRUE);
 
   // Don't fail library loading even if protocol installation fails
   return EFI_SUCCESS;

@@ -817,7 +817,7 @@ The codebase incorporates EDK II debugging and few custom features to improve th
 \begin{itemize}
 \tightlist
 \item Use module prefixes, 2-5 letters followed by a colon (\texttt{:}), for debug messages. For \texttt{OpenCorePkg}
-use \texttt{OC:}, for libraries and drivers use their own unique prefixes.
+use \texttt{OC:}, for libraries and drivers use their own unique prefixes. For example, \texttt{OcTextInputLib} uses \texttt{OCTI:}.
 \item Do not use dots (\texttt{.}) in the end of debug messages and separate \texttt{EFI\_STATUS}, printed by
 \texttt{\%r}, with a hyphen (e.g. \texttt{OCRAM: Allocation of \%u bytes failed - \%r\textbackslash n}).
 \item Use \texttt{DEBUG\_CODE\_BEGIN ()} and \texttt{DEBUG\_CODE\_END ()} constructions to guard debug checks
