@@ -13,6 +13,7 @@
 
 #include <Uefi.h>
 #include <Library/DebugLib.h>
+#include <Protocol/SimpleTextInEx.h>
 
 //
 // Debug macros for conditional compilation
@@ -130,18 +131,190 @@ OctiLogControlChar (
   Mapping = OctiGetControlCharMapping (mControlCharTable, ARRAY_SIZE (mControlCharTable), ControlChar);
   if (Mapping != NULL) {
     OCTI_DEBUG_VERBOSE (
-      "Control character detected: 0x%02X (%s)\n",
-      (UINT8)ControlChar,
-      Mapping->Description
-      );
+                        "Control character detected: 0x%02X (%s)\n",
+                        (UINT8)ControlChar,
+                        Mapping->Description
+                        );
   } else {
     OCTI_DEBUG_VERBOSE (
-      "Unknown control character: 0x%02X\n",
-      (UINT8)ControlChar
-      );
+                        "Unknown control character: 0x%02X\n",
+                        (UINT8)ControlChar
+                        );
   }
 
  #endif
+}
+
+/**
+  Process key data for SimpleTextInputEx compatibility.
+
+  This shared function handles control character detection, key state management,
+  and debug logging for both library and driver implementations.
+
+  @param[in,out]  KeyData               The key data to process.
+  @param[in]      ComponentName         Component name for debug logging.
+  @param[in]      SetControlShiftState  If TRUE, set EFI_LEFT_CONTROL_PRESSED for CTRL chars.
+                                       If FALSE, leave shift state as 0 for EFI 1.1 compatibility.
+
+**/
+STATIC
+VOID
+OctiProcessKeyData (
+  IN OUT EFI_KEY_DATA  *KeyData,
+  IN     CONST CHAR8   *ComponentName,
+  IN     BOOLEAN       SetControlShiftState
+  )
+{
+  STATIC OCTI_CONTROL_CHAR_MAPPING  mControlCharTable[] = OCTI_CONTROL_CHAR_TABLE_INIT;
+  OCTI_CONTROL_CHAR_MAPPING         *Mapping;
+
+ #if defined (DEBUG_POINTER)
+  CHAR16  CtrlChar;
+ #endif
+
+  if (KeyData == NULL) {
+    return;
+  }
+
+  // Initialize key state (important for EFI 1.1 compatibility)
+  KeyData->KeyState.KeyShiftState  = 0;
+  KeyData->KeyState.KeyToggleState = 0;
+
+  // Enhanced control key handling using shared lookup
+  if ((KeyData->Key.UnicodeChar >= 0x01) && (KeyData->Key.UnicodeChar <= 0x1F)) {
+    // This is a control character - conditionally set shift state
+    if (SetControlShiftState) {
+      KeyData->KeyState.KeyShiftState = EFI_LEFT_CONTROL_PRESSED;
+    }
+
+    // Look up the control character in our shared table
+    Mapping = OctiGetControlCharMapping (mControlCharTable, ARRAY_SIZE (mControlCharTable), KeyData->Key.UnicodeChar);
+
+ #if defined (DEBUG_POINTER)
+    CtrlChar = (CHAR16)KeyData->Key.UnicodeChar + L'@';
+    OCTI_DEBUG_VERBOSE (
+                        "%a: Control character 0x%02X (Ctrl+%c) detected\n",
+                        ComponentName ? ComponentName : "OcTI",
+                        (UINT8)KeyData->Key.UnicodeChar,
+                        (CHAR8)CtrlChar
+                        );
+ #endif
+
+    // Highlight important CTRL combinations for Shell text editor
+    if ((KeyData->Key.UnicodeChar == 0x05) || (KeyData->Key.UnicodeChar == 0x17)) {
+      // CTRL+E or CTRL+W
+      OCTI_DEBUG_INFO (
+                       "%a: *** CTRL+%c detected (%a) ***\n",
+                       ComponentName ? ComponentName : "OcTI",
+                       (CHAR8)((UINT8)KeyData->Key.UnicodeChar + 0x40),
+                       Mapping && Mapping->ShellFunction ? Mapping->ShellFunction : "Shell"
+                       );
+    } else {
+      OCTI_DEBUG_VERBOSE (
+                          "%a: CTRL+%c detected (%a)\n",
+                          ComponentName ? ComponentName : "OcTI",
+                          (CHAR8)((UINT8)KeyData->Key.UnicodeChar + 0x40),
+                          Mapping && Mapping->ShellFunction ? Mapping->ShellFunction : "Unknown"
+                          );
+    }
+  } else {
+    // Handle other special cases and key combinations
+    switch (KeyData->Key.UnicodeChar) {
+      case 0x1B:  // ESC key
+        OCTI_DEBUG_VERBOSE ("%a: ESC key detected (Exit Help)\n", ComponentName ? ComponentName : "OcTI");
+        break;
+      case 0x7F:  // DEL character
+        OCTI_DEBUG_VERBOSE ("%a: DEL character detected\n", ComponentName ? ComponentName : "OcTI");
+        break;
+      default:
+        // Check if this might be an Alt combination (high bit set)
+        if ((KeyData->Key.UnicodeChar >= 0x80) && (KeyData->Key.UnicodeChar <= 0xFF)) {
+          KeyData->KeyState.KeyShiftState = EFI_LEFT_ALT_PRESSED;
+          OCTI_DEBUG_VERBOSE (
+                              "%a: Alt combination detected - Unicode=0x%04X\n",
+                              ComponentName ? ComponentName : "OcTI",
+                              KeyData->Key.UnicodeChar
+                              );
+        }
+
+        break;
+    }
+  }
+
+  // Enhanced scan code handling for special keys and function keys
+  switch (KeyData->Key.ScanCode) {
+    case SCAN_ESC:
+      OCTI_DEBUG_VERBOSE ("%a: ESC scan code detected\n", ComponentName ? ComponentName : "OcTI");
+      break;
+
+    // Function keys F1-F12 (Shell text editor usage)
+    case SCAN_F1:
+      OCTI_DEBUG_VERBOSE ("%a: F1 (Go to Line) detected\n", ComponentName ? ComponentName : "OcTI");
+      break;
+    case SCAN_F2:
+      OCTI_DEBUG_VERBOSE ("%a: F2 (Save File) detected\n", ComponentName ? ComponentName : "OcTI");
+      break;
+    case SCAN_F3:
+      OCTI_DEBUG_VERBOSE ("%a: F3 (Exit) detected\n", ComponentName ? ComponentName : "OcTI");
+      break;
+    case SCAN_F4:
+      OCTI_DEBUG_VERBOSE ("%a: F4 (Search) detected\n", ComponentName ? ComponentName : "OcTI");
+      break;
+    case SCAN_F5:
+      OCTI_DEBUG_VERBOSE ("%a: F5 (Search & Replace) detected\n", ComponentName ? ComponentName : "OcTI");
+      break;
+    case SCAN_F6:
+      OCTI_DEBUG_VERBOSE ("%a: F6 (Cut Line) detected\n", ComponentName ? ComponentName : "OcTI");
+      break;
+    case SCAN_F7:
+      OCTI_DEBUG_VERBOSE ("%a: F7 (Paste Line) detected\n", ComponentName ? ComponentName : "OcTI");
+      break;
+    case SCAN_F8:
+      OCTI_DEBUG_VERBOSE ("%a: F8 (Open File) detected\n", ComponentName ? ComponentName : "OcTI");
+      break;
+    case SCAN_F9:
+      OCTI_DEBUG_VERBOSE ("%a: F9 (File Type) detected\n", ComponentName ? ComponentName : "OcTI");
+      break;
+    case SCAN_F10:
+      OCTI_DEBUG_INFO ("%a: *** F10 (Help) detected - cMP5,1 compatibility ***\n", ComponentName ? ComponentName : "OcTI");
+      break;
+    case SCAN_F11:
+      OCTI_DEBUG_VERBOSE ("%a: F11 (File Type) detected\n", ComponentName ? ComponentName : "OcTI");
+      break;
+    case SCAN_F12:
+      OCTI_DEBUG_VERBOSE ("%a: F12 (Not used) detected\n", ComponentName ? ComponentName : "OcTI");
+      break;
+
+    // Arrow keys
+    case SCAN_UP:
+    case SCAN_DOWN:
+    case SCAN_LEFT:
+    case SCAN_RIGHT:
+      OCTI_DEBUG_VERBOSE ("%a: Arrow key detected (0x%X)\n", ComponentName ? ComponentName : "OcTI", KeyData->Key.ScanCode);
+      break;
+
+    // Navigation keys
+    case SCAN_HOME:
+    case SCAN_END:
+    case SCAN_PAGE_UP:
+    case SCAN_PAGE_DOWN:
+    case SCAN_INSERT:
+    case SCAN_DELETE:
+      OCTI_DEBUG_VERBOSE ("%a: Navigation key detected (0x%X)\n", ComponentName ? ComponentName : "OcTI", KeyData->Key.ScanCode);
+      break;
+
+    default:
+      // No special scan code handling needed
+      break;
+  }
+
+  OCTI_DEBUG_VERBOSE (
+                      "%a: Key processed - Unicode=0x%04X, Scan=0x%04X, ShiftState=0x%08X\n",
+                      ComponentName ? ComponentName : "OcTI",
+                      KeyData->Key.UnicodeChar,
+                      KeyData->Key.ScanCode,
+                      KeyData->KeyState.KeyShiftState
+                      );
 }
 
 #endif // OC_TEXT_INPUT_COMMON_H

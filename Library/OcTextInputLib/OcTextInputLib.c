@@ -23,6 +23,7 @@
 #include <Library/DebugLib.h>
 #include <Library/OcDebugLogLib.h>
 #include <Library/OcTextInputLib.h>
+#include <Library/OcTextInputCommon.h>
 
 #include "OcTextInputLibInternal.h"
 
@@ -69,54 +70,6 @@ STATIC CONTROL_CHAR_MAPPING  mControlCharTable[] = {
   { 0x1F, DEBUG_POINTER ("CTRL+_"),  DEBUG_POINTER ("UnitSeparator")             }
 };
 
-/**
-   Get description for a control character.
-
-   @param  ControlChar  The control character code (0x01-0x1F)
-
-   @return Pointer to description string, or NULL if not found
- **/
-STATIC
-CHAR8 *
-GetControlCharDescription (
-  IN UINT8  ControlChar
-  )
-{
-  UINTN  Index;
-
-  for (Index = 0; Index < ARRAY_SIZE (mControlCharTable); Index++) {
-    if (mControlCharTable[Index].ControlChar == ControlChar) {
-      return mControlCharTable[Index].Description;
-    }
-  }
-
-  return NULL;
-}
-
-/**
-   Get Shell function name for a control character.
-
-   @param  ControlChar  The control character code (0x01-0x1F)
-
-   @return Pointer to Shell function name, or NULL if not found
- **/
-STATIC
-CHAR8 *
-GetControlCharShellFunction (
-  IN UINT8  ControlChar
-  )
-{
-  UINTN  Index;
-
-  for (Index = 0; Index < ARRAY_SIZE (mControlCharTable); Index++) {
-    if (mControlCharTable[Index].ControlChar == ControlChar) {
-      return mControlCharTable[Index].ShellFunction;
-    }
-  }
-
-  return NULL;
-}
-
 // Global variables for compatibility protocol
 STATIC EFI_SIMPLE_TEXT_INPUT_EX_PROTOCOL  *mOriginalSimpleTextInputEx = NULL;
 STATIC EFI_SIMPLE_TEXT_INPUT_EX_PROTOCOL  mCompatSimpleTextInputEx;
@@ -155,10 +108,6 @@ OcCompatReadKeyStrokeEx (
 {
   EFI_STATUS  Status;
 
- #if defined (DEBUG_POINTER)
-  CHAR16  CtrlChar;
- #endif
-
   if (KeyData == NULL) {
     return EFI_INVALID_PARAMETER;
   }
@@ -170,129 +119,19 @@ OcCompatReadKeyStrokeEx (
   Status = gST->ConIn->ReadKeyStroke (gST->ConIn, &KeyData->Key);
 
   if (!EFI_ERROR (Status)) {
-    // Set default shift state (no modifiers detected on EFI 1.1)
-    KeyData->KeyState.KeyShiftState  = 0;
-    KeyData->KeyState.KeyToggleState = 0;
+    // Handle F10 key remapping before shared processing
+    if (KeyData->Key.ScanCode == SCAN_F10) {
+      OCTI_DEBUG_INFO ("OcTextInputLib: F10 key detected - remapping to CTRL+E (Help)\n");
+      // Remap F10 to CTRL+E for programs that expect CTRL+E for help
+      KeyData->Key.ScanCode    = SCAN_NULL;
+      KeyData->Key.UnicodeChar = 5; // CTRL+E
+    }
 
-    // On EFI 1.1 systems, CTRL+key combinations are typically translated
-    // to the ASCII control code (key - 'A' + 1). The Shell text editor
-    // expects these to be handled as simple UnicodeChar values (1-26) with
-    // NO shift state flags, so we deliberately do NOT set EFI_LEFT_CONTROL_PRESSED.
+    // Use shared key processing logic from OcTextInputCommon.h
+    // Library uses no shift state setting for EFI 1.1 compatibility
     // This ensures compatibility with MenuBarDispatchControlHotKey which has
     // two different code paths for CTRL handling.
-    if ((KeyData->Key.UnicodeChar >= 1) && (KeyData->Key.UnicodeChar <= 26)) {
-      // This looks like a CTRL+letter combination (CTRL+A = 1, CTRL+B = 2, etc.)
-      // Leave KeyShiftState as 0 to use the "no shift state" code path in text editor
-      CHAR8  *Description   = GetControlCharDescription ((UINT8)KeyData->Key.UnicodeChar);
-      CHAR8  *ShellFunction = GetControlCharShellFunction ((UINT8)KeyData->Key.UnicodeChar);
-
-      // Highlight important CTRL combinations for Shell text editor
-      if (KeyData->Key.UnicodeChar == 5) {
-        // CTRL+E
-        DEBUG ((
-          DEBUG_INFO,
-          "OcTextInputLib: *** %a detected (%a) - code %d ***\n",
-          Description ? Description : "CTRL+E",
-          ShellFunction ? ShellFunction : "Help",
-          KeyData->Key.UnicodeChar
-          ));
-      } else if (KeyData->Key.UnicodeChar == 23) {
-        // CTRL+W
-        DEBUG ((
-          DEBUG_INFO,
-          "OcTextInputLib: *** %a detected (%a) - code %d ***\n",
-          Description ? Description : "CTRL+W",
-          ShellFunction ? ShellFunction : "Exit Help",
-          KeyData->Key.UnicodeChar
-          ));
-      } else {
-        // Other CTRL combinations
-        if (Description && ShellFunction) {
-          DEBUG ((
-            DEBUG_VERBOSE,
-            "OcTextInputLib: %a detected (%a) - code %d\n",
-            Description,
-            ShellFunction,
-            KeyData->Key.UnicodeChar
-            ));
-        } else {
-          // Fallback to basic display
-          DEBUG ((
-            DEBUG_VERBOSE,
-            "OcTextInputLib: CTRL+%c detected - code %d\n",
- #if defined (DEBUG_POINTER)
-            (CtrlChar = (CHAR16)('A' + KeyData->Key.UnicodeChar - 1), CtrlChar),
- #else
-            (CHAR16)('A' + KeyData->Key.UnicodeChar - 1),
- #endif
-            KeyData->Key.UnicodeChar
-            ));
-        }
-      }
-    }
-    // Handle function keys and scan codes
-    else if (KeyData->Key.ScanCode != SCAN_NULL) {
-      // Specifically handle function keys that the Shell text editor uses
-      switch (KeyData->Key.ScanCode) {
-        case SCAN_F1: // Go To Line
-          DEBUG ((DEBUG_VERBOSE, "OcTextInputLib: Detected F1 key\n"));
-          break;
-        case SCAN_F2: // Save File
-          DEBUG ((DEBUG_VERBOSE, "OcTextInputLib: Detected F2 key\n"));
-          break;
-        case SCAN_F3: // Exit
-          DEBUG ((DEBUG_VERBOSE, "OcTextInputLib: Detected F3 key\n"));
-          break;
-        case SCAN_F4: // Search
-          DEBUG ((DEBUG_VERBOSE, "OcTextInputLib: Detected F4 key\n"));
-          break;
-        case SCAN_F5: // Search/Replace
-          DEBUG ((DEBUG_VERBOSE, "OcTextInputLib: Detected F5 key\n"));
-          break;
-        case SCAN_F6: // Cut Line
-          DEBUG ((DEBUG_VERBOSE, "OcTextInputLib: Detected F6 key\n"));
-          break;
-        case SCAN_F7: // Paste Line
-          DEBUG ((DEBUG_VERBOSE, "OcTextInputLib: Detected F7 key\n"));
-          break;
-        case SCAN_F8: // Open File
-          DEBUG ((DEBUG_VERBOSE, "OcTextInputLib: Detected F8 key\n"));
-          break;
-        case SCAN_F9: // File Type
-          DEBUG ((DEBUG_VERBOSE, "OcTextInputLib: Detected F9 key\n"));
-          break;
-        case SCAN_F10: // Help (our new addition)
-          DEBUG ((DEBUG_INFO, "OcTextInputLib: F10 key detected - remapping to CTRL+E (Help)\n"));
-          // Remap F10 to CTRL+E for programs that expect CTRL+E for help
-          KeyData->Key.ScanCode    = SCAN_NULL;
-          KeyData->Key.UnicodeChar = 5; // CTRL+E
-          break;
-        case SCAN_F11: // File Type (duplicate)
-          DEBUG ((DEBUG_VERBOSE, "OcTextInputLib: Detected F11 key\n"));
-          break;
-        case SCAN_F12: // Not used by text editor
-          DEBUG ((DEBUG_VERBOSE, "OcTextInputLib: Detected F12 key\n"));
-          break;
-        default:
-          DEBUG ((DEBUG_VERBOSE, "OcTextInputLib: Detected scan code 0x%X\n", KeyData->Key.ScanCode));
-          break;
-      }
-    }
-
-    // Handle ESC key - keep it as ESC since most programs expect it
-    if (KeyData->Key.UnicodeChar == 0x1B) {
-      DEBUG ((DEBUG_VERBOSE, "OcTextInputLib: ESC key detected - keeping as ESC\n"));
-      // ESC is universally expected to work as ESC in most programs
-      // We don't remap it to CTRL+W as that would break normal ESC functionality
-    }
-
-    DEBUG ((
-      DEBUG_VERBOSE,
-      "OcTextInputLib: Key - Unicode: 0x%X, Scan: 0x%X, ShiftState: 0x%X\n",
-      KeyData->Key.UnicodeChar,
-      KeyData->Key.ScanCode,
-      KeyData->KeyState.KeyShiftState
-      ));
+    OctiProcessKeyData (KeyData, "OcTextInputLib", FALSE);
   }
 
   return Status;
@@ -447,10 +286,10 @@ OcInstallSimpleTextInputExInternal (
   // Check if SimpleTextInputEx is already available
   NativeSimpleTextInputEx = NULL;
   Status                  = gBS->HandleProtocol (
-                                   gST->ConsoleInHandle,
-                                   &gEfiSimpleTextInputExProtocolGuid,
-                                   (VOID **)&NativeSimpleTextInputEx
-                                   );
+                                                 gST->ConsoleInHandle,
+                                                 &gEfiSimpleTextInputExProtocolGuid,
+                                                 (VOID **)&NativeSimpleTextInputEx
+                                                 );
 
   if (!EFI_ERROR (Status)) {
     // Protocol already exists, no need for compatibility
@@ -473,11 +312,11 @@ OcInstallSimpleTextInputExInternal (
   // Install the compatibility protocol on the console input handle
   // NOTE: This always uses standard method regardless of UseLocalRegistration flag
   Status = gBS->InstallProtocolInterface (
-                  &gST->ConsoleInHandle,
-                  &gEfiSimpleTextInputExProtocolGuid,
-                  EFI_NATIVE_INTERFACE,
-                  &mCompatSimpleTextInputEx
-                  );
+                                          &gST->ConsoleInHandle,
+                                          &gEfiSimpleTextInputExProtocolGuid,
+                                          EFI_NATIVE_INTERFACE,
+                                          &mCompatSimpleTextInputEx
+                                          );
 
   if (EFI_ERROR (Status)) {
     DEBUG ((DEBUG_ERROR, "OcTextInputLib: Failed to install compatibility protocol - %r\n", Status));
@@ -539,10 +378,10 @@ OcUninstallSimpleTextInputEx (
   }
 
   Status = gBS->UninstallProtocolInterface (
-                  gST->ConsoleInHandle,
-                  &gEfiSimpleTextInputExProtocolGuid,
-                  &mCompatSimpleTextInputEx
-                  );
+                                            gST->ConsoleInHandle,
+                                            &gEfiSimpleTextInputExProtocolGuid,
+                                            &mCompatSimpleTextInputEx
+                                            );
 
   if (EFI_ERROR (Status)) {
     DEBUG ((DEBUG_WARN, "OcTextInputLib: Failed to uninstall compatibility protocol - %r\n", Status));
@@ -570,10 +409,10 @@ OcIsSimpleTextInputExAvailable (
   EFI_SIMPLE_TEXT_INPUT_EX_PROTOCOL  *SimpleTextInputEx;
 
   Status = gBS->HandleProtocol (
-                  gST->ConsoleInHandle,
-                  &gEfiSimpleTextInputExProtocolGuid,
-                  (VOID **)&SimpleTextInputEx
-                  );
+                                gST->ConsoleInHandle,
+                                &gEfiSimpleTextInputExProtocolGuid,
+                                (VOID **)&SimpleTextInputEx
+                                );
 
   return !EFI_ERROR (Status);
 }
@@ -594,11 +433,13 @@ OcTestCtrlKeyDetection (
   )
 {
   DEBUG ((DEBUG_INFO, "=== OcTextInputLib: CTRL Key Detection Test ===\n"));
-  DEBUG ((
-    DEBUG_INFO,
-    "OcTextInputLib: SimpleTextInputEx Available: %s\n",
-    OcIsSimpleTextInputExAvailable () ? L"YES" : L"NO"
-    ));
+  DEBUG (
+         (
+          DEBUG_INFO,
+          "OcTextInputLib: SimpleTextInputEx Available: %s\n",
+          OcIsSimpleTextInputExAvailable () ? L"YES" : L"NO"
+         )
+         );
 
   // Test Shell text editor function key assignments and our remapping
   DEBUG ((DEBUG_INFO, "OcTextInputLib: Key Remapping Behavior:\n"));
@@ -620,16 +461,8 @@ OcTestCtrlKeyDetection (
 
   // Test expected CTRL codes for Shell text editor
   DEBUG ((DEBUG_INFO, "OcTextInputLib: Shell Text Editor Key Mappings:\n"));
-  DEBUG ((
-    DEBUG_INFO,
-    "OcTextInputLib: CTRL+E (Help) -> Unicode char 5 (0x05) -> %a\n",
-    GetControlCharShellFunction (5) ? GetControlCharShellFunction (5) : "MainCommandDisplayHelp"
-    ));
-  DEBUG ((
-    DEBUG_INFO,
-    "OcTextInputLib: CTRL+W (Exit Help) -> Unicode char 23 (0x17) -> %a\n",
-    GetControlCharShellFunction (23) ? GetControlCharShellFunction (23) : "ExitHelpContext"
-    ));
+  DEBUG ((DEBUG_INFO, "OcTextInputLib: CTRL+E (Help) -> Unicode char 5 (0x05) -> MainCommandDisplayHelp\n"));
+  DEBUG ((DEBUG_INFO, "OcTextInputLib: CTRL+W (Exit Help) -> Unicode char 23 (0x17) -> ExitHelpContext\n"));
   DEBUG ((DEBUG_INFO, "OcTextInputLib: ESC (Exit Help) -> Unicode char 27 (0x1B) -> ExitHelpContext\n"));
   DEBUG ((DEBUG_INFO, "OcTextInputLib: F10 (Help) -> Scan code 0x%02X -> MainCommandDisplayHelp\n", SCAN_F10));
 
@@ -638,12 +471,14 @@ OcTestCtrlKeyDetection (
   for (UINTN Index = 0; Index < ARRAY_SIZE (mControlCharTable); Index++) {
     if (mControlCharTable[Index].ControlChar <= 0x1A) {
       // CTRL+A through CTRL+Z
-      DEBUG ((
-        DEBUG_VERBOSE,
-        "OcTextInputLib: %a -> %a\n",
-        mControlCharTable[Index].Description,
-        mControlCharTable[Index].ShellFunction
-        ));
+      DEBUG (
+             (
+              DEBUG_VERBOSE,
+              "OcTextInputLib: %a -> %a\n",
+              mControlCharTable[Index].Description,
+              mControlCharTable[Index].ShellFunction
+             )
+             );
     }
   }
 
@@ -652,17 +487,19 @@ OcTestCtrlKeyDetection (
   EFI_SIMPLE_TEXT_INPUT_EX_PROTOCOL  *SimpleTextInputEx;
 
   Status = gBS->HandleProtocol (
-                  gST->ConsoleInHandle,
-                  &gEfiSimpleTextInputExProtocolGuid,
-                  (VOID **)&SimpleTextInputEx
-                  );
+                                gST->ConsoleInHandle,
+                                &gEfiSimpleTextInputExProtocolGuid,
+                                (VOID **)&SimpleTextInputEx
+                                );
 
   if (!EFI_ERROR (Status)) {
-    DEBUG ((
-      DEBUG_INFO,
-      "OcTextInputLib: Using %s SimpleTextInputEx protocol\n",
-      SimpleTextInputEx == &mCompatSimpleTextInputEx ? L"COMPATIBILITY" : L"NATIVE"
-      ));
+    DEBUG (
+           (
+            DEBUG_INFO,
+            "OcTextInputLib: Using %s SimpleTextInputEx protocol\n",
+            SimpleTextInputEx == &mCompatSimpleTextInputEx ? L"COMPATIBILITY" : L"NATIVE"
+           )
+           );
   } else {
     DEBUG ((DEBUG_WARN, "OcTextInputLib: No SimpleTextInputEx protocol available!\n"));
   }
