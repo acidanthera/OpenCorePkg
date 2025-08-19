@@ -557,6 +557,7 @@ OcUninstallSimpleTextInputEx (
    @retval TRUE   SimpleTextInputEx is available (native or compatibility)
    @retval FALSE  SimpleTextInputEx is not available
  **/
+STATIC
 BOOLEAN
 OcIsSimpleTextInputExAvailable (
   VOID

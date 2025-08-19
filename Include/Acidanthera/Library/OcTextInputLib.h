@@ -49,17 +49,6 @@ OcUninstallSimpleTextInputEx (
   );
 
 /**
-   Check if SimpleTextInputEx protocol is available on console input handle.
-
-   @retval TRUE   SimpleTextInputEx is available (native or compatibility)
-   @retval FALSE  SimpleTextInputEx is not available
- **/
-BOOLEAN
-OcIsSimpleTextInputExAvailable (
-  VOID
-  );
-
-/**
    Internal implementation for installing SimpleTextInputEx protocol.
 
    @param  UseLocalRegistration  If TRUE, use local registration method (for OpenShell)
