@@ -26,13 +26,6 @@
 #include "OcTextInputLibInternal.h"
 
 //
-// Helper macros
-//
-#ifndef ARRAY_SIZE
-#define ARRAY_SIZE(Array)  (sizeof(Array) / sizeof((Array)[0]))
-#endif
-
-//
 // Enhanced control character mappings (from deprecated SimpleTextInputExCompatDxe)
 //
 typedef struct {
