@@ -161,29 +161,29 @@ OctiProcessKeyData (
  #if defined (DEBUG_POINTER)
     CtrlChar = (CHAR16)KeyData->Key.UnicodeChar + L'@';
     OCTI_DEBUG_VERBOSE (
-                        "%a: Control character 0x%02X (Ctrl+%c) detected\n",
-                        ComponentName ? ComponentName : "OcTI",
-                        (UINT8)KeyData->Key.UnicodeChar,
-                        (CHAR8)CtrlChar
-                        );
+      "%a: Control character 0x%02X (Ctrl+%c) detected\n",
+      ComponentName ? ComponentName : "OcTI",
+      (UINT8)KeyData->Key.UnicodeChar,
+      (CHAR8)CtrlChar
+      );
  #endif
 
     // Highlight important CTRL combinations for Shell text editor
     if ((KeyData->Key.UnicodeChar == 0x05) || (KeyData->Key.UnicodeChar == 0x17)) {
       // CTRL+E or CTRL+W
       OCTI_DEBUG_INFO (
-                       "%a: *** CTRL+%c detected (%a) ***\n",
-                       ComponentName ? ComponentName : "OcTI",
-                       (CHAR8)((UINT8)KeyData->Key.UnicodeChar + 0x40),
-                       Mapping && Mapping->ShellFunction ? Mapping->ShellFunction : "Shell"
-                       );
+        "%a: *** CTRL+%c detected (%a) ***\n",
+        ComponentName ? ComponentName : "OcTI",
+        (CHAR8)((UINT8)KeyData->Key.UnicodeChar + 0x40),
+        Mapping && Mapping->ShellFunction ? Mapping->ShellFunction : "Shell"
+        );
     } else {
       OCTI_DEBUG_VERBOSE (
-                          "%a: CTRL+%c detected (%a)\n",
-                          ComponentName ? ComponentName : "OcTI",
-                          (CHAR8)((UINT8)KeyData->Key.UnicodeChar + 0x40),
-                          Mapping && Mapping->ShellFunction ? Mapping->ShellFunction : "Unknown"
-                          );
+        "%a: CTRL+%c detected (%a)\n",
+        ComponentName ? ComponentName : "OcTI",
+        (CHAR8)((UINT8)KeyData->Key.UnicodeChar + 0x40),
+        Mapping && Mapping->ShellFunction ? Mapping->ShellFunction : "Unknown"
+        );
     }
   } else {
     // Handle other special cases and key combinations
@@ -199,10 +199,10 @@ OctiProcessKeyData (
         if ((KeyData->Key.UnicodeChar >= 0x80) && (KeyData->Key.UnicodeChar <= 0xFF)) {
           KeyData->KeyState.KeyShiftState = EFI_LEFT_ALT_PRESSED;
           OCTI_DEBUG_VERBOSE (
-                              "%a: Alt combination detected - Unicode=0x%04X\n",
-                              ComponentName ? ComponentName : "OcTI",
-                              KeyData->Key.UnicodeChar
-                              );
+            "%a: Alt combination detected - Unicode=0x%04X\n",
+            ComponentName ? ComponentName : "OcTI",
+            KeyData->Key.UnicodeChar
+            );
         }
 
         break;
@@ -277,12 +277,12 @@ OctiProcessKeyData (
   }
 
   OCTI_DEBUG_VERBOSE (
-                      "%a: Key processed - Unicode=0x%04X, Scan=0x%04X, ShiftState=0x%08X\n",
-                      ComponentName ? ComponentName : "OcTI",
-                      KeyData->Key.UnicodeChar,
-                      KeyData->Key.ScanCode,
-                      KeyData->KeyState.KeyShiftState
-                      );
+    "%a: Key processed - Unicode=0x%04X, Scan=0x%04X, ShiftState=0x%08X\n",
+    ComponentName ? ComponentName : "OcTI",
+    KeyData->Key.UnicodeChar,
+    KeyData->Key.ScanCode,
+    KeyData->KeyState.KeyShiftState
+    );
 }
 
 #endif // OC_TEXT_INPUT_COMMON_H

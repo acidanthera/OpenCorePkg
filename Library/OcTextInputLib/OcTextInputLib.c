@@ -41,29 +41,29 @@ STATIC CONTROL_CHAR_MAPPING  mControlCharTable[] = {
   { 0x02, DEBUG_POINTER ("CTRL+B"),  DEBUG_POINTER ("MoveCursorLeft")            },
   { 0x03, DEBUG_POINTER ("CTRL+C"),  DEBUG_POINTER ("Copy")                      },
   { 0x04, DEBUG_POINTER ("CTRL+D"),  DEBUG_POINTER ("Delete")                    },
-  { 0x05, DEBUG_POINTER ("CTRL+E"),  DEBUG_POINTER ("MainCommandDisplayHelp")    }, // Help - our primary focus
-  { 0x06, DEBUG_POINTER ("CTRL+F"),  DEBUG_POINTER ("MainCommandSearch")         }, // Search
-  { 0x07, DEBUG_POINTER ("CTRL+G"),  DEBUG_POINTER ("MainCommandGotoLine")       }, // Go to Line
+  { 0x05, DEBUG_POINTER ("CTRL+E"),  DEBUG_POINTER ("MainCommandDisplayHelp")    },      // Help - our primary focus
+  { 0x06, DEBUG_POINTER ("CTRL+F"),  DEBUG_POINTER ("MainCommandSearch")         },      // Search
+  { 0x07, DEBUG_POINTER ("CTRL+G"),  DEBUG_POINTER ("MainCommandGotoLine")       },      // Go to Line
   { 0x08, DEBUG_POINTER ("CTRL+H"),  DEBUG_POINTER ("Backspace")                 },
   { 0x09, DEBUG_POINTER ("CTRL+I"),  DEBUG_POINTER ("Tab")                       },
   { 0x0A, DEBUG_POINTER ("CTRL+J"),  DEBUG_POINTER ("NewLine")                   },
-  { 0x0B, DEBUG_POINTER ("CTRL+K"),  DEBUG_POINTER ("MainCommandCutLine")        }, // Cut Line
+  { 0x0B, DEBUG_POINTER ("CTRL+K"),  DEBUG_POINTER ("MainCommandCutLine")        },      // Cut Line
   { 0x0C, DEBUG_POINTER ("CTRL+L"),  DEBUG_POINTER ("Refresh")                   },
   { 0x0D, DEBUG_POINTER ("CTRL+M"),  DEBUG_POINTER ("CarriageReturn")            },
   { 0x0E, DEBUG_POINTER ("CTRL+N"),  DEBUG_POINTER ("NewFile")                   },
-  { 0x0F, DEBUG_POINTER ("CTRL+O"),  DEBUG_POINTER ("MainCommandOpenFile")       }, // Open File
+  { 0x0F, DEBUG_POINTER ("CTRL+O"),  DEBUG_POINTER ("MainCommandOpenFile")       },      // Open File
   { 0x10, DEBUG_POINTER ("CTRL+P"),  DEBUG_POINTER ("Print")                     },
-  { 0x11, DEBUG_POINTER ("CTRL+Q"),  DEBUG_POINTER ("MainCommandExit")           }, // Exit
-  { 0x12, DEBUG_POINTER ("CTRL+R"),  DEBUG_POINTER ("MainCommandSearchReplace")  }, // Search & Replace
-  { 0x13, DEBUG_POINTER ("CTRL+S"),  DEBUG_POINTER ("MainCommandSaveFile")       }, // Save File
-  { 0x14, DEBUG_POINTER ("CTRL+T"),  DEBUG_POINTER ("MainCommandSwitchFileType") }, // File Type
-  { 0x15, DEBUG_POINTER ("CTRL+U"),  DEBUG_POINTER ("MainCommandPasteLine")      }, // Paste Line
+  { 0x11, DEBUG_POINTER ("CTRL+Q"),  DEBUG_POINTER ("MainCommandExit")           },      // Exit
+  { 0x12, DEBUG_POINTER ("CTRL+R"),  DEBUG_POINTER ("MainCommandSearchReplace")  },      // Search & Replace
+  { 0x13, DEBUG_POINTER ("CTRL+S"),  DEBUG_POINTER ("MainCommandSaveFile")       },      // Save File
+  { 0x14, DEBUG_POINTER ("CTRL+T"),  DEBUG_POINTER ("MainCommandSwitchFileType") },      // File Type
+  { 0x15, DEBUG_POINTER ("CTRL+U"),  DEBUG_POINTER ("MainCommandPasteLine")      },      // Paste Line
   { 0x16, DEBUG_POINTER ("CTRL+V"),  DEBUG_POINTER ("Paste")                     },
-  { 0x17, DEBUG_POINTER ("CTRL+W"),  DEBUG_POINTER ("ExitHelpContext")           }, // Exit Help - used within help display only
+  { 0x17, DEBUG_POINTER ("CTRL+W"),  DEBUG_POINTER ("ExitHelpContext")           },      // Exit Help - used within help display only
   { 0x18, DEBUG_POINTER ("CTRL+X"),  DEBUG_POINTER ("Cut")                       },
   { 0x19, DEBUG_POINTER ("CTRL+Y"),  DEBUG_POINTER ("Redo")                      },
   { 0x1A, DEBUG_POINTER ("CTRL+Z"),  DEBUG_POINTER ("Undo")                      },
-  { 0x1B, DEBUG_POINTER ("ESC"),     DEBUG_POINTER ("ExitHelpContext")           }, // ESC - F10 alternative for help exit
+  { 0x1B, DEBUG_POINTER ("ESC"),     DEBUG_POINTER ("ExitHelpContext")           },      // ESC - F10 alternative for help exit
   { 0x1C, DEBUG_POINTER ("CTRL+\\"), DEBUG_POINTER ("FileSeparator")             },
   { 0x1D, DEBUG_POINTER ("CTRL+]"),  DEBUG_POINTER ("GroupSeparator")            },
   { 0x1E, DEBUG_POINTER ("CTRL+^"),  DEBUG_POINTER ("RecordSeparator")           },
@@ -124,7 +124,7 @@ OcCompatReadKeyStrokeEx (
       OCTI_DEBUG_INFO ("OcTextInputLib: F10 key detected - remapping to CTRL+E (Help)\n");
       // Remap F10 to CTRL+E for programs that expect CTRL+E for help
       KeyData->Key.ScanCode    = SCAN_NULL;
-      KeyData->Key.UnicodeChar = 5; // CTRL+E
+      KeyData->Key.UnicodeChar = 5;                   // CTRL+E
     }
 
     // Use shared key processing logic from OcTextInputCommon.h
@@ -160,18 +160,18 @@ OcCompatSetState (
   // to maintain compatibility with applications that expect this to work
   return EFI_SUCCESS;
 }/**
-   Compatibility implementation of RegisterKeyNotify (does nothing on EFI 1.1).
+    Compatibility implementation of RegisterKeyNotify (does nothing on EFI 1.1).
 
-   @param  This                 Protocol instance pointer.
-   @param  KeyData              A pointer to a buffer that defines the keystroke
+    @param  This                 Protocol instance pointer.
+    @param  KeyData              A pointer to a buffer that defines the keystroke
                                information for the notification function.
-   @param  KeyNotificationFunction Points to the function to be called when the key
+    @param  KeyNotificationFunction Points to the function to be called when the key
                                sequence is typed in the specified input device.
-   @param  NotifyHandle         Points to the unique handle assigned to the registered notification.
+    @param  NotifyHandle         Points to the unique handle assigned to the registered notification.
 
-   @retval EFI_SUCCESS          The notification function was registered successfully.
-   @retval EFI_OUT_OF_RESOURCES Failed to allocate memory for the dummy handle.
- **/
+    @retval EFI_SUCCESS          The notification function was registered successfully.
+    @retval EFI_OUT_OF_RESOURCES Failed to allocate memory for the dummy handle.
+  **/
 
 STATIC
 EFI_STATUS
@@ -260,20 +260,20 @@ OcInitializeCompatibilityProtocol (
   // Initialize the compatibility protocol structure
   mCompatSimpleTextInputEx.Reset               = OcCompatReset;
   mCompatSimpleTextInputEx.ReadKeyStrokeEx     = OcCompatReadKeyStrokeEx;
-  mCompatSimpleTextInputEx.WaitForKeyEx        = gST->ConIn->WaitForKey;// Reuse the same event
+  mCompatSimpleTextInputEx.WaitForKeyEx        = gST->ConIn->WaitForKey;      // Reuse the same event
   mCompatSimpleTextInputEx.SetState            = OcCompatSetState;
   mCompatSimpleTextInputEx.RegisterKeyNotify   = OcCompatRegisterKeyNotify;
   mCompatSimpleTextInputEx.UnregisterKeyNotify = OcCompatUnregisterKeyNotify;
 }/**
-   Internal implementation for installing SimpleTextInputEx protocol.
+    Internal implementation for installing SimpleTextInputEx protocol.
 
-   @param  UseLocalRegistration  If TRUE, use local registration method (for OpenShell)
+    @param  UseLocalRegistration  If TRUE, use local registration method (for OpenShell)
                                 If FALSE, use standard gBS method (for drivers)
 
-   @retval EFI_SUCCESS          Protocol installed successfully or already present
-   @retval EFI_ALREADY_STARTED  Protocol already exists, no action taken
-   @retval Others               Installation failed
- **/
+    @retval EFI_SUCCESS          Protocol installed successfully or already present
+    @retval EFI_ALREADY_STARTED  Protocol already exists, no action taken
+    @retval Others               Installation failed
+  **/
 
 EFI_STATUS
 OcInstallSimpleTextInputExInternal (
@@ -286,10 +286,10 @@ OcInstallSimpleTextInputExInternal (
   // Check if SimpleTextInputEx is already available
   NativeSimpleTextInputEx = NULL;
   Status                  = gBS->HandleProtocol (
-                                                 gST->ConsoleInHandle,
-                                                 &gEfiSimpleTextInputExProtocolGuid,
-                                                 (VOID **)&NativeSimpleTextInputEx
-                                                 );
+                                   gST->ConsoleInHandle,
+                                   &gEfiSimpleTextInputExProtocolGuid,
+                                   (VOID **)&NativeSimpleTextInputEx
+                                   );
 
   if (!EFI_ERROR (Status)) {
     // Protocol already exists, no need for compatibility
@@ -312,11 +312,11 @@ OcInstallSimpleTextInputExInternal (
   // Install the compatibility protocol on the console input handle
   // NOTE: This always uses standard method regardless of UseLocalRegistration flag
   Status = gBS->InstallProtocolInterface (
-                                          &gST->ConsoleInHandle,
-                                          &gEfiSimpleTextInputExProtocolGuid,
-                                          EFI_NATIVE_INTERFACE,
-                                          &mCompatSimpleTextInputEx
-                                          );
+                  &gST->ConsoleInHandle,
+                  &gEfiSimpleTextInputExProtocolGuid,
+                  EFI_NATIVE_INTERFACE,
+                  &mCompatSimpleTextInputEx
+                  );
 
   if (EFI_ERROR (Status)) {
     DEBUG ((DEBUG_ERROR, "OcTextInputLib: Failed to install compatibility protocol - %r\n", Status));
@@ -378,10 +378,10 @@ OcUninstallSimpleTextInputEx (
   }
 
   Status = gBS->UninstallProtocolInterface (
-                                            gST->ConsoleInHandle,
-                                            &gEfiSimpleTextInputExProtocolGuid,
-                                            &mCompatSimpleTextInputEx
-                                            );
+                  gST->ConsoleInHandle,
+                  &gEfiSimpleTextInputExProtocolGuid,
+                  &mCompatSimpleTextInputEx
+                  );
 
   if (EFI_ERROR (Status)) {
     DEBUG ((DEBUG_WARN, "OcTextInputLib: Failed to uninstall compatibility protocol - %r\n", Status));
@@ -409,10 +409,10 @@ OcIsSimpleTextInputExAvailable (
   EFI_SIMPLE_TEXT_INPUT_EX_PROTOCOL  *SimpleTextInputEx;
 
   Status = gBS->HandleProtocol (
-                                gST->ConsoleInHandle,
-                                &gEfiSimpleTextInputExProtocolGuid,
-                                (VOID **)&SimpleTextInputEx
-                                );
+                  gST->ConsoleInHandle,
+                  &gEfiSimpleTextInputExProtocolGuid,
+                  (VOID **)&SimpleTextInputEx
+                  );
 
   return !EFI_ERROR (Status);
 }
@@ -434,12 +434,12 @@ OcTestCtrlKeyDetection (
 {
   DEBUG ((DEBUG_INFO, "=== OcTextInputLib: CTRL Key Detection Test ===\n"));
   DEBUG (
-         (
-          DEBUG_INFO,
-          "OcTextInputLib: SimpleTextInputEx Available: %s\n",
-          OcIsSimpleTextInputExAvailable () ? L"YES" : L"NO"
-         )
-         );
+    (
+     DEBUG_INFO,
+     "OcTextInputLib: SimpleTextInputEx Available: %s\n",
+     OcIsSimpleTextInputExAvailable () ? L"YES" : L"NO"
+    )
+    );
 
   // Test Shell text editor function key assignments and our remapping
   DEBUG ((DEBUG_INFO, "OcTextInputLib: Key Remapping Behavior:\n"));
@@ -472,13 +472,13 @@ OcTestCtrlKeyDetection (
     if (mControlCharTable[Index].ControlChar <= 0x1A) {
       // CTRL+A through CTRL+Z
       DEBUG (
-             (
-              DEBUG_VERBOSE,
-              "OcTextInputLib: %a -> %a\n",
-              mControlCharTable[Index].Description,
-              mControlCharTable[Index].ShellFunction
-             )
-             );
+        (
+         DEBUG_VERBOSE,
+         "OcTextInputLib: %a -> %a\n",
+         mControlCharTable[Index].Description,
+         mControlCharTable[Index].ShellFunction
+        )
+        );
     }
   }
 
@@ -487,19 +487,19 @@ OcTestCtrlKeyDetection (
   EFI_SIMPLE_TEXT_INPUT_EX_PROTOCOL  *SimpleTextInputEx;
 
   Status = gBS->HandleProtocol (
-                                gST->ConsoleInHandle,
-                                &gEfiSimpleTextInputExProtocolGuid,
-                                (VOID **)&SimpleTextInputEx
-                                );
+                  gST->ConsoleInHandle,
+                  &gEfiSimpleTextInputExProtocolGuid,
+                  (VOID **)&SimpleTextInputEx
+                  );
 
   if (!EFI_ERROR (Status)) {
     DEBUG (
-           (
-            DEBUG_INFO,
-            "OcTextInputLib: Using %s SimpleTextInputEx protocol\n",
-            SimpleTextInputEx == &mCompatSimpleTextInputEx ? L"COMPATIBILITY" : L"NATIVE"
-           )
-           );
+      (
+       DEBUG_INFO,
+       "OcTextInputLib: Using %s SimpleTextInputEx protocol\n",
+       SimpleTextInputEx == &mCompatSimpleTextInputEx ? L"COMPATIBILITY" : L"NATIVE"
+      )
+      );
   } else {
     DEBUG ((DEBUG_WARN, "OcTextInputLib: No SimpleTextInputEx protocol available!\n"));
   }

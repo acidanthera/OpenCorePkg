@@ -98,9 +98,9 @@ CompatReset (
 
   // Reset underlying simple text input
   return Private->UnderlyingTextInput->Reset (
-                                              Private->UnderlyingTextInput,
-                                              ExtendedVerification
-                                              );
+                                         Private->UnderlyingTextInput,
+                                         ExtendedVerification
+                                         );
 }
 
 EFI_STATUS
@@ -138,9 +138,9 @@ CompatReadKeyStrokeEx (
 
   // Read from underlying protocol
   Status = Private->UnderlyingTextInput->ReadKeyStroke (
-                                                        Private->UnderlyingTextInput,
-                                                        &Key
-                                                        );
+                                           Private->UnderlyingTextInput,
+                                           &Key
+                                           );
 
   if (!EFI_ERROR (Status)) {
     // Convert EFI_INPUT_KEY to EFI_KEY_DATA
@@ -234,10 +234,10 @@ InstallSimpleTextInputExCompat (
 
   // Check if SimpleTextInputEx already exists
   Status = gBS->HandleProtocol (
-                                Handle,
-                                &gEfiSimpleTextInputExProtocolGuid,
-                                (VOID **)&TextInputEx
-                                );
+                  Handle,
+                  &gEfiSimpleTextInputExProtocolGuid,
+                  (VOID **)&TextInputEx
+                  );
 
   if (!EFI_ERROR (Status)) {
     // Protocol already exists, no need for compatibility layer
@@ -246,51 +246,51 @@ InstallSimpleTextInputExCompat (
   }
 
   DEBUG (
-         (
-          DEBUG_INFO,
-          "OcTextInputDxe: SimpleTextInputEx not found, Status=%r. Installing compatibility layer...\n",
-          Status
-         )
-         );
+    (
+     DEBUG_INFO,
+     "OcTextInputDxe: SimpleTextInputEx not found, Status=%r. Installing compatibility layer...\n",
+     Status
+    )
+    );
 
   // Get SimpleTextInput protocol
   Status = gBS->HandleProtocol (
-                                Handle,
-                                &gEfiSimpleTextInProtocolGuid,
-                                (VOID **)&TextInput
-                                );
+                  Handle,
+                  &gEfiSimpleTextInProtocolGuid,
+                  (VOID **)&TextInput
+                  );
 
   if (EFI_ERROR (Status)) {
     DEBUG (
-           (
-            DEBUG_ERROR,
-            "OcTextInputDxe: Failed to get SimpleTextInput protocol on handle %p: %r\n",
-            Handle,
-            Status
-           )
-           );
+      (
+       DEBUG_ERROR,
+       "OcTextInputDxe: Failed to get SimpleTextInput protocol on handle %p: %r\n",
+       Handle,
+       Status
+      )
+      );
     return Status;
   }
 
   if (TextInput == NULL) {
     DEBUG (
-           (
-            DEBUG_ERROR,
-            "OcTextInputDxe: SimpleTextInput protocol is NULL on handle %p\n",
-            Handle
-           )
-           );
+      (
+       DEBUG_ERROR,
+       "OcTextInputDxe: SimpleTextInput protocol is NULL on handle %p\n",
+       Handle
+      )
+      );
     return EFI_NOT_FOUND;
   }
 
   DEBUG (
-         (
-          DEBUG_INFO,
-          "OcTextInputDxe: Found SimpleTextInput protocol %p on handle %p\n",
-          TextInput,
-          Handle
-         )
-         );
+    (
+     DEBUG_INFO,
+     "OcTextInputDxe: Found SimpleTextInput protocol %p on handle %p\n",
+     TextInput,
+     Handle
+    )
+    );
 
   // Allocate private structure
   Private = AllocateZeroPool (sizeof (COMPAT_TEXT_INPUT_EX_PRIVATE));
@@ -315,61 +315,61 @@ InstallSimpleTextInputExCompat (
   Private->TextInputEx.UnregisterKeyNotify = CompatUnregisterKeyNotify;
 
   DEBUG (
-         (
-          DEBUG_VERBOSE,
-          "OcTextInputDxe: Initialized protocol functions for handle %p\n",
-          Handle
-         )
-         );
+    (
+     DEBUG_VERBOSE,
+     "OcTextInputDxe: Initialized protocol functions for handle %p\n",
+     Handle
+    )
+    );
 
   // Install the protocol using InstallMultipleProtocolInterfaces for better compatibility
   Status = gBS->InstallMultipleProtocolInterfaces (
-                                                   &Handle,
-                                                   &gEfiSimpleTextInputExProtocolGuid,
-                                                   &Private->TextInputEx,
-                                                   NULL
-                                                   );
+                  &Handle,
+                  &gEfiSimpleTextInputExProtocolGuid,
+                  &Private->TextInputEx,
+                  NULL
+                  );
 
   if (EFI_ERROR (Status)) {
     DEBUG (
-           (
-            DEBUG_ERROR,
-            "OcTextInputDxe: Failed to install SimpleTextInputEx protocol on handle %p: %r\n",
-            Handle,
-            Status
-           )
-           );
+      (
+       DEBUG_ERROR,
+       "OcTextInputDxe: Failed to install SimpleTextInputEx protocol on handle %p: %r\n",
+       Handle,
+       Status
+      )
+      );
     FreePool (Private);
     return Status;
   }
 
   DEBUG (
-         (
-          DEBUG_INFO,
-          "OcTextInputDxe: SimpleTextInputEx compatibility layer installed successfully on handle %p\n",
-          Handle
-         )
-         );
+    (
+     DEBUG_INFO,
+     "OcTextInputDxe: SimpleTextInputEx compatibility layer installed successfully on handle %p\n",
+     Handle
+    )
+    );
 
   // Verify installation by trying to retrieve the protocol
   EFI_SIMPLE_TEXT_INPUT_EX_PROTOCOL  *TestProtocol;
 
   Status = gBS->HandleProtocol (
-                                Handle,
-                                &gEfiSimpleTextInputExProtocolGuid,
-                                (VOID **)&TestProtocol
-                                );
+                  Handle,
+                  &gEfiSimpleTextInputExProtocolGuid,
+                  (VOID **)&TestProtocol
+                  );
 
   if (EFI_ERROR (Status)) {
     DEBUG ((DEBUG_ERROR, "OcTextInputDxe: Verification failed - cannot retrieve installed protocol: %r\n", Status));
   } else {
     DEBUG (
-           (
-            DEBUG_VERBOSE,
-            "OcTextInputDxe: Verification successful - protocol %p installed and accessible\n",
-            TestProtocol
-           )
-           );
+      (
+       DEBUG_VERBOSE,
+       "OcTextInputDxe: Verification successful - protocol %p installed and accessible\n",
+       TestProtocol
+      )
+      );
   }
 
   return EFI_SUCCESS;
@@ -396,30 +396,30 @@ PerformCompatibilityInstallation (
   }
 
   DEBUG (
-         (
-          DEBUG_INFO,
-          "OcTextInputDxe: === Performing SimpleTextInputEx Compatibility Installation ===\n"
-         )
-         );
+    (
+     DEBUG_INFO,
+     "OcTextInputDxe: === Performing SimpleTextInputEx Compatibility Installation ===\n"
+    )
+    );
 
   // Check if ANY SimpleTextInputEx protocols exist in the system
   Status = gBS->LocateHandleBuffer (
-                                    ByProtocol,
-                                    &gEfiSimpleTextInputExProtocolGuid,
-                                    NULL,
-                                    &HandleCount,
-                                    &HandleBuffer
-                                    );
+                  ByProtocol,
+                  &gEfiSimpleTextInputExProtocolGuid,
+                  NULL,
+                  &HandleCount,
+                  &HandleBuffer
+                  );
 
   if (EFI_ERROR (Status) || (HandleCount == 0)) {
     DEBUG (
-           (
-            DEBUG_INFO,
-            "OcTextInputDxe: No SimpleTextInputEx protocols found in system (Status=%r, Count=%d)\n",
-            Status,
-            HandleCount
-           )
-           );
+      (
+       DEBUG_INFO,
+       "OcTextInputDxe: No SimpleTextInputEx protocols found in system (Status=%r, Count=%d)\n",
+       Status,
+       HandleCount
+      )
+      );
     DEBUG ((DEBUG_INFO, "OcTextInputDxe: This indicates the system needs our compatibility layer\n"));
     ProtocolMissing = TRUE;
   } else {
@@ -434,21 +434,21 @@ PerformCompatibilityInstallation (
        (gST->RuntimeServices->Hdr.Revision < EFI_2_00_SYSTEM_TABLE_REVISION)))
   {
     DEBUG (
-           (
-            DEBUG_INFO,
-            "OcTextInputDxe: Installing compatibility layer due to missing protocols or legacy EFI components\n"
-           )
-           );
+      (
+       DEBUG_INFO,
+       "OcTextInputDxe: Installing compatibility layer due to missing protocols or legacy EFI components\n"
+      )
+      );
 
     // First, try installing on console input handle (most important)
     if (gST->ConsoleInHandle != NULL) {
       DEBUG (
-             (
-              DEBUG_INFO,
-              "OcTextInputDxe: Attempting installation on console input handle %p\n",
-              gST->ConsoleInHandle
-             )
-             );
+        (
+         DEBUG_INFO,
+         "OcTextInputDxe: Attempting installation on console input handle %p\n",
+         gST->ConsoleInHandle
+        )
+        );
       Status = InstallSimpleTextInputExCompat (gST->ConsoleInHandle);
       if (!EFI_ERROR (Status)) {
         DEBUG ((DEBUG_INFO, "OcTextInputDxe: *** SUCCESS: Installed on console input handle ***\n"));
@@ -464,47 +464,47 @@ PerformCompatibilityInstallation (
 
     // Try all handles with SimpleTextInput protocol
     Status = gBS->LocateHandleBuffer (
-                                      ByProtocol,
-                                      &gEfiSimpleTextInProtocolGuid,
-                                      NULL,
-                                      &HandleCount,
-                                      &HandleBuffer
-                                      );
+                    ByProtocol,
+                    &gEfiSimpleTextInProtocolGuid,
+                    NULL,
+                    &HandleCount,
+                    &HandleBuffer
+                    );
 
     if (!EFI_ERROR (Status)) {
       DEBUG ((DEBUG_INFO, "OcTextInputDxe: Found %d handles with SimpleTextInput protocol\n", HandleCount));
 
       for (Index = 0; Index < HandleCount; Index++) {
         DEBUG (
-               (
-                DEBUG_VERBOSE,
-                "OcTextInputDxe: Processing handle %d/%d: %p\n",
-                Index + 1,
-                HandleCount,
-                HandleBuffer[Index]
-               )
-               );
+          (
+           DEBUG_VERBOSE,
+           "OcTextInputDxe: Processing handle %d/%d: %p\n",
+           Index + 1,
+           HandleCount,
+           HandleBuffer[Index]
+          )
+          );
         Status = InstallSimpleTextInputExCompat (HandleBuffer[Index]);
         if (!EFI_ERROR (Status)) {
           DEBUG (
-                 (
-                  DEBUG_INFO,
-                  "OcTextInputDxe: *** SUCCESS: Installed compatibility layer on handle %d (%p) ***\n",
-                  Index,
-                  HandleBuffer[Index]
-                 )
-                 );
+            (
+             DEBUG_INFO,
+             "OcTextInputDxe: *** SUCCESS: Installed compatibility layer on handle %d (%p) ***\n",
+             Index,
+             HandleBuffer[Index]
+            )
+            );
           SuccessCount++;
         } else if (Status != EFI_ALREADY_STARTED) {
           DEBUG (
-                 (
-                  DEBUG_WARN,
-                  "OcTextInputDxe: Failed to install on handle %d (%p): %r\n",
-                  Index,
-                  HandleBuffer[Index],
-                  Status
-                 )
-                 );
+            (
+             DEBUG_WARN,
+             "OcTextInputDxe: Failed to install on handle %d (%p): %r\n",
+             Index,
+             HandleBuffer[Index],
+             Status
+            )
+            );
         }
       }
 
@@ -514,21 +514,21 @@ PerformCompatibilityInstallation (
     }
   } else {
     DEBUG (
-           (
-            DEBUG_INFO,
-            "OcTextInputDxe: System appears to have full EFI 2.0+ support, compatibility layer not needed\n"
-           )
-           );
+      (
+       DEBUG_INFO,
+       "OcTextInputDxe: System appears to have full EFI 2.0+ support, compatibility layer not needed\n"
+      )
+      );
   }
 
   gDriverInitialized = TRUE;
   DEBUG (
-         (
-          DEBUG_INFO,
-          "OcTextInputDxe: === Compatibility installation completed: %d successful installations ===\n",
-          SuccessCount
-         )
-         );
+    (
+     DEBUG_INFO,
+     "OcTextInputDxe: === Compatibility installation completed: %d successful installations ===\n",
+     SuccessCount
+    )
+    );
   return EFI_SUCCESS;
 }
 
@@ -543,11 +543,11 @@ OnReadyToBootEvent (
   )
 {
   DEBUG (
-         (
-          DEBUG_INFO,
-          "OcTextInputDxe: System is ready to boot, performing late initialization\n"
-         )
-         );
+    (
+     DEBUG_INFO,
+     "OcTextInputDxe: System is ready to boot, performing late initialization\n"
+    )
+    );
   PerformCompatibilityInstallation ();
 }
 
@@ -570,43 +570,43 @@ OcTextInputDxeEntry (
   EFI_STATUS  Status;
 
   DEBUG (
-         (
-          DEBUG_INFO,
-          "OcTextInputDxe: === OpenCore SimpleTextInputEx Compatibility Driver Starting ===\n"
-         )
-         );
+    (
+     DEBUG_INFO,
+     "OcTextInputDxe: === OpenCore SimpleTextInputEx Compatibility Driver Starting ===\n"
+    )
+    );
   DEBUG (
-         (
-          DEBUG_INFO,
-          "OcTextInputDxe: System Table Revision: 0x%08X (%d.%02d)\n",
-          SystemTable->Hdr.Revision,
-          SystemTable->Hdr.Revision >> 16,
-          SystemTable->Hdr.Revision & 0xFFFF
-         )
-         );
+    (
+     DEBUG_INFO,
+     "OcTextInputDxe: System Table Revision: 0x%08X (%d.%02d)\n",
+     SystemTable->Hdr.Revision,
+     SystemTable->Hdr.Revision >> 16,
+     SystemTable->Hdr.Revision & 0xFFFF
+    )
+    );
 
   if (SystemTable->RuntimeServices != NULL) {
     DEBUG (
-           (
-            DEBUG_INFO,
-            "OcTextInputDxe: Runtime Services Revision: 0x%08X (%d.%02d)\n",
-            SystemTable->RuntimeServices->Hdr.Revision,
-            SystemTable->RuntimeServices->Hdr.Revision >> 16,
-            SystemTable->RuntimeServices->Hdr.Revision & 0xFFFF
-           )
-           );
+      (
+       DEBUG_INFO,
+       "OcTextInputDxe: Runtime Services Revision: 0x%08X (%d.%02d)\n",
+       SystemTable->RuntimeServices->Hdr.Revision,
+       SystemTable->RuntimeServices->Hdr.Revision >> 16,
+       SystemTable->RuntimeServices->Hdr.Revision & 0xFFFF
+      )
+      );
   }
 
   if (SystemTable->BootServices != NULL) {
     DEBUG (
-           (
-            DEBUG_INFO,
-            "OcTextInputDxe: Boot Services Revision: 0x%08X (%d.%02d)\n",
-            SystemTable->BootServices->Hdr.Revision,
-            SystemTable->BootServices->Hdr.Revision >> 16,
-            SystemTable->BootServices->Hdr.Revision & 0xFFFF
-           )
-           );
+      (
+       DEBUG_INFO,
+       "OcTextInputDxe: Boot Services Revision: 0x%08X (%d.%02d)\n",
+       SystemTable->BootServices->Hdr.Revision,
+       SystemTable->BootServices->Hdr.Revision >> 16,
+       SystemTable->BootServices->Hdr.Revision & 0xFFFF
+      )
+      );
   }
 
   // Check if console services are available for immediate installation
@@ -618,34 +618,34 @@ OcTextInputDxeEntry (
       return EFI_SUCCESS;
     } else {
       DEBUG (
-             (
-              DEBUG_WARN,
-              "OcTextInputDxe: Immediate installation failed: %r, will try deferred installation\n",
-              Status
-             )
-             );
+        (
+         DEBUG_WARN,
+         "OcTextInputDxe: Immediate installation failed: %r, will try deferred installation\n",
+         Status
+        )
+        );
     }
   } else {
     DEBUG (
-           (
-            DEBUG_INFO,
-            "OcTextInputDxe: Console services not ready (ConsoleInHandle=%p, ConIn=%p)\n",
-            SystemTable->ConsoleInHandle,
-            SystemTable->ConIn
-           )
-           );
+      (
+       DEBUG_INFO,
+       "OcTextInputDxe: Console services not ready (ConsoleInHandle=%p, ConIn=%p)\n",
+       SystemTable->ConsoleInHandle,
+       SystemTable->ConIn
+      )
+      );
     DEBUG ((DEBUG_INFO, "OcTextInputDxe: Will attempt deferred installation via ReadyToBoot event\n"));
   }
 
   // Set up deferred installation via ReadyToBoot event
   Status = gBS->CreateEventEx (
-                               EVT_NOTIFY_SIGNAL,
-                               TPL_CALLBACK,
-                               OnReadyToBootEvent,
-                               NULL,
-                               &gEfiEventReadyToBootGuid,
-                               &gReadyToBootEvent
-                               );
+                  EVT_NOTIFY_SIGNAL,
+                  TPL_CALLBACK,
+                  OnReadyToBootEvent,
+                  NULL,
+                  &gEfiEventReadyToBootGuid,
+                  &gReadyToBootEvent
+                  );
 
   if (EFI_ERROR (Status)) {
     DEBUG ((DEBUG_ERROR, "OcTextInputDxe: Failed to create ReadyToBoot event: %r\n", Status));
@@ -654,19 +654,19 @@ OcTextInputDxeEntry (
     PerformCompatibilityInstallation ();
   } else {
     DEBUG (
-           (
-            DEBUG_INFO,
-            "OcTextInputDxe: ReadyToBoot event created successfully, driver will install protocols when system is ready\n"
-           )
-           );
+      (
+       DEBUG_INFO,
+       "OcTextInputDxe: ReadyToBoot event created successfully, driver will install protocols when system is ready\n"
+      )
+      );
   }
 
   // Always return success - we want the driver to stay loaded
   DEBUG (
-         (
-          DEBUG_INFO,
-          "OcTextInputDxe: OpenCore SimpleTextInputEx compatibility driver loaded successfully\n"
-         )
-         );
+    (
+     DEBUG_INFO,
+     "OcTextInputDxe: OpenCore SimpleTextInputEx compatibility driver loaded successfully\n"
+    )
+    );
   return EFI_SUCCESS;
 }
