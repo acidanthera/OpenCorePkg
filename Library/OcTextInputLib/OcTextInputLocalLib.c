@@ -14,10 +14,21 @@
 #include <Library/BaseMemoryLib.h>
 #include <Library/MemoryAllocationLib.h>
 #include <Library/UefiBootServicesTableLib.h>
+#include <Library/DebugLib.h>
 #include <Library/OcTextInputLib.h>
 
 #include "OcTextInputLibInternal.h"
 
+/**
+   Install SimpleTextInputEx compatibility protocol using local registration.
+
+   This function uses OcRegisterBootServicesProtocol instead of standard gBS
+   methods, making it suitable for use within OpenShell.
+
+   @retval EFI_SUCCESS          Protocol installed successfully or already present
+   @retval EFI_ALREADY_STARTED  Protocol already exists, no action taken
+   @retval Others               Installation failed
+ **/
 /**
    Constructor for OcTextInputLocalLib.
 
@@ -36,7 +47,7 @@ OcTextInputLocalLibConstructor (
   IN EFI_SYSTEM_TABLE  *SystemTable
   )
 {
-  // Automatically install SimpleTextInputEx compatibility using local registration
+  // Automatically install SimpleTextInputEx compatibility using internal function
   OcInstallSimpleTextInputExInternal (TRUE);
 
   // Don't fail library loading even if protocol installation fails

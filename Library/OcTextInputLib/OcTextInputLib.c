@@ -22,6 +22,7 @@
 #include <Library/UefiBootServicesTableLib.h>
 #include <Library/DebugLib.h>
 #include <Library/OcDebugLogLib.h>
+#include <Library/OcBootServicesTableLib.h>
 #include <Library/OcTextInputLib.h>
 #include <Library/OcTextInputCommon.h>
 
@@ -189,7 +190,7 @@ OcCompatRegisterKeyNotify (
     // Allocate a unique dummy handle (1 byte is sufficient)
     *NotifyHandle = AllocateZeroPool (1);
     if (*NotifyHandle == NULL) {
-      DEBUG ((DEBUG_ERROR, "OcTextInputLib: Failed to allocate dummy notify handle\n"));
+      DEBUG ((DEBUG_VERBOSE, "OCTI: Failed to allocate dummy notify handle\n"));
       return EFI_OUT_OF_RESOURCES;
     }
   }
@@ -216,7 +217,7 @@ OcCompatUnregisterKeyNotify (
 {
   // Not supported on EFI 1.1 systems, but validate and free the handle to avoid misuse
   if (NotificationHandle == NULL) {
-    DEBUG ((DEBUG_WARN, "OcTextInputLib: NULL NotificationHandle passed to UnregisterKeyNotify\n"));
+    DEBUG ((DEBUG_VERBOSE, "OCTI: NULL NotificationHandle passed to UnregisterKeyNotify\n"));
     return EFI_INVALID_PARAMETER;
   }
 
@@ -294,7 +295,7 @@ OcInstallSimpleTextInputExInternal (
   if (!EFI_ERROR (Status)) {
     // Protocol already exists, no need for compatibility
     mOriginalSimpleTextInputEx = NativeSimpleTextInputEx;
-    DEBUG ((DEBUG_INFO, "OcTextInputLib: Native SimpleTextInputEx already available\n"));
+    DEBUG ((DEBUG_INFO, "OCTI: Native SimpleTextInputEx already available\n"));
     return EFI_ALREADY_STARTED;
   }
 
@@ -302,11 +303,20 @@ OcInstallSimpleTextInputExInternal (
   OcInitializeCompatibilityProtocol ();
 
   if (UseLocalRegistration) {
-    // WARNING: Local registration is not currently implemented.
-    // For OpenShell integration: should use OcRegisterBootServicesProtocol
-    // Current behavior: Falls back to standard gBS->InstallProtocolInterface method
-    DEBUG ((DEBUG_WARN, "OcTextInputLib: UseLocalRegistration=TRUE, but local registration not implemented. Falling back to standard protocol installation.\n"));
-    // TODO: Call OcRegisterBootServicesProtocol when available
+    // Use OpenCore's internal protocol registration for OpenShell
+    Status = OcRegisterBootServicesProtocol (
+               &gEfiSimpleTextInputExProtocolGuid,
+               &mCompatSimpleTextInputEx,
+               FALSE
+               );
+
+    if (EFI_ERROR (Status)) {
+      DEBUG ((DEBUG_ERROR, "OCTI: Failed to register with OcRegisterBootServicesProtocol - %r\n", Status));
+      return Status;
+    }
+
+    DEBUG ((DEBUG_INFO, "OCTI: SimpleTextInputEx compatibility registered via OcRegisterBootServicesProtocol\n"));
+    return EFI_SUCCESS;
   }
 
   // Install the compatibility protocol on the console input handle
@@ -319,12 +329,12 @@ OcInstallSimpleTextInputExInternal (
                   );
 
   if (EFI_ERROR (Status)) {
-    DEBUG ((DEBUG_ERROR, "OcTextInputLib: Failed to install compatibility protocol - %r\n", Status));
+    DEBUG ((DEBUG_ERROR, "OCTI: Failed to install compatibility protocol - %r\n", Status));
     return Status;
   }
 
   mProtocolInstalled = TRUE;
-  DEBUG ((DEBUG_INFO, "OcTextInputLib: Successfully installed SimpleTextInputEx compatibility protocol\n"));
+  DEBUG ((DEBUG_INFO, "OCTI: Successfully installed SimpleTextInputEx compatibility protocol\n"));
   return EFI_SUCCESS;
 }
 
@@ -367,13 +377,13 @@ OcUninstallSimpleTextInputEx (
   // Only uninstall if we installed the compatibility version
   if (mOriginalSimpleTextInputEx != NULL) {
     // Native protocol was present, nothing to uninstall
-    DEBUG ((DEBUG_INFO, "OcTextInputLib: Native protocol was present, nothing to uninstall\n"));
+    DEBUG ((DEBUG_INFO, "OCTI: Native protocol was present, nothing to uninstall\n"));
     return EFI_NOT_FOUND;
   }
 
   if (!mProtocolInstalled) {
     // We didn't install anything
-    DEBUG ((DEBUG_INFO, "OcTextInputLib: No compatibility protocol was installed\n"));
+    DEBUG ((DEBUG_INFO, "OCTI: No compatibility protocol was installed\n"));
     return EFI_NOT_FOUND;
   }
 
@@ -384,10 +394,10 @@ OcUninstallSimpleTextInputEx (
                   );
 
   if (EFI_ERROR (Status)) {
-    DEBUG ((DEBUG_WARN, "OcTextInputLib: Failed to uninstall compatibility protocol - %r\n", Status));
+    DEBUG ((DEBUG_WARN, "OCTI: Failed to uninstall compatibility protocol - %r\n", Status));
   } else {
     mProtocolInstalled = FALSE;
-    DEBUG ((DEBUG_INFO, "OcTextInputLib: Successfully uninstalled compatibility protocol\n"));
+    DEBUG ((DEBUG_INFO, "OCTI: Successfully uninstalled compatibility protocol\n"));
   }
 
   return Status;
@@ -432,49 +442,49 @@ OcTestCtrlKeyDetection (
   VOID
   )
 {
-  DEBUG ((DEBUG_INFO, "=== OcTextInputLib: CTRL Key Detection Test ===\n"));
+  DEBUG ((DEBUG_INFO, "=== OCTI: CTRL Key Detection Test ===\n"));
   DEBUG (
     (
      DEBUG_INFO,
-     "OcTextInputLib: SimpleTextInputEx Available: %s\n",
+     "OCTI: SimpleTextInputEx Available: %s\n",
      OcIsSimpleTextInputExAvailable () ? L"YES" : L"NO"
     )
     );
 
   // Test Shell text editor function key assignments and our remapping
-  DEBUG ((DEBUG_INFO, "OcTextInputLib: Key Remapping Behavior:\n"));
-  DEBUG ((DEBUG_INFO, "OcTextInputLib: F10 (0x%02X) -> REMAPPED TO -> CTRL+E (Help)\n", SCAN_F10));
-  DEBUG ((DEBUG_INFO, "OcTextInputLib: ESC (0x1B) -> KEPT AS -> ESC (Universal)\n"));
-  DEBUG ((DEBUG_INFO, "OcTextInputLib: \n"));
-  DEBUG ((DEBUG_INFO, "OcTextInputLib: Shell Text Editor Key Assignments:\n"));
-  DEBUG ((DEBUG_INFO, "OcTextInputLib: F1  (0x%02X) -> Go To Line\n", SCAN_F1));
-  DEBUG ((DEBUG_INFO, "OcTextInputLib: F2  (0x%02X) -> Save File\n", SCAN_F2));
-  DEBUG ((DEBUG_INFO, "OcTextInputLib: F3  (0x%02X) -> Exit\n", SCAN_F3));
-  DEBUG ((DEBUG_INFO, "OcTextInputLib: F4  (0x%02X) -> Search\n", SCAN_F4));
-  DEBUG ((DEBUG_INFO, "OcTextInputLib: F5  (0x%02X) -> Search/Replace\n", SCAN_F5));
-  DEBUG ((DEBUG_INFO, "OcTextInputLib: F6  (0x%02X) -> Cut Line\n", SCAN_F6));
-  DEBUG ((DEBUG_INFO, "OcTextInputLib: F7  (0x%02X) -> Paste Line\n", SCAN_F7));
-  DEBUG ((DEBUG_INFO, "OcTextInputLib: F8  (0x%02X) -> Open File\n", SCAN_F8));
-  DEBUG ((DEBUG_INFO, "OcTextInputLib: F9  (0x%02X) -> File Type\n", SCAN_F9));
-  DEBUG ((DEBUG_INFO, "OcTextInputLib: F10 (0x%02X) -> Help (NEW)\n", SCAN_F10));
-  DEBUG ((DEBUG_INFO, "OcTextInputLib: F11 (0x%02X) -> File Type\n", SCAN_F11));
+  DEBUG ((DEBUG_INFO, "OCTI: Key Remapping Behavior:\n"));
+  DEBUG ((DEBUG_INFO, "OCTI: F10 (0x%02X) -> REMAPPED TO -> CTRL+E (Help)\n", SCAN_F10));
+  DEBUG ((DEBUG_INFO, "OCTI: ESC (0x1B) -> KEPT AS -> ESC (Universal)\n"));
+  DEBUG ((DEBUG_INFO, "OCTI: \n"));
+  DEBUG ((DEBUG_INFO, "OCTI: Shell Text Editor Key Assignments:\n"));
+  DEBUG ((DEBUG_INFO, "OCTI: F1  (0x%02X) -> Go To Line\n", SCAN_F1));
+  DEBUG ((DEBUG_INFO, "OCTI: F2  (0x%02X) -> Save File\n", SCAN_F2));
+  DEBUG ((DEBUG_INFO, "OCTI: F3  (0x%02X) -> Exit\n", SCAN_F3));
+  DEBUG ((DEBUG_INFO, "OCTI: F4  (0x%02X) -> Search\n", SCAN_F4));
+  DEBUG ((DEBUG_INFO, "OCTI: F5  (0x%02X) -> Search/Replace\n", SCAN_F5));
+  DEBUG ((DEBUG_INFO, "OCTI: F6  (0x%02X) -> Cut Line\n", SCAN_F6));
+  DEBUG ((DEBUG_INFO, "OCTI: F7  (0x%02X) -> Paste Line\n", SCAN_F7));
+  DEBUG ((DEBUG_INFO, "OCTI: F8  (0x%02X) -> Open File\n", SCAN_F8));
+  DEBUG ((DEBUG_INFO, "OCTI: F9  (0x%02X) -> File Type\n", SCAN_F9));
+  DEBUG ((DEBUG_INFO, "OCTI: F10 (0x%02X) -> Help (NEW)\n", SCAN_F10));
+  DEBUG ((DEBUG_INFO, "OCTI: F11 (0x%02X) -> File Type\n", SCAN_F11));
 
   // Test expected CTRL codes for Shell text editor
-  DEBUG ((DEBUG_INFO, "OcTextInputLib: Shell Text Editor Key Mappings:\n"));
-  DEBUG ((DEBUG_INFO, "OcTextInputLib: CTRL+E (Help) -> Unicode char 5 (0x05) -> MainCommandDisplayHelp\n"));
-  DEBUG ((DEBUG_INFO, "OcTextInputLib: CTRL+W (Exit Help) -> Unicode char 23 (0x17) -> ExitHelpContext\n"));
-  DEBUG ((DEBUG_INFO, "OcTextInputLib: ESC (Exit Help) -> Unicode char 27 (0x1B) -> ExitHelpContext\n"));
-  DEBUG ((DEBUG_INFO, "OcTextInputLib: F10 (Help) -> Scan code 0x%02X -> MainCommandDisplayHelp\n", SCAN_F10));
+  DEBUG ((DEBUG_INFO, "OCTI: Shell Text Editor Key Mappings:\n"));
+  DEBUG ((DEBUG_INFO, "OCTI: CTRL+E (Help) -> Unicode char 5 (0x05) -> MainCommandDisplayHelp\n"));
+  DEBUG ((DEBUG_INFO, "OCTI: CTRL+W (Exit Help) -> Unicode char 23 (0x17) -> ExitHelpContext\n"));
+  DEBUG ((DEBUG_INFO, "OCTI: ESC (Exit Help) -> Unicode char 27 (0x1B) -> ExitHelpContext\n"));
+  DEBUG ((DEBUG_INFO, "OCTI: F10 (Help) -> Scan code 0x%02X -> MainCommandDisplayHelp\n", SCAN_F10));
 
   // Show comprehensive CTRL mapping table
-  DEBUG ((DEBUG_INFO, "OcTextInputLib: Complete Control Character Support:\n"));
+  DEBUG ((DEBUG_INFO, "OCTI: Complete Control Character Support:\n"));
   for (UINTN Index = 0; Index < ARRAY_SIZE (mControlCharTable); Index++) {
     if (mControlCharTable[Index].ControlChar <= 0x1A) {
       // CTRL+A through CTRL+Z
       DEBUG (
         (
          DEBUG_VERBOSE,
-         "OcTextInputLib: %a -> %a\n",
+         "OCTI: %a -> %a\n",
          mControlCharTable[Index].Description,
          mControlCharTable[Index].ShellFunction
         )
@@ -496,12 +506,12 @@ OcTestCtrlKeyDetection (
     DEBUG (
       (
        DEBUG_INFO,
-       "OcTextInputLib: Using %s SimpleTextInputEx protocol\n",
+       "OCTI: Using %s SimpleTextInputEx protocol\n",
        SimpleTextInputEx == &mCompatSimpleTextInputEx ? L"COMPATIBILITY" : L"NATIVE"
       )
       );
   } else {
-    DEBUG ((DEBUG_WARN, "OcTextInputLib: No SimpleTextInputEx protocol available!\n"));
+    DEBUG ((DEBUG_WARN, "OCTI: No SimpleTextInputEx protocol available!\n"));
   }
 
   DEBUG ((DEBUG_INFO, "=== Test Complete ===\n"));
