@@ -18,10 +18,13 @@
 //
 // Debug macros for conditional compilation
 //
-#define OCTI_DEBUG_INFO(Format, ...)     DEBUG ((DEBUG_INFO, Format, ##__VA_ARGS__))
-#define OCTI_DEBUG_VERBOSE(Format, ...)  DEBUG ((DEBUG_VERBOSE, Format, ##__VA_ARGS__))
-#define OCTI_DEBUG_ERROR(Format, ...)    DEBUG ((DEBUG_ERROR, Format, ##__VA_ARGS__))
-#define OCTI_DEBUG_WARN(Format, ...)     DEBUG ((DEBUG_WARN, Format, ##__VA_ARGS__))
+//
+// MSVC-compatible debug macros using standard variadic syntax
+//
+#define OCTI_DEBUG_INFO(...)     DEBUG ((DEBUG_INFO, __VA_ARGS__))
+#define OCTI_DEBUG_VERBOSE(...)  DEBUG ((DEBUG_VERBOSE, __VA_ARGS__))
+#define OCTI_DEBUG_ERROR(...)    DEBUG ((DEBUG_ERROR, __VA_ARGS__))
+#define OCTI_DEBUG_WARN(...)     DEBUG ((DEBUG_WARN, __VA_ARGS__))
 
 //
 // Memory management macros

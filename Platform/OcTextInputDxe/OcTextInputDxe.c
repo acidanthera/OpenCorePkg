@@ -115,23 +115,23 @@ CompatReadKeyStrokeEx (
   EFI_STATUS                    Status;
 
   if ((This == NULL) || (KeyData == NULL)) {
-    OCTI_DEBUG_ERROR ("OcTextInputDxe: CompatReadKeyStrokeEx: Invalid parameters\n");
+    DEBUG ((DEBUG_ERROR, "OcTextInputDxe: CompatReadKeyStrokeEx: Invalid parameters\n"));
     return EFI_INVALID_PARAMETER;
   }
 
   Private = COMPAT_TEXT_INPUT_EX_PRIVATE_FROM_PROTOCOL (This);
 
   if ((Private == NULL) || (Private->Signature != COMPAT_TEXT_INPUT_EX_SIGNATURE)) {
-    OCTI_DEBUG_ERROR ("OcTextInputDxe: CompatReadKeyStrokeEx: Invalid private structure\n");
+    DEBUG ((DEBUG_ERROR, "OcTextInputDxe: CompatReadKeyStrokeEx: Invalid private structure\n"));
     return EFI_INVALID_PARAMETER;
   }
 
   if (Private->UnderlyingTextInput == NULL) {
-    OCTI_DEBUG_ERROR ("OcTextInputDxe: CompatReadKeyStrokeEx: Underlying TextInput is NULL\n");
+    DEBUG ((DEBUG_ERROR, "OcTextInputDxe: CompatReadKeyStrokeEx: Underlying TextInput is NULL\n"));
     return EFI_DEVICE_ERROR;
   }
 
-  OCTI_DEBUG_VERBOSE ("OcTextInputDxe: CompatReadKeyStrokeEx: Called on handle %p\n", Private->Handle);
+  DEBUG ((DEBUG_VERBOSE, "OcTextInputDxe: CompatReadKeyStrokeEx: Called on handle %p\n", Private->Handle));
 
   // Initialize KeyData structure
   ZeroMem (KeyData, sizeof (EFI_KEY_DATA));
@@ -151,7 +151,7 @@ CompatReadKeyStrokeEx (
     // Driver uses shift state setting for full EFI compatibility
     OctiProcessKeyData (KeyData, "OcTextInputDxe", TRUE);
   } else if (Status != EFI_NOT_READY) {
-    OCTI_DEBUG_WARN ("OcTextInputDxe: Underlying ReadKeyStroke failed: %r\n", Status);
+    DEBUG ((DEBUG_WARN, "OcTextInputDxe: Underlying ReadKeyStroke failed: %r\n", Status));
   }
 
   return Status;
