@@ -9619,9 +9619,9 @@ hdiutil create -o converted.dmg -size 14g -layout GPTSPUD -fs HFS+J
 hdiutil attach -nomount converted.dmg
 hdiutil attach -nomount /path/to/original/installer.dmg
 dd if=/dev/disk{Y} of=/dev/disk{X}s2 bs=16m
-hdiutil detach disk{X} && hdiutil detach disk{Y}
 # Optionally convert to preferrable disk image:
-qemu-img -p -O qcow2 convert /dev/disk{X} installer.qcow2
+qemu-img convert -p -O qcow2 /dev/disk{X} installer.qcow2
+hdiutil detach disk{X} && hdiutil detach disk{Y}
 \end{lstlisting}
 
     It will be necessary to replace \texttt{\{X\}} and \texttt{\{Y\}} with disk

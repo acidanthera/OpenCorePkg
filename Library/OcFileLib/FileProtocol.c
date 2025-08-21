@@ -86,7 +86,7 @@ OcGetFileData (
     //
     // We are required to read in 1 MB portions, because otherwise some
     // systems namely MacBook7,1 will not read file data from APFS volumes
-    // but will pretend they did. Repeoduced with BootKernelExtensions.kc.
+    // but will pretend they did. Reproduced with BootKernelExtensions.kc.
     //
     ReadSize = RequestedSize = MIN (Size, BASE_1MB);
     Status   = File->Read (File, &ReadSize, Buffer);

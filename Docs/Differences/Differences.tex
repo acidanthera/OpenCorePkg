@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
 %DIF DEL PreviousConfiguration.tex   Sat Aug  2 20:24:53 2025
-%DIF ADD ../Configuration.tex        Sat Aug 16 23:49:25 2025
+%DIF ADD ../Configuration.tex        Tue Aug 19 01:25:47 2025
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -9691,9 +9691,9 @@ hdiutil convert ReadWrite.dmg -format UDZO -o ReadOnly.dmg
 %DIF > hdiutil attach -nomount converted.dmg
 %DIF > hdiutil attach -nomount /path/to/original/installer.dmg
 %DIF > dd if=/dev/disk{Y} of=/dev/disk{X}s2 bs=16m
-%DIF > hdiutil detach disk{X} && hdiutil detach disk{Y}
 %DIF > # Optionally convert to preferrable disk image:
-%DIF > qemu-img -p -O qcow2 convert /dev/disk{X} installer.qcow2
+%DIF > qemu-img convert -p -O qcow2 /dev/disk{X} installer.qcow2
+%DIF > hdiutil detach disk{X} && hdiutil detach disk{Y}
 \end{lstlisting}
 \DIFmodend
 
