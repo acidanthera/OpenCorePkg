@@ -33,7 +33,7 @@
 #include <Library/BaseLib.h>
 #include <Library/BaseMemoryLib.h>
 #include <Library/UefiLib.h>
-#include <Library/OcTextInputCommon.h>
+#include <Library/OcTextInputLib.h>
 #include <Guid/GlobalVariable.h>
 #include <Guid/EventGroup.h>
 
@@ -146,10 +146,10 @@ CompatReadKeyStrokeEx (
     // Convert EFI_INPUT_KEY to EFI_KEY_DATA
     KeyData->Key = Key;
 
-    // Use shared key processing logic from OcTextInputCommon.h
+    // Use shared key processing logic from OcTextInputLib
     // This eliminates code duplication and ensures consistent behavior
     // Driver uses shift state setting for full EFI compatibility
-    OctiProcessKeyData (KeyData, "OcTextInputDxe", TRUE);
+    OctiProcessKeyData (KeyData);
   } else if (Status != EFI_NOT_READY) {
     DEBUG ((DEBUG_WARN, "OcTextInputDxe: Underlying ReadKeyStroke failed: %r\n", Status));
   }

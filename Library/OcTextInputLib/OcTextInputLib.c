@@ -24,7 +24,6 @@
 #include <Library/OcDebugLogLib.h>
 #include <Library/OcBootServicesTableLib.h>
 #include <Library/OcTextInputLib.h>
-#include <Library/OcTextInputCommon.h>
 
 #include "OcTextInputLibInternal.h"
 
@@ -122,17 +121,17 @@ OcCompatReadKeyStrokeEx (
   if (!EFI_ERROR (Status)) {
     // Handle F10 key remapping before shared processing
     if (KeyData->Key.ScanCode == SCAN_F10) {
-      OCTI_DEBUG_INFO ("OcTextInputLib: F10 key detected - remapping to CTRL+E (Help)\n");
+      DEBUG ((DEBUG_INFO, "OCTI: F10 key detected - remapping to CTRL+E (Help)\n"));
       // Remap F10 to CTRL+E for programs that expect CTRL+E for help
       KeyData->Key.ScanCode    = SCAN_NULL;
       KeyData->Key.UnicodeChar = 5;                   // CTRL+E
     }
 
-    // Use shared key processing logic from OcTextInputCommon.h
+    // Use shared key processing logic from OcTextInputLib
     // Library uses no shift state setting for EFI 1.1 compatibility
     // This ensures compatibility with MenuBarDispatchControlHotKey which has
     // two different code paths for CTRL handling.
-    OctiProcessKeyData (KeyData, "OcTextInputLib", FALSE);
+    OctiProcessKeyData (KeyData);
   }
 
   return Status;
@@ -516,4 +515,62 @@ OcTestCtrlKeyDetection (
 
   DEBUG ((DEBUG_INFO, "=== Test Complete ===\n"));
   return EFI_SUCCESS;
+}
+
+//
+// Control character table for mapping scan codes to shift states
+//
+STATIC CONST UINT16  mOctiControlCharTable[] = {
+  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,  // 0x00 - 0x07
+  0x08, 0x09, 0x00, 0x00, 0x00, 0x0D, 0x00, 0x00,  // 0x08 - 0x0F
+  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,  // 0x10 - 0x17
+  0x00, 0x00, 0x00, 0x1B, 0x00, 0x00, 0x00, 0x00   // 0x18 - 0x1F
+};
+
+/**
+  Process key data and handle control characters.
+
+  This function is provided by OcTextInputLib for use by standalone drivers.
+  It handles control character mapping and key processing logic.
+
+  @param[in,out] KeyData  Key data to process
+
+  @retval EFI_SUCCESS     Key data processed successfully
+  @retval EFI_NOT_FOUND   Key data does not need processing
+  @retval EFI_INVALID_PARAMETER KeyData is NULL
+**/
+EFI_STATUS
+OctiProcessKeyData (
+  IN OUT EFI_KEY_DATA  *KeyData
+  )
+{
+  UINT16  ScanCode;
+  UINT16  UnicodeChar;
+
+  if (KeyData == NULL) {
+    return EFI_INVALID_PARAMETER;
+  }
+
+  ScanCode    = KeyData->Key.ScanCode;
+  UnicodeChar = KeyData->Key.UnicodeChar;
+
+  //
+  // Handle control characters
+  //
+  if ((ScanCode < ARRAY_SIZE (mOctiControlCharTable)) && (mOctiControlCharTable[ScanCode] != 0)) {
+    KeyData->Key.UnicodeChar = mOctiControlCharTable[ScanCode];
+    DEBUG ((DEBUG_VERBOSE, "OCTI: Mapped scan code 0x%X to control character 0x%X\n", ScanCode, KeyData->Key.UnicodeChar));
+    return EFI_SUCCESS;
+  }
+
+  //
+  // Handle standard printable characters
+  //
+  if ((UnicodeChar >= 0x20) && (UnicodeChar <= 0x7E)) {
+    DEBUG ((DEBUG_VERBOSE, "OCTI: Standard printable character 0x%X\n", UnicodeChar));
+    return EFI_SUCCESS;
+  }
+
+  DEBUG ((DEBUG_VERBOSE, "OCTI: Unhandled key - ScanCode: 0x%X, UnicodeChar: 0x%X\n", ScanCode, UnicodeChar));
+  return EFI_NOT_FOUND;
 }

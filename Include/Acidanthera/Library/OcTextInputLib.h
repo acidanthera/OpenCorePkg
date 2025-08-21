@@ -63,4 +63,21 @@ OcTestCtrlKeyDetection (
   VOID
   );
 
+/**
+  Process key data and handle control characters.
+
+  This function is provided by OcTextInputLib for use by standalone drivers.
+  It handles control character mapping and key processing logic.
+
+  @param[in,out] KeyData  Key data to process
+
+  @retval EFI_SUCCESS     Key data processed successfully
+  @retval EFI_NOT_FOUND   Key data does not need processing
+  @retval EFI_INVALID_PARAMETER KeyData is NULL
+**/
+EFI_STATUS
+OctiProcessKeyData (
+  IN OUT EFI_KEY_DATA  *KeyData
+  );
+
 #endif // OC_TEXT_INPUT_LIB_H

@@ -13,12 +13,15 @@
 
 #include <Uefi.h>
 #include <Protocol/SimpleTextInEx.h>
-#include <Library/OcTextInputCommon.h>
 
 //
-// Type definition for compatibility
+// Control character mapping structure for hotkey descriptions.
 //
-typedef OCTI_CONTROL_CHAR_MAPPING CONTROL_CHAR_MAPPING;
+typedef struct {
+  UINT8    ControlChar;    ///< Control character code (0x01-0x1F)
+  CHAR8    *Description;   ///< Human-readable description (e.g., "CTRL+A")
+  CHAR8    *ShellFunction; ///< Shell function name (e.g., "StartOfLine")
+} CONTROL_CHAR_MAPPING;
 
 /**
   Get control character mapping for a given character.

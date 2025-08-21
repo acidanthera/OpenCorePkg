@@ -38,6 +38,7 @@
   BaseMemoryLib
   BaseLib
   DebugLib
+  OcTextInputLib
 
 [Protocols]
   gEfiSimpleTextInProtocolGuid        ## CONSUMES

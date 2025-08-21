@@ -373,8 +373,8 @@
     <LibraryClasses>
       # Use custom BootServicesTable
       UefiBootServicesTableLib|OpenCorePkg/Library/OcBootServicesTableLib/UefiBootServicesTableLib.inf
-      # Use local SimpleTextInputEx compatibility for OpenShell
-      OcTextInputLib|OpenCorePkg/Library/OcTextInputLib/OcTextInputLocalLib.inf
+      # Use SimpleTextInputEx compatibility library
+      OcTextInputLib|OpenCorePkg/Library/OcTextInputLib/OcTextInputLib.inf
       # Add the original commands.
       NULL|ShellPkg/Library/UefiShellLevel2CommandsLib/UefiShellLevel2CommandsLib.inf
       NULL|ShellPkg/Library/UefiShellLevel1CommandsLib/UefiShellLevel1CommandsLib.inf
