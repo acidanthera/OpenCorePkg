@@ -230,6 +230,7 @@
   OvmfPkg/SioBusDxe/SioBusDxe.inf
   MdeModulePkg/Bus/Isa/Ps2KeyboardDxe/Ps2KeyboardDxe.inf
   MdeModulePkg/Bus/Isa/Ps2MouseDxe/Ps2MouseDxe.inf
+  OpenCorePkg/Platform/SimpleTextInputExCompatDxe/SimpleTextInputExCompat.inf
 
   # ACPI Support
   MdeModulePkg/Universal/Acpi/AcpiTableDxe/AcpiTableDxe.inf
