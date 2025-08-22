@@ -38,12 +38,6 @@
 #include <Guid/EventGroup.h>
 
 //
-// Protocol GUIDs (in case they're not properly declared)
-//
-extern EFI_GUID  gEfiSimpleTextInProtocolGuid;
-extern EFI_GUID  gEfiSimpleTextInputExProtocolGuid;
-
-//
 // Global variables for driver state
 //
 BOOLEAN    gDriverInitialized = FALSE;
@@ -68,149 +62,8 @@ typedef struct {
         CR (a, COMPAT_TEXT_INPUT_EX_PRIVATE, TextInputEx, COMPAT_TEXT_INPUT_EX_SIGNATURE)
 
 //
-// Protocol function implementations
+// Protocol function implementations (all delegated to library functions)
 //
-
-EFI_STATUS
-EFIAPI
-CompatReset (
-  IN EFI_SIMPLE_TEXT_INPUT_EX_PROTOCOL  *This,
-  IN BOOLEAN                            ExtendedVerification
-  )
-{
-  COMPAT_TEXT_INPUT_EX_PRIVATE  *Private;
-
-  if (This == NULL) {
-    return EFI_INVALID_PARAMETER;
-  }
-
-  Private = COMPAT_TEXT_INPUT_EX_PRIVATE_FROM_PROTOCOL (This);
-
-  if ((Private == NULL) || (Private->Signature != COMPAT_TEXT_INPUT_EX_SIGNATURE)) {
-    DEBUG ((DEBUG_ERROR, "OcTextInputDxe: Invalid private structure in CompatReset\n"));
-    return EFI_INVALID_PARAMETER;
-  }
-
-  if (Private->UnderlyingTextInput == NULL) {
-    DEBUG ((DEBUG_ERROR, "OcTextInputDxe: Underlying TextInput is NULL\n"));
-    return EFI_DEVICE_ERROR;
-  }
-
-  // Reset underlying simple text input
-  return Private->UnderlyingTextInput->Reset (
-                                         Private->UnderlyingTextInput,
-                                         ExtendedVerification
-                                         );
-}
-
-EFI_STATUS
-EFIAPI
-CompatReadKeyStrokeEx (
-  IN  EFI_SIMPLE_TEXT_INPUT_EX_PROTOCOL  *This,
-  OUT EFI_KEY_DATA                       *KeyData
-  )
-{
-  COMPAT_TEXT_INPUT_EX_PRIVATE  *Private;
-  EFI_INPUT_KEY                 Key;
-  EFI_STATUS                    Status;
-
-  if ((This == NULL) || (KeyData == NULL)) {
-    DEBUG ((DEBUG_ERROR, "OcTextInputDxe: CompatReadKeyStrokeEx: Invalid parameters\n"));
-    return EFI_INVALID_PARAMETER;
-  }
-
-  Private = COMPAT_TEXT_INPUT_EX_PRIVATE_FROM_PROTOCOL (This);
-
-  if ((Private == NULL) || (Private->Signature != COMPAT_TEXT_INPUT_EX_SIGNATURE)) {
-    DEBUG ((DEBUG_ERROR, "OcTextInputDxe: CompatReadKeyStrokeEx: Invalid private structure\n"));
-    return EFI_INVALID_PARAMETER;
-  }
-
-  if (Private->UnderlyingTextInput == NULL) {
-    DEBUG ((DEBUG_ERROR, "OcTextInputDxe: CompatReadKeyStrokeEx: Underlying TextInput is NULL\n"));
-    return EFI_DEVICE_ERROR;
-  }
-
-  DEBUG ((DEBUG_VERBOSE, "OcTextInputDxe: CompatReadKeyStrokeEx: Called on handle %p\n", Private->Handle));
-
-  // Initialize KeyData structure
-  ZeroMem (KeyData, sizeof (EFI_KEY_DATA));
-
-  // Read from underlying protocol
-  Status = Private->UnderlyingTextInput->ReadKeyStroke (
-                                           Private->UnderlyingTextInput,
-                                           &Key
-                                           );
-
-  if (!EFI_ERROR (Status)) {
-    // Convert EFI_INPUT_KEY to EFI_KEY_DATA
-    KeyData->Key = Key;
-
-    // Use shared key processing logic from OcTextInputLib
-    // This eliminates code duplication and ensures consistent behavior
-    // Driver uses shift state setting for full EFI compatibility
-    OctiProcessKeyData (KeyData);
-  } else if (Status != EFI_NOT_READY) {
-    DEBUG ((DEBUG_WARN, "OcTextInputDxe: Underlying ReadKeyStroke failed: %r\n", Status));
-  }
-
-  return Status;
-}
-
-EFI_STATUS
-EFIAPI
-CompatSetState (
-  IN EFI_SIMPLE_TEXT_INPUT_EX_PROTOCOL  *This,
-  IN EFI_KEY_TOGGLE_STATE               *KeyToggleState
-  )
-{
-  // Not supported on EFI 1.1 systems
-  // Return success to maintain compatibility
-  return EFI_SUCCESS;
-}
-
-EFI_STATUS
-EFIAPI
-CompatRegisterKeyNotify (
-  IN  EFI_SIMPLE_TEXT_INPUT_EX_PROTOCOL  *This,
-  IN  EFI_KEY_DATA                       *KeyData,
-  IN  EFI_KEY_NOTIFY_FUNCTION            KeyNotificationFunction,
-  OUT VOID                               **NotifyHandle
-  )
-{
-  // Not supported on EFI 1.1 systems, but return success with unique handle
-  // to avoid breaking applications that expect this to work
-  if (NotifyHandle != NULL) {
-    // Allocate a unique dummy handle (1 byte is sufficient)
-    *NotifyHandle = AllocateZeroPool (1);
-    if (*NotifyHandle == NULL) {
-      DEBUG ((DEBUG_ERROR, "OcTextInputDxe: Failed to allocate dummy notify handle\n"));
-      return EFI_OUT_OF_RESOURCES;
-    }
-  }
-
-  DEBUG ((DEBUG_VERBOSE, "OcTextInputDxe: Returning success with unique dummy handle (EFI 1.1 limitation)\n"));
-  return EFI_SUCCESS;
-}
-
-EFI_STATUS
-EFIAPI
-CompatUnregisterKeyNotify (
-  IN EFI_SIMPLE_TEXT_INPUT_EX_PROTOCOL  *This,
-  IN VOID                               *NotificationHandle
-  )
-{
-  // Not supported on EFI 1.1 systems, but validate and free the handle to avoid misuse
-  if (NotificationHandle == NULL) {
-    DEBUG ((DEBUG_WARN, "OcTextInputDxe: NULL NotificationHandle passed to UnregisterKeyNotify\n"));
-    return EFI_INVALID_PARAMETER;
-  }
-
-  // Free the dummy handle that was allocated in RegisterKeyNotify
-  FreePool (NotificationHandle);
-  DEBUG ((DEBUG_VERBOSE, "OcTextInputDxe: Freed dummy handle and returning success (EFI 1.1 limitation)\n"));
-  return EFI_SUCCESS;
-}
 
 //
 // Install compatibility layer
@@ -306,13 +159,13 @@ InstallSimpleTextInputExCompat (
   Private->UnderlyingTextInput = TextInput;
   Private->Handle              = Handle;
 
-  // Setup protocol functions
-  Private->TextInputEx.Reset               = CompatReset;
-  Private->TextInputEx.ReadKeyStrokeEx     = CompatReadKeyStrokeEx;
+  // Setup protocol functions - use library functions directly
+  Private->TextInputEx.Reset               = OcCompatReset;
+  Private->TextInputEx.ReadKeyStrokeEx     = OcCompatReadKeyStrokeEx;
   Private->TextInputEx.WaitForKeyEx        = TextInput->WaitForKey;  // Reuse wait event
-  Private->TextInputEx.SetState            = CompatSetState;
-  Private->TextInputEx.RegisterKeyNotify   = CompatRegisterKeyNotify;
-  Private->TextInputEx.UnregisterKeyNotify = CompatUnregisterKeyNotify;
+  Private->TextInputEx.SetState            = OcCompatSetState;
+  Private->TextInputEx.RegisterKeyNotify   = OcCompatRegisterKeyNotify;
+  Private->TextInputEx.UnregisterKeyNotify = OcCompatUnregisterKeyNotify;
 
   DEBUG (
     (
