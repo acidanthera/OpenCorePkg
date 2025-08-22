@@ -24,19 +24,6 @@ typedef struct {
 } CONTROL_CHAR_MAPPING;
 
 /**
-  Get control character mapping for a given character.
-
-  @param[in]  ControlChar  The control character to get mapping for.
-
-  @retval  Pointer to CONTROL_CHAR_MAPPING structure, or NULL if not found.
-**/
-CONTROL_CHAR_MAPPING *
-EFIAPI
-GetControlCharMapping (
-  IN UINT8  ControlChar
-  );
-
-/**
   Compatibility implementation of SimpleTextInputEx Reset for EFI 1.1 systems.
 
   @param[in]  This                      Protocol instance pointer.

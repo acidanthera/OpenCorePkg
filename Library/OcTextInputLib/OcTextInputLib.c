@@ -210,7 +210,7 @@ OcCompatRegisterKeyNotify (
     // Allocate a unique dummy handle (1 byte is sufficient)
     *NotifyHandle = AllocateZeroPool (1);
     if (*NotifyHandle == NULL) {
-      DEBUG ((DEBUG_ERROR, "OcTextInputLib: Failed to allocate dummy notify handle\n"));
+      DEBUG ((DEBUG_INFO, "OcTextInputLib: Failed to allocate dummy notify handle\n"));
       return EFI_OUT_OF_RESOURCES;
     }
   }
@@ -236,7 +236,7 @@ OcCompatUnregisterKeyNotify (
 {
   // Not supported on EFI 1.1 systems, but validate and free the handle to avoid misuse
   if (NotificationHandle == NULL) {
-    DEBUG ((DEBUG_WARN, "OcTextInputLib: NULL NotificationHandle passed to UnregisterKeyNotify\n"));
+    DEBUG ((DEBUG_INFO, "OcTextInputLib: NULL NotificationHandle passed to UnregisterKeyNotify\n"));
     return EFI_INVALID_PARAMETER;
   }
 
