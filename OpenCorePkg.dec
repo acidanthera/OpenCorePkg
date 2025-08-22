@@ -988,6 +988,9 @@
   OcTemplateLib|Include/Acidanthera/Library/OcTemplateLib.h
 
   ##  @libraryclass
+  OcTextInputLib|Include/Acidanthera/Library/OcTextInputLib.h
+
+  ##  @libraryclass
   TimerLib|Include/Acidanthera/Library/OcTimerLib.h
 
   ##  @libraryclass
