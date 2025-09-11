@@ -3866,9 +3866,10 @@ the default boot entry choice will remain changed until the next manual reconfig
   For convenience purposes there also are predefined aliases:
   \begin{itemize}
     \tightlist
-    \item \texttt{Auto} --- Automatically select one set of icons based on the \texttt{DefaultBackground}
-      colour: \texttt{Acidanthera\textbackslash GoldenGate} for Syrah Black and
-      \texttt{Acidanthera\textbackslash Chardonnay} for Light Gray.
+    \item \texttt{Auto} --- Automatically select one set of icons based on the \texttt{background-color}
+      and \texttt{DefaultBackground} colours: \texttt{Acidanthera\textbackslash GoldenGate} for Syrah Black and
+      \texttt{Acidanthera\textbackslash Chardonnay} for Light Gray. \texttt{background-color} variable has
+      priority.
     \item \texttt{Default} --- \texttt{Acidanthera\textbackslash GoldenGate}.
   \end{itemize}
 
@@ -5171,6 +5172,12 @@ improvements:
   Four-byte \texttt{BGRA} data defining \texttt{boot.efi} user interface background colour.
   Standard colours include \textbf{BF BF BF 00} (Light Gray) and \textbf{00 00 00 00}
   (Syrah Black). Other colours may be set at user's preference.
+\item
+  \texttt{4D1FDA02-38C7-4A6A-9CC6-4BCCA8B30102:background-color}
+  \break
+  Acidanthera override for \texttt{DefaultBackgroundColor} useful for legacy OS X
+  versions, e.g. OS X 10.9, which does not display grey boot screen when
+  \texttt{DefaultBackgroundColor} is set, regardless of its value.
 \end{itemize}
 
 \subsection{Other Variables}\label{nvramvarsother}
@@ -6745,8 +6752,8 @@ Sample resources (fonts and images) can be found in
 (e.g. \href{https://github.com/blackosx/OpenCanopyIcons}{here} or \href{https://applelife.ru/threads/kastomizacija-opencanopy.2945020/}{there}).
 
 OpenCanopy provides full support for \texttt{PickerAttributes} and offers a configurable
-builtin icon set. The chosen icon set may depend on the \texttt{DefaultBackgroundColor}
-variable value. Refer to \texttt{PickerVariant} for more details.
+builtin icon set. The chosen icon set may depend on the \texttt{background-color} and
+\texttt{DefaultBackgroundColor} variable values. Refer to \texttt{PickerVariant} for more details.
 
 Predefined icons are saved in the \texttt{PickerVariant}-derived subdirectory of the
 \texttt{\textbackslash EFI\textbackslash OC\textbackslash Resources\textbackslash Image}

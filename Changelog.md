@@ -6,6 +6,7 @@ OpenCore Changelog
 - Increased `OC_STORAGE_SAFE_PATH_MAX` to 192 to support various plugin kexts
 - Fixed vaulting failures when custom fonts are used, thx @al3xtjames
 - Updated documentation for several Booter quirks
+- Added `background-color` NVRAM variable to fix 10.9 boot screen
 
 #### v1.0.5
 - Fixed incorrect print in PCI device info dumping in `SysReport`
