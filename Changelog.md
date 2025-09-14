@@ -7,6 +7,7 @@ OpenCore Changelog
 - Fixed vaulting failures when custom fonts are used, thx @al3xtjames
 - Updated documentation for several Booter quirks
 - Added `background-color` NVRAM variable to fix 10.9 boot screen
+- Fixed debug build of OpenShell not starting on Mac EFI with > 25 file systems
 
 #### v1.0.5
 - Fixed incorrect print in PCI device info dumping in `SysReport`
