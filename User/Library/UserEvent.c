@@ -15,43 +15,52 @@
   #include <time.h>
 #endif
 
-// Event Descriptor
-struct USER_EVENT {
-  // It is unused descriptor?
+/**
+  Event descriptor
+
+  IsClosed    Is it an unused descriptor?
+  Signaled    Is it a signaled event?
+  Type        The type of Event
+  TplLevel    The TPL Level of Event
+  NotifyFn    A callback function
+  NotifyCtx   A callback context
+  TimerEmit   The timer trigger time
+  TimerDelta  The timer triger delta
+**/
+typedef struct {
   BOOLEAN             IsClosed;
-  // Event is signaled?
   BOOLEAN             Signaled;
-
-  // Event type
   UINT32              Type;
-  // Event TPL Level
   EFI_TPL             TplLevel;
-
-  // Callback function
   EFI_EVENT_NOTIFY    NotifyFn;
-  // Callback context
   VOID                *NotifyCtx;
-
-  // Timer trigger time
   UINT64              TimerEmit;
-  // Timer trigger delta
   UINT64              TimerDelta;
-};
+} USER_EVENT;
 
-// for once init event subsystem
-static BOOLEAN  event_need_init = 1;
-// current TPL level
-static EFI_TPL  CurTPL = 0;
-// event descriptor's array
-static struct USER_EVENT  events[USER_EVENT_MAXNUM];
+/**
+  Local variables
 
+  mEventNeedInit  Do we need to initialize the event subsystem?
+  mCurTPL         The current TPL value
+  mEvents         The static array of Event descriptor
+**/
+STATIC BOOLEAN     mEventNeedInit = TRUE;
+STATIC EFI_TPL     mCurTPL        = 0;
+STATIC USER_EVENT  mEvents[USER_EVENT_MAXNUM];
+
+/**
+  Returns current time in nanoseconds
+**/
 STATIC
 UINT64
 UserEventGetTimeNow (
   VOID
   )
 {
-  UINT64  TimeNow = 0;
+  UINT64  TimeNow;
+
+  TimeNow = 0;
 
  #if defined (_WIN32)
 
@@ -65,47 +74,50 @@ UserEventGetTimeNow (
   TimeNow = TimeNow*1000000000;
 
  #elif defined (__MACH__)
-  clock_serv_t     cclock;
-  mach_timespec_t  now;
+  clock_serv_t     Cclock;
+  mach_timespec_t  Now;
 
-  host_get_clock_service (mach_host_self (), SYSTEM_CLOCK, &cclock);
-  clock_get_time (cclock, &now);
-  mach_port_deallocate (mach_task_self (), cclock);
+  host_get_clock_service (mach_host_self (), SYSTEM_CLOCK, &Cclock);
+  clock_get_time (Cclock, &Now);
+  mach_port_deallocate (mach_task_self (), Cclock);
 
-  TimeNow = (UINT64)now.tv_sec*1000000000 + now.tv_nsec;
+  TimeNow = (UINT64)Now.tv_sec*1000000000 + Now.tv_nsec;
 
  #else
-  struct timespec  now;
+  struct timespec  Now;
 
-  clock_gettime (CLOCK_MONOTONIC, &now);
-  TimeNow = (UINT64)now.tv_sec*1000000000 + now.tv_nsec;
+  clock_gettime (CLOCK_MONOTONIC, &Now);
+  TimeNow = (UINT64)Now.tv_sec*1000000000 + Now.tv_nsec;
 
  #endif
 
   return TimeNow;
 }
 
-// event allocator
+/**
+  Allocates an Event descriptor
+**/
 STATIC
-struct USER_EVENT *
+USER_EVENT *
 UserEventAlloc (
   VOID
   )
 {
-  struct USER_EVENT  *res = NULL;
+  INTN  Index;
 
-  for (INTN I = 0; I < USER_EVENT_MAXNUM; I++) {
-    if (events[I].IsClosed) {
-      events[I].IsClosed = 0;
-      res                = &(events[I]);
-      break;
+  for (Index = 0; Index < USER_EVENT_MAXNUM; Index++) {
+    if (mEvents[Index].IsClosed == TRUE) {
+      mEvents[Index].IsClosed = 0;
+      return (&(mEvents[Index]));
     }
   }
 
-  return res;
+  return NULL;
 }
 
-// internal event dispatcher
+/**
+  Dispatches signaled events and triggers active timers
+**/
 STATIC
 VOID
 UserEventDispatch (
@@ -113,71 +125,97 @@ UserEventDispatch (
   )
 {
   UINT64  TimeNow;
+  INTN    Index;
 
   TimeNow = UserEventGetTimeNow ();
 
-  for (INTN I = 0; I < USER_EVENT_MAXNUM; I++) {
-    if (events[I].IsClosed) {
-      // skip unused decriptors
+  for (Index = 0; Index < USER_EVENT_MAXNUM; Index++) {
+    if (mEvents[Index].IsClosed == TRUE) {
+      //
+      // Skip unused descriptors
+      //
       continue;
     }
 
-    // it is an active timer?
-    if ((events[I].Type & EVT_TIMER) && events[I].TimerEmit) {
-      if (TimeNow >= events[I].TimerEmit) {
-        // set signaled!
-        events[I].Signaled = 1;
+    //
+    // Is it an active timer?
+    //
+    if (((mEvents[Index].Type & EVT_TIMER) != 0) && (mEvents[Index].TimerEmit != 0)) {
+      if (TimeNow >= mEvents[Index].TimerEmit) {
+        //
+        // Signal Event
+        //
+        mEvents[Index].Signaled = TRUE;
 
-        // it is an periodic?
-        if (events[I].TimerDelta) {
-          // set new time for trigger
-          events[I].TimerEmit += events[I].TimerDelta;
+        //
+        // Is it a periodic timer?
+        //
+        if (mEvents[Index].TimerDelta != 0) {
+          //
+          // Update trigger time
+          //
+          mEvents[Index].TimerEmit += mEvents[Index].TimerDelta;
         } else {
-          events[I].TimerEmit = 0;
+          mEvents[Index].TimerEmit = 0;
         }
       }
     }
 
-    // signal?
-    if (events[I].Signaled && (events[I].Type & EVT_NOTIFY_SIGNAL)) {
-      // valid TPL?
-      if (CurTPL <= events[I].TplLevel) {
-        // clear state
-        events[I].Signaled = 0;
-        // emit handler
-        events[I].NotifyFn ((EFI_EVENT)&events[I], events[I].NotifyCtx);
+    //
+    //  Is it a signaled event?
+    //
+    if ((mEvents[Index].Signaled == TRUE) && ((mEvents[Index].Type & EVT_NOTIFY_SIGNAL) != 0)) {
+      //
+      // Is TPL of Event valid?
+      //
+      if (mCurTPL <= mEvents[Index].TplLevel) {
+        //
+        // Reset state
+        //
+        mEvents[Index].Signaled = FALSE;
+        //
+        // Call handler
+        //
+        mEvents[Index].NotifyFn ((EFI_EVENT)&mEvents[Index], mEvents[Index].NotifyCtx);
       }
     }
   }
 }
 
-// init event subsystem
+/**
+  Inits the Event subsystem
+**/
 STATIC
 VOID
 UserEventInitializer (
   VOID
   )
 {
-  for (INTN I = 0; I < USER_EVENT_MAXNUM; I++) {
-    // set unused state
-    events[I].IsClosed  = 1;
-    events[I].TplLevel  = 0;
-    events[I].TimerEmit = 0;
+  INTN  Index;
+
+  for (Index = 0; Index < USER_EVENT_MAXNUM; Index++) {
+    mEvents[Index].IsClosed  = TRUE;
+    mEvents[Index].TplLevel  = 0;
+    mEvents[Index].TimerEmit = 0;
   }
 
-  // init current TPL level
-  CurTPL = TPL_APPLICATION;
+  //
+  // Init current TPL
+  //
+  mCurTPL = TPL_APPLICATION;
 }
 
-// wrap around pthread_once() call
+/**
+  Calls UserEventInitializer() if needed
+**/
 STATIC
 VOID
 UserEventInit (
   VOID
   )
 {
-  if (event_need_init) {
-    event_need_init = 0;
+  if (mEventNeedInit == TRUE) {
+    mEventNeedInit = FALSE;
     UserEventInitializer ();
   }
 }
@@ -210,58 +248,66 @@ EFIAPI
 UserCreateEventEx (
   IN UINT32            Type,
   IN EFI_TPL           NotifyTpl,
-  IN EFI_EVENT_NOTIFY  NotifyFunction,
-  IN CONST VOID        *NotifyContext,
-  IN CONST EFI_GUID    *EventGroup,
+  IN EFI_EVENT_NOTIFY  NotifyFunction OPTIONAL,
+  IN CONST VOID        *NotifyContext OPTIONAL,
+  IN CONST EFI_GUID    *EventGroup OPTIONAL,
   OUT EFI_EVENT        *Event
   )
 {
-  struct USER_EVENT  *ev = NULL;
+  USER_EVENT  *Ev;
 
-  // init event subsystem
   UserEventInit ();
 
-  // check input params
+  //
+  // Check input params
+  //
   if (Event == NULL) {
     return EFI_INVALID_PARAMETER;
   }
 
-  if ((Type & EVT_NOTIFY_SIGNAL) && (Type & EVT_NOTIFY_WAIT)) {
+  if (((Type & EVT_NOTIFY_SIGNAL) != 0) && ((Type & EVT_NOTIFY_WAIT) != 0)) {
+    //
     // The Type param can't combine EVT_NOTIFY_SIGNAL and EVT_NOTIFY_WAIT flags
+    //
     return EFI_INVALID_PARAMETER;
   }
 
-  if (Type & (EVT_NOTIFY_SIGNAL | EVT_NOTIFY_WAIT)) {
-    // is signal or wait emit type
+  if ((Type & (EVT_NOTIFY_SIGNAL | EVT_NOTIFY_WAIT)) != 0) {
+    //
+    // Event type is signal or event
+    //
     if (NotifyFunction == NULL) {
+      //
       // callback function isn't set
+      //
       return EFI_INVALID_PARAMETER;
     }
 
-    if (!(NotifyTpl < USER_EVENT_MAXTPL)) {
-      // invalid required TPL
+    if (NotifyTpl >= USER_EVENT_MAXTPL) {
+      //
+      // Required TPL is invalid
+      //
       return EFI_INVALID_PARAMETER;
     }
   }
 
-  // try alloc event descriptor
-  ev = UserEventAlloc ();
-
-  if (ev == NULL) {
-    // have no mem
+  //
+  // Try to allocate an Event descriptor
+  //
+  Ev = UserEventAlloc ();
+  if (Ev == NULL) {
     *Event = NULL;
     return EFI_OUT_OF_RESOURCES;
   }
 
-  // set event descriptor fields
-  ev->Type      = Type;
-  ev->TplLevel  = NotifyTpl;
-  ev->Signaled  = 0;
-  ev->NotifyFn  = NotifyFunction;
-  ev->NotifyCtx = (VOID *)NotifyContext;
-  ev->TimerEmit = 0;
+  Ev->Type      = Type;
+  Ev->TplLevel  = NotifyTpl;
+  Ev->Signaled  = 0;
+  Ev->NotifyFn  = NotifyFunction;
+  Ev->NotifyCtx = (VOID *)NotifyContext;
+  Ev->TimerEmit = 0;
 
-  *Event = (EFI_EVENT)ev;
+  *Event = (EFI_EVENT)Ev;
   return EFI_SUCCESS;
 }
 
@@ -291,8 +337,8 @@ EFIAPI
 UserCreateEvent (
   IN UINT32            Type,
   IN EFI_TPL           NotifyTpl,
-  IN EFI_EVENT_NOTIFY  NotifyFunction,
-  IN VOID              *NotifyContext,
+  IN EFI_EVENT_NOTIFY  NotifyFunction OPTIONAL,
+  IN VOID              *NotifyContext OPTIONAL,
   OUT EFI_EVENT        *Event
   )
 {
@@ -319,19 +365,17 @@ UserCloseEvent (
   IN EFI_EVENT  Event
   )
 {
-  struct USER_EVENT  *ev = NULL;
+  USER_EVENT  *Ev;
 
-  // init event subsystem
   UserEventInit ();
 
   ASSERT (Event != NULL);
-  // type cast
-  ev = (struct USER_EVENT *)Event;
 
-  // clear event state
-  ev->IsClosed  = 1;
-  ev->TimerEmit = 0;
-  ev->TplLevel  = 0;
+  Ev = (USER_EVENT *)Event;
+
+  Ev->IsClosed  = TRUE;
+  Ev->TimerEmit = 0;
+  Ev->TplLevel  = 0;
 
   return EFI_SUCCESS;
 }
@@ -349,18 +393,17 @@ UserSignalEvent (
   IN EFI_EVENT  Event
   )
 {
-  struct USER_EVENT  *ev = NULL;
+  USER_EVENT  *Ev;
 
-  // init event subsystem
   UserEventInit ();
 
   ASSERT (Event != NULL);
 
-  ev = (struct USER_EVENT *)Event;
-  ASSERT (!(ev->IsClosed));
+  Ev = (USER_EVENT *)Event;
+  ASSERT (Ev->IsClosed == FALSE);
 
-  if (!(ev->IsClosed)) {
-    ev->Signaled = 1;
+  if (Ev->IsClosed == FALSE) {
+    Ev->Signaled = TRUE;
   }
 
   UserEventDispatch ();
@@ -383,32 +426,35 @@ UserCheckEvent (
   IN EFI_EVENT  Event
   )
 {
-  struct USER_EVENT  *ev = NULL;
-  EFI_STATUS         Status;
+  USER_EVENT  *Ev;
+  EFI_STATUS  Status;
 
-  // init event subsystem
   UserEventInit ();
 
   ASSERT (Event != NULL);
 
-  ev = (struct USER_EVENT *)Event;
-  ASSERT (!(ev->IsClosed));
+  Ev = (USER_EVENT *)Event;
+  ASSERT (Ev->IsClosed == FALSE);
 
-  if (ev->Type & EVT_NOTIFY_SIGNAL) {
+  if ((Ev->Type & EVT_NOTIFY_SIGNAL) != 0) {
+    //
+    // The Event can't have the EVT_NOTIFY_SIGNAL type
+    //
     return EFI_INVALID_PARAMETER;
   }
 
   UserEventDispatch ();
 
-  if (ev->Signaled) {
-    // Signaled?
-    ev->Signaled = 0;
+  if (Ev->Signaled == TRUE) {
+    Ev->Signaled = FALSE;
     Status       = EFI_SUCCESS;
   } else {
-    // It isn't signaled event, but can be EVT_NOTIFY_WAIT type
-    // then we need emit callback function if TPL is valid
-    if ((ev->Type & EVT_NOTIFY_WAIT) && (CurTPL <= ev->TplLevel)) {
-      ev->NotifyFn ((EFI_EVENT)ev, ev->NotifyCtx);
+    //
+    // It isn't signaled event, but it can have the EVT_NOTIFY_WAIT type
+    // In that case, we need to emit callback function if TPL is valid
+    //
+    if (((Ev->Type & EVT_NOTIFY_WAIT) != 0) && (mCurTPL <= Ev->TplLevel)) {
+      Ev->NotifyFn ((EFI_EVENT)Ev, Ev->NotifyCtx);
     }
 
     Status = EFI_NOT_READY;
@@ -438,58 +484,59 @@ UserWaitForEvent (
   OUT UINTN     *Index
   )
 {
-  struct USER_EVENT  **evs = NULL;
-  struct USER_EVENT  *ev   = NULL;
+  USER_EVENT  **Evs;
+  USER_EVENT  *Ev;
+  UINTN       Jndex;
 
   UserEventInit ();
 
-  if (CurTPL != TPL_APPLICATION) {
+  if (mCurTPL != TPL_APPLICATION) {
     return EFI_UNSUPPORTED;
   }
 
   ASSERT (Events != NULL);
   ASSERT (Index != NULL);
 
-  evs = (struct USER_EVENT **)Events;
+  Evs = (USER_EVENT **)Events;
 
-  if (!NumberOfEvents) {
-    // check input param
+  if (NumberOfEvents == 0) {
     return EFI_INVALID_PARAMETER;
   }
 
-WAIT_LOOP:
+  while (TRUE) {
+    //
+    // Blocking wait
+    //
 
-  UserEventDispatch ();
+    UserEventDispatch ();
 
-  for (UINTN I = 0; I < NumberOfEvents; I++) {
-    ev = evs[I];
+    for (Jndex = 0; Jndex < NumberOfEvents; Jndex++) {
+      Ev = Evs[Jndex];
 
-    if (ev == NULL) {
-      continue;
-    }
+      if (Ev == NULL) {
+        continue;
+      }
 
-    if (ev->IsClosed) {
-      continue;
-    }
+      if (Ev->IsClosed == TRUE) {
+        continue;
+      }
 
-    if (ev->Type & EVT_NOTIFY_SIGNAL) {
-      *Index = I;
-      return EFI_INVALID_PARAMETER;
-    }
+      if ((Ev->Type & EVT_NOTIFY_SIGNAL) != 0) {
+        *Index = Jndex;
+        return EFI_INVALID_PARAMETER;
+      }
 
-    if (ev->Signaled) {
-      *Index       = I;
-      ev->Signaled = 0;
-      return EFI_SUCCESS;
-    } else {
-      if ((ev->Type & EVT_NOTIFY_WAIT) && (CurTPL <= ev->TplLevel)) {
-        ev->NotifyFn ((EFI_EVENT)ev, ev->NotifyCtx);
+      if (Ev->Signaled == TRUE) {
+        *Index       = Jndex;
+        Ev->Signaled = FALSE;
+        return EFI_SUCCESS;
+      } else {
+        if (((Ev->Type & EVT_NOTIFY_WAIT) != 0) && (mCurTPL <= Ev->TplLevel)) {
+          Ev->NotifyFn ((EFI_EVENT)Ev, Ev->NotifyCtx);
+        }
       }
     }
   }
-
-  // blocking wait
-  goto WAIT_LOOP;
 }
 
 /**
@@ -512,17 +559,17 @@ UserSetTimer (
   IN UINT64           TriggerTime
   )
 {
-  UINT64             TimeNow = 0;
-  struct USER_EVENT  *ev     = NULL;
+  UINT64      TimeNow;
+  USER_EVENT  *Ev;
 
   UserEventInit ();
 
   // check input params
   ASSERT (Event != NULL);
-  ev = (struct USER_EVENT *)Event;
-  ASSERT (!(ev->IsClosed));
+  Ev = (USER_EVENT *)Event;
+  ASSERT (Ev->IsClosed == FALSE);
 
-  if (!(ev->Type & EVT_TIMER)) {
+  if ((Ev->Type & EVT_TIMER) == 0) {
     return EFI_INVALID_PARAMETER;
   }
 
@@ -530,17 +577,17 @@ UserSetTimer (
 
   switch (Type) {
     case TimerCancel:
-      ev->TimerEmit = 0;
+      Ev->TimerEmit = 0;
       break;
 
     case TimerRelative:
-      ev->TimerEmit  = TimeNow + TriggerTime * 100;
-      ev->TimerDelta = 0;
+      Ev->TimerEmit  = TimeNow + TriggerTime * 100;
+      Ev->TimerDelta = 0;
       break;
 
     case TimerPeriodic:
-      ev->TimerEmit  = TimeNow + TriggerTime * 100;
-      ev->TimerDelta = TriggerTime * 100;
+      Ev->TimerEmit  = TimeNow + TriggerTime * 100;
+      Ev->TimerDelta = TriggerTime * 100;
       break;
 
     default:
@@ -565,18 +612,18 @@ UserRaiseTPL (
   IN EFI_TPL  NewTpl
   )
 {
-  EFI_TPL  old;
+  EFI_TPL  Old;
 
   UserEventInit ();
 
   UserEventDispatch ();
 
-  old = CurTPL;
-  if ((NewTpl >= old) && (NewTpl < USER_EVENT_MAXTPL)) {
-    CurTPL = NewTpl;
+  Old = mCurTPL;
+  if ((NewTpl >= Old) && (NewTpl < USER_EVENT_MAXTPL)) {
+    mCurTPL = NewTpl;
   }
 
-  return old;
+  return Old;
 }
 
 /**
@@ -591,10 +638,10 @@ UserRestoreTPL (
   )
 {
   UserEventInit ();
-  ASSERT (OldTpl <= CurTPL);
+  ASSERT (OldTpl <= mCurTPL);
 
   if (OldTpl < USER_EVENT_MAXTPL) {
-    CurTPL = OldTpl;
+    mCurTPL = OldTpl;
   }
 
   UserEventDispatch ();
@@ -612,36 +659,38 @@ UserEventDispatchNow (
   )
 {
   UINT64   TimeNow;
-  BOOLEAN  res = FALSE;
+  BOOLEAN  Res;
+  INTN     Index;
 
   UserEventInit ();
 
   TimeNow = UserEventGetTimeNow ();
 
-  for (INTN I = 0; I < USER_EVENT_MAXNUM; I++) {
-    if (events[I].IsClosed) {
+  Res = FALSE;
+  for (Index = 0; Index < USER_EVENT_MAXNUM; Index++) {
+    if (mEvents[Index].IsClosed == TRUE) {
       continue;
     }
 
-    res = TRUE;
-    if ((events[I].Type & EVT_TIMER) && events[I].TimerEmit) {
-      if (TimeNow >= events[I].TimerEmit) {
-        events[I].Signaled = 1;
-        if (events[I].TimerDelta) {
-          events[I].TimerEmit += events[I].TimerDelta;
+    Res = TRUE;
+    if (((mEvents[Index].Type & EVT_TIMER) != 0) && (mEvents[Index].TimerEmit != 0)) {
+      if (TimeNow >= mEvents[Index].TimerEmit) {
+        mEvents[Index].Signaled = TRUE;
+        if (mEvents[Index].TimerDelta != 0) {
+          mEvents[Index].TimerEmit += mEvents[Index].TimerDelta;
         } else {
-          events[I].TimerEmit = 0;
+          mEvents[Index].TimerEmit = 0;
         }
       }
     }
 
-    if (events[I].Signaled && (events[I].Type & EVT_NOTIFY_SIGNAL)) {
-      if (CurTPL <= events[I].TplLevel) {
-        events[I].Signaled = 0;
-        events[I].NotifyFn ((EFI_EVENT)&events[I], events[I].NotifyCtx);
+    if ((mEvents[Index].Signaled == TRUE) && ((mEvents[Index].Type & EVT_NOTIFY_SIGNAL) != 0)) {
+      if (mCurTPL <= mEvents[Index].TplLevel) {
+        mEvents[Index].Signaled = FALSE;
+        mEvents[Index].NotifyFn ((EFI_EVENT)&mEvents[Index], mEvents[Index].NotifyCtx);
       }
     }
   }
 
-  return res;
+  return Res;
 }
