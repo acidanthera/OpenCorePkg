@@ -45,9 +45,9 @@ EFIAPI
 UserCreateEventEx (
   IN UINT32            Type,
   IN EFI_TPL           NotifyTpl,
-  IN EFI_EVENT_NOTIFY  NotifyFunction,
-  IN CONST VOID        *NotifyContext,
-  IN CONST EFI_GUID    *EventGroup,
+  IN EFI_EVENT_NOTIFY  NotifyFunction OPTIONAL,
+  IN CONST VOID        *NotifyContext OPTIONAL,
+  IN CONST EFI_GUID    *EventGroup OPTIONAL,
   OUT EFI_EVENT        *Event
   );
 
@@ -77,8 +77,8 @@ EFIAPI
 UserCreateEvent (
   IN UINT32            Type,
   IN EFI_TPL           NotifyTpl,
-  IN EFI_EVENT_NOTIFY  NotifyFunction,
-  IN VOID              *NotifyContext,
+  IN EFI_EVENT_NOTIFY  NotifyFunction OPTIONAL,
+  IN VOID              *NotifyContext OPTIONAL,
   OUT EFI_EVENT        *Event
   );
 
