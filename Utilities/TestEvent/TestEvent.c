@@ -5,116 +5,135 @@
 
 #include <Uefi.h>
 #include <Library/UefiBootServicesTableLib.h>
+#include <Library/DebugLib.h>
 #include <Library/UefiLib.h>
 #include <stdio.h>
 #include <unistd.h>
 
-// context for callback functions
-struct NOTIFY_CONTEXT1 {
+/**
+  The context for callback functions
+**/
+typedef struct {
   EFI_EVENT    LinkedEvent;
   UINTN        Counter;
-};
+} NOTIFY_CONTEXT1;
 
-// callback-functions for signal
+/**
+  The callback function for a simple signal
+**/
+STATIC
 VOID
 SignalNotify1 (
   IN EFI_EVENT  Event,
   IN VOID       *Context
   )
 {
-  struct NOTIFY_CONTEXT1  *ctx = (struct NOTIFY_CONTEXT1 *)Context;
+  NOTIFY_CONTEXT1  *Ctx;
 
-  printf ("SignalNotify1()\n");
-  (ctx->Counter)++;
+  DEBUG ((DEBUG_INFO, "SignalNotify1()\n"));
+  Ctx = (NOTIFY_CONTEXT1 *)Context;
+  ++(Ctx->Counter);
 }
 
+/**
+  The callback function for a self-destroy signal
+**/
+STATIC
 VOID
 SelfDestroyNotify1 (
   IN EFI_EVENT  Event,
   IN VOID       *Context
   )
 {
-  struct NOTIFY_CONTEXT1  *ctx = (struct NOTIFY_CONTEXT1 *)Context;
+  NOTIFY_CONTEXT1  *Ctx;
 
-  printf ("@@@@ SelfDestroyNotify1()\n");
-  (ctx->Counter)++;
+  DEBUG ((DEBUG_INFO, "@@@@ SelfDestroyNotify1()\n"));
+  Ctx = (NOTIFY_CONTEXT1 *)Context;
+  ++(Ctx->Counter);
   gBS->CloseEvent (Event);
 }
 
+/**
+  The callback function for linked signals
+**/
+STATIC
 VOID
 SignalNotify2 (
   IN EFI_EVENT  Event,
   IN VOID       *Context
   )
 {
-  struct NOTIFY_CONTEXT1  *ctx = (struct NOTIFY_CONTEXT1 *)Context;
-  EFI_STATUS              Status;
+  NOTIFY_CONTEXT1  *Ctx;
 
-  // printf("SignalNotify2() %lu\n", ctx->Counter);
-  Status = gBS->SignalEvent (ctx->LinkedEvent);
-
-  // if (EFI_ERROR(Status)) {
-  // printf("SignalNotify2() %lu Error emited %d\n", ctx->Counter, Status);
-  // } else {
-  // printf("SignalNotify2() %lu Success Emited\n", ctx->Counter);
-  // }
-  (ctx->Counter)++;
+  Ctx = (NOTIFY_CONTEXT1 *)Context;
+  gBS->SignalEvent (Ctx->LinkedEvent);
+  ++(Ctx->Counter);
 }
 
+/**
+  The callback function for a last-linked signal
+**/
+STATIC
 VOID
 SignalNotify3 (
   IN EFI_EVENT  Event,
   IN VOID       *Context
   )
 {
-  struct NOTIFY_CONTEXT1  *ctx = (struct NOTIFY_CONTEXT1 *)Context;
+  NOTIFY_CONTEXT1  *Ctx;
 
-  // printf("SignalNotify3() %lu\n", ctx->Counter);
-  (ctx->Counter)++;
+  Ctx = (NOTIFY_CONTEXT1 *)Context;
+  ++(Ctx->Counter);
 }
 
+/**
+  The callback function for a linked wait signal
+**/
+STATIC
 VOID
 WaitNotify1 (
   IN EFI_EVENT  Event,
   IN VOID       *Context
   )
 {
-  struct NOTIFY_CONTEXT1  *ctx = (struct NOTIFY_CONTEXT1 *)Context;
-  EFI_STATUS              Status;
+  NOTIFY_CONTEXT1  *Ctx;
 
-  // printf("WaitNotify1() %lu\n", ctx->Counter);
-  Status = gBS->SignalEvent (ctx->LinkedEvent);
-
-  // if (EFI_ERROR(Status)) {
-  //  printf("WaitNotify1() %lu Error emited %d\n", ctx->Counter, Status);
-  // } else {
-  //  printf("WaitNotify1() %lu Success Emited\n", ctx->Counter);
-  // }
-  (ctx->Counter)++;
+  Ctx = (NOTIFY_CONTEXT1 *)Context;
+  gBS->SignalEvent (Ctx->LinkedEvent);
+  ++(Ctx->Counter);
 }
 
 int
-main (
+ENTRY_POINT (
+  VOID
   )
 {
-  EFI_STATUS              Status;
-  struct NOTIFY_CONTEXT1  SignalNotifyContext1 = { 0, };
-  struct NOTIFY_CONTEXT1  SignalNotifyContext2 = { 0, };
-  struct NOTIFY_CONTEXT1  SignalNotifyContext3 = { 0, };
-  struct NOTIFY_CONTEXT1  WaitNotifyContext1   = { 0, };
-  struct NOTIFY_CONTEXT1  SelfDestroyContext1  = { 0, };
-  EFI_EVENT               Signal1;
-  EFI_EVENT               Signal2;
-  EFI_EVENT               Signal3;
-  EFI_EVENT               Wait1;
-  EFI_EVENT               Timer1;
-  EFI_EVENT               SelfD1;
-  UINTN                   TimerCounter1 = 0;
-  UINTN                   Index;
+  EFI_STATUS       Status;
+  NOTIFY_CONTEXT1  SignalNotifyContext1 = { 0, };
+  NOTIFY_CONTEXT1  SignalNotifyContext2 = { 0, };
+  NOTIFY_CONTEXT1  SignalNotifyContext3 = { 0, };
+  NOTIFY_CONTEXT1  WaitNotifyContext1   = { 0, };
+  NOTIFY_CONTEXT1  SelfDestroyContext1  = { 0, };
+  EFI_EVENT        Signal1;
+  EFI_EVENT        Signal2;
+  EFI_EVENT        Signal3;
+  EFI_EVENT        Wait1;
+  EFI_EVENT        Timer1;
+  EFI_EVENT        SelfD1;
+  UINTN            TimerCounter1 = 0;
+  UINTN            Index;
+  INTN             Jndex;
+  EFI_TPL          OriginalTPL;
+  //
+  // Array for waiting events
+  //
+  EFI_EVENT  Events[2];
 
-  printf ("=== Test UEFI Event System  ===\n");
+  DEBUG ((DEBUG_INFO, "=== Test UEFI Event System  ===\n"));
 
-  // create events
+  //
+  // Create events
+  //
   Status = gBS->CreateEvent (
                   EVT_NOTIFY_SIGNAL,
                   TPL_CALLBACK,
@@ -124,9 +143,9 @@ main (
                   );
 
   if (EFI_ERROR (Status) || (Signal1 == NULL)) {
-    printf ("FAIL: Signal1 event creation (Status: %lu)\n", Status);
+    DEBUG ((DEBUG_INFO, "FAIL: Signal1 event creation (Status: %r)\n", Status));
   } else {
-    printf ("PASS: Signal1 event created\n");
+    DEBUG ((DEBUG_INFO, "PASS: Signal1 event created\n"));
   }
 
   Status = gBS->CreateEvent (
@@ -138,9 +157,9 @@ main (
                   );
 
   if (EFI_ERROR (Status) || (Signal2 == NULL)) {
-    printf ("FAIL: Signal2 event creation (Status: %lu)\n", Status);
+    DEBUG ((DEBUG_INFO, "FAIL: Signal2 event creation (Status: %r)\n", Status));
   } else {
-    printf ("PASS: Signal2 event created\n");
+    DEBUG ((DEBUG_INFO, "PASS: Signal2 event created\n"));
   }
 
   Status = gBS->CreateEvent (
@@ -152,9 +171,9 @@ main (
                   );
 
   if (EFI_ERROR (Status) || (Signal3 == NULL)) {
-    printf ("FAIL: Signal3 event creation (Status: %lu)\n", Status);
+    DEBUG ((DEBUG_INFO, "FAIL: Signal3 event creation (Status: %r)\n", Status));
   } else {
-    printf ("PASS: Signal3 event created\n");
+    DEBUG ((DEBUG_INFO, "PASS: Signal3 event created\n"));
   }
 
   Status = gBS->CreateEvent (
@@ -166,9 +185,9 @@ main (
                   );
 
   if (EFI_ERROR (Status) || (Wait1 == NULL)) {
-    printf ("FAIL: Wait1 event creation (Status: %lu)\n", Status);
+    DEBUG ((DEBUG_INFO, "FAIL: Wait1 event creation (Status: %r)\n", Status));
   } else {
-    printf ("PASS: Wait1 event created\n");
+    DEBUG ((DEBUG_INFO, "PASS: Wait1 event created\n"));
   }
 
   Status = gBS->CreateEvent (
@@ -180,9 +199,9 @@ main (
                   );
 
   if (EFI_ERROR (Status) || (Timer1 == NULL)) {
-    printf ("FAIL: Timer1 event creation (Status: %lu)\n", Status);
+    DEBUG ((DEBUG_INFO, "FAIL: Timer1 event creation (Status: %r)\n", Status));
   } else {
-    printf ("PASS: Timer1 event created\n");
+    DEBUG ((DEBUG_INFO, "PASS: Timer1 event created\n"));
   }
 
   Status = gBS->CreateEvent (
@@ -194,94 +213,111 @@ main (
                   );
 
   if (EFI_ERROR (Status) || (SelfD1 == NULL)) {
-    printf ("FAIL: SelfD1 event creation (Status: %lu)\n", Status);
+    DEBUG ((DEBUG_INFO, "FAIL: SelfD1 event creation (Status: %r)\n", Status));
   } else {
-    printf ("PASS: SelfD event created\n");
+    DEBUG ((DEBUG_INFO, "PASS: SelfD event created\n"));
   }
 
-  // links events
-  // signal2 with signal3
+  //
+  // Link events
+  // Signal2 --> Signal3
+  // Wait1 --> Signal2
+  //
   SignalNotifyContext2.LinkedEvent = Signal3;
-  // wait1 with signal 2
-  WaitNotifyContext1.LinkedEvent = Signal2;
+  WaitNotifyContext1.LinkedEvent   = Signal2;
 
-  // try sets timers
+  //
+  // Try to set timers
+  //
   Status = gBS->SetTimer (Wait1, TimerPeriodic, 100*10000);
 
   if (EFI_ERROR (Status)) {
-    printf ("FAIL: Set timer for Wait1 (Status: %lu)\n", Status);
+    DEBUG ((DEBUG_INFO, "FAIL: Set timer for Wait1 (Status: %r)\n", Status));
   } else {
-    printf ("PASS: Wait1 set to 100*10000 periodic\n");
+    DEBUG ((DEBUG_INFO, "PASS: Wait1 set to 100*10000 periodic\n"));
   }
 
   Status = gBS->SetTimer (Timer1, TimerPeriodic, 10*10000);
 
   if (EFI_ERROR (Status)) {
-    printf ("FAIL: Set timer for Timer1 (Status: %lu)\n", Status);
+    DEBUG ((DEBUG_INFO, "FAIL: Set timer for Timer1 (Status: %r)\n", Status));
   } else {
-    printf ("PASS: Timer1 set to 10*10000 periodic\n");
+    DEBUG ((DEBUG_INFO, "PASS: Timer1 set to 10*10000 periodic\n"));
   }
 
   Status = gBS->SetTimer (SelfD1, TimerRelative, 30*10000);
 
   if (EFI_ERROR (Status)) {
-    printf ("FAIL: Set timer for SelfD1 (Status: %lu)\n", Status);
+    DEBUG ((DEBUG_INFO, "FAIL: Set timer for SelfD1 (Status: %r)\n", Status));
   } else {
-    printf ("PASS: SelfD1 set to 30*10000 relative\n");
+    DEBUG ((DEBUG_INFO, "PASS: SelfD1 set to 30*10000 relative\n"));
   }
 
-  // try emit signal1
+  //
+  // Try to emit Signal1
+  //
   gBS->SignalEvent (Signal1);
 
-  // try wait events
-  EFI_EVENT  Events[] = { Timer1, Wait1 };
+  //
+  // Try to wait events
+  //
+  Events[0] = Timer1;
+  Events[1] = Wait1;
 
-  for (int i = 0; i < 10; i++) {
+  for (Jndex = 0; Jndex < 10; Jndex++) {
     Status = gBS->WaitForEvent (2, Events, &Index);
     if (!EFI_ERROR (Status)) {
-      printf ("Event %lu triggered\n", Index);
+      DEBUG ((DEBUG_INFO, "Event %u triggered\n", Index));
       if (Index == 0) {
-        printf ("PASS: Timer1 event wait succeeded\n");
+        DEBUG ((DEBUG_INFO, "PASS: Timer1 event wait succeeded\n"));
         TimerCounter1++;
       }
     } else {
-      printf ("Event Error %lu (Status: %lu)\n", Index, Status);
+      DEBUG ((DEBUG_INFO, "Event Error %u (Status: %r)\n", Index, Status));
     }
   }
 
-  // try check event
+  //
+  // Try to check event
+  //
   Status = gBS->CheckEvent (Signal1);
   if (Status == EFI_SUCCESS) {
-    printf ("FAIL: Event check succeeded\n");
+    DEBUG ((DEBUG_INFO, "FAIL: Event check succeeded\n"));
   } else {
-    printf ("PASS: Event check error (Status: %lu)\n", Status);
+    DEBUG ((DEBUG_INFO, "PASS: Event check error (Status: %r)\n", Status));
   }
 
-  // TPL Test
-  EFI_TPL  OriginalTPL = gBS->RaiseTPL (TPL_HIGH_LEVEL);
+  //
+  // The TPL test
+  //
+  OriginalTPL = gBS->RaiseTPL (TPL_HIGH_LEVEL);
 
-  printf ("TPL raised from %lu to %d\n", OriginalTPL, TPL_HIGH_LEVEL);
+  DEBUG ((DEBUG_INFO, "TPL raised from %u to %d\n", OriginalTPL, TPL_HIGH_LEVEL));
 
   gBS->SignalEvent (Signal1);
-  printf ("EVENT SIGANL1 NEED PRINTF AFTER THIS LINE:\n");
+  DEBUG ((DEBUG_INFO, "EVENT SIGANL1 NEED PRINTF AFTER THIS LINE:\n"));
 
   gBS->RestoreTPL (OriginalTPL);
-  printf ("TPL restored to %lu\n", OriginalTPL);
+  DEBUG ((DEBUG_INFO, "TPL restored to %u\n", OriginalTPL));
 
-  // test close event
+  //
+  // Try to close event
+  //
   gBS->CloseEvent (Signal1);
   gBS->CloseEvent (Timer1);
 
-  // try signal closed event
+  //
+  // Try to signal a closed event. Need to trigger ASSERT()
+  //
   // gBS->SignalEvent (Signal1);
 
-  printf ("\n=== Test Summary ===\n");
-  printf ("Signal1 callbacks: %ld\n", SignalNotifyContext1.Counter);
-  printf ("Signal2 callbacks: %ld\n", SignalNotifyContext2.Counter);
-  printf ("Signal3 callbacks: %ld\n", SignalNotifyContext3.Counter);
-  printf ("Wait1 callbacks: %ld\n", WaitNotifyContext1.Counter);
-  printf ("SelfD1 callbacks: %ld\n", SelfDestroyContext1.Counter);
-  printf ("Timer1 callbacks: %ld\n", TimerCounter1);
+  DEBUG ((DEBUG_INFO, "\n=== Test Summary ===\n"));
+  DEBUG ((DEBUG_INFO, "Signal1 callbacks: %u\n", SignalNotifyContext1.Counter));
+  DEBUG ((DEBUG_INFO, "Signal2 callbacks: %u\n", SignalNotifyContext2.Counter));
+  DEBUG ((DEBUG_INFO, "Signal3 callbacks: %u\n", SignalNotifyContext3.Counter));
+  DEBUG ((DEBUG_INFO, "Wait1 callbacks: %u\n", WaitNotifyContext1.Counter));
+  DEBUG ((DEBUG_INFO, "SelfD1 callbacks: %u\n", SelfDestroyContext1.Counter));
+  DEBUG ((DEBUG_INFO, "Timer1 callbacks: %u\n", TimerCounter1));
 
   gBS->CloseEvent (Signal2);
   gBS->CloseEvent (Signal3);
