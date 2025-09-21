@@ -7,7 +7,7 @@ else
 fi
 
 rm -rf Recovery.RO.dmg Recovery.raw "Recovery.${FORMAT}" Recovery.dmg.sparseimage
-hdiutil create -size 800m -layout "UNIVERSAL HD" -type SPARSE -o Recovery.dmg
+hdiutil create -size 900m -layout "UNIVERSAL HD" -type SPARSE -o Recovery.dmg
 newDevice=$(hdiutil attach -nomount Recovery.dmg.sparseimage | head -n 1 | awk  '{print $1}')
 echo newdevice "$newDevice"
 diskutil partitionDisk "${newDevice}" 1 MBR fat32 RECOVERY R
