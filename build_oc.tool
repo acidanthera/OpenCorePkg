@@ -29,6 +29,7 @@ buildutil() {
     "TestExt4Dxe"
     "TestFatDxe"
     "TestNtfsDxe"
+    "TestEvent"
     "TestPeCoff"
     "TestProcessKernel"
     "TestRsaPreprocess"
