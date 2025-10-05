@@ -285,6 +285,11 @@ OBJS    += UserPseudoRandom.o
 OUT_DIR := $(DIST)_$(UDK_ARCH)$(INFIX)
 OBJS    := $(addprefix $(OUT_DIR)/,$(OBJS))
 
+#
+# Use ccache for much faster compilation.
+#
+CC	:= ccache $(CC)
+
 $(OUT_DIR)/%.o: %.c
 	@$(MKDIR) $(OUT_DIR)
 	$(CC) -MMD -MT $@ -MF $(OUT_DIR)/$*.d $(CFLAGS) $< -o $@
