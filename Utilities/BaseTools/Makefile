@@ -1,8 +1,12 @@
+DIST ?= $(shell uname)
 CC ?= gcc
-CFLAGS ?= -O3 -s
+ifeq ($(DIST),Darwin)
+	CFLAGS ?= -O3
+else
+	CFLAGS ?= -O3 -s
+endif
 MKDIR ?= mkdir
 RM ?= /bin/rm
-DIST ?= $(shell uname)
 
 ifeq ($(DIST),Darwin)
 	CFLAGS += -arch x86_64 -arch arm64 -mmacosx-version-min=10.9
