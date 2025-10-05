@@ -154,7 +154,7 @@ else
 fi
 
 if [ ! -d "${FV_TOOLS}" ]; then
-  echo "ERROR: Something goes wrong while compiling BaseTools for your platform!"
+  echo "ERROR: Something went wrong while compiling BaseTools for your platform!"
   exit 1
 fi
 
