@@ -403,7 +403,7 @@ export SELFPKG
 export NO_ARCHIVES
 export DISCARD_SUBMODULES
 
-src=$(curl -LfsS https://raw.githubusercontent.com/acidanthera/ocbuild/master/efibuild.sh) && eval "$src" || exit 1
+src=$(curl -LfsS https://raw.githubusercontent.com/acidanthera/ocbuild/UserSpace/efibuild.sh) && eval "$src" || exit 1
 
 cd Utilities/ocvalidate || exit 1
 ocv_tool=""
