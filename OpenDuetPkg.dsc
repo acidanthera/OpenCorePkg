@@ -130,6 +130,7 @@
   HobLib|MdePkg/Library/DxeCoreHobLib/DxeCoreHobLib.inf
   MemoryAllocationLib|MdeModulePkg/Library/DxeCoreMemoryAllocationLib/DxeCoreMemoryAllocationLib.inf
   CpuArchLib|UefiCpuPkg/Library/CpuArchLib/CpuArchLibNull.inf
+  MemoryPoolLib|MdeModulePkg/Library/MemoryPoolLib/MemoryPoolLib.inf
 
 [LibraryClasses.common.DXE_DRIVER]
   MemoryAllocationLib|MdePkg/Library/UefiMemoryAllocationLib/UefiMemoryAllocationLib.inf
