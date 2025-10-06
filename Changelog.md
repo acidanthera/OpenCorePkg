@@ -8,6 +8,7 @@ OpenCore Changelog
 - Updated documentation for several Booter quirks
 - Added `background-color` NVRAM variable to fix 10.9 boot screen
 - Fixed debug build of OpenShell not starting on Mac EFI with > 25 file systems
+- Improved build speed for Utilities in CI and local build
 
 #### v1.0.5
 - Fixed incorrect print in PCI device info dumping in `SysReport`

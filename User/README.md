@@ -42,8 +42,10 @@ Additional variables are supported to adjust the compilation process.
 - `UDK_PATH=/path/to/UDK` — build with custom UDK path (defaults to `$PACKAGES_PATH`).
 - `WERROR=1` — treat compiler warnings as errors.
 - `SYDR=1` — change `$(SUFFIX)` to store compilation results for Sydr DSE in a directory distinct from the default one.
+- `USE_SHARED_OBJS=1` to speed up build if building multiple tools sequentially
+   (not suitable for multiple builds in parallel, as this causes race conditions). 
 
-*NOTE: If your program uses `UserBaseMemoryLib` and calls custom allocation functions, be sure that besides `FUZZ_MEM` limit you correctly set limit `mPoolAllocationSizeLimit` which defaults to the 512 MB in cases if your code could allocate more than this limit at single AllocatePool.
+**Note 1**: If your program uses `UserBaseMemoryLib` and calls custom allocation functions, be sure that besides `FUZZ_MEM` limit you correctly set limit `mPoolAllocationSizeLimit` which defaults to the 512 MB in cases if your code could allocate more than this limit at single AllocatePool.
 
 To set up your limit, use `SetPoolAllocationSizeLimit` routine like shown in the example below:
 
@@ -58,25 +60,46 @@ int main(int argc, char *argv[]) {
 }
 ```
 
-Example 1. To build 32-bit version of utility on macOS (use High Sierra 10.13 or below):
+**Note 2**: Projects which will sometimes be built using `USE_SHARED_OBJS=1` (e.g. those
+built by `buildutil()` in `build_oc.tool`) must NOT:
+
+- Modify `SHARED_OBJS` or `SHARED_CFLAGS`.
+- Use features such as `FUZZ=1`, `SANITIZE=1`, `COVERAGE=1`, `DEBUG=1` *in their default
+  builds*, since these affect the flags used for all object files including shared ones.
+  Not obeying this rule would result in different utilities expecting the same shared
+  object files to be built with different flags, which is not supported.
+  - However these flags can still safely be specified with the `make` command for these
+    projects when building without `USE_SHARED_OBJS=1`; e.g. when fuzzing or debugging.
+  - Any of these flags can also safely be used in the default builds of projects which are not
+    built using `USE_SHARED_OBJS=1`, such as UDK/BaseTools ImageTool and MicroTool.
+
+### Example 1
+
+To build 32-bit version of utility on macOS (use High Sierra 10.13 or below):
 
 ```sh
 UDK_ARCH=Ia32 make
 ```
 
-Example 2. To build for 32-bit Windows (requires MinGW installed) use the following command:
+### Example 2
+
+To build for 32-bit Windows (requires MinGW installed) use the following command:
 
 ```sh
 UDK_ARCH=Ia32 CC=i686-w64-mingw32-gcc STRIP=i686-w64-mingw32-strip DIST=Windows make
 ```
 
-Example 3. To build with LLVM sanitizers use the following command:
+### Example 3
+
+To build with LLVM sanitizers use the following command:
 
 ```sh
 DEBUG=1 SANITIZE=1 make
 ```
 
-Example 4. Perform fuzzing and generate coverage report:
+### Example 4
+
+Perform fuzzing and generate coverage report:
 
 ```sh
 # MacPorts clang is used since Xcode clang has no fuzzing support.
@@ -86,9 +109,11 @@ make clean
 COVERAGE=1 DEBUG=1 make coverage
 ```
 
-Note: fuzzing corpus is saved in `FUZZDICT`.
+**Note**: fuzzing corpus is saved in `FUZZDICT`.
 
-Example 5. Perform fuzzing with the help of [Sydr](https://www.ispras.ru/en/technologies/crusher/) tool (path to which should be in `$PATH`):
+### Example 5
+
+Perform fuzzing with the help of [Sydr](https://www.ispras.ru/en/technologies/crusher/) tool (path to which should be in `$PATH`):
 
 ```sh
 CC=clang DEBUG=1 FUZZ=1 SANITIZE=1 make
