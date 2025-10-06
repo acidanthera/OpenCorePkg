@@ -31,7 +31,7 @@ jobs:
           brew install musl-cross
 
       - name: Install Dependencies
-        run: brew install openssl mingw-w64
+        run: brew install openssl mingw-w64 ccache
 
       - name: CI Bootstrap
         run: |
@@ -165,7 +165,7 @@ jobs:
 
       - name: Install Dependencies
         run: |
-          choco install make nasm zip iasl --no-progress
+          choco install make nasm zip iasl ccache --no-progress
 
       - name: CI Bootstrap
         run: |

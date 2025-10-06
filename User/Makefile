@@ -285,9 +285,14 @@ OBJS    += UserPseudoRandom.o
 OUT_DIR := $(DIST)_$(UDK_ARCH)$(INFIX)
 OBJS    := $(addprefix $(OUT_DIR)/,$(OBJS))
 
+#
+# Use ccache for much faster compilation.
+#
+CCACHE	:= ccache
+
 $(OUT_DIR)/%.o: %.c
 	@$(MKDIR) $(OUT_DIR)
-	$(CC) -MMD -MT $@ -MF $(OUT_DIR)/$*.d $(CFLAGS) $< -o $@
+	$(CCACHE) $(CC) -MMD -MT $@ -MF $(OUT_DIR)/$*.d $(CFLAGS) $< -o $@
 
 DEP := $(OBJS:%.o=%.d)
 -include $(DEP)
@@ -295,7 +300,7 @@ DEP := $(OBJS:%.o=%.d)
 all: $(PRODUCT)
 
 $(PRODUCT): $(OBJS)
-	$(CC) $(LDFLAGS) $(OBJS) $(LDLIBS) -o $(PRODUCT)
+	$(CCACHE) $(CC) $(LDFLAGS) $(OBJS) $(LDLIBS) -o $(PRODUCT)
 	$(STRIP) $(STRIPFLAGS) $(PRODUCT)
 
 fuzz: $(PRODUCT) FORCE
