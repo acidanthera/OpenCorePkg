@@ -760,7 +760,7 @@ AcpiInitContext (
   //
   // ACPI 2.0 and newer have XSDT as well.
   //
-  if (Context->Rsdp->Revision > 0) {
+  if (Context->Rsdp->Revision >= 2) {
     Context->Xsdt = (OC_ACPI_6_2_EXTENDED_SYSTEM_DESCRIPTION_TABLE *)(UINTN)Context->Rsdp->XsdtAddress;
     DEBUG ((DEBUG_INFO, "OCA: Found ACPI XSDT table %p\n", Context->Xsdt));
   }
