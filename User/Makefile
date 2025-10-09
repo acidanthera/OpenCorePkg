@@ -38,14 +38,14 @@ UDK_ARCH ?= X64
 #
 # Primary CFLAGS.
 #
-CFLAGS   := -c -fshort-wchar -Wall -Wextra -D EFIUSER
+SHARED_CFLAGS := -c -fshort-wchar -Wall -Wextra -D EFIUSER
 
 ifeq ($(STATIC),1)
 	LDFLAGS += -static
 endif
 
 ifeq ($(WERROR),1)
-	CFLAGS += -Werror
+	SHARED_CFLAGS += -Werror
 endif
 
 #
@@ -59,52 +59,52 @@ else
 endif
 
 ifeq ($(shell echo 'int a;' | "${CC}" -Wno-unused-parameter -x c -c - -o "${OUT_BIN}" 2>&1),)
-	CFLAGS += -Wno-unused-parameter
+	SHARED_CFLAGS += -Wno-unused-parameter
 endif
 
 ifeq ($(shell echo 'int a;' | "${CC}" -Wno-implicit-fallthrough -x c -c - -o "${OUT_BIN}" 2>&1),)
-	CFLAGS += -Wno-implicit-fallthrough
+	SHARED_CFLAGS += -Wno-implicit-fallthrough
 endif
 
 ifeq ($(shell echo 'int a;' | "${CC}" -Wno-strict-aliasing -x c -c - -o "${OUT_BIN}" 2>&1),)
-	CFLAGS += -Wno-strict-aliasing
+	SHARED_CFLAGS += -Wno-strict-aliasing
 endif
 
 ifeq ($(shell echo 'int a;' | "${CC}" -Wno-address -x c -c - -o "${OUT_BIN}" 2>&1),)
-	CFLAGS += -Wno-address
+	SHARED_CFLAGS += -Wno-address
 endif
 
 ifeq ($(shell echo 'int a;' | "${CC}" -Wno-stringop-overflow -x c -c - -o "${OUT_BIN}" 2>&1),)
-	CFLAGS += -Wno-stringop-overflow
+	SHARED_CFLAGS += -Wno-stringop-overflow
 endif
 
 ifeq ($(DIST),Darwin)
 	ifneq ($(FUZZ),1)
 		ifeq ($(FATBIN32),1)
-			CFLAGS  += -mmacosx-version-min=10.6 -arch x86_64 -arch i386
-			LDFLAGS += -mmacosx-version-min=10.6 -arch x86_64 -arch i386
+			SHARED_CFLAGS	+= -mmacosx-version-min=10.6 -arch x86_64 -arch i386
+			LDFLAGS		+= -mmacosx-version-min=10.6 -arch x86_64 -arch i386
 		else
-			CFLAGS  += -mmacosx-version-min=10.9 -arch x86_64 -arch arm64
-			LDFLAGS += -mmacosx-version-min=10.9 -arch x86_64 -arch arm64
+			SHARED_CFLAGS	+= -mmacosx-version-min=10.9 -arch x86_64 -arch arm64
+			LDFLAGS		+= -mmacosx-version-min=10.9 -arch x86_64 -arch arm64
 		endif
 	endif
 endif
 
 ifeq ($(DIST),Windows)
-	SUFFIX := .exe
-	CFLAGS += -D_ISOC99_SOURCE=1
+	SUFFIX		:= .exe
+	SHARED_CFLAGS	+= -D_ISOC99_SOURCE=1
 endif
 
 ifeq ($(SANITIZE),1)
-	CFLAGS  += -fsanitize=undefined,address -D SANITIZE_TEST
-	LDFLAGS += -fsanitize=undefined,address
+	SHARED_CFLAGS	+= -fsanitize=undefined,address -D SANITIZE_TEST
+	LDFLAGS		+= -fsanitize=undefined,address
 endif
 
 ifeq ($(FUZZ),1)
-	CFLAGS  += -fsanitize=fuzzer -D FUZZING_TEST -D ENTRY_POINT=no_main
-	LDFLAGS += -fsanitize=fuzzer
+	SHARED_CFLAGS	+= -fsanitize=fuzzer -D FUZZING_TEST -D ENTRY_POINT=no_main
+	LDFLAGS		+= -fsanitize=fuzzer
 else
-	CFLAGS  += -D ENTRY_POINT=main
+	SHARED_CFLAGS	+= -D ENTRY_POINT=main
 endif
 
 ifeq ($(FUZZ_DIR),)
@@ -124,7 +124,7 @@ ifeq ($(FUZZ_MEM),)
 endif
 
 ifeq ($(COVERAGE),1)
-	CFLAGS  += --coverage -D COVERAGE_TEST
+	SHARED_CFLAGS += --coverage -D COVERAGE_TEST
 	ifeq ($(DIST),Darwin)
 	  LDFLAGS += --coverage
 	else
@@ -133,14 +133,14 @@ ifeq ($(COVERAGE),1)
 endif
 
 ifeq ($(DEBUG),1)
-	CFLAGS  += -g -O0 -D EFIUSER_DEBUG
+	SHARED_CFLAGS += -g -O0 -D EFIUSER_DEBUG
 	#
 	# Forcibly disable stripping when enabling DEBUG mode.
 	#
 	STRIP   := @echo No strip in DEBUG mode
 	STRIPFLAGS :=
 else
-	CFLAGS  += -O3
+	SHARED_CFLAGS += -O3
 	#
 	# Default strip command with overriding (e.g. i686-w64-mingw32-strip) allowed.
 	#
@@ -155,86 +155,86 @@ endif
 #
 # Search Paths.
 #
-CFLAGS += -I$(OC_USER)/User/Include
-CFLAGS += -I$(OC_USER)/Include/Acidanthera -I$(OC_USER)/Include/Apple -I$(OC_USER)/Include/Apple/$(UDK_ARCH) -I$(OC_USER)/Include/Duet -I$(OC_USER)/Include/Generic -I$(OC_USER)/Include/Intel -I$(OC_USER)/Include/Microsoft -I$(OC_USER)/Include/Nvidia
+SHARED_CFLAGS += -I$(OC_USER)/User/Include
+SHARED_CFLAGS += -I$(OC_USER)/Include/Acidanthera -I$(OC_USER)/Include/Apple -I$(OC_USER)/Include/Apple/$(UDK_ARCH) -I$(OC_USER)/Include/Duet -I$(OC_USER)/Include/Generic -I$(OC_USER)/Include/Intel -I$(OC_USER)/Include/Microsoft -I$(OC_USER)/Include/Nvidia
 
 #
 # Skip including UDK when suggesting STANDALONE mode.
 #
 ifneq ($(STANDALONE),1)
-	CFLAGS  += -D NO_MSABI_VA_FUNCS -D OC_TARGET_DEBUG
-	CFLAGS  += -I$(UDK_PATH)/MdePkg/Include -I$(UDK_PATH)/MdePkg/Include/Library -I$(UDK_PATH)/MdePkg/Include/$(UDK_ARCH) -I$(UDK_PATH)/MdePkg/Library/BaseLib
-	CFLAGS  += -I$(UDK_PATH)/MdeModulePkg/Include
-	CFLAGS  += -I$(UDK_PATH)/UefiCpuPkg/Include
+	SHARED_CFLAGS += -D NO_MSABI_VA_FUNCS -D OC_TARGET_DEBUG
+	SHARED_CFLAGS += -I$(UDK_PATH)/MdePkg/Include -I$(UDK_PATH)/MdePkg/Include/Library -I$(UDK_PATH)/MdePkg/Include/$(UDK_ARCH) -I$(UDK_PATH)/MdePkg/Library/BaseLib
+	SHARED_CFLAGS += -I$(UDK_PATH)/MdeModulePkg/Include
+	SHARED_CFLAGS += -I$(UDK_PATH)/UefiCpuPkg/Include
 	#
 	# Compatibility headers.
 	#
-	CFLAGS  += -include $(OC_USER)/User/Include/UserPcd.h -include $(OC_USER)/User/Include/UserGlobalVar.h
+	SHARED_CFLAGS += -include $(OC_USER)/User/Include/UserPcd.h -include $(OC_USER)/User/Include/UserGlobalVar.h
 	#
 	# UDK implementations.
 	#
-	OBJS    += UefiLib.o UefiLibPrint.o CpuDeadLoop.o BaseDebugPrintErrorLevelLib.o DebugLib.o PrintLib.o PrintLibInternal.o String.o SafeString.o SwapBytes16.o SwapBytes32.o LinkedList.o HighBitSet32.o HighBitSet64.o MtrrLib.o GetPowerOfTwo32.o GetPowerOfTwo64.o Cpu.o BmpSupportLib.o SafeIntLib.o X86GetInterruptState.o PciLib.o PciExpressLib.o DevicePathUtilities.o UefiDevicePathLib.o DevicePathToText.o DevicePathFromText.o BitField.o CheckSum.o UefiSortLib.o QuickSort.o UserFile.o CommonMemoryAllocationLib.o CommonMemoryAllocationLibEx.o BaseMemoryProfileLibNull.o
+	SHARED_OBJS += UefiLib.o UefiLibPrint.o CpuDeadLoop.o BaseDebugPrintErrorLevelLib.o DebugLib.o PrintLib.o PrintLibInternal.o String.o SafeString.o SwapBytes16.o SwapBytes32.o LinkedList.o HighBitSet32.o HighBitSet64.o MtrrLib.o GetPowerOfTwo32.o GetPowerOfTwo64.o Cpu.o BmpSupportLib.o SafeIntLib.o X86GetInterruptState.o PciLib.o PciExpressLib.o DevicePathUtilities.o UefiDevicePathLib.o DevicePathToText.o DevicePathFromText.o BitField.o CheckSum.o UefiSortLib.o QuickSort.o UserFile.o CommonMemoryAllocationLib.o CommonMemoryAllocationLibEx.o BaseMemoryProfileLibNull.o
 	ifeq ($(UDK_ARCH),X64)
-		OBJS  += TdProbe.o
+		SHARED_OBJS += TdProbe.o
 	else
-	  OBJS  += IntelTdxNull.o
+	  SHARED_OBJS += IntelTdxNull.o
 	endif
 	#
 	# Customised/Simplified implementations at userspace level.
 	#
-	OBJS    += UserBaseMemoryLib.o UserBootServices.o UserGlobalVar.o UserMath.o UserMisc.o UserPcd.o UserUnicodeCollation.o UserOcDummy.o UserEvent.o
+	SHARED_OBJS += UserBaseMemoryLib.o UserBootServices.o UserGlobalVar.o UserMath.o UserMisc.o UserPcd.o UserUnicodeCollation.o UserOcDummy.o UserEvent.o
 	#
 	# BaseOverflowLib targets.
 	#
-	OBJS    += BaseMath.o BaseBitOverflow.o BaseNativeOverflow.o BaseTripleOverflow.o BaseAlignment.o
+	SHARED_OBJS += BaseMath.o BaseBitOverflow.o BaseNativeOverflow.o BaseTripleOverflow.o BaseAlignment.o
 	#
 	# OcSerializeLib targets.
 	#
-	OBJS    += OcSerializeLib.o
+	SHARED_OBJS += OcSerializeLib.o
 	#
 	# OcTemplateLib targets.
 	#
-	OBJS    += OcTemplateLib.o
+	SHARED_OBJS += OcTemplateLib.o
 	#
 	# OcXmlLib targets.
 	#
-	OBJS    += OcXmlLib.o
+	SHARED_OBJS += OcXmlLib.o
 	#
 	# OcStringLib targets.
 	#
-	OBJS    += OcAsciiLib.o OcUnicodeLib.o
+	SHARED_OBJS += OcAsciiLib.o OcUnicodeLib.o
 	#
 	# OcCryptoLib targets.
 	#
-	OBJS    += RsaDigitalSign.o BigNumMontgomery.o BigNumPrimitives.o BigNumWordMul64.o Sha2.o SecureMem.o Sha512AccelDummy.o
+	SHARED_OBJS += RsaDigitalSign.o BigNumMontgomery.o BigNumPrimitives.o BigNumWordMul64.o Sha2.o SecureMem.o Sha512AccelDummy.o
 	#
 	# OcMachoLib targets.
 	#
-	OBJS    += CxxSymbols.o MachoFat.o Header.o Macho32.o Macho64.o Relocations.o Symbols.o
+	SHARED_OBJS += CxxSymbols.o MachoFat.o Header.o Macho32.o Macho64.o Relocations.o Symbols.o
 	#
 	# OcAppleKeysLib targets.
 	#
-	OBJS    += OcAppleKeysLib.o
+	SHARED_OBJS += OcAppleKeysLib.o
 	#
 	# OcCpuLib targets.
 	#
-	OBJS    += FrequencyDetect.o AppleCpuSupport.o OcCpuLib.o MeasureTicks.o
+	SHARED_OBJS += FrequencyDetect.o AppleCpuSupport.o OcCpuLib.o MeasureTicks.o
 	#
 	# OcMiscLib targets.
 	#
-	OBJS    += ProtocolSupport.o DataPatcher.o PlatformInfo.o
+	SHARED_OBJS += ProtocolSupport.o DataPatcher.o PlatformInfo.o
 	#
 	# OcAppleKernelLib targets.
 	#
-	OBJS    += KernelVersion.o
+	SHARED_OBJS += KernelVersion.o
 	#
 	# OcUnicodeCollationEngLib targets.
 	#
-	OBJS    += OcUnicodeCollationEngCommon.o
+	SHARED_OBJS += OcUnicodeCollationEngCommon.o
 	#
 	# OcVariableLib targets.
 	#
-	OBJS    += OcVariableLib.o
+	SHARED_OBJS += OcVariableLib.o
 
 	#
 	# Add source searchpath for transparent compilation.
@@ -275,27 +275,53 @@ endif
 #
 # Miscellaneous implementations that do not depend on UDK.
 #
-VPATH   += $(OC_USER)/User/Library:$
-OBJS    += UserPseudoRandom.o
+VPATH		+= $(OC_USER)/User/Library:$
+SHARED_OBJS	+= UserPseudoRandom.o
 
 #
-# Directory where objects will be produced.
-# As well, OBJS will be prepended with actual paths.
+# Project-specific object files.
 #
-OUT_DIR := $(DIST)_$(UDK_ARCH)$(INFIX)
-OBJS    := $(addprefix $(OUT_DIR)/,$(OBJS))
+OUT_DIR	:= $(DIST)_$(UDK_ARCH)$(INFIX)
+OBJS	:= $(addprefix $(OUT_DIR)/,$(OBJS))
 
 $(OUT_DIR)/%.o: %.c
 	@$(MKDIR) $(OUT_DIR)
-	$(CC) -MMD -MT $@ -MF $(OUT_DIR)/$*.d $(CFLAGS) $< -o $@
+	$(CC) -MMD -MT $@ -MF $(OUT_DIR)/$*.d $(SHARED_CFLAGS) $(CFLAGS) $< -o $@
 
 DEP := $(OBJS:%.o=%.d)
 -include $(DEP)
 
+#
+# To avoid recompiling multiple times with the same flags we compile shared
+# object files to their own directory.
+# Note 1: When not using USE_SHARED_OBJS=1, we specify $(CURDIR)/$(OUT_DIR)
+# rather than $(OUT_DIR) to trigger a different rule from that for $(OUT_DIR)
+# above.
+# Note 2: We do not apply project-specific CFLAGS to SHARED_OBJS, regardless
+# of USE_SHARED_OBJS setting. This avoids unexpected differences in behaviour
+# between tools built one at a time and tools built in a batch using USE_SHARED_OBJS=1.
+# Note 3: USE_SHARED_OBJS=1 does not work if applied to projects which are
+# built using separate instances of make running in parallel, because it
+# leads to race conditions. This applies to UDK/BaseTools ImageTool and MicroTool.
+#
+ifeq ($(USE_SHARED_OBJS),1)
+	SHARED_DIR	:= ../Shared/$(OUT_DIR)
+else
+	SHARED_DIR	:= $(CURDIR)/$(OUT_DIR)
+endif
+SHARED_OBJS	:= $(addprefix $(SHARED_DIR)/,$(SHARED_OBJS))
+
+$(SHARED_DIR)/%.o: %.c
+	@$(MKDIR) $(SHARED_DIR)
+	$(CC) -MMD -MT $@ -MF $(SHARED_DIR)/$*.d $(SHARED_CFLAGS) $< -o $@
+
+SHARED_DEP := $(SHARED_OBJS:%.o=%.d)
+-include $(SHARED_DEP)
+
 all: $(PRODUCT)
 
-$(PRODUCT): $(OBJS)
-	$(CC) $(LDFLAGS) $(OBJS) $(LDLIBS) -o $(PRODUCT)
+$(PRODUCT): $(SHARED_OBJS) $(OBJS)
+	$(CC) $(LDFLAGS) $(SHARED_OBJS) $(OBJS) $(LDLIBS) -o $(PRODUCT)
 	$(STRIP) $(STRIPFLAGS) $(PRODUCT)
 
 fuzz: $(PRODUCT) FORCE
@@ -356,6 +382,6 @@ coverage: $(PRODUCT) FORCE
 	$(GENHTML) --branch-coverage --output-directory COVERAGE COVERAGE/trace.lcov_info_final
 
 clean: FORCE
-	rm -rf $(OUT_DIR) $(PRODUCT) $(PRODUCT).sydr $(PRODUCT).exe $(PRODUCT).sydr.exe sydr-fuzz.toml
+	rm -rf $(OUT_DIR) $(SHARED_DIR) $(PRODUCT) $(PRODUCT).sydr $(PRODUCT).exe $(PRODUCT).sydr.exe sydr-fuzz.toml
 
 FORCE:
