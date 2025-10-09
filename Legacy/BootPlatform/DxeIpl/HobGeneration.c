@@ -280,7 +280,7 @@ HOB_TEMPLATE  gHobTemplate = {
         sizeof (TABLE_HOB),                // Hob size
         0                                  // reserved
       },
-      EFI_ACPI_TABLE_GUID
+      ACPI_10_TABLE_GUID
     },
     0
   },
