@@ -419,6 +419,29 @@ can be found at \href{https://github.com/acidanthera/bugtracker}{Acidanthera Bug
 
   \end{itemize}
 
+\item
+  \textbf{Identifier}: \texttt{ERR105-2} \\
+  \textbf{Published}: 2025-10-12 11:48 BST \\
+  \textbf{Updated}: 2025-10-12 11:48 BST \\
+  \textbf{Affected versions}: 0.0.1-1.0.5 \\
+  \textbf{Resolved in}: 1.0.6 (\href{https://github.com/acidanthera/OpenCorePkg/commit/ec2713af48a0538a4a56e4e304d699b847d78194}{ec2713af}) \\
+  \textbf{Description}:
+
+  In an OpenDuetPkg bug dating back to when DuetPkg was ported from edk to edk2, the ACPI RSDP table
+  is published as ACPI 2.0 regardless of which version of ACPI is present. On old ACPI 1.0 systems
+  (and on QEMU by default) this can result in bootloaders such Grub 2 trying to dereference the
+  ACPI 2.0 XSDT pointer from uninitialised memory. Hence Linux may fail to boot on such systems,
+  typically with a protection fault or page fault.
+
+  \textbf{Possible workarounds}:
+  \begin{itemize}
+    \tightlist
+
+    \item Use RELEASE rather than DEBUG build of OpenDuet if launching Grub 2 on a system with
+    ACPI 1.0 (may still fail on some systems, depending on memory contents).
+
+  \end{itemize}
+
 \end{itemize}
 
 \end{document}
