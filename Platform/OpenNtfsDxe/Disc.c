@@ -751,6 +751,13 @@ InitFile (
 
   Record = (FILE_RECORD_HEADER *)File->FileRecord;
 
+  if ((Record->Flags & ~IS_SUPPORTED_FLAGS) != 0) {
+    DEBUG ((DEBUG_INFO, "NTFS: MFT Record 0x%Lx has invalid or unsupported flags\n", RecordNumber));
+    FreePool (File->FileRecord);
+    File->FileRecord = NULL;
+    return EFI_VOLUME_CORRUPTED;
+  }
+
   if ((Record->Flags & IS_IN_USE) == 0) {
     DEBUG ((DEBUG_INFO, "NTFS: MFT Record 0x%Lx is not in use\n", RecordNumber));
     FreePool (File->FileRecord);

@@ -187,6 +187,13 @@ enum {
 enum {
   IS_IN_USE      = 0x01,
   IS_A_DIRECTORY = 0x02,
+  IS_AN_EXTENSION = 0x04,
+  IS_A_SPECIAL = 0x08,
+
+  IS_SUPPORTED_FLAGS =    IS_IN_USE 
+                        | IS_A_DIRECTORY
+                        | IS_AN_EXTENSION
+                        | IS_A_SPECIAL,
 };
 
 ///
