@@ -260,6 +260,7 @@ FileReadDir (
       Info->PhysicalSize = TmpFile->RootFile.DataAttributeSize;
     }
 
+    FreeFile (&TmpFile->RootFile);
     FreePool (TmpFile);
   }
 
