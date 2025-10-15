@@ -286,6 +286,8 @@ NTFSStart (
     return Status;
   }
 
+  NtfsCfiInit (Instance);
+
   Status = gBS->InstallMultipleProtocolInterfaces (
                   &Controller,
                   &gEfiSimpleFileSystemProtocolGuid,
@@ -373,6 +375,7 @@ NTFSStop (
   FreePool (Instance->RootIndex->FileRecord);
   FreePool (Instance->MftStart->FileRecord);
   FreePool (Instance->RootIndex->File);
+  NtfsCfiFree (Instance);
 
   return EFI_SUCCESS;
 }

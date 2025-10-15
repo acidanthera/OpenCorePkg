@@ -649,6 +649,14 @@ typedef struct _EFI_FS {
   UINTN                              IndexRecordSize;
   UINTN                              SectorSize;
   UINTN                              ClusterSize;
+
+  //
+  // CFI = Cache for FileInfo
+  //
+  UINTN                              CFIDataSize;
+  VOID                               *CFIData;
+  UINT64                             CFIHash;
+  INT64                              CFIDirIndex;
 } EFI_FS;
 
 typedef struct {

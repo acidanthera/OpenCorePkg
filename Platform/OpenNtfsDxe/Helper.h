@@ -202,4 +202,31 @@ NtfsToEfiTime (
   UINT64    NtfsTime
   );
 
+EFI_STATUS
+NtfsCfiInit (
+  IN EFI_FS  *Fs
+  );
+
+VOID
+NtfsCfiFree (
+  IN EFI_FS  *Fs
+  );
+
+VOID
+NtfsCfiPush (
+  IN EFI_FS        *Fs,
+  IN CONST CHAR16  *Path,
+  IN UINTN         Size,
+  IN INT64         DirIndex
+  );
+
+INTN
+NtfsCfiPop (
+  IN EFI_FS        *Fs,
+  IN CONST CHAR16  *Path,
+  IN UINTN         Size,
+  IN INT64         DirIndex,
+  OUT VOID         *Buffer
+  );
+
 #endif // HELPER_H
