@@ -267,7 +267,7 @@ NTFSStart (
     return Status;
   }
 
-  Instance->EfiFile.Revision    = EFI_FILE_PROTOCOL_REVISION2;
+  Instance->EfiFile.Revision    = EFI_FILE_PROTOCOL_REVISION;
   Instance->EfiFile.Open        = FileOpen;
   Instance->EfiFile.Close       = FileClose;
   Instance->EfiFile.Delete      = FileDelete;
