@@ -11,6 +11,7 @@ OpenCore Changelog
 - Improved build speed for Utilities in CI and local build
 - Fixed ACPI 1.0 RSDP being reported under ACPI 2.0 GUID with Duet
 - Improved logic for RSDP version checking in ACPI patching code
+- Downgraded routine log messages such as 'Needs journal recovery, mounting read-only' from WARN to INFO in Ext4Dxe (allows DEBUG_WARN in HaltLevel)
 
 #### v1.0.5
 - Fixed incorrect print in PCI device info dumping in `SysReport`
