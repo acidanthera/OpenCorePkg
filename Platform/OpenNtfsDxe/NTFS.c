@@ -267,7 +267,7 @@ NTFSStart (
     return Status;
   }
 
-  Instance->EfiFile.Revision    = EFI_FILE_PROTOCOL_REVISION2;
+  Instance->EfiFile.Revision    = EFI_FILE_PROTOCOL_REVISION;
   Instance->EfiFile.Open        = FileOpen;
   Instance->EfiFile.Close       = FileClose;
   Instance->EfiFile.Delete      = FileDelete;
@@ -285,6 +285,8 @@ NTFSStart (
     FreePool (Instance);
     return Status;
   }
+
+  NtfsCfiInit (Instance);
 
   Status = gBS->InstallMultipleProtocolInterfaces (
                   &Controller,
@@ -373,6 +375,7 @@ NTFSStop (
   FreePool (Instance->RootIndex->FileRecord);
   FreePool (Instance->MftStart->FileRecord);
   FreePool (Instance->RootIndex->File);
+  NtfsCfiFree (Instance);
 
   return EFI_SUCCESS;
 }
