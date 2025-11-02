@@ -33,6 +33,7 @@
   Data.c
   Index.c
   Compression.c
+  Cache.c
 
 [Packages]
   MdePkg/MdePkg.dec

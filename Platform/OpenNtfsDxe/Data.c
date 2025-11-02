@@ -200,7 +200,12 @@ ReadAttr (
   ASSERT (Attr != NULL);
   ASSERT (Dest != NULL);
 
-  Current     = Attr->Current;
+  Current = Attr->Current;
+  if (Current == NULL) {
+    DEBUG ((DEBUG_INFO, "NTFS: Internal error! Incorrect initialization of attribute iterator\n"));
+    return EFI_VOLUME_CORRUPTED;
+  }
+
   Attr->Next  = Attr->Current;
   ClusterSize = Attr->BaseMftRecord->File->FileSystem->ClusterSize;
 
