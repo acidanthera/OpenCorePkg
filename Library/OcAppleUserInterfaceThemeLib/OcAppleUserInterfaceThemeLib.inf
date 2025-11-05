@@ -38,6 +38,7 @@
 
 [Guids]
   gAppleVendorVariableGuid            ## SOMETIMES_CONSUMES
+  gOcVendorVariableGuid               ## SOMETIMES_CONSUMES
 
 [Protocols]
   gEfiUserInterfaceThemeProtocolGuid  ## SOMETIMES_PRODUCES

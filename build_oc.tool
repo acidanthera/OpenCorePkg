@@ -29,6 +29,7 @@ buildutil() {
     "TestExt4Dxe"
     "TestFatDxe"
     "TestNtfsDxe"
+    "TestEvent"
     "TestPeCoff"
     "TestProcessKernel"
     "TestRsaPreprocess"
@@ -46,8 +47,7 @@ buildutil() {
   for util in "${UTILS[@]}"; do
     cd "$util" || exit 1
     echo "Building ${util}..."
-    make clean || exit 1
-    make -j "$cores" || exit 1
+    make -j "$cores" USE_SHARED_OBJS=1 || exit 1
     #
     # FIXME: Do not build RsaTool for Win32 without OpenSSL.
     #
@@ -57,13 +57,11 @@ buildutil() {
 
     if [ "$(which i686-w64-mingw32-gcc)" != "" ]; then
       echo "Building ${util} for Windows..."
-      UDK_ARCH=Ia32 CC=i686-w64-mingw32-gcc STRIP=i686-w64-mingw32-strip DIST=Windows make clean || exit 1
-      UDK_ARCH=Ia32 CC=i686-w64-mingw32-gcc STRIP=i686-w64-mingw32-strip DIST=Windows make -j "$cores" || exit 1
+      UDK_ARCH=Ia32 CC=i686-w64-mingw32-gcc STRIP=i686-w64-mingw32-strip DIST=Windows make -j "$cores" USE_SHARED_OBJS=1 || exit 1
     fi
     if [ "$(which x86_64-linux-musl-gcc)" != "" ]; then
       echo "Building ${util} for Linux..."
-      STATIC=1 SUFFIX=.linux UDK_ARCH=X64 CC=x86_64-linux-musl-gcc STRIP=x86_64-linux-musl-strip DIST=Linux make clean || exit 1
-      STATIC=1 SUFFIX=.linux UDK_ARCH=X64 CC=x86_64-linux-musl-gcc STRIP=x86_64-linux-musl-strip DIST=Linux make -j "$cores" || exit 1
+      STATIC=1 SUFFIX=.linux UDK_ARCH=X64 CC=x86_64-linux-musl-gcc STRIP=x86_64-linux-musl-strip DIST=Linux make -j "$cores" USE_SHARED_OBJS=1 || exit 1
     fi
     cd - || exit 1
   done

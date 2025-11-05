@@ -1696,7 +1696,14 @@ PatchProvideCurrentCpuInfo (
     busFCvtt2nValue = DivU64x64Remainder ((1000000000ULL << 32), busFreqValue, NULL);
     busFCvtn2tValue = DivU64x64Remainder ((1000000000ULL << 32), busFCvtt2nValue, NULL);
 
-    tscFreqValue    = CpuInfo->CPUFrequency;
+    tscFreqValue = CpuInfo->CPUFrequency;
+
+    // Handle case where CPUFrequency is zero, providing a fallback
+    if (tscFreqValue == 0) {
+      tscFreqValue = 1000000000; // Assume 1 GHz TSC as fallback
+      DEBUG ((DEBUG_WARN, "OCAK: CPUFrequency is zero, using fallback value: 1 GHz\n"));
+    }
+
     tscFCvtt2nValue = DivU64x64Remainder ((1000000000ULL << 32), tscFreqValue, NULL);
     tscFCvtn2tValue = DivU64x64Remainder ((1000000000ULL << 32), tscFCvtt2nValue, NULL);
   }

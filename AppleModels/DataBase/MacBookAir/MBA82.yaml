@@ -106,5 +106,5 @@ AppleModelYear:
   - 2019
   - 2020
 MinimumOSVersion: "10.14.5"
-MaximumOSVersion: "14.7.6"
+MaximumOSVersion: "14.7.7"
 AppleModelId: "J140A"

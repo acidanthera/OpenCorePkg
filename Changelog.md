@@ -1,10 +1,25 @@
 OpenCore Changelog
 ==================
+#### v1.0.6
+- Added workaround for not detected CPU frequency in ProvideCpuInfo quirk, thx @hg13bs
+- Updated QemuBuild.command to support `EFI` mode without Duet
+- Increased `OC_STORAGE_SAFE_PATH_MAX` to 192 to support various plugin kexts
+- Fixed vaulting failures when custom fonts are used, thx @al3xtjames
+- Updated documentation for several Booter quirks
+- Added `background-color` NVRAM variable to fix 10.9 boot screen
+- Fixed debug build of OpenShell not starting on Mac EFI with > 25 file systems
+- Improved build speed for Utilities in CI and local build
+- Fixed ACPI 1.0 RSDP being reported under ACPI 2.0 GUID with Duet
+- Improved logic for RSDP version checking in ACPI patching code
+- Downgraded routine log messages such as 'Needs journal recovery, mounting read-only' from WARN to INFO in Ext4Dxe (allows DEBUG_WARN in HaltLevel)
+- Improved OpenNtfsDxe stability, thx @stokescat
+
 #### v1.0.5
 - Fixed incorrect print in PCI device info dumping in `SysReport`
 - Fixed ocvalidate error messages for overlong kext paths in Kernel section, thx @corpnewt
 - Fixed kext injection compatibility issues with macOS 26
 - Updated builtin firmware versions for SMBIOS and the rest
+- Migrated to edk2-stable-202502 
 
 #### v1.0.4
 - Added support for booting from static IPv4 address in OpenCore-specific HttpBootDxe

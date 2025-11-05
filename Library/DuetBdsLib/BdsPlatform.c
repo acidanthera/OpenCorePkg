@@ -42,7 +42,7 @@ Abstract:
 
 EFI_GUID  *gTableGuidArray[] = {
   &gEfiAcpi10TableGuid,
-  &gEfiAcpiTableGuid,
+  &gEfiAcpi20TableGuid,
   &gEfiSmbiosTableGuid,
   &gEfiSmbios3TableGuid
 };
@@ -239,7 +239,7 @@ Returns:
   //
   AcpiHeader = (VOID *)(UINTN)(*(UINT64 *)(*Table));
 
-  if (CompareGuid (TableGuid, &gEfiAcpiTableGuid) || CompareGuid (TableGuid, &gEfiAcpi20TableGuid)) {
+  if (CompareGuid (TableGuid, &gEfiAcpi10TableGuid) || CompareGuid (TableGuid, &gEfiAcpi20TableGuid)) {
     if (((EFI_ACPI_1_0_ROOT_SYSTEM_DESCRIPTION_POINTER *)AcpiHeader)->Reserved == 0x00) {
       //
       // If Acpi 1.0 Table, then RSDP structure doesn't contain Length field, use structure size

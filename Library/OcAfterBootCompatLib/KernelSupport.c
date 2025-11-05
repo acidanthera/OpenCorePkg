@@ -191,10 +191,11 @@ PerformRtMemoryVirtualMapping (
     // Intel HD3000 or HD4000 is used. For example, on GA-H81N-D2H there is a single 1 GB descriptor:
     // 000000009F800000-00000000DF9FFFFF 0000000000040200 8000000000000000
     //
-    // All known boot.efi starting from at least 10.5.8 properly handle this flag and do not assign
-    // virtual addresses to reserved descriptors. However, our legacy code had a bug, and did not
-    // check for EfiReservedMemoryType. Therefore it replaced such entries by EfiMemoryMappedIO
-    // to "prevent" boot.efi relocations.
+    // Older EfiBoot (from 10.4.x) assigns virtual addresses to all descriptors containing
+    // EFI_MEMORY_RUNTIME flag, including ones with EfiReservedMemoryType. Starting with 10.5
+    // this is fixed, and virtual addresses are not assigned to reserved descriptors.
+    // We might eventually need to add some workaround to prevent exceeding virtual address space
+    // in EfiBoot from 10.4 by dropping the EFI_MEMORY_RUNTIME flag.
     //
     // The relevant discussion and the original fix can be found here:
     // http://web.archive.org/web/20141111124211/http://www.projectosx.com:80/forum/lofiversion/index.php/t2428-450.html
@@ -581,6 +582,8 @@ AppleMapPrepareBooterState (
         BootCompat->KernelState.SysTableRtArea = 0;
         return;
       }
+
+      DEBUG ((DEBUG_VERBOSE, "OCABC: Allocated SysTableRtArea %p\n", BootCompat->KernelState.SysTableRtArea));
 
       //
       // Copy UEFI system table to the new location.
