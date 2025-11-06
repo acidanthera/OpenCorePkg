@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
-%DIF DEL PreviousConfiguration.tex   Sat Aug  2 20:24:53 2025
-%DIF ADD ../Configuration.tex        Thu Sep 11 11:30:19 2025
+%DIF DEL PreviousConfiguration.tex   Thu Nov  6 19:23:44 2025
+%DIF ADD ../Configuration.tex        Thu Nov  6 19:23:44 2025
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -154,7 +154,7 @@
 
        \vspace{0.2in}
 
-       Reference Manual (1.0\DIFdelbegin \DIFdel{.5}\DIFdelend \DIFaddbegin \DIFadd{.6}\DIFaddend )
+       Reference Manual (1.0\DIFdelbegin \DIFdel{.6}\DIFdelend \DIFaddbegin \DIFadd{.7}\DIFaddend )
 
        \vspace{0.2in}
 
@@ -646,7 +646,7 @@ Available entries include:
 \end{itemize}
 
 \emph{Note}: It is not guaranteed that paths longer than
-\texttt{OC\_STORAGE\_SAFE\_PATH\_MAX} (\DIFdelbegin \DIFdel{128 }\DIFdelend \DIFaddbegin \DIFadd{192 }\DIFaddend characters including
+\texttt{OC\_STORAGE\_SAFE\_PATH\_MAX} (192 characters including
 the \texttt{\\0}-terminator) will be accessible within OpenCore.
 
 \subsection{Installation and Upgrade}\label{configuration-install}
@@ -1875,17 +1875,17 @@ To view their current state, use the \texttt{pmset -g} command in Terminal.
     variables at runtime, the Apple kernel will crash at calling UEFI runtime services
     unless the driver \texttt{.data} section has a \texttt{EfiRuntimeServicesData}
     type.
-  \DIFaddbegin \item \DIFadd{Apple kernel Memory map entry consolidation may work incorrectly for low memory descriptors,
+  \item Apple kernel Memory map entry consolidation may work incorrectly for low memory descriptors,
     which are initially marked as
-    }\href{https://github.com/apple-oss-distributions/xnu/blob/rel/xnu-792/osfmk/i386/i386_vm_init.c#L282}{\DIFadd{preallocated}}
-    \DIFadd{by Apple kernel, but then may get consolidated and lose their preallocation status due to a
-    }\href{https://github.com/apple-oss-distributions/xnu/blob/rel/xnu-792/osfmk/i386/i386_vm_init.c#L339}{\DIFadd{bug}}\DIFadd{.
+    \href{https://github.com/apple-oss-distributions/xnu/blob/rel/xnu-792/osfmk/i386/i386_vm_init.c#L282}{preallocated}
+    by Apple kernel, but then may get consolidated and lose their preallocation status due to a
+    \href{https://github.com/apple-oss-distributions/xnu/blob/rel/xnu-792/osfmk/i386/i386_vm_init.c#L339}{bug}.
     Since Apple kernel later
-    }\href{https://github.com/apple-oss-distributions/xnu/blob/rel/xnu-792/osfmk/i386/pmap.c#L1204}{\DIFadd{frees low memory}}\DIFadd{,
+    \href{https://github.com/apple-oss-distributions/xnu/blob/rel/xnu-792/osfmk/i386/pmap.c#L1204}{frees low memory},
     this may result in use-after-free errors and various kinds of kernel panics at boot time.
-    The issue was }\href{https://github.com/apple-oss-distributions/xnu/blob/rel/xnu-1699/osfmk/i386/i386_vm_init.c#L450}{\DIFadd{fixed}}
-    \DIFadd{in Mac OS X 10.7 kernel. 
-  }\DIFaddend \end{itemize}
+    The issue was \href{https://github.com/apple-oss-distributions/xnu/blob/rel/xnu-1699/osfmk/i386/i386_vm_init.c#L450}{fixed}
+    in Mac OS X 10.7 kernel. 
+  \end{itemize}
 
   To workaround these limitations, this quirk applies memory attribute table
   permissions to the memory map passed to the Apple kernel and optionally attempts
@@ -1898,11 +1898,6 @@ To view their current state, use the \texttt{pmset -g} command in Terminal.
   \emph{Note 2}: The need for this quirk is determined by early boot failures.
   This quirk replaces \texttt{EnableWriteUnprotector} on firmware supporting
   Memory Attribute Tables (MAT).
-\DIFdelbegin \DIFdel{This quirk is typically unnecessary when using
-  }\texttt{\DIFdel{OpenDuetPkg}} %DIFAUXCMD
-\DIFdel{but may be required to boot Mac OS X 10.6, and earlier, for
-  reasons that are as yet unclear.
-}\DIFdelend 
 
 \item
   \texttt{ResizeAppleGpuBars}\\
@@ -1948,12 +1943,11 @@ To view their current state, use the \texttt{pmset -g} command in Terminal.
   performing early boot identity mapping of assigned virtual addresses to physical
   memory.
 
-  \emph{Note \DIFaddbegin \DIFadd{1}\DIFaddend }: The need for this quirk is determined by early boot failures.
+  \emph{Note 1}: The need for this quirk is determined by early boot failures.
 
-  \DIFaddbegin \emph{\DIFadd{Note 2}}\DIFadd{: This quirk is not compatible with 32-bit kernels.
-}
+  \emph{Note 2}: This quirk is not compatible with 32-bit kernels.
 
-\DIFaddend \item
+\item
   \texttt{SignalAppleOS}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
@@ -3932,11 +3926,11 @@ the default boot entry choice will remain changed until the next manual reconfig
   For convenience purposes there also are predefined aliases:
   \begin{itemize}
     \tightlist
-    \item \texttt{Auto} --- Automatically select one set of icons based on the \DIFaddbegin \texttt{\DIFadd{background-color}}
-      \DIFadd{and }\DIFaddend \texttt{DefaultBackground} \DIFdelbegin \DIFdel{colour}\DIFdelend \DIFaddbegin \DIFadd{colours}\DIFaddend : \texttt{Acidanthera\textbackslash GoldenGate} for Syrah Black and
-      \texttt{Acidanthera\textbackslash Chardonnay} for Light Gray. \DIFaddbegin \texttt{\DIFadd{background-color}} \DIFadd{variable has
+    \item \texttt{Auto} --- Automatically select one set of icons based on the \texttt{background-color}
+      and \texttt{DefaultBackground} colours: \texttt{Acidanthera\textbackslash GoldenGate} for Syrah Black and
+      \texttt{Acidanthera\textbackslash Chardonnay} for Light Gray. \texttt{background-color} variable has
       priority.
-    }\DIFaddend \item \texttt{Default} --- \texttt{Acidanthera\textbackslash GoldenGate}.
+    \item \texttt{Default} --- \texttt{Acidanthera\textbackslash GoldenGate}.
   \end{itemize}
 
 \item
@@ -5238,13 +5232,13 @@ improvements:
   Four-byte \texttt{BGRA} data defining \texttt{boot.efi} user interface background colour.
   Standard colours include \textbf{BF BF BF 00} (Light Gray) and \textbf{00 00 00 00}
   (Syrah Black). Other colours may be set at user's preference.
-\DIFaddbegin \item
-  \texttt{\DIFadd{4D1FDA02-38C7-4A6A-9CC6-4BCCA8B30102:background-color}}
+\item
+  \texttt{4D1FDA02-38C7-4A6A-9CC6-4BCCA8B30102:background-color}
   \break
-  \DIFadd{Acidanthera override for }\texttt{\DIFadd{DefaultBackgroundColor}} \DIFadd{useful for legacy OS X
+  Acidanthera override for \texttt{DefaultBackgroundColor} useful for legacy OS X
   versions, e.g. OS X 10.9, which does not display grey boot screen when
-  }\texttt{\DIFadd{DefaultBackgroundColor}} \DIFadd{is set, regardless of its value.
-}\DIFaddend \end{itemize}
+  \texttt{DefaultBackgroundColor} is set, regardless of its value.
+\end{itemize}
 
 \subsection{Other Variables}\label{nvramvarsother}
 
@@ -6818,8 +6812,8 @@ Sample resources (fonts and images) can be found in
 (e.g. \href{https://github.com/blackosx/OpenCanopyIcons}{here} or \href{https://applelife.ru/threads/kastomizacija-opencanopy.2945020/}{there}).
 
 OpenCanopy provides full support for \texttt{PickerAttributes} and offers a configurable
-builtin icon set. The chosen icon set may depend on the \DIFaddbegin \texttt{\DIFadd{background-color}} \DIFadd{and
-}\DIFaddend \texttt{DefaultBackgroundColor} variable \DIFdelbegin \DIFdel{value}\DIFdelend \DIFaddbegin \DIFadd{values}\DIFaddend . Refer to \texttt{PickerVariant} for more details.
+builtin icon set. The chosen icon set may depend on the \texttt{background-color} and
+\texttt{DefaultBackgroundColor} variable values. Refer to \texttt{PickerVariant} for more details.
 
 Predefined icons are saved in the \texttt{PickerVariant}-derived subdirectory of the
 \texttt{\textbackslash EFI\textbackslash OC\textbackslash Resources\textbackslash Image}
@@ -7617,7 +7611,7 @@ Recommended configuration settings for this driver:
 \begin{itemize}
 \tightlist
   \item \texttt{OpenVariableRuntimeDxe.efi} loaded using \texttt{LoadEarly=true}. OpenDuet users
-  should not load this driver, as \DIFdelbegin \DIFdel{it }\DIFdelend \DIFaddbegin \DIFadd{a firmware driver serving the same purpose }\DIFaddend is included in OpenDuet.
+  should not load this driver, as a firmware driver serving the same purpose is included in OpenDuet.
   \item \texttt{OpenRuntime.efi} specified after \texttt{OpenVariableRuntimeDxe.efi} (when applicable),
   also loaded using \texttt{LoadEarly=true} for correct operation of \texttt{RequestBootVarRouting}.
   \begin{itemize}
@@ -9649,23 +9643,19 @@ hdiutil convert ReadWrite.dmg -format UDZO -o ReadOnly.dmg
     performance drain and will be chosen automatically when
     \texttt{KernelCache} is set to \texttt{Auto}.
   \item Last released installer image for Mac OS X~10.5 is Mac OS X~10.5.7
-    build \texttt{9J3050} (for \texttt{MacBookPro5,3}). \DIFdelbegin \DIFdel{Unlike the others,
-    this image is not limited to the target model identifiers and can be used
-    as is. }\DIFdelend The original \texttt{9J3050} image can be found
+    build \texttt{9J3050} (for \texttt{MacBookPro5,3}). The original \texttt{9J3050} image can be found
     \href{https://archive.org/details/10.5.7-9-j-3050}{here}
     (\href{https://mega.nz/folder/inRBTarD#zanf7fUbviwz3WHBU5xpCg}{MEGA Mirror}),
     assuming Mac OS X~10.5 is legally owned. Refer to the \texttt{DIGEST.txt} file
-    for details. \DIFaddbegin \DIFadd{This image is limited to }\texttt{\DIFadd{MacBookPro5,2}}\DIFadd{, }\texttt{\DIFadd{MacBookPro5,3}}\DIFadd{,
-    }\texttt{\DIFadd{MacBookPro5,4}}\DIFadd{, }\texttt{\DIFadd{MacBookPro5,5}} \DIFadd{model identifiers.
+    for details. This image is limited to \texttt{MacBookPro5,2}, \texttt{MacBookPro5,3},
+    \texttt{MacBookPro5,4}, \texttt{MacBookPro5,5} model identifiers.
     To fix compatibility with other models one can hex-edit the raw installer image replacing
-    the logic of }\texttt{\DIFadd{/usr/libexec/cpu\_check}} \DIFadd{script. For example, it can be changed
-    to always return }\texttt{\DIFadd{0}} \DIFadd{by altering the ternary operator of the }\texttt{\DIFadd{exit}} \DIFadd{function call:
-}\DIFmodbegin
-\begin{lstlisting}[label=hex105, style=ocbash,alsolanguage=DIFcode]
-%DIF > exit ( $CPUs{$hostCPU} ? 0 : 1 );
+    the logic of \texttt{/usr/libexec/cpu\_check} script. For example, it can be changed
+    to always return \texttt{0} by altering the ternary operator of the \texttt{exit} function call:
+\begin{lstlisting}[label=hex105, style=ocbash]
+exit ( $CPUs{$hostCPU} ? 0 : 1 );
 \end{lstlisting}
-\DIFmodend
-    \DIFaddend Note that this \DIFaddbegin \DIFadd{image }\DIFaddend is the earliest tested version of Mac OS X~10.5 with OpenCore.
+    Note that this image is the earliest tested version of Mac OS X~10.5 with OpenCore.
 \end{itemize}
 
 \subsubsection{Mac OS X 10.4}\label{legacy104}
@@ -9685,29 +9675,26 @@ hdiutil convert ReadWrite.dmg -format UDZO -o ReadOnly.dmg
     (\href{https://mega.nz/folder/D3ASzLzA\#7sjYXE2X09f6aGjol\_C7dg}{MEGA Mirror}),
     assuming Mac OS X~10.4 is legally owned. Refer to the \texttt{DIGEST.txt} file
     for details. Note that these are the earliest tested
-    versions of Mac OS X~10.4 with OpenCore\DIFaddbegin \DIFadd{.
-  }\item \DIFadd{Due to lack of }\texttt{\DIFadd{createinstallmedia}} \DIFadd{utility and because the DMG installer
+    versions of Mac OS X~10.4 with OpenCore.
+  \item Due to lack of \texttt{createinstallmedia} utility and because the DMG installer
     is a volume image, not of a disk image (with a partition table), it is necessary
     to either restore the DMG file to a partition on a GPT-formatted media or convert
     it to a disk image. The following commands could be used to do it:
-}
 
-\DIFmodbegin
-\begin{lstlisting}[label=convertdmg, style=ocbash,alsolanguage=DIFcode]
-%DIF > hdiutil create -o converted.dmg -size 14g -layout GPTSPUD -fs HFS+J
-%DIF > hdiutil attach -nomount converted.dmg
-%DIF > hdiutil attach -nomount /path/to/original/installer.dmg
-%DIF > dd if=/dev/disk{Y} of=/dev/disk{X}s2 bs=16m
-%DIF > # Optionally convert to preferrable disk image:
-%DIF > qemu-img convert -p -O qcow2 /dev/disk{X} installer.qcow2
-%DIF > hdiutil detach disk{X} && hdiutil detach disk{Y}
+\begin{lstlisting}[label=convertdmg, style=ocbash]
+hdiutil create -o converted.dmg -size 14g -layout GPTSPUD -fs HFS+J
+hdiutil attach -nomount converted.dmg
+hdiutil attach -nomount /path/to/original/installer.dmg
+dd if=/dev/disk{Y} of=/dev/disk{X}s2 bs=16m
+# Optionally convert to preferrable disk image:
+qemu-img convert -p -O qcow2 /dev/disk{X} installer.qcow2
+hdiutil detach disk{X} && hdiutil detach disk{Y}
 \end{lstlisting}
-\DIFmodend
 
-    \DIFadd{It will be necessary to replace }\texttt{\DIFadd{\{X\}}} \DIFadd{and }\texttt{\DIFadd{\{Y\}}} \DIFadd{with disk
+    It will be necessary to replace \texttt{\{X\}} and \texttt{\{Y\}} with disk
     numbers for attached target image (converted.dmg) and original DMG installer
     (installer.dmg). Converting the resulting dmg can be done any other preferrable
-    format with the help of }\texttt{\DIFadd{qemu-img}} \DIFadd{utility}\DIFaddend .
+    format with the help of \texttt{qemu-img} utility.
 \end{itemize}
 
 \subsection{UEFI Secure Boot}\label{uefisecureboot}
