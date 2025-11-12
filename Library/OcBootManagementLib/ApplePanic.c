@@ -309,6 +309,7 @@ OcReadApplePanicLog (
 
   PanicData = PanicUnpack (TmpData, TmpDataSize, &TmpDataSize);
   FreePool (TmpData);
+  TmpData = NULL;
 
   if (PanicData != NULL) {
     //
