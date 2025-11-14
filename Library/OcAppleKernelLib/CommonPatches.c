@@ -736,6 +736,21 @@ PATCHER_GENERIC_PATCH
 };
 
 STATIC
+PATCHER_GENERIC_PATCH
+  mRemoveUsbLimitIoP1Patch1Tahoe = {
+  .Comment     = DEBUG_POINTER ("RemoveUsbLimitIoP1 part 1"),
+  .Base        = "__ZN16AppleUSBHostPort15setPortLocationEv",
+  .Find        = mRemoveUsbLimitIoP1Find1,
+  .Mask        = NULL,
+  .Replace     = mRemoveUsbLimitIoP1Replace1,
+  .ReplaceMask = NULL,
+  .Size        = sizeof (mRemoveUsbLimitIoP1Replace1),
+  .Count       = 1,
+  .Skip        = 0,
+  .Limit       = 4096
+};
+
+STATIC
 CONST UINT8
   mRemoveUsbLimitIoP1Find2[] = {
   0x41, 0x83, 0x00, 0x0F,  ///< and whatever, 0x0Fh
@@ -812,6 +827,13 @@ PatchUsbXhciPortLimit1 (
     DEBUG ((DEBUG_INFO, "OCAK: [OK] Patch success port com.apple.iokit.IOUSBHostFamily part 1\n"));
   }
 
+  Status = PatcherApplyGenericPatch (Patcher, &mRemoveUsbLimitIoP1Patch1Tahoe);
+  if (EFI_ERROR (Status)) {
+    DEBUG ((DEBUG_INFO, "OCAK: [FAIL] Failed to apply port patch com.apple.iokit.IOUSBHostFamily part 1 for Tahoe - %r\n", Status));
+  } else {
+    DEBUG ((DEBUG_INFO, "OCAK: [OK] Patch success port com.apple.iokit.IOUSBHostFamily part 1 for Tahoe\n"));
+  }
+  
   //
   // The following patch is only needed on macOS 11.1 (Darwin 20.2.0) and above; skip it otherwise.
   //
