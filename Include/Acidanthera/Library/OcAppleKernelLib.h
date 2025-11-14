@@ -131,6 +131,7 @@ typedef enum KERNEL_CACHE_TYPE_ {
 #define KERNEL_VERSION_VENTURA        22
 #define KERNEL_VERSION_SONOMA         23
 #define KERNEL_VERSION_SEQUOIA        24
+#define KERNEL_VERSION_TAHOE          25
 
 //
 // Minimum kernel versions for each release.
@@ -152,6 +153,7 @@ typedef enum KERNEL_CACHE_TYPE_ {
 #define KERNEL_VERSION_VENTURA_MIN        KERNEL_VERSION (KERNEL_VERSION_VENTURA, 0, 0)
 #define KERNEL_VERSION_SONOMA_MIN         KERNEL_VERSION (KERNEL_VERSION_SONOMA, 0, 0)
 #define KERNEL_VERSION_SEQUOIA_MIN        KERNEL_VERSION (KERNEL_VERSION_SEQUOIA, 0, 0)
+#define KERNEL_VERSION_TAHOE_MIN        KERNEL_VERSION (KERNEL_VERSION_TAHOE, 0, 0)
 
 //
 // Maximum kernel versions for each release.
