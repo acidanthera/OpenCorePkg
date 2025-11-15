@@ -839,7 +839,7 @@ PatchUsbXhciPortLimit1 (
       DEBUG ((DEBUG_INFO, "OCAK: [OK] Patch success port com.apple.iokit.IOUSBHostFamily part 1\n"));
     }
   }
-  
+
   //
   // The following patch is only needed on macOS 11.1 (Darwin 20.2.0) and above; skip it otherwise.
   //
