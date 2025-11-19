@@ -821,8 +821,8 @@ PatchUsbXhciPortLimit1 (
   }
 
   //
-  // For macOS 26.0 , Darwin 25.0.0 and above, use Tahoe-specific patch
-  // Otherwise use the original patch
+  // For macOS 26.0 (Darwin 25.0.0) and above use Tahoe-specific patch,
+  // otherwise use the original patch.
   //
   if (OcMatchDarwinVersion (KernelVersion, KERNEL_VERSION (KERNEL_VERSION_TAHOE, 0, 0), 0)) {
     Status = PatcherApplyGenericPatch (Patcher, &mRemoveUsbLimitIoP1Patch1Tahoe);
@@ -834,9 +834,9 @@ PatchUsbXhciPortLimit1 (
   } else {
     Status = PatcherApplyGenericPatch (Patcher, &mRemoveUsbLimitIoP1Patch1);
     if (EFI_ERROR (Status)) {
-      DEBUG ((DEBUG_INFO, "OCAK: [FAIL] Failed to apply port patch com.apple.iokit.IOUSBHostFamily part 1 - %r\n", Status));
+      DEBUG ((DEBUG_INFO, "OCAK: [FAIL] Failed to apply pre-Tahoe port patch com.apple.iokit.IOUSBHostFamily part 1 - %r\n", Status));
     } else {
-      DEBUG ((DEBUG_INFO, "OCAK: [OK] Patch success port com.apple.iokit.IOUSBHostFamily part 1\n"));
+      DEBUG ((DEBUG_INFO, "OCAK: [OK] Patch success pre-Tahoe port com.apple.iokit.IOUSBHostFamily part 1\n"));
     }
   }
 
