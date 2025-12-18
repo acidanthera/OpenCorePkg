@@ -28,6 +28,7 @@
 [Sources.Ia32]
   Ia32/Canary.nasm
   Ia32/GS.nasm         | MSFT
+  Ia32/GS.nasm         | CLANGPDB
 
 [Sources.X64]
   X64/Canary.nasm
