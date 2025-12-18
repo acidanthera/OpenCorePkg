@@ -55,7 +55,6 @@
   gEfiComponentNameProtocolGuid           ## CONSUMES
   gEfiDiskIoProtocolGuid                  ## CONSUMES
   gEfiBlockIoProtocolGuid                 ## CONSUMES
-  gEfiUnicodeCollationProtocolGuid        ## CONSUMES
 
 [Guids]
   gEfiFileInfoGuid                        ## CONSUMES
