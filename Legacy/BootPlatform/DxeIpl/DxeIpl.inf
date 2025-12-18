@@ -63,6 +63,7 @@
   Ia32/VirtualMemory.h
   Ia32/Canary.nasm
   Ia32/GS.nasm         | MSFT
+  Ia32/GS.nasm         | CLANGPDB
 
 [Pcd]
   gEfiMdePkgTokenSpaceGuid.PcdDebugPropertyMask            ## CONSUMES
