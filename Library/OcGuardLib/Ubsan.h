@@ -59,11 +59,8 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 #define uint32_t UINT32
 #define uint64_t UINT64
 #define bool BOOLEAN
-
-#if !defined(__APPLE__) || defined(MDE_CPU_IA32)
 #define intptr_t INTN
 #define uintptr_t UINTN
-#endif
 
 // Try to provide a somewhat adequate size_t implementation.
 // Have to be careful about -Wformat warnings in Clang.

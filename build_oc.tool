@@ -43,10 +43,6 @@ buildutil() {
   local cores
   cores=$(getconf _NPROCESSORS_ONLN)
 
-  if [ "$(uname)" = "Darwin" ]; then
-    unset CPATH
-  fi
-
   pushd "${selfdir}/Utilities" || exit 1
   for util in "${UTILS[@]}"; do
     cd "$util" || exit 1
