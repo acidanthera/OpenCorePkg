@@ -152,7 +152,7 @@ jobs:
         run: docker compose run build-docs
 
   build-windows:
-    name: Windows VS2019
+    name: Windows VS2022
     runs-on: windows-latest
     env:
       HAS_OPENSSL_BUILD: 0
@@ -165,7 +165,9 @@ jobs:
 
       - name: Install Dependencies
         run: |
-          choco install make nasm zip iasl --no-progress
+          choco install make nasm zip iasl visualstudio2022community visualstudio2022buildtools --no-progress
+          cd 'C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Auxiliary\Build'
+          vcvarsall.bat
 
       - name: CI Bootstrap
         run: |
