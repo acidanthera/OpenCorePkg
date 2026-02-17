@@ -57,7 +57,7 @@
 
   # Console
   INF  MdeModulePkg/Universal/Console/ConPlatformDxe/ConPlatformDxe.inf
-  INF  MdeModulePkg/Universal/Console/ConSplitterDxe/ConSplitterDxe.inf
+  INF  OpenCorePkg/Legacy/BootPlatform/ConSplitterDxe/ConSplitterDxe.inf
   INF  OpenCorePkg/Legacy/BootPlatform/GraphicsConsoleDxe/GraphicsConsoleDxe.inf
 
   # CPU and interrupts

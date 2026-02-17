@@ -1,0 +1,115 @@
+## @file
+# This driver provides multi console supports.
+#
+# This driver acts as a virtual console, takes over the console I/O control from selected
+# standard console devices, and transmits console I/O to related console device drivers.
+# Consplitter could install Graphics Output protocol and/or UGA Draw protocol in system
+# table according PCD settings(PcdConOutGopSupport, and PcdConOutUgaSupport). It always
+# consumes Graphics Output protocol which is produced by display device, and consumes UGA Draw
+# protocol which is produced by display device according to PcdUgaConsumeSupport value.
+# Note: If only UGA Draw protocol is installed in system, PcdUgaConsumeSupport should be
+# set to TRUE.
+#
+# Copyright (c) 2006 - 2018, Intel Corporation. All rights reserved.<BR>
+#
+#  SPDX-License-Identifier: BSD-2-Clause-Patent
+#
+#
+##
+
+[Defines]
+  INF_VERSION                    = 0x00010005
+  BASE_NAME                      = ConSplitterDxe
+  MODULE_UNI_FILE                = ConSplitterDxe.uni
+  FILE_GUID                      = 408edcec-cf6d-477c-a5a8-b4844e3de281
+  MODULE_TYPE                    = UEFI_DRIVER
+  VERSION_STRING                 = 1.0
+  ENTRY_POINT                    = ConSplitterDriverEntry
+
+#
+# The following information is for reference only and not required by the build tools.
+#
+#  VALID_ARCHITECTURES           = IA32 X64 EBC
+#
+#  DRIVER_BINDING                =  gConSplitterConInDriverBinding
+#  COMPONENT_NAME                =  gConSplitterConInComponentName
+#  COMPONENT_NAME2               =  gConSplitterConInComponentName2
+#  DRIVER_BINDING                =  gConSplitterSimplePointerDriverBinding
+#  COMPONENT_NAME                =  gConSplitterSimplePointerComponentName
+#  COMPONENT_NAME2               =  gConSplitterSimplePointerComponentName2
+#  DRIVER_BINDING                =  gConSplitterConOutDriverBinding
+#  COMPONENT_NAME                =  gConSplitterConOutComponentName
+#  COMPONENT_NAME2               =  gConSplitterConOutComponentName2
+#  DRIVER_BINDING                =  gConSplitterStdErrDriverBinding
+#  COMPONENT_NAME                =  gConSplitterStdErrComponentName
+#  COMPONENT_NAME2               =  gConSplitterStdErrComponentName2
+#
+
+[Sources]
+  ConSplitterGraphics.c
+  ComponentName.c
+  ConSplitter.h
+  ConSplitter.c
+
+[Packages]
+  MdePkg/MdePkg.dec
+  MdeModulePkg/MdeModulePkg.dec
+  OpenCorePkg/OpenCorePkg.dec
+
+[LibraryClasses]
+  UefiBootServicesTableLib
+  MemoryAllocationLib
+  BaseMemoryLib
+  BaseLib
+  UefiLib
+  UefiDriverEntryPoint
+  DebugLib
+  PcdLib
+
+[Guids]
+  gEfiConsoleInDeviceGuid                       ## SOMETIMES_CONSUMES ## UNDEFINED # protocol GUID installed on device handle
+  gEfiStandardErrorDeviceGuid                   ## SOMETIMES_CONSUMES ## UNDEFINED # protocol GUID installed on device handle
+  gEfiConsoleOutDeviceGuid                      ## SOMETIMES_CONSUMES ## UNDEFINED # protocol GUID installed on device handle
+  ## SOMETIMES_PRODUCES ## Event
+  ## SOMETIMES_CONSUMES ## Event
+  gConnectConInEventGuid
+
+[Protocols]
+  ## PRODUCES
+  ## TO_START
+  gEfiSimplePointerProtocolGuid
+  ## PRODUCES
+  ## TO_START
+  gEfiAbsolutePointerProtocolGuid
+  ## PRODUCES
+  ## TO_START
+  gEfiSimpleTextInProtocolGuid
+  ## PRODUCES
+  ## TO_START
+  gEfiSimpleTextInputExProtocolGuid
+  ## PRODUCES
+  ## TO_START
+  gEfiSimpleTextOutProtocolGuid
+  ## SOMETIMES_PRODUCES
+  ## SOMETIMES_CONSUMES
+  gEfiGraphicsOutputProtocolGuid
+  ## SOMETIMES_PRODUCES
+  ## SOMETIMES_CONSUMES
+  gEfiUgaDrawProtocolGuid
+
+[FeaturePcd]
+  gEfiMdeModulePkgTokenSpaceGuid.PcdConOutGopSupport   ## CONSUMES
+  gOpenCorePkgTokenSpaceGuid.PcdConOutUgaSupport       ## CONSUMES
+  gOpenCorePkgTokenSpaceGuid.PcdUgaConsumeSupport      ## CONSUMES
+
+[Pcd]
+  ## SOMETIMES_PRODUCES
+  ## SOMETIMES_CONSUMES
+  gEfiMdeModulePkgTokenSpaceGuid.PcdConOutRow
+  ## SOMETIMES_PRODUCES
+  ## SOMETIMES_CONSUMES
+  gEfiMdeModulePkgTokenSpaceGuid.PcdConOutColumn
+  gEfiMdeModulePkgTokenSpaceGuid.PcdConInConnectOnDemand  ## SOMETIMES_CONSUMES
+
+[UserExtensions.TianoCore."ExtraFiles"]
+  ConSplitterDxeExtra.uni

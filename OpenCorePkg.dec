@@ -484,6 +484,9 @@
   ## Include/Acidanthera/Protocol/AudioIo.h
   gEfiAudioIoProtocolGuid                    = { 0x22266891, 0x2032, 0x4BAE, { 0xB7, 0xB5, 0x43, 0x74, 0xE7, 0x32, 0x09, 0x49 }}
 
+  ## Include/Intel/Protocol/DeviceIo.h
+  gEfiDeviceIoProtocolGuid                   = { 0xAF6AC311, 0x84C3, 0x11D2, { 0x8E, 0x3C, 0x00, 0xA0, 0xC9, 0x69, 0x72, 0x3B }}
+
   ## Include/Acidanthera/Protocol/HdaCodecInfo.h
   gEfiHdaCodecInfoProtocolGuid               = { 0x6C9CDDE1, 0xE8A5, 0x43E5, { 0xBE, 0x88, 0xDA, 0x15, 0xBC, 0x1C, 0x02, 0x50 }}
 
@@ -495,6 +498,12 @@
 
   ## Include/Acidanthera/Protocol/Legacy8259.h
   gEfiLegacy8259ProtocolGuid                 = { 0x38321dba, 0x4fe0, 0x4e17, { 0x8a, 0xec, 0x41, 0x30, 0x55, 0xea, 0xed, 0xc1 }}
+
+  ## Include/Intel/Protocol/UgaDraw.h
+  gEfiUgaDrawProtocolGuid                    = { 0x982C298B, 0xF4FA, 0x41CB, { 0xB8, 0x38, 0x77, 0xAA, 0x68, 0x8F, 0xB8, 0x39 }}
+
+  ## Include/Intel/Protocol/UgaIo.h
+  gEfiUgaIoProtocolGuid                      = { 0x61A4D49E, 0x6F68, 0x4F1B, { 0xB9, 0x22, 0xA8, 0x6E, 0xED, 0x0B, 0x07, 0xA2 }}
 
   ## Include/Acidanthera/Protocol/OcAudio.h
   gOcAudioProtocolGuid                       = { 0x4B228577, 0x6274, 0x4A48, { 0x82, 0xAE, 0x07, 0x13, 0xA1, 0x17, 0x19, 0x87 }}
@@ -759,6 +768,19 @@
   ##   FALSE - DirectGopRendering will not be used.<BR>
   ## @Prompt Use DirectGopRendering.
   gOpenCorePkgTokenSpaceGuid.PcdEnableGopDirect|FALSE|BOOLEAN|0x00000009
+
+  ## Indicates if UGA Draw Protocol will be installed on virtual handle created by ConsplitterDxe.
+  #  It could be set FALSE to save size.<BR><BR>
+  #   TRUE  - Installs UGA Draw Protocol on virtual handle created by ConsplitterDxe.<BR>
+  #   FALSE - Does not install UGA Draw Protocol on virtual handle created by ConsplitterDxe.<BR>
+  # @Prompt Enable ConOut UGA support.
+  gOpenCorePkgTokenSpaceGuid.PcdConOutUgaSupport|TRUE|BOOLEAN|0x0000000a
+
+  ## Indicates if UGA Draw Protocol is still consumed.<BR><BR>
+  #   TRUE  - Consume UGA Draw protocol.<BR>
+  #   FALSE - Does not consume UGA Draw protocol.<BR>
+  # @Prompt Consume UGA Draw Protocol.
+  gOpenCorePkgTokenSpaceGuid.PcdUgaConsumeSupport|TRUE|BOOLEAN|0x0000000b
 
 [PcdsFixedAtBuild]
   ## Defines the Console Control initialization mode set on entry.<BR><BR>
