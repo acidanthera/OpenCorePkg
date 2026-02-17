@@ -28,6 +28,7 @@
 [Packages]
   MdePkg/MdePkg.dec
   OpenCorePkg/OpenDuetPkg.dec
+  OpenCorePkg/OpenCorePkg.dec
 
 [LibraryClasses]
   UefiDriverEntryPoint

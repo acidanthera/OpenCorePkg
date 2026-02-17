@@ -39,6 +39,7 @@
 [Packages]
   MdePkg/MdePkg.dec
   MdeModulePkg/MdeModulePkg.dec
+  OpenCorePkg/OpenCorePkg.dec
 
 [LibraryClasses]
   UefiBootServicesTableLib
@@ -58,7 +59,7 @@
   ## NOTIFY
 
 [FeaturePcd]
-  gEfiMdePkgTokenSpaceGuid.PcdUgaConsumeSupport ## CONSUMES
+  gOpenCorePkgTokenSpaceGuid.PcdUgaConsumeSupport ## CONSUMES
 
 [Pcd]
   gEfiMdeModulePkgTokenSpaceGuid.PcdVideoHorizontalResolution ## SOMETIMES_CONSUMES
