@@ -3,6 +3,7 @@ OpenCore Changelog
 #### v1.0.7
 - Improved `XhciPortLimit` compatibility with macOS Tahoe, thx @laobamac
 - Updated builtin firmware versions for SMBIOS and the rest
+- Migrated to edk2-stable202511
 
 #### v1.0.6
 - Added workaround for not detected CPU frequency in ProvideCpuInfo quirk, thx @hg13bs
