@@ -1,5 +1,5 @@
 /** @file
-  Copyright (C) 2021, vit9696. All rights reserved.
+  Copyright (C) 2026, vit9696. All rights reserved.
 
   This program and the accompanying materials
   are licensed and made available under the terms and conditions of the BSD License
@@ -30,7 +30,7 @@
   OpenCore version reported to log and NVRAM.
   OPEN_CORE_VERSION must follow X.Y.Z format, where X.Y.Z are single digits.
 **/
-#define OPEN_CORE_VERSION  "1.0.7"
+#define OPEN_CORE_VERSION  "1.0.8"
 
 /**
   OpenCore build type reported to log and NVRAM.
