@@ -12,6 +12,9 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 
 **/
 
+#ifndef CONTROL_MSR_E2_H
+#define CONTROL_MSR_E2_H
+
 //
 // Unless otherwise specified all data types are naturally aligned. Structures are
 // aligned on boundaries equal to the largest internal datum of the structure and
@@ -227,3 +230,5 @@ IterateOpCode (
   IN     VOID               *Context,
   IN     OP_CODE_HANDLER    Handler
   );
+
+#endif // CONTROL_MSR_E2_H
