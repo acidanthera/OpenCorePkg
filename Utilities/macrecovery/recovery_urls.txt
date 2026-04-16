@@ -1,3 +1,7 @@
+Usage note:
+- macOS/Linux shells: run commands exactly as listed.
+- Windows Command Prompt/PowerShell: replace `./macrecovery.py` with `macrecovery.bat` (or `py macrecovery.py`).
+
 Lion
 ./macrecovery.py -b Mac-2E6FAB96566FE58C -m 00000000000F25Y00 download
 ./macrecovery.py -b Mac-C3EC7CD22292981F -m 00000000000F0HM00 download
