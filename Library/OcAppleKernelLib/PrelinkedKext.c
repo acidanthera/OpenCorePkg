@@ -84,8 +84,8 @@ InternalApplyFilesetKextFixups (
 
   FixupsHdr = (MACHO_DYLD_CHAINED_FIXUPS_HEADER *)(KCBuffer + FixupsCmd->DataOffset);
   Starts    = (MACH_DYLD_CHAINED_STARTS_IN_IMAGE *)(
-                (UINT8 *)FixupsHdr + FixupsHdr->StartsOffset
-                );
+                                                    (UINT8 *)FixupsHdr + FixupsHdr->StartsOffset
+                                                    );
 
   Resolved = 0;
 
@@ -95,8 +95,8 @@ InternalApplyFilesetKextFixups (
     }
 
     StartsSeg = (MACH_DYLD_CHAINED_STARTS_IN_SEGMENT *)(
-                  (UINT8 *)Starts + Starts->SegInfoOffset[SegIdx]
-                  );
+                                                        (UINT8 *)Starts + Starts->SegInfoOffset[SegIdx]
+                                                        );
 
     if (  (StartsSeg->PointerFormat != MACH_DYLD_CHAINED_PTR_X86_64_KERNEL_CACHE)
        && (StartsSeg->PointerFormat != MACH_DYLD_CHAINED_PTR_64_KERNEL_CACHE))
@@ -110,10 +110,10 @@ InternalApplyFilesetKextFixups (
       }
 
       FixupLoc = (UINT64 *)(
-                   KCBuffer + StartsSeg->SegmentOffset
-                   + (UINT64)PageIdx * StartsSeg->PageSize
-                   + StartsSeg->PageStart[PageIdx]
-                   );
+                            KCBuffer + StartsSeg->SegmentOffset
+                            + (UINT64)PageIdx * StartsSeg->PageSize
+                            + StartsSeg->PageStart[PageIdx]
+                            );
 
       while (TRUE) {
         Fixup = (MACH_DYLD_CHAINED_PTR_64_KERNEL_CACHE_REBASE *)FixupLoc;

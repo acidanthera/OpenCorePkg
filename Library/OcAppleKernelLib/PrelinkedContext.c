@@ -520,9 +520,9 @@ PrelinkedContextFree (
 STATIC
 EFI_STATUS
 InternalApplyKernelCollectionFixups (
-  IN  UINT8              *Buffer,
-  IN  OC_MACHO_CONTEXT   *MachContext,
-  OUT UINT32             *FixupCountOut  OPTIONAL
+  IN  UINT8             *Buffer,
+  IN  OC_MACHO_CONTEXT  *MachContext,
+  OUT UINT32            *FixupCountOut  OPTIONAL
   )
 {
   MACH_HEADER_64                                *Header;
@@ -567,8 +567,8 @@ InternalApplyKernelCollectionFixups (
 
   FixupsHeader  = (MACHO_DYLD_CHAINED_FIXUPS_HEADER *)(Buffer + ChainedFixupsCmd->DataOffset);
   StartsInImage = (MACH_DYLD_CHAINED_STARTS_IN_IMAGE *)(
-                    (UINT8 *)FixupsHeader + FixupsHeader->StartsOffset
-                    );
+                                                        (UINT8 *)FixupsHeader + FixupsHeader->StartsOffset
+                                                        );
 
   FixupCount = 0;
 
@@ -578,8 +578,8 @@ InternalApplyKernelCollectionFixups (
     }
 
     StartsInSeg = (MACH_DYLD_CHAINED_STARTS_IN_SEGMENT *)(
-                    (UINT8 *)StartsInImage + StartsInImage->SegInfoOffset[SegIndex]
-                    );
+                                                          (UINT8 *)StartsInImage + StartsInImage->SegInfoOffset[SegIndex]
+                                                          );
 
     if (  (StartsInSeg->PointerFormat != MACH_DYLD_CHAINED_PTR_X86_64_KERNEL_CACHE)
        && (StartsInSeg->PointerFormat != MACH_DYLD_CHAINED_PTR_64_KERNEL_CACHE))
@@ -594,10 +594,10 @@ InternalApplyKernelCollectionFixups (
       }
 
       FixupLocation = (UINT64 *)(
-                        Buffer + StartsInSeg->SegmentOffset
-                        + (UINT64)PageIndex * StartsInSeg->PageSize
-                        + PageStart
-                        );
+                                 Buffer + StartsInSeg->SegmentOffset
+                                 + (UINT64)PageIndex * StartsInSeg->PageSize
+                                 + PageStart
+                                 );
 
       while (TRUE) {
         Fixup = (MACH_DYLD_CHAINED_PTR_64_KERNEL_CACHE_REBASE *)FixupLocation;
