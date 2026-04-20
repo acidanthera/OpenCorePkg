@@ -386,7 +386,30 @@ InternalSolveSymbolNonWeak (
                     OcGetSymbolFirstLevel
                     );
   if (ResolveSymbol != NULL) {
-    InternalSolveSymbolValue (Context->Is32Bit, ResolveSymbol->Value, Symbol);
+    UINT64  ResolvedValue;
+
+    ResolvedValue = ResolveSymbol->Value;
+
+    //
+    // System KC kexts expose symbols with raw fileset virtual addresses
+    // (e.g. 0x149xxxxx, in the 1 MB .. 512 MB range). These must be
+    // translated into the kernel address space before the link phase
+    // emits RIP-relative relocations, otherwise the 32-bit displacements
+    // cannot reach them. The translation mirrors KcFixupValue (), which
+    // performs the same adjustment for vtable pointers; on macOS 11+
+    // all kernel collections share a single KASLR slide.
+    //
+    // Kernel-space values, zero, and weak test placeholders must not
+    // be translated.
+    //
+    if (  !Context->Is32Bit
+       && (ResolvedValue >= BASE_1MB)
+       && (ResolvedValue < BASE_1MB * 512ULL))
+    {
+      ResolvedValue = ResolvedValue + KERNEL_FIXUP_OFFSET + KERNEL_ADDRESS_BASE;
+    }
+
+    InternalSolveSymbolValue (Context->Is32Bit, ResolvedValue, Symbol);
   }
 
   return TRUE;
@@ -577,6 +600,12 @@ InternalCalculateDisplacementIntel64 (
   Difference   = ABS (Displacement);
 
   if (Difference >= X86_64_RIP_RELATIVE_LIMIT) {
+    DEBUG ((
+      DEBUG_INFO,
+      "OCAK: RIP-relative displacement overflow: target=0x%Lx diff=0x%Lx\n",
+      Target,
+      Difference
+      ));
     return FALSE;
   }
 
