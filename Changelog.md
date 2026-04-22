@@ -1,5 +1,8 @@
 OpenCore Changelog
 ==================
+#### v1.0.8
+- Fixed macrecovery utility on Windows, thx @pzhlkj6612
+
 #### v1.0.7
 - Improved `XhciPortLimit` compatibility with macOS Tahoe, thx @laobamac
 - Updated builtin firmware versions for SMBIOS and the rest
