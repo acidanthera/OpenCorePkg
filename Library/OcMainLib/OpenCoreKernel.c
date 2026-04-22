@@ -43,6 +43,14 @@ STATIC BOOLEAN            mOcCachelessInProgress;
 STATIC EFI_FILE_PROTOCOL  *mCustomKernelDirectory;
 STATIC BOOLEAN            mCustomKernelDirectoryInProgress;
 
+//
+// System KC staged on the EFI partition, read on demand in OcKernelFileOpen
+// and consumed by OcKernelProcessPrelinked.
+//
+STATIC UINT8    *mSystemKCData;
+STATIC UINT32   mSystemKCDataSize;
+STATIC BOOLEAN  mSystemKCLoaded;
+
 STATIC
 VOID
 OcKernelConfigureCapabilities (
@@ -776,11 +784,33 @@ OcKernelProcessPrelinked (
   )
 {
   EFI_STATUS         Status;
+  EFI_STATUS         SystemKCStatus;
   PRELINKED_CONTEXT  Context;
 
   Status = PrelinkedContextInit (&Context, Kernel, *KernelSize, AllocatedSize, Is32Bit);
 
   if (!EFI_ERROR (Status)) {
+    //
+    // If a System KC was loaded from the EFI partition (see
+    // OcKernelFileOpen ()), hand ownership of the buffer to the prelinked
+    // context so cross-KC dependencies resolve at prelink time. On
+    // non-KC boots the data is absent and this is a no-op.
+    //
+    if (Context.IsKernelCollection && mSystemKCLoaded && (mSystemKCData != NULL)) {
+      SystemKCStatus = PrelinkedContextLoadSystemKC (&Context, mSystemKCData, mSystemKCDataSize);
+      if (EFI_ERROR (SystemKCStatus)) {
+        DEBUG ((DEBUG_WARN, "OC: System KC parse failed - %r\n", SystemKCStatus));
+      }
+
+      //
+      // Ownership of mSystemKCData transfers to the prelinked context
+      // (freed via PrelinkedContextFree). Clear the globals so we don't
+      // attempt a double-free or reuse stale data on the next pass.
+      //
+      mSystemKCData   = NULL;
+      mSystemKCLoaded = FALSE;
+    }
+
     OcKernelBlockKexts (Config, DarwinVersion, Is32Bit, CacheTypePrelinked, &Context);
 
     OcKernelInjectKexts (Config, CacheTypePrelinked, &Context, DarwinVersion, Is32Bit, LinkedExpansion, ReservedExeSize);
@@ -1319,6 +1349,38 @@ OcKernelFileOpen (
         Kernel,
         KernelSize
         );
+
+      //
+      // Optionally load the System KC from the OpenCore EFI partition.
+      //
+      // The sealed APFS system volume cannot be read from EFI, so the
+      // System KC must be staged on the OpenCore ESP as
+      //   EFI/OC/SystemKernelExtensions.kc
+      // extracted from the booting macOS install. When absent OpenCore
+      // continues to behave as before (Boot KC only injection).
+      //
+      // The buffer's ownership is handed to OcKernelProcessPrelinked ()
+      // below and freed through PrelinkedContextFree ().
+      //
+      if (!mSystemKCLoaded && (mOcStorage != NULL)) {
+        UINT32  SystemKCFileSize;
+
+        mSystemKCData = OcStorageReadFileUnicode (
+                          mOcStorage,
+                          L"SystemKernelExtensions.kc",
+                          &SystemKCFileSize
+                          );
+
+        if (mSystemKCData != NULL) {
+          mSystemKCDataSize = SystemKCFileSize;
+          mSystemKCLoaded   = TRUE;
+          DEBUG ((
+            DEBUG_INFO,
+            "OC: System KC loaded from EFI partition (%u bytes)\n",
+            SystemKCFileSize
+            ));
+        }
+      }
 
       PrelinkedStatus = OcKernelProcessPrelinked (
                           mOcConfiguration,
