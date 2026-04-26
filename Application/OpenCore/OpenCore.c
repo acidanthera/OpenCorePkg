@@ -1,5 +1,5 @@
 /** @file
-  OpenCore driver.
+  OpenCore primary application.
 
 Copyright (c) 2019, vit9696. All rights reserved.<BR>
 This program and the accompanying materials
@@ -39,7 +39,7 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 #include <Library/PrintLib.h>
 #include <Library/UefiBootServicesTableLib.h>
 #include <Library/UefiRuntimeServicesTableLib.h>
-#include <Library/UefiDriverEntryPoint.h>
+#include <Library/UefiApplicationEntryPoint.h>
 #include <Library/UefiLib.h>
 
 STATIC
