@@ -835,3 +835,123 @@ KcFixupValue (
 
   return Value;
 }
+
+UINTN
+KcWalkChainedFixupsInSegment (
+  IN     UINT8                                *Buffer,
+  IN     MACH_DYLD_CHAINED_STARTS_IN_SEGMENT  *StartsSeg,
+  IN     KC_CHAINED_FIXUP_VISIT               Visitor OPTIONAL,
+  IN OUT VOID                                 *VisitorContext OPTIONAL
+  )
+{
+  MACH_DYLD_CHAINED_PTR_64_KERNEL_CACHE_REBASE  *Fixup;
+  UINT64                                        *FixupLoc;
+  UINT32                                        PageIdx;
+  UINT32                                        Stride;
+  UINTN                                         Count;
+
+  ASSERT (Buffer != NULL);
+  ASSERT (StartsSeg != NULL);
+
+  //
+  // Per Apple's mach-o/fixup-chains.h, the Fixup->Next field is a stride
+  // count, not a byte offset. The stride depends on the pointer format:
+  //
+  //   X86_64_KERNEL_CACHE (11): stride 1 byte  (Fixup->Next * 1)
+  //   64_KERNEL_CACHE      (8): stride 4 bytes (Fixup->Next * 4)
+  //
+  // The 64_OFFSET (6) and ARM64E_KERNEL (7) variants also use stride 4
+  // and share the same per-pointer rebase layout for the unauth case.
+  // Other formats (ARM64E with auth, 32-bit variants, userland 64) are
+  // not produced by current macOS kernel caches and are skipped here.
+  //
+  switch (StartsSeg->PointerFormat) {
+    case MACH_DYLD_CHAINED_PTR_X86_64_KERNEL_CACHE:
+      Stride = 1;
+      break;
+    case MACH_DYLD_CHAINED_PTR_64_KERNEL_CACHE:
+    case MACH_DYLD_CHAINED_PTR_64_OFFSET:
+    case MACH_DYLD_CHAINED_PTR_ARM64E_KERNEL:
+      Stride = 4;
+      break;
+    default:
+      return 0;
+  }
+
+  Count = 0;
+
+  for (PageIdx = 0; PageIdx < StartsSeg->PageCount; ++PageIdx) {
+    if (StartsSeg->PageStart[PageIdx] == MACH_DYLD_CHAINED_PTR_START_NONE) {
+      continue;
+    }
+
+    //
+    // STARTS_IN_SEGMENT entries with the START_MULTI bit set carry their
+    // chain heads via a separate ChainStarts table appended after
+    // PageStart[PageCount]. macOS kernel caches do not emit this layout
+    // for the formats handled above; skip such pages defensively rather
+    // than mis-walking foreign data.
+    //
+    if ((StartsSeg->PageStart[PageIdx] & MACH_DYLD_CHAINED_PTR_START_MULTI) != 0) {
+      continue;
+    }
+
+    FixupLoc = (UINT64 *)(
+                          Buffer + StartsSeg->SegmentOffset
+                          + (UINT64)PageIdx * StartsSeg->PageSize
+                          + StartsSeg->PageStart[PageIdx]
+                          );
+
+    while (TRUE) {
+      Fixup = (MACH_DYLD_CHAINED_PTR_64_KERNEL_CACHE_REBASE *)FixupLoc;
+
+      if (Visitor != NULL) {
+        Visitor (FixupLoc, VisitorContext);
+      }
+
+      ++Count;
+
+      if (Fixup->Next == 0) {
+        break;
+      }
+
+      FixupLoc = (UINT64 *)(
+                            (UINT8 *)FixupLoc + (UINTN)Fixup->Next * Stride
+                            );
+    }
+  }
+
+  return Count;
+}
+
+UINTN
+KcWalkChainedFixupsInImage (
+  IN     UINT8                              *Buffer,
+  IN     MACH_DYLD_CHAINED_STARTS_IN_IMAGE  *Starts,
+  IN     KC_CHAINED_FIXUP_VISIT             Visitor OPTIONAL,
+  IN OUT VOID                               *VisitorContext OPTIONAL
+  )
+{
+  MACH_DYLD_CHAINED_STARTS_IN_SEGMENT  *StartsSeg;
+  UINT32                               SegIdx;
+  UINTN                                Count;
+
+  ASSERT (Buffer != NULL);
+  ASSERT (Starts != NULL);
+
+  Count = 0;
+
+  for (SegIdx = 0; SegIdx < Starts->NumSegments; ++SegIdx) {
+    if (Starts->SegInfoOffset[SegIdx] == 0) {
+      continue;
+    }
+
+    StartsSeg = (MACH_DYLD_CHAINED_STARTS_IN_SEGMENT *)(
+                                                        (UINT8 *)Starts + Starts->SegInfoOffset[SegIdx]
+                                                        );
+
+    Count += KcWalkChainedFixupsInSegment (Buffer, StartsSeg, Visitor, VisitorContext);
+  }
+
+  return Count;
+}
