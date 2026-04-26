@@ -552,9 +552,12 @@ InternalSolveSymbol (
   Instruction will be patched with the resulting address.
   Logically matches XNU's calculate_displacement_x86_64.
 
+  @param[in]     Source       The source address (link PC of the relocation).
   @param[in]     Target       The target address.
   @param[in]     Adjustment   Adjustment to be subtracted from the
                               displacement.
+  @param[in]     Identifier   Kext bundle identifier for diagnostic output;
+                              may be NULL.
   @param[in,out] Instruction  Pointer to the instruction to be patched.
 
   @retval  Returned is whether the target instruction has been patched.
@@ -563,13 +566,15 @@ InternalSolveSymbol (
 STATIC
 BOOLEAN
 InternalCalculateDisplacementIntel64 (
-  IN     UINT64  Target,
-  IN     UINT64  Adjustment,
-  IN OUT INT32   *Instruction
+  IN     UINT64       Source,
+  IN     UINT64       Target,
+  IN     UINT64       Adjustment,
+  IN     CONST CHAR8  *Identifier OPTIONAL,
+  IN OUT INT32        *Instruction
   )
 {
-  INT64  Displacement;
-  UINT64 Difference;
+  INT64   Displacement;
+  UINT64  Difference;
 
   ASSERT (Instruction != NULL);
 
@@ -577,6 +582,14 @@ InternalCalculateDisplacementIntel64 (
   Difference   = ABS (Displacement);
 
   if (Difference >= X86_64_RIP_RELATIVE_LIMIT) {
+    DEBUG ((
+      DEBUG_INFO,
+      "OCAK: RIP-relative overflow in %a: source=0x%Lx target=0x%Lx diff=0x%Lx\n",
+      Identifier != NULL ? Identifier : "(unknown)",
+      Source,
+      Target,
+      Difference
+      ));
     return FALSE;
   }
 
@@ -1032,8 +1045,10 @@ InternalRelocateRelocation (
 
       if (PcRelative) {
         Result = InternalCalculateDisplacementIntel64 (
+                   LinkPc,
                    Target,
                    Adjustment,
+                   Kext->Identifier,
                    &Instruction32
                    );
         if (!Result) {

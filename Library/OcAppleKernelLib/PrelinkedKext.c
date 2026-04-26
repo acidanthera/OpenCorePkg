@@ -653,6 +653,13 @@ InternalInsertPrelinkedKextDependency (
 
   Status = InternalScanPrelinkedKext (DependencyKext, Context, TRUE);
   if (EFI_ERROR (Status)) {
+    DEBUG ((
+      DEBUG_INFO,
+      "OCAK: Dependency scan failed for %a (dep of %a) - %r\n",
+      DependencyKext->Identifier,
+      Kext->Identifier,
+      Status
+      ));
     return Status;
   }
 
@@ -739,7 +746,47 @@ InternalCachedPrelinkedKext (
   }
 
   if (NewKext == NULL) {
-    return NULL;
+    //
+    // On kernel-collection boots (macOS 11+), bundle identifiers that the
+    // injected kext lists in OSBundleLibraries may have no plist entry in
+    // the Boot KC because the providing module ships in a different KC or
+    // is plist-only. Returning NULL here silently breaks symbol-only
+    // dependents (weak references, build-time links): the caller skips
+    // the dependency entirely, then InternalSolveSymbol () later fails
+    // with "library kext ... not found".
+    //
+    // Materialise a minimal kernel-stub PRELINKED_KEXT aliasing the
+    // kernel's own inner Mach-O context. The stub carries no vtable
+    // source, so it cannot satisfy subclassing, but it lets the kernel's
+    // symbol table answer weak/test lookups so the link can complete.
+    // Boot-KC dependents that need real vtables still fail loudly during
+    // linking, exactly as before.
+    //
+    if (Prelinked->IsKernelCollection) {
+      NewKext = AllocateZeroPool (sizeof (*NewKext));
+      if (NewKext == NULL) {
+        return NULL;
+      }
+
+      NewKext->Signature       = PRELINKED_KEXT_SIGNATURE;
+      NewKext->Identifier      = Identifier;
+      NewKext->BundleLibraries = NULL;
+      CopyMem (
+        &NewKext->Context.MachContext,
+        &Prelinked->InnerMachContext,
+        sizeof (OC_MACHO_CONTEXT)
+        );
+      NewKext->Context.VirtualBase = 0;
+      NewKext->Context.VirtualKmod = 0;
+
+      DEBUG ((
+        DEBUG_INFO,
+        "OCAK: %a not in Boot KC, using kernel stub for symbol-only deps\n",
+        Identifier
+        ));
+    } else {
+      return NULL;
+    }
   }
 
   InsertTailList (&Prelinked->PrelinkedKexts, &NewKext->Link);
