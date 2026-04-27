@@ -67,6 +67,7 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 STATIC EFI_EVENT_NOTIFY  mOcExitBootServicesHandlers[OC_EXIT_BOOT_SERVICES_HANDLER_MAX+1];
 STATIC VOID              *mOcExitBootServicesContexts[OC_EXIT_BOOT_SERVICES_HANDLER_MAX];
 STATIC UINTN             mOcExitBootServicesIndex;
+STATIC EFI_SYSTEM_TABLE  *mNullSystemTable;
 
 VOID
 OcScheduleExitBootServices (
@@ -206,7 +207,7 @@ OcLoadDrivers (
       continue;
     }
 
-    if ((DriverArguments != NULL) && (DriverArguments[0] != '\0')) {
+    if (((DriverArguments != NULL) && (DriverArguments[0] != '\0')) || DriverEntry->HideVerbose) {
       Status = gBS->HandleProtocol (
                       ImageHandle,
                       &gEfiLoadedImageProtocolGuid,
@@ -224,7 +225,19 @@ OcLoadDrivers (
         FreePool (Driver);
         continue;
       }
+    }
 
+    if (DriverEntry->HideVerbose) {
+      if (mNullSystemTable == NULL) {
+        mNullSystemTable = AllocateNullTextOutSystemTable (gST);
+      }
+
+      if (mNullSystemTable != NULL) {
+        LoadedImage->SystemTable = mNullSystemTable;
+      }
+    }
+
+    if ((DriverArguments != NULL) && (DriverArguments[0] != '\0')) {
       UnescapedArguments = XmlUnescapeString (DriverArguments);
       if (UnescapedArguments == NULL) {
         DEBUG ((
