@@ -23,7 +23,7 @@ jobs:
       HOMEBREW_NO_INSTALL_CLEANUP: 1
       HOMEBREW_NO_AUTO_UPDATE: 1
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Install Linux Toolchain
         run: |
@@ -31,7 +31,7 @@ jobs:
           brew install musl-cross
 
       - name: Install Dependencies
-        run: brew install openssl mingw-w64
+        run: brew install mingw-w64
 
       - name: CI Bootstrap
         run: |
@@ -41,7 +41,7 @@ jobs:
       - run: ./build_oc.tool
 
       - name: Upload to Artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: macOS XCODE5 Artifacts
           path: Binaries/*.zip
@@ -60,7 +60,7 @@ jobs:
     env:
       TOOLCHAINS: CLANGPDB
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Apply Docker AppArmor settings
         run: |
@@ -76,7 +76,7 @@ jobs:
         run: docker compose run build-oc
 
       - name: Upload to Artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: Linux CLANGPDB Artifacts
           path: Binaries/*.zip
@@ -87,7 +87,7 @@ jobs:
     env:
       TOOLCHAINS: GCC
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Apply Docker AppArmor settings
         run: |
@@ -103,7 +103,7 @@ jobs:
         run: docker compose run build-oc
 
       - name: Upload to Artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: Linux GCC Artifacts
           path: Binaries/*.zip
@@ -114,7 +114,7 @@ jobs:
     env:
       TOOLCHAINS: CLANGDWARF
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Apply Docker AppArmor settings
         run: |
@@ -130,7 +130,7 @@ jobs:
         run: docker compose run build-oc
 
       - name: Upload to Artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: Linux CLANGDWARF Artifacts
           path: Binaries/*.zip
@@ -139,7 +139,7 @@ jobs:
     name: Linux Docs
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Apply Docker AppArmor settings
         run: |
@@ -161,7 +161,7 @@ jobs:
       run:
         shell: bash
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - uses: TheMrMilchmann/setup-msvc-dev@v4
         with:
           arch: x86
@@ -177,7 +177,7 @@ jobs:
       - run: ./build_oc.tool
 
       - name: Upload to Artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: Windows Artifacts
           path: Binaries/*.zip
