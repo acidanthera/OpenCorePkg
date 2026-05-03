@@ -308,6 +308,147 @@ OcGetFileSize (
   return EFI_SUCCESS;
 }
 
+//
+// Synthetic chained-fixup buffer used by --test-fixup-walk to exercise
+// KcWalkChainedFixupsInSegment for both supported pointer formats.
+//
+#define TEST_FIXUP_PAGE_SIZE   0x1000U
+#define TEST_FIXUP_PAGE_COUNT  1
+#define TEST_FIXUP_BUFFER_SZ   (TEST_FIXUP_PAGE_SIZE * TEST_FIXUP_PAGE_COUNT)
+
+STATIC
+VOID
+TestFixupVisitor (
+  IN OUT UINT64  *FixupLoc,
+  IN OUT VOID    *VisitorContext
+  )
+{
+  UINTN  *VisitedAddresses;
+
+  VisitedAddresses = (UINTN *)VisitorContext;
+  if (VisitedAddresses != NULL) {
+    VisitedAddresses[*VisitedAddresses + 1] = (UINTN)FixupLoc;
+    ++*VisitedAddresses;
+  }
+}
+
+STATIC
+INT32
+RunFixupWalkTest (
+  VOID
+  )
+{
+  UINT8                                         *Buffer;
+  UINT8                                         StartsBuffer[sizeof (MACH_DYLD_CHAINED_STARTS_IN_SEGMENT) + sizeof (UINT16) * TEST_FIXUP_PAGE_COUNT];
+  MACH_DYLD_CHAINED_STARTS_IN_SEGMENT           *StartsSeg;
+  MACH_DYLD_CHAINED_PTR_64_KERNEL_CACHE_REBASE  *Slot;
+  UINTN                                         Count;
+  UINTN                                         VisitedAddresses[8];
+  INT32                                         FailCount;
+
+  FailCount = 0;
+  Buffer    = AllocateZeroPool (TEST_FIXUP_BUFFER_SZ);
+  if (Buffer == NULL) {
+    return -1;
+  }
+
+  ZeroMem (StartsBuffer, sizeof (StartsBuffer));
+  StartsSeg                = (MACH_DYLD_CHAINED_STARTS_IN_SEGMENT *)StartsBuffer;
+  StartsSeg->Size          = sizeof (StartsBuffer);
+  StartsSeg->PageSize      = TEST_FIXUP_PAGE_SIZE;
+  StartsSeg->SegmentOffset = 0;
+  StartsSeg->PageCount     = TEST_FIXUP_PAGE_COUNT;
+  StartsSeg->PageStart[0]  = 0;
+
+  //
+  // Lay down a 4-link chain at offsets 0, 16, 32, 48 within the page.
+  // For X86_64_KERNEL_CACHE (stride 1) Next = 16; for 64_KERNEL_CACHE
+  // (stride 4) Next = 4. Both encode the same byte distance between
+  // slots, so the walker must produce identical visit counts and
+  // addresses for both layouts.
+  //
+  Slot = (MACH_DYLD_CHAINED_PTR_64_KERNEL_CACHE_REBASE *)Buffer;
+  ZeroMem (Slot, sizeof (*Slot));
+  Slot[0].Next   = 16;
+  Slot[0].Target = 0xAAAA;
+  ZeroMem (&Slot[2], sizeof (*Slot));
+  Slot[2].Next   = 16;
+  Slot[2].Target = 0xBBBB;
+  ZeroMem (&Slot[4], sizeof (*Slot));
+  Slot[4].Next   = 16;
+  Slot[4].Target = 0xCCCC;
+  ZeroMem (&Slot[6], sizeof (*Slot));
+  Slot[6].Next   = 0;
+  Slot[6].Target = 0xDDDD;
+
+  StartsSeg->PointerFormat = MACH_DYLD_CHAINED_PTR_X86_64_KERNEL_CACHE;
+  ZeroMem (VisitedAddresses, sizeof (VisitedAddresses));
+  Count = KcWalkChainedFixupsInSegment (
+            Buffer,
+            StartsSeg,
+            TestFixupVisitor,
+            VisitedAddresses
+            );
+  if ((Count != 4) || (VisitedAddresses[0] != 4)) {
+    DEBUG ((DEBUG_ERROR, "[FAIL] X86_64_KERNEL_CACHE walk: %u fixups\n", (UINT32)Count));
+    ++FailCount;
+  } else {
+    DEBUG ((DEBUG_WARN, "[OK] X86_64_KERNEL_CACHE walk visited 4 fixups (stride 1)\n"));
+  }
+
+  //
+  // Reset slots with stride-4 Next encoding.
+  //
+  ZeroMem (Slot, sizeof (*Slot));
+  Slot[0].Next   = 4;
+  Slot[0].Target = 0xAAAA;
+  ZeroMem (&Slot[2], sizeof (*Slot));
+  Slot[2].Next   = 4;
+  Slot[2].Target = 0xBBBB;
+  ZeroMem (&Slot[4], sizeof (*Slot));
+  Slot[4].Next   = 4;
+  Slot[4].Target = 0xCCCC;
+  ZeroMem (&Slot[6], sizeof (*Slot));
+  Slot[6].Next   = 0;
+  Slot[6].Target = 0xDDDD;
+
+  StartsSeg->PointerFormat = MACH_DYLD_CHAINED_PTR_64_KERNEL_CACHE;
+  ZeroMem (VisitedAddresses, sizeof (VisitedAddresses));
+  Count = KcWalkChainedFixupsInSegment (
+            Buffer,
+            StartsSeg,
+            TestFixupVisitor,
+            VisitedAddresses
+            );
+  if ((Count != 4) || (VisitedAddresses[0] != 4)) {
+    DEBUG ((DEBUG_ERROR, "[FAIL] 64_KERNEL_CACHE walk: %u fixups\n", (UINT32)Count));
+    ++FailCount;
+  } else {
+    DEBUG ((DEBUG_WARN, "[OK] 64_KERNEL_CACHE walk visited 4 fixups (stride 4)\n"));
+  }
+
+  //
+  // An unsupported format must return 0 and never invoke the visitor.
+  //
+  StartsSeg->PointerFormat = MACH_DYLD_CHAINED_PTR_ARM64E;
+  ZeroMem (VisitedAddresses, sizeof (VisitedAddresses));
+  Count = KcWalkChainedFixupsInSegment (
+            Buffer,
+            StartsSeg,
+            TestFixupVisitor,
+            VisitedAddresses
+            );
+  if ((Count != 0) || (VisitedAddresses[0] != 0)) {
+    DEBUG ((DEBUG_ERROR, "[FAIL] unsupported-format guard: %u fixups\n", (UINT32)Count));
+    ++FailCount;
+  } else {
+    DEBUG ((DEBUG_WARN, "[OK] unsupported-format guard returned 0\n"));
+  }
+
+  FreePool (Buffer);
+  return FailCount;
+}
+
 int
 WrapMain (
   int   argc,
@@ -340,8 +481,13 @@ WrapMain (
   OC_KERNEL_ADD_ENTRY  *Kext;
 
   if (argc < 2) {
-    DEBUG ((DEBUG_ERROR, "Usage: %a <path/to/OC/folder/> [path/to/kernel]\n\n", argv[0]));
+    DEBUG ((DEBUG_ERROR, "Usage: %a <path/to/OC/folder/> [path/to/kernel]\n", argv[0]));
+    DEBUG ((DEBUG_ERROR, "       %a --test-fixup-walk\n\n", argv[0]));
     return -1;
+  }
+
+  if (AsciiStrCmp (argv[1], "--test-fixup-walk") == 0) {
+    return RunFixupWalkTest () != 0 ? -1 : 0;
   }
 
   FileName = argc > 2 ? argv[2] : "/System/Library/PrelinkedKernels/prelinkedkernel";
