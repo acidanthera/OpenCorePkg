@@ -28,7 +28,7 @@ jobs:
       - name: Install Linux Toolchain
         run: |
           brew tap FiloSottile/homebrew-musl-cross
-          brew install musl-cross
+          brew install FiloSottile/musl-cross/musl-cross
 
       - name: Install Dependencies
         run: brew install mingw-w64
