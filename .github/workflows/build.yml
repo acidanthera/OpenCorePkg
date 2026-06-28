@@ -153,7 +153,7 @@ jobs:
 
   build-windows:
     name: Windows VS2022
-    runs-on: windows-latest
+    runs-on: windows-2022
     env:
       HAS_OPENSSL_BUILD: 0
       CC: gcc
