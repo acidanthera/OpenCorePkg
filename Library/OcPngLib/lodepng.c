@@ -6228,7 +6228,7 @@ static unsigned preProcessScanlines(unsigned char** out, size_t* outsize, const 
     if(!error) {
       /*non multiple of 8 bits per scanline, padding bits needed per scanline*/
       if(bpp < 8 && w * bpp != ((w * bpp + 7u) / 8u) * 8u) {
-        unsigned char* padded = (unsigned char*)lodepng_malloc(h * ((w * bpp + 7u) / 8u));
+        unsigned char* padded = (unsigned char*)lodepng_malloc((size_t)h * (((size_t)w * (size_t)bpp + 7u) / 8u));
         if(!padded) error = 83; /*alloc fail*/
         if(!error) {
           addPaddingBits(padded, in, ((w * bpp + 7u) / 8u) * 8u, w * bpp, h);
