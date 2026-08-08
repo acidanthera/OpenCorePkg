@@ -19,7 +19,7 @@ OcUnicodeCollationEngInstallProtocol (
   EFI_HANDLE                      NewHandle;
 
   OcUnicodeCollationUpdatePlatformLanguage (NULL);
-  OcUnicodeCollationInitializeMappingTables (/* pass required arguments per declaration */);
+  OcUnicodeCollationInitializeMappingTables (mEngUpperMap, mEngLowerMap);
 
   if (Reinstall) {
     Status = OcUninstallAllProtocolInstances (&gEfiUnicodeCollation2ProtocolGuid);
