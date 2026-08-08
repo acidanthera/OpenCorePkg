@@ -18,7 +18,7 @@ OcUnicodeCollationEngInstallProtocol (
   EFI_UNICODE_COLLATION_PROTOCOL  *Existing;
   EFI_HANDLE                      NewHandle;
 
-  OcUnicodeCollationUpdatePlatformLanguage ();
+  OcUnicodeCollationUpdatePlatformLanguage (NULL);
   OcUnicodeCollationInitializeMappingTables ();
 
   if (Reinstall) {
