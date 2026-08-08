@@ -67,7 +67,7 @@ Ext4InitialiseUnicodeCollation (
   EFI_HANDLE  DriverHandle
   )
 {
-  OcUnicodeCollationInitializeMappingTables ();
+  OcUnicodeCollationInitializeMappingTables (DriverHandle);
   return EFI_SUCCESS;
 }
 
