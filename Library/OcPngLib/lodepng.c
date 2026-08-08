@@ -4729,9 +4729,11 @@ static unsigned postProcessScanlines(unsigned char* out, unsigned char* in,
   if(bpp == 0) return 31; /*error: invalid colortype*/
 
   if(info_png->interlace_method == 0) {
-    if(bpp < 8 && w * bpp != ((w * bpp + 7u) / 8u) * 8u) {
+    size_t linebits = (size_t)w * (size_t)bpp;
+    size_t padded_linebits = ((linebits + 7u) / 8u) * 8u;
+    if(bpp < 8 && linebits != padded_linebits) {
       CERROR_TRY_RETURN(unfilter(in, in, w, h, bpp));
-      removePaddingBits(out, in, w * bpp, ((w * bpp + 7u) / 8u) * 8u, h);
+      removePaddingBits(out, in, linebits, padded_linebits, h);
     }
     /*we can immediately filter into the out buffer, no other steps needed*/
     else CERROR_TRY_RETURN(unfilter(out, in, w, h, bpp));
