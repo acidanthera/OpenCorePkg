@@ -16,7 +16,10 @@ OcUnicodeCollationEngLocalLibConstructor (
   IN EFI_SYSTEM_TABLE  *SystemTable
   )
 {
-  OcUnicodeCollationUpdatePlatformLanguage ();
+  OcUnicodeCollationUpdatePlatformLanguage (
+    ImageHandle,
+    SystemTable
+    );
   OcUnicodeCollationInitializeMappingTables ();
   OcRegisterBootServicesProtocol (
     &gEfiUnicodeCollation2ProtocolGuid,
