@@ -14,7 +14,7 @@ UserUnicodeCollationInstallProtocol (
   OUT EFI_UNICODE_COLLATION_PROTOCOL  **Interface
   )
 {
-  OcUnicodeCollationInitializeMappingTables ();
+  OcUnicodeCollationInitializeMappingTables (&gInternalUnicode2Eng);
 
   *Interface = &gInternalUnicode2Eng;
 }
