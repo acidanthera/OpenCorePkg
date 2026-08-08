@@ -20,7 +20,10 @@ OcUnicodeCollationEngLocalLibConstructor (
     ImageHandle,
     SystemTable
     );
-  OcUnicodeCollationInitializeMappingTables ();
+  OcUnicodeCollationInitializeMappingTables (
+    ImageHandle,
+    SystemTable
+    );
   OcRegisterBootServicesProtocol (
     &gEfiUnicodeCollation2ProtocolGuid,
     &gInternalUnicode2Eng,
