@@ -31,6 +31,7 @@ jobs:
       - name: Install Linux Toolchain
         run: |
           brew tap FiloSottile/homebrew-musl-cross
+          brew trust filosottile/musl-cross || brew trust --formula filosottile/musl-cross/musl-cross
           brew install musl-cross
 
       - name: Install Dependencies
