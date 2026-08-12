@@ -381,7 +381,7 @@ int pack_efires(const char* fname, const char* fromdir, const char* filelist[]) 
 
     {
         // write space for header
-        efires_hdr_t tmp;
+        efires_hdr_t tmp = { 0 };
         if (write(outfd, &tmp, sizeof(tmp)) == -1)
             abort();
     }
