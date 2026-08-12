@@ -4,6 +4,7 @@ OpenCore Changelog
 - Fixed macrecovery utility on Windows, thx @pzhlkj6612
 - Added launch helper for macrecovery utility on Windows, thx @aayushprsingh
 - Added option to hide verbose output from any driver, thx @ilikesn0w
+- Re-enable Secure Boot after DMG loading, thx @albert-mueller
 
 #### v1.0.7
 - Improved `XhciPortLimit` compatibility with macOS Tahoe, thx @laobamac
