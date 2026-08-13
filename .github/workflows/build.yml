@@ -18,6 +18,8 @@ jobs:
   build-macos:
     name: macOS XCODE5
     runs-on: macos-latest
+    permissions:
+      contents: write
     env:
       JOB_TYPE: BUILD
       HOMEBREW_NO_INSTALL_CLEANUP: 1
