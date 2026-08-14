@@ -18,7 +18,6 @@
   FILE_GUID                           = 9E1F2D62-016E-4CE7-BF5B-6A47286AE984
   MODULE_TYPE                         = UEFI_APPLICATION
   VERSION_STRING                      = 1.0
-  INF_VERSION                         = 0x00010005
   EDK_RELEASE_VERSION                 = 0x00020000
   EFI_SPECIFICATION_VERSION           = 0x00010000
   ENTRY_POINT                         = UefiMain
@@ -48,7 +47,6 @@
 
 [Protocols]
   gEfiAudioDecodeProtocolGuid         ## SOMETIMES_CONSUMES
-  gEfiDevicePathProtocolGuid          ## CONSUMES
   gEfiDevicePathProtocolGuid          ## CONSUMES
   gEfiLoadedImageProtocolGuid         ## CONSUMES
   gEfiSimpleFileSystemProtocolGuid    ## CONSUMES
