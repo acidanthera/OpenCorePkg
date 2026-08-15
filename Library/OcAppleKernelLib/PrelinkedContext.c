@@ -384,14 +384,30 @@ PrelinkedContextInit (
     //
     // In KC mode last load address is the __LINKEDIT address.
     //
-    SegmentEndOffset = Context->LinkEditSegment->Segment64.FileOffset + Context->LinkEditSegment->Segment64.FileSize;
+    if (BaseOverflowAddU64 (
+          Context->LinkEditSegment->Segment64.FileOffset,
+          Context->LinkEditSegment->Segment64.FileSize,
+          &SegmentEndOffset
+          ))
+    {
+      PrelinkedContextFree (Context);
+      return EFI_INVALID_PARAMETER;
+    }
 
     if (MACHO_ALIGN (SegmentEndOffset) != Context->PrelinkedSize) {
       PrelinkedContextFree (Context);
       return EFI_INVALID_PARAMETER;
     }
 
-    Context->PrelinkedLastLoadAddress = Context->LinkEditSegment->Segment64.VirtualAddress + Context->LinkEditSegment->Segment64.Size;
+    if (BaseOverflowAddU64 (
+          Context->LinkEditSegment->Segment64.VirtualAddress,
+          Context->LinkEditSegment->Segment64.Size,
+          &Context->PrelinkedLastLoadAddress
+          ))
+    {
+      PrelinkedContextFree (Context);
+      return EFI_INVALID_PARAMETER;
+    }
   }
 
   //
@@ -538,8 +554,16 @@ PrelinkedInjectPrepare (
     // For newer variant (KC mode) __LINKEDIT is last, and we need to expand it to enable
     // dyld fixup generation.
     //
-    if (  (Context->PrelinkedAllocSize < LinkedExpansion)
-       || (Context->PrelinkedAllocSize - LinkedExpansion < Context->PrelinkedSize))
+    //
+    // Align first and validate the aligned size, as that is what actually gets
+    // zeroed and committed below -- checking the unaligned LinkedExpansion here
+    // would let AlignedExpansion (rounded up) write past the validated bound.
+    //
+    AlignedExpansion = MACHO_ALIGN (LinkedExpansion);
+
+    if (  (AlignedExpansion < LinkedExpansion)
+       || (Context->PrelinkedAllocSize < AlignedExpansion)
+       || (Context->PrelinkedAllocSize - AlignedExpansion < Context->PrelinkedSize))
     {
       return EFI_OUT_OF_RESOURCES;
     }
@@ -556,7 +580,6 @@ PrelinkedInjectPrepare (
 
     Context->KextsFixupChains = (VOID *)(Context->Prelinked + Context->PrelinkedSize);
 
-    AlignedExpansion = MACHO_ALIGN (LinkedExpansion);
     //
     // Zero the expansion to account for padding.
     //
