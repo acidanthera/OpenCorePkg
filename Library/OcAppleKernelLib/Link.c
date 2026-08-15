@@ -158,13 +158,30 @@ InternalOcGetSymbolWorkerValue (
     // Increasing the iteration block to more than 16 no longer pays off.
     // Note, lower loop is not on hot path.
     //
-    SymbolsEnd = &Symbols[NumSymbols & ~15ULL];
+    SymbolsEnd = &Kext->LinkedSymbolTable[Kext->NumberOfSymbols & ~15ULL];
     while (Symbols < SymbolsEnd) {
       #define MATCH(X)  if (Symbols[X].Value == LookupValue) { return &Symbols[X]; }
       MATCH (0) MATCH (1) MATCH (2)  MATCH (3)  MATCH (4)  MATCH (5)  MATCH (6)  MATCH (7)
       MATCH (8) MATCH (9) MATCH (10) MATCH (11) MATCH (12) MATCH (13) MATCH (14) MATCH (15)
       #undef MATCH
       Symbols += 16;
+    }
+
+    //
+    // The unrolled loop above only ever advances Symbols in steps of 16 up to
+    // Kext->NumberOfSymbols, so up to 15 trailing symbols are never compared
+    // by it (the previous SymbolsEnd was derived from the level-specific
+    // NumSymbols instead of the table's true end, which cut the scan short
+    // by up to 15 real symbols rather than merely rounding the start down as
+    // the comment above intends). Pick those up individually here.
+    //
+    SymbolsEnd = &Kext->LinkedSymbolTable[Kext->NumberOfSymbols];
+    while (Symbols < SymbolsEnd) {
+      if (Symbols->Value == LookupValue) {
+        return Symbols;
+      }
+
+      Symbols++;
     }
   }
 
