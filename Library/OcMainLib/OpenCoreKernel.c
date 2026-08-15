@@ -1075,6 +1075,19 @@ OcKernelFuzzyMatch (
                LinkedExpansion,
                Digest
                );
+
+    //
+    // OcKernelReadAppleKernel never closes *KernelFile on failure. Close it
+    // here before the next loop iteration (or a break below) either
+    // overwrites *KernelFile with the next candidate's handle, or the
+    // function returns while a previous attempt's handle is still open.
+    // Without this, every rejected candidate in a directory with multiple
+    // kernelcache files leaks one EFI_FILE_PROTOCOL handle.
+    //
+    if (EFI_ERROR (Status)) {
+      (*KernelFile)->Close (*KernelFile);
+      *KernelFile = NULL;
+    }
   } while (EFI_ERROR (Status));
 
   if (FileInfo != NULL) {
@@ -1285,6 +1298,27 @@ OcKernelFileOpen (
 
         return Status;
       }
+    }
+
+    //
+    // Any other failure (EFI_UNSUPPORTED from the kext reservation/fixup
+    // chain size checks, EFI_INVALID_PARAMETER from a stale Darwin
+    // version, or an internal ReadAppleKernel failure) used to fall
+    // through silently to returning *NewHandle unmodified further below -
+    // every configured kext injection and Kernel > Patch entry (including
+    // version-gated timing/compatibility patches) is skipped for this
+    // boot with no trace above DEBUG_INFO, which is compiled out of
+    // RELEASE builds. Log it at DEBUG_WARN so a patch that appears to
+    // have "no effect" on real hardware is distinguishable from a patch
+    // that never got a chance to run in the first place.
+    //
+    if (EFI_ERROR (Status)) {
+      DEBUG ((
+        DEBUG_WARN,
+        "OC: Kernel/kext processing failed for %s - %r, booting unmodified image without any Kernel Add/Patch/Force entries applied\n",
+        FileName,
+        Status
+        ));
     }
 
     if (!EFI_ERROR (Status)) {
