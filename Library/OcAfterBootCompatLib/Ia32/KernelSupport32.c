@@ -99,8 +99,23 @@ AppleMapPrepareKernelJump32 (
   }
 
   if (!Found) {
-    RUNTIME_DEBUG ((DEBUG_ERROR, "OCABC: No 32-bit kernel entry!\n"));
-    CpuDeadLoop ();
+    //
+    // Every macOS release from Lion onwards ships a 64-bit-only kernel, which
+    // does not contain this legacy (Tiger ~ Snow Leopard) entry point
+    // signature. On a 32-bit EFI Mac, OpenCore itself must be built as Ia32,
+    // which routes every boot through this function regardless of the
+    // loaded kernel's actual bit width -- unlike the X64 build, there is no
+    // call gate available in 32-bit mode to hook a 64-bit kernel instead
+    // (see the ASSERT above). Previously this unconditionally hit
+    // CpuDeadLoop (), which silently hangs the machine right after
+    // ExitBootServices, with no panic, on every 32-bit EFI Mac (e.g.
+    // MacBookPro7,1 and other 64-bit Core 2 Duo models) booting any modern
+    // macOS with one of the settings above enabled. There is nothing safe
+    // for us to patch here, so skip it and let EfiBoot continue booting the
+    // 64-bit kernel unmodified instead of treating this as corruption.
+    //
+    RUNTIME_DEBUG ((DEBUG_INFO, "OCABC: No 32-bit kernel entry, assuming 64-bit kernel, skipping\n"));
+    return;
   }
 
   KernelEntry    = (VOID *)(UINTN)(KERNEL_BASE_PADDR + Offset);
