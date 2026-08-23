@@ -12,8 +12,9 @@ RUN apt-get update && \
     apt-get install -y lsb-release wget software-properties-common gnupg build-essential nasm uuid-dev libssl-dev libx11-dev libxext-dev iasl curl git zip file && \
     { { [ "$(dpkg --print-architecture)" != "i386" ] && [ "$(dpkg --print-architecture)" != "amd64" ] ; } || apt-get install -y gcc-multilib ; } && \
     { [ "$(dpkg --print-architecture)" == "amd64" ] || { apt-get install -y gcc-x86-64-linux-gnu && export GCC_BIN=x86_64-linux-gnu- ; } ; } && echo "export GCC_BIN=$GCC_BIN" > ~/.edk2_rc.sh && echo ". ~/.edk2_rc.sh" > /etc/profile.d/edk2-gcc5.sh && \
+    echo "prefer-family = IPv4" >> /etc/wgetrc && \
     ( for i in 1 2 3 4 5; do \
-        rm -f llvm.sh && \
+        rm -f llvm.sh /etc/apt/trusted.gpg.d/apt.llvm.org.asc /etc/apt/sources.list.d/archive_uri-https_apt_llvm_org_*.list && \
         wget https://apt.llvm.org/llvm.sh && chmod +x llvm.sh && ./llvm.sh ${OC_DEV_EDK2_LLVM_VER} && exit 0; \
         echo "apt.llvm.org install attempt $i/5 failed, retrying in 15s..." >&2; \
         sleep 15; \
