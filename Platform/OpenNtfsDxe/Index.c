@@ -926,8 +926,8 @@ RelativeToAbsolute (
 **/
 VOID
 NtfsToEfiTime (
-  EFI_TIME  *EfiTime,
-  UINT64    NtfsTime
+  OUT EFI_TIME  *EfiTime,
+  IN  UINT64    NtfsTime
   )
 {
   UINT64  Remainder64;
