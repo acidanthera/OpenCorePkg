@@ -35,6 +35,37 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 
 STATIC CHAR8  mCurrentSmbiosProductName[OC_OEM_NAME_MAX];
 
+/**
+  Determine whether an ASCII PlatformInfo->Generic->SystemUUID value should
+  be treated as OEM, i.e. extracted from the real, unspoofed SMBIOS table
+  instead of parsed as a user-specified UUID.
+
+  Per Configuration.pdf and OcValidateLib (see ValidatePlatformInfo.c), an
+  empty PlatformInfo->Generic->SystemUUID is documented as a legal value
+  equivalent to explicitly specifying "OEM". Previously only the literal
+  "OEM" string was recognised at the two call sites below, so leaving
+  SystemUUID empty silently fell through to OcAsciiStrToRawGuid() on an
+  empty string. That call fails and its status is not checked, so
+  MacInfo->Oem.SystemUuid was left zeroed by GetMacInfo(). A zero UUID is
+  skipped when populating the Data Hub entry (OcPlatformUpdateDataHub) and
+  the "system-id" NVRAM variable (OcPlatformUpdateNvram/
+  OcGetLegacySecureBootECID), but is NOT skipped by the SMBIOS UUID
+  override, which falls back to the real hardware UUID from the original
+  SMBIOS table instead of leaving it zero (see SMBIOS_OVERRIDE_V in
+  SmbiosPatch.c). This asymmetry allowed PlatformInfo->Generic (Data Hub/
+  NVRAM/IOPlatformUUID) and PlatformInfo->SMBIOS to end up exposing two
+  different UUIDs whenever SystemUUID was left empty for automatic
+  generation.
+**/
+STATIC
+BOOLEAN
+PlatformInfoUuidIsOem (
+  IN CONST CHAR8  *AsciiSystemUuid
+  )
+{
+  return (AsciiSystemUuid[0] == '\0') || (AsciiStrCmp (AsciiSystemUuid, "OEM") == 0);
+}
+
 STATIC
 VOID
 OcPlatformUpdateDataHub (
@@ -774,7 +805,7 @@ OcLoadPlatformSupport (
     GetMacInfo (OC_BLOB_GET (&Config->PlatformInfo.Generic.SystemProductName), &InfoData);
     UsedMacInfo  = &InfoData;
     UseOemSerial = AsciiStrCmp (OC_BLOB_GET (&Config->PlatformInfo.Generic.SystemSerialNumber), "OEM") == 0;
-    UseOemUuid   = AsciiStrCmp (OC_BLOB_GET (&Config->PlatformInfo.Generic.SystemUuid), "OEM") == 0;
+    UseOemUuid   = PlatformInfoUuidIsOem (OC_BLOB_GET (&Config->PlatformInfo.Generic.SystemUuid));
     UseOemMlb    = AsciiStrCmp (OC_BLOB_GET (&Config->PlatformInfo.Generic.Mlb), "OEM") == 0;
     UseOemRom    = AsciiStrCmp ((CHAR8 *)Config->PlatformInfo.Generic.Rom, "OEM") == 0;
   } else {
@@ -891,7 +922,7 @@ OcGetLegacySecureBootECID (
   //
   if (Config->PlatformInfo.UpdateNvram) {
     if (Config->PlatformInfo.Automatic) {
-      if (AsciiStrCmp (OC_BLOB_GET (&Config->PlatformInfo.Generic.SystemUuid), "OEM") == 0) {
+      if (PlatformInfoUuidIsOem (OC_BLOB_GET (&Config->PlatformInfo.Generic.SystemUuid))) {
         Status = OcSmbiosTablePrepare (&SmbiosTable);
         if (!EFI_ERROR (Status)) {
           OcSmbiosExtractOemInfo (
