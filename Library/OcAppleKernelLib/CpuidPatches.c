@@ -1960,6 +1960,11 @@ PatchProvideCurrentCpuInfo (
     ZeroMem (CacheLineSizes, sizeof (CacheLineSizes));
 
     //
+    // CacheSizes[] init
+    //
+    ZeroMem (CacheSizes, sizeof (CacheSizes));
+
+    //
     // Build CPU info struct
     //
     Index = 0;
