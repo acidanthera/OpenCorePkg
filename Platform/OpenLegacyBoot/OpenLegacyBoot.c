@@ -34,7 +34,25 @@ GetLegacyEntryName (
   OC_LEGACY_OS_TYPE  LegacyOsType
   )
 {
-  return AllocateCopyPool (L_STR_SIZE ("Windows (legacy)"), "Windows (legacy)");
+  CONST CHAR8  *Name;
+
+  switch (LegacyOsType) {
+    case OcLegacyOsTypeIsoLinux:
+      Name = "Linux (legacy)";
+      break;
+
+    case OcLegacyOsTypeGrldr:
+      Name = "Grub4dos (legacy)";
+      break;
+
+    case OcLegacyOsTypeWindowsBootmgr:
+    case OcLegacyOsTypeWindowsNtldr:
+    default:
+      Name = "Windows (legacy)";
+      break;
+  }
+
+  return AllocateCopyPool (AsciiStrSize (Name), Name);
 }
 
 STATIC
