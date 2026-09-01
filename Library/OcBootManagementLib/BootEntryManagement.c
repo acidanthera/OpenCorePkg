@@ -564,6 +564,7 @@ AddBootEntryOnFileSystem (
   BootEntry->IsFolder   = IsFolder;
   BootEntry->IsGeneric  = IsGeneric;
   BootEntry->IsExternal = RecoveryPart ? FileSystem->RecoveryFs->External : FileSystem->External;
+  BootEntry->IsCdrom    = OcIsDiskCdRom (DevicePath);
 
   Status = InternalDescribeBootEntry (BootContext, BootEntry);
   if (EFI_ERROR (Status)) {
