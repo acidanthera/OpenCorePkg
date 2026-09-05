@@ -452,6 +452,10 @@ struct OC_BOOT_ENTRY_ {
   //
   UINT32                            EntryIndex;
   //
+  // Set when this entry is an optical drive (CD/DVD/BD).
+  //
+  BOOLEAN                           IsCdrom;
+  //
   // Set when this entry is an externally available entry (e.g. USB).
   //
   BOOLEAN                           IsExternal;
