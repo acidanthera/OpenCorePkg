@@ -288,17 +288,4 @@ InternalRunRequestPrivilege (
   IN OC_PRIVILEGE_LEVEL  Level
   );
 
-/**
-  Resolve an ATAPI hibernation image path against a unique NVMe whole disk.
-
-  @param[in,out] DevicePath  Pool-allocated path. Reallocated only on success.
-
-  @retval TRUE   Replaced the unresolved path with a verified firmware path.
-  @retval FALSE  Original path left unchanged.
-**/
-BOOLEAN
-InternalFixAppleHibernateDevicePath (
-  IN OUT EFI_DEVICE_PATH_PROTOCOL  **DevicePath
-  );
-
 #endif // BOOT_MANAGEMENET_INTERNAL_H

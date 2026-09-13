@@ -32,7 +32,6 @@
 
 [Sources]
   AppleHibernate.c
-  AppleHibernatePath.c
   ApplePanic.c
   AppleRecovery.c
   BootArguments.c
@@ -76,8 +75,6 @@
   gAppleBootPickerFileGuid                      ## SOMETIMES_CONSUMES
 
 [Protocols]
-  gEfiDevicePathProtocolGuid                    ## SOMETIMES_CONSUMES
-  gEfiBlockIoProtocolGuid                       ## SOMETIMES_CONSUMES
   gAppleBootPolicyProtocolGuid                  ## PRODUCES
   gAppleKeyMapAggregatorProtocolGuid            ## SOMETIMES_CONSUMES
   gEfiSimpleFileSystemProtocolGuid              ## SOMETIMES_CONSUMES

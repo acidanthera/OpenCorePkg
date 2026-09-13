@@ -1,7 +1,7 @@
 OpenCore Changelog
 ==================
 #### v1.0.8
-- Fixed unresolved ATAPI hibernation image paths on NVMe Macs
+- Fixed unresolved ATAPI device paths on NVMe Macs
 - Fixed macrecovery utility on Windows, thx @pzhlkj6612
 - Added launch helper for macrecovery utility on Windows, thx @aayushprsingh
 - Added option to hide verbose output from any driver, thx @ilikesn0w

@@ -12,8 +12,6 @@
   WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 **/
 
-#include "BootManagementInternal.h"
-
 #include <Guid/AppleVariable.h>
 
 #include <IndustryStandard/AppleHibernate.h>
@@ -27,7 +25,6 @@
 #include <Library/OcDebugLogLib.h>
 #include <Library/OcRtcLib.h>
 #include <Library/UefiLib.h>
-#include <Library/UefiBootServicesTableLib.h>
 #include <Library/UefiRuntimeServicesTableLib.h>
 
 EFI_STATUS
@@ -46,7 +43,6 @@ OcActivateHibernateWake (
   UINT8                     *RtcRawVars;
   EFI_DEVICE_PATH_PROTOCOL  *BootImagePath;
   EFI_DEVICE_PATH_PROTOCOL  *RemainingPath;
-  EFI_HANDLE                ImageDevice;
   INTN                      NumPatchedNodes;
 
   if (HibernateMask == HIBERNATE_MODE_NONE) {
@@ -92,15 +88,6 @@ OcActivateHibernateWake (
                           &BootImagePath,
                           &RemainingPath
                           );
-      if (InternalFixAppleHibernateDevicePath (&BootImagePath)) {
-        NumPatchedNodes = 1;
-        //
-        // The previous remainder points into the replaced allocation.
-        //
-        RemainingPath = BootImagePath;
-        gBS->LocateDevicePath (&gEfiDevicePathProtocolGuid, &RemainingPath, &ImageDevice);
-      }
-
       if (NumPatchedNodes > 0) {
         DebugPrintDevicePath (
           DEBUG_INFO,
