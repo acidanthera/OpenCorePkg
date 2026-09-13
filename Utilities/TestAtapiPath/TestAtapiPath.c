@@ -1,17 +1,29 @@
 /** @file
-  Regression tests for the actual hibernation path resolver with mocked disks.
+  Regression tests for the generic device path resolver with mocked disks.
   SPDX-License-Identifier: BSD-3-Clause
 **/
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <Uefi.h>
+#include <UserMemory.h>
 #include <Protocol/BlockIo.h>
 #include <Library/BaseMemoryLib.h>
 #include <Library/DevicePathLib.h>
 #include <Library/MemoryAllocationLib.h>
 #include <Library/UefiBootServicesTableLib.h>
-#include "BootManagementInternal.h"
+#include <Library/OcDevicePathLib.h>
+#include <Library/OcDebugLogLib.h>
+
+// Diagnostic output does not affect device-path resolution.
+VOID
+DebugPrintDevicePath (
+  UINTN                     ErrorLevel,
+  CONST CHAR8               *Message,
+  EFI_DEVICE_PATH_PROTOCOL  *DevicePath
+  )
+{
+}
 
 static const unsigned char    image[] = {
   2,    1,    12, 0, 0xd0, 0x41, 3,   0x0a, 0,   0, 0,   0,
@@ -97,22 +109,40 @@ locate (
   unsigned       i;
   unsigned char  *b = (unsigned char *)*p;
 
-  if (already_valid && (b[25] == MSG_ATAPI_DP)) {
-    *p = (EFI_DEVICE_PATH_PROTOCOL *)(b + 32);
+  if (already_valid) {
+    *p = (EFI_DEVICE_PATH_PROTOCOL *)(b + 24 + b[26]);
     *h = (EFI_HANDLE)1;
     return EFI_SUCCESS;
   }
 
-  if (reject_fixed) {
-    return EFI_NOT_FOUND;
-  }
-
   for (i = 0; i < count; ++i) {
-    if (memcmp (b, paths[i], 40) == 0) {
+    if ((GetDevicePathSize (*p) >= 44) && (memcmp (b, paths[i], 40) == 0)) {
+      if (reject_fixed) {
+        return EFI_NOT_FOUND;
+      }
+
       *p = (EFI_DEVICE_PATH_PROTOCOL *)(b + 40);
+      // Partition Block I/O may consume HD too; DevicePath can resolve APFS.
+      if ((DevicePathType (*p) == MEDIA_DEVICE_PATH) && (DevicePathSubType (*p) == MEDIA_HARDDRIVE_DP)) {
+        *p = NextDevicePathNode (*p);
+      }
+
+      if (CompareGuid (g, &gEfiDevicePathProtocolGuid)) {
+        while (!IsDevicePathEnd (*p) && DevicePathSubType (*p) != MEDIA_FILEPATH_DP) {
+          *p = NextDevicePathNode (*p);
+        }
+      }
+
       *h = (EFI_HANDLE)(UINTN)(i + 1);
       return EFI_SUCCESS;
     }
+  }
+
+  if (CompareGuid (g, &gEfiDevicePathProtocolGuid)) {
+    // Firmware can locate the controller, but not its malformed storage node.
+    *p = (EFI_DEVICE_PATH_PROTOCOL *)(b + 24);
+    *h = (EFI_HANDLE)1;
+    return EFI_SUCCESS;
   }
 
   return EFI_NOT_FOUND;
@@ -156,20 +186,24 @@ run (
   int                  expected
   )
 {
-  EFI_DEVICE_PATH_PROTOCOL  *p      = AllocateCopyPool (size, input);
-  EFI_DEVICE_PATH_PROTOCOL  *before = p;
-  int                       result  = InternalFixAppleHibernateDevicePath (&p);
+  UINTN                     allocations = mPoolAllocations;
+  EFI_DEVICE_PATH_PROTOCOL  *p          = AllocateCopyPool (size, input);
+  EFI_DEVICE_PATH_PROTOCOL  *before     = p;
+  EFI_DEVICE_PATH_PROTOCOL  *remaining;
+  INTN                      result = OcFixAppleBootDevicePath (&p, &remaining);
 
-  check (result == expected, name);
+  check ((result > 0) == expected, name);
+  check ((UINTN)remaining >= (UINTN)p && (UINTN)remaining < (UINTN)p + GetDevicePathSize (p), "valid remainder allocation");
   if (expected) {
     check (GetDevicePathSize (p) == size + 8, "correct replacement size");
     check (memcmp (p, paths[0], 40) == 0, "exact firmware disk path");
-    check (memcmp ((unsigned char *)p + 40, input + 32, size - 32) == 0, "unchanged image suffix");
+    check (memcmp ((unsigned char *)p + 40, input + 32, size - 32) == 0, "unchanged suffix");
   } else {
     check (p == before && memcmp (p, input, size) == 0, "failure preserves allocation and bytes");
   }
 
   FreePool (p);
+  check (mPoolAllocations == allocations, "resolver releases temporary allocations");
   ++tests;
   printf ("PASS: %s\n", name);
 }
@@ -180,14 +214,31 @@ main (
   char  **argv
   )
 {
-  unsigned char  bad[sizeof (image)];
-  unsigned char  multi[sizeof (image) * 2];
+  unsigned char                bad[sizeof (image)];
+  unsigned char                multi[sizeof (image) * 2];
+  unsigned char                sata[sizeof (image) + 2];
+  unsigned char                disk[36];
+  unsigned char                partition[32 + 42 + 4];
+  unsigned char                apfs[sizeof (image) + 42 + 36];
+  EFI_DEVICE_PATH_PROTOCOL     *p, *node;
+  APPLE_BOOT_DP_PATCH_CONTEXT  context;
 
   reset ();
   run ("Apple NVMe node", image, sizeof (image), 1);
   reset ();
   paths[0][25] = MSG_NVME_NAMESPACE_DP;
   run ("UEFI NVMe node", image, sizeof (image), 1);
+  reset ();
+  run ("working NVMe path unchanged", paths[0], sizeof (paths[0]), 0);
+  reset ();
+  memcpy (sata, image, 24);
+  memset (sata + 24, 0, 10);
+  sata[24] = MESSAGING_DEVICE_PATH;
+  sata[25] = MSG_SATA_DP;
+  sata[26] = 10;
+  memcpy (sata + 34, image + 32, sizeof (image) - 32);
+  already_valid = 1;
+  run ("working SATA path unchanged", sata, sizeof (sata), 0);
   reset ();
   count = 2;
   run ("two namespaces rejected", image, sizeof (image), 0);
@@ -224,19 +275,63 @@ main (
   run ("non-NVMe disk rejected", image, sizeof (image), 0);
   reset ();
   memcpy (bad, image, sizeof (image));
-  bad[25] = MSG_SATA_DP;
+  bad[25] = MSG_USB_DP;
   run ("non-ATAPI input unchanged", bad, sizeof (bad), 0);
   reset ();
-  memcpy (bad, image, sizeof (image));
-  bad[33] = MEDIA_HARDDRIVE_DP;
-  run ("partition suffix unchanged", bad, sizeof (bad), 0);
+  memcpy (disk, image, 32);
+  memcpy (disk + 32, image + sizeof (image) - 4, 4);
+  run ("whole disk without file suffix", disk, sizeof (disk), 1);
+  reset ();
+  memset (partition, 0, sizeof (partition));
+  memcpy (partition, image, 32);
+  partition[32] = MEDIA_DEVICE_PATH;
+  partition[33] = MEDIA_HARDDRIVE_DP;
+  partition[34] = 42;
+  memcpy (partition + 74, disk + 32, 4);
+  run ("partition path", partition, sizeof (partition), 1);
+  reset ();
+  memcpy (apfs, partition, 74);
+  memset (apfs + 74, 0x42, 36);
+  apfs[74] = MEDIA_DEVICE_PATH;
+  apfs[75] = MEDIA_VENDOR_DP;
+  apfs[76] = 36;
+  apfs[77] = 0;
+  memcpy (apfs + 110, image + 32, sizeof (image) - 32);
+  run ("partition APFS file path", apfs, sizeof (apfs), 1);
+  reset ();
+  already_valid = 1;
+  run ("working ATA partition path", partition, sizeof (partition), 0);
+  reset ();
+  already_valid = 1;
+  run ("working ATA disk path", disk, sizeof (disk), 0);
   reset ();
   memcpy (multi, image, sizeof (image));
   memcpy (multi+sizeof (image), image, sizeof (image));
   multi[49] = 1;
   run ("multi-instance input unchanged", multi, sizeof (multi), 0);
   reset ();
-  check (!InternalFixAppleHibernateDevicePath (NULL), "null input");
+  already_valid = 1;
+  p             = AllocateCopyPool (sizeof (image), image);
+  node          = (EFI_DEVICE_PATH_PROTOCOL *)((UINT8 *)p + 24);
+  check (OcFixAppleBootDevicePathNode (&p, &node, &context, NULL) == 0, "node API preserves working ATA");
+  check (context.OldPath == NULL && memcmp (p, image, sizeof (image)) == 0, "working node has no restore allocation");
+  FreePool (p);
+  ++tests;
+  reset ();
+  p    = AllocateCopyPool (sizeof (image), image);
+  node = (EFI_DEVICE_PATH_PROTOCOL *)((UINT8 *)p + 24);
+  check (OcFixAppleBootDevicePathNode (&p, &node, &context, NULL) == 1, "node API repairs ATAPI");
+  check (context.OldPath != NULL && memcmp (context.OldPath, image, sizeof (image)) == 0, "restore context keeps old allocation");
+  OcFixAppleBootDevicePathNodeRestore (&p, &node, &context);
+  check (memcmp (p, image, sizeof (image)) == 0 && (UINT8 *)node == (UINT8 *)p + 24, "node API rollback restores bytes and cursor");
+  FreePool (p);
+  ++tests;
+  reset ();
+  p    = AllocateCopyPool (sizeof (image), image);
+  node = (EFI_DEVICE_PATH_PROTOCOL *)((UINT8 *)p + 24);
+  check (OcFixAppleBootDevicePathNode (&p, &node, &context, NULL) == 1, "node API commits repair");
+  OcFixAppleBootDevicePathNodeRestoreFree (p, &context);
+  FreePool (p);
   ++tests;
   if (argc == 2) {
     unsigned char  captured[4096];
@@ -249,6 +344,7 @@ main (
     run ("actual captured boot-image", captured, size, 1);
   }
 
+  check (mPoolAllocations == 0, "all pool allocations released");
   printf ("%u regression checks passed\n", tests);
   return 0;
 }

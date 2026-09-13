@@ -14,6 +14,7 @@
 
 #include <Uefi.h>
 
+#include <Protocol/BlockIo.h>
 #include <Protocol/DevicePathToText.h>
 #include <Protocol/SimpleFileSystem.h>
 
@@ -409,6 +410,156 @@ InternalExpandNewPath (
 }
 
 /**
+  Replace an unresolved ATAPI node with a unique NVMe whole-disk device path.
+
+  The exact prefix must identify one present, non-removable NVMe disk. Preserve
+  every node after ATAPI, whether the path names a disk, partition or file.
+  Already locatable paths and ambiguous matches are left unchanged.
+
+  @param[in,out] DevicePath      Pool-allocated device path, reallocated on success.
+  @param[in,out] DevicePathNode  ATAPI node, updated to the replacement NVMe node.
+  @param[out]    RestoreContext  Optional ownership of the original allocation.
+
+  @retval 0  Path was not modified.
+  @retval 1  ATAPI node was replaced with a verified firmware disk path.
+**/
+STATIC
+INTN
+InternalFixAppleBootDevicePathAtapiNode (
+  IN OUT EFI_DEVICE_PATH_PROTOCOL     **DevicePath,
+  IN OUT EFI_DEVICE_PATH_PROTOCOL     **DevicePathNode,
+  OUT    APPLE_BOOT_DP_PATCH_CONTEXT  *RestoreContext OPTIONAL
+  )
+{
+  EFI_DEVICE_PATH_PROTOCOL  *Node;
+  EFI_DEVICE_PATH_PROTOCOL  *Suffix;
+  EFI_DEVICE_PATH_PROTOCOL  *DiskPath;
+  EFI_DEVICE_PATH_PROTOCOL  *DiskNode;
+  EFI_DEVICE_PATH_PROTOCOL  *FixedPath;
+  EFI_DEVICE_PATH_PROTOCOL  *MatchPath;
+  EFI_HANDLE                *Handles;
+  EFI_HANDLE                Match;
+  EFI_BLOCK_IO_PROTOCOL     *BlockIo;
+  EFI_STATUS                Status;
+  UINTN                     PrefixSize;
+  UINTN                     Index;
+  UINTN                     Count;
+
+  if (  (DevicePathNodeLength (*DevicePathNode) != sizeof (ATAPI_DEVICE_PATH))
+     || IsDevicePathMultiInstance (*DevicePath))
+  {
+    return 0;
+  }
+
+  PrefixSize = (UINTN)*DevicePathNode - (UINTN)*DevicePath;
+  Suffix     = NextDevicePathNode (*DevicePathNode);
+
+  //
+  // A path that already resolves to Block I/O needs no fallback.
+  //
+  Node   = *DevicePath;
+  Status = gBS->LocateDevicePath (&gEfiBlockIoProtocolGuid, &Node, &Match);
+  if (!EFI_ERROR (Status) && ((UINTN)Node >= (UINTN)Suffix)) {
+    return 0;
+  }
+
+  Status = gBS->LocateHandleBuffer (
+                  ByProtocol,
+                  &gEfiBlockIoProtocolGuid,
+                  NULL,
+                  &Count,
+                  &Handles
+                  );
+  if (EFI_ERROR (Status)) {
+    return 0;
+  }
+
+  Match     = NULL;
+  MatchPath = NULL;
+  for (Index = 0; Index < Count; ++Index) {
+    Status = gBS->HandleProtocol (
+                    Handles[Index],
+                    &gEfiBlockIoProtocolGuid,
+                    (VOID **)&BlockIo
+                    );
+    if (  EFI_ERROR (Status) || (BlockIo->Media == NULL)
+       || !BlockIo->Media->MediaPresent || BlockIo->Media->LogicalPartition
+       || BlockIo->Media->RemovableMedia)
+    {
+      continue;
+    }
+
+    Status = gBS->HandleProtocol (
+                    Handles[Index],
+                    &gEfiDevicePathProtocolGuid,
+                    (VOID **)&DiskPath
+                    );
+    if (  EFI_ERROR (Status) || (DiskPath == NULL) || !IsDevicePathValid (DiskPath, 0)
+       || (GetDevicePathSize (DiskPath) != PrefixSize + sizeof (NVME_NAMESPACE_DEVICE_PATH) + END_DEVICE_PATH_LENGTH)
+       || (CompareMem (DiskPath, *DevicePath, PrefixSize) != 0))
+    {
+      continue;
+    }
+
+    DiskNode = (EFI_DEVICE_PATH_PROTOCOL *)((UINT8 *)DiskPath + PrefixSize);
+    //
+    // Apple firmware uses subtype 0x16 for its 16-byte NVMe namespace node.
+    //
+    if (  (DevicePathType (DiskNode) != MESSAGING_DEVICE_PATH)
+       || (  (DevicePathSubType (DiskNode) != MSG_NVME_NAMESPACE_DP)
+          && (DevicePathSubType (DiskNode) != MSG_SASEX_DP))
+       || (DevicePathNodeLength (DiskNode) != sizeof (NVME_NAMESPACE_DEVICE_PATH))
+       || !IsDevicePathEnd (NextDevicePathNode (DiskNode)))
+    {
+      continue;
+    }
+
+    if (Match != NULL) {
+      DEBUG ((DEBUG_INFO, "OCDP: Ambiguous ATAPI disk, keeping original path\n"));
+      FreePool (Handles);
+      return 0;
+    }
+
+    Match     = Handles[Index];
+    MatchPath = DiskPath;
+  }
+
+  FreePool (Handles);
+  if (Match == NULL) {
+    return 0;
+  }
+
+  //
+  // Preserve the complete suffix, including partition, APFS and file nodes.
+  // The caller owns the original allocation or its restoration context.
+  //
+  FixedPath = AppendDevicePath (MatchPath, Suffix);
+  if (FixedPath == NULL) {
+    return 0;
+  }
+
+  Node   = FixedPath;
+  Status = gBS->LocateDevicePath (&gEfiBlockIoProtocolGuid, &Node, &Match);
+  if (  EFI_ERROR (Status)
+     || ((UINTN)Node - (UINTN)FixedPath < PrefixSize + sizeof (NVME_NAMESPACE_DEVICE_PATH)))
+  {
+    FreePool (FixedPath);
+    return 0;
+  }
+
+  DEBUG ((DEBUG_INFO, "OCDP: Fixed ATAPI path using matching NVMe disk\n"));
+  if (RestoreContext != NULL) {
+    RestoreContext->OldPath = *DevicePath;
+  } else {
+    FreePool (*DevicePath);
+  }
+
+  *DevicePath     = FixedPath;
+  *DevicePathNode = (EFI_DEVICE_PATH_PROTOCOL *)((UINT8 *)FixedPath + PrefixSize);
+  return 1;
+}
+
+/**
   Fix Apple Boot Device Path VirtIO node to be compatible with conventional UEFI
   implementations. Currently only APFS file system is supported as VirtIO support
   landed in macOS in 10.14, which was APFS-only.
@@ -619,6 +770,13 @@ OcFixAppleBootDevicePathNode (
 
   if (NodeType == MESSAGING_DEVICE_PATH) {
     switch (NodeSubType) {
+      case MSG_ATAPI_DP:
+        return InternalFixAppleBootDevicePathAtapiNode (
+                 DevicePath,
+                 DevicePathNode,
+                 RestoreContext
+                 );
+
       case MSG_SATA_DP:
         if (Node.Sata->PortMultiplierPortNumber != 0xFFFF) {
           if (RestoreContext != NULL) {
@@ -912,6 +1070,16 @@ OcFixAppleBootDevicePath (
   ASSERT ((UINTN)*RemainingDevicePath >= (UINTN)*DevicePath);
   ASSERT ((UINTN)*RemainingDevicePath < ((UINTN)*DevicePath) + DevicePathSize);
   DEBUG_CODE_END ();
+
+  //
+  // A successful expansion no longer needs the original path for rollback.
+  //
+  if (NodePatched != 0) {
+    OcFixAppleBootDevicePathNodeRestoreFree (
+      *DevicePath,
+      &FirstNodeRestoreContext
+      );
+  }
 
   return NodePatched;
 }
