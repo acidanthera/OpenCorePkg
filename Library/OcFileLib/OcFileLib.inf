@@ -47,6 +47,7 @@
   DevicePathLib
   OcDevicePathLib
   MemoryAllocationLib
+  IntrinsicLib
 
 [Guids]
   gEfiFileInfoGuid                     ## CONSUMES

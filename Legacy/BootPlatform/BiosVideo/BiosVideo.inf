@@ -40,6 +40,7 @@
   OcLegacyThunkLib
   OcMemoryLib
   OcMiscLib
+  IntrinsicLib
 
 [Sources]
   BiosVideo.h

@@ -36,6 +36,7 @@
   ReportStatusCodeLib
   IoLib
   PciLib
+  IntrinsicLib
 
 [Guids]
   gEfiVariableGuid

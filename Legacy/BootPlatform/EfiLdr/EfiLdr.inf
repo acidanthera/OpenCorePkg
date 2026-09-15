@@ -36,6 +36,7 @@
   LzmaDecompressLib
   SerialPortLib
   UefiImageOnlyFvLib
+  IntrinsicLib
 
 [Sources]
   Debug.h

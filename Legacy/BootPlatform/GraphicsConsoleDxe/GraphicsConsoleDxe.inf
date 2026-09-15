@@ -49,6 +49,7 @@
   UefiDriverEntryPoint
   DebugLib
   PcdLib
+  IntrinsicLib
 
 [Protocols]
   gEfiDevicePathProtocolGuid                    ## TO_START

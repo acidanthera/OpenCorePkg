@@ -60,6 +60,7 @@
   BaseLib
   UefiDriverEntryPoint
   DebugLib
+  IntrinsicLib
 
 
 [Guids]

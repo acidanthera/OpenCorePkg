@@ -41,6 +41,7 @@
   PrintLib
   BaseLib
   DebugPrintErrorLevelLib
+  IntrinsicLib
 
 [Pcd]
   gEfiMdePkgTokenSpaceGuid.PcdDebugClearMemoryValue  ## SOMETIMES_CONSUMES
