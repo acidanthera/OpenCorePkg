@@ -1,24 +1,25 @@
 # ATAPI device path regression test
 
-Build and run the actual `OcDevicePathLib` generic resolver with mocked firmware
-protocols:
+Build and run `OcDevicePathLib` with mocked firmware protocols:
 
 ```sh
 make DEBUG=1 SANITIZE=1 WERROR=1
 ./TestAtapiPath
 ```
 
-The tests enter through `OcFixAppleBootDevicePath`, including whole-disk paths,
-partition/APFS/file suffixes, and a hibernation image path. They verify that the
-complete suffix is retained, already working ATA/SATA/NVMe paths stay unchanged,
-ambiguous or unsuitable disks are ignored, and a replacement must resolve.
-Direct node-API tests also exercise successful replacement, restoration of the
-original allocation/cursor, and committed-context cleanup under the sanitizers.
-Pool allocation counters verify that each resolver call releases temporary paths
-and that no allocations remain after the test suite.
+The tests cover ATAPI expansion with disk, partition, APFS and file suffixes,
+extended ATAPI nodes, multiple instances, removable NVMe disks, and firmware
+paths without media metadata. Partition handles are excluded by their device
+paths. Working paths remain unchanged, ambiguous matches are rejected, and the
+replacement must resolve through Block I/O.
 
-An optional argument accepts a private raw `boot-image` fixture. It is tested
-through the same generic API; machine-specific fixtures must not be published.
+Allocation counters check the original-path cleanup, including an existing
+VirtIO expansion. Context tests cover rollback, committed cleanup, a direct
+node call without a restore context, and ACPI correction followed by ATAPI
+expansion through the generic resolver.
 
-The host environment stubs unrelated partition-based short-form expansion;
-these tests exercise the ATAPI replacement, not that existing expansion code.
+An optional argument accepts a private raw `boot-image` fixture. Machine-specific
+fixtures are not included in the repository.
+
+The host environment stubs partition-based short-form expansion; it runs the
+actual ATAPI and VirtIO node handlers.
