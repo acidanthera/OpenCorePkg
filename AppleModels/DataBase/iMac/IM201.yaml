@@ -101,5 +101,5 @@ AppleModelYear:
   - 2021
   - 2022
 MinimumOSVersion: "10.15.6"
-MaximumOSVersion: null
+MaximumOSVersion: "26.7"
 AppleModelId: "J185"

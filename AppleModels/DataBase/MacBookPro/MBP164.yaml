@@ -92,5 +92,5 @@ AppleModelYear:
   - 2020
   - 2021
 MinimumOSVersion: "10.15.5"
-MaximumOSVersion: null
+MaximumOSVersion: "26.7"
 AppleModelId: "J215"

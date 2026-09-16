@@ -113,5 +113,5 @@ AppleModelYear:
   - 2022
   - 2023
 MinimumOSVersion: "10.15.1"
-MaximumOSVersion: null
+MaximumOSVersion: "26.7"
 AppleModelId: "J160"

@@ -135,5 +135,5 @@ AppleModelYear:
   - 2018
   - 2019
 MinimumOSVersion: "10.14.1"
-MaximumOSVersion: "14.8.4"
+MaximumOSVersion: "14.8.9"
 AppleModelId: "J140K"

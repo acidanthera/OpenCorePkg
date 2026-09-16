@@ -89,5 +89,5 @@ AppleModelYear:
   - 2020
   - 2021
 MinimumOSVersion: "10.15.4"
-MaximumOSVersion: null
+MaximumOSVersion: "26.7"
 AppleModelId: "J214K"
