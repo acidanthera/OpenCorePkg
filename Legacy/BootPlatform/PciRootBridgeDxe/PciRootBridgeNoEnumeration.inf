@@ -19,7 +19,7 @@
 [Defines]
   INF_VERSION                    = 0x0001001B
   BASE_NAME                      = PcatPciRootBridge
-  FILE_GUID                      = 0F7EC77A-1EE1-400f-A99D-7CBD1FEB181E
+  FILE_GUID                      = 0F7EC77A-1EE1-400F-A99D-7CBD1FEB181E
   MODULE_TYPE                    = DXE_DRIVER
   VERSION_STRING                 = 1.0
 
