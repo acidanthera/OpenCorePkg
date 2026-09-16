@@ -13,7 +13,7 @@
 ##
 
 [Defines]
-  INF_VERSION                    = 0x00010005
+  INF_VERSION                    = 0x0001001B
   BASE_NAME                      = DataHubTestApp
   FILE_GUID                      = AC252D9E-1CBD-4F61-85F0-FDBBF4103D23
   MODULE_TYPE                    = UEFI_APPLICATION

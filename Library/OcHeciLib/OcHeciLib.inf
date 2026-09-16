@@ -17,7 +17,7 @@
 ##
 
 [Defines]
-  INF_VERSION                    = 0x00010005
+  INF_VERSION                    = 0x0001001B
   BASE_NAME                      = OcHeciLib
   FILE_GUID                      = 1F1ECC50-2F1B-4888-AF74-686D8D7FC0E5
   MODULE_TYPE                    = BASE

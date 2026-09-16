@@ -7,7 +7,7 @@
 
 
 [Defines]
-  INF_VERSION    = 0x00010005
+  INF_VERSION    = 0x0001001B
   BASE_NAME      = ToggleSipEntry
   ENTRY_POINT    = UefiMain
   FILE_GUID      = C6215026-239A-44B7-B140-41348A32913C

@@ -7,7 +7,7 @@
 
 
 [Defines]
-  INF_VERSION    = 0x00010005
+  INF_VERSION    = 0x0001001B
   BASE_NAME      = OpenLinuxBoot
   ENTRY_POINT    = UefiMain
   FILE_GUID      = B2EC4DF3-FC2C-4D24-B1D6-B2D2DE8D8172

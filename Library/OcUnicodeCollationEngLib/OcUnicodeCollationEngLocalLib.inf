@@ -15,7 +15,7 @@
 ##
 
 [Defines]
-  INF_VERSION                    = 0x00010005
+  INF_VERSION                    = 0x0001001B
   BASE_NAME                      = OcUnicodeCollationEngLocalLib
   FILE_GUID                      = 342AB6E7-B87F-41C4-B8D3-51CB24065446
   MODULE_TYPE                    = DXE_DRIVER

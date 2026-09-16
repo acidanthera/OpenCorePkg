@@ -13,7 +13,7 @@
 ##
 
 [Defines]
-  INF_VERSION                    = 0x00010005
+  INF_VERSION                    = 0x0001001B
   BASE_NAME                      = Bootstrap
   FILE_GUID                      = 1E55CC26-6036-43AB-867C-213FFB426812
   MODULE_TYPE                    = UEFI_APPLICATION

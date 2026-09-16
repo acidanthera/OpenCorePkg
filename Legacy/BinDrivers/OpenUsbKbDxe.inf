@@ -5,7 +5,7 @@
 ##
 
 [Defines]
-  INF_VERSION                    = 0x00010005
+  INF_VERSION                    = 0x0001001B
   BASE_NAME                      = OpenUsbKbDxe
   FILE_GUID                      = B4B18806-349E-4305-A7F3-2BD23C8FC1B2
   MODULE_TYPE                    = UEFI_DRIVER

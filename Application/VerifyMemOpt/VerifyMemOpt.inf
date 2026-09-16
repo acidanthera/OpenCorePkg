@@ -13,7 +13,7 @@
 ##
 
 [Defines]
-  INF_VERSION                    = 0x00010005
+  INF_VERSION                    = 0x0001001B
   BASE_NAME                      = VerifyMemOpt
   FILE_GUID                      = 00697824-B09E-43D6-8A2A-1CD9E5C7BFBC
   MODULE_TYPE                    = UEFI_APPLICATION

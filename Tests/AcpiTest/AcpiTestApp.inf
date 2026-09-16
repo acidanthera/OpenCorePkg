@@ -13,7 +13,7 @@
 ##
 
 [Defines]
-  INF_VERSION                    = 0x00010005
+  INF_VERSION                    = 0x0001001B
   BASE_NAME                      = AcpiTestApp
   FILE_GUID                      = C4BE955C-47DD-427C-A38A-FE18DFF4F8FD
   MODULE_TYPE                    = UEFI_APPLICATION

@@ -13,7 +13,7 @@
 ##
 
 [Defines]
-  INF_VERSION                    = 0x00010005
+  INF_VERSION                    = 0x0001001B
   BASE_NAME                      = GopStop
   FILE_GUID                      = 76EFA38A-84A0-4B8F-ADA0-E2BE88CFA8D0
   MODULE_TYPE                    = UEFI_APPLICATION

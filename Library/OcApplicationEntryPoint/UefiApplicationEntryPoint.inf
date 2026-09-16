@@ -9,7 +9,7 @@
 ##
 
 [Defines]
-  INF_VERSION                    = 0x00010005
+  INF_VERSION                    = 0x0001001B
   BASE_NAME                      = OcApplicationEntryPoint
   MODULE_UNI_FILE                = UefiApplicationEntryPoint.uni
   FILE_GUID                      = F2C556D6-C7FA-4930-8F04-5953D9E7A98B

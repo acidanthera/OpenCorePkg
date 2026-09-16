@@ -16,7 +16,7 @@
 ##
 
 [Defines]
-  INF_VERSION                    = 0x00010005
+  INF_VERSION                    = 0x0001001B
   BASE_NAME                      = OcRngLib
   FILE_GUID                      = 416BA864-86D7-4AB5-A508-3B91DC52CFC9
   MODULE_TYPE                    = BASE

@@ -23,7 +23,7 @@
 ##
 
 [Defines]
-  INF_VERSION    = 0x00010005
+  INF_VERSION    = 0x0001001B
   BASE_NAME      = AudioDxe
   ENTRY_POINT    = AudioDxeInit
   FILE_GUID      = AEA1FB0A-8D5B-4733-8D4C-7291D83CE29E

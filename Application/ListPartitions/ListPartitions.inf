@@ -13,7 +13,7 @@
 ##
 
 [Defines]
-  INF_VERSION                    = 0x00010005
+  INF_VERSION                    = 0x0001001B
   BASE_NAME                      = ListPartitions
   FILE_GUID                      = 58856DD3-44DF-481A-BBD2-7ED13741EDF8
   MODULE_TYPE                    = UEFI_APPLICATION

@@ -12,7 +12,7 @@
 ##
 
 [Defines]
-  INF_VERSION                    = 0x00010005
+  INF_VERSION                    = 0x0001001B
   BASE_NAME                      = GraphicsConsoleDxe
   MODULE_UNI_FILE                = GraphicsConsoleDxe.uni
   FILE_GUID                      = CCCB0C28-4B24-11d5-9A5A-0090273FC14D

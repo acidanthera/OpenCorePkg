@@ -7,7 +7,7 @@
 
 
 [Defines]
-  INF_VERSION    = 0x00010005
+  INF_VERSION    = 0x0001001B
   BASE_NAME      = ResetNvramEntry
   ENTRY_POINT    = UefiMain
   FILE_GUID      = 88401E59-1FD2-44C1-9092-539866D48676

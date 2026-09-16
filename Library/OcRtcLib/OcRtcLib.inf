@@ -16,7 +16,7 @@
 ##
 
 [Defines]
-  INF_VERSION                    = 0x00010005
+  INF_VERSION                    = 0x0001001B
   BASE_NAME                      = OcRtcLib
   FILE_GUID                      = DDFDC74D-E1AC-4A9F-A667-5DB8B6D8A67E
   MODULE_TYPE                    = DXE_DRIVER

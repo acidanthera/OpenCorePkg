@@ -17,7 +17,7 @@
 ##
 
 [Defines]
-  INF_VERSION                    = 0x00010005
+  INF_VERSION                    = 0x0001001B
   BASE_NAME                      = OcAudioLib
   FILE_GUID                      = 7E6E8F20-FA64-4066-9A98-95AA0D83917C
   MODULE_TYPE                    = DXE_DRIVER

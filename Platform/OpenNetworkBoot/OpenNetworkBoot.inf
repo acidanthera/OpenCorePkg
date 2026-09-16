@@ -6,7 +6,7 @@
 ##
 
 [Defines]
-  INF_VERSION    = 0x00010005
+  INF_VERSION    = 0x0001001B
   BASE_NAME      = OpenNetworkBoot
   ENTRY_POINT    = UefiMain
   FILE_GUID      = CA2BA189-98E8-4126-ABA5-2CE5C9B4C2D8

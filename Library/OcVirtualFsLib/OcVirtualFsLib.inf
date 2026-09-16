@@ -16,7 +16,7 @@
 ##
 
 [Defines]
-  INF_VERSION                    = 0x00010005
+  INF_VERSION                    = 0x0001001B
   BASE_NAME                      = OcVirtualFsLib
   FILE_GUID                      = 3F9C1D38-B2F2-4D34-8046-FAD140E01BD6
   MODULE_TYPE                    = DXE_DRIVER

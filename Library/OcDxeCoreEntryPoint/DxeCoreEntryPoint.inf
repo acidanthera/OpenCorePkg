@@ -9,7 +9,7 @@
 ##
 
 [Defines]
-  INF_VERSION                    = 0x00010005
+  INF_VERSION                    = 0x0001001B
   BASE_NAME                      = OcDxeCoreEntryPoint
   MODULE_UNI_FILE                = DxeCoreEntryPoint.uni
   FILE_GUID                      = 619169BE-186F-447D-9DA7-AD50272A8C7D

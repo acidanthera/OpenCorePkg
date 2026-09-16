@@ -17,7 +17,7 @@
 ##
 
 [Defines]
-  INF_VERSION     = 0x00010005
+  INF_VERSION     = 0x0001001B
   BASE_NAME       = OcLogAggregatorLib
   FILE_GUID       = 2D7559C7-CB17-426A-927D-69BBCD270A9A
   MODULE_TYPE     = BASE

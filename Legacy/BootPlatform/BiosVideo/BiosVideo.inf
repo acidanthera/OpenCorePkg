@@ -14,7 +14,7 @@
 ##
 
 [Defines]
-  INF_VERSION                    = 0x00010005
+  INF_VERSION                    = 0x0001001B
   BASE_NAME                      = BiosVideo
   FILE_GUID                      = 29CF55F8-B675-4f5d-8F2F-B87A3ECFD063
   MODULE_TYPE                    = UEFI_DRIVER

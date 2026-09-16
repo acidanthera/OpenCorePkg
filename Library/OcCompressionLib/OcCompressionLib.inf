@@ -16,7 +16,7 @@
 ##
 
 [Defines]
-  INF_VERSION                    = 0x00010005
+  INF_VERSION                    = 0x0001001B
   BASE_NAME                      = OcCompressionLib
   FILE_GUID                      = C384FA2A-B1AE-44FA-A33C-D59325B637C9
   MODULE_TYPE                    = DXE_DRIVER

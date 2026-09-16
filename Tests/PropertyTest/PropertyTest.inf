@@ -13,12 +13,11 @@
 ##
 
 [Defines]
-  INF_VERSION                         = 0x00010005
+  INF_VERSION                         = 0x0001001B
   BASE_NAME                           = PropertyTest
   FILE_GUID                           = E4592761-EAFA-43E6-A33F-244C80ED4333
   MODULE_TYPE                         = UEFI_DRIVER
   VERSION_STRING                      = 1.0
-  INF_VERSION                         = 0x00010005
   ENTRY_POINT                         = TestDeviceProperties
 
 #
