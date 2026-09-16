@@ -1,6 +1,7 @@
 ## @file
 #
-#  Component description file for Debug Library using the OcLog protocol.
+#  Component description file for the library producing the OcLog
+#  and Apple Debug Log protocols.
 #
 #  Copyright (C) 2016, The HermitCrabs Lab. All rights reserved.<BR>
 #
@@ -37,8 +38,8 @@
   gApplePlatformProducerNameGuid
 
 [Protocols]
-  gOcLogProtocolGuid
-  gAppleDebugLogProtocolGuid
+  gOcLogProtocolGuid         ## SOMETIMES_PRODUCES 
+  gAppleDebugLogProtocolGuid ## SOMETIMES_PRODUCES
 
 [LibraryClasses]
   BaseLib

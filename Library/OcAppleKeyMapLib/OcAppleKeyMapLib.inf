@@ -1,6 +1,7 @@
 ## @file
 #
-#  Component description file for the library producing the Apple Event protocol.
+#  Component description file for the library producing the Apple Key Map Database
+#  and Apple Key Map Aggregator protocols.
 #
 #  Copyright (C) 2019, Download-Fritz. All rights reserved.<BR>
 #
