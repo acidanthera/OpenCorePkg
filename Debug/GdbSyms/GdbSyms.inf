@@ -51,9 +51,5 @@
   OcGuardLib
   TimerLib
 
-[Guids]
-
-[Protocols]
-
 [Depex]
   TRUE
