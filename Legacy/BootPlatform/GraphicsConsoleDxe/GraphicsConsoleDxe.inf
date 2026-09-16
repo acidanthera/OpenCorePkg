@@ -15,7 +15,7 @@
   INF_VERSION                    = 0x0001001B
   BASE_NAME                      = GraphicsConsoleDxe
   MODULE_UNI_FILE                = GraphicsConsoleDxe.uni
-  FILE_GUID                      = CCCB0C28-4B24-11d5-9A5A-0090273FC14D
+  FILE_GUID                      = CCCB0C28-4B24-11D5-9A5A-0090273FC14D
   MODULE_TYPE                    = UEFI_DRIVER
   VERSION_STRING                 = 1.0
   ENTRY_POINT                    = InitializeGraphicsConsole

@@ -19,7 +19,7 @@
 [Defines]
   INF_VERSION                    = 0x0001001B
   BASE_NAME                      = EfiLoader
-  FILE_GUID                      = A9620E5C-5FA1-40b7-8B21-50B632F88F38
+  FILE_GUID                      = A9620E5C-5FA1-40B7-8B21-50B632F88F38
   MODULE_TYPE                    = UEFI_APPLICATION
   VERSION_STRING                 = 1.0
 

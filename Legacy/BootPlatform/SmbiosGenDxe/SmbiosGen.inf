@@ -22,7 +22,7 @@
 [Defines]
   INF_VERSION                    = 0x0001001B
   BASE_NAME                      = SmbiosGenDxe
-  FILE_GUID                      = A17F4A89-5F19-444f-B7BE-48195E0575DB
+  FILE_GUID                      = A17F4A89-5F19-444F-B7BE-48195E0575DB
   MODULE_TYPE                    = DXE_DRIVER
   VERSION_STRING                 = 1.0
   ENTRY_POINT                    = SmbiosGenEntrypoint

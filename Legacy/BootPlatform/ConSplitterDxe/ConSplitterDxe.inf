@@ -21,7 +21,7 @@
   INF_VERSION                    = 0x0001001B
   BASE_NAME                      = ConSplitterDxe
   MODULE_UNI_FILE                = ConSplitterDxe.uni
-  FILE_GUID                      = 408edcec-cf6d-477c-a5a8-b4844e3de281
+  FILE_GUID                      = 408EDCEC-CF6D-477C-A5A8-B4844E3DE281
   MODULE_TYPE                    = UEFI_DRIVER
   VERSION_STRING                 = 1.0
   ENTRY_POINT                    = ConSplitterDriverEntry
