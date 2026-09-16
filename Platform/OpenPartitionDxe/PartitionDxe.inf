@@ -45,11 +45,9 @@
   Partition.c
   Partition.h
 
-
 [Packages]
   OpenCorePkg/OpenCorePkg.dec
   MdePkg/MdePkg.dec
-
 
 [LibraryClasses]
   DevicePathLib
@@ -61,13 +59,11 @@
   UefiDriverEntryPoint
   DebugLib
 
-
 [Guids]
   gEfiPartTypeUnusedGuid                        ## SOMETIMES_CONSUMES ## GUID
   ## SOMETIMES_CONSUMES ## GUID
   ## SOMETIMES_CONSUMES ## GUID # Install protocol
   gEfiPartTypeSystemPartGuid
-
 
 [Protocols]
   ## BY_START
