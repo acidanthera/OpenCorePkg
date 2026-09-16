@@ -7,7 +7,7 @@
 ##
 
 [Defines]
-  INF_VERSION                    = 0x00010005
+  INF_VERSION                    = 0x0001001B
   BASE_NAME                      = Legacy8259
   MODULE_UNI_FILE                = Legacy8259.uni
   FILE_GUID                      = 245CB4DA-8E15-4A1B-87E3-9878FFA07520

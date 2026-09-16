@@ -13,7 +13,7 @@
 ##
 
 [Defines]
-  INF_VERSION                    = 0x00010005
+  INF_VERSION                    = 0x0001001B
   BASE_NAME                      = CleanNvram
   FILE_GUID                      = 09BD751B-774E-4F54-A339-D9D6D8274BD1
   MODULE_TYPE                    = UEFI_APPLICATION

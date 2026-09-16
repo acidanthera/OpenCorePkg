@@ -17,7 +17,7 @@
 ##
 
 [Defines]
-  INF_VERSION                    = 0x00010005
+  INF_VERSION                    = 0x0001001B
   BASE_NAME                      = OcAppleKeyMapLib
   FILE_GUID                      = 3A5CA054-2A65-4A00-AE58-B61BAFD6CF9A
   MODULE_TYPE                    = DXE_DRIVER

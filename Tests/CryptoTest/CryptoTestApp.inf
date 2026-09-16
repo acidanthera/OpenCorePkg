@@ -13,7 +13,7 @@
 ##
 
 [Defines]
-  INF_VERSION                    = 0x00010005
+  INF_VERSION                    = 0x0001001B
   BASE_NAME                      = CryptoTestApp
   FILE_GUID                      = B6DDBB85-8536-4A37-B79D-F1200AEC50E2
   MODULE_TYPE                    = UEFI_APPLICATION

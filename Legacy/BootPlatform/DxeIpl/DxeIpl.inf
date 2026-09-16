@@ -17,7 +17,7 @@
 ##
 
 [Defines]
-  INF_VERSION                    = 0x00010005
+  INF_VERSION                    = 0x0001001B
   BASE_NAME                      = DxeIpl
   FILE_GUID                      = 2119BBD7-9432-4f47-B5E2-5C4EA31B6BDC
   MODULE_TYPE                    = DXE_DRIVER

@@ -4,7 +4,7 @@
 ##
 
 [Defines]
-  INF_VERSION                    = 0x00010005
+  INF_VERSION                    = 0x0001001B
   BASE_NAME                      = CrScreenshotDxe
   FILE_GUID                      = 91867CFC-F80C-4BC4-94CC-E9E3ED88BC84
   MODULE_TYPE                    = DXE_DRIVER

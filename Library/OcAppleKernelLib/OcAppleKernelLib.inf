@@ -16,7 +16,7 @@
 ##
 
 [Defines]
-  INF_VERSION                    = 0x00010005
+  INF_VERSION                    = 0x0001001B
   BASE_NAME                      = OcAppleKernelLib
   FILE_GUID                      = 9CFA01EA-9A9B-450C-B672-E108CA30DC3F
   MODULE_TYPE                    = DXE_DRIVER

@@ -17,7 +17,7 @@
 ##
 
 [Defines]
-  INF_VERSION                    = 0x00010005
+  INF_VERSION                    = 0x0001001B
   BASE_NAME                      = OcAppleBootPolicyLib
   FILE_GUID                      = 330E9083-C008-4030-AA86-ECF1FBAE824D
   MODULE_TYPE                    = BASE

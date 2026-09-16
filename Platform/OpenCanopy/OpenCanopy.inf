@@ -13,12 +13,11 @@
 ##
 
 [Defines]
-  INF_VERSION                         = 0x00010005
+  INF_VERSION                         = 0x0001001B
   BASE_NAME                           = OpenCanopy
   FILE_GUID                           = A72DCBF9-388A-47FE-B13A-591716F70609
   MODULE_TYPE                         = UEFI_DRIVER
   VERSION_STRING                      = 1.0
-  INF_VERSION                         = 0x00010005
   ENTRY_POINT                         = UefiMain
 
 #

@@ -17,7 +17,7 @@
 ##
 
 [Defines]
-  INF_VERSION                    = 0x00010005
+  INF_VERSION                    = 0x0001001B
   BASE_NAME                      = OcDevicePropertyLib
   FILE_GUID                      = 9854233D-BBFE-435A-A358-74C0C84A7A80
   MODULE_TYPE                    = BASE

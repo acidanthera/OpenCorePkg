@@ -11,7 +11,7 @@
 ##
 
 [Defines]
-  INF_VERSION                    = 0x00010005
+  INF_VERSION                    = 0x0001001B
   BASE_NAME                      = BlockIoDxe
   MODULE_UNI_FILE                = BlockIoDxe.uni
   FILE_GUID                      = 4495E47E-42A9-4007-8c17-B6664F909D04

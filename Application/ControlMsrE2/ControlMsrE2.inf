@@ -13,7 +13,7 @@
 ##
 
 [Defines]
-  INF_VERSION                    = 0x00010005
+  INF_VERSION                    = 0x0001001B
   BASE_NAME                      = ControlMsrE2
   FILE_GUID                      = A779AF43-2D2E-4C9F-998E-CA1AE5DD248B
   MODULE_TYPE                    = UEFI_APPLICATION

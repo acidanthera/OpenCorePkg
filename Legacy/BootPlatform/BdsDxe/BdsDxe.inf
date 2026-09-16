@@ -11,7 +11,7 @@
 ##
 
 [Defines]
-  INF_VERSION                    = 0x00010005
+  INF_VERSION                    = 0x0001001B
   BASE_NAME                      = BdsDxe
   MODULE_UNI_FILE                = BdsDxe.uni
   FILE_GUID                      = FC5C7020-1A48-4198-9BE2-EAD5ABC8CF2F

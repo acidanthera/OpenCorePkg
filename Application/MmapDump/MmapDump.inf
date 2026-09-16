@@ -13,7 +13,7 @@
 ##
 
 [Defines]
-  INF_VERSION                    = 0x00010005
+  INF_VERSION                    = 0x0001001B
   BASE_NAME                      = MmapDump
   FILE_GUID                      = 932C885D-D6CA-408E-B482-90A582212F30
   MODULE_TYPE                    = UEFI_APPLICATION

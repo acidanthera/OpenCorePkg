@@ -8,7 +8,7 @@
 ##
 
 [Defines]
-  INF_VERSION                    = 0x00010005
+  INF_VERSION                    = 0x0001001B
   BASE_NAME                      = OcBlitLib
   FILE_GUID                      = C857ECE4-F54F-43B8-AEFA-F63B2AAD8367
   MODULE_TYPE                    = UEFI_DRIVER

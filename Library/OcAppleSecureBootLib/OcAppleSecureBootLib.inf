@@ -15,7 +15,7 @@
 ##
 
 [Defines]
-  INF_VERSION                    = 0x00010005
+  INF_VERSION                    = 0x0001001B
   BASE_NAME                      = OcAppleSecureBootLib
   FILE_GUID                      = 5F7347FB-56B9-4183-9C5D-064CA5F1B8E3
   MODULE_TYPE                    = DXE_DRIVER

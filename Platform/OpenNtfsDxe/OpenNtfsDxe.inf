@@ -8,7 +8,7 @@
 ##
 
 [Defines]
-  INF_VERSION                    = 0x00010005
+  INF_VERSION                    = 0x0001001B
   BASE_NAME                      = OpenNtfsDxe
   FILE_GUID                      = 5E18FB33-27FE-4613-86AD-10FABDA95BB0
   MODULE_TYPE                    = DXE_DRIVER
