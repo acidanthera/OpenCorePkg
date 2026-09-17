@@ -51,6 +51,8 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 //
 // Block sizes.
 //
+#define MD5_BLOCK_SIZE     64
+#define SHA1_BLOCK_SIZE    64
 #define SHA256_BLOCK_SIZE  64
 #define SHA512_BLOCK_SIZE  128
 #define SHA384_BLOCK_SIZE  SHA512_BLOCK_SIZE
@@ -121,6 +123,11 @@ typedef struct MD5_CONTEXT_ {
   UINT32    State[4];
 } MD5_CONTEXT;
 
+typedef struct HMAC_MD5_CONTEXT_ {
+  MD5_CONTEXT    Inner;
+  UINT8          OKeyPad[MD5_BLOCK_SIZE];
+} HMAC_MD5_CONTEXT;
+
 typedef struct SHA1_CONTEXT_ {
   UINT8     Data[64];
   UINT32    DataLen;
@@ -129,12 +136,22 @@ typedef struct SHA1_CONTEXT_ {
   UINT32    K[4];
 } SHA1_CONTEXT;
 
+typedef struct HMAC_SHA1_CONTEXT_ {
+  SHA1_CONTEXT    Inner;
+  UINT8           OKeyPad[SHA1_BLOCK_SIZE];
+} HMAC_SHA1_CONTEXT;
+
 typedef struct SHA256_CONTEXT_ {
   UINT8     Data[64];
   UINT32    DataLen;
   UINT64    BitLen;
   UINT32    State[8];
 } SHA256_CONTEXT;
+
+typedef struct HMAC_SHA256_CONTEXT_ {
+  SHA256_CONTEXT    Inner;
+  UINT8             OKeyPad[SHA256_BLOCK_SIZE];
+} HMAC_SHA256_CONTEXT;
 
 typedef struct SHA512_CONTEXT_ {
   UINT64    TotalLength;
@@ -143,7 +160,14 @@ typedef struct SHA512_CONTEXT_ {
   UINT64    State[8];
 } SHA512_CONTEXT;
 
+typedef struct HMAC_SHA512_CONTEXT_ {
+  SHA512_CONTEXT    Inner;
+  UINT8             OKeyPad[SHA512_BLOCK_SIZE];
+} HMAC_SHA512_CONTEXT;
+
 typedef SHA512_CONTEXT SHA384_CONTEXT;
+
+typedef HMAC_SHA512_CONTEXT HMAC_SHA384_CONTEXT;
 
 ///
 /// The structure describing the RSA Public Key format.
@@ -295,6 +319,35 @@ Md5 (
   );
 
 VOID
+HmacMd5Init (
+  IN HMAC_MD5_CONTEXT  *Context,
+  IN CONST UINT8       *Key,
+  IN UINTN             KeyLen
+  );
+
+VOID
+HmacMd5Update (
+  IN OUT   HMAC_MD5_CONTEXT  *Context,
+  IN CONST UINT8             *Msg,
+  IN       UINTN             MsgLen
+  );
+
+VOID
+HmacMd5Final (
+  IN OUT HMAC_MD5_CONTEXT  *Context,
+  OUT    UINT8             *Dest
+  );
+
+VOID
+HmacMd5 (
+  IN  CONST UINT8  *Key,
+  IN  UINTN        KeyLen,
+  IN  CONST UINT8  *Msg,
+  IN  UINTN        MsgLen,
+  OUT UINT8        *Dest
+  );
+
+VOID
 Sha1Init (
   SHA1_CONTEXT  *Context
   );
@@ -317,6 +370,35 @@ Sha1 (
   UINT8  *Hash,
   UINT8  *Data,
   UINTN  Len
+  );
+
+VOID
+HmacSha1Init (
+  IN HMAC_SHA1_CONTEXT  *Context,
+  IN CONST UINT8        *Key,
+  IN UINTN              KeyLen
+  );
+
+VOID
+HmacSha1Update (
+  IN OUT   HMAC_SHA1_CONTEXT  *Context,
+  IN CONST UINT8              *Msg,
+  IN       UINTN              MsgLen
+  );
+
+VOID
+HmacSha1Final (
+  IN OUT HMAC_SHA1_CONTEXT  *Context,
+  OUT    UINT8              *Dest
+  );
+
+VOID
+HmacSha1 (
+  IN  CONST UINT8  *Key,
+  IN  UINTN        KeyLen,
+  IN  CONST UINT8  *Msg,
+  IN  UINTN        MsgLen,
+  OUT UINT8        *Dest
   );
 
 VOID
@@ -345,6 +427,35 @@ Sha256 (
   );
 
 VOID
+HmacSha256Init (
+  IN HMAC_SHA256_CONTEXT  *Context,
+  IN CONST UINT8          *Key,
+  IN UINTN                KeyLen
+  );
+
+VOID
+HmacSha256Update (
+  IN OUT   HMAC_SHA256_CONTEXT  *Context,
+  IN CONST UINT8                *Msg,
+  IN       UINTN                MsgLen
+  );
+
+VOID
+HmacSha256Final (
+  IN OUT HMAC_SHA256_CONTEXT  *Context,
+  OUT    UINT8                *Dest
+  );
+
+VOID
+HmacSha256 (
+  IN  CONST UINT8  *Key,
+  IN  UINTN        KeyLen,
+  IN  CONST UINT8  *Msg,
+  IN  UINTN        MsgLen,
+  OUT UINT8        *Dest
+  );
+
+VOID
 Sha512Init (
   SHA512_CONTEXT  *Context
   );
@@ -370,6 +481,35 @@ Sha512 (
   );
 
 VOID
+HmacSha512Init (
+  IN HMAC_SHA512_CONTEXT  *Context,
+  IN CONST UINT8          *Key,
+  IN UINTN                KeyLen
+  );
+
+VOID
+HmacSha512Update (
+  IN OUT   HMAC_SHA512_CONTEXT  *Context,
+  IN CONST UINT8                *Msg,
+  IN       UINTN                MsgLen
+  );
+
+VOID
+HmacSha512Final (
+  IN OUT HMAC_SHA512_CONTEXT  *Context,
+  OUT    UINT8                *Dest
+  );
+
+VOID
+HmacSha512 (
+  IN  CONST UINT8  *Key,
+  IN  UINTN        KeyLen,
+  IN  CONST UINT8  *Msg,
+  IN  UINTN        MsgLen,
+  OUT UINT8        *Dest
+  );
+
+VOID
 Sha384Init (
   SHA384_CONTEXT  *Context
   );
@@ -392,6 +532,35 @@ Sha384 (
   UINT8        *Hash,
   CONST UINT8  *Data,
   UINTN        Len
+  );
+
+VOID
+HmacSha384Init (
+  IN HMAC_SHA384_CONTEXT  *Context,
+  IN CONST UINT8          *Key,
+  IN UINTN                KeyLen
+  );
+
+VOID
+HmacSha384Update (
+  IN OUT   HMAC_SHA384_CONTEXT  *Context,
+  IN CONST UINT8                *Msg,
+  IN       UINTN                MsgLen
+  );
+
+VOID
+HmacSha384Final (
+  IN OUT HMAC_SHA384_CONTEXT  *Context,
+  OUT    UINT8                *Dest
+  );
+
+VOID
+HmacSha384 (
+  IN  CONST UINT8  *Key,
+  IN  UINTN        KeyLen,
+  IN  CONST UINT8  *Msg,
+  IN  UINTN        MsgLen,
+  OUT UINT8        *Dest
   );
 
 BOOLEAN
