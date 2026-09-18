@@ -55,7 +55,7 @@ GOST34112012Init (
   Context->digest_size = digest_size;
 
   for (Index = 0; Index < STREEBOG_QWORD_COUNT; Index++) {
-    if (digest_size == 256) {
+    if (digest_size == STREEBOG256_DIGEST_SIZE) {
       Context->h.QWORD[Index] = 0x0101010101010101ULL;
     } else {
       Context->h.QWORD[Index] = 0x00ULL;
@@ -291,7 +291,7 @@ GOST34112012Final (
 
   Context->bufsize = 0;
 
-  if (Context->digest_size == 256) {
+  if (Context->digest_size == STREEBOG256_DIGEST_SIZE) {
     for (Index = 0; Index < 32; ++Index) {
       Digest[Index] = ((UINT8 *)&(Context->hash.QWORD[4]))[Index];
     }
@@ -307,7 +307,7 @@ Streebog256Init (
   IN OUT STREEBOG_CONTEXT  *Context
   )
 {
-  GOST34112012Init (Context, 256);
+  GOST34112012Init (Context, STREEBOG256_DIGEST_SIZE);
 }
 
 VOID
@@ -349,7 +349,7 @@ Streebog512Init (
   IN OUT STREEBOG_CONTEXT  *Context
   )
 {
-  GOST34112012Init (Context, 512);
+  GOST34112012Init (Context, STREEBOG512_DIGEST_SIZE);
 }
 
 VOID
