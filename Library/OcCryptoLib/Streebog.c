@@ -25,15 +25,17 @@ GOST34112012Cleanup (
   IN OUT STREEBOG_CONTEXT  *Context
   )
 {
-  for (UINTN i = 0; i < 64; ++i) {
-    Context->buffer[i] = 0;
+  UINTN  Index;
+
+  for (Index = 0; Index < 64; ++Index) {
+    Context->buffer[Index] = 0;
   }
 
-  for (UINTN i = 0; i < STREEBOG_QWORD_COUNT; ++i) {
-    Context->hash.QWORD[i]  = 0;
-    Context->h.QWORD[i]     = 0;
-    Context->N.QWORD[i]     = 0;
-    Context->Sigma.QWORD[i] = 0;
+  for (Index = 0; Index < STREEBOG_QWORD_COUNT; ++Index) {
+    Context->hash.QWORD[Index]  = 0;
+    Context->h.QWORD[Index]     = 0;
+    Context->N.QWORD[Index]     = 0;
+    Context->Sigma.QWORD[Index] = 0;
   }
 
   Context->bufsize     = 0;
@@ -47,14 +49,16 @@ GOST34112012Init (
   IN CONST UINT32          digest_size
   )
 {
+  UINTN  Index;
+
   GOST34112012Cleanup (Context);
   Context->digest_size = digest_size;
 
-  for (UINTN i = 0; i < STREEBOG_QWORD_COUNT; i++) {
+  for (Index = 0; Index < STREEBOG_QWORD_COUNT; Index++) {
     if (digest_size == 256) {
-      Context->h.QWORD[i] = 0x0101010101010101ULL;
+      Context->h.QWORD[Index] = 0x0101010101010101ULL;
     } else {
-      Context->h.QWORD[i] = 0x00ULL;
+      Context->h.QWORD[Index] = 0x00ULL;
     }
   }
 }
@@ -65,12 +69,14 @@ Pad (
   IN OUT STREEBOG_CONTEXT  *Context
   )
 {
+  UINTN  Index;
+
   if (Context->bufsize > 63) {
     return;
   }
 
-  for (UINTN i = 0; i < sizeof (Context->buffer) - Context->bufsize; ++i) {
-    Context->buffer[Context->bufsize + i] = 0;
+  for (Index = 0; Index < sizeof (Context->buffer) - Context->bufsize; ++Index) {
+    Context->buffer[Context->bufsize + Index] = 0;
   }
 
   Context->buffer[Context->bufsize] = 0x01;
@@ -84,20 +90,22 @@ Add512 (
   OUT UINT512        *r
   )
 {
+  UINTN  Index;
+
  #if STREEBOG_LITTLE_ENDIAN
   UINT32  CF;
 
   CF = 0;
-  for (UINTN i = 0; i < STREEBOG_QWORD_COUNT; i++) {
-    CONST UINT64  left = x->QWORD[i];
+  for (Index = 0; Index < STREEBOG_QWORD_COUNT; Index++) {
+    CONST UINT64  left = x->QWORD[Index];
     UINT64        sum;
 
-    sum = left + y->QWORD[i] + CF;
+    sum = left + y->QWORD[Index] + CF;
     if (sum != left) {
       CF = (sum < left);
     }
 
-    r->QWORD[i] = sum;
+    r->QWORD[Index] = sum;
   }
 
  #else // STREEBOG_BIG_ENDIAN
@@ -110,9 +118,9 @@ Add512 (
   rp = (UINT8 *)r;
 
   buf = 0;
-  for (UINTN i = 0; i < STREEBOG_BYTE_COUNT; i++) {
-    buf   = xp[i] + yp[i] + (buf >> 8);
-    rp[i] = (UINT8)buf & 0xFF;
+  for (Index = 0; Index < STREEBOG_BYTE_COUNT; Index++) {
+    buf       = xp[Index] + yp[Index] + (buf >> 8);
+    rp[Index] = (UINT8)buf & 0xFF;
   }
 
  #endif
@@ -127,14 +135,15 @@ g (
   )
 {
   UINT512  Ki, data;
+  UINTN    Index;
 
   XLPS (h, N, (&data));
 
   Ki = data;
   XLPS ((&Ki), ((CONST UINT512 *)&m[0]), (&data));
 
-  for (UINTN i = 0; i < 11; i++) {
-    ROUND (i, (&Ki), (&data));
+  for (Index = 0; Index < 11; Index++) {
+    ROUND (Index, (&Ki), (&data));
   }
 
   XLPS ((&Ki), (&C[11]), (&Ki));
@@ -151,8 +160,10 @@ MasCpy (
   IN CONST UINT8  *From
   )
 {
-  for (UINTN i = 0; i < 64; ++i) {
-    To[i] = From[i];
+  UINTN  Index;
+
+  for (Index = 0; Index < 64; ++Index) {
+    To[Index] = From[Index];
   }
 }
 
@@ -163,8 +174,10 @@ Uint512uCpy (
   IN CONST UINT512  *From
   )
 {
-  for (UINTN i = 0; i < STREEBOG_QWORD_COUNT; ++i) {
-    To->QWORD[i] = From->QWORD[i];
+  UINTN  Index;
+
+  for (Index = 0; Index < STREEBOG_QWORD_COUNT; ++Index) {
+    To->QWORD[Index] = From->QWORD[Index];
   }
 }
 
@@ -226,6 +239,7 @@ GOST34112012Update (
   )
 {
   UINT32  chunksize;
+  UINTN   Index;
 
   if (Context->bufsize) {
     chunksize = 64 - Context->bufsize;
@@ -233,8 +247,8 @@ GOST34112012Update (
       chunksize = Length;
     }
 
-    for (UINTN i = 0; i < chunksize; ++i) {
-      Context->buffer[Context->bufsize + i] = Data[i];
+    for (Index = 0; Index < chunksize; ++Index) {
+      Context->buffer[Context->bufsize + Index] = Data[Index];
     }
 
     Context->bufsize += chunksize;
@@ -256,8 +270,8 @@ GOST34112012Update (
   }
 
   if (Length) {
-    for (UINTN i = 0; i < Length; ++i) {
-      Context->buffer[i] = Data[i];
+    for (Index = 0; Index < Length; ++Index) {
+      Context->buffer[Index] = Data[Index];
     }
 
     Context->bufsize = Length;
@@ -271,17 +285,19 @@ GOST34112012Final (
   OUT UINT8                *Digest
   )
 {
+  UINTN  Index;
+
   Stage3 (Context);
 
   Context->bufsize = 0;
 
   if (Context->digest_size == 256) {
-    for (UINTN i = 0; i < 32; ++i) {
-      Digest[i] = ((UINT8 *)&(Context->hash.QWORD[4]))[i];
+    for (Index = 0; Index < 32; ++Index) {
+      Digest[Index] = ((UINT8 *)&(Context->hash.QWORD[4]))[Index];
     }
   } else {
-    for (UINTN i = 0; i < 64; ++i) {
-      Digest[i] = ((UINT8 *)&(Context->hash.QWORD[0]))[i];
+    for (Index = 0; Index < 64; ++Index) {
+      Digest[Index] = ((UINT8 *)&(Context->hash.QWORD[0]))[Index];
     }
   }
 }
