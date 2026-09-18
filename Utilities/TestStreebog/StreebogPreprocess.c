@@ -4,9 +4,10 @@
   SPDX-License-Identifier: BSD-2-Clause
 **/
 
-#include <UserFile.h>
-#include <Library/OcCryptoLib.h>
 #include <BigNumLib.h>
+#include <UserFile.h>
+
+#include <Library/OcCryptoLib.h>
 
 #define HASHSIZE  (STREEBOG512_DIGEST_SIZE / 8)
 
@@ -180,13 +181,13 @@ ENTRY_POINT (
   char  *argv[]
   )
 {
-  UINT8  hash[HASHSIZE];
+  UINT8  Hash[HASHSIZE];
   UINT8  Flag      = 1;
   UINT8  LocalFlag = 1;
 
-  Streebog256 (M1, hash, ARRAY_SIZE (M1));
+  Streebog256 (M1, Hash, ARRAY_SIZE (M1));
 
-  LocalFlag = CompareMem (hash, H1_256, HASHSIZE / 2) == 0;
+  LocalFlag = CompareMem (Hash, H1_256, HASHSIZE / 2) == 0;
 
   if (LocalFlag) {
     DEBUG ((DEBUG_ERROR, "M1 256 OK\n"));
@@ -196,9 +197,9 @@ ENTRY_POINT (
   }
 
   LocalFlag = 1;
-  Streebog512 (M1, hash, ARRAY_SIZE (M1));
+  Streebog512 (M1, Hash, ARRAY_SIZE (M1));
 
-  LocalFlag = CompareMem (hash, H1_512, HASHSIZE) == 0;
+  LocalFlag = CompareMem (Hash, H1_512, HASHSIZE) == 0;
 
   if (LocalFlag) {
     DEBUG ((DEBUG_ERROR, "M1 512 OK\n"));
@@ -207,9 +208,9 @@ ENTRY_POINT (
     Flag = 0;
   }
 
-  Streebog256 (M2, hash, ARRAY_SIZE (M2));
+  Streebog256 (M2, Hash, ARRAY_SIZE (M2));
 
-  LocalFlag = CompareMem (hash, H2_256, HASHSIZE / 2) == 0;
+  LocalFlag = CompareMem (Hash, H2_256, HASHSIZE / 2) == 0;
 
   if (LocalFlag) {
     DEBUG ((DEBUG_ERROR, "M2 256 OK\n"));
@@ -218,9 +219,9 @@ ENTRY_POINT (
     Flag = 0;
   }
 
-  Streebog512 (M2, hash, ARRAY_SIZE (M2));
+  Streebog512 (M2, Hash, ARRAY_SIZE (M2));
 
-  LocalFlag = CompareMem (hash, H2_512, HASHSIZE) == 0;
+  LocalFlag = CompareMem (Hash, H2_512, HASHSIZE) == 0;
 
   if (LocalFlag) {
     DEBUG ((DEBUG_ERROR, "M2 512 OK\n"));

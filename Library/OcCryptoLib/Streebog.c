@@ -9,15 +9,15 @@
 #include "CryptoInternal.h"
 #include "Streebog.h"
 
-#define BSWAP64(x) \
-    (((x & 0xFF00000000000000ULL) >> 56) | \
-     ((x & 0x00FF000000000000ULL) >> 40) | \
-     ((x & 0x0000FF0000000000ULL) >> 24) | \
-     ((x & 0x000000FF00000000ULL) >>  8) | \
-     ((x & 0x00000000FF000000ULL) <<  8) | \
-     ((x & 0x0000000000FF0000ULL) << 24) | \
-     ((x & 0x000000000000FF00ULL) << 40) | \
-     ((x & 0x00000000000000FFULL) << 56))
+#define BSWAP64(X) \
+    (((X & 0xFF00000000000000ULL) >> 56) | \
+     ((X & 0x00FF000000000000ULL) >> 40) | \
+     ((X & 0x0000FF0000000000ULL) >> 24) | \
+     ((X & 0x000000FF00000000ULL) >>  8) | \
+     ((X & 0x00000000FF000000ULL) <<  8) | \
+     ((X & 0x0000000000FF0000ULL) << 24) | \
+     ((X & 0x000000000000FF00ULL) << 40) | \
+     ((X & 0x00000000000000FFULL) << 56))
 
 STATIC
 VOID
@@ -27,38 +27,38 @@ GOST34112012Cleanup (
 {
   UINTN  Index;
 
-  for (Index = 0; Index < 64; ++Index) {
-    Context->buffer[Index] = 0;
+  for (Index = 0; Index < STREEBOG_BYTE_COUNT; ++Index) {
+    Context->Buffer[Index] = 0;
   }
 
   for (Index = 0; Index < STREEBOG_QWORD_COUNT; ++Index) {
-    Context->hash.QWORD[Index]  = 0;
-    Context->h.QWORD[Index]     = 0;
+    Context->Hash.QWORD[Index]  = 0;
+    Context->H.QWORD[Index]     = 0;
     Context->N.QWORD[Index]     = 0;
     Context->Sigma.QWORD[Index] = 0;
   }
 
-  Context->bufsize     = 0;
-  Context->digest_size = 0;
+  Context->BufSize    = 0;
+  Context->DigestSize = 0;
 }
 
 STATIC
 VOID
 GOST34112012Init (
   IN OUT STREEBOG_CONTEXT  *Context,
-  IN CONST UINT32          digest_size
+  IN CONST UINT32          DigestSize
   )
 {
   UINTN  Index;
 
   GOST34112012Cleanup (Context);
-  Context->digest_size = digest_size;
+  Context->DigestSize = DigestSize;
 
   for (Index = 0; Index < STREEBOG_QWORD_COUNT; Index++) {
-    if (digest_size == STREEBOG256_DIGEST_SIZE) {
-      Context->h.QWORD[Index] = 0x0101010101010101ULL;
+    if (DigestSize == STREEBOG256_DIGEST_SIZE) {
+      Context->H.QWORD[Index] = 0x0101010101010101ULL;
     } else {
-      Context->h.QWORD[Index] = 0x00ULL;
+      Context->H.QWORD[Index] = 0x00ULL;
     }
   }
 }
@@ -71,23 +71,23 @@ Pad (
 {
   UINTN  Index;
 
-  if (Context->bufsize > 63) {
+  if (Context->BufSize > STREEBOG_BYTE_COUNT - 1) {
     return;
   }
 
-  for (Index = 0; Index < sizeof (Context->buffer) - Context->bufsize; ++Index) {
-    Context->buffer[Context->bufsize + Index] = 0;
+  for (Index = 0; Index < sizeof (Context->Buffer) - Context->BufSize; ++Index) {
+    Context->Buffer[Context->BufSize + Index] = 0;
   }
 
-  Context->buffer[Context->bufsize] = 0x01;
+  Context->Buffer[Context->BufSize] = 0x01;
 }
 
 STATIC
 VOID
 Add512 (
-  IN  CONST UINT512  *x,
-  IN  CONST UINT512  *y,
-  OUT UINT512        *r
+  IN  CONST UINT512  *X,
+  IN  CONST UINT512  *Y,
+  OUT UINT512        *R
   )
 {
   UINTN  Index;
@@ -97,30 +97,30 @@ Add512 (
 
   CF = 0;
   for (Index = 0; Index < STREEBOG_QWORD_COUNT; Index++) {
-    CONST UINT64  left = x->QWORD[Index];
-    UINT64        sum;
+    CONST UINT64  Left = X->QWORD[Index];
+    UINT64        Sum;
 
-    sum = left + y->QWORD[Index] + CF;
-    if (sum != left) {
-      CF = (sum < left);
+    Sum = Left + Y->QWORD[Index] + CF;
+    if (Sum != Left) {
+      CF = (Sum < Left);
     }
 
-    r->QWORD[Index] = sum;
+    R->QWORD[Index] = Sum;
   }
 
  #else // STREEBOG_BIG_ENDIAN
-  CONST UINT8  *xp, *yp;
-  UINT8        *rp;
-  INT32        buf;
+  CONST UINT8  *Xp, *Yp;
+  UINT8        *Rp;
+  INT32        Buf;
 
-  xp = (CONST UINT8 *)x;
-  yp = (CONST UINT8 *)y;
-  rp = (UINT8 *)r;
+  Xp = (CONST UINT8 *)X;
+  Yp = (CONST UINT8 *)Y;
+  Rp = (UINT8 *)R;
 
-  buf = 0;
+  Buf = 0;
   for (Index = 0; Index < STREEBOG_BYTE_COUNT; Index++) {
-    buf       = xp[Index] + yp[Index] + (buf >> 8);
-    rp[Index] = (UINT8)buf & 0xFF;
+    Buf       = Xp[Index] + Yp[Index] + (Buf >> 8);
+    Rp[Index] = (UINT8)Buf & 0xFF;
   }
 
  #endif
@@ -128,29 +128,29 @@ Add512 (
 
 STATIC
 VOID
-g (
-  IN OUT UINT512    *h,
+G (
+  IN OUT UINT512    *H,
   IN CONST UINT512  *N,
-  IN CONST UINT8    *m
+  IN CONST UINT8    *M
   )
 {
-  UINT512  Ki, data;
+  UINT512  Ki, Data;
   UINTN    Index;
 
-  XLPS (h, N, (&data));
+  XLPS (H, N, (&Data));
 
-  Ki = data;
-  XLPS ((&Ki), ((CONST UINT512 *)&m[0]), (&data));
+  Ki = Data;
+  XLPS ((&Ki), ((CONST UINT512 *)&M[0]), (&Data));
 
   for (Index = 0; Index < 11; Index++) {
-    ROUND (Index, (&Ki), (&data));
+    ROUND (Index, (&Ki), (&Data));
   }
 
   XLPS ((&Ki), (&C[11]), (&Ki));
-  X ((&Ki), (&data), (&data));
+  X ((&Ki), (&Data), (&Data));
 
-  X ((&data), h, (&data));
-  X ((&data), ((CONST UINT512 *)&m[0]), h);
+  X ((&Data), H, (&Data));
+  X ((&Data), ((CONST UINT512 *)&M[0]), H);
 }
 
 STATIC
@@ -162,7 +162,7 @@ MasCpy (
 {
   UINTN  Index;
 
-  for (Index = 0; Index < 64; ++Index) {
+  for (Index = 0; Index < STREEBOG_BYTE_COUNT; ++Index) {
     To[Index] = From[Index];
   }
 }
@@ -188,13 +188,13 @@ Stage2 (
   IN CONST UINT8           *Data
   )
 {
-  UINT512  m;
+  UINT512  M;
 
-  MasCpy ((UINT8 *)&m, Data);
-  g (&(Context->h), &(Context->N), (CONST UINT8 *)&m);
+  MasCpy ((UINT8 *)&M, Data);
+  G (&(Context->H), &(Context->N), (CONST UINT8 *)&M);
 
-  Add512 (&(Context->N), &buffer512, &(Context->N));
-  Add512 (&(Context->Sigma), &m, &(Context->Sigma));
+  Add512 (&(Context->N), &Buffer512, &(Context->N));
+  Add512 (&(Context->Sigma), &M, &(Context->Sigma));
 }
 
 STATIC
@@ -203,31 +203,31 @@ Stage3 (
   IN OUT STREEBOG_CONTEXT  *Context
   )
 {
-  UINT512  buf = {
+  UINT512  Buf = {
     { 0 }
   };
 
  #if STREEBOG_LITTLE_ENDIAN
-  buf.QWORD[0] = Context->bufsize << 3;
+  Buf.QWORD[0] = Context->BufSize << 3;
  #else // STREEBOG_BIG_ENDIAN
-  buf.QWORD[0] = BSWAP64 (Context->bufsize << 3);
+  Buf.QWORD[0] = BSWAP64 (Context->BufSize << 3);
  #endif
 
   Pad (Context);
 
-  g (&Context->h, &Context->N, (CONST UINT8 *)Context->buffer);
+  G (&Context->H, &Context->N, (CONST UINT8 *)Context->Buffer);
 
-  Add512 (&(Context->N), &buf, &(Context->N));
+  Add512 (&(Context->N), &Buf, &(Context->N));
   Add512 (
     &(Context->Sigma),
-    (CONST UINT512 *)&Context->buffer[0],
+    (CONST UINT512 *)&Context->Buffer[0],
     &(Context->Sigma)
     );
 
-  g (&Context->h, &buffer0, (CONST UINT8 *)&Context->N);
+  G (&Context->H, &Buffer0, (CONST UINT8 *)&Context->N);
 
-  g (&Context->h, &buffer0, (CONST UINT8 *)&Context->Sigma);
-  Uint512uCpy (&(Context->hash), &(Context->h));
+  G (&Context->H, &Buffer0, (CONST UINT8 *)&Context->Sigma);
+  Uint512uCpy (&(Context->Hash), &(Context->H));
 }
 
 STATIC
@@ -238,43 +238,43 @@ GOST34112012Update (
   IN UINT32                Length
   )
 {
-  UINT32  chunksize;
+  UINT32  ChunkSize;
   UINTN   Index;
 
-  if (Context->bufsize) {
-    chunksize = 64 - Context->bufsize;
-    if (chunksize > Length) {
-      chunksize = Length;
+  if (Context->BufSize) {
+    ChunkSize = STREEBOG_BYTE_COUNT - Context->BufSize;
+    if (ChunkSize > Length) {
+      ChunkSize = Length;
     }
 
-    for (Index = 0; Index < chunksize; ++Index) {
-      Context->buffer[Context->bufsize + Index] = Data[Index];
+    for (Index = 0; Index < ChunkSize; ++Index) {
+      Context->Buffer[Context->BufSize + Index] = Data[Index];
     }
 
-    Context->bufsize += chunksize;
-    Length           -= chunksize;
-    Data             += chunksize;
+    Context->BufSize += ChunkSize;
+    Length           -= ChunkSize;
+    Data             += ChunkSize;
 
-    if (Context->bufsize == 64) {
-      Stage2 (Context, Context->buffer);
+    if (Context->BufSize == STREEBOG_BYTE_COUNT) {
+      Stage2 (Context, Context->Buffer);
 
-      Context->bufsize = 0;
+      Context->BufSize = 0;
     }
   }
 
-  while (Length > 63) {
+  while (Length > STREEBOG_BYTE_COUNT - 1) {
     Stage2 (Context, Data);
 
-    Data   += 64;
-    Length -= 64;
+    Data   += STREEBOG_BYTE_COUNT;
+    Length -= STREEBOG_BYTE_COUNT;
   }
 
   if (Length) {
     for (Index = 0; Index < Length; ++Index) {
-      Context->buffer[Index] = Data[Index];
+      Context->Buffer[Index] = Data[Index];
     }
 
-    Context->bufsize = Length;
+    Context->BufSize = Length;
   }
 }
 
@@ -289,15 +289,15 @@ GOST34112012Final (
 
   Stage3 (Context);
 
-  Context->bufsize = 0;
+  Context->BufSize = 0;
 
-  if (Context->digest_size == STREEBOG256_DIGEST_SIZE) {
-    for (Index = 0; Index < 32; ++Index) {
-      Digest[Index] = ((UINT8 *)&(Context->hash.QWORD[4]))[Index];
+  if (Context->DigestSize == STREEBOG256_DIGEST_SIZE) {
+    for (Index = 0; Index < STREEBOG_BYTE_COUNT / 2; ++Index) {
+      Digest[Index] = ((UINT8 *)&(Context->Hash.QWORD[4]))[Index];
     }
   } else {
-    for (Index = 0; Index < 64; ++Index) {
-      Digest[Index] = ((UINT8 *)&(Context->hash.QWORD[0]))[Index];
+    for (Index = 0; Index < STREEBOG_BYTE_COUNT; ++Index) {
+      Digest[Index] = ((UINT8 *)&(Context->Hash.QWORD[0]))[Index];
     }
   }
 }

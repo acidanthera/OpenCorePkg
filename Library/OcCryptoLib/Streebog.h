@@ -4,9 +4,12 @@
   SPDX-License-Identifier: BSD-2-Clause
 **/
 
+#ifndef OC_STREEBOG_H
+#define OC_STREEBOG_H
+
 #include "CryptoInternal.h"
 
-static CONST UINT512  buffer0 = {
+STATIC CONST UINT512  Buffer0 = {
   { 0x0ULL, 0x0ULL, 0x0ULL,
     0x0ULL, 0x0ULL, 0x0ULL, 0x0ULL, 0x0ULL }
 };
@@ -14,14 +17,14 @@ static CONST UINT512  buffer0 = {
 #if (defined (__BYTE_ORDER__) && __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__) || defined (MDE_CPU_IA32) || defined (MDE_CPU_X64)
 #define STREEBOG_LITTLE_ENDIAN  1
 #define STREEBOG_BIG_ENDIAN     0
-static CONST UINT512  buffer512 = {
+STATIC CONST UINT512  Buffer512 = {
   { 0x0000000000000200ULL,
     0x0ULL, 0x0ULL, 0x0ULL, 0x0ULL, 0x0ULL, 0x0ULL, 0x0ULL }
 };
 #elif defined (__BYTE_ORDER__) && __BYTE_ORDER__ == __ORDER_BIG_ENDIAN__
 #define STREEBOG_LITTLE_ENDIAN  0
 #define STREEBOG_BIG_ENDIAN     1
-static CONST UINT512  buffer512 = {
+STATIC CONST UINT512  Buffer512 = {
   { 0x0002000000000000ULL,
     0x0ULL, 0x0ULL, 0x0ULL, 0x0ULL, 0x0ULL, 0x0ULL, 0x0ULL }
 };
@@ -33,59 +36,59 @@ static CONST UINT512  buffer512 = {
 
 #define STREEBOG_BYTE_COUNT  (STREEBOG_QWORD_COUNT * sizeof (UINT64))
 
-#define X(x, y, z)  {\
-  z->QWORD[0] = x->QWORD[0] ^ y->QWORD[0]; \
-  z->QWORD[1] = x->QWORD[1] ^ y->QWORD[1]; \
-  z->QWORD[2] = x->QWORD[2] ^ y->QWORD[2]; \
-  z->QWORD[3] = x->QWORD[3] ^ y->QWORD[3]; \
-  z->QWORD[4] = x->QWORD[4] ^ y->QWORD[4]; \
-  z->QWORD[5] = x->QWORD[5] ^ y->QWORD[5]; \
-  z->QWORD[6] = x->QWORD[6] ^ y->QWORD[6]; \
-  z->QWORD[7] = x->QWORD[7] ^ y->QWORD[7]; \
+#define X(X, Y, Z)  {\
+  Z->QWORD[0] = X->QWORD[0] ^ Y->QWORD[0]; \
+  Z->QWORD[1] = X->QWORD[1] ^ Y->QWORD[1]; \
+  Z->QWORD[2] = X->QWORD[2] ^ Y->QWORD[2]; \
+  Z->QWORD[3] = X->QWORD[3] ^ Y->QWORD[3]; \
+  Z->QWORD[4] = X->QWORD[4] ^ Y->QWORD[4]; \
+  Z->QWORD[5] = X->QWORD[5] ^ Y->QWORD[5]; \
+  Z->QWORD[6] = X->QWORD[6] ^ Y->QWORD[6]; \
+  Z->QWORD[7] = X->QWORD[7] ^ Y->QWORD[7]; \
 }
 
 #ifndef __GOST3411_BIG_ENDIAN__
-#define __XLPS_FOR  for (_i = 0; _i <= 7; _i++)
-#define _datai      _i
+#define __XLPS_FOR  for (_Index = 0; _Index <= 7; _Index++)
+#define _DataI      _Index
 #else
-#define __XLPS_FOR  for (_i = 7; _i >= 0; _i--)
-#define _datai      7 - _i
+#define __XLPS_FOR  for (_Index = 7; _Index >= 0; _Index--)
+#define _DataI      7 - _Index
 #endif
 
-#define XLPS(x, y, data)  {\
-  register UINT64  r0, r1, r2, r3, r4, r5, r6, r7; \
-  int _i; \
+#define XLPS(X, Y, Data)  {\
+  register UINT64  R0, R1, R2, R3, R4, R5, R6, R7; \
+  UINTN _Index; \
   \
-  r0 = x->QWORD[0] ^ y->QWORD[0]; \
-  r1 = x->QWORD[1] ^ y->QWORD[1]; \
-  r2 = x->QWORD[2] ^ y->QWORD[2]; \
-  r3 = x->QWORD[3] ^ y->QWORD[3]; \
-  r4 = x->QWORD[4] ^ y->QWORD[4]; \
-  r5 = x->QWORD[5] ^ y->QWORD[5]; \
-  r6 = x->QWORD[6] ^ y->QWORD[6]; \
-  r7 = x->QWORD[7] ^ y->QWORD[7]; \
+  R0 = X->QWORD[0] ^ Y->QWORD[0]; \
+  R1 = X->QWORD[1] ^ Y->QWORD[1]; \
+  R2 = X->QWORD[2] ^ Y->QWORD[2]; \
+  R3 = X->QWORD[3] ^ Y->QWORD[3]; \
+  R4 = X->QWORD[4] ^ Y->QWORD[4]; \
+  R5 = X->QWORD[5] ^ Y->QWORD[5]; \
+  R6 = X->QWORD[6] ^ Y->QWORD[6]; \
+  R7 = X->QWORD[7] ^ Y->QWORD[7]; \
   \
   \
   __XLPS_FOR \
   {\
-      data->QWORD[_datai]  = Ax[0][(r0 >> (_i << 3)) & 0xFF]; \
-      data->QWORD[_datai] ^= Ax[1][(r1 >> (_i << 3)) & 0xFF]; \
-      data->QWORD[_datai] ^= Ax[2][(r2 >> (_i << 3)) & 0xFF]; \
-      data->QWORD[_datai] ^= Ax[3][(r3 >> (_i << 3)) & 0xFF]; \
-      data->QWORD[_datai] ^= Ax[4][(r4 >> (_i << 3)) & 0xFF]; \
-      data->QWORD[_datai] ^= Ax[5][(r5 >> (_i << 3)) & 0xFF]; \
-      data->QWORD[_datai] ^= Ax[6][(r6 >> (_i << 3)) & 0xFF]; \
-      data->QWORD[_datai] ^= Ax[7][(r7 >> (_i << 3)) & 0xFF]; \
+      Data->QWORD[_DataI]  = AX[0][(R0 >> (_Index << 3)) & 0xFF]; \
+      Data->QWORD[_DataI] ^= AX[1][(R1 >> (_Index << 3)) & 0xFF]; \
+      Data->QWORD[_DataI] ^= AX[2][(R2 >> (_Index << 3)) & 0xFF]; \
+      Data->QWORD[_DataI] ^= AX[3][(R3 >> (_Index << 3)) & 0xFF]; \
+      Data->QWORD[_DataI] ^= AX[4][(R4 >> (_Index << 3)) & 0xFF]; \
+      Data->QWORD[_DataI] ^= AX[5][(R5 >> (_Index << 3)) & 0xFF]; \
+      Data->QWORD[_DataI] ^= AX[6][(R6 >> (_Index << 3)) & 0xFF]; \
+      Data->QWORD[_DataI] ^= AX[7][(R7 >> (_Index << 3)) & 0xFF]; \
   }\
 }
 
-#define ROUND(i, Ki, data)  {\
-  XLPS(Ki, (&C[i]), Ki); \
-  XLPS(Ki, data, data); \
+#define ROUND(Index, Ki, Data)  {\
+  XLPS(Ki, (&C[Index]), Ki); \
+  XLPS(Ki, Data, Data); \
 }
 
-#if (defined (__BYTE_ORDER__) && __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__) || defined (MDE_CPU_IA32) || defined (MDE_CPU_X64)
-static CONST UINT512  C[12] = {
+#if STREEBOG_LITTLE_ENDIAN
+STATIC CONST UINT512  C[12] = {
   {
     {
       0xdd806559f2a64507ULL,
@@ -231,8 +234,8 @@ static CONST UINT512  C[12] = {
     }
   }
 };
-#elif defined (__BYTE_ORDER__) && __BYTE_ORDER__ == __ORDER_BIG_ENDIAN__
-static CONST UINT512  C[12] = {
+#else // STREEBOG_BIG_ENDIAN
+STATIC CONST UINT512  C[12] = {
   {
     {
       0x0745a6f2596580ddULL,
@@ -378,12 +381,10 @@ static CONST UINT512  C[12] = {
     }
   }
 };
-#else
-  #error Byte order is undefined
 #endif
 
-#if (defined (__BYTE_ORDER__) && __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__) || defined (MDE_CPU_IA32) || defined (MDE_CPU_X64)
-static const unsigned long long  Ax[8][256] =
+#if STREEBOG_LITTLE_ENDIAN
+STATIC CONST UINT64  AX[8][256] =
 {
   {
     0xd01f715b5c7ef8e6ULL, 0x16fa240980778325ULL, 0xa8a42e857ee049c8ULL,
@@ -1090,8 +1091,8 @@ static const unsigned long long  Ax[8][256] =
     0xd6a30f258c153427ULL
   }
 };
-#elif defined (__BYTE_ORDER__) && __BYTE_ORDER__ == __ORDER_BIG_ENDIAN__
-static const unsigned long long  Ax[8][256] =
+#else // STREEBOG_BIG_ENDIAN
+STATIC CONST UINT64  AX[8][256] =
 {
   {
     0xe6f87e5c5b711fd0ULL, 0x258377800924fa16ULL, 0xc849e07e852ea4a8ULL,
@@ -1798,6 +1799,6 @@ static const unsigned long long  Ax[8][256] =
     0x2734158c250fa3d6ULL
   }
 };
-#else
-  #error Byte order is undefined
 #endif
+
+#endif // OC_STREEBOG_H

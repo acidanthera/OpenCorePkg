@@ -155,13 +155,13 @@ typedef struct UINT512_ {
 } UINT512;
 
 typedef struct STREEBOG_CONTEXT_ {
-  UINT8      buffer[64];
-  UINT512    hash;
-  UINT512    h;
+  UINT8      Buffer[64];
+  UINT512    Hash;
+  UINT512    H;
   UINT512    N;
   UINT512    Sigma;
-  UINT32     bufsize;
-  UINT32     digest_size;
+  UINT32     BufSize;
+  UINT32     DigestSize;
 } STREEBOG_CONTEXT;
 
 ///
