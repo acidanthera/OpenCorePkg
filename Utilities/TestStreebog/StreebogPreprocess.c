@@ -8,7 +8,7 @@
 #include <Library/OcCryptoLib.h>
 #include <BigNumLib.h>
 
-#define HASHSIZE 64
+#define HASHSIZE  (STREEBOG512_DIGEST_SIZE / 8)
 
 CONST UINT8  M1[] = {
   0x30, 0x31,
@@ -199,7 +199,7 @@ ENTRY_POINT (
   Streebog512 (M1, hash, ARRAY_SIZE (M1));
 
   LocalFlag = CompareMem (hash, H1_512, HASHSIZE) == 0;
-  
+
   if (LocalFlag) {
     DEBUG ((DEBUG_ERROR, "M1 512 OK\n"));
   } else {
@@ -228,7 +228,7 @@ ENTRY_POINT (
     DEBUG ((DEBUG_ERROR, "M2 512 ERROR\n"));
     Flag = 0;
   }
-  
+
   if (Flag) {
     return 0;
   } else {
