@@ -11,7 +11,7 @@ static CONST UINT512  buffer0 = {
     0x0ULL, 0x0ULL, 0x0ULL, 0x0ULL, 0x0ULL }
 };
 
-#if (defined (__BYTE_ORDER__) && __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__) || defined(MDE_CPU_IA32) || defined(MDE_CPU_X64)
+#if (defined (__BYTE_ORDER__) && __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__) || defined (MDE_CPU_IA32) || defined (MDE_CPU_X64)
 static CONST UINT512  buffer512 = {
   { 0x0000000000000200ULL,
     0x0ULL, 0x0ULL, 0x0ULL, 0x0ULL, 0x0ULL, 0x0ULL, 0x0ULL }
@@ -76,7 +76,7 @@ static CONST UINT512  buffer512 = {
   XLPS(Ki, data, data); \
 }
 
-#if (defined (__BYTE_ORDER__) && __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__) || defined(MDE_CPU_IA32) || defined(MDE_CPU_X64)
+#if (defined (__BYTE_ORDER__) && __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__) || defined (MDE_CPU_IA32) || defined (MDE_CPU_X64)
 static CONST UINT512  C[12] = {
   {
     {
@@ -374,7 +374,7 @@ static CONST UINT512  C[12] = {
   #error Byte order is undefined
 #endif
 
-#if (defined (__BYTE_ORDER__) && __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__) || defined(MDE_CPU_IA32) || defined(MDE_CPU_X64)
+#if (defined (__BYTE_ORDER__) && __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__) || defined (MDE_CPU_IA32) || defined (MDE_CPU_X64)
 static const unsigned long long  Ax[8][256] =
 {
   {

@@ -49,16 +49,16 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 #define STREEBOG256_DIGEST_SIZE  256
 #define STREEBOG512_DIGEST_SIZE  512
 
-#define OC_MAX_SHA_DIGEST_SIZE   STREEBOG512_DIGEST_SIZE
+#define OC_MAX_SHA_DIGEST_SIZE  STREEBOG512_DIGEST_SIZE
 
 //
 // Block sizes.
 //
-#define SHA256_BLOCK_SIZE        64
-#define SHA512_BLOCK_SIZE        128
-#define SHA384_BLOCK_SIZE        SHA512_BLOCK_SIZE
-#define STREEBOG256_BLOCK_SIZE   512
-#define STREEBOG512_BLOCK_SIZE   STREEBOG256_BLOCK_SIZE
+#define SHA256_BLOCK_SIZE       64
+#define SHA512_BLOCK_SIZE       128
+#define SHA384_BLOCK_SIZE       SHA512_BLOCK_SIZE
+#define STREEBOG256_BLOCK_SIZE  512
+#define STREEBOG512_BLOCK_SIZE  STREEBOG256_BLOCK_SIZE
 
 //
 // Derived parameters.
@@ -151,17 +151,17 @@ typedef struct SHA512_CONTEXT_ {
 typedef SHA512_CONTEXT SHA384_CONTEXT;
 
 typedef struct UINT512_ {
-  UINT64  QWORD[8];
+  UINT64    QWORD[8];
 } UINT512;
 
 typedef struct STREEBOG_CONTEXT_ {
-  UINT8              buffer[64];
+  UINT8      buffer[64];
   UINT512    hash;
   UINT512    h;
   UINT512    N;
   UINT512    Sigma;
-  UINT32             bufsize;
-  UINT32             digest_size;
+  UINT32     bufsize;
+  UINT32     digest_size;
 } STREEBOG_CONTEXT;
 
 ///
@@ -460,7 +460,7 @@ VOID
 Streebog512 (
   CONST UINT8  *Data,
   UINT8        *Digest,
-  UINT32        Length
+  UINT32       Length
   );
 
 BOOLEAN

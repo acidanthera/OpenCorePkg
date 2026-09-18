@@ -24,11 +24,11 @@ GOST34112012Cleanup (
   STREEBOG_CONTEXT  *Context
   )
 {
-  for (INT32 i = 0; i < 64; ++i) {
+  for (UINTN i = 0; i < 64; ++i) {
     Context->buffer[i] = 0;
   }
 
-  for (INT32 i = 0; i < 8; ++i) {
+  for (UINTN i = 0; i < 8; ++i) {
     Context->hash.QWORD[i]  = 0;
     Context->h.QWORD[i]     = 0;
     Context->N.QWORD[i]     = 0;
@@ -45,12 +45,10 @@ GOST34112012Init (
   CONST UINT32      digest_size
   )
 {
-  UINT32  i;
-
   GOST34112012Cleanup (Context);
   Context->digest_size = digest_size;
 
-  for (i = 0; i < 8; i++) {
+  for (UINTN i = 0; i < 8; i++) {
     if (digest_size == 256) {
       Context->h.QWORD[i] = 0x0101010101010101ULL;
     } else {
@@ -69,7 +67,7 @@ Pad (
     return;
   }
 
-  for (UINT32 i = 0; i < sizeof (Context->buffer) - Context->bufsize; ++i) {
+  for (UINTN i = 0; i < sizeof (Context->buffer) - Context->bufsize; ++i) {
     Context->buffer[Context->bufsize + i] = 0;
   }
 
@@ -84,12 +82,11 @@ Add512 (
   UINT512        *r
   )
 {
-#if (defined (__BYTE_ORDER__) && __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__) || defined(MDE_CPU_IA32) || defined(MDE_CPU_X64)
+ #if (defined (__BYTE_ORDER__) && __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__) || defined (MDE_CPU_IA32) || defined (MDE_CPU_X64)
   UINT32  CF;
-  UINT32  i;
 
   CF = 0;
-  for (i = 0; i < 8; i++) {
+  for (UINTN i = 0; i < 8; i++) {
     CONST UINT64  left = x->QWORD[i];
     UINT64        sum;
 
@@ -101,10 +98,9 @@ Add512 (
     r->QWORD[i] = sum;
   }
 
-#elif defined (__BYTE_ORDER__) && __BYTE_ORDER__ == __ORDER_BIG_ENDIAN__
+ #elif defined (__BYTE_ORDER__) && __BYTE_ORDER__ == __ORDER_BIG_ENDIAN__
   CONST UINT8  *xp, *yp;
   UINT8        *rp;
-  UINT32       i;
   INT32        buf;
 
   xp = (CONST UINT8 *)&x[0];
@@ -112,14 +108,14 @@ Add512 (
   rp = (UINT8 *)&r[0];
 
   buf = 0;
-  for (i = 0; i < 64; i++) {
+  for (UINTN i = 0; i < 64; i++) {
     buf   = xp[i] + yp[i] + (buf >> 8);
     rp[i] = (UINT8)buf & 0xFF;
   }
 
-#else
+ #else
   #error Byte order is undefined
-#endif
+ #endif
 }
 
 STATIC
@@ -127,18 +123,17 @@ VOID
 g (
   UINT512        *h,
   CONST UINT512  *N,
-  CONST UINT8            *m
+  CONST UINT8    *m
   )
 {
   UINT512  Ki, data;
-  UINT32           i;
 
   XLPS (h, N, (&data));
 
   Ki = data;
   XLPS ((&Ki), ((const UINT512 *)&m[0]), (&data));
 
-  for (i = 0; i < 11; i++) {
+  for (UINTN i = 0; i < 11; i++) {
     ROUND (i, (&Ki), (&data));
   }
 
@@ -156,7 +151,7 @@ MasCpy (
   CONST UINT8  *From
   )
 {
-  for (INT32 i = 0; i < 64; ++i) {
+  for (UINTN i = 0; i < 64; ++i) {
     To[i] = From[i];
   }
 }
@@ -168,7 +163,7 @@ Uint512uCpy (
   CONST UINT512  *from
   )
 {
-  for (INT32 i = 0; i < 8; ++i) {
+  for (UINTN i = 0; i < 8; ++i) {
     to->QWORD[i] = from->QWORD[i];
   }
 }
@@ -199,13 +194,13 @@ Stage3 (
     { 0 }
   };
 
-#if (defined (__BYTE_ORDER__) && __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__) || defined(MDE_CPU_IA32) || defined(MDE_CPU_X64)
+ #if (defined (__BYTE_ORDER__) && __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__) || defined (MDE_CPU_IA32) || defined (MDE_CPU_X64)
   buf.QWORD[0] = Context->bufsize << 3;
-#elif defined (__BYTE_ORDER__) && __BYTE_ORDER__ == __ORDER_BIG_ENDIAN__
+ #elif defined (__BYTE_ORDER__) && __BYTE_ORDER__ == __ORDER_BIG_ENDIAN__
   buf.QWORD[0] = BSWAP64 (Context->bufsize << 3);
-#else
+ #else
   #error Byte order is undefined
-#endif
+ #endif
 
   Pad (Context);
 
@@ -239,7 +234,7 @@ GOST34112012Update (
       chunksize = Length;
     }
 
-    for (UINT32 i = 0; i < chunksize; ++i) {
+    for (UINTN i = 0; i < chunksize; ++i) {
       ((UINT8 *)(&(Context->buffer[Context->bufsize])))[i] = Data[i];
     }
 
@@ -257,12 +252,12 @@ GOST34112012Update (
   while (Length > 63) {
     Stage2 (Context, Data);
 
-    Data += 64;
-    Length  -= 64;
+    Data   += 64;
+    Length -= 64;
   }
 
   if (Length) {
-    for (UINT32 i = 0; i < Length; ++i) {
+    for (UINTN i = 0; i < Length; ++i) {
       ((UINT8 *)(&Context->buffer))[i] = Data[i];
     }
 
@@ -273,7 +268,7 @@ GOST34112012Update (
 VOID
 GOST34112012Final (
   STREEBOG_CONTEXT  *Context,
-  UINT8            *Digest
+  UINT8             *Digest
   )
 {
   Stage3 (Context);
@@ -281,11 +276,11 @@ GOST34112012Final (
   Context->bufsize = 0;
 
   if (Context->digest_size == 256) {
-    for (INT32 i = 0; i < 32; ++i) {
+    for (UINTN i = 0; i < 32; ++i) {
       Digest[i] = ((UINT8 *)&(Context->hash.QWORD[4]))[i];
     }
   } else {
-    for (INT32 i = 0; i < 64; ++i) {
+    for (UINTN i = 0; i < 64; ++i) {
       Digest[i] = ((UINT8 *)&(Context->hash.QWORD[0]))[i];
     }
   }
@@ -312,7 +307,7 @@ Streebog256Update (
 VOID
 Streebog256Final (
   STREEBOG_CONTEXT  *Context,
-  UINT8            *Digest
+  UINT8             *Digest
   )
 {
   GOST34112012Final (Context, Digest);
@@ -330,7 +325,7 @@ Streebog256 (
   Streebog256Init (&Context);
   Streebog256Update (&Context, Data, Length);
   Streebog256Final (&Context, Digest);
-  SecureZeroMem (&Context, sizeof(Context));
+  SecureZeroMem (&Context, sizeof (Context));
 }
 
 VOID
@@ -344,8 +339,8 @@ Streebog512Init (
 VOID
 Streebog512Update (
   STREEBOG_CONTEXT  *Context,
-  CONST UINT8      *Data,
-  UINT32           Length
+  CONST UINT8       *Data,
+  UINT32            Length
   )
 {
   GOST34112012Update (Context, Data, Length);
@@ -354,7 +349,7 @@ Streebog512Update (
 VOID
 Streebog512Final (
   STREEBOG_CONTEXT  *Context,
-  UINT8            *Digest
+  UINT8             *Digest
   )
 {
   GOST34112012Final (Context, Digest);
@@ -372,7 +367,7 @@ Streebog512 (
   Streebog512Init (&Context);
   Streebog512Update (&Context, Data, Length);
   Streebog512Final (&Context, Digest);
-  SecureZeroMem (&Context, sizeof(Context));
+  SecureZeroMem (&Context, sizeof (Context));
 }
 
 #endif
