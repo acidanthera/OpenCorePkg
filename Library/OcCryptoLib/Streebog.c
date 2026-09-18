@@ -19,9 +19,10 @@
      ((x & 0x000000000000FF00ULL) << 40) | \
      ((x & 0x00000000000000FFULL) << 56))
 
+STATIC
 VOID
 GOST34112012Cleanup (
-  STREEBOG_CONTEXT  *Context
+  IN OUT STREEBOG_CONTEXT  *Context
   )
 {
   for (UINTN i = 0; i < 64; ++i) {
@@ -39,10 +40,11 @@ GOST34112012Cleanup (
   Context->digest_size = 0;
 }
 
+STATIC
 VOID
 GOST34112012Init (
-  STREEBOG_CONTEXT  *Context,
-  CONST UINT32      digest_size
+  IN OUT STREEBOG_CONTEXT  *Context,
+  IN CONST UINT32          digest_size
   )
 {
   GOST34112012Cleanup (Context);
@@ -60,7 +62,7 @@ GOST34112012Init (
 STATIC
 VOID
 Pad (
-  STREEBOG_CONTEXT  *Context
+  IN OUT STREEBOG_CONTEXT  *Context
   )
 {
   if (Context->bufsize > 63) {
@@ -77,9 +79,9 @@ Pad (
 STATIC
 VOID
 Add512 (
-  CONST UINT512  *x,
-  CONST UINT512  *y,
-  UINT512        *r
+  IN  CONST UINT512  *x,
+  IN  CONST UINT512  *y,
+  OUT UINT512        *r
   )
 {
  #if STREEBOG_LITTLE_ENDIAN
@@ -103,9 +105,9 @@ Add512 (
   UINT8        *rp;
   INT32        buf;
 
-  xp = (CONST UINT8 *)&x[0];
-  yp = (CONST UINT8 *)&y[0];
-  rp = (UINT8 *)&r[0];
+  xp = (CONST UINT8 *)x;
+  yp = (CONST UINT8 *)y;
+  rp = (UINT8 *)r;
 
   buf = 0;
   for (UINTN i = 0; i < STREEBOG_BYTE_COUNT; i++) {
@@ -119,9 +121,9 @@ Add512 (
 STATIC
 VOID
 g (
-  UINT512        *h,
-  CONST UINT512  *N,
-  CONST UINT8    *m
+  IN OUT UINT512    *h,
+  IN CONST UINT512  *N,
+  IN CONST UINT8    *m
   )
 {
   UINT512  Ki, data;
@@ -129,7 +131,7 @@ g (
   XLPS (h, N, (&data));
 
   Ki = data;
-  XLPS ((&Ki), ((const UINT512 *)&m[0]), (&data));
+  XLPS ((&Ki), ((CONST UINT512 *)&m[0]), (&data));
 
   for (UINTN i = 0; i < 11; i++) {
     ROUND (i, (&Ki), (&data));
@@ -139,14 +141,14 @@ g (
   X ((&Ki), (&data), (&data));
 
   X ((&data), h, (&data));
-  X ((&data), ((const UINT512 *)&m[0]), h);
+  X ((&data), ((CONST UINT512 *)&m[0]), h);
 }
 
 STATIC
 VOID
 MasCpy (
-  UINT8        *To,
-  CONST UINT8  *From
+  OUT UINT8       *To,
+  IN CONST UINT8  *From
   )
 {
   for (UINTN i = 0; i < 64; ++i) {
@@ -157,20 +159,20 @@ MasCpy (
 STATIC
 VOID
 Uint512uCpy (
-  UINT512        *to,
-  CONST UINT512  *from
+  OUT UINT512       *To,
+  IN CONST UINT512  *From
   )
 {
   for (UINTN i = 0; i < STREEBOG_QWORD_COUNT; ++i) {
-    to->QWORD[i] = from->QWORD[i];
+    To->QWORD[i] = From->QWORD[i];
   }
 }
 
 STATIC
 VOID
 Stage2 (
-  STREEBOG_CONTEXT  *Context,
-  CONST UINT8       *Data
+  IN OUT STREEBOG_CONTEXT  *Context,
+  IN CONST UINT8           *Data
   )
 {
   UINT512  m;
@@ -185,7 +187,7 @@ Stage2 (
 STATIC
 VOID
 Stage3 (
-  STREEBOG_CONTEXT  *Context
+  IN OUT STREEBOG_CONTEXT  *Context
   )
 {
   UINT512  buf = {
@@ -200,26 +202,27 @@ Stage3 (
 
   Pad (Context);
 
-  g (&(Context->h), &(Context->N), (const unsigned char *)&(Context->buffer));
+  g (&Context->h, &Context->N, (CONST UINT8 *)Context->buffer);
 
   Add512 (&(Context->N), &buf, &(Context->N));
   Add512 (
     &(Context->Sigma),
-    (const UINT512 *)&Context->buffer[0],
+    (CONST UINT512 *)&Context->buffer[0],
     &(Context->Sigma)
     );
 
-  g (&(Context->h), &buffer0, (const unsigned char *)&(Context->N));
+  g (&Context->h, &buffer0, (CONST UINT8 *)&Context->N);
 
-  g (&(Context->h), &buffer0, (const unsigned char *)&(Context->Sigma));
+  g (&Context->h, &buffer0, (CONST UINT8 *)&Context->Sigma);
   Uint512uCpy (&(Context->hash), &(Context->h));
 }
 
+STATIC
 VOID
 GOST34112012Update (
-  STREEBOG_CONTEXT  *Context,
-  CONST UINT8       *Data,
-  UINT32            Length
+  IN OUT STREEBOG_CONTEXT  *Context,
+  IN CONST UINT8           *Data,
+  IN UINT32                Length
   )
 {
   UINT32  chunksize;
@@ -231,7 +234,7 @@ GOST34112012Update (
     }
 
     for (UINTN i = 0; i < chunksize; ++i) {
-      ((UINT8 *)(&(Context->buffer[Context->bufsize])))[i] = Data[i];
+      Context->buffer[Context->bufsize + i] = Data[i];
     }
 
     Context->bufsize += chunksize;
@@ -254,17 +257,18 @@ GOST34112012Update (
 
   if (Length) {
     for (UINTN i = 0; i < Length; ++i) {
-      ((UINT8 *)(&Context->buffer))[i] = Data[i];
+      Context->buffer[i] = Data[i];
     }
 
     Context->bufsize = Length;
   }
 }
 
+STATIC
 VOID
 GOST34112012Final (
-  STREEBOG_CONTEXT  *Context,
-  UINT8             *Digest
+  IN OUT STREEBOG_CONTEXT  *Context,
+  OUT UINT8                *Digest
   )
 {
   Stage3 (Context);
@@ -284,7 +288,7 @@ GOST34112012Final (
 
 VOID
 Streebog256Init (
-  STREEBOG_CONTEXT  *Context
+  IN OUT STREEBOG_CONTEXT  *Context
   )
 {
   GOST34112012Init (Context, 256);
@@ -292,9 +296,9 @@ Streebog256Init (
 
 VOID
 Streebog256Update (
-  STREEBOG_CONTEXT  *Context,
-  CONST UINT8       *Data,
-  UINT32            Length
+  IN OUT STREEBOG_CONTEXT  *Context,
+  IN CONST UINT8           *Data,
+  IN UINT32                Length
   )
 {
   GOST34112012Update (Context, Data, Length);
@@ -302,8 +306,8 @@ Streebog256Update (
 
 VOID
 Streebog256Final (
-  STREEBOG_CONTEXT  *Context,
-  UINT8             *Digest
+  IN OUT STREEBOG_CONTEXT  *Context,
+  OUT UINT8                *Digest
   )
 {
   GOST34112012Final (Context, Digest);
@@ -311,9 +315,9 @@ Streebog256Final (
 
 VOID
 Streebog256 (
-  CONST UINT8  *Data,
-  UINT8        *Digest,
-  UINT32       Length
+  IN CONST UINT8  *Data,
+  OUT UINT8       *Digest,
+  IN UINT32       Length
   )
 {
   STREEBOG_CONTEXT  Context;
@@ -326,7 +330,7 @@ Streebog256 (
 
 VOID
 Streebog512Init (
-  STREEBOG_CONTEXT  *Context
+  IN OUT STREEBOG_CONTEXT  *Context
   )
 {
   GOST34112012Init (Context, 512);
@@ -334,9 +338,9 @@ Streebog512Init (
 
 VOID
 Streebog512Update (
-  STREEBOG_CONTEXT  *Context,
-  CONST UINT8       *Data,
-  UINT32            Length
+  IN OUT STREEBOG_CONTEXT  *Context,
+  IN CONST UINT8           *Data,
+  IN UINT32                Length
   )
 {
   GOST34112012Update (Context, Data, Length);
@@ -344,8 +348,8 @@ Streebog512Update (
 
 VOID
 Streebog512Final (
-  STREEBOG_CONTEXT  *Context,
-  UINT8             *Digest
+  IN OUT STREEBOG_CONTEXT  *Context,
+  OUT UINT8                *Digest
   )
 {
   GOST34112012Final (Context, Digest);
@@ -353,9 +357,9 @@ Streebog512Final (
 
 VOID
 Streebog512 (
-  CONST UINT8  *Data,
-  UINT8        *Digest,
-  UINT32       Length
+  IN CONST UINT8  *Data,
+  OUT UINT8       *Digest,
+  IN UINT32       Length
   )
 {
   STREEBOG_CONTEXT  Context;

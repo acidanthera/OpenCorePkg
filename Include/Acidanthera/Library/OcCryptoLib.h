@@ -415,52 +415,52 @@ Sha384 (
 
 VOID
 Streebog256Init (
-  STREEBOG_CONTEXT  *Context
+  IN OUT STREEBOG_CONTEXT  *Context
   );
 
 VOID
 Streebog256Update (
-  STREEBOG_CONTEXT  *Context,
-  CONST UINT8       *Data,
-  UINT32            Length
+  IN OUT STREEBOG_CONTEXT  *Context,
+  IN CONST UINT8           *Data,
+  IN UINT32                Length
   );
 
 VOID
 Streebog256Final (
-  STREEBOG_CONTEXT  *Context,
-  UINT8             *HashDigest
+  IN OUT STREEBOG_CONTEXT  *Context,
+  OUT UINT8                *Digest
   );
 
 VOID
 Streebog256 (
-  CONST UINT8  *Data,
-  UINT8        *Digest,
-  UINT32       Length
+  IN CONST UINT8  *Data,
+  OUT UINT8       *Digest,
+  IN UINT32       Length
   );
 
 VOID
 Streebog512Init (
-  STREEBOG_CONTEXT  *Context
+  IN OUT STREEBOG_CONTEXT  *Context
   );
 
 VOID
 Streebog512Update (
-  STREEBOG_CONTEXT  *Context,
-  CONST UINT8       *Data,
-  UINT32            Length
+  IN OUT STREEBOG_CONTEXT  *Context,
+  IN CONST UINT8           *Data,
+  IN UINT32                Length
   );
 
 VOID
 Streebog512Final (
-  STREEBOG_CONTEXT  *Context,
-  UINT8             *Digest
+  IN OUT STREEBOG_CONTEXT  *Context,
+  OUT UINT8                *Digest
   );
 
 VOID
 Streebog512 (
-  CONST UINT8  *Data,
-  UINT8        *Digest,
-  UINT32       Length
+  IN CONST UINT8  *Data,
+  OUT UINT8       *Digest,
+  IN UINT32       Length
   );
 
 BOOLEAN
