@@ -12,11 +12,15 @@ static CONST UINT512  buffer0 = {
 };
 
 #if (defined (__BYTE_ORDER__) && __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__) || defined (MDE_CPU_IA32) || defined (MDE_CPU_X64)
+#define STREEBOG_LITTLE_ENDIAN  1
+#define STREEBOG_BIG_ENDIAN     0
 static CONST UINT512  buffer512 = {
   { 0x0000000000000200ULL,
     0x0ULL, 0x0ULL, 0x0ULL, 0x0ULL, 0x0ULL, 0x0ULL, 0x0ULL }
 };
 #elif defined (__BYTE_ORDER__) && __BYTE_ORDER__ == __ORDER_BIG_ENDIAN__
+#define STREEBOG_LITTLE_ENDIAN  0
+#define STREEBOG_BIG_ENDIAN     1
 static CONST UINT512  buffer512 = {
   { 0x0002000000000000ULL,
     0x0ULL, 0x0ULL, 0x0ULL, 0x0ULL, 0x0ULL, 0x0ULL, 0x0ULL }
@@ -24,6 +28,10 @@ static CONST UINT512  buffer512 = {
 #else
   #error Byte order is undefined
 #endif
+
+#define STREEBOG_QWORD_COUNT  8
+
+#define STREEBOG_BYTE_COUNT  (STREEBOG_QWORD_COUNT * sizeof (UINT64))
 
 #define X(x, y, z)  {\
   z->QWORD[0] = x->QWORD[0] ^ y->QWORD[0]; \

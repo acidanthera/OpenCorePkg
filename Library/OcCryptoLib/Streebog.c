@@ -28,7 +28,7 @@ GOST34112012Cleanup (
     Context->buffer[i] = 0;
   }
 
-  for (UINTN i = 0; i < 8; ++i) {
+  for (UINTN i = 0; i < STREEBOG_QWORD_COUNT; ++i) {
     Context->hash.QWORD[i]  = 0;
     Context->h.QWORD[i]     = 0;
     Context->N.QWORD[i]     = 0;
@@ -48,7 +48,7 @@ GOST34112012Init (
   GOST34112012Cleanup (Context);
   Context->digest_size = digest_size;
 
-  for (UINTN i = 0; i < 8; i++) {
+  for (UINTN i = 0; i < STREEBOG_QWORD_COUNT; i++) {
     if (digest_size == 256) {
       Context->h.QWORD[i] = 0x0101010101010101ULL;
     } else {
@@ -82,11 +82,11 @@ Add512 (
   UINT512        *r
   )
 {
- #if (defined (__BYTE_ORDER__) && __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__) || defined (MDE_CPU_IA32) || defined (MDE_CPU_X64)
+ #if STREEBOG_LITTLE_ENDIAN
   UINT32  CF;
 
   CF = 0;
-  for (UINTN i = 0; i < 8; i++) {
+  for (UINTN i = 0; i < STREEBOG_QWORD_COUNT; i++) {
     CONST UINT64  left = x->QWORD[i];
     UINT64        sum;
 
@@ -98,7 +98,7 @@ Add512 (
     r->QWORD[i] = sum;
   }
 
- #elif defined (__BYTE_ORDER__) && __BYTE_ORDER__ == __ORDER_BIG_ENDIAN__
+ #else // STREEBOG_BIG_ENDIAN
   CONST UINT8  *xp, *yp;
   UINT8        *rp;
   INT32        buf;
@@ -108,13 +108,11 @@ Add512 (
   rp = (UINT8 *)&r[0];
 
   buf = 0;
-  for (UINTN i = 0; i < 64; i++) {
+  for (UINTN i = 0; i < STREEBOG_BYTE_COUNT; i++) {
     buf   = xp[i] + yp[i] + (buf >> 8);
     rp[i] = (UINT8)buf & 0xFF;
   }
 
- #else
-  #error Byte order is undefined
  #endif
 }
 
@@ -163,7 +161,7 @@ Uint512uCpy (
   CONST UINT512  *from
   )
 {
-  for (UINTN i = 0; i < 8; ++i) {
+  for (UINTN i = 0; i < STREEBOG_QWORD_COUNT; ++i) {
     to->QWORD[i] = from->QWORD[i];
   }
 }
@@ -194,12 +192,10 @@ Stage3 (
     { 0 }
   };
 
- #if (defined (__BYTE_ORDER__) && __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__) || defined (MDE_CPU_IA32) || defined (MDE_CPU_X64)
+ #if STREEBOG_LITTLE_ENDIAN
   buf.QWORD[0] = Context->bufsize << 3;
- #elif defined (__BYTE_ORDER__) && __BYTE_ORDER__ == __ORDER_BIG_ENDIAN__
+ #else // STREEBOG_BIG_ENDIAN
   buf.QWORD[0] = BSWAP64 (Context->bufsize << 3);
- #else
-  #error Byte order is undefined
  #endif
 
   Pad (Context);
