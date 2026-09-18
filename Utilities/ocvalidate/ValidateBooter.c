@@ -148,6 +148,7 @@ CheckBooterQuirks (
   BOOLEAN               IsEnableSafeModeSlideEnabled;
   BOOLEAN               IsDisableVariableWriteEnabled;
   BOOLEAN               IsEnableWriteUnprotectorEnabled;
+  BOOLEAN               IsClearTaskSwitchBitEnabled;
   BOOLEAN               HasOpenRuntimeEfiDriver;
   INT8                  ResizeAppleGpuBars;
 
@@ -157,6 +158,7 @@ CheckBooterQuirks (
   IsEnableSafeModeSlideEnabled    = Config->Booter.Quirks.EnableSafeModeSlide;
   IsDisableVariableWriteEnabled   = Config->Booter.Quirks.DisableVariableWrite;
   IsEnableWriteUnprotectorEnabled = Config->Booter.Quirks.EnableWriteUnprotector;
+  IsClearTaskSwitchBitEnabled     = Config->Booter.Quirks.ClearTaskSwitchBit;
   HasOpenRuntimeEfiDriver         = FALSE;
   MaxSlide                        = Config->Booter.Quirks.ProvideMaxSlide;
   ResizeAppleGpuBars              = Config->Booter.Quirks.ResizeAppleGpuBars;
@@ -186,6 +188,11 @@ CheckBooterQuirks (
 
     if (IsEnableWriteUnprotectorEnabled) {
       DEBUG ((DEBUG_WARN, "Booter->Quirks->EnableWriteUnprotector is enabled, but OpenRuntime.efi is not loaded at UEFI->Drivers!\n"));
+      ++ErrorCount;
+    }
+
+    if (IsClearTaskSwitchBitEnabled) {
+      DEBUG ((DEBUG_WARN, "Booter->Quirks->ClearTaskSwitchBit is enabled, but OpenRuntime.efi is not loaded at UEFI->Drivers!\n"));
       ++ErrorCount;
     }
   }

@@ -1,6 +1,6 @@
 ## @file
 #
-#  Component description file for the library producing the Apple Device property protocol.
+#  Component description file for OcAfterBootCompatLib.
 #
 #  Copyright (C) 2019, vit9696. All rights reserved.<BR>
 #
@@ -17,7 +17,7 @@
 ##
 
 [Defines]
-  INF_VERSION                    = 0x00010005
+  INF_VERSION                    = 0x0001001B
   BASE_NAME                      = OcAfterBootCompatLib
   FILE_GUID                      = A393F7CF-3966-4C7E-8763-3DD991681C9B
   MODULE_TYPE                    = BASE
@@ -38,6 +38,13 @@
   RelocationBlock.c
   RelocationCallGate.h
   ServiceOverrides.c
+
+[Sources.Ia32]
+  Ia32/KernelSupport32.c
+  Ia32/KernelTrampoline.nasm
+
+[Sources.X64]
+  X64/KernelSupport64.c
 
 [Packages]
   MdePkg/MdePkg.dec

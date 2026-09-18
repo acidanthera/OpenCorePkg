@@ -1075,6 +1075,9 @@ OcKernelFuzzyMatch (
                LinkedExpansion,
                Digest
                );
+    if (EFI_ERROR (Status)) {
+      (*KernelFile)->Close (*KernelFile);
+    }
   } while (EFI_ERROR (Status));
 
   if (FileInfo != NULL) {

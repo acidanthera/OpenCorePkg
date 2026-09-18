@@ -203,7 +203,7 @@ typedef struct APFS_NX_SUPERBLOCK_ {
   //
   // The logical block size used in the Apple File System container.
   // This size is often the same as the block size used by the underlying
-  // storage device, but it can also be an integer multiple of the deviceʼs block size.
+  // storage device, but it can also be an integer multiple of the device's block size.
   //
   UINT32                 BlockSize;
   //

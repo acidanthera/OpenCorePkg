@@ -10,7 +10,7 @@ EnableGop version (OpenCore version)
 
 ### 1.3 (0.9.2)
  - Included fix to GopBurstMode for non-standard frame buffer information on AMD Radeon HD 7970 and similar
- - Applied GopBurstMode even on natively supported cards, as it can provide a noticable speed up
+ - Applied GopBurstMode even on natively supported cards, as it can provide a noticeable speed up
 
 ### 1.2 (0.9.1)
  - Added GopBurstMode support
@@ -156,7 +156,13 @@ To use the provided `vBiosInsert.sh` script:
  - Locate an appropriate version of the `nvflash` tool (Nvidia) or `amdvbflash` tool (AMD) (both are available for
    Linux and Windows), which can be used to read from and write to the GPU firmware.
  - Use that tool to read a copy of the GPU firmware.
- - Run `./vBiosInsertEfi.sh [-a|-n] {original}.rom EnableGop.efi {modified}.rom`, with `-a` for AMD and `-n` for Nvidia.
+ - Run `./vBiosInsert.sh [-a|-n] {original}.rom EnableGop.efi {modified}.rom`, with `-a` for AMD and `-n` for Nvidia.
+    - If you have any problems with `vBiosInsert.sh` from a specific release
+    of EnableGop, please try the version included with the latest release of OpenCore
+    before reporting any issues.
+    The script receives updates to support additional graphics cards independently
+    of any bumps to the release version of EnableGop. If you need to, you can use
+    the latest version of `vBiosInsert.sh` to inject older versions of EnableGop.
  - The new file `{modified}.rom` may be burnt to the GPU firmware.
 
 In the case of AMD, considerably less space is normally available, due to a strict limit of 128k for legacy and EFI 

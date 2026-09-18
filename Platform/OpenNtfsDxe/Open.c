@@ -163,22 +163,13 @@ FileReadDir (
   CHAR16         Path[MAX_PATH];
   EFI_NTFS_FILE  *TmpFile = NULL;
   UINTN          Length;
+  INTN           Res;
 
   ASSERT (File != NULL);
   ASSERT (Size != NULL);
   ASSERT ((Data != NULL) || ((Data == NULL) && (*Size == 0)));
 
-  Info = (EFI_FILE_INFO *)Data;
-
-  if (*Size < MINIMUM_INFO_LENGTH) {
-    *Size = MINIMUM_INFO_LENGTH;
-    return EFI_BUFFER_TOO_SMALL;
-  }
-
   ZeroMem (Path, sizeof (Path));
-  ZeroMem (Data, *Size);
-  Info->Size = *Size;
-
   Status = StrCpyS (Path, MAX_PATH, File->Path);
   if (EFI_ERROR (Status)) {
     DEBUG ((DEBUG_INFO, "NTFS: Could not copy string.\n"));
@@ -196,11 +187,35 @@ FileReadDir (
     Length++;
   }
 
+  Res = NtfsCfiPop (
+          File->FileSystem,
+          Path,
+          *Size,
+          (INT64)File->DirIndex,
+          Data
+          );
+
+  if (Res != 0) {
+    if (Res < 0) {
+      *Size = File->FileSystem->CFIDataSize;
+      return EFI_BUFFER_TOO_SMALL;
+    }
+
+    Info  = (EFI_FILE_INFO *)Data;
+    *Size = (UINTN)Info->Size;
+    ++File->DirIndex;
+    return EFI_SUCCESS;
+  }
+
+  ZeroMem (File->FileSystem->CFIData, MINIMUM_INFO_LENGTH);
+  Info       = (EFI_FILE_INFO *)File->FileSystem->CFIData;
+  Info->Size = MINIMUM_INFO_LENGTH;
+
   mIndexCounter = (INT64)File->DirIndex;
   if (Length == 0) {
-    Status = NtfsDir (File->FileSystem, L"/", Data, DIR_HOOK);
+    Status = NtfsDir (File->FileSystem, L"/", File->FileSystem->CFIData, DIR_HOOK);
   } else {
-    Status = NtfsDir (File->FileSystem, File->Path, Data, DIR_HOOK);
+    Status = NtfsDir (File->FileSystem, File->Path, File->FileSystem->CFIData, DIR_HOOK);
   }
 
   if (mIndexCounter >= 0) {
@@ -245,7 +260,16 @@ FileReadDir (
       Info->PhysicalSize = TmpFile->RootFile.DataAttributeSize;
     }
 
+    FreeFile (&TmpFile->RootFile);
     FreePool (TmpFile);
+  }
+
+  if (*Size < Info->Size) {
+    *Size = (UINTN)Info->Size;
+    NtfsCfiPush (File->FileSystem, Path, (UINTN)Info->Size, (INT64)File->DirIndex);
+    return EFI_BUFFER_TOO_SMALL;
+  } else {
+    CopyMem (Data, File->FileSystem->CFIData, (UINTN)Info->Size);
   }
 
   *Size = (UINTN)Info->Size;

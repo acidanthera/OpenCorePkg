@@ -23,6 +23,15 @@
 #include <Protocol/OcBootEntry.h>
 
 //
+// Vars which require blank values if not present after GRUB2+blscfg var parsing, in order
+// to fix up the fact that TuneD does not always initialise them.
+//
+STATIC CHAR8  *mTuneDVars[] = {
+  "tuned_params",
+  "tuned_initrd"
+};
+
+//
 // Root.
 //
 #define ROOT_DIR  L"\\"
@@ -68,6 +77,10 @@
 //
 #define MAX_LOADER_ENTRY_FILE_SIZE  SIZE_4KB
 
+//
+// grub2/grub.cfg was found, we treat this as enough to show that /loader/entries
+// we have found are a GRUB2+blscfg setup.
+//
 STATIC
 BOOLEAN
   mIsGrub2;
@@ -435,10 +448,6 @@ ExpandReplaceOptions (
   GRUB_VAR    *DefaultOptionsVar;
 
   if (Entry->Options->Count > 0) {
-    //
-    // Grub2 blscfg takes the first only.
-    //
-    ASSERT (Entry->Options->Count == 1);
     Status = InternalExpandGrubVarsForArray (Entry->Options);
     if (EFI_ERROR (Status)) {
       return Status;
@@ -474,6 +483,68 @@ ExpandReplaceOptions (
       *Options = NewOptions;
     }
   }
+
+  return EFI_SUCCESS;
+}
+
+//
+// Expand grub vars, and expand multiple initrds per line to multiple initrd lines.
+// Do this before checking for files, etc.
+//
+STATIC
+EFI_STATUS
+ExpandInitrds (
+  IN OUT LOADER_ENTRY  *Entry
+  )
+{
+  EFI_STATUS     Status;
+  UINTN          OptionsIndex;
+  CHAR8          **Options;
+  OC_FLEX_ARRAY  *ExpandedInitrds;
+  OC_FLEX_ARRAY  *SplitInitrds;
+  UINTN          SplitInitrdsIndex;
+
+  if (Entry->Initrds->Count == 0) {
+    return EFI_SUCCESS;
+  }
+
+  Status = InternalExpandGrubVarsForArray (Entry->Initrds);
+  if (EFI_ERROR (Status)) {
+    return Status;
+  }
+
+  ExpandedInitrds = OcFlexArrayInit (sizeof (CHAR8 *), OcFlexArrayFreePointerItem);
+
+  for (OptionsIndex = 0; OptionsIndex < Entry->Initrds->Count; OptionsIndex++) {
+    Options = OcFlexArrayItemAt (Entry->Initrds, OptionsIndex);
+
+    Status = OcParseVars (*Options, &SplitInitrds, OcStringFormatAscii, TRUE);
+    if (EFI_ERROR (Status)) {
+      break;
+    }
+
+    for (SplitInitrdsIndex = 0; SplitInitrdsIndex < SplitInitrds->Count; SplitInitrdsIndex++) {
+      Status = EntryCopyMultipleValue (FALSE, ExpandedInitrds, OcParsedVarsItemAt (SplitInitrds, SplitInitrdsIndex)->Ascii.Value);
+      if (EFI_ERROR (Status)) {
+        break;
+      }
+    }
+
+    OcFlexArrayFree (&SplitInitrds);
+    if (EFI_ERROR (Status)) {
+      break;
+    }
+  }
+
+  if (EFI_ERROR (Status)) {
+    OcFlexArrayFree (&ExpandedInitrds);
+    return Status;
+  }
+
+  ASSERT (ExpandedInitrds->Count >= Entry->Initrds->Count);
+
+  OcFlexArrayFree (&Entry->Initrds);
+  Entry->Initrds = ExpandedInitrds;
 
   return EFI_SUCCESS;
 }
@@ -696,7 +767,7 @@ HasRootOption (
       return TRUE;
     }
 
-    Status = OcParseVars (OptionCopy, &ParsedVars, OcStringFormatAscii);
+    Status = OcParseVars (OptionCopy, &ParsedVars, OcStringFormatAscii, FALSE);
     if (EFI_ERROR (Status)) {
       DEBUG ((DEBUG_WARN, "LNX: Error parsing Options[%u]=<%a> - %r\n", Index, *Option, Status));
       FreePool (OptionCopy);
@@ -804,6 +875,21 @@ DoProcessLoaderEntry (
     return EFI_NOT_FOUND;
   }
 
+  if (mIsGrub2) {
+    Status = ExpandReplaceOptions (Entry);
+    if (!EFI_ERROR (Status)) {
+      Status = ExpandInitrds (Entry);
+    }
+
+    if (EFI_ERROR (Status)) {
+      OcFlexArrayDiscardItem (gLoaderEntries, TRUE);
+      return Status;
+    }
+  }
+
+  //
+  // Check all files exist, see comment on FindLoaderFile.
+  //
   Status = FindLoaderFile (Directory, DirName, &Entry->Linux);
   if (!EFI_ERROR (Status)) {
     for (Index = 0; Index < Entry->Initrds->Count; Index++) {
@@ -818,14 +904,6 @@ DoProcessLoaderEntry (
   if (EFI_ERROR (Status)) {
     OcFlexArrayDiscardItem (gLoaderEntries, TRUE);
     return Status;
-  }
-
-  if (mIsGrub2) {
-    Status = ExpandReplaceOptions (Entry);
-    if (EFI_ERROR (Status)) {
-      OcFlexArrayDiscardItem (gLoaderEntries, TRUE);
-      return Status;
-    }
   }
 
   //
@@ -891,6 +969,30 @@ ProcessLoaderEntry (
 
 STATIC
 EFI_STATUS
+FixTuneDVars (
+  VOID
+  )
+{
+  EFI_STATUS  Status;
+  UINTN       Index;
+
+  STATIC_ASSERT (ARRAY_SIZE (mTuneDVars) > 0, "No TuneD vars to set");
+
+  Status = EFI_SUCCESS;
+  for (Index = 0; Index < ARRAY_SIZE (mTuneDVars); Index++) {
+    if (InternalGetGrubVar (mTuneDVars[Index]) == NULL) {
+      Status = InternalSetGrubVar (mTuneDVars[Index], "", VAR_ERR_NONE);
+      if (EFI_ERROR (Status)) {
+        break;
+      }
+    }
+  }
+
+  return Status;
+}
+
+STATIC
+EFI_STATUS
 ScanLoaderEntriesAtDirectory (
   IN   EFI_FILE_PROTOCOL  *RootDirectory,
   IN   CHAR16             *DirName,
@@ -915,7 +1017,7 @@ ScanLoaderEntriesAtDirectory (
   gLoaderEntries = NULL;
 
   //
-  // Only treat as GRUB2 if grub2/grub.cfg exists.
+  // Treat /loader/entries as being GRUB2+blscfg style if /grub2/grub.cfg exists.
   //
   GrubCfg = OcReadFileFromDirectory (RootDirectory, GRUB2_GRUB_CFG, NULL, 0);
   if (GrubCfg == NULL) {
@@ -947,15 +1049,23 @@ ScanLoaderEntriesAtDirectory (
           ));
         Status = InternalProcessGrubCfg (GrubCfg);
       }
+
+      if (  !EFI_ERROR (Status)
+         && ((gLinuxBootFlags & LINUX_BOOT_FIX_TUNED) != 0))
+      {
+        DEBUG ((
+          (gLinuxBootFlags & LINUX_BOOT_LOG_VERBOSE) == 0 ? DEBUG_VERBOSE : DEBUG_INFO,
+          "LNX: Fix TuneD vars\n"
+          ));
+        Status = FixTuneDVars ();
+      }
     }
   }
 
   //
   // If we are grub2 and $early_initrd exists, then warn and halt (blscfg logic is to use it).
-  // Would not be hard to implement if required. This is a space separated list of filenames
-  // to use first as initrds.
-  // Note: they are filenames only, so (following how blscfg module does it) we need to prepend
-  // the path of either another (the first) initrd or the (first) vmlinuz.
+  // Would not be hard to implement in ExpandInitrds if required. This is a space separated list
+  // of filenames to use first as initrds.
   //
   if (!EFI_ERROR (Status)) {
     if (mIsGrub2) {

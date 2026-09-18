@@ -489,14 +489,17 @@ InternalCalculateARTFrequencyIntel (
   UINT32  MaxId;
   UINT32  CpuVendor;
 
-  UINT32                         CpuidDenominatorEax;
-  UINT32                         CpuidNumeratorEbx;
-  UINT32                         CpuidARTFrequencyEcx;
-  CPUID_PROCESSOR_FREQUENCY_EAX  CpuidFrequencyEax;
-  UINT64                         TscAdjust;
-  UINT64                         CPUFrequencyFromTSC;
-  CPUID_VERSION_INFO_EAX         CpuidVerEax;
-  UINT8                          Model;
+  CPUID_STRUCTURED_EXTENDED_FEATURE_FLAGS_EBX  CpuidFeatureFlagsEbx;
+  CPUID_STRUCTURED_EXTENDED_FEATURE_FLAGS_ECX  CpuidFeatureFlagsEcx;
+  CPUID_STRUCTURED_EXTENDED_FEATURE_FLAGS_EDX  CpuidFeatureFlagsEdx;
+  UINT32                                       CpuidDenominatorEax;
+  UINT32                                       CpuidNumeratorEbx;
+  UINT32                                       CpuidARTFrequencyEcx;
+  CPUID_PROCESSOR_FREQUENCY_EAX                CpuidFrequencyEax;
+  UINT64                                       TscAdjust;
+  UINT64                                       CPUFrequencyFromTSC;
+  CPUID_VERSION_INFO_EAX                       CpuidVerEax;
+  UINT8                                        Model;
 
   if (Recalculate) {
     ObtainedARTFreq     = FALSE;
@@ -514,109 +517,123 @@ InternalCalculateARTFrequencyIntel (
     //
     // Determine our core crystal clock frequency
     //
-    if ((CpuVendor == CPUID_VENDOR_INTEL) && (MaxId >= CPUID_TIME_STAMP_COUNTER)) {
-      TscAdjust = AsmReadMsr64 (MSR_IA32_TSC_ADJUST);
-      DEBUG ((DEBUG_INFO, "OCCPU: TSC Adjust %Lu\n", TscAdjust));
+    if (CpuVendor == CPUID_VENDOR_INTEL) {
+      if (MaxId >= CPUID_STRUCTURED_EXTENDED_FEATURE_FLAGS) {
+        AsmCpuidEx (
+          CPUID_STRUCTURED_EXTENDED_FEATURE_FLAGS,
+          0,
+          NULL,
+          &CpuidFeatureFlagsEbx.Uint32,
+          &CpuidFeatureFlagsEcx.Uint32,
+          &CpuidFeatureFlagsEdx.Uint32
+          );
+        if (CpuidFeatureFlagsEbx.Bits.IA32_TSC_ADJUST == 1) {
+          TscAdjust = AsmReadMsr64 (MSR_IA32_TSC_ADJUST);
+          DEBUG ((DEBUG_INFO, "OCCPU: TSC Adjust %Lu\n", TscAdjust));
 
-      if (TscAdjustPtr != NULL) {
-        *TscAdjustPtr = TscAdjust;
-      }
-
-      AsmCpuid (
-        CPUID_TIME_STAMP_COUNTER,
-        &CpuidDenominatorEax,
-        &CpuidNumeratorEbx,
-        &CpuidARTFrequencyEcx,
-        NULL
-        );
-      if (CpuidARTFrequencyEcx > 0) {
-        ARTFrequency = CpuidARTFrequencyEcx;
-        DEBUG ((DEBUG_INFO, "OCCPU: Queried Core Crystal Clock Frequency %11LuHz\n", ARTFrequency));
-      } else {
-        AsmCpuid (CPUID_VERSION_INFO, &CpuidVerEax.Uint32, NULL, NULL, NULL);
-        Model = (UINT8)CpuidVerEax.Bits.Model | (UINT8)(CpuidVerEax.Bits.ExtendedModelId << 4U);
-        //
-        // Fall back to identifying ART frequency based on known models
-        //
-        switch (Model) {
-          case CPU_MODEL_SKYLAKE:
-          case CPU_MODEL_SKYLAKE_DT:
-          case CPU_MODEL_KABYLAKE:
-          case CPU_MODEL_KABYLAKE_DT:
-            ARTFrequency = CLIENT_ART_CLOCK_SOURCE; // 24 Mhz
-            break;
-          case CPU_MODEL_DENVERTON:
-            ARTFrequency = SERVER_ART_CLOCK_SOURCE; // 25 Mhz
-            break;
-          case CPU_MODEL_GOLDMONT:
-            ARTFrequency = ATOM_ART_CLOCK_SOURCE; // 19.2 Mhz
-            break;
-        }
-
-        if (ARTFrequency > 0) {
-          DEBUG ((DEBUG_INFO, "OCCPU: Known Model Core Crystal Clock Frequency %11LuHz\n", ARTFrequency));
+          if (TscAdjustPtr != NULL) {
+            *TscAdjustPtr = TscAdjust;
+          }
         }
       }
 
-      if ((CpuidDenominatorEax > 0) && (CpuidNumeratorEbx > 0)) {
-        //
-        // Some Intel chips don't report their core crystal clock frequency.
-        // Calculate it by dividing the TSC frequency by the TSC ratio.
-        //
-        if ((ARTFrequency == 0) && (MaxId >= CPUID_PROCESSOR_FREQUENCY)) {
-          CPUFrequencyFromTSC = InternalCalculateTSCFromPMTimer (Recalculate);
-          ARTFrequency        = BaseMultThenDivU64x64x32 (
-                                  CPUFrequencyFromTSC,
-                                  CpuidDenominatorEax,
-                                  CpuidNumeratorEbx,
-                                  NULL
-                                  );
-          if (ARTFrequency > 0ULL) {
-            DEBUG ((
-              DEBUG_INFO,
-              "OCCPU: Core Crystal Clock Frequency from TSC %11LuHz = %11LuHz * %u / %u\n",
-              ARTFrequency,
-              CPUFrequencyFromTSC,
-              CpuidDenominatorEax,
-              CpuidNumeratorEbx
-              ));
-            //
-            // Use the reported CPU frequency rather than deriving it from ARTFrequency
-            //
-            AsmCpuid (CPUID_PROCESSOR_FREQUENCY, &CpuidFrequencyEax.Uint32, NULL, NULL, NULL);
-            CPUFrequencyFromART = MultU64x32 (CpuidFrequencyEax.Bits.ProcessorBaseFrequency, 1000000);
+      if (MaxId >= CPUID_TIME_STAMP_COUNTER) {
+        AsmCpuid (
+          CPUID_TIME_STAMP_COUNTER,
+          &CpuidDenominatorEax,
+          &CpuidNumeratorEbx,
+          &CpuidARTFrequencyEcx,
+          NULL
+          );
+        if (CpuidARTFrequencyEcx > 0) {
+          ARTFrequency = CpuidARTFrequencyEcx;
+          DEBUG ((DEBUG_INFO, "OCCPU: Queried Core Crystal Clock Frequency %11LuHz\n", ARTFrequency));
+        } else {
+          AsmCpuid (CPUID_VERSION_INFO, &CpuidVerEax.Uint32, NULL, NULL, NULL);
+          Model = (UINT8)CpuidVerEax.Bits.Model | (UINT8)(CpuidVerEax.Bits.ExtendedModelId << 4U);
+          //
+          // Fall back to identifying ART frequency based on known models
+          //
+          switch (Model) {
+            case CPU_MODEL_SKYLAKE:
+            case CPU_MODEL_SKYLAKE_DT:
+            case CPU_MODEL_KABYLAKE:
+            case CPU_MODEL_KABYLAKE_DT:
+              ARTFrequency = CLIENT_ART_CLOCK_SOURCE; // 24 Mhz
+              break;
+            case CPU_MODEL_DENVERTON:
+              ARTFrequency = SERVER_ART_CLOCK_SOURCE; // 25 Mhz
+              break;
+            case CPU_MODEL_GOLDMONT:
+              ARTFrequency = ATOM_ART_CLOCK_SOURCE; // 19.2 Mhz
+              break;
+          }
+
+          if (ARTFrequency > 0) {
+            DEBUG ((DEBUG_INFO, "OCCPU: Known Model Core Crystal Clock Frequency %11LuHz\n", ARTFrequency));
           }
         }
 
-        //
-        // If we still can't determine the core crystal clock frequency, assume
-        // it's 24 Mhz like most Intel chips to date.
-        //
-        if (ARTFrequency == 0ULL) {
-          ARTFrequency = DEFAULT_ART_CLOCK_SOURCE;
-          DEBUG ((DEBUG_INFO, "OCCPU: Fallback Core Crystal Clock Frequency %11LuHz\n", ARTFrequency));
-        }
+        if ((CpuidDenominatorEax > 0) && (CpuidNumeratorEbx > 0)) {
+          //
+          // Some Intel chips don't report their core crystal clock frequency.
+          // Calculate it by dividing the TSC frequency by the TSC ratio.
+          //
+          if ((ARTFrequency == 0) && (MaxId >= CPUID_PROCESSOR_FREQUENCY)) {
+            CPUFrequencyFromTSC = InternalCalculateTSCFromPMTimer (Recalculate);
+            ARTFrequency        = BaseMultThenDivU64x64x32 (
+                                    CPUFrequencyFromTSC,
+                                    CpuidDenominatorEax,
+                                    CpuidNumeratorEbx,
+                                    NULL
+                                    );
+            if (ARTFrequency > 0ULL) {
+              DEBUG ((
+                DEBUG_INFO,
+                "OCCPU: Core Crystal Clock Frequency from TSC %11LuHz = %11LuHz * %u / %u\n",
+                ARTFrequency,
+                CPUFrequencyFromTSC,
+                CpuidDenominatorEax,
+                CpuidNumeratorEbx
+                ));
+              //
+              // Use the reported CPU frequency rather than deriving it from ARTFrequency
+              //
+              AsmCpuid (CPUID_PROCESSOR_FREQUENCY, &CpuidFrequencyEax.Uint32, NULL, NULL, NULL);
+              CPUFrequencyFromART = MultU64x32 (CpuidFrequencyEax.Bits.ProcessorBaseFrequency, 1000000);
+            }
+          }
 
-        ASSERT (ARTFrequency > 0ULL);
-        if (CPUFrequencyFromART == 0ULL) {
-          CPUFrequencyFromART = BaseMultThenDivU64x64x32 (
-                                  ARTFrequency,
-                                  CpuidNumeratorEbx,
-                                  CpuidDenominatorEax,
-                                  NULL
-                                  );
-        }
+          //
+          // If we still can't determine the core crystal clock frequency, assume
+          // it's 24 Mhz like most Intel chips to date.
+          //
+          if (ARTFrequency == 0ULL) {
+            ARTFrequency = DEFAULT_ART_CLOCK_SOURCE;
+            DEBUG ((DEBUG_INFO, "OCCPU: Fallback Core Crystal Clock Frequency %11LuHz\n", ARTFrequency));
+          }
 
-        ASSERT (CPUFrequencyFromART > 0ULL);
-        DEBUG ((
-          DEBUG_INFO,
-          "OCCPU: CPUFrequencyFromART %11LuHz %5LuMHz = %Lu * %u / %u\n",
-          CPUFrequencyFromART,
-          DivU64x32 (CPUFrequencyFromART, 1000000),
-          ARTFrequency,
-          CpuidNumeratorEbx,
-          CpuidDenominatorEax
-          ));
+          ASSERT (ARTFrequency > 0ULL);
+          if (CPUFrequencyFromART == 0ULL) {
+            CPUFrequencyFromART = BaseMultThenDivU64x64x32 (
+                                    ARTFrequency,
+                                    CpuidNumeratorEbx,
+                                    CpuidDenominatorEax,
+                                    NULL
+                                    );
+          }
+
+          ASSERT (CPUFrequencyFromART > 0ULL);
+          DEBUG ((
+            DEBUG_INFO,
+            "OCCPU: CPUFrequencyFromART %11LuHz %5LuMHz = %Lu * %u / %u\n",
+            CPUFrequencyFromART,
+            DivU64x32 (CPUFrequencyFromART, 1000000),
+            ARTFrequency,
+            CpuidNumeratorEbx,
+            CpuidDenominatorEax
+            ));
+        }
       }
     }
   }

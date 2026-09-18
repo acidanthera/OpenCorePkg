@@ -16,7 +16,7 @@
 ##
 
 [Defines]
-  INF_VERSION                    = 0x00010005
+  INF_VERSION                    = 0x0001001B
   BASE_NAME                      = OcXmlLib
   FILE_GUID                      = 7DDC67E4-0556-4E86-947E-6B484A1B7015
   MODULE_TYPE                    = DXE_DRIVER

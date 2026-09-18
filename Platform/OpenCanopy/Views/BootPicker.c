@@ -1470,7 +1470,12 @@ BootPickerEntriesSet (
         Status = CopyLabel (&VolumeEntry->Label, &GuiContext->Labels[LABEL_WINDOWS]);
         break;
       case OC_BOOT_EXTERNAL_OS:
-        Status = CopyLabel (&VolumeEntry->Label, &GuiContext->Labels[LABEL_OTHER]);
+        if (OcAsciiStriStr (Entry->Flavour, OC_FLAVOUR_ID_NETWORK_BOOT) != NULL) {
+          Status = CopyLabel (&VolumeEntry->Label, &GuiContext->Labels[LABEL_NETWORK_BOOT]);
+        } else {
+          Status = CopyLabel (&VolumeEntry->Label, &GuiContext->Labels[LABEL_OTHER]);
+        }
+
         break;
       //
       // Use flavour-based labels for system entries (e.g. from boot entry protocol).
@@ -1495,7 +1500,7 @@ BootPickerEntriesSet (
         }
 
         break;
-      case OC_BOOT_EXTERNAL_SYSTEM:
+      case OC_BOOT_UNMANAGED:
         if (OcAsciiStriStr (Entry->Flavour, OC_FLAVOUR_WINDOWS) != NULL) {
           Status = CopyLabel (&VolumeEntry->Label, &GuiContext->Labels[LABEL_WINDOWS]);
         } else {
@@ -1609,7 +1614,9 @@ BootPickerEntriesSet (
     if (EFI_ERROR (Status)) {
       SuggestedIcon = NULL;
 
-      if (Entry->Type == OC_BOOT_EXTERNAL_OS) {
+      if (Entry->IsCdrom) {
+        SuggestedIcon = &GuiContext->Icons[ICON_GENERIC_CD][ICON_TYPE_BASE];
+      } else if (Entry->Type == OC_BOOT_EXTERNAL_OS) {
         SuggestedIcon = &GuiContext->Icons[ICON_OTHER][IconTypeIndex];
       } else if ((Entry->Type & (OC_BOOT_EXTERNAL_TOOL | OC_BOOT_SYSTEM)) != 0) {
         SuggestedIcon = &GuiContext->Icons[ICON_TOOL][IconTypeIndex];

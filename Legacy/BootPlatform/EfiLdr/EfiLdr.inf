@@ -17,9 +17,9 @@
 ##
 
 [Defines]
-  INF_VERSION                    = 0x00010005
+  INF_VERSION                    = 0x0001001B
   BASE_NAME                      = EfiLoader
-  FILE_GUID                      = A9620E5C-5FA1-40b7-8B21-50B632F88F38
+  FILE_GUID                      = A9620E5C-5FA1-40B7-8B21-50B632F88F38
   MODULE_TYPE                    = UEFI_APPLICATION
   VERSION_STRING                 = 1.0
 
@@ -38,10 +38,11 @@
   UefiImageOnlyFvLib
 
 [Sources]
+  Debug.h
   Support.h
-  EfiLdrHandoff.h
   EfiLdr.h
   EfiLoader.c
+  Debug.c
   PeLoader.c
   Support.c
   LzmaDecompress.h
@@ -49,6 +50,7 @@
 [Sources.IA32]
   Ia32/Canary.nasm
   Ia32/GS.nasm         | MSFT
+  Ia32/GS.nasm         | CLANGPDB
 
 [Sources.X64]
   X64/Canary.nasm

@@ -1,0 +1,15 @@
+// /** @file
+// 8254 timer driver that provides Timer Arch protocol.
+//
+// 8254 timer driver that provides Timer Arch protocol.
+//
+// Copyright (c) 2005 - 2018, Intel Corporation. All rights reserved.<BR>
+//
+// SPDX-License-Identifier: BSD-2-Clause-Patent
+//
+// **/
+
+
+#string STR_MODULE_ABSTRACT             #language en-US "8254 timer driver that provides Timer Arch protocol"
+
+#string STR_MODULE_DESCRIPTION          #language en-US "8254 timer driver that provides Timer Arch protocol."

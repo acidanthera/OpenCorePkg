@@ -36,8 +36,12 @@ imgbuild() {
     "${BUILD_DIR_ARCH}/DxeIplUe.raw" || exit 1
 
   echo "Generating Loader Image..."
-
-  ImageTool GenImage -c PE -x -b 0x10000 -o "${BUILD_DIR_ARCH}/EfiLoaderRebased.efi" "${BUILD_DIR_ARCH}/EfiLoader.efi" || exit 1
+  # Reuse DEBUG EfiLdr in NOOPT build to keep within allotted 0x10000-0x20000 space.
+  # With this approach, everything after EfiLdr is fully NOOPT, but EfiLdr starts.
+  # TODO: Look at moving EFILDR_BASE_SEGMENT (see also kBoot2Segment, BASE_ADDR_32)
+  # to make space for NOOPT loader.
+  SAFE_LOADER=$(echo "${BUILD_DIR_ARCH}/EfiLoader.efi" | sed -e 's/NOOPT/DEBUG/')
+  ImageTool GenImage -c PE -x -b 0x10000 -o "${BUILD_DIR_ARCH}/EfiLoaderRebased.efi" "${SAFE_LOADER}" || exit 1
 
   "${FV_TOOLS}/EfiLdrImage" -o "${BUILD_DIR}/FV/Efildr${arch}" \
     "${BUILD_DIR_ARCH}/EfiLoaderRebased.efi" "${BUILD_DIR}/FV/DxeIpl${arch}.z" \
@@ -77,7 +81,7 @@ imgbuild() {
   # Build bootsectors.
   mkdir -p "${BOOTSECTORS}" || exit 1
   cd "${BOOTSECTORS}"/.. || exit 1
-  make || exit 1
+  make "${arch}" || exit 1
   cd - || exit 1
 
   # Concatenate bootsector into the resulting image.
@@ -150,7 +154,7 @@ else
 fi
 
 if [ ! -d "${FV_TOOLS}" ]; then
-  echo "ERROR: Something goes wrong while compiling BaseTools for your platform!"
+  echo "ERROR: Something went wrong while compiling BaseTools for your platform!"
   exit 1
 fi
 
@@ -176,7 +180,7 @@ if [ "${INTREE}" != "" ]; then
   imgbuild "${TARGETARCH}"
 else
   if [ "$TARGETS" = "" ]; then
-    TARGETS=(DEBUG RELEASE)
+    TARGETS=(DEBUG RELEASE NOOPT)
     export TARGETS
   fi
   if [ "$ARCHS" = "" ]; then

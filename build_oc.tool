@@ -29,6 +29,7 @@ buildutil() {
     "TestExt4Dxe"
     "TestFatDxe"
     "TestNtfsDxe"
+    "TestEvent"
     "TestPeCoff"
     "TestProcessKernel"
     "TestRsaPreprocess"
@@ -47,8 +48,7 @@ buildutil() {
   for util in "${UTILS[@]}"; do
     cd "$util" || exit 1
     echo "Building ${util}..."
-    make clean || exit 1
-    make -j "$cores" || exit 1
+    make -j "$cores" USE_SHARED_OBJS=1 || exit 1
     #
     # FIXME: Do not build RsaTool for Win32 without OpenSSL.
     #
@@ -58,13 +58,11 @@ buildutil() {
 
     if [ "$(which i686-w64-mingw32-gcc)" != "" ]; then
       echo "Building ${util} for Windows..."
-      UDK_ARCH=Ia32 CC=i686-w64-mingw32-gcc STRIP=i686-w64-mingw32-strip DIST=Windows make clean || exit 1
-      UDK_ARCH=Ia32 CC=i686-w64-mingw32-gcc STRIP=i686-w64-mingw32-strip DIST=Windows make -j "$cores" || exit 1
+      UDK_ARCH=Ia32 CC=i686-w64-mingw32-gcc STRIP=i686-w64-mingw32-strip DIST=Windows make -j "$cores" USE_SHARED_OBJS=1 || exit 1
     fi
     if [ "$(which x86_64-linux-musl-gcc)" != "" ]; then
       echo "Building ${util} for Linux..."
-      STATIC=1 SUFFIX=.linux UDK_ARCH=X64 CC=x86_64-linux-musl-gcc STRIP=x86_64-linux-musl-strip DIST=Linux make clean || exit 1
-      STATIC=1 SUFFIX=.linux UDK_ARCH=X64 CC=x86_64-linux-musl-gcc STRIP=x86_64-linux-musl-strip DIST=Linux make -j "$cores" || exit 1
+      STATIC=1 SUFFIX=.linux UDK_ARCH=X64 CC=x86_64-linux-musl-gcc STRIP=x86_64-linux-musl-strip DIST=Linux make -j "$cores" USE_SHARED_OBJS=1 || exit 1
     fi
     cd - || exit 1
   done
@@ -187,21 +185,27 @@ package() {
       "BiosVideo.efi"
       "CrScreenshotDxe.efi"
       "Dhcp4Dxe.efi"
+      "Dhcp6Dxe.efi"
       "DnsDxe.efi"
       "DpcDxe.efi"
       "Ext4Dxe.efi"
       "FirmwareSettingsEntry.efi"
+      "Hash2DxeCrypto.efi"
       "HiiDatabase.efi"
       "HttpBootDxe.efi"
       "HttpDxe.efi"
       "HttpUtilitiesDxe.efi"
       "Ip4Dxe.efi"
+      "Ip6Dxe.efi"
       "MnpDxe.efi"
+      "Mtftp4Dxe.efi"
+      "Mtftp6Dxe.efi"
       "NvmExpressDxe.efi"
       "OpenCanopy.efi"
       "OpenHfsPlus.efi"
       "OpenLegacyBoot.efi"
       "OpenLinuxBoot.efi"
+      "OpenNetworkBoot.efi"
       "OpenNtfsDxe.efi"
       "OpenPartitionDxe.efi"
       "OpenRuntime.efi"
@@ -209,12 +213,24 @@ package() {
       "OpenVariableRuntimeDxe.efi"
       "Ps2KeyboardDxe.efi"
       "Ps2MouseDxe.efi"
+      "RamDiskDxe.efi"
       "ResetNvramEntry.efi"
+      "RngDxe.efi"
       "SnpDxe.efi"
       "TcpDxe.efi"
+      "TlsDxe.efi"
       "ToggleSipEntry.efi"
       "Udp4Dxe.efi"
+      "Udp6Dxe.efi"
+      "UefiPxeBcDxe.efi"
       "UsbMouseDxe.efi"
+      "Virtio10.efi"
+      "VirtioBlkDxe.efi"
+      "VirtioGpuDxe.efi"
+      "VirtioNetDxe.efi"
+      "VirtioPciDeviceDxe.efi"
+      "VirtioScsiDxe.efi"
+      "VirtioSerialDxe.efi"
       "XhciDxe.efi"
       )
     for efiDriver in "${efiDrivers[@]}"; do
@@ -262,7 +278,7 @@ package() {
     "Launchd.command"
     "Launchd.command.plist"
     "README.md"
-    "nvramdump"
+    "Legacy/nvramdump"
     )
   for file in "${logoutFiles[@]}"; do
     cp "${selfdir}/Utilities/LogoutHook/${file}" "${dstdir}/Utilities/LogoutHook"/ || exit 1

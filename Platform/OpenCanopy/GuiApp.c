@@ -47,7 +47,8 @@ CONST CHAR8 *
   [LABEL_SHELL]              = "Shell",
   [LABEL_SIP_IS_ENABLED]     = "SIPEnabled",
   [LABEL_SIP_IS_DISABLED]    = "SIPDisabled",
-  [LABEL_FIRMWARE_SETTINGS]  = "FirmwareSettings"
+  [LABEL_FIRMWARE_SETTINGS]  = "FirmwareSettings",
+  [LABEL_NETWORK_BOOT]       = "NetworkBoot"
 };
 
 STATIC
@@ -67,6 +68,7 @@ CONST CHAR8 *
   [ICON_ENTER]              = "Enter",
   [ICON_LOCK]               = "Lock",
   [ICON_GENERIC_HDD]        = "HardDrive",
+  [ICON_GENERIC_CD]         = "OpticalDrive",
   [ICON_APPLE]              = "Apple",
   [ICON_APPLE_RECOVERY]     = "AppleRecv",
   [ICON_APPLE_TIME_MACHINE] = "AppleTM",

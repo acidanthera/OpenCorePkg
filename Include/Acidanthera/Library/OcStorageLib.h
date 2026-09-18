@@ -38,7 +38,7 @@
 /**
   Safe maximum file path in the storage.
 **/
-#define OC_STORAGE_SAFE_PATH_MAX  128
+#define OC_STORAGE_SAFE_PATH_MAX  192
 
 /**
   Structure declaration for vault file.

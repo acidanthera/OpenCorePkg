@@ -17,7 +17,7 @@
 ##
 
 [Defines]
-  INF_VERSION                    = 0x00010005
+  INF_VERSION                    = 0x0001001B
   BASE_NAME                      = OpenPartitionDxe
   MODULE_UNI_FILE                = PartitionDxe.uni
   FILE_GUID                      = 861AD32A-F4C4-43BE-936A-239A814CB215
@@ -45,11 +45,9 @@
   Partition.c
   Partition.h
 
-
 [Packages]
   OpenCorePkg/OpenCorePkg.dec
   MdePkg/MdePkg.dec
-
 
 [LibraryClasses]
   DevicePathLib
@@ -61,13 +59,11 @@
   UefiDriverEntryPoint
   DebugLib
 
-
 [Guids]
   gEfiPartTypeUnusedGuid                        ## SOMETIMES_CONSUMES ## GUID
   ## SOMETIMES_CONSUMES ## GUID
   ## SOMETIMES_CONSUMES ## GUID # Install protocol
   gEfiPartTypeSystemPartGuid
-
 
 [Protocols]
   ## BY_START

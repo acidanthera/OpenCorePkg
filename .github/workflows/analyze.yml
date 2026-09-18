@@ -13,13 +13,12 @@ env:
 jobs:
   analyze-shell-scripts:
     name: Shell Scripts
-    # See https://github.blog/changelog/2024-01-30-github-actions-introducing-the-new-m1-macos-runner-available-to-open-source
-    runs-on: macos-14
+    runs-on: macos-latest
     env:
       JOB_TYPE: ANALYZE
       HOMEBREW_NO_INSTALL_CLEANUP: 1
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       # Due to brew adopting PEP 668 https://github.com/orgs/Homebrew/discussions/3404 pip installs should be in a Python venv
       - name: Install Dependencies
@@ -65,11 +64,11 @@ jobs:
 
   analyze-python-scripts:
     name: Python Scripts
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     env:
       JOB_TYPE: ANALYZE
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Install Dependencies
         run: |
@@ -77,11 +76,11 @@ jobs:
 
       - name: Run prospector
         run: |
-          /usr/bin/curl -L https://raw.githubusercontent.com/acidanthera/ocbuild/master/prospector/profile.yml -o profile.yml || exit 1
+          /usr/bin/curl -OLf https://raw.githubusercontent.com/acidanthera/ocbuild/master/prospector/profile.yml || exit 1
           python3 -m prospector . -P ./profile.yml | tee prospector_result.txt || exit 1
 
       - name: Upload prospector result to Artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         if: failure()
         with:
           name: Prospector Artifacts
@@ -89,10 +88,10 @@ jobs:
 
   analyze-docs-linux:
     name: Documentation
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     if: github.repository_owner == 'acidanthera' && github.ref_name == 'master'
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Install Dependencies
         run: |
@@ -104,13 +103,13 @@ jobs:
 
   analyze-coverity:
     name: Coverity
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     env:
       JOB_TYPE: COVERITY
       TOOLCHAINS: GCC
     if: github.repository_owner == 'acidanthera' && github.event_name != 'pull_request'
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Install Dependencies
         run: |

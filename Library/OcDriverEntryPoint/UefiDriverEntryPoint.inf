@@ -9,7 +9,7 @@
 ##
 
 [Defines]
-  INF_VERSION                    = 0x00010005
+  INF_VERSION                    = 0x0001001B
   BASE_NAME                      = OcDriverEntryPoint
   MODULE_UNI_FILE                = UefiDriverEntryPoint.uni
   FILE_GUID                      = 4F74BFAF-C4B4-4B0F-8437-6BD7ACC84B58
@@ -29,7 +29,8 @@
 [Sources.Ia32]
   Ia32/Canary.nasm
   Ia32/GS.nasm         | MSFT
-
+  Ia32/GS.nasm         | CLANGPDB
+  
 [Sources.X64]
   X64/Canary.nasm
   X64/GS.nasm          | MSFT

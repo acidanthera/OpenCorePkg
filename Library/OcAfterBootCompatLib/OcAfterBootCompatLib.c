@@ -112,7 +112,7 @@ OcAbcInitialize (
 
   DEBUG ((
     DEBUG_INFO,
-    "OCABC: ALRBL %d RTDFRG %d DEVMMIO %d NOSU %d NOVRWR %d NOSB %d FBSIG %d NOHBMAP %d SMSLIDE %d WRUNPROT %d\n",
+    "OCABC: ALRBL %d RTDFRG %d DEVMMIO %d NOSU %d NOVRWR %d NOSB %d FBSIG %d NOHBMAP %d SMSLIDE %d WRUNPROT %d CLRTS %d\n",
     Settings->AllowRelocationBlock,
     Settings->AvoidRuntimeDefrag,
     Settings->DevirtualiseMmio,
@@ -122,7 +122,8 @@ OcAbcInitialize (
     Settings->ForceBooterSignature,
     Settings->DiscardHibernateMap,
     Settings->EnableSafeModeSlide,
-    Settings->EnableWriteUnprotector
+    Settings->EnableWriteUnprotector,
+    Settings->ClearTaskSwitchBit
     ));
 
   DEBUG ((

@@ -1,6 +1,6 @@
 ## @file
 #
-#  Component description file for OcDevicePathLibrary.
+#  Component description file for OcDevicePathLib.
 #
 #  Copyright (C) 2016, The HermitCrabs Lab. All rights reserved.<BR>
 #
@@ -17,7 +17,7 @@
 ##
 
 [Defines]
-  INF_VERSION                    = 0x00010005
+  INF_VERSION                    = 0x0001001B
   BASE_NAME                      = OcDevicePathLib
   FILE_GUID                      = BDEBB36A-9261-4908-9E42-FE59E0B43B82
   MODULE_TYPE                    = BASE

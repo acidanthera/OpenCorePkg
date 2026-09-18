@@ -199,7 +199,7 @@ FindAcpiPtr (
   //
   // Check ACPI2.0 table
   //
-  if ((int)Hob->Acpi20.Table != -1) {
+  if ((int)Hob->Acpi20.Table != 0) {
     Rsdp = (EFI_ACPI_3_0_ROOT_SYSTEM_DESCRIPTION_POINTER *)(UINTN)Hob->Acpi20.Table;
     Rsdt = (RSDT_TABLE *)(UINTN)Rsdp->RsdtAddress;
     Xsdt = NULL;
@@ -225,7 +225,7 @@ FindAcpiPtr (
   //
   // Check ACPI1.0 table
   //
-  if ((AcpiTable == NULL) && ((int)Hob->Acpi.Table != -1)) {
+  if ((AcpiTable == NULL) && ((int)Hob->Acpi.Table != 0)) {
     Rsdp = (EFI_ACPI_3_0_ROOT_SYSTEM_DESCRIPTION_POINTER *)(UINTN)Hob->Acpi.Table;
     Rsdt = (RSDT_TABLE *)(UINTN)Rsdp->RsdtAddress;
     //
@@ -435,8 +435,16 @@ PrepareHobLegacyTable (
   IN HOB_TEMPLATE  *Hob
   )
 {
-  Hob->Acpi.Table   = (EFI_PHYSICAL_ADDRESS)(UINTN)FindAcpiRsdPtr ();
-  Hob->Acpi20.Table = (EFI_PHYSICAL_ADDRESS)(UINTN)FindAcpiRsdPtr ();
+  EFI_ACPI_3_0_ROOT_SYSTEM_DESCRIPTION_POINTER  *AcpiRsdPtr;
+
+  AcpiRsdPtr      = FindAcpiRsdPtr ();
+  Hob->Acpi.Table = (EFI_PHYSICAL_ADDRESS)(UINTN)AcpiRsdPtr;
+  if ((AcpiRsdPtr != NULL) && (AcpiRsdPtr->Revision >= 2)) {
+    Hob->Acpi20.Table = (EFI_PHYSICAL_ADDRESS)(UINTN)AcpiRsdPtr;
+  } else {
+    Hob->Acpi20.Table = (EFI_PHYSICAL_ADDRESS)(UINTN)NULL;
+  }
+
   Hob->Smbios.Table = (EFI_PHYSICAL_ADDRESS)(UINTN)FindSMBIOSPtr ();
   Hob->Mps.Table    = (EFI_PHYSICAL_ADDRESS)(UINTN)FindMPSPtr ();
 

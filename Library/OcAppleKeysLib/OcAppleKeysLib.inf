@@ -1,5 +1,5 @@
 ## @file
-# OcAppleVerificationLib
+# OcAppleKeysLib
 #
 # Copyright (c) 2017-2018, savvas
 #
@@ -16,7 +16,7 @@
 ##
 
 [Defines]
-  INF_VERSION                    = 0x00010005
+  INF_VERSION                    = 0x0001001B
   BASE_NAME                      = OcAppleKeysLib
   FILE_GUID                      = 1CADD588-89D4-464C-92DC-FA0ABE350B16
   MODULE_TYPE                    = DXE_DRIVER

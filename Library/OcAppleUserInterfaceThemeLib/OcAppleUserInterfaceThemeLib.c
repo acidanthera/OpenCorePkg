@@ -14,6 +14,7 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 **/
 
 #include <Guid/AppleVariable.h>
+#include <Guid/OcVariable.h>
 #include <Library/DebugLib.h>
 #include <Library/OcMiscLib.h>
 #include <Library/UefiRuntimeServicesTableLib.h>
@@ -72,20 +73,38 @@ OcAppleUserInterfaceThemeInstallProtocol (
   }
 
   //
-  // Default color is black
+  // Default color is black.
   //
   mCurrentColor = APPLE_COLOR_SYRAH_BLACK;
 
+  //
+  // OC_BACKGROUND_COLOR_VARIABLE_NAME has priority.
+  //
   DataSize = sizeof (Color);
   Status   = gRT->GetVariable (
-                    APPLE_DEFAULT_BACKGROUND_COLOR_VARIABLE_NAME,
-                    &gAppleVendorVariableGuid,
+                    OC_BACKGROUND_COLOR_VARIABLE_NAME,
+                    &gOcVendorVariableGuid,
                     0,
                     &DataSize,
                     &Color
                     );
   if (!EFI_ERROR (Status)) {
     mCurrentColor = Color;
+  } else {
+    //
+    // APPLE_DEFAULT_BACKGROUND_COLOR_VARIABLE_NAME is used as a fallback.
+    //
+    DataSize = sizeof (Color);
+    Status   = gRT->GetVariable (
+                      APPLE_DEFAULT_BACKGROUND_COLOR_VARIABLE_NAME,
+                      &gAppleVendorVariableGuid,
+                      0,
+                      &DataSize,
+                      &Color
+                      );
+    if (!EFI_ERROR (Status)) {
+      mCurrentColor = Color;
+    }
   }
 
   NewHandle = NULL;

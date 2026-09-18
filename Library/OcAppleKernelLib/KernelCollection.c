@@ -835,3 +835,311 @@ KcFixupValue (
 
   return Value;
 }
+
+UINTN
+KcWalkChainedFixupsInSegment (
+  IN     UINT8                                *Buffer,
+  IN     UINTN                                BufferSize,
+  IN     MACH_DYLD_CHAINED_STARTS_IN_SEGMENT  *StartsSeg,
+  IN     UINTN                                StartsSegSize,
+  IN     KC_CHAINED_FIXUP_VISIT               Visitor OPTIONAL,
+  IN OUT VOID                                 *VisitorContext OPTIONAL
+  )
+{
+  MACH_DYLD_CHAINED_PTR_64_KERNEL_CACHE_REBASE  *Fixup;
+  UINT64                                        *FixupLoc;
+  UINT64                                        PageBase;
+  UINT64                                        PageEnd;
+  UINT64                                        SlotOffset;
+  UINT64                                        SlotEnd;
+  UINT64                                        NextStep;
+  UINT64                                        NextSlotOffset;
+  UINT16                                        PageStart;
+  UINT16                                        PageCount;
+  UINT16                                        PageSize;
+  UINT16                                        PointerFormat;
+  UINT32                                        Size;
+  UINT32                                        PageIdx;
+  UINT32                                        Stride;
+  UINTN                                         StructHeaderSize;
+  UINTN                                         MaxIters;
+  UINTN                                         IterCount;
+  UINTN                                         Count;
+
+  ASSERT (Buffer != NULL);
+  ASSERT (StartsSeg != NULL);
+
+  //
+  // None of the fields below can be trusted to bound themselves; treat
+  // every read of StartsSeg as untrusted input from the kernel
+  // collection blob and validate against caller-supplied container
+  // sizes (BufferSize bounds the contents being walked, StartsSegSize
+  // bounds the metadata struct itself).
+  //
+
+  //
+  // 1. The fixed-size header of MACH_DYLD_CHAINED_STARTS_IN_SEGMENT
+  //    must fit, otherwise reading Size/PageCount below is OOB.
+  //
+  StructHeaderSize = OFFSET_OF (MACH_DYLD_CHAINED_STARTS_IN_SEGMENT, PageStart);
+  if (StartsSegSize < StructHeaderSize) {
+    return 0;
+  }
+
+  Size          = StartsSeg->Size;
+  PageSize      = StartsSeg->PageSize;
+  PageCount     = StartsSeg->PageCount;
+  PointerFormat = StartsSeg->PointerFormat;
+
+  //
+  // 2. The struct's self-declared Size must not exceed StartsSegSize
+  //    and must be at least the fixed header.
+  //
+  if ((Size > StartsSegSize) || (Size < StructHeaderSize)) {
+    return 0;
+  }
+
+  //
+  // 3. The PageStart[PageCount] flexible array must fit within Size.
+  //    Equivalent to:  StructHeaderSize + PageCount * sizeof(UINT16) <= Size.
+  //
+  if ((UINTN)PageCount > (Size - StructHeaderSize) / sizeof (UINT16)) {
+    return 0;
+  }
+
+  //
+  // 4. PageSize must be large enough to hold a pointer slot, and small
+  //    enough that one page fits in the buffer at all. macOS kernel
+  //    caches use 0x1000 or 0x4000.
+  //
+  if ((PageSize < sizeof (UINT64)) || ((UINTN)PageSize > BufferSize)) {
+    return 0;
+  }
+
+  //
+  // 5. The segment must start within the buffer.
+  //
+  if (StartsSeg->SegmentOffset >= BufferSize) {
+    return 0;
+  }
+
+  //
+  // 6. Pointer-format dispatch. Stride is the chain step in bytes per
+  //    Apple's mach-o/fixup-chains.h. Other formats (auth ARM64E,
+  //    32-bit variants, userland 64) are not produced by current macOS
+  //    kernel caches and are skipped.
+  //
+  switch (PointerFormat) {
+    case MACH_DYLD_CHAINED_PTR_X86_64_KERNEL_CACHE:
+      Stride = 1;
+      break;
+    case MACH_DYLD_CHAINED_PTR_64_KERNEL_CACHE:
+    case MACH_DYLD_CHAINED_PTR_64_OFFSET:
+    case MACH_DYLD_CHAINED_PTR_ARM64E_KERNEL:
+      Stride = 4;
+      break;
+    default:
+      return 0;
+  }
+
+  //
+  // 7. A correctly formed chain visits each pointer slot at most once.
+  //    Cap the per-page iteration count at PageSize / sizeof(UINT64) to
+  //    defeat hostile self-referencing chains where Fixup->Next would
+  //    cycle back to a previously visited slot.
+  //
+  MaxIters = (UINTN)PageSize / sizeof (UINT64);
+
+  Count = 0;
+
+  for (PageIdx = 0; PageIdx < PageCount; ++PageIdx) {
+    PageStart = StartsSeg->PageStart[PageIdx];
+
+    if (PageStart == MACH_DYLD_CHAINED_PTR_START_NONE) {
+      continue;
+    }
+
+    //
+    // 8. STARTS_IN_SEGMENT pages with the START_MULTI bit carry chain
+    //    heads via a separate ChainStarts[] table appended after
+    //    PageStart[PageCount]. macOS kernel caches do not emit this
+    //    layout for the formats handled above; skip such pages
+    //    defensively rather than mis-walking foreign data.
+    //
+    if ((PageStart & MACH_DYLD_CHAINED_PTR_START_MULTI) != 0) {
+      continue;
+    }
+
+    //
+    // 9. Compute and bounds-check the page base in Buffer:
+    //      PageBase = SegmentOffset + PageIdx * PageSize
+    //    Arithmetic is overflow-checked, and the resulting page must
+    //    fit entirely in Buffer.
+    //
+    if (BaseOverflowMulAddU64 (
+          (UINT64)PageIdx,
+          (UINT64)PageSize,
+          StartsSeg->SegmentOffset,
+          &PageBase
+          ))
+    {
+      continue;
+    }
+
+    if (BaseOverflowAddU64 (PageBase, (UINT64)PageSize, &PageEnd)) {
+      continue;
+    }
+
+    if (PageEnd > BufferSize) {
+      continue;
+    }
+
+    //
+    // 10. The chain head must point inside this page; otherwise the
+    //     starts table is malformed for this entry.
+    //
+    if (PageStart >= PageSize) {
+      continue;
+    }
+
+    SlotOffset = PageBase + PageStart;
+
+    //
+    // 11. The chain head's pointer slot must fit inside the page.
+    //
+    if (BaseOverflowAddU64 (SlotOffset, sizeof (UINT64), &SlotEnd) ||
+        (SlotEnd > PageEnd))
+    {
+      continue;
+    }
+
+    FixupLoc = (UINT64 *)(Buffer + SlotOffset);
+
+    //
+    // 12. Walk this page's chain with a hard upper iteration bound. A
+    //     well-formed chain cannot revisit a slot, so MaxIters slots is
+    //     a strict upper bound; we stop short on any sign of looping.
+    //
+    for (IterCount = 0; IterCount < MaxIters; ++IterCount) {
+      Fixup = (MACH_DYLD_CHAINED_PTR_64_KERNEL_CACHE_REBASE *)FixupLoc;
+
+      if (Visitor != NULL) {
+        Visitor (FixupLoc, VisitorContext);
+      }
+
+      ++Count;
+
+      if (Fixup->Next == 0) {
+        break;
+      }
+
+      //
+      // 13. Compute and bounds-check the next slot. The chain MUST
+      //     stay within the same page; if Fixup->Next would step
+      //     outside the page, stop walking this chain.
+      //
+      if (BaseOverflowMulU64 (
+            (UINT64)Fixup->Next,
+            (UINT64)Stride,
+            &NextStep
+            ))
+      {
+        break;
+      }
+
+      if (BaseOverflowAddU64 (SlotOffset, NextStep, &NextSlotOffset)) {
+        break;
+      }
+
+      if (BaseOverflowAddU64 (NextSlotOffset, sizeof (UINT64), &SlotEnd) ||
+          (SlotEnd > PageEnd))
+      {
+        break;
+      }
+
+      SlotOffset = NextSlotOffset;
+      FixupLoc   = (UINT64 *)(Buffer + SlotOffset);
+    }
+  }
+
+  return Count;
+}
+
+UINTN
+KcWalkChainedFixupsInImage (
+  IN     UINT8                              *Buffer,
+  IN     UINTN                              BufferSize,
+  IN     MACH_DYLD_CHAINED_STARTS_IN_IMAGE  *Starts,
+  IN     UINTN                              StartsSize,
+  IN     KC_CHAINED_FIXUP_VISIT             Visitor OPTIONAL,
+  IN OUT VOID                               *VisitorContext OPTIONAL
+  )
+{
+  MACH_DYLD_CHAINED_STARTS_IN_SEGMENT  *StartsSeg;
+  UINTN                                StartsSegSize;
+  UINT32                               NumSegments;
+  UINT32                               SegOffset;
+  UINT32                               SegIdx;
+  UINTN                                StructHeaderSize;
+  UINTN                                Count;
+
+  ASSERT (Buffer != NULL);
+  ASSERT (Starts != NULL);
+
+  //
+  // The fixed header of MACH_DYLD_CHAINED_STARTS_IN_IMAGE is one UINT32
+  // (NumSegments) before the variable-length SegInfoOffset[] array.
+  //
+  StructHeaderSize = OFFSET_OF (MACH_DYLD_CHAINED_STARTS_IN_IMAGE, SegInfoOffset);
+  if (StartsSize < StructHeaderSize) {
+    return 0;
+  }
+
+  NumSegments = Starts->NumSegments;
+
+  //
+  // The SegInfoOffset[NumSegments] array must fit within StartsSize.
+  //
+  if ((UINTN)NumSegments > (StartsSize - StructHeaderSize) / sizeof (UINT32)) {
+    return 0;
+  }
+
+  Count = 0;
+
+  for (SegIdx = 0; SegIdx < NumSegments; ++SegIdx) {
+    SegOffset = Starts->SegInfoOffset[SegIdx];
+
+    //
+    // SegInfoOffset == 0 is the sentinel for "segment has no fixups".
+    //
+    if (SegOffset == 0) {
+      continue;
+    }
+
+    //
+    // The per-segment record must lie within the StartsSize region.
+    // We pass the remaining bytes from this offset as StartsSegSize;
+    // KcWalkChainedFixupsInSegment validates further (struct header,
+    // declared Size, page array).
+    //
+    if ((UINTN)SegOffset >= StartsSize) {
+      continue;
+    }
+
+    StartsSegSize = StartsSize - (UINTN)SegOffset;
+    StartsSeg     = (MACH_DYLD_CHAINED_STARTS_IN_SEGMENT *)(
+                                                            (UINT8 *)Starts + SegOffset
+                                                            );
+
+    Count += KcWalkChainedFixupsInSegment (
+               Buffer,
+               BufferSize,
+               StartsSeg,
+               StartsSegSize,
+               Visitor,
+               VisitorContext
+               );
+  }
+
+  return Count;
+}

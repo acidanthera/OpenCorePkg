@@ -403,7 +403,7 @@ TestHash (
 
 EFI_STATUS
 EFIAPI
-UefiDriverMain (
+TestCrypto (
   IN EFI_HANDLE        ImageHandle,
   IN EFI_SYSTEM_TABLE  *SystemTable
   )
@@ -475,7 +475,7 @@ UefiDriverMain (
 
 EFI_STATUS
 EFIAPI
-UefiAppMain (
+UefiMain (
   IN EFI_HANDLE        ImageHandle,
   IN EFI_SYSTEM_TABLE  *SystemTable
   )

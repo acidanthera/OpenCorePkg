@@ -3,7 +3,9 @@
   and volatile storage space and install variable architecture protocol.
 
   Modified to work with UEFI1.1 for Apple firmware, and for immediate
-  install.
+  install. Additionally, copies AcpiGlobalVariable from existing NVRAM
+  implementation which will become hidden (if there is one), in order
+  for wake from S3 sleep to work.
 
 Copyright (C) 2013, Red Hat, Inc.
 Copyright (c) 2006 - 2019, Intel Corporation. All rights reserved.<BR>
@@ -409,7 +411,6 @@ VariableWriteServiceInitializeDxe (
                   EFI_NATIVE_INTERFACE,
                   NULL
                   );
-
   ASSERT_EFI_ERROR (Status);
 }
 

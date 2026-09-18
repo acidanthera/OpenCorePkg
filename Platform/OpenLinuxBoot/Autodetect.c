@@ -269,7 +269,7 @@ LoadOsRelease (
         "LNX: Reading %s\n",
         OS_RELEASE_FILE
         ));
-      Status = OcParseVars (mEtcOsReleaseFileContents, &mEtcOsReleaseOptions, OcStringFormatAscii);
+      Status = OcParseVars (mEtcOsReleaseFileContents, &mEtcOsReleaseOptions, OcStringFormatAscii, FALSE);
       if (EFI_ERROR (Status)) {
         FreePool (mEtcOsReleaseFileContents);
         mEtcOsReleaseFileContents = NULL;
@@ -320,7 +320,7 @@ LoadDefaultGrub (
       "LNX: Reading %s\n",
       GRUB_DEFAULT_FILE
       ));
-    Status = OcParseVars (mEtcDefaultGrubFileContents, &mEtcDefaultGrubOptions, OcStringFormatAscii);
+    Status = OcParseVars (mEtcDefaultGrubFileContents, &mEtcDefaultGrubOptions, OcStringFormatAscii, FALSE);
     if (EFI_ERROR (Status)) {
       FreePool (mEtcDefaultGrubFileContents);
       mEtcDefaultGrubFileContents = NULL;

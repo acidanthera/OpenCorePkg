@@ -112,4 +112,4 @@ AppleBoardCode:
 AppleModelYear:
   - 2013
 MinimumOSVersion: "10.8.2"
-MaximumOSVersion: "10.15.7"
+MaximumOSVersion: "10.15.8"

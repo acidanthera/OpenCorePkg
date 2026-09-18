@@ -353,6 +353,10 @@ InternalGetPartitionLegacyOsType (
             || CheckLegacySignature ("isolinux", Buffer, BufferSize))
   {
     LegacyOsType = OcLegacyOsTypeIsoLinux;
+  } else if (  CheckLegacySignature ("GRLDR", Buffer, BufferSize)
+            || CheckLegacySignature ("grldr", Buffer, BufferSize))
+  {
+    LegacyOsType = OcLegacyOsTypeGrldr;
   } else {
     LegacyOsType = OcLegacyOsTypeNone;
     DEBUG ((DEBUG_INFO, "OLB: Unknown legacy bootsector signature\n"));

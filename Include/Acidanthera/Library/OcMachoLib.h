@@ -41,7 +41,6 @@ typedef struct {
   MACH_NLIST_ANY           *SymbolTable;
   CHAR8                    *StringTable;
   MACH_DYSYMTAB_COMMAND    *DySymtab;
-  MACH_NLIST_ANY           *IndirectSymbolTable;
   MACH_RELOCATION_INFO     *LocalRelocations;
   MACH_RELOCATION_INFO     *ExternRelocations;
 
@@ -1522,48 +1521,6 @@ MachoGetSymbolTable64 (
   OUT UINT32               *NumExternalSymbols OPTIONAL,
   OUT CONST MACH_NLIST_64  **UndefinedSymbols OPTIONAL,
   OUT UINT32               *NumUndefinedSymbols OPTIONAL
-  );
-
-/**
-  Obtain indirect symbol table.
-
-  @param[in]     Context              Context of the Mach-O.
-  @param[in,out] SymbolTable          Indirect symbol table.
-
-  @return number of symbols in indirect symbol table or 0.
-**/
-UINT32
-MachoGetIndirectSymbolTable (
-  IN OUT OC_MACHO_CONTEXT   *Context,
-  OUT CONST MACH_NLIST_ANY  **SymbolTable
-  );
-
-/**
-  Obtain indirect 32-bit symbol table.
-
-  @param[in]     Context              Context of the Mach-O.
-  @param[in,out] SymbolTable          Indirect symbol table.
-
-  @return number of symbols in indirect symbol table or 0.
-**/
-UINT32
-MachoGetIndirectSymbolTable32 (
-  IN OUT OC_MACHO_CONTEXT  *Context,
-  OUT CONST MACH_NLIST     **SymbolTable
-  );
-
-/**
-  Obtain indirect 64-bit symbol table.
-
-  @param[in]     Context              Context of the Mach-O.
-  @param[in,out] SymbolTable          Indirect symbol table.
-
-  @return number of symbols in indirect symbol table or 0.
-**/
-UINT32
-MachoGetIndirectSymbolTable64 (
-  IN OUT OC_MACHO_CONTEXT  *Context,
-  OUT CONST MACH_NLIST_64  **SymbolTable
   );
 
 /**

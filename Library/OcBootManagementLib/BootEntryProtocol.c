@@ -248,6 +248,10 @@ OcAddEntriesFromBootEntryProtocol (
 {
   BEP_ADD_ENTRIES_CONTEXT  AddEntriesContext;
 
+  //
+  // May be CustomFileSystem, but not NULL.
+  //
+  ASSERT (FileSystem != NULL);
   ASSERT (!CreateDefault || (DefaultEntryId != NULL));
 
   AddEntriesContext.ReturnStatus    = EFI_NOT_FOUND;

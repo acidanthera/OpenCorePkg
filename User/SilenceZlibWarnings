@@ -1,0 +1,15 @@
+## @file
+# Copyright (c) 2023-2025, PMheart, Mike Beaton. All rights reserved.
+# SPDX-License-Identifier: BSD-3-Clause
+##
+
+#
+# Add additional flags to silence warnings for legacy code style in zlib.
+#
+ifeq ($(shell echo 'int a;' | "${CC}" -Wno-deprecated-non-prototype -x c -c - -o /dev/null 2>&1),)
+	CFLAGS += -Wno-deprecated-non-prototype
+endif
+
+ifeq ($(shell echo 'void foo(a) int a; {}' | "${CC}" -Wno-old-style-definition -x c -c - -o /dev/null 2>&1),)
+	CFLAGS += -Wno-old-style-definition
+endif

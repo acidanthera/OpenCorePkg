@@ -7,7 +7,7 @@
 
 
 [Defines]
-  INF_VERSION    = 0x00010005
+  INF_VERSION    = 0x0001001B
   BASE_NAME      = FirmwareSettingsEntry
   ENTRY_POINT    = UefiMain
   FILE_GUID      = 81DA83B8-15F6-4EA5-B067-C2B3AC7BAE49

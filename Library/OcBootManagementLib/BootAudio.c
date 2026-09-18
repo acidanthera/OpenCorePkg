@@ -214,7 +214,11 @@ OcPlayAudioEntry (
   } else if (Entry->Type == OC_BOOT_WINDOWS) {
     OcPlayAudioFile (Context, OC_VOICE_OVER_AUDIO_FILE_WINDOWS, OC_VOICE_OVER_AUDIO_BASE_TYPE_OPEN_CORE, FALSE);
   } else if (Entry->Type == OC_BOOT_EXTERNAL_OS) {
-    OcPlayAudioFile (Context, OC_VOICE_OVER_AUDIO_FILE_EXTERNAL_OS, OC_VOICE_OVER_AUDIO_BASE_TYPE_OPEN_CORE, FALSE);
+    if (OcAsciiStriStr (Entry->Flavour, OC_FLAVOUR_ID_NETWORK_BOOT) != NULL) {
+      OcPlayAudioFile (Context, OC_VOICE_OVER_AUDIO_FILE_NETWORK_BOOT, OC_VOICE_OVER_AUDIO_BASE_TYPE_OPEN_CORE, FALSE);
+    } else {
+      OcPlayAudioFile (Context, OC_VOICE_OVER_AUDIO_FILE_EXTERNAL_OS, OC_VOICE_OVER_AUDIO_BASE_TYPE_OPEN_CORE, FALSE);
+    }
   } else if (Entry->Type == OC_BOOT_SYSTEM) {
     OcPlayAudioFile (Context, Entry->AudioBasePath, Entry->AudioBaseType, FALSE);
   } else if (Entry->Type == OC_BOOT_EXTERNAL_TOOL) {

@@ -136,6 +136,7 @@ OC_DECLARE (OC_BOOTER_PATCH_ARRAY)
 #define OC_BOOTER_QUIRKS_FIELDS(_, __) \
   _(BOOLEAN                     , AllowRelocationBlock      ,     , FALSE  , ()) \
   _(BOOLEAN                     , AvoidRuntimeDefrag        ,     , FALSE  , ()) \
+  _(BOOLEAN                     , ClearTaskSwitchBit        ,     , FALSE  , ()) \
   _(BOOLEAN                     , DevirtualiseMmio          ,     , FALSE  , ()) \
   _(BOOLEAN                     , DisableSingleUser         ,     , FALSE  , ()) \
   _(BOOLEAN                     , DisableVariableWrite      ,     , FALSE  , ()) \
@@ -607,12 +608,20 @@ OC_DECLARE (OC_PLATFORM_CONFIG)
 **/
 
 ///
+/// Array of driver names to unload.
+///
+#define OC_UEFI_UNLOAD_ARRAY_FIELDS(_, __) \
+  OC_ARRAY (OC_STRING, _, __)
+OC_DECLARE (OC_UEFI_UNLOAD_ARRAY)
+
+///
 /// Drivers is an ordered array of drivers to load.
 ///
 #define OC_UEFI_DRIVER_ENTRY_FIELDS(_, __) \
   _(OC_STRING                   , Arguments          ,     , OC_STRING_CONSTR ("", _, __)                    , OC_DESTR (OC_STRING) ) \
   _(OC_STRING                   , Comment            ,     , OC_STRING_CONSTR ("", _, __)                    , OC_DESTR (OC_STRING) ) \
   _(BOOLEAN                     , Enabled            ,     , FALSE                                           , ()) \
+  _(BOOLEAN                     , HideVerbose        ,     , FALSE                                           , ()) \
   _(BOOLEAN                     , LoadEarly          ,     , FALSE                                           , ()) \
   _(OC_STRING                   , Path               ,     , OC_STRING_CONSTR ("", _, __)                    , OC_DESTR (OC_STRING) )
 OC_DECLARE (OC_UEFI_DRIVER_ENTRY)
@@ -782,7 +791,8 @@ OC_DECLARE (OC_UEFI_RSVD_ARRAY)
   _(OC_UEFI_OUTPUT              , Output            ,     , OC_CONSTR2 (OC_UEFI_OUTPUT, _, __)             , OC_DESTR (OC_UEFI_OUTPUT)) \
   _(OC_UEFI_PROTOCOL_OVERRIDES  , ProtocolOverrides ,     , OC_CONSTR2 (OC_UEFI_PROTOCOL_OVERRIDES, _, __) , OC_DESTR (OC_UEFI_PROTOCOL_OVERRIDES)) \
   _(OC_UEFI_QUIRKS              , Quirks            ,     , OC_CONSTR2 (OC_UEFI_QUIRKS, _, __)             , OC_DESTR (OC_UEFI_QUIRKS)) \
-  _(OC_UEFI_RSVD_ARRAY          , ReservedMemory    ,     , OC_CONSTR2 (OC_UEFI_RSVD_ARRAY, _, __)         , OC_DESTR (OC_UEFI_RSVD_ARRAY))
+  _(OC_UEFI_RSVD_ARRAY          , ReservedMemory    ,     , OC_CONSTR2 (OC_UEFI_RSVD_ARRAY, _, __)         , OC_DESTR (OC_UEFI_RSVD_ARRAY)) \
+  _(OC_UEFI_UNLOAD_ARRAY        , Unload            ,     , OC_CONSTR2 (OC_UEFI_UNLOAD_ARRAY, _, __)       , OC_DESTR (OC_UEFI_UNLOAD_ARRAY))
 OC_DECLARE (OC_UEFI_CONFIG)
 
 /**

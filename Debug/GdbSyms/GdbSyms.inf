@@ -16,9 +16,9 @@
 ##
 
 [Defines]
-  INF_VERSION                    = 0x00010005
+  INF_VERSION                    = 0x0001001B
   BASE_NAME                      = GdbSyms
-  FILE_GUID                      = 22abcb60-fb40-42ac-b01f-3ab1fad9aad8
+  FILE_GUID                      = 22ABCB60-FB40-42AC-B01F-3AB1FAD9AAD8
   MODULE_TYPE                    = DXE_DRIVER
   VERSION_STRING                 = 1.0
   ENTRY_POINT                    = Initialize
@@ -50,10 +50,6 @@
   UefiLib
   OcGuardLib
   TimerLib
-
-[Guids]
-
-[Protocols]
 
 [Depex]
   TRUE

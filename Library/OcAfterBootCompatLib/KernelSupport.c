@@ -191,10 +191,11 @@ PerformRtMemoryVirtualMapping (
     // Intel HD3000 or HD4000 is used. For example, on GA-H81N-D2H there is a single 1 GB descriptor:
     // 000000009F800000-00000000DF9FFFFF 0000000000040200 8000000000000000
     //
-    // All known boot.efi starting from at least 10.5.8 properly handle this flag and do not assign
-    // virtual addresses to reserved descriptors. However, our legacy code had a bug, and did not
-    // check for EfiReservedMemoryType. Therefore it replaced such entries by EfiMemoryMappedIO
-    // to "prevent" boot.efi relocations.
+    // Older EfiBoot (from 10.4.x) assigns virtual addresses to all descriptors containing
+    // EFI_MEMORY_RUNTIME flag, including ones with EfiReservedMemoryType. Starting with 10.5
+    // this is fixed, and virtual addresses are not assigned to reserved descriptors.
+    // We might eventually need to add some workaround to prevent exceeding virtual address space
+    // in EfiBoot from 10.4 by dropping the EFI_MEMORY_RUNTIME flag.
     //
     // The relevant discussion and the original fix can be found here:
     // http://web.archive.org/web/20141111124211/http://www.projectosx.com:80/forum/lofiversion/index.php/t2428-450.html
@@ -321,13 +322,6 @@ RestoreProtectedRtMemoryTypes (
   }
 }
 
-/**
-  Prepare environment for normal booting. Called when boot.efi jumps to kernel.
-
-  @param[in,out]  BootCompat    Boot compatibility context.
-  @param[in,out]  BootArgs      Apple kernel boot arguments.
-**/
-STATIC
 VOID
 AppleMapPrepareForBooting (
   IN OUT BOOT_COMPAT_CONTEXT  *BootCompat,
@@ -439,13 +433,6 @@ AppleMapPrepareForBooting (
   }
 }
 
-/**
-  Prepare environment for hibernate wake. Called when boot.efi jumps to kernel.
-
-  @param[in,out]  BootCompat       Boot compatibility context.
-  @param[in,out]  ImageHeaderPage  Apple hibernate image page number.
-**/
-STATIC
 VOID
 AppleMapPrepareForHibernateWake (
   IN OUT BOOT_COMPAT_CONTEXT  *BootCompat,
@@ -596,6 +583,8 @@ AppleMapPrepareBooterState (
         return;
       }
 
+      DEBUG ((DEBUG_VERBOSE, "OCABC: Allocated SysTableRtArea %p\n", BootCompat->KernelState.SysTableRtArea));
+
       //
       // Copy UEFI system table to the new location.
       //
@@ -616,66 +605,6 @@ AppleMapPrepareBooterState (
     LoadedImage->SystemTable =
       (EFI_SYSTEM_TABLE *)(UINTN)BootCompat->KernelState.SysTableRtArea;
   }
-}
-
-VOID
-AppleMapPrepareKernelJump (
-  IN OUT BOOT_COMPAT_CONTEXT   *BootCompat,
-  IN     EFI_PHYSICAL_ADDRESS  CallGate,
-  IN     UINTN                 HookAddress
-  )
-{
-  CALL_GATE_JUMP  *CallGateJump;
-
-  //
-  // There is no reason to patch the kernel when we do not need it.
-  //
-  if (  !BootCompat->Settings.AvoidRuntimeDefrag
-     && !BootCompat->Settings.DiscardHibernateMap
-     && !BootCompat->Settings.AllowRelocationBlock
-     && !BootCompat->Settings.DisableSingleUser
-     && !BootCompat->Settings.ForceBooterSignature)
-  {
-    return;
-  }
-
- #ifndef MDE_CPU_X64
-  RUNTIME_DEBUG ((DEBUG_ERROR, "OCABC: Kernel trampolines are unsupported for non-X64\n"));
-  CpuDeadLoop ();
- #endif
-
-  //
-  // Check whether we have address and abort if not.
-  //
-  if (CallGate == 0) {
-    RUNTIME_DEBUG ((DEBUG_ERROR, "OCABC: Failed to find call gate address\n"));
-    return;
-  }
-
-  CallGateJump = (VOID *)(UINTN)CallGate;
-
-  //
-  // Move call gate jump bytes front.
-  // Performing this on the EfiBootRt KCG may bork the binary, but right now
-  // only corrupts an unused string.
-  //
-  CopyMem (
-    CallGateJump + 1,
-    CallGateJump,
-    ESTIMATED_CALL_GATE_SIZE
-    );
-  //
-  // lea r8, [rip+XXX]
-  // Passes KCG as third argument to be relocatable. macOS 13 Developer Beta 1
-  // copies the KCG into a separately allocated buffer.
-  //
-  CallGateJump->LeaRip.Command[0] = 0x4C;
-  CallGateJump->LeaRip.Command[1] = 0x8D;
-  CallGateJump->LeaRip.Command[2] = 0x05;
-  CallGateJump->LeaRip.Argument   = sizeof (*CallGateJump) - sizeof (CallGateJump->LeaRip);
-  CallGateJump->Jmp.Command       = 0x25FF;
-  CallGateJump->Jmp.Argument      = 0x0;
-  CallGateJump->Jmp.Address       = HookAddress;
 }
 
 EFI_STATUS
@@ -757,77 +686,4 @@ AppleMapPrepareMemState (
   }
 
   return Status;
-}
-
-UINTN
-EFIAPI
-AppleMapPrepareKernelStateWorker (
-  IN UINTN             *Args,
-  IN UINTN             EntryPoint,
-  IN KERNEL_CALL_GATE  CallGate,
-  IN UINTN             *Arg1,
-  IN UINTN             Arg2
-  )
-{
-  BOOT_COMPAT_CONTEXT  *BootCompatContext;
-
-  BootCompatContext = GetBootCompatContext ();
-
-  if (BootCompatContext->ServiceState.AppleHibernateWake) {
-    AppleMapPrepareForHibernateWake (
-      BootCompatContext,
-      *Args
-      );
-  } else {
-    AppleMapPrepareForBooting (
-      BootCompatContext,
-      (VOID *)*Args
-      );
-  }
-
-  if (BootCompatContext->KernelState.RelocationBlock != 0) {
-    AppleRelocationCallGate (
-      Args,
-      BootCompatContext,
-      CallGate,
-      Arg1,
-      Arg2
-      );
-  }
-
-  return CallGate (*Arg1, Arg2);
-}
-
-EFI_STATUS
-EFIAPI
-AppleMapPrepareKernelStateNew (
-  IN     UINTN                       SystemTable,
-  IN OUT APPLE_EFI_BOOT_RT_KCG_ARGS  *KcgArguments,
-  IN     KERNEL_CALL_GATE            CallGate
-  )
-{
-  return AppleMapPrepareKernelStateWorker (
-           &KcgArguments->Args,
-           KcgArguments->EntryPoint,
-           CallGate,
-           &SystemTable,
-           (UINTN)KcgArguments
-           );
-}
-
-UINTN
-EFIAPI
-AppleMapPrepareKernelStateOld (
-  IN UINTN             Args,
-  IN UINTN             EntryPoint,
-  IN KERNEL_CALL_GATE  CallGate
-  )
-{
-  return AppleMapPrepareKernelStateWorker (
-           &Args,
-           EntryPoint,
-           CallGate,
-           &Args,
-           EntryPoint
-           );
 }

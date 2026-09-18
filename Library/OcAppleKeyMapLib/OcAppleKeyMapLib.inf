@@ -1,6 +1,7 @@
 ## @file
 #
-#  Component description file for the library producing the Apple Event protocol.
+#  Component description file for the library producing the Apple Key Map Database
+#  and Apple Key Map Aggregator protocols.
 #
 #  Copyright (C) 2019, Download-Fritz. All rights reserved.<BR>
 #
@@ -17,7 +18,7 @@
 ##
 
 [Defines]
-  INF_VERSION                    = 0x00010005
+  INF_VERSION                    = 0x0001001B
   BASE_NAME                      = OcAppleKeyMapLib
   FILE_GUID                      = 3A5CA054-2A65-4A00-AE58-B61BAFD6CF9A
   MODULE_TYPE                    = DXE_DRIVER

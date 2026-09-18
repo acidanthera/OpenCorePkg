@@ -23,6 +23,7 @@ Revision History:
 
 #include <Base.h>
 #include <Uefi.h>
+#include <Library/UefiImageLib.h>
 
 #define EFILDR_BASE_SEGMENT    0x2000
 #define EFILDR_LOAD_ADDRESS    (EFILDR_BASE_SEGMENT << 4)
@@ -31,15 +32,16 @@ Revision History:
 #define EFILDR_CB_VA  0x00
 
 typedef struct _EFILDRHANDOFF {
-  UINTN                    MemDescCount;
-  EFI_MEMORY_DESCRIPTOR    *MemDesc;
-  VOID                     *BfvBase;
-  UINTN                    BfvSize;
-  VOID                     *DxeIplImageBase;
-  UINTN                    DxeIplImageSize;
-  VOID                     *DxeCoreImageBase;
-  UINTN                    DxeCoreImageSize;
-  VOID                     *DxeCoreEntryPoint;
+  UINTN                              MemDescCount;
+  EFI_MEMORY_DESCRIPTOR              *MemDesc;
+  VOID                               *BfvBase;
+  UINTN                              BfvSize;
+  VOID                               *DxeIplImageBase;
+  UINTN                              DxeIplImageSize;
+  VOID                               *DxeCoreImageBase;
+  UINTN                              DxeCoreImageSize;
+  VOID                               *DxeCoreEntryPoint;
+  UEFI_IMAGE_LOADER_IMAGE_CONTEXT    DxeCoreImageContext;
 } EFILDRHANDOFF;
 
 typedef struct {

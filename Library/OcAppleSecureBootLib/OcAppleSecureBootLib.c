@@ -1002,7 +1002,7 @@ OcAppleSecureBootSetDmgLoading (
     mSecureBoot->SetAvailability (mSecureBoot, FALSE);
   } else {
     DEBUG ((DEBUG_INFO, "OCSB: Reenabling secure boot after Apple images\n"));
-    mSecureBoot->SetAvailability (mSecureBoot, FALSE);
+    mSecureBoot->SetAvailability (mSecureBoot, TRUE);
   }
 }
 

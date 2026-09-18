@@ -1,10 +1,96 @@
 OpenCore Changelog
 ==================
+#### v1.0.8
+- Fixed macrecovery utility on Windows, thx @pzhlkj6612
+- Added launch helper for macrecovery utility on Windows, thx @aayushprsingh
+- Added option to hide verbose output from any driver, thx @ilikesn0w
+- Re-enable Secure Boot after DMG loading, thx @albert-mueller
+- Fixed uninitialized L3 cache value on CPUs without L3 cache, thx @bugprogrammer
+- Added grub4dos detection to OpenLegacyBoot, thx @bugprogrammer
+- Added OpticalDrive icon to OpenCanopy, thx @ilikesn0w
+- Fixed unresolved ATAPI device paths on NVMe Macs during hibernation, thx @rctphone
+
+#### v1.0.7
+- Improved `XhciPortLimit` compatibility with macOS Tahoe, thx @laobamac
+- Updated builtin firmware versions for SMBIOS and the rest
+- Migrated to edk2-stable202511
+
+#### v1.0.6
+- Added workaround for not detected CPU frequency in ProvideCpuInfo quirk, thx @hg13bs
+- Updated QemuBuild.command to support `EFI` mode without Duet
+- Increased `OC_STORAGE_SAFE_PATH_MAX` to 192 to support various plugin kexts
+- Fixed vaulting failures when custom fonts are used, thx @al3xtjames
+- Updated documentation for several Booter quirks
+- Added `background-color` NVRAM variable to fix 10.9 boot screen
+- Fixed debug build of OpenShell not starting on Mac EFI with > 25 file systems
+- Improved build speed for Utilities in CI and local build
+- Fixed ACPI 1.0 RSDP being reported under ACPI 2.0 GUID with Duet
+- Improved logic for RSDP version checking in ACPI patching code
+- Downgraded routine log messages such as 'Needs journal recovery, mounting read-only' from WARN to INFO in Ext4Dxe (allows DEBUG_WARN in HaltLevel)
+- Improved OpenNtfsDxe stability, thx @stokescat
+
+#### v1.0.5
+- Fixed incorrect print in PCI device info dumping in `SysReport`
+- Fixed ocvalidate error messages for overlong kext paths in Kernel section, thx @corpnewt
+- Fixed kext injection compatibility issues with macOS 26
+- Updated builtin firmware versions for SMBIOS and the rest
+- Migrated to edk2-stable-202502 
+
+#### v1.0.4
+- Added support for booting from static IPv4 address in OpenCore-specific HttpBootDxe
+- Added static IPv4 configuration options to OpenNetworkBoot
+- Removed `--` prefix from OpenNetworkBoot arguments (modify driver arguments if using this driver)
+- Updated `Unload` option to unload drivers in reverse of the order in which they were loaded
+- Fixed `MSR_IA32_TSC_ADJUST` access on unsupported CPUs (e.g. Virtualization.framework), thx @t0rr3sp3dr0
+- Downgraded WARN log level to INFO for ALREADY_STARTED in AudioDxe (restores ability to include DEBUG_WARN in HaltLevel if required when using this driver)
+- Added `ClearTaskSwitchBit` Booter quirk to fix crashes when using 32-bit versions of macOS on Hyper-V Gen2 VMs
+- Fixed `ProvideCurrentCpuInfo` and CPUID patching on older versions of macOS 10.4
+- Removed ACPI0007 objects from `SSDT-HV-DEV.dsl`
+- Removed `SSDT-HV-DEV-WS2022.dsl` as it is no longer required
+- Added PCI class names to PCI device info dumping in `SysReport`
+
+#### v1.0.3
+- Fixed support for `AMD_CPU_EXT_FAMILY_1AH`, thx @Shaneee
+- Fixed EHCI handoff logic in OpenDuet, causing older machines to hang at start
+- Added Arrow Lake CPU detection
+- Fixed Raptor Lake CPU detection
+- Supported booting with TuneD in Fedora 41 in OpenLinuxBoot
+- Fixed failure of vault `sign.command` to insert signature in correct location in some circumstances
+- Added OpenNetworkBoot driver to support HTTP(S) and PXE boot
+- Supported DMG loading and verification (e.g. macOS Recovery) over HTTP(S) boot
+
+#### v1.0.2
+- Fixed error in macrecovery when running headless, thx @mkorje
+- Added support for `AMD_CPU_EXT_FAMILY_1AH`, thx @Shaneee
+- Updated builtin firmware versions for SMBIOS and the rest
+- Enabled `XcpmExtraMsrs MSR_MISC_PWR_MGMT` patch back on macOS 12+
+- Fixed `XcpmExtraMsrs MSR_MISC_PWR_MGMT` patch on macOS 15
+- Added `UEFI` `Unload` option to unload existing firmware drivers
+- Fixed boot device selection with VirtIO disk drives used for macOS installations
+
+#### v1.0.1
+- Updated code and added progress bar to macrecovery, thx @soyeonswife63
+- Bundled fat binary i386/x64 10.6+ compatible `nvramdump` with LogoutHook release
+- Added support for manual build of i386/x64 10.6+ versions of userspace tools via `FATBIN32=1 make`
+- Disabled `XcpmExtraMsrs MSR_MISC_PWR_MGMT` patch on macOS 12+ due to non-existence
+- Fixed `ThirdPartyDrives` quirk on macOS 14.4 and above
+- Resolved issue booting recovery for OS X 10.8 and earlier since 0.9.7
+- Migrated to edk2-stable202405 
+
 #### v1.0.0
 - Updated builtin firmware versions for SMBIOS and the rest
 - Switched to Apple silicon GitHub runner for CI, thx @Goooler
 - Added Apple Silicon support in all provided utilities
 - Utilities now require macOS 10.9+ (OpenCore itself still supports macOS 10.4+)
+- Added `AllowRelocationBlock` support for 32-bit version
+- Enabled additional serial logging in non-RELEASE builds of OpenDuet
+- Added missing DxeCore ImageContext HOB in OpenDuet
+- Fixed assert caused by dependency ordering in OpenDuet
+- Prevented assert in normal situation when freeing memory above 4GB in OpenDuet
+- Prevented debug assert reporting that optional Hii protocols are not present in OpenDuet
+- Fixed problem loading non-firmware runtime drivers (e.g. OpenRuntime.efi) in OpenDuet
+- Resolved issue using NOOPT debugging in OpenDuet
+- Fixed alphabetical ordering in Configuration.pdf, thx @leon9078
 
 #### v0.9.9
 - Fixed incorrect warning in ocvalidate

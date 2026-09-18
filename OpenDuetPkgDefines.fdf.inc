@@ -14,7 +14,17 @@
 ##
 
   BlockSize          = 0x10000
-  NumBlocks          = 22
+  # Required IA32 size is ~1 block bigger than required X64 size for each
+  # build, so just use minimum IA32 sizes for both.
+!if ($(TARGET) == RELEASE)
+  NumBlocks          = 0x8        #GenFv image size 0x80000
+!else
+!if ($(TARGET) == DEBUG)
+  NumBlocks          = 0xe        #GenFv image size 0xe0000
+!else
+  NumBlocks          = 0x25       #GenFv image size 0x250000
+!endif
+!endif 
   FvAlignment        = 16         #FV alignment and FV attributes setting.
   ERASE_POLARITY     = 1
   MEMORY_MAPPED      = TRUE
@@ -33,8 +43,9 @@
   READ_LOCK_STATUS   = TRUE
 
   APRIORI DXE {
+    INF  MdeModulePkg/Universal/DevicePathDxe/DevicePathDxe.inf
     INF  MdeModulePkg/Universal/PCD/Dxe/Pcd.inf
-    INF  OvmfPkg/8259InterruptControllerDxe/8259.inf
+    INF  OpenCorePkg/Legacy/BootPlatform/8259InterruptControllerDxe/8259.inf
   }
 
   # Core code
@@ -46,20 +57,20 @@
 
   # Console
   INF  MdeModulePkg/Universal/Console/ConPlatformDxe/ConPlatformDxe.inf
-  INF  MdeModulePkg/Universal/Console/ConSplitterDxe/ConSplitterDxe.inf
+  INF  OpenCorePkg/Legacy/BootPlatform/ConSplitterDxe/ConSplitterDxe.inf
   INF  OpenCorePkg/Legacy/BootPlatform/GraphicsConsoleDxe/GraphicsConsoleDxe.inf
 
   # CPU and interrupts
   INF  UefiCpuPkg/CpuIo2Dxe/CpuIo2Dxe.inf
   INF  OpenCorePkg/Legacy/BootPlatform/CpuDxe/CpuDxe.inf
-  INF  OvmfPkg/8259InterruptControllerDxe/8259.inf
+  INF  OpenCorePkg/Legacy/BootPlatform/8259InterruptControllerDxe/8259.inf
   INF  OpenCorePkg/Legacy/BootPlatform/AcpiResetDxe/Reset.inf
 
   # Timer
   INF  MdeModulePkg/Universal/Metronome/Metronome.inf
   INF  MdeModulePkg/Universal/WatchdogTimerDxe/WatchdogTimer.inf
   INF  MdeModulePkg/Universal/MonotonicCounterRuntimeDxe/MonotonicCounterRuntimeDxe.inf
-  INF  OvmfPkg/8254TimerDxe/8254Timer.inf
+  INF  OpenCorePkg/Legacy/BootPlatform/8254TimerDxe/8254Timer.inf
   INF  PcAtChipsetPkg/PcatRealTimeClockRuntimeDxe/PcatRealTimeClockRuntimeDxe.inf
 
   # PCI

@@ -16,7 +16,7 @@
 ##
 
 [Defines]
-  INF_VERSION                    = 0x00010005
+  INF_VERSION                    = 0x0001001B
   BASE_NAME                      = OcCryptoLib
   FILE_GUID                      = 56C05E0A-52BB-4B16-B472-6A816E82E5AD
   MODULE_TYPE                    = DXE_DRIVER

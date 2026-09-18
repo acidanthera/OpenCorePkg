@@ -48,7 +48,7 @@ VariableLockRequestToLock (
   EFI_STATUS             Status;
   VARIABLE_POLICY_ENTRY  *NewPolicy;
 
-  DEBUG ((DEBUG_WARN, "!!! DEPRECATED INTERFACE !!! %a() will go away soon!\n", __FUNCTION__));
+  DEBUG ((DEBUG_WARN, "!!! DEPRECATED INTERFACE !!! %a() will go away soon!\n", __func__));
   DEBUG ((DEBUG_WARN, "!!! DEPRECATED INTERFACE !!! Please move to use Variable Policy!\n"));
   DEBUG ((DEBUG_WARN, "!!! DEPRECATED INTERFACE !!! Variable: %g %s\n", VendorGuid, VariableName));
 
@@ -85,7 +85,7 @@ VariableLockRequestToLock (
   }
 
   if (EFI_ERROR (Status)) {
-    DEBUG ((DEBUG_ERROR, "%a - Failed to lock variable %s! %r\n", __FUNCTION__, VariableName, Status));
+    DEBUG ((DEBUG_ERROR, "%a - Failed to lock variable %s! %r\n", __func__, VariableName, Status));
   }
 
   if (NewPolicy != NULL) {

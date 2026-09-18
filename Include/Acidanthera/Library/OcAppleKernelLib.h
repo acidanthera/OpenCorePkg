@@ -129,6 +129,9 @@ typedef enum KERNEL_CACHE_TYPE_ {
 #define KERNEL_VERSION_BIG_SUR        20
 #define KERNEL_VERSION_MONTEREY       21
 #define KERNEL_VERSION_VENTURA        22
+#define KERNEL_VERSION_SONOMA         23
+#define KERNEL_VERSION_SEQUOIA        24
+#define KERNEL_VERSION_TAHOE          25
 
 //
 // Minimum kernel versions for each release.
@@ -148,6 +151,9 @@ typedef enum KERNEL_CACHE_TYPE_ {
 #define KERNEL_VERSION_BIG_SUR_MIN        KERNEL_VERSION (KERNEL_VERSION_BIG_SUR, 0, 0)
 #define KERNEL_VERSION_MONTEREY_MIN       KERNEL_VERSION (KERNEL_VERSION_MONTEREY, 0, 0)
 #define KERNEL_VERSION_VENTURA_MIN        KERNEL_VERSION (KERNEL_VERSION_VENTURA, 0, 0)
+#define KERNEL_VERSION_SONOMA_MIN         KERNEL_VERSION (KERNEL_VERSION_SONOMA, 0, 0)
+#define KERNEL_VERSION_SEQUOIA_MIN        KERNEL_VERSION (KERNEL_VERSION_SEQUOIA, 0, 0)
+#define KERNEL_VERSION_TAHOE_MIN          KERNEL_VERSION (KERNEL_VERSION_TAHOE, 0, 0)
 
 //
 // Maximum kernel versions for each release.
@@ -166,6 +172,8 @@ typedef enum KERNEL_CACHE_TYPE_ {
 #define KERNEL_VERSION_CATALINA_MAX       (KERNEL_VERSION_BIG_SUR_MIN - 1)
 #define KERNEL_VERSION_BIG_SUR_MAX        (KERNEL_VERSION_MONTEREY_MIN - 1)
 #define KERNEL_VERSION_MONTEREY_MAX       (KERNEL_VERSION_VENTURA_MIN - 1)
+#define KERNEL_VERSION_VENTURA_MAX        (KERNEL_VERSION_SONOMA_MIN - 1)
+#define KERNEL_VERSION_SONOMA_MAX         (KERNEL_VERSION_SEQUOIA_MIN - 1)
 
 //
 // Prelinked context used for kernel modification.
@@ -1041,6 +1049,107 @@ UINT64
 KcFixupValue (
   IN UINT64       Value,
   IN CONST CHAR8  *Name OPTIONAL
+  );
+
+/**
+  Visitor callback invoked once per chained-fixup slot encountered while
+  walking a kernel-collection chained-fixup table. The callback may
+  rewrite the slot in place (e.g. to translate a fileset VA into a kernel
+  VA) or just observe it (e.g. for counting / validation).
+
+  @param[in,out] FixupLoc        Pointer to the 8-byte fixup slot.
+  @param[in,out] VisitorContext  Caller-provided context, may be NULL.
+**/
+typedef
+VOID
+(*KC_CHAINED_FIXUP_VISIT)(
+  IN OUT UINT64  *FixupLoc,
+  IN OUT VOID    *VisitorContext
+  );
+
+/**
+  Walk every chained-fixup slot in a single segment of a kernel
+  collection's LC_DYLD_CHAINED_FIXUPS payload, invoking Visitor on each
+  slot. Pointer-format-aware: handles both stride-1
+  (X86_64_KERNEL_CACHE) and stride-4 (64_KERNEL_CACHE / 64_OFFSET /
+  ARM64E_KERNEL) layouts; returns 0 for any other format without
+  walking.
+
+  All fields read from StartsSeg are treated as untrusted input. Every
+  computed offset and chain step is bounds-checked against the
+  caller-supplied container sizes. The walker never reads or invokes
+  Visitor on a slot that lies outside [Buffer, Buffer + BufferSize).
+  A self-referencing chain is bounded by the per-page iteration cap
+  PageSize / sizeof (UINT64).
+
+  @param[in]     Buffer          Pointer to the containing kernel
+                                 collection buffer (the same base
+                                 SegmentOffset is relative to).
+  @param[in]     BufferSize      Size of Buffer in bytes. The walker
+                                 will not access Buffer past this.
+  @param[in]     StartsSeg       MACH_DYLD_CHAINED_STARTS_IN_SEGMENT for
+                                 the segment to walk.
+  @param[in]     StartsSegSize   Size of the metadata region pointed to
+                                 by StartsSeg. The walker will not read
+                                 the StartsSeg struct or its
+                                 PageStart[] array past this.
+  @param[in]     Visitor         Callback invoked per fixup slot, or
+                                 NULL to count only.
+  @param[in,out] VisitorContext  Opaque context forwarded to Visitor,
+                                 may be NULL.
+
+  @return  Count of fixup slots visited. 0 if any size precondition
+           fails, the pointer format is unsupported, or the structure
+           is malformed.
+**/
+UINTN
+KcWalkChainedFixupsInSegment (
+  IN     UINT8                                *Buffer,
+  IN     UINTN                                BufferSize,
+  IN     MACH_DYLD_CHAINED_STARTS_IN_SEGMENT  *StartsSeg,
+  IN     UINTN                                StartsSegSize,
+  IN     KC_CHAINED_FIXUP_VISIT               Visitor OPTIONAL,
+  IN OUT VOID                                 *VisitorContext OPTIONAL
+  );
+
+/**
+  Walk every chained-fixup slot in every segment of a kernel
+  collection's LC_DYLD_CHAINED_FIXUPS payload by iterating over the
+  STARTS_IN_IMAGE table and calling KcWalkChainedFixupsInSegment for
+  each populated segment.
+
+  Both the Starts table and each per-segment record it indexes are
+  treated as untrusted input and bounds-checked against StartsSize.
+  Per-segment validation is performed by KcWalkChainedFixupsInSegment.
+
+  @param[in]     Buffer          Pointer to the containing kernel
+                                 collection buffer.
+  @param[in]     BufferSize      Size of Buffer in bytes. Forwarded to
+                                 KcWalkChainedFixupsInSegment.
+  @param[in]     Starts          MACH_DYLD_CHAINED_STARTS_IN_IMAGE for
+                                 the whole image.
+  @param[in]     StartsSize      Size of the chained-fixups metadata
+                                 region pointed to by Starts. Bounds
+                                 the SegInfoOffset[] array reads and
+                                 each per-segment dereference.
+  @param[in]     Visitor         Callback invoked per fixup slot, or
+                                 NULL to count only.
+  @param[in,out] VisitorContext  Opaque context forwarded to Visitor,
+                                 may be NULL.
+
+  @return  Total count of fixup slots visited across all segments. 0
+           if a size precondition fails or the structure is malformed;
+           a malformed individual segment is skipped without affecting
+           other segments.
+**/
+UINTN
+KcWalkChainedFixupsInImage (
+  IN     UINT8                              *Buffer,
+  IN     UINTN                              BufferSize,
+  IN     MACH_DYLD_CHAINED_STARTS_IN_IMAGE  *Starts,
+  IN     UINTN                              StartsSize,
+  IN     KC_CHAINED_FIXUP_VISIT             Visitor OPTIONAL,
+  IN OUT VOID                               *VisitorContext OPTIONAL
   );
 
 /**

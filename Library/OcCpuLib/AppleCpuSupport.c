@@ -613,6 +613,9 @@ InternalDetectAppleProcessorType (
     case CPU_MODEL_ALDERLAKE_S:    // 0x97 FIXME - unknown, for now
     case CPU_MODEL_RAPTORLAKE_S:   // 0xB7 FIXME - unknown, for now
     case CPU_MODEL_RAPTORLAKE_HX:  // 0xBF FIXME - unknown, for now
+    case CPU_MODEL_ARROWLAKE_S:    // 0xC6 FIXME - unknown, for now
+    case CPU_MODEL_ARROWLAKE_HX:   // 0xC5 FIXME - unknown, for now
+    case CPU_MODEL_ARROWLAKE_U:    // 0xB5 FIXME - unknown, for now
       if (AppleMajorType == AppleProcessorMajorM3) {
         // MB101 (m3 7Y32)
         return AppleProcessorTypeCoreM3Type7; // 0x0C07

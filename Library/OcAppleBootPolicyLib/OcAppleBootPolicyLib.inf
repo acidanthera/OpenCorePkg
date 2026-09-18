@@ -1,6 +1,6 @@
 ## @file
 #
-#  Component description file for the library producing the Apple Device property protocol.
+#  Component description file for the library producing the Apple Boot Policy protocol.
 #
 #  Copyright (C) 2019, vit9696. All rights reserved.<BR>
 #
@@ -17,7 +17,7 @@
 ##
 
 [Defines]
-  INF_VERSION                    = 0x00010005
+  INF_VERSION                    = 0x0001001B
   BASE_NAME                      = OcAppleBootPolicyLib
   FILE_GUID                      = 330E9083-C008-4030-AA86-ECF1FBAE824D
   MODULE_TYPE                    = BASE

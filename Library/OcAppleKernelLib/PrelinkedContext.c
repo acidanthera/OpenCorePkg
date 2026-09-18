@@ -538,8 +538,10 @@ PrelinkedInjectPrepare (
     // For newer variant (KC mode) __LINKEDIT is last, and we need to expand it to enable
     // dyld fixup generation.
     //
-    if (  (Context->PrelinkedAllocSize < LinkedExpansion)
-       || (Context->PrelinkedAllocSize - LinkedExpansion < Context->PrelinkedSize))
+    AlignedExpansion = MACHO_ALIGN (LinkedExpansion);
+    if (  (AlignedExpansion < LinkedExpansion)
+       || (Context->PrelinkedAllocSize < AlignedExpansion)
+       || (Context->PrelinkedAllocSize - AlignedExpansion < Context->PrelinkedSize))
     {
       return EFI_OUT_OF_RESOURCES;
     }
@@ -556,7 +558,6 @@ PrelinkedInjectPrepare (
 
     Context->KextsFixupChains = (VOID *)(Context->Prelinked + Context->PrelinkedSize);
 
-    AlignedExpansion = MACHO_ALIGN (LinkedExpansion);
     //
     // Zero the expansion to account for padding.
     //

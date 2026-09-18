@@ -6,7 +6,7 @@
 PROJECT = TestNtfsDxe
 PRODUCT = $(PROJECT)$(INFIX)$(SUFFIX)
 OBJS    = $(PROJECT).o
-OBJS    += Compression.o Data.o Disc.o Index.o Info.o NTFS.o Open.o Position.o
+OBJS    += Compression.o Data.o Disc.o Index.o Info.o NTFS.o Open.o Position.o Cache.o
 
 include  ../../User/Makefile
 

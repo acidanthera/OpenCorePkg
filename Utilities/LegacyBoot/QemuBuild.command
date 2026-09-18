@@ -7,7 +7,7 @@
 cd "$(dirname "$0")" || exit 1
 
 usage () {
-  echo "Usage: $(basename "$0") [X64|IA32]"
+  echo "Usage: $(basename "$0") [X64|IA32|EFI]"
   exit 1
 }
 
@@ -20,7 +20,7 @@ missing_files () {
 if [ $# -gt 1 ]; then
   usage
 elif [ $# -eq 1 ]; then
-  if [ "$1" != "X64" ] && [ "$1" != "IA32" ]; then
+  if [ "$1" != "X64" ] && [ "$1" != "IA32" ] && [ "$1" != "EFI" ]; then
     usage
   fi
   ARCHS=$1
@@ -28,8 +28,10 @@ elif [ "${ARCHS}" = "" ]; then
   usage
 fi
 
-if [ ! -f "boot${ARCHS}" ] || [ ! -f boot0 ] || [ ! -f boot1f32 ]; then
-  missing_files
+if [ "$ARCHS" != "EFI" ]; then
+  if [ ! -f "boot${ARCHS}" ] || [ ! -f boot0 ] || [ ! -f boot1f32 ]; then
+    missing_files
+  fi
 fi
 
 if [ "$(which qemu-img)" = "" ]; then
@@ -87,17 +89,24 @@ END
   sleep 2
   mkfs.vfat -F32 ${NBD}p1
 
-  # Copy boot1f32 into FAT32 Boot Record
-  dd if=${NBD}p1 of=origbs count=1
-  cp -v boot1f32 newbs
-  dd if=origbs of=newbs skip=3 seek=3 bs=1 count=87 conv=notrunc
-  dd if=/dev/random of=newbs skip=496 seek=496 bs=1 count=14 conv=notrunc
-  dd if=newbs of=${NBD}p1 conv=notrunc
+  if [ "$ARCHS" != "EFI" ]; then
+    # Copy boot1f32 into FAT32 Boot Record
+    dd if=${NBD}p1 of=origbs count=1
+    cp -v boot1f32 newbs
+    dd if=origbs of=newbs skip=3 seek=3 bs=1 count=87 conv=notrunc
+    dd if=/dev/random of=newbs skip=496 seek=496 bs=1 count=14 conv=notrunc
+    dd if=newbs of=${NBD}p1 conv=notrunc
+  fi
 
-  # Copy boot file and ESP contents into FAT32 file system
   mount -t vfat ${NBD}p1 "$DIR" -o rw,noatime,uid="$(id -u)",gid="$(id -g)"
   sleep 2
-  cp -v "boot${ARCHS}" "$DIR/boot"
+
+  if [ "$ARCHS" != "EFI" ]; then
+    # Copy boot file into FAT32 file system
+    cp -v "boot${ARCHS}" "$DIR/boot"
+  fi
+
+  # Copy ESP contents into FAT32 file system
   cp -rv ROOT/* "$DIR"
 
   # Remove temporary files
@@ -107,8 +116,11 @@ END
   rm -r "$DIR"
   rm newbs origbs
 
-  # Copy boot0 into MBR
-  dd if=boot0 of="$IMAGE" bs=1 count=446 conv=notrunc
+  if [ "$ARCHS" != "EFI" ]; then
+    # Copy boot0 into MBR
+    dd if=boot0 of="$IMAGE" bs=1 count=446 conv=notrunc
+  fi
+
   chown "$(whoami)" "$IMAGE"
 elif [ "$(uname)" = "Darwin" ]; then
   rm -f OpenCore.dmg.sparseimage OpenCore.RO.raw OpenCore.RO.dmg
@@ -139,22 +151,26 @@ elif [ "$(uname)" = "Darwin" ]; then
     exit 1
   fi
 
-  # Write MBR
-  sudo fdisk -f boot0 -u /dev/rdisk"${N}"
+  if [ "$ARCHS" != "EFI" ]; then
+    # Write MBR
+    sudo fdisk -f boot0 -u /dev/rdisk"${N}"
 
-  diskutil umount disk"${N}"s1
-  sudo dd if=/dev/rdisk"${N}"s1 count=1  of=origbs
-  cp -v boot1f32 newbs
-  sudo dd if=origbs of=newbs skip=3 seek=3 bs=1 count=87 conv=notrunc
-  dd if=/dev/random of=newbs skip=496 seek=496 bs=1 count=14 conv=notrunc
-  sudo dd if=newbs of=/dev/rdisk"${N}"s1
-  diskutil mount disk"${N}"s1
+    # Write boot1f32
+    diskutil umount disk"${N}"s1
+    sudo dd if=/dev/rdisk"${N}"s1 count=1  of=origbs
+    cp -v boot1f32 newbs
+    sudo dd if=origbs of=newbs skip=3 seek=3 bs=1 count=87 conv=notrunc
+    dd if=/dev/random of=newbs skip=496 seek=496 bs=1 count=14 conv=notrunc
+    sudo dd if=newbs of=/dev/rdisk"${N}"s1
+    diskutil mount disk"${N}"s1
 
-  cp -v "boot${ARCHS}" "$(diskutil info  disk"${N}"s1 |  sed -n 's/.*Mount Point: *//p')/boot"
+    # Copy boot
+    cp -v "boot${ARCHS}" "$(diskutil info  disk"${N}"s1 |  sed -n 's/.*Mount Point: *//p')/boot"
+  fi
+
   cp -rv ROOT/* "$(diskutil info  disk"${N}"s1 |  sed -n 's/.*Mount Point: *//p')"
 
-  if [ "$(diskutil info  disk"${N}" |  sed -n 's/.*Content (IOContent): *//p')" == "FDisk_partition_scheme" ]
-  then
+  if [ "$ARCHS" != "EFI" ] && [ "$(diskutil info  disk"${N}" |  sed -n 's/.*Content (IOContent): *//p')" == "FDisk_partition_scheme" ]; then
   sudo fdisk -e /dev/rdisk"$N" <<-MAKEACTIVE
 p
 f 1

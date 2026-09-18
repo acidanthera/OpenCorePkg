@@ -1,6 +1,6 @@
 ## @file
 #
-#  Component description file for OcCpulibrary.
+#  Component description file for OcCpuLib.
 #
 #  Copyright (C) 2016, The HermitCrabs Lab. All rights reserved.<BR>
 #
@@ -17,7 +17,7 @@
 ##
 
 [Defines]
-  INF_VERSION     = 0x00010005
+  INF_VERSION     = 0x0001001B
   BASE_NAME       = OcCpuLib
   FILE_GUID       = 5F3FA330-4F32-4AC9-9407-B932CFECFDB2
   MODULE_TYPE     = BASE

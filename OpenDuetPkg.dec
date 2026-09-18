@@ -16,7 +16,7 @@
 ##
 
 [Defines]
-  DEC_SPECIFICATION              = 0x00010005
+  DEC_SPECIFICATION              = 0x0001001B
   PACKAGE_NAME                   = OpenDuetPkg
   PACKAGE_GUID                   = C10BE46B-35C3-4B0B-9B9C-3F02051D782F
   PACKAGE_VERSION                = 0.4

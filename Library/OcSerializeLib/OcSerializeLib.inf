@@ -16,7 +16,7 @@
 ##
 
 [Defines]
-  INF_VERSION                    = 0x00010005
+  INF_VERSION                    = 0x0001001B
   BASE_NAME                      = OcSerializeLib
   FILE_GUID                      = CABE9035-D604-4504-B338-A5BCEFCDEE95
   MODULE_TYPE                    = DXE_DRIVER

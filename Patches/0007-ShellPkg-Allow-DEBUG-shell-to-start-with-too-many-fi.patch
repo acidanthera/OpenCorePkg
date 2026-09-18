@@ -1,0 +1,28 @@
+From b80d468ab21a80fdc83ce9c419e2eaf9cef6b744 Mon Sep 17 00:00:00 2001
+From: ocbuild <ocbuild@acidanthera.local>
+Date: Sun, 14 Sep 2025 21:47:29 +0100
+Subject: [PATCH] ShellPkg: Allow DEBUG shell to start with too many file
+ systems under Mac EFI
+
+---
+ ShellPkg/Library/UefiShellCommandLib/UefiShellCommandLib.c | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/ShellPkg/Library/UefiShellCommandLib/UefiShellCommandLib.c b/ShellPkg/Library/UefiShellCommandLib/UefiShellCommandLib.c
+index b0c77e4..f27b727 100644
+--- a/ShellPkg/Library/UefiShellCommandLib/UefiShellCommandLib.c
++++ b/ShellPkg/Library/UefiShellCommandLib/UefiShellCommandLib.c
+@@ -1359,8 +1359,8 @@ ShellCommandAddMapItemAndUpdatePath (
+     StrnCatGrow (&NewPath, &NewPathSize, Name, 0);
+     StrnCatGrow (&NewPath, &NewPathSize, L"\\", 0);
+ 
+-    Status = gEfiShellProtocol->SetEnv (L"path", NewPath, TRUE);
+-    ASSERT_EFI_ERROR (Status);
++    gEfiShellProtocol->SetEnv (L"path", NewPath, TRUE);
++
+     FreePool (NewPath);
+   }
+ 
+-- 
+2.45.2
+

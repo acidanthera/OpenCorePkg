@@ -73,6 +73,7 @@ OC_STRUCTORS (OC_PLATFORM_NVRAM_CONFIG, ())
 OC_STRUCTORS (OC_PLATFORM_SMBIOS_CONFIG, ())
 OC_STRUCTORS (OC_PLATFORM_CONFIG, ())
 
+OC_ARRAY_STRUCTORS (OC_UEFI_UNLOAD_ARRAY)
 OC_STRUCTORS (OC_UEFI_DRIVER_ENTRY, ())
 OC_ARRAY_STRUCTORS (OC_UEFI_DRIVER_ARRAY)
 OC_STRUCTORS (OC_UEFI_APFS, ())
@@ -183,6 +184,7 @@ OC_SCHEMA
   mBooterQuirksSchema[] = {
   OC_SCHEMA_BOOLEAN_IN ("AllowRelocationBlock",   OC_GLOBAL_CONFIG, Booter.Quirks.AllowRelocationBlock),
   OC_SCHEMA_BOOLEAN_IN ("AvoidRuntimeDefrag",     OC_GLOBAL_CONFIG, Booter.Quirks.AvoidRuntimeDefrag),
+  OC_SCHEMA_BOOLEAN_IN ("ClearTaskSwitchBit",     OC_GLOBAL_CONFIG, Booter.Quirks.ClearTaskSwitchBit),
   OC_SCHEMA_BOOLEAN_IN ("DevirtualiseMmio",       OC_GLOBAL_CONFIG, Booter.Quirks.DevirtualiseMmio),
   OC_SCHEMA_BOOLEAN_IN ("DisableSingleUser",      OC_GLOBAL_CONFIG, Booter.Quirks.DisableSingleUser),
   OC_SCHEMA_BOOLEAN_IN ("DisableVariableWrite",   OC_GLOBAL_CONFIG, Booter.Quirks.DisableVariableWrite),
@@ -701,11 +703,12 @@ OC_SCHEMA
 STATIC
 OC_SCHEMA
   mUefiDriversSchemaEntry[] = {
-  OC_SCHEMA_STRING_IN ("Arguments",  OC_UEFI_DRIVER_ENTRY, Arguments),
-  OC_SCHEMA_STRING_IN ("Comment",    OC_UEFI_DRIVER_ENTRY, Comment),
-  OC_SCHEMA_BOOLEAN_IN ("Enabled",   OC_UEFI_DRIVER_ENTRY, Enabled),
-  OC_SCHEMA_BOOLEAN_IN ("LoadEarly", OC_UEFI_DRIVER_ENTRY, LoadEarly),
-  OC_SCHEMA_STRING_IN ("Path",       OC_UEFI_DRIVER_ENTRY, Path),
+  OC_SCHEMA_STRING_IN ("Arguments",    OC_UEFI_DRIVER_ENTRY, Arguments),
+  OC_SCHEMA_STRING_IN ("Comment",      OC_UEFI_DRIVER_ENTRY, Comment),
+  OC_SCHEMA_BOOLEAN_IN ("Enabled",     OC_UEFI_DRIVER_ENTRY, Enabled),
+  OC_SCHEMA_BOOLEAN_IN ("HideVerbose", OC_UEFI_DRIVER_ENTRY, HideVerbose),
+  OC_SCHEMA_BOOLEAN_IN ("LoadEarly",   OC_UEFI_DRIVER_ENTRY, LoadEarly),
+  OC_SCHEMA_STRING_IN ("Path",         OC_UEFI_DRIVER_ENTRY, Path),
 };
 
 STATIC
@@ -854,6 +857,10 @@ OC_SCHEMA
 
 STATIC
 OC_SCHEMA
+  mUefiUnloadSchema = OC_SCHEMA_STRING (NULL);
+
+STATIC
+OC_SCHEMA
   mUefiConfigurationSchema[] = {
   OC_SCHEMA_DICT ("APFS",                 mUefiApfsSchema),
   OC_SCHEMA_DICT ("AppleInput",           mUefiAppleInputSchema),
@@ -865,6 +872,7 @@ OC_SCHEMA
   OC_SCHEMA_DICT ("ProtocolOverrides",    mUefiProtocolOverridesSchema),
   OC_SCHEMA_DICT ("Quirks",               mUefiQuirksSchema),
   OC_SCHEMA_ARRAY_IN ("ReservedMemory",   OC_GLOBAL_CONFIG,             Uefi.ReservedMemory, &mUefiReservedMemorySchema),
+  OC_SCHEMA_ARRAY_IN ("Unload",           OC_GLOBAL_CONFIG,             Uefi.Unload,         &mUefiUnloadSchema),
 };
 
 //

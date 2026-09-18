@@ -755,14 +755,14 @@ AcpiInitContext (
   // Support RSDT on ACPI 1.0 and newer.
   //
   Context->Rsdt = (OC_ACPI_6_2_ROOT_SYSTEM_DESCRIPTION_TABLE *)(UINTN)Context->Rsdp->RsdtAddress;
-  DEBUG ((DEBUG_VERBOSE, "OCA: Found ACPI RSDT table %p", Context->Rsdt));
+  DEBUG ((DEBUG_INFO, "OCA: Found ACPI RSDT table %p from RSDP %p\n", Context->Rsdt, Context->Rsdp));
 
   //
   // ACPI 2.0 and newer have XSDT as well.
   //
-  if (Context->Rsdp->Revision > 0) {
+  if (Context->Rsdp->Revision >= 2) {
     Context->Xsdt = (OC_ACPI_6_2_EXTENDED_SYSTEM_DESCRIPTION_TABLE *)(UINTN)Context->Rsdp->XsdtAddress;
-    DEBUG ((DEBUG_VERBOSE, "OCA: Found ACPI XSDT table %p", Context->Xsdt));
+    DEBUG ((DEBUG_INFO, "OCA: Found ACPI XSDT table %p\n", Context->Xsdt));
   }
 
   if ((Context->Rsdt == NULL) && (Context->Xsdt == NULL)) {

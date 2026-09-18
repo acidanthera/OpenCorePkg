@@ -42,7 +42,7 @@ Abstract:
 
 EFI_GUID  *gTableGuidArray[] = {
   &gEfiAcpi10TableGuid,
-  &gEfiAcpiTableGuid,
+  &gEfiAcpi20TableGuid,
   &gEfiSmbiosTableGuid,
   &gEfiSmbios3TableGuid
 };
@@ -239,7 +239,7 @@ Returns:
   //
   AcpiHeader = (VOID *)(UINTN)(*(UINT64 *)(*Table));
 
-  if (CompareGuid (TableGuid, &gEfiAcpiTableGuid) || CompareGuid (TableGuid, &gEfiAcpi20TableGuid)) {
+  if (CompareGuid (TableGuid, &gEfiAcpi10TableGuid) || CompareGuid (TableGuid, &gEfiAcpi20TableGuid)) {
     if (((EFI_ACPI_1_0_ROOT_SYSTEM_DESCRIPTION_POINTER *)AcpiHeader)->Reserved == 0x00) {
       //
       // If Acpi 1.0 Table, then RSDP structure doesn't contain Length field, use structure size
@@ -357,17 +357,45 @@ UpdateMemoryMap (
                       MemorySpaceMap[Index].BaseAddress,
                       MemorySpaceMap[Index].Length
                       );
-      if (!EFI_ERROR (Status)) {
-        Status = gDS->AddMemorySpace (
-                        (Capabilities & EFI_MEMORY_MORE_RELIABLE) == EFI_MEMORY_MORE_RELIABLE
-            ? EfiGcdMemoryTypeMoreReliable : EfiGcdMemoryTypeSystemMemory,
-                        MemorySpaceMap[Index].BaseAddress,
-                        MemorySpaceMap[Index].Length,
-                        Capabilities &~(EFI_MEMORY_PRESENT | EFI_MEMORY_INITIALIZED | EFI_MEMORY_TESTED | EFI_MEMORY_RUNTIME)
-                        );
+      if (EFI_ERROR (Status)) {
+        //
+        // This loop's purpose is to free reserved memory above 4GB. DxeCore
+        // itself is also found (below 4GB) and gives Access Denied here
+        // because it is associated with an image handle.
+        // TODO: Is it is possible to work round issue in first REF (note: that
+        // line dates to original EDK II DuetPkg) while still allowing DxeCore
+        // memory to be mapped as System rather than Reserved in the first place
+        // (see second REF)? (If it's not mapped correctly in the first place
+        // and it's associated with an image handle, it can't be remapped later
+        // using gDS calls.)
+        // REF: https://github.com/acidanthera/OpenCorePkg/blob/2462e02d49b8b9f2562ca76850b73477cc573d47/Legacy/BootPlatform/DxeIpl/HobGeneration.c#L201
+        // REF: https://github.com/acidanthera/audk/blob/e26eb0f9c18e6672c9516dbfdebf2dd9f750207e/MdeModulePkg/Core/Dxe/Gcd/Gcd.c#L2577-L2587
+        //
+        DEBUG ((
+          EFI_D_INFO,
+          "UpdateMemoryMap: Remove %016lx %016lx - %r\n",
+          MemorySpaceMap[Index].BaseAddress,
+          MemorySpaceMap[Index].Length,
+          Status
+          ));
+        continue;
       }
 
+      Status = gDS->AddMemorySpace (
+                      (Capabilities & EFI_MEMORY_MORE_RELIABLE) == EFI_MEMORY_MORE_RELIABLE
+          ? EfiGcdMemoryTypeMoreReliable : EfiGcdMemoryTypeSystemMemory,
+                      MemorySpaceMap[Index].BaseAddress,
+                      MemorySpaceMap[Index].Length,
+                      Capabilities &~(EFI_MEMORY_PRESENT | EFI_MEMORY_INITIALIZED | EFI_MEMORY_TESTED | EFI_MEMORY_RUNTIME)
+                      );
       ASSERT_EFI_ERROR (Status);
+      DEBUG ((
+        EFI_D_INFO,
+        "UpdateMemoryMap: Remap %016lx %016lx - %r\n",
+        MemorySpaceMap[Index].BaseAddress,
+        MemorySpaceMap[Index].Length,
+        Status
+        ));
     }
   }
 

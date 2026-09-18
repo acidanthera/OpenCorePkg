@@ -9,7 +9,7 @@
 ##
 
 [Defines]
-  INF_VERSION                    = 0x00010005
+  INF_VERSION                    = 0x0001001B
   BASE_NAME                      = OcPeimEntryPoint
   MODULE_UNI_FILE                = PeimEntryPoint.uni
   FILE_GUID                      = 796150C8-578F-4C0C-B662-441C4F1176B3
@@ -27,6 +27,7 @@
 [Sources.Ia32]
   Ia32/Canary.nasm
   Ia32/GS.nasm         | MSFT
+  Ia32/GS.nasm         | CLANGPDB
 
 [Sources.X64]
   X64/Canary.nasm

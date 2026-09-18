@@ -1,14 +1,12 @@
 ## @file
-#
 #  New Technologies File System (NTFS) read-only driver.
 #
 #  Copyright (c) 2022, Mikhail Krichanov. All rights reserved.
 #  SPDX-License-Identifier: BSD-3-Clause
-#
 ##
 
 [Defines]
-  INF_VERSION                    = 0x00010005
+  INF_VERSION                    = 0x0001001B
   BASE_NAME                      = OpenNtfsDxe
   FILE_GUID                      = 5E18FB33-27FE-4613-86AD-10FABDA95BB0
   MODULE_TYPE                    = DXE_DRIVER
@@ -33,6 +31,7 @@
   Data.c
   Index.c
   Compression.c
+  Cache.c
 
 [Packages]
   MdePkg/MdePkg.dec
@@ -54,7 +53,6 @@
   gEfiComponentNameProtocolGuid           ## CONSUMES
   gEfiDiskIoProtocolGuid                  ## CONSUMES
   gEfiBlockIoProtocolGuid                 ## CONSUMES
-  gEfiUnicodeCollationProtocolGuid        ## CONSUMES
 
 [Guids]
   gEfiFileInfoGuid                        ## CONSUMES

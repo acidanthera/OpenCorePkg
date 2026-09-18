@@ -1,6 +1,6 @@
 ## @file
 #
-#  Component description file for the library producing the English version of Unicode Collation Protocol.
+#  Component description file for the library producing the Cpu IO 2 and PCI Root Bridge IO protocols overrides.
 #
 #  Copyright (c) 2006 - 2011, Intel Corporation. All rights reserved.<BR>
 #
@@ -15,7 +15,7 @@
 ##
 
 [Defines]
-  INF_VERSION                    = 0x00010005
+  INF_VERSION                    = 0x0001001B
   BASE_NAME                      = OcPciIoLib
   FILE_GUID                      = BC045E46-093A-4217-B836-8FF2CD890FCC
   MODULE_TYPE                    = DXE_DRIVER

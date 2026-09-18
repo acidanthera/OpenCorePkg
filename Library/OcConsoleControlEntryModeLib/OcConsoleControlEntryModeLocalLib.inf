@@ -14,7 +14,7 @@
 ##
 
 [Defines]
-  INF_VERSION                    = 0x00010005
+  INF_VERSION                    = 0x0001001B
   BASE_NAME                      = OcConsoleControlEntryModeLocalLib
   FILE_GUID                      = 987B4FC6-929A-4F34-9C1B-1876484C92FE
   MODULE_TYPE                    = DXE_DRIVER

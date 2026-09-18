@@ -16,7 +16,7 @@
 ##
 
 [Defines]
-  INF_VERSION                    = 0x00010005
+  INF_VERSION                    = 0x0001001B
   BASE_NAME                      = OcTemplateLib
   FILE_GUID                      = E40ABEF1-29B0-4D59-92B1-BF94A3CEB994
   MODULE_TYPE                    = DXE_DRIVER

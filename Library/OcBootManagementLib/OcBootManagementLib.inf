@@ -1,6 +1,6 @@
 ## @file
 #
-#  Component description file for the library producing the Apple Device property protocol.
+#  Component description file for the library that handles boot management in OpenCore.
 #
 #  Copyright (C) 2019, vit9696. All rights reserved.<BR>
 #
@@ -17,7 +17,7 @@
 ##
 
 [Defines]
-  INF_VERSION                    = 0x00010005
+  INF_VERSION                    = 0x0001001B
   BASE_NAME                      = OcBootManagementLib
   FILE_GUID                      = A28FEC6F-DD5C-4D8D-9351-50D9A2047634
   MODULE_TYPE                    = BASE
@@ -75,7 +75,7 @@
   gAppleBootPickerFileGuid                      ## SOMETIMES_CONSUMES
 
 [Protocols]
-  gAppleBootPolicyProtocolGuid                  ## PRODUCES
+  gAppleBootPolicyProtocolGuid                  ## SOMETIMES_CONSUMES
   gAppleKeyMapAggregatorProtocolGuid            ## SOMETIMES_CONSUMES
   gEfiSimpleFileSystemProtocolGuid              ## SOMETIMES_CONSUMES
   gEfiLoadedImageProtocolGuid                   ## SOMETIMES_CONSUMES

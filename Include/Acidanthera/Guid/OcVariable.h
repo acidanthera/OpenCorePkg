@@ -80,6 +80,14 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 #define OC_RTC_BLACKLIST_VARIABLE_NAME  L"rtc-blacklist"
 
 //
+// Variable used to contain background colour for OpenCanopy.
+// This is separate from APPLE_DEFAULT_BACKGROUND_COLOR_VARIABLE_NAME
+// because macOS 10.9 fails to parse APPLE_DEFAULT_BACKGROUND_COLOR_VARIABLE_NAME
+// and always assumes it is black.
+//
+#define OC_BACKGROUND_COLOR_VARIABLE_NAME  L"background-color"
+
+//
 // Boot prefix used instead of normal Boot in OC_VENDOR_VARIABLE_GUID
 //
 #define OC_VENDOR_BOOT_VARIABLE_PREFIX  L"OCBt"

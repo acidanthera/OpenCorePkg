@@ -34,7 +34,8 @@ typedef enum OC_LEGACY_OS_TYPE_ {
   OcLegacyOsTypeNone,
   OcLegacyOsTypeWindowsNtldr,
   OcLegacyOsTypeWindowsBootmgr,
-  OcLegacyOsTypeIsoLinux
+  OcLegacyOsTypeIsoLinux,
+  OcLegacyOsTypeGrldr
 } OC_LEGACY_OS_TYPE;
 
 EFI_STATUS

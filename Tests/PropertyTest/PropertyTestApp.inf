@@ -1,5 +1,5 @@
 ## @file
-#  General purpose test application.
+#  Device property support test application.
 #
 #  Copyright (c) 2019, vit9696. All rights reserved.<BR>
 #
@@ -13,17 +13,12 @@
 ##
 
 [Defines]
-  INF_VERSION                    = 0x00010005
+  INF_VERSION                    = 0x0001001B
   BASE_NAME                      = PropertyTestApp
   FILE_GUID                      = 02B7826F-3865-47B8-94A4-EB85F01FC59F
   MODULE_TYPE                    = UEFI_APPLICATION
   VERSION_STRING                 = 1.0
   ENTRY_POINT                    = UefiMain
-
-#
-#  This flag specifies whether HII resource section is generated into PE image.
-#
-  UEFI_HII_RESOURCE_SECTION      = TRUE
 
 #
 # The following information is for reference only and not required by the build tools.

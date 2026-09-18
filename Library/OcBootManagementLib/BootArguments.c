@@ -1,5 +1,5 @@
 /** @file
-  Copyright (C) 2019-2021, vit9696, mikebeaton. All rights reserved.<BR>
+  Copyright (C) 2019-2024, vit9696, mikebeaton. All rights reserved.<BR>
   SPDX-License-Identifier: BSD-3-Clause
 **/
 
@@ -24,19 +24,19 @@ typedef enum PARSE_VARS_STATE_ {
   PARSE_VARS_WHITE_SPACE,
   PARSE_VARS_COMMENT,
   PARSE_VARS_NAME,
-  PARSE_VARS_VALUE_FIRST,
   PARSE_VARS_VALUE,
   PARSE_VARS_QUOTED_VALUE,
   PARSE_VARS_SHELL_EXPANSION
 } PARSE_VARS_STATE;
 
 //
-// Shift from token start to current position forwards by offset characters.
+// Shift memory from token start to current position forwards by offset bytes
+// and update token to point to shifted start (thereby discarding offset bytes
+// from the token ending at current position).
 //
 #define SHIFT_TOKEN(pos, token, offset)  do {\
   CopyMem ((UINT8 *)(token) + (offset), (token), (UINT8 *)(pos) - (UINT8 *)(token)); \
   (token) = (UINT8 *)(token) + (offset); \
-  (pos)   = (UINT8 *)(pos) + (offset); \
 } while (0)
 
 VOID
@@ -434,7 +434,7 @@ OcParseLoadOptions (
     return EFI_NOT_FOUND;
   }
 
-  Status = OcParseVars (LoadedImage->LoadOptions, ParsedVars, OcStringFormatUnicode);
+  Status = OcParseVars (LoadedImage->LoadOptions, ParsedVars, OcStringFormatUnicode, FALSE);
 
   if (Status == EFI_INVALID_PARAMETER) {
     DEBUG ((DEBUG_ERROR, "OCB: Failed to parse LoadOptions (%p:%u)\n", LoadedImage->LoadOptions, LoadedImage->LoadOptionsSize));
@@ -449,16 +449,21 @@ EFI_STATUS
 OcParseVars (
   IN           VOID              *StrVars,
   OUT       OC_FLEX_ARRAY        **ParsedVars,
-  IN     CONST OC_STRING_FORMAT  StringFormat
+  IN     CONST OC_STRING_FORMAT  StringFormat,
+  IN     CONST BOOLEAN           TokensOnly
   )
 {
   VOID              *Pos;
+  VOID              *NewPos;
   PARSE_VARS_STATE  State;
   PARSE_VARS_STATE  PushState;
   BOOLEAN           Retake;
   CHAR16            Ch;
+  CHAR16            NewCh;
+  CHAR16            QuoteChar;
   VOID              *Name;
   VOID              *Value;
+  VOID              *OriginalValue;
   OC_PARSED_VAR     *Option;
 
   if ((StrVars == NULL) || ((StringFormat == OcStringFormatUnicode) ? (((CHAR16 *)StrVars)[0] == CHAR_NULL) : (((CHAR8 *)StrVars)[0] == '\0'))) {
@@ -475,6 +480,7 @@ OcParseVars (
   State     = PARSE_VARS_WHITE_SPACE;
   PushState = PARSE_VARS_WHITE_SPACE;
   Retake    = FALSE;
+  QuoteChar = CHAR_NULL;
 
   do {
     Ch = (StringFormat == OcStringFormatUnicode) ? *((CHAR16 *)Pos) : *((CHAR8 *)Pos);
@@ -482,9 +488,24 @@ OcParseVars (
       case PARSE_VARS_WHITE_SPACE:
         if (Ch == '#') {
           State = PARSE_VARS_COMMENT;
-        } else if (!(OcIsSpace (Ch) || (Ch == CHAR_NULL))) {
-          Name  = Pos;
-          State = PARSE_VARS_NAME;
+        } else if (!OcIsSpaceOrNull (Ch)) {
+          if (TokensOnly) {
+            Option = OcFlexArrayAddItem (*ParsedVars);
+            if (Option == NULL) {
+              OcFlexArrayFree (ParsedVars);
+              return EFI_OUT_OF_RESOURCES;
+            }
+
+            DEBUG ((OC_TRACE_PARSE_VARS, "OCB: Value-only token\n"));
+
+            State         = PARSE_VARS_VALUE;
+            Value         = Pos;
+            OriginalValue = Value;
+            Retake        = TRUE;
+          } else {
+            State = PARSE_VARS_NAME;
+            Name  = Pos;
+          }
         }
 
         break;
@@ -497,7 +518,7 @@ OcParseVars (
         break;
 
       case PARSE_VARS_NAME:
-        if ((Ch == L'=') || OcIsSpace (Ch) || (Ch == CHAR_NULL)) {
+        if ((Ch == L'=') || OcIsSpaceOrNull (Ch)) {
           if (StringFormat == OcStringFormatUnicode) {
             *((CHAR16 *)Pos) = CHAR_NULL;
           } else {
@@ -505,7 +526,9 @@ OcParseVars (
           }
 
           if (Ch == L'=') {
-            State = PARSE_VARS_VALUE_FIRST;
+            State         = PARSE_VARS_VALUE;
+            Value         = (UINT8 *)Pos + ((StringFormat == OcStringFormatUnicode) ? sizeof (CHAR16) : sizeof (CHAR8));
+            OriginalValue = Value;
           } else {
             State = PARSE_VARS_WHITE_SPACE;
           }
@@ -533,18 +556,6 @@ OcParseVars (
 
         break;
 
-      case PARSE_VARS_VALUE_FIRST:
-        if (Ch == L'"') {
-          State = PARSE_VARS_QUOTED_VALUE;
-          Value = (UINT8 *)Pos + ((StringFormat == OcStringFormatUnicode) ? sizeof (CHAR16) : sizeof (CHAR8));
-        } else {
-          State  = PARSE_VARS_VALUE;
-          Value  = Pos;
-          Retake = TRUE;
-        }
-
-        break;
-
       case PARSE_VARS_SHELL_EXPANSION:
         if (Ch == '`') {
           ASSERT (PushState != PARSE_VARS_WHITE_SPACE);
@@ -553,23 +564,39 @@ OcParseVars (
 
         break;
 
+      //
+      // In token value (but not name) we handle sh and grub quoting and string concatenation, e.g. 'abc\'"'\""def becomes abc\'"def.
+      //
       case PARSE_VARS_VALUE:
       case PARSE_VARS_QUOTED_VALUE:
-        if (Ch == L'`') {
+        if ((State != PARSE_VARS_QUOTED_VALUE) && ((Ch == L'\'') || (Ch == L'"'))) {
+          QuoteChar = Ch;
+          SHIFT_TOKEN (Pos, Value, (StringFormat == OcStringFormatUnicode) ? sizeof (CHAR16) : sizeof (CHAR8));
+          State = PARSE_VARS_QUOTED_VALUE;
+        } else if ((State == PARSE_VARS_QUOTED_VALUE) && (Ch == QuoteChar)) {
+          SHIFT_TOKEN (Pos, Value, (StringFormat == OcStringFormatUnicode) ? sizeof (CHAR16) : sizeof (CHAR8));
+          QuoteChar = CHAR_NULL;
+          State     = PARSE_VARS_VALUE;
+        } else if (((State != PARSE_VARS_QUOTED_VALUE) || (QuoteChar == L'"')) && (Ch == L'\\')) {
+          NewPos = (UINT8 *)Pos + ((StringFormat == OcStringFormatUnicode) ? sizeof (CHAR16) : sizeof (CHAR8));
+          NewCh  = (StringFormat == OcStringFormatUnicode) ? *((CHAR16 *)Pos) : *((CHAR8 *)Pos);
+          //
+          // https://www.gnu.org/software/bash/manual/html_node/Double-Quotes.html
+          //
+          if ((State != PARSE_VARS_QUOTED_VALUE) || (NewCh == '"') || (NewCh == '\\') || (NewCh == '$') || (NewCh == '`')) {
+            SHIFT_TOKEN (Pos, Value, (StringFormat == OcStringFormatUnicode) ? sizeof (CHAR16) : sizeof (CHAR8));
+            Pos = NewPos;
+            Ch  = NewCh;
+          }
+        } else if (Ch == L'`') {
           PushState = State;
           State     = PARSE_VARS_SHELL_EXPANSION;
-        } else if (Ch == L'\\') {
-          SHIFT_TOKEN (Pos, Value, (StringFormat == OcStringFormatUnicode) ? sizeof (CHAR16) : sizeof (CHAR8));
-          Ch = (StringFormat == OcStringFormatUnicode) ? *((CHAR16 *)Pos) : *((CHAR8 *)Pos);
-        } else if (
-                   ((State == PARSE_VARS_VALUE) && (OcIsSpace (Ch) || (Ch == CHAR_NULL))) ||
-                   ((State == PARSE_VARS_QUOTED_VALUE) && (Ch == '"')))
-        {
+        } else if ((State == PARSE_VARS_VALUE) && OcIsSpaceOrNull (Ch)) {
           //
-          // Explicitly quoted empty string needs to be stored detectably
-          // differently from missing value.
+          // Explicitly quoted empty string (e.g. `var=""`) is stored detectably differently from missing value (i.e. `var=`, or just `var`).
           //
-          if ((State != PARSE_VARS_QUOTED_VALUE) && (Pos == Value)) {
+          if (Pos == OriginalValue) {
+            ASSERT (!TokensOnly);
             DEBUG ((OC_TRACE_PARSE_VARS, "OCB: No value %u\n", 2));
           } else {
             if (PushState != PARSE_VARS_WHITE_SPACE) {
@@ -588,9 +615,10 @@ OcParseVars (
             }
           }
 
-          Value  = NULL;
-          Option = NULL;
-          State  = PARSE_VARS_WHITE_SPACE;
+          Value         = NULL;
+          OriginalValue = NULL;
+          Option        = NULL;
+          State         = PARSE_VARS_WHITE_SPACE;
         }
 
         break;

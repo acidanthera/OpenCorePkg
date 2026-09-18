@@ -1456,34 +1456,3 @@ MACH_X (
 
   return Context->Symtab->NumSymbols;
 }
-
-UINT32
-MACH_X (
-  MachoGetIndirectSymbolTable
-  )(
-      IN OUT OC_MACHO_CONTEXT     *Context,
-      OUT    CONST MACH_NLIST_X   **SymbolTable
-      ) {
-  UINT32  Index;
-
-  ASSERT (Context != NULL);
-  ASSERT (SymbolTable != NULL);
-  MACH_ASSERT_X (Context);
-
-  if (!InternalRetrieveSymtabs (Context) || (Context->DySymtab == NULL)) {
-    return 0;
-  }
-
-  for (Index = 0; Index < Context->DySymtab->NumIndirectSymbols; ++Index) {
-    if (
-        !MACH_X (InternalSymbolIsSane)(Context, &(MACH_X (&Context->IndirectSymbolTable->Symbol))[Index])
-        )
-    {
-      return 0;
-    }
-  }
-
-  *SymbolTable = MACH_X (&Context->IndirectSymbolTable->Symbol);
-
-  return Context->DySymtab->NumIndirectSymbols;
-}

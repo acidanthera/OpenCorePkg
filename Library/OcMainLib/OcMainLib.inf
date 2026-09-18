@@ -13,7 +13,7 @@
 ##
 
 [Defines]
-  INF_VERSION                         = 0x00010005
+  INF_VERSION                         = 0x0001001B
   BASE_NAME                           = OcMainLib
   FILE_GUID                           = 1210D2A2-FA16-49DF-A7AA-E8C72DB7F2B5
   MODULE_TYPE                         = DXE_DRIVER
@@ -31,6 +31,7 @@
   OpenCoreUefi.c
   OpenCoreUefiAudio.c
   OpenCoreUefiInOut.c
+  OpenCoreUefiUnloadDrivers.c
   OpenCoreVault.c
 
 [Packages]
@@ -47,6 +48,7 @@
   gEfiAudioDecodeProtocolGuid         ## SOMETIMES_CONSUMES
   gEfiDevicePathProtocolGuid          ## CONSUMES
   gEfiDevicePathProtocolGuid          ## CONSUMES
+  gEfiDriverBindingProtocolGuid       ## CONSUMES
   gEfiSimplePointerProtocolGuid       ## SOMETIMES_CONSUMES
   gEfiLoadedImageProtocolGuid         ## CONSUMES
   gEfiSimpleFileSystemProtocolGuid    ## CONSUMES

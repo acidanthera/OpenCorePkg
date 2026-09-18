@@ -16,7 +16,7 @@
 ##
 
 [Defines]
-  INF_VERSION                    = 0x00010005
+  INF_VERSION                    = 0x0001001B
   BASE_NAME                      = OcConfigurationLib
   FILE_GUID                      = A7252001-1736-47A0-B01F-068BE264160B
   MODULE_TYPE                    = DXE_DRIVER

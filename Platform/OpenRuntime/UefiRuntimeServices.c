@@ -65,42 +65,74 @@ STATIC BOOLEAN  mInsideVarService;
 
 STATIC
 VOID
-WriteUnprotectorPrologue (
+Cr0QuirkPrologue (
   OUT BOOLEAN  *Ints,
-  OUT BOOLEAN  *Wp
+  OUT BOOLEAN  *Wp,
+  OUT BOOLEAN  *Ts
   )
 {
   IA32_CR0  Cr0;
 
-  if (gCurrentConfig->WriteUnprotector) {
+  if (gCurrentConfig->WriteUnprotector || gCurrentConfig->ClearTaskSwitchBit) {
     *Ints     = SaveAndDisableInterrupts ();
     Cr0.UintN = AsmReadCr0 ();
-    if (Cr0.Bits.WP == 1) {
-      *Wp         = TRUE;
-      Cr0.Bits.WP = 0;
+
+    if (gCurrentConfig->WriteUnprotector) {
+      if (Cr0.Bits.WP == 1) {
+        *Wp         = TRUE;
+        Cr0.Bits.WP = 0;
+      } else {
+        *Wp = FALSE;
+      }
+    }
+
+    if (gCurrentConfig->ClearTaskSwitchBit) {
+      if (Cr0.Bits.TS == 1) {
+        *Ts         = TRUE;
+        Cr0.Bits.TS = 0;
+      } else {
+        *Ts = FALSE;
+      }
+    }
+
+    if (*Wp || *Ts) {
       AsmWriteCr0 (Cr0.UintN);
-    } else {
-      *Wp = FALSE;
     }
   } else {
     *Ints = FALSE;
     *Wp   = FALSE;
+    *Ts   = FALSE;
   }
 }
 
 STATIC
 VOID
-WriteUnprotectorEpilogue (
+Cr0QuirkEpilogue (
   IN BOOLEAN  Ints,
-  IN BOOLEAN  Wp
+  IN BOOLEAN  Wp,
+  IN BOOLEAN  Ts
   )
 {
   IA32_CR0  Cr0;
 
-  if (gCurrentConfig->WriteUnprotector) {
-    if (Wp) {
-      Cr0.UintN   = AsmReadCr0 ();
-      Cr0.Bits.WP = 1;
+  if (gCurrentConfig->WriteUnprotector || gCurrentConfig->ClearTaskSwitchBit) {
+    if (Wp || Ts) {
+      Cr0.UintN = AsmReadCr0 ();
+    }
+
+    if (gCurrentConfig->WriteUnprotector) {
+      if (Wp) {
+        Cr0.Bits.WP = 1;
+      }
+    }
+
+    if (gCurrentConfig->ClearTaskSwitchBit) {
+      if (Ts) {
+        Cr0.Bits.TS = 1;
+      }
+    }
+
+    if (Wp || Ts) {
       AsmWriteCr0 (Cr0.UintN);
     }
 
@@ -221,8 +253,9 @@ WrapGetTime (
   EFI_STATUS  Status;
   BOOLEAN     Ints;
   BOOLEAN     Wp;
+  BOOLEAN     Ts;
 
-  WriteUnprotectorPrologue (&Ints, &Wp);
+  Cr0QuirkPrologue (&Ints, &Wp, &Ts);
 
   Status = mStoredGetTime (
              Time,
@@ -242,7 +275,7 @@ WrapGetTime (
     }
   }
 
-  WriteUnprotectorEpilogue (Ints, Wp);
+  Cr0QuirkEpilogue (Ints, Wp, Ts);
 
   return Status;
 }
@@ -257,14 +290,15 @@ WrapSetTime (
   EFI_STATUS  Status;
   BOOLEAN     Ints;
   BOOLEAN     Wp;
+  BOOLEAN     Ts;
 
-  WriteUnprotectorPrologue (&Ints, &Wp);
+  Cr0QuirkPrologue (&Ints, &Wp, &Ts);
 
   Status = mStoredSetTime (
              Time
              );
 
-  WriteUnprotectorEpilogue (Ints, Wp);
+  Cr0QuirkEpilogue (Ints, Wp, Ts);
 
   return Status;
 }
@@ -281,8 +315,9 @@ WrapGetWakeupTime (
   EFI_STATUS  Status;
   BOOLEAN     Ints;
   BOOLEAN     Wp;
+  BOOLEAN     Ts;
 
-  WriteUnprotectorPrologue (&Ints, &Wp);
+  Cr0QuirkPrologue (&Ints, &Wp, &Ts);
 
   Status = mStoredGetWakeupTime (
              Enabled,
@@ -290,7 +325,7 @@ WrapGetWakeupTime (
              Time
              );
 
-  WriteUnprotectorEpilogue (Ints, Wp);
+  Cr0QuirkEpilogue (Ints, Wp, Ts);
 
   return Status;
 }
@@ -306,15 +341,16 @@ WrapSetWakeupTime (
   EFI_STATUS  Status;
   BOOLEAN     Ints;
   BOOLEAN     Wp;
+  BOOLEAN     Ts;
 
-  WriteUnprotectorPrologue (&Ints, &Wp);
+  Cr0QuirkPrologue (&Ints, &Wp, &Ts);
 
   Status = mStoredSetWakeupTime (
              Enable,
              Time
              );
 
-  WriteUnprotectorEpilogue (Ints, Wp);
+  Cr0QuirkEpilogue (Ints, Wp, Ts);
 
   return Status;
 }
@@ -334,6 +370,7 @@ WrapGetVariable (
   CHAR16      TempName[OC_VARIABLE_NAME_SIZE];
   BOOLEAN     Ints;
   BOOLEAN     Wp;
+  BOOLEAN     Ts;
 
   //
   // Perform early checks for speedup.
@@ -373,7 +410,7 @@ WrapGetVariable (
     VendorGuid   = &gOcVendorVariableGuid;
   }
 
-  WriteUnprotectorPrologue (&Ints, &Wp);
+  Cr0QuirkPrologue (&Ints, &Wp, &Ts);
 
   Status = (mCustomGetVariable != NULL ? mCustomGetVariable : mStoredGetVariable)(
   VariableName,
@@ -383,7 +420,7 @@ WrapGetVariable (
   Data
   );
 
-  WriteUnprotectorEpilogue (Ints, Wp);
+  Cr0QuirkEpilogue (Ints, Wp, Ts);
 
   return Status;
 }
@@ -405,6 +442,7 @@ WrapGetNextVariableName (
   BOOLEAN     StartBootVar;
   BOOLEAN     Ints;
   BOOLEAN     Wp;
+  BOOLEAN     Ts;
 
  #ifdef OC_DEBUG_VAR_SERVICE
   if (!mInsideVarService) {
@@ -442,14 +480,14 @@ WrapGetNextVariableName (
     return EFI_INVALID_PARAMETER;
   }
 
-  WriteUnprotectorPrologue (&Ints, &Wp);
+  Cr0QuirkPrologue (&Ints, &Wp, &Ts);
 
   //
   // In case we do not redirect, simply do nothing.
   //
   if (!gCurrentConfig->BootVariableRedirect) {
     Status = mStoredGetNextVariableName (VariableNameSize, VariableName, VendorGuid);
-    WriteUnprotectorEpilogue (Ints, Wp);
+    Cr0QuirkEpilogue (Ints, Wp, Ts);
     return Status;
   }
 
@@ -499,7 +537,7 @@ WrapGetNextVariableName (
             Status            = EFI_BUFFER_TOO_SMALL;
           }
 
-          WriteUnprotectorEpilogue (Ints, Wp);
+          Cr0QuirkEpilogue (Ints, Wp, Ts);
           return Status;
         } else {
           //
@@ -512,7 +550,7 @@ WrapGetNextVariableName (
         // At this step we cannot do anything, but let's replace error
         // with something sensible.
         //
-        WriteUnprotectorEpilogue (Ints, Wp);
+        Cr0QuirkEpilogue (Ints, Wp, Ts);
         return EFI_DEVICE_ERROR;
       } else if (Status == EFI_NOT_FOUND) {
         //
@@ -527,7 +565,7 @@ WrapGetNextVariableName (
         // We got EFI_UNSUPPORTED, EFI_DEVICE_ERROR or EFI_INVALID_PARAMETER.
         // Return as is.
         //
-        WriteUnprotectorEpilogue (Ints, Wp);
+        Cr0QuirkEpilogue (Ints, Wp, Ts);
         return Status;
       }
     }
@@ -585,7 +623,7 @@ WrapGetNextVariableName (
           Status            = EFI_BUFFER_TOO_SMALL;
         }
 
-        WriteUnprotectorEpilogue (Ints, Wp);
+        Cr0QuirkEpilogue (Ints, Wp, Ts);
         return Status;
       }
     } else {
@@ -599,7 +637,7 @@ WrapGetNextVariableName (
   //
   // Report this is the end.
   //
-  WriteUnprotectorEpilogue (Ints, Wp);
+  Cr0QuirkEpilogue (Ints, Wp, Ts);
   return EFI_NOT_FOUND;
 }
 
@@ -618,6 +656,7 @@ WrapSetVariable (
   CHAR16      TempName[OC_VARIABLE_NAME_SIZE];
   BOOLEAN     Ints;
   BOOLEAN     Wp;
+  BOOLEAN     Ts;
 
  #ifdef OC_DEBUG_VAR_SERVICE
   if (!mInsideVarService) {
@@ -681,7 +720,7 @@ WrapSetVariable (
     VendorGuid   = &gOcVendorVariableGuid;
   }
 
-  WriteUnprotectorPrologue (&Ints, &Wp);
+  Cr0QuirkPrologue (&Ints, &Wp, &Ts);
 
   Status = mStoredSetVariable (
              VariableName,
@@ -691,7 +730,7 @@ WrapSetVariable (
              Data
              );
 
-  WriteUnprotectorEpilogue (Ints, Wp);
+  Cr0QuirkEpilogue (Ints, Wp, Ts);
 
   return Status;
 }
@@ -706,14 +745,15 @@ WrapGetNextHighMonotonicCount (
   EFI_STATUS  Status;
   BOOLEAN     Ints;
   BOOLEAN     Wp;
+  BOOLEAN     Ts;
 
-  WriteUnprotectorPrologue (&Ints, &Wp);
+  Cr0QuirkPrologue (&Ints, &Wp, &Ts);
 
   Status = mStoredGetNextHighMonotonicCount (
              Count
              );
 
-  WriteUnprotectorEpilogue (Ints, Wp);
+  Cr0QuirkEpilogue (Ints, Wp, Ts);
 
   return Status;
 }
@@ -730,8 +770,9 @@ WrapResetSystem (
 {
   BOOLEAN  Ints;
   BOOLEAN  Wp;
+  BOOLEAN  Ts;
 
-  WriteUnprotectorPrologue (&Ints, &Wp);
+  Cr0QuirkPrologue (&Ints, &Wp, &Ts);
 
   mStoredResetSystem (
     ResetType,
@@ -740,7 +781,7 @@ WrapResetSystem (
     ResetData
     );
 
-  WriteUnprotectorEpilogue (Ints, Wp);
+  Cr0QuirkEpilogue (Ints, Wp, Ts);
 }
 
 STATIC

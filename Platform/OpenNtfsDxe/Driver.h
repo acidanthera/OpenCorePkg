@@ -185,8 +185,15 @@ enum {
 /// Table 4.22. File record flags
 ///
 enum {
-  IS_IN_USE      = 0x01,
-  IS_A_DIRECTORY = 0x02,
+  IS_IN_USE       = 0x01,
+  IS_A_DIRECTORY  = 0x02,
+  IS_AN_EXTENSION = 0x04,
+  IS_A_SPECIAL    = 0x08,
+
+  IS_SUPPORTED_FLAGS =    IS_IN_USE
+                       | IS_A_DIRECTORY
+                       | IS_AN_EXTENSION
+                       | IS_A_SPECIAL,
 };
 
 ///
@@ -649,6 +656,14 @@ typedef struct _EFI_FS {
   UINTN                              IndexRecordSize;
   UINTN                              SectorSize;
   UINTN                              ClusterSize;
+
+  //
+  // CFI = Cache for FileInfo
+  //
+  UINTN                              CFIDataSize;
+  VOID                               *CFIData;
+  UINT64                             CFIHash;
+  INT64                              CFIDirIndex;
 } EFI_FS;
 
 typedef struct {

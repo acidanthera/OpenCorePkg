@@ -375,7 +375,7 @@ AppleRelocationRebase (
 }
 
 VOID
-AppleRelocationCallGate (
+AppleRelocationCallGate64 (
   IN OUT UINTN                *Args,
   IN     BOOT_COMPAT_CONTEXT  *BootCompat,
   IN     KERNEL_CALL_GATE     CallGate,

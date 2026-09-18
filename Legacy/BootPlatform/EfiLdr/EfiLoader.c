@@ -20,6 +20,7 @@ Revision History:
 
 #include "EfiLdr.h"
 #include "Support.h"
+#include "Debug.h"
 #include "LzmaDecompress.h"
 
 EFILDR_LOADED_IMAGE  DxeCoreImage;
@@ -52,7 +53,7 @@ EfiLoader (
 
  #if 0
   SerialPortInitialize ();
-  SerialPortWrite ((UINT8 *)"EfiLdr\r\n", L_STR_LEN ("EfiLdr\r\n"));
+  PrintString ("EfiLdr\n");
  #endif
 
   //
@@ -142,7 +143,8 @@ EfiLoader (
              DestinationSize,
              &DxeIplImage,
              &NumberOfMemoryMapEntries,
-             EfiMemoryDescriptor
+             EfiMemoryDescriptor,
+             NULL
              );
   if (EFI_ERROR (Status)) {
     SystemHang ("Failed to load and relocate DxeIpl PE image!\n");
@@ -184,7 +186,8 @@ EfiLoader (
              DestinationSize,
              &DxeCoreImage,
              &NumberOfMemoryMapEntries,
-             EfiMemoryDescriptor
+             EfiMemoryDescriptor,
+             &Handoff.DxeCoreImageContext
              );
   if (EFI_ERROR (Status)) {
     SystemHang ("Failed to load/relocate DxeMain!\n");
