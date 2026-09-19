@@ -46,6 +46,7 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 #include <Library/OcMiscLib.h>
 #include <Library/OcMemoryLib.h>
 #include <Library/OcRtcLib.h>
+#include <Library/OcSimpleTextInputLib.h>
 #include <Library/OcSmcLib.h>
 #include <Library/OcOSInfoLib.h>
 #include <Library/OcUnicodeCollationEngGenericLib.h>
@@ -1013,6 +1014,13 @@ OcLoadUefiSupport (
     DEBUG ((DEBUG_INFO, "OC: Connecting drivers done...\n"));
   } else {
     OcLoadDrivers (Storage, Config, NULL, FALSE);
+  }
+
+  //
+  // We should install it here, otherwise we'll not be able to use OEM's AppleEvent.
+  //
+  if (OcSimpleTextInputExInstallProtocol (Config->Uefi.ProtocolOverrides.SimpleTextInputEx) == NULL) {
+    DEBUG ((DEBUG_INFO, "OC: Failed to install simple text input ex protocol\n"));
   }
 
   DEBUG_CODE_BEGIN ();

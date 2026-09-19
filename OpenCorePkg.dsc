@@ -129,6 +129,7 @@
   OcRngLib|OpenCorePkg/Library/OcRngLib/OcRngLib.inf
   OcRtcLib|OpenCorePkg/Library/OcRtcLib/OcRtcLib.inf
   OcSerializeLib|OpenCorePkg/Library/OcSerializeLib/OcSerializeLib.inf
+  OcSimpleTextInputLib|OpenCorePkg/Library/OcSimpleTextInputLib/OcSimpleTextInputLib.inf
   OcSmbiosLib|OpenCorePkg/Library/OcSmbiosLib/OcSmbiosLib.inf
   OcSmcLib|OpenCorePkg/Library/OcSmcLib/OcSmcLib.inf
   OcStorageLib|OpenCorePkg/Library/OcStorageLib/OcStorageLib.inf
@@ -299,6 +300,7 @@
   OpenCorePkg/Library/OcPngLib/OcPngLib.inf
   OpenCorePkg/Library/OcRngLib/OcRngLib.inf
   OpenCorePkg/Library/OcSerializeLib/OcSerializeLib.inf
+  OpenCorePkg/Library/OcSimpleTextInputLib/OcSimpleTextInputLib.inf
   OpenCorePkg/Library/OcSmbiosLib/OcSmbiosLib.inf
   OpenCorePkg/Library/OcSmcLib/OcSmcLib.inf
   OpenCorePkg/Library/OcStorageLib/OcStorageLib.inf
