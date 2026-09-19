@@ -1676,7 +1676,7 @@ To view their current state, use the \texttt{pmset -g} command in Terminal.
   Certain firmware will offer to register the hash of new, unknown images for future
   secure boot - this would still work. On the other hand, it is not particularly realistic
   to want to start these early, insecure images with secure boot anyway.
-  
+
 \item
   \texttt{ForceBooterSignature}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
@@ -1824,7 +1824,7 @@ To view their current state, use the \texttt{pmset -g} command in Terminal.
     \href{https://github.com/apple-oss-distributions/xnu/blob/rel/xnu-792/osfmk/i386/pmap.c#L1204}{frees low memory},
     this may result in use-after-free errors and various kinds of kernel panics at boot time.
     The issue was \href{https://github.com/apple-oss-distributions/xnu/blob/rel/xnu-1699/osfmk/i386/i386_vm_init.c#L450}{fixed}
-    in Mac OS X 10.7 kernel. 
+    in Mac OS X 10.7 kernel.
   \end{itemize}
 
   To workaround these limitations, this quirk applies memory attribute table
@@ -7152,7 +7152,7 @@ The below configuration options may be specified in the \texttt{Arguments} secti
 \emph{Note}: There is no problem if configuration options within \texttt{<Arguments>...</Arguments>} are given on
 multiple lines, and option values enclosed within quotes can also span multiple lines. This applies to all drivers
 which use OpenCore argument parsing, and can be particularly convenient when multiple long options such as \texttt{uri},
-\texttt{static4} and particularly \texttt{enroll-cert} may be needed.  
+\texttt{static4} and particularly \texttt{enroll-cert} may be needed.
 
 \begin{itemize}
   \item \texttt{aux} - Boolean flag, enabled if present. \medskip
@@ -7230,7 +7230,7 @@ which use OpenCore argument parsing, and can be particularly convenient when mul
   Required elements in value are IP address in \texttt{IP}, network mask in \texttt{MASK}
   and gateway in \texttt{GATEWAY}. Optional is an additional space separated list of one or more DNS servers
   in \texttt{DNS}. \texttt{DNS} will be needed if the boot file URI includes a domain name rather than an IP address.
-  
+
   \texttt{MAC\_ADDR} is not optional.
 
   If value is omitted, then any static IP for this MAC address (and VLAN ID when present) will be deleted.
@@ -7242,7 +7242,7 @@ which use OpenCore argument parsing, and can be particularly convenient when mul
 
   \emph{Note 1}: This option is written to NVRAM and will remain present even if the option is removed from the driver
   \texttt{Arguments}, unless an alternative value is written or the value deleted, using this option.
-  
+
   \emph{Note 2}: This setting will normally cause a static IP to be assigned during pre-boot, even in vendor-provided
   network stacks. However, due to a quirk of the design of PXE and HTTP boot, any such static assignment will then be
   ignored and DHCP used instead, during network boot. The OpenCore network stack (specifically \texttt{HttpBootDxe.efi})
@@ -8462,6 +8462,20 @@ OpenCore is installed, in order for the \texttt{Launchd.command} script to work 
 \subsection{Input Properties}\label{uefiinputprops}
 
 \begin{enumerate}
+
+\item
+  \texttt{InstallSimpleTextInputEx}\\
+  \textbf{Type}: \texttt{plist\ boolean}\\
+  \textbf{Failsafe}: \texttt{false}\\
+  \textbf{Description}: Install builtin \texttt{SimpleTextInputEx} protocol implementation
+  based on \texttt{AppleEvent} and \texttt{SimpleTextInput} protocols.
+
+  This option is intended for old Macs and other systems
+  that do not have the \texttt{SimpleTextInputEx} protocol implementation in their firmware.
+  Without this option some UEFI Shell commands on affected platforms, such as \texttt{edit}, would not work.
+
+  \emph{Note}: This option requires available \texttt{AppleEvent} and \texttt{SimpleTextInput}
+  protocol instances and does not replace existing instances of \texttt{SimpleTextInputEx}.
 
 \item
   \texttt{KeyFiltering}\\

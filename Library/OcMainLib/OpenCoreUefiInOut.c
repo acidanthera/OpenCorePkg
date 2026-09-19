@@ -41,6 +41,7 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 #include <Library/OcMiscLib.h>
 #include <Library/OcSmcLib.h>
 #include <Library/OcOSInfoLib.h>
+#include <Library/OcSimpleTextInputLib.h>
 #include <Library/OcVariableLib.h>
 #include <Library/PrintLib.h>
 #include <Library/UefiBootServicesTableLib.h>
@@ -172,6 +173,12 @@ OcLoadUefiInputSupport (
       } else {
         ExitBs = TRUE;
       }
+    }
+  }
+
+  if (Config->Uefi.Input.InstallSimpleTextInputEx) {
+    if (OcSimpleTextInputExInstallProtocol () == NULL) {
+      DEBUG ((DEBUG_INFO, "OC: Failed to install simple text input ex protocol\n"));
     }
   }
 
