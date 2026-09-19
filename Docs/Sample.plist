@@ -2444,6 +2444,8 @@
 			<false/>
 			<key>PciIo</key>
 			<false/>
+			<key>SimpleTextInputEx</key>
+			<false/>
 			<key>UnicodeCollation</key>
 			<false/>
 		</dict>
