@@ -808,14 +808,15 @@ OC_SCHEMA
 STATIC
 OC_SCHEMA
   mUefiInputSchema[] = {
-  OC_SCHEMA_BOOLEAN_IN ("KeyFiltering",       OC_GLOBAL_CONFIG, Uefi.Input.KeyFiltering),
-  OC_SCHEMA_INTEGER_IN ("KeyForgetThreshold", OC_GLOBAL_CONFIG, Uefi.Input.KeyForgetThreshold),
-  OC_SCHEMA_BOOLEAN_IN ("KeySupport",         OC_GLOBAL_CONFIG, Uefi.Input.KeySupport),
-  OC_SCHEMA_STRING_IN ("KeySupportMode",      OC_GLOBAL_CONFIG, Uefi.Input.KeySupportMode),
-  OC_SCHEMA_BOOLEAN_IN ("KeySwap",            OC_GLOBAL_CONFIG, Uefi.Input.KeySwap),
-  OC_SCHEMA_BOOLEAN_IN ("PointerSupport",     OC_GLOBAL_CONFIG, Uefi.Input.PointerSupport),
-  OC_SCHEMA_STRING_IN ("PointerSupportMode",  OC_GLOBAL_CONFIG, Uefi.Input.PointerSupportMode),
-  OC_SCHEMA_INTEGER_IN ("TimerResolution",    OC_GLOBAL_CONFIG, Uefi.Input.TimerResolution)
+  OC_SCHEMA_BOOLEAN_IN ("InstallSimpleTextInputEx", OC_GLOBAL_CONFIG, Uefi.Input.InstallSimpleTextInputEx),
+  OC_SCHEMA_BOOLEAN_IN ("KeyFiltering",             OC_GLOBAL_CONFIG, Uefi.Input.KeyFiltering),
+  OC_SCHEMA_INTEGER_IN ("KeyForgetThreshold",       OC_GLOBAL_CONFIG, Uefi.Input.KeyForgetThreshold),
+  OC_SCHEMA_BOOLEAN_IN ("KeySupport",               OC_GLOBAL_CONFIG, Uefi.Input.KeySupport),
+  OC_SCHEMA_STRING_IN ("KeySupportMode",            OC_GLOBAL_CONFIG, Uefi.Input.KeySupportMode),
+  OC_SCHEMA_BOOLEAN_IN ("KeySwap",                  OC_GLOBAL_CONFIG, Uefi.Input.KeySwap),
+  OC_SCHEMA_BOOLEAN_IN ("PointerSupport",           OC_GLOBAL_CONFIG, Uefi.Input.PointerSupport),
+  OC_SCHEMA_STRING_IN ("PointerSupportMode",        OC_GLOBAL_CONFIG, Uefi.Input.PointerSupportMode),
+  OC_SCHEMA_INTEGER_IN ("TimerResolution",          OC_GLOBAL_CONFIG, Uefi.Input.TimerResolution)
 };
 
 STATIC

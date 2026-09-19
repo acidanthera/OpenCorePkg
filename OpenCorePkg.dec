@@ -995,6 +995,9 @@
   OcSerializeLib|Include/Acidanthera/Library/OcSerializeLib.h
 
   ##  @libraryclass
+  OcSimpleTextInputLib|Include/Acidanthera/OcSimpleTextInputLib.h
+
+  ##  @libraryclass
   OcSmbiosLib|Include/Acidanthera/Library/OcSmbiosLib.h
 
   ##  @libraryclass
