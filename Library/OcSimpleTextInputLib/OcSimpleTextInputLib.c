@@ -18,7 +18,7 @@
 #include <Library/OcSimpleTextInputLib.h>
 #include <Library/OcMiscLib.h>
 
-STATIC  OC_SIMPLE_TEST_INPUT_EX_CONTEXT  mOcInExContext;
+STATIC  OC_SIMPLE_TEXT_INPUT_EX_CONTEXT  mOcInExContext;
 STATIC  EFI_SIMPLE_TEXT_INPUT_PROTOCOL   *mOriginalTextInput;
 
 STATIC
@@ -75,9 +75,9 @@ OcInExAppleEventKeyHandler (
   IN VOID                     *NotifyContext
   )
 {
-  OC_SIMPLE_TEST_INPUT_EX_CONTEXT  *Context;
+  OC_SIMPLE_TEXT_INPUT_EX_CONTEXT  *Context;
 
-  Context = (OC_SIMPLE_TEST_INPUT_EX_CONTEXT *)NotifyContext;
+  Context = (OC_SIMPLE_TEXT_INPUT_EX_CONTEXT *)NotifyContext;
 
   OcInExAppleEventModifiersConvert (Information->Modifiers, &Context->LastShiftState);
 }

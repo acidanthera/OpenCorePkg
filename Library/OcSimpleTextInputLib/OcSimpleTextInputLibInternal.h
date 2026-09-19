@@ -28,6 +28,6 @@ typedef struct {
   EFI_KEY_TOGGLE_STATE    KeyToggleState;
 
   LIST_ENTRY              NotifyList;
-} OC_SIMPLE_TEST_INPUT_EX_CONTEXT;
+} OC_SIMPLE_TEXT_INPUT_EX_CONTEXT;
 
 #endif // OC_SIMPLE_TEXT_INPUT_LIB_INTERNAL_H
