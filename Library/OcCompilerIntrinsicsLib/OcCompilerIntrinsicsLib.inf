@@ -6,7 +6,7 @@
 ##
 
 [Defines]
-  INF_VERSION                    = 1.5
+  INF_VERSION                    = 0x0001001B
   BASE_NAME                      = OcCompilerIntrinsicsLib
   FILE_GUID                      = AB87D1A9-F9EC-4B66-80EE-E88A15EAA254
   MODULE_TYPE                    = BASE
