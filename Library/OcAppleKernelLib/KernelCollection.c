@@ -838,16 +838,27 @@ KcFixupValue (
 
 UINTN
 KcWalkChainedFixupsInSegment (
-  IN     UINT8                                *Buffer,
-  IN     UINTN                                BufferSize,
-  IN     MACH_DYLD_CHAINED_STARTS_IN_SEGMENT  *StartsSeg,
-  IN     UINTN                                StartsSegSize,
-  IN     KC_CHAINED_FIXUP_VISIT               Visitor OPTIONAL,
-  IN OUT VOID                                 *VisitorContext OPTIONAL
+  IN     UINT8                   *Buffer,
+  IN     UINTN                   BufferSize,
+  IN     CONST UINT8             *StartsSegBacking,
+  IN     UINTN                   StartsSegSize,
+  IN     KC_CHAINED_FIXUP_VISIT  Visitor OPTIONAL,
+  IN OUT VOID                    *VisitorContext OPTIONAL
   )
 {
+  //
+  // StartsSegBacking is not assumed to be aligned for the struct
+  // (Apple's tooling places it on UINT32-array boundaries inside
+  // MACH_DYLD_CHAINED_STARTS_IN_IMAGE.SegInfoOffset[], and Buffer
+  // slot offsets are not guaranteed UINT64-aligned). The fixed
+  // header is copied into StartsSegHeader (a local with natural
+  // alignment); PageStart[] entries are read via ReadUnaligned16,
+  // and fixup slots in Buffer are read via ReadUnaligned64 into
+  // a local UINT64 used to parse the bitfield struct.
+  //
+  MACH_DYLD_CHAINED_STARTS_IN_SEGMENT           StartsSegHeader;
   MACH_DYLD_CHAINED_PTR_64_KERNEL_CACHE_REBASE  *Fixup;
-  UINT64                                        *FixupLoc;
+  UINT64                                        RawFixup;
   UINT64                                        PageBase;
   UINT64                                        PageEnd;
   UINT64                                        SlotOffset;
@@ -867,14 +878,14 @@ KcWalkChainedFixupsInSegment (
   UINTN                                         Count;
 
   ASSERT (Buffer != NULL);
-  ASSERT (StartsSeg != NULL);
+  ASSERT (StartsSegBacking != NULL);
 
   //
   // None of the fields below can be trusted to bound themselves; treat
-  // every read of StartsSeg as untrusted input from the kernel
-  // collection blob and validate against caller-supplied container
-  // sizes (BufferSize bounds the contents being walked, StartsSegSize
-  // bounds the metadata struct itself).
+  // every read of the per-segment metadata as untrusted input from the
+  // kernel collection blob and validate against caller-supplied
+  // container sizes (BufferSize bounds the contents being walked,
+  // StartsSegSize bounds the metadata buffer itself).
   //
 
   //
@@ -886,10 +897,18 @@ KcWalkChainedFixupsInSegment (
     return 0;
   }
 
-  Size          = StartsSeg->Size;
-  PageSize      = StartsSeg->PageSize;
-  PageCount     = StartsSeg->PageCount;
-  PointerFormat = StartsSeg->PointerFormat;
+  //
+  // Copy the fixed header into a properly-aligned local. Direct
+  // dereference of (MACH_DYLD_CHAINED_STARTS_IN_SEGMENT *)StartsSegBacking
+  // is undefined behaviour when StartsSegBacking isn't aligned for
+  // UINT64 (the struct's most-restrictive field is SegmentOffset).
+  //
+  CopyMem (&StartsSegHeader, StartsSegBacking, StructHeaderSize);
+
+  Size          = StartsSegHeader.Size;
+  PageSize      = StartsSegHeader.PageSize;
+  PageCount     = StartsSegHeader.PageCount;
+  PointerFormat = StartsSegHeader.PointerFormat;
 
   //
   // 2. The struct's self-declared Size must not exceed StartsSegSize
@@ -919,7 +938,7 @@ KcWalkChainedFixupsInSegment (
   //
   // 5. The segment must start within the buffer.
   //
-  if (StartsSeg->SegmentOffset >= BufferSize) {
+  if (StartsSegHeader.SegmentOffset >= BufferSize) {
     return 0;
   }
 
@@ -953,7 +972,16 @@ KcWalkChainedFixupsInSegment (
   Count = 0;
 
   for (PageIdx = 0; PageIdx < PageCount; ++PageIdx) {
-    PageStart = StartsSeg->PageStart[PageIdx];
+    //
+    // PageStart[] follows the fixed header and is naturally UINT16-
+    // aligned only if StartsSegBacking is. Apple's tooling does not
+    // guarantee 2-byte alignment of the per-segment record, so use
+    // ReadUnaligned16 unconditionally — it's a single-byte-mov pair
+    // on architectures that don't have a faster unaligned helper.
+    //
+    PageStart = ReadUnaligned16 (
+                  (CONST UINT16 *)(StartsSegBacking + StructHeaderSize + PageIdx * sizeof (UINT16))
+                  );
 
     if (PageStart == MACH_DYLD_CHAINED_PTR_START_NONE) {
       continue;
@@ -979,7 +1007,7 @@ KcWalkChainedFixupsInSegment (
     if (BaseOverflowMulAddU64 (
           (UINT64)PageIdx,
           (UINT64)PageSize,
-          StartsSeg->SegmentOffset,
+          StartsSegHeader.SegmentOffset,
           &PageBase
           ))
     {
@@ -1013,18 +1041,29 @@ KcWalkChainedFixupsInSegment (
       continue;
     }
 
-    FixupLoc = (UINT64 *)(Buffer + SlotOffset);
-
     //
     // 12. Walk this page's chain with a hard upper iteration bound. A
     //     well-formed chain cannot revisit a slot, so MaxIters slots is
     //     a strict upper bound; we stop short on any sign of looping.
     //
+    //     Buffer + SlotOffset isn't guaranteed UINT64-aligned (the
+    //     stride-1 X86_64_KERNEL_CACHE format steps single bytes). We
+    //     read each slot into the stack-aligned RawFixup local via
+    //     ReadUnaligned64, then cast &RawFixup to the bitfield struct
+    //     to extract Fixup->Next safely.
+    //
     for (IterCount = 0; IterCount < MaxIters; ++IterCount) {
-      Fixup = (MACH_DYLD_CHAINED_PTR_64_KERNEL_CACHE_REBASE *)FixupLoc;
+      RawFixup = ReadUnaligned64 ((CONST UINT64 *)(Buffer + SlotOffset));
+      Fixup    = (MACH_DYLD_CHAINED_PTR_64_KERNEL_CACHE_REBASE *)&RawFixup;
 
       if (Visitor != NULL) {
-        Visitor (FixupLoc, VisitorContext);
+        //
+        // Visitor receives the raw byte address of the slot. The typedef
+        // commits the contract via the UINT8 * type so visitor authors
+        // can't accidentally trip alignment UB by dereferencing as
+        // UINT64. See KC_CHAINED_FIXUP_VISIT in OcAppleKernelLib.h.
+        //
+        Visitor (Buffer + SlotOffset, VisitorContext);
       }
 
       ++Count;
@@ -1058,7 +1097,6 @@ KcWalkChainedFixupsInSegment (
       }
 
       SlotOffset = NextSlotOffset;
-      FixupLoc   = (UINT64 *)(Buffer + SlotOffset);
     }
   }
 
@@ -1067,24 +1105,31 @@ KcWalkChainedFixupsInSegment (
 
 UINTN
 KcWalkChainedFixupsInImage (
-  IN     UINT8                              *Buffer,
-  IN     UINTN                              BufferSize,
-  IN     MACH_DYLD_CHAINED_STARTS_IN_IMAGE  *Starts,
-  IN     UINTN                              StartsSize,
-  IN     KC_CHAINED_FIXUP_VISIT             Visitor OPTIONAL,
-  IN OUT VOID                               *VisitorContext OPTIONAL
+  IN     UINT8                   *Buffer,
+  IN     UINTN                   BufferSize,
+  IN     CONST UINT8             *StartsBacking,
+  IN     UINTN                   StartsSize,
+  IN     KC_CHAINED_FIXUP_VISIT  Visitor OPTIONAL,
+  IN OUT VOID                    *VisitorContext OPTIONAL
   )
 {
-  MACH_DYLD_CHAINED_STARTS_IN_SEGMENT  *StartsSeg;
-  UINTN                                StartsSegSize;
-  UINT32                               NumSegments;
-  UINT32                               SegOffset;
-  UINT32                               SegIdx;
-  UINTN                                StructHeaderSize;
-  UINTN                                Count;
+  UINTN   StartsSegSize;
+  UINT32  NumSegments;
+  UINT32  SegOffset;
+  UINT32  SegIdx;
+  UINTN   StructHeaderSize;
+  UINTN   Count;
 
   ASSERT (Buffer != NULL);
-  ASSERT (Starts != NULL);
+  ASSERT (StartsBacking != NULL);
+
+  //
+  // StartsBacking is not assumed to be aligned for the
+  // MACH_DYLD_CHAINED_STARTS_IN_IMAGE struct. Both NumSegments and
+  // each SegInfoOffset[i] are UINT32 reads off this pointer; do them
+  // via ReadUnaligned32 so a chained-fixups payload that lands at
+  // any byte alignment in its containing buffer is parsed correctly.
+  //
 
   //
   // The fixed header of MACH_DYLD_CHAINED_STARTS_IN_IMAGE is one UINT32
@@ -1095,7 +1140,7 @@ KcWalkChainedFixupsInImage (
     return 0;
   }
 
-  NumSegments = Starts->NumSegments;
+  NumSegments = ReadUnaligned32 ((CONST UINT32 *)StartsBacking);
 
   //
   // The SegInfoOffset[NumSegments] array must fit within StartsSize.
@@ -1107,7 +1152,9 @@ KcWalkChainedFixupsInImage (
   Count = 0;
 
   for (SegIdx = 0; SegIdx < NumSegments; ++SegIdx) {
-    SegOffset = Starts->SegInfoOffset[SegIdx];
+    SegOffset = ReadUnaligned32 (
+                  (CONST UINT32 *)(StartsBacking + StructHeaderSize + SegIdx * sizeof (UINT32))
+                  );
 
     //
     // SegInfoOffset == 0 is the sentinel for "segment has no fixups".
@@ -1127,14 +1174,11 @@ KcWalkChainedFixupsInImage (
     }
 
     StartsSegSize = StartsSize - (UINTN)SegOffset;
-    StartsSeg     = (MACH_DYLD_CHAINED_STARTS_IN_SEGMENT *)(
-                                                            (UINT8 *)Starts + SegOffset
-                                                            );
 
     Count += KcWalkChainedFixupsInSegment (
                Buffer,
                BufferSize,
-               StartsSeg,
+               StartsBacking + SegOffset,
                StartsSegSize,
                Visitor,
                VisitorContext

@@ -319,8 +319,8 @@ OcGetFileSize (
 STATIC
 VOID
 TestFixupVisitor (
-  IN OUT UINT64  *FixupLoc,
-  IN OUT VOID    *VisitorContext
+  IN OUT UINT8  *FixupLoc,
+  IN OUT VOID   *VisitorContext
   )
 {
   UINTN  *VisitedAddresses;
@@ -387,7 +387,7 @@ RunFixupWalkTest (
   Count = KcWalkChainedFixupsInSegment (
             Buffer,
             TEST_FIXUP_BUFFER_SZ,
-            StartsSeg,
+            StartsBuffer,
             sizeof (StartsBuffer),
             TestFixupVisitor,
             VisitedAddresses
@@ -420,7 +420,7 @@ RunFixupWalkTest (
   Count = KcWalkChainedFixupsInSegment (
             Buffer,
             TEST_FIXUP_BUFFER_SZ,
-            StartsSeg,
+            StartsBuffer,
             sizeof (StartsBuffer),
             TestFixupVisitor,
             VisitedAddresses
@@ -440,7 +440,7 @@ RunFixupWalkTest (
   Count = KcWalkChainedFixupsInSegment (
             Buffer,
             TEST_FIXUP_BUFFER_SZ,
-            StartsSeg,
+            StartsBuffer,
             sizeof (StartsBuffer),
             TestFixupVisitor,
             VisitedAddresses
@@ -470,7 +470,7 @@ RunFixupWalkTest (
   Count = KcWalkChainedFixupsInSegment (
             Buffer,
             TEST_FIXUP_BUFFER_SZ,
-            StartsSeg,
+            StartsBuffer,
             sizeof (StartsBuffer),
             TestFixupVisitor,
             VisitedAddresses
@@ -492,7 +492,7 @@ RunFixupWalkTest (
   Count = KcWalkChainedFixupsInSegment (
             Buffer,
             TEST_FIXUP_BUFFER_SZ,
-            StartsSeg,
+            StartsBuffer,
             sizeof (StartsBuffer),
             TestFixupVisitor,
             VisitedAddresses
@@ -514,7 +514,7 @@ RunFixupWalkTest (
   Count = KcWalkChainedFixupsInSegment (
             Buffer,
             TEST_FIXUP_BUFFER_SZ,
-            StartsSeg,
+            StartsBuffer,
             sizeof (StartsBuffer),
             TestFixupVisitor,
             VisitedAddresses
@@ -536,7 +536,7 @@ RunFixupWalkTest (
   Count = KcWalkChainedFixupsInSegment (
             Buffer,
             TEST_FIXUP_BUFFER_SZ,
-            StartsSeg,
+            StartsBuffer,
             sizeof (StartsBuffer),
             TestFixupVisitor,
             VisitedAddresses
@@ -571,7 +571,7 @@ RunFixupWalkTest (
   Count = KcWalkChainedFixupsInSegment (
             Buffer,
             TEST_FIXUP_BUFFER_SZ,
-            StartsSeg,
+            StartsBuffer,
             sizeof (StartsBuffer),
             TestFixupVisitor,
             VisitedAddresses
@@ -602,7 +602,7 @@ RunFixupWalkTest (
   Count = KcWalkChainedFixupsInSegment (
             Buffer,
             TEST_FIXUP_BUFFER_SZ,
-            StartsSeg,
+            StartsBuffer,
             sizeof (StartsBuffer),
             TestFixupVisitor,
             VisitedAddresses
@@ -635,7 +635,7 @@ RunFixupWalkTest (
     Count = KcWalkChainedFixupsInImage (
               Buffer,
               TEST_FIXUP_BUFFER_SZ,
-              ImageStarts,
+              ImageStartsBuffer,
               sizeof (ImageStartsBuffer),
               TestFixupVisitor,
               VisitedAddresses
@@ -645,6 +645,84 @@ RunFixupWalkTest (
       ++FailCount;
     } else {
       DEBUG ((DEBUG_WARN, "[OK] InImage oversize NumSegments rejected\n"));
+    }
+  }
+
+  //
+  // (h) Alignment-safety: place the per-segment metadata at a
+  //     deliberately misaligned byte offset inside a containing
+  //     buffer, and confirm the walker still produces the canonical
+  //     visit count (4) for the stride-4 chain. This exercises
+  //     ReadUnaligned32 / ReadUnaligned16 / CopyMem on the metadata
+  //     side and ReadUnaligned64 on the Buffer slot side. A pre-fix
+  //     implementation that did `(struct *)(StartsSegBacking)` cast
+  //     directly would either GP-fault on strict-alignment hosts,
+  //     trip UBSan, or read torn fields here.
+  //
+  {
+    UINT8  AlignedStarts[sizeof (StartsBuffer)];
+    UINT8  MisalignedContainer[sizeof (StartsBuffer) + 8];
+    UINTN  MisalignOffset;
+
+    //
+    // Rebuild the canonical StartsBuffer at native alignment for
+    // copying. The slot data was overwritten by tests (e)/(f)/(g);
+    // restore the 4-link stride-4 layout used in the first stride-4
+    // walk above.
+    //
+    Slot = (MACH_DYLD_CHAINED_PTR_64_KERNEL_CACHE_REBASE *)Buffer;
+    ZeroMem (Buffer, TEST_FIXUP_BUFFER_SZ);
+    Slot[0].Next   = 4;
+    Slot[0].Target = 0xAAAA;
+    Slot[2].Next   = 4;
+    Slot[2].Target = 0xBBBB;
+    Slot[4].Next   = 4;
+    Slot[4].Target = 0xCCCC;
+    Slot[6].Next   = 0;
+    Slot[6].Target = 0xDDDD;
+
+    StartsSeg = (MACH_DYLD_CHAINED_STARTS_IN_SEGMENT *)AlignedStarts;
+    ZeroMem (AlignedStarts, sizeof (AlignedStarts));
+    StartsSeg->Size          = sizeof (AlignedStarts);
+    StartsSeg->PageSize      = TEST_FIXUP_PAGE_SIZE;
+    StartsSeg->PointerFormat = MACH_DYLD_CHAINED_PTR_64_KERNEL_CACHE;
+    StartsSeg->SegmentOffset = 0;
+    StartsSeg->PageCount     = TEST_FIXUP_PAGE_COUNT;
+    StartsSeg->PageStart[0]  = 0;
+
+    //
+    // Try every byte offset 1..7 — at least one of these (the odd
+    // ones) is misaligned for the UINT64 SegmentOffset field's
+    // natural alignment, and the others (2/4) for less-strict
+    // boundaries. All must produce identical results.
+    //
+    for (MisalignOffset = 1; MisalignOffset < 8; ++MisalignOffset) {
+      ZeroMem (MisalignedContainer, sizeof (MisalignedContainer));
+      CopyMem (MisalignedContainer + MisalignOffset, AlignedStarts, sizeof (AlignedStarts));
+
+      ZeroMem (VisitedAddresses, sizeof (VisitedAddresses));
+      Count = KcWalkChainedFixupsInSegment (
+                Buffer,
+                TEST_FIXUP_BUFFER_SZ,
+                MisalignedContainer + MisalignOffset,
+                sizeof (AlignedStarts),
+                TestFixupVisitor,
+                VisitedAddresses
+                );
+      if ((Count != 4) || (VisitedAddresses[0] != 4)) {
+        DEBUG ((
+          DEBUG_ERROR,
+          "[FAIL] alignment-safety at offset %u: %u fixups\n",
+          (UINT32)MisalignOffset,
+          (UINT32)Count
+          ));
+        ++FailCount;
+        break;
+      }
+    }
+
+    if (MisalignOffset == 8) {
+      DEBUG ((DEBUG_WARN, "[OK] alignment-safe walk at byte offsets 1..7 (4 fixups each)\n"));
     }
   }
 
