@@ -69,6 +69,63 @@ AudioIoProtocolConfirmRevision (
   return EFI_UNSUPPORTED;
 }
 
+/**
+  Locate the playback progress protocol belonging to a located Audio I/O
+  protocol.
+
+  Progress reporting is an addition to AudioDxe rather than a requirement, so
+  a missing protocol is not an error: Private->Progress is simply left NULL and
+  OcAudioGetPlaybackProgress reports EFI_UNSUPPORTED. A revision this build does
+  not know is treated the same way rather than being called through, since the
+  layout of the struct is what the function pointers are read from.
+
+  @param[in]     Handle   Handle carrying the Audio I/O protocol, or NULL when
+                          it was found through LocateProtocol and the owning
+                          handle is not known.
+  @param[in,out] Private  Audio protocol private data to update.
+**/
+STATIC
+VOID
+OcAudioLocateProgress (
+  IN     EFI_HANDLE                 Handle OPTIONAL,
+  IN OUT OC_AUDIO_PROTOCOL_PRIVATE  *Private
+  )
+{
+  EFI_STATUS  Status;
+
+  Private->Progress = NULL;
+
+  if (Handle != NULL) {
+    Status = gBS->HandleProtocol (
+                    Handle,
+                    &gEfiAudioProgressProtocolGuid,
+                    (VOID **)&Private->Progress
+                    );
+  } else {
+    Status = gBS->LocateProtocol (
+                    &gEfiAudioProgressProtocolGuid,
+                    NULL,
+                    (VOID **)&Private->Progress
+                    );
+  }
+
+  if (EFI_ERROR (Status)) {
+    Private->Progress = NULL;
+    DEBUG ((DEBUG_VERBOSE, "OCAU: No playback progress protocol - %r\n", Status));
+    return;
+  }
+
+  if (Private->Progress->Revision != EFI_AUDIO_PROGRESS_PROTOCOL_REVISION) {
+    DEBUG ((
+      DEBUG_WARN,
+      "OCAU: Incorrect playback progress protocol revision %u != %u\n",
+      (UINT32)Private->Progress->Revision,
+      EFI_AUDIO_PROGRESS_PROTOCOL_REVISION
+      ));
+    Private->Progress = NULL;
+  }
+}
+
 STATIC
 EFI_STATUS
 InternalMatchCodecDevicePath (
@@ -158,6 +215,10 @@ InternalMatchCodecDevicePath (
         Status = AudioIoProtocolConfirmRevision (Private->AudioIo);
       }
 
+      if (!EFI_ERROR (Status)) {
+        OcAudioLocateProgress (AudioIoHandles[Index], Private);
+      }
+
       return Status;
     }
   }
@@ -199,6 +260,7 @@ InternalOcAudioConnect (
   Private = OC_AUDIO_PROTOCOL_PRIVATE_FROM_OC_AUDIO (This);
 
   Private->OutputIndexMask = OutputIndexMask;
+  Private->Progress        = NULL;
 
   if (DevicePath == NULL) {
     Status = gBS->LocateProtocol (
@@ -208,6 +270,10 @@ InternalOcAudioConnect (
                     );
     if (!EFI_ERROR (Status)) {
       Status = AudioIoProtocolConfirmRevision (Private->AudioIo);
+    }
+
+    if (!EFI_ERROR (Status)) {
+      OcAudioLocateProgress (NULL, Private);
     }
   } else {
     Status = gBS->LocateHandleBuffer (

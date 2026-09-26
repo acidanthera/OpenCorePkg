@@ -577,6 +577,12 @@ HdaControllerHdaIoStopStream (
     return EFI_INVALID_PARAMETER;
   }
 
+  //
+  // Retain the progress reached by the playback being stopped, as the buffer
+  // information below is about to be discarded.
+  //
+  HdaControllerStreamLatchProgress (HdaStream);
+
   // Remove source buffer pointer.
   HdaStream->BufferSource         = NULL;
   HdaStream->BufferSourceLength   = 0;

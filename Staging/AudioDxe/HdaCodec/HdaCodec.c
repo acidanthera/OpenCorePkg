@@ -1116,6 +1116,9 @@ HdaCodecInstallProtocols (
   AudioIoData->AudioIo.StartPlayback      = HdaCodecAudioIoStartPlayback;
   AudioIoData->AudioIo.StartPlaybackAsync = HdaCodecAudioIoStartPlaybackAsync;
   AudioIoData->AudioIo.StopPlayback       = HdaCodecAudioIoStopPlayback;
+  AudioIoData->AudioProgress.Revision     = EFI_AUDIO_PROGRESS_PROTOCOL_REVISION;
+  AudioIoData->AudioProgress.GetPosition  = HdaCodecAudioProgressGetPosition;
+  AudioIoData->AudioProgress.GetFormat    = HdaCodecAudioProgressGetFormat;
   HdaCodecDev->AudioIoData                = AudioIoData;
 
   // Install protocols.
@@ -1125,6 +1128,8 @@ HdaCodecInstallProtocols (
                   &HdaCodecInfoData->HdaCodecInfo,
                   &gEfiAudioIoProtocolGuid,
                   &AudioIoData->AudioIo,
+                  &gEfiAudioProgressProtocolGuid,
+                  &AudioIoData->AudioProgress,
                   &gEfiCallerIdGuid,
                   HdaCodecDev,
                   NULL
@@ -1648,6 +1653,14 @@ HdaCodecCleanup (
                     HdaCodecDev->ControllerHandle,
                     &gEfiAudioIoProtocolGuid,
                     &HdaCodecDev->AudioIoData->AudioIo
+                    );
+    ASSERT_EFI_ERROR (Status);
+
+    // Uninstall playback progress protocol.
+    Status = gBS->UninstallProtocolInterface (
+                    HdaCodecDev->ControllerHandle,
+                    &gEfiAudioProgressProtocolGuid,
+                    &HdaCodecDev->AudioIoData->AudioProgress
                     );
     ASSERT_EFI_ERROR (Status);
 
