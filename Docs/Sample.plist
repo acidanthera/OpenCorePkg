@@ -2350,6 +2350,8 @@
 		</array>
 		<key>Input</key>
 		<dict>
+			<key>InstallSimpleTextInputEx</key>
+			<false/>
 			<key>KeyFiltering</key>
 			<false/>
 			<key>KeyForgetThreshold</key>
