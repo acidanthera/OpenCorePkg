@@ -19,7 +19,7 @@
 #include <Protocol/AppleVoiceOver.h>
 #include <Protocol/DevicePath.h>
 
-#define OC_AUDIO_PROTOCOL_REVISION  0x070000
+#define OC_AUDIO_PROTOCOL_REVISION  0x080000
 
 //
 // OC_AUDIO_PROTOCOL_GUID
@@ -77,6 +77,13 @@ typedef struct OC_AUDIO_PROTOCOL_ OC_AUDIO_PROTOCOL;
 
 /**
   Connect to Audio I/O.
+
+  When DevicePath is NULL, the first Audio I/O protocol and the first playback
+  progress protocol are located independently. They are installed and removed as a
+  pair on the same handle, in the same per-codec order, so those first instances
+  belong to the same codec and GetProgress reports the codec this connected to; a
+  producer that published only one of the two would break that. The device-path form
+  selects the codec by handle and does not depend on it.
 
   @param[in,out] This             Audio protocol instance.
   @param[in]     DevicePath       Controller device path, optional.
@@ -250,6 +257,69 @@ UINTN
   IN     UINTN                      Delay
   );
 
+/**
+  Get playback progress.
+
+  Reports the position of the audio stream the connected codec is playing, taken
+  from AudioDxe's own DMA accounting, so the counts describe data the controller has
+  consumed rather than data the listener has heard, and they lead the audible output
+  slightly. The stream need not have been started through PlayFile: anything driving
+  the same codec moves these counts. SampleRate, Channels and BitsPerSample convert
+  the byte counts into a time position:
+
+    ElapsedMs = BytesConsumed * 1000 / (SampleRate * Channels * BitsPerSample / 8)
+
+  That needs 64-bit arithmetic once BytesConsumed exceeds 4 MB, about 22 seconds at
+  48 kHz stereo 16-bit.
+
+  BytesConsumed never exceeds BytesTotal. The counts outlive the playback request:
+  once it completes or is stopped they stop at the position reached, and Playing
+  becomes FALSE. Before the first request both counts are 0.
+
+  Two consequences of the clamping are worth guarding against. Playing can be TRUE
+  while BytesConsumed already equals BytesTotal, because the driver clamps the last
+  poll or two of a request to its size; a caller computing time remaining has to
+  treat that as done rather than as an inconsistency. And a playback that failed to
+  start after the buffer was claimed retains BytesTotal of the request with
+  BytesConsumed 0, which is what a caller sees after a stop before anything played.
+
+  The format is the one requested for that codec and stays 0 when AudioDxe cannot
+  report it, since a position without a format is still useful.
+
+  Every output parameter is optional.
+
+  GetProgress was appended to this protocol, so Revision is what tells a consumer
+  which layout it is reading: a build that predates the appending reports 0x070000
+  and has no GetProgress member, and calling the member anyway reads the slot after
+  the struct. Where the producing OpenCore is not known to be at least as new as the
+  header being compiled against, check Revision first.
+
+  @param[in,out] This            Audio protocol instance.
+  @param[out]    BytesConsumed   Bytes consumed by the controller, optional.
+  @param[out]    BytesTotal      Total size of the playback request in bytes, optional.
+  @param[out]    Playing         Whether a playback request is currently running, optional.
+  @param[out]    SampleRate      Sample rate in hertz, optional.
+  @param[out]    Channels        Channel count, optional.
+  @param[out]    BitsPerSample   Bits per sample, optional.
+
+  @retval EFI_SUCCESS            The progress was retrieved.
+  @retval EFI_INVALID_PARAMETER  This is NULL, or all output parameters are NULL.
+  @retval EFI_UNSUPPORTED        AudioDxe does not report playback progress, or no
+                                 successful Connect preceded this call.
+  @retval other                  Error returned by the playback progress protocol.
+**/
+typedef
+EFI_STATUS
+(EFIAPI *OC_AUDIO_GET_PROGRESS)(
+  IN OUT OC_AUDIO_PROTOCOL  *This,
+  OUT UINT32                *BytesConsumed  OPTIONAL,
+  OUT UINT32                *BytesTotal     OPTIONAL,
+  OUT BOOLEAN               *Playing        OPTIONAL,
+  OUT UINT32                *SampleRate     OPTIONAL,
+  OUT UINT8                 *Channels       OPTIONAL,
+  OUT UINT8                 *BitsPerSample  OPTIONAL
+  );
+
 //
 // Includes a revision for debugging reasons.
 //
@@ -262,6 +332,7 @@ struct OC_AUDIO_PROTOCOL_ {
   OC_AUDIO_PLAY_FILE               PlayFile;
   OC_AUDIO_STOP_PLAYBACK           StopPlayback;
   OC_AUDIO_SET_DELAY               SetDelay;
+  OC_AUDIO_GET_PROGRESS            GetProgress;
 };
 
 extern EFI_GUID  gOcAudioProtocolGuid;

@@ -83,6 +83,41 @@ OcAudioDump (
   IN EFI_FILE_PROTOCOL  *Root
   );
 
+/**
+  Playback progress of the most recent audio stream.
+
+  The byte counts come from the AudioDxe driver's own DMA accounting, so Played
+  describes data the controller has consumed rather than data the listener has
+  heard, and it leads the audible output slightly. Played and Total keep the
+  result of the last playback after it ends, while Playing turns FALSE.
+**/
+typedef struct {
+  UINT32     Played;
+  UINT32     Total;
+  UINT32     SampleRate;
+  UINT8      Channels;
+  UINT8      BitsPerSample;
+  BOOLEAN    Playing;
+} OC_AUDIO_PROGRESS;
+
+/**
+  Get playback progress of the most recent audio stream.
+
+  Requires an AudioDxe build that produces EFI_AUDIO_PROGRESS_PROTOCOL. The
+  format fields stay 0 when the driver cannot report them; a position without a
+  format is still reported, so only a failure of the position query is an error.
+
+  @param[out] Progress  Playback progress.
+
+  @retval EFI_SUCCESS      Progress was retrieved.
+  @retval EFI_UNSUPPORTED  AudioDxe does not report playback progress.
+  @retval other            Error returned by the playback progress protocol.
+**/
+EFI_STATUS
+OcAudioGetPlaybackProgress (
+  OUT OC_AUDIO_PROGRESS  *Progress
+  );
+
 //
 // Base path and base type for a given APPLE_VOICE_OVER_AUDIO_FILE index.
 //

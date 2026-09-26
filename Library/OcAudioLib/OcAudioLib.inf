@@ -53,6 +53,7 @@
   gEfiHdaCodecInfoProtocolGuid
   gAppleHighDefinitionAudioProtocolGuid
   gEfiAudioIoProtocolGuid
+  gEfiAudioProgressProtocolGuid
   gOcAudioProtocolGuid
 
 [LibraryClasses]
