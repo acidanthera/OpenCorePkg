@@ -1,0 +1,41 @@
+## @file
+# Simple Text Input Ex protocol implementation on top of Apple Event protocol.
+#
+# Copyright (c) 2026, ilikesn0w. All rights reserved.
+# SPDX-License-Identifier: BSD-3-Clause
+##
+
+[Defines]
+  INF_VERSION                    = 0x0001001B
+  BASE_NAME                      = OcSimpleTextInputLib
+  FILE_GUID                      = 82D9E179-87B7-4434-8CF6-1A40B1ED888A
+  MODULE_TYPE                    = DXE_DRIVER
+  VERSION_STRING                 = 1.0
+  LIBRARY_CLASS                  = OcSimpleTextInputLib|DXE_DRIVER DXE_RUNTIME_DRIVER UEFI_DRIVER UEFI_APPLICATION DXE_SMM_DRIVER
+
+#
+# The following information is for reference only and not required by the build tools.
+#
+# VALID_ARCHITECTURES           = IA32 X64 IPF EBC
+#
+
+[Sources]
+  OcSimpleTextInputLib.c
+  OcSimpleTextInputLibInternal.h
+
+[Packages]
+  OpenCorePkg/OpenCorePkg.dec
+  MdePkg/MdePkg.dec
+
+[Protocols]
+  gAppleEventProtocolGuid            ## SOMETIMES_CONSUMES
+  gEfiSimpleTextInProtocolGuid       ## SOMETIMES_CONSUMES
+  gEfiSimpleTextInputExProtocolGuid  ## SOMETIMES_PRODUCES 
+
+[LibraryClasses]
+  BaseLib
+  BaseMemoryLib
+  DebugLib
+  MemoryAllocationLib
+  UefiBootServicesTableLib
+  OcMiscLib

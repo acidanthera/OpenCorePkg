@@ -8464,6 +8464,20 @@ OpenCore is installed, in order for the \texttt{Launchd.command} script to work 
 \begin{enumerate}
 
 \item
+  \texttt{InstallSimpleTextInputEx}\\
+  \textbf{Type}: \texttt{plist\ boolean}\\
+  \textbf{Failsafe}: \texttt{false}\\
+  \textbf{Description}: Install builtin \texttt{SimpleTextInputEx} protocol implementation
+  based on \texttt{AppleEvent} protocol.
+
+  This option is intended for old Macs and other systems
+  that do not have the \texttt{SimpleTextInputEx} protocol in their firmware.
+  Without this option some UEFI Shell commands, such as \texttt{edit}, would not work.
+
+  \emph{Note}: This option requires available \texttt{AppleEvent} protocol instance
+  and does not replace existing instances of \texttt{SimpleTextInputEx}.
+
+\item
   \texttt{KeyFiltering}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
