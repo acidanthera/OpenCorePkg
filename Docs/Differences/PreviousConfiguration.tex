@@ -94,7 +94,7 @@
 
        \vspace{0.2in}
 
-       Reference Manual (1.0.7)
+       Reference Manual (1.0.8)
 
        \vspace{0.2in}
 
@@ -6778,6 +6778,7 @@ scaled accordingly for other levels.
   \item \texttt{AppleRecv} --- Apple Recovery OS (128x128).
   \item \texttt{AppleTM} --- Apple Time Machine (128x128).
   \item \texttt{Windows} --- Windows (128x128).
+  \item \texttt{OpticalDrive} --- Optical disc drive (128x128).
   \item \texttt{Other} --- Custom entry (see \texttt{Entries}, 128x128).
   \item \texttt{ResetNVRAM} --- Reset NVRAM system action or tool (128x128).
   \item \texttt{Shell} --- Entry with UEFI Shell name for e.g. \texttt{OpenShell} (128x128).
@@ -8432,6 +8433,12 @@ OpenCore is installed, in order for the \texttt{Launchd.command} script to work 
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
   \textbf{Description}: If \texttt{false} this driver entry will be ignored.
+
+\item
+  \texttt{HideVerbose}\\
+  \textbf{Type}: \texttt{plist\ boolean}\\
+  \textbf{Failsafe}: \texttt{false}\\
+  \textbf{Description}: If \texttt{true} text output for this driver will be disabled.
 
 \item
   \texttt{LoadEarly}\\

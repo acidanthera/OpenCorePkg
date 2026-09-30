@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
-%DIF DEL PreviousConfiguration.tex   Sun May  3 11:04:53 2026
-%DIF ADD ../Configuration.tex        Sun Sep 13 15:44:57 2026
+%DIF DEL PreviousConfiguration.tex   Wed Sep 30 15:51:56 2026
+%DIF ADD ../Configuration.tex        Wed Sep 30 15:51:56 2026
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -83,16 +83,16 @@
 \RequirePackage[normalem]{ulem} %DIF PREAMBLE
 \RequirePackage{color}\definecolor{RED}{rgb}{1,0,0}\definecolor{BLUE}{rgb}{0,0,1} %DIF PREAMBLE
 \providecommand{\DIFaddtex}[1]{{\protect\color{blue}\uwave{#1}}} %DIF PREAMBLE
-\providecommand{\DIFdeltex}[1]{{\protect\color{red}\sout{#1}}} %DIF PREAMBLE
+\providecommand{\DIFdeltex}[1]{{\protect\color{red}\sout{#1}}}                      %DIF PREAMBLE
 %DIF ONLYCHANGEDPAGE PREAMBLE %DIF PREAMBLE
 \RequirePackage{atbegshi} %DIF PREAMBLE
 \RequirePackage{etoolbox} %DIF PREAMBLE
 \RequirePackage{zref} %DIF PREAMBLE
 % redefine label command to write immediately to aux file - page references will be lost %DIF PREAMBLE
-\makeatletter \let\oldlabel\label% Store \label %DIF PREAMBLE
-\renewcommand{\label}[1]{% Update \label to write to the .aux immediately %DIF PREAMBLE
-\zref@wrapper@immediate{\oldlabel{#1}}} %DIF PREAMBLE
-\makeatother %DIF PREAMBLE
+\makeatletter \let\oldlabel\label% Store \label  %DIF PREAMBLE
+\renewcommand{\label}[1]{% Update \label to write to the .aux immediately  %DIF PREAMBLE
+\zref@wrapper@immediate{\oldlabel{#1}}}  %DIF PREAMBLE
+\makeatother  %DIF PREAMBLE
 \newbool{DIFkeeppage} %DIF PREAMBLE
 \newbool{DIFchange} %DIF PREAMBLE
 \boolfalse{DIFkeeppage} %DIF PREAMBLE
@@ -118,12 +118,7 @@
 %DIF HYPERREF PREAMBLE %DIF PREAMBLE
 \providecommand{\DIFadd}[1]{\texorpdfstring{\DIFaddtex{#1}}{#1}} %DIF PREAMBLE
 \providecommand{\DIFdel}[1]{\texorpdfstring{\DIFdeltex{#1}}{}} %DIF PREAMBLE
-%DIF AMSMATHULEM PREAMBLE %DIF PREAMBLE
-\makeatletter %DIF PREAMBLE
-\let\sout@orig\sout %DIF PREAMBLE
-\renewcommand{\sout}[1]{\ifmmode\text{\sout@orig{\ensuremath{#1}}}\else\sout@orig{#1}\fi} %DIF PREAMBLE
-\makeatother %DIF PREAMBLE
-%DIF COLORLISTINGS PREAMBLE %DIF PREAMBLE
+%DIF LISTINGS PREAMBLE %DIF PREAMBLE
 \RequirePackage{listings} %DIF PREAMBLE
 \RequirePackage{color} %DIF PREAMBLE
 \lstdefinelanguage{DIFcode}{ %DIF PREAMBLE
@@ -137,10 +132,8 @@
 	columns=fullflexible, %DIF PREAMBLE
 	keepspaces=true %DIF PREAMBLE
 } %DIF PREAMBLE
-\lstnewenvironment{DIFverbatim}[1][]{\lstset{style=DIFverbatimstyle}}{} %DIF PREAMBLE
-\lstnewenvironment{DIFverbatim*}[1][]{\lstset{style=DIFverbatimstyle,showspaces=true}}{} %DIF PREAMBLE
-\lstset{extendedchars=\true,inputencoding=utf8}
-
+\lstnewenvironment{DIFverbatim}{\lstset{style=DIFverbatimstyle}}{} %DIF PREAMBLE
+\lstnewenvironment{DIFverbatim*}{\lstset{style=DIFverbatimstyle,showspaces=true}}{} %DIF PREAMBLE
 %DIF END PREAMBLE EXTENSION ADDED BY LATEXDIFF
 
 \begin{document}
@@ -161,7 +154,7 @@
 
        \vspace{0.2in}
 
-       Reference Manual (1.0\DIFdelbegin \DIFdel{.7}\DIFdelend \DIFaddbegin \DIFadd{.8}\DIFaddend )
+       Reference Manual (1.0\DIFdelbegin \DIFdel{.8}\DIFdelend \DIFaddbegin \DIFadd{.9}\DIFaddend )
 
        \vspace{0.2in}
 
@@ -6845,8 +6838,8 @@ scaled accordingly for other levels.
   \item \texttt{AppleRecv} --- Apple Recovery OS (128x128).
   \item \texttt{AppleTM} --- Apple Time Machine (128x128).
   \item \texttt{Windows} --- Windows (128x128).
-  \item \DIFaddbegin \texttt{\DIFadd{OpticalDrive}} \DIFadd{--- Optical disc drive (128x128).
-  }\item \DIFaddend \texttt{Other} --- Custom entry (see \texttt{Entries}, 128x128).
+  \item \texttt{OpticalDrive} --- Optical disc drive (128x128).
+  \item \texttt{Other} --- Custom entry (see \texttt{Entries}, 128x128).
   \item \texttt{ResetNVRAM} --- Reset NVRAM system action or tool (128x128).
   \item \texttt{Shell} --- Entry with UEFI Shell name for e.g. \texttt{OpenShell} (128x128).
   \item \texttt{Tool} --- Any other tool (128x128).
@@ -8499,14 +8492,13 @@ OpenCore is installed, in order for the \texttt{Launchd.command} script to work 
   \texttt{Enabled}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
-  \textbf{Description}: If \texttt{false} this driver entry will be ignored\DIFaddbegin \DIFadd{.
-}
+  \textbf{Description}: If \texttt{false} this driver entry will be ignored.
 
 \item
-  \texttt{\DIFadd{HideVerbose}}\\
-  \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ boolean}}\\
-  \textbf{\DIFadd{Failsafe}}\DIFadd{: }\texttt{\DIFadd{false}}\\
-  \textbf{\DIFadd{Description}}\DIFadd{: If }\texttt{\DIFadd{true}} \DIFadd{text output for this driver will be disabled}\DIFaddend .
+  \texttt{HideVerbose}\\
+  \textbf{Type}: \texttt{plist\ boolean}\\
+  \textbf{Failsafe}: \texttt{false}\\
+  \textbf{Description}: If \texttt{true} text output for this driver will be disabled.
 
 \item
   \texttt{LoadEarly}\\
