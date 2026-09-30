@@ -991,11 +991,43 @@ HdaControllerSetStreamId (
 }
 
 VOID
+HdaControllerStreamLatchProgress (
+  IN HDA_STREAM  *HdaStream
+  )
+{
+  ASSERT (HdaStream != NULL);
+
+  //
+  // A stream without a buffer has no progress to retain. This also stops the
+  // second latch of the completion path, which reaches HdaControllerStreamIdle
+  // again through HdaControllerStreamAbort, from clearing what was just saved.
+  //
+  if (HdaStream->BufferSourceLength == 0) {
+    return;
+  }
+
+  //
+  // The padding added to compensate for the delay between DMA transfer and
+  // audible playback lets DmaPositionTotal overtake the buffer length, so the
+  // retained count is clamped to what was actually requested. Note that a start
+  // request failing after claiming the buffer reaches this path with a claimed
+  // length and no progress, and so retains 0 of that length.
+  //
+  HdaStream->LastBufferSourceLength = HdaStream->BufferSourceLength;
+  HdaStream->LastDmaPositionTotal   = HdaStream->DmaPositionTotal;
+  if (HdaStream->LastDmaPositionTotal > HdaStream->LastBufferSourceLength) {
+    HdaStream->LastDmaPositionTotal = HdaStream->LastBufferSourceLength;
+  }
+}
+
+VOID
 HdaControllerStreamIdle (
   IN HDA_STREAM  *HdaStream
   )
 {
   ASSERT (HdaStream != NULL);
+
+  HdaControllerStreamLatchProgress (HdaStream);
 
   //
   // Reset buffer information to idle stream.

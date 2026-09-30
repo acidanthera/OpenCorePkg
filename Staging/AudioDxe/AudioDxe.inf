@@ -61,6 +61,7 @@
   gEfiHdaCodecInfoProtocolGuid        # PRODUCES
   gEfiAudioIoProtocolGuid             # PRODUCES
   gEfiAudioDecodeProtocolGuid         # PRODUCES
+  gEfiAudioProgressProtocolGuid       # PRODUCES
   gVMwareHdaProtocolGuid              # SOMETIMES_CONSUMES
 
 [FeaturePcd]

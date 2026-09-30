@@ -17,6 +17,7 @@
 
 #include <Library/OcAudioLib.h>
 #include <Protocol/AudioIo.h>
+#include <Protocol/AudioProgress.h>
 #include <Protocol/AppleBeepGen.h>
 #include <Protocol/AppleVoiceOver.h>
 #include <Protocol/OcAudio.h>
@@ -43,6 +44,11 @@
 typedef struct {
   UINT32                             Signature;
   EFI_AUDIO_IO_PROTOCOL              *AudioIo;
+  //
+  // Playback progress, optional and NULL when the running AudioDxe is too old
+  // to produce it.
+  //
+  EFI_AUDIO_PROGRESS_PROTOCOL        *Progress;
   OC_AUDIO_PROVIDER_ACQUIRE          ProviderAcquire;
   OC_AUDIO_PROVIDER_RELEASE          ProviderRelease;
   VOID                               *ProviderContext;
@@ -114,6 +120,18 @@ EFIAPI
 InternalOcAudioSetDelay (
   IN OUT OC_AUDIO_PROTOCOL  *This,
   IN     UINTN              Delay
+  );
+
+EFI_STATUS
+EFIAPI
+InternalOcAudioGetProgress (
+  IN OUT OC_AUDIO_PROTOCOL  *This,
+  OUT UINT32                *BytesConsumed  OPTIONAL,
+  OUT UINT32                *BytesTotal     OPTIONAL,
+  OUT BOOLEAN               *Playing        OPTIONAL,
+  OUT UINT32                *SampleRate     OPTIONAL,
+  OUT UINT8                 *Channels       OPTIONAL,
+  OUT UINT8                 *BitsPerSample  OPTIONAL
   );
 
 EFI_STATUS
