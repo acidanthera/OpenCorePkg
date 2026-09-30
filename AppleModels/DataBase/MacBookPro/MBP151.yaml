@@ -147,5 +147,5 @@ AppleModelYear:
   - 2018
   - 2019
 MinimumOSVersion: "10.13.6"
-MaximumOSVersion: "15.8"
+MaximumOSVersion: "15.8.1"
 AppleModelId: "J680"

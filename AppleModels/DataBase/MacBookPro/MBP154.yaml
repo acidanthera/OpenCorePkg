@@ -115,5 +115,5 @@ AppleModelYear:
   - 2019
   - 2020
 MinimumOSVersion: "10.14.5"
-MaximumOSVersion: "15.8"
+MaximumOSVersion: "15.8.1"
 AppleModelId: "J213"
