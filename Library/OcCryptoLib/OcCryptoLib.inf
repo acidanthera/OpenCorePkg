@@ -32,6 +32,9 @@
   Aes.c
   ChaCha.c
   CryptoInternal.h
+  HmacMd5.c
+  HmacSha1.c
+  HmacSha2.c
   Md5.c
   RsaDigitalSign.c
   Sha1.c
