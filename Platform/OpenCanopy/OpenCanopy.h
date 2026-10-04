@@ -338,10 +338,10 @@ GuiBlendPixelOpaque (
   );
 
 EFI_STATUS
-GuiCreateHighlightedImage (
-  OUT GUI_IMAGE                            *SelectedImage,
-  IN  CONST GUI_IMAGE                      *SourceImage,
-  IN  CONST EFI_GRAPHICS_OUTPUT_BLT_PIXEL  *HighlightPixel
+GuiCreateDarkenedImage (
+  OUT GUI_IMAGE       *DarkenedImage,
+  IN CONST GUI_IMAGE  *SourceImage,
+  IN UINT32           Factor
   );
 
 typedef enum {
