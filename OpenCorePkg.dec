@@ -869,6 +869,9 @@
   OcAppleEventLib|Include/Acidanthera/Library/OcAppleEventLib.h
 
   ##  @libraryclass
+  OcAppleFirmwarePasswordLib|Include/Acidanthera/Library/OcAppleFirmwarePasswordLib.h
+
+  ##  @libraryclass
   OcAppleImageConversionLib|Include/Acidanthera/Library/OcAppleImageConversionLib.h
 
   ##  @libraryclass
@@ -939,9 +942,6 @@
 
   ##  @libraryclass
   OcFileLib|Include/Acidanthera/Library/OcFileLib.h
-
-  ##  @libraryclass
-  OcFirmwarePasswordLib|Include/Acidanthera/Library/OcFirmwarePasswordLib.h
 
   ##  @libraryclass
   OcFirmwareVolumeLib|Include/Acidanthera/Library/OcFirmwareVolumeLib.h
