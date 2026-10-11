@@ -79,6 +79,7 @@
   OcAppleChunklistLib|OpenCorePkg/Library/OcAppleChunklistLib/OcAppleChunklistLib.inf
   OcAppleDiskImageLib|OpenCorePkg/Library/OcAppleDiskImageLib/OcAppleDiskImageLib.inf
   OcAppleEventLib|OpenCorePkg/Library/OcAppleEventLib/OcAppleEventLib.inf
+  OcAppleFirmwarePasswordLib|OpenCorePkg/Library/OcAppleFirmwarePasswordLib/OcAppleFirmwarePasswordLib.inf
   OcAppleImageConversionLib|OpenCorePkg/Library/OcAppleImageConversionLib/OcAppleImageConversionLib.inf
   OcAppleImg4Lib|OpenCorePkg/Library/OcAppleImg4Lib/OcAppleImg4Lib.inf
   OcAppleKernelLib|OpenCorePkg/Library/OcAppleKernelLib/OcAppleKernelLib.inf
@@ -106,7 +107,6 @@
   OcDirectResetLib|OpenCorePkg/Library/OcDirectResetLib/OcDirectResetLib.inf
   OcDriverConnectionLib|OpenCorePkg/Library/OcDriverConnectionLib/OcDriverConnectionLib.inf
   OcFileLib|OpenCorePkg/Library/OcFileLib/OcFileLib.inf
-  OcFirmwarePasswordLib|OpenCorePkg/Library/OcFirmwarePasswordLib/OcFirmwarePasswordLib.inf
   OcFirmwareVolumeLib|OpenCorePkg/Library/OcFirmwareVolumeLib/OcFirmwareVolumeLib.inf
   OcFlexArrayLib|OpenCorePkg/Library/OcFlexArrayLib/OcFlexArrayLib.inf
   OcGuardLib|OpenCorePkg/Library/OcGuardLib/OcGuardLib.inf
@@ -249,6 +249,7 @@
   OpenCorePkg/Library/OcAppleChunklistLib/OcAppleChunklistLib.inf
   OpenCorePkg/Library/OcAppleDiskImageLib/OcAppleDiskImageLib.inf
   OpenCorePkg/Library/OcAppleEventLib/OcAppleEventLib.inf
+  OpenCorePkg/Library/OcAppleFirmwarePasswordLib/OcAppleFirmwarePasswordLib.inf
   OpenCorePkg/Library/OcAppleImageConversionLib/OcAppleImageConversionLib.inf
   OpenCorePkg/Library/OcAppleImg4Lib/OcAppleImg4Lib.inf
   OpenCorePkg/Library/OcAppleKernelLib/OcAppleKernelLib.inf
@@ -278,7 +279,6 @@
   OpenCorePkg/Library/OcDirectResetLib/OcDirectResetLib.inf
   OpenCorePkg/Library/OcDriverConnectionLib/OcDriverConnectionLib.inf
   OpenCorePkg/Library/OcFileLib/OcFileLib.inf
-  OpenCorePkg/Library/OcFirmwarePasswordLib/OcFirmwarePasswordLib.inf
   OpenCorePkg/Library/OcFirmwareVolumeLib/OcFirmwareVolumeLib.inf
   OpenCorePkg/Library/OcFlexArrayLib/OcFlexArrayLib.inf
   OpenCorePkg/Library/OcGuardLib/OcGuardLib.inf
