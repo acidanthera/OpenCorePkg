@@ -220,6 +220,13 @@ typedef enum {
 #define APPLE_PANIC_INFO_NO_VARIABLE_NAME  L"AAPL,PanicInfo%04x"
 
 ///
+/// Prevents EG2 from creating display polling timer.
+/// Note: Available starting from revision 0x10003.
+/// gAppleBootVariableGuid
+///
+#define APPLE_DISABLE_DISPLAY_POLL_VARIABLE_NAME  L"DisableDisplayPoll"
+
+///
 /// Set display rotation angle.
 /// UINT32: 0, 90, 180, 270.
 /// gAppleBootVariableGuid
