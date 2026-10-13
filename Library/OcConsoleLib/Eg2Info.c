@@ -1,15 +1,9 @@
 /** @file
-  Copyright (C) 2021, vit9696. All rights reserved.
+  AppleEg2Info protocol implementation.
 
-  All rights reserved.
-
-  This program and the accompanying materials
-  are licensed and made available under the terms and conditions of the BSD License
-  which accompanies this distribution.  The full text of the license may be found at
-  http://opensource.org/licenses/bsd-license.php
-
-  THE PROGRAM IS DISTRIBUTED UNDER THE BSD LICENSE ON AN "AS IS" BASIS,
-  WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
+  Copyright (c) 2020, vit9696. All rights reserved.
+  Copyright (c) 2026, ilikesn0w. All rights reserved.
+  SPDX-License-Identifier: BSD-3-Clause
 **/
 
 #include "OcConsoleLibInternal.h"
@@ -93,6 +87,17 @@ AppleEg2GetRotation (
 }
 
 STATIC
+EFI_STATUS
+EFIAPI
+AppleEg2DisableDisplayPolling (
+  IN APPLE_EG2_INFO_PROTOCOL  *This,
+  IN BOOLEAN                  Disable
+  )
+{
+  return EFI_UNSUPPORTED;
+}
+
+STATIC
 APPLE_EG2_INFO_PROTOCOL
   mAppleEg2Info = {
   APPLE_EG2_INFO_PROTOCOL_REVISION,
@@ -101,7 +106,8 @@ APPLE_EG2_INFO_PROTOCOL
   AppleEg2GetPlatformInfo,
   AppleEg2StartupDisplay,
   AppleEg2GetHibernation,
-  AppleEg2GetRotation
+  AppleEg2GetRotation,
+  AppleEg2DisableDisplayPolling
 };
 
 APPLE_EG2_INFO_PROTOCOL *
