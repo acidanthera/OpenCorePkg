@@ -18,7 +18,7 @@
 #ifndef APPLE_GRAPHICS_POLICY_H
 #define APPLE_GRAPHICS_POLICY_H
 
-#define APPLE_GRAPHICS_POLICY_PROTCOL_GUID                \
+#define APPLE_GRAPHICS_POLICY_PROTOCOL_GUID                \
   { 0xA4BB4654, 0x9F72, 0x4BC8,                           \
     { 0x93, 0xEB, 0x65, 0x9F, 0xD8, 0x70, 0x8B, 0x10 } }
 
