@@ -5,8 +5,8 @@
   SPDX-License-Identifier: BSD-3-Clause
 **/
 
-#ifndef __SHIM_H
-#define __SHIM_H
+#ifndef SHIM_VARS_H
+#define SHIM_VARS_H
 
 #include <Guid/ShimLock.h>
 
@@ -15,4 +15,4 @@
 //
 #define SHIM_RETAIN_PROTOCOL  L"ShimRetainProtocol"
 
-#endif // __SHIM_H
+#endif // SHIM_VARS_H
