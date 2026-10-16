@@ -5,10 +5,8 @@
   SPDX-License-Identifier: BSD-3-Clause
 **/
 
-#ifndef __SHIM_GUID_H
-#define __SHIM_GUID_H
-
-#include <Uefi.h>
+#ifndef SHIM_LOCK_H
+#define SHIM_LOCK_H
 
 ///
 /// Shim lock protocol GUID.
@@ -22,4 +20,4 @@
 ///
 extern EFI_GUID  gShimLockGuid;
 
-#endif // __SHIM_GUID_H
+#endif // SHIM_LOCK_H
