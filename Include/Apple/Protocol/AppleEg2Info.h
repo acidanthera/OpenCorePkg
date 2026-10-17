@@ -1,13 +1,9 @@
 /** @file
-Copyright (C) 2020, vit9696.  All rights reserved.<BR>
-This program and the accompanying materials are licensed and made available
-under the terms and conditions of the BSD License which accompanies this
-distribution.  The full text of the license may be found at
-http://opensource.org/licenses/bsd-license.php.
+  AppleEg2Info protocol.
 
-THE PROGRAM IS DISTRIBUTED UNDER THE BSD LICENSE ON AN "AS IS" BASIS,
-WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
-
+  Copyright (c) 2020, vit9696. All rights reserved.
+  Copyright (c) 2026, ilikesn0w. All rights reserved.
+  SPDX-License-Identifier: BSD-3-Clause
 **/
 
 #ifndef APPLE_EG2_INFO_H
@@ -21,7 +17,7 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
   { 0x63FAECF2, 0xE7EE, 0x4CB9,               \
     { 0x8A, 0x0C, 0x11, 0xCE, 0x5E, 0x89, 0xE3, 0x3C } }
 
-#define APPLE_EG2_INFO_PROTOCOL_REVISION  0x10002
+#define APPLE_EG2_INFO_PROTOCOL_REVISION  0x10003
 
 typedef struct APPLE_EG2_INFO_PROTOCOL_ APPLE_EG2_INFO_PROTOCOL;
 
@@ -86,14 +82,32 @@ EFI_STATUS
   OUT  UINT32                       *Rotation
   );
 
+/**
+  Disable display polling timer.
+  Note: Available starting from revision 0x10003.
+
+  @param[in]  This               A pointer to the protocol instance.
+  @param[in]  Disable            If TRUE display polling timer will be disabled.
+
+  @retval EFI_NOT_FOUND          No display in the system.
+  @retval EFI_SUCCESS            Display polling timer enabled/disabled.
+**/
+typedef
+EFI_STATUS
+(EFIAPI *APPLE_EG2_INFO_DISABLE_DISPLAY_POLLING)(
+  IN APPLE_EG2_INFO_PROTOCOL *This,
+  IN BOOLEAN                 Disable
+  );
+
 struct APPLE_EG2_INFO_PROTOCOL_ {
-  UINT32                              Revision;
-  VOID                                *Unused;
-  APPLE_EG2_INFO_UNKNOWN1             Unknown1;
-  APPLE_EG2_INFO_GET_PLATFORM_INFO    GetPlatformInfo;
-  APPLE_EG2_INFO_STARTUP_DISPLAY      StartupDisplay;
-  APPLE_EG2_INFO_GET_HIBERNATION      GetHibernation;
-  APPLE_EG2_INFO_GET_ROTATION         GetRotation;
+  UINT32                                    Revision;
+  VOID                                      *Unused;
+  APPLE_EG2_INFO_UNKNOWN1                   Unknown1;
+  APPLE_EG2_INFO_GET_PLATFORM_INFO          GetPlatformInfo;
+  APPLE_EG2_INFO_STARTUP_DISPLAY            StartupDisplay;
+  APPLE_EG2_INFO_GET_HIBERNATION            GetHibernation;
+  APPLE_EG2_INFO_GET_ROTATION               GetRotation;
+  APPLE_EG2_INFO_DISABLE_DISPLAY_POLLING    DisableDisplayPolling;
 };
 
 extern EFI_GUID  gAppleEg2InfoProtocolGuid;
