@@ -15,8 +15,6 @@
 #ifndef OC_FILE_LIB_H
 #define OC_FILE_LIB_H
 
-// Include the abstracted protocol for its definitions
-
 #include <Guid/FileInfo.h>
 
 #include <IndustryStandard/Mbr.h>
@@ -517,6 +515,19 @@ OcPartitionGetDiskHandle (
 EFI_HANDLE
 OcPartitionGetPartitionHandle (
   IN EFI_DEVICE_PATH_PROTOCOL  *HdDevicePath
+  );
+
+/**
+  Check if disk is formatted in APM.
+
+  @param[in] BlockIo The BlockIo of the disk.
+
+  @retval TRUE       Disk is formatted in APM.
+  @retval FALSE      Disk is not formatted in APM.
+**/
+BOOLEAN
+OcIsApmMedia (
+  IN EFI_BLOCK_IO_PROTOCOL  *BlockIo
   );
 
 /**

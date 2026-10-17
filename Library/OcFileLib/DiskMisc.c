@@ -14,6 +14,8 @@
 
 #include <Guid/Gpt.h>
 
+#include <IndustryStandard/Apm.h>
+
 #include <IndustryStandard/Mbr.h>
 
 #include <Protocol/BlockIo.h>
@@ -366,26 +368,125 @@ OcPartitionGetPartitionHandle (
 }
 
 BOOLEAN
+OcIsApmMedia (
+  IN EFI_BLOCK_IO_PROTOCOL  *BlockIo
+  )
+{
+  UINT8                      *Buffer;
+  APM_DRIVER_DESCRIPTOR_MAP  *Apm;
+  APM_ENTRY                  *ApmEntry;
+  UINT32                     ApmBlockSize;
+  UINT32                     BlockSize;
+  UINT64                     ByteOffset;
+  BOOLEAN                    IsApmMedia;
+
+  ASSERT (BlockIo != NULL);
+  ASSERT (BlockIo->Media != NULL);
+
+  BlockSize = BlockIo->Media->BlockSize;
+  Buffer    = AllocatePool (BlockSize);
+  if (Buffer == NULL) {
+    return FALSE;
+  }
+
+  IsApmMedia = FALSE;
+
+  if (!EFI_ERROR (BlockIo->ReadBlocks (BlockIo, BlockIo->Media->MediaId, 0, BlockSize, Buffer))) {
+    Apm = (APM_DRIVER_DESCRIPTOR_MAP *)Buffer;
+    if (Apm->Signature == APM_DRIVER_DESCRIPTOR_MAP_SIGNATURE) {
+      ApmBlockSize = SwapBytes16 (Apm->BlockSize);
+      ByteOffset   = ApmBlockSize;
+      if ((ApmBlockSize >= sizeof (APM_ENTRY)) && (((ByteOffset % BlockSize) == 0) || (BlockSize > ByteOffset))) {
+        EFI_LBA  Lba;
+        UINTN    InSector;
+
+        Lba      = DivU64x32 (ByteOffset, BlockSize);
+        InSector = (UINTN)(ByteOffset % BlockSize);
+
+        if (  (InSector + sizeof (APM_ENTRY) <= BlockSize)
+           && !EFI_ERROR (BlockIo->ReadBlocks (BlockIo, BlockIo->Media->MediaId, Lba, BlockSize, Buffer)))
+        {
+          ApmEntry = (APM_ENTRY *)(Buffer + InSector);
+          if (  (ApmEntry->Signature == APM_ENTRY_SIGNATURE)
+             && (AsciiStrnCmp (ApmEntry->PartitionType, APM_ENTRY_TYPE_APM, sizeof (ApmEntry->PartitionType)) == 0))
+          {
+            IsApmMedia = TRUE;
+          }
+        }
+      }
+    }
+  }
+
+  FreePool (Buffer);
+  return IsApmMedia;
+}
+
+BOOLEAN
 OcIsDiskCdRom (
   IN EFI_DEVICE_PATH_PROTOCOL  *DiskDevicePath
   )
 {
   EFI_DEVICE_PATH_PROTOCOL  *DevicePathWalker;
+  EFI_DEVICE_PATH_PROTOCOL  *ParentPath;
+  EFI_DEVICE_PATH_PROTOCOL  *Remaining;
+  EFI_BLOCK_IO_PROTOCOL     *BlockIo;
+  EFI_HANDLE                Handle;
+  EFI_STATUS                Status;
+  UINTN                     HdOffset;
+  BOOLEAN                   HasUnsignedHd;
 
   ASSERT (DiskDevicePath != NULL);
 
+  HasUnsignedHd = FALSE;
+  HdOffset      = 0;
+
   DevicePathWalker = DiskDevicePath;
   while (!IsDevicePathEnd (DevicePathWalker)) {
-    if (  (DevicePathType (DevicePathWalker) == MEDIA_DEVICE_PATH)
-       && (DevicePathSubType (DevicePathWalker) == MEDIA_CDROM_DP))
-    {
-      return TRUE;
+    if (DevicePathType (DevicePathWalker) == MEDIA_DEVICE_PATH) {
+      if (DevicePathSubType (DevicePathWalker) == MEDIA_CDROM_DP) {
+        return TRUE;
+      }
+
+      if (  !HasUnsignedHd
+         && (DevicePathSubType (DevicePathWalker) == MEDIA_HARDDRIVE_DP)
+         && (((HARDDRIVE_DEVICE_PATH *)DevicePathWalker)->SignatureType == 0))
+      {
+        HasUnsignedHd = TRUE;
+        HdOffset      = (UINTN)DevicePathWalker - (UINTN)DiskDevicePath;
+      }
     }
 
     DevicePathWalker = NextDevicePathNode (DevicePathWalker);
   }
 
-  return FALSE;
+  if (!HasUnsignedHd) {
+    return FALSE;
+  }
+
+  ParentPath = DuplicateDevicePath (DiskDevicePath);
+  if (ParentPath == NULL) {
+    return FALSE;
+  }
+
+  SetDevicePathEndNode ((EFI_DEVICE_PATH_PROTOCOL *)((UINT8 *)ParentPath + HdOffset));
+
+  Remaining = ParentPath;
+  Status    = gBS->LocateDevicePath (&gEfiBlockIoProtocolGuid, &Remaining, &Handle);
+  if (EFI_ERROR (Status) || !IsDevicePathEnd (Remaining)) {
+    FreePool (ParentPath);
+    return FALSE;
+  }
+
+  FreePool (ParentPath);
+
+  Status = gBS->HandleProtocol (Handle, &gEfiBlockIoProtocolGuid, (VOID **)&BlockIo);
+  if (EFI_ERROR (Status) || (BlockIo->Media == NULL)) {
+    return FALSE;
+  }
+
+  return !BlockIo->Media->LogicalPartition
+         && (BlockIo->Media->BlockSize == 2048)
+         && OcIsApmMedia (BlockIo);
 }
 
 EFI_STATUS
