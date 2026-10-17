@@ -28,11 +28,6 @@
 
 GLOBAL_REMOVE_IF_UNREFERENCED BOOT_PICKER_GUI_CONTEXT  mGuiContext;
 
-//
-// FIXME: Should not be global here.
-//
-STATIC EFI_GRAPHICS_OUTPUT_BLT_PIXEL  mHighlightPixel = { 0xAF, 0xAF, 0xAF, 0x32 };
-
 STATIC
 CONST CHAR8 *
   mLabelNames[LABEL_NUM_TOTAL] = {
@@ -539,10 +534,10 @@ InternalContextConstruct (
                );
     if (!EFI_ERROR (Status)) {
       if ((Index == ICON_SELECTOR) || (Index == ICON_SET_DEFAULT) || (Index == ICON_LEFT) || (Index == ICON_RIGHT) || (Index == ICON_SHUT_DOWN) || (Index == ICON_RESTART) || (Index == ICON_ENTER)) {
-        Status = GuiCreateHighlightedImage (
+        Status = GuiCreateDarkenedImage (
                    &Context->Icons[Index][ICON_TYPE_HELD],
                    &Context->Icons[Index][ICON_TYPE_BASE],
-                   &mHighlightPixel
+                   BOOT_ACTION_BUTTON_PRESSED_FACTOR
                    );
         if (Index == ICON_SET_DEFAULT) {
           if (Context->Icons[Index]->Width != Context->Icons[ICON_SELECTOR]->Width) {

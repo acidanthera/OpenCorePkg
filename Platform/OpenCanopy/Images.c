@@ -18,6 +18,8 @@
 
 #include "OpenCanopy.h"
 
+#define BOOT_ACTION_BUTTON_PRESSED_FACTOR_MAX  0x10000U
+
 //
 // Disk label palette.
 //
@@ -276,78 +278,40 @@ GuiPngToImage (
 }
 
 EFI_STATUS
-GuiCreateHighlightedImage (
-  OUT GUI_IMAGE                            *SelectedImage,
-  IN  CONST GUI_IMAGE                      *SourceImage,
-  IN  CONST EFI_GRAPHICS_OUTPUT_BLT_PIXEL  *HighlightPixel
+GuiCreateDarkenedImage (
+  OUT GUI_IMAGE       *DarkenedImage,
+  IN CONST GUI_IMAGE  *SourceImage,
+  IN UINT32           Factor
   )
 {
-  EFI_GRAPHICS_OUTPUT_BLT_PIXEL  PremulPixel;
-
   EFI_GRAPHICS_OUTPUT_BLT_PIXEL  *Buffer;
-  UINT32                         ColumnOffset;
-  BOOLEAN                        OneSet;
-  UINT32                         FirstUnsetX;
-  UINT32                         IndexY;
-  UINT32                         RowOffset;
+  UINT32                         Count;
+  UINT32                         Index;
 
-  ASSERT (SelectedImage != NULL);
+  ASSERT (DarkenedImage != NULL);
   ASSERT (SourceImage != NULL);
   ASSERT (SourceImage->Buffer != NULL);
-  ASSERT (HighlightPixel != NULL);
-  //
-  // The multiplication cannot wrap around because the original allocation sane.
-  //
+  ASSERT (Factor <= BOOT_ACTION_BUTTON_PRESSED_FACTOR_MAX);
+
+  Count  = SourceImage->Width * SourceImage->Height;
   Buffer = AllocateCopyPool (
-             SourceImage->Width * SourceImage->Height * sizeof (*SourceImage->Buffer),
+             Count * sizeof (*SourceImage->Buffer),
              SourceImage->Buffer
              );
+
   if (Buffer == NULL) {
     return EFI_OUT_OF_RESOURCES;
   }
 
-  PremulPixel.Blue     = (UINT8)((HighlightPixel->Blue  * HighlightPixel->Reserved) / 0xFF);
-  PremulPixel.Green    = (UINT8)((HighlightPixel->Green * HighlightPixel->Reserved) / 0xFF);
-  PremulPixel.Red      = (UINT8)((HighlightPixel->Red   * HighlightPixel->Reserved) / 0xFF);
-  PremulPixel.Reserved = HighlightPixel->Reserved;
-
-  for (
-       IndexY = 0, RowOffset = 0;
-       IndexY < SourceImage->Height;
-       ++IndexY, RowOffset += SourceImage->Width
-       )
-  {
-    FirstUnsetX = 0;
-    OneSet      = FALSE;
-
-    for (ColumnOffset = 0; ColumnOffset < SourceImage->Width; ++ColumnOffset) {
-      if (SourceImage->Buffer[RowOffset + ColumnOffset].Reserved != 0) {
-        OneSet = TRUE;
-        GuiBlendPixelSolid (&Buffer[RowOffset + ColumnOffset], &PremulPixel);
-        if (FirstUnsetX != 0) {
-          //
-          // Set all fully transparent pixels between two not fully transparent
-          // pixels to the highlighter pixel.
-          //
-          while (FirstUnsetX < ColumnOffset) {
-            CopyMem (
-              &Buffer[RowOffset + FirstUnsetX],
-              &PremulPixel,
-              sizeof (*Buffer)
-              );
-            ++FirstUnsetX;
-          }
-
-          FirstUnsetX = 0;
-        }
-      } else if ((FirstUnsetX == 0) && OneSet) {
-        FirstUnsetX = ColumnOffset;
-      }
-    }
+  for (Index = 0; Index < Count; ++Index) {
+    Buffer[Index].Blue  = (UINT8)((Factor * Buffer[Index].Blue >> 16));
+    Buffer[Index].Green = (UINT8)((Factor * Buffer[Index].Green >> 16));
+    Buffer[Index].Red   = (UINT8)((Factor * Buffer[Index].Red >> 16));
   }
 
-  SelectedImage->Width  = SourceImage->Width;
-  SelectedImage->Height = SourceImage->Height;
-  SelectedImage->Buffer = Buffer;
+  DarkenedImage->Width  = SourceImage->Width;
+  DarkenedImage->Height = SourceImage->Height;
+  DarkenedImage->Buffer = Buffer;
+
   return EFI_SUCCESS;
 }
