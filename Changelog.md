@@ -11,6 +11,7 @@ OpenCore Changelog
 - Fixed unresolved ATAPI device paths on NVMe Macs during hibernation, thx @rctphone
 
 #### v1.0.7
+- Added System KC loading and cross-KC dependency resolution in OcAppleKernelLib
 - Improved `XhciPortLimit` compatibility with macOS Tahoe, thx @laobamac
 - Updated builtin firmware versions for SMBIOS and the rest
 - Migrated to edk2-stable202511
