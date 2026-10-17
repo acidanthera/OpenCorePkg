@@ -205,6 +205,14 @@ typedef struct {
   UINT32                        DmaPositionTotal;
   UINT32                        DmaPositionChangedMax;
 
+  //
+  // Last playback progress, retained for EFI_AUDIO_PROGRESS_PROTOCOL. The
+  // counters above are cleared once a stream goes idle, which would otherwise
+  // erase the outcome of the playback that just ended.
+  //
+  UINT32                        LastBufferSourceLength;
+  UINT32                        LastDmaPositionTotal;
+
   // Timing elements for buffer filling.
   EFI_EVENT                     PollTimer;
   EFI_HDA_IO_STREAM_CALLBACK    Callback;
@@ -610,6 +618,22 @@ HdaControllerSetStreamId (
 
 VOID
 HdaControllerStreamIdle (
+  IN HDA_STREAM  *HdaStream
+  );
+
+/**
+  Retain the current playback progress before the stream buffer is released.
+
+  Call this before clearing BufferSourceLength or DmaPositionTotal, so that
+  EFI_AUDIO_PROGRESS_PROTOCOL can still report the playback that just ended.
+  The call is a no-op when the stream holds no buffer, which also keeps the
+  completion path, going through both HdaControllerStreamIdle and
+  HdaControllerStreamAbort, from discarding the result it just stored.
+
+  @param[in]  HdaStream  Stream to retain the progress of.
+**/
+VOID
+HdaControllerStreamLatchProgress (
   IN HDA_STREAM  *HdaStream
   );
 

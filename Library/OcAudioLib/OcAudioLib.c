@@ -14,6 +14,7 @@
 
 #include <Guid/AppleVariable.h>
 
+#include <Library/BaseMemoryLib.h>
 #include <Library/DebugLib.h>
 #include <Library/DevicePathLib.h>
 #include <Library/MemoryAllocationLib.h>
@@ -63,7 +64,8 @@ OC_AUDIO_PROTOCOL_PRIVATE
     .SetProvider       = InternalOcAudioSetProvider,
     .PlayFile          = InternalOcAudioPlayFile,
     .StopPlayback      = InternalOcAudioStopPlayback,
-    .SetDelay          = InternalOcAudioSetDelay
+    .SetDelay          = InternalOcAudioSetDelay,
+    .GetProgress       = InternalOcAudioGetProgress
   },
   .BeepGen             = {
     .GenBeep           = InternalOcAudioGenBeep,
@@ -238,4 +240,109 @@ OcGetAmplifierGain (
   // If no saved decibel gain, but saved raw gain, it is worth trying to convert.
   //
   *TryConversion = !EFI_ERROR (Status1) && EFI_ERROR (Status2);
+}
+
+EFI_STATUS
+OcAudioGetPlaybackProgress (
+  OUT OC_AUDIO_PROGRESS  *Progress
+  )
+{
+  EFI_STATUS                   Status;
+  EFI_AUDIO_PROGRESS_PROTOCOL  *AudioProgress;
+
+  if (Progress == NULL) {
+    return EFI_INVALID_PARAMETER;
+  }
+
+  ZeroMem (Progress, sizeof (*Progress));
+
+  AudioProgress = mAudioProtocol.Progress;
+  if (AudioProgress == NULL) {
+    return EFI_UNSUPPORTED;
+  }
+
+  Status = AudioProgress->GetPosition (
+                            AudioProgress,
+                            &Progress->Played,
+                            &Progress->Total,
+                            &Progress->Playing
+                            );
+  if (EFI_ERROR (Status)) {
+    return Status;
+  }
+
+  //
+  // A position without a format is still useful, so a format the driver cannot
+  // report is not a failure: the fields simply stay zeroed.
+  //
+  Status = AudioProgress->GetFormat (
+                            AudioProgress,
+                            &Progress->SampleRate,
+                            &Progress->Channels,
+                            &Progress->BitsPerSample
+                            );
+  if (EFI_ERROR (Status)) {
+    Progress->SampleRate    = 0;
+    Progress->Channels      = 0;
+    Progress->BitsPerSample = 0;
+  }
+
+  return EFI_SUCCESS;
+}
+
+EFI_STATUS
+EFIAPI
+InternalOcAudioGetProgress (
+  IN OUT OC_AUDIO_PROTOCOL  *This,
+  OUT UINT32                *BytesConsumed  OPTIONAL,
+  OUT UINT32                *BytesTotal     OPTIONAL,
+  OUT BOOLEAN               *Playing        OPTIONAL,
+  OUT UINT32                *SampleRate     OPTIONAL,
+  OUT UINT8                 *Channels       OPTIONAL,
+  OUT UINT8                 *BitsPerSample  OPTIONAL
+  )
+{
+  OC_AUDIO_PROGRESS  Progress;
+  EFI_STATUS         Status;
+
+  if (This == NULL) {
+    return EFI_INVALID_PARAMETER;
+  }
+
+  if (  (BytesConsumed == NULL) && (BytesTotal == NULL) && (Playing == NULL)
+     && (SampleRate == NULL) && (Channels == NULL) && (BitsPerSample == NULL))
+  {
+    return EFI_INVALID_PARAMETER;
+  }
+
+  Status = OcAudioGetPlaybackProgress (&Progress);
+  if (EFI_ERROR (Status)) {
+    return Status;
+  }
+
+  if (BytesConsumed != NULL) {
+    *BytesConsumed = Progress.Played;
+  }
+
+  if (BytesTotal != NULL) {
+    *BytesTotal = Progress.Total;
+  }
+
+  if (Playing != NULL) {
+    *Playing = Progress.Playing;
+  }
+
+  if (SampleRate != NULL) {
+    *SampleRate = Progress.SampleRate;
+  }
+
+  if (Channels != NULL) {
+    *Channels = Progress.Channels;
+  }
+
+  if (BitsPerSample != NULL) {
+    *BitsPerSample = Progress.BitsPerSample;
+  }
+
+  return EFI_SUCCESS;
 }

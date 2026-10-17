@@ -6,6 +6,7 @@
 #include <Guid/AppleVariable.h>
 
 #include "HdaCodec.h"
+#include "HdaController/HdaController.h"
 #include <Protocol/AudioIo.h>
 #include <Library/OcMiscLib.h>
 #include <Library/PcdLib.h>
@@ -359,6 +360,14 @@ HdaCodecAudioIoSetupPlayback (
 
   DEBUG ((DEBUG_VERBOSE, "HdaCodecAudioIoSetupPlayback(): start\n"));
 
+  // If a parameter is invalid, return error.
+  if (This == NULL) {
+    return EFI_INVALID_PARAMETER;
+  }
+
+  // Get private data.
+  AudioIoPrivateData = AUDIO_IO_PRIVATE_DATA_FROM_THIS (This);
+
   // Basic settings caching.
   if (  (mOutputIndexMask == OutputIndexMask)
      && (mGain == Gain)
@@ -366,6 +375,15 @@ HdaCodecAudioIoSetupPlayback (
      && (mBits == Bits)
      && (mChannels == Channels))
   {
+    //
+    // The cache short-circuits the work below, so the format still has to be
+    // recorded here: the progress protocol reports the format of the stream this
+    // instance was asked to set up, not the one some other codec set up last.
+    //
+    AudioIoPrivateData->PlaybackFreq     = Freq;
+    AudioIoPrivateData->PlaybackBits     = Bits;
+    AudioIoPrivateData->PlaybackChannels = Channels;
+
     return EFI_SUCCESS;
   }
 
@@ -375,15 +393,8 @@ HdaCodecAudioIoSetupPlayback (
   mBits            = Bits;
   mChannels        = Channels;
 
-  // If a parameter is invalid, return error.
-  if (This == NULL) {
-    return EFI_INVALID_PARAMETER;
-  }
-
-  // Get private data.
-  AudioIoPrivateData = AUDIO_IO_PRIVATE_DATA_FROM_THIS (This);
-  HdaCodecDev        = AudioIoPrivateData->HdaCodecDev;
-  HdaIo              = HdaCodecDev->HdaIo;
+  HdaCodecDev = AudioIoPrivateData->HdaCodecDev;
+  HdaIo       = HdaCodecDev->HdaIo;
 
   // Mask to only outputs which are within bounds.
   if (HdaCodecDev->OutputPortsCount > sizeof (UINT64) * OC_CHAR_BIT) {
@@ -615,6 +626,16 @@ HdaCodecAudioIoSetupPlayback (
 
   // Save requested outputs.
   AudioIoPrivateData->SelectedOutputIndexMask = OutputIndexMask;
+
+  //
+  // The request passed validation, so record the format it is applied with.
+  // Recording it only now keeps a rejected request from advertising a format
+  // that was never set up, which would otherwise be paired with the position of
+  // an earlier playback.
+  //
+  AudioIoPrivateData->PlaybackFreq     = Freq;
+  AudioIoPrivateData->PlaybackBits     = Bits;
+  AudioIoPrivateData->PlaybackChannels = Channels;
 
   // Nothing to play.
   if (OutputIndexMask == 0) {
@@ -908,4 +929,273 @@ HdaCodecAudioIoStopPlayback (
 
   // Stop stream.
   return HdaIo->StopStream (HdaIo, EfiHdaIoTypeOutput);
+}
+
+/**
+  Gets the progress of the most recent playback request.
+
+  See EFI_AUDIO_PROGRESS_GET_POSITION for the exact semantics.
+
+  @param[in]  This            A pointer to the EFI_AUDIO_PROGRESS_PROTOCOL instance.
+  @param[out] BytesConsumed   Bytes consumed by the controller, optional.
+  @param[out] BytesTotal      Total size of the playback request in bytes, optional.
+  @param[out] Playing         Whether a playback request is currently running, optional.
+
+  @retval EFI_SUCCESS           The progress was retrieved.
+  @retval EFI_INVALID_PARAMETER This is NULL, or all output parameters are NULL.
+  @retval EFI_NOT_READY         The output stream is not available yet.
+**/
+EFI_STATUS
+EFIAPI
+HdaCodecAudioProgressGetPosition (
+  IN  EFI_AUDIO_PROGRESS_PROTOCOL  *This,
+  OUT UINT32                       *BytesConsumed  OPTIONAL,
+  OUT UINT32                       *BytesTotal     OPTIONAL,
+  OUT BOOLEAN                      *Playing        OPTIONAL
+  )
+{
+  AUDIO_IO_PRIVATE_DATA  *AudioIoPrivateData;
+  HDA_CODEC_DEV          *HdaCodecDev;
+  HDA_IO_PRIVATE_DATA    *HdaIoPrivateData;
+  HDA_STREAM             *HdaStream;
+  EFI_TPL                OldTpl;
+  UINT32                 Consumed;
+  UINT32                 Total;
+  BOOLEAN                Active;
+
+  // If a parameter is invalid, return error.
+  if (This == NULL) {
+    return EFI_INVALID_PARAMETER;
+  }
+
+  if ((BytesConsumed == NULL) && (BytesTotal == NULL) && (Playing == NULL)) {
+    return EFI_INVALID_PARAMETER;
+  }
+
+  //
+  // Get private data. CR returns NULL on a signature mismatch only where asserts
+  // are disabled, which is the RELEASE configuration that ships, so this check is
+  // live rather than defensive.
+  //
+  AudioIoPrivateData = AUDIO_IO_PRIVATE_DATA_FROM_PROGRESS (This);
+  if (AudioIoPrivateData == NULL) {
+    return EFI_INVALID_PARAMETER;
+  }
+
+  HdaCodecDev = AudioIoPrivateData->HdaCodecDev;
+  if ((HdaCodecDev == NULL) || (HdaCodecDev->HdaIo == NULL)) {
+    return EFI_NOT_READY;
+  }
+
+  // Get stream. The protocol macro expands to a ternary, so it cannot be
+  // dereferenced without an intermediate variable.
+  HdaIoPrivateData = HDA_IO_PRIVATE_DATA_FROM_THIS (HdaCodecDev->HdaIo);
+  if (HdaIoPrivateData == NULL) {
+    return EFI_NOT_READY;
+  }
+
+  HdaStream = HdaIoPrivateData->HdaOutputStream;
+  if (HdaStream == NULL) {
+    return EFI_NOT_READY;
+  }
+
+  //
+  // The polling timer handler updates the counters at TPL_NOTIFY, so raise to
+  // the same level to take a snapshot of them that is not half updated.
+  //
+  OldTpl = gBS->RaiseTPL (TPL_NOTIFY);
+
+  //
+  // The live counters are cleared as soon as a stream stops, which makes a
+  // non-zero source length the sign of a running request. Everything else is
+  // answered from the retained result, so that a caller polling after the end
+  // of playback still sees where it got to.
+  //
+  if (HdaStream->BufferActive && (HdaStream->BufferSourceLength != 0)) {
+    Consumed = HdaStream->DmaPositionTotal;
+    Total    = HdaStream->BufferSourceLength;
+
+    //
+    // Completion is only declared once the counter overshoots the request by
+    // HDA_STREAM_BUFFER_PADDING, so during the last few ticks of a playback the
+    // raw counter is already ahead of the request size. Clamp here as well as in
+    // the retained value, so that a caller never computes a position past 100%.
+    //
+    if (Consumed > Total) {
+      Consumed = Total;
+    }
+
+    Active = TRUE;
+  } else {
+    Consumed = HdaStream->LastDmaPositionTotal;
+    Total    = HdaStream->LastBufferSourceLength;
+    Active   = FALSE;
+  }
+
+  gBS->RestoreTPL (OldTpl);
+
+  if (BytesConsumed != NULL) {
+    *BytesConsumed = Consumed;
+  }
+
+  if (BytesTotal != NULL) {
+    *BytesTotal = Total;
+  }
+
+  if (Playing != NULL) {
+    *Playing = Active;
+  }
+
+  return EFI_SUCCESS;
+}
+
+/**
+  Gets the format of the most recent playback request.
+
+  See EFI_AUDIO_PROGRESS_GET_FORMAT for the exact semantics.
+
+  @param[in]  This            A pointer to the EFI_AUDIO_PROGRESS_PROTOCOL instance.
+  @param[out] SampleRate      Sample rate in hertz, optional.
+  @param[out] Channels        Channel count, optional.
+  @param[out] BitsPerSample   Bits per sample, optional.
+
+  @retval EFI_SUCCESS           The format was retrieved.
+  @retval EFI_INVALID_PARAMETER This is NULL, or all output parameters are NULL.
+  @retval EFI_NOT_READY         No playback has been set up for this codec yet.
+**/
+EFI_STATUS
+EFIAPI
+HdaCodecAudioProgressGetFormat (
+  IN  EFI_AUDIO_PROGRESS_PROTOCOL  *This,
+  OUT UINT32                       *SampleRate     OPTIONAL,
+  OUT UINT8                        *Channels       OPTIONAL,
+  OUT UINT8                        *BitsPerSample  OPTIONAL
+  )
+{
+  AUDIO_IO_PRIVATE_DATA       *AudioIoPrivateData;
+  EFI_AUDIO_IO_PROTOCOL_FREQ  PlaybackFreq;
+  EFI_AUDIO_IO_PROTOCOL_BITS  PlaybackBits;
+  UINT8                       PlaybackChannels;
+  EFI_TPL                     OldTpl;
+  UINT32                      Rate;
+  UINT8                       Bits;
+
+  // If a parameter is invalid, return error.
+  if (This == NULL) {
+    return EFI_INVALID_PARAMETER;
+  }
+
+  if ((SampleRate == NULL) && (Channels == NULL) && (BitsPerSample == NULL)) {
+    return EFI_INVALID_PARAMETER;
+  }
+
+  // Get private data. See HdaCodecAudioProgressGetPosition on why this is live.
+  AudioIoPrivateData = AUDIO_IO_PRIVATE_DATA_FROM_PROGRESS (This);
+  if (AudioIoPrivateData == NULL) {
+    return EFI_INVALID_PARAMETER;
+  }
+
+  //
+  // SetupPlayback is the only writer of these three fields. It is not reachable
+  // from the polling handler, so the raise below cannot exclude it, and an in-tree
+  // caller already runs it at TPL_NOTIFY (OcAudio.c, inside its own RaiseTPL), so
+  // the raise is decorative. What actually keeps a reader from assembling a partly
+  // updated format is that each field is a separate naturally aligned store.
+  //
+  OldTpl = gBS->RaiseTPL (TPL_NOTIFY);
+
+  PlaybackFreq     = AudioIoPrivateData->PlaybackFreq;
+  PlaybackBits     = AudioIoPrivateData->PlaybackBits;
+  PlaybackChannels = AudioIoPrivateData->PlaybackChannels;
+
+  gBS->RestoreTPL (OldTpl);
+
+  // PlaybackChannels keeps 0 until playback has been set up for this codec.
+  if (PlaybackChannels == 0) {
+    return EFI_NOT_READY;
+  }
+
+  switch (PlaybackFreq) {
+    case EfiAudioIoFreq8kHz:
+      Rate = 8000;
+      break;
+
+    case EfiAudioIoFreq11kHz:
+      Rate = 11025;
+      break;
+
+    case EfiAudioIoFreq16kHz:
+      Rate = 16000;
+      break;
+
+    case EfiAudioIoFreq22kHz:
+      Rate = 22050;
+      break;
+
+    case EfiAudioIoFreq32kHz:
+      Rate = 32000;
+      break;
+
+    case EfiAudioIoFreq44kHz:
+      Rate = 44100;
+      break;
+
+    case EfiAudioIoFreq48kHz:
+      Rate = 48000;
+      break;
+
+    case EfiAudioIoFreq88kHz:
+      Rate = 88200;
+      break;
+
+    case EfiAudioIoFreq96kHz:
+      Rate = 96000;
+      break;
+
+    case EfiAudioIoFreq192kHz:
+      Rate = 192000;
+      break;
+
+    default:
+      return EFI_NOT_READY;
+  }
+
+  switch (PlaybackBits) {
+    case EfiAudioIoBits8:
+      Bits = 8;
+      break;
+
+    case EfiAudioIoBits16:
+      Bits = 16;
+      break;
+
+    case EfiAudioIoBits20:
+      Bits = 20;
+      break;
+
+    case EfiAudioIoBits24:
+      Bits = 24;
+      break;
+
+    case EfiAudioIoBits32:
+      Bits = 32;
+      break;
+
+    default:
+      return EFI_NOT_READY;
+  }
+
+  if (SampleRate != NULL) {
+    *SampleRate = Rate;
+  }
+
+  if (Channels != NULL) {
+    *Channels = PlaybackChannels;
+  }
+
+  if (BitsPerSample != NULL) {
+    *BitsPerSample = Bits;
+  }
+
+  return EFI_SUCCESS;
 }

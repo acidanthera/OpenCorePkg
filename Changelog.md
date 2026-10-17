@@ -9,6 +9,7 @@ OpenCore Changelog
 - Added grub4dos detection to OpenLegacyBoot, thx @bugprogrammer
 - Added OpticalDrive icon to OpenCanopy, thx @ilikesn0w
 - Fixed unresolved ATAPI device paths on NVMe Macs during hibernation, thx @rctphone
+- Added playback progress reporting protocol to AudioDxe and a progress query to OcAudio, thx @llz121517
 
 #### v1.0.7
 - Improved `XhciPortLimit` compatibility with macOS Tahoe, thx @laobamac
