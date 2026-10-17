@@ -30,30 +30,35 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 // Set supported hashes to all by default.
 //
 #ifndef CONFIG_HAS_SUPPORTED_HASHES
-#define OC_CRYPTO_SUPPORTS_SHA256  1
-#define OC_CRYPTO_SUPPORTS_SHA384  1
-#define OC_CRYPTO_SUPPORTS_SHA512  1
-#define OC_CRYPTO_SUPPORTS_SHA1    1
-#define OC_CRYPTO_SUPPORTS_MD5     1
+#define OC_CRYPTO_SUPPORTS_SHA256    1
+#define OC_CRYPTO_SUPPORTS_SHA384    1
+#define OC_CRYPTO_SUPPORTS_SHA512    1
+#define OC_CRYPTO_SUPPORTS_SHA1      1
+#define OC_CRYPTO_SUPPORTS_MD5       1
+#define OC_CRYPTO_SUPPORTS_STREEBOG  1
 #endif
 
 //
 // Digest sizes.
 //
-#define MD5_DIGEST_SIZE     16
-#define SHA1_DIGEST_SIZE    20
-#define SHA256_DIGEST_SIZE  32
-#define SHA384_DIGEST_SIZE  48
-#define SHA512_DIGEST_SIZE  64
+#define MD5_DIGEST_SIZE          16
+#define SHA1_DIGEST_SIZE         20
+#define SHA256_DIGEST_SIZE       32
+#define SHA384_DIGEST_SIZE       48
+#define SHA512_DIGEST_SIZE       64
+#define STREEBOG256_DIGEST_SIZE  256
+#define STREEBOG512_DIGEST_SIZE  512
 
-#define OC_MAX_SHA_DIGEST_SIZE  SHA512_DIGEST_SIZE
+#define OC_MAX_SHA_DIGEST_SIZE  STREEBOG512_DIGEST_SIZE
 
 //
 // Block sizes.
 //
-#define SHA256_BLOCK_SIZE  64
-#define SHA512_BLOCK_SIZE  128
-#define SHA384_BLOCK_SIZE  SHA512_BLOCK_SIZE
+#define SHA256_BLOCK_SIZE       64
+#define SHA512_BLOCK_SIZE       128
+#define SHA384_BLOCK_SIZE       SHA512_BLOCK_SIZE
+#define STREEBOG256_BLOCK_SIZE  512
+#define STREEBOG512_BLOCK_SIZE  STREEBOG256_BLOCK_SIZE
 
 //
 // Derived parameters.
@@ -144,6 +149,20 @@ typedef struct SHA512_CONTEXT_ {
 } SHA512_CONTEXT;
 
 typedef SHA512_CONTEXT SHA384_CONTEXT;
+
+typedef struct UINT512_ {
+  UINT64    QWORD[8];
+} UINT512;
+
+typedef struct STREEBOG_CONTEXT_ {
+  UINT8      Buffer[64];
+  UINT512    Hash;
+  UINT512    H;
+  UINT512    N;
+  UINT512    Sigma;
+  UINT32     BufSize;
+  UINT32     DigestSize;
+} STREEBOG_CONTEXT;
 
 ///
 /// The structure describing the RSA Public Key format.
@@ -392,6 +411,56 @@ Sha384 (
   UINT8        *Hash,
   CONST UINT8  *Data,
   UINTN        Len
+  );
+
+VOID
+Streebog256Init (
+  IN OUT STREEBOG_CONTEXT  *Context
+  );
+
+VOID
+Streebog256Update (
+  IN OUT STREEBOG_CONTEXT  *Context,
+  IN CONST UINT8           *Data,
+  IN UINT32                Length
+  );
+
+VOID
+Streebog256Final (
+  IN OUT STREEBOG_CONTEXT  *Context,
+  OUT UINT8                *Digest
+  );
+
+VOID
+Streebog256 (
+  IN CONST UINT8  *Data,
+  OUT UINT8       *Digest,
+  IN UINT32       Length
+  );
+
+VOID
+Streebog512Init (
+  IN OUT STREEBOG_CONTEXT  *Context
+  );
+
+VOID
+Streebog512Update (
+  IN OUT STREEBOG_CONTEXT  *Context,
+  IN CONST UINT8           *Data,
+  IN UINT32                Length
+  );
+
+VOID
+Streebog512Final (
+  IN OUT STREEBOG_CONTEXT  *Context,
+  OUT UINT8                *Digest
+  );
+
+VOID
+Streebog512 (
+  IN CONST UINT8  *Data,
+  OUT UINT8       *Digest,
+  IN UINT32       Length
   );
 
 BOOLEAN
