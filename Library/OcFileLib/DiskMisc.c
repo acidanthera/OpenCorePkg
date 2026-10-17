@@ -370,22 +370,49 @@ OcIsDiskCdRom (
   IN EFI_DEVICE_PATH_PROTOCOL  *DiskDevicePath
   )
 {
-  EFI_DEVICE_PATH_PROTOCOL  *DevicePathWalker;
+  EFI_BLOCK_IO_PROTOCOL  *BlockIo;
+  EFI_BLOCK_IO_MEDIA     *Media;
+  EFI_HANDLE             Handle;
+  EFI_STATUS             Status;
 
   ASSERT (DiskDevicePath != NULL);
 
-  DevicePathWalker = DiskDevicePath;
-  while (!IsDevicePathEnd (DevicePathWalker)) {
-    if (  (DevicePathType (DevicePathWalker) == MEDIA_DEVICE_PATH)
-       && (DevicePathSubType (DevicePathWalker) == MEDIA_CDROM_DP))
-    {
-      return TRUE;
-    }
-
-    DevicePathWalker = NextDevicePathNode (DevicePathWalker);
+  if (FindDevicePathNodeWithType (DiskDevicePath, MESSAGING_DEVICE_PATH, 0) == NULL) {
+    return FALSE;
   }
 
-  return FALSE;
+  Handle = NULL;
+
+  Status = gBS->LocateDevicePath (&gEfiBlockIoProtocolGuid, &DiskDevicePath, &Handle);
+  if (EFI_ERROR (Status) || (Handle == NULL)) {
+    return FALSE;
+  }
+
+  BlockIo = NULL;
+
+  Status = gBS->HandleProtocol (Handle, &gEfiBlockIoProtocolGuid, (VOID **)&BlockIo);
+  if (EFI_ERROR (Status) || (BlockIo == NULL)) {
+    return FALSE;
+  }
+
+  Media = BlockIo->Media;
+  if ((Media == NULL) || (!Media->MediaPresent) || (!Media->RemovableMedia)) {
+    return FALSE;
+  }
+
+  //
+  // CDs, DVDs and BDs have 2 KB block size.
+  // REF: https://en.wikipedia.org/wiki/Disk_sector
+  //
+  if (Media->BlockSize != SIZE_2KB) {
+    return FALSE;
+  }
+
+  if (Media->LastBlock == 0) {
+    return FALSE;
+  }
+
+  return TRUE;
 }
 
 EFI_STATUS
