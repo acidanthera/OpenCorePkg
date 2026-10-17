@@ -15,8 +15,6 @@
 #ifndef OC_FILE_LIB_H
 #define OC_FILE_LIB_H
 
-// Include the abstracted protocol for its definitions
-
 #include <Guid/FileInfo.h>
 
 #include <IndustryStandard/Mbr.h>
@@ -524,7 +522,19 @@ OcPartitionGetPartitionHandle (
 
   @param[in] DiskDevicePath  The Device Path of the disk.
 
-  @retval Device Path or NULL
+  @retval FALSE  DiskDevicePath is NULL.
+  @retval FALSE  DiskDevicePath has no Messaging node.
+  @retval FALSE  Unable to locate BlockIo handle for DiskDevicePath.
+  @retval FALSE  Located BlockIo handle is NULL.
+  @retval FALSE  Unable to get BlockIo from the located handle.
+  @retval FALSE  BlockIo interface is NULL.
+  @retval FALSE  BlockIo->Media is NULL.
+  @retval FALSE  Media is not present.
+  @retval FALSE  Media is not removable.
+  @retval FALSE  Media block size is not 2 KB.
+  @retval FALSE  Media last block is 0.
+
+  @retval TRUE   Disk is a CD-ROM device.
 **/
 BOOLEAN
 OcIsDiskCdRom (
