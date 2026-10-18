@@ -13,6 +13,9 @@
 typedef struct {
   GUI_OBJ_CHILD    Hdr;
   GUI_IMAGE        EntryIcon;
+  GUI_IMAGE        DarkIcon;
+  BOOLEAN          IsHeld;
+  UINT64           PressStartTsc;
   GUI_IMAGE        Label;
   OC_BOOT_ENTRY    *Context;
   BOOLEAN          CustomIcon;
