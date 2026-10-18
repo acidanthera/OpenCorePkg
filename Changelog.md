@@ -1,5 +1,9 @@
 OpenCore Changelog
 ==================
+#### v1.0.9
+- Made pressed buttons darker instead of highlighting them in OpenCanopy
+- Added minor configuration sample improvements 
+
 #### v1.0.8
 - Fixed macrecovery utility on Windows, thx @pzhlkj6612
 - Added launch helper for macrecovery utility on Windows, thx @aayushprsingh
