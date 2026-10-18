@@ -16,6 +16,8 @@
 #include <Library/BaseMemoryLib.h>
 #include <Library/DebugLib.h>
 #include <Library/MemoryAllocationLib.h>
+#include <Library/TimerLib.h>
+
 #include <Library/OcBootManagementLib.h>
 #include <Library/OcPngLib.h>
 #include <Library/OcStorageLib.h>
@@ -35,6 +37,8 @@
 
 #define BOOT_LABEL_SHADOW_WIDTH   8U
 #define BOOT_LABEL_SHADOW_HEIGHT  BOOT_ENTRY_LABEL_HEIGHT
+
+#define BOOT_PRESSED_ENTRY_DELAY_NS  (175ULL * 1000000ULL)
 
 extern GUI_KEY_CONTEXT  *mKeyContext;
 
@@ -542,7 +546,7 @@ InternalBootPickerEntryDraw (
   /*if (mBootPickerImageIndex < 5) {
     EntryIcon = &((BOOT_PICKER_GUI_CONTEXT *) DrawContext->GuiContext)->Poof[mBootPickerImageIndex];
   } else */{
-    EntryIcon = &Entry->EntryIcon;
+    EntryIcon = Entry->IsHeld ? &Entry->DarkIcon : &Entry->EntryIcon;
   }
   Label = &Entry->Label;
   //
@@ -757,7 +761,9 @@ InternalBootPickerEntryPtrEvent (
   )
 {
   GUI_VOLUME_ENTRY  *Entry;
+  BOOLEAN           IsHeld;
   BOOLEAN           IsHit;
+  BOOLEAN           WasPressed;
   UINT32            OffsetX;
   UINT32            OffsetY;
 
@@ -777,12 +783,43 @@ InternalBootPickerEntryPtrEvent (
             OffsetX,
             OffsetY
             );
+  WasPressed = (Entry->PressStartTsc != 0);
+
+  if (Event->Type == GuiPointerPrimaryUp) {
+    Entry->PressStartTsc = 0;
+  } else if
+  (IsHit && (Event->Type == GuiPointerPrimaryDown) && !WasPressed && (mBootPicker.SelectedIndex != Entry->Index)) {
+    Entry->PressStartTsc = AsmReadTsc ();
+  }
+
+  IsHeld = IsHit && (Event->Type == GuiPointerPrimaryDown) && (Entry->PressStartTsc != 0) && (mBootPicker.SelectedIndex != Entry->Index) && (GetTimeInNanoSecond (AsmReadTsc () - Entry->PressStartTsc) >= BOOT_PRESSED_ENTRY_DELAY_NS);
+
+  if (Entry->IsHeld != IsHeld) {
+    if (IsHeld && (Entry->DarkIcon.Buffer == NULL)) {
+      if (EFI_ERROR (
+            GuiCreateDarkenedImage (
+              &Entry->DarkIcon,
+              &Entry->EntryIcon,
+              BOOT_ACTION_BUTTON_PRESSED_FACTOR
+              )
+            ))
+      {
+        IsHeld = FALSE;
+      }
+    }
+  }
+
+  if (Entry->IsHeld != IsHeld) {
+    Entry->IsHeld = IsHeld;
+    GuiRequestDraw ((UINT32)BaseX, (UINT32)BaseY, This->Width, This->Height);
+  }
+
   if (!IsHit) {
     return This;
   }
 
-  if (Event->Type == GuiPointerPrimaryDown) {
-    if (mBootPicker.SelectedIndex != Entry->Index) {
+  if (Event->Type == GuiPointerPrimaryUp) {
+    if (WasPressed && (mBootPicker.SelectedIndex != Entry->Index)) {
       ASSERT (Entry->Hdr.Parent == &mBootPicker.Hdr.Obj);
       InternalBootPickerChangeEntry (
         &mBootPicker,
@@ -793,11 +830,17 @@ InternalBootPickerEntryPtrEvent (
         );
     }
   } else if (Event->Type == GuiPointerPrimaryDoubleClick) {
-    //
-    // This must be ensured because the UI directs Move/Up events to the object
-    // Down had been sent to.
-    //
-    ASSERT (mBootPicker.SelectedIndex == Entry->Index);
+    if (mBootPicker.SelectedIndex != Entry->Index) {
+      ASSERT (Entry->Hdr.Parent == &mBootPicker.Hdr.Obj);
+      InternalBootPickerChangeEntry (
+        &mBootPicker,
+        DrawContext,
+        BaseX - This->OffsetX,
+        BaseY - This->OffsetY,
+        Entry->Index
+        );
+    }
+
     Context->ReadyToBoot = TRUE;
   }
 
@@ -1674,6 +1717,10 @@ InternalBootPickerEntryDestruct (
 
   if (Entry->CustomIcon) {
     FreePool (Entry->EntryIcon.Buffer);
+  }
+
+  if (Entry->DarkIcon.Buffer != NULL) {
+    FreePool (Entry->DarkIcon.Buffer);
   }
 
   FreePool (Entry->Label.Buffer);
