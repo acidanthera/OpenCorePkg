@@ -522,7 +522,6 @@ OcPartitionGetPartitionHandle (
 
   @param[in] DiskDevicePath  The Device Path of the disk.
 
-  @retval FALSE  DiskDevicePath is NULL.
   @retval FALSE  DiskDevicePath has no Messaging node.
   @retval FALSE  Unable to locate BlockIo handle for DiskDevicePath.
   @retval FALSE  Located BlockIo handle is NULL.
