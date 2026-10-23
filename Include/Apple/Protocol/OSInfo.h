@@ -1,23 +1,20 @@
 /** @file
-Copyright (C) 2014 - 2017, Download-Fritz.  All rights reserved.<BR>
-This program and the accompanying materials are licensed and made available
-under the terms and conditions of the BSD License which accompanies this
-distribution.  The full text of the license may be found at
-http://opensource.org/licenses/bsd-license.php.
+  EFI OS Info protocol.
 
-THE PROGRAM IS DISTRIBUTED UNDER THE BSD LICENSE ON AN "AS IS" BASIS,
-WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
-
+  Copyright (c) 2014-2017, mhaeuser. All rights reserved.
+  Copyright (c) 2026, ilikesn0w. All rights reserved.
+  SPDX-License-Identifier: BSD-3-Clause
 **/
 
 #ifndef EFI_OS_INFO_H
 #define EFI_OS_INFO_H
 
 // EFI_OS_INFO_PROTOCOL_REVISION
-#define EFI_OS_INFO_PROTOCOL_REVISION_NAME    0x00000001
-#define EFI_OS_INFO_PROTOCOL_REVISION_VENDOR  0x00000002
-#define EFI_OS_INFO_PROTOCOL_REVISION_VTD     0x00000003
-#define EFI_OS_INFO_PROTOCOL_REVISION         0x00000003
+#define EFI_OS_INFO_PROTOCOL_REVISION_NAME       0x00000001
+#define EFI_OS_INFO_PROTOCOL_REVISION_VENDOR     0x00000002
+#define EFI_OS_INFO_PROTOCOL_REVISION_VTD        0x00000003
+#define EFI_OS_INFO_PROTOCOL_REVISION_FORCE_VTD  0x00000004
+#define EFI_OS_INFO_PROTOCOL_REVISION            0x00000004
 
 // EFI_OS_INFO_PROTOCOL_GUID
 #define EFI_OS_INFO_PROTOCOL_GUID  \
@@ -37,7 +34,7 @@ VOID
 typedef
 VOID
 (EFIAPI *OS_INFO_OS_VENDOR)(
-  IN CHAR8  *OSName
+  IN CHAR8  *OSVendor
   );
 
 // OS_INFO_SET_VTD_ENABLED
@@ -54,13 +51,21 @@ VOID
   OUT UINTN  *BootVTdEnabled
   );
 
+// OS_INFO_FORCE_VTD_ENABLED
+typedef
+VOID
+(EFIAPI *OS_INFO_FORCE_VTD_ENABLED)(
+  IN UINTN  *BootVTdEnabled
+  );
+
 // EFI_OS_INFO_PROTOCOL
 typedef struct {
-  UINTN                      Revision;          ///< Revision.
-  OS_INFO_OS_NAME            OSName;            ///< Present as of Revision 1.
-  OS_INFO_OS_VENDOR          OSVendor;          ///< Present as of Revision 2.
-  OS_INFO_SET_VTD_ENABLED    SetBootVTdEnabled; ///< Present as of Revision 3.
-  OS_INFO_GET_VTD_ENABLED    GetBootVTdEnabled; ///< Present as of Revision 3.
+  UINTN                        Revision;            ///< Revision.
+  OS_INFO_OS_NAME              OSName;              ///< Present as of Revision 1.
+  OS_INFO_OS_VENDOR            OSVendor;            ///< Present as of Revision 2.
+  OS_INFO_SET_VTD_ENABLED      SetBootVTdEnabled;   ///< Present as of Revision 3.
+  OS_INFO_GET_VTD_ENABLED      GetBootVTdEnabled;   ///< Present as of Revision 3.
+  OS_INFO_FORCE_VTD_ENABLED    ForceBootVTdEnabled; ///< Present as of Revision 4.
 } EFI_OS_INFO_PROTOCOL;
 
 // gEfiOSInfoProtocolGuid
