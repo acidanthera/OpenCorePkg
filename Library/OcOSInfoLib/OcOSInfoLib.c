@@ -1,15 +1,9 @@
 /** @file
-  Copyright (C) 2020, vit9696. All rights reserved.
+  EFI OS Info protocol implementation.
 
-  All rights reserved.
-
-  This program and the accompanying materials
-  are licensed and made available under the terms and conditions of the BSD License
-  which accompanies this distribution.  The full text of the license may be found at
-  http://opensource.org/licenses/bsd-license.php
-
-  THE PROGRAM IS DISTRIBUTED UNDER THE BSD LICENSE ON AN "AS IS" BASIS,
-  WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
+  Copyright (c) 2020, vit9696. All rights reserved.
+  Copyright (c) 2026, ilikesn0w. All rights reserved.
+  SPDX-License-Identifier: BSD-3-Clause
 **/
 
 #include <Guid/AppleOSLoaded.h>
@@ -23,6 +17,7 @@
 #include <Library/UefiBootServicesTableLib.h>
 
 STATIC UINTN    mBootVTdEnabled;
+STATIC UINTN    mBootVTdForced;
 STATIC CHAR8    *mOSName;
 STATIC CHAR8    *mOSVendor;
 STATIC BOOLEAN  mAppleOSLoadedSignaled;
@@ -173,7 +168,7 @@ SetBootVTdEnabled (
   IN UINTN  *BootVTdEnabled
   )
 {
-  mBootVTdEnabled = *BootVTdEnabled;
+  mBootVTdEnabled = *BootVTdEnabled | mBootVTdForced;
 }
 
 STATIC
@@ -187,13 +182,25 @@ GetBootVTdEnabled (
 }
 
 STATIC
+VOID
+EFIAPI
+ForceBootVTdEnabled (
+  IN UINTN  *BootVTdEnabled
+  )
+{
+  mBootVTdForced  |= *BootVTdEnabled;
+  mBootVTdEnabled |= mBootVTdForced;
+}
+
+STATIC
 EFI_OS_INFO_PROTOCOL
   mOSInfoProtocol = {
   EFI_OS_INFO_PROTOCOL_REVISION,
   SetName,
   SetVendor,
   SetBootVTdEnabled,
-  GetBootVTdEnabled
+  GetBootVTdEnabled,
+  ForceBootVTdEnabled
 };
 
 EFI_OS_INFO_PROTOCOL *
