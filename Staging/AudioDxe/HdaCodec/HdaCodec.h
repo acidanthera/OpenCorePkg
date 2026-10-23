@@ -26,6 +26,7 @@
 #define _EFI_HDA_CODEC_H_
 
 #include "AudioDxe.h"
+#include <Protocol/AudioProgress.h>
 
 typedef struct _HDA_CODEC_DEV                HDA_CODEC_DEV;
 typedef struct _HDA_FUNC_GROUP               HDA_FUNC_GROUP;
@@ -145,18 +146,29 @@ struct _HDA_CODEC_INFO_PRIVATE_DATA {
 // Audio I/O private data.
 struct _AUDIO_IO_PRIVATE_DATA {
   // Signature.
-  UINTN                    Signature;
+  UINTN                          Signature;
 
   // Audio I/O protocol.
-  EFI_AUDIO_IO_PROTOCOL    AudioIo;
-  UINT64                   SelectedOutputIndexMask;
-  UINT8                    SelectedInputIndex;
+  EFI_AUDIO_IO_PROTOCOL          AudioIo;
+  UINT64                         SelectedOutputIndexMask;
+  UINT8                          SelectedInputIndex;
+
+  // Playback format requested through this codec, for the progress protocol.
+  // PlaybackChannels stays 0 until playback has been set up.
+  EFI_AUDIO_IO_PROTOCOL_FREQ     PlaybackFreq;
+  EFI_AUDIO_IO_PROTOCOL_BITS     PlaybackBits;
+  UINT8                          PlaybackChannels;
+
+  // Playback progress protocol.
+  EFI_AUDIO_PROGRESS_PROTOCOL    AudioProgress;
 
   // Codec device.
-  HDA_CODEC_DEV            *HdaCodecDev;
+  HDA_CODEC_DEV                  *HdaCodecDev;
 };
 
 #define AUDIO_IO_PRIVATE_DATA_FROM_THIS(This)  CR(This, AUDIO_IO_PRIVATE_DATA, AudioIo, HDA_CODEC_PRIVATE_DATA_SIGNATURE)
+
+#define AUDIO_IO_PRIVATE_DATA_FROM_PROGRESS(This)  CR(This, AUDIO_IO_PRIVATE_DATA, AudioProgress, HDA_CODEC_PRIVATE_DATA_SIGNATURE)
 
 //
 // HDA Codec Info protocol functions.
@@ -284,6 +296,27 @@ EFI_STATUS
 EFIAPI
 HdaCodecAudioIoStopPlayback (
   IN EFI_AUDIO_IO_PROTOCOL  *This
+  );
+
+//
+// Playback progress protocol functions.
+//
+EFI_STATUS
+EFIAPI
+HdaCodecAudioProgressGetPosition (
+  IN  EFI_AUDIO_PROGRESS_PROTOCOL  *This,
+  OUT UINT32                       *BytesConsumed  OPTIONAL,
+  OUT UINT32                       *BytesTotal     OPTIONAL,
+  OUT BOOLEAN                      *Playing        OPTIONAL
+  );
+
+EFI_STATUS
+EFIAPI
+HdaCodecAudioProgressGetFormat (
+  IN  EFI_AUDIO_PROGRESS_PROTOCOL  *This,
+  OUT UINT32                       *SampleRate     OPTIONAL,
+  OUT UINT8                        *Channels       OPTIONAL,
+  OUT UINT8                        *BitsPerSample  OPTIONAL
   );
 
 //
