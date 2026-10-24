@@ -422,7 +422,7 @@ VOID
 Streebog256Update (
   IN OUT STREEBOG_CONTEXT  *Context,
   IN CONST UINT8           *Data,
-  IN UINT32                Length
+  IN UINTN                 Length
   );
 
 VOID
@@ -435,7 +435,7 @@ VOID
 Streebog256 (
   IN CONST UINT8  *Data,
   OUT UINT8       *Digest,
-  IN UINT32       Length
+  IN UINTN        Length
   );
 
 VOID
@@ -447,7 +447,7 @@ VOID
 Streebog512Update (
   IN OUT STREEBOG_CONTEXT  *Context,
   IN CONST UINT8           *Data,
-  IN UINT32                Length
+  IN UINTN                 Length
   );
 
 VOID
@@ -460,7 +460,7 @@ VOID
 Streebog512 (
   IN CONST UINT8  *Data,
   OUT UINT8       *Digest,
-  IN UINT32       Length
+  IN UINTN        Length
   );
 
 BOOLEAN

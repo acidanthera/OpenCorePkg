@@ -1,6 +1,6 @@
-/** StreebogPreprocess.c
-  Copyright (c) 2013, Alexey Degtyarev <alexey@renatasystems.org>. All rights reserved.<BR>
-  Copyright (c) 2022 Maxim Kuznetsov. All rights reserved.<BR>
+/** @file
+  Copyright (c) 2013, Alexey Degtyarev <alexey@renatasystems.org>. All rights reserved.
+  Copyright (c) 2022, Maxim Kuznetsov. All rights reserved.
   SPDX-License-Identifier: BSD-2-Clause
 **/
 

@@ -1,6 +1,7 @@
 /** @file
-  Copyright (c) 2013, Alexey Degtyarev <alexey@renatasystems.org>. All rights reserved.<BR>
-  Copyright (c) 2022 Maxim Kuznetsov. All rights reserved.<BR>
+  Copyright (c) 2013, Alexey Degtyarev <alexey@renatasystems.org>. All rights reserved.
+  Copyright (c) 2022, Maxim Kuznetsov. All rights reserved.
+  Copyright (c) 2026, ilikesn0w. All rights reserved.
   SPDX-License-Identifier: BSD-2-Clause
 **/
 

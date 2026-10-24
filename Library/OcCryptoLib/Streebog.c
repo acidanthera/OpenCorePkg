@@ -1,6 +1,7 @@
 /** @file
-  Copyright (c) 2013, Alexey Degtyarev <alexey@renatasystems.org>. All rights reserved.<BR>
-  Copyright (c) 2022 Maxim Kuznetsov. All rights reserved.<BR>
+  Copyright (c) 2013, Alexey Degtyarev <alexey@renatasystems.org>. All rights reserved.
+  Copyright (c) 2022, Maxim Kuznetsov. All rights reserved.
+  Copyright (c) 2026, ilikesn0w. All rights reserved.
   SPDX-License-Identifier: BSD-2-Clause
 **/
 
@@ -235,11 +236,11 @@ VOID
 GOST34112012Update (
   IN OUT STREEBOG_CONTEXT  *Context,
   IN CONST UINT8           *Data,
-  IN UINT32                Length
+  IN UINTN                 Length
   )
 {
-  UINT32  ChunkSize;
-  UINTN   Index;
+  UINTN  ChunkSize;
+  UINTN  Index;
 
   if (Context->BufSize) {
     ChunkSize = STREEBOG_BYTE_COUNT - Context->BufSize;
@@ -251,7 +252,7 @@ GOST34112012Update (
       Context->Buffer[Context->BufSize + Index] = Data[Index];
     }
 
-    Context->BufSize += ChunkSize;
+    Context->BufSize += (UINT32)ChunkSize;
     Length           -= ChunkSize;
     Data             += ChunkSize;
 
@@ -274,7 +275,7 @@ GOST34112012Update (
       Context->Buffer[Index] = Data[Index];
     }
 
-    Context->BufSize = Length;
+    Context->BufSize = (UINT32)Length;
   }
 }
 
@@ -314,7 +315,7 @@ VOID
 Streebog256Update (
   IN OUT STREEBOG_CONTEXT  *Context,
   IN CONST UINT8           *Data,
-  IN UINT32                Length
+  IN UINTN                 Length
   )
 {
   GOST34112012Update (Context, Data, Length);
@@ -333,7 +334,7 @@ VOID
 Streebog256 (
   IN CONST UINT8  *Data,
   OUT UINT8       *Digest,
-  IN UINT32       Length
+  IN UINTN        Length
   )
 {
   STREEBOG_CONTEXT  Context;
@@ -356,7 +357,7 @@ VOID
 Streebog512Update (
   IN OUT STREEBOG_CONTEXT  *Context,
   IN CONST UINT8           *Data,
-  IN UINT32                Length
+  IN UINTN                 Length
   )
 {
   GOST34112012Update (Context, Data, Length);
@@ -375,7 +376,7 @@ VOID
 Streebog512 (
   IN CONST UINT8  *Data,
   OUT UINT8       *Digest,
-  IN UINT32       Length
+  IN UINTN        Length
   )
 {
   STREEBOG_CONTEXT  Context;
