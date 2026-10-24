@@ -340,6 +340,30 @@ typedef struct {
   // Prelinked is 32-bit.
   //
   BOOLEAN                                Is32Bit;
+  //
+  // System KC buffer used to resolve cross-KC kext dependencies
+  // (e.g. IOGraphicsFamily). Optional; set via PrelinkedContextLoadSystemKC.
+  // Ownership is held by the context and released in PrelinkedContextFree.
+  //
+  UINT8                                  *SystemKC;
+  //
+  // System KC buffer size in bytes.
+  //
+  UINT32                                 SystemKCSize;
+  //
+  // Mach-O context covering the System KC outer header.
+  //
+  OC_MACHO_CONTEXT                       SystemKCMachContext;
+  //
+  // Mach-O context covering the System KC inner kernel when present,
+  // otherwise a copy of SystemKCMachContext. Used as the symtab source
+  // for fileset-entry kexts.
+  //
+  OC_MACHO_CONTEXT                       SystemKCInnerMachContext;
+  //
+  // TRUE once a System KC has been parsed and fixed up successfully.
+  //
+  BOOLEAN                                SystemKCValid;
 } PRELINKED_CONTEXT;
 
 //
@@ -820,6 +844,34 @@ EFI_STATUS
 PrelinkedDependencyInsert (
   IN OUT  PRELINKED_CONTEXT  *Context,
   IN      VOID               *Buffer
+  );
+
+/**
+  Associate a System Kernel Collection buffer with a prelinked context.
+
+  On macOS 11+ common kext libraries such as IOGraphicsFamily live in
+  the System KC rather than the Boot KC. When this function succeeds,
+  InternalCachedPrelinkedKext () can satisfy such dependencies by
+  walking the System KC's LC_FILESET_ENTRY commands.
+
+  LC_DYLD_CHAINED_FIXUPS on the outer collection are applied in place
+  so subsequent pointer reads observe resolved virtual addresses.
+
+  @param[in,out] Context       Initialized prelinked context.
+  @param[in]     SystemKC      System KC buffer. Ownership transfers to
+                               the context and is released by
+                               PrelinkedContextFree ().
+  @param[in]     SystemKCSize  System KC buffer size in bytes.
+
+  @retval EFI_SUCCESS            System KC associated successfully.
+  @retval EFI_INVALID_PARAMETER  Buffer is not a valid Mach-O kernel
+                                 collection.
+**/
+EFI_STATUS
+PrelinkedContextLoadSystemKC (
+  IN OUT  PRELINKED_CONTEXT  *Context,
+  IN      UINT8              *SystemKC,
+  IN      UINT32             SystemKCSize
   );
 
 /**
