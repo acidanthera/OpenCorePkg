@@ -206,7 +206,7 @@ ifneq ($(STANDALONE),1)
 	#
 	# OcCryptoLib targets.
 	#
-	SHARED_OBJS += RsaDigitalSign.o BigNumMontgomery.o BigNumPrimitives.o BigNumWordMul64.o Sha2.o SecureMem.o Sha512AccelDummy.o
+    SHARED_OBJS += RsaDigitalSign.o BigNumMontgomery.o BigNumPrimitives.o BigNumWordMul64.o Sha2.o SecureMem.o Sha512AccelDummy.o Streebog.o
 	#
 	# OcMachoLib targets.
 	#
