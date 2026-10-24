@@ -1057,14 +1057,25 @@ KcFixupValue (
   rewrite the slot in place (e.g. to translate a fileset VA into a kernel
   VA) or just observe it (e.g. for counting / validation).
 
-  @param[in,out] FixupLoc        Pointer to the 8-byte fixup slot.
+  The fixup slot's containing buffer is not guaranteed to be 8-byte
+  aligned, so FixupLoc is typed UINT8 * to make the unaligned-access
+  contract explicit at the API boundary. Read or modify the 8-byte slot
+  via ReadUnaligned64 / WriteUnaligned64; treating FixupLoc as a UINT64
+  pointer and dereferencing directly is undefined behaviour per the C
+  standard and may misbehave on strict-alignment hosts (some ARM
+  configurations) and under sanitizers (UBSan).
+
+  @param[in,out] FixupLoc        Byte address of the 8-byte fixup slot.
+                                 Access via ReadUnaligned64 /
+                                 WriteUnaligned64; do not cast and
+                                 dereference as UINT64 *.
   @param[in,out] VisitorContext  Caller-provided context, may be NULL.
 **/
 typedef
 VOID
 (*KC_CHAINED_FIXUP_VISIT)(
-  IN OUT UINT64  *FixupLoc,
-  IN OUT VOID    *VisitorContext
+  IN OUT UINT8  *FixupLoc,
+  IN OUT VOID   *VisitorContext
   );
 
 /**
@@ -1075,28 +1086,37 @@ VOID
   ARM64E_KERNEL) layouts; returns 0 for any other format without
   walking.
 
-  All fields read from StartsSeg are treated as untrusted input. Every
-  computed offset and chain step is bounds-checked against the
-  caller-supplied container sizes. The walker never reads or invokes
-  Visitor on a slot that lies outside [Buffer, Buffer + BufferSize).
-  A self-referencing chain is bounded by the per-page iteration cap
-  PageSize / sizeof (UINT64).
+  All fields read from the per-segment metadata are treated as
+  untrusted input. Every computed offset and chain step is
+  bounds-checked against the caller-supplied container sizes. The
+  walker never reads or invokes Visitor on a slot that lies outside
+  [Buffer, Buffer + BufferSize). A self-referencing chain is bounded
+  by the per-page iteration cap PageSize / sizeof (UINT64).
 
-  @param[in]     Buffer          Pointer to the containing kernel
-                                 collection buffer (the same base
-                                 SegmentOffset is relative to).
-  @param[in]     BufferSize      Size of Buffer in bytes. The walker
-                                 will not access Buffer past this.
-  @param[in]     StartsSeg       MACH_DYLD_CHAINED_STARTS_IN_SEGMENT for
-                                 the segment to walk.
-  @param[in]     StartsSegSize   Size of the metadata region pointed to
-                                 by StartsSeg. The walker will not read
-                                 the StartsSeg struct or its
-                                 PageStart[] array past this.
-  @param[in]     Visitor         Callback invoked per fixup slot, or
-                                 NULL to count only.
-  @param[in,out] VisitorContext  Opaque context forwarded to Visitor,
-                                 may be NULL.
+  StartsSegBacking is not assumed to be aligned for any type. The
+  fixed header is read into a local properly-aligned struct via
+  CopyMem, and PageStart[] entries + fixup slots in Buffer are
+  accessed via ReadUnaligned* helpers. Buffer itself is treated as
+  potentially unaligned for UINT64 access at any SlotOffset.
+
+  @param[in]     Buffer            Pointer to the containing kernel
+                                   collection buffer (the same base
+                                   SegmentOffset is relative to).
+  @param[in]     BufferSize        Size of Buffer in bytes. The walker
+                                   will not access Buffer past this.
+  @param[in]     StartsSegBacking  Byte pointer to the per-segment
+                                   MACH_DYLD_CHAINED_STARTS_IN_SEGMENT
+                                   metadata. Need not be aligned for
+                                   the struct; reads are unaligned-safe
+                                   and the walker never writes through
+                                   it (CONST).
+  @param[in]     StartsSegSize     Size of the metadata region pointed
+                                   to by StartsSegBacking. The walker
+                                   will not read the metadata past this.
+  @param[in]     Visitor           Callback invoked per fixup slot, or
+                                   NULL to count only.
+  @param[in,out] VisitorContext    Opaque context forwarded to Visitor,
+                                   may be NULL.
 
   @return  Count of fixup slots visited. 0 if any size precondition
            fails, the pointer format is unsupported, or the structure
@@ -1104,12 +1124,12 @@ VOID
 **/
 UINTN
 KcWalkChainedFixupsInSegment (
-  IN     UINT8                                *Buffer,
-  IN     UINTN                                BufferSize,
-  IN     MACH_DYLD_CHAINED_STARTS_IN_SEGMENT  *StartsSeg,
-  IN     UINTN                                StartsSegSize,
-  IN     KC_CHAINED_FIXUP_VISIT               Visitor OPTIONAL,
-  IN OUT VOID                                 *VisitorContext OPTIONAL
+  IN     UINT8                   *Buffer,
+  IN     UINTN                   BufferSize,
+  IN     CONST UINT8             *StartsSegBacking,
+  IN     UINTN                   StartsSegSize,
+  IN     KC_CHAINED_FIXUP_VISIT  Visitor OPTIONAL,
+  IN OUT VOID                    *VisitorContext OPTIONAL
   );
 
 /**
@@ -1122,16 +1142,25 @@ KcWalkChainedFixupsInSegment (
   treated as untrusted input and bounds-checked against StartsSize.
   Per-segment validation is performed by KcWalkChainedFixupsInSegment.
 
+  StartsBacking is not assumed to be aligned. NumSegments and each
+  SegInfoOffset[i] are read via ReadUnaligned32, so a chained-fixups
+  payload that starts at any byte alignment in a containing buffer
+  is handled safely.
+
   @param[in]     Buffer          Pointer to the containing kernel
                                  collection buffer.
   @param[in]     BufferSize      Size of Buffer in bytes. Forwarded to
                                  KcWalkChainedFixupsInSegment.
-  @param[in]     Starts          MACH_DYLD_CHAINED_STARTS_IN_IMAGE for
-                                 the whole image.
+  @param[in]     StartsBacking   Byte pointer to the
+                                 MACH_DYLD_CHAINED_STARTS_IN_IMAGE
+                                 metadata. Need not be aligned for the
+                                 struct; reads are unaligned-safe and
+                                 the walker never writes through it
+                                 (CONST).
   @param[in]     StartsSize      Size of the chained-fixups metadata
-                                 region pointed to by Starts. Bounds
-                                 the SegInfoOffset[] array reads and
-                                 each per-segment dereference.
+                                 region pointed to by StartsBacking.
+                                 Bounds the SegInfoOffset[] array reads
+                                 and each per-segment dereference.
   @param[in]     Visitor         Callback invoked per fixup slot, or
                                  NULL to count only.
   @param[in,out] VisitorContext  Opaque context forwarded to Visitor,
@@ -1144,12 +1173,12 @@ KcWalkChainedFixupsInSegment (
 **/
 UINTN
 KcWalkChainedFixupsInImage (
-  IN     UINT8                              *Buffer,
-  IN     UINTN                              BufferSize,
-  IN     MACH_DYLD_CHAINED_STARTS_IN_IMAGE  *Starts,
-  IN     UINTN                              StartsSize,
-  IN     KC_CHAINED_FIXUP_VISIT             Visitor OPTIONAL,
-  IN OUT VOID                               *VisitorContext OPTIONAL
+  IN     UINT8                   *Buffer,
+  IN     UINTN                   BufferSize,
+  IN     CONST UINT8             *StartsBacking,
+  IN     UINTN                   StartsSize,
+  IN     KC_CHAINED_FIXUP_VISIT  Visitor OPTIONAL,
+  IN OUT VOID                    *VisitorContext OPTIONAL
   );
 
 /**
