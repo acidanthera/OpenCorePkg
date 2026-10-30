@@ -4579,7 +4579,7 @@ RouteConfigRespForEfiVarStore (
 
   Status = gRT->GetVariable (VarStoreName, &EfiVarStoreInfo->Guid, NULL, &BufferSize, NULL);
   if (Status != EFI_BUFFER_TOO_SMALL) {
-    DEBUG ((DEBUG_ERROR, "The variable does not exist!"));
+    DEBUG ((DEBUG_ERROR, "OCHII: Failed to get HII variable store - %r\n", Status));
     goto Done;
   }
 

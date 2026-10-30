@@ -3429,13 +3429,13 @@ HiiGetConfigRespInfo (
       gConfigRespSize = ConfigSize + (ConfigSize >> 2);
       if (gRTConfigRespBuffer != NULL) {
         FreePool (gRTConfigRespBuffer);
-        DEBUG ((DEBUG_WARN, "[HiiDatabase]: Memory allocation is required after ReadyToBoot, which may change memory map and cause S4 resume issue.\n"));
+        DEBUG ((DEBUG_WARN, "OCHII: Memory allocation is required after ReadyToBoot, which may change memory map and cause S4 resume issue.\n"));
       }
 
       gRTConfigRespBuffer = (EFI_STRING)AllocateRuntimeZeroPool (gConfigRespSize);
       if (gRTConfigRespBuffer == NULL) {
         FreePool (ConfigAltResp);
-        DEBUG ((DEBUG_ERROR, "[HiiDatabase]: No enough memory resource to store the ConfigResp string.\n"));
+        DEBUG ((DEBUG_ERROR, "OCHII: No enough memory resource to store the ConfigResp string.\n"));
         //
         // Remove from the System Table when the configuration runtime buffer is freed.
         //
@@ -3490,12 +3490,12 @@ HiiGetDatabaseInfo (
     gDatabaseInfoSize = DatabaseInfoSize + (DatabaseInfoSize >> 2);
     if (gRTDatabaseInfoBuffer != NULL) {
       FreePool (gRTDatabaseInfoBuffer);
-      DEBUG ((DEBUG_WARN, "[HiiDatabase]: Memory allocation is required after ReadyToBoot, which may change memory map and cause S4 resume issue.\n"));
+      DEBUG ((DEBUG_WARN, "OCHII: Memory allocation is required after ReadyToBoot, which may change memory map and cause S4 resume issue.\n"));
     }
 
     gRTDatabaseInfoBuffer = AllocateRuntimeZeroPool (gDatabaseInfoSize);
     if (gRTDatabaseInfoBuffer == NULL) {
-      DEBUG ((DEBUG_ERROR, "[HiiDatabase]: No enough memory resource to store the HiiDatabase info.\n"));
+      DEBUG ((DEBUG_ERROR, "OCHII: No enough memory resource to store the HiiDatabase info.\n"));
       //
       // Remove from the System Table when the configuration runtime buffer is freed.
       //
