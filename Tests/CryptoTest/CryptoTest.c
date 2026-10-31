@@ -2,6 +2,7 @@
   Test crypto algos support.
 
 Copyright (c) 2018, savvas. All rights reserved.<BR>
+Copyright (c) 2026, ilikesn0w. All rights reserved.<BR>
 This program and the accompanying materials
 are licensed and made available under the terms and conditions of the BSD License
 which accompanies this distribution.  The full text of the license may be found at
@@ -300,7 +301,7 @@ TestHash (
   //
   for (Index = 0; Index < HASH_SAMPLES_NUM; Index++) {
     Print (L"#########################\n");
-    Print (L"Running hash test №%lu\n", Index);
+    Print (L"Running hash test #%lu\n", Index);
     Print (L"Test data:\n");
     for (Index2 = 0; Index2 < HashSamples[Index].PlainTextLen; Index2++) {
       if ((Index2 % 8 == 0) && (Index2 > 0)) {
@@ -403,6 +404,138 @@ TestHash (
 
 EFI_STATUS
 EFIAPI
+TestHmac (
+  VOID
+  )
+{
+  EFI_STATUS  Status         = EFI_INVALID_PARAMETER;
+  UINTN       Index          = 0;
+  UINTN       Index2         = 0;
+  BOOLEAN     HmacTestPassed = TRUE;
+  UINT8       HmacMd5Hash[MD5_DIGEST_SIZE];
+  UINT8       HmacSha1Hash[SHA1_DIGEST_SIZE];
+  UINT8       HmacSha256Hash[SHA256_DIGEST_SIZE];
+  UINT8       HmacSha512Hash[SHA512_DIGEST_SIZE];
+  UINT8       HmacSha384Hash[SHA384_DIGEST_SIZE];
+
+  //
+  // Iterate through HMAC samples
+  //
+  for (Index = 0; Index < HMAC_SAMPLES_NUM; Index++) {
+    Print (L"#########################\n");
+    Print (L"Running HMAC test #%lu\n", Index);
+    Print (L"Test data:\n");
+    for (Index2 = 0; Index2 < HmacSamples[Index].PlainTextLen; Index2++) {
+      if ((Index2 % 8 == 0) && (Index2 > 0)) {
+        Print (L"\n");
+      }
+
+      Print (L"%02x ", HmacSamples[Index].PlainText[Index2]);
+    }
+
+    Print (L"\n-------------------------\n");
+    HmacMd5 (
+      HmacSamples[Index].Key,
+      HmacSamples[Index].KeyLen,
+      HmacSamples[Index].PlainText,
+      HmacSamples[Index].PlainTextLen,
+      HmacMd5Hash
+      );
+
+    HmacSha1 (
+      HmacSamples[Index].Key,
+      HmacSamples[Index].KeyLen,
+      HmacSamples[Index].PlainText,
+      HmacSamples[Index].PlainTextLen,
+      HmacSha1Hash
+      );
+
+    HmacSha256 (
+      HmacSamples[Index].Key,
+      HmacSamples[Index].KeyLen,
+      HmacSamples[Index].PlainText,
+      HmacSamples[Index].PlainTextLen,
+      HmacSha256Hash
+      );
+
+    HmacSha512 (
+      HmacSamples[Index].Key,
+      HmacSamples[Index].KeyLen,
+      HmacSamples[Index].PlainText,
+      HmacSamples[Index].PlainTextLen,
+      HmacSha512Hash
+      );
+
+    HmacSha384 (
+      HmacSamples[Index].Key,
+      HmacSamples[Index].KeyLen,
+      HmacSamples[Index].PlainText,
+      HmacSamples[Index].PlainTextLen,
+      HmacSha384Hash
+      );
+
+    if (CompareMem (HmacMd5Hash, HmacSamples[Index].HmacMd5Hash, MD5_DIGEST_SIZE) == 0) {
+      Print (L"HmacMd5 hash test passed\n");
+    } else {
+      Print (L"HmacMd5 hash test failed\n");
+      HmacTestPassed = FALSE;
+    }
+
+    if (CompareMem (HmacSha1Hash, HmacSamples[Index].HmacSha1Hash, SHA1_DIGEST_SIZE) == 0) {
+      Print (L"HmacSha1 hash test passed\n");
+    } else {
+      Print (L"HmacSha1 hash test failed\n");
+      HmacTestPassed = FALSE;
+    }
+
+    if (CompareMem (HmacSha256Hash, HmacSamples[Index].HmacSha256Hash, SHA256_DIGEST_SIZE) == 0) {
+      Print (L"HmacSha256 hash test passed\n");
+    } else {
+      Print (L"HmacSha256 hash test failed\n");
+      HmacTestPassed = FALSE;
+    }
+
+    if (CompareMem (HmacSha512Hash, HmacSamples[Index].HmacSha512Hash, SHA512_DIGEST_SIZE) == 0) {
+      Print (L"HmacSha512 hash test passed\n");
+    } else {
+      Print (L"HmacSha512 hash test failed\n");
+      HmacTestPassed = FALSE;
+    }
+
+    if (CompareMem (HmacSha384Hash, HmacSamples[Index].HmacSha384Hash, SHA384_DIGEST_SIZE) == 0) {
+      Print (L"HmacSha384 hash test passed\n");
+    } else {
+      Print (L"HmacSha384 hash test failed\n");
+      HmacTestPassed = FALSE;
+    }
+
+    ZeroMem (HmacMd5Hash, MD5_DIGEST_SIZE);
+    ZeroMem (HmacSha1Hash, SHA1_DIGEST_SIZE);
+    ZeroMem (HmacSha256Hash, SHA256_DIGEST_SIZE);
+    ZeroMem (HmacSha512Hash, SHA512_DIGEST_SIZE);
+    ZeroMem (HmacSha384Hash, SHA384_DIGEST_SIZE);
+  }
+
+  if (HmacTestPassed) {
+    Status = EFI_SUCCESS;
+  } else {
+    Status = EFI_INVALID_PARAMETER;
+  }
+
+  //
+  // Zeroes buffers
+  //
+  ZeroMem (HmacMd5Hash, MD5_DIGEST_SIZE);
+  ZeroMem (HmacSha1Hash, SHA1_DIGEST_SIZE);
+  ZeroMem (HmacSha256Hash, SHA256_DIGEST_SIZE);
+  ZeroMem (HmacSha512Hash, SHA512_DIGEST_SIZE);
+  ZeroMem (HmacSha384Hash, SHA384_DIGEST_SIZE);
+
+  return Status;
+}
+
+EFI_STATUS
+EFIAPI
 TestCrypto (
   IN EFI_HANDLE        ImageHandle,
   IN EFI_SYSTEM_TABLE  *SystemTable
@@ -422,6 +555,17 @@ TestCrypto (
     Failure = TRUE;
   } else {
     Print (L"All hash tests passed!\n");
+  }
+
+  //
+  // Test HMAC alghoritms
+  //
+  Status = TestHmac ();
+  if (EFI_ERROR (Status)) {
+    Print (L"HmacTest failed!\n");
+    Failure = TRUE;
+  } else {
+    Print (L"All HMAC tests passed!\n");
   }
 
   //
@@ -497,6 +641,19 @@ UefiMain (
     Failure = TRUE;
   } else {
     Print (L"All hash tests passed!\n");
+  }
+
+  WaitForKeyPress (L"Press any key...");
+
+  //
+  // Test HMAC alghoritms
+  //
+  Status = TestHmac ();
+  if (EFI_ERROR (Status)) {
+    Print (L"HmacTest failed!\n");
+    Failure = TRUE;
+  } else {
+    Print (L"All HMAC tests passed!\n");
   }
 
   WaitForKeyPress (L"Press any key...");
