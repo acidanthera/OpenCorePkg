@@ -1059,47 +1059,7 @@ InternalScanPrelinkedKext (
         DEBUG ((DEBUG_INFO, "OCAK: Dependency %a was not found for kext %a\n", DependencyId, Kext->Identifier));
 
         DependencyKext = InternalGetQuirkDependencyKext (DependencyId, Context);
-        if (DependencyKext == NULL && Context->IsKernelCollection) {
-          //
-          // On kernel-collection boots (macOS 11+), bundle identifiers that the
-          // injected kext lists in OSBundleLibraries may have no plist entry in
-          // the Boot KC because the providing module ships in a different KC or
-          // is plist-only. Returning NULL here silently breaks symbol-only
-          // dependents (weak references, build-time links): the caller skips
-          // the dependency entirely, then InternalSolveSymbol () later fails
-          // with "library kext ... not found".
-          //
-          // Materialise a minimal kernel-stub PRELINKED_KEXT aliasing the
-          // kernel's own inner Mach-O context. The stub carries no vtable
-          // source, so it cannot satisfy subclassing, but it lets the kernel's
-          // symbol table answer weak/test lookups so the link can complete.
-          // Boot-KC dependents that need real vtables still fail loudly during
-          // linking, exactly as before.
-          //
-          DependencyKext = AllocateZeroPool (sizeof (*DependencyKext));
-          if (DependencyKext == NULL) {
-            continue;
-          }
-
-          DependencyKext->Signature       = PRELINKED_KEXT_SIGNATURE;
-          DependencyKext->Identifier      = DependencyId;
-          DependencyKext->BundleLibraries = NULL;
-          CopyMem (
-            &DependencyKext->Context.MachContext,
-            &Context->InnerMachContext,
-            sizeof (OC_MACHO_CONTEXT)
-            );
-          DependencyKext->Context.VirtualBase = 0;
-          DependencyKext->Context.VirtualKmod = 0;
-
-          DEBUG ((
-            DEBUG_INFO,
-            "OCAK: %a not in Boot KC, using kernel stub for symbol-only deps\n",
-            DependencyId
-            ));
-
-          InsertTailList (&Context->PrelinkedKexts, &DependencyKext->Link);
-        } else if (DependencyKext == NULL) {
+        if (DependencyKext == NULL) {
           //
           // Skip missing dependencies.  PLIST-only dependencies, such as used
           // in macOS Catalina, will not be found in prelinkedkernel and are
