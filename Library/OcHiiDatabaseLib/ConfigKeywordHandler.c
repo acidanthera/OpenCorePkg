@@ -2102,7 +2102,7 @@ ExtractConfigRequest (
       // Header->VarStoreId == 0 means no storage for this question.
       //
       ASSERT (Header->VarStoreId != 0);
-      DEBUG ((EFI_D_INFO, "Varstore Id: 0x%x\n", Header->VarStoreId));
+      DEBUG ((DEBUG_INFO, "OCHII: Varstore Id: 0x%x\n", Header->VarStoreId));
 
       Storage = FindStorageFromVarId (FormPackage, Header->VarStoreId);
       ASSERT (Storage != NULL);
@@ -2207,7 +2207,7 @@ ExtractConfigResp (
       // Header->VarStoreId == 0 means no storage for this question.
       //
       ASSERT (Header->VarStoreId != 0);
-      DEBUG ((EFI_D_INFO, "Varstore Id: 0x%x\n", Header->VarStoreId));
+      DEBUG ((DEBUG_INFO, "OCHII: Varstore Id: 0x%x\n", Header->VarStoreId));
 
       Storage = FindStorageFromVarId (FormPackage, Header->VarStoreId);
       ASSERT (Storage != NULL);

@@ -79,31 +79,31 @@ UefiHiiServicesLibConstructor (
   // Retrieve the pointer to the UEFI HII String Protocol
   //
   Status = gBS->LocateProtocol (&gEfiHiiStringProtocolGuid, NULL, (VOID **)&gHiiString);
-  DEBUG ((DEBUG_INFO, "Locate UEFI HII String Protocol - %r\n", Status));
+  DEBUG ((DEBUG_INFO, "OCHII: Locate UEFI HII String Protocol - %r\n", Status));
 
   //
   // Retrieve the pointer to the UEFI HII Database Protocol
   //
   Status = gBS->LocateProtocol (&gEfiHiiDatabaseProtocolGuid, NULL, (VOID **)&gHiiDatabase);
-  DEBUG ((DEBUG_INFO, "Locate UEFI HII Database Protocol - %r\n", Status));
+  DEBUG ((DEBUG_INFO, "OCHII: Locate UEFI HII Database Protocol - %r\n", Status));
 
   //
   // Retrieve the pointer to the UEFI HII Config Routing Protocol
   //
   Status = gBS->LocateProtocol (&gEfiHiiConfigRoutingProtocolGuid, NULL, (VOID **)&gHiiConfigRouting);
-  DEBUG ((DEBUG_INFO, "Locate UEFI HII Config Routing Protocol - %r\n", Status));
+  DEBUG ((DEBUG_INFO, "OCHII: Locate UEFI HII Config Routing Protocol - %r\n", Status));
 
   //
   // Retrieve the pointer to the optional UEFI HII Font Protocol
   //
   Status = gBS->LocateProtocol (&gEfiHiiFontProtocolGuid, NULL, (VOID **)&gHiiFont);
-  DEBUG ((DEBUG_INFO, "Locate UEFI HII Font Protocol - %r\n", Status));
+  DEBUG ((DEBUG_INFO, "OCHII: Locate UEFI HII Font Protocol - %r\n", Status));
 
   //
   // Retrieve the pointer to the optional UEFI HII Image Protocol
   //
   Status = gBS->LocateProtocol (&gEfiHiiImageProtocolGuid, NULL, (VOID **)&gHiiImage);
-  DEBUG ((DEBUG_INFO, "Locate UEFI HII Image Protocol - %r\n", Status));
+  DEBUG ((DEBUG_INFO, "OCHII: Locate UEFI HII Image Protocol - %r\n", Status));
 
   return EFI_SUCCESS;
 }
