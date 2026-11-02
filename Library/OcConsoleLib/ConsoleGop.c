@@ -567,7 +567,7 @@ OcUseDirectGop (
                   );
   if (!EFI_ERROR (Status)) {
     DEBUG ((DEBUG_INFO, "OCC: Found EG2 support %X\n", Eg2->Revision));
-    if (Eg2->Revision >= APPLE_EG2_INFO_PROTOCOL_REVISION) {
+    if (Eg2->Revision >= APPLE_EG2_INFO_PROTOCOL_REVISION_ROTATE) {
       Rotation = 0;
       Status   = Eg2->GetRotation (Eg2, &Rotation);
       if (!EFI_ERROR (Status) && (Rotation < AppleDisplayRotateMax)) {
