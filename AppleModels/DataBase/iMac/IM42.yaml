@@ -23,6 +23,7 @@ ChassisManufacturer: "Apple Computer, Inc."
 ChassisType: 0xD
 ChassisVersion: "Mac-F4218EC8"
 ChassisAssetTag: "Asset Tag"
+DataHubChassisType: ""
 MemoryFormFactor: 0x9
 # FIXME: check values (most should be correct?) and add missing, if any
 ProcessorType:

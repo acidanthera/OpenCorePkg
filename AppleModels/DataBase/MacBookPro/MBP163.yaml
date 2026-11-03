@@ -20,6 +20,7 @@ ChassisManufacturer: "Apple Inc."
 ChassisType: 0x9
 ChassisVersion: "Mac-E7203C0F68AA0004"
 ChassisAssetTag: ""
+DataHubChassisType: ""
 PlatformFeature: 0x32
 FirmwareFeatures: 0xFDAFF066
 FirmwareFeaturesMask: 0xFFFFFF7F

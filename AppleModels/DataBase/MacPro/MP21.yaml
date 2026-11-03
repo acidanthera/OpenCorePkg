@@ -23,6 +23,7 @@ ChassisManufacturer: "Apple Computer, Inc."
 ChassisType: 0x2
 ChassisVersion: "Mac-F4208DA9"
 ChassisAssetTag: "Asset Tag#"
+DataHubChassisType: ""
 FirmwareFeatures: 0xC0000015
 FirmwareFeaturesMask: 0xC0000FFF
 ExtendedFirmwareFeatures: 0x00000000C0000015

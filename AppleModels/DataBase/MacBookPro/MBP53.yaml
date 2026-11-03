@@ -23,6 +23,7 @@ ChassisManufacturer: "Apple Inc."
 ChassisType: 0xA
 ChassisVersion: "Mac-F22587C8"
 ChassisAssetTag: "Asset Tag#"
+DataHubChassisType: ""
 MemoryFormFactor: 0xD
 FirmwareFeatures: 0xC0001403
 FirmwareFeaturesMask: 0xC0007FFF

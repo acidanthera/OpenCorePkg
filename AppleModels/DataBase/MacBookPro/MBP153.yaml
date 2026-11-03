@@ -25,6 +25,7 @@ ChassisManufacturer: "Apple Inc."
 ChassisType: 0x9
 ChassisVersion: "Mac-1E7E29AD0135F9BC"
 ChassisAssetTag: ""
+DataHubChassisType: ""
 PlatformFeature: 0x32
 # FIXME: check
 FirmwareFeatures: 0xFD8FF426
