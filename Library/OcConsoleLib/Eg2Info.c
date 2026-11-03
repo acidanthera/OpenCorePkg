@@ -1,7 +1,7 @@
 /** @file
   AppleEg2Info protocol implementation.
 
-  Copyright (c) 2020, vit9696. All rights reserved.
+  Copyright (c) 2021, vit9696. All rights reserved.
   Copyright (c) 2026, ilikesn0w. All rights reserved.
   SPDX-License-Identifier: BSD-3-Clause
 **/
