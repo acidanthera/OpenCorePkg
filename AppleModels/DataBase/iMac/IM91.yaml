@@ -23,6 +23,7 @@ ChassisManufacturer: "Apple Inc."
 ChassisType: 0xD
 ChassisVersion: "Mac-F2218FA9"
 ChassisAssetTag: "Asset Tag#"
+DataHubChassisType: ""
 FirmwareFeatures: 0xC0001403
 FirmwareFeaturesMask: 0xC0003FFF
 ExtendedFirmwareFeatures: 0x00000000C0001403

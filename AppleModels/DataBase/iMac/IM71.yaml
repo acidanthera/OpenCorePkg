@@ -23,6 +23,7 @@ ChassisManufacturer: "Apple Inc."
 ChassisType: 0xD
 ChassisVersion: "Mac-F42386C8"
 ChassisAssetTag: "Asset Tag#"
+DataHubChassisType: ""
 FirmwareFeatures: 0xC0001407
 FirmwareFeaturesMask: 0xC0001FFF
 ExtendedFirmwareFeatures: 0x00000000C0001407

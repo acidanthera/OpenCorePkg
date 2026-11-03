@@ -23,6 +23,7 @@ ChassisManufacturer: "Apple Inc."
 ChassisType: 0xA
 ChassisVersion: "Mac-F22C8AC8"
 ChassisAssetTag: "Asset Tag#"
+DataHubChassisType: ""
 # FIXME: check
 FirmwareFeatures: 0xFC0FE13F
 # FIXME: check

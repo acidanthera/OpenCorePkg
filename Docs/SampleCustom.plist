@@ -1567,6 +1567,8 @@
 			<string>Mac-AA95B1DDAB278B95</string>
 			<key>BoardRevision</key>
 			<data>Bw==</data>
+			<key>ChassisType</key>
+			<string></string>
 			<key>DevicePathsSupported</key>
 			<integer>1</integer>
 			<key>FSBFrequency</key>

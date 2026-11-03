@@ -24,6 +24,7 @@ ChassisManufacturer: "Apple Inc."
 ChassisType: 0x9
 ChassisVersion: "Mac-551B86E5744E2388"
 ChassisAssetTag: ""
+DataHubChassisType: ""
 PlatformFeature: 0x1A
 FirmwareFeatures: 0xFF0FF57E
 FirmwareFeaturesMask: 0xFF1FFF7F

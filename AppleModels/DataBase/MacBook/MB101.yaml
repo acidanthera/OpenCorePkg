@@ -25,6 +25,7 @@ ChassisManufacturer: "Apple Inc."
 ChassisType: 0x9
 ChassisVersion: "Mac-EE2EBD4B90B839A8"
 ChassisAssetTag: ""
+DataHubChassisType: ""
 # FIXME: check
 PlatformFeature: 0x1A
 # FIXME: check
