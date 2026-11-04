@@ -27,6 +27,10 @@ ChassisType: 0x7
 # ChassisType: 0x17
 ChassisVersion: "Mac-27AD2F918AE68F61"
 ChassisAssetTag: ""
+# Tower
+DataHubChassisType: "Tower"
+# Rack
+# DataHubChassisType: "Rack Mount"
 PlatformFeature: 0x0
 FirmwareFeatures: 0xFDAFF066
 FirmwareFeaturesMask: 0xFFFFFF7F

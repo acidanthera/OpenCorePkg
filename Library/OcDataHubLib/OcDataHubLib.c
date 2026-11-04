@@ -287,6 +287,7 @@ UpdateDataHub (
   // without real coprocessor hardware present.
   //
   DataHubSetAppleMiscData (DataHub, OC_COPROCESSOR_VERSION, Data->CoprocessorVersion, sizeof (*Data->CoprocessorVersion));
+  DataHubSetAppleMiscAscii (DataHub, OC_CHASSIS_TYPE, Data->ChassisType);
 
   return EFI_SUCCESS;
 }

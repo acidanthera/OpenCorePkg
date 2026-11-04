@@ -23,6 +23,7 @@ ChassisManufacturer: "Apple Inc."
 ChassisType: 0x10
 ChassisVersion: "Mac-35C5E08120C7EEAF"
 ChassisAssetTag: ""
+DataHubChassisType: ""
 PlatformFeature: 0x3
 FirmwareFeatures: 0xE00DE137
 FirmwareFeaturesMask: 0xFF1FFF3F

@@ -23,6 +23,7 @@ ChassisManufacturer: "Apple Inc."
 ChassisType: 0x2
 ChassisVersion: "Mac-F60DEB81FF30ACF6"
 ChassisAssetTag: ""
+DataHubChassisType: ""
 PlatformFeature: 0x4
 FirmwareFeatures: 0xE90FF576
 FirmwareFeaturesMask: 0xFF1FFF7F
@@ -141,7 +142,7 @@ AppleModelCode:
   - "N1VX"
 # Note, first board code is used by macserial
 AppleBoardCode:
-  - "FHDD" 
+  - "FHDD"
   - "FNN1"
   - "FWC3"
 # Note, first year is used by macserial
