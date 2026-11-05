@@ -38,11 +38,14 @@ typedef struct {
   ///
   UINT8    Mode;
   ///
-  /// Always 0 and changes only if unknown protocol is present in system.
-  /// The producer of this unknown protocol has not been found, its only
-  /// consumer is FirmwarePasswordDxe.
+  /// 0x8 if the unknown protocol (2C7B7BEE-1B43-4485-AB0D-963BF193CFE1) was
+  /// found and its request failed or reported bit 0, otherwise 0.
   ///
   UINT8    Flags;
+  ///
+  /// Zeroed by the original implementation.
+  ///
+  UINT8    Reserved[6];
 } APPLE_FIRMWARE_PASSWORD_MODE_INFO;
 
 /**
@@ -67,8 +70,9 @@ EFI_STATUS
   @param[in] Password            Password to check.
 
   @retval EFI_ACCESS_DENIED      Entered password is incorrect.
-  @retval EFI_INVALID_PARAMETER  This is NULL or has a wrong signature.
-  @retval EFI_NOT_FOUND          There is no password set in the system.
+  @retval EFI_INVALID_PARAMETER  This or Password is NULL or This has a wrong signature.
+  @retval EFI_NOT_FOUND          There is no password set in the system or the unknown protocol
+                                 request failed or reported bit 0.
   @retval EFI_SUCCESS            Entered password is correct.
 **/
 typedef
@@ -84,7 +88,7 @@ EFI_STATUS
   @param[in]  This               A pointer to the protocol instance.
   @param[out] Info               Pointer to APPLE_FIRMWARE_PASSWORD_MODE_INFO.
 
-  @retval EFI_INVALID_PARAMETER  This is NULL or has a wrong signature.
+  @retval EFI_INVALID_PARAMETER  This or Info is NULL or This has a wrong signature.
   @retval EFI_SUCCESS            Info was populated.
 **/
 typedef
