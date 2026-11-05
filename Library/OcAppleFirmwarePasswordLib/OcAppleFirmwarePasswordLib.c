@@ -6,9 +6,14 @@
 **/
 
 #include <Uefi.h>
+
+#include <Library/DebugLib.h>
+#include <Library/BaseMemoryLib.h>
+#include <Library/MemoryAllocationLib.h>
 #include <Library/UefiBootServicesTableLib.h>
 
 #include <Library/OcAppleFirmwarePasswordLib.h>
+#include <Library/OcMiscLib.h>
 
 STATIC
 EFI_STATUS
@@ -17,7 +22,11 @@ AppleFirmwarePasswordIsSet (
   IN     APPLE_FIRMWARE_PASSWORD_PROTOCOL  *This
   )
 {
-  return EFI_UNSUPPORTED;
+  if ((This == NULL) || (This->Signature != APPLE_FIRMWARE_PASSWORD_PROTOCOL_SIGNATURE)) {
+    return EFI_INVALID_PARAMETER;
+  }
+
+  return EFI_NOT_FOUND;
 }
 
 STATIC
@@ -28,7 +37,11 @@ AppleFirmwarePasswordCheck (
   IN     CONST CHAR16                      *Password
   )
 {
-  return EFI_UNSUPPORTED;
+  if ((This == NULL) || (Password == NULL) || (This->Signature != APPLE_FIRMWARE_PASSWORD_PROTOCOL_SIGNATURE)) {
+    return EFI_INVALID_PARAMETER;
+  }
+
+  return EFI_NOT_FOUND;
 }
 
 STATIC
@@ -39,7 +52,13 @@ AppleFirmwarePasswordGetMode (
   OUT    APPLE_FIRMWARE_PASSWORD_MODE_INFO  *Info
   )
 {
-  return EFI_UNSUPPORTED;
+  if ((This == NULL) || (Info == NULL) || (This->Signature != APPLE_FIRMWARE_PASSWORD_PROTOCOL_SIGNATURE)) {
+    return EFI_INVALID_PARAMETER;
+  }
+
+  ZeroMem (Info, sizeof (*Info));
+
+  return EFI_SUCCESS;
 }
 
 STATIC APPLE_FIRMWARE_PASSWORD_PROTOCOL  mAppleFirmwarePasswordProtocol = {
@@ -52,22 +71,41 @@ STATIC APPLE_FIRMWARE_PASSWORD_PROTOCOL  mAppleFirmwarePasswordProtocol = {
 
 APPLE_FIRMWARE_PASSWORD_PROTOCOL *
 OcAppleFirmwarePasswordInstallProtocol (
-  VOID
+  IN BOOLEAN  Reinstall
   )
 {
   EFI_STATUS                        Status;
   APPLE_FIRMWARE_PASSWORD_PROTOCOL  *FwPass;
+  UINTN                             Index;
+  UINTN                             HandleCount;
+  EFI_HANDLE                        *HandleBuffer;
   EFI_HANDLE                        NewHandle;
 
-  FwPass = NULL;
+  FwPass       = NULL;
+  HandleBuffer = NULL;
+  HandleCount  = 0;
+  Index        = 0;
 
-  Status = gBS->LocateProtocol (
-                  &gAppleFirmwarePasswordProtocolGuid,
-                  NULL,
-                  (VOID **)&FwPass
-                  );
-  if (!EFI_ERROR (Status)) {
-    return FwPass;
+  if (Reinstall) {
+    Status = OcUninstallAllProtocolInstances (&gAppleFirmwarePasswordProtocolGuid);
+    if (EFI_ERROR (Status)) {
+      DEBUG ((DEBUG_ERROR, "OCAFWP: Uninstall failed - %r\n", Status));
+      return NULL;
+    }
+  } else {
+    Status = gBS->LocateHandleBuffer (ByProtocol, &gAppleFirmwarePasswordProtocolGuid, NULL, &HandleCount, &HandleBuffer);
+    if (!EFI_ERROR (Status) && (HandleCount != 0) && (HandleBuffer != NULL)) {
+      for (Index = 0; Index < HandleCount; Index++) {
+        FwPass = NULL;
+        Status = OcHandleProtocolFallback (HandleBuffer[Index], &gAppleFirmwarePasswordProtocolGuid, (VOID **)&FwPass);
+        if (!EFI_ERROR (Status) && (FwPass != NULL) && (FwPass->Signature == APPLE_FIRMWARE_PASSWORD_PROTOCOL_SIGNATURE)) {
+          FreePool (HandleBuffer);
+          return FwPass;
+        }
+      }
+
+      FreePool (HandleBuffer);
+    }
   }
 
   NewHandle = NULL;
@@ -77,6 +115,7 @@ OcAppleFirmwarePasswordInstallProtocol (
                      &mAppleFirmwarePasswordProtocol,
                      NULL
                      );
+
   if (EFI_ERROR (Status)) {
     return NULL;
   }

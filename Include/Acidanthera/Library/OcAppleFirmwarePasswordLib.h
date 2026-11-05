@@ -13,11 +13,13 @@
 /**
   Install and initialise Apple Firmware Password protocol.
 
+  @param[in] Reinstall  Overwrite installed protocol.
+
   @retval installed or located protocol or NULL.
 **/
 APPLE_FIRMWARE_PASSWORD_PROTOCOL *
 OcAppleFirmwarePasswordInstallProtocol (
-  VOID
+  IN BOOLEAN  Reinstall
   );
 
 #endif // OC_APPLE_FIRMWARE_PASSWORD_LIB_H
