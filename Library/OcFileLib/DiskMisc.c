@@ -12,6 +12,8 @@
 
 #include <Uefi.h>
 
+#include <Guid/AppleDevicePath.h>
+
 #include <Guid/Gpt.h>
 
 #include <IndustryStandard/Mbr.h>
@@ -413,6 +415,41 @@ OcIsDiskCdRom (
   }
 
   return TRUE;
+}
+
+BOOLEAN
+OcIsDiskSdCard (
+  IN EFI_DEVICE_PATH_PROTOCOL  *DiskDevicePath
+  )
+{
+  EFI_DEVICE_PATH_PROTOCOL    *DevicePathWalker;
+  VENDOR_DEFINED_DEVICE_PATH  *VendorNode;
+
+  ASSERT (DiskDevicePath != NULL);
+
+  DevicePathWalker = DiskDevicePath;
+
+  while (!IsDevicePathEnd (DevicePathWalker)) {
+    if ((  (DevicePathType (DevicePathWalker) == MESSAGING_DEVICE_PATH)
+        && ((DevicePathSubType (DevicePathWalker)) == MSG_SD_DP)))
+    {
+      return TRUE;
+    }
+
+    if (  (DevicePathType (DevicePathWalker) == MESSAGING_DEVICE_PATH)
+       && (DevicePathSubType (DevicePathWalker) == MSG_VENDOR_DP)
+       && (DevicePathNodeLength (DevicePathWalker) >= sizeof (VENDOR_DEFINED_DEVICE_PATH)))
+    {
+      VendorNode = (VENDOR_DEFINED_DEVICE_PATH *)DevicePathWalker;
+      if (CompareGuid (&gAppleSdCardVendorDevicePathGuid, &VendorNode->Guid)) {
+        return TRUE;
+      }
+    }
+
+    DevicePathWalker = NextDevicePathNode (DevicePathWalker);
+  }
+
+  return FALSE;
 }
 
 EFI_STATUS

@@ -49,6 +49,7 @@
   MemoryAllocationLib
 
 [Guids]
+  gAppleSdCardVendorDevicePathGuid     ## SOMETIMES_CONSUMES
   gEfiFileInfoGuid                     ## CONSUMES
   gEfiFileSystemInfoGuid               ## CONSUMES
   gEfiFileSystemVolumeLabelInfoIdGuid  ## CONSUMES

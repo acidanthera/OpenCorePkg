@@ -96,13 +96,8 @@ GuiClickableIsHit (
   ASSERT (Image != NULL);
   ASSERT (Image->Buffer != NULL);
 
-  if (  (OffsetX < 0) || (OffsetX >= Image->Width)
-     || (OffsetY < 0) || (OffsetY >= Image->Height))
-  {
-    return FALSE;
-  }
-
-  return Image->Buffer[(UINT32)OffsetY * Image->Width + (UINT32)OffsetX].Reserved > 0;
+  return (OffsetX >= 0) && (OffsetX < Image->Width)
+         && (OffsetY >= 0) && (OffsetY < Image->Height);
 }
 
 GUI_OBJ *

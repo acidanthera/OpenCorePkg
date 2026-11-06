@@ -533,10 +533,23 @@ OcPartitionGetPartitionHandle (
   @retval FALSE  Media block size is not 2 KB.
   @retval FALSE  Media last block is 0.
 
-  @retval TRUE   Disk is a CD-ROM device.
+  @retval TRUE   The disk is a CD-ROM device.
 **/
 BOOLEAN
 OcIsDiskCdRom (
+  IN EFI_DEVICE_PATH_PROTOCOL  *DiskDevicePath
+  );
+
+/**
+  Check if disk is SD card.
+
+  @param[in] DiskDevicePath  The Device Path of the disk.
+
+  @retval FALSE  The disk is not an SD card.
+  @retval TRUE   The disk is an SD card.
+**/
+BOOLEAN
+OcIsDiskSdCard (
   IN EFI_DEVICE_PATH_PROTOCOL  *DiskDevicePath
   );
 
