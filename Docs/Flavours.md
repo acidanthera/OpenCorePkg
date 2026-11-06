@@ -214,6 +214,7 @@ Provided by OcBinaryData. Used automatically by OC in some circumstances, if pro
  - **Other** - Other OS (fallback: **HardDrive**)
  - **Windows** - Microsoft Windows (fallback: **HardDrive**)
  - **OpticalDrive** - Optical disc drive (fallback: **HardDrive**)
+ - **SdCard** - SD card (fallback: **HardDrive**)
 
 ### Additional Optional
 

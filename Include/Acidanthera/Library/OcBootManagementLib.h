@@ -456,6 +456,10 @@ struct OC_BOOT_ENTRY_ {
   //
   BOOLEAN                           IsCdrom;
   //
+  // Set when this entry is an SD card.
+  //
+  BOOLEAN                           IsSdCard;
+  //
   // Set when this entry is an externally available entry (e.g. USB).
   //
   BOOLEAN                           IsExternal;
