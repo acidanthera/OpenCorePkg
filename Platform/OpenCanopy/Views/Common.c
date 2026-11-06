@@ -94,15 +94,12 @@ GuiClickableIsHit (
   )
 {
   ASSERT (Image != NULL);
-  ASSERT (Image->Buffer != NULL);
 
-  if (  (OffsetX < 0) || (OffsetX >= Image->Width)
-     || (OffsetY < 0) || (OffsetY >= Image->Height))
-  {
-    return FALSE;
-  }
-
-  return Image->Buffer[(UINT32)OffsetY * Image->Width + (UINT32)OffsetX].Reserved > 0;
+  //
+  // Icons may have transparent areas, which must be pressable.
+  //
+  return (OffsetX >= 0) && (OffsetX < Image->Width)
+         && (OffsetY >= 0) && (OffsetY < Image->Height);
 }
 
 GUI_OBJ *
