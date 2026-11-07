@@ -1424,27 +1424,28 @@ OcLoadPickerHotKeys (
   Key index mappings.
   Non-negative values may also be returned to request a specific zero-indexed boot entry.
 **/
-#define OC_INPUT_STR               "123456789ABCDEFGHIJKLMNOPQRSTUVXWZ"
-#define OC_INPUT_MAX               L_STR_LEN (OC_INPUT_STR)
-#define OC_INPUT_ABORTED           -1           ///< Esc or 0
-#define OC_INPUT_NO_ACTION         -2           ///< Some other key
-#define OC_INPUT_TIMEOUT           -3           ///< Timeout
-#define OC_INPUT_CONTINUE          -4           ///< Continue (press enter)
-#define OC_INPUT_UP                -5           ///< Move up
-#define OC_INPUT_DOWN              -6           ///< Move down
-#define OC_INPUT_LEFT              -7           ///< Move left
-#define OC_INPUT_RIGHT             -8           ///< Move right
-#define OC_INPUT_TOP               -9           ///< Move to top
-#define OC_INPUT_BOTTOM            -10          ///< Move to bottom
-#define OC_INPUT_MORE              -11          ///< Show more entries (press space)
-#define OC_INPUT_VOICE_OVER        -12          ///< Toggle VoiceOver (press CMD+F5)
-#define OC_INPUT_INTERNAL          -13          ///< Accepted internal hotkey (e.g. Apple)
-#define OC_INPUT_TYPING_CLEAR_ALL  -14          ///< Clear current input while typing (press esc)
-#define OC_INPUT_TYPING_BACKSPACE  -15          ///< Clear last typed character while typing (press backspace)
-#define OC_INPUT_TYPING_LEFT       -16          ///< Move left while typing (UI does not have to support)
-#define OC_INPUT_TYPING_RIGHT      -17          ///< Move right while typing (UI does not have to support)
-#define OC_INPUT_TYPING_CONFIRM    -18          ///< Confirm input while typing (press enter)
-#define OC_INPUT_SWITCH_FOCUS      -19          ///< Switch UI focus (tab and shift+tab)
+#define OC_INPUT_STR                      "123456789ABCDEFGHIJKLMNOPQRSTUVXWZ"
+#define OC_INPUT_MAX                      L_STR_LEN (OC_INPUT_STR)
+#define OC_INPUT_ABORTED                  -1    ///< Esc or 0
+#define OC_INPUT_NO_ACTION                -2    ///< Some other key
+#define OC_INPUT_TIMEOUT                  -3    ///< Timeout
+#define OC_INPUT_CONTINUE                 -4    ///< Continue (press enter)
+#define OC_INPUT_UP                       -5    ///< Move up
+#define OC_INPUT_DOWN                     -6    ///< Move down
+#define OC_INPUT_LEFT                     -7    ///< Move left
+#define OC_INPUT_RIGHT                    -8    ///< Move right
+#define OC_INPUT_TOP                      -9    ///< Move to top
+#define OC_INPUT_BOTTOM                   -10   ///< Move to bottom
+#define OC_INPUT_MORE                     -11   ///< Show more entries (press space)
+#define OC_INPUT_VOICE_OVER               -12   ///< Toggle VoiceOver (press CMD+F5)
+#define OC_INPUT_INTERNAL                 -13   ///< Accepted internal hotkey (e.g. Apple)
+#define OC_INPUT_TYPING_CLEAR_ALL         -14   ///< Clear current input while typing (press esc)
+#define OC_INPUT_TYPING_BACKSPACE         -15   ///< Clear last typed character while typing (press backspace)
+#define OC_INPUT_TYPING_LEFT              -16   ///< Move left while typing (UI does not have to support)
+#define OC_INPUT_TYPING_RIGHT             -17   ///< Move right while typing (UI does not have to support)
+#define OC_INPUT_TYPING_CONFIRM           -18   ///< Confirm input while typing (press enter)
+#define OC_INPUT_SWITCH_FOCUS             -19   ///< Switch UI focus (tab and shift+tab)
+#define OC_INPUT_EJECT_INJECT_DISC_DRIVE  -20   ///< Eject/Inject disc drive (press F12)
 #define OC_INPUT_FUNCTIONAL(x)  (-50 - (x))     ///< Function hotkeys
 
 /**
@@ -2304,6 +2305,17 @@ EFI_STATUS
 EFIAPI
 OcResetSystem (
   IN CHAR16  *Mode
+  );
+
+/**
+  Eject/Inject disc from optical drive using Apple Removable Media protocol.
+
+  @retval  FALSE disc was not ejected/injected.
+  @retval  TRUE  disc was ejected/injected.
+**/
+BOOLEAN
+OcEjectInjectRemMediaDrive (
+  VOID
   );
 
 #endif // OC_BOOT_MANAGEMENT_LIB_H

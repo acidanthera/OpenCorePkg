@@ -480,6 +480,14 @@ GetPickerKeyInfo (
     return;
   }
 
+  //
+  // Handle eject/Inject disc drive - non-repeating.
+  //
+  if (OcKeyMapHasKey (KeysDoNotRepeat, NumKeysDoNotRepeat, AppleHidUsbKbUsageKeyF12)) {
+    PickerKeyInfo->OcKeyCode = OC_INPUT_EJECT_INJECT_DISC_DRIVE;
+    return;
+  }
+
   if ((KeyFilter & OC_PICKER_KEYS_TYPING) == 0) {
     //
     // Handle reload menu - non-repeating.

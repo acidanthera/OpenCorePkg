@@ -858,6 +858,12 @@ OcShowSimpleBootMenu (
       } else if (PickerKeyInfo.OcKeyCode == OC_INPUT_VOICE_OVER) {
         OcToggleVoiceOver (BootContext->PickerContext, NULL, NULL);
         break;
+      } else if (PickerKeyInfo.OcKeyCode == OC_INPUT_EJECT_INJECT_DISC_DRIVE) {
+        if (OcEjectInjectRemMediaDrive ()) {
+          return EFI_ABORTED;
+        } else {
+          break;
+        }
       } else if ((PickerKeyInfo.OcKeyCode != OC_INPUT_NO_ACTION) && (PickerKeyInfo.OcKeyCode >= 0) && ((UINTN)PickerKeyInfo.OcKeyCode < Count)) {
         *ChosenBootEntry               = BootEntries[PickerKeyInfo.OcKeyCode];
         (*ChosenBootEntry)->SetDefault = ((PickerKeyInfo.OcModifiers & OC_MODIFIERS_SET_DEFAULT) != 0);
