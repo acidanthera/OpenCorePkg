@@ -37,6 +37,12 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 //
 extern KERNEL_QUIRK  gKernelQuirks[];
 
+EFI_STATUS
+InternalPatchRealtekEthernet (
+  IN OUT PRELINKED_CONTEXT  *Context,
+  IN     UINT32             KernelVersion
+  );
+
 typedef struct PRELINKED_KEXT_ PRELINKED_KEXT;
 
 typedef struct {

@@ -1233,6 +1233,8 @@
 			<false/>
 			<key>ForceAquantiaEthernet</key>
 			<false/>
+			<key>ForceRealtekEthernet</key>
+			<false/>
 			<key>ForceSecureBootScheme</key>
 			<false/>
 			<key>IncreasePciBarSize</key>

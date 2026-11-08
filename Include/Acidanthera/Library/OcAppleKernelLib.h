@@ -586,6 +586,10 @@ typedef enum {
   //
   KernelQuirkForceAquantiaEthernet,
   //
+  // Enable native Realtek PCIe Ethernet support on Tahoe.
+  //
+  KernelQuirkForceRealtekEthernet,
+  //
   // Force SecureBoot support for all CPUs.
   //
   KernelQuirkForceSecureBootScheme,
@@ -631,6 +635,17 @@ typedef enum {
 
   KernelQuirkMax
 } KERNEL_QUIRK_NAME;
+
+struct OC_GLOBAL_CONFIG_;
+
+/**
+  Check Realtek quirk configuration conflicts. Zero KernelVersion checks any Tahoe version.
+**/
+UINT32
+OcKernelCheckRealtekEthernetConfig (
+  IN struct OC_GLOBAL_CONFIG_  *Config,
+  IN UINT32                    KernelVersion
+  );
 
 /**
   Kernel quirk patch function.

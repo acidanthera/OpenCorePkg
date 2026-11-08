@@ -387,6 +387,19 @@ OcKernelApplyPatches (
       Status
       ));
   }
+
+  if (  !IsKernelPatch
+     && !Is32Bit
+     && Config->Kernel.Quirks.ForceRealtekEthernet
+     && OcMatchDarwinVersion (DarwinVersion, KERNEL_VERSION_TAHOE_MIN, KERNEL_VERSION (KERNEL_VERSION_TAHOE + 1, 0, 0) - 1))
+  {
+    if (OcKernelCheckRealtekEthernetConfig (Config, DarwinVersion) == 0) {
+      Status = OcKernelApplyQuirk (KernelQuirkForceRealtekEthernet, CacheType, DarwinVersion, Context, NULL);
+      DEBUG ((EFI_ERROR (Status) ? DEBUG_WARN : DEBUG_INFO, "OC: ForceRealtekEthernet - %r\n", Status));
+    } else {
+      DEBUG ((DEBUG_WARN, "OC: ForceRealtekEthernet skipped due to conflicting kernel configuration\n"));
+    }
+  }
 }
 
 VOID

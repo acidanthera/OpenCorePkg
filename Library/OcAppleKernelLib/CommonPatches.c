@@ -2973,6 +2973,17 @@ PatchSetApfsTrimTimeout (
   return EFI_SUCCESS;
 }
 
+STATIC
+EFI_STATUS
+PatchRealtekEthernet (
+  IN OUT PATCHER_CONTEXT  *Patcher OPTIONAL,
+  IN     UINT32           KernelVersion
+  )
+{
+  DEBUG ((DEBUG_WARN, "OCAK: ForceRealtekEthernet requires kernel collection dependency context\n"));
+  return EFI_UNSUPPORTED;
+}
+
 //
 // Quirks table.
 //
@@ -2991,6 +3002,7 @@ KERNEL_QUIRK  gKernelQuirks[] = {
   [KernelQuirkExtendBTFeatureFlags]    = { "com.apple.iokit.IOBluetoothFamily",             PatchBTFeatureFlags         },
   [KernelQuirkExternalDiskIcons]       = { "com.apple.driver.AppleAHCIPort",                PatchForceInternalDiskIcons },
   [KernelQuirkForceAquantiaEthernet]   = { "com.apple.driver.AppleEthernetAquantiaAqtion",  PatchAquantiaEthernet       },
+  [KernelQuirkForceRealtekEthernet]    = { "com.apple.driver.AppleEthernetRL",              PatchRealtekEthernet        },
   [KernelQuirkForceSecureBootScheme]   = { "com.apple.security.AppleImage4",                PatchForceSecureBootScheme  },
   [KernelQuirkIncreasePciBarSize]      = { "com.apple.iokit.IOPCIFamily",                   PatchIncreasePciBarSize     },
   [KernelQuirkLapicKernelPanic]        = { NULL,                                            PatchLapicKernelPanic       },
