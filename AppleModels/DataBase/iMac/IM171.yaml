@@ -29,6 +29,7 @@ ChassisVersion:
   - "Mac-65CE76090165799A"
   - "Mac-B809C3757DA9BB8D"
 ChassisAssetTag: ""
+DataHubChassisType: ""
 PlatformFeature: 0x0
 FirmwareFeatures: 0xFC0FE137
 FirmwareFeaturesMask: 0xFF1FFF3F

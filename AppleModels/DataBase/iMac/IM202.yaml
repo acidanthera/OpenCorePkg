@@ -25,6 +25,7 @@ ChassisManufacturer: "Apple Inc."
 ChassisType: 0xD
 ChassisVersion: "Mac-AF89B6D9451A490B"
 ChassisAssetTag: ""
+DataHubChassisType: ""
 PlatformFeature: 0x20
 # FIXME:
 FirmwareFeatures: 0xFFB3F066
