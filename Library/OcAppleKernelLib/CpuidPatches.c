@@ -881,7 +881,8 @@ PatchKernelCpuId (
   IN     OC_CPU_INFO      *CpuInfo,
   IN     UINT32           *Data,
   IN     UINT32           *DataMask,
-  IN     UINT32           KernelVersion
+  IN     UINT32           KernelVersion,
+  OUT    UINT8            *LogicalProcessorIdCapacity
   )
 {
   EFI_STATUS                Status;
@@ -998,6 +999,9 @@ PatchKernelCpuId (
       );
     Record += FoundSize;
 
+    *LogicalProcessorIdCapacity = (Edx.Uint32 & CPUID_FEATURE_HTT) != 0
+                                  ? (UINT8)Ebx.Bits.MaximumAddressableIdsForLogicalProcessors : 1;
+
     for (Index = 0; Index < EFI_PAGE_SIZE - sizeof (mKernelCpuidFindMcRel); ++Index, ++Record) {
       if (CompareMem (Record, mKernelCpuidFindMcRel, sizeof (mKernelCpuidFindMcRel)) == 0) {
         McPatch         = (INTERNAL_MICROCODE_PATCH *)Record;
@@ -1041,6 +1045,7 @@ PatchKernelCpuId (
 
     FnPatch->AppleFamily1 = FnPatch->AppleFamily2 = OcCpuModelToAppleFamily (Eax);
 
+    *LogicalProcessorIdCapacity = (UINT8)FnPatch->LogicalPerPkg;
     DEBUG ((DEBUG_INFO, "OCAK: [OK] Patch success CPUID debug\n"));
     return EFI_SUCCESS;
   }
@@ -1240,18 +1245,18 @@ CONST UINT8
 };
 
 STATIC
-CONST UINT8
+UINT8
   mProvideCurrentCpuInfoTopologyCorePerPackageV1Replace[] = {
   // mov  eax, r13d
-  // mov  eax, 0x80    <--- start
+  // mov  eax, logical processor ID capacity    <--- start
   // mov  dword[], eax
-  0xB8, 0x80, 0x00, 0x00, 0x00, 0x89
+  0xB8, 0x00, 0x00, 0x00, 0x00, 0x89
 };
 
 STATIC
 PATCHER_GENERIC_PATCH
   mProvideCurrentCpuInfoTopologyCorePerPackageV1Patch = {
-  .Comment     = DEBUG_POINTER ("Set core per package count to 128 V1"),
+  .Comment     = DEBUG_POINTER ("Set core per package count V1"),
   .Base        = NULL,
   .Find        = mProvideCurrentCpuInfoTopologyCorePerPackageV1Find,
   .Mask        = NULL,
@@ -1274,18 +1279,18 @@ CONST UINT8
 };
 
 STATIC
-CONST UINT8
+UINT8
   mProvideCurrentCpuInfoTopologyCorePerPackageV1_5Replace[] = {
   // mov  edx, r13d
-  // mov  edx, 0x80    <--- start
+  // mov  edx, logical processor ID capacity    <--- start
   // mov  dword[], edx
-  0xBA, 0x80, 0x00, 0x00, 0x00, 0x89
+  0xBA, 0x00, 0x00, 0x00, 0x00, 0x89
 };
 
 STATIC
 PATCHER_GENERIC_PATCH
   mProvideCurrentCpuInfoTopologyCorePerPackageV1_5Patch = {
-  .Comment     = DEBUG_POINTER ("Set core per package count to 128 V1_5"),
+  .Comment     = DEBUG_POINTER ("Set core per package count V1_5"),
   .Base        = NULL,
   .Find        = mProvideCurrentCpuInfoTopologyCorePerPackageV1_5Find,
   .Mask        = NULL,
@@ -1314,20 +1319,20 @@ CONST UINT8
 };
 
 STATIC
-CONST UINT8
+UINT8
   mProvideCurrentCpuInfoTopologyCorePerPackageV2Replace[] = {
   // mov  eax/edx, r13d
   // shr  eax/edx, 0x1a    <--- start
   // nop
-  // mov  al/dl, 128
+  // mov  al/dl, logical processor ID capacity
   // mov  dword[], eax/edx
-  0xC1, 0xE8 /* 0xEA */, 0x1A, 0x90, 0xB0 /* 0xB2 */, 0x80, 0x89
+  0xC1, 0xE8 /* 0xEA */, 0x1A, 0x90, 0xB0 /* 0xB2 */, 0x00, 0x89
 };
 
 STATIC
 PATCHER_GENERIC_PATCH
   mProvideCurrentCpuInfoTopologyCorePerPackageV2Patch = {
-  .Comment     = DEBUG_POINTER ("Set core per package count to 128 V2"),
+  .Comment     = DEBUG_POINTER ("Set core per package count V2"),
   .Base        = NULL,
   .Find        = mProvideCurrentCpuInfoTopologyCorePerPackageV2Find,
   .Mask        = mProvideCurrentCpuInfoTopologyCorePerPackageV2Mask,
@@ -1344,7 +1349,8 @@ EFI_STATUS
 PatchProvideCurrentCpuInfoMSR35h (
   IN OUT PATCHER_CONTEXT  *Patcher,
   IN     OC_CPU_INFO      *CpuInfo,
-  IN     UINT32           KernelVersion
+  IN     UINT32           KernelVersion,
+  IN     UINT8            LogicalProcessorIdCapacity
   )
 {
   EFI_STATUS  Status;
@@ -1361,6 +1367,11 @@ PatchProvideCurrentCpuInfoMSR35h (
   }
 
   IsAmpCpu = (CpuInfo->ThreadCount % CpuInfo->CoreCount) != 0;
+
+  if (IsAmpCpu && (LogicalProcessorIdCapacity < CpuInfo->ThreadCount)) {
+    DEBUG ((DEBUG_WARN, "OCAK: Invalid AMP logical capacity %u for %u threads\n", LogicalProcessorIdCapacity, CpuInfo->ThreadCount));
+    return EFI_UNSUPPORTED;
+  }
 
   //
   // Provide real values for normal CPUs.
@@ -1391,6 +1402,13 @@ PatchProvideCurrentCpuInfoMSR35h (
     return Status;
   }
 
+  //
+  // Match XNU's logical ID capacity to keep its APIC ID divisor at one.
+  //
+  mProvideCurrentCpuInfoTopologyCorePerPackageV1Replace[1]   = LogicalProcessorIdCapacity;
+  mProvideCurrentCpuInfoTopologyCorePerPackageV1_5Replace[1] = LogicalProcessorIdCapacity;
+  mProvideCurrentCpuInfoTopologyCorePerPackageV2Replace[5]   = LogicalProcessorIdCapacity;
+
   if (KernelVersion >= KERNEL_VERSION_MONTEREY_MIN) {
     Status = PatcherApplyGenericPatch (
                Patcher,
@@ -1410,7 +1428,7 @@ PatchProvideCurrentCpuInfoMSR35h (
                );
   }
 
-  DEBUG ((DEBUG_INFO, "OCAK: Patching core per package count - %r\n", Status));
+  DEBUG ((DEBUG_INFO, "OCAK: Patching core per package count to %u - %r\n", LogicalProcessorIdCapacity, Status));
 
   return Status;
 }
@@ -1557,7 +1575,8 @@ EFI_STATUS
 PatchProvideCurrentCpuInfo (
   IN OUT PATCHER_CONTEXT  *Patcher,
   IN     OC_CPU_INFO      *CpuInfo,
-  IN     UINT32           KernelVersion
+  IN     UINT32           KernelVersion,
+  IN     UINT8            LogicalProcessorIdCapacity
   )
 {
   EFI_STATUS  Status;
@@ -1644,7 +1663,7 @@ PatchProvideCurrentCpuInfo (
   IsTigerCacheUnsupported = (IsTigerOld || IsTigerNew) && IsLeaf4CacheSupported;
 
   Status  = EFI_SUCCESS;
-  Status |= PatchProvideCurrentCpuInfoMSR35h (Patcher, CpuInfo, KernelVersion);
+  Status |= PatchProvideCurrentCpuInfoMSR35h (Patcher, CpuInfo, KernelVersion, LogicalProcessorIdCapacity);
 
   //
   // Pull required symbols.

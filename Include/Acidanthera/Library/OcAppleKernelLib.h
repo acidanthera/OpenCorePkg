@@ -1351,11 +1351,12 @@ PatchSetPciSerialDevice (
 /**
   Apply modification to CPUID 1.
 
-  @param Patcher        Patcher context.
-  @param CpuInfo        CPU information.
-  @param Data           4 32-bit integers with CPUID data.
-  @param DataMask       4 32-bit integers with CPUID enabled overrides data.
-  @param KernelVersion  Current kernel version.
+  @param Patcher                     Patcher context.
+  @param CpuInfo                     CPU information.
+  @param Data                        4 32-bit integers with CPUID data.
+  @param DataMask                    4 32-bit integers with CPUID enabled overrides data.
+  @param KernelVersion               Current kernel version.
+  @param LogicalProcessorIdCapacity  Logical processor ID capacity reported by the CPUID patch.
 
   @return  EFI_SUCCESS on success.
 **/
@@ -1365,15 +1366,17 @@ PatchKernelCpuId (
   IN     OC_CPU_INFO      *CpuInfo,
   IN     UINT32           *Data,
   IN     UINT32           *DataMask,
-  IN     UINT32           KernelVersion
+  IN     UINT32           KernelVersion,
+  OUT    UINT8            *LogicalProcessorIdCapacity
   );
 
 /**
   Apply current CPU information patches.
 
-  @param Patcher        Patcher context.
-  @param CpuInfo        CPU information.
-  @param KernelVersion  Current kernel version.
+  @param Patcher                     Patcher context.
+  @param CpuInfo                     CPU information.
+  @param KernelVersion               Current kernel version.
+  @param LogicalProcessorIdCapacity  Logical processor ID capacity reported by the CPUID patch.
 
   @return  EFI_SUCCESS on success.
 **/
@@ -1381,7 +1384,8 @@ EFI_STATUS
 PatchProvideCurrentCpuInfo (
   IN OUT PATCHER_CONTEXT  *Patcher,
   IN     OC_CPU_INFO      *CpuInfo,
-  IN     UINT32           KernelVersion
+  IN     UINT32           KernelVersion,
+  IN     UINT8            LogicalProcessorIdCapacity
   );
 
 /**

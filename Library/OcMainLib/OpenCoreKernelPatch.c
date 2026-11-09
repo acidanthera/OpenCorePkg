@@ -97,6 +97,7 @@ OcKernelApplyPatches (
   BOOLEAN                IsKernelPatch;
   UINTN                  RegisterBase;
   UINT32                 RegisterStride;
+  UINT8                  LogicalProcessorIdCapacity;
 
   IsKernelPatch = Context == NULL;
 
@@ -196,6 +197,9 @@ OcKernelApplyPatches (
       OcKernelApplyQuirk (KernelQuirkSetApfsTrimTimeout, CacheType, DarwinVersion, Context, NULL);
     }
   } else {
+    LogicalProcessorIdCapacity = (CpuInfo->CpuidVerEdx.Uint32 & CPUID_FEATURE_HTT) != 0
+                                 ? (UINT8)CpuInfo->CpuidVerEbx.Bits.MaximumAddressableIdsForLogicalProcessors : 1;
+
     if (Config->Kernel.Quirks.AppleXcpmCfgLock) {
       OcKernelApplyQuirk (KernelQuirkAppleXcpmCfgLock, CacheType, DarwinVersion, NULL, &KernelPatcher);
     }
@@ -241,7 +245,8 @@ OcKernelApplyPatches (
           CpuInfo,
           Config->Kernel.Emulate.Cpuid1Data,
           Config->Kernel.Emulate.Cpuid1Mask,
-          DarwinVersion
+          DarwinVersion,
+          &LogicalProcessorIdCapacity
           );
       } else {
         DEBUG ((
@@ -272,7 +277,7 @@ OcKernelApplyPatches (
     }
 
     if (Config->Kernel.Quirks.ProvideCurrentCpuInfo) {
-      PatchProvideCurrentCpuInfo (&KernelPatcher, CpuInfo, DarwinVersion);
+      PatchProvideCurrentCpuInfo (&KernelPatcher, CpuInfo, DarwinVersion, LogicalProcessorIdCapacity);
     }
   }
 

@@ -455,6 +455,7 @@ ApplyKernelPatches (
   UINT32       VirtualCpuid[4]     = { 0, 0, 0, 0 };
   UINT32       VirtualCpuidMask[4] = { 0xFFFFFFFF, 0, 0, 0 };
   OC_CPU_INFO  CpuInfo;
+  UINT8        LogicalProcessorIdCapacity;
 
   ZeroMem (&CpuInfo, sizeof (CpuInfo));
   Status = PatchKernelCpuId (
@@ -462,7 +463,8 @@ ApplyKernelPatches (
              &CpuInfo,
              VirtualCpuid,
              VirtualCpuidMask,
-             KernelVersion
+             KernelVersion,
+             &LogicalProcessorIdCapacity
              );
   if (EFI_ERROR (Status)) {
     DEBUG ((DEBUG_WARN, "[FAIL] CPUID kernel patch - %r\n", Status));
