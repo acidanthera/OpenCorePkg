@@ -31,6 +31,7 @@
 #
 
 [Sources]
+  AppleDiscDrive.c
   AppleHibernate.c
   ApplePanic.c
   AppleRecovery.c
@@ -75,16 +76,17 @@
   gAppleBootPickerFileGuid                      ## SOMETIMES_CONSUMES
 
 [Protocols]
-  gAppleBootPolicyProtocolGuid                  ## SOMETIMES_CONSUMES
-  gAppleKeyMapAggregatorProtocolGuid            ## SOMETIMES_CONSUMES
-  gEfiSimpleFileSystemProtocolGuid              ## SOMETIMES_CONSUMES
-  gEfiLoadedImageProtocolGuid                   ## SOMETIMES_CONSUMES
-  gEfiUsbIoProtocolGuid                         ## SOMETIMES_CONSUMES
-  gOcFirmwareRuntimeProtocolGuid                ## SOMETIMES_CONSUMES
-  gOcAudioProtocolGuid                          ## SOMETIMES_CONSUMES
   gAppleBeepGenProtocolGuid                     ## SOMETIMES_CONSUMES
-  gOcBootEntryProtocolGuid                      ## CONSUMES
+  gAppleBootPolicyProtocolGuid                  ## SOMETIMES_CONSUMES
   gAppleFirmwareUserInterfaceProtocolGuid       ## SOMETIMES_CONSUMES
+  gAppleRemovableMediaProtocolGuid              ## SOMETIMES_CONSUMES
+  gAppleKeyMapAggregatorProtocolGuid            ## SOMETIMES_CONSUMES
+  gEfiLoadedImageProtocolGuid                   ## SOMETIMES_CONSUMES
+  gEfiSimpleFileSystemProtocolGuid              ## SOMETIMES_CONSUMES
+  gEfiUsbIoProtocolGuid                         ## SOMETIMES_CONSUMES
+  gOcAudioProtocolGuid                          ## SOMETIMES_CONSUMES
+  gOcBootEntryProtocolGuid                      ## CONSUMES
+  gOcFirmwareRuntimeProtocolGuid                ## SOMETIMES_CONSUMES
 
 [LibraryClasses]
   BaseLib

@@ -1172,6 +1172,17 @@ InternalBootPickerViewKeyEvent (
     return;
   }
 
+  if (KeyEvent->OcKeyCode == OC_INPUT_EJECT_INJECT_DISC_DRIVE) {
+    if (OcEjectInjectRemMediaDrive ()) {
+      //
+      // TODO: Replace with normal hotplug.
+      //
+      Context->Refresh = TRUE;
+    }
+
+    return;
+  }
+
   Entry = InternalGetVolumeEntry (mBootPicker.SelectedIndex);
 
   FocusChangedObj = InternalFocusKeyHandler (
