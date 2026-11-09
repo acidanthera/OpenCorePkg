@@ -7,6 +7,7 @@ PROJECT = KextInject
 PRODUCT = $(PROJECT)$(INFIX)$(SUFFIX)
 OBJS    = $(PROJECT).o \
 	CommonPatches.o \
+	RealtekPatches.o \
 	CpuidPatches.o \
 	KextPatcher.o \
 	KxldState.o \

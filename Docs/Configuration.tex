@@ -2838,6 +2838,33 @@ Kernel and kext changes apply with the following effective order:
   \href{https://github.com/acidanthera/OpenCorePkg/commit/24414555f2c07e06a3674ec7a2aa1ce4860bbcc7#commitcomment-70530145}{comment on commit 2441455}.
 
 \item
+  \texttt{ForceRealtekEthernet}\\
+  \textbf{Type}: \texttt{plist\ boolean}\\
+  \textbf{Failsafe}: \texttt{false}\\
+  \textbf{Requirement}: 26\\
+  \textbf{Description}: Enable supported Realtek RTL8125, RTL8126, and RTL8127
+  Ethernet controllers through the native \texttt{AppleEthernetRL} driver.
+
+  Applies firmware, interrupt, legacy packet queue, DMA, and statistics
+  patches on macOS Tahoe (Darwin 25.x) x86\_64 kernel collections. All patch
+  locations and the shared queue function layout are checked before writing.
+  Incompatible driver code causes the entire quirk to be skipped. All Tahoe
+  minor versions are eligible; other Darwin versions are skipped.
+
+  \emph{Note 1}: Requires the native \texttt{IOSkywalkFamily} and the other
+  system driver dependencies, including \texttt{AppleSkywalkAVB}. Do not
+  block, replace, downgrade, or patch \texttt{IOSkywalkFamily}, or combine
+  this option with manual \texttt{AppleEthernetRL} patches or replacement
+  drivers. Conflicts are checked according to their architecture and kernel
+  version ranges. Boot-time checks also cover renamed injected bundles and
+  the required \texttt{IOSkywalkFamily} member and virtual table layouts.
+  These checks do not authenticate the entire installed driver.
+
+  \emph{Note 2}: Preserves the existing IOMapper configuration. AVB is
+  disabled. The receive path requires a single DMA segment of at most 4096
+  bytes; use the standard MTU of 1500. MTU 9000 jumbo frames are unsupported.
+
+\item
   \texttt{ForceSecureBootScheme}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\

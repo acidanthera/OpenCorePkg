@@ -8,6 +8,8 @@ PRODUCT = $(PROJECT)$(INFIX)$(SUFFIX)
 OBJS    = $(PROJECT).o \
 	ProcessKernelDummy.o \
 	CommonPatches.o \
+	RealtekPatches.o \
+	RealtekConfig.o \
 	CpuidPatches.o \
 	KextPatcher.o \
 	KxldState.o \

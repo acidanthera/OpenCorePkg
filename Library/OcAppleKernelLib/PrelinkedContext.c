@@ -1296,6 +1296,10 @@ PrelinkedContextApplyQuirk (
   KernelQuirk = &gKernelQuirks[Quirk];
   ASSERT (KernelQuirk->Identifier != NULL);
 
+  if (Quirk == KernelQuirkForceRealtekEthernet) {
+    return InternalPatchRealtekEthernet (Context, KernelVersion);
+  }
+
   Status = PatcherInitContextFromPrelinked (&Patcher, Context, KernelQuirk->Identifier);
   if (!EFI_ERROR (Status)) {
     return KernelQuirk->PatchFunction (&Patcher, KernelVersion);

@@ -740,6 +740,8 @@ CheckKernelQuirks (
     ++ErrorCount;
   }
 
+  ErrorCount += OcKernelCheckRealtekEthernetConfig (Config, 0);
+
   return ErrorCount;
 }
 

@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
-%DIF DEL PreviousConfiguration.tex   Wed Sep 30 15:51:56 2026
-%DIF ADD ../Configuration.tex        Wed Sep 30 15:51:56 2026
+%DIF DEL PreviousConfiguration.tex   Sun Nov  8 11:50:39 2026
+%DIF ADD ../Configuration.tex        Sun Nov  8 13:43:37 2026
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -83,16 +83,16 @@
 \RequirePackage[normalem]{ulem} %DIF PREAMBLE
 \RequirePackage{color}\definecolor{RED}{rgb}{1,0,0}\definecolor{BLUE}{rgb}{0,0,1} %DIF PREAMBLE
 \providecommand{\DIFaddtex}[1]{{\protect\color{blue}\uwave{#1}}} %DIF PREAMBLE
-\providecommand{\DIFdeltex}[1]{{\protect\color{red}\sout{#1}}}                      %DIF PREAMBLE
+\providecommand{\DIFdeltex}[1]{{\protect\color{red}\sout{#1}}} %DIF PREAMBLE
 %DIF ONLYCHANGEDPAGE PREAMBLE %DIF PREAMBLE
 \RequirePackage{atbegshi} %DIF PREAMBLE
 \RequirePackage{etoolbox} %DIF PREAMBLE
 \RequirePackage{zref} %DIF PREAMBLE
 % redefine label command to write immediately to aux file - page references will be lost %DIF PREAMBLE
-\makeatletter \let\oldlabel\label% Store \label  %DIF PREAMBLE
-\renewcommand{\label}[1]{% Update \label to write to the .aux immediately  %DIF PREAMBLE
-\zref@wrapper@immediate{\oldlabel{#1}}}  %DIF PREAMBLE
-\makeatother  %DIF PREAMBLE
+\makeatletter \let\oldlabel\label% Store \label %DIF PREAMBLE
+\renewcommand{\label}[1]{% Update \label to write to the .aux immediately %DIF PREAMBLE
+\zref@wrapper@immediate{\oldlabel{#1}}} %DIF PREAMBLE
+\makeatother %DIF PREAMBLE
 \newbool{DIFkeeppage} %DIF PREAMBLE
 \newbool{DIFchange} %DIF PREAMBLE
 \boolfalse{DIFkeeppage} %DIF PREAMBLE
@@ -118,7 +118,12 @@
 %DIF HYPERREF PREAMBLE %DIF PREAMBLE
 \providecommand{\DIFadd}[1]{\texorpdfstring{\DIFaddtex{#1}}{#1}} %DIF PREAMBLE
 \providecommand{\DIFdel}[1]{\texorpdfstring{\DIFdeltex{#1}}{}} %DIF PREAMBLE
-%DIF LISTINGS PREAMBLE %DIF PREAMBLE
+%DIF AMSMATHULEM PREAMBLE %DIF PREAMBLE
+\makeatletter %DIF PREAMBLE
+\let\sout@orig\sout %DIF PREAMBLE
+\renewcommand{\sout}[1]{\ifmmode\text{\sout@orig{\ensuremath{#1}}}\else\sout@orig{#1}\fi} %DIF PREAMBLE
+\makeatother %DIF PREAMBLE
+%DIF COLORLISTINGS PREAMBLE %DIF PREAMBLE
 \RequirePackage{listings} %DIF PREAMBLE
 \RequirePackage{color} %DIF PREAMBLE
 \lstdefinelanguage{DIFcode}{ %DIF PREAMBLE
@@ -132,8 +137,10 @@
 	columns=fullflexible, %DIF PREAMBLE
 	keepspaces=true %DIF PREAMBLE
 } %DIF PREAMBLE
-\lstnewenvironment{DIFverbatim}{\lstset{style=DIFverbatimstyle}}{} %DIF PREAMBLE
-\lstnewenvironment{DIFverbatim*}{\lstset{style=DIFverbatimstyle,showspaces=true}}{} %DIF PREAMBLE
+\lstnewenvironment{DIFverbatim}[1][]{\lstset{style=DIFverbatimstyle}}{} %DIF PREAMBLE
+\lstnewenvironment{DIFverbatim*}[1][]{\lstset{style=DIFverbatimstyle,showspaces=true}}{} %DIF PREAMBLE
+\lstset{extendedchars=\true,inputencoding=utf8}
+
 %DIF END PREAMBLE EXTENSION ADDED BY LATEXDIFF
 
 \begin{document}
@@ -2895,7 +2902,38 @@ Kernel and kext changes apply with the following effective order:
   \texttt{AML} with tool \texttt{iASL}. For the patched \texttt{DMAR} table to be \hyperref[acpipropsadd]{added},
   the original one should be \hyperref[acpipropsdelete]{deleted}.
   More details can be found at
-  \href{https://github.com/acidanthera/OpenCorePkg/commit/24414555f2c07e06a3674ec7a2aa1ce4860bbcc7#commitcomment-70530145}{comment on commit 2441455}.
+  \href{https://github.com/acidanthera/OpenCorePkg/commit/24414555f2c07e06a3674ec7a2aa1ce4860bbcc7#commitcomment-70530145}{comment on commit 2441455}\DIFaddbegin \DIFadd{.
+}
+
+\item
+  \texttt{\DIFadd{ForceRealtekEthernet}}\\
+  \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ boolean}}\\
+  \textbf{\DIFadd{Failsafe}}\DIFadd{: }\texttt{\DIFadd{false}}\\
+  \textbf{\DIFadd{Requirement}}\DIFadd{: 26}\\
+  \textbf{\DIFadd{Description}}\DIFadd{: Enable supported Realtek RTL8125, RTL8126, and RTL8127
+  Ethernet controllers through the native }\texttt{\DIFadd{AppleEthernetRL}} \DIFadd{driver.
+}
+
+  \DIFadd{Applies firmware, interrupt, legacy packet queue, DMA, and statistics
+  patches on macOS Tahoe (Darwin 25.x) x86\_64 kernel collections. All patch
+  locations and the shared queue function layout are checked before writing.
+  Incompatible driver code causes the entire quirk to be skipped. All Tahoe
+  minor versions are eligible; other Darwin versions are skipped.
+}
+
+  \emph{\DIFadd{Note 1}}\DIFadd{: Requires the native }\texttt{\DIFadd{IOSkywalkFamily}} \DIFadd{and the other
+  system driver dependencies, including }\texttt{\DIFadd{AppleSkywalkAVB}}\DIFadd{. Do not
+  block, replace, downgrade, or patch }\texttt{\DIFadd{IOSkywalkFamily}}\DIFadd{, or combine
+  this option with manual }\texttt{\DIFadd{AppleEthernetRL}} \DIFadd{patches or replacement
+  drivers. Conflicts are checked according to their architecture and kernel
+  version ranges. Boot-time checks also cover renamed injected bundles and
+  the required }\texttt{\DIFadd{IOSkywalkFamily}} \DIFadd{member and virtual table layouts.
+  These checks do not authenticate the entire installed driver.
+}
+
+  \emph{\DIFadd{Note 2}}\DIFadd{: Preserves the existing IOMapper configuration. AVB is
+  disabled. The receive path requires a single DMA segment of at most 4096
+  bytes; use the standard MTU of 1500. MTU 9000 jumbo frames are unsupported}\DIFaddend .
 
 \item
   \texttt{ForceSecureBootScheme}\\
