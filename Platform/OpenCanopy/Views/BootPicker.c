@@ -1659,6 +1659,8 @@ BootPickerEntriesSet (
 
       if (Entry->IsCdrom) {
         SuggestedIcon = &GuiContext->Icons[ICON_GENERIC_CD][ICON_TYPE_BASE];
+      } else if (Entry->IsSdCard) {
+        SuggestedIcon = &GuiContext->Icons[ICON_SD_CARD][ICON_TYPE_BASE];
       } else if (Entry->Type == OC_BOOT_EXTERNAL_OS) {
         SuggestedIcon = &GuiContext->Icons[ICON_OTHER][IconTypeIndex];
       } else if ((Entry->Type & (OC_BOOT_EXTERNAL_TOOL | OC_BOOT_SYSTEM)) != 0) {
