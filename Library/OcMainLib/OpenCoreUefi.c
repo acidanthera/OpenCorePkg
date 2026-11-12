@@ -46,6 +46,7 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 #include <Library/OcMiscLib.h>
 #include <Library/OcMemoryLib.h>
 #include <Library/OcRtcLib.h>
+#include <Library/OcSimpleTextInputLib.h>
 #include <Library/OcSmcLib.h>
 #include <Library/OcOSInfoLib.h>
 #include <Library/OcUnicodeCollationEngGenericLib.h>
@@ -477,6 +478,10 @@ OcReinstallProtocols (
      && InstallAppleEvent)
   {
     DEBUG ((DEBUG_INFO, "OC: Failed to install apple event protocol\n"));
+  }
+
+  if (OcSimpleTextInputExInstallProtocol (Config->Uefi.ProtocolOverrides.SimpleTextInputEx) == NULL) {
+    DEBUG ((DEBUG_INFO, "OC: Failed to install simple text input ex protocol\n"));
   }
 
   if (OcFirmwareVolumeInstallProtocol (Config->Uefi.ProtocolOverrides.FirmwareVolume) == NULL) {
