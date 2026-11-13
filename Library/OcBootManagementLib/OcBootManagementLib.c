@@ -611,6 +611,71 @@ OcRunFirmwareApplication (
   return Status;
 }
 
+EFI_STATUS
+OcRunFirmwareApplicationWithLoadOptions (
+  IN EFI_GUID  *ApplicationGuid,
+  IN CHAR16    *Options
+  )
+{
+  EFI_STATUS                 Status;
+  EFI_HANDLE                 NewHandle;
+  EFI_DEVICE_PATH_PROTOCOL   *Dp;
+  EFI_LOADED_IMAGE_PROTOCOL  *LoadedImage;
+
+  if ((ApplicationGuid == NULL) || (Options == NULL)) {
+    return EFI_INVALID_PARAMETER;
+  }
+
+  DEBUG ((DEBUG_INFO, "OCB: run fw app attempting to find %g...\n", ApplicationGuid));
+
+  Dp = OcCreateFvFileDevicePath (ApplicationGuid);
+  if (Dp == NULL) {
+    return EFI_OUT_OF_RESOURCES;
+  }
+
+  DEBUG ((DEBUG_INFO, "OCB: run fw app attempting to load %g...\n", ApplicationGuid));
+  NewHandle = NULL;
+  Status    = gBS->LoadImage (
+                     FALSE,
+                     gImageHandle,
+                     Dp,
+                     NULL,
+                     0,
+                     &NewHandle
+                     );
+  if (EFI_ERROR (Status)) {
+    FreePool (Dp);
+    return Status;
+  }
+
+  FreePool (Dp);
+
+  LoadedImage = NULL;
+  Status      = gBS->HandleProtocol (NewHandle, &gEfiLoadedImageProtocolGuid, (VOID **)&LoadedImage);
+  if (EFI_ERROR (Status)) {
+    DEBUG ((DEBUG_ERROR, "OCB: Failed to get LoadedImage for app - %r\n", Status));
+    gBS->UnloadImage (NewHandle);
+    return Status;
+  }
+
+  LoadedImage->LoadOptions     = Options;
+  LoadedImage->LoadOptionsSize = (UINT32)StrSize (Options);
+
+  DEBUG ((
+    DEBUG_INFO,
+    "OCB: run fw app attempting to start %g with %s...\n",
+    ApplicationGuid,
+    Options
+    ));
+  Status = gBS->StartImage (
+                  NewHandle,
+                  NULL,
+                  NULL
+                  );
+
+  return Status;
+}
+
 //
 // Patching prolog of this function works on more similar era firmware
 // than assuming that mGopAlreadyConnected is located immediately after
@@ -769,6 +834,56 @@ OcLaunchAppleBootPicker (
   OcUnlockAppleFirmwareUI ();
 
   Status = OcRunFirmwareApplication (&gAppleBootPickerFileGuid, TRUE);
+
+  return Status;
+}
+
+EFI_STATUS
+OcLaunchAppleSlingShot (
+  IN SLING_SHOT_BOOT_MODE  Mode
+  )
+{
+  EFI_STATUS  Status;
+  CHAR16      *LoadOptions;
+  CHAR8       *RecMode;
+
+  OcUnlockAppleFirmwareUI ();
+
+  if ((Mode == SlingShotModeRecDisk) || (Mode == SlingShotModeRecDiskLatest)) {
+    LoadOptions = APPLE_SLING_SHOT_REC_DISK_OPT;
+  } else if ((Mode == SlingShotModeRecNet) || (Mode == SlingShotModeRecNetLatest)) {
+    LoadOptions = APPLE_SLING_SHOT_REC_NET_OPT;
+  } else if (Mode == SlingShotModeDiagDisk) {
+    LoadOptions = APPLE_SLING_SHOT_DIAG_DISK_OPT;
+  } else if (Mode == SlingShotModeDiagNet) {
+    LoadOptions = APPLE_SLING_SHOT_DIAG_NET_OPT;
+  } else {
+    return EFI_INVALID_PARAMETER;
+  }
+
+  RecMode = NULL;
+  if ((Mode == SlingShotModeRecDisk) || (Mode == SlingShotModeRecNet) || (Mode == SlingShotModeRecDiskLatest) || (Mode == SlingShotModeRecNetLatest)) {
+    if ((Mode == SlingShotModeRecDisk) || (Mode == SlingShotModeRecNet)) {
+      RecMode = APPLE_SLING_SHOT_REC_TYPE_DEFAULT;
+    } else {
+      RecMode = APPLE_SLING_SHOT_REC_TYPE_LATEST;
+    }
+
+    Status = gRT->SetVariable (
+                    APPLE_INTERNET_RECOVERY_TYPE_VARIABLE_NAME,
+                    &gAppleVendorVariableGuid,
+                    EFI_VARIABLE_BOOTSERVICE_ACCESS,
+                    AsciiStrLen (RecMode),
+                    (VOID *)RecMode
+                    );
+
+    if (EFI_ERROR (Status)) {
+      DEBUG ((DEBUG_ERROR, "OCB: Failed to set internet-recovery-type - %r\n", Status));
+      return Status;
+    }
+  }
+
+  Status = OcRunFirmwareApplicationWithLoadOptions (&gAppleSlingShotFileGuid, LoadOptions);
 
   return Status;
 }
