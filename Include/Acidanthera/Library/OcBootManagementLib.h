@@ -1504,6 +1504,18 @@ OcRunBootPicker (
   );
 
 /**
+  SlingShot boot mode.
+**/
+typedef enum {
+  SlingShotModeRecDisk,       ///< Equivalent to CMD+R
+  SlingShotModeRecNet,        ///< Equivalent to CMD+OPT+SHIFT+R
+  SlingShotModeRecDiskLatest, ///< Equivalent to CMD+R with latest macOS (internet-recovery-type = latest)
+  SlingShotModeRecNetLatest,  ///< Equivalent to CMD+OPT+R
+  SlingShotModeDiagDisk,      ///< Equivalent to D
+  SlingShotModeDiagNet        ///< Equivalent to OPT+D
+} SLING_SHOT_BOOT_MODE;
+
+/**
   Get device scan policy type.
 
   @param[in]  Handle        Device/partition handle.
@@ -1725,6 +1737,20 @@ EFI_STATUS
 OcRunFirmwareApplication (
   IN EFI_GUID  *ApplicationGuid,
   IN BOOLEAN   SetReason
+  );
+
+/**
+  Launch firmware application with LoadOptions.
+
+  @param[in] ApplicationGuid  Application GUID identifier in the firmware.
+  @param[in] Options          LoadOptions that should be given to the image.
+
+  @retval error code, should not return.
+**/
+EFI_STATUS
+OcRunFirmwareApplicationWithLoadOptions (
+  IN EFI_GUID  *ApplicationGuid,
+  IN CHAR16    *Options
   );
 
 /**
@@ -2209,6 +2235,20 @@ OcUnlockAppleFirmwareUI (
 EFI_STATUS
 OcLaunchAppleBootPicker (
   VOID
+  );
+
+/**
+  Launch Apple SlingShot firmware application.
+
+  @param[in] Mode       Any mode that defined in SLING_SHOT_BOOT_MODE
+
+  @retval EFI_SUCCESS   SlingShot was successfully executed.
+  @retval other         SlingShot could not be launched.
+**/
+
+EFI_STATUS
+OcLaunchAppleSlingShot (
+  IN SLING_SHOT_BOOT_MODE  Mode
   );
 
 /**

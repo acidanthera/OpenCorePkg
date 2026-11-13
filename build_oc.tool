@@ -167,6 +167,7 @@ package() {
       "MmapDump.efi"
       "ResetSystem.efi"
       "RtcRw.efi"
+      "SlingKicker.efi"
       "TpmInfo.efi"
       "OpenControl.efi"
       "ControlMsrE2.efi"

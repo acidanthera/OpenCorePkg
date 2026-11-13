@@ -235,6 +235,7 @@
   OpenCorePkg/Application/PavpProvision/PavpProvision.inf
   OpenCorePkg/Application/ResetSystem/ResetSystem.inf
   OpenCorePkg/Application/RtcRw/RtcRw.inf
+  OpenCorePkg/Application/SlingKicker/SlingKicker.inf
   OpenCorePkg/Application/TpmInfo/TpmInfo.inf
   OpenCorePkg/Application/VerifyMemOpt/VerifyMemOpt.inf {
     <LibraryClasses>

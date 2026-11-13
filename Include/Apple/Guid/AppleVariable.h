@@ -136,6 +136,36 @@ typedef enum {
 ///
 #define APPLE_PICKER_ENTRY_REASON_VARIABLE_NAME  L"PickerEntryReason"
 
+///
+/// Defines which macOS version SlingShot will download.
+/// CHAR8: gAppleVendorVariableGuid
+/// If has latest value - launch the latest compatible macOS,
+/// if default - launch the first (or the nearest) compatible macOS version
+/// for the machine.
+///
+#define APPLE_INTERNET_RECOVERY_TYPE_VARIABLE_NAME  L"internet-recovery-type"
+
+///
+/// One of these values should be received by SlingShot as LoadOption.
+///
+#define APPLE_SLING_SHOT_REC_DISK_OPT   L"RecoveryModeDisk"    ///< Equivalent to CMD+R
+#define APPLE_SLING_SHOT_REC_NET_OPT    L"RecoveryModeNetwork" ///< Equivalent to CMD+OPT+(SHIFT)+R
+#define APPLE_SLING_SHOT_DIAG_DISK_OPT  L"DiagsModeDisk"       ///< Equivalent to D
+#define APPLE_SLING_SHOT_DIAG_NET_OPT   L"DiagsModeNetwork"    ///< Equivalent to OPT+D
+
+///
+/// Values that internet-recovery-type variable can have.
+///
+#define APPLE_SLING_SHOT_REC_TYPE_DEFAULT  "default" ///< Launch the first (or the nearest) compatible macOS version for the machine.
+#define APPLE_SLING_SHOT_REC_TYPE_LATEST   "latest"  ///< Launch the latest compatible macOS version for the machine.
+
+///
+/// Defines which server SlingShot will use to download macOS.
+/// If not present in system SlingShot will set it to osrecovery.apple.com
+/// CHAR8: gAppleBootVariableGuid
+///
+#define APPLE_OTA_RECOVERY_SERVER_ADDRESS_VARIABLE_NAME  L"AppleOTARecoveryServerAddress"
+
 #define APPLE_SYSTEM_AUDIO_VOLUME_MUTED        BIT7
 #define APPLE_SYSTEM_AUDIO_VOLUME_VOLUME_MASK  0x7FU
 
