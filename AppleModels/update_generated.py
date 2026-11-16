@@ -164,6 +164,7 @@ def export_db_macinfolib(db, path, year=0):
                 f'''  .SmcGeneration = 0x{info['SmcGeneration']:X},\n'''
                 f'''  .BoardType = 0x{info['BoardType']:X},\n'''
                 f'''  .ChassisType = 0x{info['ChassisType']:X},\n'''
+                f'''  .DataHubChassisType = "{info['DataHubChassisType']}",\n'''
                 f'''  .MemoryFormFactor = 0x{info['MemoryFormFactor']:X},\n'''
                 f'''  .PlatformFeature = {f"0x{info['PlatformFeature']:X}" if 'PlatformFeature' in info else 'MAC_INFO_PLATFORM_FEATURE_MISSING'},\n'''
                 f'''  .ChassisAssetTag = "{info['ChassisAssetTag']}",\n'''

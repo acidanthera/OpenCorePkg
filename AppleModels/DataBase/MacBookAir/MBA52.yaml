@@ -23,6 +23,7 @@ ChassisManufacturer: "Apple Inc."
 ChassisType: 0xA
 ChassisVersion: "Mac-2E6FAB96566FE58C"
 ChassisAssetTag: ""
+DataHubChassisType: ""
 FirmwareFeatures: 0xE00DE137
 FirmwareFeaturesMask: 0xFF1FFF3F
 ExtendedFirmwareFeatures: 0x00000000E00DE137

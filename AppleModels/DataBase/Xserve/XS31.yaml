@@ -23,6 +23,7 @@ ChassisManufacturer: "Apple Inc."
 ChassisType: 0x17
 ChassisVersion: "Mac-F223BEC8"
 ChassisAssetTag: "Xserve"
+DataHubChassisType: ""
 MemoryFormFactor: 0x9
 # FIXME: check values (most should be correct?) and add missing, if any
 ProcessorType:

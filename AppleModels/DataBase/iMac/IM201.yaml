@@ -24,6 +24,7 @@ ChassisManufacturer: "Apple Inc."
 ChassisType: 0xD
 ChassisVersion: "Mac-CFF7D910A743CAAF"
 ChassisAssetTag: ""
+DataHubChassisType: ""
 PlatformFeature: 0x20
 FirmwareFeatures: 0xFFB3F066
 FirmwareFeaturesMask: 0xFFFFFFFF

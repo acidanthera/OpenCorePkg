@@ -23,6 +23,7 @@ ChassisManufacturer: "Apple Inc."
 ChassisType: 0xA
 ChassisVersion: "Mac-35C1E88140C3E6CF"
 ChassisAssetTag: ""
+DataHubChassisType: ""
 # FIXME: check
 FirmwareFeatures: 0xE00FE137
 # FIXME: check

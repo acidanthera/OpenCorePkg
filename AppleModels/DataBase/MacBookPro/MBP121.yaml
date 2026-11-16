@@ -23,6 +23,7 @@ ChassisManufacturer: "Apple Inc."
 ChassisType: 0x9
 ChassisVersion: "Mac-E43C1C25D4880AD6"
 ChassisAssetTag: ""
+DataHubChassisType: ""
 PlatformFeature: 0x2
 FirmwareFeatures: 0xFD0FF576
 FirmwareFeaturesMask: 0xFF1FFF7F

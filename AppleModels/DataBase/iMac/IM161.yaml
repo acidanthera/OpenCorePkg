@@ -24,6 +24,7 @@ ChassisManufacturer: "Apple Inc."
 ChassisType: 0xD
 ChassisVersion: "Mac-A369DDC4E67F1C45"
 ChassisAssetTag: ""
+DataHubChassisType: ""
 PlatformFeature: 0x3
 # FIXME: check
 FirmwareFeatures: 0xFC0FE137

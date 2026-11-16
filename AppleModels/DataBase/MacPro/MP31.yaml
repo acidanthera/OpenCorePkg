@@ -23,6 +23,7 @@ ChassisManufacturer: "Apple Inc."
 ChassisType: 0x2
 ChassisVersion: "Mac-F42C88C8"
 ChassisAssetTag: "Pro-Enclosure"
+DataHubChassisType: ""
 FirmwareFeatures: 0xC0001403
 FirmwareFeaturesMask: 0xC0003FFF
 ExtendedFirmwareFeatures: 0x00000000C0001403

@@ -27,6 +27,7 @@ ChassisVersion:
 - "Mac-F221DCC8"
 - "Mac-F2268CC8"
 ChassisAssetTag: "Asset Tag#"
+DataHubChassisType: ""
 # FIXME: check
 FirmwareFeatures: 0xE00DE137
 # FIXME: check

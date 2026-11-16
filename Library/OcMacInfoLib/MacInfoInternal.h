@@ -23,6 +23,7 @@ typedef struct {
   CONST CHAR8 *CONST    SystemProductName;
   CONST CHAR8 *CONST    BoardProduct;
   CONST UINT8           BoardRevision;
+  CONST CHAR8 *CONST    DataHubChassisType;
   CONST UINT8           SmcRevision[6];
   CONST UINT8           SmcBranch[8];
   CONST UINT8           SmcPlatform[8];

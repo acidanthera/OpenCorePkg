@@ -23,6 +23,7 @@ ChassisManufacturer: "Apple Inc."
 ChassisType: 0xA
 ChassisVersion: "Mac-F222BEC8"
 ChassisAssetTag: ""
+DataHubChassisType: ""
 # FIXME: check
 FirmwareFeatures: 0xC00DE137
 # FIXME: check

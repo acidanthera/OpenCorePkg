@@ -115,6 +115,11 @@ GetMacInfo (
   MacInfo->DataHub.PlatformName      = "platform";
   MacInfo->DataHub.SystemProductName = ProductName;
   MacInfo->DataHub.BoardProduct      = InternalEntry->BoardProduct;
+
+  if (InternalEntry->DataHubChassisType[0] != '\0') {
+    MacInfo->DataHub.ChassisType = InternalEntry->DataHubChassisType;
+  }
+
   if (InternalEntry->BoardRevision != MAC_INFO_BOARD_REVISION_MISSING) {
     MacInfo->DataHub.BoardRevision = &InternalEntry->BoardRevision;
   }

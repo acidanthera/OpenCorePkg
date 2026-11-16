@@ -24,6 +24,7 @@ ChassisManufacturer: "Apple Inc."
 ChassisType: 0xD
 ChassisVersion: "Mac-FFE5EF870D7BA81A"
 ChassisAssetTag: ""
+DataHubChassisType: ""
 PlatformFeature: 0x3
 # FIXME: check
 FirmwareFeatures: 0xFC0FE137

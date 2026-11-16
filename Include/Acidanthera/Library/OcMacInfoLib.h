@@ -84,6 +84,7 @@ typedef struct MAC_INFO_DATA_DATAHUB_ {
   CONST UINT8     *SmcRevision;
   CONST UINT8     *SmcBranch;
   CONST UINT8     *SmcPlatform;
+  CONST CHAR8     *ChassisType;
 } MAC_INFO_DATA_DATAHUB;
 
 typedef struct MAC_INFO_DATA_OEM_ {

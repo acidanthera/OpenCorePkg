@@ -24,6 +24,7 @@ ChassisManufacturer: "Apple Inc."
 ChassisType: 0x9
 ChassisVersion: "Mac-A61BADE1FDAD7B05"
 ChassisAssetTag: ""
+DataHubChassisType: ""
 PlatformFeature: 0x32
 FirmwareFeatures: 0xFDAFF066
 FirmwareFeaturesMask: 0xFFFFFF7F

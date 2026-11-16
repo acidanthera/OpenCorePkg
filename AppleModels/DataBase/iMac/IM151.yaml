@@ -23,6 +23,7 @@ ChassisManufacturer: "Apple Inc."
 ChassisType: 0xD
 ChassisVersion: "Mac-42FD25EABCABB274"
 ChassisAssetTag: ""
+DataHubChassisType: ""
 PlatformFeature: 0x1
 FirmwareFeatures: 0xF80FE137
 FirmwareFeaturesMask: 0xFF1FFF3F

@@ -23,6 +23,7 @@ ChassisManufacturer: "Apple Inc."
 ChassisType: 0x10
 ChassisVersion: "Mac-F2208EC8"
 ChassisAssetTag: ""
+DataHubChassisType: ""
 FirmwareFeatures: 0xC00C9423
 FirmwareFeaturesMask: 0xFF1FFF3F
 ExtendedFirmwareFeatures: 0x00000000C00C9423

@@ -19,6 +19,7 @@ ChassisManufacturer: "Apple Inc."
 ChassisType: 0x7
 ChassisVersion: "Mac-F221BEC8"
 ChassisAssetTag: ""
+DataHubChassisType: ""
 FirmwareFeatures: 0xE80FE137
 FirmwareFeaturesMask: 0xFF1FFF3F
 ExtendedFirmwareFeatures: 0x00000000E80FE137

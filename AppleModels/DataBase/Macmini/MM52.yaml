@@ -23,6 +23,7 @@ ChassisManufacturer: "Apple Inc."
 ChassisType: 0x10
 ChassisVersion: "Mac-4BC72D62AD45599E"
 ChassisAssetTag: ""
+DataHubChassisType: ""
 # FIXME: check
 FirmwareFeatures: 0xD00DE137
 # FIXME: check

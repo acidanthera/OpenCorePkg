@@ -23,6 +23,7 @@ ChassisManufacturer: "Apple Inc."
 ChassisType: 0xA
 ChassisVersion: "Mac-6F01561E16C75D06"
 ChassisAssetTag: ""
+DataHubChassisType: ""
 FirmwareFeatures: 0xC10DF577
 FirmwareFeaturesMask: 0xFF1FFF7F
 ExtendedFirmwareFeatures: 0x00000000C10DF577

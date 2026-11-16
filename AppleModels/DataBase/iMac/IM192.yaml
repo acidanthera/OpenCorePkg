@@ -24,6 +24,7 @@ ChassisManufacturer: "Apple Inc."
 ChassisType: 0xD
 ChassisVersion: "Mac-63001698E7A34814"
 ChassisAssetTag: ""
+DataHubChassisType: ""
 PlatformFeature: 0x20
 FirmwareFeatures: 0xFD8FF576
 FirmwareFeaturesMask: 0xFFDFFF7F

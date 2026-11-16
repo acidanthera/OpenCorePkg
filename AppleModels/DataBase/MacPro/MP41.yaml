@@ -23,6 +23,7 @@ ChassisManufacturer: "Apple Inc."
 ChassisType: 0x7
 ChassisVersion: "Mac-F221BEC8"
 ChassisAssetTag: "Pro-Enclosure"
+DataHubChassisType: ""
 FirmwareFeatures: 0xE001F537
 FirmwareFeaturesMask: 0xC003FF37
 ExtendedFirmwareFeatures: 0x00000000E001F537

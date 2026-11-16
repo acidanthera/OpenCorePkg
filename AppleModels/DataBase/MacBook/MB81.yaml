@@ -23,6 +23,7 @@ ChassisManufacturer: "Apple Inc."
 ChassisType: 0x9
 ChassisVersion: "Mac-BE0E8AC46FE800CC"
 ChassisAssetTag: "Chassis Board Asset Tag#"
+DataHubChassisType: ""
 PlatformFeature: 0x1A
 # FIXME: check
 FirmwareFeatures: 0xFC0FE13F

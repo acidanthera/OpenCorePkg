@@ -23,6 +23,7 @@ ChassisManufacturer: "Apple Inc."
 ChassisType: 0xD
 ChassisVersion: "Mac-27ADBB7B4CEE8E61"
 ChassisAssetTag: ""
+DataHubChassisType: ""
 PlatformFeature: 0x1
 FirmwareFeatures: 0xE00FE137
 FirmwareFeaturesMask: 0xFF1FFF3F

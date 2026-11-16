@@ -23,6 +23,7 @@ ChassisManufacturer: "Apple Inc."
 ChassisType: 0xA
 ChassisVersion: "Mac-94245A3940C91C80"
 ChassisAssetTag: ""
+DataHubChassisType: ""
 # FIXME: check
 FirmwareFeatures: 0xC00DE137
 # FIXME: check

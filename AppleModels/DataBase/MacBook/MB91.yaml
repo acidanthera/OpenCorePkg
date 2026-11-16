@@ -23,6 +23,7 @@ ChassisManufacturer: "Apple Inc."
 ChassisType: 0x9
 ChassisVersion: "Mac-9AE82516C7C6B903"
 ChassisAssetTag: ""
+DataHubChassisType: ""
 # FIXME: check
 PlatformFeature: 0x1A
 # FIXME: check

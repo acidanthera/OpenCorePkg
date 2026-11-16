@@ -20,6 +20,7 @@ ChassisManufacturer: "Apple Inc."
 ChassisType: 0x9
 ChassisVersion: "Mac-0CFF9C7C2B63DF8D"
 ChassisAssetTag: ""
+DataHubChassisType: ""
 PlatformFeature: 0x3A
 FirmwareFeatures: 0xFFAFF06E
 FirmwareFeaturesMask: 0xFFFFFF7F

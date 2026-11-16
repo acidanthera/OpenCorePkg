@@ -23,6 +23,7 @@ ChassisManufacturer: "Apple Inc."
 ChassisType: 0xD
 ChassisVersion: "Mac-7DF2A3B5E5D671ED"
 ChassisAssetTag: ""
+DataHubChassisType: ""
 PlatformFeature: 0x1
 # FIXME: check
 FirmwareFeatures: 0xE00DE137

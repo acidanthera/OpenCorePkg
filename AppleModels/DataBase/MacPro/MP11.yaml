@@ -23,6 +23,7 @@ ChassisManufacturer: "Apple Computer, Inc."
 ChassisType: 0x2
 ChassisVersion: "Mac-F4208DC8"
 ChassisAssetTag: "Asset Tag#"
+DataHubChassisType: ""
 FirmwareFeatures: 0x80000015
 FirmwareFeaturesMask: 0x800003FF
 ExtendedFirmwareFeatures: 0x0000000080000015

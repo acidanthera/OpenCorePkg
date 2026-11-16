@@ -82,6 +82,10 @@ OcPlatformUpdateDataHub (
       Data.BoardProduct = OC_BLOB_GET (&Config->PlatformInfo.DataHub.BoardProduct);
     }
 
+    if (OC_BLOB_GET (&Config->PlatformInfo.DataHub.ChassisType)[0] != '\0') {
+      Data.ChassisType = OC_BLOB_GET (&Config->PlatformInfo.DataHub.ChassisType);
+    }
+
     Data.BoardRevision      = &Config->PlatformInfo.DataHub.BoardRevision[0];
     Data.StartupPowerEvents = &Config->PlatformInfo.DataHub.StartupPowerEvents;
     Data.InitialTSC         = &Config->PlatformInfo.DataHub.InitialTSC;
@@ -137,6 +141,7 @@ OcPlatformUpdateDataHub (
     //
     Data.PlatformName      = MacInfo->DataHub.PlatformName;
     Data.SystemProductName = MacInfo->DataHub.SystemProductName;
+    Data.ChassisType       = MacInfo->DataHub.ChassisType;
 
     if (MacInfo->Oem.SystemSerialNumber[0] != '\0') {
       Data.SystemSerialNumber = MacInfo->Oem.SystemSerialNumber;

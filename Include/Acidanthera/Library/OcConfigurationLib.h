@@ -510,6 +510,7 @@ OC_DECLARE (OC_PLATFORM_GENERIC_CONFIG)
   _(OC_STRING                   , SystemProductName   ,     , OC_STRING_CONSTR ("", _, __)     , OC_DESTR (OC_STRING) ) \
   _(OC_STRING                   , SystemSerialNumber  ,     , OC_STRING_CONSTR ("", _, __)     , OC_DESTR (OC_STRING) ) \
   _(OC_STRING                   , SystemUuid          ,     , OC_STRING_CONSTR ("", _, __)     , OC_DESTR (OC_STRING) ) \
+  _(OC_STRING                   , ChassisType         ,     , OC_STRING_CONSTR ("", _, __)     , OC_DESTR (OC_STRING) ) \
   _(OC_STRING                   , BoardProduct        ,     , OC_STRING_CONSTR ("", _, __)     , OC_DESTR (OC_STRING) ) \
   _(UINT8                       , BoardRevision       , [1] , {0}                              , () )                   \
   _(UINT64                      , StartupPowerEvents  ,     , 0                                , () )                   \
