@@ -250,6 +250,44 @@ SetDataHubEntry (
   return Status;
 }
 
+STATIC
+VOID
+DataHubSetDeviceColors (
+  IN EFI_DATA_HUB_PROTOCOL  *DataHub,
+  IN CONST CHAR8            *ChassisType
+  )
+{
+  OC_DEVICE_COLORS_CONTEXT  Colors;
+  BOOLEAN                   IsRack;
+  BOOLEAN                   IsTower;
+
+  if ((ChassisType == NULL) || (ChassisType[0] == '\0')) {
+    return;
+  }
+
+  IsRack  = (AsciiStrCmp (ChassisType, "Rack Mount") == 0);
+  IsTower = (AsciiStrCmp (ChassisType, "Tower") == 0);
+
+  if (!IsRack && !IsTower) {
+    return;
+  }
+
+  ZeroMem (&Colors, sizeof (Colors));
+
+  Colors.Unknown = 0x0200;
+  Colors.Blue    = 223;
+  Colors.Green   = 225;
+  Colors.Red     = 225;
+
+  if (IsRack) {
+    Colors.Blue++;
+    Colors.Green++;
+    Colors.Red++;
+  }
+
+  DataHubSetAppleMiscData (DataHub, OC_DEVICE_COLORS, &Colors, sizeof (Colors));
+}
+
 EFI_STATUS
 UpdateDataHub (
   IN EFI_DATA_HUB_PROTOCOL  *DataHub,
@@ -288,6 +326,7 @@ UpdateDataHub (
   //
   DataHubSetAppleMiscData (DataHub, OC_COPROCESSOR_VERSION, Data->CoprocessorVersion, sizeof (*Data->CoprocessorVersion));
   DataHubSetAppleMiscAscii (DataHub, OC_CHASSIS_TYPE, Data->ChassisType);
+  DataHubSetDeviceColors (DataHub, Data->ChassisType);
 
   return EFI_SUCCESS;
 }

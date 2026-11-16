@@ -32,6 +32,7 @@
 #define OC_DEVICE_PATHS_SUPPORTED  L"DevicePathsSupported"
 #define OC_COPROCESSOR_VERSION     L"apple-coprocessor-version"
 #define OC_CHASSIS_TYPE            L"chassis-type"
+#define OC_DEVICE_COLORS           L"device-colors"
 
 //
 // These are custom and match VirtualSMC, FakeSMC, and Clover.
@@ -43,6 +44,26 @@
 #define OC_SMC_REVISION_SIZE  6U
 #define OC_SMC_BRANCH_SIZE    8U
 #define OC_SMC_PLATFORM_SIZE  8U
+
+//
+// Specifies the icon for MacPro7,1 SMBIOS.
+// Tower: 225, 225, 223
+// Rack:  226, 226, 224
+// TODO: Maybe Apple uses it somewhere else?
+//
+#pragma pack (push, 1)
+typedef struct {
+  UINT16    Unknown; ///< Apple sets to 0x0200
+  UINT16    Reserved0;
+  UINT8     Blue;
+  UINT8     Green;
+  UINT8     Red;
+  UINT8     Reserved1;
+  UINT8     Reserved2[8];
+} OC_DEVICE_COLORS_CONTEXT;
+#pragma pack (pop)
+
+STATIC_ASSERT (sizeof (OC_DEVICE_COLORS_CONTEXT) == 16, "Invalid OC_DEVICE_COLORS_CONTEXT size");
 
 typedef struct {
   CONST CHAR8     *PlatformName;
