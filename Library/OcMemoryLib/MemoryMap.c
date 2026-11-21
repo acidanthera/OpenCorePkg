@@ -424,13 +424,6 @@ OcShrinkMemoryMap (
     SizeFromDescToEnd -= DescriptorSize;
   }
 
-  //
-  // Handle last entries if they were merged.
-  //
-  if (HasEntriesToRemove) {
-    *MemoryMapSize += DescriptorSize;
-  }
-
   return EFI_SUCCESS;
 }
 
