@@ -73,6 +73,7 @@
   gEfiPartTypeUnusedGuid                        ## SOMETIMES_CONSUMES
   gOcVendorVariableGuid                         ## SOMETIMES_CONSUMES
   gAppleBootPickerFileGuid                      ## SOMETIMES_CONSUMES
+  gAppleSlingShotFileGuid                       ## SOMETIMES_CONSUMES
 
 [Protocols]
   gAppleBootPolicyProtocolGuid                  ## SOMETIMES_CONSUMES
