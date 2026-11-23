@@ -461,8 +461,8 @@ def action_guess(args):
 
     if len(supported) > 0:
         print(f'SUCCESS: MLB {mlb} looks supported for:')
-        for model in supported.items():
-            print(f'- {model}, up to {supported[model][0]}, default: {supported[model][1]}, latest: {supported[model][2]}')
+        for model, info in supported.items():
+            print(f'- {model}, up to {info[0]}, default: {info[1]}, latest: {info[2]}')
         return 0
 
     print(f'UNKNOWN: Failed to determine supported models for MLB {mlb}!')
